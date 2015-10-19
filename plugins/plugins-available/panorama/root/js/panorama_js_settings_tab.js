@@ -544,6 +544,17 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     getInnerTpl: function(displayField) {
                         return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
                     }
+                },
+                listeners: {
+                    select: function(combo, records, eOpts) {
+                        if(records[0].data['image'] == "&lt;upload new image&gt;") {
+                            TP.uploadUserContent('image', 'backgrounds/', function(filename) {
+                                combo.setValue('../usercontent/backgrounds/'+filename);
+                            });
+                        }
+                        return(true);
+                    },
+                    change: function(This) { applyBackground() }
                 }
             },
             { xtype: 'label', text:  'Scale:', style: 'margin-left: 10px; margin-right: 2px;', cls: 'x-form-item-label' },
@@ -618,7 +629,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             boxLabel:   ' (widget header will be displayed on mouse over)'
         }, {
             xtype:      'panel',
-            html:       'Place background images in: '+usercontent_folder+'/backgrounds/',
+            html:       'Place background images in: '+usercontent_folder+'/backgrounds/ <a href="#" onclick="TP.uploadUserContent(\'image\', \'backgrounds/\')">(upload)</a>',
             style:      'text-align: center;',
             bodyCls:    'form-hint',
             padding:    '10 0 0 0',
@@ -931,3 +942,59 @@ TP.tabSettingsWindowLocked = function(tab, val) {
         });
     }
 };
+
+TP.uploadUserContent = function(type, location, onSuccess) {
+    TP.modalWindows.push(Ext.create('Ext.window.Window', {
+        title: 'Usercontent Upload',
+        height: 100,
+        width:  300,
+        layout: 'anchor',
+        items: [{
+            xtype:  'form',
+            border:  false,
+            layout: 'anchor',
+            anchor: '100% 100%',
+            bodyPadding: 5,
+            items: [{
+                xtype:      'filefield',
+                anchor:     '90% 100%',
+                name:        type,
+                allowBlank:  false,
+                buttonText: 'Select '+type+'...'
+            }]
+        }],
+        buttons: [{
+            text: 'Cancel',
+            handler: function() {
+                this.up('window').destroy();
+            }
+        }, {
+            text: 'Upload',
+            handler: function() {
+                var win  = this.up('window');
+                var form = win.down('form').getForm();
+                if(form.isValid()){
+                    form.submit({
+                        url: 'panorama.cgi',
+                        params: {
+                            task:    'upload',
+                            type:     type,
+                            location: location
+                        },
+                        waitMsg: 'Uploading your '+type+'...',
+                        success: function(form, action) {
+                            TP.Msg.msg("success_message~~uploaded "+type+" successfully.");
+                            win.destroy();
+                            backgrounds.load();
+                            if(onSuccess) { onSuccess(action.result.filename); }
+                        },
+                        failure: function(form, action) {
+                            TP.Msg.msg("fail_message~~uploading "+type+" failed. "+action.result.msg);
+                            win.destroy();
+                        }
+                    });
+                }
+            }
+        }]
+    }).show());
+}

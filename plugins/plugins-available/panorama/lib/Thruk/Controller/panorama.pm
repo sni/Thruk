@@ -203,6 +203,9 @@ sub index {
         elsif($task eq 'wms_provider') {
             return(_task_wms_provider($c));
         }
+        elsif($task eq 'upload') {
+            return(_task_upload($c));
+        }
     }
 
     # find images for preloader
@@ -632,6 +635,64 @@ sub _task_serveraction {
     my $json = { 'rc' => $rc, 'msg' => $msg };
     _add_misc_details($c, 1, $json);
     return $c->render(json => $json);
+}
+
+##########################################################
+sub _task_upload {
+    my($c) = @_;
+
+    $c->stash->{'template'} = 'passthrough.tt';
+
+    my $type     = $c->req->parameters->{'type'};
+    my $location = $c->req->parameters->{'location'};
+    if(!$type || !$location || !$c->req->uploads->{$type}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'missing properties in fileupload.', success => JSON::XS::false });
+        return;
+    }
+    $location =~ s|/$||gmx;
+
+    my $upload = $c->req->uploads->{$type};
+    my $folder = $c->stash->{'usercontent_folder'}.'/'.$location;
+
+    if(!-w $folder.'/.') {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload must use existing and writable folder.', success => JSON::XS::false });
+        return;
+    }
+
+    if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        return;
+    }
+
+    my $filename = $upload->{'filename'};
+    if($filename !~ m/^[a-z0-9_\- ]+\.(jpeg|jpg|gif|png)$/mxi) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload contains invalid characters (a-z0-9_- ) in filename.', success => JSON::XS::false });
+        return;
+    }
+
+    my $newlocation = $folder.'/'.$filename;
+    if(-s $newlocation && !$c->stash->{'is_admin'}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'Only administrator may overwrite existing files.', success => JSON::XS::false });
+        return;
+    }
+
+    eval {
+        move($upload->{'tempname'}, $newlocation);
+    };
+    if($@) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => $@, success => JSON::XS::false });
+        return;
+    }
+
+    # must be text/html result, otherwise extjs form result handler dies
+    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, filename => $filename });
+    return;
 }
 
 ##########################################################
@@ -1770,7 +1831,10 @@ sub _task_userdata_backgroundimages {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
-    unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => 'none'} unless($query);
+    if(!$query) {
+        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => '&lt;upload new image&gt;'};
+        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => 'none'};
+    }
     $c->{'db'}->_page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},

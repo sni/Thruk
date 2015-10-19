@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 451;
+    plan tests => 462;
 }
 
 BEGIN {
@@ -104,6 +104,7 @@ $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_list', post => { nr => '__DASHBOARD__' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore', post => { nr => '__DASHBOARD__', timestamp => '__TIMESTAMP__', mode => 'a' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_save_states', post => { nr => '__DASHBOARD__', states => '[]' } },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=upload', like => 'missing properties in fileupload.', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
 ];
 
 for my $url (@{$pages}) {
