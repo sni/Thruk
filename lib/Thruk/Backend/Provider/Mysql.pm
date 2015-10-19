@@ -1171,10 +1171,13 @@ sub _update_logcache_optimize {
         return(-1);
     }
 
-    print "update logs table order..." if $verbose;
-    $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    print "done\n" if $verbose;
+    eval {
+        print "update logs table order..." if $verbose;
+        $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+        print "done\n" if $verbose;
+    };
+    print "$@\n" if($@ && $verbose);
 
     # repair / optimize tables
     print "optimizing / repairing tables\n" if $verbose;
