@@ -11,6 +11,7 @@ next:
             - add scrollbars for large maps
             - add action menus for dashboards
             - add file upload for background images
+            - add file upload for static images
             - fix grid panels not restoring column width
           - Reports:
             - add quarterly and half year reports

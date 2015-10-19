@@ -2298,12 +2298,21 @@ Ext.define('TP.StaticIcon', {
                 maxWidth: 800
             },
             matchFieldWidth: false,
-            listeners: { change: function() {
+            listeners: {
+                select: function(combo, records, eOpts) {
+                    if(records[0].data['image'] == "&lt;upload new image&gt;") {
+                        TP.uploadUserContent('image', 'images/', function(filename) {
+                            combo.setValue('../usercontent/images/'+filename);
+                        });
+                    }
+                    return(true);
+                },
+                change: function() {
                 TP.iconSettingsWindow.renderUpdate();
             }}
         }, {
             xtype:      'panel',
-            html:       'Place images in: '+usercontent_folder+'/images/',
+            html:       'Place images in: '+usercontent_folder+'/images/ <a href="#" onclick="TP.uploadUserContent(\'image\', \'images/\')">(upload)</a>',
             style:      'text-align: center;',
             bodyCls:    'form-hint',
             padding:    '10 0 0 0',

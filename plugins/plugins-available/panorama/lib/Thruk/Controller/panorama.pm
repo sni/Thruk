@@ -1866,6 +1866,9 @@ sub _task_userdata_images {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
+    if(!$query) {
+        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => '&lt;upload new image&gt;'};
+    }
     $c->{'db'}->_page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},
