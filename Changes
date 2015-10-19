@@ -13,6 +13,7 @@ next:
             - fix grid panels not restoring column width
           - Reports:
             - add quarterly and half year reports
+            - change pdf converter to phantomjs
 
 2.02     Wed Sep 30 17:38:30 CEST 2015
           - show eventhandler name on extinfo page if available

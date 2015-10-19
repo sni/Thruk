@@ -40,7 +40,7 @@ sub index {
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
-    $c->stash->{'wkhtmltopdf'}         = 1;
+    $c->stash->{'phantomjs'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
 
     my $report_nr = $c->req->parameters->{'report'};
@@ -137,9 +137,9 @@ sub index {
         }
     }
 
-    if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
-        $c->stash->{'wkhtmltopdf'} = 0;
-        $c->stash->{'wkhtmltopdf_file'} = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'};
+    if($c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'}) {
+        $c->stash->{'phantomjs'} = 0;
+        $c->stash->{'phantomjs_file'} = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'};
     }
 
     # show list of configured reports

@@ -2011,7 +2011,7 @@ drop down selection.
 == Component Thruk::Plugin::Reports2
 
 The 'Reports2' plugin creates sla reports in html or pdf format. You
-probably have to download the link:/documentation/faq.html#wkhtmltopdf[wkhtmltopdf binary] in a recent version.
+probably have to download the link:/documentation/faq.html#phantomjs[phantomjs binary] in a recent version.
 
 ex.:
 
@@ -2019,7 +2019,7 @@ ex.:
     report_nice_level      = 5
     max_concurrent_reports = 2
     report_base_url        = http://host.local/thruk/cgi-bin/
-    wkhtmltopdf            = /usr/bin/wkhtmltopdf
+    phantomjs              = /usr/bin/phantomjs
     pnp_export             = plugins/plugins-enabled/reports2/script/pnp_export.sh
     report_from_email      = User Name <example@mail.com>
     default_template       = host_sla.tt
@@ -2037,9 +2037,9 @@ they will be queued up. Default is 2.
 === report_base_url
 Url used to replace relative links in html reports.
 
-=== wkhtmltopdf
-`wkhtmltopdf` is used to convert html pages into pdf.
-See the link:/documentation/faq.html#wkhtmltopdf[FAQ] for download
+=== phantomjs
+`phantomjs` is used to convert html pages into pdf.
+See the link:/documentation/faq.html#phantomjs[FAQ] for download
 links and further information.
 
 === pnp_export

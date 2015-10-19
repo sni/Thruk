@@ -51,11 +51,7 @@ perfectly documented at http://template-toolkit.org/docs/manual/index.html
 
 ==== Converting
 
-The generated HTML report will be converted into a pdf file using wkhtml2pdf
-together with xvfb. Both tools must be installed on Thruks host. There is
-a binary download for wkhtml2pdf on http://code.google.com/p/wkhtmltopdf/.
-Use at least the 0.11 version or later.
-
+The generated HTML report will be converted into a pdf file using phantomjs.
 
 
 ==== Sending Reports By Mail

@@ -355,9 +355,9 @@ sub get_url {
     if($url =~ m/^https?:/mx && $c->stash->{'param'}->{'pdf'}) {
         $Thruk::Utils::PDF::ctype = "html2pdf";
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
-        my $wkhtmltopdf = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} || 'wkhtmltopdf';
-        my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$wkhtmltopdf.'"';
-        `WKHTMLTOPDFOPTIONS='--cookie thruk_auth $sessionid' $cmd`;
+        my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
+        my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
+        `PHANTOMJSOPTIONS='--cookie thruk_auth $sessionid' $cmd`;
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
         $Thruk::Utils::PDF::attachment = 'report.pdf';

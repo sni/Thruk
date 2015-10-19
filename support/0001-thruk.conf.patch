@@ -128,9 +128,9 @@
 @@ -718,7 +732,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  
-     # wkhtmltopdf is used to convert html pages into pdf
--    #wkhtmltopdf = /path/to/wkhtmltopdf
-+    wkhtmltopdf = @DATADIR@/script/wkhtmltopdf
+     # phantomjs is used to convert html pages into pdf
+-    #phantomjs = /path/to/phantomjs
++    phantomjs = @DATADIR@/script/phantomjs
  
      # pnp export script is used to export pnp graphs into reports
      #pnp_export = /path/to/pnp_export.sh

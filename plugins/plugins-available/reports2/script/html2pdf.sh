@@ -2,72 +2,31 @@
 #
 # usage:
 #
-# html2pdf.sh <html inputfile> <pdf outputfile> [<logfile>] [<wkhtmltopdf binary>]
+# html2pdf.sh <html inputfile> <pdf outputfile> [<logfile>] [<phantomjs binary>]
 #
 
 # read rc files if exist
 [ -e ~/.thruk   ] && . ~/.thruk
 [ -e ~/.profile ] && . ~/.profile
 
+DIR=$(dirname "$BASH_SOURCE")
+
 LOGFILE="$3";
 if [ "$LOGFILE" != "" ]; then
-  exec >>$LOGFILE 2>&1
+    exec >>$LOGFILE 2>&1
 fi
 
 INPUT=$1
 OUTPUT=$2
-WKHTMLTOPDF=$4
+PHANTOMJS=$4
 
-[ -z $WKHTMLTOPDF ] && WKHTMLTOPDF="wkhtmltopdf"
+[ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
 
-EXTRAOPTIONS='-q'
-
-DISP=$RANDOM
-let "DISP %= 500"
-while [ -f /tmp/.X${DISP}-lock ];do
-  DISP=$RANDOM
-  let "DISP %= 500";
-done;
-XAUTHORITY=`mktemp`;
-TMPLOG=`mktemp`;
-Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP >$TMPLOG 2>&1 &
-xpid=$!
-
-# wait for xauth
-for x in seq 10; do
-    sleep 1;
-    [ -e $XAUTHORITY ] && break;
-done
-
-# wait x-lock
-for x in seq 5; do
-    sleep 1;
-    [ -e /tmp/.X${DISP}-lock ] && break;
-done
-
-if [ ! -e /tmp/.X${DISP}-lock -o ! -e $XAUTHORITY ]; then
-    echo "xvfb failed to start"
-    cat $TMPLOG
-    exit 1
-fi
+EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true"
 
 rm -f $OUTPUT
-DISPLAY=:$DISP $WKHTMLTOPDF \
-        --use-xserver \
-        -l \
-        $WKHTMLTOPDFOPTIONS \
-        $EXTRAOPTIONS \
-        --image-quality 100 \
-        --disable-smart-shrinking \
-        -s A4 \
-        -B 0mm -L 0mm -R 0mm -T 0mm \
-        "$INPUT" "$OUTPUT" 2>&1 | \
-    grep -v 'QPixmap: Cannot create a QPixmap when no GUI is being used'
-
-if [ ! -e "$OUTPUT" ]; then
-    cat $TMPLOG
-    exit 1;
-fi
+$PHANTOMJS $EXTRAOPTIONS "$DIR/html2pdf.js" "$INPUT" "$OUTPUT" 2>&1
+rc=$?
 
 # ensure file is not owned by root
 if [ -e "$OUTPUT" -a $UID == 0 ]; then
@@ -76,5 +35,8 @@ if [ -e "$OUTPUT" -a $UID == 0 ]; then
     chown $usr:$grp $OUTPUT
 fi
 
-kill $xpid >/dev/null 2>&1
-rm -f $TMPLOG $XAUTHORITY /tmp/.X${DISP}-lock
+if [ ! -e "$OUTPUT" -a $rc -eq 0 ]; then
+    rc=1
+fi
+
+exit $rc
