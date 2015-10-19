@@ -688,6 +688,9 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.on("click", function(evt) {
                 tab.tabBodyClick(evt);
             });
+            if(!tab.isActiveTab()) {
+                tab.bgDragEl.hide();
+            }
         }
         tab.disableMapControls();
 
