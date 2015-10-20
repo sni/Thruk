@@ -955,6 +955,7 @@ plugins/plugins-available/reports2/root/reports.css
 plugins/plugins-available/reports2/root/reports.js
 plugins/plugins-available/reports2/root/reports_render.js
 plugins/plugins-available/reports2/routes
+plugins/plugins-available/reports2/script/grafana_export.sh
 plugins/plugins-available/reports2/script/html2pdf.js
 plugins/plugins-available/reports2/script/html2pdf.sh
 plugins/plugins-available/reports2/script/pnp_export.sh

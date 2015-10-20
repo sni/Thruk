@@ -343,34 +343,15 @@ sub get_url {
     my $url            = $c->stash->{'param'}->{'url'};
 
     # create fake session
-    my $sdir        = $c->config->{'var_path'}.'/sessions';
-    my $sessionid   = md5_hex(rand(1000).time());
-    my $sessionfile = $sdir.'/'.$sessionid;
-    Thruk::Utils::IO::mkdir_r($sdir);
-    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
-    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
-    $c->stash->{'fake_session_id'} = $sessionid;
+    my $sessionid = _get_fake_session($c);
 
     # directly convert external urls
     if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'}) {
-        my $domain = $1;
-        $Thruk::Utils::PDF::ctype = "html2pdf";
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
         my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
-        my($tfh, $tmp_cookie_file) = tempfile();
-        CORE::close($tfh);
-        push @{$c->stash->{'tmp_files_to_delete'}}, $tmp_cookie_file;
-        # create fake cookie
-        Thruk::Utils::IO::write($tmp_cookie_file, sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s",
-                                                             $domain,
-                                                            'TRUE',
-                                                            '/',
-                                                            $url =~ m/^https/mx ? 'TRUE' : 'FALSE',
-                                                            (time()+3600),
-                                                            'thruk_auth',
-                                                             $sessionid));
-        `PHANTOMJSOPTIONS='--cookies-file=$tmp_cookie_file' $cmd`;
+        local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
+        `$cmd`;
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
         $Thruk::Utils::PDF::attachment = 'report.pdf';
@@ -562,22 +543,38 @@ A string will be returned if no PNP graph can be exported.
 =cut
 sub get_pnp_image {
     my($hst, $svc, $start, $end, $width, $height, $source) = @_;
-    my $c        = $Thruk::Request::c or die("not initialized!");
-    my $exporter = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} || $c->config->{plugin_path}.'/plugins-enabled/reports2/script/pnp_export.sh';
-    my $pnpurl   = "";
-    $source      = 0 unless defined $source;
+    my $c          = $Thruk::Request::c or die("not initialized!");
+    my $pnpurl     = "";
+    my $grafanaurl = "";
+    $source        = 0 unless defined $source;
 
     if($svc) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
         $pnpurl     = Thruk::Utils::get_pnp_url($c, $svcdata->[0], 1);
+        $grafanaurl = Thruk::Utils::get_histou_url($c, $svcdata->[0], 1);
     } else {
         my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
         $pnpurl     = Thruk::Utils::get_pnp_url($c, $hstdata->[0], 1);
-        $svc = '_HOST_';
+        $grafanaurl = Thruk::Utils::get_histou_url($c, $hstdata->[0], 1);
+        $svc = '_HOST_' if $pnpurl;
     }
 
+    if($grafanaurl) {
+        $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
+        $grafanaurl .= '&panelId='.($source || 2);
+        $width  *= 1.2;
+        $height *= 1.6;
+    }
+
+    my $exporter = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/pnp_export.sh';
+    $exporter    = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/grafana_export.sh' if $grafanaurl;
+    $exporter    = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'};
+
+    # create fake session
+    my $sessionid = _get_fake_session($c);
+    local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
     my($fh, $filename) = tempfile();
-    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$pnpurl.'" "'.$filename.'" "'.$source.'"';
+    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||$grafanaurl).'" "'.$filename.'" "'.$source.'"';
     `$cmd`;
     if(-s $filename) {
         my $imgdata  = read_file($filename);
@@ -1055,6 +1052,19 @@ sub _locale {
     my $tr  = $Thruk::Utils::Reports::Render::locale;
     $fmt = $tr->{$fmt} || $fmt;
     return sprintf($fmt, @args);
+}
+
+##############################################
+sub _get_fake_session {
+    my($c) = @_;
+    my $sdir        = $c->config->{'var_path'}.'/sessions';
+    my $sessionid   = md5_hex(rand(1000).time());
+    my $sessionfile = $sdir.'/'.$sessionid;
+    Thruk::Utils::IO::mkdir_r($sdir);
+    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
+    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
+    $c->stash->{'fake_session_id'}   = $sessionid;
+    return($sessionid);
 }
 
 ##############################################

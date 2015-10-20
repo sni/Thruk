@@ -12,12 +12,41 @@ if (version == 2) {
     page.zoomFactor = 1.4;
 }
 
-if (system.args.length != 3) {
-    console.log('Usage: html2pdf.js INPUT.html OUTPUT.pdf');
+if (system.args.length < 3) {
+    console.log('Usage: html2pdf.js INPUT.html OUTPUT.pdf [<options>]');
     phantom.exit(1);
 } else {
-    input  = system.args[1];
-    output = system.args[2];
+    var args    = [];
+    var options = {}
+    system.args.forEach(function(arg, i) {
+        var matches = arg.match(/^--([^=]+)=(.*)$/);
+        if(matches) {
+            options[matches[1]] = matches[2];
+        } else {
+            args.push(arg);
+        }
+    });
+    input  = args[1];
+    output = args[2];
+
+    if(options.width && options.height) {
+        page.paperSize  = undefined;
+        page.zoomFactor = 0.7;
+        page.viewportSize = {
+            width:  options.width,
+            height: options.height
+        };
+    }
+
+    if(options.cookie) {
+        var c = options.cookie.match(/^([^,]+),(.*)$/);
+        phantom.addCookie({
+          'domain'   : 'mo.nierlein.de',
+          'name'     : c[1],
+          'value'    : c[2],
+          'path'     : '/'
+        });
+    }
 
     page.open(input, function (status) {
         if (status !== 'success') {
