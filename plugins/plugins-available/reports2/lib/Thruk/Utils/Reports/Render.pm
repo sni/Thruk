@@ -362,11 +362,12 @@ sub get_url {
         CORE::close($tfh);
         push @{$c->stash->{'tmp_files_to_delete'}}, $tmp_cookie_file;
         # create fake cookie
-        Thruk::Utils::IO::write($tmp_cookie_file, sprintf("%s\t%s\t%s\t%s\t%s\t%s",
+        Thruk::Utils::IO::write($tmp_cookie_file, sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s",
                                                              $domain,
                                                             'TRUE',
                                                             '/',
                                                             $url =~ m/^https/mx ? 'TRUE' : 'FALSE',
+                                                            (time()+3600),
                                                             'thruk_auth',
                                                              $sessionid));
         `PHANTOMJSOPTIONS='--cookies-file=$tmp_cookie_file' $cmd`;
