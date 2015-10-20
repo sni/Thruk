@@ -352,12 +352,24 @@ sub get_url {
     $c->stash->{'fake_session_id'} = $sessionid;
 
     # directly convert external urls
-    if($url =~ m/^https?:/mx && $c->stash->{'param'}->{'pdf'}) {
+    if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'}) {
+        my $domain = $1;
         $Thruk::Utils::PDF::ctype = "html2pdf";
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
         my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
-        `PHANTOMJSOPTIONS='--cookie thruk_auth $sessionid' $cmd`;
+        my($tfh, $tmp_cookie_file) = tempfile();
+        CORE::close($tfh);
+        push @{$c->stash->{'tmp_files_to_delete'}}, $tmp_cookie_file;
+        # create fake cookie
+        Thruk::Utils::IO::write($tmp_cookie_file, sprintf("%s\t%s\t%s\t%s\t%s\t%s",
+                                                             $domain,
+                                                            'TRUE',
+                                                            '/',
+                                                            $url =~ m/^https/mx ? 'TRUE' : 'FALSE',
+                                                            'thruk_auth',
+                                                             $sessionid));
+        `PHANTOMJSOPTIONS='--cookies-file=$tmp_cookie_file' $cmd`;
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
         $Thruk::Utils::PDF::attachment = 'report.pdf';

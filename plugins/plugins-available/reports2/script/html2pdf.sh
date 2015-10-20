@@ -22,7 +22,7 @@ PHANTOMJS=$4
 
 [ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
 
-EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true"
+EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true $PHANTOMJSOPTIONS"
 
 rm -f $OUTPUT
 $PHANTOMJS $EXTRAOPTIONS "$DIR/html2pdf.js" "$INPUT" "$OUTPUT" 2>&1
