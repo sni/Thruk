@@ -1174,6 +1174,7 @@ sub _cmd_import_logs {
         return("ERROR - please run the initial import with --local\n", 1);
     }
     if($mode eq 'import' && !$opt->{'yes'}) {
+        local $|=1;
         print "import removes current cache and imports new logfile data.\n";
         print "use logcacheupdate to update cache. Continue? [n]: ";
         my $buf;
