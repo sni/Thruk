@@ -54,10 +54,41 @@ if (system.args.length < 3) {
             console.log('Unable to load the input file!');
             phantom.exit(1);
         } else {
-            window.setTimeout(function () {
-                page.render(output);
-                phantom.exit();
-            }, 500);
+            if(input.match(/histou\.js\?/)) {
+                var retries = 0;
+                window.setInterval(function () {
+                    retries++;
+                    if(checkGrafanaLoaded() || retries > 100) {
+                        page.render(output);
+                        phantom.exit();
+                    }
+                }, 100);
+            } else {
+                window.setTimeout(function () {
+                    page.render(output);
+                    phantom.exit();
+                }, 3000);
+            }
         }
     });
+}
+
+function checkGrafanaLoaded() {
+    var chartEl = page.evaluate(function() {
+        return [].map.call(document.querySelectorAll('DIV.flot-text'), function(el) {
+            return el.className;
+        });
+    });
+    if(chartEl.length == 0) {
+        return(false);
+    }
+    var loadingEl = page.evaluate(function() {
+        return [].map.call(document.querySelectorAll('span.panel-loading'), function(el) {
+            return el.className;
+        });
+    });
+    if(loadingEl.length > 0 && loadingEl[0].match(/ng-hide/)) {
+        return(true);
+    }
+    return(false);
 }
