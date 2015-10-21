@@ -5478,7 +5478,8 @@ function move_png_img(factor) {
 function set_histou_img(start, end, id, source) {
     if(start  == undefined) { start  = histou_start; }
     if(end    == undefined) { end    = histou_end; }
-    var newUrl = histou_frame_url + "&from=" + (start*1000) + "&to=" + (end*1000);
+    if(source == undefined) { source = histou_source; }
+    var newUrl = histou_frame_url + "&from=" + (start*1000) + "&to=" + (end*1000) + '&panelId='+source;
 
     jQuery('#pnpwaitimg').css('display', 'block');
 

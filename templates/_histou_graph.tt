@@ -1,14 +1,51 @@
 ﻿[% USE date %]
-[% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/') _ "&panelId=2" %]
+[% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/') %]
 <script type="text/javascript">
   var histou_url        = "[% histou_url %]";
   var histou_frame_url  = "[% histou_frame_url %]";
-  var histou_source     = "";
+  var histou_source     = 2;
+  var random            = Number(Math.random() * 100000).toFixed(0);
+
+  /* try to fetch sources */
+  var source_url = histou_url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&');
+  jQuery.ajax({
+    url: source_url,
+    type: 'POST',
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function(data) {
+      data = data.replace(/^[\s\S]*<br>\{/, '{');
+      data = data.replace(/<br><\/pre>$/, '');
+      data = data.replace(/\n/g, '');
+      eval('data = '+data+";");
+      var sources    = [];
+      var has_graphs = false;
+      jQuery('#histou_source_select').find('option').remove();
+      jQuery(data.rows).each(function(i, row) {
+          jQuery(row.panels).each(function(j, panel) {
+            var title = panel.title;
+            jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+title+'<\/option>');
+            has_graphs = true;
+          });
+      });
+      /* only useful for multiple sources */
+      if(has_graphs) {
+        jQuery('#histou_source_select').show();
+      }
+    }
+  });
 </script>
 <table>
   <tr>
     <td style="position: relative;">
         <div class='commentTitle'>Performance Graph</div>
+        <div class='pnpSelector'>
+          <form action="#">
+            <select onchange="histou_source=this.value; set_histou_img();" id="histou_source_select" style="display: none;">
+            </select>
+          </form>
+        </div>
     </td>
   </tr>
   <tr>
