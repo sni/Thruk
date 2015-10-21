@@ -33,15 +33,16 @@ if (system.args.length < 3) {
         page.paperSize  = undefined;
         page.zoomFactor = 1;
         page.viewportSize = {
-            width:  options.width*1.3,
-            height: options.height*2
+            width:  options.width,
+            height: options.height
         };
     }
 
     if(options.cookie) {
         var c = options.cookie.match(/^([^,]+),(.*)$/);
+        var domain = input.match(/https?:\/\/([^/:]+)/);
         phantom.addCookie({
-          'domain'   : 'mo.nierlein.de',
+          'domain'   : domain[1],
           'name'     : c[1],
           'value'    : c[2],
           'path'     : '/'
@@ -56,7 +57,7 @@ if (system.args.length < 3) {
             window.setTimeout(function () {
                 page.render(output);
                 phantom.exit();
-            }, 2000);
+            }, 500);
         }
     });
 }

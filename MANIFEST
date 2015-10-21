@@ -847,6 +847,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_menu_add.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_chart.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_clock.js
+plugins/plugins-available/panorama/root/js/panorama_js_panlet_grafana.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_core_metrics.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_gearman.js
@@ -955,10 +956,6 @@ plugins/plugins-available/reports2/root/reports.css
 plugins/plugins-available/reports2/root/reports.js
 plugins/plugins-available/reports2/root/reports_render.js
 plugins/plugins-available/reports2/routes
-plugins/plugins-available/reports2/script/grafana_export.sh
-plugins/plugins-available/reports2/script/html2pdf.js
-plugins/plugins-available/reports2/script/html2pdf.sh
-plugins/plugins-available/reports2/script/pnp_export.sh
 plugins/plugins-available/reports2/t/controller_reports.t
 plugins/plugins-available/reports2/t/report_locales.t
 plugins/plugins-available/reports2/t/report_templates.t
@@ -1183,9 +1180,13 @@ script/append.make
 script/disable_debug_timer.sh
 script/enable_debug_timer.sh
 script/generate_timeperiod_transitions.pl
+script/grafana_export.sh
+script/html2pdf.js
+script/html2pdf.sh
 script/nagexp
 script/nagimp
 script/naglint
+script/pnp_export.sh
 script/test_cpan_modules.pl
 script/test_page_rps
 script/thruk

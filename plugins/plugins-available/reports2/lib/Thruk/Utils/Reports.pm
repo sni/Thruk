@@ -1232,7 +1232,7 @@ sub _convert_to_pdf {
     }
 
     my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
-    my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
+    my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
     my $out = `$cmd 2>&1`;
 
     # try again to avoid occasionally qt errors

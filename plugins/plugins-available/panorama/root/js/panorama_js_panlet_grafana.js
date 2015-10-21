@@ -1,11 +1,29 @@
-TP.graphStore = Ext.create('Ext.data.Store', {
+Ext.define('TP_Sources', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'image_url', type: 'string'},
+        {name: 'name',      type: 'string'},
+        {name: 'source',    type: 'number'},
+    ]
+});
+
+Ext.define('TP_GraphModell', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'text',       type: 'string'},
+        {name: 'url',        type: 'string'},
+        {name: 'source_url', type: 'string'}
+    ]
+});
+
+TP.grafanaStore = Ext.create('Ext.data.Store', {
     pageSize:     10,
     model:       'TP_GraphModell',
     remoteSort:   true,
     remoteFilter: true,
     proxy: {
         type:   'ajax',
-        url:    'panorama.cgi?task=pnp_graphs',
+        url:    'panorama.cgi?task=grafana_graphs',
         method: 'POST',
         params: {},
         reader: {
@@ -25,10 +43,10 @@ TP.graphStore = Ext.create('Ext.data.Store', {
     }
 });
 
-Ext.define('TP.PanletPNP', {
+Ext.define('TP.PanletGrafana', {
     extend: 'TP.Panlet',
 
-    title: 'PNPGraph',
+    title: 'GrafanaGraph',
     height: 240,
     width:  420,
     hideSettingsForm: ['backends'],
@@ -37,14 +55,10 @@ Ext.define('TP.PanletPNP', {
         var panel             = this;
         this.xdata.url        = '';
         this.xdata.graph      = '';
-        this.xdata.source     = 0;
+        this.xdata.source     = 2;
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
         this.lastGraph        = '';
-        this.adjusting        = 0;
-
-        this.size_adjustment_x = 97;
-        this.size_adjustment_y = 50;
 
         /* update source selector */
         this.updateSource = function(force) {
@@ -53,7 +67,19 @@ Ext.define('TP.PanletPNP', {
             if(!values.graph) { return; }
             if(force || (values.graph != this.lastGraph && values.graph.indexOf('host=') != -1)) {
                 this.lastGraph = values.graph;
-                var url = values.graph.replace(/\/image\?/, '/json?');
+                // get source url for graph
+                var url = values.graph;
+                var matched = false;
+                for(var i=0; i<TP.grafanaStore.data.items.length; i++) {
+                    if(TP.grafanaStore.data.items[i].raw.url == url) {
+                        url = TP.grafanaStore.data.items[i].raw.source_url;
+                        matched = true;
+                        break;
+                    }
+                }
+                if(!matched) { return; }
+
+                url = url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?');
                 Ext.Ajax.cors                = true;
                 Ext.Ajax.withCredentials     = true;
                 Ext.Ajax.useDefaultXhrHeader = false;
@@ -61,22 +87,32 @@ Ext.define('TP.PanletPNP', {
                     url:     url,
                     method: 'POST',
                     callback: function(options, success, response) {
-                        var data = [];
-                        var tmp  = TP.getResponse(panel, response);
-                        if(tmp) {
-                            for(var nr=0; nr<tmp.length; nr++) {
-                                var row = tmp[nr];
-                                var match = row.image_url.match(/\&source=(\d+)\&/);
-                                data[match[1]] = {
-                                    name:    tmp[nr].ds_name,
-                                    source:  match[1]
-                                };
+                        if(!success) { return; }
+                        var data = response.responseText;
+                        try {
+                            data = data.replace(/^[\s\S]*<br>\{/, '{');
+                            data = data.replace(/<br><\/pre>$/, '');
+                            data = data.replace(/\n/g, '');
+                            eval('data = '+data+";");
+                        }
+                        catch(e) { debug(e); }
+                        var sources = [];
+                        if(data && data.rows) {
+                            for(var i=0; i<data.rows.length; i++) {
+                                var row = data.rows[i];
+                                for(var k=0; i<row.panels.length; i++) {
+                                    var p = row.panels[k];
+                                    sources.push({
+                                        name:    p.title,
+                                        source:  p.id
+                                    });
+                                }
                             }
                         }
                         var source_combo = TP.getFormField(panel.gearitem.down('form'), 'source');
                         source_combo.store.removeAll();
-                        for(var nr=0; nr<data.length; nr++) {
-                            source_combo.store.loadRawData(data[nr], true);
+                        for(var nr=0; nr<sources.length; nr++) {
+                            source_combo.store.loadRawData(sources[nr], true);
                         }
                         source_combo.setValue(panel.xdata.source);
                     }
@@ -87,25 +123,19 @@ Ext.define('TP.PanletPNP', {
 
         /* update graph source */
         this.refreshHandler = function() {
-            if(this.xdata.graph == '') {
-                return;
-            }
+            if(this.xdata.graph == '') { return; }
             var imgPanel = this.items.getAt(0);
             if(!imgPanel || !imgPanel.el) { // not yet initialized
                 return;
             }
             var size     = imgPanel.getSize();
-            var url      = this.xdata.graph + '&view=1&source='+this.xdata.source;
+            if(size.width == 0) { return; }
+            var url      = this.xdata.graph + '&source='+this.xdata.source;
             var now      = new Date();
-            url = url + '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
-            url = url + '&end='   + Math.round(now.getTime()/1000);
-            if(size.height > 1 && (size.height - this.size_adjustment_y) < 81) {
-                url = url + '&graph_width=' + size.width;
-                url = url + '&graph_height='+ size.height;
-            } else {
-                url = url + '&graph_width=' +(size.width  - this.size_adjustment_x);
-                url = url + '&graph_height='+(size.height - this.size_adjustment_y);
-            }
+            url = url + '&from='  + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
+            url = url + '&to='    + Math.round(now.getTime()/1000);
+            url = url + '&width=' + size.width;
+            url = url + '&height='+ size.height;
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
         };
@@ -120,7 +150,6 @@ Ext.define('TP.PanletPNP', {
                             var panel = me.up('panel');
                             var refresh = panel.getTool('refresh') || panel.getTool('broken');
                             refresh.setType('refresh');
-                            panel.adjustImgSize();
                             panel.imgMask.hide();
                         },
                         error: function (evt, ele, opts) {
@@ -145,41 +174,8 @@ Ext.define('TP.PanletPNP', {
             }
         });
         this.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
-            var size = This.getSize();
-            // not on initial resizing
-            if(size.width != adjWidth || size.height != adjHeight) {
-                this.size_adjustment_x += adjWidth;
-                this.size_adjustment_y += adjHeight;
-            }
             this.refreshHandler();
         });
-
-        /* adjust size of image */
-        this.adjustImgSize = function() {
-            var imgPanel = this.items.getAt(0);
-            if(!imgPanel || !imgPanel.el) { // not yet initialized
-                return;
-            }
-            var size = imgPanel.getSize();
-            var naturalWidth  = imgPanel.getEl().dom.naturalWidth;
-            var naturalHeight = imgPanel.getEl().dom.naturalHeight;
-            if(naturalWidth && naturalWidth > 81 && size.height - this.size_adjustment_y > 81) {
-                var oldX = this.size_adjustment_x;
-                var oldY = this.size_adjustment_y;
-                this.size_adjustment_x += (naturalWidth  - size.width);
-                this.size_adjustment_y += (naturalHeight - size.height);
-                if(oldX != this.size_adjustment_x || oldY != this.size_adjustment_y) {
-                    panel.adjusting++;
-                    if(panel.adjusting < 5) {
-                        window.setTimeout(function() {
-                            panel.refreshHandler();
-                        }, 100);
-                    }
-                } else {
-                    panel.adjusting = 0;
-                }
-            }
-        }
     },
     setGearItems: function() {
         var panel = this;
@@ -194,7 +190,7 @@ Ext.define('TP.PanletPNP', {
             typeAhead:       true,
             minChars:        3,
             pageSize:        10,
-            store:           TP.graphStore,
+            store:           TP.grafanaStore,
             listeners: {
                 select: function( combo, records, eOpts ) {
                     panel.xdata.source = 0;
@@ -215,7 +211,7 @@ Ext.define('TP.PanletPNP', {
             valueField:     'source',
             forceSelection: true,
             editable:       false,
-            store:          { model: 'TP_Sources', data : [ {name: '0', source: 0, image_url: ''} ] }
+            store:          { model: 'TP_Sources', data : [ {name: '2', source: 2, image_url: ''} ] }
         });
 
         this.addGearItems({
@@ -230,8 +226,8 @@ Ext.define('TP.PanletPNP', {
         });
     },
     gearInitCallback: function(panel) {
-        TP.graphStore.panel = panel;
-        TP.graphStore.load();
+        TP.grafanaStore.panel = panel;
+        TP.grafanaStore.load();
         panel.updateSource(true);
     }
 });

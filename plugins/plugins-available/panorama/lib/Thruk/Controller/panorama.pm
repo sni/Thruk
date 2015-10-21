@@ -173,6 +173,9 @@ sub index {
         elsif($task eq 'pnp_graphs') {
             return(_task_pnp_graphs($c));
         }
+        elsif($task eq 'grafana_graphs') {
+            return(_task_grafana_graphs($c));
+        }
         elsif($task eq 'userdata_backgroundimages') {
             return(_task_userdata_backgroundimages($c));
         }
@@ -1794,6 +1797,54 @@ sub _task_pnp_graphs {
             push @{$graphs}, {
                 text => $text,
                 url  => $url.'/image?host='.$svc->{'host_name'}.'&srv='.$svc->{'description'},
+            };
+        }
+    }
+    $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
+    $c->{'db'}->_page_data($c, $graphs);
+
+    my $json = {
+        data        => $c->stash->{'data'},
+        total       => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => JSON::XS::true,
+    };
+
+    return $c->render(json => $json);
+}
+
+##########################################################
+sub _task_grafana_graphs {
+    my($c) = @_;
+
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
+    my $search = $c->req->parameters->{'query'};
+    my $graphs = [];
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    for my $hst (@{$data}) {
+        my $url = Thruk::Utils::get_histou_url($c, $hst, 1);
+        if($url ne '') {
+            my $text = $hst->{'name'}.';';
+            next if($search and $text !~ m/$search/mxi);
+            push @{$graphs}, {
+                text       => $text,
+                url        => 'extinfo.cgi?type=grafana&host='.$hst->{'name'},
+                source_url => $url,
+            };
+        }
+    }
+
+    $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    for my $svc (@{$data}) {
+        my $url = Thruk::Utils::get_histou_url($c, $svc, 1);
+        if($url ne '') {
+            my $text = $svc->{'host_name'}.';'.$svc->{'description'};
+            next if($search and $text !~ m/$search/mxi);
+            push @{$graphs}, {
+                text       => $text,
+                url        => 'extinfo.cgi?type=grafana&host='.$svc->{'host_name'}.'&service='.$svc->{'description'},
+                source_url => $url,
             };
         }
     }

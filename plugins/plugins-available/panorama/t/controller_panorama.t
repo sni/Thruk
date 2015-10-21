@@ -77,6 +77,7 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=hosts_pie',
     '/thruk/cgi-bin/panorama.cgi?task=hosttotals',
     '/thruk/cgi-bin/panorama.cgi?task=pnp_graphs',
+    '/thruk/cgi-bin/panorama.cgi?task=grafana_graphs',
     '/thruk/cgi-bin/panorama.cgi?task=server_stats',
     { url => '/thruk/cgi-bin/panorama.cgi?task=service_detail', post => { host => $host, service => $service } },
     '/thruk/cgi-bin/panorama.cgi?task=service_list',

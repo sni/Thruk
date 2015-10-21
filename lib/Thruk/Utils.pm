@@ -1362,6 +1362,86 @@ sub get_graph_url {
     }
 }
 
+##########################################################
+
+=head2 get_perf_image
+
+  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images)
+
+return base64 encoded pnp/grafana image if possible.
+An empty string will be returned if no graph can be exported.
+
+=cut
+sub get_perf_image {
+    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images) = @_;
+    my $pnpurl     = "";
+    my $grafanaurl = "";
+    $source        = 0 unless defined $source;
+
+    if($svc) {
+        my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
+        $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
+        $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
+    } else {
+        my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
+        $pnpurl     = get_pnp_url($c, $hstdata->[0], 1);
+        $grafanaurl = get_histou_url($c, $hstdata->[0], 1);
+        $svc = '_HOST_' if $pnpurl;
+    }
+
+    if($grafanaurl) {
+        $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
+        $grafanaurl .= '&panelId='.($source || 2);
+        if($resize_grafana_images) {
+            $width  = $width * 1.3;
+            $height = $height * 2;
+        }
+        $grafanaurl .= '&legend=false' if $height < 200;
+    }
+
+    my $exporter = $c->config->{home}.'/script/pnp_export.sh';
+    $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
+    $exporter    = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'};
+
+    # create fake session
+    my $sessionid = get_fake_session($c);
+    local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
+    my($fh, $filename) = tempfile();
+    CORE::close($fh);
+    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||$grafanaurl).'" "'.$filename.'" "'.$source.'"';
+    `$cmd`;
+    if(-s $filename) {
+        my $imgdata  = read_file($filename);
+        unlink($filename);
+        return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
+        return $imgdata;
+    }
+    unlink($c->stash->{'fake_session_file'});
+    return "";
+}
+
+##############################################
+
+=head2 get_fake_session
+
+  get_fake_session($c)
+
+create and return fake session id for current user
+
+=cut
+
+sub get_fake_session {
+    my($c) = @_;
+    my $sdir        = $c->config->{'var_path'}.'/sessions';
+    my $sessionid   = md5_hex(rand(1000).time());
+    my $sessionfile = $sdir.'/'.$sessionid;
+    Thruk::Utils::IO::mkdir_r($sdir);
+    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
+    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
+    $c->stash->{'fake_session_id'}   = $sessionid;
+    $c->stash->{'fake_session_file'} = $sessionfile;
+    return($sessionid);
+}
 
 ########################################
 

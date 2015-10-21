@@ -332,6 +332,10 @@ exit 0
 %attr(0755,root,root) %{_datadir}/thruk/thruk_auth
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk.psgi
+%attr(0755,root,root) %{_datadir}/thruk/script/grafana_export.sh
+%attr(0644,root,root) %{_datadir}/thruk/script/html2pdf.js
+%attr(0755,root,root) %{_datadir}/thruk/script/html2pdf.sh
+%attr(0755,root,root) %{_datadir}/thruk/script/pnp_export.sh
 %{_datadir}/thruk/root
 %{_datadir}/thruk/templates
 %{_datadir}/thruk/themes

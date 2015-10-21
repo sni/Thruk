@@ -49,6 +49,10 @@
 /usr/share/thruk/thruk_auth
 /usr/share/thruk/script/thruk_fastcgi.pl
 /usr/share/thruk/script/thruk.psgi
+/usr/share/thruk/script/grafana_export.sh
+/usr/share/thruk/script/html2pdf.js
+/usr/share/thruk/script/html2pdf.sh
+/usr/share/thruk/script/pnp_export.sh
 /usr/share/thruk/templates
 /usr/share/thruk/themes
 /var/cache/thruk
