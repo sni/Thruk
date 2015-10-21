@@ -31,10 +31,10 @@ if (system.args.length < 3) {
 
     if(options.width && options.height) {
         page.paperSize  = undefined;
-        page.zoomFactor = 0.7;
+        page.zoomFactor = 1;
         page.viewportSize = {
-            width:  options.width,
-            height: options.height
+            width:  options.width*1.3,
+            height: options.height*2
         };
     }
 
@@ -56,7 +56,7 @@ if (system.args.length < 3) {
             window.setTimeout(function () {
                 page.render(output);
                 phantom.exit();
-            }, 200);
+            }, 2000);
         }
     });
 }

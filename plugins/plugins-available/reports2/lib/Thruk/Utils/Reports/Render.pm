@@ -562,8 +562,6 @@ sub get_pnp_image {
     if($grafanaurl) {
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         $grafanaurl .= '&panelId='.($source || 2);
-        $width  *= 1.2;
-        $height *= 1.6;
     }
 
     my $exporter = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/pnp_export.sh';
