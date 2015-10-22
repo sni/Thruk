@@ -125,7 +125,6 @@ local_install: local_patches
 	cp -p script/html2pdf.js       ${DESTDIR}${DATADIR}/script/
 	cp -p script/html2pdf.sh       ${DESTDIR}${DATADIR}/script/
 	cp -p script/pnp_export.sh     ${DESTDIR}${DATADIR}/script/
-	cp -p script/ ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/
 	[ ! -f script/phantomjs ] || cp -p script/phantomjs ${DESTDIR}${DATADIR}/script/
 	echo " " > ${DESTDIR}${DATADIR}/dist.ini
