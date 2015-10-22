@@ -611,11 +611,12 @@ sub wait_for_job {
     like    => (list of) regular expressions which have to match stdout
     errlike => (list of) regular expressions which have to match stderr, default: empty
     sleep   => time to wait after executing the command
+    env     => hash with extra environment variables
   }
 
 =cut
 sub test_command {
-   my $test = shift;
+    my $test = shift;
     my($rc, $stderr) = ( -1, '') ;
     my $return = 1;
 
@@ -624,6 +625,12 @@ sub test_command {
 
     # run the command
     isnt($test->{'cmd'}, undef, "running cmd: ".$test->{'cmd'}) or $return = 0;
+
+    if($test->{'env'}) {
+        for my $key (%{$test->{'env'}}) {
+            $ENV{$key} = $test->{'env'}->{$key};
+        }
+    }
 
     my($prg,$arg) = split(/\s+/, $test->{'cmd'}, 2);
     my $t = Test::Cmd->new(prog => $prg, workdir => '') or die($!);

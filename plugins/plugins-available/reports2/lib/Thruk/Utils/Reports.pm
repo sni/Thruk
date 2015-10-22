@@ -251,7 +251,12 @@ sub report_send {
                      Disposition => 'attachment',
             );
         }
-        return 1 if $msg->send;
+        if($ENV{'THRUK_MAIL_TEST'}) {
+            $msg->send_by_testfile($ENV{'THRUK_MAIL_TEST'});
+            return 1;
+        } else {
+            return 1 if $msg->send;
+        }
     }
     Thruk::Utils::set_message( $c, 'fail_message', 'failed to send report' );
     return 0;
