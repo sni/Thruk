@@ -457,7 +457,8 @@ sub generate_report {
     eval {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 5, 'preparing') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'prepare';
-        Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'});
+        my $discard;
+        Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'}, undef, \$discard);
     };
     if($@) {
         return(_report_die($c, $@, $logfile));
