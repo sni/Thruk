@@ -232,8 +232,12 @@ sub report_send {
 
         # url reports as html
         if(defined $report->{'params'}->{'pdf'} && $report->{'params'}->{'pdf'} eq 'no') {
+            $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.html';
+            if(!-s $attachment) {
+                $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.dat';
+            }
             $msg->attach(Type    => 'text/html',
-                     Path        => $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.html',
+                     Path        => $attachment,
                      Filename    => $report->{'var'}->{'attachment'},
                      Disposition => 'attachment',
             );
