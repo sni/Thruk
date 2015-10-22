@@ -129,20 +129,24 @@ for my $report (@{$test_pdf_reports}) {
         cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=update&report=9999"',
         like => ['/^OK - report scheduled for update$/'],
     });
-    my $mailtestfile = '/tmp/mailtest.'.$$;
-    unlink($mailtestfile);
-    TestUtils::test_command({
-        cmd  => $BIN.' -a reportmail=9999',
-        like => ['/^mail send successfully$/'],
-        env  => { 'THRUK_MAIL_TEST' => $mailtestfile },
-    });
-    ok(-s $mailtestfile, 'mail testfile '.$mailtestfile.' does exist');
-    if(-s $mailtestfile) {
-        my $mail = read_file($mailtestfile);
-        for my $like (@{$report->{'mail.like'}}) {
-            like($mail, $like, 'Mail contains: '.$like);
+    SKIP: {
+        skip("skip mail test with external server", 9) if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+
+        my $mailtestfile = '/tmp/mailtest.'.$$;
+        unlink($mailtestfile);
+        TestUtils::test_command({
+            cmd  => $BIN.' -a reportmail=9999',
+            like => ['/^mail send successfully$/'],
+            env  => { 'THRUK_MAIL_TEST' => $mailtestfile },
+        });
+        ok(-s $mailtestfile, 'mail testfile '.$mailtestfile.' does exist');
+        if(-s $mailtestfile) {
+            my $mail = read_file($mailtestfile);
+            for my $like (@{$report->{'mail.like'}}) {
+                like($mail, $like, 'Mail contains: '.$like);
+            }
         }
-    }
+    };
 }
 
 # remove report
