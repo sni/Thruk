@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 119;
+    plan tests => 194;
 }
 
 BEGIN {
@@ -32,6 +32,8 @@ my($hostname,$servicename) = TestUtils::get_test_service();
 
 my $pages = [
     { url => '/thruk/cgi-bin/reports2.cgi' },
+    { url => '/thruk/cgi-bin/reports2.cgi?action=edit&report=new', like => ['Create Report'] },
+    # sample pdf report
     { url => '/thruk/cgi-bin/reports2.cgi', post => {'action'               => 'save',
                                                      'report'               => 999,
                                                      'name'                 => 'Service SLA Report for '.$hostname.' - '.$servicename,
@@ -53,9 +55,41 @@ my $pages = [
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&html=1', like => [ 'SLA Report' ], skip_js_check => 1, fail_message_ok => 1, unlike => [ 'internal server error', 'HASH' ] },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=edit' },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=email' },
+    { url => '/thruk/cgi-bin/reports2.cgi', post => {'action'               => 'email',
+                                                     'report'               => 999,
+                                                     'send'                 => 1,
+                                                     'to'                   => 'nobody@localhost',
+                                                     'subject'              => 'Report: Test Email',
+                                                     'description'          => 'test mail',
+                                                     'testmode'             => 1,
+                                                    },
+                                            'follow' => 1, like => 'report successfully sent to testfile:' },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['Profile:','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json;charset=UTF-8', },
     { url => '/thruk/cgi-bin/reports2.cgi', post => { 'action' => 'remove', 'report' => 999 }, 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
-    { url => '/thruk/cgi-bin/reports2.cgi?action=edit&report=new', like => ['Create Report'] },
+
+    # sample excel report
+    { url => '/thruk/cgi-bin/reports2.cgi', post => {'action'               => 'save',
+                                                     'report'               => 999,
+                                                     'name'                 => 'Excel Report',
+                                                     'template'             => 'report_from_url.tt',
+                                                     'params.url'           => 'status.cgi?style=hostdetail&hostgroup=all&view_mode=xls',
+                                                     'params.pdf'           => 'no',
+                                                    },
+                                            'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=update', 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
+    { url => '/thruk/cgi-bin/reports2.cgi', waitfor => 'reports2.cgi\?report=999\&amp;refresh=0', unlike => '<span[^>]*style="color:\ red;".*?\'([^\']*)\'' },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999', like => [ 'Arial1', 'Tahoma1' ] },
+    { url => '/thruk/cgi-bin/reports2.cgi', post => {'action'               => 'email',
+                                                     'report'               => 999,
+                                                     'send'                 => 1,
+                                                     'to'                   => 'nobody@localhost',
+                                                     'subject'              => 'Report: Test Email',
+                                                     'description'          => 'test mail',
+                                                     'testmode'             => 1,
+                                                    },
+                                            'follow' => 1, like => 'report successfully sent to testfile:' },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['Profile:','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json;charset=UTF-8', },
+    { url => '/thruk/cgi-bin/reports2.cgi', post => { 'action' => 'remove', 'report' => 999 }, 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
 ];
 
 for my $test (@{$pages}) {
@@ -78,3 +112,7 @@ for my $url (@{$json_hash_pages}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
 }
+
+###########################################################
+# cleanup
+`rm -f /tmp/mailtest.*`;

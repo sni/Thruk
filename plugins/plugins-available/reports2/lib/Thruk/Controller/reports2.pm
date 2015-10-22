@@ -364,8 +364,12 @@ sub report_email {
         my $desc    = $c->req->parameters->{'desc'}    || '';
         my $subject = $c->req->parameters->{'subject'} || '';
         if($to) {
+            local $ENV{'THRUK_MAIL_TEST'} = '/tmp/mailtest.'.$$ if $c->req->parameters->{'testmode'};
             Thruk::Utils::Reports::report_send($c, $report_nr, 1, $to, $cc, $subject, $desc);
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report successfully sent by e-mail' });
+            if($c->req->parameters->{'testmode'}) {
+                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report successfully sent to testfile: '.$ENV{'THRUK_MAIL_TEST'} });
+            }
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr);
         }
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => '\'to\' address missing' });
