@@ -100,7 +100,7 @@ Ext.define('TP.PanletGrafana', {
                         if(data && data.rows) {
                             for(var i=0; i<data.rows.length; i++) {
                                 var row = data.rows[i];
-                                for(var k=0; i<row.panels.length; i++) {
+                                for(var k=0; k<row.panels.length; k++) {
                                     var p = row.panels[k];
                                     sources.push({
                                         name:    p.title,
@@ -129,13 +129,13 @@ Ext.define('TP.PanletGrafana', {
                 return;
             }
             var size     = imgPanel.getSize();
-            if(size.width == 0) { return; }
+            if(size.width <= 1) { return; }
             var url      = this.xdata.graph + '&source='+this.xdata.source;
             var now      = new Date();
             url = url + '&from='  + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&to='    + Math.round(now.getTime()/1000);
             url = url + '&width=' + size.width;
-            url = url + '&height='+ size.height;
+            url = url + '&height='+ (size.height+30);
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
         };
@@ -151,6 +151,10 @@ Ext.define('TP.PanletGrafana', {
                             var refresh = panel.getTool('refresh') || panel.getTool('broken');
                             refresh.setType('refresh');
                             panel.imgMask.hide();
+
+                            var imgPanel = panel.items.getAt(0);
+                            var size = panel.getSize();
+                            imgPanel.el.dom.style.height=size.height+"px";
                         },
                         error: function (evt, ele, opts) {
                             var panel = me.up('panel');
