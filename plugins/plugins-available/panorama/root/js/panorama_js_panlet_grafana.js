@@ -180,6 +180,7 @@ Ext.define('TP.PanletGrafana', {
         this.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
             this.refreshHandler();
         });
+        this.gearHandler = this.grafanaGearHandler;
     },
     setGearItems: function() {
         var panel = this;
@@ -231,7 +232,17 @@ Ext.define('TP.PanletGrafana', {
     },
     gearInitCallback: function(panel) {
         TP.grafanaStore.panel = panel;
-        TP.grafanaStore.load();
-        panel.updateSource(true);
+        TP.grafanaStore.load({
+            callback: function() {
+                panel.updateSource(true);
+            }
+        });
+    },
+    grafanaGearHandler: function() {
+        var panel = this;
+        TP.panletGearHandler(panel);
+        if(panel.gearitem == undefined) {
+            panel.refreshHandler();
+        }
     }
 });
