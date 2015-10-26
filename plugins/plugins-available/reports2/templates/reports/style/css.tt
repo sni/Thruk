@@ -226,6 +226,7 @@ DIV.page {
   height: 874px;
   page-break-after: always;
   position: relative;
+  overflow: hidden;
 }
 TABLE.page {
   height: 810px;
