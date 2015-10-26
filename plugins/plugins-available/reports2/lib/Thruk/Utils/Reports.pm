@@ -403,8 +403,14 @@ sub generate_report {
     local $ENV{'THRUK_BACKENDS'} = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
 
     # need to update defaults backends
-    my($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
-    Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
+    my($disabled_backends,$has_groups);
+    eval {
+        ($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
+        Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
+    };
+    if($@) {
+        return(_report_die($c, $@, $logfile));
+    }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 2, 'getting backends') if $ENV{'THRUK_JOB_DIR'};
 
