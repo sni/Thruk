@@ -741,10 +741,16 @@ sub _process_grafana_page {
     my $end     = $c->req->parameters->{'to'};
     my $width   = $c->req->parameters->{'width'}  || 800;
     my $height  = $c->req->parameters->{'height'} || 300;
+    my $format  = $c->req->parameters->{'format'} || 'png';
 
-    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source));
+    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format));
     $c->{'rendered'} = 1;
-    $c->res->headers->content_type('image/png');
+    if($format eq 'png') {
+        $c->res->headers->content_type('image/png');
+    }
+    elsif($format eq 'pdf') {
+        $c->res->headers->content_type('application/pdf');
+    }
     return 1;
 }
 

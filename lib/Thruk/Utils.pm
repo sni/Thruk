@@ -1366,17 +1366,18 @@ sub get_graph_url {
 
 =head2 get_perf_image
 
-  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images)
+  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format)
 
 return base64 encoded pnp/grafana image if possible.
 An empty string will be returned if no graph can be exported.
 
 =cut
 sub get_perf_image {
-    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images) = @_;
+    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format) = @_;
     my $pnpurl     = "";
     my $grafanaurl = "";
     $source        = 0 unless defined $source;
+    $format        = 'png' unless $format;
 
     if($svc) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
@@ -1405,7 +1406,7 @@ sub get_perf_image {
 
     # create fake session
     my $sessionid = get_fake_session($c);
-    local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
+    local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
     my($fh, $filename) = tempfile();
     CORE::close($fh);
     my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||$grafanaurl).'" "'.$filename.'" "'.$source.'"';
@@ -1413,7 +1414,9 @@ sub get_perf_image {
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
-        return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
+        if($format eq 'png') {
+            return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
+        }
         return $imgdata;
     }
     unlink($c->stash->{'fake_session_file'});

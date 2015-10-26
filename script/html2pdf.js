@@ -31,11 +31,17 @@ if (system.args.length < 3) {
 
     if(options.width && options.height) {
         page.paperSize  = undefined;
+        options.width   = Number(options.width);
+        options.height  = Number(options.height);
         page.zoomFactor = 1;
         page.viewportSize = {
             width:  options.width,
             height: options.height
         };
+        if(options.format && options.format == 'pdf') {
+            // check if the margin is required for phantomjs 2 too
+            page.paperSize = { width: options.width+140, height: options.height+50, margin: 0 }
+        }
     }
 
     if(options.cookie) {
@@ -59,13 +65,13 @@ if (system.args.length < 3) {
                 window.setInterval(function () {
                     retries++;
                     if(checkGrafanaLoaded() || retries > 100) {
-                        page.render(output);
+                        page.render(output, {format: options.format, quality: 100});
                         phantom.exit();
                     }
                 }, 100);
             } else {
                 window.setTimeout(function () {
-                    page.render(output);
+                    page.render(output, {format: options.format, quality: 100});
                     phantom.exit();
                 }, 3000);
             }
