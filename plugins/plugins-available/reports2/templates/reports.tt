@@ -130,7 +130,7 @@
   <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
     <td class="status [% rowclass %]"></td>
     <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
-      [% IF r.exists('long_error') %]
+      [% IF r.exists('long_error') && r.long_error != "" %]
       <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;" style="float:right;">
       [% END %]
       [% escape_html(r.error) | nl2br %]
