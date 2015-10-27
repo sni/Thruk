@@ -2636,6 +2636,10 @@ sub _save_dashboard {
     delete $dashboard->{'tab'}->{'ts'};
     delete $dashboard->{'tab'}->{'public'};
 
+    if($dashboard->{'tab'}->{'xdata'}->{'backends'}) {
+        $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
+    }
+
     # save runtime data in extra file
     my $runtime = _extract_runtime_data($dashboard);
 

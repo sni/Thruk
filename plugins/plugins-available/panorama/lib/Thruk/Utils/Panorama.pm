@@ -194,7 +194,8 @@ sub load_dashboard {
 
     if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
     if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = _get_default_tab_xdata($c) }
-    $dashboard->{'tab'}->{'xdata'}->{'owner'} = $dashboard->{'user'};
+    $dashboard->{'tab'}->{'xdata'}->{'owner'}    = $dashboard->{'user'};
+    $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
     return $dashboard;
 }
 

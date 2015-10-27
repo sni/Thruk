@@ -818,6 +818,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             var b_form  = Ext.getCmp('backendsForm').getForm();
                             if(!b_form.isValid()) { return false; }
                             var values = b_form.getFieldValues();
+console.log(values);
                             Ext.apply(tab.xdata, values);
                         }
 
@@ -922,9 +923,14 @@ TP.tabSettingsWindowLocked = function(tab, val) {
     /* change backends tab */
     var backendsForm = Ext.getCmp('backendsForm');
     if(backendsForm) {
+        var b_form   = backendsForm.getForm();
+        var b_values = b_form.getFieldValues();
+        if(b_values['select_backends'] == undefined) {
+            b_values['select_backends'] = tab.xdata.select_backends;
+        }
         backendsForm.items.each(function(item, idx, len) {
             item.setDisabled(val);
-            if(item.name == "backends" && !tab.xdata.select_backends) {
+            if(item.name == "backends" && !b_values['select_backends']) {
                 item.setDisabled(true);
             }
         });
