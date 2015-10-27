@@ -2449,6 +2449,54 @@ sub get_plugin_name {
 }
 
 ########################################
+
+=head2 backends_list_to_hash
+
+    backends_list_to_hash($c, $list)
+
+returns array of backend ids converted as list of hashes
+
+=cut
+sub backends_list_to_hash {
+    my($c, $backends) = @_;
+    my $hashlist = [];
+    for my $b (@{list($backends)}) {
+        my $backend = $c->{'db'}->get_peer_by_key($b);
+        push @{$hashlist}, { $b => $backend->{'name'} };
+    }
+    return($hashlist);
+}
+
+########################################
+
+=head2 backends_hash_to_list
+
+    backends_hash_to_list($c, $hashlist)
+
+returns array of backends (inverts backends_list_to_hash function)
+
+=cut
+sub backends_hash_to_list {
+    my($c, $hashlist) = @_;
+    my $backends = [];
+    for my $b (@{list($hashlist)}) {
+        if(ref $b eq '') {
+            push @{$backends}, $b;
+        } else {
+            for my $key (keys %{$b}) {
+                my $backend = $c->{'db'}->get_peer_by_key($key) || $c->{'db'}->get_peer_by_key($b->{$key});
+                if($backend) {
+                    push @{$backends}, $backend->peer_key();
+                } else {
+                    push @{$backends}, $key;
+                }
+            }
+        }
+    }
+    return($backends);
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 

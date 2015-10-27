@@ -994,6 +994,9 @@ sub _report_save {
     delete $report->{'long_error'};
     delete $report->{'failed'};
 
+    # save backends as hash with name
+    $report->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $report->{'backends'});
+
     Thruk::Utils::write_data_file($file, $report);
     return $report;
 }
@@ -1120,6 +1123,8 @@ sub _read_report_file {
             $report->{$key} = $rdata->{$key};
         }
     }
+
+    $report->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $report->{'backends'});
 
     _report_save($c, $nr, $report) if $needs_save;
 
