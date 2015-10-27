@@ -818,7 +818,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             var b_form  = Ext.getCmp('backendsForm').getForm();
                             if(!b_form.isValid()) { return false; }
                             var values = b_form.getFieldValues();
-console.log(values);
                             Ext.apply(tab.xdata, values);
                         }
 
@@ -1003,4 +1002,4 @@ TP.uploadUserContent = function(type, location, onSuccess) {
             }
         }]
     }).show());
-}
+};
