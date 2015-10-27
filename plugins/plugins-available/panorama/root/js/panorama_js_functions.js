@@ -596,6 +596,8 @@ var TP = {
                 data.push([key, backends[key].name]);
             }
         }
+        /* sort by name */
+        data = Ext.Array.sort(data, function(a,b) { return(a[1].toLowerCase() > b[1].toLowerCase()) });
         return data;
     },
 
