@@ -3,7 +3,7 @@ Ext.define('TP.Pantab', {
 
     tooltip:     (readonly || dashboard_ignore_changes) ? undefined : 'double click to open settings',
     closable:    (readonly || dashboard_ignore_changes) ? false : true,
-    bodyCls:     (readonly || dashboard_ignore_changes) ? undefined : 'pantabbody',
+    bodyCls:     'pantabbody',
     stateful:    true,
     stateEvents: ['add', 'titlechange'],
     locked:      start_unlocked, // lock it by default
@@ -679,8 +679,9 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.dom.style.position = "fixed";
             tab.bgDragEl.dom.style.width    = "100%";
             tab.bgDragEl.dom.style.height   = "100%";
-            tab.bgDragEl.dom.style.top      = "0px";
+            tab.bgDragEl.dom.style.top      = TP.offset_y+"px";
             tab.bgDragEl.dom.style.left     = "0px";
+            tab.bgDragEl.dom.style.zIndex   = 2001;
             tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
             tab.bgDragEl.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);

@@ -22,9 +22,6 @@ HTML, BODY {
 .x-viewport.geomap {
     overflow: hidden;
 }
-.x-panel-body-default {
-  background: transparent;
-}
 #tabpan {
     position: fixed !important;
     z-index: 2001 !important;
@@ -36,8 +33,11 @@ HTML, BODY {
 .tabbarbody {
   border-right: 1px solid white;
   border-bottom: 1px solid white;
+  background: transparent;
 }
-
+.pantabbody {
+  background: transparent;
+}
 .window_drop_shadow {
   border: 1px dashed black;
 }
