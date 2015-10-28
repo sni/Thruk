@@ -819,6 +819,7 @@ sub _do_finalize_config {
                 }
             }
             if(!-e $target_symlink) {
+                unlink($target_symlink);
                 symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
             }
         }
