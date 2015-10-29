@@ -1398,6 +1398,12 @@ sub get_perf_image {
             $height = $height * 2;
         }
         $grafanaurl .= '&legend=false' if $height < 200;
+        if($grafanaurl !~ m|^https?:|mx) {
+            my $uri = Thruk::Utils::Filter::full_uri($c, 1);
+            $uri    =~ s|(https?://[^/]+?)/.*$|$1|gmx;
+            $uri    =~ s|&amp;|&|gmx;
+            $grafanaurl = $uri.$grafanaurl;
+        }
     }
 
     my $exporter = $c->config->{home}.'/script/pnp_export.sh';
