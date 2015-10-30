@@ -555,6 +555,10 @@ Ext.define('TP.Pantab', {
                 window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
                 return;
             }
+
+            /* remove chrome workaround */
+            Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+
             /* get wms provider */
             var wmsData;
             wmsProvider.findBy(function(rec, id) {
@@ -669,6 +673,8 @@ Ext.define('TP.Pantab', {
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
+            /* add chrome workaround */
+            Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
         }
         tab.setBaseHtmlClass();
 
