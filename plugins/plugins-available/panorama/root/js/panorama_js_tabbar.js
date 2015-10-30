@@ -366,6 +366,13 @@ Ext.define('TP.TabBar', {
                 tab.hidePanlets();
             }
         });
+        if(activeTab.map) {
+            /* remove chrome workaround */
+            Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+        } else {
+            /* apply chrome background workaround */
+            Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
+        }
     }
 });
 
