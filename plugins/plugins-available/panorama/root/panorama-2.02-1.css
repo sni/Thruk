@@ -24,7 +24,6 @@ HTML, BODY {
 }
 #tabpan {
     position: fixed !important;
-    z-index: 2001 !important;
 }
 #maintabbar {
     z-index: 1000000;
@@ -315,7 +314,7 @@ DIV.msg {
     left:35%;
     top:10px;
     width:350px;
-    z-index:20000;
+    z-index: 1000001;
 }
 #msg-div .msg {
     border-radius: 8px;

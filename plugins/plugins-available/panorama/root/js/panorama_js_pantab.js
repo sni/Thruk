@@ -681,7 +681,7 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.dom.style.height   = "100%";
             tab.bgDragEl.dom.style.top      = TP.offset_y+"px";
             tab.bgDragEl.dom.style.left     = "0px";
-            tab.bgDragEl.dom.style.zIndex   = 2001;
+            tab.bgDragEl.dom.style.zIndex   = 2000;
             tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
             tab.bgDragEl.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);
@@ -732,7 +732,7 @@ Ext.define('TP.Pantab', {
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         if(tab.map.locked) { return; }
-        tab.bgDragEl.dom.style.zIndex=2000;
+        tab.bgDragEl.dom.style.zIndex=2001;
     },
     enableMapControlsTemp: function() {
         if(!this.mapEl) { return; }
@@ -745,7 +745,7 @@ Ext.define('TP.Pantab', {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
-        tab.bgDragEl.dom.style.zIndex=2000;
+        tab.bgDragEl.dom.style.zIndex=2001;
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div && !tab.map.map.controls[x].div.id.match('Attribution')) {
                 var ctrl = tab.map.map.controls[x];
