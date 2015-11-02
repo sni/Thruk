@@ -303,6 +303,9 @@ var TP = {
         /* ensure the panel gets where it should be */
         window.setTimeout(function() {
             panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
+            if(panel.xdata.layout) {
+                TP.iconMoveHandler(panel, config.conf.pos[0], config.conf.pos[1]);
+            }
         }, 200);
     },
 
