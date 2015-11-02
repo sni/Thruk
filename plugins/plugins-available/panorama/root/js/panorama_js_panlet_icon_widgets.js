@@ -210,7 +210,11 @@ Ext.define('TP.SmallWidget', {
         if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon' };
 
         /* restore position */
-        this.setRawPosition(Number(xdata.layout.x), Number(xdata.layout.y));
+        xdata.layout.x = Number(xdata.layout.x);
+        xdata.layout.y = Number(xdata.layout.y);
+        if(xdata.layout.x == null || isNaN(xdata.layout.x)) { xdata.layout.x = 0; }
+        if(xdata.layout.y == null || isNaN(xdata.layout.y)) { xdata.layout.y = 0; }
+        this.setRawPosition(xdata.layout.x, xdata.layout.y);
         if(xdata.layout.rotation) {
             this.applyRotation(Number(xdata.layout.rotation), xdata);
         } else {
@@ -2764,16 +2768,18 @@ TP.moveAlignedIcons = function(deltaX, deltaY, skip_id) {
     if(!TP.moveIcons) { return; }
     Ext.Array.each(TP.moveIcons, function(item) {
         if(item.id != skip_id) {
+            deltaX = Number(deltaX);
+            deltaY = Number(deltaY);
             if(item.setIconLabel) {
                 item.suspendEvents();
-                item.xdata.layout.x += deltaX;
-                item.xdata.layout.y += deltaY;
+                item.xdata.layout.x = Number(item.xdata.layout.x) + deltaX;
+                item.xdata.layout.y = Number(item.xdata.layout.y) + deltaY;
                 item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
                 if(item.xdata.appearance.type == "connector") {
-                    item.xdata.appearance.connectorfromx += deltaX;
-                    item.xdata.appearance.connectorfromy += deltaY;
-                    item.xdata.appearance.connectortox   += deltaX;
-                    item.xdata.appearance.connectortoy   += deltaY;
+                    item.xdata.appearance.connectorfromx = Number(item.xdata.appearance.connectorfromx) + deltaX;
+                    item.xdata.appearance.connectorfromy = Number(item.xdata.appearance.connectorfromy) + deltaY;
+                    item.xdata.appearance.connectortox   = Number(item.xdata.appearance.connectortox)   + deltaX;
+                    item.xdata.appearance.connectortoy   = Number(item.xdata.appearance.connectortoy)   + deltaY;
                 }
                 item.setIconLabel();
                 item.resumeEvents();

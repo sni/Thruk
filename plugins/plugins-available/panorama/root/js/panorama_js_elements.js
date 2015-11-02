@@ -659,6 +659,8 @@ Ext.define('TP.dragEl', {
     },
     moveDragEl: function(deltaX, deltaY) {
         var This = this;
+        This.xdata.appearance[This.keyX] = Number(This.xdata.appearance[This.keyX]);
+        This.xdata.appearance[This.keyY] = Number(This.xdata.appearance[This.keyY]);
         This.xdata.appearance[This.keyX] += deltaX;
         This.xdata.appearance[This.keyY] += deltaY;
         This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
