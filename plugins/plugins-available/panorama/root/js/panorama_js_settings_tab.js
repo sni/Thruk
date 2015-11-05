@@ -760,11 +760,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         layout :     'fit',
         buttonAlign: 'center',
         items:       tabPanel,
+        hadMapAlready: tab.xdata.map ? true : false,
         fbar: [{/* cancel button */
                     xtype:  'button',
                     text:   'cancel',
                     handler: function(This) {
                         // restore old values
+                        if(!tab_win_settings.hadMapAlready) {
+                            delete tab.xdata['map'];
+                            delete tab.xdata['wms_provider'];
+                        }
                         tab.applyXdata(undefined, false);
                         tab_win_settings.destroy();
                         if(closeAfterEdit) { tab.destroy(); }
