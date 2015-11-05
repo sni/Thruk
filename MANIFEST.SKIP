@@ -73,3 +73,9 @@ script/append.make.options
 t/testurls.txt
 .rps_results
 rpsresults.html
+t/docker/Dockerfile$
+t/docker/results
+t/docker/cases/.*/.sakuli-steps-cache
+t/docker/cases/testsuite.suite
+t/docker/cases/.*/.*.js
+.gem/

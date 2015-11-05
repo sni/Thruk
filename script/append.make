@@ -189,3 +189,35 @@ timedtest:
 			printf "% 8ss\n" $$time; \
 		fi; \
 	done
+
+DOCKERRESULTS=$(shell pwd)/t/docker/results/$(shell date +'%Y-%m-%d_%H.%M')
+DOCKERCMD=cd t/docker && \
+            docker run \
+                -it \
+                -p 5901:5901 \
+                --rm \
+                -v $(shell pwd)/.:/src \
+                -v $(shell pwd)/t/docker/cases:/root/cases \
+                -v $(DOCKERRESULTS):/root/cases/_logs \
+                -v /etc/localtime:/etc/localtime
+t/docker/Dockerfile:
+	cp -p t/docker/Dockerfile.in t/docker/Dockerfile
+	cd t/docker && docker build -t="local/thruk_panorama_test" .
+
+dockerbuild: t/docker/Dockerfile
+
+dockertest: t/docker/Dockerfile dockertestfirefox dockertestchrome
+
+dockertestchrome:
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) local/thruk_panorama_test /root/test.sh -b chrome | ./sakuli2unittest.pl
+	rm -rf $(DOCKERRESULTS)
+
+dockertestfirefox:
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) local/thruk_panorama_test /root/test.sh -b firefox | ./sakuli2unittest.pl
+	rm -rf $(DOCKERRESULTS)
+
+dockershell: t/docker/Dockerfile
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) local/thruk_panorama_test /bin/bash

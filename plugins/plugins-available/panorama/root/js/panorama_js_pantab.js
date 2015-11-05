@@ -687,7 +687,7 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.dom.style.height   = "100%";
             tab.bgDragEl.dom.style.top      = TP.offset_y+"px";
             tab.bgDragEl.dom.style.left     = "0px";
-            tab.bgDragEl.dom.style.zIndex   = 2000;
+            tab.bgDragEl.dom.style.zIndex   = 2001;
             tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
             tab.bgDragEl.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);
