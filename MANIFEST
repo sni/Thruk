@@ -1,5 +1,6 @@
 cgi.cfg
 Changes
+circle.yml
 configure
 debian/changelog
 debian/compat
