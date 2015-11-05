@@ -9,7 +9,7 @@ machine:
 dependencies:
   override:
     - bundle install:
-      timeout: 300
+        timeout: 300
   pre:
     - sudo apt-get update
     - sudo apt-get -y install apt-transport-https
@@ -47,5 +47,6 @@ dependencies:
     - make dockerbuild
 
 test:
-  - sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
-  - make dockertest
+  override:
+    - sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
+    - make dockertest
