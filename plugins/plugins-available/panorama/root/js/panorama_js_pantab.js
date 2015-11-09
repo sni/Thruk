@@ -144,6 +144,7 @@ Ext.define('TP.Pantab', {
             if(This.bgDragEl) { This.bgDragEl.show(); }
             if(This.bgImgEl)  { This.bgImgEl.show();  }
             if(This.mapEl)    { This.mapEl.show();    }
+            if(This.map)      { This.map.controlsDiv.dom.style.display = ""; }
             This.applyZindex();
             This.setBackground(This.xdata);
             if(TP.initialized && missingPanlets > 0) {
@@ -157,6 +158,7 @@ Ext.define('TP.Pantab', {
             if(This.bgDragEl) { This.bgDragEl.hide(); }
             if(This.bgImgEl)  { This.bgImgEl.hide();  }
             if(This.mapEl)    { This.mapEl.hide();    }
+            if(This.map)      { This.map.controlsDiv.dom.style.display = "none"; }
         },
         afterrender: function(This, eOpts) {
             var tab = This;
@@ -595,12 +597,14 @@ Ext.define('TP.Pantab', {
             tab.mapEl.lastWMSProvider = xdata.wms_provider;
             OpenLayers.ImgPath               = url_prefix +'plugins/panorama/openlayer/images/';
             OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
+            var controlsBody = Ext.getBody();
+            var controlsDiv  = controlsBody.createChild('<div style="position: absolute; z-index: 100001; top: 50px; left: 3px; display: none;">');
+            var zoomDiv      = controlsDiv.createChild('<div style="position: absolute; z-index: 100001; top: 0; left: 0;">');
             var map   = new OpenLayers.Map('map', { controls: [], theme: url_prefix+'plugins/panorama/openlayer/theme/default/style.css' });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
-            var zoomControlDiv = body.createChild('<div style="position: absolute; z-index: 100000; display: none;">', body.dom.childNodes[0]);
-            var zoomControl    = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomControlDiv.dom});
+            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom});
             map.addControl(zoomControl);
             map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
@@ -612,6 +616,7 @@ Ext.define('TP.Pantab', {
                 zoom:     default_map_zoom,
                 stateful: true,
                 style:    "position: absolute; top: 0px; left: 0px;",
+                controlsDiv: controlsDiv,
                 listeners: {
                     aftermapmove: function(This, map, eOpts) {
                         if(tab.map == undefined) {
@@ -629,6 +634,8 @@ Ext.define('TP.Pantab', {
                     },
                     destroy: function(This){
                         zoomControl.destroy();
+                        zoomDiv.destroy();
+                        controlsDiv.destroy();
                         tab.lockButton.destroy();
                         tab.lockButton = undefined;
                     }
@@ -646,10 +653,8 @@ Ext.define('TP.Pantab', {
                 tab.moveMapIcons(true);
             });
             tab.fixMapIcons();
-            map.controls[1].moveTo({x:4,y:30});
-            map.controls[1].position.x = 4; /* looses position on next resize otherwise */
-            map.controls[1].position.y = 20;
-            tab.lockButton = body.createChild('<div class="lockButton unlocked">', body.dom.childNodes[0]);
+            controlsDiv.dom.style.display = "";
+            tab.lockButton = controlsDiv.createChild('<div class="lockButton unlocked">', controlsDiv.dom.childNodes[0]);
             tab.lockButton.on("click", function(evt) {
                 if(tab.lockButton.hasCls('unlocked')) {
                     tab.disableMapControls();
@@ -687,7 +692,7 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.dom.style.height   = "100%";
             tab.bgDragEl.dom.style.top      = TP.offset_y+"px";
             tab.bgDragEl.dom.style.left     = "0px";
-            tab.bgDragEl.dom.style.zIndex   = 2000;
+            tab.bgDragEl.dom.style.zIndex   = 2001;
             tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
             tab.bgDragEl.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);
@@ -738,25 +743,23 @@ Ext.define('TP.Pantab', {
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         if(tab.map.locked) { return; }
-        tab.bgDragEl.dom.style.zIndex=2001;
+        tab.bgDragEl.dom.style.display="";
     },
     enableMapControlsTemp: function() {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         if(tab.map.locked) { return; }
-        tab.bgDragEl.dom.style.zIndex="";
+        tab.bgDragEl.dom.style.display="none";
     },
     disableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
-        tab.bgDragEl.dom.style.zIndex=2001;
-        for(var x=0; x<tab.map.map.controls.length; x++) {
-            if(tab.map.map.controls[x].div && !tab.map.map.controls[x].div.id.match('Attribution')) {
-                var ctrl = tab.map.map.controls[x];
-                ctrl.div.style.display="none";
-            }
+        tab.bgDragEl.dom.style.display="";
+        for(var x=1; x<tab.map.controlsDiv.dom.childNodes.length; x++) {
+            var ctrl = tab.map.controlsDiv.dom.childNodes[x];
+            ctrl.style.display="none";
         }
         if(tab.locked) {
             TP.suppressIconTip = false;
@@ -768,18 +771,16 @@ Ext.define('TP.Pantab', {
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].el.dom.style.pointerEvents = "";
         }
-        tab.map.el.dom.style.zIndex = "";
+        tab.map.el.dom.style.display = "";
     },
     enableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
-        tab.bgDragEl.dom.style.zIndex="";
-        for(var x=0; x<tab.map.map.controls.length; x++) {
-            if(tab.map.map.controls[x].div) {
-                var ctrl = tab.map.map.controls[x];
-                ctrl.div.style.display="";
-            }
+        tab.bgDragEl.dom.style.display="none";
+        for(var x=1; x<tab.map.controlsDiv.dom.childNodes.length; x++) {
+            var ctrl = tab.map.controlsDiv.dom.childNodes[x];
+            ctrl.style.display="";
         }
         tab.map.locked = false;
         tab.lockButton.removeCls('locked');

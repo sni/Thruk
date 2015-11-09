@@ -641,10 +641,9 @@ SPAN.avail_result_error {
     height: 25px;
     cursor: pointer;
     position: absolute;
-    top: 10px;
+    top: -15px;
     left: 9px;
     background-repeat: no-repeat;
-    z-index: 100001;
 }
 .lockButton.unlocked {
     background-image: url(images/lock_open.png);
