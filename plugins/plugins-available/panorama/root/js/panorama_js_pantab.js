@@ -344,6 +344,10 @@ Ext.define('TP.Pantab', {
         }
     },
     createInitialPanlets: function(retries, autoshow) {
+        if(autoshow == undefined) { autoshow = false; }
+        if(autoshow || (TP.initial_active_tab != undefined && this.id == TP.initial_active_tab)) {
+            autoshow = true;
+        }
         if(retries == undefined) { retries=0; }
         if(retries > 1000) {
             var err = new Error;
@@ -351,17 +355,16 @@ Ext.define('TP.Pantab', {
             return;
         }
         if(this.xdata.map && (!this.mapEl || !this.map)) {
-            if(this.isActiveTab()) {
+            if(autoshow) {
                 window.setTimeout(Ext.bind(this.createInitialPanlets, this, [retries+1, autoshow]), 50);
+            } else {
             }
             return;
         }
         for(var nr=0; nr<this.window_ids.length; nr++) {
             // delayed panlet creation
-            if(autoshow == undefined) { autoshow = false; }
             var delay    = TP.initial_create_delay_inactive;
-            if(autoshow || (TP.initial_active_tab != undefined && this.id == TP.initial_active_tab)) {
-                autoshow = true;
+            if(autoshow) {
                 delay    = TP.initial_create_delay_active;
             }
             var tabpan    = Ext.getCmp('tabpan');
