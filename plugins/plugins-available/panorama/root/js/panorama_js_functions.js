@@ -325,7 +325,7 @@ var TP = {
             throw new Error("TP.add_panlet(): no active tab! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
         }
         var el = tb.getEl();
-        if(tb.bgDragEl && tb.map) {
+        if(tb.bgDragEl) {
             el = tb.bgDragEl;
         }
         el.dom.style.cursor = 'crosshair';
