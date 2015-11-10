@@ -1648,8 +1648,10 @@ var TP = {
                     }
                     /* update stateproviders last data to prevent useless updates */
                     TP.cp.lastdata = setStateByTab(ExtState);
-                    if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
-                    if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
+                    if(!tab.xdata.map) {
+                        if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
+                        if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
+                    }
                     tab.renewInProgress = false;
                 } else {
                     tab.renewInProgress = false;

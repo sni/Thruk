@@ -394,8 +394,10 @@ Ext.define('TP.Pantab', {
         xdata.locked = This.locked;
         This.setLock(xdata.locked);
         This.setTitle(xdata.title);
-        if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
-        if(This.map)   { This.map.destroy();   This.map   = undefined; }
+        if(!xdata.map) {
+            if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
+            if(This.map)   { This.map.destroy();   This.map   = undefined; }
+        }
         This.setBaseHtmlClass();
         This.setBackground(xdata);
         if(startTimeouts != false) {
