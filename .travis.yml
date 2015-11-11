@@ -43,7 +43,7 @@ notifications:
     - sven@nierlein.de
   irc:
     channels:
-      - "chat.freenode.net#thruk"
+      - "chat.freenode.net#thruk-dev"
     on_success: change
     on_failure: always
     skip_join: true
