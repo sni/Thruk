@@ -5485,7 +5485,7 @@ function set_histou_img(start, end, id, source) {
     var newUrl = histou_frame_url + getParamFrom + getParamTo + '&panelId='+source;
 
     //add timerange to iconlink, so the target graph matches the preview
-    histou_url += getParamFrom + getParamTo;
+    jQuery("#histou_graph_link").attr("href", histou_url + getParamFrom + getParamTo);
 
     jQuery('#pnpwaitimg').css('display', 'block');
 
