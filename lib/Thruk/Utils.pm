@@ -1485,7 +1485,7 @@ sub get_action_url {
         $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
-        $popup_url .= '&amp;panelId=2';
+        $popup_url .= '&amp;panelId=1';
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
