@@ -625,7 +625,7 @@ sub _process_service_page {
     $c->stash->{'recurring_downtimes'} = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 0, 1, $hostname, $servicename);
 
     # set allowed custom vars into stash
-    Thruk::Utils::set_custom_vars($c, {'host' => $service, 'service' => $service});
+    Thruk::Utils::set_custom_vars($c, {'host' => $service, 'service' => $service, add_host => 1});
 
     return 1;
 }

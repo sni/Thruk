@@ -4,6 +4,7 @@ next:
           - add json export to process info page
           - fix problem with removing reports when trying to save files on a full disk.
           - fix "show link" not displaying the hostname
+          - support host custom variables in services via show_custom_vars
           - Config Tool:
             - add reference clone selection page
           - Panorama View:

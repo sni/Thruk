@@ -895,13 +895,13 @@ sub set_paging_steps {
 
 =head2 get_custom_vars
 
-  get_custom_vars($c, $obj, [$prefix])
+  get_custom_vars($c, $obj, [$prefix], [$add_host])
 
 return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my($c, $data,$prefix) = @_;
+    my($c, $data, $prefix, $add_host) = @_;
     $prefix = '' unless defined $prefix;
 
     my %hash;
@@ -913,6 +913,18 @@ sub get_custom_vars {
     {
         # merge custom variables into a hash
         @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
+    }
+
+    if($add_host
+      and defined $data
+      and defined $data->{'host_custom_variable_names'}
+      and defined $data->{'host_custom_variable_values'}
+      and ref $data->{'host_custom_variable_names'} eq 'ARRAY')
+    {
+        for(my $x = 0; $x < scalar @{$data->{'host_custom_variable_names'}}; $x++) {
+            my $key = $data->{'host_custom_variable_names'}->[$x];
+            $hash{"HOST".$key} = $data->{'host_custom_variable_values'}->[$x];
+        }
     }
 
     # add action menu from apply rules
@@ -959,11 +971,12 @@ sub set_custom_vars {
     my $c      = shift;
     my $args   = shift;
 
-    my $prefix  = $args->{'prefix'} || '';
-    my $search  = $args->{'search'} || 'show_custom_vars';
-    my $dest    = $args->{'dest'}   || 'custom_vars';
-    my $host    = $args->{'host'};
-    my $service = $args->{'service'};
+    my $prefix   = $args->{'prefix'} || '';
+    my $search   = $args->{'search'} || 'show_custom_vars';
+    my $dest     = $args->{'dest'}   || 'custom_vars';
+    my $host     = $args->{'host'};
+    my $service  = $args->{'service'};
+    my $add_host = $args->{'add_host'};
     my $data;
 
     if (defined $host and defined $service) {
@@ -982,7 +995,7 @@ sub set_custom_vars {
     return unless defined $c->config->{$search};
 
     my $vars        = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
-    my $custom_vars = get_custom_vars($c, $data, $prefix);
+    my $custom_vars = get_custom_vars($c, $data, $prefix, $add_host);
 
     my $already_added = {};
     for my $test (@{$vars}) {
@@ -1019,6 +1032,9 @@ sub set_custom_vars {
 
                 # add to dest
                 $already_added->{$cust_name} = 1;
+                if($add_host) {
+                    $cust_name =~ s/^HOST//gmx;
+                }
                 push @{$c->stash->{$dest}}, [ $cust_name, $cust_value ];
             }
         }

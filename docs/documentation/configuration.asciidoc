@@ -1031,6 +1031,9 @@ Show custom vars in host / service ext info. List variable names to
 display in the host and service extinfo details page. Can be specified
 more than once to define multiple variables. You may use html in your
 variables. Use * as wildcard, ex.: _VAR*
+To show a host custom variable for services, prepend
+_HOST, ex.:  _HOSTVAR1. To show all host variables in the service view, use
+wildcards, ex.: _HOST*
 
 ex.:
 
