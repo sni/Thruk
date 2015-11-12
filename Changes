@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.04     Thu Nov 12 10:32:27 CET 2015
           - add json export to process info page
           - fix problem with removing reports when trying to save files on a full disk.
           - fix "show link" not displaying the hostname
