@@ -66,7 +66,7 @@
   </tr>
   <tr>
     <td colspan=7 align="center">
-      <a href="[% histou_url %]"><div style="z-index: 100; position: absolute; width: 800px; height: 262px;"></div></a>
+      <a id="histou_graph_link" href="[% histou_url %]"><div style="z-index: 100; position: absolute; width: 800px; height: 262px;"></div></a>
       <div id="histou_graph_pane" style="position: relative; width: 800px; height: 262px; overflow: hidden;">
         <img id="pnpwaitimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
         <iframe id="histou_iframe" src="[% histou_frame_url %]" width="800" height="270" frameborder="0" scrolling='no' style="padding: 0; margin: 0;"></iframe>
