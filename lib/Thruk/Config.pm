@@ -459,6 +459,7 @@ sub set_default_config {
         'apache_status'                     => {},
         'disable_user_password_change'      => 0,
         'user_password_min_length'          => 5,
+        'grafana_default_panelId'           => 1,
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};

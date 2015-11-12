@@ -1392,7 +1392,7 @@ sub get_perf_image {
 
     if($grafanaurl) {
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
-        $grafanaurl .= '&panelId='.($source || 2);
+        $grafanaurl .= '&panelId='.($source || $c->config->{'grafana_default_panelId'} || 1);
         if($resize_grafana_images) {
             $width  = $width * 1.3;
             $height = $height * 2;
@@ -1485,7 +1485,7 @@ sub get_action_url {
         $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
-        $popup_url .= '&amp;panelId=1';
+        $popup_url .= '&amp;panelId='.$c->config->{'grafana_default_panelId'};
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
