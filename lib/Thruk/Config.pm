@@ -527,6 +527,9 @@ sub set_default_config {
     # ensure csrf hosts is a list
     $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
 
+    # make show_custom_vars a list
+    $config->{'show_custom_vars'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))];
+
     ## no critic
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
     ## use critic

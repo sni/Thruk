@@ -981,8 +981,7 @@ sub set_custom_vars {
     return unless ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY';
     return unless defined $c->config->{$search};
 
-    my $vars = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
-
+    my $vars        = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
     my $custom_vars = get_custom_vars($c, $data, $prefix);
 
     my $already_added = {};
@@ -1019,6 +1018,7 @@ sub set_custom_vars {
                 }
 
                 # add to dest
+                $already_added->{$cust_name} = 1;
                 push @{$c->stash->{$dest}}, [ $cust_name, $cust_value ];
             }
         }
