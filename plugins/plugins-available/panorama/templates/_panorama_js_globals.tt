@@ -46,5 +46,6 @@ var default_map_lon          = [% default_map_lon %];
 var default_map_lat          = [% default_map_lat %];
 var available_fonts          = [% json_encode(fonts) %];
 var omd_site                 = '[% omd_site %]';
+var grafana_default_panelId  = [% c.config.grafana_default_panelId %];
 
 [%+ PROCESS _header_initial_states.tt +%]

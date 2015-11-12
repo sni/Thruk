@@ -55,7 +55,7 @@ Ext.define('TP.PanletGrafana', {
         var panel             = this;
         this.xdata.url        = '';
         this.xdata.graph      = '';
-        this.xdata.source     = 2;
+        this.xdata.source     = grafana_default_panelId;
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
         this.lastGraph        = '';
@@ -216,7 +216,7 @@ Ext.define('TP.PanletGrafana', {
             valueField:     'source',
             forceSelection: true,
             editable:       false,
-            store:          { model: 'TP_Sources', data : [ {name: '2', source: 2, image_url: ''} ] }
+            store:          { model: 'TP_Sources', data : [ {name: grafana_default_panelId, source: grafana_default_panelId, image_url: ''} ] }
         });
 
         this.addGearItems({
