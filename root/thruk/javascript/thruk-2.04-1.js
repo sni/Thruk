@@ -5421,6 +5421,9 @@ function set_png_img(start, end, id, source) {
     var newUrl = pnp_url + "&start=" + start + "&end=" + end+"&source="+source;
     //debug(newUrl);
 
+    pnp_start = start;
+    pnp_end   = end;
+
     jQuery('#pnpwaitimg').css('display', 'block');
 
     jQuery('#pnpimg').load(function() {
@@ -5479,6 +5482,9 @@ function set_histou_img(start, end, id, source) {
     if(start  == undefined) { start  = histou_start; }
     if(end    == undefined) { end    = histou_end; }
     if(source == undefined) { source = histou_source; }
+
+    histou_start = start;
+    histou_end   = end;
 
     var getParamFrom = "&from=" + (start*1000);
     var getParamTo = "&to=" + (end*1000);
