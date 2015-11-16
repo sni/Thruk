@@ -12,6 +12,7 @@
     <th class='data'>Address</th>
     <th class='data'>Parent Hosts</th>
     <th class='data'>Contacts</th>
+    <th class='data'>Contact Groups</th>
     <th class='data'>Max. Check Attempts</th>
     <th class='data'>Check Interval</th>
     <th class='data'>Retry Interval</th>
@@ -88,6 +89,7 @@
     <td class='[% class %]'>[% d.address %]</td>
     <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts&amp;jump=[% parent | uri %]#[% parent | uri %]">[% parent %]</a>[% END %]</td>
     <td class='[% class %]'>[% FOREACH contact = d.contacts.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH contact_group = d.contact_groups.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contactgroups&amp;jump=[% contact_group | uri %]#[% contact_group | uri %]">[% contact_group %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.max_check_attempts %]</td>
     <td class='[% class %]'>[% duration(d.check_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
     <td class='[% class %]'>[% duration(d.retry_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
