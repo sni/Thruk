@@ -125,7 +125,7 @@
                   [% FOREACH cust = custom_vars %]
                   <tr>
                     <td style="padding-right: 7px;" valign="top">
-                      <font size="-1"><i>[% cust.0 %]</i></font><br clear="all">
+                      <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 %]</i></font></a><br clear="all">
                     </td>
                     <td>
                       <font size="-1">[% cust.1 %]</font>
