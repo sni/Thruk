@@ -3946,6 +3946,7 @@ function add_new_filter(search_prefix, table) {
                              'Custom Variable',
                              'Downtime Duration',
                              'Duration',
+                             'Event Handler',
                              'Execution Time',
                              'Host',
                              'Hostgroup',
@@ -4283,6 +4284,7 @@ function verify_op(event) {
          && selValue != 'contact'
          && selValue != 'custom variable'
          && selValue != 'comment'
+         && selValue != 'event handler'
          && selValue != 'plugin output') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
@@ -4624,7 +4626,7 @@ var ajax_search = {
 
         search_url = ajax_search.url;
         if(options.url != undefined) {
-            search_url              = options.url;
+            search_url = options.url;
         }
 
         if(type != undefined) {
@@ -4637,7 +4639,7 @@ var ajax_search = {
                 search_url = search_url + "&type=" + type;
             }
         } else {
-            type                    = 'all';
+            type = 'all';
         }
 
         var appended_value;
@@ -4680,6 +4682,8 @@ var ajax_search = {
                || search_type == 'timeperiod'
                || search_type == 'priority'
                || search_type == 'custom variable'
+               || search_type == 'contact'
+               || search_type == 'event handler'
             ) {
                 ajax_search.search_type = search_type;
             }
@@ -4695,8 +4699,7 @@ var ajax_search = {
             if(search_type == 'business impact') {
                 ajax_search.search_type = 'priority';
             }
-            if(   search_type == 'contact'
-               || search_type == 'comment'
+            if(   search_type == 'comment'
                || search_type == 'next check'
                || search_type == 'last check'
                || search_type == 'latency'
@@ -4713,6 +4716,14 @@ var ajax_search = {
         if(ajax_search.search_type == 'none') {
             removeEvent( input, 'keyup', ajax_search.suggest );
             return true;
+        } else {
+            if(   search_type == 'event handler'
+               || search_type == 'contact'
+            ) {
+                if(!search_url.match(/type=/)) {
+                    search_url = search_url + "&type=" + ajax_search.search_type;
+                }
+            }
         }
 
         var date = new Date;

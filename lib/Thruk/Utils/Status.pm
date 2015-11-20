@@ -663,6 +663,7 @@ sub single_search {
         if(    $value =~ m/^\s*$/mx
            and $filter->{'type'} ne 'next check'
            and $filter->{'type'} ne 'last check'
+           and $filter->{'type'} ne 'event handler'
         ) {
             next;
         }
@@ -853,6 +854,10 @@ sub single_search {
             if($op eq '!=' or $op eq '!~~') { $cop = '-and' }
             push @hostfilter,    { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
             push @servicefilter, { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+        }
+        elsif ( $filter->{'type'} eq 'event handler' ) {
+            push @hostfilter,    { event_handler => { $op => $value } };
+            push @servicefilter, { event_handler => { $op => $value } };
         }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {

@@ -278,6 +278,7 @@ Ext.define('TP.formFilterSelect', {
             'custom variable':     ['~','!~','=','!='],
             'downtime duration':   ['=','!=','<=','>='],
             'duration':            ['=','!=','<=','>='],
+            'event handler':       ['~','!~','=','!='],
             'execution time':      ['=','!=','<=','>='],
             'host':                ['~','!~','=','!='],
             'hostgroup':           ['~','!~','=','!='],
