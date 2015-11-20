@@ -4669,8 +4669,10 @@ var ajax_search = {
 
         input.setAttribute("autocomplete", "off");
         if(!iPhone && !internetExplorer) {
+            ajax_search.dont_hide = true;
             input.blur();   // blur & focus the element, otherwise the first
             input.focus();  // click would result in the browser autocomplete
+            ajax_search.dont_hide = false;
         }
 
         if(selector && selector.tagName == 'SELECT') {
