@@ -470,7 +470,7 @@ sub _process_details_page {
        and defined $c->stash->{'host_stats'}->{'up'}
        and $c->stash->{'host_stats'}->{'up'} + $c->stash->{'host_stats'}->{'down'} + $c->stash->{'host_stats'}->{'unreachable'} + $c->stash->{'host_stats'}->{'pending'} == 1) {
         # set allowed custom vars into stash
-        Thruk::Utils::set_custom_vars($c, {'prefix' => 'host_', 'host' => $c->stash->{'data'}->[0]});
+        Thruk::Utils::set_custom_vars($c, {'prefix' => 'host_', 'host' => $c->stash->{'data'}->[0], 'add_host' => 1 });
     }
 
     return 1;

@@ -1013,32 +1013,32 @@ sub set_custom_vars {
                     $found = 1;
                 }
             }
-            if($found) {
-                # expand macros in custom vars
-                if (defined $host and defined $service) {
-                        #($cust_value, $rc)...
-                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                            string  => $cust_value,
-                            host    => $host,
-                            service => $service,
-                        });
-                } elsif (defined $host) {
-                        #($cust_value, $rc)...
-                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                            string  => $cust_value,
-                            host    => $host,
-                        });
-                }
+            next unless $found;
 
-                # add to dest
-                $already_added->{$cust_name} = 1;
-                my $is_host = defined $service ? 0 : 1;
-                if($add_host) {
-                    $cust_name =~ s/^HOST//gmx;
-                    $is_host = 1;
-                }
-                push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
+            # expand macros in custom vars
+            if(defined $host and defined $service) {
+                    #($cust_value, $rc)...
+                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                        string  => $cust_value,
+                        host    => $host,
+                        service => $service,
+                    });
+            } elsif (defined $host) {
+                    #($cust_value, $rc)...
+                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                        string  => $cust_value,
+                        host    => $host,
+                    });
             }
+
+            # add to dest
+            $already_added->{$cust_name} = 1;
+            my $is_host = defined $service ? 0 : 1;
+            if($add_host) {
+                $cust_name =~ s/^HOST//gmx;
+                $is_host = 1;
+            }
+            push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
         }
     }
     return;
