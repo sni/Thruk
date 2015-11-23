@@ -601,6 +601,7 @@ Ext.define('TP.SmallWidget', {
             evt.preventDefault();
             TP.resetMoveIcons();
             tab.disableMapControlsTemp();
+            TP.suppressIconTip = true;
 
             var menu_items = [{
                     text:   'Refresh',
@@ -690,6 +691,7 @@ Ext.define('TP.SmallWidget', {
                     beforehide: function(menu, eOpts) {
                         menu.destroy();
                         tab.enableMapControlsTemp();
+                        TP.suppressIconTip = false;
                     }
                 }
             }).showBy(This);
