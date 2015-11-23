@@ -507,6 +507,7 @@ sub _task_status {
     $servicefilter = Thruk::Utils::combine_filter('-or', $servicefilter);
 
     if($c->req->parameters->{'reschedule'}) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
         # works only for a single host or service
         $c->stash->{'now'}                               = time();
         $c->req->parameters->{'cmd_mod'}     = 2;
@@ -535,7 +536,8 @@ sub _task_status {
         }
         $c->stash->{'use_csrf'} = 0;
         if($c->req->parameters->{'cmd_typ'}) {
-            if(Thruk::Controller::cmd->_do_send_command($c)) {
+            require Thruk::Controller::cmd;
+            if(Thruk::Controller::cmd::_do_send_command($c)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
                 Thruk::Controller::cmd::_redirect_or_success($c, -2, 1);
             }

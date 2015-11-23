@@ -3,6 +3,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - make custom variables from show_custom_vars clickable
           - add eventhandler search option
+          - Panorama View:
+            - fix sending reschedule commands
 
 2.04     Thu Nov 12 10:32:27 CET 2015
           - add json export to process info page
