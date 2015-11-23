@@ -1396,6 +1396,7 @@ sub get_perf_image {
     my $grafanaurl = "";
     $source        = 0 unless defined $source;
     $format        = 'png' unless $format;
+    $svc           = ''    unless defined $svc;
 
     if($svc) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
