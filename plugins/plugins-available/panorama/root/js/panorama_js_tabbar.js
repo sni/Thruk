@@ -85,7 +85,7 @@ Ext.define('TP.TabBar', {
                         handler: function() { TP.tabSettingsWindow() },
                         hidden: readonly
                     }, {
-                        text: 'Dashboard Managment',
+                        text: 'Dashboard Management',
                         icon: url_prefix+'plugins/panorama/images/new_tab.gif',
                         handler: function() { TP.dashboardsWindow() },
                         hidden: readonly
@@ -149,7 +149,7 @@ Ext.define('TP.TabBar', {
                     icon:   url_prefix+'plugins/panorama/images/map.png',
                     handler: function() { TP.log('[global] adding new geo map from menu'); TP.add_pantab('new', undefined, undefined, undefined, {map: {}}) }
                 }, '-', {
-                    text:   'Dashboard Managment',
+                    text:   'Dashboard Management',
                     icon:   url_prefix+'plugins/panorama/images/new_tab.gif',
                     handler: function() { TP.dashboardsWindow() }
                 }, '-', {

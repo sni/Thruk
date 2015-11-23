@@ -713,8 +713,6 @@ var TP = {
 
         if(decoded.tabpan) {
             /* old export with all tabs*/
-            // verify complete import of all tabs export still works
-            // REMOVE AFTER: 01.01.2016
             TP.cp.saveChanges(false);
             TP.modalWindows.push(Ext.Msg.confirm(
                 'Confirm Import',
@@ -1387,7 +1385,7 @@ var TP = {
 
     /* fetch dashboard data from server and reapply settings */
     reconfigureDashboard: function(nr) {
-        /* update dashboard managment view */
+        /* update dashboard management view */
         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
             TP.dashboardsSettingGrid.getView().refresh();
         }

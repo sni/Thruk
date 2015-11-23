@@ -98,6 +98,9 @@ TP.getExportTab = function(options) {
                         if(btn == 'ok') {
                             if(TP.importAllTabs(text)) {
                                 if(options.close_handler) { options.close_handler(); }
+                                if(TP.dashboardsSettingWindow) {
+                                    TP.dashboardsSettingWindow.destroy();
+                                }
                             }
                         }
                     }

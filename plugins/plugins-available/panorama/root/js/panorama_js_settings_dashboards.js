@@ -1,12 +1,13 @@
-/* show dashboard managment window */
+/* show dashboard management window */
 Ext.define('TP.DashboardManagementWindow', {
     extend:      'Ext.window.Window',
     autoShow:     true,
     modal:        true,
     width:        800,
     resizable:    false,
-    title:       'Dashboard Managment',
+    title:       'Dashboard Management',
     closeAction: 'destroy',
+    cls:         'dashboardmanagementwindow',
     initComponent: function() {
         this.xdata = {};
         this.callParent();
@@ -23,8 +24,8 @@ Ext.define('TP.DashboardManagementWindow', {
                 TP.dashboardsSettingGrid = This;
                 // reset filter
                 if(TP.dashboardsSettingWindow) {
-                    var filterEl = Ext.getCmp('dashboardManagmentFilterEl');
-                    var resetEl  = Ext.getCmp('dashboardManagmentResetBtn');
+                    var filterEl = Ext.getCmp('dashboardManagementFilterEl');
+                    var resetEl  = Ext.getCmp('dashboardManagementResetBtn');
                     if(   (TP.dashboardsSettingGrid.tabConfig && TP.dashboardsSettingGrid.tabConfig.title.match(/Import/))
                        || (TP.dashboardsSettingGrid.title && TP.dashboardsSettingGrid.title.match(/Import/))
                        ) {
@@ -52,7 +53,7 @@ Ext.define('TP.DashboardManagementWindow', {
                 return true;
             },
             close: function(This, eOpts) {
-                delete TP.dashboardsSettingWindow;
+                This.destroy();
                 return true;
             }
         }
@@ -161,12 +162,12 @@ Ext.define('TP.DashboardManagementWindow', {
                 emptyText:    'filter dashboards',
                 width:         120,
                 closable:      false,
-                id:           'dashboardManagmentFilterEl',
+                id:           'dashboardManagementFilterEl',
                 fieldStyle:   'border-bottom: 1px solid #EAEAEA;',
                 fieldBodyCls: 'x-form-clear-trigger',
                 listeners: {
                     change: function(This) {
-                        var clearBtn  = Ext.getCmp('dashboardManagmentResetBtn');
+                        var clearBtn  = Ext.getCmp('dashboardManagementResetBtn');
                         var activeTab = This.up('window').items.getAt(0).getActiveTab();
                         var store     = activeTab.store;
                         if(This.value != undefined && This.value != '') {
@@ -192,10 +193,10 @@ Ext.define('TP.DashboardManagementWindow', {
                 border:   1,
                 style:    'padding: 0 0 5px;',
                 cls:     'x-form-clear-trigger',
-                id:      'dashboardManagmentResetBtn',
+                id:      'dashboardManagementResetBtn',
                 disabled: true,
                 handler: function(This) {
-                   var searchField = Ext.getCmp('dashboardManagmentFilterEl');
+                   var searchField = Ext.getCmp('dashboardManagementFilterEl');
                     searchField.reset();
                 },
                 listeners: {

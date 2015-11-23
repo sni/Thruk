@@ -1,4 +1,4 @@
-var testCase      = new TestCase(90, 120);
+var testCase      = new TestCase(180, 240);
 var env           = new Environment();
 var screenRegion  = new Region();
 var $waitTimeout  = 10000;
@@ -55,6 +55,7 @@ function thruk_panorama_logout() {
     thruk_logout();
 }
 
+/* open panorama dashboard */
 function thruk_open_panorama() {
     click(_link("Panorama View"));
 
@@ -63,6 +64,7 @@ function thruk_open_panorama() {
     _assertContainsText("Dashboard", _emphasis("Dashboard"));
 }
 
+/* unlock dashboard by name */
 function thruk_unlock_dashboard($name) {
     if($name == undefined) { $name = "Dashboard"; }
     rightClick(_emphasis($name));
@@ -71,10 +73,29 @@ function thruk_unlock_dashboard($name) {
     testCase.endOfStep("panorama unlock", 20);
 }
 
+/* remove panorama dashboard */
+function thruk_remove_panorama_dashboard($name) {
+    isVisible(_button($name));
+    click(_button("", _rightOf(_button($name))));
+
+    click(_span("Dashboard Management", _near(_span("New Dashboard"))));
+    click(_button("My"));
+
+    isVisible(_cell($name));
+    click(_image("delete.png", _rightOf(_cell($name))));
+
+    click(_button("Yes"));
+
+    isNotVisible(_button($name));
+    click(_image("/close/", _in(_div("/dashboardmanagementwindow/"))));
+}
+
 /* wrap click in a highlight */
 function click($el, $combo) {
     _wait($waitTimeout, _assertExists($el));
-    _mouseOver($el, $combo);
+    try {
+        _mouseOver($el, $combo);
+    } catch(e) {};
     isVisible($el, "red");
     _click($el, $combo);
 }
@@ -82,7 +103,9 @@ function click($el, $combo) {
 /* wrap rightclick in a highlight */
 function rightClick($el, $combo) {
     _wait($waitTimeout, _assertExists($el));
-    _mouseOver($el, $combo);
+    try {
+        _mouseOver($el, $combo);
+    } catch(e) {};
     isVisible($el, "red");
     _rightClick($el, $combo);
 }
@@ -90,8 +113,18 @@ function rightClick($el, $combo) {
 /* wrap isVisible with a small wait */
 function isVisible($el, $color) {
     if(!$color) { $color = "blue"; }
-    _wait($waitTimeout, _isVisible($el));
-    _assert(_isVisible($el));
+    _wait($waitTimeout, _isVisible($el, true));
+
+    _assert(_isVisible($el, true));
+    if(!_isVisible($el, true)) {
+        _log("ERROR: "+$el+" is not visible");
+        if(_exists($el)) {
+            var $position = _position($el);
+            _log("not visible but exists at "+$el+" at "+$position[0]+"/"+$position[1]);
+            _call(_eval("document.body.appendChild(document.createElement('div'))").innerHTML = "<div style='position:absolute; width: 30px; height: 30px; left; "+$position[0]+"px; top: "+$position[1]+"px; border: 2px solid green;'></div>");
+        }
+        env.sleep(60);
+    }
     _highlight($el, $color);
 }
 
@@ -101,7 +134,7 @@ function isNotVisible($el) {
     _assert(!_isVisible($el));
 }
 
-
+/* try something multiple times */
 function tryMultiple($test, $action, $retries, $atLeastOnce) {
     for(var $x = 0; $x < $retries; $x++) {
         if($x > 0) {

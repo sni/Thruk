@@ -67,19 +67,7 @@ try {
     screenRegion.waitForImage("island_green.png", 3).mouseMove();
 
     // remove dashboard
-    isVisible(_button("GeoMap Test"));
-    click(_button("", _rightOf(_button("GeoMap Test"))));
-
-    click(_span("Dashboard Managment"));
-    click(_button("My"));
-
-    isVisible(_cell("GeoMap Test"));
-    click(_image("delete.png", _rightOf(_cell("GeoMap Test"))));
-
-    click(_button("Yes"));
-    click(_image("x-tool-close"));
-
-    isNotVisible(_button("GeoMap Test"));
+    thruk_remove_panorama_dashboard("GeoMap Test");
 
     testCase.endOfStep("panorama geo map switch II", 60);
 } catch (e) {

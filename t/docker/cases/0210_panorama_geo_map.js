@@ -34,23 +34,13 @@ try {
 
     isVisible(_textbox("title"));
     _assertEqual("Dashboard", _getValue(_textbox("title")));
-    _setValue(_textbox("title"), "GeoMap");
+    _setValue(_textbox("title"), "GeoMap Test");
 
     click(_button("save"));
 
-    isVisible(_button("GeoMap"));
-    click(_button("", _rightOf(_button("GeoMap"))));
+    isVisible(_button("GeoMap Test"));
 
-    click(_span("Dashboard Managment"));
-    click(_button("My"));
-
-    isVisible(_cell("GeoMap"));
-    click(_image("delete.png", _rightOf(_cell("GeoMap"))));
-
-    click(_button("Yes"));
-    click(_image("x-tool-close"));
-
-    isNotVisible(_button("GeoMap"));
+    thruk_remove_panorama_dashboard("GeoMap Test");
 
     testCase.endOfStep("panorama geo map", 60);
 } catch (e) {
