@@ -40,6 +40,7 @@ Ext.define('TP.PanletPNP', {
         this.xdata.source     = 0;
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
+        this.xdata.graph_only = false;
         this.lastGraph        = '';
         this.adjusting        = 0;
 
@@ -99,7 +100,12 @@ Ext.define('TP.PanletPNP', {
             var now      = new Date();
             url = url + '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&end='   + Math.round(now.getTime()/1000);
-            if(size.height > 1 && (size.height - this.size_adjustment_y) < 81) {
+            if(this.xdata.graph_only) {
+                url = url + "&graph_only";
+                url = url + '&graph_width=' + size.width;
+                url = url + '&graph_height='+ size.height;
+            }
+            else if(size.height > 1 && (size.height - this.size_adjustment_y) < 81) {
                 url = url + '&graph_width=' + size.width;
                 url = url + '&graph_height='+ size.height;
             } else {
@@ -227,6 +233,12 @@ Ext.define('TP.PanletPNP', {
             fieldLabel: 'Show Border',
             xtype:      'checkbox',
             name:       'showborder'
+        });
+        this.addGearItems({
+            fieldLabel: 'Hide Legend',
+            xtype:      'checkbox',
+            name:       'graph_only',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
         });
     },
     gearInitCallback: function(panel) {
