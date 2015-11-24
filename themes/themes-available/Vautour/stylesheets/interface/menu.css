@@ -79,6 +79,7 @@ ul {
 
 #menu ul li.menuli_style1 {
   background-color: #ededed;
+  white-space:nowrap;
 }
 
 #menu ul li.menuli_style2 {
