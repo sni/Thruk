@@ -80,7 +80,7 @@ sub report_show {
         return $c->redirect_to('reports2.cgi');
     }
 
-    my $report_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+    my $report_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
     if($refresh || ! -f $report_file) {
         generate_report($c, $nr, $report);
     }
@@ -88,9 +88,9 @@ sub report_show {
     if(defined $report_file and -f $report_file) {
         $c->stash->{'template'} = 'passthrough.tt';
         if($c->req->parameters->{'html'}) {
-            my $html_file   = $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
+            my $html_file   = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
             if(!-e $html_file) {
-                $html_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+                $html_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
             }
             my $report_text = decode_utf8(read_file($html_file));
             $report_text    =~ s/^<body>/<body class="preview">/mx;
@@ -160,7 +160,7 @@ sub report_send {
 
     my $attachment;
     if($skip_generate) {
-        $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.dat';
+        $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
         if(!-s $attachment) {
             Thruk::Utils::set_message( $c, 'fail_message', 'report not yet generated' );
             return $c->redirect_to('reports2.cgi');
@@ -232,9 +232,9 @@ sub report_send {
 
         # url reports as html
         if(defined $report->{'params'}->{'pdf'} && $report->{'params'}->{'pdf'} eq 'no') {
-            $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.html';
+            $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.html';
             if(!-s $attachment) {
-                $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.dat';
+                $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
             }
             $msg->attach(Type    => 'text/html',
                      Path        => $attachment,
@@ -278,8 +278,7 @@ save a report
 sub report_save {
     my($c, $nr, $data) = @_;
 
-    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/',
-                            $c->config->{'tmp_path'}.'/reports/');
+    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     my $old_report;
     if($nr ne 'new' and -f $file) {
@@ -354,8 +353,8 @@ sub generate_report {
         return;
     }
 
-    Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/reports/');
-    my $attachment = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
+    my $attachment = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
     $c->stash->{'attachment'} = $attachment;
 
     # report is already beeing generated
@@ -393,7 +392,7 @@ sub generate_report {
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 1, 'starting') if $ENV{'THRUK_JOB_DIR'};
 
     # empty logfile
-    my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
     open(my $fh, '>', $logfile);
     Thruk::Utils::IO::close($fh, $logfile);
 
@@ -484,7 +483,7 @@ sub generate_report {
     # convert to pdf
     if($Thruk::Utils::PDF::ctype eq 'text/html') {
         $Thruk::Utils::PDF::ctype = "html2pdf";
-        my $htmlfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
+        my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
         move($attachment, $htmlfile);
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
         _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
@@ -813,9 +812,9 @@ remove any tmp files from this report
 =cut
 sub clean_report_tmp_files {
     my($c, $nr) = @_;
-    unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat'  if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
-    unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.log'  if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
-    unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.html' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dat'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.log'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.log';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.html' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.html';
     return;
 }
 
@@ -1050,7 +1049,7 @@ sub _read_report_file {
     }
 
     # add some runtime information
-    my $rfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+    my $rfile = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
     $report->{'var'}->{'file_exists'} = 0;
     $report->{'var'}->{'file_exists'} = 1  if -f $rfile;
     $report->{'var'}->{'is_running'}  = 0  unless defined $report->{'var'}->{'is_running'};
@@ -1077,7 +1076,7 @@ sub _read_report_file {
         $needs_save = 1;
     }
 
-    my $log = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    my $log = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
     if(!$report->{'var'}->{'is_running'} && $report->{'var'}->{'job'} && !Thruk::Utils::External::is_running($c, $report->{'var'}->{'job'}, 1)) {
         my $jobid = delete $report->{'var'}->{'job'};
         my($out,$err,$time, $dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $jobid, 1);
@@ -1158,8 +1157,7 @@ sub _is_authorized_for_report {
 ##########################################################
 sub _get_report_cmd {
     my($c, $nr, $mail) = @_;
-    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/',
-                            $c->config->{'tmp_path'}.'/reports/');
+    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $thruk_bin = $c->config->{'thruk_bin'};
     my $type      = 'report';
     if($mail) {
@@ -1177,7 +1175,7 @@ sub _get_report_cmd {
                             $thruk_bin,
                             $type,
                             $nr,
-                            $c->config->{'tmp_path'},
+                            $c->config->{'var_path'},
                             $nr,
                     );
     return $cmd;
@@ -1227,7 +1225,7 @@ sub _verify_fields {
 ##########################################################
 sub _convert_to_pdf {
     my($c, $reportdata, $attachment, $nr, $logfile) = @_;
-    my $htmlfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
+    my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
 
     my $htmlonly = 0;
 

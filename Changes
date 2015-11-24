@@ -5,6 +5,8 @@ next:
           - add eventhandler search option
           - Panorama View:
             - fix sending reschedule commands
+          - Reports:
+            - keep reports during updates (#546)
 
 2.04     Thu Nov 12 10:32:27 CET 2015
           - add json export to process info page

@@ -375,7 +375,7 @@ sub report_email {
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => '\'to\' address missing' });
     }
 
-    $c->stash->{size}    = -s $c->config->{'tmp_path'}.'/reports/'.$r->{'nr'}.'.dat';
+    $c->stash->{size} = -s $c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.dat';
     if($r->{'var'}->{'attachment'} && (!$r->{'var'}->{'ctype'} || $r->{'var'}->{'ctype'} ne 'html2pdf')) {
         $c->stash->{attach}  = $r->{'var'}->{'attachment'};
     } else {
