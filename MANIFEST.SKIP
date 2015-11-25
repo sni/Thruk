@@ -26,6 +26,8 @@ logs/thruk.log
 ^thruk_local.conf\.
 ^thruk_local.conf\-
 ^menu_local.conf
+ssi/extinfo-header.ssi$
+ssi/status-header.ssi$
 script/thruk.lib
 script/thruk_update_docs.sh
 script/wkhtmltopdf
