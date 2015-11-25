@@ -204,8 +204,7 @@ Ext.define('TP.TabBar', {
             TP.startServerTime();
         });
         if(!ExtState[this.id]) {
-            TP.initialized = true;
-            if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+            TP.initComplete();
         }
     },
     getState: function() {
@@ -319,7 +318,7 @@ Ext.define('TP.TabBar', {
 
     /* start all timed actions all tabs all panels */
     startTimeouts: function() {
-        TP.initialized = true;
+        TP.initComplete();
         this.stopTimeouts();
         TP.log('['+this.id+'] startTimeouts');
 

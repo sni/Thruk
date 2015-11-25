@@ -25,6 +25,16 @@ var TP = {
     logHistory:   [],
     modalWindows: [],
 
+    /* called once the initialization */
+    initComplete: function() {
+        if(TP.initialized) { return; }
+        TP.log('[global] init complete');
+        TP.initialized = true;
+        if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+        /* preload images */
+        window.setTimeout(preloader, 2000);
+    },
+
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
         newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
@@ -49,7 +59,7 @@ var TP = {
         }
 
         if(id == undefined) {
-            TP.initialized = true;
+            TP.initComplete();
             id = 'new_or_empty';
         }
 
