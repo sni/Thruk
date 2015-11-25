@@ -2200,7 +2200,7 @@ sub _sort {
     for my $key (@keys) {
 
         # sort numeric
-        if( defined $data->[0]->{$key} and $data->[0]->{$key} =~ m/^[\d\.\-]+$/xm ) {
+        if( defined $data->[0]->{$key} and looks_like_number($data->[0]->{$key}) ) {
             push @compares, '$a->{"'.$key.'"} <=> $b->{"'.$key.'"}';
         }
 
