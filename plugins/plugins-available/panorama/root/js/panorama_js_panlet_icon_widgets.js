@@ -314,6 +314,14 @@ Ext.define('TP.SmallWidget', {
         var txt = String(cfg.labeltext);
         if(txt == undefined) { txt = ''; }
         this.el.dom.title = '';
+
+        /* hide the icon element for label only appearance */
+        if(panel.locked && panel.el) {
+            if(panel.xdata.appearance.type == "none") {
+                panel.el.dom.style.display = "none";
+            }
+        }
+
         /* dynamic label? */
         if(force_perfdata || txt.match(/\{\{.*?\}\}/)) {
             var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];

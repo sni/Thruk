@@ -177,7 +177,7 @@ TP.iconShowEditDialog = function(panel) {
         Ext.getCmp('shapetogglelocked').toggle(xdata.appearance.shapelocked);
         Ext.getCmp('pieheightfield').setDisabled(xdata.appearance.pielocked);
         Ext.getCmp('pietogglelocked').toggle(xdata.appearance.pielocked);
-        if(xdata.appearance.type == "connector") {
+        if(xdata.appearance.type == "connector" || xdata.appearance.type == "none") {
             Ext.getCmp('rotationfield').setVisible(false);
         } else {
             Ext.getCmp('rotationfield').setVisible(true);
@@ -320,7 +320,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'combobox',
                     fieldLabel: 'Type',
                     name:       'type',
-                    store:      [['icon','Icon'], ['connector', 'Line / Arrow / Watermark'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer'], ['shape', 'Shape']],
+                    store:      [['none','Label Only'], ['icon','Icon'], ['connector', 'Line / Arrow / Watermark'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer'], ['shape', 'Shape']],
                     id:         'appearance_types',
                     editable:    false,
                     listeners: {
