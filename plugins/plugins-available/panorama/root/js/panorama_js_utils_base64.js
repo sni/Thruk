@@ -37,9 +37,11 @@ var decode64 = function(input) {
     var enc1, enc2, enc3, enc4 = "";
     var i = 0;
 
-    var base64test = /[^A-Za-z0-9\+\/\=]/g;
-    if (base64test.exec(input)) {
+    var base64test = /([^A-Za-z0-9\+\/\=])/g;
+    var testResult = base64test.exec(input);
+    if(testResult) {
         TP.modalWindows.push(Ext.Msg.alert("Warning", "The document contains invalid characters. Errors can occur when decoding it."));
+        console.log(testResult);
     }
     input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 
