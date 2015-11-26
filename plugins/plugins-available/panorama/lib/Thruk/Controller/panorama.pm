@@ -209,6 +209,9 @@ sub index {
         elsif($task eq 'upload') {
             return(_task_upload($c));
         }
+        elsif($task eq 'uploadecho') {
+            return(_task_uploadecho($c));
+        }
     }
 
     # find images for preloader
@@ -620,7 +623,8 @@ sub _task_redirect_status {
 ##########################################################
 sub _task_textsave {
     my($c) = @_;
-    $c->res->headers->header('Content-Disposition', qq[attachment; filename="log.txt"]);
+    my $file = $c->req->parameters->{'file'} || "log.txt";
+    $c->res->headers->header('Content-Disposition', 'attachment; filename="'.$file.'"');
     $c->res->headers->content_type('application/octet-stream');
     $c->stash->{text}     = $c->req->parameters->{'text'};
     $c->stash->{template} = 'passthrough.tt';
@@ -697,6 +701,33 @@ sub _task_upload {
 
     # must be text/html result, otherwise extjs form result handler dies
     $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, filename => $filename });
+    return;
+}
+
+##########################################################
+sub _task_uploadecho {
+    my($c) = @_;
+
+    $c->stash->{'template'} = 'passthrough.tt';
+
+    if(!$c->req->uploads->{'file'}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => JSON::XS::false });
+        return;
+    }
+
+    my $upload = $c->req->uploads->{'file'};
+    if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        return;
+    }
+
+    my $content = read_file($upload->{'tempname'});
+    unlink($upload->{'tempname'});
+
+    # must be text/html result, otherwise extjs form result handler dies
+    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, content => $content });
     return;
 }
 

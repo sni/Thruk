@@ -9,14 +9,16 @@ Ext.define('TP.DashboardManagementWindow', {
     closeAction: 'destroy',
     cls:         'dashboardmanagementwindow',
     initComponent: function() {
-        this.xdata = {};
-        this.callParent();
+        var win   = this;
+        win.xdata = {};
+        win.callParent();
+        win.startLoading = false;
 
         var listeners = {
             activate: function(This, eOpts) {
                 var panel = This.up('panel').up('panel');
                 // update grid content
-                if(This.loader) {
+                if(This.loader && win.startLoading) {
                     This.loader.grid  = This;
                     This.loader.xdata = panel.xdata;
                     This.loader.load();
@@ -55,10 +57,20 @@ Ext.define('TP.DashboardManagementWindow', {
             close: function(This, eOpts) {
                 This.destroy();
                 return true;
+            },
+            afterrender: function(This) {
+                win.startLoading = true;
+                if(This.loader) {
+                    /* prevent tab switching directly after open which leads to js errors targetParent undef */
+                    win.mask("Loading");
+                }
+            },
+            reconfigure: function(This) {
+                win.unmask();
             }
         }
         /* My Dasboards */
-        this.grid_my = Ext.create('Ext.grid.Panel', {
+        win.grid_my = Ext.create('Ext.grid.Panel', {
             tabConfig: {
                 title:   'My',
                 tooltip: 'My Dashboards'
@@ -68,14 +80,14 @@ Ext.define('TP.DashboardManagementWindow', {
             loader:      Ext.create('TP.GridLoader', {
                 url:        'panorama.cgi?task=dashboard_list&list=my',
                 loadMask:    true,
-                target:      this
+                target:      win
             }),
             plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
         });
-        this.items.get(0).add(this.grid_my);
+        win.items.get(0).add(win.grid_my);
 
         /* Public Dasboards */
-        this.grid_public = Ext.create('Ext.grid.Panel', {
+        win.grid_public = Ext.create('Ext.grid.Panel', {
             tabConfig: {
                 title:   'Public',
                 tooltip: 'Public Dashboards'
@@ -85,15 +97,15 @@ Ext.define('TP.DashboardManagementWindow', {
             loader:      Ext.create('TP.GridLoader', {
                 url:        'panorama.cgi?task=dashboard_list&list=public',
                 loadMask:    true,
-                target:      this
+                target:      win
             }),
             plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
         });
-        this.items.get(0).add(this.grid_public);
+        win.items.get(0).add(win.grid_public);
 
         /* All Dasboards, Admins only */
         if(thruk_is_admin) {
-            this.grid_all = Ext.create('Ext.grid.Panel', {
+            win.grid_all = Ext.create('Ext.grid.Panel', {
                 tabConfig: {
                     title:   'All',
                     tooltip: 'All Dashboards'
@@ -103,7 +115,7 @@ Ext.define('TP.DashboardManagementWindow', {
                 loader:      Ext.create('TP.GridLoader', {
                     url:        'panorama.cgi?task=dashboard_list&list=all',
                     loadMask:    true,
-                    target:      this
+                    target:      win
                 }),
                 plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })],
                 bbar:[{
@@ -139,16 +151,16 @@ Ext.define('TP.DashboardManagementWindow', {
                     }
                 }]
             });
-            this.items.get(0).add(this.grid_all);
+            win.items.get(0).add(win.grid_all);
         }
 
         /* import / export */
         var tabpan = Ext.getCmp('tabpan');
         var tab    = tabpan.getActiveTab();
-        this.exportTab = TP.getExportTab({listeners: listeners, tab: tab});
-        this.items.get(0).add(this.exportTab);
+        win.exportTab = TP.getExportTab({listeners: listeners, tab: tab});
+        win.items.get(0).add(win.exportTab);
 
-        this.items.get(0).setActiveTab(0);
+        win.items.get(0).setActiveTab(0);
     },
     items: [{
         xtype:        'tabpanel',
