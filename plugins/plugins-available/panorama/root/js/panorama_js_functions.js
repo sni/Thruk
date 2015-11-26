@@ -691,8 +691,8 @@ var TP = {
     },
     /* import tabs from string */
     importAllTabs: function(data) {
-        // strip off comments
-        data = data.replace(/\s*\#.*/g, '').replace(/\n/g, '');
+        /* strip off comments */
+        data = data.replace(/\s*\#.*/g, '').replace(/[\n\r]/g, '');
         var decoded;
         try {
             decoded = TP.cp.decodeValue(decode64(data));
@@ -1756,8 +1756,9 @@ var TP = {
     /* make sure our modal windows are still in front */
     checkModalWindows: function() {
         if(TP.modalWindows.length == 0) { return; }
+        TP.modalWindows = Ext.Array.unique(TP.modalWindows);
         var newModelWindows = [];
-        var zIndex;
+        var zIndex = 0;
         var length = TP.modalWindows.length;
         var first  = true;
         for(var x=length-1; x>=0; x--) {
@@ -1767,7 +1768,10 @@ var TP = {
                     try { win.toFront(); } catch(err) {}
                     var masks = Ext.Element.select('.x-mask');
                     if(masks.elements.length > 0) {
-                        zIndex = Number(masks.elements[0].style.zIndex);
+                        for(var k = 0; k < masks.elements.length; k++) {
+                            var tmp = Number(masks.elements[k].style.zIndex);
+                            if(tmp > zIndex) { zIndex = tmp; }
+                        }
                     } else {
                         zIndex = Number(win.el.dom.style.zIndex);
                     }
