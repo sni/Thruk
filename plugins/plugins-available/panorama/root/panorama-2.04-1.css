@@ -94,6 +94,16 @@ DIV.x-tab-top button {
     left: 4px;
     top: 3px;
 }
+.load-btn {
+    background-image: url("images/folder_picture.png") !important;
+    left: 4px;
+    top: 3px;
+}
+.text-btn {
+    background-image: url("images/text_align_center.png") !important;
+    left: 4px;
+    top: 3px;
+}
 .wait-btn {
     background-image: url("images/loading-icon.gif") !important;
     left: 4px;

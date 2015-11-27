@@ -877,7 +877,16 @@ Ext.define('TP.Pantab', {
                 icon:   url_prefix+'plugins/panorama/images/information.png',
                 handler: function() { thruk_debug_window_handler() },
                 hidden:  (!thruk_debug_js || thruk_demo_mode)
-        }];
+            }, '-', {
+                text:   'Save Dashboard',
+                icon:    url_prefix+'plugins/panorama/images/disk.png',
+                href:   'panorama.cgi?task=save_dashboard&nr='+tab.id
+            }, {
+                text:   'Load Dashboard',
+                icon:    url_prefix+'plugins/panorama/images/folder_picture.png',
+                handler: function() { TP.loadDashboardWindow() },
+                hidden:  !!one_tab_only
+            }];
         if(!readonly && !tab.readonly) {
             menu_items = menu_items.concat([
                  '-', {

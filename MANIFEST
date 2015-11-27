@@ -791,6 +791,7 @@ plugins/plugins-available/panorama/root/images/exclamation.png
 plugins/plugins-available/panorama/root/images/exit.png
 plugins/plugins-available/panorama/root/images/eye.png
 plugins/plugins-available/panorama/root/images/flag_blue.png
+plugins/plugins-available/panorama/root/images/folder_picture.png
 plugins/plugins-available/panorama/root/images/gear.gif
 plugins/plugins-available/panorama/root/images/house.png
 plugins/plugins-available/panorama/root/images/html_add.png
@@ -833,6 +834,7 @@ plugins/plugins-available/panorama/root/images/sport_golf.png
 plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_go.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
+plugins/plugins-available/panorama/root/images/text_align_center.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/images/text_bold.png
 plugins/plugins-available/panorama/root/images/text_italic.png

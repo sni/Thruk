@@ -41,10 +41,55 @@ var wmsProvider = Ext.create('Ext.data.Store', {
 TP.getExportTab = function(options) {
     var exportItems = [{
         xtype:      'fieldcontainer',
-        fieldLabel: 'Export',
+        fieldLabel: 'File Save',
+        items: [{
+            xtype:  'button',
+            text:   'Save Active Dashboard',
+            iconCls:'save-btn',
+            width:   150,
+            href:   'panorama.cgi?task=save_dashboard&nr='+options.tab.id
+        }, {
+            xtype:  'button',
+            text:   'Load Dashboard',
+            iconCls:'load-btn',
+            width:   150,
+            margin: '0 0 0 10',
+            handler: function() { TP.loadDashboardWindow() }
+        }]
+    }, {
+        xtype:      'fieldcontainer',
+        fieldLabel: 'Text Export',
         items: [{
             xtype: 'button',
-            text:  'Export Active Tab',
+            text: 'Import Tab(s) from Text',
+            iconCls:'text-btn',
+            width:   150,
+            handler: function() {
+                TP.modalWindows.push(Ext.MessageBox.prompt({
+                    title:      'Import Tab(s)',
+                    id:         'importdialog',
+                    multiline:  true,
+                    value:      '',
+                    width:      600,
+                    msg:        'Enter Saved String.<br>This will add the imported tabs next to your current ones.',
+                    buttons:    Ext.MessageBox.OKCANCEL,
+                    icon:       Ext.MessageBox.INFO,
+                    handler: function() {
+                        if(TP.importAllTabs(text)) {
+                            if(options.close_handler) { options.close_handler(); }
+                            if(TP.dashboardsSettingWindow) {
+                                TP.dashboardsSettingWindow.destroy();
+                            }
+                        }
+                    }
+                }));
+            }
+        }, {
+            xtype: 'button',
+            text:  'Export Active Tab as Text',
+            iconCls:'text-btn',
+            width:   150,
+            margin: '0 0 0 10',
             handler: function() {
                 var exportText = '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(Ext.JSON.encode(TP.cp.lastdata[options.tab.id])).match(/.{1,65}/g).join("\n")+"\n# End Export";
                 TP.modalWindows.push(Ext.MessageBox.show({
@@ -54,18 +99,16 @@ TP.getExportTab = function(options) {
                     width:      600,
                     msg:        'Copy this string and use it for later import:',
                     value:      exportText,
-                    buttonText:{ok: 'OK', yes: 'Download', cancel: 'Cancel'},
+                    buttons:    Ext.MessageBox.OK,
                     icon:       Ext.MessageBox.INFO,
-                    fn:         function(buttonId, text, opt) {
-                        if(buttonId == 'yes') {
-                            var form = Ext.getCmp('downloadform').getForm();
-                            form.standardSubmit = true;
-                            form.submit({
-                                url:    'panorama.cgi',
-                                target: '_blank',
-                                params: {text: exportText, task: 'textsave', file: options.tab.title+'.panorama'}
-                            });
-                        }
+                    handler: function() {
+                        var form = Ext.getCmp('downloadform').getForm();
+                        form.standardSubmit = true;
+                        form.submit({
+                            url:    'panorama.cgi',
+                            target: '_blank',
+                            params: {text: exportText, task: 'textsave', file: options.tab.title+'.panorama'}
+                        });
                     }
                 }));
             }
@@ -78,109 +121,10 @@ TP.getExportTab = function(options) {
         }]
     }, {
         xtype:      'fieldcontainer',
-        fieldLabel: ' ',
-        labelSeparator: ' ',
-        items: [{
-            xtype: 'button',
-            text: 'Export All Open Tabs',
-            handler: function() {
-                TP.modalWindows.push(Ext.MessageBox.show({
-                    cls:        'monospaced',
-                    title:      'All Tabs Export',
-                    multiline:  true,
-                    width:      600,
-                    msg:        'Copy this string and use it for later import:',
-                    value:      '# Thruk Panorama Dashboard Export\n'+encode64(TP.cp.encodeValue(TP.cp.readValues())).match(/.{1,65}/g).join("\n")+"\n# End Export",
-                    buttons:    Ext.MessageBox.OK,
-                    icon:       Ext.MessageBox.INFO
-                }));
-            }
-        }]
-    }, {
-        xtype:      'fieldcontainer',
-        fieldLabel: 'Import',
-        items: [{
-            xtype: 'button',
-            text: 'Import Tab(s)',
-            handler: function() {
-                TP.modalWindows.push(Ext.MessageBox.prompt({
-                    title:      'Import Tab(s)',
-                    id:         'importdialog',
-                    multiline:  true,
-                    value:      '',
-                    width:      600,
-                    msg:        'Enter Saved String.<br>This will add the imported tabs next to your current ones.',
-                    buttons:    Ext.MessageBox.OKCANCEL,
-                    buttonText:{ok: 'OK', yes: 'Import From File', cancel: 'Cancel'},
-                    icon:       Ext.MessageBox.INFO,
-                    fn:         function(btn, text, window){
-                        if(btn == 'ok') {
-                            if(TP.importAllTabs(text)) {
-                                if(options.close_handler) { options.close_handler(); }
-                                if(TP.dashboardsSettingWindow) {
-                                    TP.dashboardsSettingWindow.destroy();
-                                }
-                            }
-                        }
-                        /* import from file */
-                        if(btn == 'yes') {
-                            TP.modalWindows.push(Ext.create('Ext.window.Window', {
-                                title: 'Import Tab From File',
-                                height: 100,
-                                width:  300,
-                                layout: 'anchor',
-                                items: [{
-                                    xtype:  'form',
-                                    border:  false,
-                                    layout: 'anchor',
-                                    anchor: '100% 100%',
-                                    bodyPadding: 5,
-                                    items: [{
-                                        xtype:      'filefield',
-                                        anchor:     '90% 100%',
-                                        name:        'file',
-                                        allowBlank:  false,
-                                        buttonText: 'Select Dashboard File...'
-                                    }]
-                                }],
-                                buttons: [{
-                                    text: 'Cancel',
-                                    handler: function() {
-                                        this.up('window').destroy();
-                                    }
-                                }, {
-                                    text: 'Import',
-                                    handler: function() {
-                                        var win  = this.up('window');
-                                        var form = win.down('form').getForm();
-                                        if(form.isValid()){
-                                            form.submit({
-                                                url: 'panorama.cgi',
-                                                params: { task: 'uploadecho' },
-                                                waitMsg: 'Importing Dashboard...',
-                                                success: function(form, action) {
-                                                    TP.importAllTabs(action.result.content);
-                                                    win.destroy();
-                                                },
-                                                failure: function(form, action) {
-                                                    TP.Msg.msg("fail_message~~importing dashboard failed. "+action.result.msg);
-                                                    win.destroy();
-                                                }
-                                            });
-                                        }
-                                    }
-                                }]
-                            }).show());
-                        }
-                    }
-                }));
-            }
-        }]
-    }, {
-        xtype:      'fieldcontainer',
         fieldLabel: 'Reset',
         items: [{
             xtype: 'button',
+            width:  150,
             text: 'Reset to Default View',
             handler: function() {
                 TP.modalWindows.push(Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
@@ -1080,3 +1024,54 @@ TP.uploadUserContent = function(type, location, onSuccess) {
         }]
     }).show());
 };
+
+TP.loadDashboardWindow = function() {
+    TP.modalWindows.push(Ext.create('Ext.window.Window', {
+        title: 'Load Dashboard From File',
+        height: 100,
+        width:  300,
+        layout: 'anchor',
+        items: [{
+            xtype:  'form',
+            border:  false,
+            layout: 'anchor',
+            anchor: '100% 100%',
+            bodyPadding: 5,
+            items: [{
+                xtype:      'filefield',
+                anchor:     '90% 100%',
+                name:        'file',
+                allowBlank:  false,
+                buttonText: 'Select Dashboard File...'
+            }]
+        }],
+        buttons: [{
+            text: 'Cancel',
+            handler: function() {
+                this.up('window').destroy();
+            }
+        }, {
+            text: 'Import',
+            handler: function() {
+                var win  = this.up('window');
+                var form = win.down('form').getForm();
+                if(form.isValid()){
+                    form.submit({
+                        url: 'panorama.cgi',
+                        params: { task: 'load_dashboard' },
+                        waitMsg: 'Loading Dashboard...',
+                        success: function(form, action) {
+                            TP.add_pantab(action.result.newid);
+                            TP.Msg.msg("success_message~~dashboard loaded successfully.");
+                            win.destroy();
+                        },
+                        failure: function(form, action) {
+                            TP.Msg.msg("fail_message~~loading dashboard failed. "+action.result.msg);
+                            win.destroy();
+                        }
+                    });
+                }
+            }
+        }]
+    }).show());
+}

@@ -78,8 +78,7 @@ Ext.define('TP.TabBar', {
                         text: 'About',
                         icon: url_prefix+'plugins/panorama/images/information.png',
                         handler: function() { TP.aboutWindow() }
-                    },
-                    {
+                    }, {
                         text: 'Settings',
                         icon: url_prefix+'plugins/panorama/images/cog.png',
                         handler: function() { TP.tabSettingsWindow() },
@@ -89,6 +88,19 @@ Ext.define('TP.TabBar', {
                         icon: url_prefix+'plugins/panorama/images/new_tab.gif',
                         handler: function() { TP.dashboardsWindow() },
                         hidden: readonly
+                    }, '-', {
+                        text:   'Save Active Dashboard',
+                        icon:    url_prefix+'plugins/panorama/images/disk.png',
+                        href:   'panorama.cgi?task=save_dashboard&nr=',
+                        listeners: {
+                            focus: function(item, e, eOpts) {
+                                item.el.dom.firstChild.href = 'panorama.cgi?task=save_dashboard&nr='+Ext.getCmp('tabpan').getActiveTab().id;
+                            }
+                        }
+                    }, {
+                        text:   'Load Dashboard',
+                        icon:    url_prefix+'plugins/panorama/images/folder_picture.png',
+                        handler: function() { TP.loadDashboardWindow() }
                     },
                     /* Exit */
                     '-',

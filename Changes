@@ -6,7 +6,7 @@ next:
           - Panorama View:
             - add hide label checkbox for pnp panel
             - add new appearance type 'label only'
-            - add export/import to files
+            - add export/import to files including images
             - fix sending reschedule commands
             - fix not triggering upload popup
           - Reports:

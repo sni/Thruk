@@ -213,6 +213,12 @@ sub index {
         elsif($task eq 'uploadecho') {
             return(_task_uploadecho($c));
         }
+        elsif($task eq 'save_dashboard') {
+            return(_task_save_dashboard($c));
+        }
+        elsif($task eq 'load_dashboard') {
+            return(_task_load_dashboard($c));
+        }
     }
 
     # find images for preloader
@@ -663,6 +669,12 @@ sub _task_upload {
     }
     $location =~ s|/$||gmx;
 
+    if($c->config->{'demo_mode'}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'fileupload is disabled in demo mode.', success => JSON::XS::false });
+        return;
+    }
+
     my $upload = $c->req->uploads->{$type};
     my $folder = $c->stash->{'usercontent_folder'}.'/'.$location;
 
@@ -732,6 +744,131 @@ sub _task_uploadecho {
     $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, content => $content });
     return;
 }
+
+##########################################################
+sub _task_save_dashboard {
+    my($c) = @_;
+
+    my $nr   = $c->req->parameters->{'nr'} || die('no number supplied');
+    $nr      =~ s/^tabpan-tab_//gmx;
+    my $d = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $d) >= ACCESS_READONLY;
+
+    my $data = {
+        usercontent => {},
+        version     => $c->config->{'version'},
+    };
+    for my $key (keys %{$d}) {
+        if($key =~ m/^tab/mx) {
+            $data->{$key} = $d->{$key};
+        }
+    }
+    # add image data
+    require MIME::Base64;
+    my $images = {};
+    for my $id (sort keys %{$d}) {
+        my $p = $d->{$id};
+        next unless ref $p eq 'HASH';
+        # dashboard background
+        if($p->{'xdata'}->{'background'}) {
+            my $file = $p->{'xdata'}->{'background'};
+            if($file =~ s|^../usercontent/||mx && $file !~ m|\.\.|mx) {
+                $images->{$file} = $c->stash->{'usercontent_folder'}.'/'.$file;
+            }
+        }
+        # type image
+        if($p->{'xdata'}->{'appearance'} && $p->{'xdata'}->{'appearance'}->{'type'} && $p->{'xdata'}->{'appearance'}->{'type'} eq 'icon') {
+            my $file = $p->{'xdata'}->{'general'}->{'src'};
+            if($file && $file =~ s|^../usercontent/||mx && $file !~ m|\.\.|mx) {
+                $images->{$file} = $c->stash->{'usercontent_folder'}.'/'.$file;
+            }
+        }
+        # type icon - iconset
+        if($p->{'xdata'}->{'appearance'} && $p->{'xdata'}->{'appearance'}->{'iconset'}) {
+            my $file = $p->{'xdata'}->{'appearance'}->{'iconset'};
+            if($file && $file !~ m|/|mx && $file !~ m|\.\.|mx) {
+                my @files = glob($c->stash->{'usercontent_folder'}.'/images/status/'.$file.'/*');
+                my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
+                for my $f (@files) {
+                    my $short = $f;
+                    $short =~ s|^$usercontent_folder||mx;
+                    $images->{$short} = $f;
+                }
+            }
+        }
+    }
+    for my $image (sort keys %{$images}) {
+        my $file = $images->{$image};
+        next unless -r $file;
+        $data->{'usercontent'}->{$image} = MIME::Base64::encode_base64("".read_file($file));
+    }
+    $c->stash->{'template'} = 'passthrough.tt';
+    my $text = "";
+    $text   .= "# Thruk Panorama Dashboard Export: ".$d->{'tab'}->{'xdata'}->{'title'}."\n";
+    $text   .= decode_utf8(encode_json($data));
+    $text   .= "\n# End Export\n";
+    $c->stash->{text} = $text;
+    $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$d->{'tab'}->{'xdata'}->{'title'}.'.dashboard"' );
+    return;
+}
+
+##########################################################
+sub _task_load_dashboard {
+    my($c) = @_;
+
+    $c->stash->{'template'} = 'passthrough.tt';
+
+    if(!$c->req->uploads->{'file'}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => JSON::XS::false });
+        return;
+    }
+
+    my $upload = $c->req->uploads->{'file'};
+    if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'File exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        return;
+    }
+
+    my $content = read_file($upload->{'tempname'});
+    unlink($upload->{'tempname'});
+
+    $content =~ s/^\#.*$//gmx;
+    my $data;
+    eval {
+        $data = decode_json($content);
+    };
+    if($@) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'This is not a valid dashboard', success => JSON::XS::false });
+        return;
+    }
+
+    if($data->{'usercontent'}) {
+        require MIME::Base64;
+        my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
+        for my $file (sort keys %{$data->{'usercontent'}}) {
+            next if $c->config->{'demo_mode'};
+            next if -s $file && !$c->stash->{'is_admin'};
+            my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
+            my $dir     = $file;
+            $dir        =~ s|/.*?$||gmx;
+            Thruk::Utils::IO::mkdir_r($dir);
+            Thruk::Utils::IO::write($usercontent_folder.$file,$content);
+        }
+        delete $data->{'usercontent'};
+    }
+    $data->{'id'} = 'new';
+    $data = _save_dashboard($c, $data);
+    my $newid = $data->{'id'};
+
+    # must be text/html result, otherwise extjs form result handler dies
+    $c->stash->{text} = encode_json({ 'msg' => 'Import successfull', success => JSON::XS::true, newid => $newid });
+    return;
+}
+
+##########################################################
 
 ##########################################################
 sub _task_wms_provider {
