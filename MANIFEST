@@ -1350,6 +1350,7 @@ t/docker/cases/0200_panorama_start_page.js
 t/docker/cases/0201_panorama_basic_controls.js
 t/docker/cases/0202_panorama_icon_clone.js
 t/docker/cases/0202_panorama_import_export.js
+t/docker/cases/0203_panorama_direct_link.js
 t/docker/cases/0210_panorama_geo_map.js
 t/docker/cases/0210_panorama_hostgroup_icon.js
 t/docker/cases/0211_panorama_geo_map_cancel.js
@@ -1367,6 +1368,7 @@ t/docker/cases/0257_panorama_services_panel.js
 t/docker/cases/0258_panorama_services_totals_panel.js
 t/docker/cases/0259_panorama_services_graph_panel.js
 t/docker/cases/0260_panorama_mine_map_panel.js
+t/docker/cases/_dashboard_exports.js
 t/docker/cases/_images/applications.png
 t/docker/cases/_images/controls_unlock.png
 t/docker/cases/_images/dropdown.png
