@@ -367,10 +367,10 @@ Ext.define('TP.TabBar', {
         });
         if(activeTab.map) {
             /* remove chrome workaround */
-            Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
         } else {
             /* apply chrome background workaround */
-            Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
         }
     }
 });

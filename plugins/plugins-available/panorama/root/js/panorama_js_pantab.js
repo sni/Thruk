@@ -564,7 +564,7 @@ Ext.define('TP.Pantab', {
             }
 
             /* remove chrome workaround */
-            Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
 
             /* get wms provider */
             var wmsData;
@@ -684,7 +684,7 @@ Ext.define('TP.Pantab', {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
             /* add chrome workaround */
-            Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
         }
         tab.setBaseHtmlClass();
 
