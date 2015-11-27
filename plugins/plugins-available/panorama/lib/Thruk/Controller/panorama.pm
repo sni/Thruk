@@ -915,7 +915,7 @@ sub _task_timezones {
     my $query = $c->req->parameters->{'query'} || '';
     my $data  = [];
     for my $tz (@{_get_timezone_data($c)}) {
-        next unless $tz->{'text'} =~ m/$query/mxi;
+        next if($query && $tz->{'text'} !~ m/$query/mxi);
         push @{$data}, $tz;
     }
 
