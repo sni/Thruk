@@ -146,6 +146,8 @@ sub get_test_timeperiod {
         $timeperiod = $2;
     }
     isnt($timeperiod, undef, "got a timeperiod from config.cgi") or bail_out_req('got no test config, cannot test.', $request);
+    $timeperiod =~ s|^\s*||gmx;
+    $timeperiod =~ s|\s*$||gmx;
     return($timeperiod);
 }
 
