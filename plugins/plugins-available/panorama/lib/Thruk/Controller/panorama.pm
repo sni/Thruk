@@ -52,6 +52,7 @@ sub index {
     # add some functions
     $c->stash->{'get_static_panorama_files'} = \&Thruk::Utils::Panorama::get_static_panorama_files;
 
+    $c->stash->{title}             = 'Thruk Panorama';
     $c->stash->{'skip_navigation'} = 1;
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
@@ -246,6 +247,7 @@ sub _js {
         }
         $open_tabs = [$dashboard->{'nr'}];
         $c->stash->{one_tab_only} = $dashboard->{'nr'};
+        $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
     }
 
     $c->stash->{shapes} = {};

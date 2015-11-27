@@ -8,7 +8,7 @@
     -->
     </script>
     [% PROCESS custom_perf_bar_adjustments.tt %]
-    <title>[% title_prefix %]Thruk Panorama</title>
+    <title>[% title_prefix %][% title %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/resources/css/ext-all-gray.css">
