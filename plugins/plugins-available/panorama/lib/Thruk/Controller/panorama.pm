@@ -849,9 +849,11 @@ sub _task_load_dashboard {
         require MIME::Base64;
         my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
         for my $file (sort keys %{$data->{'usercontent'}}) {
+            my $size = -s $usercontent_folder.$file;
             next if $c->config->{'demo_mode'};
-            next if -s $file && !$c->stash->{'is_admin'};
+            next if $size && !$c->stash->{'is_admin'};
             my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
+            next if($size && length($content) == $size);
             my $dir     = $file;
             $dir        =~ s|/.*?$||gmx;
             Thruk::Utils::IO::mkdir_r($dir);
