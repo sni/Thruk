@@ -74,11 +74,13 @@ TP.getExportTab = function(options) {
                     msg:        'Enter Saved String.<br>This will add the imported tabs next to your current ones.',
                     buttons:    Ext.MessageBox.OKCANCEL,
                     icon:       Ext.MessageBox.INFO,
-                    handler: function() {
-                        if(TP.importAllTabs(text)) {
-                            if(options.close_handler) { options.close_handler(); }
-                            if(TP.dashboardsSettingWindow) {
-                                TP.dashboardsSettingWindow.destroy();
+                    fn:         function(btn, text, window) {
+                        if(btn == 'ok') {
+                            if(TP.importAllTabs(text)) {
+                                if(options.close_handler) { options.close_handler(); }
+                                if(TP.dashboardsSettingWindow) {
+                                    TP.dashboardsSettingWindow.destroy();
+                                }
                             }
                         }
                     }
