@@ -2258,6 +2258,8 @@ Ext.define('TP.TextLabelWidget', {
         var panel = this;
         panel.xdata.label.labeltext = 'Label';
         panel.xdata.label.position  = 'top-left';
+        panel.xdata.layout.x        = 0;
+        panel.xdata.layout.y        = 0;
     },
     getGeneralItems: function() { return; },
     refreshHandler: function()  { return; }
