@@ -773,6 +773,8 @@ sub _task_save_dashboard {
         if($p->{'xdata'}->{'background'}) {
             my $file = $p->{'xdata'}->{'background'};
             if($file =~ s|^../usercontent/||mx && $file !~ m|\.\.|mx) {
+                next if $file eq 'backgrounds/europa.png';
+                next if $file eq 'backgrounds/world.png';
                 $images->{$file} = $c->stash->{'usercontent_folder'}.'/'.$file;
             }
         }
@@ -787,6 +789,9 @@ sub _task_save_dashboard {
         if($p->{'xdata'}->{'appearance'} && $p->{'xdata'}->{'appearance'}->{'iconset'}) {
             my $file = $p->{'xdata'}->{'appearance'}->{'iconset'};
             if($file && $file !~ m|/|mx && $file !~ m|\.\.|mx) {
+                next if $file eq 'default'; # skip our default sets
+                next if $file eq 'default_64';
+                next if $file eq 'tfl';
                 my @files = glob($c->stash->{'usercontent_folder'}.'/images/status/'.$file.'/*');
                 my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
                 for my $f (@files) {
