@@ -1383,6 +1383,7 @@ t/docker/cases/_include.js
 t/docker/cases/testsuite.properties
 t/docker/Dockerfile.in
 t/docker/dropbox_uploader.sh
+t/docker/failsafe.sh
 t/docker/naemon.cfg
 t/docker/resource.cfg
 t/docker/sakuli2unittest.pl

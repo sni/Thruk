@@ -17,12 +17,11 @@ RUN sed -e 's|incognito|incognito --no-sandbox --no-default-browser-check --no-f
 RUN rm -rf /etc/naemon/conf.d/*
 RUN mkdir -p /root/cases/
 
-COPY test.sh            /root/
-COPY start_dashboard.sh /root/
-COPY start_chrome.sh    /root/
+COPY *.sh               /root/
+COPY *.pl               /root/
 COPY *.patch            /root/
 
 RUN cd /root/ && patch -p 0 < 0001-sahi_add_color_to_highlight.js.patch
 
 WORKDIR /root
-CMD ["/root/test.sh"]
+CMD ["/root/failsafe.sh"]

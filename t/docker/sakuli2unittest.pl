@@ -84,7 +84,6 @@ while(my $line = <>) {
         if(!$in_results || $print_result) {
             print $line;
         }
-
     }
 }
 exit($exitcode);
