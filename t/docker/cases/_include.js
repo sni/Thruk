@@ -123,7 +123,7 @@ function isVisible($el, $color) {
             _log("not visible but exists at "+$el+" at "+$position[0]+"/"+$position[1]);
             _call(_eval("document.body.appendChild(document.createElement('div'))").innerHTML = "<div style='position:absolute; width: 30px; height: 30px; left; "+$position[0]+"px; top: "+$position[1]+"px; border: 2px solid green;'></div>");
         }
-        env.sleep(60);
+        //env.sleep(60);
     }
     _highlight($el, $color);
 }

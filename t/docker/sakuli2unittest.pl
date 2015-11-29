@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 $| = 1;
+my $quiet = ($ARGV[0] && $ARGV[0] eq '-q') ? 1 : 0;
 
 my $cur_case_logs   = [];
 my $errored         = 0;
@@ -14,13 +15,15 @@ my $in_results      = 0;
 my $exitcode        = 0;
 my $latest_case;
 my $counting_cases;
-while(my $line = <>) {
+while(my $line = <STDIN>) {
     # just skip empty lines
     if($line =~ m|^[\s\.]+$|mx) {
     }
+    elsif($line =~ m|^INFO.*\]\s+\-\s*$|mx) {
+    }
     elsif($line =~ m|SAKULI_RETURN_VAL:\s+(\d+)|mx) {
         $exitcode = $1;
-        print $line;
+        print $line unless $quiet;
     }
     # number of cases
     # number of cases
@@ -39,7 +42,8 @@ while(my $line = <>) {
         $cur_case_num++;
         _print_end_case() if $latest_case;
         $latest_case = $1;
-        printf("%02d/%02d %s", $cur_case_num, $case_num, $latest_case);
+        printf("%02d/%02d ", $cur_case_num, $case_num) if $case_num > 1;
+        printf("%s", $latest_case);
         $cur_case_logs = [];
         $errored = 0;
     }
@@ -53,14 +57,14 @@ while(my $line = <>) {
         } else {
             $print_result = 0;
         }
-        print $line;
+        print $line unless $quiet;
         $in_results = 1;
     }
     # end of tests
     elsif($line =~ m|^===|mx) {
         _print_end_case() if $latest_case;
         $latest_case = "";
-        print $line;
+        print $line unless $quiet;
         $in_results = 1;
     }
     # inside case
@@ -92,7 +96,9 @@ sub _print_end_case {
     print "OK" unless $errored;
     print "\n";
     if($errored) {
-        `docker kill \$(docker ps | awk '{print \$1}' | grep -v CONT)`;
+        if(-x "/usr/bin/docker") {
+            `docker kill \$(docker ps | awk '{print \$1}' | grep -v CONT)`;
+        }
         exit($exitcode) if $exitcode;
         exit(1);
     }

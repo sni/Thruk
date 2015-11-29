@@ -13,13 +13,12 @@ find /usr/share/thruk -type f -exec chmod o+r {} \;
 rsync -a --delete /src/t/docker/cases/. $CASEDIR/.
 
 for case in $(cd $CASEDIR && ls -1 *.js); do
-    if [ $case != '_include.js' ]; then
-        echo $case
+    if [ $case != '_include.js' -a $case != '_dashboard_exports.js' ]; then
         for retry in $(seq 3); do
-            ./test.sh $* $case | ./sakuli2unittest.pl
+            ./test.sh $* $case | ./sakuli2unittest.pl -q
             rc=$?
-            echo " $retry/$rc"
-            [ $rc == 0 ] && break
+            [ $retry -gt 1 ] && echo "$case: retry:$retry - exited:$rc"
+            [ $rc == 0 ]     && break
         done
         [ $rc != 0 ] && exit $rc
     fi

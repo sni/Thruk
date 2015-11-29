@@ -82,7 +82,7 @@ set -- ${NEW_ARGS[@]}
 
 if [ $HAS_CASE -eq 0 ]; then
     for case in $(cd $CASEDIR && ls -1 *.js); do
-        if [ $case != '_include.js' ]; then
+        if [ $case != '_include.js' -a $case != '_dashboard_exports.js' ]; then
             dir="${case%.js}"
             echo "$dir/$case http://127.0.0.1/thruk/" >> $CASEDIR/testsuite.suite
             mkdir -p $CASEDIR/$dir && cp $CASEDIR/$case $CASEDIR/$dir/
