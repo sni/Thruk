@@ -26,27 +26,21 @@ try {
     rightClick(_button("Export Test"));
     click(_span("Dashboard Settings"));
     click(_button("Import/Export"));
-    click(_button("Export Active Tab"));
+    click(_button("Export Active Tab as Text"));
 
     _log("get export string");
     isVisible(_textarea(0));
     var $exportTab = _getValue(_textarea(0));
     click(_button("OK"));
 
-    click(_button("Export All Open Tabs"));
-    isVisible(_textarea(0));
-    var $exportAll = _getValue(_textarea(0));
-    click(_button("OK"));
-    click(_button("cancel"));
-
     _log("remove dashboard");
     thruk_remove_panorama_dashboard("Export Test");
 
-    _log("single tab import");
+    _log("tab import");
     click(_button($testUser));
     click(_span("Dashboard Management"));
     click(_button("Import/Export"));
-    click(_button("Import Tab(s)"));
+    click(_button("Import Tab(s) from Text"));
     _setValue(_textarea(0), $exportTab);
     click(_button("OK"));
 
@@ -54,27 +48,6 @@ try {
     isVisible(_div("User"));
 
     _log("remove dashboard again");
-    thruk_remove_panorama_dashboard("Export Test");
-
-    _log("all tab import");
-    click(_button($testUser));
-    click(_span("Dashboard Management"));
-    click(_button("Import/Export"));
-    click(_button("Import Tab(s)"));
-    _setValue(_textarea(0), $exportAll);
-    click(_button("OK"));
-
-    isVisible(_span("Confirm Import"));
-    click(_button("Yes"));
-
-    click(_button("", _rightOf(_button("Dashboard"))));
-    click(_span("My Dashboards"));
-    click(_span("Export Test"));
-
-    isVisible(_div("Naemon"));
-    isVisible(_div("User"));
-
-    _log("remove dashboard once more");
     thruk_remove_panorama_dashboard("Export Test");
 
     testCase.endOfStep("panorama import export", 120);

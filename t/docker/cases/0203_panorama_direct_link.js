@@ -9,7 +9,7 @@ try {
     click(_button($testUser));
     click(_span("Dashboard Management"));
     click(_button("Import/Export"));
-    click(_button("Import Tab(s)"));
+    click(_button("Import Tab(s) from Text"));
     _setValue(_textarea(0), $dashboardTestBackground);
     click(_button("OK"));
 
