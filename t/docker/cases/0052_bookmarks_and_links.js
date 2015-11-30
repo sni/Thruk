@@ -26,7 +26,7 @@ try {
     _assertEqual("/^http:/", _getValue(_textbox("url_input")));
     _assertNotEqual("/&amp;/", _getValue(_textbox("url_input")));
 
-    testCase.endOfStep("bookmarks", 20);
+    testCase.endOfStep("bookmarks", 30);
 } catch (e) {
     testCase.handleException(e);
 } finally {
