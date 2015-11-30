@@ -67,6 +67,13 @@ sub external_authentication {
     $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
     my $res      = $ua->post($authurl);
     $stats->profile(end   => "ext::auth: post1 ".$authurl) if $stats;
+    if($res->code == 302 && $authurl =~ m|^http:|mx) {
+        (my $authurl_https = $authurl) =~ s|^http:|https:|gmx;
+        if($res->{'_headers'}->{'location'} eq $authurl_https) {
+            $config->{'cookie_auth_restricted_url'} = $authurl_https;
+            return(external_authentication($config, $login, $pass, $address, $stats));
+        }
+    }
     if($res->code == 401) {
         my $realm = $res->header('www-authenticate');
         if($realm =~ m/Basic\ realm=\"([^"]+)\"/mx) {
@@ -122,6 +129,13 @@ sub verify_basic_auth {
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
     my $res = $ua->post($authurl);
+    if($res->code == 302 && $authurl =~ m|^http:|mx) {
+        (my $authurl_https = $authurl) =~ s|^http:|https:|gmx;
+        if($res->{'_headers'}->{'location'} eq $authurl_https) {
+            $config->{'cookie_auth_restricted_url'} = $authurl_https;
+            return(verify_basic_auth($config, $basic_auth, $login));
+        }
+    }
     if($res->code == 200 and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
         if($1 eq $login) {
             return 1;
