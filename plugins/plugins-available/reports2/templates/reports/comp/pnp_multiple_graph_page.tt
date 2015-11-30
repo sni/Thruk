@@ -15,7 +15,7 @@
       [% nb_graph = nb_graph + 1 %]
       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="" %]
         <div align="center">
-          <img src="[% pnpdata %]" class="pnpimage" alt="pnp graph">
+          <img src="[% pnpdata %]" class="[% c.stash.last_graph_type %]image" alt="[% c.stash.last_graph_type %] graph">
         </div>
         [% source = source + 1 %]
         [% IF source == param.max_pnp_sources %]
@@ -26,7 +26,7 @@
           [% IF pnpdata %]
             [% nb_graph = nb_graph + 1 %]
             <div align="center">
-              <img src="[% pnpdata %]" class="pnpimage" alt="pnp graph">
+              <img src="[% pnpdata %]" class="[% c.stash.last_graph_type %]image" alt="[% c.stash.last_graph_type %] graph">
             </div>
           [% END %]
           [% source = source + 1 %]

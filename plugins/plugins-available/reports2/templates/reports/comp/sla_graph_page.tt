@@ -12,7 +12,7 @@
   [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, 0) %]
   [% IF pnpdata %]
   <div align="center">
-    <img src="[% pnpdata %]" class="pnpimage" alt="pnp graph">
+    <img src="[% pnpdata %]" class="[% c.stash.last_graph_type %]image" alt="[% c.stash.last_graph_type %] graph">
   </div>
   [% END %]
 [% END %]

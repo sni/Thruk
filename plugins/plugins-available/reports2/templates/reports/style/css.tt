@@ -214,6 +214,10 @@ SPAN.graph_percent_legend {
 IMG.pnpimage {
   margin-top: 5px;
 }
+IMG.grafanaimage {
+  margin-top: 35px;
+  width: 80%;
+}
 
 /* page sizing */
 BODY {

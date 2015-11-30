@@ -1409,7 +1409,9 @@ sub get_perf_image {
         $svc = '_HOST_' if $pnpurl;
     }
 
+    $c->stash->{'last_graph_type'} = 'pnp';
     if($grafanaurl) {
+        $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         $grafanaurl .= '&panelId='.($source || $c->config->{'grafana_default_panelId'} || 1);
         if($resize_grafana_images) {
