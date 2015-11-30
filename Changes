@@ -7,6 +7,7 @@ next:
             - add hide label checkbox for pnp panel
             - add new appearance type 'label only'
             - add export/import to files including images
+            - add emoji icon set
             - fix sending reschedule commands
             - fix not triggering upload popup
           - Reports:
