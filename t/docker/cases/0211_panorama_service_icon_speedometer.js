@@ -34,7 +34,7 @@ try {
     click(_span("Remove"));
     click(_button("Yes"));
 
-    testCase.endOfStep("panorama service speedometer", 30);
+    testCase.endOfStep("panorama service speedometer", 40);
 } catch (e) {
     testCase.handleException(e);
 } finally {
