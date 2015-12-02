@@ -1036,6 +1036,7 @@ sub set_custom_vars {
             my $is_host = defined $service ? 0 : 1;
             if($add_host) {
                 if($cust_name =~ s/^HOST//gmx) {
+                    $already_added->{$cust_name} = 1;
                     $is_host = 1;
                 }
             }
