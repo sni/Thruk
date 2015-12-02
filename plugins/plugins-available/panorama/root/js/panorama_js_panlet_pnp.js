@@ -41,6 +41,7 @@ Ext.define('TP.PanletPNP', {
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
         this.xdata.graph_only = false;
+        this.xdata.hide_legend= false;
         this.lastGraph        = '';
         this.adjusting        = 0;
 
@@ -106,9 +107,15 @@ Ext.define('TP.PanletPNP', {
                 url = url + '&graph_height='+ size.height;
             }
             else if(size.height > 1 && (size.height - this.size_adjustment_y) < 81) {
+                if(this.xdata.hide_legend) {
+                    url = url + "&no_legend";
+                }
                 url = url + '&graph_width=' + size.width;
                 url = url + '&graph_height='+ size.height;
             } else {
+                if(this.xdata.hide_legend) {
+                    url = url + "&no_legend";
+                }
                 url = url + '&graph_width=' +(size.width  - this.size_adjustment_x);
                 url = url + '&graph_height='+(size.height - this.size_adjustment_y);
             }
@@ -236,6 +243,12 @@ Ext.define('TP.PanletPNP', {
         });
         this.addGearItems({
             fieldLabel: 'Hide Legend',
+            xtype:      'checkbox',
+            name:       'hide_legend',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
+        });
+        this.addGearItems({
+            fieldLabel: 'Graph Only',
             xtype:      'checkbox',
             name:       'graph_only',
             boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
