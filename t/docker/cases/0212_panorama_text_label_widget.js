@@ -28,7 +28,7 @@ try {
     click(_span("Remove"));
     click(_button("Yes"));
 
-    testCase.endOfStep("panorama text label widget", 20);
+    testCase.endOfStep("panorama text label widget", 30);
 } catch (e) {
     testCase.handleException(e);
 } finally {
