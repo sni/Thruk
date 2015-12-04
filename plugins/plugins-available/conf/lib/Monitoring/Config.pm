@@ -1430,10 +1430,10 @@ sub _set_config {
 
         my $core_conf = $self->{'config'}->{'core_conf'};
         if(defined $ENV{'OMD_ROOT'}
-           && -s $ENV{'OMD_ROOT'}."/version"
-           && !$core_conf
-           && scalar(Thruk::Utils::list($self->{'config'}->{'obj_dir'}))  == 0
-           && scalar(Thruk::Utils::list($self->{'config'}->{'obj_file'})) == 0) {
+           && -d $ENV{'OMD_ROOT'}."/version/."
+           && ! -s $core_conf
+           && scalar(@{Thruk::Utils::list($self->{'config'}->{'obj_dir'})})  == 0
+           && scalar(@{Thruk::Utils::list($self->{'config'}->{'obj_file'})}) == 0) {
             my $newest = $self->_newest_file(
                                              $ENV{'OMD_ROOT'}.'/tmp/naemon/naemon.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
