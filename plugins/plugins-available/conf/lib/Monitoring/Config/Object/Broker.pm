@@ -40,6 +40,7 @@ $Monitoring::Config::Object::Broker::Defaults = {
     # Specific
     'broker_name'                     => { type => 'STRING', cat => 'Basic' },
     'port'                            => { type => 'INT', cat => 'Basic' },
+    'hard_ssl_name_check'             => { type => 'BOOL', cat => 'Extended' },
 };
 
 ##########################################################
