@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2015-09-30" "perl v5.20.2" "User Contributed Perl Documentation"
+.TH thruk 3 "2015-11-10" "perl v5.20.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -230,16 +230,7 @@ script has the following arguments
 \&      \- livecacherestart            restart livecaches for each site sequentially
 \&      \- livecachestatus             show livecache status
 \&
-\&    Internal Commands
-\&      \- installcron                 update cronjobs for downtimes and reports
-\&                                    (only needed during package installation)
-\&      \- uninstallcron               remove all thruk cronjobs
-\&                                    (only needed during package deinstallation)
-\&      \- compile                     compile templates for faster access
-\&      \- bp/bpd(=nr)                 calculate all/specified business process(es)
-\&      \- bpcommit                    write objects for business processes and reloads core
-\&
-\&    Testing Commands
+\&    Data Commands
 \&      \- listbackends                list all backends
 \&      \- listhosts                   list hostnames
 \&      \- listhostgroups              list hostgroupnames
@@ -252,6 +243,16 @@ script has the following arguments
 \&                                     \- logfiles
 \&                                     \- reports
 \&                                     \- recurring_downtimes
+\&
+\&    Internal Commands
+\&      \- installcron                 update cronjobs for downtimes and reports
+\&                                    (only needed during package installation)
+\&      \- uninstallcron               remove all thruk cronjobs
+\&                                    (only needed during package deinstallation)
+\&      \- compile                     compile templates for faster access
+\&      \- bp/bpd(=nr)                 calculate all/specified business process(es)
+\&      \- bpcommit                    write objects for business processes and reloads core
+\&      \- clean_dashboards            remove empty dashboards which are older than 1 day
 .Ve
 .IP "\fB\-A\fR \fIauthname\fR, \fB\-\-auth\fR=\fIauthname\fR" 4
 .IX Item "-A authname, --auth=authname"

@@ -81,17 +81,23 @@ For example:
 <style type="text/css">
 /* override css styles */
 BODY {
+    /* use a different font */
     font-family: arial, sans-serif;
-    font-size: 11px;
-    line-height: 18px;
-    font-size: 16px;
+
+    /* change default font color */
+    color: DarkSlateGray;
+}
+TD.header DIV.title {
+    /* change gradient on page cover and page header */
+    background: rgba(0, 0, 0, 0) -moz-linear-gradient(45deg, #ffd972 0%, #fff9a1 100%) repeat scroll 0 0;
+    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#ffd972), color-stop(100%,#fff9a1));
 }
 </style>
 
 <script language="javascript" type="text/javascript">
-/* add complete new elements by javascript */
+  /* add complete new elements by javascript, ex.: company logo on page cover */
   jQuery(document).ready(function() {
-    jQuery('<img src="' + url_prefix + 'themes/Thruk/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
+    jQuery('<img src="http://www.thruk.org/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
   });
 </script>
 ------

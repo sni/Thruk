@@ -119,8 +119,12 @@ local_install: local_patches
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
-	cp -p script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
-	cp -p script/thruk.psgi       ${DESTDIR}${DATADIR}/script/
+	cp -p script/thruk_fastcgi.pl  ${DESTDIR}${DATADIR}/script/
+	cp -p script/thruk.psgi        ${DESTDIR}${DATADIR}/script/
+	cp -p script/grafana_export.sh ${DESTDIR}${DATADIR}/script/
+	cp -p script/html2pdf.js       ${DESTDIR}${DATADIR}/script/
+	cp -p script/html2pdf.sh       ${DESTDIR}${DATADIR}/script/
+	cp -p script/pnp_export.sh     ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/
 	[ ! -f script/phantomjs ] || cp -p script/phantomjs ${DESTDIR}${DATADIR}/script/
 	echo " " > ${DESTDIR}${DATADIR}/dist.ini
@@ -185,3 +189,36 @@ timedtest:
 			printf "% 8ss\n" $$time; \
 		fi; \
 	done
+
+DOCKERRESULTS=$(shell pwd)/t/docker/results/$(shell date +'%Y-%m-%d_%H.%M')
+DOCKERCMD=cd t/docker && \
+            docker run \
+                -p 5901:5901 \
+                --rm \
+                -v $(shell pwd)/.:/src \
+                -v $(shell pwd)/t/docker/cases:/root/cases \
+                -v $(DOCKERRESULTS):/root/cases/_logs \
+                -v /etc/localtime:/etc/localtime
+t/docker/Dockerfile:
+	cp -p t/docker/Dockerfile.in t/docker/Dockerfile
+	cd t/docker && docker build -t="local/thruk_panorama_test" .
+
+dockerbuild:
+	rm -f t/docker/Dockerfile
+	$(MAKE) t/docker/Dockerfile
+
+dockertest: t/docker/Dockerfile dockertestfirefox dockertestchrome
+
+dockertestchrome:
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -b chrome
+	rm -rf $(DOCKERRESULTS)
+
+dockertestfirefox:
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -b firefox
+	rm -rf $(DOCKERRESULTS)
+
+dockershell: t/docker/Dockerfile
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) -it local/thruk_panorama_test /bin/bash

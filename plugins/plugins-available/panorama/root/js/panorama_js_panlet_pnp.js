@@ -1,20 +1,3 @@
-Ext.define('TP_Sources', {
-    extend: 'Ext.data.Model',
-    fields: [
-        {name: 'image_url', type: 'string'},
-        {name: 'name',      type: 'string'},
-        {name: 'source',    type: 'number'}
-    ]
-});
-
-Ext.define('TP_GraphModell', {
-    extend: 'Ext.data.Model',
-    fields: [
-        {name: 'text', type: 'string'},
-        {name: 'url',  type: 'string'}
-    ]
-});
-
 TP.graphStore = Ext.create('Ext.data.Store', {
     pageSize:     10,
     model:       'TP_GraphModell',
@@ -57,6 +40,8 @@ Ext.define('TP.PanletPNP', {
         this.xdata.source     = 0;
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
+        this.xdata.graph_only = false;
+        this.xdata.hide_legend= false;
         this.lastGraph        = '';
         this.adjusting        = 0;
 
@@ -116,10 +101,21 @@ Ext.define('TP.PanletPNP', {
             var now      = new Date();
             url = url + '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&end='   + Math.round(now.getTime()/1000);
-            if(size.height > 1 && (size.height - this.size_adjustment_y) < 81) {
+            if(this.xdata.graph_only) {
+                url = url + "&graph_only";
+                url = url + '&graph_width=' + size.width;
+                url = url + '&graph_height='+ size.height;
+            }
+            else if(size.height > 1 && (size.height - this.size_adjustment_y) < 81) {
+                if(this.xdata.hide_legend) {
+                    url = url + "&no_legend";
+                }
                 url = url + '&graph_width=' + size.width;
                 url = url + '&graph_height='+ size.height;
             } else {
+                if(this.xdata.hide_legend) {
+                    url = url + "&no_legend";
+                }
                 url = url + '&graph_width=' +(size.width  - this.size_adjustment_x);
                 url = url + '&graph_height='+(size.height - this.size_adjustment_y);
             }
@@ -244,6 +240,18 @@ Ext.define('TP.PanletPNP', {
             fieldLabel: 'Show Border',
             xtype:      'checkbox',
             name:       'showborder'
+        });
+        this.addGearItems({
+            fieldLabel: 'Hide Legend',
+            xtype:      'checkbox',
+            name:       'hide_legend',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
+        });
+        this.addGearItems({
+            fieldLabel: 'Graph Only',
+            xtype:      'checkbox',
+            name:       'graph_only',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
         });
     },
     gearInitCallback: function(panel) {

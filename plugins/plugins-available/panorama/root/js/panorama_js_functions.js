@@ -25,6 +25,16 @@ var TP = {
     logHistory:   [],
     modalWindows: [],
 
+    /* called once the initialization */
+    initComplete: function() {
+        if(TP.initialized) { return; }
+        TP.log('[global] init complete');
+        TP.initialized = true;
+        if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+        /* preload images */
+        window.setTimeout(preloader, 2000);
+    },
+
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
         newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
@@ -49,7 +59,7 @@ var TP = {
         }
 
         if(id == undefined) {
-            TP.initialized = true;
+            TP.initComplete();
             id = 'new_or_empty';
         }
 
@@ -303,6 +313,9 @@ var TP = {
         /* ensure the panel gets where it should be */
         window.setTimeout(function() {
             panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
+            if(panel.xdata.layout) {
+                TP.iconMoveHandler(panel, config.conf.pos[0], config.conf.pos[1]);
+            }
         }, 200);
     },
 
@@ -596,6 +609,8 @@ var TP = {
                 data.push([key, backends[key].name]);
             }
         }
+        /* sort by name */
+        data = Ext.Array.sort(data, function(a,b) { return(a[1].toLowerCase() > b[1].toLowerCase()) });
         return data;
     },
 
@@ -676,8 +691,8 @@ var TP = {
     },
     /* import tabs from string */
     importAllTabs: function(data) {
-        // strip off comments
-        data = data.replace(/\s*\#.*/g, '').replace(/\n/g, '');
+        /* strip off comments */
+        data = data.replace(/\s*\#.*/g, '').replace(/[\n\r]/g, '');
         var decoded;
         try {
             decoded = TP.cp.decodeValue(decode64(data));
@@ -708,8 +723,6 @@ var TP = {
 
         if(decoded.tabpan) {
             /* old export with all tabs*/
-            // verify complete import of all tabs export still works
-            // REMOVE AFTER: 01.01.2016
             TP.cp.saveChanges(false);
             TP.modalWindows.push(Ext.Msg.confirm(
                 'Confirm Import',
@@ -1382,7 +1395,7 @@ var TP = {
 
     /* fetch dashboard data from server and reapply settings */
     reconfigureDashboard: function(nr) {
-        /* update dashboard managment view */
+        /* update dashboard management view */
         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
             TP.dashboardsSettingGrid.getView().refresh();
         }
@@ -1643,8 +1656,10 @@ var TP = {
                     }
                     /* update stateproviders last data to prevent useless updates */
                     TP.cp.lastdata = setStateByTab(ExtState);
-                    if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
-                    if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
+                    if(!tab.xdata.map) {
+                        if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
+                        if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
+                    }
                     tab.renewInProgress = false;
                 } else {
                     tab.renewInProgress = false;
@@ -1741,8 +1756,9 @@ var TP = {
     /* make sure our modal windows are still in front */
     checkModalWindows: function() {
         if(TP.modalWindows.length == 0) { return; }
+        TP.modalWindows = Ext.Array.unique(TP.modalWindows);
         var newModelWindows = [];
-        var zIndex;
+        var zIndex = 0;
         var length = TP.modalWindows.length;
         var first  = true;
         for(var x=length-1; x>=0; x--) {
@@ -1752,7 +1768,10 @@ var TP = {
                     try { win.toFront(); } catch(err) {}
                     var masks = Ext.Element.select('.x-mask');
                     if(masks.elements.length > 0) {
-                        zIndex = Number(masks.elements[0].style.zIndex);
+                        for(var k = 0; k < masks.elements.length; k++) {
+                            var tmp = Number(masks.elements[k].style.zIndex);
+                            if(tmp > zIndex) { zIndex = tmp; }
+                        }
                     } else {
                         zIndex = Number(win.el.dom.style.zIndex);
                     }

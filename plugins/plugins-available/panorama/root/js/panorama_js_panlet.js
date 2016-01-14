@@ -519,65 +519,66 @@ Ext.define('TP.PanletGearItem', {
 });
 
 /* called when user clicks on the gear icon in panlet header */
-TP.panletGearHandler = function() {
-    if(this.locked) { return; }
-    var tab = Ext.getCmp(this.panel_id);
-    if(this.gearitem == undefined) {
-        this.add(Ext.create('TP.PanletGearItem', {}));
-        this.gearitem = this.items.getAt(this.items.length-1);
-        if(!this.gearItemsExtra) {
-            this.setGearItems();
+TP.panletGearHandler = function(panel) {
+    if(panel == undefined) { panel = this; }
+    if(panel.locked) { return; }
+    var tab = Ext.getCmp(panel.panel_id);
+    if(panel.gearitem == undefined) {
+        panel.add(Ext.create('TP.PanletGearItem', {}));
+        panel.gearitem = panel.items.getAt(panel.items.length-1);
+        if(!panel.gearItemsExtra) {
+            panel.setGearItems();
         }
-        if(this.gearItemsExtra) {
-            this.gearitem.down('form').add(this.gearItemsExtra);
+        if(panel.gearItemsExtra) {
+            panel.gearitem.down('form').add(panel.gearItemsExtra);
         }
-        if(this.hideSettingsForm) {
-            TP.hideFormElements(this.gearitem.down('form').getForm(), this.hideSettingsForm);
+        if(panel.hideSettingsForm) {
+            TP.hideFormElements(panel.gearitem.down('form').getForm(), panel.hideSettingsForm);
         }
 
         /* set initial form values */
-        this.setFormDefaults();
-        this.stateful = false;
-        this.items.getAt(0).hide();
+        panel.setFormDefaults();
+        panel.stateful = false;
+        panel.items.getAt(0).hide();
 
         // add current available backends
-        var backendItem = TP.getFormField(this.gearitem.down('form'), 'backends');
+        var backendItem = TP.getFormField(panel.gearitem.down('form'), 'backends');
         TP.updateArrayStoreKV(backendItem.store, TP.getAvailableBackendsTab(tab));
         if(backendItem.store.count() <= 1) { backendItem.hide(); }
 
-        this.gearitem.down('form').getForm().reset();
-        if(this.has_search_button != undefined) {
+        panel.gearitem.down('form').getForm().reset();
+        if(panel.has_search_button != undefined) {
             // make filter show the same value as the main filter button
-            var form = this.gearitem.down('form').getForm();
-            form.setValues({filter: this.xdata.filter});
+            var form = panel.gearitem.down('form').getForm();
+            form.setValues({filter: panel.xdata.filter});
         }
-        if(this.gearInitCallback) {
-            this.gearInitCallback(this);
+        if(panel.gearInitCallback) {
+            panel.gearInitCallback(panel);
         }
-        this.origSize = this.getSize();
-        if(this.origSize.width < 450 || this.origSize.height < 250) {
-            this.setSize(Ext.Array.max([450, this.origSize.width]),
-                         Ext.Array.max([250, this.origSize.height])
+        panel.origSize = panel.getSize();
+        if(panel.origSize.width < 450 || panel.origSize.height < 250) {
+            panel.setSize(Ext.Array.max([450, panel.origSize.width]),
+                         Ext.Array.max([250, panel.origSize.height])
                         );
         }
-        this.applyBorderAndBackground();
-        this.addCls('gearopen');
-        this.showHeader(tab);
+        panel.applyBorderAndBackground();
+        panel.addCls('gearopen');
+        panel.showHeader(tab);
     } else {
-        this.remove(this.gearitem);
-        this.gearitem.destroy();
-        delete this.gearItemsExtra;
-        this.removeCls('gearopen');
-        this.removeCls('autohideheaderover');
-        delete this.gearitem;
-        if(this.origSize != undefined) {
-            this.setSize(this.origSize);
-            delete this.origSize;
+        panel.remove(panel.gearitem);
+        panel.gearitem.destroy();
+        delete panel.gearItemsExtra;
+        panel.removeCls('gearopen');
+        panel.removeCls('autohideheaderover');
+        delete panel.gearitem;
+        if(panel.origSize != undefined) {
+            panel.setSize(panel.origSize);
+            delete panel.origSize;
         }
-        this.stateful = true;
-        this.applyBorderAndBackground();
-        this.items.getAt(0).show();
-        this.hideHeader(tab);
-        this.syncShadowTimeout();
+        panel.stateful = true;
+        panel.applyBorderAndBackground();
+        panel.items.getAt(0).show();
+        panel.hideHeader(tab);
+        panel.syncShadowTimeout();
     }
 }

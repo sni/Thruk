@@ -26,6 +26,8 @@ logs/thruk.log
 ^thruk_local.conf\.
 ^thruk_local.conf\-
 ^menu_local.conf
+ssi/extinfo-header.ssi$
+ssi/status-header.ssi$
 script/thruk.lib
 script/thruk_update_docs.sh
 script/wkhtmltopdf
@@ -73,3 +75,9 @@ script/append.make.options
 t/testurls.txt
 .rps_results
 rpsresults.html
+t/docker/Dockerfile$
+t/docker/results
+t/docker/cases/.*/.sakuli-steps-cache
+t/docker/cases/testsuite.suite
+t/docker/cases/.*/.*.js
+.gem/

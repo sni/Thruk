@@ -68,7 +68,7 @@ sub index {
         if(defined $c->req->parameters->{'jump2'}) {
             $filter = [ { 'name' => $c->req->parameters->{'jump2'} } ];
         }
-        $c->{'db'}->get_hosts(sort => 'name', remove_duplicates => 1, pager => 1, extra_columns => ['contacts'], filter => $filter );
+        $c->{'db'}->get_hosts(sort => 'name', remove_duplicates => 1, pager => 1, extra_columns => ['contacts', 'contact_groups'], filter => $filter );
         $c->stash->{template} = 'config_hosts.tt';
     }
 
@@ -78,7 +78,7 @@ sub index {
         if( defined $c->req->parameters->{'jump2'} and defined $c->req->parameters->{'jump3'} ) {
             $filter = [ { 'host_name' => $c->req->parameters->{'jump2'}, 'description' => $c->req->parameters->{'jump3'} } ];
         }
-        $c->{'db'}->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => 1, extra_columns => ['contacts'], filter => $filter);
+        $c->{'db'}->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => 1, extra_columns => ['contacts', 'contact_groups'], filter => $filter);
         $c->stash->{template} = 'config_services.tt';
     }
 

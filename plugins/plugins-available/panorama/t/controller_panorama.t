@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 462;
+    plan tests => 513;
 }
 
 BEGIN {
@@ -77,6 +77,7 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=hosts_pie',
     '/thruk/cgi-bin/panorama.cgi?task=hosttotals',
     '/thruk/cgi-bin/panorama.cgi?task=pnp_graphs',
+    '/thruk/cgi-bin/panorama.cgi?task=grafana_graphs',
     '/thruk/cgi-bin/panorama.cgi?task=server_stats',
     { url => '/thruk/cgi-bin/panorama.cgi?task=service_detail', post => { host => $host, service => $service } },
     '/thruk/cgi-bin/panorama.cgi?task=service_list',
@@ -99,12 +100,16 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=wms_provider',
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboards_clean', like => '"num" : ' },
     { url => '/thruk/cgi-bin/panorama.cgi?task=timezones', like => 'Berlin' },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=timezones&query=Berl', like => 'Berlin' },
     { url => '/thruk/cgi-bin/panorama.cgi?task=serveraction', post => { dashboard => '__DASHBOARD__', link => 'server://test' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_point', post => { nr => '__DASHBOARD__', mode => 'a' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_list', post => { nr => '__DASHBOARD__' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore', post => { nr => '__DASHBOARD__', timestamp => '__TIMESTAMP__', mode => 'a' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_save_states', post => { nr => '__DASHBOARD__', states => '[]' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=upload', like => 'missing properties in fileupload.', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
+    { url => '/thruk/cgi-bin/panorama.cgi?task=uploadecho', like => 'missing file in fileupload.', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
+    { url => '/thruk/cgi-bin/panorama.cgi?task=save_dashboard&nr=__DASHBOARD__', like => ['Thruk Panorama Dashboard Export:','End Export'], content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
+    { url => '/thruk/cgi-bin/panorama.cgi?task=load_dashboard', like => 'missing file in fileupload', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
 ];
 
 for my $url (@{$pages}) {
@@ -179,7 +184,9 @@ sub _test_json_page {
     if(!ref $url) {
         $url = { url => $url };
     }
-    delete $subs->{$url->{'url'}};
+    my $taskurl = $url->{'url'};
+    $taskurl =~ s|task=([a-z_]+).*?$|task=$1|gmx;
+    delete $subs->{$taskurl};
     $url->{'post'}         = {} unless $url->{'post'};
     $url->{'content_type'} = 'application/json;charset=UTF-8' unless $url->{'content_type'};
 
@@ -190,6 +197,9 @@ sub _test_json_page {
     eval {
         $data = decode_json($page->{'content'});
     };
+    if($url->{'url'} =~ m|save_dashboard|gmx) {
+        return($data);
+    }
     is(ref $data, 'HASH', "json result is an array: ".$url->{'url'});
     if($url->{'url'} !~ m/gearman/mx) {
         ok(scalar keys %{$data} > 0, "json result has content: ".$url->{'url'});

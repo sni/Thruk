@@ -52,6 +52,7 @@ sub index {
     # add some functions
     $c->stash->{'get_static_panorama_files'} = \&Thruk::Utils::Panorama::get_static_panorama_files;
 
+    $c->stash->{title}             = 'Thruk Panorama';
     $c->stash->{'skip_navigation'} = 1;
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
@@ -173,6 +174,9 @@ sub index {
         elsif($task eq 'pnp_graphs') {
             return(_task_pnp_graphs($c));
         }
+        elsif($task eq 'grafana_graphs') {
+            return(_task_grafana_graphs($c));
+        }
         elsif($task eq 'userdata_backgroundimages') {
             return(_task_userdata_backgroundimages($c));
         }
@@ -205,6 +209,15 @@ sub index {
         }
         elsif($task eq 'upload') {
             return(_task_upload($c));
+        }
+        elsif($task eq 'uploadecho') {
+            return(_task_uploadecho($c));
+        }
+        elsif($task eq 'save_dashboard') {
+            return(_task_save_dashboard($c));
+        }
+        elsif($task eq 'load_dashboard') {
+            return(_task_load_dashboard($c));
         }
     }
 
@@ -240,6 +253,7 @@ sub _js {
         }
         $open_tabs = [$dashboard->{'nr'}];
         $c->stash->{one_tab_only} = $dashboard->{'nr'};
+        $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
     }
 
     $c->stash->{shapes} = {};
@@ -504,6 +518,7 @@ sub _task_status {
     $servicefilter = Thruk::Utils::combine_filter('-or', $servicefilter);
 
     if($c->req->parameters->{'reschedule'}) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
         # works only for a single host or service
         $c->stash->{'now'}                               = time();
         $c->req->parameters->{'cmd_mod'}     = 2;
@@ -532,7 +547,8 @@ sub _task_status {
         }
         $c->stash->{'use_csrf'} = 0;
         if($c->req->parameters->{'cmd_typ'}) {
-            if(Thruk::Controller::cmd->_do_send_command($c)) {
+            require Thruk::Controller::cmd;
+            if(Thruk::Controller::cmd::_do_send_command($c)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
                 Thruk::Controller::cmd::_redirect_or_success($c, -2, 1);
             }
@@ -615,7 +631,8 @@ sub _task_redirect_status {
 ##########################################################
 sub _task_textsave {
     my($c) = @_;
-    $c->res->headers->header('Content-Disposition', qq[attachment; filename="log.txt"]);
+    my $file = $c->req->parameters->{'file'} || "log.txt";
+    $c->res->headers->header('Content-Disposition', 'attachment; filename="'.$file.'"');
     $c->res->headers->content_type('application/octet-stream');
     $c->stash->{text}     = $c->req->parameters->{'text'};
     $c->stash->{template} = 'passthrough.tt';
@@ -651,6 +668,12 @@ sub _task_upload {
         return;
     }
     $location =~ s|/$||gmx;
+
+    if($c->config->{'demo_mode'}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'fileupload is disabled in demo mode.', success => JSON::XS::false });
+        return;
+    }
 
     my $upload = $c->req->uploads->{$type};
     my $folder = $c->stash->{'usercontent_folder'}.'/'.$location;
@@ -694,6 +717,167 @@ sub _task_upload {
     $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, filename => $filename });
     return;
 }
+
+##########################################################
+sub _task_uploadecho {
+    my($c) = @_;
+
+    $c->stash->{'template'} = 'passthrough.tt';
+
+    if(!$c->req->uploads->{'file'}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => JSON::XS::false });
+        return;
+    }
+
+    my $upload = $c->req->uploads->{'file'};
+    if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        return;
+    }
+
+    my $content = read_file($upload->{'tempname'});
+    unlink($upload->{'tempname'});
+
+    # must be text/html result, otherwise extjs form result handler dies
+    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, content => $content });
+    return;
+}
+
+##########################################################
+sub _task_save_dashboard {
+    my($c) = @_;
+
+    my $nr   = $c->req->parameters->{'nr'} || die('no number supplied');
+    $nr      =~ s/^tabpan-tab_//gmx;
+    my $d = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $d) >= ACCESS_READONLY;
+
+    my $data = {
+        usercontent => {},
+        version     => $c->config->{'version'},
+    };
+    for my $key (keys %{$d}) {
+        if($key =~ m/^tab/mx) {
+            $data->{$key} = $d->{$key};
+        }
+    }
+    # add image data
+    require MIME::Base64;
+    my $images = {};
+    for my $id (sort keys %{$d}) {
+        my $p = $d->{$id};
+        next unless ref $p eq 'HASH';
+        # dashboard background
+        if($p->{'xdata'}->{'background'}) {
+            my $file = $p->{'xdata'}->{'background'};
+            if($file =~ s|^../usercontent/||mx && $file !~ m|\.\.|mx) {
+                next if $file eq 'backgrounds/europa.png';
+                next if $file eq 'backgrounds/world.png';
+                $images->{$file} = $c->stash->{'usercontent_folder'}.'/'.$file;
+            }
+        }
+        # type image
+        if($p->{'xdata'}->{'appearance'} && $p->{'xdata'}->{'appearance'}->{'type'} && $p->{'xdata'}->{'appearance'}->{'type'} eq 'icon') {
+            my $file = $p->{'xdata'}->{'general'}->{'src'};
+            if($file && $file =~ s|^../usercontent/||mx && $file !~ m|\.\.|mx) {
+                $images->{$file} = $c->stash->{'usercontent_folder'}.'/'.$file;
+            }
+        }
+        # type icon - iconset
+        if($p->{'xdata'}->{'appearance'} && $p->{'xdata'}->{'appearance'}->{'iconset'}) {
+            my $file = $p->{'xdata'}->{'appearance'}->{'iconset'};
+            if($file && $file !~ m|/|mx && $file !~ m|\.\.|mx) {
+                next if $file eq 'default'; # skip our default sets
+                next if $file eq 'default_64';
+                next if $file eq 'tfl';
+                next if $file eq 'emoji';
+                next if $file eq 'emoji_64';
+                my @files = glob($c->stash->{'usercontent_folder'}.'/images/status/'.$file.'/*');
+                my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
+                for my $f (@files) {
+                    my $short = $f;
+                    $short =~ s|^$usercontent_folder||mx;
+                    $images->{$short} = $f;
+                }
+            }
+        }
+    }
+    for my $image (sort keys %{$images}) {
+        my $file = $images->{$image};
+        next unless -r $file;
+        $data->{'usercontent'}->{$image} = MIME::Base64::encode_base64("".read_file($file));
+    }
+    $c->stash->{'template'} = 'passthrough.tt';
+    my $text = "";
+    $text   .= "# Thruk Panorama Dashboard Export: ".$d->{'tab'}->{'xdata'}->{'title'}."\n";
+    $text   .= decode_utf8(encode_json($data));
+    $text   .= "\n# End Export\n";
+    $c->stash->{text} = $text;
+    $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$d->{'tab'}->{'xdata'}->{'title'}.'.dashboard"' );
+    return;
+}
+
+##########################################################
+sub _task_load_dashboard {
+    my($c) = @_;
+
+    $c->stash->{'template'} = 'passthrough.tt';
+
+    if(!$c->req->uploads->{'file'}) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => JSON::XS::false });
+        return;
+    }
+
+    my $upload = $c->req->uploads->{'file'};
+    if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'File exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        return;
+    }
+
+    my $content = read_file($upload->{'tempname'});
+    unlink($upload->{'tempname'});
+
+    $content =~ s/^\#.*$//gmx;
+    my $data;
+    eval {
+        $data = decode_json($content);
+    };
+    if($@) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = encode_json({ 'msg' => 'This is not a valid dashboard', success => JSON::XS::false });
+        return;
+    }
+
+    if($data->{'usercontent'}) {
+        require MIME::Base64;
+        my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
+        for my $file (sort keys %{$data->{'usercontent'}}) {
+            my $size = -s $usercontent_folder.$file;
+            next if $c->config->{'demo_mode'};
+            next if $size && !$c->stash->{'is_admin'};
+            my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
+            next if($size && length($content) == $size);
+            my $dir     = $file;
+            $dir        =~ s|/.*?$||gmx;
+            Thruk::Utils::IO::mkdir_r($dir);
+            Thruk::Utils::IO::write($usercontent_folder.$file,$content);
+        }
+        delete $data->{'usercontent'};
+    }
+    $data->{'id'} = 'new';
+    $data = _save_dashboard($c, $data);
+    my $newid = $data->{'id'};
+
+    # must be text/html result, otherwise extjs form result handler dies
+    $c->stash->{text} = encode_json({ 'msg' => 'Import successfull', success => JSON::XS::true, newid => $newid });
+    return;
+}
+
+##########################################################
 
 ##########################################################
 sub _task_wms_provider {
@@ -740,7 +924,7 @@ sub _task_timezones {
     my $query = $c->req->parameters->{'query'} || '';
     my $data  = [];
     for my $tz (@{_get_timezone_data($c)}) {
-        next unless $tz->{'text'} =~ m/$query/mxi;
+        next if($query && $tz->{'text'} !~ m/$query/mxi);
         push @{$data}, $tz;
     }
 
@@ -1811,6 +1995,54 @@ sub _task_pnp_graphs {
 }
 
 ##########################################################
+sub _task_grafana_graphs {
+    my($c) = @_;
+
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
+    my $search = $c->req->parameters->{'query'};
+    my $graphs = [];
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    for my $hst (@{$data}) {
+        my $url = Thruk::Utils::get_histou_url($c, $hst, 1);
+        if($url ne '') {
+            my $text = $hst->{'name'}.';';
+            next if($search and $text !~ m/$search/mxi);
+            push @{$graphs}, {
+                text       => $text,
+                url        => 'extinfo.cgi?type=grafana&host='.$hst->{'name'},
+                source_url => $url,
+            };
+        }
+    }
+
+    $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    for my $svc (@{$data}) {
+        my $url = Thruk::Utils::get_histou_url($c, $svc, 1);
+        if($url ne '') {
+            my $text = $svc->{'host_name'}.';'.$svc->{'description'};
+            next if($search and $text !~ m/$search/mxi);
+            push @{$graphs}, {
+                text       => $text,
+                url        => 'extinfo.cgi?type=grafana&host='.$svc->{'host_name'}.'&service='.$svc->{'description'},
+                source_url => $url,
+            };
+        }
+    }
+    $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
+    $c->{'db'}->_page_data($c, $graphs);
+
+    my $json = {
+        data        => $c->stash->{'data'},
+        total       => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => JSON::XS::true,
+    };
+
+    return $c->render(json => $json);
+}
+
+##########################################################
 sub _task_userdata_backgroundimages {
     my($c) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/backgrounds/';
@@ -1832,8 +2064,8 @@ sub _task_userdata_backgroundimages {
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
     if(!$query) {
-        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => '&lt;upload new image&gt;'};
-        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => 'none'};
+        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
+        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif',  image => 'none'};
     }
     $c->{'db'}->_page_data($c, $images);
     my $json = {
@@ -1867,7 +2099,7 @@ sub _task_userdata_images {
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
     if(!$query) {
-        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => '&lt;upload new image&gt;'};
+        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
     }
     $c->{'db'}->_page_data($c, $images);
     my $json = {
@@ -2584,6 +2816,10 @@ sub _save_dashboard {
     delete $dashboard->{'tab'}->{'user'};
     delete $dashboard->{'tab'}->{'ts'};
     delete $dashboard->{'tab'}->{'public'};
+
+    if($dashboard->{'tab'}->{'xdata'}->{'backends'}) {
+        $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
+    }
 
     # save runtime data in extra file
     my $runtime = _extract_runtime_data($dashboard);

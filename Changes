@@ -1,8 +1,23 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - make custom variables from show_custom_vars clickable
+          - add eventhandler search option
+          - Panorama View:
+            - add hide legend / graph only checkbox for pnp panel
+            - add new appearance type 'label only'
+            - add export/import to files including images
+            - add emoji icon set
+            - fix sending reschedule commands
+            - fix not triggering upload popup
+          - Reports:
+            - keep reports during updates (#546)
+
+2.04     Thu Nov 12 10:32:27 CET 2015
           - add json export to process info page
           - fix problem with removing reports when trying to save files on a full disk.
+          - fix "show link" not displaying the hostname
+          - support host custom variables in services via show_custom_vars
           - Config Tool:
             - add reference clone selection page
           - Panorama View:
@@ -16,6 +31,7 @@ next:
           - Reports:
             - add quarterly and half year reports
             - change pdf converter to phantomjs
+            - fix sending excel reports from web
 
 2.02     Wed Sep 30 17:38:30 CEST 2015
           - show eventhandler name on extinfo page if available

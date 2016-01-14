@@ -3946,6 +3946,7 @@ function add_new_filter(search_prefix, table) {
                              'Custom Variable',
                              'Downtime Duration',
                              'Duration',
+                             'Event Handler',
                              'Execution Time',
                              'Host',
                              'Hostgroup',
@@ -4283,6 +4284,7 @@ function verify_op(event) {
          && selValue != 'contact'
          && selValue != 'custom variable'
          && selValue != 'comment'
+         && selValue != 'event handler'
          && selValue != 'plugin output') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
@@ -4624,7 +4626,7 @@ var ajax_search = {
 
         search_url = ajax_search.url;
         if(options.url != undefined) {
-            search_url              = options.url;
+            search_url = options.url;
         }
 
         if(type != undefined) {
@@ -4637,7 +4639,7 @@ var ajax_search = {
                 search_url = search_url + "&type=" + type;
             }
         } else {
-            type                    = 'all';
+            type = 'all';
         }
 
         var appended_value;
@@ -4667,8 +4669,10 @@ var ajax_search = {
 
         input.setAttribute("autocomplete", "off");
         if(!iPhone && !internetExplorer) {
+            ajax_search.dont_hide = true;
             input.blur();   // blur & focus the element, otherwise the first
             input.focus();  // click would result in the browser autocomplete
+            ajax_search.dont_hide = false;
         }
 
         if(selector && selector.tagName == 'SELECT') {
@@ -4680,6 +4684,8 @@ var ajax_search = {
                || search_type == 'timeperiod'
                || search_type == 'priority'
                || search_type == 'custom variable'
+               || search_type == 'contact'
+               || search_type == 'event handler'
             ) {
                 ajax_search.search_type = search_type;
             }
@@ -4695,8 +4701,7 @@ var ajax_search = {
             if(search_type == 'business impact') {
                 ajax_search.search_type = 'priority';
             }
-            if(   search_type == 'contact'
-               || search_type == 'comment'
+            if(   search_type == 'comment'
                || search_type == 'next check'
                || search_type == 'last check'
                || search_type == 'latency'
@@ -4713,6 +4718,14 @@ var ajax_search = {
         if(ajax_search.search_type == 'none') {
             removeEvent( input, 'keyup', ajax_search.suggest );
             return true;
+        } else {
+            if(   search_type == 'event handler'
+               || search_type == 'contact'
+            ) {
+                if(!search_url.match(/type=/)) {
+                    search_url = search_url + "&type=" + ajax_search.search_type;
+                }
+            }
         }
 
         var date = new Date;
@@ -5421,6 +5434,9 @@ function set_png_img(start, end, id, source) {
     var newUrl = pnp_url + "&start=" + start + "&end=" + end+"&source="+source;
     //debug(newUrl);
 
+    pnp_start = start;
+    pnp_end   = end;
+
     jQuery('#pnpwaitimg').css('display', 'block');
 
     jQuery('#pnpimg').load(function() {
@@ -5478,7 +5494,17 @@ function move_png_img(factor) {
 function set_histou_img(start, end, id, source) {
     if(start  == undefined) { start  = histou_start; }
     if(end    == undefined) { end    = histou_end; }
-    var newUrl = histou_frame_url + "&from=" + (start*1000) + "&to=" + (end*1000);
+    if(source == undefined) { source = histou_source; }
+
+    histou_start = start;
+    histou_end   = end;
+
+    var getParamFrom = "&from=" + (start*1000);
+    var getParamTo = "&to=" + (end*1000);
+    var newUrl = histou_frame_url + getParamFrom + getParamTo + '&panelId='+source;
+
+    //add timerange to iconlink, so the target graph matches the preview
+    jQuery("#histou_graph_link").attr("href", histou_url + getParamFrom + getParamTo);
 
     jQuery('#pnpwaitimg').css('display', 'block');
 

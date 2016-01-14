@@ -972,8 +972,8 @@ sub split_perfdata {
             $key = $2;
             $has_parents = 1;
         }
-        $warn =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo;
-        $crit =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo;
+        $warn =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $warn;
+        $crit =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $crit;
         push @{$data}, {
             'parent'    => $last_parent,
             'name'      => $key,

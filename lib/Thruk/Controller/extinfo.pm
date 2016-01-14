@@ -37,32 +37,35 @@ sub index {
     $c->stash->{template}     = 'extinfo_type_' . $type . '.tt';
 
     my $infoBoxTitle;
-    if( $type == 0 ) {
+    if( $type eq 'grafana' ) {
+        return(_process_grafana_page($c));
+    }
+    elsif( $type == 0 ) {
         $infoBoxTitle = 'Process Information';
         return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
         _process_process_info_page($c);
     }
-    if( $type == 1 ) {
+    elsif( $type == 1 ) {
         $infoBoxTitle = 'Host Information';
         return unless _process_host_page($c);
     }
-    if( $type == 2 ) {
+    elsif( $type == 2 ) {
         $infoBoxTitle = 'Service Information';
         return unless _process_service_page($c);
     }
-    if( $type == 3 ) {
+    elsif( $type == 3 ) {
         $infoBoxTitle = 'All Host and Service Comments';
         _process_comments_page($c);
     }
-    if( $type == 4 ) {
+    elsif( $type == 4 ) {
         $infoBoxTitle = 'Performance Information';
         _process_perf_info_page($c);
     }
-    if( $type == 5 ) {
+    elsif( $type == 5 ) {
         $infoBoxTitle = 'Hostgroup Information';
         _process_hostgroup_cmd_page($c);
     }
-    if( $type == 6 ) {
+    elsif( $type == 6 ) {
         if(exists $c->req->parameters->{'recurring'}) {
             $infoBoxTitle = 'Recurring Downtimes';
             _process_recurring_downtimes_page($c);
@@ -71,11 +74,11 @@ sub index {
             _process_downtimes_page($c);
         }
     }
-    if( $type == 7 ) {
+    elsif( $type == 7 ) {
         $infoBoxTitle = 'Check Scheduling Queue';
         _process_scheduling_page($c);
     }
-    if( $type == 8 ) {
+    elsif( $type == 8 ) {
         $infoBoxTitle = 'Servicegroup Information';
         _process_servicegroup_cmd_page($c);
     }
@@ -622,7 +625,7 @@ sub _process_service_page {
     $c->stash->{'recurring_downtimes'} = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 0, 1, $hostname, $servicename);
 
     # set allowed custom vars into stash
-    Thruk::Utils::set_custom_vars($c, {'host' => $service, 'service' => $service});
+    Thruk::Utils::set_custom_vars($c, {'host' => $service, 'service' => $service, add_host => 1});
 
     return 1;
 }
@@ -723,6 +726,31 @@ sub _process_perf_info_page {
         }
     }
 
+    return 1;
+}
+
+##########################################################
+# create the grafana page
+sub _process_grafana_page {
+    my($c) = @_;
+
+    my $hst     = $c->req->parameters->{'host'};
+    my $svc     = $c->req->parameters->{'service'};
+    my $source  = $c->req->parameters->{'source'} || 2;
+    my $start   = $c->req->parameters->{'from'};
+    my $end     = $c->req->parameters->{'to'};
+    my $width   = $c->req->parameters->{'width'}  || 800;
+    my $height  = $c->req->parameters->{'height'} || 300;
+    my $format  = $c->req->parameters->{'format'} || 'png';
+
+    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format));
+    $c->{'rendered'} = 1;
+    if($format eq 'png') {
+        $c->res->headers->content_type('image/png');
+    }
+    elsif($format eq 'pdf') {
+        $c->res->headers->content_type('application/pdf');
+    }
     return 1;
 }
 

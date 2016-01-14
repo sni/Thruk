@@ -895,13 +895,13 @@ sub set_paging_steps {
 
 =head2 get_custom_vars
 
-  get_custom_vars($c, $obj, [$prefix])
+  get_custom_vars($c, $obj, [$prefix], [$add_host])
 
 return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my($c, $data,$prefix) = @_;
+    my($c, $data, $prefix, $add_host) = @_;
     $prefix = '' unless defined $prefix;
 
     my %hash;
@@ -913,6 +913,18 @@ sub get_custom_vars {
     {
         # merge custom variables into a hash
         @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
+    }
+
+    if($add_host
+      and defined $data
+      and defined $data->{'host_custom_variable_names'}
+      and defined $data->{'host_custom_variable_values'}
+      and ref $data->{'host_custom_variable_names'} eq 'ARRAY')
+    {
+        for(my $x = 0; $x < scalar @{$data->{'host_custom_variable_names'}}; $x++) {
+            my $key = $data->{'host_custom_variable_names'}->[$x];
+            $hash{"HOST".$key} = $data->{'host_custom_variable_values'}->[$x];
+        }
     }
 
     # add action menu from apply rules
@@ -959,11 +971,12 @@ sub set_custom_vars {
     my $c      = shift;
     my $args   = shift;
 
-    my $prefix  = $args->{'prefix'} || '';
-    my $search  = $args->{'search'} || 'show_custom_vars';
-    my $dest    = $args->{'dest'}   || 'custom_vars';
-    my $host    = $args->{'host'};
-    my $service = $args->{'service'};
+    my $prefix   = $args->{'prefix'} || '';
+    my $search   = $args->{'search'} || 'show_custom_vars';
+    my $dest     = $args->{'dest'}   || 'custom_vars';
+    my $host     = $args->{'host'};
+    my $service  = $args->{'service'};
+    my $add_host = $args->{'add_host'};
     my $data;
 
     if (defined $host and defined $service) {
@@ -981,13 +994,12 @@ sub set_custom_vars {
     return unless ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY';
     return unless defined $c->config->{$search};
 
-    my $vars = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
-
-    my $custom_vars = get_custom_vars($c, $data, $prefix);
+    my $vars        = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
+    my $custom_vars = get_custom_vars($c, $data, $prefix, $add_host);
 
     my $already_added = {};
     for my $test (@{$vars}) {
-        for my $cust_name (keys %{$custom_vars}) {
+        for my $cust_name (sort keys %{$custom_vars}) {
             next if defined $already_added->{$cust_name};
             my $cust_value = $custom_vars->{$cust_name};
             my $found      = 0;
@@ -1001,26 +1013,34 @@ sub set_custom_vars {
                     $found = 1;
                 }
             }
-            if($found) {
-                # expand macros in custom vars
-                if (defined $host and defined $service) {
-                        #($cust_value, $rc)...
-                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                            string  => $cust_value,
-                            host    => $host,
-                            service => $service,
-                        });
-                } elsif (defined $host) {
-                        #($cust_value, $rc)...
-                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                            string  => $cust_value,
-                            host    => $host,
-                        });
-                }
+            next unless $found;
 
-                # add to dest
-                push @{$c->stash->{$dest}}, [ $cust_name, $cust_value ];
+            # expand macros in custom vars
+            if(defined $host and defined $service) {
+                    #($cust_value, $rc)...
+                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                        string  => $cust_value,
+                        host    => $host,
+                        service => $service,
+                    });
+            } elsif (defined $host) {
+                    #($cust_value, $rc)...
+                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                        string  => $cust_value,
+                        host    => $host,
+                    });
             }
+
+            # add to dest
+            $already_added->{$cust_name} = 1;
+            my $is_host = defined $service ? 0 : 1;
+            if($add_host) {
+                if($cust_name =~ s/^HOST//gmx) {
+                    $already_added->{$cust_name} = 1;
+                    $is_host = 1;
+                }
+            }
+            push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
         }
     }
     return;
@@ -1362,6 +1382,98 @@ sub get_graph_url {
     }
 }
 
+##########################################################
+
+=head2 get_perf_image
+
+  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format)
+
+return base64 encoded pnp/grafana image if possible.
+An empty string will be returned if no graph can be exported.
+
+=cut
+sub get_perf_image {
+    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format) = @_;
+    my $pnpurl     = "";
+    my $grafanaurl = "";
+    $source        = 0 unless defined $source;
+    $format        = 'png' unless $format;
+    $svc           = ''    unless defined $svc;
+
+    if($svc) {
+        my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
+        $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
+        $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
+    } else {
+        my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
+        $pnpurl     = get_pnp_url($c, $hstdata->[0], 1);
+        $grafanaurl = get_histou_url($c, $hstdata->[0], 1);
+        $svc = '_HOST_' if $pnpurl;
+    }
+
+    $c->stash->{'last_graph_type'} = 'pnp';
+    if($grafanaurl) {
+        $c->stash->{'last_graph_type'} = 'grafana';
+        $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
+        $grafanaurl .= '&panelId='.($source || $c->config->{'grafana_default_panelId'} || 1);
+        if($resize_grafana_images) {
+            $width  = $width * 1.3;
+            $height = $height * 2;
+        }
+        $grafanaurl .= '&legend=false' if $height < 200;
+        if($grafanaurl !~ m|^https?:|mx) {
+            my $uri = Thruk::Utils::Filter::full_uri($c, 1);
+            $uri    =~ s|(https?://[^/]+?)/.*$|$1|gmx;
+            $uri    =~ s|&amp;|&|gmx;
+            $grafanaurl = $uri.$grafanaurl;
+        }
+    }
+
+    my $exporter = $c->config->{home}.'/script/pnp_export.sh';
+    $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
+    $exporter    = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'};
+
+    # create fake session
+    my $sessionid = get_fake_session($c);
+    local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
+    my($fh, $filename) = tempfile();
+    CORE::close($fh);
+    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||$grafanaurl).'" "'.$filename.'" "'.$source.'"';
+    `$cmd`;
+    if(-s $filename) {
+        my $imgdata  = read_file($filename);
+        unlink($filename);
+        if($format eq 'png') {
+            return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
+        }
+        return $imgdata;
+    }
+    unlink($c->stash->{'fake_session_file'});
+    return "";
+}
+
+##############################################
+
+=head2 get_fake_session
+
+  get_fake_session($c)
+
+create and return fake session id for current user
+
+=cut
+
+sub get_fake_session {
+    my($c) = @_;
+    my $sdir        = $c->config->{'var_path'}.'/sessions';
+    my $sessionid   = md5_hex(rand(1000).time());
+    my $sessionfile = $sdir.'/'.$sessionid;
+    Thruk::Utils::IO::mkdir_r($sdir);
+    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
+    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
+    $c->stash->{'fake_session_id'}   = $sessionid;
+    $c->stash->{'fake_session_file'} = $sessionfile;
+    return($sessionid);
+}
 
 ########################################
 
@@ -1396,7 +1508,7 @@ sub get_action_url {
         $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
-        $popup_url .= '&amp;panelId=2';
+        $popup_url .= '&amp;panelId='.$c->config->{'grafana_default_panelId'};
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
@@ -2363,6 +2475,54 @@ sub get_plugin_name {
     $file =~ s|/lib/\Q$pkg\E$||gmx;
     $file =~ s|^.*/||gmx;
     return($file);
+}
+
+########################################
+
+=head2 backends_list_to_hash
+
+    backends_list_to_hash($c, $list)
+
+returns array of backend ids converted as list of hashes
+
+=cut
+sub backends_list_to_hash {
+    my($c, $backends) = @_;
+    my $hashlist = [];
+    for my $b (@{list($backends)}) {
+        my $backend = $c->{'db'}->get_peer_by_key($b);
+        push @{$hashlist}, { $b => $backend->{'name'} };
+    }
+    return($hashlist);
+}
+
+########################################
+
+=head2 backends_hash_to_list
+
+    backends_hash_to_list($c, $hashlist)
+
+returns array of backends (inverts backends_list_to_hash function)
+
+=cut
+sub backends_hash_to_list {
+    my($c, $hashlist) = @_;
+    my $backends = [];
+    for my $b (@{list($hashlist)}) {
+        if(ref $b eq '') {
+            push @{$backends}, $b;
+        } else {
+            for my $key (keys %{$b}) {
+                my $backend = $c->{'db'}->get_peer_by_key($key) || $c->{'db'}->get_peer_by_key($b->{$key});
+                if($backend) {
+                    push @{$backends}, $backend->peer_key();
+                } else {
+                    push @{$backends}, $key;
+                }
+            }
+        }
+    }
+    return($backends);
 }
 
 ########################################

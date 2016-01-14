@@ -31,7 +31,7 @@ Ext.onReady(function() {
         TP.initMask.show();
     }
     if(TP.num_panels == 0) {
-        TP.initialized = true;
+        TP.initComplete();
     }
 
     Ext.QuickTips.init();
@@ -54,7 +54,7 @@ Ext.onReady(function() {
             setActiveTab: function() {}
         });
         TP.add_pantab(one_tab_only, undefined, undefined, function(id) {
-            TP.initialized = true;
+            TP.initComplete();
             if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
         });
     } else {
@@ -76,7 +76,7 @@ Ext.onReady(function() {
     }
 
     /* make sure initialized is set to true */
-    TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initialized = true;", 60000);
+    TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initComplete();", 60000);
 
     /* full reload page interval */
     [% IF full_reload_interval != 0 %]
@@ -94,7 +94,4 @@ Ext.onReady(function() {
             }
         }
     });
-
-    /* preload images */
-    window.setTimeout(preloader, 3000);
 });

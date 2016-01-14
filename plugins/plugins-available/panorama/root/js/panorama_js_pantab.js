@@ -3,7 +3,7 @@ Ext.define('TP.Pantab', {
 
     tooltip:     (readonly || dashboard_ignore_changes) ? undefined : 'double click to open settings',
     closable:    (readonly || dashboard_ignore_changes) ? false : true,
-    bodyCls:     (readonly || dashboard_ignore_changes) ? undefined : 'pantabbody',
+    bodyCls:     'pantabbody',
     stateful:    true,
     stateEvents: ['add', 'titlechange'],
     locked:      start_unlocked, // lock it by default
@@ -144,6 +144,7 @@ Ext.define('TP.Pantab', {
             if(This.bgDragEl) { This.bgDragEl.show(); }
             if(This.bgImgEl)  { This.bgImgEl.show();  }
             if(This.mapEl)    { This.mapEl.show();    }
+            if(This.map)      { This.map.controlsDiv.dom.style.display = ""; }
             This.applyZindex();
             This.setBackground(This.xdata);
             if(TP.initialized && missingPanlets > 0) {
@@ -157,6 +158,7 @@ Ext.define('TP.Pantab', {
             if(This.bgDragEl) { This.bgDragEl.hide(); }
             if(This.bgImgEl)  { This.bgImgEl.hide();  }
             if(This.mapEl)    { This.mapEl.hide();    }
+            if(This.map)      { This.map.controlsDiv.dom.style.display = "none"; }
         },
         afterrender: function(This, eOpts) {
             var tab = This;
@@ -342,6 +344,10 @@ Ext.define('TP.Pantab', {
         }
     },
     createInitialPanlets: function(retries, autoshow) {
+        if(autoshow == undefined) { autoshow = false; }
+        if(autoshow || (TP.initial_active_tab != undefined && this.id == TP.initial_active_tab)) {
+            autoshow = true;
+        }
         if(retries == undefined) { retries=0; }
         if(retries > 1000) {
             var err = new Error;
@@ -349,17 +355,16 @@ Ext.define('TP.Pantab', {
             return;
         }
         if(this.xdata.map && (!this.mapEl || !this.map)) {
-            if(this.isActiveTab()) {
+            if(autoshow) {
                 window.setTimeout(Ext.bind(this.createInitialPanlets, this, [retries+1, autoshow]), 50);
+            } else {
             }
             return;
         }
         for(var nr=0; nr<this.window_ids.length; nr++) {
             // delayed panlet creation
-            if(autoshow == undefined) { autoshow = false; }
             var delay    = TP.initial_create_delay_inactive;
-            if(autoshow || (TP.initial_active_tab != undefined && this.id == TP.initial_active_tab)) {
-                autoshow = true;
+            if(autoshow) {
                 delay    = TP.initial_create_delay_active;
             }
             var tabpan    = Ext.getCmp('tabpan');
@@ -389,8 +394,10 @@ Ext.define('TP.Pantab', {
         xdata.locked = This.locked;
         This.setLock(xdata.locked);
         This.setTitle(xdata.title);
-        if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
-        if(This.map)   { This.map.destroy();   This.map   = undefined; }
+        if(!xdata.map) {
+            if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
+            if(This.map)   { This.map.destroy();   This.map   = undefined; }
+        }
         This.setBaseHtmlClass();
         This.setBackground(xdata);
         if(startTimeouts != false) {
@@ -555,6 +562,10 @@ Ext.define('TP.Pantab', {
                 window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
                 return;
             }
+
+            /* remove chrome workaround */
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+
             /* get wms provider */
             var wmsData;
             wmsProvider.findBy(function(rec, id) {
@@ -591,12 +602,14 @@ Ext.define('TP.Pantab', {
             tab.mapEl.lastWMSProvider = xdata.wms_provider;
             OpenLayers.ImgPath               = url_prefix +'plugins/panorama/openlayer/images/';
             OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
+            var controlsBody = Ext.getBody();
+            var controlsDiv  = controlsBody.createChild('<div style="position: absolute; z-index: 100001; top: 50px; left: 3px; display: none;">');
+            var zoomDiv      = controlsDiv.createChild('<div style="position: absolute; z-index: 100001; top: 0; left: 0;">');
             var map   = new OpenLayers.Map('map', { controls: [], theme: url_prefix+'plugins/panorama/openlayer/theme/default/style.css' });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
-            var zoomControlDiv = body.createChild('<div style="position: absolute; z-index: 100000; display: none;">', body.dom.childNodes[0]);
-            var zoomControl    = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomControlDiv.dom});
+            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom});
             map.addControl(zoomControl);
             map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
@@ -608,6 +621,7 @@ Ext.define('TP.Pantab', {
                 zoom:     default_map_zoom,
                 stateful: true,
                 style:    "position: absolute; top: 0px; left: 0px;",
+                controlsDiv: controlsDiv,
                 listeners: {
                     aftermapmove: function(This, map, eOpts) {
                         if(tab.map == undefined) {
@@ -625,6 +639,8 @@ Ext.define('TP.Pantab', {
                     },
                     destroy: function(This){
                         zoomControl.destroy();
+                        zoomDiv.destroy();
+                        controlsDiv.destroy();
                         tab.lockButton.destroy();
                         tab.lockButton = undefined;
                     }
@@ -642,10 +658,8 @@ Ext.define('TP.Pantab', {
                 tab.moveMapIcons(true);
             });
             tab.fixMapIcons();
-            map.controls[1].moveTo({x:4,y:30});
-            map.controls[1].position.x = 4; /* looses position on next resize otherwise */
-            map.controls[1].position.y = 20;
-            tab.lockButton = body.createChild('<div class="lockButton unlocked">', body.dom.childNodes[0]);
+            controlsDiv.dom.style.display = "";
+            tab.lockButton = controlsDiv.createChild('<div class="lockButton unlocked">', controlsDiv.dom.childNodes[0]);
             tab.lockButton.on("click", function(evt) {
                 if(tab.lockButton.hasCls('unlocked')) {
                     tab.disableMapControls();
@@ -669,6 +683,8 @@ Ext.define('TP.Pantab', {
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
+            /* add chrome workaround */
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
         }
         tab.setBaseHtmlClass();
 
@@ -679,8 +695,9 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.dom.style.position = "fixed";
             tab.bgDragEl.dom.style.width    = "100%";
             tab.bgDragEl.dom.style.height   = "100%";
-            tab.bgDragEl.dom.style.top      = "0px";
+            tab.bgDragEl.dom.style.top      = TP.offset_y+"px";
             tab.bgDragEl.dom.style.left     = "0px";
+            tab.bgDragEl.dom.style.zIndex   = 2001;
             tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
             tab.bgDragEl.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);
@@ -731,25 +748,23 @@ Ext.define('TP.Pantab', {
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         if(tab.map.locked) { return; }
-        tab.bgDragEl.dom.style.zIndex=2000;
+        tab.bgDragEl.dom.style.display="";
     },
     enableMapControlsTemp: function() {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         if(tab.map.locked) { return; }
-        tab.bgDragEl.dom.style.zIndex="";
+        tab.bgDragEl.dom.style.display="none";
     },
     disableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
-        tab.bgDragEl.dom.style.zIndex=2000;
-        for(var x=0; x<tab.map.map.controls.length; x++) {
-            if(tab.map.map.controls[x].div && !tab.map.map.controls[x].div.id.match('Attribution')) {
-                var ctrl = tab.map.map.controls[x];
-                ctrl.div.style.display="none";
-            }
+        tab.bgDragEl.dom.style.display="";
+        for(var x=1; x<tab.map.controlsDiv.dom.childNodes.length; x++) {
+            var ctrl = tab.map.controlsDiv.dom.childNodes[x];
+            ctrl.style.display="none";
         }
         if(tab.locked) {
             TP.suppressIconTip = false;
@@ -761,18 +776,16 @@ Ext.define('TP.Pantab', {
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].el.dom.style.pointerEvents = "";
         }
-        tab.map.el.dom.style.zIndex = "";
+        tab.map.el.dom.style.display = "";
     },
     enableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
-        tab.bgDragEl.dom.style.zIndex="";
-        for(var x=0; x<tab.map.map.controls.length; x++) {
-            if(tab.map.map.controls[x].div) {
-                var ctrl = tab.map.map.controls[x];
-                ctrl.div.style.display="";
-            }
+        tab.bgDragEl.dom.style.display="none";
+        for(var x=1; x<tab.map.controlsDiv.dom.childNodes.length; x++) {
+            var ctrl = tab.map.controlsDiv.dom.childNodes[x];
+            ctrl.style.display="";
         }
         tab.map.locked = false;
         tab.lockButton.removeCls('locked');
@@ -864,7 +877,16 @@ Ext.define('TP.Pantab', {
                 icon:   url_prefix+'plugins/panorama/images/information.png',
                 handler: function() { thruk_debug_window_handler() },
                 hidden:  (!thruk_debug_js || thruk_demo_mode)
-        }];
+            }, '-', {
+                text:   'Save Dashboard',
+                icon:    url_prefix+'plugins/panorama/images/disk.png',
+                href:   'panorama.cgi?task=save_dashboard&nr='+tab.id
+            }, {
+                text:   'Load Dashboard',
+                icon:    url_prefix+'plugins/panorama/images/folder_picture.png',
+                handler: function() { TP.loadDashboardWindow() },
+                hidden:  !!one_tab_only
+            }];
         if(!readonly && !tab.readonly) {
             menu_items = menu_items.concat([
                  '-', {

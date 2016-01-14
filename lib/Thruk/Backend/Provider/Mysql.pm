@@ -1477,6 +1477,9 @@ sub _import_peer_logfiles {
     my $log_count = 0;
     $c->stats->profile(begin => "get livestatus timestamp");
     my($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
+    if(!$start || !$end) {
+        die("something went wrong, cannot get start/end from logfiles ($start / $end)");
+    }
     print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
     $c->stats->profile(end => "get livestatus timestamp");
     $start = $forcestart if $forcestart;

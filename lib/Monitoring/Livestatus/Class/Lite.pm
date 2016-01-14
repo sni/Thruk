@@ -436,6 +436,7 @@ sub _cond_hashpair_UNDEF {
 sub _cond_hashpair_SCALAR {
     my($key, $value, $operator, $combining_count) = @_;
     $combining_count = 0 unless $combining_count;
+    $value =~ s|\n|\\n|gmx if $value;
     my @statement = (sprintf("%s: %s %s %s",
                                 $filter_mode,
                                 ($key || '') ,

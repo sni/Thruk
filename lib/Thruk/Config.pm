@@ -27,7 +27,7 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.02';
+our $VERSION = '2.04';
 
 my $project_root = home('Thruk::Config');
 my $branch       = '';
@@ -45,7 +45,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'September 30, 2015',
+              'released'               => 'November 12, 2015',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -459,6 +459,7 @@ sub set_default_config {
         'apache_status'                     => {},
         'disable_user_password_change'      => 0,
         'user_password_min_length'          => 5,
+        'grafana_default_panelId'           => 1,
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
@@ -525,6 +526,9 @@ sub set_default_config {
 
     # ensure csrf hosts is a list
     $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
+
+    # make show_custom_vars a list
+    $config->{'show_custom_vars'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))];
 
     ## no critic
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
@@ -819,6 +823,7 @@ sub _do_finalize_config {
                 }
             }
             if(!-e $target_symlink) {
+                unlink($target_symlink);
                 symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
             }
         }

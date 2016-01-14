@@ -204,7 +204,7 @@ wkhtmltopdf is no longer required and has been replaced by phantomjs.
 
 === phantomjs
 phantomjs is required to create PDF reports with the reports2 plugin. You can get
-wkhtmltopdf from http://phantomjs.org/ if it's not available for your system.
+phantomjs from http://phantomjs.org/ if it's not available for your system.
 
 
 === How can I enable the business process addon.

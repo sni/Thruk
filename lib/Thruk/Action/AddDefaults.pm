@@ -372,8 +372,10 @@ sub end {
         elsif($c->stash->{page} eq 'extinfo') {
             my $type = $c->req->parameters->{'type'} || 0;
 
+            $c->stash->{'title'} = $c->stash->{'infoBoxTitle'};
+            if($type !~ m/^\d+$/mx) {}
             # host details
-            if($type == 1) {
+            elsif($type == 1) {
                 $c->stash->{'title'} = $c->req->parameters->{'host'};
             }
             # service details
@@ -387,9 +389,6 @@ sub end {
             # servicegroup information
             elsif($type == 8) {
                $c->stash->{'title'} = $c->req->parameters->{'servicegroup'} . " " . $c->stash->{'infoBoxTitle'};
-            }
-            else {
-               $c->stash->{'title'} = $c->stash->{'infoBoxTitle'};
             }
         }
     }

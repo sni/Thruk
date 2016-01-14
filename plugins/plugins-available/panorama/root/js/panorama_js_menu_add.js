@@ -117,6 +117,10 @@ TP.addPanletsMenu = function(options) {
                     icon:   url_prefix+'plugins/panorama/images/text_align_left.png',
                     handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
                 }, {
+                    text:   'Grafana Graph',
+                    icon:   url_prefix+'plugins/panorama/images/chart_curve.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletGrafana'}) }
+                }, {
                     text:   'PNP Graph',
                     icon:   url_prefix+'plugins/panorama/images/chart_curve.png',
                     handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }

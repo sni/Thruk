@@ -847,7 +847,7 @@ sub _cmd_report {
     if($@) {
         return("reports plugin is not enabled.\n", 1);
     }
-    my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
     # set waiting flag for queued reports, so the show up nicely in the gui
     Thruk::Utils::Reports::process_queue_file($c);
     if($mail eq 'mail') {
@@ -1174,6 +1174,7 @@ sub _cmd_import_logs {
         return("ERROR - please run the initial import with --local\n", 1);
     }
     if($mode eq 'import' && !$opt->{'yes'}) {
+        local $|=1;
         print "import removes current cache and imports new logfile data.\n";
         print "use logcacheupdate to update cache. Continue? [n]: ";
         my $buf;
