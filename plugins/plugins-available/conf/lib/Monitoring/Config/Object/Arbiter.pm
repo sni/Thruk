@@ -36,6 +36,7 @@ $Monitoring::Config::Object::Arbiter::Defaults = {
     'realm'                           => { type => 'LIST', 'link' => 'realm', cat => 'Extended' },
     'satellitemap'                    => { type => 'STRING', cat => 'Extended' },
     'use_ssl'                         => { type => 'BOOL', cat => 'Extended' },
+    'hard_ssl_name_check'             => { type => 'BOOL', cat => 'Extended' },
 
     # Specific
     'arbiter_name'                    => { type => 'STRING', cat => 'Basic' },
