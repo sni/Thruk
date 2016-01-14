@@ -41,6 +41,7 @@ $Monitoring::Config::Object::Receiver::Defaults = {
     'receiver_name'                   => { type => 'STRING', cat => 'Basic' },
     'port'                            => { type => 'INT', cat => 'Basic' },
     'direct_routing'                  => { type => 'BOOL', cat => 'Extended' },
+    'hard_ssl_name_check'             => { type => 'BOOL', cat => 'Extended' },
 };
 
 ##########################################################
