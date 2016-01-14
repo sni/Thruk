@@ -36,6 +36,20 @@ $Monitoring::Config::Object::Module::ShinkenSpecific = {
     # Parameters used by various modules:
     'host'                            => { type => 'STRING', cat => 'Basic' },
     'port'                            => { type => 'INT', cat => 'Basic' },
+    'mapping_command'                 => { type => 'STRING', cat => 'Basic' },
+    'command_file'                    => { type => 'STRING', cat => 'Basic' },
+    'config_file'                     => { type => 'STRING', cat => 'Basic' },
+    'database_file'                   => { type => 'STRING', cat => 'Basic' },
+    'ip_range'                        => { type => 'STRING', cat => 'Basic' },
+    'mapping_command_interval'        => { type => 'STRING', cat => 'Basic' },
+    'mapping_command_timeout'         => { type => 'STRING', cat => 'Basic' },
+    'mapping_file'                    => { type => 'STRING', cat => 'Basic' },
+    'max_logs_age'                    => { type => 'STRING', cat => 'Basic' },
+    'method'                          => { type => 'STRING', cat => 'Basic' },
+    'path'                            => { type => 'STRING', cat => 'Basic' },
+    'property'                        => { type => 'STRING', cat => 'Basic' },
+    'socket'                          => { type => 'STRING', cat => 'Basic' },
+    'value'                           => { type => 'STRING', cat => 'Basic' },
 };
 
 ##########################################################
