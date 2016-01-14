@@ -42,6 +42,7 @@ $Monitoring::Config::Object::Scheduler::Defaults = {
     'port'                            => { type => 'INT', cat => 'Basic' },
     'weight'                          => { type => 'INT', cat => 'Extended' },
     'skip_initial_broks'              => { type => 'BOOL', cat => 'Extended' },
+    'hard_ssl_name_check'             => { type => 'BOOL', cat => 'Extended' },
 };
 
 ##########################################################
