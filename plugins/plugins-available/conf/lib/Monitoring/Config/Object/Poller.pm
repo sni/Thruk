@@ -45,6 +45,7 @@ $Monitoring::Config::Object::Poller::Defaults = {
     'max_workers'                     => { type => 'INT', cat => 'Extended' },
     'processes_by_worker'             => { type => 'INT', cat => 'Extended' },
     'poller_tags'                     => { type => 'STRING', cat => 'Extended' },
+    'hard_ssl_name_check'             => { type => 'BOOL', cat => 'Extended' },
 };
 
 ##########################################################
