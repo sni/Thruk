@@ -52,6 +52,7 @@ $Monitoring::Config::Object::Contact::ShinkenSpecific = {
     'min_business_impact'   => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => Monitoring::Config::Object::Parent::_business_impact_keys(), cat => 'Extended' },
     'notificationways'      => { type => 'LIST', 'link' => 'notificationway', cat => 'Notifications' },
     'password'              => { type => 'STRING', cat => 'Extended' },
+    'expert'              => { type => 'BOOL', cat => 'Extended' },
 };
 
 ##########################################################
