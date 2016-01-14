@@ -2023,6 +2023,10 @@ sub _check_references {
 
             # hostgroups are allowed to have a register 0
             return if ($link eq 'hostgroup' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+            # host are allowed to have a register 0
+            return if ($link eq 'host' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+
+
 
             # shinken defines this command by itself
             return if ($self->{'coretype'} eq 'shinken' and $val eq 'bp_rule');
