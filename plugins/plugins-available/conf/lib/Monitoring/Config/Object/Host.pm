@@ -90,6 +90,9 @@ $Monitoring::Config::Object::Host::ShinkenSpecific = {
     'checkmodulations'            => { type => 'STRING', 'link' => 'checkmodulation', cat => 'Extended' },
     'escalations'                 => { type => 'STRING', 'link' => 'escalation', cat => 'Extended' },
     'icon_set'                    => { type => 'STRING', cat => 'Extended' },
+    'service_excludes'            => { type => 'STRING', cat => 'Extended' },
+    'service_overrides'           => { type => 'STRING', cat => 'Extended' },
+    'service_includes'            => { type => 'STRING', cat => 'Extended' },
 };
 
 ##########################################################
