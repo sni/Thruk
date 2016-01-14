@@ -90,6 +90,7 @@ $Monitoring::Config::Object::Service::ShinkenSpecific = {
     'icon_set'                     => { type => 'STRING', cat => 'Extended' },
     'duplicate_foreach'            => { type => 'STRING', cat => 'Extended' },
     'service_dependencies'         => { type => 'STRING', cat => 'Extended' },
+    'host_dependency_enabled'      => { type => 'BOOL', cat => 'Extended' },
 };
 
 ##########################################################
