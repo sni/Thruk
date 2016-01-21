@@ -109,6 +109,7 @@ __DATA__
         'min_business_impact' => 'This directive is use to define the minimum business criticity level of a service/host the contact will be notified',
         'password' => 'Contact password (used by Shinken UI).',
         'notificationways' => '(Shinken Only).',
+        'expert' => '(Shinken Only).',        
     },
     'contactgroup' => {
         'alias' => 'This directive is used to define a longer name or description used to identify the contact group.',
@@ -172,6 +173,9 @@ __DATA__
         'icon_set' => 'This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server',
         'maintenance_period' => 'no help yet',
         'reactionner_tag' => 'no help yet',
+        'service_overrides' => 'no help yet',
+        'service_includes' => 'no help yet',
+        'service_excludes' => 'no help yet',
     },
     'hostdependency' => {
         'dependency_period' => 'This directive is used to specify the short name of the time period during which this dependency is valid.  If this directive is not specified, the dependency is considered to be valid during all times.',
@@ -268,6 +272,7 @@ __DATA__
         'icon_set' => 'This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server',
         'maintenance_period' => 'no help yet',
         'reactionner_tag' => 'no help yet',
+        'host_dependency_enabled'  => 'This variable may be used to remove the dependency between a service and its parenthost. Used for volatile services that need notification related to itself and not depend on the host notifications',
     },
     'servicedependency' => {
         'dependency_period' => 'This directive is used to specify the short name of the time period during which this dependency is valid.  If this directive is not specified, the dependency is considered to be valid during all times.',
@@ -329,6 +334,21 @@ __DATA__
 
         'host' => 'Host name or IP address to connect or listen to (depending on the module).',
         'port' => 'TCP port to connect or listen to (depending on the module).'
+        'mapping_command' => 'no help yet',
+        'command_file' => 'no help yet',
+        'config_file' => 'no help yet',
+        'database_file' => 'no help yet',
+        'ip_range' => 'no help yet',
+        'mapping_command_interval' => 'no help yet',
+        'mapping_command_timeout' => 'no help yet',
+        'mapping_file' => 'no help yet',
+        'max_logs_age' => 'no help yet',
+        'method' => 'no help yet',
+        'path' => 'no help yet',
+        'property' => 'no help yet',
+        'socket' => 'no help yet',
+        'value' => 'no help yet',
+
     },
     'escalation' => {
         'escalation_name' => 'This directive identifies the unique name of the escalation so you reference this escalation by your hosts and services.',
@@ -355,7 +375,7 @@ __DATA__
         'realm' => 'Daemon realm',
         'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
         'use_ssl' => 'Use SSL',
-
+        'hard_ssl_name_check' => 'Enable SSL name check',
         'arbiter_name' => 'This directive identifies the unique name of the daemon.',
         'host_name' => 'Host name.',
         'port' => 'TCP port.',
@@ -375,6 +395,7 @@ __DATA__
         'realm' => 'Daemon realm',
         'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
         'use_ssl' => 'Use SSL',
+        'hard_ssl_name_check' => 'Enable SSL name check',
 
         'broker_name' => 'This directive identifies the unique name of the daemon.',
         'port' => 'TCP port.',
@@ -394,6 +415,7 @@ __DATA__
         'realm' => 'Daemon realm',
         'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
         'use_ssl' => 'Use SSL',
+        'hard_ssl_name_check' => 'Enable SSL name check',
 
         'poller_name' => 'This directive identifies the unique name of the daemon.',
         'port' => 'TCP port.',
@@ -418,6 +440,7 @@ __DATA__
         'realm' => 'Daemon realm',
         'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
         'use_ssl' => 'Use SSL',
+        'hard_ssl_name_check' => 'Enable SSL name check',
 
         'reactionner_name' => 'This directive identifies the unique name of the daemon.',
         'port' => 'TCP port.',
@@ -442,6 +465,7 @@ __DATA__
         'realm' => 'Daemon realm',
         'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
         'use_ssl' => 'Use SSL',
+        'hard_ssl_name_check' => 'Enable SSL name check',
 
         'receiver_name' => 'This directive identifies the unique name of the daemon.',
         'port' => 'TCP port.',
@@ -462,6 +486,7 @@ __DATA__
         'realm' => 'Daemon realm',
         'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
         'use_ssl' => 'Use SSL',
+        'hard_ssl_name_check' => 'Enable SSL name check',
 
         'scheduler_name' => 'This directive identifies the unique name of the daemon.',
         'port' => 'TCP port.',
