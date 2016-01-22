@@ -109,7 +109,7 @@ __DATA__
         'min_business_impact' => 'This directive is use to define the minimum business criticity level of a service/host the contact will be notified',
         'password' => 'Contact password (used by Shinken UI).',
         'notificationways' => '(Shinken Only).',
-        'expert' => '(Shinken Only).',        
+        'expert' => '(Shinken Only).',
     },
     'contactgroup' => {
         'alias' => 'This directive is used to define a longer name or description used to identify the contact group.',
