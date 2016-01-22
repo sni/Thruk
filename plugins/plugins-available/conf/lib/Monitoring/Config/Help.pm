@@ -333,7 +333,7 @@ __DATA__
         'modules' => 'List of submodules.',
 
         'host' => 'Host name or IP address to connect or listen to (depending on the module).',
-        'port' => 'TCP port to connect or listen to (depending on the module).'
+        'port' => 'TCP port to connect or listen to (depending on the module).',
         'mapping_command' => 'no help yet',
         'command_file' => 'no help yet',
         'config_file' => 'no help yet',
