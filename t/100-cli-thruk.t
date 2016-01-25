@@ -56,28 +56,57 @@ TestUtils::test_command({
 });
 
 # list backends
-TestUtils::test_command({
+my $test = {
     cmd  => $BIN.' -l',
     like => ['/\s+\*\s*\w{5}\s*[^\s]+/',
              '/Def\s+Key\s+Name/'
             ],
-});
+};
+TestUtils::test_command($test);
+
+if($test->{'exit'} == 0) {
+    my @out = split/\n/mx, $test->{'stdout'};
+    @out = grep(!/^(-|Def)/, @out);
+    my @backends;
+    my @names;
+    for my $line (@out) {
+        $line =~ s/^\ \*\s+//mx;
+        $line =~ s/^\s+//gmx;
+        my $data = [split(/\s+/mx, $line)];
+        push @backends, $data->[0];
+        push @names, $data->[1];
+    }
+    if(scalar @backends > 1) {
+        # test commands with multiple backends
+        local $ENV{'THRUK_NO_COMMANDS'} = 1;
+        TestUtils::test_command({
+            cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0].' -b '.$backends[1],
+            errlike => ['/\['.$backends[0].','.$backends[1].'\]/', '/TESTMODE:/' ],
+            like => ['/Command request successfully submitted to the Backend for processing/'],
+        });
+        TestUtils::test_command({
+            cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0],
+            errlike => ['/\['.$names[0].'\]/', '/TESTMODE:/' ],
+            like => ['/Command request successfully submitted to the Backend for processing/'],
+        });
+    }
+}
 
 # clearcache
 TestUtils::test_command({
-    cmd  => $BIN.' ./script/thruk -a clearcache',
+    cmd  => $BIN.' -a clearcache',
     like => ['/^cache cleared$/'],
 });
 
 # dumpcache
 TestUtils::test_command({
-    cmd  => $BIN.' ./script/thruk -a dumpcache',
+    cmd  => $BIN.' -a dumpcache',
     like => ['/^\$VAR1/'],
 });
 
 # 2 commands
 TestUtils::test_command({
-    cmd  => $BIN.' ./script/thruk -a clearcache,dumpcache',
+    cmd  => $BIN.' -a clearcache,dumpcache',
     like => ['/^cache cleared\$VAR1/'],
 });
 

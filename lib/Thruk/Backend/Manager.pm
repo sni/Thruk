@@ -292,16 +292,21 @@ sub disable_backends {
 
 =head2 enable_backends
 
-  enable_backends(<keys>)
+  enable_backends(<keys>, [<exclusive>])
 
 enables all backends
 
 =cut
 
 sub enable_backends {
-    my($self, $keys) = @_;
+    my($self, $keys, $exclusive) = @_;
 
     if( defined $keys ) {
+        if($exclusive) {
+            for my $peer ( @{ $self->get_peers() } ) {
+                $peer->{'enabled'} = 0;
+            }
+        }
         if(ref $keys eq 'ARRAY') {
             my %hash = map { $_ => 1 } @{$keys};
             $keys = \%hash;

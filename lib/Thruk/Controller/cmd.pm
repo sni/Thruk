@@ -155,7 +155,7 @@ sub index {
         # comments / downtimes quick commands
         for my $id (@idsdata) {
             my($typ, $id, $backend) = split(/_/m,$id, 3);
-            $c->req->parameters->{'backend'} = $backend;
+            $c->{'db'}->enable_backends($backend, 1);
             if($typ eq 'hst' and defined $host_quick_commands->{$quick_command} ) {
                 $cmd_typ = $host_quick_commands->{$quick_command};
             }
@@ -195,7 +195,7 @@ sub index {
             $c->stash->{'lasthost'}      = $host;
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             $c->req->parameters->{'host'}    = $host;
-            $c->req->parameters->{'backend'} = \@backends;
+            $c->{'db'}->enable_backends(\@backends, 1);
             if( $quick_command == 5 ) {
                 if($c->req->parameters->{'active_downtimes'}) {
                     _remove_all_downtimes( $c, $host, undef, 'active' );
@@ -232,7 +232,7 @@ sub index {
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             $c->req->parameters->{'host'}    = $host;
             $c->req->parameters->{'service'} = $service;
-            $c->req->parameters->{'backend'} = \@backends;
+            $c->{'db'}->enable_backends(\@backends, 1);
             if( $quick_command == 5 ) {
                 if($c->req->parameters->{'active_downtimes'}) {
                     _remove_all_downtimes( $c, $host, $service, 'active' );
@@ -700,7 +700,11 @@ sub _bulk_send {
                                     $cmd,
                                     ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
                                 );
-            $c->log->info($logstr) unless $ENV{'THRUK_TEST_CMD_NO_LOG'};
+            if($ENV{'THRUK_TEST_CMD_NO_LOG'}) {
+                $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
+            } else {
+                $c->log->info($logstr);
+            }
         }
         if(!$testmode) {
             $c->{'db'}->send_command( %{$options} );
