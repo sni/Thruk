@@ -56,6 +56,7 @@ use Carp qw/confess/;
 use File::Slurp qw(read_file);
 use Module::Load qw/load/;
 use Data::Dumper qw/Dumper/;
+use Plack::Util qw//;
 
 ###################################################
 $Data::Dumper::Sortkeys = 1;
