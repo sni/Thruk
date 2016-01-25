@@ -259,7 +259,7 @@ sub _js {
     $c->stash->{shapes} = {};
     my $data = Thruk::Utils::get_user_data($c);
     # split old format into new separated format
-    # REMOVE AFTER: 01.01.2016
+    # REMOVE AFTER: 01.01.2017
     $c->stash->{state} = '';
     if(defined $data->{'panorama'}->{'state'} and defined $data->{'panorama'}->{'state'}->{'tabpan'}) {
         $c->stash->{state} = encode_json($data->{'panorama'}->{'state'} || {});
@@ -383,25 +383,6 @@ sub _stateprovider {
     my $name  = $param->{'name'};
     if($c->stash->{'readonly'} || $c->stash->{'dashboard_ignore_changes'}) {
         $json = { 'status' => 'failed' };
-    }
-    # REMOVE AFTER: 01.01.2016
-    elsif(defined $task and ($task eq 'set' or $task eq 'update')) {
-        my $data = Thruk::Utils::get_user_data($c);
-        if($task eq 'update') {
-            $c->log->debug("panorama: update users data");
-            $data->{'panorama'} = { 'state' => $param };
-        } else {
-            if($value eq 'null') {
-                $c->log->debug("panorama: removed ".$name);
-                delete $data->{'panorama'}->{'state'}->{$name};
-            } else {
-                $c->log->debug("panorama: set ".$name." to "._nice_ext_value($value));
-                $data->{'panorama'}->{'state'}->{$name} = $value;
-            }
-        }
-        Thruk::Utils::store_user_data($c, $data);
-
-        $json = { 'status' => 'ok' };
     }
     elsif(defined $task and $task eq 'update2') {
         $json = { 'status' => 'ok' };
