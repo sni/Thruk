@@ -26,7 +26,10 @@ my $post           = { test_only => 1, cmd_mod => 2, host => $host, 'service' =>
 # test quick commands
 SKIP: {
     my $backends = $c->{'db'}->get_peers();
-    skip "test is useless with only a single backend", 21 if (scalar @{$backends} <= 1);
+    my $num = 21;
+    skip "test is useless with only a single backend",                $num if (scalar @{$backends} <= 1);
+    skip "test is requires authorized_for_all_service_commands role", $num if !$c->user->check_user_roles('authorized_for_all_service_commands');
+    skip "test is requires authorized_for_all_host_commands role",    $num if !$c->user->check_user_roles('authorized_for_all_host_commands');
 
     TestUtils::test_page(
         'url'      => '/thruk/cgi-bin/cmd.cgi',
