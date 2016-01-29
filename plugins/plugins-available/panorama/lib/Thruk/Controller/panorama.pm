@@ -308,6 +308,10 @@ sub _js {
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
         for my $nr (@{$open_tabs}) {
             my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+            if(!$dashboard && $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}) {
+                # remove orphaned or removed dashboards
+                @{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}} = grep !/^\Q$nr\E$/mx, @{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}};
+            }
             _merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
             # add shapes data
             for my $key (keys %{$dashboard}) {
