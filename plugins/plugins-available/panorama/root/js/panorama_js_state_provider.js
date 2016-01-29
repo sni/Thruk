@@ -100,7 +100,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
                 try {
                     state[key] = Ext.JSON.decode(ExtState[key]);
                 } catch(err) {
-                    // REMOVE AFTER: 01.01.2016
+                    // REMOVE AFTER: 01.01.2017
                     // old style is just decoded
                     if(state[key] == undefined) {
                         state[key] = this.decodeValue(ExtState[key]);
@@ -113,7 +113,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             }
         }
 
-        // REMOVE AFTER: 01.01.2016
+        // REMOVE AFTER: 01.01.2017
         if(ExtStateSplit == false) {
             this.lastdata = Ext.JSON.encode(ExtState);
         }
@@ -171,7 +171,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(!TP.initialized) { this.queueChanges(); return; }
         if(async == undefined) { async = true; }
 
-        // REMOVE AFTER: 01.01.2016
+        // REMOVE AFTER: 01.01.2017
         if(ExtStateSplit == false) {
             var sum = Ext.JSON.encode(ExtState);
             if(sum == this.lastdata) {

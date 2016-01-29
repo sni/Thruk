@@ -311,7 +311,7 @@ Ext.define('TP.Pantab', {
         this.applyXdata();
         if(state) {
             TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
-            // REMOVE AFTER: 01.01.2016
+            // REMOVE AFTER: 01.01.2017
             // migrate old settings
             if(state.xdata == undefined) { state.xdata = {} }
             var oldKeys = ['window_ids', 'background', 'title'];
@@ -333,7 +333,7 @@ Ext.define('TP.Pantab', {
                 }
             }
 
-            // REMOVE AFTER: 01.01.2016
+            // REMOVE AFTER: 01.01.2017
             if(state.xdata.window_ids) {
                 this.window_ids = state.xdata.window_ids;
             }

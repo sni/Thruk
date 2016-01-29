@@ -277,7 +277,7 @@ Ext.define('TP.TabBar', {
                 }
                 this.xdata = state.xdata;
 
-                // REMOVE AFTER: 01.01.2016
+                // REMOVE AFTER: 01.01.2017
                 if(state.item_ids) {
                     for(var nr=0; nr<state.item_ids.length; nr++) {
                         TP.add_pantab(state.item_ids[nr]);
@@ -334,7 +334,7 @@ Ext.define('TP.TabBar', {
         this.stopTimeouts();
         TP.log('['+this.id+'] startTimeouts');
 
-        // REMOVE AFTER: 01.01.2016
+        // REMOVE AFTER: 01.01.2017
         delete this.xdata['refresh'];
         delete this.xdata['autohideheader'];
         delete this.xdata['backends'];
