@@ -406,6 +406,9 @@ Ext.define('TP.SmallWidget', {
                 shadow:     false,
                 renderTo:  "bodyview",
                 cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
+                style:      {
+                    whiteSpace: 'nowrap'
+                },
                 autoEl: {
                     tag:     'a',
                     href:    panel.xdata.link ? panel.xdata.link.link : '',
