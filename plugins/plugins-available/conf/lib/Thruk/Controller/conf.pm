@@ -1772,6 +1772,7 @@ sub _object_revert {
             }
         }
         if(defined $oldobj) {
+            $c->stash->{'obj_model_changed'} = 1;
             $c->{'obj_db'}->update_object($obj, dclone($oldobj->{'conf'}), join("\n", @{$oldobj->{'comments'}}));
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' reverted successfully' );
         } else {
