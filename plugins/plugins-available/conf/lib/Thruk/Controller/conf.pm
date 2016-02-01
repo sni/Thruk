@@ -1774,7 +1774,11 @@ sub _object_revert {
         if(defined $oldobj) {
             $c->{'obj_db'}->update_object($obj, dclone($oldobj->{'conf'}), join("\n", @{$oldobj->{'comments'}}));
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' reverted successfully' );
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Cannot revert new objects, you can just delete them.' );
         }
+    } else {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Cannot revert new objects, you can just delete them.' );
     }
 
     return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
