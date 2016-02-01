@@ -31,3 +31,10 @@
 [% IF css.list.size > 0 %][% FOREACH cs = css.list %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix _ cs %]' />
 [% END %][% END %]
+<!--[if IE 8]>
+<style type="text/css">
+.vertical {
+  filter: flipv() fliph(); writing-mode: tb-rl; /* required for IE < 9 */
+}
+</style>
+<![endif]-->

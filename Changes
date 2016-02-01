@@ -4,6 +4,7 @@ next:
           - make custom variables from show_custom_vars clickable
           - add eventhandler search option
           - fix sending commands to all backends (#555)
+          - fix vertical header in Minemap for recent firefox
           - Panorama View:
             - add hide legend / graph only checkbox for pnp panel
             - add new appearance type 'label only'
