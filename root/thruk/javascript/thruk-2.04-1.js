@@ -4785,6 +4785,9 @@ var ajax_search = {
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     ajax_search.error=errorThrown;
+                    if(ajax_search.error == undefined || ajax_search.error == "") {
+                        ajax_search.error = "server unavailable";
+                    }
                     ajax_search.updating=false;
                     ajax_search.show_results([]);
                     ajax_search.initialized = false;
