@@ -675,6 +675,7 @@ function conf_validate_object_form(f) {
         alert("please enter filename for this object.");
         return false;
     }
+    initial_form_values = jQuery(f).serialize();
     return true;
 }
 
