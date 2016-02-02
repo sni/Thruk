@@ -22,7 +22,7 @@
   </tr>
   <tr>
     <td class="dataVar" colspan=3>
-        <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF file.readonly %] readonly[% END %] style="line-height: 15px;">[% escape_html(file_content) %]</textarea>
+        <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF file.readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
         <script type="text/javascript">
         var editor;
         var original_value;
