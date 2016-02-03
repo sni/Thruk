@@ -843,13 +843,20 @@ sub _task_load_dashboard {
         for my $file (sort keys %{$data->{'usercontent'}}) {
             my $size = -s $usercontent_folder.$file;
             next if $c->config->{'demo_mode'};
-            next if $size && !$c->stash->{'is_admin'};
+            next if $size && !$c->stash->{'is_admin'}; # overwrite only if this is an admin
             my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
             next if($size && length($content) == $size);
             my $dir     = $file;
             $dir        =~ s|/.*?$||gmx;
-            Thruk::Utils::IO::mkdir_r($dir);
-            Thruk::Utils::IO::write($usercontent_folder.$file,$content);
+            eval {
+                Thruk::Utils::IO::mkdir_r($dir);
+                Thruk::Utils::IO::write($usercontent_folder.$file,$content);
+            };
+            if($@) {
+                $c->log->error('Usercontent upload for '.$file.' failed: '.$@);
+                $c->stash->{text} = encode_json({ 'msg' => 'Usercontent upload for '.$file.' failed.', success => JSON::XS::false });
+                return;
+            }
         }
         delete $data->{'usercontent'};
     }
