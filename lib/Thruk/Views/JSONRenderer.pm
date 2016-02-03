@@ -45,12 +45,13 @@ sub render_json {
 
 sub _get_encoder {
     my($c) = @_;
-        $c->app->{'jsonencoder'} =
-            JSON::XS->new
-                    ->ascii
-                    ->pretty
-                    ->allow_blessed
-                    ->allow_nonref;
+    $c->app->{'jsonencoder'} =
+        JSON::XS->new
+                ->ascii
+                ->pretty
+                ->canonical             # sort hash keys, breaks panorama if not set
+                ->allow_blessed
+                ->allow_nonref;
     return($c->app->{'jsonencoder'});
 }
 

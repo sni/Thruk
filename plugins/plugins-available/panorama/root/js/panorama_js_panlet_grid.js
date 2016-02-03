@@ -109,7 +109,7 @@ Ext.define('TP.GridLoader', {
                 }
                 if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
                     this.gridcolumns = newcolumns;
-                    /* width is not recognized on recognized, so set it here */
+                    /* width is not recognized, so set it here */
                     if(this.initialState) {
                         for(var x = 0; x < data.columns.length; x++) {
                             if(this.initialState.columns && this.initialState.columns[x] && this.initialState.columns[x].width) {
