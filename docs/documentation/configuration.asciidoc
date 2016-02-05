@@ -1834,6 +1834,9 @@ for details.
                               object directories and files from this config
                               file.
         *** `obj_check_cmd`   Commandline to verify the config.
+                              Use something like 'sudo -u root /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg'
+                              if you have different user for Thruk and the monitoring core.
+                              See http://monitoring-portal.org/wbb/index.php?page=Thread&postID=224902#post224902 for an example.
         *** `obj_reload_cmd`  Commandline to reload the config.
         *** `obj_readonly`    Filename pattern to define readonly objects.
                               For example for generated config files.
