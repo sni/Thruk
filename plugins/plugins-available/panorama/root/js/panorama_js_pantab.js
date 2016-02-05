@@ -691,14 +691,13 @@ Ext.define('TP.Pantab', {
         var bodyView = Ext.fly('bodyview');
         if(!tab.bgDragEl) {
             tab.bgDragEl = bodyView.createChild('<img>', bodyView.dom.childNodes[0]);
-            tab.bgDragEl.dom.src            = background;
             tab.bgDragEl.dom.style.position = "fixed";
             tab.bgDragEl.dom.style.width    = "100%";
             tab.bgDragEl.dom.style.height   = "100%";
             tab.bgDragEl.dom.style.top      = TP.offset_y+"px";
             tab.bgDragEl.dom.style.left     = "0px";
             tab.bgDragEl.dom.style.zIndex   = 2001;
-            tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
+            tab.bgDragEl.dom.src            = url_prefix+"plugins/panorama/images/s.gif";
             tab.bgDragEl.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);
             });
@@ -714,25 +713,15 @@ Ext.define('TP.Pantab', {
         if(background != undefined && background != 'none' && !xdata.map) {
             if(!tab.bgImgEl) {
                 tab.bgImgEl  = bodyView.createChild('<img>', bodyView.dom.childNodes[0]);
+                tab.bgImgEl.on({
+                    load: function (evt, ele, opts) {
+                        tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
+                    }
+                });
             }
             tab.bgImgEl.dom.src            = background;
             tab.bgImgEl.dom.style.position = "absolute";
-            if(scale == 100) {
-                tab.bgImgEl.dom.style.width  = "";
-                tab.bgImgEl.dom.style.height = "";
-            } else {
-                var naturalSize = TP.getNatural(background);
-                if(naturalSize.width < 2 || naturalSize.height < 2) {
-                    window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
-                    return;
-                }
-                var width  = Number(scale * naturalSize.width  / 100);
-                var height = Number(scale * naturalSize.height / 100);
-                tab.bgImgEl.dom.style.width  = width+"px";
-                tab.bgImgEl.dom.style.height = height+"px";
-            }
-            tab.bgImgEl.dom.style.top  = (25+offset_y)+"px";
-            tab.bgImgEl.dom.style.left = offset_x+"px";
+            tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
             if(!tab.isActiveTab()) {
                 tab.bgImgEl.hide();
             }
@@ -742,6 +731,25 @@ Ext.define('TP.Pantab', {
                 tab.bgImgEl = undefined;
             }
         }
+    },
+    applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y) {
+        var tab = this;
+        if(scale == 100) {
+            tab.bgImgEl.dom.style.width  = "";
+            tab.bgImgEl.dom.style.height = "";
+        } else {
+            var naturalSize = TP.getNatural(background);
+            if(naturalSize.width < 2 || naturalSize.height < 2) {
+                window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
+                return;
+            }
+            var width  = Number(scale * naturalSize.width  / 100);
+            var height = Number(scale * naturalSize.height / 100);
+            tab.bgImgEl.dom.style.width  = width+"px";
+            tab.bgImgEl.dom.style.height = height+"px";
+        }
+        tab.bgImgEl.dom.style.top  = (25+offset_y)+"px";
+        tab.bgImgEl.dom.style.left = offset_x+"px";
     },
     disableMapControlsTemp: function() {
         if(!this.mapEl) { return; }
