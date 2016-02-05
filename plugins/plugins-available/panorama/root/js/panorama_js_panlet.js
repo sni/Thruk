@@ -347,6 +347,10 @@ Ext.define('TP.Panlet', {
                 if(this.chart && this.chart.getEl()) {
                     this.chart.getEl().setStyle('background-color', 'transparent');
                 }
+                if(this.autohideHeaderOffset != undefined) {
+                    this.getEl().setStyle('overflow', 'visible');
+                    this.getHeader().getEl().dom.style.top = this.autohideHeaderOffset+'px';
+                }
             }
         } else {
             this.cls     = '';
@@ -361,6 +365,9 @@ Ext.define('TP.Panlet', {
                 this.getEl().setStyle('background-color', '');
                 if(this.chart && this.chart.getEl()) {
                     this.chart.getEl().setStyle('background-color', '#FFFFFF');
+                }
+                if(this.autohideHeaderOffset != undefined) {
+                    this.getEl().setStyle('overflow', '');
                 }
             }
         }
