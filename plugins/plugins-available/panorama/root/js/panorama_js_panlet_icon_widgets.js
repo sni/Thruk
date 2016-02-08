@@ -591,6 +591,17 @@ Ext.define('TP.SmallWidget', {
                     return(false);
                 }
             }
+            if(This.locked) {
+                /* make links clickable in text labels */
+                if(evt.target.tagName == "A" && !evt.target.className.match('component')) {
+                    /* link must be cloned, added to document body, clicked and then be removed */
+                    var link = evt.target.cloneNode();
+                    document.body.appendChild(link);
+                    link.click();
+                    link.parentNode.removeChild(link);
+                    return(false);
+                }
+            }
             return(TP.iconClickHandler(This.id));
         });
 
