@@ -86,7 +86,7 @@ sub self_check {
         $msg = 'CRITICAL - '.join(', ', @{$critical}) if $rc == 2;
         $msg = 'UNKNOWN - '. join(', ', @{$unknown})  if $rc == 3;
     }
-    return($rc, $msg, $details);
+    return($rc, $msg, ($details || ''));
 }
 
 ##############################################
