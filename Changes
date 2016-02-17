@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - make custom variables from show_custom_vars clickable
           - add eventhandler search option
+          - add core scheduling graph page
           - fix sending commands to all backends (#555)
           - fix vertical header in Minemap for recent firefox
           - Panorama View:

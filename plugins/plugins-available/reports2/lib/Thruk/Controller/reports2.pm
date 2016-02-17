@@ -16,6 +16,8 @@ Thruk Controller.
 
 =cut
 
+my $pluginname = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
+
 ##########################################################
 
 =head2 index
@@ -42,6 +44,7 @@ sub index {
     $c->stash->{has_jquery_ui}         = 1;
     $c->stash->{'phantomjs'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
+    $c->stash->{plugin}                = $pluginname;
 
     my $report_nr = $c->req->parameters->{'report'};
     my $action    = $c->req->parameters->{'action'}    || 'show';
@@ -50,6 +53,10 @@ sub index {
     $refresh = $c->req->parameters->{'refresh'} if exists $c->req->parameters->{'refresh'};
 
     if(ref $action eq 'ARRAY') { $action = pop @{$action}; }
+
+    if($action eq 'scheduling') {
+        return report_scheduling($c);
+    }
 
     if($action eq 'updatecron') {
         if(Thruk::Utils::Reports::update_cron_file($c)) {
@@ -404,6 +411,65 @@ sub _set_report_data {
 
     Thruk::Utils::Reports::add_report_defaults($c, undef, $r);
 
+    return;
+}
+
+##########################################################
+
+=head2 report_scheduling
+
+=cut
+sub report_scheduling {
+    my($c) = @_;
+
+    my $now           = time();
+    my $data          = $c->{'db'}->get_scheduling_queue($c);
+    my $group_seconds = $c->req->parameters->{'group_seconds'} || 10;
+    my $look_back     = $c->req->parameters->{'look_back'}     || 60;
+    my $look_ahead    = $c->req->parameters->{'look_ahead'}    || 300;
+
+    my $queue = [
+        { label => "host checks",     data =>  [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
+        { label => "service checks",  data =>  [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
+    ];
+    my $markings = [
+        { color => '#990000', lineWidth => 1, xaxis => { from => $now*1000, to => $now*1000 } },
+    ];
+
+    my $grouped = {};
+    $grouped->{($now-$look_back)*1000} = { hosts => 0, services => 0 };
+    $grouped->{($now+$look_ahead)*1000} = { hosts => 0, services => 0 };
+
+    for my $d (@{$data}) {
+        my $time = $d->{'next_check'};
+        next unless $time > $now - $look_back;
+        next unless $time < $now + $look_ahead;
+        $time = ($time - ($time % $group_seconds))*1000;
+        if(!$grouped->{$time}) {
+            $grouped->{$time} = { hosts => 0, services => 0 };
+        }
+        if($d->{'description'}) {
+            $grouped->{$time}->{'services'}++;
+        } else {
+            $grouped->{$time}->{'hosts'}++;
+        }
+    }
+    for my $time (sort keys %{$grouped}) {
+        push @{$queue->[0]->{'data'}}, [$time, $grouped->{$time}->{hosts}];
+        push @{$queue->[1]->{'data'}}, [$time, $grouped->{$time}->{services}];
+    }
+
+    if($c->req->parameters->{'json'}) {
+        return $c->render(json => { queue => $queue, markings => $markings });
+    }
+
+    $c->stash->{'markings'}         = $markings;
+    $c->stash->{'scheduling_queue'} = $queue;
+
+    Thruk::Utils::ssi_include($c);
+
+    $c->stash->{title}    = 'Core Scheduling Overview';
+    $c->stash->{template} = 'reports_scheduling.tt';
     return;
 }
 
