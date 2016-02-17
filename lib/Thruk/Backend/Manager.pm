@@ -364,12 +364,14 @@ sub get_scheduling_queue {
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}],
                                                  }],
+                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check/],
                                       );
     my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                               { '-or' => [{ 'active_checks_enabled' => '1' },
                                                          { 'check_options' => { '!=' => '0' }}],
                                               }],
-                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
+                                     options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
+                                     columns => [qw/name active_checks_enabled check_options last_check next_check/],
                                     );
 
     my $queue = [];
