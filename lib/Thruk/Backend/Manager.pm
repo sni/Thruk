@@ -381,8 +381,8 @@ sub get_scheduling_queue {
     if(defined $hosts) {
         push @{$queue}, @{$hosts};
     }
-    $queue = $self->_sort( $queue, $options{'sort'} );
-    $self->_page_data( $c, $queue );
+    $queue = $self->_sort( $queue, $options{'sort'} ) if defined $options{'sort'};
+    $self->_page_data( $c, $queue ) if defined $options{'pager'};
     return $queue;
 }
 

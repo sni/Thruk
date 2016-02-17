@@ -1,29 +1,31 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0">
-      <tr>
-        <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="middle" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-          [% PROCESS _help.tt topic = "extinfo_7" %]
-        </td>
-      </tr>
-    </table><br>
-    <div align="center" class='statusSort'>
-      Entries sorted by <b>[% sortkey %]</b>
-      [% IF order == 'ASC' %]
-      (ascending)
-      [% ELSE %]
-      (descending)
-      [% END %]
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="left" valign="top" width="33%">
+    [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="middle" width="33%"></td>
+    <td align="right" valign="bottom" width="33%">
+      [% PROCESS _help.tt topic = "extinfo_7" %]
+    </td>
+  </tr>
+</table>
+<br>
 
-      <br>
-      [% PROCESS _pager.tt %]
-    </div>
-    <br>
+<div align="center" class='statusSort'>
+  Entries sorted by <b>[% sortkey %]</b>
+  [% IF order == 'ASC' %]
+  (ascending)
+  [% ELSE %]
+  (descending)
+  [% END %]
+
+  <br>
+  [% PROCESS _pager.tt %]
+</div>
+<br>
 
     <div align="center">
       <table border="0" class='queue'>
