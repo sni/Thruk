@@ -434,7 +434,7 @@ sub report_scheduling {
     ];
 
     my $grouped = {};
-    $grouped->{($now-$look_back)*1000} = { hosts => 0, services => 0 };
+    $grouped->{($now-$look_back )*1000} = { hosts => 0, services => 0 };
     $grouped->{($now+$look_ahead)*1000} = { hosts => 0, services => 0 };
 
     for my $d (@{$data}) {

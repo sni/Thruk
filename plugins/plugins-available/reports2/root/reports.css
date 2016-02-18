@@ -86,3 +86,13 @@ body.status TABLE.weekly_days TD {
   white-space: nowrap;
   overflow-x: hidden;
 }
+
+TABLE.core_schedule {
+ border: 2px solid grey;
+ margin-left: 20px;
+}
+
+TABLE.core_schedule INPUT {
+  width: 50px;
+  text-align: right;
+}

@@ -3,6 +3,7 @@
                       "plugins/reports2/flot-d7c58b5/jquery.flot.time.js",
                       "plugins/reports2/flot-d7c58b5/jquery.flot.stack.js",
                     ],
+    css          => [ "plugins/reports2/reports.css" ],
 %]
 [% PROCESS _message.tt %]
 [% USE date %]
@@ -30,45 +31,36 @@
 </table>
 
 <div id='tooltip'></div>
-<div align="center">
+<div id="queue_graph" style="height: 350px; width: 1000px;"></div>
+
+<br>
 <form>
-<table>
+<table class="core_schedule">
   <tr>
-    <td rowspan=10>
-      <div id="queue_graph" style="height: 350px; width: 1000px;"></div>
-    </td>
+    <th colspan=2>Graph Options</th>
+  </tr>
+  <tr>
     <th>Look ahead seconds</th>
-    <td><input type="text" id="look_ahead" value=900 style="width: 50px;">s</td>
+    <td><input type="text" id="look_ahead" value=300 onchange="updateGraphDelayed()">s</td>
   </tr>
   <tr>
     <th>Look back seconds</th>
-    <td><input type="text" id="look_back" value=60 style="width: 50px;">s</td>
+    <td><input type="text" id="look_back" value=60 onchange="updateGraphDelayed()">s</td>
   </tr>
   <tr>
     <th>Group Checks</th>
-    <td><input type="text" id="group_seconds" value=1 style="width: 50px;">s</td>
+    <td><input type="text" id="group_seconds" value=10 onchange="updateGraphDelayed()">s</td>
   </tr>
   <tr>
     <th>Update interval</th>
-    <td><input type="text" id="update_interval" value=5 style="width: 50px;">s</td>
-  </tr>
-  <tr>
-    <td colspan=2></td>
+    <td><input type="text" id="update_interval" value=3 onchange="updateGraphDelayed()">s</td>
   </tr>
 </table>
 </form>
-</div>
 
 <script type="text/javascript">
 <!--
 var updateInterval = 5000;
-var standard_xaxis = {
-    mode: "time",
-    timezone: "browser",
-    labelHeight: 0,
-    labelWidth: 0,
-    tickFormatter: function() { return(""); }
-};
 var standard_grid = {
     backgroundColor: "#F0F0ED",
     markings: [% encode_json_obj(markings) %]
@@ -83,7 +75,8 @@ var queue_options = {
     },
     yaxes: [{
                min: 0,
-               tickFormatter: function(val, axis) { return(val < axis.max ? val : "#"); }
+               tickFormatter: function(val, axis) { return(val < axis.max ? val : "#"); },
+               labelWidth: 15
     }],
     grid:      standard_grid,
     legend:    standard_legend
@@ -91,11 +84,14 @@ var queue_options = {
 var queue_series = [% encode_json_obj(scheduling_queue) %];
 
 jQuery().ready(function() {
-    var queue_plot   = jQuery.plot('#queue_graph', queue_series, queue_options);
-
-    queue_plot.draw();
-    window.setTimeout(updateGraph, updateInterval);
+    updateGraph();
 });
+
+var updateTimer;
+function updateGraphDelayed() {
+  window.clearTimeout(updateTimer);
+  updateTimer = window.setTimeout(updateGraph, 200);
+}
 
 function updateGraph() {
   updateInterval = jQuery('#update_interval').val()*1000;
@@ -114,6 +110,7 @@ function updateGraph() {
         queue_options.grid.markings = markings;
 
         var queue_plot = jQuery.plot('#queue_graph', queue_series, queue_options);
+        queue_plot.draw();
 
         var o = queue_plot.pointOffset({ x: standard_grid['markings'][0]['xaxis']['from'], y: 0});
         var d = new Date(standard_grid['markings'][0]['xaxis']['from']);
