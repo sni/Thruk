@@ -456,12 +456,26 @@ sub report_scheduling {
         push @{$queue->[1]->{'data'}}, [$time, $grouped->{$time}->{services}];
     }
 
+    my $perf_stats = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
     if($c->req->parameters->{'json'}) {
-        return $c->render(json => { queue => $queue, markings => $markings });
+        return $c->render(json => { queue => $queue, markings => $markings, rate => sprintf("%.2f", $perf_stats->{'host_checks_rate'} + $perf_stats->{'service_checks_rate'}) });
     }
 
     $c->stash->{'markings'}         = $markings;
     $c->stash->{'scheduling_queue'} = $queue;
+
+    # sort checks by interval
+    my $intervals = {};
+    my $total     = 0;
+    my $num       = 0;
+    for my $d (@{$data}) {
+        $intervals->{$d->{'check_interval'}}++;
+        $num++;
+        $total += $d->{'check_interval'};
+    }
+    $c->stash->{intervals}  = $intervals;
+    $c->stash->{average}    = $total / $num / 60;
+    $c->stash->{perf_stats} = $perf_stats;
 
     Thruk::Utils::ssi_include($c);
 

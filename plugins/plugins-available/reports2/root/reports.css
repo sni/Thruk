@@ -89,10 +89,21 @@ body.status TABLE.weekly_days TD {
 
 TABLE.core_schedule {
  border: 2px solid grey;
- margin-left: 20px;
+ margin-left: 16px;
+ border-collapse: collapse;
 }
 
 TABLE.core_schedule INPUT {
   width: 50px;
   text-align: right;
+}
+
+TABLE.core_schedule TH {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+TABLE.core_schedule TD {
+  padding-left: 5px;
+  padding-right: 5px;
 }

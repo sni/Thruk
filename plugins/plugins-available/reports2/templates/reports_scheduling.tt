@@ -34,10 +34,12 @@
 <div id="queue_graph" style="height: 350px; width: 1000px;"></div>
 
 <br>
+<table style="width: 1000px;"><tr><td style="vertical-align: top;">
+
 <form>
 <table class="core_schedule">
   <tr>
-    <th colspan=2>Graph Options</th>
+    <th colspan=2 style="border-bottom: 1px solid grey;">Graph Options</th>
   </tr>
   <tr>
     <th>Look ahead seconds</th>
@@ -57,6 +59,43 @@
   </tr>
 </table>
 </form>
+
+</td><td style="vertical-align: top;">
+
+<table class="core_schedule">
+  <tr>
+    <th colspan=2 style="border-bottom: 1px solid grey;">Check Interval Disposition</th>
+  </tr>
+  <tr>
+    <th style="border-bottom: 1px solid grey;">Interval</th>
+    <th style="border-bottom: 1px solid grey; border-left: 1px solid grey;">Number of Checks</th>
+  </tr>
+  [% FOREACH interval = intervals.keys.nsort %]
+  <tr>
+    <th style="text-align: right;">[% interval %] min</th>
+    <td style="text-align: right; border-left: 1px solid grey;">[% intervals.$interval %] #</td>
+  </tr>
+  [% END %]
+</table>
+
+</td><td style="vertical-align: top;">
+
+
+<table class="core_schedule">
+  <tr>
+    <th colspan=2 style="border-bottom: 1px solid grey;">Checks per Second</th>
+  </tr>
+  <tr>
+    <th style="text-align: right;">Calculated Average</th>
+    <td style="border-bottom: 1px solid grey; border-left: 1px solid grey;">[% sprintf("%.2f", average) %]/s</td>
+  </tr>
+  <tr>
+    <th style="text-align: right;">Current Rate</th>
+    <td style="border-bottom: 1px solid grey; border-left: 1px solid grey;" id="current_rate">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]/s</td>
+  </tr>
+</table>
+
+</td></tr></table>
 
 <script type="text/javascript">
 <!--
@@ -108,6 +147,7 @@ function updateGraph() {
         var queue_series = data['queue'];
         var markings     = data['markings'];
         queue_options.grid.markings = markings;
+        jQuery("#current_rate").html(data['rate']+"/s");
 
         var queue_plot = jQuery.plot('#queue_graph', queue_series, queue_options);
         queue_plot.draw();
