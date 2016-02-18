@@ -16,8 +16,6 @@ Thruk Controller.
 
 =cut
 
-my $pluginname = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
-
 ##########################################################
 
 =head2 index
@@ -44,7 +42,6 @@ sub index {
     $c->stash->{has_jquery_ui}         = 1;
     $c->stash->{'phantomjs'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
-    $c->stash->{plugin}                = $pluginname;
 
     my $report_nr = $c->req->parameters->{'report'};
     my $action    = $c->req->parameters->{'action'}    || 'show';
