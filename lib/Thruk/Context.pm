@@ -304,6 +304,16 @@ sub translate_request_path {
     return($path_info);
 }
 
+=head2 has_route
+
+$c->has_route(<url>)
+
+=cut
+sub has_route {
+    my($c, $url) = @_;
+    return(defined $c->app->{'routes'}->{$url});
+}
+
 1;
 __END__
 
