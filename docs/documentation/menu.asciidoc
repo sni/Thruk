@@ -113,6 +113,12 @@ do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
 insert_item('General', { 'href' => 'http://your-company.com', 'name' => 'Company' });
 -----
 
+Use 'insert_sub_item' to create a new sub entry to an existing link.
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+insert_sub_item('General', 'Home', { 'href' => 'http://your-company.com', 'name' => 'Company' });
+-----
+
 
 === Removing item in existing Section
 
