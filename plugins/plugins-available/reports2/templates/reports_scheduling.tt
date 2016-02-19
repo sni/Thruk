@@ -123,11 +123,33 @@ var queue_options = {
 var queue_series = [% encode_json_obj(scheduling_queue) %];
 
 jQuery().ready(function() {
-    updateGraph();
+  var look_ahead = get_hash(1);
+  if(look_ahead != undefined && jQuery.isNumeric(look_ahead)) {
+      jQuery('#look_ahead').val(look_ahead);
+  }
+  var look_back = get_hash(2);
+  if(look_back != undefined && jQuery.isNumeric(look_back)) {
+      jQuery('#look_back').val(look_back);
+  }
+  var group_seconds = get_hash(3);
+  if(group_seconds != undefined && jQuery.isNumeric(group_seconds)) {
+      jQuery('#group_seconds').val(group_seconds);
+  }
+  var update_interval = get_hash(4);
+  if(update_interval != undefined && jQuery.isNumeric(update_interval)) {
+      jQuery('#update_interval').val(update_interval);
+  }
+
+  updateGraph();
 });
 
 var updateTimer;
 function updateGraphDelayed() {
+  set_hash(jQuery('#look_ahead').val(), 1);
+  set_hash(jQuery('#look_back').val(), 2);
+  set_hash(jQuery('#group_seconds').val(), 3);
+  set_hash(jQuery('#update_interval').val(), 4);
+
   window.clearTimeout(updateTimer);
   updateTimer = window.setTimeout(updateGraph, 200);
 }
@@ -154,12 +176,15 @@ function updateGraph() {
 
         var o = queue_plot.pointOffset({ x: standard_grid['markings'][0]['xaxis']['from'], y: 0});
         var d = new Date(standard_grid['markings'][0]['xaxis']['from']);
-        jQuery('#queue_graph').append("<div style='position:absolute;left:"+(o.left+4)+"px;top:20px;color:#990000;font-size:smaller'>now ("+d.strftime("%H:%M:%S")+")</div>");
+        jQuery('#queue_graph').append("<div id='now_label' style='position:absolute;left:"+(o.left+4)+"px;top:20px;color:#990000;font-size:smaller'>now ("+d.strftime("%H:%M:%S")+")</div>");
 
-        window.setTimeout(updateGraph, updateInterval);
+        window.clearTimeout(updateTimer);
+        updateTimer = window.setTimeout(updateGraph, updateInterval);
       },
-      error:  function(err) {
-        window.setTimeout(updateGraph, updateInterval*2);
+      error:  function(jqXHR, textStatus, errorThrown) {
+        window.clearTimeout(updateTimer);
+        updateTimer = window.setTimeout(updateGraph, updateInterval*2);
+        jQuery("#now_label").html("update error: "+textStatus);
       }
   });
 }
