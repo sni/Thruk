@@ -86,6 +86,8 @@
     <td style="border-bottom: 1px solid grey; border-left: 1px solid grey;" id="current_rate">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]/s</td>
   </tr>
 </table>
+<br>
+<a href="reports2.cgi?action=edit&amp;report=new" class="button wzd_button">reschedule all hosts and services</a>
 
 </td></tr></table>
 
@@ -132,6 +134,15 @@ jQuery().ready(function() {
       jQuery('#update_interval').val(update_interval);
   }
 
+  jQuery('A.wzd_button').button({
+    icons: {primary: 'ui-wzd-button'}
+  }).click(function() {
+    if(confirm('really reschedule everything?')) {
+        updateGraph(true);
+    }
+    return(false);
+  });
+
   updateGraph();
 });
 
@@ -146,15 +157,17 @@ function updateGraphDelayed() {
   updateTimer = window.setTimeout(updateGraph, 200);
 }
 
-function updateGraph() {
+function updateGraph(reschedule) {
+  window.clearTimeout(updateTimer);
   updateInterval = jQuery('#update_interval').val()*1000;
   jQuery.ajax({
-      url:      "core_scheduling.cgi?action=scheduling&json=true",
+      url:      "core_scheduling.cgi?json=true",
       type:     "POST",
       data:     {
         look_ahead: jQuery('#look_ahead').val(),
         look_back: jQuery('#look_back').val(),
-        group_seconds: jQuery('#group_seconds').val()
+        group_seconds: jQuery('#group_seconds').val(),
+        reschedule: reschedule
       },
       dataType: "json",
       success:  function(data) {

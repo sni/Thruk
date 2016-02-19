@@ -137,7 +137,7 @@ sub index {
         my @hostdata    = split /,/mx, $c->req->parameters->{'selected_hosts'};
         my @servicedata = split /,/mx, $c->req->parameters->{'selected_services'};
         my @idsdata     = split /,/mx, $c->req->parameters->{'selected_ids'};
-        $c->{'spread_startdates'} = _generate_spread_startdates( $c, scalar @hostdata + scalar @servicedata, $c->req->parameters->{'start_time'}, $c->req->parameters->{'spread'} );
+        $c->{'spread_startdates'} = generate_spread_startdates( $c, scalar @hostdata + scalar @servicedata, $c->req->parameters->{'start_time'}, $c->req->parameters->{'spread'} );
 
         # persistent can be set in two ways
         if(    $c->req->parameters->{'persistent'} eq 'ack'
@@ -362,7 +362,7 @@ sub _redirect_or_success {
     my( $c, $how_far_back, $just_return ) = @_;
 
     my $wait = defined $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 0;
-    if(_bulk_send($c)) {
+    if(bulk_send($c, $c->stash->{'commands2send'})) {
         $c->log->debug("bulk sending commands succeeded");
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'Sending Commands failed' );
@@ -670,14 +670,19 @@ sub _do_send_command {
 }
 
 ######################################
-# send all collected commands at once
-sub _bulk_send {
-    my($c) = @_;
 
-    for my $backends (keys %{$c->stash->{'commands2send'}}) {
+=head2 bulk_send
+
+    send all collected commands at once
+
+=cut
+sub bulk_send {
+    my($c, $commands) = @_;
+
+    for my $backends (keys %{$commands}) {
         my $options = {};
         # remove duplicate commands
-        my $commands2send     = Thruk::Utils::array_uniq($c->stash->{'commands2send'}->{$backends});
+        my $commands2send     = Thruk::Utils::array_uniq($commands->{$backends});
         $options->{'command'} = join("\n\n", @{$commands2send});
         $options->{'backend'} = [ split(/,/mx, $backends) ];
         return 1 if $options->{'command'} eq '';
@@ -720,12 +725,14 @@ sub _bulk_send {
 }
 
 ######################################
-# generate spreaded start dates
-sub _generate_spread_startdates {
-    my $c            = shift;
-    my $number       = shift;
-    my $starttime    = shift;
-    my $spread       = shift;
+
+=head2 generate_spread_startdates
+
+    generate spreaded start dates
+
+=cut
+sub generate_spread_startdates {
+    my($c, $number, $starttime, $spread) = @_;
     my $spread_dates = [];
 
     # check for a valid number
