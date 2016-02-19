@@ -3,29 +3,21 @@
                       "plugins/reports2/flot-d7c58b5/jquery.flot.time.js",
                       "plugins/reports2/flot-d7c58b5/jquery.flot.stack.js",
                     ],
-    css          => [ "plugins/reports2/reports.css" ],
+    css          => [ "plugins/core_scheduling/core_scheduling.css" ],
 %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
 <table border="0" width="100%" cellspacing="0" cellpadding="0">
   <tr>
-    <td align="left" valign="top" width="20%">
-      <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
-        <tr>
-          <td class='linkBox'>
-            <a href='extinfo.cgi?type=7'>back to overview</a><br>
-          </td>
-        </tr>
-      </table>
-    </td>
+    <td align="left" valign="top" width="20%"></td>
     <td align="center" valign="top" width="60%">
       <div align="center" class='dataTitle'>
         Core Scheduling Overview
       </div>
     </td>
     <td align="right" valign="bottom" width="20%">
-      [% PROCESS _help.tt topic = "reports2" %]
+      [% PROCESS _help.tt topic = "core_scheduling" %]
     </td>
   </tr>
 </table>
@@ -157,7 +149,7 @@ function updateGraphDelayed() {
 function updateGraph() {
   updateInterval = jQuery('#update_interval').val()*1000;
   jQuery.ajax({
-      url:      "reports2.cgi?action=scheduling&json=true",
+      url:      "core_scheduling.cgi?action=scheduling&json=true",
       type:     "POST",
       data:     {
         look_ahead: jQuery('#look_ahead').val(),

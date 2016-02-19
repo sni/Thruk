@@ -283,6 +283,14 @@ plugins/plugins-available/conf/templates/conf_objects_tree.tt
 plugins/plugins-available/conf/templates/conf_objects_tree_objects.tt
 plugins/plugins-available/conf/templates/conf_plugins.tt
 plugins/plugins-available/conf/templates/conf_user_password.tt
+plugins/plugins-enabled/core_scheduling
+plugins/plugins-available/core_scheduling/description.txt
+plugins/plugins-available/core_scheduling/lib/Thruk/Controller/core_scheduling.pm
+plugins/plugins-available/core_scheduling/preview.png
+plugins/plugins-available/core_scheduling/root/core_scheduling.css
+plugins/plugins-available/core_scheduling/routes
+plugins/plugins-available/core_scheduling/t/controller_core_scheduling.t
+plugins/plugins-available/core_scheduling/templates/core_scheduling.tt
 plugins/plugins-available/dashboard/description.txt
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardHTTP.pm
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardLivestatus.pm
@@ -938,7 +946,6 @@ plugins/plugins-available/reports2/lib/Thruk/Controller/reports2.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports/Render.pm
 plugins/plugins-available/reports2/preview.png
-plugins/plugins-available/reports2/README.txt
 plugins/plugins-available/reports2/root/flot-d7c58b5/jquery.colorhelpers.js
 plugins/plugins-available/reports2/root/flot-d7c58b5/jquery.flot.categories.js
 plugins/plugins-available/reports2/root/flot-d7c58b5/jquery.flot.crosshair.js
@@ -1000,7 +1007,6 @@ plugins/plugins-available/reports2/templates/reports/style/custom.tt
 plugins/plugins-available/reports2/templates/reports_edit.tt
 plugins/plugins-available/reports2/templates/reports_edit_step2.tt
 plugins/plugins-available/reports2/templates/reports_email.tt
-plugins/plugins-available/reports2/templates/reports_scheduling.tt
 plugins/plugins-available/shinken_features/description.txt
 plugins/plugins-available/shinken_features/lib/Thruk/Controller/shinken_features.pm
 plugins/plugins-available/shinken_features/preview.png

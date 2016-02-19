@@ -1,0 +1,5 @@
+The 'core_scheduling' plugin creates a graph for scheduled host and service
+checks and helps smoothing the core scheduling queue by flattening piles of
+checks.
+
+Url: core_scheduling.cgi
