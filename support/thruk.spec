@@ -325,6 +325,8 @@ exit 0
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/statusmap
 %{_datadir}/%{name}/plugins/plugins-available/wml
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/wml
+%{_datadir}/%{name}/plugins/plugins-available/core_scheduling
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/core_scheduling
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/usercontent/

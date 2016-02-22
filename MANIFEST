@@ -283,7 +283,6 @@ plugins/plugins-available/conf/templates/conf_objects_tree.tt
 plugins/plugins-available/conf/templates/conf_objects_tree_objects.tt
 plugins/plugins-available/conf/templates/conf_plugins.tt
 plugins/plugins-available/conf/templates/conf_user_password.tt
-plugins/plugins-enabled/core_scheduling
 plugins/plugins-available/core_scheduling/description.txt
 plugins/plugins-available/core_scheduling/lib/Thruk/Controller/core_scheduling.pm
 plugins/plugins-available/core_scheduling/preview.png

@@ -31,6 +31,8 @@
 /etc/thruk/plugins/plugins-enabled/statusmap
 /usr/share/thruk/plugins/plugins-available/wml
 /etc/thruk/plugins/plugins-available/wml
+/usr/share/thruk/plugins/plugins-available/core_scheduling
+/etc/thruk/plugins/plugins-available/core_scheduling
 /etc/thruk/ssi
 /etc/thruk/themes
 /etc/thruk/thruk.conf
