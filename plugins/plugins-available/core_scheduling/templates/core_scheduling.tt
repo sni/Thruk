@@ -35,15 +35,15 @@
   </tr>
   <tr>
     <th>Look ahead seconds</th>
-    <td><input type="text" id="look_ahead" value=300 onchange="updateGraphDelayed()">s</td>
+    <td><input type="text" id="look_ahead" value="[% look_ahead %]" onchange="updateGraphDelayed()">s</td>
   </tr>
   <tr>
     <th>Look back seconds</th>
-    <td><input type="text" id="look_back" value=60 onchange="updateGraphDelayed()">s</td>
+    <td><input type="text" id="look_back" value=[% look_back %] onchange="updateGraphDelayed()">s</td>
   </tr>
   <tr>
     <th>Group Checks</th>
-    <td><input type="text" id="group_seconds" value=10 onchange="updateGraphDelayed()">s</td>
+    <td><input type="text" id="group_seconds" value=[% group_seconds %] onchange="updateGraphDelayed()">s</td>
   </tr>
   <tr>
     <th>Update interval</th>
@@ -87,7 +87,7 @@
   </tr>
 </table>
 <br>
-<a href="reports2.cgi?action=edit&amp;report=new" class="button wzd_button">reschedule all hosts and services</a>
+<a href="reports2.cgi?action=edit&amp;report=new" class="button wzd_button">balance all hosts and services</a>
 
 </td></tr></table>
 

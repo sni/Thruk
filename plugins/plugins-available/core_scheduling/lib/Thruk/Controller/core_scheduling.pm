@@ -48,8 +48,8 @@ sub core_scheduling_page {
     _reschedule_everything($c) if $c->req->parameters->{'reschedule'};
 
     my $now           = time();
-    my $group_seconds = $c->req->parameters->{'group_seconds'} || 10;
-    my $look_back     = $c->req->parameters->{'look_back'}     || 60;
+    my $group_seconds = $c->req->parameters->{'group_seconds'} || 1;
+    my $look_back     = defined $c->req->parameters->{'look_back'} ? $c->req->parameters->{'look_back'} : 60;
     my $look_ahead    = $c->req->parameters->{'look_ahead'}    || 300;
 
     my $grouped = {};
@@ -115,6 +115,10 @@ sub core_scheduling_page {
     $c->stash->{intervals}  = $intervals;
     $c->stash->{average}    = $total / 60;
     $c->stash->{perf_stats} = $perf_stats;
+
+    $c->stash->{group_seconds}  = $group_seconds;
+    $c->stash->{look_back}      = $look_back;
+    $c->stash->{look_ahead}     = $look_ahead;
 
     $c->stash->{title}    = 'Core Scheduling Overview';
     $c->stash->{template} = 'core_scheduling.tt';
