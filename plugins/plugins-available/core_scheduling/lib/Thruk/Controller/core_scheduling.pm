@@ -48,6 +48,11 @@ sub core_scheduling_page {
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
 
+    my $style = $c->req->parameters->{'style'} || 'core_scheduling';
+    if($style ne 'core_scheduling') {
+        return if Thruk::Utils::Status::redirect_view($c, $style);
+    }
+
     # do the filtering
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
@@ -133,6 +138,7 @@ sub core_scheduling_page {
     $c->stash->{look_back}      = $look_back;
     $c->stash->{look_ahead}     = $look_ahead;
 
+    $c->stash->{style}    = 'core_scheduling';
     $c->stash->{substyle} = 'service';
     $c->stash->{title}    = 'Core Scheduling Overview';
     $c->stash->{template} = 'core_scheduling.tt';

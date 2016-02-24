@@ -16,6 +16,11 @@
     <td align="center" valign="top" width="60%">
       <div align="center" class='dataTitle'>
         Core Scheduling Overview
+        [% IF hostgroup       == 'all' %] For All Host Groups
+        [% ELSIF hostgroup    != ''    %] For Host Group '[% hostgroup %]'
+        [% ELSIF servicegroup == 'all' %] For All Service Groups
+        [% ELSIF servicegroup != ''    %] For Service Group '[% servicegroup %]'
+        [% END %]
       </div>
     </td>
     <td align="right" valign="bottom" width="20%">

@@ -13,5 +13,11 @@ Thruk::Utils::Menu::insert_sub_item('System', 'Scheduling Queue', {
                                 'name'  => 'Core Scheduling Graph',
 });
 
+Thruk::Utils::Status::add_view({'group' => 'Core Scheduling',
+                                'name'  => 'Core Scheduling Graph',
+                                'value' => 'core_scheduling',
+                                'url'   => 'core_scheduling.cgi',
+});
+
 # enable reporting features if this plugin is loaded
 $app->config->{'use_feature_core_scheduling'} = 'core_scheduling.cgi';
