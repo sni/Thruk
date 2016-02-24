@@ -212,7 +212,15 @@ sub _reccuring_downtime_checks  {
 
     my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 0, 1);
     for my $d (@{$downtimes}) {
-        my($err, $detail) = _check_recurring_downtime($c, $d);
+        my $file    = $c->config->{'var_path'}.'/downtimes/'.$d->{'file'}.'.tsk';
+        my($err, $detail) = (0, "");
+        eval {
+            ($err, $detail) = _check_recurring_downtime($c, $d, $file);
+        };
+        if($@) {
+            $err++;
+            $detail = "Could not check recurring downtimes from $file: ".$@;
+        }
         $errors  += $err;
         $details .= $detail;
     }
@@ -231,20 +239,19 @@ sub _reccuring_downtime_checks  {
 
 =head2 _check_recurring_downtime
 
-    _check_recurring_downtime($c, $d)
+    _check_recurring_downtime($c, $d, $file)
 
 verify errors in specific recurring downtime
 
 =cut
 sub _check_recurring_downtime  {
-    my($c, $downtime) = @_;
+    my($c, $downtime, $file) = @_;
 
     #my($backends, $cmd_typ)...
     my($backends, undef) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
 
     my $errors  = 0;
     my $details = "";
-    my $file    = $c->config->{'var_path'}.'/downtimes/'.$downtime->{'file'}.'.tsk';
     if($downtime->{'target'} eq 'host') {
         for my $hst (@{$downtime->{'host'}}) {
             my $data = $c->{'db'}->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name/], backend => $backends );
