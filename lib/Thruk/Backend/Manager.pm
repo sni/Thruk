@@ -363,13 +363,13 @@ sub get_scheduling_queue {
     my($services) = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}],
-                                                 }],
+                                                 }, $options{'servicefilter'}],
                                         columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing/],
                                       );
     my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                               { '-or' => [{ 'active_checks_enabled' => '1' },
                                                          { 'check_options' => { '!=' => '0' }}],
-                                              }],
+                                              }, $options{'hostfilter'}],
                                      options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
                                      columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing/],
                                     );

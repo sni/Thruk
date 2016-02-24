@@ -45,7 +45,14 @@ sub index {
 sub core_scheduling_page {
     my($c) = @_;
 
-    _reschedule_everything($c) if $c->req->parameters->{'reschedule'};
+    # set some defaults
+    Thruk::Utils::Status::set_default_stash($c);
+
+    # do the filtering
+    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    _reschedule_everything($c, $hostfilter, $servicefilter) if $c->req->parameters->{'reschedule'};
 
     my $now           = time();
     my $group_seconds = $c->req->parameters->{'group_seconds'} || 1;
@@ -56,7 +63,7 @@ sub core_scheduling_page {
     $grouped->{($now-$look_back )*1000} = { hosts => 0, services => 0, hosts_running => 0, services_running => 0 };
     $grouped->{($now+$look_ahead)*1000} = { hosts => 0, services => 0, hosts_running => 0, services_running => 0 };
 
-    my $data = $c->{'db'}->get_scheduling_queue($c);
+    my $data = $c->{'db'}->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     for my $d (@{$data}) {
         my $time = $d->{'next_check'};
         next unless $time > $now - $look_back;
@@ -99,7 +106,13 @@ sub core_scheduling_page {
 
     my $perf_stats = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
     if($c->req->parameters->{'json'}) {
-        return $c->render(json => { queue => $queue, markings => $markings, rate => sprintf("%.2f", $perf_stats->{'host_checks_rate'} + $perf_stats->{'service_checks_rate'}) });
+        my $json = {
+            queue    => $queue,
+            markings => $markings,
+            rate     => sprintf("%.2f", $perf_stats->{'host_checks_rate'} + $perf_stats->{'service_checks_rate'}),
+        };
+        $json->{'message'} = $c->stash->{message} if $c->stash->{message};
+        return $c->render(json => $json);
     }
 
     $c->stash->{'markings'}         = $markings;
@@ -120,6 +133,7 @@ sub core_scheduling_page {
     $c->stash->{look_back}      = $look_back;
     $c->stash->{look_ahead}     = $look_ahead;
 
+    $c->stash->{substyle} = 'service';
     $c->stash->{title}    = 'Core Scheduling Overview';
     $c->stash->{template} = 'core_scheduling.tt';
     return;
@@ -127,29 +141,33 @@ sub core_scheduling_page {
 
 ##########################################################
 sub _reschedule_everything {
-    my($c) = @_;
+    my($c, $hostfilter, $servicefilter) = @_;
 
     load Thruk::Controller::cmd;
 
+    $c->stash->{scheduled} = 0;
     my $commands2send = {};
     my($backends_list) = $c->{'db'}->select_backends('send_command');
     for my $backend (@{$backends_list}) {
-        my $cmds = _reschedule_backend($c, $backend);
+        my $cmds = _reschedule_backend($c, $backend, $hostfilter, $servicefilter);
         $commands2send->{$backend} = $cmds;
     }
     $c->{'db'}->enable_backends($backends_list, 1);
 
     Thruk::Controller::cmd::bulk_send($c, $commands2send);
 
+
+    $c->stash->{message} = $c->stash->{scheduled}.' hosts and services rescheduled successfully';
+
     return;
 }
 ##########################################################
 sub _reschedule_backend {
-    my($c, $backend) = @_;
+    my($c, $backend, $hostfilter, $servicefilter) = @_;
     my $cmds = [];
 
     $c->{'db'}->enable_backends([$backend], 1);
-    my $data = $c->{'db'}->get_scheduling_queue($c);
+    my $data = $c->{'db'}->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     my $intervals = {};
     for my $d (@{$data}) {
         push @{$intervals->{$d->{'check_interval'}}}, $d;
@@ -197,6 +215,7 @@ sub _reschedule_backend {
                 } else {
                     $cmd_line .= sprintf('SCHEDULE_FORCED_HOST_CHECK;%s;%lu', $d->{'host_name'}, $ts);
                 }
+                $c->stash->{scheduled}++;
                 push @{$cmds}, $cmd_line;
 
             }
