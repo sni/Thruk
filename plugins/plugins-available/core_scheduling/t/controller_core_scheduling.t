@@ -57,3 +57,6 @@ for my $url (@{$json_hash_pages}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
 }
+
+# restore default
+`cd plugins/plugins-enabled && rm -f core_scheduling`;
