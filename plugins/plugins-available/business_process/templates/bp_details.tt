@@ -8,7 +8,7 @@
   <table border="0" class="optBox" style="position: absolute; right: 30px; top: 55px;">
     <tr>
       <td>
-        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;token=' _ get_user_token(c); button(link, 'save', 'bp_save_button') %]
+        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;token=' _ get_user_token(c); button(link, 'save changes', 'bp_save_button') %]
       </td>
     </tr>
   </table>
@@ -182,6 +182,17 @@
                     <input type="hidden" name="bp" value="[% bp.id %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
                     <a href='bp.cgi' onClick="confirm('Really discard all changes?') && jQuery(this).closest('FORM').submit(); return false;">Discard Changes</a>
+                  </form>
+                </td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='Save Changes' title='Save Changes' width="16" height="16"></td>
+                <td class='command'>
+                  <form action='bp.cgi' method='POST' style="display: inline;">
+                    <input type='hidden' name='action' value='commit'>
+                    <input type="hidden" name="bp" value="[% bp.id %]">
+                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <a href='bp.cgi' onClick="jQuery(this).closest('FORM').submit(); return false;">Save Changes</a>
                   </form>
                 </td>
               </tr>
