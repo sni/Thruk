@@ -150,6 +150,37 @@ sub get_downtimes_list {
 
 ##########################################################
 
+=head2 check_downtime
+
+    check_downtime($c, $rd, $file)
+
+check downtime for expired hosts or services
+
+=cut
+sub check_downtime {
+    my($c, $rd, $file) = @_;
+    require Thruk::Utils::SelfCheck;
+    my($err, $detail) = (0, "");
+    eval {
+        ($err, $detail) = Thruk::Utils::SelfCheck::check_recurring_downtime($c, $rd, $file);
+    };
+    if($@) {
+        $err++;
+        $detail = "Could not check recurring downtimes from $file: ".$@;
+    }
+    if($err) {
+        $rd->{'error'} = $detail;
+        Thruk::Utils::write_data_file($file, $rd);
+    }
+    if($err == 0 && $rd->{'error'}) {
+        delete $rd->{'error'};
+        Thruk::Utils::write_data_file($file, $rd);
+    }
+    return($err, $detail);
+}
+
+##########################################################
+
 =head2 read_downtime
 
     read_downtime($c, $dfile, $default_rd, $authhosts, $authservices, $authhostgroups, $authservicegroups, $host, $service, $auth, $backendfilter, $hosts, $services, $hostgroups, $servicegroups)

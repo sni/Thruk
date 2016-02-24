@@ -213,14 +213,7 @@ sub _reccuring_downtime_checks  {
     my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 0, 1);
     for my $d (@{$downtimes}) {
         my $file    = $c->config->{'var_path'}.'/downtimes/'.$d->{'file'}.'.tsk';
-        my($err, $detail) = (0, "");
-        eval {
-            ($err, $detail) = _check_recurring_downtime($c, $d, $file);
-        };
-        if($@) {
-            $err++;
-            $detail = "Could not check recurring downtimes from $file: ".$@;
-        }
+        my($err, $detail) = Thruk::Utils::RecurringDowntimes::check_downtime($c, $d, $file);
         $errors  += $err;
         $details .= $detail;
     }
@@ -237,14 +230,14 @@ sub _reccuring_downtime_checks  {
 
 ##############################################
 
-=head2 _check_recurring_downtime
+=head2 check_recurring_downtime
 
-    _check_recurring_downtime($c, $d, $file)
+    check_recurring_downtime($c, $d, $file)
 
 verify errors in specific recurring downtime
 
 =cut
-sub _check_recurring_downtime  {
+sub check_recurring_downtime {
     my($c, $downtime, $file) = @_;
 
     #my($backends, $cmd_typ)...

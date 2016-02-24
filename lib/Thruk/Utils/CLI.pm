@@ -994,6 +994,9 @@ sub _cmd_downtimetask {
         $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
     }
 
+    # do quick self check
+    Thruk::Utils::RecurringDowntimes::check_downtime($c, $downtime, $file);
+
     my $start    = time();
     my $end      = $start + ($downtime->{'duration'}*60);
     my $hours    = 0;

@@ -319,6 +319,10 @@ sub _process_recurring_downtimes_page {
         my $file = $old_file || Thruk::Utils::RecurringDowntimes::get_data_file_name($c);
         Thruk::Utils::write_data_file($file, $rd);
         Thruk::Utils::RecurringDowntimes::update_cron_file($c);
+
+        # do quick self check
+        Thruk::Utils::RecurringDowntimes::check_downtime($c, $rd, $file);
+
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime saved' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
