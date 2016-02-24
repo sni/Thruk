@@ -719,7 +719,15 @@ sub _process_plugins_page {
                 }
                 if(defined $c->req->parameters->{'plugin.'.$dir} and $c->req->parameters->{'plugin.'.$dir} == 1) {
                     if(!-e $plugin_enabled_dir.'/'.$dir) {
-                        symlink($plugin_available_dir.'/'.$dir,
+                        my $plugin_src_dir = $plugin_available_dir.'/'.$dir;
+                        # make nicer and maintainable symlinks by not using absolute paths if possible
+                        if(-d $plugin_enabled_dir.'/../plugins-available/'.$dir) {
+                            $plugin_src_dir = '../plugins-available/'.$dir;
+                        }
+                        elsif($ENV{'OMD_ROOT'}) {
+                            $plugin_src_dir = '../../../share/thruk/plugins/plugins-available/'.$dir;
+                        }
+                        symlink($plugin_src_dir,
                                 $plugin_enabled_dir.'/'.$dir)
                             or die("cannot create ".$plugin_enabled_dir.'/'.$dir." : ".$!);
                     }
