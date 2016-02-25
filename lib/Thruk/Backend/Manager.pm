@@ -364,15 +364,37 @@ sub get_scheduling_queue {
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}],
                                                  }, $options{'servicefilter'}],
-                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing/],
+                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing/,
+                                                    $options{'servicefilter'} ? qw/host_active_checks_enabled host_check_options host_last_check host_next_check host_check_interval host_is_executing/ :()],
                                       );
-    my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                              { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                         { 'check_options' => { '!=' => '0' }}],
-                                              }, $options{'hostfilter'}],
-                                     options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
-                                     columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing/],
-                                    );
+    my($hosts);
+    if($options{'servicefilter'}) {
+        # extract hosts from services
+        my $uniq = {};
+        for my $s (@{$services}) {
+            next if defined $uniq->{$s->{'host_name'}};
+            my $host = {
+                host_name               => $s->{'host_name'},
+                description             => '',
+                active_checks_enabled   => $s->{'host_active_checks_enabled'},
+                check_options           => $s->{'host_check_options'},
+                last_check              => $s->{'host_last_check'},
+                next_check              => $s->{'host_next_check'},
+                check_interval          => $s->{'host_check_interval'},
+                is_executing            => $s->{'host_is_executing'},
+            };
+            $uniq->{$s->{'host_name'}} = $host;
+        }
+        $hosts = [values %{$uniq}];
+    } else {
+        ($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
+                                                             { 'check_options' => { '!=' => '0' }}],
+                                                  }, $options{'hostfilter'}],
+                                         options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
+                                         columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing/],
+                                        );
+    }
 
     my $queue = [];
     if(defined $services) {
