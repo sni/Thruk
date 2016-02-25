@@ -57,7 +57,7 @@ sub core_scheduling_page {
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
-    _reschedule_everything($c, $hostfilter, $servicefilter) if $c->req->parameters->{'reschedule'};
+    reschedule_everything($c, $hostfilter, $servicefilter) if $c->req->parameters->{'reschedule'};
 
     my $now           = time();
     my $group_seconds = $c->req->parameters->{'group_seconds'} || 1;
@@ -146,7 +146,13 @@ sub core_scheduling_page {
 }
 
 ##########################################################
-sub _reschedule_everything {
+
+=head2 reschedule_everything
+
+    reschedule_everything($c, [$hostfilter], [$servicefilter])
+
+=cut
+sub reschedule_everything {
     my($c, $hostfilter, $servicefilter) = @_;
 
     load Thruk::Controller::cmd;

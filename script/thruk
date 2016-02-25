@@ -187,6 +187,12 @@ script has the following arguments
                                      - reports
                                      - recurring_downtimes
 
+    Scheduling Commands
+      - fix_scheduling(=filter)     balance scheduling or all hosts and services
+                                    or just a group by adding a filter like
+                                    fix_scheduling=hg:<hostgroup>
+                                    fix_scheduling=sg:<servicegroup>
+
     Internal Commands
       - installcron                 update cronjobs for downtimes and reports
                                     (only needed during package installation)

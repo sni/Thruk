@@ -669,6 +669,11 @@ sub _run_command_action {
         $data->{'all_stdout'} = 1;
     }
 
+    # core reschedule?
+    elsif($action =~ /^fix_scheduling=?(.*)$/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_fix_scheduling($c, $1);
+    }
+
     # nothing matched...
     else {
         $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
@@ -966,6 +971,45 @@ sub _cmd_panorama {
 
     $c->stats->profile(end => "_cmd_panorama($action)");
     return("unknown panorma command", 1);
+}
+
+##############################################
+sub _cmd_fix_scheduling {
+    my($c, $filter) = @_;
+
+    if(!$c->config->{'use_feature_core_scheduling'}) {
+        return("ERROR - core_scheduling addon is disabled\n", 1);
+    }
+
+    eval {
+        require Thruk::Controller::core_scheduling;
+    };
+    if($@) {
+        _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
+        return("core_scheduling plugin is disabled.\n", 1);
+    }
+
+    $c->stats->profile(begin => "_cmd_fix_scheduling()");
+
+    my $hostfilter;
+    my $servicefilter;
+    if($filter) {
+        if($filter =~ m/^hg:(.*)$/mx) {
+            $hostfilter    = { 'groups'      => { '>=' => $1 } };
+            $servicefilter = { 'host_groups' => { '>=' => $1 } };
+        }
+        elsif($filter =~ m/^sg:(.*)$/mx) {
+            $servicefilter = { 'groups'      => { '>=' => $1 } };
+        }
+        else {
+            return("filter must be either hg:<hostgroup> or sg:<servicegroup>\n", 1);
+        }
+    }
+    Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+    Thruk::Controller::core_scheduling::reschedule_everything($c, $hostfilter, $servicefilter);
+
+    $c->stats->profile(end => "_cmd_fix_scheduling()");
+    return($c->stash->{message}."\n", 0);
 }
 
 ##############################################
