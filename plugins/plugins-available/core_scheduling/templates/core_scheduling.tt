@@ -95,7 +95,7 @@
   </tr>
 </table>
 <br>
-<a href="reports2.cgi?action=edit&amp;report=new" class="button wzd_button">balance all hosts and services</a>
+<a href="reports2.cgi?action=edit&amp;report=new" id="reschedule_btn" class="button wzd_button">balance all hosts and services</a>
 
 </td></tr></table>
 
@@ -168,6 +168,11 @@ function updateGraphDelayed() {
 function updateGraph(reschedule) {
   window.clearTimeout(updateTimer);
   updateInterval = jQuery('#update_interval').val()*1000;
+  if(reschedule) {
+    jQuery('#reschedule_btn').button({
+        icons: {primary: 'ui-waiting-button'}
+    }).button("disable");
+  }
   jQuery.ajax({
       url:      "[%  uri_with(c, 'json' => 'true' ) %]",
       type:     "POST",
@@ -193,6 +198,12 @@ function updateGraph(reschedule) {
 
         if(data['message'] != undefined) {
             thruk_message(0, data['message']);
+        }
+
+        if(reschedule) {
+          jQuery('#reschedule_btn').button({
+              icons: {primary: 'ui-wzd-button'}
+          }).button("enable");
         }
 
         window.clearTimeout(updateTimer);
