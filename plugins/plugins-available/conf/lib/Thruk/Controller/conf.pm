@@ -734,7 +734,7 @@ sub _process_plugins_page {
                 }
             }
             Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully.' );
-            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=plugins');
+            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=plugins&reload_nav=1');
         }
     }
 
