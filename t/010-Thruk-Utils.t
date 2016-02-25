@@ -1,19 +1,19 @@
 #!/usr/bin/env perl
 
+use warnings;
 use strict;
+use utf8;
 use Test::More;
-use Data::Dumper;
+use Encode qw/is_utf8/;
 
 BEGIN {
-    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 38;
+    plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    plan tests => 59;
 
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
-
-use Catalyst::Test 'Thruk';
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
@@ -59,11 +59,8 @@ my $sorted_by_abc_exp = [
 ];
 #########################
 # initialize backend manager
-my $m;
-use_ok 'Thruk::Model::Thruk';
-$m = Thruk::Model::Thruk->new();
-isa_ok($m, 'Thruk::Model::Thruk');
-my $b = $m->{'obj'};
+use_ok 'Thruk::Backend::Manager';
+my $b = Thruk::Backend::Manager->new();
 isa_ok($b, 'Thruk::Backend::Manager');
 
 my $c = TestUtils::get_c();
@@ -119,7 +116,7 @@ SKIP: {
 
     #########################
     # external cmd
-    Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
+    Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;", background => 1 });
     my $id = $c->stash->{'job_id'};
     isnt($id, undef, "got an id: ".$id);
 
@@ -139,7 +136,7 @@ SKIP: {
 
     #########################
     # external perl
-    Thruk::Utils::External::perl($c, { expr => "print STDERR 'blah'; print 'blub';" });
+    Thruk::Utils::External::perl($c, { expr => "print STDERR 'blah'; print 'blub';", background => 1 });
     $id = $c->stash->{'job_id'};
     isnt($id, undef, "got an id");
 
@@ -176,3 +173,82 @@ my($replaced,$rc) = $b->_get_replaced_string($str, $macros);
 my $expected = '/opt/test -a a -b  -c host';
 is($rc, 1, 'macro replacement with empty args succeeds');
 is($replaced, $expected, 'macro replacement with empty args string');
+
+#########################
+# utf8 encoding
+my $teststring = 'test';
+my $encoded    = $teststring;
+$encoded       = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, $teststring, 'ensure utf8 test');
+ok(is_utf8($encoded), 'is_utf8 test');
+
+$teststring = 'testä';
+$encoded    = $teststring;
+$encoded    = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, 'test'.chr(228), 'ensure utf8 testae');
+ok(is_utf8($encoded), 'is_utf8 testae');
+
+$teststring ='test€';
+$encoded    = $teststring;
+$encoded    = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, "test\x{20ac}", 'ensure utf8 testeuro');
+ok(is_utf8($encoded), 'is_utf8 testeuro');
+
+$teststring = "test\x{20ac}";
+$encoded    = $teststring;
+$encoded    = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, "test\x{20ac}", 'ensure utf8 test20ac');
+ok(is_utf8($encoded), 'is_utf8 test20ac');
+
+#########################
+my $uri;
+$uri = Thruk::Utils::Filter::uri_with($c, {});
+is($uri, 'side.html', 'uri_with without params');
+
+$uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => 2, c => 3});
+is($uri, 'side.html?a=1&amp;b=2&amp;c=3', 'uri_with with 3 params');
+
+$uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => undef, c => 'undef'});
+is($uri, 'side.html?a=1', 'uri_with with undef params');
+
+my($res, $context) = TestUtils::ctx_request('/thruk/main.html?a=1&b=2&c=3&a=4');
+$c = $context;
+
+my $param_exp = {a=>[1,4], b => 2, c => 3};
+is_deeply($c->req->parameters, $param_exp, 'got array parameters');
+
+$param_exp = {a=>[1,4], b => 2, c => 3};
+is_deeply($c->req->query_parameters, $param_exp, 'got array query parameters');
+
+$uri = Thruk::Utils::Filter::uri_with($c, {});
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'uri_with with existing params');
+
+$uri = Thruk::Utils::Filter::full_uri($c);
+is($uri, '/thruk/main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'full_uri with existing params');
+
+$uri = Thruk::Utils::Filter::short_uri($c);
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'short_uri with existing params');
+
+$uri = Thruk::Utils::Filter::uri_with($c, { d => 5 });
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4&amp;d=5', 'uri_with with added params');
+
+$uri = Thruk::Utils::Filter::uri_with($c, { b => 5 });
+is($uri, 'main.html?a=1&amp;b=5&amp;c=3&amp;a=4', 'uri_with with replaced params');
+
+#########################
+my $args = Thruk::Utils::Filter::as_url_arg('blah=&blub"');
+is($args, 'blah%3D%26blub%22', 'as_url_arg');
+
+#########################
+Thruk::Utils::set_message($c, 'fail_message', "test_error");
+
+my $exp_cookie = {'value' => 'fail_message~~test_error', 'path' => '/thruk/'};
+is_deeply($c->res->{'cookies'}->{'thruk_message'}, $exp_cookie, 'get_message cookie');
+
+my @msg = Thruk::Utils::Filter::get_message($c);
+my $exp = ['fail_message', 'test_error', 0];
+is_deeply(\@msg, $exp, 'get_message');
+
+is($c->res->{'cookies'}->{'thruk_message'}, undef, 'get_message cookie after');
+
+#########################

@@ -1,4 +1,5 @@
-﻿[% PROCESS custom_perf_bar_adjustments.tt %]
+﻿[% PROCESS _blocks.tt %]
+[% PROCESS custom_perf_bar_adjustments.tt %]
 
     <table border="0" width="100%" class='status servicestatus' id="statusTable" onmouseout='reset_all_hosts_and_services();'>
       <tr>
@@ -20,15 +21,7 @@
       [% SET lasthost = '' %]
 
       [% FOREACH s = data %]
-      [% SET serviceclass = 'statusOdd'  IF loop.even %]
-      [% SET serviceclass = 'statusEven' IF loop.odd %]
-      [% SET hostclass = 'statusOdd'  IF loop.even %]
-      [% SET hostclass = 'statusEven' IF loop.odd %]
-      [% IF s.host_state == 1 %]
-        [% hostclass = 'statusHOSTDOWN' %]
-      [% ELSIF s.host_state == 2 %]
-        [% hostclass = 'statusHOSTUNREACHABLE' %]
-      [% END %]
+      [% IF loop.even; serviceclass = 'statusOdd'; ELSE; serviceclass = 'statusEven'; END %]
       [% IF s.has_been_checked == 0 %]
         [% state = 'PENDING' %]
       [% ELSIF s.state == 0 %]
@@ -53,50 +46,65 @@
       [% SET peer_key      = s.peer_key %]
       [% SET program_start = pi_detail.$peer_key.program_start %]
 
+      [% rowclasses = "" %]
+      [% IF s.state_type == 1 %]
+        [% rowclasses = "hard_state" %]
+      [% ELSE %]
+        [% rowclasses = "soft_state" %]
+      [% END%]
+
       [% IF lasthost != '' && lasthost != s.host_name %]
       <tr><td colspan="6"></td></tr>
       <tr><td colspan="6"></td></tr>
       [% END %]
 
-      <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %]>
+      <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">
         [% IF lasthost == s.host_name %]
         <td></td>
         [% ELSE %]
+        [% SET lasthost = s.host_name %]
         [% SET host_comment_count = 0 %]
         [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
+        [% SET hostclass = 'statusOdd'  IF loop.even %]
+        [% SET hostclass = 'statusEven' IF loop.odd %]
+        [% IF s.host_state == 1 %]
+          [% hostclass = 'statusHOSTDOWN' %]
+        [% ELSIF s.host_state == 2 %]
+          [% hostclass = 'statusHOSTUNREACHABLE' %]
+        [% END %]
         <td class='[% hostclass %]'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
               <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
               <td align="right">
-                [% PROCESS _status_host_attributes.tt hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
+                [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
               </td>
             </tr>
           </table>
         </td>
         [% END %]
         [% IF show_backends_in_table == 2 %]
-        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% s.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='[% serviceclass %]'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
             <tr>
               <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a></td>
               <td align="right" class='[% serviceclass %]'>
-              [% PROCESS _status_service_attributes.tt service=s service_comment_count=comment_count %]
+              [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
               </td>
             </tr>
           </table>
         </td>
         <td class='status[% state %]'>[% state %]</td>
-        <td class='[% serviceclass %]' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
-        <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
-        <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number > 0 %] <span title="This service has send out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
+        <td class='[% serviceclass %] last_check' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
+        <td class='[% serviceclass %] duration' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
+        <td class='[% serviceclass %] attempt' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% IF show_backends_in_table == 1 %]
-        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% s.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
           [% IF s.has_been_checked == 0 %]
-            <td class='[% serviceclass %]' align="left">
+            <td class='[% serviceclass %] output' align="left">
               [% IF s.active_checks_enabled == 0 %]
               Service is not scheduled to be checked...
               [% ELSE %]
@@ -104,40 +112,38 @@
               [% END %]
             </td>
           [% ELSE %]
-            <td align="left" class='[% serviceclass %]'
-            [% IF s.long_plugin_output and show_long_plugin_output != 'off' %]
+            [% plugin_output      = remove_html_comments(s.plugin_output) %]
+            [% long_plugin_output = remove_html_comments(s.long_plugin_output) %]
+            <td align="left" class='[% serviceclass %] output'
+            [% IF long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(s.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(s.long_plugin_output))) %]'
+                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(plugin_output)) %]<br>[% escape_html(nl2br(escape_html(long_plugin_output))) %]'
                 [% ELSE %]
-                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]'
+                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(plugin_output) %]<br>[% nl2br(escape_html(long_plugin_output)) %]'
                 [% END %]
               [% END %]
             [% END %]
             >
-            [% s.plugin_output      = remove_html_comments(s.plugin_output) %]
-            [% s.long_plugin_output = remove_html_comments(s.long_plugin_output) %]
             [% pnp_url = get_pnp_url(c, s, 1) %]
-            [% graph_url = get_graph_url(c, s, 1) %]
-            [% PROCESS _perfdata_table.tt write="true" state=s.state plugin_output=s.plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description %]
+            [% PROCESS _perfdata_table write="true" state=s.state plugin_output=plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description %]
 
-            [% IF s.long_plugin_output and show_long_plugin_output == 'popup' %]
-              [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(s.plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% s.plugin_output %]</span>[% END %]
+            [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
+              [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% plugin_output %]</span>[% END %]
             [% ELSE %]
-              [% IF escape_html_tags %][% escape_html(s.plugin_output) %][% ELSE %][% s.plugin_output %][% END %]
+              [% IF escape_html_tags %][% escape_html(plugin_output) %][% ELSE %][% plugin_output %][% END %]
             [% END %]
 
-            [% IF s.long_plugin_output and show_long_plugin_output == 'inline' %]
+            [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
               [% IF escape_html_tags %]
-                <br>[% nl2br(escape_html(s.long_plugin_output)) %]
+                <br>[% nl2br(escape_html(long_plugin_output)) %]
               [% ELSE %]
-                <br>[% nl2br(s.long_plugin_output) %]
+                <br>[% nl2br(long_plugin_output) %]
               [% END %]
             [% END %]
             </td>
           [% END %]
       </tr>
-      [% SET lasthost = s.host_name %]
       [% END %]
 
     </table>

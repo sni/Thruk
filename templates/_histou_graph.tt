@@ -1,0 +1,102 @@
+﻿[% USE date %]
+[% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/') %]
+<script type="text/javascript">
+  var histou_url        = "[% histou_url %]";
+  var histou_frame_url  = "[% histou_frame_url %]";
+  var histou_source     = [% c.config.grafana_default_panelId %];
+  var random            = Number(Math.random() * 100000).toFixed(0);
+
+  /* try to fetch sources */
+  var source_url = histou_url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&');
+  jQuery.ajax({
+    url: source_url,
+    type: 'POST',
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function(data) {
+      data = data.replace(/^[\s\S]*<br>\{/, '{');
+      data = data.replace(/<br><\/pre>$/, '');
+      data = data.replace(/\n/g, '');
+      eval('data = '+data+";");
+      var sources    = [];
+      var has_graphs = false;
+      jQuery('#histou_source_select').find('option').remove();
+      jQuery(data.rows).each(function(i, row) {
+          jQuery(row.panels).each(function(j, panel) {
+            var title = panel.title;
+            title = title.replace('[% hst %] ', '');
+            title = title.replace('[% svc %] ', '');
+            jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+title+'<\/option>');
+            has_graphs = true;
+          });
+      });
+      /* only useful for multiple sources */
+      if(has_graphs) {
+        jQuery('#histou_source_select').show();
+      }
+    }
+  });
+</script>
+<table>
+  <tr>
+    <td style="position: relative;">
+        <div class='commentTitle'>Performance Graph</div>
+        <div class='pnpSelector'>
+          <form action="#">
+            <select onchange="histou_source=this.value; set_histou_img();" id="histou_source_select" style="display: none;">
+            </select>
+          </form>
+        </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+<table border="0" class='comment blockHeadBorder' width='650'>
+  <tr class='comment' style="cursor:pointer">
+    <th class='comment' width="20" nowrap>
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_histou_img(-0.5)">
+    </th>
+    <th id="histou_th1" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_histou_img([% date.now -    14400 %], [% date.now %], this.id, histou_source)">4 hours</th>
+    <th id="histou_th2" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_histou_img([% date.now -    90000 %], [% date.now %], this.id, histou_source)">day</th>
+    <th id="histou_th3" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_histou_img([% date.now -   540000 %], [% date.now %], this.id, histou_source)">week</th>
+    <th id="histou_th4" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_histou_img([% date.now -  2764800 %], [% date.now %], this.id, histou_source)">month</th>
+    <th id="histou_th5" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_histou_img([% date.now - 30067200 %], [% date.now %], this.id, histou_source)">year</th>
+    <th class='comment' width="20" nowrap>
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_histou_img(0.5)">
+    </th>
+  </tr>
+  <tr>
+    <td colspan=7 align="center">
+      <a id="histou_graph_link" href="[% histou_url %]"><div style="z-index: 100; position: absolute; width: 800px; height: 262px;"></div></a>
+      <div id="histou_graph_pane" style="position: relative; width: 800px; height: 262px; overflow: hidden;">
+        <img id="pnpwaitimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
+        <iframe id="histou_iframe" src="[% histou_frame_url %]" width="800" height="270" frameborder="0" scrolling='no' style="padding: 0; margin: 0;"></iframe>
+      </div>
+    </td>
+  </tr>
+</table>
+    </td>
+  </tr>
+</table>
+<script type="text/javascript">
+  var histou_id     = 'histou_th2';
+  var histou_start  = [% date.now - 90000 %];
+  var histou_end    = [% date.now %];
+  if(window.location.hash != '#') {
+    var values = window.location.hash.split("/");
+    if(values[0]) {
+      histou_id = values[0].replace(/^#/, '');
+    }
+    if(values[1]) {
+      histou_start = values[1];
+    }
+    if(values[2]) {
+      histou_end = values[2];
+    }
+    if(values[3] != undefined) {
+      histou_source = values[3];
+    }
+  }
+  set_histou_img(histou_start, histou_end, histou_id, histou_source);
+</script>

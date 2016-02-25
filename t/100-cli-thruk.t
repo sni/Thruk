@@ -1,12 +1,11 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 }
 
 BEGIN {
@@ -16,8 +15,8 @@ BEGIN {
 }
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
-$BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
-$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
+$BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+$BIN    = $BIN.' --remote-url="'.$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.'"' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 my $cronuser = '';
 $cronuser = ' -u '.$ENV{'THRUK_USER'} if defined $ENV{'THRUK_USER'};
@@ -40,7 +39,7 @@ TestUtils::test_command({
     like => ['/Tactical Monitoring Overview/',
              '/Network Outages/',
              '/Monitoring Features/',
-             '/(javascript\/overlib\.js|all_in_one-.\...\.css)/',
+             '/(javascript\/overlib\.js|all_in_one-[\d\-\.]+\.js)/',
             ],
 });
 
@@ -57,29 +56,58 @@ TestUtils::test_command({
 });
 
 # list backends
-TestUtils::test_command({
+my $test = {
     cmd  => $BIN.' -l',
     like => ['/\s+\*\s*\w{5}\s*[^\s]+/',
              '/Def\s+Key\s+Name/'
             ],
-});
+};
+TestUtils::test_command($test);
+
+if($test->{'exit'} == 0) {
+    my @out = split/\n/mx, $test->{'stdout'};
+    @out = grep(!/^(-|Def)/, @out);
+    my @backends;
+    my @names;
+    for my $line (@out) {
+        $line =~ s/^\ \*\s+//mx;
+        $line =~ s/^\s+//gmx;
+        my $data = [split(/\s+/mx, $line)];
+        push @backends, $data->[0];
+        push @names, $data->[1];
+    }
+    if(scalar @backends > 1) {
+        # test commands with multiple backends
+        local $ENV{'THRUK_NO_COMMANDS'} = 1;
+        TestUtils::test_command({
+            cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0].' -b '.$backends[1],
+            errlike => ['/\['.$backends[0].','.$backends[1].'\]/', '/TESTMODE:/' ],
+            like => ['/Command request successfully submitted to the Backend for processing/'],
+        });
+        TestUtils::test_command({
+            cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0],
+            errlike => ['/\['.$names[0].'\]/', '/TESTMODE:/' ],
+            like => ['/Command request successfully submitted to the Backend for processing/'],
+        });
+    }
+}
 
 # clearcache
 TestUtils::test_command({
-    cmd  => $BIN.' ./script/thruk -a clearcache',
-    like => ['/^$/'],
+    cmd  => $BIN.' -a clearcache',
+    like => ['/^cache cleared$/'],
 });
 
 # dumpcache
 TestUtils::test_command({
-    cmd  => $BIN.' ./script/thruk -a dumpcache',
+    cmd  => $BIN.' -a dumpcache',
     like => ['/^\$VAR1/'],
 });
 
 # 2 commands
 TestUtils::test_command({
-    cmd  => $BIN.' ./script/thruk -a clearcache,dumpcache',
-    like => ['/^\$VAR1/'],
+    cmd  => $BIN.' -a clearcache,dumpcache',
+    like => ['/^cache cleared\$VAR1/'],
 });
 
 # create recurring downtime
@@ -146,6 +174,19 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => $BIN.' -a command "'.$host.'"',
     like    => ['/Expaned Command:/'],
+});
+
+# self check
+TestUtils::test_command({
+    cmd  => $BIN.' -a selfcheck',
+    like => ['/Filesystem:/', '/is writable/', '/Logfiles:/', '/no errors/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    exit => undef,
+});
+
+# panorama cleanup
+TestUtils::test_command({
+    cmd  => $BIN.' -a clean_dashboards',
+    like => ['/OK - cleaned up 0 old dashboards/'],
 });
 
 done_testing();

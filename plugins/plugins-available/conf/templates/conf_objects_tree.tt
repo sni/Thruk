@@ -1,5 +1,24 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
+[% BLOCK dir_block %]
+  [% FOREACH d = dir.dirs.keys.sort %]
+  [% folder = dir.dirs.$d %]
+    <ul>
+      <li>
+        <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;dir=[% dir.path %][% d %]" target="content_frame">[% d %]</a>
+        [% INCLUDE dir_block dir = folder %]
+      </li>
+    </ul>
+  [% END %]
+  [% FOREACH f = dir.files.keys.sort %]
+    <ul>
+      <li class="file_node">
+        <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;dir=[% dir.path %][% f %]" target="content_frame">[% f %]</a>
+      </li>
+    </ul>
+  [% END %]
+[% END %]
+
 <div class="dataTitle" style="padding-top: 4px; padding-bottom: 4px;">
   <a href="conf.cgi?sub=objects" style="float:left;"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='go back' title='go back' width="16" height="16" style="vertical-align: middle;"> back</a>
   Objects Browser
@@ -16,6 +35,11 @@
       </div>
       <div id="container">
       <ul>
+        <li id="o_files">
+          <a href="conf.cgi?sub=objects&amp;action=tree_objects" target="content_frame">Files</a>
+          [% INCLUDE dir_block dir = files_tree %]
+        </li>
+
         <li id="o_objects" class="jstree-open">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects" target="content_frame">Objects</a>
           <ul>
@@ -105,7 +129,14 @@ jQuery(function($) {
         return;
     });
 
-  jQuery('#container').jstree({
+  jQuery('#container')
+  .on('changed.jstree', function (e, data) {
+    var node=data.instance.get_node(data.selected[0]);
+    if(node && node.a_attr && node.a_attr.href) {
+      jQuery('#content_frame').attr('src', node.a_attr.href);
+    }
+  })
+  .jstree({
     plugins: [ "themes", "dnd"/*, "contextmenu"*/ ],
     core:    {
       animation: 0

@@ -1,0 +1,832 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+test_page_rps - command line utility for testing Thruks page requests per second
+
+=head1 SYNOPSIS
+
+  Usage: test_page_rps [options] [<commit|tags> ...]
+
+  Options:
+  -h, --help                    Show this help message and exit
+
+  -w, --write                   Write result file only.
+
+  -u, --update                  Do not retry already existing results.
+                                Only update new commits and tags.
+  -a, --all                     Run for normal commits too instead of just tags.
+  -n, --number=<n>              Limit tests to this number
+
+=head1 DESCRIPTION
+
+This script runs apache ab tool against a few sample pages and renders a
+result html page with the cpu and memory usage as well as the requests per second.
+
+=head1 EXAMPLES
+
+Update for the last 15 commits
+
+  %> test_page_rps -u -a -n 15
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-2015, <sven@nierlein.org>
+
+=cut
+
+use warnings;
+use strict;
+use JSON::XS;
+use File::Slurp qw/read_file/;
+use Time::HiRes qw/sleep gettimeofday tv_interval/;
+use Getopt::Long;
+
+my $started = 0;
+my $tags    = [];
+my $options = {
+    number   => 10,
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+Getopt::Long::GetOptions (
+   "h|help"             => \$options->{'help'},
+   "w|write"            => \$options->{'write_file'},
+   "u|update"           => \$options->{'update_only'},
+   "a|all"              => \$options->{'all'},
+   "n|number=i"         => \$options->{'number'},
+   "<>"                 => sub { push @{$tags}, "".shift },
+) or do {
+    print "usage: $0 [<options>] [<commit|tag> ...]\nsee --help for detailed help.\n";
+    exit(3);
+};
+_usage() if $options->{'help'};
+#################################################
+# settings
+my $NUM         = $options->{'number'};
+my $REQUESTS    = $ENV{REQUESTS}    || 100;
+my $CONCURRENCY = $ENV{CONCURRENCY} || 5;
+my $DELAY       = $ENV{DELAY}       || 2;
+my $BASEPORT    = 3000;
+my $BASEURL     = "http://127.0.0.1:$BASEPORT/thruk";
+
+#################################################
+# prepare
+$started = 1;
+cleanup();
+my $result_html = 'rpsresults.html';
+my $results_file = '.rps_results';
+my $results = {};
+if(-s $results_file) {
+    $results = JSON::XS::decode_json(read_file($results_file));
+}
+
+# clean non-existing git hashes
+_clean_old_git_hashes();
+
+if($options->{'write_file'}) {
+    # write results file only (will be done on exit)
+    exit;
+}
+my $author = -f '.author' ? 1 : 0;
+unlink('.author');
+
+#################################################
+# run tests
+print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+print("| Branch      | Startup | 1st Req | Static HTML     | Tactical CGI    | Status CGI      | JSON CGI        | Business P. CGI | Memory                | Load  | Dur  |\n");
+print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+chomp(my $branch = `git branch --no-color 2>/dev/null | grep ^\*`);
+$branch =~ s|^\*\s+||mx;
+
+if($options->{'all'}) {
+    my $one_per_day = {};
+    for my $line (split/\n/m, `git log --format="%ct %h"`) {
+        my($ts, $hash) = split/\s+/mx, $line;
+        my $day = POSIX::strftime( "%d%m%Y", localtime($ts));
+        next if $one_per_day->{$day};
+        push @{$tags}, $hash;
+        $one_per_day->{$day} = 1;
+        last if scalar @{$tags} >= $NUM;
+    }
+}
+if(scalar @{$tags} == 0) {
+    $tags = [reverse split(/\n/, `git tag -l | awk -F- '{ print \$1 }' | sort -u | tail -$NUM`)];
+    if($branch ne 'master') { unshift @{$tags}, 'master' }
+    unshift @{$tags}, $branch;
+}
+
+#################################################
+END {
+    if($started) {
+        cleanup();
+        switch_tag($branch) if $branch;
+    }
+    `touch .author` if $author;
+    print "\n" if $branch;
+    _create_results_file();
+}
+$SIG{'INT'}  = sub {
+    cleanup();
+    switch_tag($branch);
+    `touch .author` if $author;
+    exit;
+};
+
+#################################################
+# run tests
+for my $tag (@{$tags}) {
+    $tag =~ s|^\*\s+||gmx;
+    if($tag =~ /^v/mx) {
+        # get latest sp for this tag
+        chomp($tag = `git tag -l 2>/dev/null | grep $tag | tail -n 1`);
+    }
+    test_tag($tag);
+}
+print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+cleanup();
+exit;
+
+
+#################################################
+# SUBS
+#################################################
+sub _usage {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+}
+
+sub cleanup {
+    `ps -efl | grep thruk_server | grep -v grep | awk '{ print \$4 }' | xargs -r kill >/dev/null 2>&1`;
+    _safe_results();
+}
+
+#################################################
+sub _safe_results {
+    return unless $results;
+    if(scalar keys %{$results}) {
+        open(my $fh, '>', $results_file) or die("couldn't write results $results_file: $!");
+        print $fh JSON::XS->new->canonical(1)->encode($results);
+        close($fh);
+    }
+    return;
+}
+
+#################################################
+sub test_page {
+    my($name, $url) = @_;
+    our $currenttag;
+    sleep $DELAY;
+    my $cmd      = "ab -l -c $CONCURRENCY -n $REQUESTS $url 2>&1";
+    my $pageres  = `$cmd`;
+    my($page)    = $pageres =~ m/\QRequests per second:\E\s+([\d\.]+)/mx;
+    my($pageerr) = $pageres =~ m/\QNon-2xx responses:\E|\QFailed requests:\E\s+([\d\.]+)/mx;
+    if($pageerr && $pageerr >= 5) {
+        printf "errored           | ";
+        if($currenttag !~ m/^v/mx) {
+            printf(STDERR "\n**********\n%s\n\ncmd: %s\n**********\n", $pageres, $cmd);
+            exit;
+        }
+    } else {
+        printf("%6s #/sec    | ", $page);
+    }
+    our $cur_pages;
+    $cur_pages->{$name} = $page;
+    return;
+}
+
+#################################################
+sub switch_tag {
+    my($tag) = @_;
+    die("no tag") unless $tag;
+    my $git = `git checkout -q $tag 2>&1`;
+    if($git =~ /error:/) {
+        printf("\n| %s", $git);
+        exit;
+    }
+    `git log -1 2>&1`; # result in wrong startup times otherwise
+    `git describe --tag --exact-match 2>&1`; # result in wrong startup times otherwise
+    `git branch --no-color 2>&1`; # result in wrong startup times otherwise
+    `rm -rf tmp/ttc_*`;
+}
+
+#################################################
+sub test_tag {
+    my($tag) = @_;
+    my $start_test = time();
+    our $currenttag = $tag;
+    printf("| %-11s | ", substr($tag,0,11));
+    switch_tag($tag);
+
+    chomp(my $time = `git log -1 --format=%ct`);
+    chomp(my $hash = `git log -1 --format=%h`);
+    chomp(my $msg  = `git log -1 --format=%s`);
+
+    if($options->{'update_only'} && defined $results->{$time}) {
+        print("skipped |\n");
+        return;
+    }
+
+    # warmup, start twice to get more accurate startup times
+    my $pid = _start_server();
+    kill('TERM', $pid);
+    sleep(3);
+
+    my $t0 = [gettimeofday];
+    $pid   = _start_server();
+    my $elapsed = tv_interval($t0);
+    printf("% 5.2fs  | ", $elapsed);
+
+    # time for first request(s)
+    my $t1 = [gettimeofday];
+    my $rc = 0;
+    for my $url (
+        "$BASEURL/index.html",
+        "$BASEURL/side.html",
+        "$BASEURL/main.html",
+        "$BASEURL/cgi-bin/tac.cgi",
+    ) {
+        `wget -O - "$url" >/dev/null 2>&1`;
+        $rc += $?;
+    }
+    my $first_req = tv_interval($t0);
+    printf("% 6.2fs | ", ($rc == 0 ? $first_req : 'Err'));
+
+
+    # warm up
+    `ab -c $CONCURRENCY -n 10 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1`;
+
+    our $cur_pages = {};
+    test_page('main',   "$BASEURL/changes.html");
+    test_page('tac',    "$BASEURL/cgi-bin/tac.cgi");
+    test_page('status', "$BASEURL/cgi-bin/status.cgi");
+    chomp(my $mem  = `cat /proc/$pid/status | grep VmRSS:  | awk '{print \$2}'`);
+    test_page('json',   "$BASEURL/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json");
+    test_page('bp',     "$BASEURL/cgi-bin/bp.cgi");
+    chomp(my $max  = `cat /proc/$pid/status | grep VmPeak: | awk '{print \$2}'`);
+    chomp(my $load = `cat /proc/loadavg | awk '{ print \$1 }'`);
+
+    kill('TERM', $pid);
+    printf(" %3d MB (max. %4dMB) | %5s |", $mem/1000, $max/1000, $load);
+    $results->{$time} = {
+        time        => $time,
+        tag         => $tag =~ /^v/mx ? $tag : 'master',
+        msg         => $msg,
+        hash        => $hash,
+        startup     => $elapsed,
+        first_req   => $first_req,
+        load        => $load,
+        mem         => $mem,
+        max_mem     => $max,
+        pages       => $cur_pages,
+    };
+    _safe_results();
+    _create_results_file(1);
+    my $tag_duration = time() - $start_test;
+    printf(" %3ss |\n", $tag_duration);
+    return;
+}
+
+#################################################
+sub _start_server {
+    chomp(my $pid = `./script/thruk_server.pl >/dev/null 2>&1 & echo \$!`);
+    while(`lsof -i:$BASEPORT | grep -c LISTEN` != 1) {
+        sleep(0.05);
+        -d '/proc/'.$pid || die("failed to start!\n");
+    }
+    return($pid);
+}
+
+#################################################
+sub _create_results_file {
+    my($skip_print) = @_;
+    our $template;
+    if(!defined $template) {
+        $template = join("", <DATA>);
+    }
+    my $copy = $template;
+    my $res  = JSON::XS::encode_json($results);
+    $res    =~ s/},/},\n/gmx;
+    $copy =~ s/\#\#\#DATA\#\#\#/$res/g;
+    open(my $fh, '>', $result_html) or die("cannot write $result_html: $!");
+    print $fh $copy;
+    close($fh);
+    print $result_html." written\n" unless $skip_print;
+    return;
+}
+
+#################################################
+sub _clean_old_git_hashes {
+    return unless scalar keys %{$results} > 0;
+    my $hashes = {};
+    for my $line (split/\n/m, `git log --format="%ct %h"`) {
+        my($ts, $hash) = split/\s+/mx, $line;
+        $hashes->{$hash} = 1;
+    }
+    for my $ts (keys %{$results}) {
+        my $d = $results->{$ts};
+        if(!$hashes->{$d->{'hash'}}) {
+            print "cleaned old hash: ".$d->{'hash'}."\n";
+            delete $results->{$ts};
+        }
+    }
+    return;
+}
+
+#################################################
+
+__DATA__
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Thruk Development Performance Monitoring</title>
+  <script language="javascript" type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.selection.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.crosshair.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.stack.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.fillbetween.js"></script>
+  <style>
+BODY {
+  padding-top: 70px;
+}
+A {
+  border-bottom: 1px dotted black;
+  color: black;
+  text-decoration: none;
+}
+A:hover {
+  border-bottom: 1px solid black;
+}
+#tooltip {
+    position: absolute;
+    display: none;
+    border: 1px solid #666666;
+    padding: 2px;
+    background-color: #d6e5e4;
+    opacity: 0.9;
+    z-index: 100;
+}
+table.thruktooltip {
+    border-collapse: collapse;
+}
+table.thruktooltip .var {
+    font-weight: bold;
+    padding-left: 5px;
+    border-top: 1px solid grey;
+}
+table.thruktooltip .val {
+    text-align: right;
+    font-weight: bold;
+    border-left: 1px solid grey;
+    border-top: 1px solid grey;
+}
+table.thruktooltip .date {
+    padding-right: 5px;
+}
+
+
+/* Affix Navigation */
+
+/* First level of nav */
+.sidenav {
+  margin-top:       40px;
+  margin-bottom:    30px;
+  padding:          2px;
+  background-color: #f8f8f8;
+  border-radius:    5px;
+  border:           1px solid #ddd;
+}
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+  border-width: 0;
+}
+
+/* All levels of nav */
+.sidebar .nav > li > a {
+  display: block;
+  color: #716b7a;
+  padding: 1px 20px;
+  line-height: 16px;
+}
+.sidebar .nav > li > a:hover,
+.sidebar .nav > li > a:focus {
+  text-decoration: none;
+  background-color: #e5e3e9;
+}
+.sidebar .nav > .active > a,
+.sidebar .nav > .active:hover > a,
+.sidebar .nav > .active:focus > a {
+  font-weight: bold;
+  color: #ba3925;
+  background-color: transparent;
+}
+
+/* Nav: second level */
+.sidebar .nav .nav {
+  margin-bottom: 8px;
+}
+.sidebar .nav .nav > li > a {
+  padding-top:    2px;
+  padding-bottom: 0;
+  padding-left: 30px;
+  font-size: 90%;
+  line-height: 16px;
+}
+A.nav_label {
+    visibility: hidden;
+    position: absolute;
+    left: -20px;
+}
+A.nav_anchor {
+    position: absolute;
+    top: -50px;
+    display: block;
+}
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#" onclick="zoomIn(); return false;">Thruk Performance Charts</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#" onclick="zoomIn(Date.now()-(31*86400*1000), Date.now()); return false;">Last Month</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<nav id="affix-nav" class="sidebar col-md-4 col-sm-4 hidden-xs">
+  <ul class="nav sidenav nav-tabs nav-stacked affix-top shadow" data-spy="affix" style="position: fixed; right: 100px; top: 50px;">
+    <li><a href='#resource_usage'>Resource Usage</a></li>
+    <li>
+        <a href='#pages'>Requests per Second</a>
+        <ul class="nav">
+           <li><a href='#graph_page_static'>Static</a></li>
+           <li><a href='#graph_page_status'>Status</a></li>
+           <li><a href='#graph_page_tac'>Tactical Overview</a></li>
+           <li><a href='#graph_page_json'>JSON Status</a></li>
+           <li><a href='#graph_page_bp'>Business Process</a></li>
+        </ul>
+    </li>
+  </ul>
+</nav>
+
+<div id='tooltip'></div>
+<div style="padding-left: 30px;">
+<h2 id="resource_usage">Resource Usage</h2>
+<div id="graph_startup"     style="width: 1000px; height: 300px;"></div>
+<div id="graph_memory"      style="width: 1000px; height: 300px; margin-top:10px;"></div>
+<hr>
+<h2 id="pages">Page Requests per Second</h2>
+<h3>Static Content Page</h3>
+<div id="graph_page_static" style="width: 1000px; height: 300px;"></div>
+<h3>Status Page</h3>
+<div id="graph_page_status" style="width: 1000px; height: 300px;"></div>
+<h3>Tactical Overview Page</h3>
+<div id="graph_page_tac"    style="width: 1000px; height: 300px;"></div>
+<h3>JSON Status Page</h3>
+<div id="graph_page_json"   style="width: 1000px; height: 300px;"></div>
+<h3>Business Process Page</h3>
+<div id="graph_page_bp"     style="width: 1000px; height: 300px;"></div>
+</div>
+
+
+<script type="text/javascript">
+<!--
+
+// data
+var data = ###DATA###;
+
+var plots   = {};
+var commits = {};
+var graph_options = {
+    legend: {
+        show: true,
+        position: "ne"
+    },
+    xaxis: {
+        mode: "time",
+        tickLength: 5
+    },
+    yaxis: {
+        min: 0
+    },
+    series: {
+        lines:  { show: true },
+    },
+    selection: {
+        mode: "x"
+    },
+    grid: {
+        hoverable: true,
+        markings: []
+    },
+    crosshair: {
+        mode: "x"
+    }
+};
+var dataSets = getData();
+var fadeOutTimer;
+$(function() {
+    plots['startup']     = $.plot("#graph_startup",     dataSets['startup'],     graph_options);
+    plots['memory']      = $.plot("#graph_memory",      dataSets['memory'],      graph_options);
+    plots['page_static'] = $.plot("#graph_page_static", dataSets['page_static'], graph_options);
+    plots['page_status'] = $.plot("#graph_page_status", dataSets['page_status'], graph_options);
+    plots['page_tac']    = $.plot("#graph_page_tac",    dataSets['page_tac'],    graph_options);
+    plots['page_json']   = $.plot("#graph_page_json",   dataSets['page_json'],   graph_options);
+    plots['page_bp']     = $.plot("#graph_page_bp",     dataSets['page_bp'],     graph_options);
+    redrawMarkings();
+
+    jQuery.each(plots, function(graph, v) {
+        $("#graph_"+graph).bind("plotselected", function (event, ranges) {
+            // do the zooming
+            zoomIn(ranges.xaxis.from, ranges.xaxis.to);
+        });
+
+        $("#graph_"+graph).bind("plothover", function (event, pos, item) {
+            if (item) {
+                var date = new Date(item.datapoint[0]).toLocaleString();
+                var tooltip = "<table class='thruktooltip'><tr><td class='date' colspan=2>"+date+" ("+commits[item.datapoint[0]].tag+")</td><tr>";
+                tooltip += "<tr><td class='date' colspan=2><a href='https://github.com/sni/Thruk/commit/"+commits[item.datapoint[0]].hash+"' target='_blank'>"+commits[item.datapoint[0]].msg+"</td></tr>";
+                tooltip += "<td class='var'>Load:</td>";
+                tooltip += "<td class='val'>"+(dataSets['startup'][2]['data'][item.dataIndex][1])+"</td></tr>";
+
+                tooltip += "<td class='var'>Memory:</td>";
+                tooltip += "<td class='val'>"+(dataSets['memory'][0]['data'][item.dataIndex][1].toFixed(0))+" - "+(dataSets['memory'][1]['data'][item.dataIndex][1].toFixed(0))+"MB</td></tr>";
+
+                tooltip += "<td class='var'>Startup:</td>";
+                tooltip += "<td class='val'>"+(dataSets['startup'][0]['data'][item.dataIndex][1].toFixed(2))+"s</td></tr>";
+
+                tooltip += "<td class='var'>First Request:</td>";
+                tooltip += "<td class='val'>"+(dataSets['startup'][1]['data'][item.dataIndex][1].toFixed(2))+"s</td></tr>";
+
+                tooltip += "<td class='var'>Pages per Second:</td>";
+                tooltip += "<td class='val'></td></tr>";
+
+                tooltip += "<td class='var'>Static:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_static'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>Status:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_status'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>Tac:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_tac'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>JSON:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_json'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>BP:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_bp'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "</table>";
+                window.clearTimeout(fadeOutTimer);
+                jQuery("#tooltip").html(tooltip)
+                                  .css({top: item.pageY+5, left: item.pageX+5})
+                                  .fadeIn(300);
+
+            } else {
+                window.clearTimeout(fadeOutTimer);
+                fadeOutTimer = window.setTimeout(function() {
+                    $("#tooltip").fadeOut(600);
+                }, 1000);
+            }
+            jQuery.each(plots, function(k, plot) {
+                plot.setCrosshair(pos);
+            });
+        });
+        /* set selection for other plots too */
+        jQuery("#graph_"+graph).bind("plotselecting", function (event, ranges) {
+            if(ranges == null) { return; }
+            $("#tooltip").hide();
+            jQuery.each(plots, function(name, plot) {
+                plot.setSelection(ranges, true);
+            });
+        });
+        /* reset zoom on rightclick */
+        jQuery("#graph_"+graph).bind("contextmenu", function (event, pos, item) {
+            event.preventDefault();
+            jQuery.each(plots, function(name, plot) {
+                zoomOut(plot);
+            });
+            redrawMarkings();
+        });
+    });
+    jQuery("#tooltip").mouseover(function() {
+        window.clearTimeout(fadeOutTimer);
+    });
+    jQuery("#tooltip").mouseout(function() {
+        window.clearTimeout(fadeOutTimer);
+        fadeOutTimer = window.setTimeout(function() {
+            $("#tooltip").fadeOut(600);
+        }, 1000);
+    });
+
+    if(window.location.hash) {
+        var range = window.location.hash.replace(/^#/, '').split(',');
+        zoomIn(Number(range[0]), Number(range[1]));
+    }
+
+    /* hide tooltip on document click */
+    $(window.document).bind("click", function (event, pos, item) {
+        window.clearTimeout(fadeOutTimer);
+        $("#tooltip").fadeOut(300);
+    });
+});
+
+function redrawMarkings() {
+    jQuery(".marking").remove();
+    jQuery.each(plots, function(name, plot) {
+        var div = $("#graph_"+name);
+        jQuery.each(graph_options.grid.markings, function(i, m) {
+            var o = plot.pointOffset({ x: m.xaxis.from, y: 0});
+            div.append("<div class='marking' style='position:absolute;left:" + (o.left + 4) + "px;top:" + (-9) + "px;color:#666;font-size:smaller'>"+m.name+"</div>");
+        });
+    });
+}
+
+function zoomIn(from, to) {
+    setAllData(from, to);
+    jQuery.each(plots, function(k, plot) {
+        plot.setupGrid();
+        plot.draw();
+        plot.clearSelection();
+    });
+    redrawMarkings();
+}
+
+
+function zoomOut(plot) {
+    setAllData();
+    plot.setupGrid();
+    plot.draw();
+}
+
+function setAllData(from, to) {
+    if(from != undefined) {
+      window.location.hash = '#'+from+','+to;
+    } else {
+      window.location.hash = '';
+    }
+    dataSets = getData(from, to);
+    jQuery.each(plots, function(k, v) {
+        plots[k].setData(dataSets[k]);
+    });
+}
+
+function getData(from, to) {
+    var startup_data = {
+        label: "startup time",
+        stack: true,
+        color: '#347d98',
+        lines: {
+            show: true,
+            lineWidth: 2,
+            fill: 0.2
+        },
+        data: []
+    };
+    var firstreq_data = {
+        label: "first request",
+        stack: true,
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2,
+            fill: 0.2
+        },
+        data: []
+    };
+    var load_data = {
+        label: "load",
+        color: '#f8a346',
+        lines: {
+            show: true,
+            lineWidth: 2,
+        },
+        data: []
+    };
+    var mem_data = {
+        id:    "memory",
+        label: "memory",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var memmax_data = {
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2,
+            fill: 0.2
+        },
+        fillBetween: "memory",
+        data: []
+    };
+    var page_static_data = {
+        id:    "static",
+        label: "static rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_status_data = {
+        id:    "status",
+        label: "status rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_tac_data = {
+        id:    "tac",
+        label: "tac rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_json_data = {
+        id:    "json",
+        label: "json rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_bp_data = {
+        id:    "bp",
+        label: "bp rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+
+    var markings = [];
+
+    jQuery.each(Object.keys(data).sort(), function(i, t) {
+        var d = data[t];
+        var jstime = Number(t)*1000;
+        if(from != undefined && (from > jstime || to < jstime)) { return; }
+        startup_data['data'].push([jstime, Number(d.startup)]);
+        firstreq_data['data'].push([jstime, Number(d.first_req)]);
+        load_data['data'].push([jstime, Number(d.load)]);
+        mem_data['data'].push([jstime, Number(d.mem)/1024]);
+        memmax_data['data'].push([jstime, Number(d.max_mem)/1024]);
+        page_static_data['data'].push([jstime, Number(d.pages.main)]);
+        page_status_data['data'].push([jstime, Number(d.pages.status)]);
+        page_tac_data['data'].push([jstime, Number(d.pages.tac)]);
+        page_json_data['data'].push([jstime, Number(d.pages.json)]);
+        page_bp_data['data'].push([jstime, Number(d.pages.bp)]);
+        if(d.tag.match(/^v/)) {
+            markings.push({
+                color: "#000",
+                lineWidth: 1,
+                xaxis: {
+                    from: jstime,
+                    to: jstime
+                },
+                name: d.tag
+            });
+        }
+        commits[jstime] = {
+            tag:  d.tag,
+            msg:  d.msg,
+            hash: d.hash
+        };
+    });
+    var dataSets = {
+        startup:     [startup_data, firstreq_data, load_data],
+        memory:      [mem_data, memmax_data],
+        page_static: [page_static_data],
+        page_status: [page_status_data],
+        page_tac:    [page_tac_data],
+        page_json:   [page_json_data],
+        page_bp:     [page_bp_data]
+    };
+    graph_options.grid.markings = markings;
+    return(dataSets);
+}
+
+-->
+</script>
+
+</body>
+</html>

@@ -2,16 +2,7 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]
-[% authorized_for_read_only = 0 %][% IF c.check_user_roles_wrapper('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
-
-[% UNLESS authorized_for_read_only %]
-<script type="text/javascript">
-<!--
-  var dfl_Hash = new Object({[% FOREACH h = data %]r[% loop.index %]: "[% escape_bslash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
-  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
--->
-</script>
-[% END %]
+[% authorized_for_read_only = 0 %][% IF c.check_user_roles('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
 
 [% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
@@ -58,7 +49,8 @@
         </td>
         <td valign="top" align="center" width="33%" nowrap>
           <div align="center" class='statusTitle'>
-            [% IF hostgroup == 'all' %]Host Status Details For All Host Groups
+            [% IF custom_title != '' %][% custom_title %]
+            [% ELSIF hostgroup == 'all' %]Host Status Details For All Host Groups
             [% ELSIF hostgroup != '' %]Host Status Details For Host Group '[% hostgroup %]'
             [% ELSE %]Host Status Details
             [% END %]
@@ -102,8 +94,8 @@
 
     [% PROCESS _status_hostdetail_table.tt %]
 
-    [% UNLESS authorized_for_read_only %]
     [% UNLESS minimal %]
+    [% UNLESS authorized_for_read_only %]
     <div class="hint">
         <a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'[% paneprefix %]');return false;">select all</a>
       - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');return false;">unselect all</a>
@@ -111,11 +103,20 @@
       - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
     </div>
     [% END %]
-    [% END %]
 
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
+    [% END %]
+
+[% UNLESS authorized_for_read_only %]
+<script type="text/javascript">
+<!--
+  var dfl_Hash = [% get_cmd_submit_hash(data, 'hst') %];
+  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
+-->
+</script>
+[% END %]
 
 [% PROCESS _footer.tt %]

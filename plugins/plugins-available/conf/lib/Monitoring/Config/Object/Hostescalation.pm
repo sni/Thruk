@@ -29,7 +29,7 @@ $Monitoring::Config::Object::Hostescalation::Defaults = {
     'last_notification'      => { type => 'INT' },
     'notification_interval'  => { type => 'INT' },
     'escalation_period'      => { type => 'STRING', 'link' => 'timeperiod' },
-    'escalation_options'     => { type => 'ENUM', values => ['w','u','c','r'], keys => [ 'Ok', 'Warning', 'Critical','Unknown' ] },
+    'escalation_options'     => { type => 'ENUM', values => ['r','d','u'], keys => [ 'Up(recovery)', 'Down', 'Unreachable' ] },
 
     # aliased attributes
     'host'                   => { type => 'ALIAS', 'name' => 'host_name' },
@@ -62,7 +62,7 @@ sub BUILD {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

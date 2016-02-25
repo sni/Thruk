@@ -1,0 +1,63 @@
+---
+layout: docs
+title: JSON Exporting
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+
+== JSON Exporting
+
+There are several pages which offer json exports.
+
+=== List of Pages
+
+==== Status Data
+
+Example: /thruk/cgi-bin/status.cgi?view_mode=json&host=all
+
+Parameters: all usual status page parameters and filter. Use the gui filter
+and then json export link for maximum convenience.
+
+It is possible to set the columns by using the 'columns' parameter:
+
+Example: /thruk/cgi-bin/status.cgi?view_mode=json&host=all&columns=name,status
+
+
+==== Availability Data
+
+Example: /thruk/cgi-bin/avail.cgi?view_mode=json&host=all
+
+Parameters:
+
+------
+    t1=1357575984                       # start timestamp
+    t2=1357662384                       # end timestamp
+    host=hostname                       # hostname
+    assumestateretention=yes            # assume state retention or not
+    assumeinitialstates=yes             # assume initial state or not
+    assumestatesduringnotrunning=yes    # assume state during core not running or not
+    initialassumedhoststate=0           # initial assumed host state
+    initialassumedservicestate=0        # initial assumed service state
+    full_log_entries                    # include full logs
+    showscheduleddowntime=
+    rpttimeperiod=
+------
+
+See http://search.cpan.org/~nierlein/Monitoring-Availability-0.40/lib/Monitoring/Availability.pm#CONSTRUCTOR[Monitoring::Availability]
+for a detailed description of all parameters.
+
+
+==== Backends / Sites Data
+{% include new_since.ad version="2.04" %}
+Export all site/backend specific data:
+
+Example: /thruk/cgi-bin/extinfo.cgi?type=0&view_mode=json
+
+
+==== Business Process Data
+
+Example: /thruk/cgi-bin/bp.cgi?view_mode=json&bp=id
+
+Parameters: optional business process id
+
+Example: /thruk/cgi-bin/bp.cgi?view_mode=json&bp=1

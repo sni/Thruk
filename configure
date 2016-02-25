@@ -4,6 +4,13 @@ use strict;
 use warnings;
 use Getopt::Long qw//;
 
+eval "use inc::Module::Install";
+if($@ && !-e 'Makefile') {
+    print STDERR "Module::Install is required to build Thruk from source.\n\n";
+    print STDERR $@;
+    exit 1;
+}
+
 alarm(180);
 
 my $options = {
@@ -12,7 +19,8 @@ my $options = {
   'thruk-user'      => `id -un`,
   'thruk-group'     => `id -gn`,
   'httpd-conf'      => '',
-  'logrotate-dir'   => '',
+  'logrotatedir'    => '',
+  'nocompress'      => 0,
   'quiet'           => 0,
 };
 Getopt::Long::Configure('no_ignore_case');
@@ -30,18 +38,20 @@ Getopt::Long::GetOptions (
    "datadir=s"              => \$options->{'datadir'},
    "mandir=s"               => \$options->{'mandir'},
    "with-tempdir=s"         => \$options->{'tmpdir'},
-   "with-initdir=s"         => \$options->{'init-dir'},
-   "with-logrotatedir=s"    => \$options->{'logrotate-dir'},
-   "with-logdir=s"          => \$options->{'log-dir'},
+   "with-initdir=s"         => \$options->{'initdir'},
+   "with-logrotatedir=s"    => \$options->{'logrotatedir'},
+   "with-logdir=s"          => \$options->{'logdir'},
    "with-htmlurl=s"         => \$options->{'htmlurl'},
    "with-httpd-conf=s"      => \$options->{'httpd-conf'},
-   "with-checkresultdir=s"  => \$options->{'with-checkresult-dir'},
+   "with-checkresultdir=s"  => \$options->{'with-checkresultdir'},
    "with-thruk-user=s"      => \$options->{'thruk-user'},
    "with-thruk-group=s"     => \$options->{'thruk-group'},
    "with-thruk-libs=s"      => \$options->{'thruk-libs'},
-   "with-thruk-tempdir=s"   => \$options->{'thruk-temp-dir'},
-   "with-thruk-vardir=s"    => \$options->{'thruk-var-dir'},
-   "with-thruk-logdir=s"    => \$options->{'thruk-log-dir'},
+   "with-thruk-tempdir=s"   => \$options->{'thruk-tempdir'},
+   "with-thruk-vardir=s"    => \$options->{'thruk-vardir'},
+   "with-thruk-logdir=s"    => \$options->{'thruk-logdir'},
+   "without-compress"       => \$options->{'nocompress'},
+   "without-thruk-libs"     => \$options->{'nolibs'},
    "quiet|q"                => \$options->{'quiet'},
 ) or warn "error in options";
 
@@ -50,10 +60,10 @@ if($options->{'help'}) {
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
 }
 
-$options->{'init-dir'}        = $options->{'init-dir'} || $options->{'prefix'}.'/etc/init.d';
-$options->{'log-dir'}         = $options->{'log-dir'} || $options->{'prefix'}.'/var/log/thruk';
+$options->{'initdir'}         = $options->{'initdir'} || $options->{'prefix'}.'/etc/init.d';
+$options->{'logdir'}          = $options->{'logdir'} || $options->{'prefix'}.'/var/log/thruk';
 $options->{'thruk-libs'}      = $options->{'thruk-libs'} || $options->{'prefix'}.'/lib/thruk/perl5';
-$options->{'checkresult-dir'} = $options->{'checkresult-dir'} || $options->{'prefix'}.'/var/cache/naemon/checkresults';
+$options->{'checkresultdir'}  = $options->{'checkresultdir'} || $options->{'prefix'}.'/var/cache/naemon/checkresults';
 
 $options->{'eprefix'}        = $options->{'prefix'}          unless $options->{'eprefix'};
 $options->{'bindir'}         = $options->{'prefix'}.'/bin'   unless $options->{'bindir'};
@@ -64,16 +74,18 @@ $options->{'libdir'}         = $options->{'prefix'}.'/lib'   unless $options->{'
 $options->{'datadir'}        = $options->{'prefix'}.'/share' unless $options->{'datadir'};
 $options->{'mandir'}         = $options->{'prefix'}.'/man'   unless $options->{'mandir'};
 
-$options->{'tmpdir'}         = $options->{'thruk-temp-dir'} if $options->{'thruk-temp-dir'};
-$options->{'localstatedir'}  = $options->{'thruk-var-dir'}  if $options->{'thruk-var-dir'};
-$options->{'log-dir'}        = $options->{'thruk-log-dir'}  if $options->{'thruk-log-dir'};
+$options->{'tmpdir'}         = $options->{'thruk-tempdir'} if $options->{'thruk-tempdir'};
+$options->{'localstatedir'}  = $options->{'thruk-vardir'}  if $options->{'thruk-vardir'};
+$options->{'logdir'}         = $options->{'thruk-logdir'}  if $options->{'thruk-logdir'};
 
 chomp($options->{'thruk-user'});
 chomp($options->{'thruk-group'});
 
-$options->{'htmlurl'} =~ s|/+$||mx;
-$options->{'htmlurl'} =~ s|^/+||mx;
-$options->{'htmlurl'} = '/'.$options->{'htmlurl'};
+$options->{'htmlurl'}    =~ s|/+$||mx;
+$options->{'htmlurl'}    =~ s|^/+||mx;
+$options->{'htmlurl'}    = '/'.$options->{'htmlurl'};
+$options->{'compress'}   = $options->{'nocompress'} ? 'disabled' : 'enabled';
+$options->{'thruk-libs'} = '' if $options->{'nolibs'};
 
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;
@@ -87,48 +99,67 @@ TMPDIR           = $options->{'tmpdir'}
 LOCALSTATEDIR    = $options->{'localstatedir'}
 DATADIR          = $options->{'datadir'}
 MANDIR           = $options->{'mandir'}
-INITDIR          = $options->{'init-dir'}
-LOGROTATEDIR     = $options->{'logrotate-dir'}
-LOGDIR           = $options->{'log-dir'}
+INITDIR          = $options->{'initdir'}
+LOGROTATEDIR     = $options->{'logrotatedir'}
+LOGDIR           = $options->{'logdir'}
 HTMLURL          = $options->{'htmlurl'}
 HTTPDCONF        = $options->{'httpd-conf'}
 THRUKUSER        = $options->{'thruk-user'}
 THRUKGROUP       = $options->{'thruk-group'}
 THRUKLIBS        = $options->{'thruk-libs'}
-CHECKRESULTDIR   = $options->{'checkresult-dir'}
+CHECKRESULTDIR   = $options->{'checkresultdir'}
+THRUKCOMPRESS    = $options->{'compress'}
 
 EOT
 
 close($fh);
-`yes n | $^X Makefile.PL >/dev/null 2>&1`;
+my $out = `yes n | $^X Makefile.PL 2>&1`;
+if(!-e "Makefile") {
+    print "configure failed:\n\n";
+    print $out;
+    exit 1;
+}
+
+# check our modules if not modules are build
+if($options->{'nolibs'}) {
+    $out = `make checkdeps 2>&1`;
+    if($out =~ m/Warning:\sprerequisite/mx) {
+        print $out;
+        unlink("Makefile");
+        print "ERROR: missing dependencies, see list above for details\n";
+        exit 1;
+    }
+}
 
 exit if $options->{'quiet'};
 
 $options->{'httpd-conf'}    = '** not installed **' unless $options->{'httpd-conf'};
-$options->{'logrotate-dir'} = '** not installed **' unless $options->{'logrotate-dir'};
+$options->{'logrotatedir'}  = '** not installed **' unless $options->{'logrotatedir'};
 print <<EOT;
 
 *************************************
 * THRUK - configuration
 *************************************
 
-  eprefix          = $options->{'eprefix'}
-  bindir           = $options->{'bindir'}
-  sysconfdir       = $options->{'sysconfdir'}
-  libdir           = $options->{'libdir'}
-  tmpdir           = $options->{'tmpdir'}
-  localstatedir    = $options->{'localstatedir'}
-  datadir          = $options->{'datadir'}
-  mandir           = $options->{'mandir'}
+  eprefix            = $options->{'eprefix'}
+  bindir             = $options->{'bindir'}
+  sysconfdir         = $options->{'sysconfdir'}
+  libdir             = $options->{'libdir'}
+  tmpdir             = $options->{'tmpdir'}
+  localstatedir      = $options->{'localstatedir'}
+  datadir            = $options->{'datadir'}
+  mandir             = $options->{'mandir'}
 
-  init-dir         = $options->{'init-dir'}
-  logrotate-dir    = $options->{'logrotate-dir'}
-  log-dir          = $options->{'log-dir'}
-  htmlurl          = $options->{'htmlurl'}
-  httpd-conf       = $options->{'httpd-conf'}
-  thruk-user       = $options->{'thruk-user'}
-  thruk-group      = $options->{'thruk-group'}
-  thruk-libs       = $options->{'thruk-libs'}
+  initdir            = $options->{'initdir'}
+  logrotatedir       = $options->{'logrotatedir'}
+  logdir             = $options->{'logdir'}
+  htmlurl            = $options->{'htmlurl'}
+  httpd-conf         = $options->{'httpd-conf'}
+  thruk-user         = $options->{'thruk-user'}
+  thruk-group        = $options->{'thruk-group'}
+  thruk-libs         = $options->{'thruk-libs'}
+  checkresultdir     = $options->{'checkresultdir'}
+  css/js compression = $options->{'compress'}
 
 now run
   perl Makefile.PL
@@ -156,14 +187,14 @@ __END__
   Installation directories:
 
     --prefix=PREFIX               install architecture-independent files in PREFIX
-                                  [/usr/local/thruk]
+                                  [/usr/local]
 
     --exec-prefix=EPREFIX         install architecture-dependent files in EPREFIX
                                   [PREFIX]
 
   By default, `make install' will install all the files in
-  `/usr/local/thruk/bin', `/usr/local/thruk/lib' etc.  You can specify
-  an installation prefix other than `/usr/local/thruk' using `--prefix',
+  `/usr/local/bin', `/usr/local/lib' etc.  You can specify
+  an installation prefix other than `/usr/local/' using `--prefix',
   for instance `--prefix=$HOME'.
 
   For better control, use the options below.
@@ -180,12 +211,16 @@ __END__
 
     --with-htmlurl=<local-url>   sets URL for public html [/thruk]
 
-    --with-temp-dir              sets the temp folder [PREFIX/tmp]
-    --with-init-dir              sets the folder for rc scripts
+    --with-tempdir               sets the temp folder [PREFIX/tmp]
+    --with-initdir               sets the folder for rc scripts
     --with-httpd-conf            sets path to Apache conf.d directory
-    --with-logrotate-dir         sets path to logrotates.d directory
-    --with-log-dir               sets path to log files. [/var/log/thruk]
+    --with-logrotatedir          sets path to logrotates.d directory
+    --with-logdir                sets path to log files [PREFIX/var/log/thruk]
+    --with-thruk-libs            sets path to thruk libs directory [PREFIX/lib/thruk/perl5]
     --with-thruk-user            sets user name to run thruk [thruk]
     --with-thruk-group           sets group name to run thruk [thruk]
+    --with-checkresultdir        sets path to Naemon/Nagios/Icinga/Shinken checkresult directory [PREFIX/var/cache/naemon/checkresults]
+    --without-compress           skip compression of css and javascript files which requires yui-compressor
+    --without-thruk-libs         skip building the required perl modules. Make sure you add dependencies accordingly
 
 =cut

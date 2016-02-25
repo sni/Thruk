@@ -4,6 +4,7 @@
 <input type="hidden" name="sub" value="[% sub %]">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
 <div align="center">
 [% IF readonly %]
 <br><div class="alert"><b>Readonly!</b> Make sure the config file is writable</div>

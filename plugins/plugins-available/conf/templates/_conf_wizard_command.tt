@@ -4,7 +4,7 @@
 
 <div id="[% id %]_dialog" title="Command Wizzard" style="display: none;">
 <table><tr><td class="filter">
-  <table style="width:100%;">
+  <table style="width:610px;">
     <tr>
       <td class="attrName" width="10%"><b>Choose Command</b></td>
       <td>
@@ -17,8 +17,8 @@
       <td>&nbsp;</td>
     </tr>
     <tr>
-      <td colspan=2>
-        <span id="[% id %]_command_line" style="text-align: left;"></span>
+      <td colspan=2 style="position: relative;">
+        <span id="[% id %]_command_line" class="cmd_line_wizard_wrapper"></span>
         <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the command line is loaded" title="please wait till the command line is loaded" border="0" height="20" width="20"></div>
       </td>
     </tr>

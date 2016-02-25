@@ -1,0 +1,348 @@
+---
+layout: docs
+title: FAQ
+---
+
+Frequently Asked Questions
+==========================
+
+== General
+
+=== What is Thruk?
+Thruk is a Webgui for Nagios (and compatible) based on the Livestatus
+API. It's capable of merging multiple cores into a single display
+while being much faster than the original cgis. In addition there have
+been tons of usability improvments and there are plenty of useful
+addons included like a dashboard, business process addons, a
+configuration interface and many more...
+
+
+=== Is Thruk an Abbreviation? What does Thruk mean?
+
+Thruk is just a random word and has no meaning. Pronounce it like 'Truck'.
+
+
+=== Where is the statusmap?
+
+The statusmap got replaced by a own variant which is more scalable in
+large environments. Its shipped as Thruk addon, but enabled by
+default. See the link:plugins.html[plugins page] for details and screenshots.
+
+
+=== Authorization/Authentication is not working
+
+Authentication is done by the webserver, so authentication is only available
+with the fastcgi version.
+
+
+=== All dates and times are displayed with the wrong timezone
+
+Try to set the use_timezone configuration option in your
+thruk_local.conf
+
+
+
+== Usage
+
+=== How do I select hosts/services on the status page?
+
+Just click on the empty table row when the row is highlighted. This only works
+if you do not click on a link.
+
+
+=== How can i enable debug logging
+
+Have a look at the link:logfiles.html#enable-debug-logging[logfiles section].
+
+
+=== Where can I see the full command line for a host or servicecheck?
+
+You have to enable the option 'set show_full_commandline'. It's
+disabled for security reasons by default. So be careful to not display
+any passwords though the webinterface.
+
+
+
+
+== Customization
+
+=== How to change the side menu
+This is covered in the link:menu.html[advanced menu] section.
+
+=== How can I integrate Nagvis Maps
+
+There is an example in the link:menu.html#nagvis-maps[menu] documentation.
+
+=== How can I integrate Nagvis Maps in the Panorama Dashboard
+
+Choose 'Generic Url Panlet' from the 'New Panlet' list. Then enter
+the following url:
+....
+/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo-automap
+....
+Replace demo-automap with the name of your map. If you use OMD, you have
+to prepend the site name to the url.
+
+[TIP]
+.nagvis panel
+=======
+There is a dedicated nagvis panel since Thruk release 1.78.
+=======
+
+
+=== How can I add more themes?
+
+Themes are located under 'themes'. Just copy and modify the one you
+like. See the link:themes.html[themes page] for details.
+
+
+=== How can I disable themes?
+
+Themes can be disabled by removing the symlink from your
+'themes/themes-enabled' directory.
+See the link:themes.html[themes page] for details.
+
+
+=== How can I customize reports?
+Customizing reports is coverd in the link:reporting.html#customized-reports[official documenation].
+
+=== Why are the PNP graphs missing in my reports?
+First you need a working PNP installation. Then check
+the link:configuration.html#pnp_export[official documenation].
+
+If nothing helps, add some debug output to the script which is responsible for
+the pnp export (experienced users only).
+
+Add these lines to 'plugins/plugins-available/reports2/script/pnp_export.sh'.
+
+-------
+exec >/tmp/pnp.log 2>&1
+set -x
+-------
+
+Then regenerate a report and investigate that new logfile.
+
+
+=== How can I create a readonly Panorama dashboard for my boss
+In combination with the user specific settings, this can easily be achieved in
+your thruk_local.conf:
+
+-------
+  <User boss>
+    <Component Thruk::Plugin::Panorama>
+      default_view    = /var/lib/thruk/panorama_view.boss
+      readonly        = 1
+  </Component>
+  </User>
+-------
+
+The default view can be exported from the 'Settings' menu inside the panorama
+dashboard.
+
+
+
+=== How can I set custom page titles
+There are few ways to do this. The first way is you can turn on the
+use_bookmark_titles in your thruk_local.conf:
+
+-------
+    use_bookmark_titles = 1
+-------
+
+Now anytime you go to one of your Thruk bookmarks the name of
+that bookmark will be used as the page title.
+The second option is on most pages adding 'title=your title here' to
+the url will set a custom title
+
+
+=== How can I enable form based authentication
+{% include note.ad text="activated by default since v2.0" %}
+In order to use the form or cookie based authentication like demo.thruk.org does,
+you have to do two small changes in your apache configuration.
+Get https://github.com/sni/Thruk/blob/master/support/thruk_cookie_auth.example[thruk_cookie_auth.example]
+and put everything except the RewriteLock into the virtualhost of your choice.
+The RewriteLock must be outside any virtualhost. After that, restart the apache.
+
+
+=== How can I disable cookie authentication
+Starting with v2.0 cookie (form based) authentication is enabled by default. In
+case you want to disable it again and switch back to standard basic
+authentication, you just need to comment the includes in your apache
+configuration.
+
+On Debian and Ubuntu open all files matching:
+
+    /etc/apache2/sites-enabled/*default*
+    /etc/apache2/conf-available/thruk_cookie_auth_vhost.conf
+
+On SLES systems open:
+
+    /etc/apache2/conf.d/thruk_cookie_auth_vhost.conf
+
+On Centos/RHEL systems open:
+
+    /etc/httpd/conf.d/thruk_cookie_auth_vhost.conf
+
+then comment the line with:
+
+    Include /usr/share/thruk/thruk_cookie_auth.include
+
+After that, restart the apache.
+
+== Installation
+
+=== Is it possible to operate Thruk in a cluster?
+Yes, just put a load balancer before 2 (or more) Thruk installations
+and make sure the 'var_path' directory is shared between all instances ( by
+NFS, DRBD or similar ). There is usually not much traffic in this
+folder.
+
+
+=== wkhtmltopdf
+wkhtmltopdf is no longer required and has been replaced by phantomjs.
+
+
+=== phantomjs
+phantomjs is required to create PDF reports with the reports2 plugin. You can get
+phantomjs from http://phantomjs.org/ if it's not available for your system.
+
+
+=== How can I enable the business process addon.
+It works out of the box with OMD. If not using OMD, some manual steps
+are required which are described in the
+link:business-process.html[official documenation].
+
+
+== Hacking Thruk
+=== Within OMD
+If you are using OMD, then you just might want to follow this guide:
+https://github.com/sni/omd_utils/tree/master/thruk_developer
+Which connects a test OMD site to the git version of Thruk. This works quite
+well as long as there are only small changes in the perl module dependencies.
+
+The installer adds a new OMD daemon which restarts Thruk whenever you change
+a perl file or template.
+
+=== Install Test Environment from Source
+ 1. First get a fresh copy of the sources:
+
+  /tmp %> git clone git://github.com/sni/Thruk.git
+
+ 2. Create a .author file which prevents some caching mechanisms.
+
+  /tmp %> cd Thruk && touch .author
+
+3. use perl dependencies from existing installation.
+
+  /tmp/Thruk %> export PERL5LIB=/usr/lib/thruk/perl5
++
+Refer to the official documentation on how to install Thruk: link:install.html
+
+4. start development server
+
+  /tmp/Thruk %> ./script/thruk_server.pl -r
+  HTTP::Server::PSGI: Accepting connections at http://0:3000/
+
+5. hack Thruk...
+
+6. create a git patch
++
+review and commit your changes, then create a patch file which can be sent upstream to the author.
+
+  /tmp/Thruk %> git commit -av
+  /tmp/Thruk %> git format-patch -o /tmp/ --signoff -1
+
+
+
+== Errors
+=== Backend not available
+
+The socat solution for using livestatus with SSL does not longer work
+due to problems with socat and json data. If you see errors like:
+
+------------------
+[ERROR][Thruk.Controller.Root] Caught exception in Thruk::Controller::status->index "socket error at thruk/script/../lib/Monitoring/Livestatus/Class/Base/Table.pm line 186"
+[ERROR][Thruk.Controller.error] internal server error
+------------------
+
+and you use socat for livestatus over ssl, please change to stunnel or
+ssh with the normal xinetd solution.
+
+=== undefined symbol: Perl_Istack_sp_ptr
+
+You will get perl errors about undefined symbols when you try to
+install a debian package on ubuntu or a ubuntu 11 deb file on ubuntu
+12 or any package on a different platform than the package was build
+for.
+
+------------------
+/usr/bin/perl: symbol lookup error: /usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/List/Util/Util.so: undefined symbol: Perl_Istack_sp_ptr
+------------------
+
+The solution is simple: use the right package for your distribution.
+If there is no package is available for your platform, use the source
+installation.
+
+
+=== Broken PDF Reports in Centos/Rhel 5
+
+PDF reports won't work with libcairo < 1.8.8. Therefor you may use the
+prepared packages for cairo 1.8.8 on rhel/centos 5 on the
+link:../download.html[download page].
+
+TIP: The new 'reports2' module should work fine, even on older Redhat
+boxes.
+
+
+
+=== Premature end of script headers: fcgid_env.sh
+
+A few things to check:
+
+- check the apache error log for more details.
+- check the thruk logfile, usually located in /var/log/thruk/error.log
+- if you are using Redhat/Centos, check if you have SELinux enabled:
++
+  #>getenforce
+  Disabled
++
+'Enforcing' means SELinux is enable. Details can be found in the audit
+log: /var/log/audit/audit.log.  SELinux can be disabled in
+'/etc/selinux/config' (you will have to reboot once to make the
+changes active).
++
+  SELINUX=disabled
++
+Read more about SELinux on http://wiki.centos.org/HowTos/SELinux
+
+
+If there is no error in either apache or thruk logs, try to manually run the
+fcgi script with your webserver user (usually something like `www-data` or
+`apache`)
+
++
+  su - www-data -c "/usr/share/thruk/fcgid_env.sh"
+  STDIN is not a socket: specify a listen location at /usr/lib/thruk/perl5/Plack/Handler/FCGI.pm line 57.
++
+
+If you see the error above, eveything is ok. Otherwise you should see the real
+error now.
+
+
+=== possible csrf, no or invalid token
+
+This happens if you directly send commands to Thruk without a valid
+csrf protection token. This will happen in combination with nagstamon.
+You have to put those clients in the exception list:
+link:configuration.html#csrf_allowed_hosts[csrf_allowed_hosts].
+
+More information about link:http://en.wikipedia.org/wiki/Cross-site_request_forgery[csrf].
+
+
+=== Error: TypeError: $.browser is undefined
+
+Assuming you are using the ssi file to display PNP4Nagios popups, you have to update
+the ssi files to the latest from link:https://github.com/sni/Thruk/tree/master/ssi[Thruks examples].
+
+The cluetip jquery plugin used in this popups does not work with the latest jQuery release
+from Thruk, so Thruk now ships a own updated copy for this javascript library.

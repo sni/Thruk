@@ -4,24 +4,24 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>[% title_prefix %][% title %]</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    [% PROCESS _common_js.tt %]
-    [% UNLESS all_in_one_css %]
-    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
-    [% END %]
-    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' />
+    [% PROCESS _common_css.tt %]
+    [% PROCESS _common_js_files.tt %]
     <style type="text/css">
     <!--
     HTML {
-        overflow: inherit;
+        overflow-x: hidden;
         overflow-y: auto;
     }
     -->
     </style>
+    <!-- avoid menu flickering in IE9 -->
+    <!--[if IE 9]>
+    <style type="text/css">ul.navsectionlinks li:hover { background:none !important; }</style>
+    <![endif]-->
   </head>
   <body class='navbar'>
+  [% PROCESS _common_js.tt bodyonload=0 %]
 [% END %]
     <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
 
@@ -56,10 +56,11 @@
                 <input type='hidden' name='hidesearch' value='2' />
                 <input type='hidden' name='s0_op' value='~' id="s0_to" />
                 <input type='hidden' name='s0_type' value='search' />
-                <input type='text' name='s0_value' size='15' class="NavBarSearchItem" id="s0_value" />
+                <input type='hidden' name='add_default_service_filter' value='1' />
+                <input type='text' name='s0_value' size='15' class="NavBarSearchItem  deletable" id="s0_value" />
                 [% ELSE %]
                 <input type='hidden' name='navbarsearch' value='1' />
-                <input type='text' name='host' size='15' class="NavBarSearchItem" id="NavBarSearchItem" />
+                <input type='text' name='host' size='15' class="NavBarSearchItem deletable" id="NavBarSearchItem" />
                 [% END %]
               </fieldset>
             </form>

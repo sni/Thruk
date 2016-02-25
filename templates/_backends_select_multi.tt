@@ -20,7 +20,7 @@
     </td>
     <td class="attrName" style="height: 100%;">
       <input type="text" id="filter_selected" class="filter_selected" placeholder="filter..." style="width:220px; padding:0;" onkeyup="data_filter_select('[% param_name %]', this.value)"[% IF !can_edit || !backends_selected %] disabled[% END %]><br>
-      <select multiple id="[% param_name %]" name="[% param_name %]" style="width:225px; height:85%;" ondblclick="data_select_move('[% param_name %]', 'available_backends')"[% IF !can_edit || !backends_selected %] disabled[% END %]>
+      <select multiple id="[% param_name %]" name="[% param_name %]" style="width:225px; height:85%;" ondblclick="data_select_move('[% param_name %]', 'available_backends')"[% IF !can_edit || !backends_selected %] disabled[% END %][% IF onchange%] onchange="[% onchange %]"[% END %]>
         <option disabled>loading...</option>
       </select>
     </td>
@@ -39,7 +39,7 @@
       [% IF rb == b %]
         selected_backends.push('[% b %]');
         selected_backends_h['[% b %]'] = 1;
-        options.push(new Option('[% b %]', '[% backend_detail.$b.name %]'));
+        options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
       [% END %]
     [% END %]
   [% END %]
@@ -62,7 +62,7 @@
     [% IF found == 0 %]
       available_backends.push('[% b %]');
       available_backends_h['[% b %]'] = 1;
-      options.push(new Option('[% b %]', '[% backend_detail.$b.name %]'));
+      options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
     [% END %]
   [% END %]
 

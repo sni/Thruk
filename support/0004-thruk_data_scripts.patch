@@ -1,26 +1,12 @@
---- a/script/thruk_fastcgi.pl	2012-03-05 11:14:09.710307837 +0100
-+++ b/script/thruk_fastcgi.pl	2012-03-05 11:17:30.835302404 +0100
-@@ -3,6 +3,9 @@
+--- a/script/thruk_fastcgi.pl
++++ b/script/thruk_fastcgi.pl
+@@ -2,7 +2,8 @@
+ 
  use strict;
  use warnings;
- 
+-use lib 'lib';
 +use lib '@THRUKLIBS@';
 +use lib '@DATADIR@/lib';
-+
+ 
  ###################################################
  # create connection pool
- # has to be done really early to save memory
---- a/thruk_auth	2014-01-30 11:36:54.000000000 +0100
-+++ b/thruk_auth	2014-01-30 11:37:01.000000000 +0100
-@@ -12,8 +12,9 @@
-   export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
-   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
- else
--  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
--  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
-+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
-+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='@SYSCONFDIR@'; fi
-+  if [ -z $REMOTEURL ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
- fi
- 
- eval 'exec perl -x $0 ${1+"$@"} ;'

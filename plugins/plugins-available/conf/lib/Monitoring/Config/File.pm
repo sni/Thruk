@@ -6,7 +6,6 @@ use Carp;
 use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object;
 use File::Slurp;
-use utf8;
 use Encode qw(encode_utf8 decode);
 use Thruk::Utils;
 use Thruk::Utils::Conf;
@@ -136,6 +135,7 @@ sub update_objects {
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
             = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
     }
+    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
 
     if(defined $current_object or $in_unknown_object) {
         push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
@@ -150,8 +150,6 @@ sub update_objects {
             $self->{'comments'} = $comments;
         }
     }
-
-    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
 
     $self->{'parsed'}  = 1;
     $self->{'changed'} = 0;
@@ -201,7 +199,7 @@ sub update_objects_from_text {
         }
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
             = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
-        if(defined $lastline and $lastline ne '' and !defined $object_at_line) {
+        if(defined $lastline && $lastline ne '' && !defined $object_at_line) {
             if($linenr >= $lastline) {
                 $object_at_line = $current_object;
             }
@@ -283,9 +281,9 @@ sub _parse_line {
 
     # full line comments
     if(!$in_disabled_object
-       and (   substr($line, 0, 1) eq '#'
-            or substr($line, 0, 1) eq ';')
-       and $line !~ m/^(;|\#)\s*define\s+/mxo
+       && (    substr($line, 0, 1) eq '#'
+            || substr($line, 0, 1) eq ';')
+       && $line !~ m/^(;|\#)\s*define\s+/mxo
     ) {
         $line =~ s/^(;|\#)\s+//mx;
         push @{$comments}, $line;
@@ -299,9 +297,10 @@ sub _parse_line {
     # inline comments only with ; not with #
     if($line =~ s/^(.+?)\s*([\;].*)$//gmxo) {
         $line = $1;
+        my $comment = $2;
         # save inline comments if possible
         my($key, $value) = split(/\s+/mxo, $line, 2);
-        $inl_comments->{$key} = $2 if defined $key;
+        $inl_comments->{$key} = $comment if defined $key;
     }
 
     $line =~ s/$semicolonreplacement/\\;/gmxo;
@@ -348,7 +347,7 @@ sub _parse_line {
     elsif(defined $current_object) {
         if($in_disabled_object) { $line =~ s/^(\#|;)\s*//mxo; }
         my($key, $value) = split(/\s+/mxo, $line, 2);
-        return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object) if($in_disabled_object and !defined $key);
+        return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object) if($in_disabled_object && !defined $key);
         # different parsing for timeperiods
         if($current_object->{'type'} eq 'timeperiod'
            and $key ne 'use'
@@ -376,7 +375,7 @@ sub _parse_line {
             }
         }
         else {
-            if(defined $current_object->{'conf'}->{$key} and $current_object->{'conf'}->{$key} ne $value) {
+            if(defined $current_object->{'conf'}->{$key} and $current_object->{'conf'}->{$key} ne $value and substr($key, 0, 1) ne '#') {
                 push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
             $current_object->{'conf'}->{$key} = $value;
@@ -386,9 +385,23 @@ sub _parse_line {
         }
     }
 
-    # something totally unknown
     else {
-        push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+        my($key,$value) = split/\s*=\s*/mx, $line, 2;
+        # shinken macros can be anywhere
+        if(defined $value and $self->{'coretype'} eq 'shinken') {
+            $key   =~ s/^\s*(.*?)\s*$/$1/mx;
+            $value =~ s/^\s*(.*?)\s*$/$1/mx;
+            if (substr($key, 0, 1) eq '$' and substr($key, -1, 1) eq '$') {
+                # Ignore macros
+            } elsif($key =~ /^[a-z0-9_]+$/mx) {
+                # Ignore cfg_dir, cfg_file, ...
+            } else {
+                push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+            }
+        # something totally unknown
+        } else {
+            push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+        }
     }
 
     return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
@@ -413,17 +426,17 @@ sub get_meta_data {
     if($self->{'is_new_file'}) {
         return $meta;
     }
-    if(!-f $self->{'path'} or !-r $self->{'path'}) {
+    if(!-f $self->{'path'} || !-r $self->{'path'}) {
         push @{$self->{'errors'}}, "cannot read file: ".$self->{'path'}.": ".$!;
         return $meta;
     }
 
     # md5 hex
     my $ctx = Digest::MD5->new;
-    open(my $fh, $self->{'path'});
+    open(my $fh, '<', $self->{'path'});
     $ctx->addfile($fh);
     $meta->{'md5'} = $ctx->hexdigest;
-    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
+    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
@@ -502,7 +515,7 @@ sub diff {
     my ($fh, $filename) = tempfile();
     my $content         = $self->get_new_file_content();
     print $fh $content;
-    Thruk::Utils::IO::close($fh, $filename);
+    CORE::close($fh);
 
     my $diff = "";
     my $cmd = 'diff -wuN "'.$self->{'path'}.'" "'.$filename.'" 2>&1';
@@ -614,7 +627,7 @@ sub StripLTSpace {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

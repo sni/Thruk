@@ -15,8 +15,7 @@ use strict;
 use Carp;
 use Data::Dumper qw/Dumper/;
 
-require Exporter;
-our @ISA = qw(Exporter);
+use base 'Exporter';
 our @EXPORT_OK = qw(_error _info _debug _trace);
 
 ##############################################
@@ -50,7 +49,7 @@ sub _debug {
         if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
             print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
         } else {
-            my $c = $Thruk::Utils::CLI::c;
+            my $c = $Thruk::Request::c;
             confess('no c') unless defined $c;
             if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
             if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }
@@ -64,7 +63,7 @@ sub _debug {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

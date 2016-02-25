@@ -2,20 +2,23 @@
 [% IF block == 'edit' %]
   [%
     required_fields = [
-        { 'language'                => [ 'Language',              'language',        'en'                  ,'', 1    ] },
-        { 'host'                    => [ 'Host',                  'hosts',           ''                    ,'', 1    ] },
-        { 'timeperiod'              => [ 'Timeperiod',            'rptimeperiod',    'last12months'                  ] },
-        { 'breakdown'               => [ 'Breakdown by',          'breakdowns',      'months'                        ] },
-        { 'rpttimeperiod'           => [ 'Report Timeperiod',     'rpttimeperiod',   ''                              ] },
-        { 'sla'                     => [ 'SLA %',                 'int',             '98'                  ,'', 1    ] },
-        { 'graph_min_sla'           => [ 'Graph SLA %',           'int',             '90'                  ,'', 1    ] },
-        { 'decimals'                => [ 'Decimal Points',        'int',             '2'                   ,'', 1    ] },
-        { 'assumeinitialstates'     => [ 'Assume Initial States', 'yes_no',          'yes'                           ] },
-        { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '0'            ] },
-        { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                            ] },
-        { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable'], '', 1  ] },
-        { 'max_outages_pages'       => [ 'Latest Outages',        'int',             '1'          ,'max. # pages', 1 ] },
-        { 'max_worst_pages'         => [ 'Worst Outages',         'int',             '1'          ,'max. # pages', 1 ] },
+        { 'language'                     => [ 'Language',                   'language',        'en'                  ,'', 1    ] },
+        { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                         ] },
+        { 'host'                         => [ 'Host',                       'hosts',           ''                    ,'', 1    ] },
+        { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'last12months'                  ] },
+        { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'months'                        ] },
+        { 'rpttimeperiod'                => [ 'Report Timeperiod',          'rpttimeperiod',   ''                              ] },
+        { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
+        { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
+        { 'details_max_level'            => [ 'Details SLA %',              'int',             '-1' ,'hide details if sla is above threshold', 1 ] },
+        { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
+        { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
+        { 'initialassumedhoststate'      => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'            ] },
+        { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                            ] },
+        { 'unavailable'                  => [ 'Unavailable States',         'hst_unavailable', ['down', 'unreachable'], '', 1  ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '1'          ,'max. # pages', 1 ] },
+        { 'max_worst_pages'              => [ 'Worst Outages',              'int',             '1'          ,'max. # pages', 1 ] },
+        { 'max_pnp_sources'              => [ 'Maximum PNP Sources',        'int',             '1'          ,'max. # pnp images', 1 ] },
     ];
   %]
 [% END %]
@@ -40,6 +43,7 @@
 
   [% WRAPPER 'reports/comp/report.tt' %]
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+    [% PROCESS 'reports/comp/backend_error_page.tt' %]
 
     [% IF total_hosts > 1 %]
       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("SLA Overview Graph") %]
@@ -48,12 +52,15 @@
     [% END %]
 
     [% FOREACH hst = avail_data.hosts.keys.sort %]
-    [% c.request.parameters.host    = hst %]
-    [% c.request.parameters.service = "" %]
+    [% c.req.parameters.host    = hst %]
+    [% c.req.parameters.service = "" %]
+    [% available = get_availability_percents() %]
+    [% p = available.total.percent; IF p == -1; p = 100; END; IF param.details_max_level != -1 && p >= param.details_max_level; NEXT; END %]
     [% pagetitle = loc("Host: %s", hst) %]
     [% WRAPPER 'reports/comp/page_standard.tt' %]
       [% PROCESS 'reports/comp/sla_graph_page.tt' %]
     [% END %]
+    [% PROCESS 'reports/comp/pnp_multiple_graph_page.tt' %]
     [% PROCESS 'reports/comp/sla_outages.tt' %]
     [% END %]
   [% END %][%# report wrapper #%]

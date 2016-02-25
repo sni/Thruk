@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -19,6 +18,9 @@ my @jsfiles = glob('root/thruk/javascript/thruk-*.js
                     ');
 for my $file (@jsfiles) {
     ok(1, "checking ".$file);
+    next if $file =~ m/bigscreen/mxi;
+    next if $file =~ m/OpenLayers/mxi;
+    next if $file =~ m/all_in_one/mxi;
     TestUtils::verify_js($file);
 }
 

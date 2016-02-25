@@ -2,13 +2,19 @@ package Thruk::Utils::Conf;
 
 use strict;
 use warnings;
-use POSIX qw(tzset);
-use Carp;
-use File::Slurp;
+use POSIX ();
+use Carp qw/confess/;
+use File::Slurp qw/read_file/;
 use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
+
+use constant {
+    DISABLED_CONF    => 5,
+    HIDDEN_CONF      => 6,
+    UP_CONF          => 7,
+};
 
 =head1 NAME
 
@@ -32,29 +38,37 @@ put objects model into stash
 sub set_object_model {
     my ( $c, $no_recursion ) = @_;
 
-    Thruk::Action::AddDefaults::set_processinfo($c, undef, 2);
+    my $cached_data = $c->cache->get->{'global'} || {};
+    Thruk::Action::AddDefaults::set_processinfo($c, undef, 2, $cached_data, 1);
+    $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
 
-    $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
+    # if this is no obj config yet, try updating process info which updates
+    # configuration information from http backends
+    if(!$c->stash->{has_obj_conf}) {
+        Thruk::Action::AddDefaults::set_processinfo($c, undef, undef, undef, 1);
+        $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
+    }
 
     return unless $c->stash->{has_obj_conf};
 
-    my $refresh = $c->{'request'}->{'parameters'}->{'refresh'} || 0;
+    my $refresh = $c->req->parameters->{'refreshdata'} || 0;
 
     $c->stats->profile(begin => "_update_objects_config()");
-    my $model                    = $c->model('Objects');
-    my $peer_conftool            = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
+    my $model         = $c->app->obj_db_model;
+    my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
     Thruk::Utils::Conf::get_default_peer_config($peer_conftool->{'configtool'});
     $c->stash->{'peer_conftool'} = $peer_conftool->{'configtool'};
 
     # already parsed?
+    my $jobid = $model->currently_parsing($c->stash->{'param_backend'});
     if(    Thruk::Utils::Conf::get_model_retention($c)
        and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model)
     ) {
         # objects initialized
     }
     # currently parsing
-    elsif(my $id = $model->currently_parsing($c->stash->{'param_backend'})) {
-        $c->response->redirect("job.cgi?job=".$id);
+    elsif($jobid && Thruk::Utils::External::is_running($c, $jobid, 1)) {
+        $c->redirect_to("job.cgi?job=".$jobid);
         return 0;
     }
     else {
@@ -62,16 +76,14 @@ sub set_object_model {
         if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
                                                message => 'please stand by while reading the configuration files...',
-                                               forward => $c->request->uri()
-                                              }
-                                        );
+                                               forward => $c->req->url,
+                                              });
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
-            $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
-            if($c->config->{'no_external_job_forks'} == 1 and !$no_recursion) {
+            if($c->config->{'no_external_job_forks'} == 1 && !$no_recursion) {
                 # should be parsed now
                 return set_object_model($c, 1);
             }
-            return;
+            return 0;
         }
         return 0;
     }
@@ -96,7 +108,7 @@ sub set_object_model {
             $error = 'Got multiple errors!';
         }
         if($c->{'obj_db'}->{'needs_update'}) {
-            $error = 'Config has been changed externally. Need to <a href="'.Thruk::Utils::Filter::uri_with($c, { 'refresh' => 1 }).'">refresh</a> objects.';
+            $error = 'Config has been changed externally. Need to <a href="'.Thruk::Utils::Filter::uri_with($c, { 'refreshdata' => 1 }).'">refresh</a> objects.';
         }
         Thruk::Utils::set_message( $c,
                                   'fail_message',
@@ -121,7 +133,7 @@ read objects and store them as storable
 sub read_objects {
     my $c             = shift;
     $c->stats->profile(begin => "read_objects()");
-    my $model         = $c->model('Objects');
+    my $model         = $c->app->obj_db_model;
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
     my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, undef, $c->{'stats'}, $peer_conftool);
     store_model_retention($c);
@@ -163,13 +175,13 @@ sub update_conf {
            or $old_data->{$key}->[0] eq 'LIST'
            ) {
             if($old_data->{$key}->[1] eq $data->{$key}) {
-                delete $data->{$key}
+                delete $data->{$key};
             }
         }
         elsif(   $old_data->{$key}->[0] eq 'ARRAY'
               or $old_data->{$key}->[0] eq 'MULTI_LIST') {
             if(join(',',@{$old_data->{$key}->[1]}) eq join(',',@{$data->{$key}})) {
-                delete $data->{$key}
+                delete $data->{$key};
             }
         } else {
             confess("unknown type: ".$old_data->{$key}->[0]);
@@ -181,11 +193,13 @@ sub update_conf {
         for my $key (keys %{$data}) {
             $update_c->config->{$key} = $data->{$key};
             if($key eq 'use_timezone') {
+                ## no critic
                 if($data->{$key} ne '') {
-                    $ENV{'TZ'} = $data->{$key}
+                    $ENV{'TZ'} = $data->{$key};
                 } else {
                     delete $ENV{'TZ'};
                 }
+                ## use critic
                 POSIX::tzset();
             }
         }
@@ -550,7 +564,7 @@ sub store_model_retention {
     my($c) = @_;
     $c->stats->profile(begin => "store_model_retention()");
 
-    my $model = $c->model('Objects');
+    my $model = $c->app->obj_db_model;
     my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
 
     # try to save retention data
@@ -591,7 +605,7 @@ sub get_model_retention {
     my($c) = @_;
     $c->stats->profile(begin => "get_model_retention()");
 
-    my $model = $c->model('Objects');
+    my $model = $c->app->obj_db_model;
     my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
 
     if(! -f $file) {
@@ -745,9 +759,9 @@ sub _compare_configs {
     my($c1, $c2) = @_;
 
     for my $key (qw/core_conf core_type/) {
-        return 0 if !defined $c1->{$key} and  defined $c2->{$key};
-        return 0 if  defined $c1->{$key} and !defined $c2->{$key};
-        next if !defined $c1->{$key} and !defined $c2->{$key};
+        return 0 if !defined $c1->{$key} &&  defined $c2->{$key};
+        return 0 if  defined $c1->{$key} && !defined $c2->{$key};
+        next if !defined $c1->{$key} && !defined $c2->{$key};
         return 0 if $c1->{$key} ne $c2->{$key};
     }
 
@@ -782,58 +796,95 @@ sub _link_obj {
 }
 
 ##########################################################
-sub _get_backends_with_obj_config {
-    my $c        = shift;
+
+=head2 get_backends_with_obj_config
+
+    get_backends_with_obj_config($c);
+
+returns all backends which do have a objects configuration
+
+=cut
+sub get_backends_with_obj_config {
+    my($c)       = @_;
     my $backends = {};
     my $firstpeer;
     $c->stash->{'param_backend'} = '';
 
+    my @peers = @{$c->{'db'}->get_peers(1)};
+    my @fetch;
+    for my $peer (@peers) {
+        if($peer->{'addr'} && $peer->{'addr'} =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
+            if(!$c->stash->{'failed_backends'}->{$peer->{'key'}}) {
+                $peer->{'configtool'} = { remote => 1 };
+                push @fetch, $peer->{'key'};
+            }
+        }
+    }
+    if(scalar @fetch > 0) {
+        eval {
+            $c->{'db'}->get_processinfo(backend => \@fetch);
+        };
+        for my $key (@fetch) {
+            if($c->stash->{'failed_backends'}->{$key}) {
+                my $peer = $c->{'db'}->get_peer_by_key($key);
+                delete $peer->{'configtool'}->{remote};
+            }
+        }
+        # when using shadownaemon, do fetch the real config data now
+        if($Thruk::Backend::Pool::xs && (!defined $ENV{'THRUK_USE_SHADOW'} || $ENV{'THRUK_USE_SHADOW'})) {
+            for my $key (@fetch) {
+                my $peer = $c->{'db'}->get_peer_by_key($key);
+                delete $peer->{'configtool'}->{remote};
+            }
+            # make sure we have uptodate information about config section of http backends
+            local $ENV{'THRUK_USE_SHADOW'} = 0;
+            get_backends_with_obj_config($c);
+        }
+    }
+
     # first hide all of them
-    for my $peer (@{$c->{'db'}->get_peers(1)}) {
-        if(scalar keys %{$peer->{'configtool'}} > 0) {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
+    for my $peer (@peers) {
+        my $min_key_size = 0;
+        if(defined $peer->{'configtool'}->{remote} and $peer->{'configtool'}->{remote} == 1) { $min_key_size = 1; }
+        if(scalar keys %{$peer->{'configtool'}} > $min_key_size) {
+            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = HIDDEN_CONF;
         } else {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5
+            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = DISABLED_CONF;
         }
     }
 
     # first non hidden peer with object config enabled
-    for my $peer (@{$c->{'db'}->get_peers(1)}) {
+    for my $peer (@peers) {
         next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
             $firstpeer = $peer->{'key'} unless defined $firstpeer;
-            $backends->{$peer->{'key'}} = $peer->{'configtool'}
+            $backends->{$peer->{'key'}} = $peer->{'configtool'};
         }
     }
 
     # first peer with object config enabled
     if(!defined $firstpeer) {
-        for my $peer (@{$c->{'db'}->get_peers(1)}) {
+        for my $peer (@peers) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;
-                $backends->{$peer->{'key'}} = $peer->{'configtool'}
+                $backends->{$peer->{'key'}} = $peer->{'configtool'};
             }
         }
     }
 
     # from cookie setting?
-    if(defined $c->request->cookie('thruk_conf')) {
-        for my $val (@{$c->request->cookie('thruk_conf')->{'value'}}) {
+    if(defined $c->cookie('thruk_conf')) {
+        for my $val (@{$c->cookies('thruk_conf')->{'value'}}) {
             next unless defined $c->stash->{'backend_detail'}->{$val};
             $c->stash->{'param_backend'} = $val;
         }
     }
 
     # from url parameter
-    if(defined $c->{'request'}->{'parameters'}->{'backend'}) {
-        my $val = $c->{'request'}->{'parameters'}->{'backend'};
+    if(defined $c->req->parameters->{'backend'}) {
+        my $val = $c->req->parameters->{'backend'};
         if(defined $c->stash->{'backend_detail'}->{$val}) {
             $c->stash->{'param_backend'} = $val;
-            # save value in the cookie, so later pages will show the same selected backend
-            $c->res->cookies->{'thruk_conf'} = {
-                value => $val,
-                path  => $c->stash->{'cookie_path'},
-            };
         }
     }
 
@@ -841,17 +892,46 @@ sub _get_backends_with_obj_config {
         $c->stash->{'param_backend'} = $firstpeer;
     }
     if($c->stash->{'param_backend'} and defined $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}) {
-        $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} = 7;
+        $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} = UP_CONF;
     }
+
+    # save value in the cookie, so later pages will show the same selected backend
+    $c->cookie('thruk_conf' => $c->stash->{'param_backend'}, { path  => $c->stash->{'cookie_path'} });
+
     $c->stash->{'backend_chooser'} = 'switch';
+
     return $backends;
+}
+
+##########################################################
+
+=head2 clean_from_tool_ignores
+
+    clean_from_tool_ignores($list, $ignores);
+
+returns list with all ignores removed
+
+=cut
+sub clean_from_tool_ignores {
+    my($list, $ignores) = @_;
+    return(0, $list) unless $ignores;
+    my $hidden  = 0;
+    my $cleaned = [];
+    for my $r (@{$list}) {
+        if(!defined $ignores->{$r->{'ident'}}) {
+            push @{$cleaned}, $r;
+        } else {
+            $hidden++;
+        }
+    }
+    return($hidden, $cleaned);
 }
 
 ##########################################################
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

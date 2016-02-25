@@ -1,0 +1,216 @@
+---
+layout: docs
+title: SLA Reporting
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+== SLA Reporting
+
+=== Installation
+
+This plugin is marked as optional/recommends due to depedencies to xlibs, xvfb and fonts.
+
+To install use the package 'thruk-plugin-reporting' from Consol Labs Repository.
+
+=== How it works
+
+SLA Reporting consists of several steps.
+
+ - report configuration
+ - report template
+ - converting html report into pdf
+ - optionally send report by mail
+
+==== Report Configuration
+
+You can create and adjust report settings on the 'Reporting' page.
+Make sure the plugin is enabled. After selecting a template for your
+report you have to set specific types of input fields on the second
+page. If you make you report public, everyone can view and refresh the
+report.
+
+==== Report Templates
+
+All templates used for reports can be found in
+'plugins/plugins-enabled/reports2/templates/reports'.
+You may adjust or override all templates to your needs and put them
+into a 'reports' subfolder of the 'user_template_path'.
+
+------
+  | reports     contains the selectable reports
+  |- comp       contains components used in reports
+  |- locale     contains localization settings
+  |- style      contains css used to make reports pretty
+------
+
+See link:../api/Thruk/Utils/Reports/Render.html for details on
+available functions and examples.
+
+The Templates itself are written in Template::Toolkit which is
+perfectly documented at http://template-toolkit.org/docs/manual/index.html
+
+==== Converting
+
+The generated HTML report will be converted into a pdf file using phantomjs.
+
+
+==== Sending Reports By Mail
+
+It's quite easy to setup sla reports by mail. All you need is to
+create send option in the report configuration. It is even possible to
+send one report at multiple times.
+
+
+=== Customized Reports
+Reports can be customized with some HTML and CSS knowledge. Reports in general
+have several blocks which specify the steps done to produce the report.
+
+  * styles
+  * edit
+  * prepare
+  * render
+  * mail
+
+==== Styles
+Customizing css styles of your reports is easy. You need to create a
+new file 'reports/style/custom.tt' below your 'user_template_path'.
+
+For example:
+
+------
+<style type="text/css">
+/* override css styles */
+BODY {
+    /* use a different font */
+    font-family: arial, sans-serif;
+
+    /* change default font color */
+    color: DarkSlateGray;
+}
+TD.header DIV.title {
+    /* change gradient on page cover and page header */
+    background: rgba(0, 0, 0, 0) -moz-linear-gradient(45deg, #ffd972 0%, #fff9a1 100%) repeat scroll 0 0;
+    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#ffd972), color-stop(100%,#fff9a1));
+}
+</style>
+
+<script language="javascript" type="text/javascript">
+  /* add complete new elements by javascript, ex.: company logo on page cover */
+  jQuery(document).ready(function() {
+    jQuery('<img src="http://www.thruk.org/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
+  });
+</script>
+------
+
+If thats not enough, you still can change each and every template used to create the reports.
+
+
+
+==== Edit Block
+The edit block contains configuration items used for this report. They create
+the edit page when someone chooses to create or edit a report of this type.
+Basically this block contains all required and optional fields used for this
+report.
+
+For example:
+
+------
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'host'       => [ 'Host',        'hosts',         ''              , '', 1 ] },
+        { 'timeperiod' => [ 'Timeperiod',  'rptimeperiod',  'last12months'          ] },
+    ];
+  %]
+[% END %]
+------
+
+The key in that hash defines the parameter by which that value can be accessed
+later. Each field has to point to an array with at least 3 values. The required
+flag is optional.
+
+  * Name
+  * Type
+  * Default value
+  * Required Flag
+
+
+
+==== Prepare Block
+The prepare block is used to gather data used in the report. Usually it's been
+used to get availability data via livestatus or fetch events from logfiles.
+
+For example:
+
+------
+[% IF block == 'prepare' %]
+  [%
+    set_unavailable_states(param.unavailable);
+    calculate_availability();
+  %]
+[% END %]
+------
+
+You may use all functions available from the link:../api/Thruk/Utils/Reports/Render.html[Render Helper]
+
+
+==== Render Block
+The render block defines the layout of the report.
+
+For example:
+
+------
+[% IF block == 'render' %]
+  [% PROCESS 'reports/locale/en.tt' %]
+  [%
+    title        = 'Hello World Report'
+    subtitle     = r.name
+    coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat),
+                     'Host:', param.host,
+                   ]
+  %]
+
+  [% WRAPPER 'reports/comp/report.tt' %]
+    [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+    [% WRAPPER 'reports/comp/page_standard.tt' %]
+      <b>hello world</b>
+    [% END %]
+  [% END %]
+[% END %]
+------
+
+This report would contain 2 pages. First you wrap everything into the report.tt
+which defines the basic report layout and contains the stylesheets.
+Then you have to define some settings used by the cover page. 'r' is a reference
+to the report object, in this example we just use that as subtitle. 'coverdetails'
+is a list of name / value pairs used in the details list on the cover page.
+Finally we wrap a 'hello world' in a standard page. The content could contain
+standard HTML tags like tables and images as well.
+
+
+==== Mail Block
+Finally we define a mail block which is used for the mail layout if a report
+is sent by e-mail.
+
+For example:
+
+------
+[% IF block == 'mail' +%]
+SUBJECT: Report: [% r.name %]
+
+Your report is attached.
+
+[% IF r.desc %]Description: [%+ r.desc %][% END %]
+[%+ END %]
+------
+
+We use the report name 'r.name' as subject and put the report description 'r.desc'
+in the body.
+
+
+==== Custom Perl Render Helper
+You may create a Perl Module named
+'Thruk::Utils::Reports::CustomRender' which will be automatically made
+available to the stash, so functions from this module can be used in
+the reporting templates.
+

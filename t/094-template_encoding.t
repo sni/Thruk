@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 
 eval "use File::BOM";
 plan skip_all => 'File::BOM required' if $@;

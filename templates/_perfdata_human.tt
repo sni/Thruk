@@ -1,4 +1,6 @@
-﻿[% IF perfdata %]
+﻿[% PROCESS _blocks.tt %]
+
+[% IF perfdata %]
   [% orig_perfdata = perfdata %]
   [% tmp = split_perfdata(perfdata) %]
   [% IF tmp.size > 0 && tmp.0.size > 0 %]
@@ -26,19 +28,19 @@
         [% END %]
         <td class="[% class %]" align="left">[% p.name %]</td>
         <td class="[% class %]" align="right" style="padding-right: 8px;">[% format_number(p.value) %][% p.unit %]</td>
-        [% IF has_warn %]<td class="[% class %]">[% p.warn %]</td>[% END %]
-        [% IF has_crit %]<td class="[% class %]">[% p.crit %]</td>[% END %]
-        [% IF has_min  %]<td class="[% class %]">[% p.min %]</td>[% END %]
-        [% IF has_max  %]<td class="[% class %]">[% p.max %]</td>[% END %]
+        [% IF has_warn %]<td class="[% class %]">[% format_number(p.warn) %]</td>[% END %]
+        [% IF has_crit %]<td class="[% class %]">[% format_number(p.crit) %]</td>[% END %]
+        [% IF has_min  %]<td class="[% class %]">[% format_number(p.min) %]</td>[% END %]
+        [% IF has_max  %]<td class="[% class %]">[% format_number(p.max) %]</td>[% END %]
         <td class="[% class %]">
-          [% PROCESS _perfdata_table.tt write="true" perfdata=p.orig state=0 %]
+          [% PROCESS _perfdata_table write="true" perfdata=p.orig state=4 %]
         </td>
       </tr>
       [% END %]
     </table>
     <div id="perfdata_raw" style="display:none;">
       [% perfdata = orig_perfdata %]
-      [% PROCESS _perfdata_table.tt write="true" %]
+      [% PROCESS _perfdata_table write="true" %]
       [% orig_perfdata %]
     </div>
   [% ELSE %]

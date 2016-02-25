@@ -2,7 +2,6 @@ package Thruk::Backend::Provider::ConfigOnly;
 
 use strict;
 use warnings;
-use Carp;
 
 =head1 NAME
 
@@ -25,7 +24,8 @@ create new manager
 =cut
 
 sub new {
-    my( $class, $peer_config, $config, $log ) = @_;
+    #my( $class, $peer_config, $config, $log ) = @_;
+    my( $class, $peer_config, undef, undef ) = @_;
     my $self = {
         'key'   => '',
         'name'  => $peer_config->{'name'},
@@ -476,7 +476,7 @@ sub renew_logcache {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

@@ -1,87 +1,97 @@
-﻿Ext.BLANK_IMAGE_URL        = '[% url_prefix %]plugins/panorama/images/s.gif';
+﻿[%+ PROCESS _common_js_bugs.tt +%]
 
-[% IF thruk_debug %]
-    [%+ PROCESS _panorama_js_globals.tt +%]
-[% END %]
-[%+ PROCESS _common_js_bugs.tt +%]
-
-var ExtState     = [% state %];
-var default_view = '[% default_view %]';
-
-[% IF stateprovider == 'server' %]
-    [%+ PROCESS _panorama_js_state_provider_http.tt +%]
-[% ELSE %]
-    [%+ PROCESS _panorama_js_state_provider_cookie.tt +%]
-[% END %]
-
-[%+ PROCESS _panorama_js_functions.tt +%]
+Ext.BLANK_IMAGE_URL = url_prefix+'plugins/panorama/images/s.gif';
 Ext.namespace("TP");
-TP.initialized = false;
-TP.num_panels  = 0;
-TP.cur_panels  = 0;
-for(var key in ExtState) {
-    if(key.match(/^panlet_/)) {
-        TP.num_panels++;
-    }
-}
+[%+ IF state +%]
+var ExtState      = [% state %];
+var ExtStateSplit = false;
+[%+ ELSE +%]
+var ExtState      = [% dashboards %];
+var ExtStateSplit = true;
+[%+ END +%]
+var default_dashboard = [% default_dashboard %];
+var initial_shapes = [% json_encode(shapes) %];
+
 Ext.onReady(function() {
+    /* create state provider */
+    TP.cp = new Ext.state.HttpProvider({
+        url: 'panorama.cgi?state'
+    });
+    Ext.state.Manager.setProvider(TP.cp);
+
+    TP.unloading = false;
+    var state = TP.cp.readValues();
+    for(var key in ExtState) {
+        if(key.search(/panlet_/) != -1) {
+            TP.num_panels++;
+        }
+    }
     if(TP.num_panels > 0) {
         TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
         TP.initMask.show();
     }
-});
+    if(TP.num_panels == 0) {
+        TP.initComplete();
+    }
 
-[%+ PROCESS _panorama_js_tab_reorder.tt +%]
-[%+ PROCESS _panorama_js_elements.tt +%]
-[%+ PROCESS _panorama_js_utils_base64.tt +%]
-[%+ PROCESS _panorama_js_slider.tt +%]
-[%+ PROCESS _panorama_js_form_filter.tt +%]
-[%+ PROCESS _panorama_js_grid_renderer.tt +%]
-[%+ PROCESS _panorama_js_settings_global.tt +%]
-[%+ PROCESS _panorama_js_tabbar.tt +%]
-[%+ PROCESS _panorama_js_pantab.tt +%]
-[%+ PROCESS _panorama_js_panlet.tt +%]
-[%+ PROCESS _panorama_js_panlet_url.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_core_metrics.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_logs.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_server.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_hosts.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_services.tt +%]
-[%+ PROCESS _panorama_js_panlet_chart.tt +%]
-[%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
-[%+ PROCESS _panorama_js_panlet_piechart.tt +%]
-[%+ PROCESS _panorama_js_panlet_piechart_stats.tt +%]
-[%+ PROCESS _panorama_js_panlet_pnp.tt +%]
-[%+ PROCESS _panorama_js_panlet_host.tt +%]
-[%+ PROCESS _panorama_js_panlet_service.tt +%]
-[%+ PROCESS _panorama_js_panlet_url_bp.tt +%]
-[%+ PROCESS _panorama_js_panlet_url_nagvis.tt +%]
+    Ext.QuickTips.init();
 
-/* main viewport */
-Ext.onReady(function() {
-  Ext.QuickTips.init();
+    /* main viewport */
+    if(one_tab_only) {
+        TP.viewport = new Ext.Viewport({
+            id:       'tabpan',
+            layout:   'border',
+            renderTo: Ext.getBody(),
+            margins:  '0 0 0 0',
+            items:    [],
+            xdata:    {},
+            getActiveTab: function() {
+                if(this.items.length > 0) {
+                    return(this.items.get(0));
+                }
+                return;
+            },
+            setActiveTab: function() {}
+        });
+        TP.add_pantab(one_tab_only, undefined, undefined, function(id) {
+            TP.initComplete();
+            if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+        });
+    } else {
+        TP.viewport = new Ext.Viewport({
+            id:       'viewport',
+            layout:   'border',
+            renderTo: Ext.getBody(),
+            margins:  '0 0 0 0',
+            items:    [ new TP.TabBar() ]
+        });
+        [% IF thruk_debug && !c.config.demo_mode %]
+        Ext.getCmp('debug_tab').show();
+        [% END %]
 
-  /* do we have a state? */
-  var state = cp.readValues();
-  if(!state['tabpan'] && default_view != '') {
-      debug("using default view");
-      data = cp.decodeValue(decode64(default_view));
-      cp.loadData(data);
-  }
+        if(readonly || dashboard_ignore_changes) {
+            var icon = Ext.query('SPAN.new-tab')[0];
+            icon.parentNode.parentNode.parentNode.style.display = 'none';
+        }
+    }
 
-  TP.viewport = new Ext.Viewport({
-    id:       'viewport',
-    layout:   'border',
-    renderTo: Ext.getBody(),
-    margins:  '0 0 0 0',
-    items:    [ new TP.TabBar() ]
-  });
-  Ext.getCmp('bug_report').hide();
-  Ext.getCmp('test_tab').hide();
+    /* make sure initialized is set to true */
+    TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initComplete();", 60000);
 
-  [% IF readonly %]
-    var icon = Ext.query('SPAN.new-tab')[0];
-    icon.parentNode.parentNode.parentNode.style.display = 'none';
-  [% END %]
+    /* full reload page interval */
+    [% IF full_reload_interval != 0 %]
+    TP.timeouts['timeout_page_reload'] = window.setInterval("TP.fullReload()", [% full_reload_interval %]*1000);
+    TP.log('[global] full_reload_interval set to: [% full_reload_interval %]');
+    [% END %]
+    cleanUnderscoreUrl();
+
+    /* disable backspace on body to prevent accidentally leaving the page */
+    Ext.EventManager.on(document, 'keydown', function(evt, t) {
+        if(evt.getKey() == evt.BACKSPACE && evt.target) {
+            if(evt.target.tagName.toLowerCase() != "input" && evt.target.tagName.toLowerCase() != "textarea") {
+                evt.preventDefault();
+                return false;
+            }
+        }
+    });
 });

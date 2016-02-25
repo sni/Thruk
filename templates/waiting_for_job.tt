@@ -17,60 +17,20 @@
 
     <div align="center">
     [% IF job_id %]
-    <!-- thruk: waiting for job [% job_id %] -->
     [% IF job_message %][% job_message %][% ELSE %]please stand by while your job is being processed...[% END %]<br>
-    <div id="progressbar" style="width: 400px; color: inherit;"><div align="center" id="job_time" style="z-index: 100;  line-height: 24px; position: absolute; width: 400px; color: inherit;">[% job_time %]s</div></div>
-    <script type="text/javascript">
-    <!--
-        jQuery(function() {
-            jQuery( "#progressbar" ).progressbar({
-                value: [% job_percent %]
-            });
-        });
-        var last_time = 0;
-
-        function update_job_progressbar() {
-            var datestr = Math.round((new Date()).getTime()/1000);
-            var val = jQuery( "#progressbar" ).progressbar( "value" );
-            // update every 2 seconds
-            if(last_time != 0 && datestr%2 != 0 && val < 100) {
-                last_time = last_time + 1;
-                jQuery( "#progressbar" ).progressbar( "value", val + 1 );
-                jQuery( "#job_time" ).html(last_time + "s");
-                return;
-            }
-            jQuery.ajax({
-                url: "job.cgi?job=[% job_id %]&json=1&_"+datestr,
-                type: 'POST',
-                dataType: 'json',
-                success: function(data, status, jqXHR) {
-                    if(data.percent != 0) {
-                        jQuery( "#progressbar" ).progressbar( "value", data.percent );
+    [% PROCESS _progressbar.tt
+                    pb_options = {
+                        percent             => job_percent,
+                        time                => job_time,
+                        job_id              => job_id,
+                        id                  => "progressbar",
+                        lineheight          =>  24,
+                        width               => 400,
+                        height              =>  24,
+                        percent_per_second  =>   1,
+                        show_message        =>   0,
                     }
-                    if(data.percent != 100) {
-                      last_time = data.time;
-                      jQuery( "#job_time" ).html(data.time + "s");
-                    }
-                }
-            });
-
-            var val = jQuery( "#progressbar" ).progressbar( "value" );
-            if(val >= 100) {
-                clearInterval(job_wait_timer);
-                reloadPage();
-                return;
-            } else {
-                jQuery( "#progressbar" ).progressbar( "value", val + 1 );
-            }
-        }
-        [% IF job_percent != 100 %]
-        var job_wait_timer;
-        jQuery(function() {
-            job_wait_timer = window.setInterval(update_job_progressbar, 1000);
-        });
-        [% END +%]
-    -->
-    </script>
+    %]
     [% END %]
 
     <br>

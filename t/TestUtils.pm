@@ -8,31 +8,66 @@ package TestUtils;
 BEGIN {
   $ENV{'THRUK_SRC'} = 'TEST';
 
-  $ENV{'CATALYST_SERVER'} =~ s#/$##gmx if $ENV{'CATALYST_SERVER'};
+  $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ s#/$##gmx if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 }
 
+###################################################
+use lib 'lib';
+use warnings;
 use strict;
 use Data::Dumper;
 use Test::More;
-use URI::Escape;
-use Encode qw/decode_utf8/;
-use File::Slurp;
-use HTTP::Request::Common;
+use URI::Escape qw/uri_unescape/;
+use File::Slurp qw/read_file/;
+use HTTP::Request::Common qw(GET POST);
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
-use File::Temp qw/ tempfile /;
-use Thruk::Utils;
-use Thruk::Utils::External;
+use File::Temp qw/tempfile/;
+use Carp qw/confess/;
+use Plack::Test;
 
-use Catalyst::Test 'Thruk';
+require Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT    = qw(request ctx_request);
+our @EXPORT_OK = qw(request ctx_request);
 
-my $use_html_lint = 0;
+my $use_html_lint;
 my $lint;
-eval {
-    require HTML::Lint;
-    $use_html_lint = 1;
-    $lint          = new HTML::Lint;
-};
+
+use Thruk;
+use Thruk::Config;
+Thruk::Config::get_config(); # adds plugins to INC which is required for many tests
+our $placktest;
+
+#########################
+sub request {
+    my($url) = @_;
+    if(!defined $Thruk::Backend::Pool::peers) {
+        require Thruk::Backend::Pool;
+        Thruk::Backend::Pool::init_backend_thread_pool();
+    }
+
+    my($req, $res);
+    if(!$placktest) {
+        $placktest = Plack::Test->create(Thruk->startup)
+    }
+    if(ref $url eq "") {
+        $res = $placktest->request(GET $url);
+    } else {
+        $res = $placktest->request($url);
+    }
+    return($res);
+}
+
+#########################
+sub ctx_request {
+    my($url) = @_;
+    local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
+    $Thruk::Request::c = undef;
+    my $res = request($url);
+    my $c = $Thruk::Request::c;
+    return($res, $c);
+}
 
 #########################
 sub get_test_servicegroup {
@@ -62,6 +97,8 @@ sub get_test_hostgroup {
 
 #########################
 sub get_test_user {
+    our $remote_user_cache;
+    return $remote_user_cache if $remote_user_cache;
     my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
     ok( $request->is_success, 'get_test_user() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
@@ -70,6 +107,7 @@ sub get_test_user {
         $user = $1;
     }
     isnt($user, undef, "got a user from config.cgi") or bail_out_req('got no test user, cannot test.', $request);
+    $remote_user_cache = $user;
     return($user);
 }
 
@@ -108,6 +146,8 @@ sub get_test_timeperiod {
         $timeperiod = $2;
     }
     isnt($timeperiod, undef, "got a timeperiod from config.cgi") or bail_out_req('got no test config, cannot test.', $request);
+    $timeperiod =~ s|^\s*||gmx;
+    $timeperiod =~ s|\s*$||gmx;
     return($timeperiod);
 }
 
@@ -115,7 +155,7 @@ sub get_test_timeperiod {
 sub get_test_host_cli {
     my($binary) = @_;
     my $auth = '';
-    if(!$ENV{'CATALYST_SERVER'}) {
+    if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
@@ -130,7 +170,7 @@ sub get_test_host_cli {
 sub get_test_hostgroup_cli {
     my($binary) = @_;
     my $auth = '';
-    if(!$ENV{'CATALYST_SERVER'}) {
+    if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
@@ -169,7 +209,9 @@ sub get_test_hostgroup_cli {
     skip_doctype    => skip doctype check, even if its an html page
     skip_js_check   => skip js comma check
     sleep           => sleep this amount of seconds after the request
-    waitfor         => wait till regex occurs (max 60sec)
+    waitfor         => wait till regex occurs (max 300sec)
+    agent           => user agent for requests
+    callback        => content callback
   }
 
 =cut
@@ -182,20 +224,26 @@ sub test_page {
 
     # make tests with http://localhost/naemon possible
     my $product = 'thruk';
-    if(defined $ENV{'CATALYST_SERVER'} and $ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
-        $product = $1;
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
+        $product = $2;
         $opts->{'url'} =~ s|/thruk|/$product|gmx;
     }
 
-    ok($opts->{'url'}, $opts->{'url'});
+    if($opts->{'post'}) {
+        local $Data::Dumper::Indent = 0;
+        local $Data::Dumper::Varname = 'POST';
+        ok($opts->{'url'}, 'POST '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
+    } else {
+        ok($opts->{'url'}, 'GET '.$opts->{'url'});
+    }
 
-    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'});
+    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'});
 
     if(defined $opts->{'follow'}) {
         my $redirects = 0;
         while(my $location = $request->{'_headers'}->{'location'}) {
             if($location !~ m/^(http|\/)/gmxo) { $location = _relative_url($location, $request->base()->as_string()); }
-            $request = _request($location);
+            $request = _request($location, undef, undef, $opts->{'agent'});
             $redirects++;
             last if $redirects > 10;
         }
@@ -214,7 +262,7 @@ sub test_page {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
-        while($now < $start + 60) {
+        while($now < $start + 300) {
             # text that shouldn't appear
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
@@ -232,10 +280,10 @@ sub test_page {
             }
             sleep(1);
             $now = time();
-            $request = _request($opts->{'url'}, $opts->{'startup_to_url'});
+            $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
             $return->{'content'} = $request->content;
         }
-        fail("content did not occur within 60 seconds") unless $found;
+        fail("content did not occur within 300 seconds") unless $found;
         return $return;
     }
 
@@ -243,7 +291,7 @@ sub test_page {
         # is it a background job page?
         wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
-        $request = _request($location);
+        $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
             fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
@@ -254,7 +302,7 @@ sub test_page {
         ok( $request->is_error, 'Request '.$opts->{'url'}.' should fail' );
     }
     elsif(defined $opts->{'redirect'}) {
-        ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($request));
+        ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($opts, $request));
         if(defined $opts->{'location'}) {
             if(defined $request->{'_headers'}->{'location'}) {
                 like($request->{'_headers'}->{'location'}, qr/$opts->{'location'}/, "Content should redirect: ".$opts->{'location'});
@@ -267,7 +315,7 @@ sub test_page {
         # is it a background job page?
         wait_for_job($1);
         my $location = "/".$product."/cgi-bin/job.cgi?job=".$1;
-        $request = _request($location);
+        $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
             fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
@@ -292,8 +340,8 @@ sub test_page {
     }
 
     # test the content type
-    $return->{'content_type'} = $request->header('Content-Type');
-    my $content_type = $request->header('Content-Type');
+    $return->{'content_type'} = $request->header('content-type');
+    my $content_type = $request->header('content-type') || '';
     if(defined $opts->{'content_type'}) {
         is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'}) or diag($opts->{'url'});
     }
@@ -301,8 +349,9 @@ sub test_page {
 
     # memory usage
     SKIP: {
-        skip "skipped memory check, set TEST_AUTHOR_MEMORY to enable", 1 unless defined $ENV{'TEST_AUTHOR_MEMORY'};
-        my $rsize = Thruk::Utils::get_memory_usage($$);
+        skip "skipped memory check", 1 if $ENV{'TEST_SKIP_MEMORY'};
+        require Thruk::Backend::Pool;
+        my $rsize = Thruk::Backend::Pool::get_memory_usage($$);
         ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
     }
 
@@ -313,20 +362,45 @@ sub test_page {
             like($return->{'content'}, '/<!doctype/i',   'html page has doctype');
         }
     }
+    if($content_type =~ m|text/html| && !defined $return->{'content_type'}) {
+        # test without having to change the test number in all tests
+        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+    }
+    if($content_type =~ m|application/json|) {
+        # test without having to change the test number in all tests
+        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+    }
+    my $is_length  = length($request->content);
+    my $got_length = $request->header('content-length');
+    if($got_length && $is_length != $got_length) {
+        fail("Content-Length did not match, $is_length != $got_length");
+    }
+    if(!$got_length && ($content_type =~ m|text/html| || $content_type =~ m|application/json|)) {
+        fail("no Content-Length set");
+    }
 
     SKIP: {
-        if($content_type =~ 'text\/html' and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
-            if($use_html_lint == 0) {
-                skip "no HTML::Lint installed", 2;
+        if($content_type =~ m|text/html| and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
+            if(!defined $use_html_lint) {
+                # load lint on first use
+                $use_html_lint = 0;
+                eval {
+                    require HTML::Lint;
+                    $use_html_lint = 1;
+                    $lint          = new HTML::Lint;
+                };
             }
-            isa_ok( $lint, "HTML::Lint" );
+            if($use_html_lint == 0) {
+                skip "no HTML::Lint installed", 1;
+            }
             $lint->newfile($opts->{'url'});
             # will result in "Parsing of undecoded UTF-8 will give garbage when decoding entities..." otherwise
-            my $content = decode_utf8($return->{'content'});
+            my $content = $return->{'content'};
+            utf8::decode($content);
             $lint->parse($content);
             my @errors = $lint->errors;
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
-            is( scalar @errors, 0, "No errors found in HTML" );
+            is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
             $lint->clear_errors();
         }
     }
@@ -336,7 +410,8 @@ sub test_page {
         my $content = $return->{'content'};
         # check for failed javascript lists
         verify_html_js($content) unless $opts->{'skip_js_check'};
-        $content =~ s/<script[^>]*>.*?<\/script>//gsmxio;
+        # remove script tags without a src
+        $content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
         my @matches1 = $content =~ m/\s+(src|href)='(.+?)'/gio;
         my @matches2 = $content =~ m/\s+(src|href)="(.+?)"/gio;
         my $links_to_check;
@@ -351,8 +426,8 @@ sub test_page {
             next if $match =~ m/^\/$product\/cgi\-bin/mxo;
             next if $match =~ m/^\w+\.cgi/mxo;
             next if $match =~ m/^javascript:/mxo;
-            next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'CATALYST_SERVER'};
-            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'CATALYST_SERVER'};
+            next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
             next if $match =~ m/data:image\/png;base64/mxo;
@@ -363,15 +438,16 @@ sub test_page {
         my $errors = 0;
         for my $test_url (keys %{$links_to_check}) {
             next if $test_url =~ m/\/pnp4nagios\//mxo;
+            next if $test_url =~ m/\/pnp\//mxo;
             next if $test_url =~ m|/$product/themes/.*?/images/logos/|mxo;
             if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
-            my $request = _request($test_url);
+            my $request = _request($test_url, undef, undef, $opts->{'agent'});
 
             if($request->is_redirect) {
                 my $redirects = 0;
                 while(my $location = $request->{'_headers'}->{'location'}) {
                     if($location !~ m/^(http|\/)/gmxo) { $location = _relative_url($location, $request->base()->as_string()); }
-                    $request = _request($location);
+                    $request = _request($location, undef, undef, $opts->{'agent'});
                     $redirects++;
                     last if $redirects > 10;
                 }
@@ -389,7 +465,38 @@ sub test_page {
         ok(sleep($opts->{'sleep'}), "slept $opts->{'sleep'} seconds");
     }
 
+    if($opts->{'callback'}) {
+        $opts->{'callback'}($return->{'content'});
+    }
+
+    $return->{'response'} = $request;
+    $return->{'code'}     = $request->code();
     return $return;
+}
+
+#########################
+
+=head2 set_cookie
+
+    set_cookie($name, $value, $expire)
+
+  Sets cookie. Expire date is in seconds. A value <= 0 will remove the cookie.
+
+=cut
+sub set_cookie {
+    my($var, $val, $expire) = @_;
+    our($cookie_jar, $cookie_file);
+    if(!defined $cookie_jar) {
+        my $fh;
+        ($fh, $cookie_file) = tempfile(TEMPLATE => 'tempXXXXX', UNLINK => 1);
+        unlink ($cookie_file);
+        $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
+    }
+    my $config      = Thruk::Config::get_config();
+    my $cookie_path = $config->{'cookie_path'};
+    $cookie_jar->set_cookie( 0, $var, $val, $cookie_path, 'localhost.local', undef, 1, 0, $expire, 1, {});
+    $cookie_jar->save();
+    return;
 }
 
 #########################
@@ -430,7 +537,10 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <input>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "class"\ for\ tag\ <html>/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <form>/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <input>/imxo;
         next if $err_str =~ m/Character\ ".*?"\ should\ be\ written\ as/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "manifest"\ for\ tag\ <html>/imxo;
         diag($error->as_string."\n");
         push @return, $error;
     }
@@ -445,13 +555,17 @@ sub get_themes {
 
 #########################
 sub get_c {
-    my($res, $c) = ctx_request('/thruk/side.html');
+    our($c);
+    return $c if defined $c;
+    my $res;
+    ($res, $c) = ctx_request('/thruk/side.html');
     return $c;
 }
 
 #########################
 sub get_user {
     my $c = get_c();
+    require Thruk::Utils;
     my ($uid, $groups) = Thruk::Utils::get_user($c);
     my $user           = getpwuid($uid);
     return $user;
@@ -460,12 +574,29 @@ sub get_user {
 #########################
 sub wait_for_job {
     my $job = shift;
-    alarm(60);
-    while(Thruk::Utils::External::_is_running('./var/jobs/'.$job)) {
-        sleep(1);
+    my $start  = time();
+    my $config = Thruk::Config::get_config();
+    my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
+    if(!-e $jobdir) {
+        fail("job folder ".$jobdir.": ".$!);
+        return;
     }
-    is(Thruk::Utils::External::_is_running('./var/jobs/'.$job), 0, 'job is finished');
+    local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
+    require Thruk::Utils::External;
+    alarm(300);
+    eval {
+        while(Thruk::Utils::External::_is_running($jobdir)) {
+            sleep(1);
+        }
+    };
     alarm(0);
+    my $end  = time();
+    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds')
+        or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
+                            scalar `uptime`,
+                            scalar `ps -efl`,
+                            scalar `find $jobdir/ -ls -exec cat {} \\;`,
+               ));
     return;
 }
 
@@ -482,11 +613,12 @@ sub wait_for_job {
     like    => (list of) regular expressions which have to match stdout
     errlike => (list of) regular expressions which have to match stderr, default: empty
     sleep   => time to wait after executing the command
+    env     => hash with extra environment variables
   }
 
 =cut
 sub test_command {
-   my $test = shift;
+    my $test = shift;
     my($rc, $stderr) = ( -1, '') ;
     my $return = 1;
 
@@ -495,6 +627,12 @@ sub test_command {
 
     # run the command
     isnt($test->{'cmd'}, undef, "running cmd: ".$test->{'cmd'}) or $return = 0;
+
+    if($test->{'env'}) {
+        for my $key (%{$test->{'env'}}) {
+            $ENV{$key} = $test->{'env'}->{$key};
+        }
+    }
 
     my($prg,$arg) = split(/\s+/, $test->{'cmd'}, 2);
     my $t = Test::Cmd->new(prog => $prg, workdir => '') or die($!);
@@ -587,48 +725,56 @@ sub _relative_url {
 
 #########################
 sub _request {
-    my($url, $start_to, $post) = @_;
+    my($url, $start_to, $post, $agent) = @_;
 
-    if(defined $ENV{'CATALYST_SERVER'}) {
+    our($cookie_jar, $cookie_file);
+    if(!defined $cookie_jar) {
+        my $fh;
+        ($fh, $cookie_file) = tempfile(TEMPLATE => 'tempXXXXX', UNLINK => 1);
+        unlink ($cookie_file);
+        $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
+    }
+
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         return(_external_request(@_));
     }
+    # add pseudo domain, otherwise cookies from set_cookie() won't work
+    $url = 'http://localhost.local'.$url unless $url =~ m|^https?:|mx;
 
     my $request;
     if($post) {
-        $request = request POST $url, $post;
+        $post->{'token'} = 'test';
+        $request = POST($url, [%{$post}]);
     } else {
-        $request = request($url);
+        $request = HTTP::Request->new(GET => $url);
     }
-    $request = _check_startup_redirect($request, $start_to);
+    $request->header("User-Agent" => $agent) if $agent;
+    $cookie_jar->add_cookie_header($request);
+    my $response = request($request);
+    $cookie_jar->extract_cookies($response);
+    $response = _check_startup_redirect($response, $start_to);
 
-    return $request;
+    return $response;
 }
 
 #########################
 sub _external_request {
-    my($url, $start_to, $post, $retry) = @_;
+    my($url, $start_to, $post, $agent, $retry) = @_;
     $retry = 1 unless defined $retry;
 
     # make tests with http://localhost/naemon possible
     unless($url =~ m/^http/) {
         my $product = 'thruk';
-        if($ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
-            $product = $1;
-            $url =~ s|/$product/|/|gmx;
-            $url =~ s|/thruk/|/|gmx;
+        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
+            $product = $2;
+            $url =~ s|^/$product||mx;
+            $url =~ s|^/thruk||mx;
         }
         $url =~ s#//#/#gmx;
-        $url = $ENV{'CATALYST_SERVER'}.$url;
+        $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
     }
 
     our($cookie_jar, $cookie_file);
-    if(!defined $cookie_jar) {
-        my $fh;
-        ($fh, $cookie_file) = tempfile(undef, UNLINK => 1);
-        unlink ($cookie_file);
-        $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
-    }
-
     my $ua = LWP::UserAgent->new(
         keep_alive   => 1,
         max_redirect => 0,
@@ -637,25 +783,31 @@ sub _external_request {
     );
     $ua->env_proxy;
     $ua->cookie_jar($cookie_jar);
+    $ua->agent( $agent ) if $agent;
 
-    my $request;
+    if($post and ref $post ne 'HASH') {
+        confess("unknown post data: ".Dumper($post));
+    }
+    my $req;
     if($post) {
-        $request = $ua->post($url, $post);
+        $post->{'token'} = 'test';
+        $req = $ua->post($url, $post);
     } else {
-        $request = $ua->get($url);
+        $req = $ua->get($url);
     }
 
-    $request = _check_startup_redirect($request, $start_to);
+    $req = _check_startup_redirect($req, $start_to);
 
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
-        die("login failed: ".Dumper($request)) unless $retry;
+    if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
+        die("login failed: ".Dumper($req)) unless $retry;
         my $product = $1;
+        my $referer = uri_unescape($2);
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
-        my $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, 0);
-           $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, { password => $pass, login => $user, submit => 'login' }, 0);
-        $request = _external_request($url, $start_to, $post, 0);
+        my $r = _external_request($req->{'_headers'}->{'location'}, undef, undef, $agent);
+           $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, 0);
+        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, 0);
     }
-    return $request;
+    return $req;
 }
 
 #########################
@@ -668,12 +820,13 @@ sub _check_startup_redirect {
         #diag("starting up... ".$link);
         is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
         # startup fcgid
-        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, []);
+        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, {});
         #diag("startup request:");
         #diag(Dumper($r));
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
         fail("startup failed, no pid: ".Dumper($r)) unless(-f '/var/cache/thruk/thruk.pid' || -f '/var/cache/naemon/thruk/thruk.pid');
         sleep(3);
+        if($link !~ m/\?/mx && $link =~ m/\&/mx) { $link =~ s/\&/?/mx; }
         $request = _request($link);
         #diag("original request:");
         #diag(Dumper($request));
@@ -695,16 +848,52 @@ sub bail_out_req {
     my($msg, $req) = @_;
     my $page    = $req->content;
     my $error   = "";
-    if($page =~ m/<!--error:(.*?):error-->/smxo) {
+    if($page =~ m/<!--error:(.*?):error-->/smx) {
         $error = $1;
-        diag(Dumper($msg));
-        diag(Dumper($error));
-        BAIL_OUT($0.': '.$msg);
+        $error =~ s/\A\s*//gmsx;
+        $error =~ s/\s*\Z//gmsx;
+        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
+    }
+    if($page =~ m/<pre\s+id="error">(.*)$/mx) {
+        $error = $1;
+        $error =~ s|</pre>$||gmx;
+        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
+    }
+    if($page =~ m/\Qsubject=Thruk%20Error%20Report&amp;body=\E(.*?)">/smx) {
+        require URI::Escape;
+        diag($1);
+        $error = URI::Escape::uri_unescape($1);
+        diag($error);
+        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }
     diag(Dumper($msg));
     diag(Dumper($req));
     BAIL_OUT($0.': '.$msg);
     return;
+}
+
+#########################
+my $test_token_set = 0;
+sub set_test_user_token {
+    my($remove) = @_;
+    require Thruk::Config;
+    require Thruk::Utils::Cache;
+    my $config = Thruk::Config::get_config();
+    my $store  = Thruk::Utils::Cache->new($config->{'var_path'}.'/token');
+    my $tokens = $store->get('token');
+    if($remove) {
+        delete $tokens->{get_test_user()};
+    } else {
+        $tokens->{get_test_user()} = { token => 'test', time => time() };
+    }
+    $store->set('token', $tokens);
+    return;
+}
+END {
+    # remove test token again
+    if($test_token_set) {
+        set_test_user_token(1);
+    }
 }
 
 #########################
@@ -716,14 +905,15 @@ sub _list {
 
 #################################################
 # verify js syntax
+my $errors_js = 0;
 sub verify_js {
     my($file) = @_;
     return if $file =~ m/jit-yc.js/gmx;
     return if $file =~ m/jquery.mobile.router/gmx;
     my $content = read_file($file);
     my $matches = _replace_with_marker($content);
-    return unless scalar $matches > 0;
-    _check_marker($file, $content);
+    return unless $matches;
+    _check_marker($file, $content) if $errors_js;
     return;
 }
 
@@ -732,7 +922,7 @@ sub verify_js {
 sub verify_html_js {
     my($content) = @_;
     $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
-    _check_marker(undef, $content);
+    _check_marker(undef, $content) if $errors_js;
     return;
 }
 
@@ -742,7 +932,7 @@ sub verify_tt {
     my($file) = @_;
     my $content = read_file($file);
     $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
-    _check_marker($file, $content);
+    _check_marker($file, $content) if $errors_js;
     return;
 }
 
@@ -761,14 +951,22 @@ sub _replace_with_marker {
 
     # trailing commas
     my @matches = $_[0]  =~ s/(\,\s*[\)|\}|\]])/JS_ERROR_MARKER1:$1/sgmxi;
+    @matches = grep {!/^\s*$/} @matches;
     $errors    += scalar @matches;
 
     # insecure for loops which do not work in IE8
     @matches = $_[0]  =~ s/(for\s*\(.*\s+in\s+.*\))/JS_ERROR_MARKER2:$1/gmxi;
+    @matches = grep {!/^\s*$/} @matches;
     # for(var key in... is ok
     @matches = grep {!/var\s+key/} @matches;
     $errors    += scalar @matches;
 
+    # jQuery().attr('checked', true) must be .prop now
+    @matches = $_[0]  =~ s/(\.attr\s*\(.*checked)/JS_ERROR_MARKER3:$1/gmxi;
+    @matches = grep {!/^\s*$/} @matches;
+    $errors    += scalar @matches;
+
+    $errors_js += $errors;
     return $errors;
 }
 
@@ -776,8 +974,10 @@ sub _replace_with_marker {
 sub _check_marker {
     my($file, $content) = @_;
     my @lines = split/\n/mx, $content;
-    my $x = 1;
+    my $x = 0;
     for my $line (@lines) {
+        $x++;
+        next unless $line =~ m/JS_ERROR_MARKER/mx;
         if($line =~ m/JS_ERROR_MARKER1:/mx) {
             my $orig = $line;
             $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
@@ -791,8 +991,15 @@ sub _check_marker {
             fail('found insecure for loop in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
-        $x++;
+        if($line =~ m/JS_ERROR_MARKER3:/mx) {
+            my $orig = $line;
+            $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
+            $orig =~ s/JS_ERROR_MARKER3://gmx;
+            fail('found jQuery.attr(checked) instead of .prop() in '.($file || 'content').' line: '.$x);
+            diag($orig);
+        }
     }
+    $errors_js = 0;
 }
 
 #################################################

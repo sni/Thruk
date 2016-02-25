@@ -4,13 +4,14 @@
   <head>
     <title>Thruk Monitoring Webinterface</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    [%+ PROCESS _common_css.tt use_frames=1 +%]
-    [%+ PROCESS _common_js.tt +%]
+    [% PROCESS _common_css.tt use_frames=1 %]
+    [% PROCESS _common_js_files.tt %]
   </head>
   <body class='[% page %] loginpage' id='[% page %]' onload="javascript:document.getElementById('loginuser').focus();">
+  [% PROCESS _common_js.tt %]
   [% ssi_header %]
   <!-- Produced by Thruk (http://www.thruk.org).
-       Copyright (c) 2009-2014 Thruk Developer Team.
+       Copyright (c) 2009-present Thruk Developer Team.
        Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
        Copyright (c) 1999-2009 Ethan Galstad.
   -->
@@ -46,26 +47,39 @@
     <br>
     <br>
     <div id="currentversioninfo">
-    <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
+    <div class="version">Version [% version %][% IF branch %]-[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
     <div class="releasedate">[% released %]</div>
     </div>
     [% PROCESS _disclaimer.tt %]
   </div>
   <script type="text/javascript">
   <!--
+    function clean_ref(ref, keepflag) {
+        ref = ref.replace(/\/\w+\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
+        ref = ref.replace(/\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
+        if(keepflag == undefined || keepflag == false) {
+            ref = ref.replace(/^\?(expired|invalid|problem)\&/, '?');
+            ref = ref.replace(/^\?(expired|invalid|problem)$/,  '');
+        }
+        ref = ref.replace(/^\?/, '/');
+        ref = ref.replace(/^\/+/, '/');
+        ref = ref.replace(/^\?/, '/');
+        ref = ref.replace(/^\/(expired|invalid|problem)\&/,  '$1&/');
+        ref = ref.replace(/_=\d+/, '');
+        ref = ref.replace(/\?$/, '');
+        ref = ref.replace(/\#side.html$/, '');
+        return(ref);
+    }
+
     if ( top.location != location ) {
-      var ref = document.location.pathname + document.location.search + document.location.hash;
+      // when inside a frame, open login page in top frame
+      var ref = clean_ref(document.location.pathname + document.location.search + document.location.hash, true);
+      ref = ref.replace(/\/thruk\//, '/thruk/#');
       top.location.href = '[% loginurl %]?'+ref;
     } else {
-      var ref = window.location.search + window.location.hash;
-      ref = ref.replace(/^\?expired\&/, '?');
-      ref = ref.replace(/^\?expired$/,  '');
-      ref = ref.replace(/^\?invalid\&/, '?');
-      ref = ref.replace(/^\?invalid$/,  '');
-      ref = ref.replace(/^\?problem\&/, '?');
-      ref = ref.replace(/^\?problem$/,  '');
-      ref = ref.replace(/^\?/, '/');
-      jQuery('#referer').val(ref);
+      var ref = clean_ref(window.location.search + window.location.hash);
+      var el  = document.getElementById('referer');
+      if(el) { el.value = ref; }
     }
   -->
   </script>

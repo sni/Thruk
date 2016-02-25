@@ -1,0 +1,9 @@
+﻿[% IF r.failed_backends == 'print' && failed_backends.keys.size > 0 %]
+[% WRAPPER 'reports/comp/page_standard.tt' pagetitle="Backend Errors" title="Backend Errors" %]
+    [% FOREACH b = selected_backends %]
+        [% IF failed_backends.exists(b) %]
+            [% c.db.get_peer_by_key(b).peer_name %]: [% failed_backends.$b %]<br>
+        [% END %]
+    [% END %]
+[% END %]
+[% END %]

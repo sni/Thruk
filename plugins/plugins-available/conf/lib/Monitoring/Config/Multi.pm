@@ -2,7 +2,7 @@ package Monitoring::Config::Multi;
 
 use strict;
 use warnings;
-use Monitoring::Config;
+use Module::Load qw/load/;
 
 =head1 NAME
 
@@ -56,6 +56,7 @@ sub init {
         return $self->{'configs'}->{$key};
     }
 
+    load Monitoring::Config;
     if(defined $self->{'configs'}->{$key}) {
         $self->{'configs'}->{$key}->{'cached'} = 1;
         $self->{'configs'}->{$key}->init($config, $stats) if defined $config;
@@ -126,7 +127,7 @@ sub get_object_by_key {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

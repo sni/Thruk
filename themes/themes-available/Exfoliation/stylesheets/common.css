@@ -1,5 +1,4 @@
 /* exfoliation: a nagios makeover                                          */
-/* version: 0.5                                                            */
 /* Copyright 2010 Matthew Wall, all rights reserved                        */
 /*                                                                         */
 /* Permission to use, copy, modify, and distribute this software for any   */
@@ -24,7 +23,7 @@ INDETERMINATE:  purple           ddccff  777777
           ACK:  aaaaaa
        CUSTOM:  778899
 
-      important: lighter grey
+      important: red
   not important: darker grey
 
    table header: d0d0d0
@@ -63,32 +62,36 @@ form {
   padding: 0;
 }
 
-
 a img {
   border: none;
 }
+
 a {
   text-decoration: none;
   color: #40529b;
 }
+
 a:hover {
   text-decoration: underline;
   color #3f5bcd;
 }
+
 a:active {
   color: #496aef;
 }
+
 a:visited {
   color: #2c3763;
 }
 
-
 div.navbarlogo {
   margin: 0 0 10px 0;
 }
+
 div.navsection {
   margin: 5px 0 10px 0;
 }
+
 div.navsectiontitle {
   font-size: 9pt;
   font-weight: bold;
@@ -96,6 +99,7 @@ div.navsectiontitle {
   background-color: #efefef;
   border:1px solid #dddddd;
 }
+
 div.navsectionlinks {
   margin: 3px 0 0 0;
 }
@@ -105,7 +109,9 @@ ul.navsectionlinks {
   padding: 0;
   list-style: none;
 }
+
 ul.navsectionlinks li {	}
+
 ul.navsectionlinks li a {
   font-weight: bold;
   font-size: 9pt;
@@ -113,33 +119,39 @@ ul.navsectionlinks li a {
   padding: 0 0 0 15px;
   background: transparent url(../images/greendot.gif) no-repeat scroll 0 0;
 }
+
 ul.navsectionlinks li ul {
   margin: 0px;
   padding: 0 0 0 30px;
   list-style: disc;
 }
+
 ul.navsectionlinks li ul li { }
+
 ul.navsectionlinks li a:hover {
   background: transparent url(../images/orangedot.gif) no-repeat scroll 0 0;
 }
+
 ul.navsectionlinks li ul li a {
   background: none;
   padding: 0;
   font-weight: normal;
 }
+
 ul.navsectionlinks li ul li a:hover {
   background: none;
 }
+
 ul.navsectionlinks li ul li ul {
   margin: 0px;
   padding: 0 0 0 15px;
   list-style: circle;
 }
 
-
 .navbarsearch {
   margin: 5px 0 0 0;
 }
+
 .navbarsearch fieldset {
   border: none;
 }
@@ -147,95 +159,106 @@ ul.navsectionlinks li ul li ul {
 .navbarsearch fieldset legend {
   font-size: 8pt;
 }
+
 .navbarsearch input{
   font-size: 9pt;
 }
 
-
-#splashpage{
+#splashpage {
   text-align: center;
 }
-#mainbrandsplash{
+
+#mainbrandsplash {
   font-size: 12pt;
   font-weight: bold;
   margin: 0 0 35px 0;
 }
-#maincopy{
+
+#maincopy {
   margin: 0 0 15px 0;
 }
-#currentversioninfo{
+
+#currentversioninfo {
   font-size: 12pt;
 }
-#currentversioninfo .product{
+
+#currentversioninfo .product {
   font-size: 14pt;
   font-weight: bold;
 }
-#currentversioninfo .version{
+
+#currentversioninfo .version {
   font-size: 14pt;
   font-weight: bold;
 }
-#currentversioninfo .releasedate{
+
+#currentversioninfo .releasedate {
   font-size: 11pt;
   margin: 5px 0 0 0;
 }
-#currentversioninfo .checkforupdates{
+
+#currentversioninfo .checkforupdates {
   font-size: 11pt;
   font-weight: bold;
 }
-#currentversioninfo .whatsnew{
+
+#currentversioninfo .whatsnew {
   font-size: 11pt;
   font-weight: bold;
   margin: 50px 0 0 0;
 }
-#updateversioninfo{
+
+#updateversioninfo {
   margin: 15px auto 50px auto;
   width: 400px;
 }
-.updatechecksdisabled{
+
+.updatechecksdisabled {
   border: 1px solid red;
   padding: 10px;
 }
-.updatechecksdisabled div.warningmessage{
+
+.updatechecksdisabled div.warningmessage {
   font-weight: bold;
 }
-#updateversioninfo div.submessage{
+
+#updateversioninfo div.submessage {
   clear: left;
 }
-.updateavailable{
+
+.updateavailable {
   border: 1px solid blue;
   padding: 10px;
 }
-.updateavailable div.updatemessage{
+
+.updateavailable div.updatemessage {
   font-size: 12pt;
   font-weight: bold;
 }
 
-#splashpage #mainfooter{
+#splashpage #mainfooter {
   margin: 100px 0 0 0;
   font-size: 8pt;
 }
-#splashpage #mainfooter .disclaimer{
+
+#splashpage #mainfooter .disclaimer {
   width: 80%;
   margin: auto;
 }
-#splashpage #mainfooter .logos{
+
+#splashpage #mainfooter .logos {
   margin: 15px 0 0 0;
 }
 
-
-
-
-
-
-table.infoBox { width: 100%; }
-td.infoBox { font-size: 8pt; padding: 0 0 1em 0; white-space: nowrap; }
-div.infoBoxTitle { font-size: 10pt; font-weight: bold; }
+table.infoBox            { width: 100%; }
+td.infoBox               { font-size: 8pt; padding: 0 0 1em 0; white-space: nowrap; }
+div.infoBoxTitle         { font-size: 10pt; font-weight: bold; }
 div.infoBoxBadProcStatus { font-size: 8pt; font-weight: bold; color: red; }
 
-.linkBox { font-size: 8pt; padding: 1; }
+.linkBox         { font-size: 8pt; padding: 1px; }
 table.linkBox td { white-space: nowrap; }
 
-.filter      { font-size: 8pt; padding: 1; }
+.filter      { font-size: 8pt; padding: 1px; }
 .filterTitle { font-size: 9pt; font-weight: bold; }
 .filterName  { font-size: 8pt; text-align: right; font-weight: bold; }
 .filterValue { font-size: 8pt; }
@@ -248,20 +271,22 @@ table.linkBox td { white-space: nowrap; }
 .statusSort  { font-size: 8pt; }
 
 table.data    { padding: 0; }
-th.data       { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
-.dataOdd      { font-size: 8pt; background-color: #e7e7e7; padding: 0 4 0 4; }
-.dataEven     { font-size: 8pt; background-color: #f4f2f2; padding: 0 4 0 4; }
+th.data       { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
+.dataOdd      { font-size: 8pt; background-color: #e7e7e7; padding: 0 4px 0 4px; }
+.dataEven     { font-size: 8pt; background-color: #f4f2f2; padding: 0 4px 0 4px; }
 .dataTitle    { font-size: 12pt; text-align: center; font-weight: bold; }
 .dataSubTitle { font-size: 10pt; text-align: center; font-weight: bold; }
 
-.optBox             { font-size:  9pt; white-space: nowrap; padding: 2 0 0 0; }
+th.pnpSelected, th.dataSelected { background-color: #f0f1ee; border: 1px #444444 outset; font-size: 12px; }
+
+.optBox             { font-size:  9pt; white-space: nowrap; padding: 2px 0 0 0; }
 .optBoxTitle        { font-size: 10pt; font-weight: bold; text-align: center; }
-.optBoxRequiredItem { font-size:  9pt; text-align: right; padding: 0 5 0 5; color: red; }
-.optBoxItem         { font-size:  9pt; text-align: right; padding: 0 5 0 5; }
+.optBoxRequiredItem { font-size:  9pt; text-align: right; padding: 0 5px 0 5px; color: red; }
+.optBoxItem         { font-size:  9pt; text-align: right; padding: 0 5px 0 5px; }
 .optBoxValue        { font-size:  9pt; }
 
 .optionBoxTitle { font-size: 10pt; text-align: center; font-weight: bold; }
-.optionBox      { font-size: 10pt; padding: 2; }
+.optionBox      { font-size: 10pt; padding: 2px; }
 
 .navBoxTitle { font-size: 10pt; font-weight: bold; white-space: nowrap; }
 .navBoxItem  { font-size: 8pt; }
@@ -287,13 +312,13 @@ th.data       { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-b
 .dateSelectSubTitle { font-size:  9pt; text-align: right; }
 .dateSelectItem     { font-size:  9pt; }
 
-.popupText { font-size: 8pt; background-color: #eeeeaa; border: 1px solid #777777; padding: 10 10 10 10; }
+.popupText { font-size: 8pt; background-color: #eeeeaa; border: 1px solid #777777; padding: 10px 10px 10px 10px; }
 
-.hostImportantProblem      { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.hostUnimportantProblem    { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.hostImportantProblem      { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #aaaaaa; padding: 0 5px 0 5px; }
+.hostUnimportantProblem    { font-size: 8pt; text-align: center; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5px 0 5px; }
 
-.serviceImportantProblem   { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.serviceUnimportantProblem { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.serviceImportantProblem   { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #aaaaaa; padding: 0 5px 0 5px; }
+.serviceUnimportantProblem { font-size: 8pt; text-align: center; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5px 0 5px; }
 
-.outageImportantProblem    { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.outageUnimportantProblem  { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.outageImportantProblem    { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #aaaaaa; padding: 0 5px 0 5px; }
+.outageUnimportantProblem  { font-size: 8pt; text-align: center; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5px 0 5px; }

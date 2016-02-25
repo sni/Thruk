@@ -6,14 +6,14 @@
 
 if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
   export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib";
-  if [ "$OMD_ROOT" != "" -a "$CATALYST_CONFIG" = "" ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
-  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$(dirname $0)/../"; fi
 elif [ ! -z $OMD_ROOT ]; then
   export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
-  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
 else
   export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
-  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
 fi
 
 eval 'exec perl -x $0 ${1+"$@"} ;'
@@ -24,18 +24,12 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 24
 
 ###################################################
-# clean up env
-use Thruk::Utils::INC;
-BEGIN {
-    Thruk::Utils::INC::clean();
-}
-
 use strict;
 use warnings;
 use Getopt::Long qw//;
 
-our $VERSION = '1.81';
-my $branch   = '';
+our $VERSION = '2.04';
+my $branch       = '';
 
 my $options = {
     'verbose'  => 1,
@@ -59,6 +53,7 @@ Getopt::Long::GetOptions (
    "y|yes"              => \$options->{'yes'},
    "f|force"            => \$options->{'force'},
    "i|all-inclusive"    => \$options->{'all_inclusive'},
+   "s|start=s"          => \$options->{'start'},
    "<>"                 => sub { push @{$options->{'url'}}, "".shift },
 ) or do {
     print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
@@ -164,13 +159,39 @@ script has the following arguments
       - reportmail=<nr>             send report by mail
 
     Logcache: ( MySQL / MongoDB )
-      - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day.
+      - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day. (hint: use --start=3w to import last 3weeks only)
       - logcacheupdate              update logcache
       - logcacheauthupdate          update logcache authorization information
       - logcachestats               print logcache statistics
       - logcacheclean(=days)        clean everything older than specified number of days. Default is one year.
       - logcacheoptimize            optimize and repair logcache (mysql only)
       - logcacheremoveunused        remove old tables from no longer used backends (mysql only)
+
+    Livestatus Cache:
+      - livecachestart              start shadownaemons livecache
+      - livecachestop               stop all shadownaemons
+      - livecacherestart            restart livecaches for each site sequentially
+      - livecachestatus             show livecache status
+
+    Data Commands
+      - listbackends                list all backends
+      - listhosts                   list hostnames
+      - listhostgroups              list hostgroupnames
+      - command <host> <service>    print used command line for this host/service
+
+    Selfcheck Commands
+      - selfcheck(=subtype)         run self check(s)
+                                    availabel subtypes:
+                                     - filesystem
+                                     - logfiles
+                                     - reports
+                                     - recurring_downtimes
+
+    Scheduling Commands
+      - fix_scheduling(=filter)     balance scheduling or all hosts and services
+                                    or just a group by adding a filter like
+                                    fix_scheduling=hg:<hostgroup>
+                                    fix_scheduling=sg:<servicegroup>
 
     Internal Commands
       - installcron                 update cronjobs for downtimes and reports
@@ -180,12 +201,8 @@ script has the following arguments
       - compile                     compile templates for faster access
       - bp/bpd(=nr)                 calculate all/specified business process(es)
       - bpcommit                    write objects for business processes and reloads core
+      - clean_dashboards            remove empty dashboards which are older than 1 day
 
-    Testing Commands
-      - listbackends                list all backends
-      - listhosts                   list hostnames
-      - listhostgroups              list hostgroupnames
-      - command <host> <service>    print used command line for this host/service
 
 
 =item B<-A> I<authname>, B<--auth>=I<authname>
@@ -220,7 +237,7 @@ thruk returns 0 on success and >= 1 otherwise
 
 =head1 EXAMPLES
 
-List available backends
+List available backends:
 
   %> thruk -l
 
@@ -241,12 +258,16 @@ Generate pdf report
 
   %> thruk -a 'report=1' > report.pdf
 
-Generate pdf report and send it by mail
+Generate pdf report and send it by mail:
 
   %> thruk -a 'reportmail=1'
 
+Reschedule next check for host localhost now:
+
+  %> thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now'
+
 =head1 AUTHOR
 
-2012-2013, Sven Nierlein, <sven@nierlein.de>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =cut

@@ -2,7 +2,7 @@ Source: thruk
 Section: net
 Priority: extra
 Maintainer: Sven Nierlein <sven.nierlein@consol.de>
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7), libthruk (>=2.00)
 Standards-Version: 3.7.3
 Homepage: http://www.thruk.org
 Bugs: https://github.com/sni/Thruk/issues
@@ -10,10 +10,37 @@ Vcs-Git: git://github.com/sni/Thruk.git
 
 Package: thruk
 Architecture: any
-Depends: ${shlibs:Depends}, ${perl:Depends}, apache2, libapache2-mod-fcgid, cron, logrotate, xvfb
+Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends}, thruk-base (= ${source:Version})
+Recommends: thruk-plugin-reporting (= ${source:Version})
 Description: Monitoring Webinterface for Nagios/Icinga and Shinken
  Thruk is a multibackend monitoring webinterface which currently
  supports Nagios, Icinga and Shinken as backend using the Livestatus
  API. It is designed to be a 'dropin' replacement and covers almost
  all of the original features plus adds additional enhancements for
- large installations.
+ large installations. This is the metapackage for complete Thruk setup.
+
+Package: thruk-base
+Architecture: any
+Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
+         libthruk (>=2.00),
+         apache2 | nginx-full,
+         libapache2-mod-fcgid | nginx-full,
+         cron, logrotate
+Provides: thruk
+Replaces: thruk (<< 2.00)
+Breaks: thruk (<< 2.00)
+Description: Monitoring Webinterface for Nagios/Icinga and Shinken
+ Thruk is a multibackend monitoring webinterface which currently
+ supports Nagios, Icinga and Shinken as backend using the Livestatus
+ API. It is designed to be a 'dropin' replacement and covers almost
+ all of the original features plus adds additional enhancements for
+ large installations. This package contains the Thruk gui base files.
+
+
+
+Package: thruk-plugin-reporting
+Architecture: any
+Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
+         thruk-base (= ${source:Version})
+Description: This package contains the reporting addon for thruk useful for sla
+ and event reporting.

@@ -67,8 +67,8 @@
            [% END %]
           </td>
           <td align="right">
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search">
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
+            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search" alt="accept">
+            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)" alt="remove">
           </td>
           <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">
             <img src="[% url_prefix %]themes/[% theme %]/images/right.png" alt="add new filter"><br>
@@ -88,7 +88,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Host Status Types:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;" alt="accept"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_ht2n" onclick="toggleFilterCheckBox(this.id)">Up</td>
@@ -127,7 +127,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Host Properties:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;" alt="accept"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
@@ -229,10 +229,10 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Service Status Types:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;" alt="accept"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">Ok</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">OK</td>
                       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% paneprefix %][% prefix %]_st2" name="[% paneprefix %][% prefix %]_servicestatustype"></td>
                     </tr>
                     <tr>
@@ -272,7 +272,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle'>Service Properties:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;" alt="update"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
@@ -380,6 +380,7 @@
               <option value="custom variable"[% IF s.type == 'custom variable' %] selected[% END %]>Custom Variable</option>
               <option value="downtime duration"[% IF s.type == 'downtime duration' %] selected[% END %]>Downtime Duration</option>
               <option value="duration"[% IF s.type == 'duration' %] selected[% END %]>Duration</option>
+              <option value="event handler"[% IF s.type == 'event handler' %] selected[% END %]>Event Handler</option>
               <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
               <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
               <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
@@ -394,7 +395,7 @@
               <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
               <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
             </select>[%# we don't want whitespaces here in final html but keep the nice source layout
-            #%]<input type="text" name="[% paneprefix %][% prefix %]_val_pre" class="filter_pre_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_val_pre" value="[% s.val_pre %]"[% IF 0 && use_ajax_search %][%# disabled for now #%] onclick="ajax_search.init(this, 'custom variable')"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">[%#
+            #%]<input type="text" name="[% paneprefix %][% prefix %]_val_pre" class="filter_pre_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_val_pre" value="[% s.val_pre %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'custom variable')"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">[%#
             #%]<select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to" class="filter_op_select">
               <option value="~"[% IF  s.op == '~'  %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
@@ -403,7 +404,7 @@
               <option value="<="[% IF s.op == '<=' %] selected[% END %]>&lt;=</option>
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>[%#
-            #%]<input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this)"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
+            #%]<input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, undefined, {striped: true})"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
             <a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="#" onclick="show_cal('[% paneprefix %][% prefix %]_[% loop.index %]_value')">
             <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
             <select name="[% paneprefix %][% prefix %]_value_sel" id="[% paneprefix %][% prefix %]_[% loop.index %]_value_sel" style="[% IF s.type == 'priority' %]visibility: visible;[% ELSE %]display: none; visibility: hidden;[% END %]">
@@ -414,7 +415,7 @@
           </td>
 
 
-          <td class='newfilter' onclick="delete_filter_row(this); return false;"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete Filter">
+          <td class='newfilter' onclick="delete_filter_row(this); return false;"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete Filter" alt="remove filter">
             <script type="text/javascript">
             <!--
               verify_op("[% paneprefix %][% prefix %]_[% loop.index %]_ts");

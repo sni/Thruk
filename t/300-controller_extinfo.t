@@ -1,12 +1,11 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
 use JSON::XS;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 218;
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    plan tests => 222;
 }
 
 BEGIN {
@@ -34,6 +33,8 @@ my $pages = [
     '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=edit&target=host&host='.$host,
     '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=edit&target=service&host='.$host.'&service='.$service,
     { url => '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=save&target=host&host='.$host.'&comment=automatic+downtime&send_type_1=month&send_day_1=1&week_day_1=&send_hour_1=0&send_minute_1=0&duration=120&childoptions=0&nr=999', 'redirect' => 1, location => 'extinfo.cgi', like => 'This item has moved' },
+    '/thruk/cgi-bin/extinfo.cgi?type=6&recurring',
+    '/thruk/cgi-bin/extinfo.cgi?type=6&nr=999&recurring=edit',
     { url => '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=remove&target=host&host='.$host.'&nr=999', 'redirect' => 1, location => 'extinfo.cgi', like => 'This item has moved' },
     '/thruk/cgi-bin/extinfo.cgi?type=7',
     '/thruk/cgi-bin/extinfo.cgi?type=8&servicegroup='.$servicegroup,
@@ -56,7 +57,7 @@ $pages = [
 for my $url (@{$pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an array: ".$url);

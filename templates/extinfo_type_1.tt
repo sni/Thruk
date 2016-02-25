@@ -14,7 +14,7 @@
             <tr>
               <td class='linkBox'>
                 <a href='status.cgi?host=[% host.name | uri %]'>View Status Detail For This Host</a><br>
-                [% IF host.childs.size > 0 %]<a href='status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]'>View Childs Hosts For This Host</a><br>[% END %]
+                [% IF host.childs.size > 0 %]<a href='status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]'>View Child Hosts For This Host</a><br>[% END %]
                 [% IF show_impacts_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>View Impacts For This Problem</a><br>[% END %]
                 [% IF show_rootproblems_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]'>View Root Problem For This Impact</a><br>[% END %]
                 <a href='history.cgi?host=[% host.name | uri %]'>View Alert History For This Host</a> (<a href='showlog.cgi?host=[% host.name | uri %]'>Logs</a>)<br>
@@ -22,7 +22,7 @@
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name | uri %]'>View Alert Histogram For This Host</a><br>[% END %]
                 <a href='avail.cgi?host=[% host.name | uri %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
                 <a href='notifications.cgi?host=[% host.name | uri %]'>View Notifications For This Host</a>
-                [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
+                [% IF c.check_user_roles('authorized_for_configuration_information') %]
                 <br><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a>
                 [% END %]
               </td>
@@ -82,7 +82,7 @@
           </tr>
           [% END %]
           [% IF host.action_url_expanded %]
-          [% action_url = get_action_url(2, 1, host.action_url_expanded, host.name) %]
+          [% action_url = get_action_url(c, 2, 1, host.action_url_expanded, host.name) %]
             <tr>
               <td align='right'>
                 <a href='[% action_url %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(host, host_action_icon) %]' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host' width="40" height="40"></a><br clear="all">
@@ -110,6 +110,14 @@
               </td>
             </tr>
           [% END %]
+          [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
+            <tr>
+              <td align='left'>
+                [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% host.peer_key %]', '[% host.name %]', undefined, 'b-l', true);</script>[% END %]
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
           [% IF custom_vars.size > 0 %]
             <tr>
               <td align='right'>
@@ -117,7 +125,7 @@
                   [% FOREACH cust = custom_vars %]
                   <tr>
                     <td style="padding-right: 7px;" valign="top">
-                      <font size="-1"><i>[% cust.0 %]</i></font><br clear="all">
+                      <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 %]</i></font></a><br clear="all">
                     </td>
                     <td>
                       <font size="-1">[% cust.1 %]</font>
@@ -178,10 +186,10 @@
                           <tr>
                             <td class='dataVar' valign='top'>Performance Data:
                               [% IF host.perf_data %]
-                              <div style="float: right; font-weight: normal;" id="raw_perf_switch">
+                              <div style="font-weight: normal;" id="raw_perf_switch">
                                 <a href="#" onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement('raw_perf_switch'); showElement('human_perf_switch'); return false;">(show raw data)</a>
                               </div>
-                              <div style="float: right; font-weight: normal; display: none;" id="human_perf_switch">
+                              <div style="font-weight: normal; display: none;" id="human_perf_switch">
                                 <a href="#" onclick="hideElement('perfdata_raw'); showElement('perfdata_human'); hideElement('human_perf_switch'); showElement('raw_perf_switch'); return false;">(show human data)</a>
                               </div>
                               <br><br>
@@ -235,7 +243,7 @@
                               N/A
                               [% END %]
                               &nbsp;(notification [% host.current_notification_number %])
-                              [% IF host.current_notification_number == 0 && host.first_notification_delay > 0 %]
+                              [% IF host.current_notification_number == 0 && host.first_notification_delay != "" && host.first_notification_delay > 0 %]
                                 [% first_remaining = calculate_first_notification_delay_remaining(host) %]
                                 [% IF first_remaining >= 0 %]
                                   &nbsp;<span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
@@ -301,7 +309,7 @@
                           [% IF backends && backends.size > 1 %]
                           <tr>
                             <td class='dataVar'>Monitored by:</td>
-                            <td class='dataVal'>[% host.peer_name %]</td>
+                            <td class='dataVal'>[% pi_detail.$peer_key.peer_name %]</td>
                           </tr>
                           [% END %]
                         </table>
@@ -359,8 +367,15 @@
                           <tr>
                             <td class='dataVar'>Event Handler:</td>
                             <td class='dataVal'>
-                              [% IF host.event_handler_enabled %]
-                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% IF !host.event_handler %]
+                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;UNUSED&nbsp;&nbsp;</div>
+                              [% ELSIF host.event_handler_enabled %]
+                              <div class='eventhandlersENABLED' style="float: left; margin-right: 5px;">&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                                [% IF   show_full_commandline == 2 ||
+                                      ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
+                                %]
+                                <div>([% host.event_handler %])</div>
+                                [% END %]
                               [% ELSE %]
                               <div class='eventhandlersDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
                               [% END %]
@@ -400,7 +415,13 @@
           [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
           </td>
         </tr>
-        [% END %]
+        [% ELSIF histou_url %]
+        <tr>
+          <td colspan="2" align="center">
+          [% PROCESS _histou_graph.tt hst=host.name svc="" %]
+          </td>
+        </tr>
+        [% ELSE %]
         [% graph_url = get_graph_url(c, host, 1)%]
         [% IF graph_url %]
         <tr>
@@ -408,6 +429,7 @@
           [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
           </td>
         </tr>
+        [% END %]
         [% END %]
 
         <tr>
@@ -435,14 +457,17 @@
               </tr>
             </table>
             [% IF comments.size > 0 %]
-              [% PROCESS _comments_table.tt comments = comments type='host' names=0 %]
+              [% IF sortoption_cmt %]
+              <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+              [% END %]
+              [% PROCESS _comments_table.tt comments = comments type='host' names=0 sortprefix='_cmt' %]
             [% END %]
           [% END %]
           </td>
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_user_roles_wrapper('authorized_for_read_only') %]
+          [% IF c.check_user_roles('authorized_for_read_only') %]
           [% ELSE %]
             <br>
             <a name="downtimes" id="downtimes"></a>
@@ -467,9 +492,13 @@
               </tr>
             </table>
             [% IF downtimes.size > 0 %]
-              [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 %]
+              [% IF sortoption_dtm %]
+              <div class="statusSort" align="CENTER">Downtimes sorted by <b>[% dtm_orderby %]</b> ([% IF dtm_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+              [% END %]
+              [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 sortprefix='_dtm' %]
             [% END %]
             [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
+              <br>
               <div class='commentTitle'>Recurring Host Downtime</div>
               [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' %]
             [% END %]
@@ -478,7 +507,7 @@
         </tr>
 
         [% IF   show_full_commandline == 2 ||
-              ( show_full_commandline == 1 && c.check_user_roles_wrapper('authorized_for_configuration_information') )
+              ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
         %]
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
@@ -488,7 +517,7 @@
             <table border="0">
               <tr>
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
-                [% IF use_feature_configtool && c.check_user_roles_wrapper('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+                [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
                 <td valign="middle"><a href='conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Configure This Host</a></td>
                 [% ELSE %]
                 <td valign="middle"><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a></td>

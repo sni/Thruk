@@ -7,18 +7,22 @@
   <th class='data[% IF type == 'servicegroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=servicegroup">Servicegroups</a></th>
   <th class='data[% IF type == 'contact'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contact">Contacts</a></th>
   <th class='data[% IF type == 'contactgroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroups</a></th>
-  [% IF coretype == 'icinga' %]
+  [% IF coretype == 'shinken' %]
+  <th class='data[% IF type == 'notificationway' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=notificationway">Notificationways</a></th>
+  <th class='data[% IF type == 'discoveryrule'   %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=discoveryrule">Discoveryrules</a></th>
+  <th class='data[% IF type == 'discoveryrun'   %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=discoveryrun">Discoveryruns</a></th>
+  <th class='data[% IF type == 'realm'           %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=realm">Realms</a></th>
+  [% END %]
+  [% IF coretype == 'icinga' or coretype == 'shinken' %]
   <th class='data[% IF type == 'module'       %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=module">Modules</a></th>
   [% END %]
   <th class='data'>&nbsp;</th>
   <th class='data[% IF type == 'tools'        %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;tools=start">Tools</a></th>
-  <th class='data[% IF type == 'apply'        %] confSelected[% END %]' style="width:60px;">
+  <th class='data[% IF type == 'apply'        %] confSelected[% END %]' style="width:60px;" nowrap>
     <a href="conf.cgi?sub=objects&amp;apply=yes">Apply</a>
     [% IF parse_errors.size > 0 %]
     <a href="conf.cgi?sub=objects&amp;apply=yes"><img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Config Errors Detected' title='Config Errors Detected' width="16" height="16" style="vertical-align: text-bottom"></a>
     [% END %]
-    [% IF last_changed || needs_commit %]
-    <a href="conf.cgi?sub=objects&amp;apply=yes"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' alt='Config has changed and needs to be applied' title='Config has changed and needs to be applied' width="16" height="16" style="vertical-align: text-bottom"></a>
-    [% END %]
+    <a href="conf.cgi?sub=objects&amp;apply=yes" id="apply_config_changes_icon" style="display: [% IF last_changed || needs_commit %][% ELSE %]none[% END %];"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' alt='Config has changed and needs to be applied' title='Config has changed and needs to be applied' width="16" height="16" style="vertical-align: text-bottom"></a>
   </th>
 </tr>

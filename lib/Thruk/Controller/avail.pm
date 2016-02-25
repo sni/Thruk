@@ -2,18 +2,15 @@ package Thruk::Controller::avail;
 
 use strict;
 use warnings;
-use utf8;
-use Data::Dumper;
-use Monitoring::Availability 0.48;
-use parent 'Catalyst::Controller';
+use Module::Load qw/load/;
 
 =head1 NAME
 
-Thruk::Controller::avail - Catalyst Controller
+Thruk::Controller::avail - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
@@ -25,8 +22,16 @@ Catalyst Controller.
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+
+    if(!$c->config->{'avail_modules_loaded'}) {
+        load Monitoring::Availability;
+        load Thruk::Utils::Avail;
+        $c->config->{'avail_modules_loaded'} = 1;
+    }
 
     # set defaults
     $c->stash->{title}            = 'Availability';
@@ -37,12 +42,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     Thruk::Utils::ssi_include($c);
 
     # lookup parameters
-    my $report_type    = $c->{'request'}->{'parameters'}->{'report_type'}  || '';
-    my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'};
-    my $host           = $c->{'request'}->{'parameters'}->{'host'}         || '';
-    my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
-    my $service        = $c->{'request'}->{'parameters'}->{'service'}      || '';
-    my $servicegroup   = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+    my $report_type    = $c->req->parameters->{'report_type'}  || '';
+    my $host           = $c->req->parameters->{'host'}         || '';
+    my $hostgroup      = $c->req->parameters->{'hostgroup'}    || '';
+    my $service        = $c->req->parameters->{'service'}      || '';
+    my $servicegroup   = $c->req->parameters->{'servicegroup'} || '';
 
     # set them for our template
     $c->stash->{report_type}  = $report_type;
@@ -68,24 +72,24 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 
     # Step 2 - select specific host/service/group
-    if($report_type and $self->_show_step_2($c, $report_type)) {
+    if($report_type and _show_step_2($c, $report_type)) {
     }
 
     # Step 3 - select date parts
-    elsif(exists $c->{'request'}->{'parameters'}->{'get_date_parts'} and $self->_show_step_3($c)) {
+    elsif(exists $c->req->parameters->{'get_date_parts'} and _show_step_3($c)) {
     }
 
     # Step 4 - create report
     elsif(!$report_type
-       and ($host or $service or $servicegroup or $hostgroup)
-       and $self->_create_report($c)) {
+       && ($host || $service || $servicegroup || $hostgroup)
+       && _create_report($c)) {
     }
 
 
 
     # Step 1 - select report type
     else {
-        $self->_show_step_1($c);
+        _show_step_1($c);
     }
 
     return 1;
@@ -93,7 +97,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 ##########################################################
 sub _show_step_1 {
-    my ( $self, $c ) = @_;
+    my ( $c ) = @_;
 
     $c->stats->profile(begin => "_show_step_1()");
     $c->stash->{template} = 'avail_step_1.tt';
@@ -105,7 +109,7 @@ sub _show_step_1 {
 
 ##########################################################
 sub _show_step_2 {
-    my ( $self, $c, $report_type ) = @_;
+    my ( $c, $report_type ) = @_;
 
     $c->stats->profile(begin => "_show_step_2($report_type)");
 
@@ -131,8 +135,8 @@ sub _show_step_2 {
         return 0;
     }
 
-    $c->stash->{data}        = $data;
-    $c->stash->{template}    = 'avail_step_2.tt';
+    $c->stash->{data}     = $data;
+    $c->stash->{template} = 'avail_step_2.tt';
 
     $c->stats->profile(end => "_show_step_2($report_type)");
 
@@ -141,7 +145,7 @@ sub _show_step_2 {
 
 ##########################################################
 sub _show_step_3 {
-    my ( $self, $c ) = @_;
+    my ( $c ) = @_;
 
     $c->stats->profile(begin => "_show_step_3()");
 
@@ -149,7 +153,7 @@ sub _show_step_3 {
     $c->stash->{template}    = 'avail_step_3.tt';
 
     my($host,$service);
-    $service = $c->{'request'}->{'parameters'}->{'service'};
+    $service = $c->req->parameters->{'service'};
 
     if($service and CORE::index($service, ';') > 0) {
         ($host,$service) = split/;/mx, $service;
@@ -164,13 +168,14 @@ sub _show_step_3 {
 
 ##########################################################
 sub _create_report {
-    my ( $self, $c ) = @_;
+    my ( $c ) = @_;
+    $c->req->parameters->{'include_host_services'} = 1;
     return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
 }
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 
@@ -178,7 +183,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

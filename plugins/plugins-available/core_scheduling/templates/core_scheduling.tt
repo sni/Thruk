@@ -1,0 +1,221 @@
+﻿[% PROCESS _header.tt
+    js           => [ "plugins/reports2/flot-d7c58b5/jquery.flot.js",
+                      "plugins/reports2/flot-d7c58b5/jquery.flot.time.js",
+                      "plugins/reports2/flot-d7c58b5/jquery.flot.stack.js",
+                    ],
+    css          => [ "plugins/core_scheduling/core_scheduling.css" ],
+%]
+[% PROCESS _message.tt %]
+[% USE date %]
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="left" valign="top" width="20%">
+      [% PROCESS _status_filter.tt %]
+    </td>
+    <td align="center" valign="top" width="60%">
+      <div align="center" class='dataTitle'>
+        Core Scheduling Overview
+        [% IF hostgroup       == 'all' %] For All Host Groups
+        [% ELSIF hostgroup    != ''    %] For Host Group '[% hostgroup %]'
+        [% ELSIF servicegroup == 'all' %] For All Service Groups
+        [% ELSIF servicegroup != ''    %] For Service Group '[% servicegroup %]'
+        [% END %]
+      </div>
+    </td>
+    <td align="right" valign="bottom" width="20%">
+      [% PROCESS _help.tt topic = "core_scheduling" %]
+    </td>
+  </tr>
+</table>
+
+
+<div id='tooltip'></div>
+<div id="queue_graph" style="height: 350px; width: 1000px;"></div>
+
+<br>
+<table style="width: 1000px;"><tr><td style="vertical-align: top;">
+
+<form>
+<table class="core_schedule">
+  <tr>
+    <th colspan=2 style="border-bottom: 1px solid grey;">Graph Options</th>
+  </tr>
+  <tr>
+    <th>Look ahead seconds</th>
+    <td><input type="text" id="look_ahead" value="[% look_ahead %]" onchange="updateGraphDelayed()">s</td>
+  </tr>
+  <tr>
+    <th>Look back seconds</th>
+    <td><input type="text" id="look_back" value=[% look_back %] onchange="updateGraphDelayed()">s</td>
+  </tr>
+  <tr>
+    <th>Group Checks</th>
+    <td><input type="text" id="group_seconds" value=[% group_seconds %] onchange="updateGraphDelayed()">s</td>
+  </tr>
+  <tr>
+    <th>Update interval</th>
+    <td><input type="text" id="update_interval" value=3 onchange="updateGraphDelayed()">s</td>
+  </tr>
+</table>
+</form>
+
+</td><td style="vertical-align: top;">
+
+<table class="core_schedule">
+  <tr>
+    <th colspan=2 style="border-bottom: 1px solid grey;">Check Interval Disposition</th>
+  </tr>
+  <tr>
+    <th style="border-bottom: 1px solid grey;">Interval</th>
+    <th style="border-bottom: 1px solid grey; border-left: 1px solid grey;">Number of Checks</th>
+  </tr>
+  [% FOREACH interval = intervals.keys.nsort %]
+  <tr>
+    <th style="text-align: right;">[% interval %] min</th>
+    <td style="text-align: right; border-left: 1px solid grey;">[% intervals.$interval %] #</td>
+  </tr>
+  [% END %]
+</table>
+
+</td><td style="vertical-align: top;">
+
+
+<table class="core_schedule">
+  <tr>
+    <th colspan=2 style="border-bottom: 1px solid grey;">Checks per Second</th>
+  </tr>
+  <tr>
+    <th style="text-align: right;">Calculated Average</th>
+    <td style="border-bottom: 1px solid grey; border-left: 1px solid grey;">[% sprintf("%.2f", average) %]/s</td>
+  </tr>
+  <tr>
+    <th style="text-align: right;">Current Rate</th>
+    <td style="border-bottom: 1px solid grey; border-left: 1px solid grey;" id="current_rate">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]/s</td>
+  </tr>
+</table>
+<br>
+<a href="reports2.cgi?action=edit&amp;report=new" id="reschedule_btn" class="button wzd_button">balance all hosts and services</a>
+
+</td></tr></table>
+
+<script type="text/javascript">
+<!--
+var updateInterval = 5000;
+var standard_grid = {
+    backgroundColor: "#F0F0ED",
+    markings: [% encode_json_obj(markings) %]
+};
+var standard_legend = {
+    position: 'ne',
+    margin: [10, 40]
+};
+var queue_options = {
+    xaxis: { mode: "time",
+         timezone: "browser"
+    },
+    yaxes: [{
+               min: 0,
+               tickFormatter: function(val, axis) { return(val < axis.max ? val : "#"); },
+               labelWidth: 15
+    }],
+    grid:      standard_grid,
+    legend:    standard_legend
+};
+var queue_series = [% encode_json_obj(scheduling_queue) %];
+
+jQuery().ready(function() {
+  var look_ahead = get_hash(1);
+  if(look_ahead != undefined && jQuery.isNumeric(look_ahead)) {
+      jQuery('#look_ahead').val(look_ahead);
+  }
+  var look_back = get_hash(2);
+  if(look_back != undefined && jQuery.isNumeric(look_back)) {
+      jQuery('#look_back').val(look_back);
+  }
+  var group_seconds = get_hash(3);
+  if(group_seconds != undefined && jQuery.isNumeric(group_seconds)) {
+      jQuery('#group_seconds').val(group_seconds);
+  }
+  var update_interval = get_hash(4);
+  if(update_interval != undefined && jQuery.isNumeric(update_interval)) {
+      jQuery('#update_interval').val(update_interval);
+  }
+
+  jQuery('A.wzd_button').button({
+    icons: {primary: 'ui-wzd-button'}
+  }).click(function() {
+    if(confirm('really reschedule everything?')) {
+        updateGraph(true);
+    }
+    return(false);
+  });
+
+  updateGraph();
+});
+
+var updateTimer;
+function updateGraphDelayed() {
+  set_hash(jQuery('#look_ahead').val(), 1);
+  set_hash(jQuery('#look_back').val(), 2);
+  set_hash(jQuery('#group_seconds').val(), 3);
+  set_hash(jQuery('#update_interval').val(), 4);
+
+  window.clearTimeout(updateTimer);
+  updateTimer = window.setTimeout(updateGraph, 200);
+}
+
+function updateGraph(reschedule) {
+  window.clearTimeout(updateTimer);
+  updateInterval = jQuery('#update_interval').val()*1000;
+  if(reschedule) {
+    jQuery('#reschedule_btn').button({
+        icons: {primary: 'ui-waiting-button'}
+    }).button("disable");
+  }
+  jQuery.ajax({
+      url:      "[%  uri_with(c, 'json' => 'true' ) %]",
+      type:     "POST",
+      data:     {
+        look_ahead: jQuery('#look_ahead').val(),
+        look_back: jQuery('#look_back').val(),
+        group_seconds: jQuery('#group_seconds').val(),
+        reschedule: reschedule
+      },
+      dataType: "json",
+      success:  function(data) {
+        var queue_series = data['queue'];
+        var markings     = data['markings'];
+        queue_options.grid.markings = markings;
+        jQuery("#current_rate").html(data['rate']+"/s");
+
+        var queue_plot = jQuery.plot('#queue_graph', queue_series, queue_options);
+        queue_plot.draw();
+
+        var o = queue_plot.pointOffset({ x: standard_grid['markings'][0]['xaxis']['from'], y: 0});
+        var d = new Date(standard_grid['markings'][0]['xaxis']['from']);
+        jQuery('#queue_graph').append("<div id='now_label' style='position:absolute;left:"+(o.left+4)+"px;top:20px;color:#990000;font-size:smaller'>now ("+d.strftime("%H:%M:%S")+")</div>");
+
+        if(data['message'] != undefined) {
+            thruk_message(0, data['message']);
+        }
+
+        if(reschedule) {
+          jQuery('#reschedule_btn').button({
+              icons: {primary: 'ui-wzd-button'}
+          }).button("enable");
+        }
+
+        window.clearTimeout(updateTimer);
+        updateTimer = window.setTimeout(updateGraph, updateInterval);
+      },
+      error:  function(jqXHR, textStatus, errorThrown) {
+        window.clearTimeout(updateTimer);
+        updateTimer = window.setTimeout(updateGraph, updateInterval*2);
+        jQuery("#now_label").html("update error: "+textStatus);
+      }
+  });
+}
+
+-->
+</script>

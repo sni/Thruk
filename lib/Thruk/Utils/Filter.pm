@@ -12,12 +12,33 @@ Filter Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Carp;
-use Data::Dumper;
+use Carp qw/confess cluck carp/;
 use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
-use JSON::XS;
+use JSON::XS ();
 use Encode qw/decode_utf8/;
+use Digest::MD5 qw(md5_hex);
+
+##############################################
+# use faster HTML::Escape if available
+eval {
+    require HTML::Escape;
+    *html_escape = sub {
+        return HTML::Escape::escape_html(@_);
+    };
+};
+if($@) {
+    eval {
+        require HTML::Entities;
+        *html_escape = sub {
+            return HTML::Entities::encode_entities(@_);
+        };
+    };
+}
+if($@) {
+    die("either HTML::Escape or HTML::Entities required: ".$!);
+}
+*escape_html = *html_escape;
 
 ##############################################
 
@@ -33,6 +54,27 @@ can be used to die in templates
 sub throw {
     my $string = shift;
     die($string);
+}
+
+
+##############################################
+
+=head2 contains
+
+  contains($haystack, $needle)
+
+returns true if needle is found in haystack or needle equals haystack
+
+=cut
+sub contains {
+    my($haystack, $needle) = @_;
+    if(ref $haystack eq 'ARRAY') {
+        for my $test (@{$haystack}) {
+            return 1 if $test eq $needle;
+        }
+    }
+    return 1 if $haystack eq $needle;
+    return 0;
 }
 
 
@@ -145,18 +187,23 @@ formats a time definition into date format
 =cut
 sub date_format {
     my($c, $timestamp, $format) = @_;
-    return "" unless defined $timestamp;
+    return '' unless defined $timestamp;
+    confess("no c") unless defined $c;
+
+    if($format) {
+        return(Thruk::Utils::format_date($timestamp, $format));
+    }
 
     # get today
     my @today;
-    if(defined $c->{'stash'}->{'today'}) {
-        @today = @{$c->{'stash'}->{'today'}};
+    if(defined $c->stash->{'today'}) {
+        @today = @{$c->stash->{'today'}};
     }
     else {
         @today = Today();
+        $c->stash->{'today'} = \@today;
     }
     my($t_year,$t_month,$t_day) = @today;
-    $c->{'stash'}->{'today'} = \@today;
 
     my($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst);
     eval {
@@ -167,15 +214,13 @@ sub date_format {
         return "err:$timestamp";
     }
 
-    if(defined $format) {
-        return(Thruk::Utils::format_date($timestamp, $format));
-    }
-
     if($t_year == $year and $t_month == $month and $t_day == $day) {
-        return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format_today'}));
+        #confess("no datetime_format_today") unless $c->stash->{'datetime_format_today'};
+        return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format_today'}));
     }
 
-    return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format'}));
+    #confess("no datetime_format") unless $c->stash->{'datetime_format'};
+    return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format'}));
 }
 
 
@@ -191,10 +236,9 @@ returns a correct uri
 sub uri {
     my $c = shift;
     carp("no c") unless defined $c;
-    my $uri = $c->request->uri();
+    my $uri = $c->req->url();
     $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri    =~ s/&amp;/&/gmx;
-    $uri    =~ s/&/&amp;/gmx;
+    $uri    = &escape_ampersand($uri);
     return $uri;
 }
 
@@ -203,24 +247,27 @@ sub uri {
 
 =head2 full_uri
 
-  full_uri($c)
+  full_uri($c, $return_full_url)
 
-returns a correct uri
+returns uri to current page.
+
+    $return_full_url   -> return http://host/thruk/... instead of /thruk/...
 
 =cut
 sub full_uri {
-    my $c    = shift;
-    my $amps = shift || 0;
+    my $c        = shift;
+    my $full     = shift || 0;
     carp("no c") unless defined $c;
-    my $uri = ''.$c->request->uri_with($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
+    my $uri = ''.uri_with($c, $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}, 1);
 
     # uri always contains /thruk/, so replace it with our product prefix
     my $url_prefix = $c->stash->{'url_prefix'};
-    $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
-    if($amps) {
-        $uri    =~ s/&amp;/&/gmx;
-        $uri    =~ s/&/&amp;/gmx;
+    if($full) {
+        $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
+    } else {
+        $uri =~ s|(https?://[^/]+)/thruk/|$url_prefix|gmx;
     }
+    $uri = &escape_ampersand($uri);
     return $uri;
 }
 
@@ -254,17 +301,16 @@ returns a correct uri but only the url part
 sub short_uri {
     my($c, $data) = @_;
     my $filter = {};
-    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
-        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
+    for my $key (sort keys %uri_filter) {
+        $filter->{$key} = $uri_filter{$key};
     }
     if(defined $data) {
-        for my $key (%{$data}) {
+        for my $key (sort keys %{$data}) {
             $filter->{$key} = $data->{$key};
         }
     }
-    my $uri = uri_with($c, $filter);
-    $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
-    return $uri;
+    return(uri_with($c, $filter));
 }
 
 
@@ -292,37 +338,39 @@ sub clean_referer {
 
 =head2 uri_with
 
-  uri_with($c, $data)
+  uri_with($c, $data, $keep_absolute)
 
-returns a correct uri
+returns a relative uri to current page
 
 =cut
 sub uri_with {
-    my $c    = shift;
-    my $data = shift;
-
-    my $filter = {};
-    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
-        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    my($c, $data, $keep_absolute) = @_;
+    my $uri = $c->req->uri;
+    my @old_param = $uri->query_form();
+    my @new_param;
+    while(my $k = shift @old_param) {
+        my $v = shift @old_param;
+        if(exists $data->{$k}) {
+            if(!defined $data->{$k} || $data->{$k} eq 'undef') {
+                next;
+            } else {
+                push(@new_param, $k, delete $data->{$k});
+            }
+        } else {
+            push(@new_param, $k, $v);
+        }
     }
-    for my $key (keys %{$data}) {
-        next unless defined $data->{$key};
-        $filter->{$key} = $data->{$key};
-        $filter->{$key} = undef if $filter->{$key} eq 'undef';
+    for my $k (sort keys %{$data}) {
+        push(@new_param, $k, $data->{$k}) if(defined $data->{$k} && $data->{$k} ne 'undef');
     }
-
-    my $uri;
-    eval {
-        $uri = $c->request->uri_with($filter);
-    };
-    if($@) {
-        confess("ERROR in uri_with(): ".$@);
+    $uri->query_form(@new_param);
+    $uri = $uri->as_string;
+    unless($keep_absolute) {
+        $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
+        $uri = &escape_ampersand($uri);
+        # make relative url
+        $uri =~ s|^/[^?]+/||mx;
     }
-    $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri =~ s/&amp;/&/gmx;
-    $uri =~ s/&/&amp;/gmx;
-    # make relative url
-    $uri =~ s|^/[^?]+/||mx;
     return $uri;
 }
 
@@ -336,10 +384,6 @@ sub uri_with {
 wrapper for escape_html for compatibility reasons
 
 =cut
-sub html_escape {
-    return escape_html(@_);
-}
-
 
 ########################################
 
@@ -350,10 +394,6 @@ sub html_escape {
 returns an escaped string
 
 =cut
-sub escape_html {
-    return HTML::Entities::encode($_[0]);
-}
-
 
 ########################################
 
@@ -368,6 +408,22 @@ sub escape_quotes {
     $_[0] =~ s/\\'/'/gmx;
     $_[0] =~ s/'/\\'/gmx;
     $_[0] =~ s/"/\\'/gmx;
+    return $_[0];
+}
+
+
+########################################
+
+=head2 escape_ampersand
+
+  escape_ampersand($text)
+
+returns a string with & escaped to &amp;
+
+=cut
+sub escape_ampersand{
+    $_[0] =~ s/&amp;/&/gmx;
+    $_[0] =~ s/&/&amp;/gmx;
     return $_[0];
 }
 
@@ -389,6 +445,68 @@ sub remove_html_comments {
 
 ########################################
 
+=head2 validate_json
+
+  validate_json(...)
+
+returns error if json is invalid
+
+=cut
+sub validate_json {
+    my($str) = @_;
+    eval {
+        JSON::XS->new->decode($str);
+    };
+    if($@) {
+        my $err = $@;
+        chomp($err);
+        return($err);
+    }
+    return("");
+}
+
+########################################
+
+=head2 get_action_menu
+
+  get_action_menu(c, [name|menu])
+
+returns menu and error
+
+=cut
+sub get_action_menu {
+    my($c, $menu) = @_;
+    our $already_checked_action_menus;
+    $already_checked_action_menus = {} unless defined $already_checked_action_menus;
+
+    if($menu !~ m/^[\[\{]/mx) {
+        my $new = $c->config->{'action_menu_items'}->{$menu};
+        if(!$new) {
+            return(["no $menu in action_menu_items", "{}"]);
+        }
+        # fix trailing commas in menu
+        $new =~ s/\,\s*([\}\]\)]+)/$1/gmx;
+        unless(exists $already_checked_action_menus->{$menu}) {
+            $already_checked_action_menus->{$menu} = validate_json($new);
+            if($already_checked_action_menus->{$menu}) {
+                $c->log->error("error in action menu: ".$already_checked_action_menus->{$menu}."\nsource:\n".$new);
+            }
+        }
+        return([$already_checked_action_menus->{$menu}, $new]);
+    }
+
+    # fix trailing commas in menu
+    $menu =~ s/\,\s*([\}\]\)]+)/$1/gmx;
+
+    my $err = validate_json($menu);
+    if($err) {
+        $c->log->error("error in action menu: ".$err."\nsource:\n".$menu);
+    }
+    return([$err, $menu]);
+}
+
+########################################
+
 =head2 json_encode
 
   json_encode(...)
@@ -397,10 +515,12 @@ returns json encoded string
 
 =cut
 sub json_encode {
+    # do not use utf8 here, results in double encoding because object should be utf8 already
+    # for example business processes having utf8 characters in the plugin output
     if(scalar @_ > 1) {
-        return JSON::XS::encode_json([@_]);
+        return JSON::XS->new->encode([@_]);
     }
-    return JSON::XS::encode_json($_[0]);
+    return JSON::XS->new->encode($_[0]);
 }
 
 ########################################
@@ -427,8 +547,8 @@ used to escape html tags so it can be used as javascript string
 
 =cut
 sub escape_js {
-    my $text = shift;
-    $text = HTML::Entities::encode($text);
+    my($text) = @_;
+    $text = escape_html($text);
     $text =~ s/&amp;quot;/&quot;/gmx;
     $text =~ s/&amp;gt;/>/gmx;
     $text =~ s/&amp;lt;/</gmx;
@@ -446,7 +566,7 @@ used to escape backslashes
 
 =cut
 sub escape_bslash {
-    my $text = shift;
+    my($text) = @_;
     $text =~ s/\\/\\\\/gmx;
     return $text;
 }
@@ -462,13 +582,28 @@ returns an escaped string for xml output
 
 =cut
 sub escape_xml {
-    my $text = shift;
+    my($text) = @_;
+    $text =~ s/&/&amp;/gmx;
+    $text =~ s/</&lt;/gmx;
+    $text =~ s/>/&gt;/gmx;
+    $text =~ s/\\n\Z//gmx;
+    $text =~ s/\\n/\n/gmx;
+    $text =~ tr/\x80-\xFF//d;
+    $text =~ s/\p{Cc}//gmx;
+    return $text;
+}
 
-    my $return = HTML::Entities::encode($text, '<>&');
-    $return =~ s/\\n\Z//mx;
-    $return =~ s/\\n/\n/gmx;
-    $return =~ tr/\x80-\xFF//d;
-    return $return;
+########################################
+
+=head2 escape_regex
+
+  escape_regex($text)
+
+returns an escaped string for regular expression
+
+=cut
+sub escape_regex {
+    return(quotemeta($_[0]));
 }
 
 
@@ -529,17 +664,16 @@ sub get_message {
     my $has_details = 0;
 
     # message from cookie?
-    if(defined $c->request->cookie('thruk_message')) {
-        my $cookie = $c->request->cookie('thruk_message');
-        $c->res->cookies->{'thruk_message'} = {
-            value   => '',
-            expires => '-1M',
-            path    => $c->stash->{'cookie_path'}
-        };
+    if(defined $c->cookie('thruk_message')) {
+        my $cookie = $c->cookie('thruk_message');
+        $c->cookie('thruk_message' => '', {
+            expires => 0,
+            path    => $c->stash->{'cookie_path'},
+        });
         # sometimes the cookie is empty, so delete it in every case
         # and show it if it contains data
-        if(defined $cookie and defined $cookie->value) {
-            my($style,$message) = split/~~/mx, $cookie->value;
+        if(defined $cookie and $cookie->value) {
+            my($style,$message) = split(/~~/mx, $cookie->value, 2);
             my @msg = split(/\n/mx, $message);
             if(scalar @msg > 1) {
                 $has_details = 2;
@@ -552,8 +686,7 @@ sub get_message {
     # message from stash
     elsif(defined $c->stash->{'thruk_message'}) {
         my($style,$message) = split/~~/mx, $c->stash->{'thruk_message'};
-        delete $c->res->cookies->{'thruk_message'};
-
+        delete $c->res->{'cookies'}->{'thruk_message'};
         if(defined $c->stash->{'thruk_message_details'}) {
             $has_details = 1;
         }
@@ -636,6 +769,7 @@ sub action_icon {
     my($obj, $fallback, $prefix) = @_;
     $prefix = '' unless defined $prefix;
     my $x = 0;
+    return $fallback unless ref $obj->{$prefix.'custom_variable_names'} eq 'ARRAY';
     for my $var (@{$obj->{$prefix.'custom_variable_names'}}) {
         return $obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'ACTION_ICON';
         $x++;
@@ -737,18 +871,24 @@ sub has_business_process {
 
 =head2 button
 
-  my $html = button($link, $value, $class, [$onclick])
+  my $html = button($link, $value, $class, [$onclick], [$formstyle], [$keeplink])
 
 returns button html source
 
 =cut
 sub button {
-    my($link, $value, $class, $onclick) = @_;
+    my($link, $value, $class, $onclick, $formstyle, $keeplink) = @_;
 
-    my($page, $args) = split(/\?/mx, $link, 2);
-    $args =~ s/&amp;/&/gmx;
+    my($page, $args);
+    if($keeplink) {
+        $page = $link;
+        $args = "";
+    } else {
+        ($page, $args) = split(/\?/mx, $link, 2);
+        $args =~ s/&amp;/&/gmx;
+    }
 
-    my $html = '<form action="'.$page.'" method="POST">';
+    my $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>';
     for my $a (split/\&/mx, $args) {
         my($k,$v) = split(/=/mx,$a,2);
         $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
@@ -818,13 +958,22 @@ sub split_perfdata {
         if($val =~ m/^(\-?[\d\.]+)([^;]*?);([^;]*);([^;]*);([^;]*);([^;]*)/mxo) {
             ($var, $unit, $warn, $crit, $min, $max) = ($1, $2, $3, $4, $5, $6);
         }
+        elsif($val =~ m/^U;/mxi) {
+            $var  = 'Unknown';
+            $unit = '';
+            $warn = '';
+            $crit = '';
+            $min  = '';
+            $max  = '';
+        }
+
         if($key =~ m/^(.*)::(.*?)$/mx) {
             $last_parent = $1;
             $key = $2;
             $has_parents = 1;
         }
-        $warn =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo;
-        $crit =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo;
+        $warn =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $warn;
+        $crit =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $crit;
         push @{$data}, {
             'parent'    => $last_parent,
             'name'      => $key,
@@ -846,40 +995,77 @@ sub split_perfdata {
 
 ########################################
 
-=head2 get_cookie_remove_paths
+=head2 get_user_token
 
-  get_cookie_remove_paths($c)
+  get_user_token($c)
 
-return paths used to remove old/abandoned cookie paths
+returns user token which can be used to validate requests
 
 =cut
-sub get_cookie_remove_paths {
+sub get_user_token {
     my($c) = @_;
-    my $prefix  = $c->{'stash'}->{'url_prefix'};
-    $prefix     =~ s|/$||gmx;
-    my $product = $c->{'stash'}->{'product_prefix'};
-    $product    =~ s|/$||gmx;
-    my $paths   = [
-        '/',
-        $prefix,
-        $prefix.'/',
-        $prefix.'/thruk',
-        $prefix.'/thruk/',
-        $product,
-        $product.'/',
-        $product.'/thruk',
-        $product.'/thruk/',
-    ];
-    return($paths);
+    return $c->stash->{'user_token'} if $c->stash->{'user_token'};
+    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
+        return("");
+    }
+    my $store  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
+    my $tokens = $store->get('token');
+    my $minage = time() - 7200;
+    for my $usr (keys %{$tokens}) {
+        delete $tokens->{$usr} if $tokens->{$usr}->{'time'} < $minage;
+    }
+    if(!defined $tokens->{$c->stash->{'remote_user'}}) {
+        $tokens->{$c->stash->{'remote_user'}} = {
+            'token' => md5_hex($c->stash->{'remote_user'}.time().rand()),
+        };
+    }
+    $tokens->{$c->stash->{'remote_user'}}->{'time'} = time();
+    $store->set('token', $tokens);
+    $c->stash->{'user_token'} = $tokens->{$c->stash->{'remote_user'}}->{'token'};
+    return $c->stash->{'user_token'};
+}
+
+########################################
+
+=head2 get_cmd_submit_hash
+
+  get_cmd_submit_hash($data)
+
+create hash used in service/host details page
+
+=cut
+sub get_cmd_submit_hash {
+    my($data, $type) = @_;
+    return('{}') unless $data;
+    my $hash = {};
+    my $x = 0;
+    if($type eq 'svc') {
+        for my $d (@{$data}) {
+            $hash->{'r'.$x} = $d->{'host_name'}.';'.$d->{'description'}.';'.$d->{'peer_key'};
+            $x++;
+        }
+    }
+    elsif($type eq 'hst') {
+        for my $d (@{$data}) {
+            $hash->{'r'.$x} = $d->{'name'}.';;'.$d->{'peer_key'};
+            $x++;
+        }
+    }
+    else {
+        confess("no such type: $type");
+    }
+    return(JSON::XS::encode_json($hash));
 }
 
 ########################################
 
 1;
 
+__END__
+
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

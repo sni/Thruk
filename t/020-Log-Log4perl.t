@@ -2,10 +2,9 @@ use strict;
 use warnings;
 use Test::More;
 use File::Copy;
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
 use lib('t');
 
+my $log4perl_created;
 BEGIN {
     unless($ENV{TEST_AUTHOR}) {
         plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
@@ -15,10 +14,12 @@ BEGIN {
         my $rc = $?>>8;
         plan skip_all => 'there is a log4perl.conf already, cannot test' if $rc != 0;
     }
-    $ENV{'THRUK_SRC'} = 'TEST';
+    $ENV{'THRUK_SRC'}     = 'TEST';
+    $ENV{'THRUK_VERBOSE'} = 1;
 }
 
-plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+plan skip_all => 'backends required' if !-s 'thruk_local.conf';
 
 # remove old leftovers
 unlink('/tmp/thruk_test_error.log');
@@ -26,20 +27,14 @@ unlink('/tmp/thruk_test_debug.log');
 
 # copy our test log4perl config
 ok(copy('t/data/log4perl.conf', 'log4perl.conf'), 'copy test config') or BAIL_OUT("$0: copy failed: $!");
+$log4perl_created = 1;
 
-if(defined $ENV{'CATALYST_SERVER'}) {
-    move('/etc/thruk/log4perl.conf', '/etc/thruk/log4perl.conf.orig');
-    move('log4perl.conf', '/etc/thruk/log4perl.conf');
-}
+# this either works because we are root otherwise it will silently fail but isn't neccessary at all either
+move('/etc/thruk/log4perl.conf', '/etc/thruk/log4perl.conf.orig');
+move('log4perl.conf', '/etc/thruk/log4perl.conf');
 
 require TestUtils;
 import TestUtils;
-
-# reload apache
-if(defined $ENV{'CATALYST_SERVER'}) {
-    -e '/etc/init.d/httpd'  && print `/etc/init.d/httpd reload`;
-    -e '/etc/init.d/apache' && print `/etc/init.d/apache reload`;
-}
 
 # test some pages
 my $pages = [
@@ -59,20 +54,16 @@ is(-s '/tmp/thruk_test_error.log', 0, 'thruk_test_error.log is empty') or diag(q
 
 ok(`grep '[DEBUG]' /tmp/thruk_test_debug.log | wc -l` > 0, 'debug log contains debug messages');
 
-# clean up
-if(defined $ENV{'CATALYST_SERVER'}) {
-    unlink('/etc/thruk/log4perl.conf');
-    ok(move('/etc/thruk/log4perl.conf.orig', '/etc/thruk/log4perl.conf'), 'restore test config');
-} else {
-    ok(unlink('log4perl.conf'), 'unlink test config');
-}
+ok(unlink('log4perl.conf'), 'unlink test config');
 ok(unlink('/tmp/thruk_test_error.log'), 'unlink test logfile');
 ok(unlink('/tmp/thruk_test_debug.log'), 'unlink test debug file');
 
-# reload apache again
-if(defined $ENV{'CATALYST_SERVER'}) {
-    -e '/etc/init.d/httpd'  && print `/etc/init.d/httpd reload`;
-    -e '/etc/init.d/apache' && print `/etc/init.d/apache reload`;
-}
-
 done_testing();
+
+END {
+    if($log4perl_created) {
+        unlink("log4perl.conf");
+        unlink('/tmp/thruk_test_error.log');
+        unlink('/tmp/thruk_test_debug.log');
+    }
+}

@@ -7,7 +7,7 @@
     errorDescription: '[% escape_quotes(errorDescription) %]'
   [% ELSE %]
     errorMessage: 'internal server error',
-    errorDescription: 'internal server error occured, please look at your catalyst logfile'
+    errorDescription: 'internal server error occured, please look at your logfiles'
   [% END %]
   [% IF errorDetails %]
   , errorDetails: '[% escape_quotes(errorDetails) %]'
@@ -32,7 +32,7 @@
   [% ELSE %]
   [% hide_output = c.log.error('on page: ' _ c.request.method _ ' ' _ c.request.uri) %]
   <div class='errorMessage'>internal server error</div>
-  <div class='errorDescription'>internal server error occured, please look at your catalyst logfile</div>
+  <div class='errorDescription'>internal server error occured, please look at your logfiles</div>
   [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
   [% END %]
 
@@ -51,8 +51,11 @@
     <img src="[% url_prefix %]themes/[% theme %]/images/bug_error.png" alt="Send Bug Report" width="16" height="16" style="vertical-align: text-bottom;">
     Help making Thruk better and send a bug report</a>.<br>
   </div>
+  [% IF thruk_debug %]
+  <pre style="margin-top: 50px;">[% stacktrace %]</pre>
   [% END %]
-[% IF make_test_mode %]
+  [% END %]
+[% IF make_test_mode || thruk_debug %]
 <!--error:
 [%+ errorMessage +%]
 [%+ errorDetails +%]

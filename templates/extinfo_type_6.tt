@@ -19,16 +19,20 @@
     <div class='downtimeNav'>[&nbsp;<a href='#HOSTDOWNTIME' class='downtimeNav'>Host Downtime</a>&nbsp;|&nbsp;<a href='#SERVICEDOWNTIME' class='downtimeNav'>Service Downtime</a>&nbsp;]</div><br>
 
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
-    <div class='downtimeTitle'>Scheduled Host Downtime</div>
-    [% UNLESS c.config.command_disabled.exists('55') || c.check_user_roles_wrapper('authorized_for_read_only') %]
-    <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
+    <div class='downtimeTitle'>Scheduled Host Downtimes</div>
+    [% UNLESS c.config.command_disabled.exists('55') || c.check_user_roles('authorized_for_read_only') %]
+    <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div>
+    [% END %]
+    <br>
+    [% IF sortoption_hst %]
+    <div class="statusSort" align="CENTER">Host downtimes sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
     [% END %]
     <div align="center">
     <table border=0 cellpadding=0 cellspacing=0>
       <tr>
         <td width="220"></td>
         <td align="center">
-          <div class="hint">mark host / service downtimes with leftclick. Select multiple with shift + mouse.</div>
+          <div class="hint">Mark host / service downtimes with leftclick. Select multiple with shift + mouse.</div>
         </td>
         <td width="220" align="right" class="toolbar">
           [% style="comments" %]
@@ -50,10 +54,15 @@
     <br>
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
-    <div class='downtimeTitle'>Scheduled Service Downtime</div>
-    [% UNLESS c.config.command_disabled.exists('56') || c.check_user_roles_wrapper('authorized_for_read_only') %]
+    <div class='downtimeTitle'>Scheduled Service Downtimes</div>
+    [% UNLESS c.config.command_disabled.exists('56') || c.check_user_roles('authorized_for_read_only') %]
     <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div>
     [% END %]
+    <br>
+    [% IF sortoption_svc %]
+    <div class="statusSort" align="CENTER">Service downtimes sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+    [% END %]
+    <div align="center" class="hint" style="padding: 4px;">Mark service downtimes with leftclick. Select multiple with shift + mouse.</div>
     [% PROCESS _downtimes_table.tt downtimes = servicedowntimes type='service' names=1 sortprefix='_svc' %]
 <br>
 

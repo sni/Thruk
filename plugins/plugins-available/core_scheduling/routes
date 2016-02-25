@@ -1,0 +1,23 @@
+##########################################################
+
+=head2 add_routes
+
+page: /thruk/cgi-bin/core_scheduling.cgi
+
+=cut
+
+$routes->{'/thruk/cgi-bin/core_scheduling.cgi'} = 'Thruk::Controller::core_scheduling::index';
+
+Thruk::Utils::Menu::insert_sub_item('System', 'Scheduling Queue', {
+                                'href'  => '/thruk/cgi-bin/core_scheduling.cgi',
+                                'name'  => 'Core Scheduling Graph',
+});
+
+Thruk::Utils::Status::add_view({'group' => 'Core Scheduling',
+                                'name'  => 'Core Scheduling Graph',
+                                'value' => 'core_scheduling',
+                                'url'   => 'core_scheduling.cgi',
+});
+
+# enable reporting features if this plugin is loaded
+$app->config->{'use_feature_core_scheduling'} = 'core_scheduling.cgi';

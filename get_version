@@ -26,6 +26,7 @@ if [ $? -eq 0 ]; then
   if [ $mod -eq 0 ]; then
     minor=$((minor+1))
   fi
+  minor=`printf "%02d" $minor`
   version="$major.$minor"
 
   echo ${version} ${date} | tr -d 'v'

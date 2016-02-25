@@ -2,11 +2,12 @@ use strict;
 use warnings;
 use Test::More;
 use URI::Escape;
-use Data::Dumper;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
-plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+`ps -fu root | grep cron >/dev/null 2>&1`;
+plan skip_all => 'crond required' if $? != 0;
 
 BEGIN {
     use lib('t');
@@ -15,8 +16,8 @@ BEGIN {
 }
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
-$BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
-$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
+$BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+$BIN    = $BIN.' --remote-url="'.$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.'"' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 # get test host
 my $host = TestUtils::get_test_host_cli($BIN);
@@ -38,7 +39,8 @@ my $test_downtime = [{
     'fixed'         => 1,
     'flex_range'    => 720,
     'childoptions'  => 0,
-    'nr'            => $rand,
+    'nr'            => 9999,
+    'verbose'       => 1,
 }];
 
 for my $downtime (@{$test_downtime}) {
@@ -52,11 +54,9 @@ for my $downtime (@{$test_downtime}) {
         like => ['/^OK - recurring downtime saved$/'],
     });
 
-    my $host = $downtime->{'host'};
-    my $user = defined $ENV{THRUK_USER} ? ' -u '.$ENV{THRUK_USER} : '';
-    my $grephost = $host;
-    $grephost =~ s/["'\/\s;]+/_/gmx;
-    my $cronentry = `crontab -l $user | grep downtimetask | grep '$grephost'`;
+    my $host      = $downtime->{'host'};
+    my $user      = defined $ENV{THRUK_USER} ? ' -u '.$ENV{THRUK_USER} : '';
+    my $cronentry = `crontab -l $user | grep downtimetask | grep '9999'`;
     chomp($cronentry);
     like($cronentry, '/downtimetask=/', "got cron entry: ".$cronentry) or BAIL_OUT("$0: got no cron entry");
 
@@ -64,7 +64,7 @@ for my $downtime (@{$test_downtime}) {
     like($logfile, '/cron\.log$/', "got cron log: ".$logfile);
     `>$logfile`;
 
-    # wait 90 seconds for a downtime
+    # wait 150 seconds for a downtime
     my $now   = time();
     my $found = 0;
     while($now > time() - 150) {
@@ -78,14 +78,21 @@ for my $downtime (@{$test_downtime}) {
     }
     if(!$found) {
         fail("downtime did not occur in time");
-        diag("cat $logfile:");
-        diag(`cat $logfile`);
+        for my $cmd ("cat $logfile",
+                     "crontab -l",
+                     "ps -efl",
+                     "$BIN 'extinfo.cgi?type=6'",
+                     "$BIN 'showlog.cgi?pattern=EXTERNAL+COMMAND&start=yesterday&end=now'",
+                    ) {
+            diag("cmd: $cmd");
+            diag(`$cmd`);
+        }
     }
 }
 
 # remove downtime
 TestUtils::test_command({
-    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&target=host&nr='.$rand.'&host='.$host.'"',
+    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&nr=9999"',
     like => ['/^OK - recurring downtime removed$/'],
 });
 

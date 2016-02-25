@@ -11,6 +11,10 @@ function init_report_tool_buttons() {
         icons: {primary: 'ui-save-button'}
     });
 
+    jQuery('.report_email_button').button({
+        icons: {primary: 'ui-email-button'}
+    });
+
     jQuery('.right_arrow_button').button({
         icons: {primary: 'ui-r-arrow-button'}
     });
@@ -30,21 +34,6 @@ function init_report_tool_buttons() {
         icons: {primary: 'ui-remove-button'}
     }).click(function() {
         return confirm('really delete?');
-    });
-}
-
-/* update report list status */
-function update_reports_status() {
-    /* adding timestamp makes IE happy */
-    var ts = new Date().getTime();
-    jQuery('#reports_table').load('reports2.cgi?tab='+last_reports_typ+'&_=' + ts + ' #statusTable', {},
-                                  function(responseText, textStatus, XMLHttpRequest) {
-        // now count is_running elements
-        size = jQuery('.is_running').size();
-        if(size > 0) {
-            window.setTimeout('update_reports_status()', 1500);
-        }
-        reports_view(last_reports_typ);
     });
 }
 
@@ -78,15 +67,11 @@ function update_reports_type_step2() {
 /* show hide specific types of reports */
 var last_reports_typ;
 function reports_view(typ) {
-    var need_filter = true;
-    var hide_only   = false;
     if(typ == undefined) {
         typ = last_reports_typ;
-        need_filter = false;
-        hide_only   = true;
-    } else {
-        last_reports_typ = typ;
     }
+    last_reports_typ = typ;
+
     // show owner column?
     if(typ == 'all' || typ == 'public') {
         jQuery('#reports_table .usercol').each(function(nr, el) {
@@ -99,31 +84,88 @@ function reports_view(typ) {
     }
 
     if(typ == 'all') {
-        if(!hide_only) {
-            jQuery('#reports_table TR').each(function(nr, el) {
-                showElement(el);
-            });
-        }
+        jQuery('#reports_table TR').each(function(nr, el) {
+            jQuery(el).removeClass('tab_hidden');
+        });
     } else {
         jQuery('#reports_table TR').each(function(nr, el) {
             if(nr > 0) {
                 if(jQuery(el).hasClass(typ)) {
-                    if(!hide_only) {
-                        showElement(el);
-                    }
+                    jQuery(el).removeClass('tab_hidden');
                 } else {
-                    hideElement(el);
+                    jQuery(el).addClass('tab_hidden');
                 }
             }
         });
     }
-    set_hash(typ);
-    if(need_filter) {
-        do_table_search(true);
+    set_hash(typ, 1);
+}
+
+/* collect total number of affected hosts and services */
+function reports_update_affected_sla_objects(input) {
+    var form = jQuery(input).closest('FORM');
+
+    // only useful if there is a affected objects output field
+    if(form.find('TR.report_type_affected_sla_objects SPAN.value').size() == 0) {
+        return;
     }
 
-    jQuery('A.editlinks, A.updatelinks').each(function(nr, link) {
-        var tmp   = link.href.replace(/tab=.*/g, 'tab='+typ);
-        link.href = tmp;
+    var span1 = form.find('TR.report_type_affected_sla_objects SPAN.name');
+    var span2 = form.find('TR.report_type_affected_sla_objects SPAN.value');
+    showElement('reports_waiting');
+    hideElement(span2[0].id);
+    try {
+        // only select all backends if using the _backend_select_multi.tt
+        if(document.getElementById('available_backends') != undefined) {
+            select_all_options('report_backends');
+        }
+    } catch(e) {
+        debug(e);
+    }
+    jQuery.ajax({
+        url:  'reports2.cgi',
+        data: {
+                action:         'check_affected_objects',
+                host:            form.find('INPUT[name="params.host"]').val(),
+                service:         form.find('INPUT[name="params.service"]').val(),
+                hostgroup:       form.find('INPUT[name="params.hostgroup"]').val(),
+                servicegroup:    form.find('INPUT[name="params.servicegroup"]').val(),
+                template:        form.find('SELECT[name=template]').val(),
+                backends:        form.find('SELECT[name=report_backends]').val(),
+                backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val()),
+                param:           form.serialize()
+        },
+        type: 'POST',
+        cache: false,
+        success: function(data) {
+            hideElement('reports_waiting');
+            showElement(span2[0].id);
+            var msg = "none";
+            if(data.hosts > 0 && data.services > 0) {
+                msg = data.hosts + " host"+(data.hosts == 1 ? '' : 's')+", "+data.services+" service"+(data.services == 1 ? '' : 's');
+            }
+            else if(data.hosts > 0 && data.services == 0) {
+                msg = data.hosts + " host"+(data.hosts == 1 ? '' : 's');
+            }
+            else if(data.hosts == 0 && data.services > 0) {
+                msg = data.services+" service"+(data.services == 1 ? '' : 's');
+            }
+            span1.removeClass('error');
+            span2.removeClass('error');
+            span1.attr('title', '');
+            span2.attr('title', '');
+            span2.html(msg);
+            if(data['too_many'] != undefined && data['too_many'] == 1) {
+                span1.addClass('error');
+                span2.addClass('error');
+                span1.attr('title', 'too many objects, please use more specific filter');
+                span2.attr('title', 'too many objects, please use more specific filter');
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            hideElement('reports_waiting');
+            showElement(span2[0].id);
+            thruk_message(1, 'getting affected objects failed: - ' + jqXHR.status + ' ' + errorThrown);
+        }
     });
 }

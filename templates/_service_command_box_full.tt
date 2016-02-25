@@ -27,7 +27,18 @@
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
                 <td class='command'>
                   <a href='cmd.cgi?cmd_typ=7&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Re-schedule next check of this service</a>
-                  (<a href='cmd.cgi?cmd_typ=7&amp;cmd_mod=2&amp;start_time=[% date.now %]&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check=1&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'> Now </a>)
+                  <form action='cmd.cgi' method='POST' style="display: inline;">
+                    <input type='hidden' name='cmd_typ' value='7'>
+                    <input type='hidden' name='cmd_mod' value='2'>
+                    <input type='hidden' name='start_time' value='[% date.now %]'>
+                    <input type='hidden' name='host' value='[% service.host_name %]'>
+                    <input type='hidden' name='service' value='[% service.description %]'>
+                    <input type='hidden' name='force_check' value='1'>
+                    <input type='hidden' name='backend' value='[% service.peer_key %]'>
+                    <input type='hidden' name='referer' value='[% short_uri(c, {referer => 'undef'}) %]'>
+                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    (<a href='cmd.cgi?cmd_typ=7&amp;&amp;start_time=[% date.now %]&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check=1&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]' onClick="jQuery(this).closest('FORM').submit(); return false;">Now</a>)
+                  </form>
                 </td>
               </tr>
               [% END %]
@@ -45,7 +56,6 @@
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service' width="20" height="20"></td>
                 <td class='command' nowrap><a href='cmd.cgi?cmd_typ=40&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Stop accepting passive checks for this service</a></td>
               </tr>
-              [% END %]
               [% ELSE %]
               [% UNLESS c.config.command_disabled.exists('39') %]
               <tr class='command'>

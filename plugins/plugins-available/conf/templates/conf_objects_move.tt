@@ -10,6 +10,7 @@
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
 <input type="hidden" name="action" value="movefile">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj'>
     <tr>
       <th class='data' style="width: 40px;"><a href='conf.cgi?sub=objects&amp;type=[% object.get_type() %]&amp;data.id=[% object.get_id %]'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"> back</a></th>

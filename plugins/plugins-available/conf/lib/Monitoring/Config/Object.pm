@@ -18,8 +18,26 @@ use Monitoring::Config::Object::Command;
 use Monitoring::Config::Object::Timeperiod;
 use Monitoring::Config::Object::Contact;
 use Monitoring::Config::Object::Contactgroup;
-use Monitoring::Config::Object::Module;
 use Monitoring::Config::Object::Escalation;
+
+# Icinga and Shinken:
+use Monitoring::Config::Object::Module;
+
+# Shinken:
+use Monitoring::Config::Object::Arbiter;
+use Monitoring::Config::Object::Broker;
+use Monitoring::Config::Object::Poller;
+use Monitoring::Config::Object::Reactionner;
+use Monitoring::Config::Object::Receiver;
+use Monitoring::Config::Object::Scheduler;
+
+use Monitoring::Config::Object::Discoveryrule;
+use Monitoring::Config::Object::Discoveryrun;
+use Monitoring::Config::Object::Notificationway;
+use Monitoring::Config::Object::Realm;
+use Monitoring::Config::Object::Businessimpactmodulation;
+use Monitoring::Config::Object::Resultmodulation;
+use Monitoring::Config::Object::Checkmodulation;
 
 =head1 NAME
 
@@ -50,6 +68,11 @@ $Monitoring::Config::Object::Types = [
     'contactgroup',
     'module',
     'escalation',
+    # Shinken:
+    'discoveryrule',
+    'discoveryrun',
+    'notificationway',
+    'realm',
 ];
 
 ##########################################################
@@ -84,36 +107,35 @@ return a new L<object|Monitoring::Config::Object::Parent> of given type. Type ca
 
 =cut
 sub new {
-    my $class = shift;
-    my $conf  = {@_};
-    confess('no core type!') unless defined $conf->{'coretype'};
+    my($class, %conf) = @_;
+    confess('no core type!') unless defined $conf{'coretype'};
 
-    my $objclass = 'Monitoring::Config::Object::'.ucfirst($conf->{'type'});
+    my $objclass = 'Monitoring::Config::Object::'.ucfirst($conf{'type'});
     my $obj = \&{$objclass."::BUILD"};
-    return unless defined &$obj;
-    my $current_object = &$obj($objclass, $conf->{'coretype'});
+    return unless defined &{$obj};
+    my $current_object = &{$obj}($objclass, $conf{'coretype'});
 
     return unless defined $current_object;
 
-    $current_object->{'conf'}     = dclone( $conf->{'conf'} || {} );
-    $current_object->{'line'}     = $conf->{'line'} || 0;
-    $current_object->set_file($conf->{'file'}) if defined $conf->{'file'};
+    $current_object->{'conf'}     = dclone( $conf{'conf'} || {} );
+    $current_object->{'line'}     = $conf{'line'} || 0;
+    $current_object->set_file($conf{'file'}) if defined $conf{'file'};
     $current_object->{'comments'} = [];
     $current_object->{'id'}       = 'new';
-    $current_object->{'disabled'} = defined $conf->{'disabled'} ? $conf->{'disabled'} : 0;
+    $current_object->{'disabled'} = defined $conf{'disabled'} ? $conf{'disabled'} : 0;
 
-    if(defined $conf->{'name'}) {
+    if(defined $conf{'name'}) {
         if(ref $current_object->{'primary_key'} eq 'ARRAY') {
             if($current_object->{'default'}->{$current_object->{'primary_key'}->[0]}->{'type'} eq 'LIST') {
-                $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = [ $conf->{'name'} ];
+                $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = [ $conf{'name'} ];
             } else {
-                $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = $conf->{'name'};
+                $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = $conf{'name'};
             }
         } else {
             if($current_object->{'default'}->{$current_object->{'primary_key'}}->{'type'} eq 'LIST') {
-                $current_object->{'conf'}->{$current_object->{'primary_key'}} = [ $conf->{'name'} ];
+                $current_object->{'conf'}->{$current_object->{'primary_key'}} = [ $conf{'name'} ];
             } else {
-                $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf->{'name'};
+                $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf{'name'};
             }
         }
         if(defined $current_object->{'standard'}) {
@@ -170,7 +192,7 @@ sub format_comments {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

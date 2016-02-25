@@ -2,73 +2,87 @@
 
 use strict;
 use warnings;
-
-###################################################
-# create connection pool
-# has to be done really early to save memory
 use lib 'lib';
-use Thruk::Backend::Pool;
+
 BEGIN {
-    # won't work with automatical restarts
-    unless(grep {/^\-r/} @ARGV) {
-        Thruk::Backend::Pool::init_backend_thread_pool()
-    }
+    $ENV{'THRUK_SRC'} = 'DebugServer';
 }
+
+if(grep {/^\-r/} @ARGV) {
+    @ARGV = grep {!/^\-r/} @ARGV;
+    my @watch = qw/lib script thruk_local.conf thruk.conf thruk_local.d/;
+    for my $plugin (glob('plugins/plugins-enabled/*/lib')) {
+        push @watch, $plugin;
+    }
+    push @ARGV, '-R', join(',', @watch);
+}
+# set default port to 3000 unless port is specified
+if(!grep {/^\-p/} @ARGV) {
+    push @ARGV, '-p', '3000';
+}
+# use -vvvv for trace mode
+if(grep {/^\-vvvv/} @ARGV) {
+    @ARGV = grep {!/^\-vvvv/} @ARGV;
+    $ENV{'THRUK_VERBOSE'} = 4;
+}
+# use -vvv for super verbose mode for backwards compatibility
+elsif(grep {/^\-vvv/} @ARGV) {
+    @ARGV = grep {!/^\-vvv/} @ARGV;
+    $ENV{'THRUK_VERBOSE'} = 3;
+}
+# use -vv for very verbose mode for backwards compatibility
+elsif(grep {/^\-vv/} @ARGV) {
+    @ARGV = grep {!/^\-vv/} @ARGV;
+    $ENV{'THRUK_VERBOSE'} = 2;
+}
+# use -v for verbose mode for backwards compatibility
+if(grep {/^\-v/} @ARGV) {
+    @ARGV = grep {!/^\-v/} @ARGV;
+    $ENV{'THRUK_VERBOSE'} = 1 unless(defined $ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} > 1);
+}
+# use -d for verbose mode for backwards compatibility
+if(grep {/^\-d/} @ARGV) {
+    @ARGV = grep {!/^\-d/} @ARGV;
+    $ENV{'THRUK_VERBOSE'} = 3;
+}
+
+my $bin = $0;
+$bin =~ s|/thruk_server.pl$||gmx;
+unshift(@ARGV, $bin.'/thruk.psgi');
+push @ARGV, '--no-default-middleware';
+
+require Plack::Runner;
+my $runner = Plack::Runner->new;
+$runner->parse_options(@ARGV);
+$runner->run;
 
 ###################################################
-# clean up env
-use Thruk::Utils::INC;
-BEGIN {
-    Thruk::Utils::INC::clean();
-}
-
-use Catalyst::ScriptRunner;
-$ENV{'THRUK_SRC'} = 'DebugServer';
-Catalyst::ScriptRunner->run('Thruk', 'Server');
-
-1;
 
 =head1 NAME
 
-thruk_server.pl - Catalyst Test Server
+thruk_server.pl - Thruk Development Server
 
 =head1 SYNOPSIS
 
 thruk_server.pl [options]
 
-   -d --debug           force debug mode
-   -f --fork            handle each request in a new process
-                        (defaults to false)
-   -? --help            display this help and exits
-   -h --host            host (defaults to all)
-   -p --port            port (defaults to 3000)
-   -k --keepalive       enable keep-alive connections
-   -r --restart         restart when files get modified
-                        (defaults to false)
-   -rd --restart_delay  delay between file checks
-                        (ignored if you have Linux::Inotify2 installed)
-   -rr --restart_regex  regex match files that trigger
-                        a restart when modified
-                        (defaults to '\.yml$|\.yaml$|\.conf|\.pm$')
-   --restart_directory  the directory to search for
-                        modified files, can be set mulitple times
-                        (defaults to '[SCRIPT_DIR]/..')
-   --follow_symlinks    follow symlinks in search directories
-                        (defaults to false. this is a no-op on Win32)
-   --background         run the process in the background
-   --pidfile            specify filename for pid file
+   -p <port>            use tcp port. default: 3000
+   -d                   debug mode
+   -v                   verbose mode
+   -vv                  very verbose mode
+   -vvv                 debug mode
+   -h                   display this help and exits
+   -r                   restart when files get modified
 
- See also:
-   perldoc Catalyst::Manual
-   perldoc Catalyst::Manual::Intro
+  also all options from plackup -h should work.
 
 =head1 DESCRIPTION
 
-Run a Catalyst Testserver for this application.
+Run a Thruk Testserver.
 
 =head1 AUTHORS
 
-Catalyst Contributors, see Catalyst.pm
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 COPYRIGHT
 

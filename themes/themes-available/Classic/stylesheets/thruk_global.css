@@ -384,6 +384,11 @@ body.summary table.data {
   background-color: white;
 }
 
+/* simple table row hover */
+.hoverTable tr:not(:first-child):hover {
+  background-color: #DBDBDB;
+}
+
 /* mouse over classes for inline command selection in status page */
 .tableRowHover {
   cursor: pointer;
@@ -489,6 +494,10 @@ div.thruk_message table {
   padding: 1px 1px 1px 1px;
   margin-bottom: 0px;
   margin-left: 3px;
+}
+
+.alerttext {
+  color: #b94a48;
 }
 
 /* show log filter */
@@ -761,7 +770,6 @@ select#quick_command {
   margin: 0px;
   margin-bottom: 4px;
   -ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=-0.00000000, M12=1.00000000, M21=-1.00000000, M22=-0.00000000,sizingMethod='auto expand')";
-  filter: flipv() fliph(); writing-mode: tb-rl; /* IE < 9 */
   -webkit-transform: rotate(-90.0deg);  /* Safari 3.1+, Chrome */
   -moz-transform: rotate(-90.0deg);  /* Firefox 3.5-15 */
   -ms-transform: rotate(-90.0deg);  /* IE9+ */
@@ -817,11 +825,12 @@ DIV#progressbar .ui-progressbar-value {
 
 SPAN.deleteicon {
   position: relative;
+  display: inline-block;
 }
 SPAN.deleteicon SPAN {
   position: absolute;
   display: block;
-  top: -1px;
+  top: 4px;
   right: 5px;
   width: 14px;
   height: 14px;
@@ -880,6 +889,18 @@ SPAN.deleteicon INPUT {
 }
 .ui-delete-button {
   background-image: url(../images/delete.gif) !important;
+}
+.ui-refresh-button {
+  background-image: url(../images/arrow_refresh.png) !important;
+}
+.ui-email-button {
+  background-image: url(../images/email_attach.png) !important;
+}
+.ui-waiting-button {
+  background-image: url(../images/loading-icon.gif) !important;
+}
+.ui-error-button {
+  background-image: url(../images/error.png) !important;
 }
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
@@ -1085,7 +1106,104 @@ DIV.alert.floating {
 }
 
 .btn_small {
-    height: inherit;
-    width: inherit;
-    white-space: inherit;
+  height: inherit;
+  width: inherit;
+  white-space: inherit;
+}
+
+TABLE.livestatus_metrics TD.dataVal {
+  text-align: right;
+  padding-left: 6px;
+}
+
+.tab_hidden, .filter_hidden {
+  display: none;
+}
+
+.action_icon {
+  margin: 1px 1px 1px 2px;
+}
+
+IMG.action_icon.clickable.active {
+  border: 1px inset black;
+  margin: 0px 0px 0px 1px;
+}
+
+DIV.action_menu {
+  position: absolute;
+  z-index: 1000;
+}
+
+UL.action_menu {
+  background: #F0F1EE;
+  border: 1px outset #444444;
+  padding: 0px;
+  margin: 0px;
+}
+
+UL.action_menu LI {
+  list-style: none;
+  border: 1px solid #F0F1EE;
+  padding: 0px 3px;
+}
+
+UL.action_menu LI:hover {
+  background: #E5E5E5;
+  border: 1px inset black;
+}
+
+UL.action_menu LI.nohover:hover {
+  background: inherit;
+  border: 1px solid #F0F1EE;
+}
+
+UL.action_menu LI IMG {
+  vertical-align: bottom;
+  padding-right: 3px;
+  border: 0;
+  max-width: 20px;
+  max-height: 20px;
+}
+
+IMG.action_icon {
+  vertical-align: bottom;
+}
+
+IMG.action_icon.clickable {
+  vertical-align: middle;
+  max-width: 20px;
+  max-height: 20px;
+  border: 0px;
+}
+
+UL.action_menu LI.clickable A SPAN.icon {
+  width: 22px;
+  height: 20px;
+  display: inline-block;
+}
+
+UL.action_menu A:hover {
+  text-decoration: none;
+}
+
+UL.action_menu LI.clickable A {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+UL.action_menu LI HR {
+  margin: 2px 8px;
+}
+
+DIV.pnpSelector {
+  display: inline;
+  position: absolute;
+  right: 2px;
+  top: 22px;
+}
+
+.black_white {
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
 }

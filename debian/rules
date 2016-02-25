@@ -3,9 +3,11 @@
 
 export DH_VERBOSE=1
 DESTDIR=$(CURDIR)/debian/tmp/
-PERLARCH=$(shell perl -e 'use Config; print $$Config{archname}')
-
+PERLVER=$(shell perl -e 'use Config; print $$Config{version}')
 HTTPDCONF=$(shell if [ -d "/etc/apache2/conf-available" ]; then echo "/etc/apache2/conf-available"; else echo "/etc/apache2/conf.d"; fi )
+SHELL=bash
+DIST := $(shell lsb_release -i | awk '{print tolower($$3)}')
+RELEASE := $(shell lsb_release -r | awk '{print $$2}')
 
 override_dh_auto_configure:
 	dh_auto_configure -- --prefix=/usr \
@@ -24,11 +26,27 @@ override_dh_auto_configure:
 		--with-thruk-libs="/usr/lib/thruk/perl5" \
 		--with-httpd-conf="$(HTTPDCONF)" \
 		--with-htmlurl="/thruk"
-	echo "thruk: embedded-library usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so: zlib" >> debian/thruk.lintian-overrides
-	echo "thruk: embedded-zlib ./usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so"        >> debian/thruk.lintian-overrides
+	echo $(HTTPDCONF)/thruk.conf                   >> debian/thruk-base.install
+	echo $(HTTPDCONF)/thruk_cookie_auth_vhost.conf >> debian/thruk-base.install
+
+override_dh_auto_install:
+	dh_auto_install
+	# enable su logrotate directive if required
+	if [[ ${DIST} == debian ]] ; then \
+		if [[ $$(echo "${RELEASE}>=7" | bc -l) -eq 1 || ${RELEASE} == testing || ${RELEASE} == unstable ]] ; then \
+			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
+		fi ; \
+	elif [[ ${DIST} == ubuntu ]] ; then \
+		if [[ $$(echo "${RELEASE}>=13.04" | bc -l) -eq 1 ]] ; then \
+			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
+		fi ; \
+	fi
+
+override_dh_gencontrol:
+	dh_gencontrol -- -Vextra:Depends=perlapi-$(PERLVER)
 
 override_dh_strip:
-	dh_strip --exclude=wkhtmltopdf
+	dh_strip --exclude=phantomjs
 
 override_dh_auto_test:
 

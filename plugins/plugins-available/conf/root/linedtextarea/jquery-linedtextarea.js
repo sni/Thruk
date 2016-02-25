@@ -1,6 +1,6 @@
 /**
  * jQuery Lined Textarea Plugin
- *   http://alan.blog-city.com/jquerylinedtextarea.htm
+ *   https://github.com/aw20/JQueryLinedText
  *
  * Copyright (c) 2010 Alan Williamson
  *
@@ -82,8 +82,7 @@
 
 			/* Move the textarea to the selected line */
 			if ( opts.selectedLine != -1 && !isNaN(opts.selectedLine) ){
-				//var fontSize = parseInt( textarea.height() / (lineNo-2) );
-				var fontSize = 15; /* requires style="line-height:15px" for the textarea but in reward works for IE too */
+				var fontSize = parseInt( textarea.height() / (lineNo-2) );
 				var position = parseInt( fontSize * opts.selectedLine ) - (textarea.height()/2);
 				textarea[0].scrollTop = position;
 			}
@@ -97,6 +96,7 @@
 
 			textarea.width( textareaNewWidth );
 			linedWrapDiv.width( linedWrapDivNewWidth );
+
 
 
 			/* React to the scroll event */
@@ -115,9 +115,6 @@
 				linesDiv.height( domTextArea.clientHeight + 6 );
 			});
 
-
-			/* IE needs that */
-			textarea.scroll();
 		});
 	};
 

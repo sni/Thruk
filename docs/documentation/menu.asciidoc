@@ -1,0 +1,217 @@
+---
+layout: docs
+title: Menu Customization
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+== Menu Configuration
+
+The main left menu is highly editable through menu_local.conf. It is
+recommended apply changes only to your menu_local.conf in order to
+avoid conflicts on updating Thruk.
+
+Navigation configuration is split in two files
+
+ * menu.conf
+ * menu_local.conf
+
+The menu.conf contains the default side menu configuration. Do not change
+it as this file will be overwritten with every update. If you want to
+create a complete custom navigation, just copy this file to
+menu_local.conf and adjust it to your needs. See the next chapter on
+how to add just add a few links without having to copy the complete
+file.
+
+The menu_local.conf contains the user configuration for the side menu. It usually
+does not exist by default and has to be created in `/etc/thruk/`.
+
+The file itself is perl syntax, so you can do whatever perl can do.
+Make sure you verify the syntax after changing the file. The changes
+will be used immediately. So maybe you want to test your changes
+on a test instance first.
+
+[TIP]
+.Syntax Check for Menu Configuration
+=======
+ %>perl -wc menu_local.conf
+ menu_local.conf syntax OK
+=======
+
+[TIP]
+.No Restart Required
+=======
+Thruk does not need to be restarted and immediately displays changes in the menu_local.conf.
+=======
+
+If you just want to add a few entries, create a empty menu_local.conf
+and put these lines into it:
+
+-----
+do '/usr/share/thruk/menu.conf';
+insert_item('General', { 'href' => 'http://labs.consol.de', 'name' => 'Labs', target => '_blank' });
+-----
+
+
+
+=== Adding new Section
+
+You can add new sections with:
+
+-----
+add_section('name' => 'General');
+-----
+
+
+=== Adding a new Link
+
+To add a new link use the following syntax:
+
+-----
+add_link('name' => 'Home', 'href' => '/thruk/main.html');
+-----
+
+.Available parameters
+* name: This is how the link is called in the web front end.
+* href: This is the destination link optional you can add.
+* target: If Link shall open in a new window.
+* icon: Used for themes which support icons.
+
+Then the config looks like this:
+
+-----
+add_link('name' => 'Nagios, 'href' => '/nagios', 'target' => '_new');
+-----
+
+
+'add_link' always adds the new link to the last section. Use 'insert_item' to
+add a link to any section.
+
+
+=== Including original side navigation
+
+
+You can include the main menu config with the perl do statement.
+Ex.: If you just want to add a new link to your config menu, your
+menu_local.conf could look like this:
+
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+add_link('name' => 'Wato', 'href' => '/'.$ENV{'OMD_SITE'}.'/check_mk/wato.py?filename=wato.mk');
+-----
+
+This example just puts the Wato link from check_mks Multisite in your
+config section. Replace the ENV part with a proper path if you do not
+use http://omdistro.org[OMD].
+
+
+=== Inserting item in existing Section
+
+Adding Items to existing sections can also be achieved by
+'insert_item':
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+insert_item('General', { 'href' => 'http://your-company.com', 'name' => 'Company' });
+-----
+
+Use 'insert_sub_item' to create a new sub entry to an existing link.
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+insert_sub_item('General', 'Home', { 'href' => 'http://your-company.com', 'name' => 'Company' });
+-----
+
+
+=== Removing item in existing Section
+
+Existing Items can be removed with the 'remove_item' function:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_item('Reports', 'Availability');
+-----
+
+To remove a sub menuitem, use the 3 arguments variant of `remove_item`:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_item('Current Status', 'Problems', 'Network Outages');
+-----
+
+To remove a sub menuitem hint, use the 4 arguments variant of `remove_item`:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_item('Current Status', 'Problems', 'Services', 'Unhandled');
+-----
+
+
+=== Make item available for some groups only
+
+Just wrap your changes in a 'has_group' condition.
+
+-----
+if(has_group('Admins')) {
+  insert_item('Admins Only', { 'href' => '.../only_for_admins.html', 'name' => 'Admin Link' });
+}
+-----
+
+
+=== Make item available for some roles only
+
+Just wrap your changes in a 'has_role' condition.
+
+-----
+if(has_role('authorized_for_configuration_information')) {
+  insert_item('System', { 'href' => '.../only_for_some_roles.html', 'name' => 'Admin Link' });
+}
+-----
+
+
+=== Make item available for some specific user only
+
+Just wrap your changes in a 'is_user' condition.
+
+-----
+if(is_user('thrukadmin')) {
+  insert_item('Admins Only', { 'href' => '.../only_for_some_user.html', 'name' => 'Admin Link' });
+}
+-----
+
+
+== Examples
+
+=== Hide Reporting for Non-Admins
+Create a `/etc/thruk/menu_local.conf` like this:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+if(!has_group('Admins')) {
+  remove_item('Reports', 'Reporting');
+}
+-----
+
+[NOTE]
+=======
+This only hides the reporting menu item, everbody who knows the url can still access it.
+=======
+
+
+=== Nagvis Maps
+Integrating Nagivs is currently only possible when frames are enabled.
+So first step is editing the thruk_local.conf and set
+....
+use_frames = 1
+....
+
+Integration is easy. Just copy and edit your menu_local.conf.
+For Nagvis 1.4 add something like:
+
+-----
+add_section('name' => 'Nagvis');
+add_link('name' => "Nagvis",        'href' => '/nagvis/frontend/nagvis-js/index.php');
+add_sub_link('name' => "demo",      'href' => '/nagvis/index.php?Map=demo');
+add_sub_link('name' => "demo-map2", 'href' => '/nagvis/index.php?Map=demo-map2');
+-----
+
+For Nagvis 1.5:
+-----
+add_section('name' => 'Nagvis');
+add_link('name' => "Nagvis",         'href' => '/nagvis/frontend/nagvis-js/index.php');
+add_sub_link('name' => "demo",       'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo');
+add_sub_link('name' => "demo-map2",  'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo-map2');
+-----

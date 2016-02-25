@@ -2,16 +2,7 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]
-[% authorized_for_read_only = 0 %][% IF c.check_user_roles_wrapper('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
-
-[% UNLESS authorized_for_read_only %]
-<script type="text/javascript">
-<!--
-  var hst_Hash = new Object({[% FOREACH h = hosts %]r[% loop.index %]: "[% escape_bslash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
-  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
--->
-</script>
-[% END %]
+[% authorized_for_read_only = 0 %][% IF c.check_user_roles('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
 
 [% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
@@ -30,7 +21,7 @@
 </table>
 
 <form action="" method="GET" id="[% paneprefix %]filterForm">
-<input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:none;">
+<input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:none;" alt="show">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% nav %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
@@ -99,12 +90,6 @@
 </table>
 [% END %]
 
-<script type="text/javascript">
-<!--
-  var svc_Hash = new Object({[% FOREACH s = services %]r[% loop.index %]: "[% escape_bslash(s.host_name) %];[% escape_bslash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
--->
-</script>
-
 [% IF sortoption_svc %]
 <div class="statusSort" align="CENTER">Services sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
 [% END %]
@@ -122,5 +107,16 @@
 <div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
 
 </form>
+
+[% UNLESS authorized_for_read_only %]
+<script type="text/javascript">
+<!--
+  var hst_Hash = [% get_cmd_submit_hash(hosts, 'hst') %];
+  var svc_Hash = [% get_cmd_submit_hash(services, 'svc') %];
+  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
+-->
+</script>
+[% END %]
+
 
 [% PROCESS _footer.tt %]

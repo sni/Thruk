@@ -64,9 +64,13 @@ sub new {
 
         'exported_nodes'    => {},
         'testmode'          => 0,
+        'draft'             => 0,
     };
     bless $self, $class;
     $self->set_file($c, $file);
+    if(!-e $file) {
+        $self->{'draft'} = 1;
+    }
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-e $file) {
@@ -89,14 +93,7 @@ sub new {
     }
 
     $self->_resolve_nodes();
-
-    if($self->{'editmode'}) {
-        # updating the BP here unnecessarily slows down responsive editing
-        #die("no context") unless $c;
-        #$self->update_status($c);
-    } else {
-        $self->load_runtime_data();
-    }
+    $self->load_runtime_data();
 
     $self->save() if $self->{'need_save'};
 
@@ -119,10 +116,14 @@ update runtime data
 sub load_runtime_data {
     my($self) = @_;
 
-    return unless -e $self->{'datafile'};
+    my $file = $self->{'datafile'};
+    if($self->{'editmode'} and -s $self->{'datafile'}.'.edit') {
+        $file = $self->{'datafile'}.'.edit';
+    }
 
-    my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'datafile'});
+    return unless -e $file;
 
+    my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     for my $key (@stateful_keys) {
         $self->{$key} = $data->{$key} if defined $data->{$key};
     }
@@ -183,7 +184,11 @@ sub update_status {
     }
 
     # everything else is non-edit only
-    return if $self->{'editmode'} or $self->{'testmode'};
+    return if $self->{'testmode'};
+    if($self->{'editmode'}) {
+        $self->save_runtime();
+        return;
+    }
 
     # submit back to core
     $self->_submit_results_to_core($c, $results);
@@ -249,8 +254,11 @@ sub set_file {
     $self->{'file'}     = Thruk::BP::Utils::base_folder($c).'/'.$basename;
     $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
     $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
-    $basename =~ m/(\d+).tbp/mx;
-    $self->{'id'}       = $1;
+    if($basename =~ m/(\d+).tbp/mx) {
+        $self->{'id'} = $1;
+    } else {
+        die("wrong file format in ".$basename);
+    }
     return;
 }
 
@@ -264,6 +272,46 @@ return node by id
 sub get_node {
     my ( $self, $node_id ) = @_;
     return $self->{'nodes_by_id'}->{$node_id};
+}
+
+##########################################################
+
+=head2 get_json_nodes
+
+return nodes as json array
+
+=cut
+sub get_json_nodes {
+    my($self, $c) = @_;
+    my $list = [];
+    for my $n (@{$self->{'nodes'}}) {
+        push @{$list}, {
+          id                        => $n->{'id'},
+          label                     => $n->{'label'},
+          host                      => $n->{'host'},
+          service                   => $n->{'service'},
+          hostgroup                 => $n->{'hostgroup'},
+          servicegroup              => $n->{'servicegroup'},
+          template                  => $n->{'template'},
+          create_obj                => $n->{'create_obj'} ? JSON::XS::true : JSON::XS::false,
+          create_obj_ok             => $n->{'create_obj_ok'} ? JSON::XS::true : JSON::XS::false,
+          status                    => $n->{'status'},
+          status_text               => $n->{'status_text'},
+          short_desc                => $n->{'short_desc'},
+          last_check                => $n->{'last_check'} ? Thruk::Utils::Filter::date_format($c, $n->{'last_check'}) : 'never',
+          duration                  => $n->{'last_state_change'} ? Thruk::Utils::Filter::duration(time() - $n->{'last_state_change'}) : '',
+          acknowledged              => $n->{'acknowledged'}."",
+          scheduled_downtime_depth  => $n->{'scheduled_downtime_depth'}."",
+          depends                   => $n->depends_list,
+          func                      => $n->{'function'},
+          func_args                 => $n->{'function_args'},
+          contacts                  => $n->{'contacts'},
+          contactgroups             => $n->{'contactgroups'},
+          notification_period       => $n->{'notification_period'},
+          event_handler             => $n->{'event_handler'},
+        }
+    }
+    return(Thruk::Utils::Filter::json_encode($list));
 }
 
 ##########################################################
@@ -369,6 +417,7 @@ sub remove {
     unlink($self->{'file'});     # may not exist, if removed before first commit
     unlink($self->{'datafile'}); # can fail if not updated before removal
     unlink($self->{'editfile'}); # may also not exist
+    unlink($self->{'datafile'}.'.edit');
     return;
 }
 
@@ -472,7 +521,6 @@ save run time data
 sub save_runtime {
     my ( $self ) = @_;
     return if $self->{'testmode'};
-    return if $self->{'editmode'};
     my $data = {};
     for my $key (@stateful_keys) {
         $data->{$key} = $self->{$key};
@@ -480,7 +528,11 @@ sub save_runtime {
     for my $n (@{$self->{'nodes'}}) {
         $data->{'nodes'}->{$n->{'id'}} = $n->get_stateful_data();
     }
-    Thruk::Utils::IO::json_lock_store($self->{'datafile'}, $data);
+    if($self->{'editmode'}) {
+        Thruk::Utils::IO::json_lock_store($self->{'datafile'}.'.edit', $data);
+    } else {
+        Thruk::Utils::IO::json_lock_store($self->{'datafile'}, $data);
+    }
     return;
 }
 
@@ -587,7 +639,7 @@ sub bulk_fetch_live_data {
         'hosts'         => $hostdata,
         'services'      => $servicedata,
         'hostgroups'    => $hostgroupdata,
-        'servicegroups' => $servicegroupdata
+        'servicegroups' => $servicegroupdata,
     });
 }
 
@@ -618,8 +670,8 @@ sub _submit_results_to_core_backend {
 
     my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
     my $peer = $c->{'db'}->get_peer_by_key($name);
-    my $pkey = $peer->peer_key();
     die("no backend found by name ".$name) unless $peer;
+    my $pkey = $peer->peer_key();
 
     for my $id (@{$results}) {
         my $cmds = $self->{'nodes_by_id'}->{$id}->result_to_cmd($self);
@@ -695,7 +747,7 @@ sub TO_JSON {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

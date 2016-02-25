@@ -14,7 +14,7 @@ to logout again.
 use warnings;
 use strict;
 use Data::Dumper;
-use LWP::UserAgent;
+use Thruk::UserAgent;
 use Digest::MD5 qw(md5_hex);
 use Thruk::Utils;
 use Thruk::Utils::IO;
@@ -22,14 +22,18 @@ use Encode qw/encode_utf8/;
 
 ##############################################
 BEGIN {
-    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
-    eval {
-        # required for new IO::Socket::SSL versions
-        require IO::Socket::SSL;
-        IO::Socket::SSL->import();
-        IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-    };
-};
+    if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
+        ## no critic
+        $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
+        ## use critic
+        eval {
+            # required for new IO::Socket::SSL versions
+            require IO::Socket::SSL;
+            IO::Socket::SSL->import();
+            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+        };
+    }
+}
 
 ##############################################
 
@@ -49,32 +53,45 @@ return:
 
 =cut
 sub external_authentication {
-    my($config, $login, $pass, $address) = @_;
+    my($config, $login, $pass, $address, $stats) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
     my $sdir     = $config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
 
     my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
-    my $ua       = get_user_agent();
+    my $ua       = get_user_agent($config);
     # unset proxy which eventually has been set from https backends
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
+    $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
     my $res      = $ua->post($authurl);
+    $stats->profile(end   => "ext::auth: post1 ".$authurl) if $stats;
+    if($res->code == 302 && $authurl =~ m|^http:|mx) {
+        (my $authurl_https = $authurl) =~ s|^http:|https:|gmx;
+        if($res->{'_headers'}->{'location'} eq $authurl_https) {
+            $config->{'cookie_auth_restricted_url'} = $authurl_https;
+            return(external_authentication($config, $login, $pass, $address, $stats));
+        }
+    }
     if($res->code == 401) {
         my $realm = $res->header('www-authenticate');
         if($realm =~ m/Basic\ realm=\"([^"]+)\"/mx) {
             $realm = $1;
-            $login = encode_utf8(Thruk::Utils::decode_any($login));
-            $pass  = encode_utf8(Thruk::Utils::decode_any($pass));
+            # LWP requires perl internal format
+            $login = encode_utf8(Thruk::Utils::ensure_utf8($login));
+            $pass  = encode_utf8(Thruk::Utils::ensure_utf8($pass));
             $ua->credentials( $netloc, $realm, $login, $pass );
+            $stats->profile(begin => "ext::auth: post2 ".$authurl) if $stats;
             $res = $ua->post($authurl);
+            $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
                 if($1 eq $login) {
                     my $sessionid = md5_hex(rand(1000).time());
                     chomp($sessionid);
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
+                    $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
                     my $sessionfile = $sdir.'/'.$sessionid;
                     open(my $fh, '>', $sessionfile) or die('failed to open session file: '.$sessionfile.' '.$!);
                     print $fh join('~~~', $hash, $address, $login), "\n";
@@ -107,11 +124,18 @@ sub verify_basic_auth {
     my($config, $basic_auth, $login) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
 
-    my $ua = get_user_agent();
+    my $ua = get_user_agent($config);
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
     my $res = $ua->post($authurl);
+    if($res->code == 302 && $authurl =~ m|^http:|mx) {
+        (my $authurl_https = $authurl) =~ s|^http:|https:|gmx;
+        if($res->{'_headers'}->{'location'} eq $authurl_https) {
+            $config->{'cookie_auth_restricted_url'} = $authurl_https;
+            return(verify_basic_auth($config, $basic_auth, $login));
+        }
+    }
     if($res->code == 200 and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
         if($1 eq $login) {
             return 1;
@@ -124,13 +148,14 @@ sub verify_basic_auth {
 
 =head2 get_user_agent
 
-    get_user_agent()
+    get_user_agent($config)
 
 returns user agent used for external requests
 
 =cut
 sub get_user_agent {
-    my $ua = LWP::UserAgent->new;
+    my($config) = @_;
+    my $ua = Thruk::UserAgent->new($config);
     $ua->timeout(30);
     $ua->agent("thruk_auth");
     return $ua;
@@ -147,8 +172,14 @@ clean up session files
 =cut
 sub clean_session_files {
     my($config) = @_;
+    die("no config") unless $config;
     my $sdir    = $config->{'var_path'}.'/sessions';
-    my $timeout = time() - $config->{'cookie_auth_session_timeout'};
+    my $cookie_auth_session_timeout = $config->{'cookie_auth_session_timeout'};
+    if($cookie_auth_session_timeout <= 0) {
+        # clean old unused sessions after one year, even if they don't expire
+        $cookie_auth_session_timeout = 365 * 86400;
+    }
+    my $timeout = time() - $cookie_auth_session_timeout;
     Thruk::Utils::IO::mkdir($sdir);
     opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
@@ -187,7 +218,7 @@ sub get_netloc {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

@@ -2,172 +2,21 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html[% IF minimal %] class='minimal'[% END %]>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <title>[% title_prefix %][% title %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
-
     [% SET page = 'status' IF page == '' %]
-
-    <!-- stylesheets -->
-    [%+ PROCESS _common_css.tt %]
-
-    <!-- javascript -->
-    [% PROCESS _common_js.tt %]
-    [% FOREACH j = js.list %]
-      <script type="text/javascript" src="[% url_prefix _ j %]"></script>
-    [% END %]
-    <script type="text/javascript">
-    <!--
-      var ajax_search_enabled     = '[% use_ajax_search %]';
-      var backend_chooser         = '[% backend_chooser %]';
-      [% IF refresh_rate +%]
-      var refresh_rate            = [% refresh_rate %];
-      [% END +%]
-      [% IF auto_reload_fn +%]
-      var auto_reload_fn          = function(cb) { return([% auto_reload_fn %](cb)) };
-      var datetime_format_long    = '[% datetime_format_long %]';
-      [% END +%]
-      [% PROCESS _header_initial_states.tt %]
-      /* create clone */
-      var current_backend_states  = jQuery.extend(true, {}, initial_backend_states);
-      var enable_shinken_features = [% enable_shinken_features %];
-      [% IF enable_shinken_features +%]
-      var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
-      [% END +%]
-
-      [% IF original_url %]
-      var original_url = '[% original_url %]';
-      original_url     = original_url.replace(/&amp;/g, '&');
-      if (history.replaceState) {
-        history.replaceState({}, "", original_url);
-      }
-      [% END %]
-
-      init_page();
-
-      [%+ IF use_frames && use_dynamic_titles %]
-      if(window.parent.frames) {
-        try {
-          window.parent.document.title = '[% title_prefix %][% title %]';
-        } catch(e) { debug(e) }
-      }
-      [% END +%]
-
-    -->
-    </script>
-
-    [% IF show_nav_button && use_frames %]
-    <style type='text/css'>
-      body {
-        margin-left: 8px;
-      }
-    </style>
-    [% END %]
-
+    [% PROCESS _common_css.tt %]
+    [% PROCESS _common_js_files.tt %]
     [% PROCESS extra_headers.tt %]
     [% IF extra_header %][% extra_header %][% END %]
   </head>
 
-  <body class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %]' id='[% page %]' onLoad="bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %])">
+  <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %][% IF iframed %] iframed[% END %]' id='[% page %]'>
+  [% PROCESS _common_js.tt %]
   [% ssi_header %]
   <div style="display:none;" id="search-results"></div>
 
-  <div class="pref_pane" id="pref_pane" style="display:none;">
-    <div>
-    <a href="#" onclick="toggleElement('pref_pane'); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
-    <form action="" method="GET">
-    <table class="pref_pane" border=1 width="490">
-      <tr>
-        <td>
-          <table width="470">
-            <tr>
-              <th colspan=2 align="center" style="border-bottom: 1px dotted grey">User Settings</th>
-            </tr>
-            <tr>
-              <th width="100">Theme:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:top;">
-                <select name="theme" id="pref_theme">
-                  [% FOR t = themes %]
-                  <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
-                  [% END %]
-                </select>
-                <input type="button" name="submit" value="change" onClick="prefSubmit('[% escape_html(full_uri(c)) %]', '[% theme %]')">
-              </td>
-            </tr>
-          [% IF show_sounds %]
-            <tr>
-              <th>Sounds:</th>
-              <td>
-                [% IF has_cgi_sounds %]
-                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound_mute.png[% ELSE %]sound.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(full_uri(c)) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
-                [% ELSE %]
-                <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled>
-                [% END %]
-              </td>
-            </tr>
-          [% END %]
-            <tr>
-              <th>Favicon:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter('[% escape_html(full_uri(c)) %]', '[% IF fav_counter %]off[% ELSE %]on[% END %]')">
-                <script type="text/javascript">
-                <!--
-                    try {
-                        if(window.parent.frames && top.frames['side']) {
-                            top.frames['side'].is_reloading = undefined;
-                            top.frames['side'].load_errors  = 0;
-                        }
-                    }
-                    catch(e) { debug(e); }
-
-                [%+ IF fav_counter +%]
-                [% totals = set_favicon_counter(c) %]
-                  [%+ IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 +%]
-                    updateFaviconCounter([% totals.red %], '#FF5B33');
-                  [%+ ELSIF totals.red == 0 && totals.yellow > 0 && totals.orange == 0 +%]
-                    updateFaviconCounter([% totals.yellow %], '#FFDE00');
-                  [%+ ELSIF totals.red == 0 && totals.yellow == 0 && totals.orange > 0 +%]
-                    updateFaviconCounter([% totals.orange %], '#FF9E00');
-                  [%+ ELSE +%]
-                    updateFaviconCounter([% totals.red + totals.yellow + totals.orange %], '#FF9E00');
-                  [%+ END +%]
-                [%+ END +%]
-                -->
-                </script>
-              </td>
-            </tr>
-          [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
-            <tr>
-              <th>Report:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% c.config.use_feature_reports %]?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% ELSE %][% short_uri(c).replace('&amp;', '&') | uri %][% END %]'; return false;">
-              </td>
-            </tr>
-          [% END %]
-            <tr>
-              <th>Page Refresh:</th>
-              <td nowrap>
-              <img src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:top;">
-              [% IF refresh_rate %]
-              <span id="refresh_rate">Update in [% refresh_rate %] seconds <input type="button" value="stop" onClick="stopRefresh()"></span>
-              [% ELSE %]
-              <span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>
-              [% END %]
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-    </form>
-  </div>
-  <div class="pref_pane_shadow shadow"></div>
-  </div>
+  <div class="pref_pane" id="pref_pane" style="display:none;"></div>
   [% IF use_frames %]
       [% IF reload_nav %]
       <script type="text/javascript">
@@ -192,7 +41,7 @@
   [% END %]
 
 <!-- Produced by Thruk (http://www.thruk.org).
-     Copyright (c) 2009-2014 Thruk Developer Team.
+     Copyright (c) 2009-present Thruk Developer Team.
      Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
      Copyright (c) 1999-2009 Ethan Galstad.
 -->
@@ -216,7 +65,7 @@
       <input type="image" src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
     </td>
     <td class="top_nav_pref">
-      <input type="button" class="top_nav_pref_button noprint" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('pref_pane', undefined, true); return false;">
+      <input type="button" class="top_nav_pref_button noprint" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;">
     </td>
     [% IF cookie_auth && show_logout_button %]
     <td class="top_nav_pref">

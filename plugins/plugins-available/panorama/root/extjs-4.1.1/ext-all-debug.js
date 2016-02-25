@@ -12281,6 +12281,8 @@ Element.override({
                         }
                         value = prop[name];
                         value = (value == null) ? '' : value;
+// THRUK: breaks on IE 8 sometimes
+try {
                         if (hook.set) {
                             hook.set(dom, value, me);
                         } else {
@@ -12289,6 +12291,13 @@ Element.override({
                         if (hook.afterSet) {
                             hook.afterSet(dom, value, me);
                         }
+}
+catch(e) {
+  try { // console may be not available
+    console.log(me.html);
+    console.trace();
+  } catch(e) {}
+}
                     }
                 }
             }

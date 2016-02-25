@@ -1,0 +1,23 @@
+--- sakuli/sahi/htdocs/spr/concat.js	2015-11-09 10:54:24.671521014 +0100
++++ sakuli/sahi/htdocs/spr/concat.js	2015-11-09 10:55:22.456352581 +0100
+@@ -1200,7 +1200,8 @@
+ 	return "";
+ }
+ Sahi.pointTimer = 0;
+-Sahi.prototype._highlight = function (el) {
++Sahi.prototype._highlight = function (el, color) {
++	if(!color) { color = "red"; }
+ 	if (this.isFlexObj(el)) return el.highlight();
+ 	if (this.isApplet(el))	return el.highlight();
+ 	if (Sahi.lastUnhighlight) {
+@@ -1209,8 +1210,8 @@
+ 	}
+     var oldBorder = el.style.border;
+     var oldOutline = el.style.outline;
+-    el.style.border = "1px solid red";
+-    el.style.outline = "1px solid red";
++    el.style.border = "1px solid "+color;
++    el.style.outline = "1px solid "+color;
+     Sahi.lastUnhighlight = function(){el.style.border = oldBorder;el.style.outline = oldOutline;Sahi.lastUnhighlight=null;}
+     Sahi.unhighlightTimer = window.setTimeout(Sahi.lastUnhighlight, 1000);
+ };

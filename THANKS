@@ -28,10 +28,14 @@ Oliver Falk
 Thibault Cohen
 Davide Cecchetto (dcec)
 Dene Tariko
-Olivier Li-Kiang-Cheong
-awiddersheim
+Olivier Li-Kiang-Cheong (lkco)
+Andrew Widdersheim (awiddersheim)
 Jean Prat (saez0pub)
 Feraudet Cyril
+Mathieu Parent (sathieu)
+Guy Antony Halse (ghalse)
+Jens Hyllegaard
+Alexandre Anriot (aanriot)
 
 
 
@@ -107,6 +111,7 @@ http://www.jstree.com/
 
 JQuery linedtextarea
 http://alan.blog-city.com/jquerylinedtextarea.htm
+https://github.com/aw20/JQueryLinedText
 
 JS strftime
 http://hacks.bluesmoon.info/strftime
@@ -116,3 +121,15 @@ http://www.flotcharts.org
 
 JS dagre
 https://github.com/cpettitt/dagre
+
+JS sprintf
+https://github.com/kvz/phpjs/blob/master/functions/strings/sprintf.js
+
+JS BigScreen
+https://github.com/bdougherty/BigScreen
+
+JS GeoExt 2
+http://geoext.github.io
+
+JS Overlayers 3
+http://openlayers.org/

@@ -24,10 +24,10 @@
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="save">
 <input type="hidden" name="report" value="[% r.nr %]">
-<input type="hidden" name="tab" value="[% prev_tab %]">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
 <table border="1" class='data reports'>
   <tr>
-    <th class='data' style="width:125px;"><a href='reports2.cgi#[% prev_tab %]'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
     <th class='data' style="width:125px;"></th>
   </tr>
@@ -47,7 +47,7 @@
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
     <td class="dataOdd" align="left" colspan=2 style="height:150px;">
-    [% PROCESS _backends_select_multi.tt param_name='report_backends' selected_backends=r.backends can_edit=1 %]
+    [% PROCESS _backends_select_multi.tt param_name='report_backends' selected_backends=r.backends can_edit=1 onchange="reports_update_affected_sla_objects(this)" %]
     </td>
   </tr>
   [% ELSIF backends.size > 1 %]
@@ -55,12 +55,25 @@
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
     <td class="dataOdd" align="left" colspan=2>
       [% backends_selected=0 %]
-      [% IF r.backends.size < backends.size && r.backends.size > 0 %][% backends_selected=1 %][% END %]
-      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends');" class="clickable"> Select Backends:</span><br>
-      <select id="report_backends" name="report_backends" multiple style="min-width: 180px;"[% IF !backends_selected %] disabled[% END %]>
+      [% IF r.backends.size > 0 %][% backends_selected=1 %][% END %]
+      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends'); reports_update_affected_sla_objects(this);" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span><br>
+      <select id="report_backends" name="report_backends" multiple style="min-width: 180px;"[% IF !backends_selected %] disabled[% END %] onchange="reports_update_affected_sla_objects(this)">
         [% FOREACH b = backends %]
         <option value="[% b %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
+      </select>
+    </td>
+  </tr>
+  [% END %]
+  [% IF backends.size > 1 %]
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Failed Backends</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <font size='-2'>what should happen if some of the selected backends are not available:</font><br>
+      <select name="failed_backends">
+        <option value="cancel"[% IF r.failed_backends == 'cancel' %] selected[% END %]>cancel report</option>
+        <option value="ignore"[% IF r.failed_backends == 'ignore' %] selected[% END %]>ignore the error</option>
+        <option value="print"[%  IF r.failed_backends == 'print'  %] selected[% END %]>ignore the error and add error details page</option>
       </select>
     </td>
   </tr>
@@ -88,7 +101,7 @@
           [% END %]
           <tr>
             <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add">
+                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
                 add more
             </td>
           </tr>
@@ -121,7 +134,7 @@
   <tr>
     <td class="dataEven" align="center" colspan=3>
       <span class="required" style="float: left;">* - required</span>
-      [% IF r.nr != "new" %]<a href="reports2.cgi?action=remove&amp;report=[% r.nr %]" class="report_remove_button report_button" style="width: 80px;">Delete</a>[% END %]
+      [% IF r.nr != "new" %]<button name="action" value="remove" class="report_remove_button report_button" style="width: 80px;">Delete</button>[% END %]
       <button class="report_save_button report_button" style="width: 160px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
     </td>
   </tr>
@@ -132,5 +145,13 @@
 <script type="text/javascript">
 <!--
   init_report_tool_buttons();
+
+  var inp = jQuery('SELECT[name=template]');
+  if(inp && inp.length > 0) {
+    reports_update_affected_sla_objects(inp[0]);
+  }
+  // preserve filter and tab on save
+  jQuery("FORM").on('submit', preserve_hash);
+  jQuery("FORM A").on('click', preserve_hash);
 -->
 </script>

@@ -22,6 +22,7 @@
 
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
+  [% PROCESS _blocks.tt %]
 
   [%# report settings #%]
   [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
@@ -35,6 +36,7 @@
   [% WRAPPER 'reports/comp/report.tt' %]
 
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+    [% PROCESS 'reports/comp/backend_error_page.tt' %]
 
     [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc('Legend') %]
       <table class="legendtable">
@@ -88,7 +90,7 @@
         [% logblock = logs.splice(0, 14) %][%# Items per page #%]
         [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc('Events') %]
             [% FOREACH l = logblock %]
-              [% PROCESS _logs_line.tt %]
+              [% PROCESS _logs_line %]
               <div class="logdate">
                 <img src="[% url_prefix %]themes/Thruk/images/[% pic %]">
                 [% format_date(l.time, reportDateTimeFormat) %]

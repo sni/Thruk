@@ -4,7 +4,7 @@ use Test::More;
 use File::Temp qw/tempdir/;
 
 BEGIN {
-    plan skip_all => 'local tests only'  if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'local tests only'  if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 }
 
 BEGIN {

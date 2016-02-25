@@ -3,9 +3,7 @@ package Monitoring::Availability::Logs;
 use 5.008;
 use strict;
 use warnings;
-use Data::Dumper;
 use Carp;
-use POSIX qw(strftime);
 use Encode qw/decode/;
 
 use constant {
@@ -59,8 +57,7 @@ Creates an C<Monitoring::Availability::Log> object.
 =cut
 
 sub new {
-    my $class = shift;
-    my(%options) = @_;
+    my($class, %options) = @_;
 
     my $self = {
         'verbose'        => 0,       # enable verbose output
@@ -129,11 +126,10 @@ return parsed logfile line
 
 =cut
 
+## no critic (Subroutines::RequireArgUnpacking)
 sub parse_line {
     return if substr($_[0], 0, 1, '') ne '[';
-    my $return = {
-        'time' => substr($_[0], 0, 10, '')
-    };
+    my $return = { 'time' => substr($_[0], 0, 10, '') };
     substr($_[0], 0, 2, '');
 
     ($return->{'type'},$_[0]) = split(/:\ /mxo, $_[0], 2);
@@ -148,13 +144,13 @@ sub parse_line {
 
     return $return;
 }
+## use critic
 
 ########################################
 # INTERNAL SUBS
 ########################################
 sub _store_logs_from_string {
-    my $self   = shift;
-    my $string = shift;
+    my($self, $string) = @_;
     return unless defined $string;
     for my $line (split/\n/mxo, $string) {
         my $data = &parse_line($line);
@@ -181,8 +177,7 @@ sub _store_logs_from_file {
 
 ########################################
 sub _store_logs_from_dir {
-    my $self   = shift;
-    my $dir   = shift;
+    my($self, $dir) = @_;
 
     return unless defined $dir;
 
@@ -199,11 +194,10 @@ sub _store_logs_from_dir {
 
 ########################################
 sub _store_logs_from_livestatus {
-    my $self      = shift;
-    my $log_array = shift;
+    my($self, $log_array) = @_;
     return unless defined $log_array;
     for my $entry (@{$log_array}) {
-        my $data = $self->_parse_livestatus_entry($entry);
+        my $data = &_parse_livestatus_entry($entry);
         push @{$self->{'logs'}}, $data if defined $data;
     }
     return 1;
@@ -211,7 +205,7 @@ sub _store_logs_from_livestatus {
 
 ########################################
 sub _parse_livestatus_entry {
-    my($self, $entry) = @_;
+    my($entry) = @_;
 
     my $string = $entry->{'message'} || $entry->{'options'} || '';
     if($string eq '') {
@@ -242,6 +236,7 @@ sub _set_from_options {
         my @tmp = split(/;/mxo, $string,6); # regex is faster than strtok here
         $data->{'host_name'}           = $tmp[0];
         $data->{'service_description'} = $tmp[1];
+        return unless defined $tmp[2];
         $data->{'state'}               = $Monitoring::Availability::Logs::service_states->{$tmp[2]};
         return unless defined $data->{'state'};
         $data->{'hard'}                = $tmp[3] eq 'HARD' ? 1 : 0;
@@ -255,6 +250,7 @@ sub _set_from_options {
     ) {
         my @tmp = split(/;/mxo, $string,5); # regex is faster than strtok here
         $data->{'host_name'}     = $tmp[0];
+        return unless defined $tmp[1];
         $data->{'state'}         = $Monitoring::Availability::Logs::host_states->{$tmp[1]};
         return unless defined $data->{'state'};
         $data->{'hard'}          = $tmp[2] eq 'HARD' ? 1 : 0;
@@ -285,6 +281,7 @@ sub _set_from_options {
         $data->{'timeperiod'} = $tmp[0];
         $data->{'from'}       = $tmp[1];
         $data->{'to'}         = $tmp[2];
+        $data->{'timeperiod'} =~ s/^TIMEPERIOD\ TRANSITION:\ //mxo; # workaround for doubled string in logcache db
     }
 
     # Host States
@@ -345,7 +342,7 @@ sub _decode_any {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 COPYRIGHT AND LICENSE
 

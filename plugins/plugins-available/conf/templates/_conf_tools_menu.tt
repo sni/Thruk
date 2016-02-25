@@ -6,9 +6,42 @@
         <tr>
           <td>
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
+              [% FOREACH category = tools_by_category.keys.sort %]
+              <tr class='data[% IF !loop.first %] tools_category[% END %]'>
+                <td width=23></td>
+                <td class='command'><b>[% category %]</b></td>
+              </tr>
+              [% FOREACH name = tools_by_category.$category.keys.sort %]
+              [% t = tools.$name %]
               <tr class='data'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt='Create a new [% type %]' title='Create a new [% type %]' width="16" height="16"></td>
-                <td class='command'><a href='conf.cgi?sub=objects&amp;tools=check_object_references'>Check Object References</a></td>
+                <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt='[% t.link %]' title='[% t.link %]' width="16" height="16"></td>
+                <td class='command'>
+                    [% IF name == tool %]<b>[% END %]
+                    <a href='conf.cgi?sub=objects&amp;tools=[% name %]'>[% t.link %]</a>
+                    [% IF name == tool %]</b>[% END %]
+                </td>
+              </tr>
+              [% END %]
+              [% END %]
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<br>
+<table border='0' cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center" valign="top" class='confPanel'>
+      <div class='dataTitle'>Actions</div>
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+        <tr>
+          <td>
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
+              <tr class='data'>
+                <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/folder_brick.png' border="0" alt='reset ignores' title='reset ignores' width="16" height="16"></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;tools=reset_ignores&amp;oldtool=[% tool %]'>Reset Ignores</a></td>
               </tr>
             </table>
           </td>

@@ -8,6 +8,8 @@ use File::Spec;
 use Test::More;
 use English qw(-no_match_vars);
 use lib glob("plugins/plugins-enabled/*/lib");
+use Thruk;
+use Thruk::Action::AddDefaults;
 
 if ( not $ENV{TEST_AUTHOR} ) {
     my $msg = 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
@@ -30,11 +32,7 @@ for my $module (@modules) {
     $module =~ s/plugins::plugins\-enabled::\w+::lib:://gmx;
 
     # check module and skip UPPERCASE constants which are reported as fail
-    if($module eq 'Thruk::Controller::summary' or $module eq 'Thruk::Controller::trends') {
-        pod_coverage_ok( $module, { also_private => [ qr/^[A-Z_]+$/ ]} );
-    } else {
-        pod_coverage_ok( $module );
-    }
+    pod_coverage_ok($module, { also_private => [ qr/^[A-Z_]+$/ ]});
 }
 
 done_testing;

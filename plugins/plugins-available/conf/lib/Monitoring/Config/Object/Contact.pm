@@ -49,7 +49,10 @@ $Monitoring::Config::Object::Contact::Defaults = {
 # Only shinken has these...
 $Monitoring::Config::Object::Contact::ShinkenSpecific = {
     'is_admin'              => { type => 'BOOL', cat => 'Extended' },
-    'min_business_impact'   => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' },
+    'min_business_impact'   => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => Monitoring::Config::Object::Parent::_business_impact_keys(), cat => 'Extended' },
+    'notificationways'      => { type => 'LIST', 'link' => 'notificationway', cat => 'Notifications' },
+    'password'              => { type => 'STRING', cat => 'Extended' },
+    'expert'              => { type => 'BOOL', cat => 'Extended' },
 };
 
 ##########################################################
@@ -87,7 +90,7 @@ sub BUILD {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

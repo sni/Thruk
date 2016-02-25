@@ -6,11 +6,11 @@
 
 
 
-    <link rel='stylesheet' type='text/css' href='themes/Thruk/stylesheets/all_in_one-1.81.css' />
+    <link rel='stylesheet' type='text/css' href='themes/Thruk/stylesheets/all_in_one-2.04-1.css' />
 
 
 
-    <script type="text/javascript" src="javascript/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="javascript/jquery-1.11.1.min.js"></script>
     <script type="text/javascript">
     <!--
         function debug(str) {
@@ -22,7 +22,11 @@
             jQuery.ajax({
                 url: 'cgi-bin/remote.cgi?startup',
                 type: 'POST',
-                success: function() {
+                success: function(data, textStatus, jqXHR) {
+                    if(data == undefined || (!data.match('^startup done') && !data.match('^OK'))) {
+                        jQuery('#msg').html('<font color="red"><b>failed.<\/b><\/font><br>please have a look at the apache error log and the thruk error log.');
+                        return false;
+                    }
                     jQuery('#msg').html(' <font color="green"><b>done.<\/b><\/font><br>You will be redirected...');
 
                     // reload navigation too
@@ -67,7 +71,12 @@
     </script>
   </head>
   <body class='splashpage' id='splashpage'>
-  <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010-2013 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
+  <!--
+    Produced by Thruk (http://www.thruk.org).
+    Copyright (c) 2009-2015 Thruk Developer Team.
+    Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
+    Copyright (c) 1999-2009 Ethan Galstad.
+  -->
   <br><br>
   <br><br>
   <div id="mainbrandsplash">

@@ -18,7 +18,13 @@
 <input type="hidden" name="type" value="[% type %]">
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
 <input type="hidden" name="action" value="store">
+<input type="hidden" name="cloned" value="[% cloned %]">
+<input type="hidden" name="clone_ref" value="">
+[% FOR value IN clone_ref.list %]
+<input type="hidden" name="clone_ref" value="[% value %]">
+[% END %]
 <input type="hidden" name="referer" value="[% referer %]">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj'[% IF bare %] width="100%"[% END %]>
     <tr>
       <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' style="width:33%" id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
@@ -168,6 +174,23 @@
       $input.attr("tabindex", -1);
     }
   });
+
+  [% IF show_object %]
+  [% IF ! object.defined('file') || ! object.file.readonly %]
+  var form_id = "obj_edit_[% object.get_id() %]";
+  var initial_form_values;
+  jQuery(window).on('beforeunload', function(){
+    var form_values = jQuery("#"+form_id).serialize();
+    if(form_values != initial_form_values) {
+      return("Not applied changes will be lost if you leave this page.");
+    }
+    return;
+  });
+  jQuery(document).ready(function() {
+    initial_form_values = jQuery("#"+form_id).serialize();
+  });
+  [% END %]
+  [% END %]
 
 -->
 </script>

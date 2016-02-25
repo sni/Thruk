@@ -14,8 +14,9 @@
       </tr>
     </table>
 
-    <br><br>
-
+    <div align="right" style="padding-right: 20px;">
+    [% PROCESS _json_export.tt %]
+    </div>
 
     <div align="center">
       <table border="0" cellpadding="20">
@@ -55,7 +56,7 @@
                       <td class='dataVar' nowrap>Program Version:</td>
                       [% FOREACH pd IN tmpbackends %]
                         [% IF backend_detail.$pd.running %]
-                          <td class='dataVal'>[% pi_detail.$pd.program_version %]</td>
+                          <td class='dataVal'>[% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.program_version %][% ELSE %][% pi_detail.$pd.program_version %][% END %]</td>
                         [% ELSE %]
                           <td class='dataVal'>&nbsp;</td>
                         [% END %]
@@ -247,7 +248,9 @@
                       [% FOREACH pd IN tmpbackends %]
                       <td class='dataVal dataValBackendVersion'>
                         [% IF backend_detail.$pd.running %]
+                          [% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]<br>([% END %]
                           [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
+                          [% IF real_pi_detail.exists(pd) %])[% END %]
                         [% ELSE %]
                           [% backend_detail.$pd.last_error %]
                         [% END %]

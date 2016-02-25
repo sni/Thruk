@@ -1,8 +1,48 @@
 ### THRUK
 
-newversion:
+DAILYVERSION=$(shell ./get_version)
+DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
+
+newversion: versionprecheck
 	test -e .git
-	make NEWVERSION="`./get_version`" version
+	make NEWVERSION="$(DAILYVERSION)" version
+
+dailyversion: newversion
+
+dailydist: cleandist
+	# run in own make process, otherwise VERSION variable would not be updated
+	$(MAKE) newversion
+	$(MAKE) dist
+	$(MAKE) resetdaily
+	mv Thruk-*.tar.gz Thruk-$$(echo "$(DAILYVERSION)" | tr ' ' '~').tar.gz
+	rm -f plugins/plugins-available/panorama/root/all_in_one-$(DAILYVERSIONFILES)_panorama.js \
+		root/thruk/javascript/all_in_one-$(DAILYVERSIONFILES).js \
+		themes/themes-available/Thruk/stylesheets/all_in_one-$(DAILYVERSIONFILES).css \
+		themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$(DAILYVERSIONFILES).css
+	ls -la *.gz
+
+releasedist: cleandist dist
+	git describe --tag --exact-match
+	if [ "$(VERSION)" != "$(DAILYVERSION)" ]; then \
+	    tar zxf Thruk-$(VERSION).tar.gz; \
+	    mv Thruk-$(VERSION) Thruk-$(DAILYVERSION); \
+	    tar cfz Thruk-$(DAILYVERSION).tar.gz Thruk-$(DAILYVERSION); \
+	    rm -f Thruk-$(VERSION).tar.gz; \
+	    rm -rf Thruk-$(DAILYVERSION); \
+	fi
+	ls -la *.gz
+
+cleandist:
+	rm -f *.gz
+
+resetdaily:
+	git reset --hard HEAD
+	git checkout .
+	yes n | perl Makefile.PL || yes n | perl Makefile.PL
+
+versionprecheck:
+	[ -e .git ] || { echo "changing versions only works in git clones!"; exit 1; }
+	[ `git status | grep -c 'working directory clean'` -eq 1 ] || { echo "git project is not clean, cannot tag version"; exit 1; }
 
 version:
 	script/thruk_version.sh
@@ -14,8 +54,6 @@ docs:
 
 staticfiles:
 	script/thruk_create_combined_static_content.pl
-
-local_all:
 
 local_patches:
 	mkdir -p blib/replace
@@ -71,15 +109,24 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${DATADIR}/script
 	cp -rp lib root templates ${DESTDIR}${DATADIR}/
 	rm -f ${DESTDIR}${DATADIR}/root/thruk/themes
+	mkdir -p ${DESTDIR}${SYSCONFDIR}/usercontent/
+	rm -rf ${DESTDIR}${DATADIR}/root/thruk/usercontent
+	ln -fs ${SYSCONFDIR}/usercontent ${DESTDIR}${DATADIR}/root/thruk/
+	cp -rp root/thruk/usercontent/* ${DESTDIR}${SYSCONFDIR}/usercontent/
 	cp -rp support/fcgid_env.sh ${DESTDIR}${DATADIR}/
 	chmod 755 ${DESTDIR}${DATADIR}/fcgid_env.sh
 	cp -rp menu.conf ${DESTDIR}${DATADIR}/
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
-	cp -p script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
+	cp -p script/thruk_fastcgi.pl  ${DESTDIR}${DATADIR}/script/
+	cp -p script/thruk.psgi        ${DESTDIR}${DATADIR}/script/
+	cp -p script/grafana_export.sh ${DESTDIR}${DATADIR}/script/
+	cp -p script/html2pdf.js       ${DESTDIR}${DATADIR}/script/
+	cp -p script/html2pdf.sh       ${DESTDIR}${DATADIR}/script/
+	cp -p script/pnp_export.sh     ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/
-	[ ! -f script/wkhtmltopdf ] || cp -p script/wkhtmltopdf ${DESTDIR}${DATADIR}/script/
+	[ ! -f script/phantomjs ] || cp -p script/phantomjs ${DESTDIR}${DATADIR}/script/
 	echo " " > ${DESTDIR}${DATADIR}/dist.ini
 	############################################################################
 	# bin files
@@ -91,56 +138,87 @@ local_install: local_patches
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3
 	mkdir -p ${DESTDIR}${MANDIR}/man8
-	cp -p docs/thruk.3 ${DESTDIR}${MANDIR}/man3/thruk.3
-	cp -p docs/thruk.8 ${DESTDIR}${MANDIR}/man8/thruk.8
-	cp -p docs/naglint.3 ${DESTDIR}${MANDIR}/man3/naglint.3
-	cp -p docs/nagexp.3 ${DESTDIR}${MANDIR}/man3/nagexp.3
-	############################################################################
-	# docs
-	mkdir -p                     ${DESTDIR}${DATADIR}/docs
-	cp -p docs/FAQ.html          ${DESTDIR}${DATADIR}/docs/FAQ.html
-	cp -p docs/THRUK_MANUAL.html ${DESTDIR}${DATADIR}/docs/THRUK_MANUAL.html
+	cp -p docs/manpages/thruk.3 ${DESTDIR}${MANDIR}/man3/thruk.3
+	cp -p docs/manpages/thruk.8 ${DESTDIR}${MANDIR}/man8/thruk.8
+	cp -p docs/manpages/naglint.3 ${DESTDIR}${MANDIR}/man3/naglint.3
+	cp -p docs/manpages/nagexp.3 ${DESTDIR}${MANDIR}/man3/nagexp.3
 	############################################################################
 	# logfiles
 	mkdir -p ${DESTDIR}${LOGDIR}
 	############################################################################
 	# logrotation
-	[ -z "${LOGROTATEDIR}" ] || { mkdir -p ${DESTDIR}${LOGROTATEDIR} && cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk && cd ${DESTDIR}${LOGROTATEDIR} && patch -p1 < $(shell pwd)/blib/replace/0006-logrotate.patch; }
+	[ -z "${LOGROTATEDIR}" ] || { mkdir -p ${DESTDIR}${LOGROTATEDIR} && cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk-base && cd ${DESTDIR}${LOGROTATEDIR} && patch -p1 < $(shell pwd)/blib/replace/0006-logrotate.patch; }
 	############################################################################
 	# rc script
 	[ -z "${INITDIR}" ] || { mkdir -p ${DESTDIR}${INITDIR} && cp -p support/thruk.init ${DESTDIR}${INITDIR}/thruk; }
 	############################################################################
-	# embedded thruk libs - handled in seperate package for naemon
-	[ ! -d local-lib ] || { mkdir -p ${DESTDIR}${LIBDIR} && cp -rp local-lib ${DESTDIR}${LIBDIR}/perl5; }
-	############################################################################
 	# httpd config
 	[ -z "${HTTPDCONF}" ] || { mkdir -p ${DESTDIR}${HTTPDCONF} && cp -p support/apache_fcgid.conf ${DESTDIR}${HTTPDCONF}/thruk.conf; }
+	[ -z "${HTTPDCONF}" ] || cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
+	cp -p blib/replace/thruk_cookie_auth.include ${DESTDIR}${DATADIR}/
 	############################################################################
 	# some patches
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0001-thruk.conf.patch
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0002-log4perl.conf.patch
 	cd ${DESTDIR}${BINDIR}/     && patch -p1 < $(shell pwd)/blib/replace/0003-thruk-scripts.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0004-thruk_data_scripts.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0005-thruk_auth.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0007-fcgish.patch
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
-	mkdir -p                          ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
+	mkdir -p ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
+	############################################################################
+	# examples
+	cp -p examples/bp_functions.pm ${DESTDIR}${SYSCONFDIR}/bp/
 
-naemon-patch:
-	[ -z "${INITDIR}" ] || { cd ${DESTDIR}${INITDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch; }
-	[ -z "${INITDIR}" ] || find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
-	[ -z "${HTTPDCONF}" ] || { cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/replace/0008-naemon-httpd.patch; }
-	[ -z "${HTTPDCONF}" ] || find ${DESTDIR}${HTTPDCONF}/ -name \*.orig -delete
-	[ -z "${HTTPDCONF}" ] || cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0005-naemon.patch
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0011-naemon-cgicfg.patch
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0012-naemon-htpasswd.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0009-naemon-fcgish.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0010-naemon-branding.patch
-	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
-	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
-	mkdir -p ${DESTDIR}${SYSCONFDIR}/conf.d/
-	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg ] || cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
-	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg ] ||  echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
-	rm -f ${DESTDIR}${DATADIR}/root/index.html
-	cp -p blib/replace/thruk_cookie_auth.include ${DESTDIR}${DATADIR}/
+quicktest:
+	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \
+	    t/xt/panorama/javascript.t \
+	    t/0*.t \
+	    t/9*.t
+
+timedtest:
+	for file in $(TEST_FILES); do \
+		printf "%-60s" $$file; \
+		output=$$(TEST_AUTHOR=1 PERL_DL_NONLAZY=1 /usr/bin/time -f %e perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" $$file 2>&1); \
+		if [ $$? != 0 ]; then \
+			printf "% 8s \n" "FAILED"; \
+		else \
+			time=$$(echo "$$output" | tail -n1); \
+			printf "% 8ss\n" $$time; \
+		fi; \
+	done
+
+DOCKERRESULTS=$(shell pwd)/t/docker/results/$(shell date +'%Y-%m-%d_%H.%M')
+DOCKERCMD=cd t/docker && \
+            docker run \
+                -p 5901:5901 \
+                --rm \
+                -v $(shell pwd)/.:/src \
+                -v $(shell pwd)/t/docker/cases:/root/cases \
+                -v $(DOCKERRESULTS):/root/cases/_logs \
+                -v /etc/localtime:/etc/localtime
+t/docker/Dockerfile:
+	cp -p t/docker/Dockerfile.in t/docker/Dockerfile
+	cd t/docker && docker build -t="local/thruk_panorama_test" .
+
+dockerbuild:
+	rm -f t/docker/Dockerfile
+	$(MAKE) t/docker/Dockerfile
+
+dockertest: t/docker/Dockerfile dockertestfirefox dockertestchrome
+
+dockertestchrome:
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -b chrome
+	rm -rf $(DOCKERRESULTS)
+
+dockertestfirefox:
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -b firefox
+	rm -rf $(DOCKERRESULTS)
+
+dockershell: t/docker/Dockerfile
+	mkdir -p $(DOCKERRESULTS)
+	$(DOCKERCMD) -it local/thruk_panorama_test /bin/bash

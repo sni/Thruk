@@ -1,12 +1,11 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
 use JSON::XS;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1087;
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    plan tests => 1025;
 }
 
 BEGIN {
@@ -23,6 +22,9 @@ my $servicegroup   = TestUtils::get_test_servicegroup();
 my $pages = [
     '/thruk/cgi-bin/status.cgi',
     { url => '/thruk/cgi-bin/status.cgi', like => '<input\ type="text".*?value=".*\/thruk\/cgi\-bin\/status\.cgi"\ name="bookmark">' },  # test bookmarks
+
+# Found 0 matching services, but there are x matching hosts
+    { url => '/thruk/cgi-bin/status.cgi?style=detail&dfl_s0_type=host&dfl_s0_val_pre=&dfl_s0_op=%3D&dfl_s0_value='.$host.'&dfl_s0_value_sel=5&dfl_s0_type=service&dfl_s0_val_pre=&dfl_s0_op=~&dfl_s0_value=noserviceswiththisname', unlike => 'Found 0 matching services, but there\s+is \d matching host' },
 
 # Host / Hostgroups
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
@@ -156,7 +158,7 @@ $pages = [
 for my $url (@{$pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array");
@@ -170,7 +172,7 @@ $pages = [
 for my $url (@{$pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is a hash");
@@ -189,7 +191,7 @@ $pages = [
 for my $url (@{$pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array");

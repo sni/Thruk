@@ -1,11 +1,10 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 13;
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    plan tests => 12;
 }
 
 BEGIN {

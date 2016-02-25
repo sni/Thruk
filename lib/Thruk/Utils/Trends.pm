@@ -2,8 +2,9 @@ package Thruk::Utils::Trends;
 
 use strict;
 use warnings;
-use GD;
-use POSIX qw(strftime);
+use GD qw/gdSmallFont gdStyled gdTransparent/;
+use POSIX ();
+use Thruk::Utils::Avail ();
 
 =head1 NAME
 
@@ -42,7 +43,7 @@ sub new {
 sub _show_step_2 {
     my ( $self, $c ) = @_;
 
-    my $input = $c->{'request'}->{'parameters'}->{'input'};
+    my $input = $c->req->parameters->{'input'};
 
     return unless defined $input;
 
@@ -63,8 +64,8 @@ sub _show_step_2 {
     }
 
     $c->stash->{input}       = $input;
-    $c->stash->{data}        = $data;
-    $c->stash->{template}    = 'trends_step_2.tt';
+    $c->stash->{data}       = $data;
+    $c->stash->{template}   = 'trends_step_2.tt';
 
     return 1;
 }
@@ -74,15 +75,15 @@ sub _show_step_2 {
 sub _show_step_3 {
     my ( $self, $c ) = @_;
 
-    my $input = $c->{'request'}->{'parameters'}->{'input'};
+    my $input = $c->req->parameters->{'input'};
 
     return unless defined $input;
     return unless $input eq 'getoptions';
 
-    my $host    = $c->{'request'}->{'parameters'}->{'host'};
-    my $service = $c->{'request'}->{'parameters'}->{'service'};
+    my $host    = $c->req->parameters->{'host'};
+    my $service = $c->req->parameters->{'service'};
 
-    if(!defined $host and !defined $service) {
+    if(!defined $host && !defined $service) {
         return;
     }
 
@@ -94,7 +95,7 @@ sub _show_step_3 {
     $c->stash->{service}     = $service || '';
     $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1);
 
-    $c->stash->{template}    = 'trends_step_3.tt';
+    $c->stash->{template}   = 'trends_step_3.tt';
 
     return 1;
 }
@@ -104,8 +105,8 @@ sub _show_step_3 {
 sub _show_report {
     my ( $self, $c ) = @_;
 
-    my $host       = $c->{'request'}->{'parameters'}->{'host'}       || '';
-    my $service    = $c->{'request'}->{'parameters'}->{'service'}    || '';
+    my $host       = $c->req->parameters->{'host'}       || '';
+    my $service    = $c->req->parameters->{'service'}    || '';
 
     $c->stash->{host}    = $host;
     $c->stash->{service} = $service;
@@ -122,11 +123,8 @@ sub _do_report {
 
     my $start_time = time();
 
-    my $host    = $c->stash->{host};
-    my $service = $c->stash->{service};
-
     # calculate availability data
-    $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
+    $c->req->parameters->{'full_log_entries'} = 1;
     Thruk::Utils::Avail::calculate_availability($c);
 
     # create the image map
@@ -142,9 +140,9 @@ sub _do_report {
         Thruk::Utils::IO::close($fh, $dir."/graph.png");
     }
 
-    unless(exists $c->{'request'}->{'parameters'}->{'nomap'}) {
+    unless(exists $c->req->parameters->{'nomap'}) {
         $c->stash->{image_map} = $image_map;
-        $c->stash->{nomap}     = $c->{'request'}->{'parameters'}->{'nomap'};
+        $c->stash->{nomap}     = $c->req->parameters->{'nomap'};
     }
     $c->stash->{nomap}     = '' unless defined $c->stash->{nomap};
     $c->stash->{image_map} = '' unless defined $c->stash->{image_map};
@@ -154,11 +152,11 @@ sub _do_report {
 
     $c->stash->{image_width}  = '900';
     $c->stash->{image_height} = '300';
-    if($service ne '') {
+    if($c->stash->{service} ne '') {
         $c->stash->{image_height} = '320';
     }
 
-    $c->stash->{template}    = 'trends_report.tt';
+    $c->stash->{template}   = 'trends_report.tt';
 
     return 1;
 }
@@ -169,9 +167,9 @@ sub _create_image {
     my ( $c, $mode ) = @_;
 
     my $smallimage = 0;
-    $smallimage = 1 if exists $c->{'request'}->{'parameters'}->{'smallimage'};
+    $smallimage = 1 if exists $c->req->parameters->{'smallimage'};
     my $service = 0;
-    $service = 1 if exists $c->{'request'}->{'parameters'}->{'service'};
+    $service = 1 if exists $c->req->parameters->{'service'};
 
     my $host_drawing_width          = 498;
     my $host_drawing_height         = 70;
@@ -194,11 +192,11 @@ sub _create_image {
     my $small_svc_drawing_y_offset  = 0;
 
     unless(defined $c->stash->{'logs'}) {
-        $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
+        $c->req->parameters->{'full_log_entries'} = 1;
         Thruk::Utils::Avail::calculate_availability($c);
     }
 
-    my($im, $width, $height, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+    my($im, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
     if($smallimage) {
         unless($mode == IMAGE_MAP_MODE) {
             $im = GD::Image->new(500, 20);
@@ -261,7 +259,9 @@ sub _create_image {
         $im->transparent($colors->{'white'});
 
         # make sure the graphic is interlaced
-        $im->interlaced('true');
+        # 2014-06-16: interlaced png are broken on centos 7, resulting in
+        # libpng warning: Interlace handling should be turned on when using png_read_image
+        #$im->interlaced('true');
     }
 
     # draw service / host states
@@ -276,13 +276,13 @@ sub _create_image {
 
         unless($smallimage) {
             # draw horizontal grid lines
-            _draw_horizontal_grid_lines($c, $im, $colors->{'black'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_horizontal_grid_lines($im, $colors->{'black'}, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->req->parameters->{'service'});
 
             # draw total times / percentages
-            _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
+            _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->req->parameters->{'host'}, $c->req->parameters->{'service'} );
 
             # draw text
-            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_x_offset, $c->req->parameters->{'host'}, $c->req->parameters->{'service'});
         }
 
         # draw a border
@@ -327,7 +327,7 @@ sub _draw_timestamp {
 
     my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
 
-    my $string       = strftime($c->config->{'datetime_format_trends'}, localtime($timestamp));
+    my $string       = POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($timestamp));
     my $string_width = $font_width * length($string);
 
     unless($smallimage) {
@@ -454,8 +454,8 @@ sub _draw_states {
 
                 "state"              => $state,
 
-                "start_human"        => strftime($c->config->{'datetime_format_trends'}, localtime($log->{'start'})),
-                "end_human"          => strftime($c->config->{'datetime_format_trends'}, localtime($log->{'end'})),
+                "start_human"        => POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($log->{'start'})),
+                "end_human"          => POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($log->{'end'})),
                 "start"              => $log->{'start'},
                 "end"                => $log->{'end'},
                 "plugin_output"      => $log->{'plugin_output'},
@@ -482,7 +482,7 @@ sub _draw_states {
 
 ##########################################################
 sub _draw_text {
-    my ($c, $im, $color, $start, $end, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
+    my ($c, $im, $color, $start, $end, $drawing_width, $drawing_x_offset, $host, $service ) = @_;
 
     my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
 
@@ -507,7 +507,7 @@ sub _draw_text {
     }
 
     # report start/end date
-    my $from_to = strftime($c->config->{'datetime_format_trends'}, localtime($start))." to ".strftime($c->config->{'datetime_format_trends'}, localtime($end));
+    my $from_to = POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($start))." to ".POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($end));
     $string_width  = length($from_to) * $font_width;
     $im->string(gdSmallFont,($drawing_width/2)-($string_width/2)+$drawing_x_offset,($font_height*2)+5,$from_to,$color);
 
@@ -516,7 +516,7 @@ sub _draw_text {
 
 ##########################################################
 sub _draw_horizontal_grid_lines {
-    my ($c, $im, $color, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $service ) = @_;
+    my ($im, $color, $drawing_width, $drawing_x_offset, $drawing_y_offset, $service ) = @_;
 
     _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+10,$drawing_x_offset+$drawing_width,$drawing_y_offset+10,$color);
     _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+30,$drawing_x_offset+$drawing_width,$drawing_y_offset+30,$color);
@@ -530,9 +530,9 @@ sub _draw_horizontal_grid_lines {
 
 ##########################################################
 sub _draw_time_breakdowns {
-    my ($c, $im, $colors, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
+    my ($c, $im, $colors, $drawing_width, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
 
-    my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
+    my $font_width = gdSmallFont->width;
 
     my $string;
     if(defined $service){
@@ -622,7 +622,7 @@ sub _get_image {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

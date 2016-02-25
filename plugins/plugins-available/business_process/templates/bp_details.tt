@@ -8,7 +8,7 @@
   <table border="0" class="optBox" style="position: absolute; right: 30px; top: 55px;">
     <tr>
       <td>
-        [% button('bp.cgi?action=commit&amp;bp=' _ bp.id, 'save', 'bp_save_button') %]
+        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;token=' _ get_user_token(c); button(link, 'save changes', 'bp_save_button') %]
       </td>
     </tr>
   </table>
@@ -165,11 +165,36 @@
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt='Delete this Business Process' title='Delete this Business Process' width="20" height="20"></td>
-                <td class='command'><a href='bp.cgi?action=remove&amp;bp=[% bp.id %]' onclick="return confirm('Removed Business Process cannot be restored. Really remove?')">Delete this Business Process</a></td>
+                <td class='command'>
+                  <form action='bp.cgi' method='POST' style="display: inline;">
+                    <input type='hidden' name='action' value='remove'>
+                    <input type="hidden" name="bp" value="[% bp.id %]">
+                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <a href='bp.cgi' onClick="confirm('A removed business process cannot be restored. Really remove?') && jQuery(this).closest('FORM').submit(); return false;">Delete this Business Process</a>
+                  </form>
+                </td>
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/page_white_swoosh.png' border="0" alt='Discard Changes' title='Discard Changes' width="16" height="16"></td>
-                <td class='command'><a href='bp.cgi?action=revert&amp;bp=[% bp.id %]'>Discard Changes</a></td>
+                <td class='command'>
+                  <form action='bp.cgi' method='POST' style="display: inline;">
+                    <input type='hidden' name='action' value='revert'>
+                    <input type="hidden" name="bp" value="[% bp.id %]">
+                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <a href='bp.cgi' onClick="confirm('Really discard all changes?') && jQuery(this).closest('FORM').submit(); return false;">Discard Changes</a>
+                  </form>
+                </td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='Save Changes' title='Save Changes' width="16" height="16"></td>
+                <td class='command'>
+                  <form action='bp.cgi' method='POST' style="display: inline;">
+                    <input type='hidden' name='action' value='commit'>
+                    <input type="hidden" name="bp" value="[% bp.id %]">
+                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <a href='bp.cgi' onClick="jQuery(this).closest('FORM').submit(); return false;">Save Changes</a>
+                  </form>
+                </td>
               </tr>
             </table>
           </td>

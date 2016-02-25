@@ -50,7 +50,6 @@ reports:
     - flexible report output
         HTML, Text, CVS, XML, PDF
         CSV output for single hosts/services,hostgroups/servicegroups
-    - use mongodb with cursors
     - utf-8 mails: https://rt.cpan.org/Public/Bug/Display.html?id=42481
 
 histogram:
@@ -68,10 +67,6 @@ addons:
     - nagios.cfg editor (with omd support)
     - resource.cfg editor
     - wizards: new host, scan services
-
-  panorama:
-    - allow multiple filter
-
 
 
 =========================================

@@ -24,18 +24,7 @@
         <td class='reportSelectSubTitle' align="right">Report period:</td>
         <td class='reportSelectItem'>
           <select name='timeperiod'>
-            <option value="today">Today</option>
-            <option value="last24hours">Last 24 Hours</option>
-            <option value="yesterday">Yesterday</option>
-            <option value="thisweek">This Week</option>
-            <option value="last7days" selected>Last 7 Days</option>
-            <option value="lastweek">Last Week</option>
-            <option value="thismonth">This Month</option>
-            <option value="last31days">Last 31 Days</option>
-            <option value="lastmonth">Last Month</option>
-            <option value="last12months">Last 12 Months</option>
-            <option value="thisyear">This Year</option>
-            <option value="lastyear">Last Year</option>
+            [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" %]
             <option value="custom">* CUSTOM REPORT PERIOD *</option>
           </select>
         </td>

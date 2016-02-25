@@ -1,0 +1,60 @@
+﻿[% WRAPPER _conf_objects_frame.tt %]
+
+<form action="conf.cgi" method="post">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
+[% FOREACH par = c.request.parameters.keys %]
+  [% NEXT IF !c.request.parameters.defined(par) %]
+  [% NEXT IF par == "token" %]
+  [% FOR value IN c.request.parameters.$par.list %]
+    <input type="hidden" name="[% par %]" value="[% value %]">
+  [% END %]
+[% END %]
+<input type="hidden" name="clone_ref" value="-1">
+<table border="0" class='data conftoolobj'>
+  <tr>
+    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Cloning [% object.get_type() | ucfirst +%] [%+ object.get_name() %] - Step 1</a></th>
+  </tr>
+  <tr>
+    <td class='dataVar' colspan=2>
+      Select incoming references which should be cloned:
+    </td>
+  </tr>
+  [% FOREACH t = clonables.keys.sort %]
+  <tr>
+    <td class='dataVar' colspan=2>
+      <br>
+      [% t | ucfirst %]:
+      <ul>
+      [% FOREACH id = clonables.$t.keys %]
+        <li>
+          <input type="checkbox" name="clone_ref" value="[% id %]" [% IF clonables.$t.$id.readonly %]disabled[% ELSE %]checked[% END %]>
+          <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% clonables.$t.$id.name %]</a>
+        </li>
+      [% END %]
+      </ul>
+    </td>
+  </tr>
+  [% END %]
+  <tr>
+    <td class='dataVar' colspan=2>
+      <ul>
+        <li>
+          select
+          <input type="checkbox" name="none" value="">
+          <a href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
+          <input type="checkbox" name="all" value="" checked>
+          <a href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">all</a>
+        </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td class='dataVar' colspan=2 style="text-align: right; padding-bottom: 5px;">
+      <button class="conf_next_button conf_button">next</button>
+    </td>
+  </tr>
+
+</table>
+</form>
+
+[% END %]

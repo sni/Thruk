@@ -2,12 +2,9 @@ package Thruk::Backend::Provider::HTTP;
 
 use strict;
 use warnings;
-use Carp;
 use Data::Dumper;
-use JSON::XS;
-use LWP::UserAgent;
-use Thruk::Utils;
-use Encode qw/encode_utf8/;
+use Module::Load qw/load/;
+use JSON::XS qw/decode_json encode_json/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -29,7 +26,7 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $options, $peerconfig, $config ) = @_;
+    my($class, $options, $peerconfig, $config, $product_prefix, $thruk_config) = @_;
 
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
@@ -39,6 +36,7 @@ sub new {
         'logs_timeout'         => 100,
         'config'               => $config,
         'peerconfig'           => $peerconfig,
+        'product_prefix'       => $product_prefix,
         'key'                  => '',
         'name'                 => $options->{'name'},
         'addr'                 => $options->{'peer'},
@@ -47,19 +45,10 @@ sub new {
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
         'min_backend_version'  => 1.63,
+        'verify_hostname'      => $thruk_config->{'ssl_verify_hostnames'},
     };
     bless $self, $class;
 
-    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $options->{'peer'} =~ m/^https:/mx) {
-        eval {
-            # required for new IO::Socket::SSL versions
-            require IO::Socket::SSL;
-            IO::Socket::SSL->import();
-            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-        };
-    }
-
-    $self->reconnect();
     return $self;
 }
 
@@ -122,8 +111,20 @@ recreate lwp object
 sub reconnect {
     my($self) = @_;
 
-    if(defined $self->{'logcache'}) {
-        $self->{'logcache'}->reconnect();
+    my $verify_hostname = 1;
+    $verify_hostname = $self->{'verify_hostname'} if defined $self->{'verify_hostname'};
+    if(!$self->{'modules_loaded'}) {
+        if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
+            if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $self->{'addr'} =~ m/^https:/mx) {
+                $verify_hostname = 0;
+                eval {
+                    # required for new IO::Socket::SSL versions
+                    load IO::Socket::SSL;
+                    IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+                };
+            }
+        }
+        load Thruk::UserAgent;
     }
 
     # correct address
@@ -131,26 +132,32 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} =~ s|cgi-bin$||mx;
     $self->{'addr'} =~ s|/$||mx;
-    $self->{'addr'} =~ s|thruk$||mx;
+    my $pp = $self->{'product_prefix'} || 'thruk';
+    $self->{'addr'} =~ s|\Q$pp\E$||mx;
     $self->{'addr'} =~ s|/$||mx;
-    $self->{'addr'} .= '/thruk/cgi-bin/remote.cgi';
+    $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
 
-    $self->{'ua'} = LWP::UserAgent->new;
+    $self->{'ua'} = Thruk::UserAgent->new({ use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->agent('Thruk');
+    $self->{'ua'}->ssl_opts(verify_hostname => $verify_hostname);
     if($self->{'proxy'}) {
         # http just works
         $self->{'ua'}->proxy('http', $self->{'proxy'});
         # ssl depends on which class we have
         if($INC{'IO/Socket/SSL.pm'}) {
+            ## no critic
             $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
+            ## use critic
             my $con_proxy = $self->{'proxy'};
             $con_proxy =~ s#^(http|https)://#connect://#mx;
             $self->{'ua'}->proxy('https', $con_proxy);
         } else {
             # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
+            ## no critic
             $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
+            ## use critic
             # env proxy breaks the ssl proxy above
             #$self->{'ua'}->env_proxy();
         }
@@ -186,11 +193,11 @@ renew logcache
 =cut
 sub renew_logcache {
     my($self, $c) = @_;
-    return unless defined $self->{'logcache'};
+    return unless defined $self->{'_peer'}->{'logcache'};
     # renew cache?
-    if(!defined $self->{'lastcacheupdate'} or $self->{'lastcacheupdate'} < time()-5) {
+    if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
         $self->{'lastcacheupdate'} = time();
-        $self->{'logcache'}->_import_logs($c, 'update', 0, $self->peer_key());
+        $self->{'_peer'}->logcache->_import_logs($c, 'update', 0, $self->peer_key());
     }
     return;
 }
@@ -217,6 +224,7 @@ return the process info
 =cut
 sub get_processinfo {
     my $self = shift;
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     my $res = $self->_req('get_processinfo');
     $self->{'ua'}->timeout($self->{'timeout'});
@@ -243,10 +251,11 @@ returns if this user is allowed to submit commands
 =cut
 sub get_can_submit_commands {
     my($self,$user) = @_;
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     my $res = $self->_req('get_can_submit_commands', [$user]);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -260,11 +269,12 @@ returns a list of contactgroups by contact
 =cut
 sub get_contactgroups_by_contact {
     my($self,$user) = @_;
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     confess("no user") unless defined $user;
     my $res = $self->_req('get_contactgroups_by_contact', [$user]);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -279,7 +289,8 @@ returns a list of hosts
 sub get_hosts {
     my($self, @options) = @_;
     my $res = $self->_req('get_hosts', \@options);
-    my($typ, $size, $data) = @{$res};
+    #my($typ, $size, $data)...
+    my(undef, $size, $data) = @{$res};
     return($data, undef, $size);
 }
 
@@ -295,8 +306,8 @@ returns a list of host by a services query
 sub get_hosts_by_servicequery {
     my($self, @options) = @_;
     my $res = $self->_req('get_hosts_by_servicequery', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, undef);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], undef);
 }
 
 ##########################################################
@@ -311,8 +322,8 @@ returns a list of host names
 sub get_host_names{
     my($self, @options) = @_;
     my $res = $self->_req('get_host_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -327,8 +338,8 @@ returns a list of hostgroups
 sub get_hostgroups {
     my($self, @options) = @_;
     my $res = $self->_req('get_hostgroups', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -343,8 +354,8 @@ returns a list of hostgroup names
 sub get_hostgroup_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_hostgroup_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -359,8 +370,8 @@ returns a list of services
 sub get_services {
     my($self, @options) = @_;
     my $res = $self->_req('get_services', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, undef, $size);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], undef, $res->[1]);
 }
 
 ##########################################################
@@ -375,8 +386,8 @@ returns a list of service names
 sub get_service_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_service_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -391,8 +402,8 @@ returns a list of servicegroups
 sub get_servicegroups {
     my($self, @options) = @_;
     my $res = $self->_req('get_servicegroups', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -407,8 +418,8 @@ returns a list of servicegroup names
 sub get_servicegroup_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_servicegroup_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -423,8 +434,8 @@ returns a list of comments
 sub get_comments {
     my($self, @options) = @_;
     my $res = $self->_req('get_comments', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -439,8 +450,8 @@ returns a list of downtimes
 sub get_downtimes {
     my($self, @options) = @_;
     my $res = $self->_req('get_downtimes', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -455,8 +466,8 @@ returns a list of contactgroups
 sub get_contactgroups {
     my($self, @options) = @_;
     my $res = $self->_req('get_contactgroups', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -471,9 +482,9 @@ returns logfile entries
 sub get_logs {
     my($self, @options) = @_;
     my %options = @options;
-    if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
-        return $self->{'logcache'}->get_logs(%options);
+        return $self->{'_peer'}->logcache->get_logs(%options);
     }
 
     my $use_file = 0;
@@ -483,13 +494,14 @@ sub get_logs {
         @options = %options;
     }
     # increased timeout for logs
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);
-    my($typ, $size, $data) = @{$res};
+    #my($typ, $size, $data) = @{$res};
     $self->{'ua'}->timeout($self->{'timeout'});
 
-    return(Thruk::Utils::save_logs_to_tempfile($data), 'file') if $use_file;
-    return $data;
+    return(Thruk::Utils::IO::save_logs_to_tempfile($res->[2]), 'file') if $use_file;
+    return $res->[2];
 }
 
 
@@ -505,8 +517,8 @@ returns a list of timeperiods
 sub get_timeperiods {
     my($self, @options) = @_;
     my $res = $self->_req('get_timeperiods', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -521,8 +533,8 @@ returns a list of timeperiod names
 sub get_timeperiod_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_timeperiod_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -537,8 +549,8 @@ returns a list of commands
 sub get_commands {
     my($self, @options) = @_;
     my $res = $self->_req('get_commands', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -553,8 +565,8 @@ returns a list of contacts
 sub get_contacts {
     my($self, @options) = @_;
     my $res = $self->_req('get_contacts', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -569,8 +581,8 @@ returns a list of contact names
 sub get_contact_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_contact_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -585,8 +597,8 @@ returns the host statistics for the tac page
 sub get_host_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_host_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'SUM');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
 }
 
 ##########################################################
@@ -601,8 +613,8 @@ returns the services statistics for the tac page
 sub get_service_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_service_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'SUM');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
 }
 
 ##########################################################
@@ -617,8 +629,8 @@ returns the service / host execution statistics
 sub get_performance_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_performance_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'STATS');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'STATS');
 }
 
 ##########################################################
@@ -633,8 +645,8 @@ returns the service /host execution statistics
 sub get_extra_perf_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_extra_perf_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'SUM');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
 }
 
 ##########################################################
@@ -678,14 +690,15 @@ sub _req {
         $options->{'auth'} = $args->{'auth'} if defined $args->{'auth'};
     }
 
+    $self->{'ua'} || $self->reconnect();
     my $response = _ua_post_with_timeout(
                         $self->{'ua'},
                         $self->{'addr'},
                         { data => encode_json({
                                     credential => $self->{'auth'},
                                     options    => $options,
-                                })
-                        }
+                                }),
+                        },
                     );
 
     if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&|%3f)job=(.*)$/mx) {
@@ -700,7 +713,8 @@ sub _req {
         eval {
             $data = decode_json($response->decoded_content);
         };
-        die($@."\nrequest:\n".Dumper($response)) if $@;
+        #die($@."\nrequest:\n".Dumper($response)) if $@;
+        die($@."\n") if $@;
         if($data->{'rc'} == 1) {
             my $remote_version = $data->{'version'};
             $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
@@ -727,8 +741,7 @@ sub _req {
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
-    die(Thruk::Utils::format_response_error($response));
-    return;
+    die(_format_response_error($response));
 }
 
 ##########################################################
@@ -751,9 +764,11 @@ sub _ua_post_with_timeout {
 
     # make sure nobody else calls alarm in between
     {
+        ## no critic
         no warnings qw(redefine prototype);
         *CORE::GLOBAL::alarm = sub {};
-    };
+        ## use critic
+    }
 
     # try to fetch result
     my $res = $ua->post($url, $data);
@@ -812,9 +827,9 @@ sub _replace_peer_key {
     return $data;
 }
 
-##############################################
+##########################################################
 sub _clean_code_refs {
-    my($var,$lvl) = @_;
+    my($var) = @_;
     if(ref $var eq 'ARRAY') {
         for (@{$var}) {
             if(ref $_ eq 'CODE') {
@@ -837,10 +852,24 @@ sub _clean_code_refs {
 }
 
 ##########################################################
+sub _format_response_error {
+    my($response) = @_;
+    my $message = "";
+    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)\-\->|sxm) {
+        $message = "\n".$1;
+    }
+    if(defined $response) {
+        return $response->code().': '.$response->message().$message;
+    } else {
+        return Dumper($response);
+    }
+}
+
+##########################################################
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

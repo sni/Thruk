@@ -16,6 +16,24 @@ body.status TABLE.reports TEXTAREA {
   width: 520px;
   height: 80px;
 }
+body.status TABLE.reports TR.report_type_affected_sla_objects TD {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  height: 12px;
+  line-height: 10px;
+  font-size: smaller;
+}
+TR.report_type_affected_sla_objects SPAN {
+  float: right;
+  position: relative;
+  top: 3px;
+}
+TR.report_type_affected_sla_objects SPAN.name {
+  padding-right: 5px;
+}
+TR.report_type_affected_sla_objects SPAN.value, TR.report_type_affected_sla_objects SPAN.wait {
+  width: 170px;
+}
 
 TABLE.unavailable_states {
   border-collapse: collapse;
@@ -57,4 +75,14 @@ body.status TABLE.weekly_days TD {
 
 .ui-buttonset .ui-button {
     margin-right: -5px;
+}
+
+.error {
+    color: #FF0000;
+}
+
+.report_progessbar DIV {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow-x: hidden;
 }

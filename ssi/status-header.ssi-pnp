@@ -1,8 +1,30 @@
-<script src="/pnp4nagios/media/js/jquery.cluetip.js" type="text/javascript"></script>
+<script src="../javascript/jquery.cluetip.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 jQuery(document).ready(function() {
   try {
-    jQuery('a.tips').cluetip({ajaxCache: false, dropShadow: false, showTitle: false });
+    jQuery('a.tips').cluetip({ajaxCache: false, dropShadow: false, showTitle: false, sticky: false });
   } catch(e) {}
+
+  jQuery("a.histou_tips").hover(
+    function(e){
+      var popup_width  = 600;
+      var screen_width = jQuery(window).width();
+      var popup_pos_x  = e.pageX + 5;
+      if(e.pageX + popup_width > screen_width) {
+        popup_pos_x  = e.pageX - popup_width - 5;
+      }
+      this.r = this.rel;
+      jQuery("body").append("<div id='tooltip'><iframe src='"+this.r+"' width='"+popup_width+"' height='200' frameBorder='0' scrolling='no'></iframe></div>");
+      jQuery("#tooltip")
+        .css("position","absolute")
+        .css("z-index","15")
+        .css("top",(e.pageY - 10) + "px")
+        .css("left", popup_pos_x + "px")
+        .fadeIn("fast");
+    },
+    function(){
+      jQuery("#tooltip").remove();
+    }
+  );
 });
 </script>

@@ -5,15 +5,15 @@
       <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
       Last Updated: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span><br />
       [% IF ! no_auto_reload %]Updated every [% refresh_rate %] seconds<br />[% END %]
-      Thruk [% version %][% IF branch %]~[% branch %][% END %]<span class="infoboxlinks"> - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a>[% IF c.config.extra_version %] - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]</span><br />
+      Thruk [% version %][% IF branch %]-[% branch %][% END %]<span class="infoboxlinks"> - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a>[% IF c.config.extra_version %] - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]</span><br />
       Logged in as <i>[% remote_user %]</i><br />
       [% IF has_proc_info %]
       [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
-      [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partial disabled</div>[% END %]
+      [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partially disabled</div>[% END %]
       [% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]<div class='infoBoxBadProcStatus'> - Service checks are disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partial disabled </div>[% END %]
+      [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partially disabled </div>[% END %]
       [% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='infoBoxBadProcStatus'> - Host checks are disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='infoBoxBadProcStatus'> - Host checks are partial disabled </div>[% END %]
+      [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='infoBoxBadProcStatus'> - Host checks are partially disabled </div>[% END %]
       [% END %]
     </td>
   </tr>

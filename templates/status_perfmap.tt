@@ -2,6 +2,7 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]
+[% PROCESS _blocks.tt %]
 
 [% UNLESS minimal %]
 <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
@@ -99,8 +100,29 @@
       [% serviceclass = 'statusBGUNKNOWN' %]
     [% END %]
     <tr>
-      <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
-      <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a></td>
+      <td class='[% hostclass %]'>
+        <table border="0" width='100%' cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
+            <td align="right">
+              [% SET host_comment_count = 0 %]
+              [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
+              [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class='[% serviceclass %]'>
+        <table border="0" width='100%' cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a></td>
+            <td align="right" class='[% serviceclass %]'>
+            [% SET comment_count = s.comments.size %]
+            [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
+            </td>
+          </tr>
+        </table>
+      </td>
       <td class='status[% state %]'>[% state %]</td>
       [% IF s.perf.keys.size == 0 %]
         <td class='[% serviceclass %]' colspan=[% sortedkeys.size %] align="left">[% s.plugin_output %]</td>

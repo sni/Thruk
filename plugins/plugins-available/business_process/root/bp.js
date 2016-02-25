@@ -155,11 +155,7 @@ function bp_context_menu_open(evt, node) {
         if(h < evt.pageY) {
             jQuery("#bp_menu").css('top', h+'px');
         }
-        if(node.id == 'node1') {
-            jQuery('.firstnode').css('display', '');
-        } else {
-            jQuery('.firstnode').css('display', 'none');
-        }
+        bp_update_firstnode_css();
         // first node cannot be removed
         if(node.id == 'node1' || !editmode) {
             jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
@@ -288,7 +284,7 @@ function bp_add_new_node() {
     jQuery("#bp_add_new_node").dialog({
         modal: true,
         closeOnEscape: true,
-        width: 365
+        width: 450
     });
     jQuery('.bp_type_btn').button();
     showElement('bp_add_new_node');
@@ -303,7 +299,7 @@ function bp_fill_select_form(data, form) {
         for(var key in data.radio) {
             var d = data.radio[key];
             jQuery('#'+form).find('INPUT[type=radio][name='+key+']').removeAttr("checked");
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+']][value="'+d[0]+'"]').attr("checked","checked");
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').prop("checked","checked");
             jQuery(d[1]).buttonset();
         }
     }
@@ -316,8 +312,8 @@ function bp_fill_select_form(data, form) {
     if(data.select) {
         for(var key in data.select) {
             var d = data.select[key];
-            jQuery("#"+form+" option[text="+d+"]").attr("selected","selected");
-            jQuery("#"+form+" option[value="+d+"]").attr("selected","selected");
+            jQuery('#'+form).find('SELECT[name='+key+'] option[text="'+d+'"]').attr("selected","selected");
+            jQuery('#'+form).find('SELECT[name='+key+'] option[value="'+d+'"]').attr("selected","selected");
         }
     }
 }
@@ -342,9 +338,9 @@ function bp_input_keys(evt, input) {
 /* generic node type selection */
 function bp_select_type(type) {
     bp_show_edit_node(undefined, false);
-    jQuery('.bp_type_box').attr('checked', false).button("refresh");
-    jQuery('#bp_check_'+type).attr('checked', true).button("refresh");
-    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst'], function(nr, s) {
+    jQuery('.bp_type_box').prop('checked', false).button("refresh");
+    jQuery('#bp_check_'+type).prop('checked', true).button("refresh");
+    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst', 'custom'], function(nr, s) {
         hideElement('bp_select_'+s);
     });
     // change details tab
@@ -367,7 +363,9 @@ function bp_select_type(type) {
     else if(type == 'best')        { bp_select_best(node)        }
     else if(type == 'worst')       { bp_select_worst(node)       }
     else if(type == 'equals')      { bp_select_equals(node)      }
+    else if(type == 'custom')      { bp_select_custom(node)      }
     jQuery('#bp_function').val(type);
+    bp_update_status_function();
 }
 
 /* show node type select: status */
@@ -443,6 +441,103 @@ function bp_select_equals(node) {
             text:  { 'bp_arg1_equals': '' }
         });
     }
+}
+
+/* show node type select: custom */
+function bp_select_custom(node) {
+
+    if(node == undefined) {
+        node = bp_get_node(current_edit_node);
+    }
+
+    // function select field
+    var options = [];
+    jQuery(cust_func).each(function(nr, f) {
+        options.push(new Option(f['function'], f['function']));
+    });
+    set_select_options("bp_arg1_custom", options, true);
+
+    if(node && node.func.toLowerCase() == 'custom') {
+        bp_fill_select_form({
+            select:  { 'bp_arg1_custom': node.func_args[0] }
+        });
+    } else {
+        bp_fill_select_form({
+            select:  { 'bp_arg1_custom': '' }
+        });
+    }
+
+    // update help text and attributes
+    bp_update_cust_attributes(document.getElementById('bp_arg1_custom'), node);
+}
+
+/* update custom function help text */
+function bp_update_cust_attributes(select, node) {
+    var selected = jQuery(select).val();
+    var func;
+    jQuery(cust_func).each(function(nr, f) {
+        if(f['function'] == selected) {
+            func = f;
+        }
+    });
+
+    // remove old attributes and help
+    jQuery('#bp_select_custom > tbody > tr').each(function(nr, row) {
+        if(nr >= 3) {
+            jQuery(row).remove();
+        }
+    });
+
+    if(func == undefined) { return; }
+
+    // add new attributes
+    jQuery(func['args']).each(function(x, arg) {
+        var nr = x + 2;
+        var field;
+        var val = '';
+        if(node && node.func_args) {
+            val = node['func_args'][x+1];
+        }
+        if(arg['type'] == 'text') {
+            field = '<input type="text" value="" name="bp_arg'+nr+'_custom" placeholder="'+arg['args']+'"><\/td><\/tr>';
+        }
+        else if(arg['type'] == 'select') {
+            field = '<select name="bp_arg'+nr+'_custom">';
+            jQuery(arg['args']).each(function(x, option) {
+                field += "<option value='"+option+"'>"+option+"<\/option>";
+            });
+            field += '<\/select>';
+        }
+        else if(arg['type'] == 'checkbox') {
+            field = '<div id="bp_radio_'+nr+'">';
+            jQuery(arg['args']).each(function(y, option) {
+                field += '<input type="radio" value="'+option+'" id="bp_custom_'+nr+'_'+y+'" name="bp_arg'+nr+'_custom" /><label for="bp_custom_'+nr+'_'+y+'">'+option+'</label>';
+            });
+            field += "<\/div>";
+        }
+        jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">'+arg['name']+'</th><td align="left">'+field+'<\/td><\/tr>');
+
+        // make buttonset nicer
+        if(arg['type'] == 'checkbox') {
+            jQuery('#bp_radio_'+nr).buttonset();
+        }
+
+        var value = {};
+        value['bp_arg'+nr+'_custom'] = val;
+        if(arg['type'] == 'text') {
+            bp_fill_select_form({ text: value });
+        }
+        else if(arg['type'] == 'select') {
+            bp_fill_select_form({ select: value });
+        }
+        else if(arg['type'] == 'checkbox') {
+            value['bp_arg'+nr+'_custom'] = [val, '#bp_radio_'+nr];
+            bp_fill_select_form({ radio: value });
+        }
+    });
+
+    // add help row
+    jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">Help</th><td align="left" class="bp_type_desc" id="cust_help"><pre>'+func['help']+'<\/pre><\/td><\/tr>');
 }
 
 /* show node type select: not_more */
@@ -552,10 +647,38 @@ function bp_show_edit_node(id, refreshType) {
         jQuery("INPUT[name=bp_host]").val(node.host);
         jQuery("INPUT[name=bp_service]").val(node.service);
         jQuery("INPUT[name=bp_template]").val(node.template);
+        jQuery("INPUT[name=bp_contactgroups]").val(node.contactgroups.join(", "));
+        jQuery("INPUT[name=bp_contacts]").val(node.contacts.join(", "));
+        jQuery("INPUT[name=bp_notification_period]").val(node.notification_period);
+
+        if(node.contactgroups.length == 0) {
+            jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_contactgroups]").parents("TR").show();
+        }
+        if(node.contacts.length == 0) {
+            jQuery("INPUT[name=bp_contacts]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_contacts]").parents("TR").show();
+        }
+        if(!node.event_handler) {
+            jQuery("INPUT[name=bp_event_handler]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_event_handler]").parents("TR").show();
+        }
+        if(!node.notification_period) {
+            jQuery("INPUT[name=bp_notification_period]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_notification_period]").parents("TR").show();
+        }
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
         jQuery("INPUT[name=bp_template]").val('');
+        bpRemoveAttribute('contactgroups');
+        bpRemoveAttribute('contacts');
+        bpRemoveAttribute('notification_period');
+        bpRemoveAttribute('event_handler');
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
@@ -592,6 +715,16 @@ function bp_show_edit_node(id, refreshType) {
     }
 }
 
+function bpRemoveAttribute(attr) {
+    jQuery("INPUT[name=bp_"+attr+"]").parents("TR").hide();
+    jQuery("INPUT[name=bp_"+attr+"]").val('');
+}
+
+function bpAddAttribute(attr) {
+    jQuery("INPUT[name=bp_"+attr+"]").parents("TR").show();
+    jQuery("INPUT[name=bp_"+attr+"]").val('');
+}
+
 /* initialize childrens tab */
 bp_list_wizard_initialized = {};
 function bp_initialize_children_tab(node) {
@@ -603,7 +736,7 @@ function bp_initialize_children_tab(node) {
             var val = d[0];
             selected_nodes.push(val);
             selected_nodes_h[val] = 1;
-            options.push(new Option(val, d[1]));
+            options.push(new Option(d[1], val));
         });
     }
     set_select_options('bp_'+bp_id+"_selected_nodes", options, false);
@@ -622,7 +755,7 @@ function bp_initialize_children_tab(node) {
         if(first_node && val == 'node1') { return true; } // skip first/master node
         available_nodes.push(val);
         available_nodes_h[val] = 1;
-        options.push(new Option(val, n.label));
+        options.push(new Option(n.label, val));
         return true;
     });
     set_select_options('bp_'+bp_id+"_available_nodes", options, false);
@@ -764,7 +897,29 @@ function bp_update_status(evt, node) {
 function bp_update_obj_create() {
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
-        jQuery("INPUT.bp_create").attr('disabled', !checkbox.checked);
+        jQuery("INPUT.bp_create").prop('disabled', !checkbox.checked);
+    }
+}
+
+/* toggle status function disabled fields */
+function bp_update_status_function() {
+    var type = jQuery('#bp_function').val();
+    if(type == "status" || type == "groupstatus") {
+        jQuery(".no_supports_link").show();
+        jQuery(".supports_link").hide();
+    } else {
+        jQuery(".no_supports_link").hide();
+        jQuery(".supports_link").show();
+    }
+    bp_update_firstnode_css();
+}
+
+/* toggle firstnode class */
+function bp_update_firstnode_css() {
+    if(bp_active_node == 'node1') {
+        jQuery('.firstnode').css('display', '');
+    } else {
+        jQuery('.firstnode').css('display', 'none');
     }
 }
 
@@ -813,7 +968,7 @@ function bp_render(containerId, nodes, edges) {
     bp_zoom(1);
     var g = new dagre.Digraph();
     jQuery.each(nodes, function(nr, n) {
-        g.addNode(n.id, { label: n.label, width: n.width, height: n.height });
+        g.addNode(n.id, { label: n.label, width: node_width, height: node_height });
     });
     jQuery.each(edges, function(nr, e) {
         g.addEdge(null, e.sourceId, e.targetId);
@@ -830,6 +985,7 @@ function bp_render(containerId, nodes, edges) {
     } catch(e) {
         var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>';
         if(thruk_debug_js) { msg += '<br><div style="width:500px; height: 400px; text-align: left;">Details:<br>'+e+'</div>'; }
+        jQuery('.bp_zoom_container').css('height','500px');
         jQuery('#inner_'+containerId).html(msg);
         return;
     }
@@ -949,12 +1105,18 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     return;
 }
 
-function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2) {
-    var w = x2 - x1, h = y2 - y1;
+function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2, recursion_level) {
+    var w = x2 - x1;
+    var h = y2 - y1;
+    if(recursion_level == undefined) { recursion_level = 0; }
     if(w != 0 && h != 0) {
+        if(recursion_level > 10) {
+            if(thruk_debug_js) { alert("ERROR: deep recursion "+x1+"/"+y1+" "+x2+"/"+y2); }
+            return;
+        }
         // need two lines
-        bp_draw_edge(edge_container, edge_id, x1, y1, x1, y2);
-        bp_draw_edge(edge_container, edge_id, x1, y2, x2, y2);
+        bp_draw_edge(edge_container, edge_id, x1, y1, x1, y2, recursion_level+1);
+        bp_draw_edge(edge_container, edge_id, x1, y2, x2, y2, recursion_level+1);
         return;
     }
     if(w < 0) { x1 = x2; w = -w +2; }

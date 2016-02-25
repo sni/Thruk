@@ -2,19 +2,15 @@ package Thruk::Controller::error;
 
 use strict;
 use warnings;
-use utf8;
-use Data::Dumper;
-use Carp qw/cluck confess/;
-
-use parent 'Catalyst::Controller';
+use Carp qw/cluck confess longmess/;
 
 =head1 NAME
 
-Thruk::Controller::error - Catalyst Controller
+Thruk::Controller::error - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
     predefined errors:
 
@@ -35,16 +31,23 @@ Catalyst Controller.
 
 =cut
 
-sub index :Path :Args(1) :ActionClass('RenderView') {
-    my ( $self, $c, $arg1 ) = @_;
+sub index {
+    my ( $c, $arg1 ) = @_;
 
+    if(!defined $arg1 && defined $c->stash->{'err'}) {
+        $arg1 = $c->stash->{'err'};
+    }
+    if(!defined $arg1 && defined $c->req->parameters->{'error'}) {
+        $arg1 = $c->req->parameters->{'error'};
+    }
     if(!defined $c) {
         confess("undefined c in error/index");
     }
 
-    Thruk::Action::AddDefaults::add_defaults(1, undef, $self, $c) unless defined $c->stash->{'defaults_added'};
+    Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
 
-    $c->{'canceled'}          = 1;
+    $c->{'errored'}           = 1;
     $c->stash->{errorDetails} = '';
 
     # status code must be != 200, otherwise compressed output will fail
@@ -147,7 +150,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '14'  => {
             'mess' => 'missing backend configuration',
-            'dscr' => 'please specify at least one backend in your thruk_local.conf<br>Please read the <a href="'.$c->stash->{'url_prefix'}.'documentation.html#_configuration_2">setup instructions</a>.',
+            'dscr' => 'please specify at least one backend in your thruk_local.conf<br>Please read the <a href="http://www.thruk.org/documentation/install.html" target="_blank">setup instructions</a>.',
             'code' => 500, # internal server error
         },
         '15'  => {
@@ -185,6 +188,21 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'dscr' => 'background job failed, look at your logfile for details',
             'code' => 500, # internal server error
         },
+        '24'  => {
+            'mess' => 'Security Alert',
+            'dscr' => 'This request is not allowed, details can be found in the thruk.log.',
+            'code' => 403, # forbidden
+        },
+        '25'  => {
+            'mess' => 'This page does not exist...',
+            'dscr' => 'If you believe this is an error, check your configuration and your logfiles.',
+            'code' => 404, # not found
+        },
+        '26'  => {
+            'mess' => 'It appears as though you do not have permission to view this information...',
+            'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
+            'code' => 403, # forbidden
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
@@ -199,13 +217,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         $c->stash->{errorDetails} .= join('<br>', @{$c->error});
     }
 
-    Thruk->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
-    Thruk->config->{'custom-error-message'}->{'response-status'}   = $code;
-    $c->response->status($code);
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500) {
             $c->log->error($errors->{$arg1}->{'mess'});
-            $c->log->error("on page: ".$c->request->uri) if defined $c->request->uri;
+            $c->log->error("on page: ".$c->req->url) if defined $c->req->url;
             if($errors->{$arg1}->{'details'}) {
                 for my $row (split(/\n/mx, $errors->{$arg1}->{'details'})) {
                     $c->log->error($row);
@@ -213,7 +228,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             }
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
-            $c->log->debug("on page: ".$c->request->uri) if defined $c->request->uri;
+            $c->log->debug("on page: ".$c->req->url) if defined $c->req->url;
         }
     }
 
@@ -221,6 +236,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         for my $error ( @{ $c->error } ) {
             $c->stash->{'stacktrace'} .= $error;
         }
+        $c->stash->{'stacktrace'} .= "\n".longmess();
     }
 
     # clear errors to avoid invinite loops
@@ -233,11 +249,11 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         $c->stash->{'remote_user'}  = '?';
     }
 
-    $c->stash->{'template'} = Thruk->config->{'custom-error-message'}->{'error-template'};
+    $c->stash->{'template'} = 'error.tt';
 
     ###############################
     # try to set the refresh
-    if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
+    if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} && (!defined $c->stash->{'no_auto_reload'} || $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
 
@@ -250,11 +266,6 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
-    # do not cache errors
-    $c->response->headers->last_modified(time);
-    $c->response->headers->expires(time - 3600);
-    $c->response->headers->header(cache_control => "public, max-age=0");
-
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         Thruk::Utils::CLI::_error($c->stash->{errorMessage});
         Thruk::Utils::CLI::_error($c->stash->{errorDescription});
@@ -265,6 +276,19 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         }
     }
 
+    # going back on error pages is ok
+    $c->stash->{'disable_backspace'} = 0;
+
+    # do not download errors
+    $c->res->headers->header('Content-Disposition', '');
+    $c->res->headers->content_type('');
+
+    # do not cache errors
+    $c->res->code($code);
+    $c->res->headers->last_modified(time);
+    $c->res->headers->expires(time - 3600);
+    $c->res->headers->header(cache_control => "public, max-age=0");
+    $c->{'rendered'} = 0; # force rerendering
     return 1;
 }
 
@@ -280,7 +304,7 @@ sub _get_connection_details {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 
@@ -288,7 +312,5 @@ This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

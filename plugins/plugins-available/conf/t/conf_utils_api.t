@@ -8,14 +8,17 @@ use IO::Socket::UNIX;
 use IO::Socket::INET;
 use File::Temp qw/tempdir/;
 use File::Copy qw/copy/;
+use File::Slurp qw/read_file/;
 use Storable qw/dclone/;
 
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
-    plan skip_all => 'local test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 28;
+    plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    plan tests => 32;
     $SIG{'ALRM'} = sub { confess('alarm'); };
     alarm(60);
+    $ENV{'THRUK_TEST_NO_STDOUT_LOG'} = 1;
+    $ENV{'THRUK_TEST_CONF_NO_LOG'}   = 1;
 }
 
 ###########################################################
@@ -25,7 +28,7 @@ BEGIN {
     for my $x (0..99) {
         $testport = $start + $x;
         my $socket = IO::Socket::INET->new(Listen    => 5,
-                                           LocalAddr => 'localhost',
+                                           LocalAddr => '127.0.0.1',
                                            LocalPort => $testport,
                                            Proto     => 'tcp');
         last if($socket);
@@ -63,33 +66,42 @@ BEGIN {
     print $fh "tmp_path  = ".$http_dir."/tmp\n";
     close($fh);
     my $cmd = "cat $local_dir/thruk_local.conf | sed -e 's|/tmp/live|$local_dir/tmp/live|g' -e 's|= plugins/.*\$|$local_dir/$input_dir|g' > $local_dir/thruk_local.conf2 && mv $local_dir/thruk_local.conf2 $local_dir/thruk_local.conf";
+    ok($cmd, $cmd);
     `$cmd`;
 
     $cmd = "cat $http_dir/thruk_local.conf | sed -e 's|%TESTPORT%|$testport|g' > $http_dir/thruk_local.conf2 && mv $http_dir/thruk_local.conf2 $http_dir/thruk_local.conf";
+    ok($cmd, $cmd);
     `$cmd`;
 
-    $ENV{'CATALYST_CONFIG'} = $http_dir;
+    $ENV{'THRUK_CONFIG'} = $http_dir;
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
-use Catalyst::Test 'Thruk';
-
 
 ###########################################################
 # start test server
+my $cmd     = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
+ok($cmd, $cmd);
+$SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
 my $httppid = fork();
 if(!$httppid) {
-    mkdir('/tmp/');
-    exec("CATALYST_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport) or exit 1;
+    exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
+    exit 1;
 }
+ok($httppid, "http server started with pid: ".$httppid);
 my $now = time();
+my $connected;
 for my $x (1..15) {
-    my $socket = IO::Socket::INET->new('localhost:'.$testport);
-    last if($socket and $socket->connected());
+    my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
+    $connected = 1 if($socket and $socket->connected());
+    last if $connected;
+    last unless -d "/proc/$httppid";
     sleep(1);
 }
+bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
 ok($httppid, 'test server started: '.$httppid);
+$SIG{CHLD} = 'DEFAULT';
 sleep(2);
 alarm(30);
 
@@ -144,7 +156,7 @@ for my $x (1..30) {
     }
     sleep(1);
 }
-bail_out_with_kill('server did not start') unless $started;
+bail_out_with_kill('server did not start properly') unless $started;
 
 ###########################################################
 # init our components
@@ -230,18 +242,21 @@ sleep(1);
 
 ###########################################################
 # really stop test server
-END {
-    `ps auxww | grep -- '-p $testport' | awk '{ print \$2 }' | xargs kill >/dev/null 2>&1` if $httppid;
+sub stop_clean_all {
+    # kill thruk_server by match, because it forks and cannot be killed by the original pid
+    `ps auxww | grep -- './script/thruk_server.pl' | awk '{ print \$2 }' | xargs kill -2 >/dev/null 2>&1` if $httppid;
     kill(9, $socketpid) if $socketpid;
+    kill(9, $httppid)   if $httppid;
     `rm -rf $http_dir $local_dir`;
 }
+END {
+    stop_clean_all();
+};
 
 ###########################################################
 sub bail_out_with_kill {
     my($msg) = @_;
-    `ps -efl | grep -- '-p $testport' | awk '{ print \$4 }' | xargs kill >/dev/null 2>&1`;
-    kill(9, $socketpid)             if $socketpid;
-    `rm -rf $http_dir $local_dir`;
-    BAIL_OUT($msg);
+    stop_clean_all();
+    BAIL_OUT($msg.' (in '.$0.')');
 }
 

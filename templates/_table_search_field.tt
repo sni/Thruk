@@ -1,1 +1,16 @@
 ﻿<input type="text" placeholder="filter" id="table_search_input" class="deletable" style="width: 100px; margin-right: 3px;" onchange='table_search(this.id, [% encode_json_obj(ids) %])' onkeyup='table_search(this.id, [% encode_json_obj(ids) %])' onfocus='table_search(this.id, [% encode_json_obj(ids) %])'>
+<script type="text/javascript">
+<!--
+[%+ FOREACH id = ids +%]
+    var filter = get_hash(2);
+    if(filter != undefined) {
+        jQuery('#table_search_input').val(filter);
+    }
+
+jQuery(document).ready(function() {
+    // preserve hash
+    jQuery("TABLE#[% id %] A").on('click', preserve_hash);
+});
+[%+ END +%]
+-->
+</script>

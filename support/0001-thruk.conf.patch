@@ -1,6 +1,6 @@
---- a/thruk.conf	2014-01-22 23:19:55.000000000 +0100
-+++ b/thruk.conf	2014-01-22 23:20:00.000000000 +0100
-@@ -80,11 +80,11 @@
+--- a/thruk.conf	2015-05-04 11:38:01.000000000 +0200
++++ b/thruk.conf	2015-05-04 11:38:37.000000000 +0200
+@@ -91,7 +91,7 @@
  
  ######################################
  # location of your cgi.cfg
@@ -9,12 +9,7 @@
  
  ######################################
  # use frames, can be useful for addons
--use_frames          = 0
-+use_frames          = 1
- 
- ######################################
- # use histograms, shows histogram links
-@@ -182,11 +182,11 @@
+@@ -197,11 +197,11 @@
  
  ######################################
  # temporary directory, used for template cache...
@@ -28,7 +23,7 @@
  
  ######################################
  # mode used when creating or saving files
-@@ -195,24 +195,24 @@
+@@ -210,24 +210,24 @@
  
  ######################################
  # files owners for new / changed files
@@ -58,7 +53,7 @@
  
  ######################################
  # custom templates
-@@ -220,7 +220,7 @@
+@@ -235,7 +235,7 @@
  
  ######################################
  # log4perl config
@@ -67,7 +62,7 @@
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -453,23 +453,23 @@
+@@ -490,23 +490,23 @@
  # Specifiy a file which is then completly under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
@@ -96,7 +91,7 @@
  
  # Set first day of week. Used in reports.
  # Sunday: 0
-@@ -578,6 +578,20 @@
+@@ -616,6 +616,20 @@
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
  #    <peer>
@@ -117,7 +112,7 @@
  #        name   = Local Naemon
  #        type   = livestatus
  #        hidden = 1             # make this backend hidden by default
-@@ -629,9 +643,9 @@
+@@ -667,9 +681,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
@@ -130,12 +125,12 @@
  
      #pre_obj_save_cmd   =
      #post_obj_save_cmd  =
-@@ -664,7 +678,7 @@
+@@ -718,7 +732,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  
-     # wkhtmltopdf is used to convert html pages into pdf
--    #wkhtmltopdf = /path/to/wkhtmltopdf
-+    wkhtmltopdf = @DATADIR@/script/wkhtmltopdf
+     # phantomjs is used to convert html pages into pdf
+-    #phantomjs = /path/to/phantomjs
++    phantomjs = @DATADIR@/script/phantomjs
  
      # pnp export script is used to export pnp graphs into reports
      #pnp_export = /path/to/pnp_export.sh

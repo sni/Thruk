@@ -1,4 +1,6 @@
 ﻿[% USE date %]
+[% PROCESS _blocks.tt %]
+
 [% size = 1 %]
 [% IF data %][% size = data.size + 1 %][% END %]
 <workbook>
@@ -15,14 +17,14 @@
       </format>
     </row>
     [% FOREACH l = data %]
-    [% PROCESS _logs_line.tt %]
+    [% PROCESS _logs_line %]
     [% IF has_type == 1 %]
       [% message = message.remove('^\s*' _ l.type _ ':\s*') %]
       [% IF l.host_name != '' %]
-        [% message = message.remove('^\s*' _ l.host_name _ '\;\s*') %]
+        [% message = message.remove('^\s*' _ escape_regex(l.host_name) _ '\;\s*') %]
       [% END %]
       [% IF l.service_description != '' %]
-        [% message = message.remove('^\s*' _ l.service_description _ '\;\s*') %]
+        [% message = message.remove('^\s*' _ escape_regex(l.service_description) _ '\;\s*') %]
       [% END %]
       [% IF info != '' %]
         [% message = message.remove('^\s*' _ info _ '\;\s*') %]

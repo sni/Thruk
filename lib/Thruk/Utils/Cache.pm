@@ -12,12 +12,12 @@ Cache Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Carp;
-use Thruk::Utils::IO;
-use Storable qw/lock_nstore lock_retrieve/;
+use Carp qw/confess/;
+use Thruk::Utils::IO ();
+use Storable qw(nstore retrieve);
+use File::Copy qw(move);
 
-require Exporter;
-our @ISA = qw(Exporter);
+use base 'Exporter';
 our @EXPORT_OK = qw(cache);
 
 ##########################################################
@@ -32,10 +32,10 @@ create new cache instance
 sub new {
     my($class,$cachefile) = @_;
     my $self = {
-        '_cachefile' => $cachefile,
-        '_data'      => {},
-        '_stat'      => [],
-        '_checked'   => 0,
+        '_cachefile'    => $cachefile,
+        '_data'         => {},
+        '_stat'         => [],
+        '_checked'      => 0,
     };
     bless $self, $class;
     $self->_update();
@@ -53,7 +53,8 @@ return cache
 
 =cut
 sub cache {
-    my($class, $file) = @_;
+    #my($class, $file)...
+    my(undef, $file) = @_;
     our $instance;
     if($file) { $instance = __PACKAGE__->new($file); }
     if(!$instance) { confess('uninitialized'); }
@@ -64,37 +65,58 @@ sub cache {
 
 =head2 get
 
+  get()
   get($key)
+  get($key, $key2)
+  get($key, $key2, $key3)
+  ...
 
 return cache entry
 
 =cut
 sub get {
-    my($self,$key) = @_;
+    my($self,@keys) = @_;
     $self->_update();
-    if($key) {
-        return($self->{'_data'}->{$key});
+    my $last_key = pop(@keys);
+    return($self->{'_data'}) unless $last_key;
+    my $data = $self->{'_data'};
+    return unless defined $data;
+    while(my $key = shift @keys) {
+        return unless defined $data->{$key};
+        $data = $data->{$key};
     }
-    return($self->{'_data'});
+    return($data->{$last_key});
 }
 
 ##############################################
 
 =head2 set
 
+  set($data)
   set($key, $value)
+  set($key, $key2, $value)
+  set($key, $key2, $key3, $value)
+  ...
 
 set value
 
 =cut
 sub set {
-    my($self,$key,$value, $value2) = @_;
-    $self->_update('force' => 1);
-    if(defined $value2) {
-        $self->{'_data'}->{$key}->{$value} = $value2;
-    } else {
-        $self->{'_data'}->{$key} = $value;
+    my($self,@keys) = @_;
+    if(scalar @keys == 1) {
+        $self->{'_data'} = $keys[0];
+        $self->_store();
+        return;
     }
+    my $value    = pop(@keys);
+    my $last_key = pop(@keys);
+    $self->_update('force' => 1);
+    my $data = $self->{'_data'};
+    while(my $key = shift @keys) {
+        $data->{$key} = {} unless defined $data->{$key};
+        $data = $data->{$key};
+    }
+    $data->{$last_key} = $value;
     $self->_store();
     return;
 }
@@ -124,8 +146,8 @@ clear complete cache
 =cut
 sub clear {
     my($self) = @_;
-    $self->{'_data'} = {};
-    $self->_store();
+    unlink($self->{'_cachefile'});
+    $_[0] = Thruk::Utils::Cache->new($self->{'_cachefile'});
     return;
 }
 
@@ -140,26 +162,17 @@ update cache from file
 =cut
 sub _update {
     my($self, %args) = @_;
-    my $update = 0;
-    if($args{'force'}) {
-        $update = 1;
-    }
     if(-f $self->{'_cachefile'}) {
         my $now = time();
         # only check every x seconds
-        if($now > $self->{'_checked'} + 5) {
+        if($now > $self->{'_checked'} + 5 || $args{'force'}) {
             $self->{'_checked'} = $now;
             my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
             if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
-                $self->{'_data'} = lock_retrieve($self->{'_cachefile'});
+                $self->{'_data'} = $self->_retrieve();
                 $self->{'_stat'} = \@stat;
                 return;
             }
-        }
-        if($update) {
-            my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-            $self->{'_data'} = lock_retrieve($self->{'_cachefile'});
-            $self->{'_stat'} = \@stat;
         }
     } else {
         # did not exist before, so create an empty cache
@@ -179,22 +192,50 @@ store cache to disk
 =cut
 sub _store {
     my($self) = @_;
-    lock_nstore($self->{'_data'}, $self->{'_cachefile'});
+    nstore($self->{'_data'}, $self->{'_cachefile'}.'.'.$$);
+    move($self->{'_cachefile'}.'.'.$$, $self->{'_cachefile'});
+    Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
     my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
     $self->{'_stat'}    = \@stat;
-    Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
-    my $now = time();
-    $self->{'_checked'} = $now;
+    $self->{'_checked'} = time();
     return;
+}
+
+##############################################
+
+=head2 _retrieve
+
+  _retrieve()
+
+retrieve data from disk
+
+=cut
+sub _retrieve {
+    my($self) = @_;
+    my $data;
+    eval {
+        $data = retrieve($self->{'_cachefile'});
+    };
+    if($@) {
+        my $err = $@;
+        $self->clear();
+        $self->{'_data'} = {};
+        $self->_store();
+        $data = {};
+        warn('failed to read '.$self->{'_cachefile'}.': '.$err);
+    }
+    return $data;
 }
 
 ##############################################
 
 1;
 
+__END__
+
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 
