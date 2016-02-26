@@ -70,6 +70,8 @@ sub core_scheduling_page {
 
     my $data = $c->{'db'}->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     for my $d (@{$data}) {
+        next unless $d->{'check_interval'};
+        next unless $d->{'has_been_checked'};
         my $time = $d->{'next_check'};
         next unless $time > $now - $look_back;
         next unless $time < $now + $look_ahead;
@@ -127,6 +129,8 @@ sub core_scheduling_page {
     my $intervals = {};
     my $total     = 0;
     for my $d (@{$data}) {
+        next unless $d->{'check_interval'};
+        next unless $d->{'has_been_checked'};
         $intervals->{$d->{'check_interval'}}++;
         $total += 1/$d->{'check_interval'};
     }
@@ -182,6 +186,8 @@ sub _reschedule_backend {
     my $data = $c->{'db'}->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     my $intervals = {};
     for my $d (@{$data}) {
+        next unless $d->{'check_interval'};
+        next unless $d->{'has_been_checked'};
         push @{$intervals->{$d->{'check_interval'}}}, $d;
     }
     for my $interval (keys %{$intervals}) {
