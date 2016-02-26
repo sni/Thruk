@@ -485,7 +485,8 @@ sub _process_host_page {
     $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
 
     # pnp graph?
-    $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
+    $c->stash->{'pnp_url'}    = Thruk::Utils::get_pnp_url($c, $host);
+    $c->stash->{'pnp_source'} = $custvars->{'PNP_SOURCE'} || '0';
 
     # grafana graph?
     $c->stash->{'histou_url'} = Thruk::Utils::get_histou_url($c, $host);
@@ -617,7 +618,8 @@ sub _process_service_page {
     $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
 
     # pnp graph?
-    $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $service);
+    $c->stash->{'pnp_url'}    = Thruk::Utils::get_pnp_url($c, $service);
+    $c->stash->{'pnp_source'} = $custvars->{'PNP_SOURCE'} || '0';
 
     # grafana graph?
     $c->stash->{'histou_url'} = Thruk::Utils::get_histou_url($c, $service);
