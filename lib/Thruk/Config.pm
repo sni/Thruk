@@ -726,6 +726,15 @@ sub finalize {
             $c->config->{$key} = $c->stash->{'config_adjustments'}->{$key};
         }
     }
+    if($c->stash->{'config_adjustments_extra'}) {
+        $Thruk::Backend::Pool::peer_order   = $c->stash->{'config_adjustments_extra'}->{peer_order};
+        $Thruk::Backend::Pool::peers        = $c->stash->{'config_adjustments_extra'}->{peers};
+        $Thruk::Backend::Pool::pool         = $c->stash->{'config_adjustments_extra'}->{pool};
+        $Thruk::Backend::Pool::pool_size    = $c->stash->{'config_adjustments_extra'}->{pool_size};
+        $Thruk::Backend::Pool::xs           = $c->stash->{'config_adjustments_extra'}->{xs};
+        delete $c->stash->{'config_adjustments_extra'};
+    }
+
 
     if($Thruk::deprecations_log) {
         if(    $ENV{'THRUK_SRC'} ne 'TEST'
