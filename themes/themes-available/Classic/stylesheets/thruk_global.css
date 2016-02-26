@@ -722,6 +722,7 @@ DIV#search-results ul li a.ajax_search_selected, DIV#search-results ul li a:hove
 
 .command_line {
   max-width:800px;
+  word-wrap: break-word;
 }
 
 .config_info {
