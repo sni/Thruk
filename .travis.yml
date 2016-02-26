@@ -6,8 +6,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install apt-transport-https
   - sudo sh -c "echo 'deb https://labs.consol.de/repo/stable/ubuntu precise main' >> /etc/apt/sources.list"
-  - gpg --keyserver keys.gnupg.net --recv-keys F8C1CA08A57B9ED7
-  - gpg --armor --export F8C1CA08A57B9ED7 | sudo apt-key add -
+  - wget -q "https://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | sudo apt-key add -
   - sudo apt-get update
   - sudo apt-get -y install make build-essential rsync perl-doc tofrodos libcurl4-openssl-dev apache2 libcairo2-dev libperl-dev libmysqlclient-dev libgd2-xpm-dev cpanminus yui-compressor wget
   - sudo apt-get -y install libfile-bom-perl libhtml-lint-perl libtest-simple-perl libtest-cmd-perl libtest-pod-perl libmodule-install-perl libgd-gd2-perl libdevel-cycle-perl
