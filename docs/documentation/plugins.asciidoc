@@ -114,6 +114,29 @@ Thruk.
 
 
 
+Core Scheduling Graph
+~~~~~~~~~~~~~~~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Visualize Core Scheduling
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The Core scheduling plugin allows you to visualize the active host
+and service checks on a timeline. This plugin also provides a cli
+command to balance out all (or only a few) checks evenly to reduce
+load piles.
+
+This addon is shipped with Thruk since version 2.06 but not enabled by
+default.
+
+++++
+<a title="core scheduling graph" rel="lightbox[plugins]" href="plugins/core_scheduling1.png"><img src="plugins/core_scheduling1.png" alt="core scheduling graph " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
 
 
 Mine Map
