@@ -534,6 +534,33 @@ sub get_day_name {
 
 ##########################################################
 
+=head2 get_graph_source
+
+  get_graph_source(c, host, service)
+
+return index of first graph for given host (or service) provided
+by the _GRAPH_SOURCE custom variable or 0 as default fallback.
+
+=cut
+sub get_graph_source {
+    my($host, $service) = @_;
+    my $c = $Thruk::Request::c or die("not initialized!");
+    my $data;
+    if($service) {
+        $data = $c->stash->{'services'}->{$host}->{$service};
+    } else {
+        $data = $c->stash->{'hosts'}->{$host};
+    }
+    if($data) {
+        my $custvars = Thruk::Utils::get_custom_vars($c, $data);
+        return($custvars->{'GRAPH_SOURCE'} || '0');
+    }
+    return 0;
+}
+
+
+##########################################################
+
 =head2 get_pnp_image
 
   get_pnp_image(hst, svc, start, end, width, height, source)

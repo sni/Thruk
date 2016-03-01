@@ -1415,6 +1415,7 @@ sub get_perf_image {
     if($grafanaurl) {
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
+        # grafana panel ids usually start at 1 (or 2 with old versions)
         $grafanaurl .= '&panelId='.($source || $c->config->{'grafana_default_panelId'} || 1);
         if($resize_grafana_images) {
             $width  = $width * 1.3;

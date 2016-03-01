@@ -9,7 +9,8 @@
 [% PROCESS 'reports/comp/sla_total_table.tt' data = available.total %]
 
 [% IF param.max_pnp_sources >= 1 %]
-  [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, 0) %]
+  [% source = get_graph_source(c.req.parameters.host, c.req.parameters.service) %]
+  [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, source) %]
   [% IF pnpdata %]
   <div align="center">
     <img src="[% pnpdata %]" class="[% c.stash.last_graph_type %]image" alt="[% c.stash.last_graph_type %] graph">
