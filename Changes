@@ -18,6 +18,7 @@ next:
             - keep reports during updates (#546)
           - Config Tool:
             - show message if unsaved changes would be lost
+            - fix user password change (marcantoinedupre)
 
 2.04     Thu Nov 12 10:32:27 CET 2015
           - add json export to process info page
