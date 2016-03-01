@@ -5,6 +5,7 @@ next:
           - add eventhandler search option
           - add core scheduling graph page
             - add fix_scheduling cli command
+          - set default graph from _GRAPH_SOURCE custom variable
           - fix sending commands to all backends (#555)
           - fix vertical header in Minemap for recent firefox
           - Panorama View:
