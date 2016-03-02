@@ -9,7 +9,7 @@
 %endif
 
 Name:          thruk
-Version:       2.04
+Version:       2.06
 Release: 1
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>

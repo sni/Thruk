@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.06     Wed Mar 02 16:08:00 CET 2016
           - make custom variables from show_custom_vars clickable
           - add eventhandler search option
           - add core scheduling graph page
