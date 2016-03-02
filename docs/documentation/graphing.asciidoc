@@ -76,7 +76,23 @@ to Grafana similar to PNP4Nagios. (This is already prepared in OMD-Labs)
 === Other 3rd Party Grapher
 Other 3rd party grapher like graphite or graphios can be integrated in a generic
 way through the link:configuration.html#graph_word[graph_word] setting from the
-thruk_local.conf.
+thruk_local.conf. If you need to rewrite the host or service names to make the
+url work with the grapher addon of your choice, you can use the regular
+expressions from link:configuration.html#graph_replace[graph_replace] to replace
+unwanted characters.
+
+graphite:
+
+------
+graph_replace = s/[^\w\-]/_/gmx
+------
+
+graphios:
+
+------
+graph_replace = s/\s//gmx
+graph_replace = s/[^\w\-]/_/gmx
+------
 
 
 === General Tips & Tricks

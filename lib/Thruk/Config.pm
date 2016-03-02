@@ -461,6 +461,7 @@ sub set_default_config {
         'disable_user_password_change'      => 0,
         'user_password_min_length'          => 5,
         'grafana_default_panelId'           => 1,
+        'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
@@ -530,6 +531,9 @@ sub set_default_config {
 
     # make show_custom_vars a list
     $config->{'show_custom_vars'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))];
+
+    # make graph_replace a list
+    $config->{'graph_replace'} = [@{list($config->{'graph_replace'})}];
 
     ## no critic
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
