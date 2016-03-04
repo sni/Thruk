@@ -1,7 +1,7 @@
 var testCase      = new TestCase(180, 240);
 var env           = new Environment();
 var screenRegion  = new Region();
-var $waitTimeout  = 10000;
+var $waitTimeout  = 5000;
 var $testUser     = "thrukadmin"
 var $testPassword = "thrukadmin"
 _set($testUser,     $testUser);
@@ -14,12 +14,12 @@ env.setSimilarity(0.9);     // default is 0.7
 
 function mouseClickXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
-    region.click().sleep(1);
+    region.click();
 }
 
 function mouseRightClickXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
-    region.rightClick().sleep(1);
+    region.rightClick();
 }
 
 function thruk_login() {

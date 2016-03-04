@@ -1,4 +1,4 @@
-FROM consol/sakuli-ubuntu-xfce:v0.9.1
+FROM consol/sakuli-ubuntu-xfce:v1.0.0
 MAINTAINER Sven Nierlein "sven@nierlein.de"
 ENV REFRESHED_AT 2015-10-27
 

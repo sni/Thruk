@@ -90,7 +90,7 @@ if [ $HAS_CASE -eq 0 ]; then
     done
 fi
 
-$SAKULI_HOME/bin/sakuli.sh --run $CASEDIR $*
+$SAKULI_HOME/bin/sakuli run $CASEDIR $*
 res=$?
 echo "SAKULI_RETURN_VAL: $res"
 

@@ -19,7 +19,7 @@ while(my $line = <STDIN>) {
     # just skip empty lines
     if($line =~ m|^[\s\.]+$|mx) {
     }
-    elsif($line =~ m|^INFO.*\]\s+\-\s*$|mx) {
+    elsif($line =~ m%^(WARN|INFO).*\]\s+\-\s*$%mx) {
     }
     elsif($line =~ m|SAKULI_RETURN_VAL:\s+(\d+)|mx) {
         $exitcode = $1;
@@ -70,7 +70,20 @@ while(my $line = <STDIN>) {
     # inside case
     elsif($latest_case) {
         push @{$cur_case_logs}, $line;
-        if($errored || $line !~ m/^INFO\s+/mx) {
+
+        if($line =~ m/\QCertificate not found:\E/mx) {
+        }
+        elsif($line =~ m/^----$/mx) {
+        }
+        elsif($line =~ m/^WARN\s+/mx) {
+        }
+        elsif($line =~ m/^\s+at\s+/mx) {
+        }
+        elsif($line =~ m/^\s*Caused\ by:/mx) {
+        }
+        elsif($line =~ m/^\s+\.\.\.\ /mx) {
+        }
+        elsif($errored || $line !~ m/^INFO\s+/mx) {
             if(!$errored) {
                 print "ERROR\n";
                 # print backlog for this case
