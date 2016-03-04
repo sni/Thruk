@@ -41,8 +41,8 @@ install:
   - '[ "$TRAVIS_BRANCH" != "docker" ] || make dockerbuild'
 
 script:
-  - sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_TRAVIS=1 TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
-  - '[ "$TRAVIS_BRANCH" != "docker" ] ||  make dockertestfirefox'
+  - '[ "$TRAVIS_BRANCH"  = "docker" ] || sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_TRAVIS=1 TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
+  - '[ "$TRAVIS_BRANCH" != "docker" ] || make dockertestfirefox'
 after_failure:
   - '[ "$TRAVIS_BRANCH" != "docker" -o ! -f ~/.dropbox_uploader ] || ./t/docker/dropbox_uploader.sh upload t/docker/results/*/* thruk-travis/$TRAVIS_JOB_NUMBER/'
 notifications:
