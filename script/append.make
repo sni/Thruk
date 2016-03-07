@@ -211,12 +211,12 @@ dockertest: t/docker/Dockerfile dockertestfirefox dockertestchrome
 
 dockertestchrome:
 	mkdir -p $(DOCKERRESULTS)
-	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -b chrome
+	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -browser chrome
 	rm -rf $(DOCKERRESULTS)
 
 dockertestfirefox:
 	mkdir -p $(DOCKERRESULTS)
-	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -b firefox
+	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -browser firefox
 	rm -rf $(DOCKERRESULTS)
 
 dockershell: t/docker/Dockerfile

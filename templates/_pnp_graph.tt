@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 <script type="text/javascript">
-  var pnp_source = 0;
+  var pnp_source = [% pnp_source %];
   var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550";
 
   /* try to fetch sources */

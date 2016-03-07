@@ -557,7 +557,7 @@ sub get_new_file_content {
 
     return $new_content if $self->{'deleted'};
 
-    return encode_utf8(read_file($self->{'path'})) unless $self->{'changed'};
+    return encode_utf8(Thruk::Utils::decode_any(scalar read_file($self->{'path'}))) unless $self->{'changed'};
 
     my $linenr = 1;
 

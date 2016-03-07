@@ -1,12 +1,19 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+next
+          - Config Tool:
+            - fix encodig when raw editing files (#572)
+
+2.06     Wed Mar 02 16:08:00 CET 2016
           - make custom variables from show_custom_vars clickable
           - add eventhandler search option
           - add core scheduling graph page
             - add fix_scheduling cli command
+          - set default graph from _GRAPH_SOURCE custom variable
           - fix sending commands to all backends (#555)
           - fix vertical header in Minemap for recent firefox
+          - fix graphite integration (#557)
+          - add generic grapher replace setting 'graph_replace'
           - Panorama View:
             - add hide legend / graph only checkbox for pnp panel
             - add new appearance type 'label only'
@@ -18,6 +25,7 @@ next:
             - keep reports during updates (#546)
           - Config Tool:
             - show message if unsaved changes would be lost
+            - fix user password change (marcantoinedupre)
 
 2.04     Thu Nov 12 10:32:27 CET 2015
           - add json export to process info page

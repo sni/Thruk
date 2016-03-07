@@ -266,7 +266,7 @@ sub calculate_availability {
         die('no such service: '.($service||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ])) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
-            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
             push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
             if($initialassumedservicestate == -1) {
                 $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
@@ -314,7 +314,7 @@ sub calculate_availability {
                 # calculate service availability for services on these hosts too
                 my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
                 for my $service (@{$service_data}) {
-                    $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+                    $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
                     push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
                 }
 
@@ -338,6 +338,7 @@ sub calculate_availability {
         for my $host (@{$host_data}) {
             push @{$hosts}, $host->{'name'};
         }
+        $c->stash->{'hosts'} = Thruk::Utils::array2hash($host_data, 'name');
     }
 
     # all hosts
@@ -408,6 +409,7 @@ sub calculate_availability {
             }
         }
         $c->stash->{'groups'} = \%joined_groups;
+        $c->stash->{'hosts'}  = $host_data;
 
         push @{$hosts}, keys %{$host_data};
 
@@ -422,7 +424,7 @@ sub calculate_availability {
             # calculate service availability for services on these hosts too
             my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
             for my $service (@{$service_data}) {
-                $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+                $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
                 push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
             }
 
@@ -457,8 +459,9 @@ sub calculate_availability {
 
         my $service_data;
         for my $service (@{$all_services}) {
-            $service_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+            $service_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
         }
+        $c->stash->{'services'} = $service_data;
 
         # join our groups together
         my %joined_groups;

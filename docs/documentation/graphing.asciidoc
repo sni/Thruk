@@ -1,0 +1,134 @@
+---
+layout: docs
+title: Graphing Addons Integration
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+== Graphing Addons Integration
+
+=== PNP4Nagios
+
+link:http://docs.pnp4nagios.org/[PNP4Nagios] graphs can be easily integrated in Thruk which will make them appear
+in the service or host details as well as in the SLA reports.
+
+Integration is done by specifing an 'action_url' with the path to your pnp4nagios installation.
+
+When using OMD, the integration of PNP4Nagios has been done for you already.
+
+Example Service
+
+------
+define service {
+  host_name             Example Host
+  service_description   Service with Performance Data
+  use                   generic_service
+  action_url            /pnp4nagios/index.php/graph?host=$HOSTNAME$&srv=$SERVICEDESC$' class='tips' rel='/pnp4nagios/index.php/popup?host=$HOSTNAME$&srv=$SERVICEDESC$
+}
+------
+
+[TIP]
+.templates
+=======
+Often you can use the templates 'host-pnp' or 'srv-pnp' which set the right action_url automatically.
+=======
+
+Read more about the integration in web interfaces on link:http://docs.pnp4nagios.org/pnp-0.6/webfe[pnp4nagios.org].
+
+==== Popups
+
+Thruk can display popups on the host- and service list pages with the action url from
+the example above. All you need to do is to enable the provided ssi file from
+etc/thruk/ssi/status-header.ssi-pnp (This file is enabled in OMD already). Do not
+forget to restart Thruk or the webserver after renaming the file.
+
+
+
+
+=== Grafana / Histou
+
+The integration of link:http://grafana.org/[Grafana] graphs is very similar to
+the PNP4Nagios integration by using the 'action_url'.
+
+[TIP]
+.labs-omd
+=======
+The OMD Labs Edition from link:https://labs.consol.de/omd/[labs.consol.de] comes with grafana preconfigured and is
+the easiest way to configure Thruk with Grafana. link:https://labs.consol.de/omd/packages/grafana/[Here is a guide to enable Grafana
+in OMD-Labs].
+=======
+
+Example Service:
+
+------
+define service {
+  host_name             Example Host
+  service_description   Service with Performance Data
+  use                   generic_service
+  action_url            /grafana/dashboard/script/histou.js?host=$HOSTNAME$$&service=$SERVICEDESC$
+}
+------
+
+To get the most out of Grafana, it is recommended to install the
+link:https://github.com/Griesbacher/histou[Histou] project which add templating
+to Grafana similar to PNP4Nagios. (This is already prepared in OMD-Labs)
+
+
+=== Other 3rd Party Grapher
+Other 3rd party grapher like graphite or graphios can be integrated in a generic
+way through the link:configuration.html#graph_word[graph_word] setting from the
+thruk_local.conf. If you need to rewrite the host or service names to make the
+url work with the grapher addon of your choice, you can use the regular
+expressions from link:configuration.html#graph_replace[graph_replace] to replace
+unwanted characters.
+
+graphite:
+
+------
+graph_replace = s/[^\w\-]/_/gmx
+------
+
+graphios:
+
+------
+graph_replace = s/\s//gmx
+graph_replace = s/[^\w\-]/_/gmx
+------
+
+
+=== General Tips & Tricks
+
+==== Action Url Icons
+
+You can change the action url icons from the thruk_local.conf with
+link:configuration.html#host_action_icon[host_action_icon] and link:configuration.html#service_action_icon[service_action_icon].
+
+It is also possible to set a custom variable '_ACTION_ICON' which overrides the
+icon for a particular host or service.
+
+Example Service
+
+------
+define service {
+  ...
+  _ACTION_ICON          action_pnp.png
+}
+------
+
+
+==== Specifing Default Graph
+{% include new_since.ad version="2.06" %}
+Often hosts or services have more than one graph, for example the ping check has
+one graph for round trip time and one for packet loss. By default Thruk will
+always use the first graph in it's details page and in reports. Since release
+2.06 you can specify the graph index by setting a custom variable '_GRAPH_SOURCE'.
+The PNP4Nagios source index starts with 0 as first graph. So use 1 if you want
+to view the second graph as default.
+
+Example Service
+
+------
+define service {
+  ...
+  _GRAPH_SOURCE         1
+}
+------

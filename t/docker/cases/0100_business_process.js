@@ -18,7 +18,7 @@ try {
     isVisible(_div("WARNING"));
     click(_link("Business Process"));
     click(_span("(DRAFT)"));
-    click(_submit("save"));
+    click(_submit("save changes"));
     isVisible(_span("business process updated sucessfully"));
     isVisible(_div("WARNING"));
 

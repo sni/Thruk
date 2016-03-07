@@ -1415,6 +1415,7 @@ sub get_perf_image {
     if($grafanaurl) {
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
+        # grafana panel ids usually start at 1 (or 2 with old versions)
         $grafanaurl .= '&panelId='.($source || $c->config->{'grafana_default_panelId'} || 1);
         if($resize_grafana_images) {
             $width  = $width * 1.3;
@@ -1517,14 +1518,20 @@ sub get_action_url {
         for my $regex (@{list($graph_word)}) {
             if ($action_url =~ m|$regex|mx){
                 my $new_host = $host;
-                $new_host =~ s/\s//gmx;
-                $new_host =~ s/[^\w\-]/_/gmx;
+                for my $regex (@{$c->config->{'graph_replace'}}) {
+                    ## no critic
+                    eval('$new_host =~ '.$regex);
+                    ## use critic
+                }
                 $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
                 if ($svc) {
                     my $new_svc = $svc;
-                    $new_svc =~ s/\s//gmx;
-                    $new_svc =~ s/[^\w\-]/_/gmx;
+                    for my $regex (@{$c->config->{'graph_replace'}}) {
+                        ## no critic
+                        eval('$new_svc =~ '.$regex);
+                        ## use critic
+                    }
                     $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
                 }
 

@@ -3,7 +3,7 @@
 <script type="text/javascript">
   var histou_url        = "[% histou_url %]";
   var histou_frame_url  = "[% histou_frame_url %]";
-  var histou_source     = [% c.config.grafana_default_panelId %];
+  var histou_source     = [% histou_source %];
   var random            = Number(Math.random() * 100000).toFixed(0);
 
   /* try to fetch sources */

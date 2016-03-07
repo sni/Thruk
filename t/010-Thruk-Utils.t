@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 59;
+    plan tests => 60;
 
     use lib('t');
     require TestUtils;
@@ -102,7 +102,10 @@ SKIP: {
 
     my($res, $c) = ctx_request('/thruk/side.html');
     my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
-    is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(thrukadmin)');
+    is(ref $contactgroups, 'HASH', 'get_contactgroups_by_contact(thrukadmin)');
+
+    $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'nonexistant');
+    is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(nonexistant)');
 
     #########################
     use_ok('XML::Parser');

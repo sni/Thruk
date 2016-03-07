@@ -485,10 +485,12 @@ sub _process_host_page {
     $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
 
     # pnp graph?
-    $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
+    $c->stash->{'pnp_url'}    = Thruk::Utils::get_pnp_url($c, $host);
+    $c->stash->{'pnp_source'} = $custvars->{'GRAPH_SOURCE'} || '0';
 
     # grafana graph?
-    $c->stash->{'histou_url'} = Thruk::Utils::get_histou_url($c, $host);
+    $c->stash->{'histou_url'}    = Thruk::Utils::get_histou_url($c, $host);
+    $c->stash->{'histou_source'} = $custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1';
 
     # other graphs?
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $host);
@@ -617,10 +619,12 @@ sub _process_service_page {
     $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
 
     # pnp graph?
-    $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $service);
+    $c->stash->{'pnp_url'}    = Thruk::Utils::get_pnp_url($c, $service);
+    $c->stash->{'pnp_source'} = $custvars->{'GRAPH_SOURCE'} || '0';
 
     # grafana graph?
-    $c->stash->{'histou_url'} = Thruk::Utils::get_histou_url($c, $service);
+    $c->stash->{'histou_url'}    = Thruk::Utils::get_histou_url($c, $service);
+    $c->stash->{'histou_source'} = $custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1';
 
     # other graphs?
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $service);
@@ -740,7 +744,7 @@ sub _process_grafana_page {
 
     my $hst     = $c->req->parameters->{'host'};
     my $svc     = $c->req->parameters->{'service'};
-    my $source  = $c->req->parameters->{'source'} || 2;
+    my $source  = $c->req->parameters->{'source'} || 1;
     my $start   = $c->req->parameters->{'from'};
     my $end     = $c->req->parameters->{'to'};
     my $width   = $c->req->parameters->{'width'}  || 800;

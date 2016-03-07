@@ -5,10 +5,12 @@ use JSON::XS;
 use Thruk::Config;
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8);
+use File::Temp qw/tempfile/;
+use Thruk::Utils::IO;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    my $tests = 1342;
+    my $tests = 1381;
     $tests    = $tests - 11 if $ENV{'THRUK_TEST_NO_RELOADS'};
     plan tests => $tests;
 }
@@ -65,6 +67,54 @@ TestUtils::test_page(
     'like'    => '"ok" : 1',
 );
 
+SKIP: {
+    skip 'external tests', 50 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+
+    my $c = TestUtils::get_c();
+    delete $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+    my $page = TestUtils::test_page(
+        'url'               => '/thruk/cgi-bin/conf.cgi?action=user_password&referer=/thruk/cgi-bin/tac.cgi',
+        'like'              => ['Changing passwords is disabled', 'Tactical Monitoring Overview'],
+        'follow'            => 1,
+        'fail_message_ok'   => 1,
+    );
+
+    my($fh, $tmp_htpasswd) = tempfile();
+    $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'} = $tmp_htpasswd;
+
+    $page = TestUtils::test_page(
+        'url'               => '/thruk/cgi-bin/conf.cgi?action=user_password&referer=/thruk/cgi-bin/tac.cgi',
+        'like'              => ['Your password cannot be changed', 'Tactical Monitoring Overview'],
+        'follow'            => 1,
+        'fail_message_ok'   => 1,
+    );
+
+    # add user with password test
+    my $user = TestUtils::get_test_user();
+    Thruk::Utils::IO::write($tmp_htpasswd, $user.":wizDR5wi.JkYc\n");
+
+    $page = TestUtils::test_page(
+        'url'               => '/thruk/cgi-bin/conf.cgi?action=user_password&referer=/thruk/cgi-bin/tac.cgi',
+        'like'              => ['User: '.$user, 'Change Password'],
+    );
+
+    # change password
+    $page = TestUtils::test_page(
+        'url'               => '/thruk/cgi-bin/conf.cgi',
+        'like'              => ['Password changed successfully'],
+        'post'              => {
+            'action'         => 'user_password',
+            'save'           => 'Update',
+            'data.old'       => 'test',
+            'data.password'  => 'test.new',
+            'data.password2' => 'test.new',
+        },
+        follow              => 1,
+    );
+
+    unlink($tmp_htpasswd);
+};
+
 ###########################################################
 # test some pages
 my $pages = [
@@ -73,7 +123,6 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=thruk',
     '/thruk/cgi-bin/conf.cgi?sub=users',
     '/thruk/cgi-bin/conf.cgi?sub=plugins',
-    '/thruk/cgi-bin/conf.cgi?sub=user_password',
     '/thruk/cgi-bin/conf.cgi?sub=users&action=change&data.username=testuser',
     { url => '/thruk/cgi-bin/conf.cgi?sub=objects', fail_message_ok => 1 },
     '/thruk/cgi-bin/conf.cgi?edit&host='.$host,

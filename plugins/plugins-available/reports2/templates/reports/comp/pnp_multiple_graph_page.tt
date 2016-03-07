@@ -7,7 +7,7 @@
     [% nb_page = ( (param.max_pnp_sources - 1) div 3 ) + 1 %]
   [% END %]
   [% page = 1 %]
-  [% source = 1 %]
+  [% source = get_graph_source(c.req.parameters.host, c.req.parameters.service) + 1 %][%# start at default source + 1 because the first graph is added in sla_graph_page.tt already #%]
   [% WHILE page <= nb_page %]
     [% nb_graph = 0 %]
     [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, source) %]

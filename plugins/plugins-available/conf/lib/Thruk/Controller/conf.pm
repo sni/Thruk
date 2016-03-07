@@ -1442,7 +1442,7 @@ sub _htpasswd_password {
         push @{$cmd}, $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
         push @{$cmd}, $user;
         push @{$cmd}, $oldpassword if !$has_minus_i;
-        if(_cmd($c, $cmd, $has_minus_i ? $oldpassword : undef)) {
+        if(!_cmd($c, $cmd, $has_minus_i ? $oldpassword : undef)) {
             return('old password did not match');
         }
     }

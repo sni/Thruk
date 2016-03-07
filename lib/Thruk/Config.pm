@@ -27,7 +27,7 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.04';
+our $VERSION = '2.06';
 
 my $project_root = home('Thruk::Config');
 my $branch       = '';
@@ -45,7 +45,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'November 12, 2015',
+              'released'               => 'March 02, 2016',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -461,6 +461,7 @@ sub set_default_config {
         'disable_user_password_change'      => 0,
         'user_password_min_length'          => 5,
         'grafana_default_panelId'           => 1,
+        'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
@@ -530,6 +531,9 @@ sub set_default_config {
 
     # make show_custom_vars a list
     $config->{'show_custom_vars'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))];
+
+    # make graph_replace a list
+    $config->{'graph_replace'} = [@{list($config->{'graph_replace'})}];
 
     ## no critic
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
@@ -726,6 +730,15 @@ sub finalize {
             $c->config->{$key} = $c->stash->{'config_adjustments'}->{$key};
         }
     }
+    if($c->stash->{'config_adjustments_extra'}) {
+        $Thruk::Backend::Pool::peer_order   = $c->stash->{'config_adjustments_extra'}->{peer_order};
+        $Thruk::Backend::Pool::peers        = $c->stash->{'config_adjustments_extra'}->{peers};
+        $Thruk::Backend::Pool::pool         = $c->stash->{'config_adjustments_extra'}->{pool};
+        $Thruk::Backend::Pool::pool_size    = $c->stash->{'config_adjustments_extra'}->{pool_size};
+        $Thruk::Backend::Pool::xs           = $c->stash->{'config_adjustments_extra'}->{xs};
+        delete $c->stash->{'config_adjustments_extra'};
+    }
+
 
     if($Thruk::deprecations_log) {
         if(    $ENV{'THRUK_SRC'} ne 'TEST'
