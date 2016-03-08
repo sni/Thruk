@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next
+          - add status column to performance map excel export
           - Config Tool:
             - fix encodig when raw editing files (#572)
 

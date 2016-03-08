@@ -15,7 +15,32 @@
     <row>
       [% FOREACH col = columns %]
       [% x = loop.index + 1 %]
-      [% IF col_sel.$x %]<cell>[% IF d.exists(col) %][% d.$col %][% END %]</cell>[% END %]
+      [% IF col_sel.$x %]
+        [%# status column #%]
+        [% IF col == 'state' %]
+          [% IF d.has_been_checked == 0 %]
+            [% state       = 'PENDING' %]
+            [% state_color = 'grey' %]
+          [% ELSIF d.state == 0 %]
+            [% state       = 'OK' %]
+            [% state_color = 'green' %]
+          [% ELSIF d.state == 1 %]
+            [% state       = 'WARNING' %]
+            [% state_color = 'yellow' %]
+          [% ELSIF d.state == 2 %]
+            [% state       = 'CRITICAL' %]
+            [% state_color = 'red' %]
+          [% ELSIF d.state == 3 %]
+            [% state       = 'UNKNOWN' %]
+            [% state_color = 'orange' %]
+          [% END %]
+            <format bg_color='[% state_color %]'>
+              <cell>[% state %]</cell>
+            </format>
+        [% ELSE %]
+          <cell>[% IF d.exists(col) %][% d.$col %][% END %]</cell>
+        [% END %]
+      [% END %]
       [% END %]
     </row>
     [% END %]

@@ -1102,8 +1102,8 @@ sub _process_perfmap_page {
         $c->stash->{'name'}      = 'Performance';
         $c->stash->{'data'}     = $data;
         $c->stash->{'col_sel'}   = $c->stash->{'columns'};
-        $c->stash->{'col_tr'}    = { 'host_name' => 'Hostname', 'description' => 'Service' };
-        $c->stash->{'columns'}   = ['host_name', 'description', sort keys %{$keys}];
+        $c->stash->{'col_tr'}    = { 'host_name' => 'Hostname', 'description' => 'Service', 'state' => 'Status' };
+        $c->stash->{'columns'}   = ['host_name', 'description', 'state', sort keys %{$keys}];
         $c->stash->{'template'}  = 'excel/generic.tt';
         return $c->render_excel();
     }
