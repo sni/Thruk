@@ -1983,8 +1983,9 @@ sub wait_after_reload {
         $c->cache->clear();
     } else {
         $c->log->error('waiting for core reload failed');
+        return(0);
     }
-    return;
+    return(1);
 }
 
 ##############################################

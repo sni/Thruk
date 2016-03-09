@@ -2420,7 +2420,11 @@ sub _config_reload {
     }
 
     # wait until core responds again
-    Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if $wait;
+    if($wait) {
+        if(!Thruk::Utils::wait_after_reload($c, $pkey, $time-1)) {
+            $c->stash->{'output'} .= "\n<font color='red'>Warning: waiting for core reload failed.</font>";
+        }
+    }
 
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;

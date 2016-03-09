@@ -554,6 +554,9 @@ sub _do_child_stuff {
         POSIX::close($fd);
     }
 
+    # logging must be reset after closing the filehandles
+    $c->app->reset_logging();
+
     $c->stats->enable(1) if $c;
 
     return;

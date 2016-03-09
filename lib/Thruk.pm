@@ -354,6 +354,20 @@ sub log {
 
 ###################################################
 
+=head2 reset_logging
+
+    reset logging system, for example after starting child processes
+
+=cut
+sub reset_logging {
+    my($self) = @_;
+    delete $self->{'_log'};
+    delete $self->{'log'};
+    return;
+}
+
+###################################################
+
 =head2 verbose
 
     make verbose accessible via Thruk->verbose
