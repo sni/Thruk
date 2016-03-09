@@ -713,12 +713,15 @@ Ext.define('TP.Pantab', {
         if(background != undefined && background != 'none' && !xdata.map) {
             if(!tab.bgImgEl) {
                 tab.bgImgEl  = bodyView.createChild('<img>', bodyView.dom.childNodes[0]);
-                tab.bgImgEl.on({
-                    load: function (evt, ele, opts) {
-                        tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
-                    }
-                });
             }
+            tab.bgImgEl.on('load',
+                            function (evt, ele, opts) {
+                                tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
+                            },
+                            undefined, {
+                                single: true    // remove event handler after first occurence
+                            }
+            );
             tab.bgImgEl.dom.src            = background;
             tab.bgImgEl.dom.style.position = "absolute";
             tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
