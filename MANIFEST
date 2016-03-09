@@ -1410,6 +1410,7 @@ t/docker/cases/0212_panorama_text_label_widget.js
 t/docker/cases/0220_panorama_geo_map.js
 t/docker/cases/0221_panorama_geo_switch.js
 t/docker/cases/0222_panorama_geo_map_cancel.js
+t/docker/cases/0223_panorama_background_image.js
 t/docker/cases/0250_panorama_site_status_panel.js
 t/docker/cases/0251_panorama_core_performance_metrics_panel.js
 t/docker/cases/0252_panorama_server_status_panel.js
@@ -1428,6 +1429,7 @@ t/docker/cases/_images/dropdown.png
 t/docker/cases/_images/green.png
 t/docker/cases/_images/island_green.png
 t/docker/cases/_images/island_map_green.png
+t/docker/cases/_images/island_map_green_offset.png
 t/docker/cases/_images/speedometer.png
 t/docker/cases/_include.js
 t/docker/cases/testsuite.properties
