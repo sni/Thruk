@@ -6,6 +6,7 @@ next
           - Config Tool:
             - fix encodig when raw editing files (#572)
           - Panorama View:
+            - reload dashboards if server was updated
             - fix background image offset not working properly
             - fix mixed up label offset x/y
 

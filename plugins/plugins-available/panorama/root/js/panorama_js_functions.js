@@ -799,6 +799,20 @@ var TP = {
                     }
                 }
             }
+
+            if(data && !TP.already_reloading) {
+                if(data.server_version != undefined && thruk_version != data.server_version) {
+                    TP.already_reloading = true;
+                    TP.Msg.msg("info_message~~Server version has changed: "+thruk_version+" -> "+data.server_version+"<br>Panorama dashboard will be reloaded...");
+                    window.setTimeout(TP.fullReload, 5000);
+                }
+                else if(data.server_extra_version != undefined && thruk_extra_version != data.server_extra_version) {
+                    TP.already_reloading = true;
+                    TP.Msg.msg("info_message~~Server version has changed: "+thruk_version+"~"+thruk_extra_version+" -> "+data.server_version+"~"+data.server_extra_version+"<br>Panorama dashboard will be reloaded...");
+                    window.setTimeout(TP.fullReload, 5000);
+                }
+            }
+
             var tab = Ext.getCmp('tabpan').getActiveTab();
             if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
                 var old = tab.ts ? tab.ts : '';
