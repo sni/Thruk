@@ -1422,6 +1422,7 @@ t/docker/cases/0257_panorama_services_panel.js
 t/docker/cases/0258_panorama_services_totals_panel.js
 t/docker/cases/0259_panorama_services_graph_panel.js
 t/docker/cases/0260_panorama_mine_map_panel.js
+t/docker/cases/0299_panorama_show_case.js
 t/docker/cases/_dashboard_exports.js
 t/docker/cases/_images/applications.png
 t/docker/cases/_images/controls_unlock.png
