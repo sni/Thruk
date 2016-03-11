@@ -9,7 +9,7 @@ use File::Copy qw/move copy/;
 use Encode qw(decode_utf8);
 use Module::Load qw/load/;
 use Carp qw/confess/;
-use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER/;
+use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION/;
 
 =head1 NAME
 
@@ -2808,6 +2808,9 @@ sub _save_dashboard {
     delete $dashboard->{'tab'}->{'user'};
     delete $dashboard->{'tab'}->{'ts'};
     delete $dashboard->{'tab'}->{'public'};
+
+    # set file version
+    $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
     if($dashboard->{'tab'}->{'xdata'}->{'backends'}) {
         $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});

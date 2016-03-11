@@ -26,10 +26,12 @@ use constant {
     ACCESS_READONLY  => 1,
     ACCESS_READWRITE => 2,
     ACCESS_OWNER     => 3,
+
+    DASHBOARD_FILE_VERSION => 2,
 };
 
 use base 'Exporter';
-our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER/);
+our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION/);
 
 ##########################################################
 
@@ -174,11 +176,29 @@ sub load_dashboard {
     $dashboard->{'nr'}   = $nr;
     $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
     $dashboard->{'file'} = $file;
+
+    # convert old public flag to group based permissions
     my $public = delete $dashboard->{'public'};
     $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
     if($public) {
         push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
     }
+
+    $dashboard->{'file_version'} = 1 unless defined $dashboard->{'dashboard_version'};
+    if($dashboard->{'file_version'} == 1) {
+        # convert label x/y from old dashboard versions which had them mixed up
+        for my $id (keys %{$dashboard}) {
+            my $tab = $dashboard->{$id};
+            if($id =~ m|^tabpan\-tab_|mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
+                my $offsetx = $tab->{'xdata'}->{'label'}->{'offsetx'};
+                my $offsety = $tab->{'xdata'}->{'label'}->{'offsety'};
+                $tab->{'xdata'}->{'label'}->{'offsety'} = $offsetx;
+                $tab->{'xdata'}->{'label'}->{'offsetx'} = $offsety;
+            }
+        }
+        $dashboard->{'file_version'} = 2;
+    }
+    $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
     # merge runtime data
     my $runtime = {};

@@ -7,6 +7,7 @@ next
             - fix encodig when raw editing files (#572)
           - Panorama View:
             - fix background image offset not working properly
+            - fix mixed up label offset x/y
 
 2.06     Wed Mar 02 16:08:00 CET 2016
           - make custom variables from show_custom_vars clickable

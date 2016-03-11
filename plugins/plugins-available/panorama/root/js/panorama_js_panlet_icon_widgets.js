@@ -520,40 +520,40 @@ Ext.define('TP.SmallWidget', {
         if(size.width == 0) { return; }
 
         if(cfg.position == 'above') {
-            top = top - offsetx - size.height;
+            top = top - offsety - size.height;
             if(cfg.orientation == 'horizontal') {
                 left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
-            left = left - offsety;
+            left = left - offsetx;
         }
         if(cfg.position == 'below') {
-            top = top + offsetx + elHeight;
+            top = top + offsety + elHeight;
             if(cfg.orientation == 'horizontal') {
                 left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
-            left = left - offsety;
+            left = left - offsetx;
         }
         if(cfg.position == 'right') {
-            left = left + offsetx + elWidth + 2;
+            left = left + offsety + elWidth + 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
-            top = top - offsety;
+            top = top - offsetx;
         }
         if(cfg.position == 'left') {
-            left = left - offsetx - size.width - 2;
+            left = left - offsety - size.width - 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
-            top = top - offsety;
+            top = top - offsetx;
         }
         if(cfg.position == 'center') {
-            top  = top + offsetx + (elHeight/2) - (size.height/2);
-            left = left + (elWidth / 2) - (size.width / 2) - offsety;
+            top  = top + offsety + (elHeight/2) - (size.height/2);
+            left = left + (elWidth / 2) - (size.width / 2) - offsetx;
         }
         if(cfg.position == 'top-left') {
-            top  = top + offsetx;
-            left = left + offsety;
+            top  = top + offsety;
+            left = left + offsetx;
         }
         el.style.left = left+"px";
         el.style.top  = top+"px";
