@@ -63,7 +63,7 @@ try {
     click(_div('/up/', _rightOf(_textbox("piegradient"))));
     click(_button("save"));
 
-    testCase.endOfStep("panorama show case", 20);
+    testCase.endOfStep("panorama show case", 90);
 } catch (e) {
     testCase.handleException(e);
 } finally {
