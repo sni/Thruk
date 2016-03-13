@@ -1476,6 +1476,7 @@ sub _cmd_configtool {
         # changed and new files
         for my $f (@{$changed}) {
             my($path,$content, $mtime) = @{$f};
+            $content = encode_utf8(Thruk::Utils::decode_any($content));
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
             my $saved;
