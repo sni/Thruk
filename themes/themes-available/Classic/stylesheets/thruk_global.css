@@ -38,6 +38,9 @@ a img {
 td.dataVal {
   text-align: left;
 }
+td.dataVal.eventHandler {
+  width: 500px;
+}
 td.dataVar {
   text-align: left;
 }
