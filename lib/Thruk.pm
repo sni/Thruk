@@ -361,8 +361,16 @@ sub log {
 =cut
 sub reset_logging {
     my($self) = @_;
-    delete $self->{'_log'};
-    delete $self->{'log'};
+
+    my $appenders = Log::Log4perl::appenders();
+    for my $name (keys %{$appenders}) {
+        my $appender = $appenders->{$name};
+        if($appender->{'appender'} && $appender->{'appender'}->{'fh'}) {
+            # enable closing logs for forked childs
+            $appender->{'appender'}->{'close'} = 1;
+        }
+    }
+
     return;
 }
 

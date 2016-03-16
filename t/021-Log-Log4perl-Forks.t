@@ -1,0 +1,72 @@
+use strict;
+use warnings;
+use Test::More;
+use File::Copy;
+use lib('t');
+
+my $log4perl_created;
+BEGIN {
+    unless($ENV{TEST_AUTHOR}) {
+        plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
+    }
+    if(-e 'log4perl.conf') {
+        `diff t/data/log4perl.conf log4perl.conf`;
+        my $rc = $?>>8;
+        plan skip_all => 'there is a log4perl.conf already, cannot test' if $rc != 0;
+    }
+    $ENV{'THRUK_SRC'}     = 'TEST';
+    $ENV{'THRUK_VERBOSE'} = 1;
+}
+
+plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+plan skip_all => 'backends required' if !-s 'thruk_local.conf';
+
+# remove old leftovers
+unlink('/tmp/thruk_test_error.log');
+unlink('/tmp/thruk_test_debug.log');
+
+# copy our test log4perl config
+ok(copy('t/data/log4perl.conf', 'log4perl.conf'), 'copy test config') or BAIL_OUT("$0: copy failed: $!");
+is(-e 'log4perl.conf', 1, 'log4perl.conf exists');
+$log4perl_created = 1;
+
+require TestUtils;
+import TestUtils;
+
+# test some pages
+my($host,$service) = TestUtils::get_test_service();
+my $pages = [
+    '/thruk/cgi-bin/tac.cgi',
+    '/thruk/side.html',
+    '/thruk/cgi-bin/avail.cgi?host='.$host.'&timeperiod=last24hours',
+];
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url' => $url,
+    );
+
+    # do they exist all all?
+    is(-e '/tmp/thruk_test_error.log', 1, 'thruk_test_error.log exists');
+    is(-e '/tmp/thruk_test_debug.log', 1, 'thruk_test_debug.log exists');
+    is(-s '/tmp/thruk_test_error.log', 0, 'thruk_test_error.log is empty') or diag(qx|cat /tmp/thruk_test_error.log|);
+    ok(`grep '[DEBUG]' /tmp/thruk_test_debug.log | wc -l` > 0, 'debug log contains debug messages');
+    if($url =~ m/avail.cgi/mx) {
+        ok(`grep 'logstart:' /tmp/thruk_test_debug.log | wc -l` > 0, 'debug log contains debug messages from forked child');
+    }
+    `>/tmp/thruk_test_error.log`;
+    `>/tmp/thruk_test_debug.log`;
+}
+
+ok(unlink('log4perl.conf'), 'unlink test config');
+ok(unlink('/tmp/thruk_test_error.log'), 'unlink test logfile');
+ok(unlink('/tmp/thruk_test_debug.log'), 'unlink test debug file');
+
+done_testing();
+
+END {
+    if($log4perl_created && !$ENV{'THRUK_JOB_ID'}) {
+        unlink("log4perl.conf");
+        unlink('/tmp/thruk_test_error.log');
+        unlink('/tmp/thruk_test_debug.log');
+    }
+}
