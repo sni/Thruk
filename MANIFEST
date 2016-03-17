@@ -15,7 +15,6 @@ debian/thruk-base.prerm
 debian/thruk-plugin-reporting.install
 debian/thruk-plugin-reporting.postinst
 debian/thruk-plugin-reporting.prerm
-debian/thruk.lintian-overrides
 dist.ini
 docs/documentation/configuration.asciidoc
 docs/manpages/nagexp.3

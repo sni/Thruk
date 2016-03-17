@@ -41,6 +41,18 @@ override_dh_auto_install:
 			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
 		fi ; \
 	fi
+	# fix location of phantomjs
+	mkdir -p debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/thruk
+	mv debian/tmp/usr/share/thruk/script/phantomjs debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/thruk/
+	sed -e 's|/usr/share/thruk/script/phantomjs|/usr/lib/'$(DEB_HOST_MULTIARCH)'/thruk/phantomjs|' \
+		-i debian/tmp/etc/thruk/thruk.conf \
+		-i debian/thruk-plugin-reporting.install
+	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: sqlite"   > debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libpng"  >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: zlib"    >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libjpeg" >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: hardening-no-relro usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"        >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "debian/thruk-plugin-reporting.lintian-overrides" >> MANIFEST
 
 override_dh_gencontrol:
 	dh_gencontrol -- -Vextra:Depends=perlapi-$(PERLVER)
