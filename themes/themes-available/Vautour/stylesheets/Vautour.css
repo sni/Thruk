@@ -50,3 +50,6 @@ TABLE.bookmarks TH {
   height: 17px;
 }
 
+td.dataVal.eventHandler {
+  width: auto;
+}

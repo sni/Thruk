@@ -20,3 +20,7 @@ table.filter .filterName    { background-color: white; }
   line-height: 1.1;
   font-size: 0.85em;
 }
+
+td.dataVal.eventHandler {
+  width: auto;
+}
