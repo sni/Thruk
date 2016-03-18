@@ -5,9 +5,13 @@
 
 [% IF !defaults.exists(key) || defaults.$key.type == 'STRING' || defaults.$key.type == 'INT' %]
   [% IF edit %]
-    <input type="text" class="obj_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value | html %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]>
-    [% IF key == 'command_line' %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
-    [% IF key == 'address' %]<button class="conf_button ip_wzd_button" id="[% key %]_btn[% nr %]">&nbsp;</button>[% END %]
+    [% has_wizard = 0 %]
+    [% wzd_btn = BLOCK %]
+    [% IF key == 'command_line' %][% has_wizard = 1 %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
+    [% IF key == 'address'      %][% has_wizard = 1 %]<button class="conf_button ip_wzd_button" id="[% key %]_btn[% nr %]">&nbsp;</button>[% END %]
+    [% END %]
+    <input type="text" class="obj_[% key %][% IF has_wizard %] wizard[% END %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value | html %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]>
+    [% wzd_btn %]
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') && defaults.$key.link == 'icon' %]
         [% escape_html(value) %] <img class="notclickable" src='[% logo_path_prefix %][% value %]' border="0" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
@@ -87,9 +91,24 @@
 
 [% ELSIF defaults.$key.type == 'LIST' %]
   [% IF edit %]
-    <input type="text" class="obj_[% key %] obj_[% type %]_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false, list:'[ ,!\+]'[% IF key == "use" %], templates:'templates'[% END %]})"[% END %]>
-    [% IF type == 'servicegroup' && key == 'members'    %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicemembers,2" %][% END %]
-    [% IF type == 'host'         && key == 'hostgroups' %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hostgroups,1" %][% END %]
+    [% has_wizard = 0 %]
+    [% wzd_btn = BLOCK %]
+      [% IF    type == 'servicegroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicemembers,2" %]
+      [% ELSIF                           key == 'contact_groups' %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contactgroups,1" %]
+      [% ELSIF                           key == 'use'            %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ type _ ",1,templates" %]
+      [% ELSIF type == 'service' && key == 'host_name'           %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
+      [% ELSIF type == 'service' && key == 'hostgroup_name'      %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hostgroups,1" %]
+      [% ELSIF type == 'service' && key == 'servicegroups'       %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicegroups,1" %]
+      [% ELSIF type == 'contactgroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contacts,1" %]
+      [% ELSIF type == 'hostgroup'    && key == 'members'        %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
+      [% ELSIF key == 'hostgroups'
+            || key == 'contacts'
+            || key == 'contactgroups'
+      %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ key _ ",1" %]
+      [% END %]
+    [% END %]
+    <input type="text" class="obj_[% key %] obj_[% type %]_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false, list:'[ ,!\+]'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'wand.png',cls:'wzd' }][% END %]})"[% END %]>
+    [% wzd_btn %]
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
         [% FOREACH o = value %]

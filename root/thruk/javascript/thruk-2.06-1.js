@@ -4483,6 +4483,7 @@ var ajax_search = {
     filter          : undefined,
     regex_matching  : false,
     backend_select  : false,
+    button_links    : [],
 
     /* initialize search
      *
@@ -4503,6 +4504,7 @@ var ajax_search = {
      *   onemptyclick:      when clicking on the empty button
      *   filter:            run this function as additional filter
      *   backend_select:    append value of this backend selector
+     *   button_links:      prepend links to buttons on top of result
      * }
      */
     init: function(elem, type, options) {
@@ -4558,6 +4560,11 @@ var ajax_search = {
             backend_select = options.backend_select;
         } else {
             backend_select = ajax_search.backend_select;
+        }
+
+        ajax_search.button_links = [];
+        if(options.button_links != undefined) {
+            ajax_search.button_links = options.button_links;
         }
 
         ajax_search.empty = false;
@@ -4993,6 +5000,17 @@ var ajax_search = {
         results.sort(sort_by('top_hits', false));
 
         var resultHTML = '<ul>';
+        if(ajax_search.button_links) {
+            jQuery.each(ajax_search.button_links, function(i, btn) {
+                resultHTML += '<li class="'+(btn.cls ? ' '+btn.cls+' ' : '')+'"><b>';
+                resultHTML += '<a href="" class="item" onclick="jQuery(\'#'+btn.id+'\').click(); return false;" style="width:'+ajax_search.size+'px;">';
+                if(btn.icon) {
+                    resultHTML += '<img src="'+ url_prefix + 'themes/' + theme + '/images/' + btn.icon+'">';
+                }
+                resultHTML += btn.text;
+                resultHTML += '<\/b><\/a><\/li>';
+            });
+        }
         var x = 0;
         var results_per_type = Math.ceil(ajax_search.max_results / results.length);
         ajax_search.res   = new Array();

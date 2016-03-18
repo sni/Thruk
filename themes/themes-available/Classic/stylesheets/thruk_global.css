@@ -718,6 +718,13 @@ DIV#search-results ul li a.ajax_search_selected, DIV#search-results ul li a:hove
   cursor: pointer;
 }
 
+DIV#search-results ul li.wzd A IMG {
+    width: 12px;
+    height: 12px;
+    margin-right: 3px;
+    vertical-align: top;
+}
+
 /* generic rules */
 .no_margin {
   margin: 0px;

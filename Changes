@@ -4,6 +4,7 @@ next
           - add status column to performance map excel export
           - fix 'bad file descriptor' error when trying to log in subprocesses
           - Config Tool:
+            - add list wizard to drop down
             - fix encodig when raw editing files (#572)
           - Panorama View:
             - reload dashboards if server was updated

@@ -541,6 +541,7 @@ function init_conf_tool_list_wizard(id, type) {
     var input_id  = tmp[0];
     type          = tmp[1];
     var aggregate = Math.abs(tmp[2]);
+    var templates = tmp[3] ? true : false;
 
     var $d = jQuery('#' + id + 'dialog')
       .dialog({
@@ -580,6 +581,9 @@ function init_conf_tool_list_wizard(id, type) {
         type: 'POST',
         success: function(data) {
             var result = data[0]['data'];
+            if(templates) {
+                result = data[1]['data'];
+            }
             var options = [];
             var size = result.length;
             for(var x=0; x<size;x++) {
