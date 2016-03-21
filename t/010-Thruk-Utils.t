@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 60;
+    plan tests => 69;
 
     use lib('t');
     require TestUtils;
@@ -18,6 +18,7 @@ BEGIN {
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
+use_ok('Thruk::Utils::CookieAuth');
 
 #########################
 # sort
@@ -253,5 +254,21 @@ my $exp = ['fail_message', 'test_error', 0];
 is_deeply(\@msg, $exp, 'get_message');
 
 is($c->res->{'cookies'}->{'thruk_message'}, undef, 'get_message cookie after');
+
+#########################
+my $locations = [
+    ["http://localhost/thruk",              "localhost:80"],
+    ["https://localhost/thruk",             "localhost:443"],
+    ["http://localhost:80/thruk",           "localhost:80"],
+    ["https://localhost:80/thruk",          "localhost:80"],
+    ["http://localhost:81/thruk",           "localhost:81"],
+    ["https://localhost:81/thruk",          "localhost:81"],
+    ["http://some.other.host/thruk",        "some.other.host:80"],
+    ["http://some.other.host:8000/thruk",   "some.other.host:8000"],
+];
+for my $l (@{$locations}) {
+    is(Thruk::Utils::CookieAuth::get_netloc($l->[0]), $l->[1], "get_netloc for ".$l->[0]." is ".$l->[1]);
+}
+
 
 #########################

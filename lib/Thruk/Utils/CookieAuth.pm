@@ -208,6 +208,12 @@ sub get_netloc {
     if($url =~ m/^(http|https):\/\/([^\/:]+)\//mx) {
         my $port = $1 eq 'https' ? 443 : 80;
         my $host = $2;
+        $host = $host.':'.$port;
+        return($host);
+    }
+    if($url =~ m/^(http|https):\/\/([^\/:]+):(\d+)\//mx) {
+        my $port = $3;
+        my $host = $2;
         $host = $host.':'.$port unless CORE::index($host, ':') != -1;
         return($host);
     }

@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next
           - add status column to performance map excel export
           - fix 'bad file descriptor' error when trying to log in subprocesses
+          - fix using non-standard webserver ports with cookie authentication (#576)
           - Config Tool:
             - add list wizard to drop down
             - fix encodig when raw editing files (#572)
