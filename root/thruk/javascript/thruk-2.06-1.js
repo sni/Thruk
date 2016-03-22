@@ -3786,8 +3786,9 @@ function toggleFilterPaneSelector(search_prefix, id) {
     if(thruk_debug_js) { alert("ERROR: unknown id in toggleFilterPaneSelector(): " + search_prefix + id); }
     return;
   }
-  if(!toggleElement(search_prefix+panel, undefined, true)) {
-    accept_filter_types(search_prefix, checkbox_name, input_name, checkbox_prefix);
+  var accept_callback = function() { accept_filter_types(search_prefix, checkbox_name, input_name, checkbox_prefix)};
+  if(!toggleElement(search_prefix+panel, undefined, true, undefined, accept_callback)) {
+    accept_callback();
     remove_close_element(search_prefix+panel);
   } {
     set_filter_types(search_prefix, input_name, checkbox_prefix);
