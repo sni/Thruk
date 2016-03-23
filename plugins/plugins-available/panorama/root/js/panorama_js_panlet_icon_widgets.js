@@ -1253,6 +1253,9 @@ Ext.define('TP.IconWidget', {
 
         // which source to use
         var state  = xdata.state, value = 0, min = 0, max = 100;
+        var factor = xdata.appearance.speedofactor == '' ? Number(1) : Number(xdata.appearance.speedofactor);
+        if(isNaN(factor)) { factor = 1; }
+
         if(state == undefined) { state = panel.xdata.state; }
         if(xdata.appearance.speedosource == undefined) { xdata.appearance.speedosource = 'problems'; }
         var matchesP = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
@@ -1264,8 +1267,8 @@ Ext.define('TP.IconWidget', {
                 var p = perfdata[matchesP[1]];
                 value = p.val;
                 var r = TP.getPerfDataMinMax(p, '?');
-                max   = r.max;
-                min   = r.min;
+                max   = r.max * factor;
+                min   = r.min * factor;
             }
         }
         else if(matchesA && matchesA[1]) {
@@ -1298,6 +1301,9 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
+
+        value *= factor;
+
         /* inverted value? */
         if(xdata.appearance.speedoinvert) {
             value = max - value;

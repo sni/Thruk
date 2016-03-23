@@ -535,7 +535,7 @@ TP.iconShowEditDialog = function(panel) {
                             name:           'shapecolor_ok',
                             value:           panel.xdata.appearance.shapecolor_ok,
                             width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
+                            tdAttrs:       { style: 'padding-right: 11px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
                         { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
@@ -1095,15 +1095,18 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel: 'Options',
                     xtype:      'fieldcontainer',
                     cls:        'speedometer',
-                    layout:     'table',
+                    layout:      { type: 'table', columns: 6, tableAttrs: { style: { width: '100%' } } },
                     defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [{ xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'checkbox', name: 'speedoinvert' },
-                            { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
-                            { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 }
-                        ]
+                    items: [
+                        { xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
+                        { xtype: 'checkbox', name: 'speedoinvert' },
+                        { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
+                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
+                        { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
+                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 },
+                        { xtype: 'label', text: 'Factor:', style: 'margin-left: 8px; margin-right: 2px;' },
+                        { xtype: 'textfield', width: 120, name: 'speedofactor', colspan: 5, emptyText: '100, 0.01, 1e3, 1e-6 ...' }
+                    ]
                 }]
             }]
         }]
