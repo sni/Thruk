@@ -61,6 +61,21 @@ create send option in the report configuration. It is even possible to
 send one report at multiple times.
 
 
+==== Debugging Reports
+
+Sometimes it may be neccessary to create a report in debug mode in order to
+save information to reproduce the report for developers.
+
+In order to create debug information for a report, open the reports page and
+add the debug parameter. The url should end with `reports2.cgi?debug=1`. You
+may have to remove the `#` sign and everything after it.
+
+  * Append `?debug=1` to the url. This will show an additional icon next to each report.
+  * Click on the wizards wand icon next to the refresh button
+  * Download the debug information with the icon next to the wizards wand.
+
+
+
 === Customized Reports
 Reports can be customized with some HTML and CSS knowledge. Reports in general
 have several blocks which specify the steps done to produce the report.
@@ -213,4 +228,3 @@ You may create a Perl Module named
 'Thruk::Utils::Reports::CustomRender' which will be automatically made
 available to the stash, so functions from this module can be used in
 the reporting templates.
-

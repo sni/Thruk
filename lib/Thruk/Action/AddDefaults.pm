@@ -296,28 +296,7 @@ sub end {
 
     if($c->stash->{'debug_info'}) {
         # save debug info into tmp file
-        my $tmp = $c->config->{'tmp_path'}.'/debug';
-        Thruk::Utils::IO::mkdir_r($tmp);
-        my $tmpfile = $tmp.'/'.POSIX::strftime('%Y-%m-%d_%H_%M_%S', localtime).'.log';
-        open(my $fh, '>', $tmpfile);
-        print $fh 'Uri: '.Thruk::Utils::Filter::full_uri($c)."\n";
-        print $fh "*************************************\n";
-        print $fh "version: ".Thruk::Utils::Filter::fullversion($c)."\n";
-        print $fh "user:    ".$c->stash->{'remote_user'}."\n";
-        print $fh "parameters:\n";
-        print $fh Dumper($c->req->parameters);
-        print $fh "debug info:\n";
-        print $fh Thruk::Config::get_debug_details();
-        if($c->stash->{'original_url'}) {
-            print $fh "*************************************\n";
-            print $fh "job:\n";
-            print $fh 'Uri: '.$c->stash->{'original_url'}."\n";
-        }
-        print $fh "*************************************\n";
-        print $fh "\n";
-        print $fh $c->stash->{'debug_info'};
-        Thruk::Utils::IO::close($fh, $tmpfile);
-        Thruk::Utils::set_message( $c, 'success_message fixed', 'Debug Information written to: '.$tmpfile );
+        save_debug_information_to_tmp_file($c);
     }
 
     if($ENV{THRUK_LEAK_CHECK}) {
@@ -1238,6 +1217,42 @@ sub delayed_proc_info_update {
     my $cached_data = $c->cache->get->{'global'} || {};
     set_processinfo($c, undef, undef, $cached_data, 1);
     return;
+}
+
+########################################
+
+=head2 save_debug_information_to_tmp_file
+
+    save debug information to a temp file
+
+=cut
+sub save_debug_information_to_tmp_file {
+    my($c) = @_;
+
+    my $tmp = $c->config->{'tmp_path'}.'/debug';
+    Thruk::Utils::IO::mkdir_r($tmp);
+    my $tmpfile = $tmp.'/'.POSIX::strftime('%Y-%m-%d_%H_%M_%S', localtime).'.log';
+    open(my $fh, '>', $tmpfile);
+    print $fh 'Uri: '.Thruk::Utils::Filter::full_uri($c)."\n";
+    print $fh "*************************************\n";
+    print $fh "version: ".Thruk::Utils::Filter::fullversion($c)."\n";
+    print $fh "user:    ".$c->stash->{'remote_user'}."\n";
+    print $fh "parameters:\n";
+    print $fh Dumper($c->req->parameters);
+    print $fh "debug info:\n";
+    print $fh Thruk::Config::get_debug_details();
+    if($c->stash->{'original_url'}) {
+        print $fh "*************************************\n";
+        print $fh "job:\n";
+        print $fh 'Uri: '.$c->stash->{'original_url'}."\n";
+    }
+    print $fh "*************************************\n";
+    print $fh "\n";
+    print $fh $c->stash->{'debug_info'};
+    Thruk::Utils::IO::close($fh, $tmpfile);
+    print $fh $c->stash->{'debug_info_file'} = $tmpfile;
+    Thruk::Utils::set_message( $c, 'success_message fixed', 'Debug Information written to: '.$tmpfile );
+    return($tmpfile);
 }
 
 ########################################

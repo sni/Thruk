@@ -34,6 +34,7 @@ use POSIX ":sys_wait_h";
             background   => "return $jobid if set, or redirect otherwise"
             nofork       => "don't fork"
             no_shell     => "wrap command in a shell unless no_shell is set"
+            env          => hash with extra environment variables
         }
     );
 
@@ -67,6 +68,15 @@ sub cmd {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir, $id);
+
+        # set additional environment variables
+        if($conf->{'env'}) {
+            for my $key (keys %{$conf->{env}}) {
+                ## no critic
+                $ENV{$key} = $conf->{env}->{$key};
+                ## use critic
+            }
+        }
 
         ## no critic
         $SIG{CHLD} = 'DEFAULT';
