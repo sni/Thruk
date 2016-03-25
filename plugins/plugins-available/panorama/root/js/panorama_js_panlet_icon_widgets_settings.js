@@ -1600,7 +1600,9 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     window.setTimeout(function() {
-        TP.iconSettingsWindow.toFront();
+        if(TP.iconSettingsWindow) {
+            TP.iconSettingsWindow.toFront();
+        }
     }, 100);
     TP.modalWindows.push(settingsWindow);
 };
