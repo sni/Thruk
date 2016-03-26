@@ -141,6 +141,7 @@ Source:
     "speedocolor_critical": "#CA1414",
     "speedocolor_unknown": "#CC740F",
     "speedocolor_bg": "#DDDDDD",
+    "speedofactor": "1e3",
     "speedogradient": "-0.15",
     "speedosource": "perfdata:users"
   },
