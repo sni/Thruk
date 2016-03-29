@@ -1104,7 +1104,7 @@ TP.iconShowEditDialog = function(panel) {
                         { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
                         { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
                         { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 },
-                        { xtype: 'label', text: 'Factor:', style: 'margin-left: 8px; margin-right: 2px;' },
+                        { xtype: 'label', text: 'Factor:', style: 'margin-left: 0; margin-right: 2px;' },
                         { xtype: 'textfield', width: 120, name: 'speedofactor', colspan: 5, emptyText: '100, 0.01, 1e3, 1e-6 ...' }
                     ]
                 }]

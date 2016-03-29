@@ -10,6 +10,7 @@ next
             - fix encodig when raw editing files (#572)
           - Panorama View:
             - reload dashboards if server was updated
+            - add factor for speedometers
             - fix background image offset not working properly
             - fix mixed up label offset x/y
           - Reports:
