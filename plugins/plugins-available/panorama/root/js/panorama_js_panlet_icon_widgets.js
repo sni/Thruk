@@ -294,7 +294,13 @@ Ext.define('TP.SmallWidget', {
     /* render label for this widget */
     setIconLabel: function(cfg, force_perfdata) {
         var panel = this;
-        if(cfg       == undefined) { cfg       = this.xdata.label; }
+        if(cfg       == undefined) {
+            cfg       = this.xdata.label;
+            if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel.id == panel.id) {
+                var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+                cfg       = xdata.label;
+            }
+        }
         if(!this.el || !this.el.dom)  { return; }
         if(!this.el.dom.style.zIndex && cfg && cfg.labeltext) {
             var tab  = Ext.getCmp(panel.panel_id);

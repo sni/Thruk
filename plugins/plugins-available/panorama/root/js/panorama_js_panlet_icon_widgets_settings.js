@@ -54,7 +54,6 @@ TP.iconShowEditDialog = function(panel) {
     var perfDataUpdate = function() {
         // ensure fresh and correct performance data
         window.perfdata = {};
-        panel.setIconLabel(undefined, true);
 
         // update speedo
         var data = [['number of problems',                  'problems'],
@@ -80,6 +79,7 @@ TP.iconShowEditDialog = function(panel) {
                 data.push(['Availability: '+last+'% ('+options+')', 'avail:'+key]);
             }
         }
+        panel.setIconLabel(xdata.label || {}, true);
         var cbo = Ext.getCmp('speedosourceStore');
         TP.updateArrayStoreKV(cbo.store, data);
 
