@@ -1600,7 +1600,8 @@ Sample menu with two items and a seperator:
 
 A menu has the following attributes:
 
-     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url
+                        and `{% raw %}{{remote_user}}{% endraw %}` for the user name. Within OMD, the the site variable `{{site}}` must be prepended.
      ** `title`         title of the menu, will be display on mouse over.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
      ** `...`           arbitrary attributes will be used as attributes of the menu icon html element.
@@ -1610,7 +1611,8 @@ A single `"-"` item can be used as a menu item seperator.
 
 The menu item can have the following attributes:
 
-     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
+     ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url. Within OMD, the the site variable `{{site}}` must be prepended.
+     ** `label`         label name of the menu item.
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
