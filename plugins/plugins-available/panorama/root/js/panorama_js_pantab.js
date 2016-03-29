@@ -425,6 +425,7 @@ Ext.define('TP.Pantab', {
     applyZindex: function() {
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
+        var maxZindex;
         if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
         /* do not change zindex if there are modal windows and masks on screen */
         var masks = Ext.Element.select('.x-mask');
@@ -458,11 +459,12 @@ Ext.define('TP.Pantab', {
                 var panel = Ext.getCmp(this.window_ids[nr]);
                 if(panel && panel.labelEl && panel.labelEl.el && panel.labelEl.el.dom) {
                     panel.labelEl.el.dom.style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
+                    if(maxZindex < panel.labelEl.el.dom.style.zIndex) { maxZindex = panel.labelEl.el.dom.style.zIndex; }
                 }
             }
         }
 
-        TP.checkModalWindows();
+        TP.checkModalWindows(maxZindex);
     },
 
     hidePanlets: function() {
@@ -817,6 +819,7 @@ Ext.define('TP.Pantab', {
         if(tab.locked != val && panels.length > 0) {
             tab.mask = tab.body.mask((val ? "" : "un")+"locking dashboard...");
         }
+        var changed = (tab.xdata.locked != val);
         tab.xdata.locked   = val;
         tab.locked         = val;
         TP.suppressIconTip = !val;
@@ -838,7 +841,9 @@ Ext.define('TP.Pantab', {
             tab.disableMapControls();
         }
         /* schedule update, which also remove the mask from above */
-        TP.updateAllIcons(tab);
+        if(changed) { /* leads to double status update on inital page render */
+            TP.updateAllIcons(tab);
+        }
     },
     contextmenu: function(evt, hidePasteAndNew) {
         var tab = this;

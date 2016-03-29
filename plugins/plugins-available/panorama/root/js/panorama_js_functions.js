@@ -1768,11 +1768,12 @@ var TP = {
         return(nr);
     },
     /* make sure our modal windows are still in front */
-    checkModalWindows: function() {
+    checkModalWindows: function(maxZindex) {
         if(TP.modalWindows.length == 0) { return; }
+        if(maxZindex == undefined)      { maxZindex = 0; }
         TP.modalWindows = Ext.Array.unique(TP.modalWindows);
         var newModelWindows = [];
-        var zIndex = 0;
+        var zIndex = maxZindex;
         var length = TP.modalWindows.length;
         var first  = true;
         for(var x=length-1; x>=0; x--) {

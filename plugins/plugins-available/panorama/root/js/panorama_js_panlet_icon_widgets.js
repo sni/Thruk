@@ -291,8 +291,15 @@ Ext.define('TP.SmallWidget', {
         }
     },
 
-    /* render label for this widget */
+    /* queue label renderer */
     setIconLabel: function(cfg, force_perfdata) {
+        var panel = this;
+        TP.reduceDelayEvents(panel, function() {
+            panel.setIconLabelDo(cfg, force_perfdata);
+        }, 300, panel.id+'setIconLabel');
+    },
+    /* render label for this widget */
+    setIconLabelDo: function(cfg, force_perfdata) {
         var panel = this;
         if(cfg       == undefined) {
             cfg       = this.xdata.label;
