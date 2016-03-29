@@ -410,84 +410,7 @@ Ext.define('TP.SmallWidget', {
             return;
         }
         if(!this.labelEl) {
-            var panel = this;
-            if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
-            this.labelEl = Ext.create('Ext.Component', {
-                'html':     ' ',
-                panel:       panel,
-                draggable:  !panel.locked,
-                shadow:     false,
-                renderTo:  "bodyview",
-                cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
-                style:      {
-                    whiteSpace: 'nowrap'
-                },
-                autoEl: {
-                    tag:     'a',
-                    href:    panel.xdata.link ? panel.xdata.link.link : '',
-                    target:  '',
-                    onclick: "return(false);"
-                },
-                listeners: {
-                    /* move parent element according to our drag / drop */
-                    move: function(This, x, y, eOpts) {
-                        var diffX = 0, diffY = 0;
-                        if(x != undefined && This.oldX != undefined) { diffX = x - This.oldX; }
-                        if(y != undefined && This.oldY != undefined) { diffY = y - This.oldY; }
-                        if(x != undefined) { This.oldX = x; }
-                        if(y != undefined) { This.oldY = y; }
-                        if(diffX != 0 || diffY != 0) {
-                            var pos = panel.getPosition();
-                            var newX = pos[0]+diffX;
-                            var newY = pos[1]+diffY;
-                            panel.setRawPosition(newX, newY);
-                            // update settings window
-                            if(TP.iconSettingsWindow) {
-                                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:newX, y:newY});
-                            } else if(panel.iconType == "text" && !panel.readonly) {
-                                panel.xdata.layout.x = newX;
-                                panel.xdata.layout.y = newY;
-                                panel.saveState();
-                            }
-                        }
-                    },
-                    boxready: function( This, width, height, eOpts ) {
-                        panel.addDDListener(This);
-                    },
-                    afterrender: function(This, eOpts) {
-                        panel.addClickEventhandler(This.el);
-                        panel.addDDListener(This);
-                        if(!panel.locked) {
-                            This.el.on('mouseover', function(evt,t,a) {
-                                if(!panel.el) { return; }
-                                if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
-                                    This.el.dom.style.outline = "1px dashed grey";
-                                    if(panel.iconType != "text") {
-                                        panel.el.dom.style.outline = "1px dashed grey";
-                                    }
-                                }
-                            });
-                            This.el.on('mouseout', function(evt,t,a) {
-                                if(This.el.dom.style.outline.match("grey")) {
-                                    This.el.dom.style.outline = "";
-                                }
-                                if(panel.el && panel.el.dom && panel.el.dom.style.outline.match("grey")) {
-                                    panel.el.dom.style.outline = "";
-                                }
-                            });
-                        }
-                    },
-                    show: function( This, eOpts ) {
-                        panel.addDDListener(This);
-                        /* make sure we don't overlap dashboard settings window */
-                        TP.checkModalWindows();
-                    }
-                }
-            });
-            if(panel.rotateLabel) {
-                panel.rotateEl = panel.labelEl.el;
-            }
-            panel.applyRotation(panel.xdata.layout.rotation);
+            panel.createLabelEl();
         }
         var el = this.labelEl.el.dom;
         el.style.zIndex       = Number(this.el.dom.style.zIndex)+1; /* keep above icon */
@@ -539,32 +462,32 @@ Ext.define('TP.SmallWidget', {
             }
             left = left - offsetx;
         }
-        if(cfg.position == 'below') {
+        else if(cfg.position == 'below') {
             top = top + offsety + elHeight;
             if(cfg.orientation == 'horizontal') {
                 left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
             left = left - offsetx;
         }
-        if(cfg.position == 'right') {
+        else if(cfg.position == 'right') {
             left = left + offsety + elWidth + 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
             top = top - offsetx;
         }
-        if(cfg.position == 'left') {
+        else if(cfg.position == 'left') {
             left = left - offsety - size.width - 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
             top = top - offsetx;
         }
-        if(cfg.position == 'center') {
+        else if(cfg.position == 'center') {
             top  = top + offsety + (elHeight/2) - (size.height/2);
             left = left + (elWidth / 2) - (size.width / 2) - offsetx;
         }
-        if(cfg.position == 'top-left') {
+        else if(cfg.position == 'top-left') {
             top  = top + offsety;
             left = left + offsetx;
         }
@@ -574,7 +497,88 @@ Ext.define('TP.SmallWidget', {
         this.labelEl.oldY = top;
     },
 
-    /* add dbl click and context menu events */
+    /* creates the label element */
+    createLabelEl: function() {
+        var panel = this;
+        if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
+        this.labelEl = Ext.create('Ext.Component', {
+            'html':     ' ',
+            panel:       panel,
+            draggable:  !panel.locked,
+            shadow:     false,
+            renderTo:  "bodyview",
+            cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
+            style:      {
+                whiteSpace: 'nowrap'
+            },
+            autoEl: {
+                tag:     'a',
+                href:    panel.xdata.link ? panel.xdata.link.link : '',
+                target:  '',
+                onclick: "return(false);"
+            },
+            listeners: {
+                /* move parent element according to our drag / drop */
+                move: function(This, x, y, eOpts) {
+                    var diffX = 0, diffY = 0;
+                    if(x != undefined && This.oldX != undefined) { diffX = x - This.oldX; }
+                    if(y != undefined && This.oldY != undefined) { diffY = y - This.oldY; }
+                    if(x != undefined) { This.oldX = x; }
+                    if(y != undefined) { This.oldY = y; }
+                    if(diffX != 0 || diffY != 0) {
+                        var pos = panel.getPosition();
+                        var newX = pos[0]+diffX;
+                        var newY = pos[1]+diffY;
+                        panel.setRawPosition(newX, newY);
+                        // update settings window
+                        if(TP.iconSettingsWindow) {
+                            TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:newX, y:newY});
+                        } else if(panel.iconType == "text" && !panel.readonly) {
+                            panel.xdata.layout.x = newX;
+                            panel.xdata.layout.y = newY;
+                            panel.saveState();
+                        }
+                    }
+                },
+                boxready: function( This, width, height, eOpts ) {
+                    panel.addDDListener(This);
+                },
+                afterrender: function(This, eOpts) {
+                    panel.addClickEventhandler(This.el);
+                    panel.addDDListener(This);
+                    if(!panel.locked) {
+                        This.el.on('mouseover', function(evt,t,a) {
+                            if(!panel.el) { return; }
+                            if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
+                                This.el.dom.style.outline = "1px dashed grey";
+                                if(panel.iconType != "text") {
+                                    panel.el.dom.style.outline = "1px dashed grey";
+                                }
+                            }
+                        });
+                        This.el.on('mouseout', function(evt,t,a) {
+                            if(This.el.dom.style.outline.match("grey")) {
+                                This.el.dom.style.outline = "";
+                            }
+                            if(panel.el && panel.el.dom && panel.el.dom.style.outline.match("grey")) {
+                                panel.el.dom.style.outline = "";
+                            }
+                        });
+                    }
+                },
+                show: function( This, eOpts ) {
+                    panel.addDDListener(This);
+                    /* make sure we don't overlap dashboard settings window */
+                    TP.checkModalWindows();
+                }
+            }
+        });
+        if(panel.rotateLabel) {
+            panel.rotateEl = panel.labelEl.el;
+        }
+        panel.applyRotation(panel.xdata.layout.rotation);    /* add dbl click and context menu events */
+    },
+
     addClickEventhandler: function(el) {
         var This = this;
         var tab  = Ext.getCmp(This.panel_id);
@@ -1740,8 +1744,8 @@ Ext.define('TP.IconWidget', {
             // image size has changed
             if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight || panel.lastScale != scale) {
                 panel.setRenderItem(xdata, true);
+                panel.setIconLabel();
             }
-            this.setIconLabel();
         }
     },
     iconCheckBorder: function(xdata, isError) {

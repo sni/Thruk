@@ -39,6 +39,13 @@
 <div id="bodyview"></div>
 <script type="text/javascript">
 <!--
+/*
+console.profile("Page Load Profile");
+window.setTimeout(function() {
+    console.profileEnd();
+}, 5000);
+*/
+
 [%+ PROCESS panorama_js.tt +%]
 
 function preloader() {
