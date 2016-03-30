@@ -1017,9 +1017,13 @@ sub _report_save {
     delete $report->{'failed'};
 
     # save backends as hash with name
-    $report->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $report->{'backends'});
+    $report->{'backends'} = Thruk::Utils::backends_list_to_hash($c, ($report->{'backends_hash'} || $report->{'backends'}));
+    delete $report->{'backends_hash'};
 
     Thruk::Utils::write_data_file($file, $report);
+
+    $report->{'backends_hash'} = $report->{'backends'};
+
     return $report;
 }
 
@@ -1150,9 +1154,10 @@ sub _read_report_file {
         }
     }
 
-    $report->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $report->{'backends'});
-
     _report_save($c, $nr, $report) if $needs_save;
+
+    $report->{'backends_hash'} = $report->{'backends'};
+    $report->{'backends'}      = Thruk::Utils::backends_hash_to_list($c, $report->{'backends'});
 
     return $report;
 }

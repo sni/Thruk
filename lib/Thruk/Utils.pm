@@ -2497,9 +2497,16 @@ returns array of backend ids converted as list of hashes
 sub backends_list_to_hash {
     my($c, $backends) = @_;
     my $hashlist = [];
-    for my $b (@{list($backends)}) {
-        my $backend = $c->{'db'}->get_peer_by_key($b);
-        push @{$hashlist}, { $b => $backend->{'name'} };
+    for my $back (@{list($backends)}) {
+        my $name;
+        if(ref $back eq 'HASH') {
+            my $key  = (keys %{$back})[0];
+            $name    = $back->{$key};
+            $back    = $key;
+        }
+        my $backend = $c->{'db'}->get_peer_by_key($back);
+        $name = $backend->{'name'} if $backend;
+        push @{$hashlist}, { $back => $name };
     }
     return($hashlist);
 }
