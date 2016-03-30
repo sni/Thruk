@@ -574,6 +574,11 @@ sub _run_command_action {
         $data->{'output'} = _cmd_listhosts($c);
     }
 
+    # list services
+    elsif($action eq 'listservices') {
+        $data->{'output'} = _cmd_listservices($c);
+    }
+
     # list hostgroups
     elsif($action eq 'listhostgroups') {
         $data->{'output'} = _cmd_listhostgroups($c);
@@ -701,6 +706,20 @@ sub _cmd_listhosts {
     my $output = '';
     for my $host (@{$c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )], sort => {'ASC' => 'name'})}) {
         $output .= $host->{'name'}."\n";
+    }
+
+    # fix encoding
+    utf8::decode($output);
+
+    return encode_utf8($output);
+}
+
+##############################################
+sub _cmd_listservices {
+    my($c) = @_;
+    my $output = '';
+    for my $svc (@{$c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], sort => {'ASC' => [ 'host_name', 'description' ] })}) {
+        $output .= $svc->{'host_name'}.";".$svc->{'description'}."\n";
     }
 
     # fix encoding

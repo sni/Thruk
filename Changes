@@ -17,6 +17,7 @@ next
             - create debug information more easily
           - CLI
             - add new graph command to export graphs from cli
+            - add new listservices command
 
 2.06     Wed Mar 02 16:08:00 CET 2016
           - make custom variables from show_custom_vars clickable

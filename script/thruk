@@ -182,6 +182,7 @@ script has the following arguments
     Data Commands
       - listbackends                list all backends
       - listhosts                   list hostnames
+      - listservices                list servicesnames
       - listhostgroups              list hostgroupnames
       - command <host> <service>    print used command line for this host/service
 
