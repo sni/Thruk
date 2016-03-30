@@ -1601,7 +1601,7 @@ Sample menu with two items and a seperator:
 A menu has the following attributes:
 
      ** `icon`          icon for the menu itself. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url
-                        and `{% raw %}{{remote_user}}{% endraw %}` for the user name. Within OMD, the the site variable `{{site}}` must be prepended.
+                        and `{% raw %}{{remote_user}}{% endraw %}` for the user name. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
      ** `title`         title of the menu, will be display on mouse over.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
      ** `...`           arbitrary attributes will be used as attributes of the menu icon html element.
