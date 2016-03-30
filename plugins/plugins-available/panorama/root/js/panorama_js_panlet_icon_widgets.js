@@ -302,14 +302,14 @@ Ext.define('TP.SmallWidget', {
     setIconLabelDo: function(cfg, force_perfdata) {
         var panel = this;
         if(cfg       == undefined) {
-            cfg       = this.xdata.label;
+            cfg       = panel.xdata.label;
             if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel.id == panel.id) {
                 var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
                 cfg       = xdata.label;
             }
         }
-        if(!this.el || !this.el.dom)  { return; }
-        if(!this.el.dom.style.zIndex && cfg && cfg.labeltext) {
+        if(!panel.el || !panel.el.dom)  { return; }
+        if(!panel.el.dom.style.zIndex && cfg && cfg.labeltext) {
             var tab  = Ext.getCmp(panel.panel_id);
             tab.scheduleApplyZindex();
             return;
@@ -324,9 +324,17 @@ Ext.define('TP.SmallWidget', {
             }, 100);
         }
         if(cfg == undefined) { return; }
+
+        panel.setIconLabelText(cfg, force_perfdata);
+        panel.setIconLabelPosition(cfg);
+        return;
+    },
+
+    setIconLabelText: function(cfg, force_perfdata) {
+        var panel = this;
         var txt = String(cfg.labeltext);
         if(txt == undefined) { txt = ''; }
-        this.el.dom.title = '';
+        panel.el.dom.title = '';
 
         /* hide the icon element for label only appearance */
         if(panel.locked && panel.el) {
@@ -341,11 +349,11 @@ Ext.define('TP.SmallWidget', {
             if(TP.availabilities == undefined) { TP.availabilities = {}; }
             if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
             var matches           = txt.match(/(\{\{.*?\}\})/g);
-            if(this.servicegroup) { totals = this.servicegroup; }
-            if(this.hostgroup)    { totals = this.hostgroup; }
-            if(this.results)      { totals = this.results; }
-            if(this.host)         { for(var key in this.host)    { window[key] = this.host[key];    } window['performance_data'] = this.host['perf_data']; }
-            if(this.service)      { for(var key in this.service) { window[key] = this.service[key]; } window['performance_data'] = this.service['perf_data']; }
+            if(panel.servicegroup) { totals = panel.servicegroup; }
+            if(panel.hostgroup)    { totals = panel.hostgroup; }
+            if(panel.results)      { totals = panel.results; }
+            if(panel.host)         { for(var key in panel.host)    { window[key] = panel.host[key];    } window['performance_data'] = panel.host['perf_data']; }
+            if(panel.service)      { for(var key in panel.service) { window[key] = panel.service[key]; } window['performance_data'] = panel.service['perf_data']; }
             if(window.perf_data) {
                 window.perf_data = parse_perf_data(window.perf_data);
                 window.perfdata = {};
@@ -406,53 +414,67 @@ Ext.define('TP.SmallWidget', {
         }
         /* no label at all */
         if(!cfg.labeltext) {
-            if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
+            if(panel.labelEl) { panel.labelEl.destroy(); panel.labelEl = undefined; }
             return;
         }
-        if(!this.labelEl) {
+        if(!panel.labelEl) {
             panel.createLabelEl();
         }
-        var el = this.labelEl.el.dom;
-        el.style.zIndex       = Number(this.el.dom.style.zIndex)+1; /* keep above icon */
-        this.labelEl.update(txt);
-        el.style.color        = cfg.fontcolor;
-        el.style.fontFamily   = cfg.fontfamily;
-        el.style.background   = cfg.bgcolor;
-        el.style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
-        el.style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
-        el.style.paddingLeft  = "3px";
-        el.style.paddingRight = "3px";
-        if(cfg.orientation == 'vertical') { this.labelEl.addCls('vertical');    }
-        else                              { this.labelEl.removeCls('vertical'); }
+        if(!panel.labelEl) { return; }
+        var el    = panel.labelEl.el.dom;
+        var style = el.style;
+        style.zIndex       = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
+        var oldTxt = panel.labelEl.el.dom.innerHTML;
+        if(oldTxt != txt) {
+            panel.labelEl.update(txt);
+        }
+        style.color        = cfg.fontcolor;
+        style.fontFamily   = cfg.fontfamily;
+        style.background   = cfg.bgcolor;
+        style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
+        style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
+        style.paddingLeft  = "3px";
+        style.paddingRight = "3px";
+        if(cfg.orientation == 'vertical') { panel.labelEl.addCls('vertical');    }
+        else                              { panel.labelEl.removeCls('vertical'); }
 
-        var left          = TP.extract_number_with_unit({ value: this.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
-        var top           = TP.extract_number_with_unit({ value: this.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
-        var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,            unit:' px', floor: true, defaultValue:   0 });
-        var offsety       = TP.extract_number_with_unit({ value: cfg.offsety,            unit:' px', floor: true, defaultValue:   0 });
-        var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize,           unit:' px', floor: true, defaultValue:  14 });
-        var elWidth       = TP.extract_number_with_unit({ value: this.width,             unit:'',    floor: true, defaultValue:   0 });
-        var elHeight      = TP.extract_number_with_unit({ value: this.height,            unit:'',    floor: true, defaultValue:   0 });
-        var bordersize    = TP.extract_number_with_unit({ value: cfg.bordersize,         unit:' px', floor: true, defaultValue:   0 });
+        return;
+    },
+
+    setIconLabelPosition: function(cfg) {
+        var panel = this;
+        if(!panel.labelEl) { return; }
+        var left          = TP.extract_number_with_unit({ value: panel.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
+        var top           = TP.extract_number_with_unit({ value: panel.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
+        var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,             unit:' px', floor: true, defaultValue:   0 });
+        var offsety       = TP.extract_number_with_unit({ value: cfg.offsety,             unit:' px', floor: true, defaultValue:   0 });
+        var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize,            unit:' px', floor: true, defaultValue:  14 });
+        var elWidth       = TP.extract_number_with_unit({ value: panel.width,             unit:'',    floor: true, defaultValue:   0 });
+        var elHeight      = TP.extract_number_with_unit({ value: panel.height,            unit:'',    floor: true, defaultValue:   0 });
+        var bordersize    = TP.extract_number_with_unit({ value: cfg.bordersize,          unit:' px', floor: true, defaultValue:   0 });
+
+        var el    = panel.labelEl.el.dom;
+        var style = el.style;
 
         if(cfg.bordercolor && bordersize > 0) {
-            el.style.border = bordersize+"px solid "+cfg.bordercolor;
+            style.border = bordersize+"px solid "+cfg.bordercolor;
         } else {
-            el.style.border = "";
+            style.border = "";
         }
 
         if(cfg.width == undefined || cfg.width == '') {
-            el.style.width = '';
+            style.width = '';
         } else {
-            el.style.width = cfg.width+"px";
+            style.width = cfg.width+"px";
         }
         if(cfg.height == undefined || cfg.height == '') {
-            el.style.height = '';
+            style.height = '';
         } else {
-            el.style.height = cfg.height+"px";
+            style.height = cfg.height+"px";
         }
 
-        el.style.fontSize = fontsize+'px';
-        var size          = this.labelEl.getSize();
+        style.fontSize = fontsize+'px';
+        var size          = panel.labelEl.getSize();
         if(size.width == 0) { return; }
 
         if(cfg.position == 'above') {
@@ -491,10 +513,10 @@ Ext.define('TP.SmallWidget', {
             top  = top + offsety;
             left = left + offsetx;
         }
-        el.style.left = left+"px";
-        el.style.top  = top+"px";
-        this.labelEl.oldX = left;
-        this.labelEl.oldY = top;
+        style.left = left+"px";
+        style.top  = top+"px";
+        panel.labelEl.oldX = left;
+        panel.labelEl.oldY = top;
     },
 
     /* creates the label element */
