@@ -15,6 +15,8 @@ next
             - fix mixed up label offset x/y
           - Reports:
             - create debug information more easily
+          - CLI
+            - add new graph command to export graphs from cli
 
 2.06     Wed Mar 02 16:08:00 CET 2016
           - make custom variables from show_custom_vars clickable

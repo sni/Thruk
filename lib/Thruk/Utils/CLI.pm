@@ -674,6 +674,11 @@ sub _run_command_action {
         ($data->{'output'}, $data->{'rc'}) = _cmd_fix_scheduling($c, $1);
     }
 
+    # graph actions
+    elsif($action eq 'graph') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_graph($c, $opt);
+    }
+
     # nothing matched...
     else {
         $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
@@ -1628,6 +1633,67 @@ sub _cmd_selfcheck {
 
     $c->stats->profile(end => "_cmd_selfcheck()");
     return($msg."\n".$details."\n", $rc);
+}
+
+##############################################
+sub _cmd_graph {
+    my($c, $opt) = @_;
+    my $now = time();
+    if(!defined $c->stash->{'remote_user'}) {
+        $c->stash->{'remote_user'} = 'cli';
+    }
+    my $start  = ($opt->{'start'} || $now-86400);
+    my $end    = ($opt->{'end'}   || $now);
+    # if no start / end given, round to nearest 10 seconds which makes caching more effective
+    if(!$opt->{'start'} && !$opt->{'end'}) {
+        $start = $start - $start % 10;
+        $end   = $end   - $end   % 10;
+    }
+    my $format = $opt->{'format'} || 'png';
+    my $width  = $opt->{'width'}  || 800;
+    my $height = $opt->{'height'} || 300;
+    if($format ne 'png' && $format ne 'base64') {
+        return("ERROR: please use either 'png' or 'base64' format.", 1);
+    }
+    # use cached version?
+    Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/graphs/');
+    my $cache_file = $opt->{'host'}.'_'.($opt->{'service'} || '_HOST_');
+    $cache_file =~ s|[^\a-zA-A_-]|.|gmx;
+    $cache_file = $cache_file.'-'.$start.'-'.$end.'-'.($opt->{'source'}||'').'-'.$width.'-'.$height.'.'.$format;
+    $cache_file = $c->config->{'tmp_path'}.'/graphs/'.$cache_file;
+    if(-e $cache_file) {
+        _debug("cache hit from ".$cache_file) if $Thruk::Utils::CLI::verbose >= 2;
+        return(scalar read_file($cache_file), 0);
+    }
+
+    # create new image
+    my $img = Thruk::Utils::get_perf_image($c,
+                                           $opt->{'host'},
+                                           $opt->{'service'},
+                                           $start,
+                                           $end,
+                                           $width,
+                                           $height,
+                                           $opt->{'source'},
+                                        );
+    return("", 1) unless $img;
+    if($format eq 'base64') {
+        require MIME::Base64;
+        $img = MIME::Base64::encode_base64($img);
+    }
+    Thruk::Utils::IO::write($cache_file, $img);
+    _debug("cached graph to ".$cache_file) if $Thruk::Utils::CLI::verbose >= 2;
+
+    # clean old cached files, threshold is 5minutes, since we mainly
+    # want to cache files used from many seriel notifications
+    for my $file (glob($c->config->{'tmp_path'}.'/graphs/*')) {
+        my $mtime = (stat($file))[9];
+        if($mtime < $now - 300) {
+            _debug("removed old cached file (mtime: ".scalar($mtime)."): ".$file) if $Thruk::Utils::CLI::verbose >= 2;
+            unlink($file);
+        }
+    }
+    return($img, 0);
 }
 
 ##############################################

@@ -1388,7 +1388,7 @@ sub get_graph_url {
 
   get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format)
 
-return base64 encoded pnp/grafana image if possible.
+return raw pnp/grafana image if possible.
 An empty string will be returned if no graph can be exported.
 
 =cut
@@ -1396,19 +1396,21 @@ sub get_perf_image {
     my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format) = @_;
     my $pnpurl     = "";
     my $grafanaurl = "";
-    $source        = 0 unless defined $source;
     $format        = 'png' unless $format;
     $svc           = ''    unless defined $svc;
 
+    my $custvars;
     if($svc) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
         $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
         $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
+        $custvars   = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
     } else {
         my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
         $pnpurl     = get_pnp_url($c, $hstdata->[0], 1);
         $grafanaurl = get_histou_url($c, $hstdata->[0], 1);
-        $svc = '_HOST_' if $pnpurl;
+        $svc        = '_HOST_' if $pnpurl;
+        $custvars   = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
@@ -1416,7 +1418,8 @@ sub get_perf_image {
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
-        $grafanaurl .= '&panelId='.($source || $c->config->{'grafana_default_panelId'} || 1);
+        $source = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $source;
+        $grafanaurl .= '&panelId='.$source;
         if($resize_grafana_images) {
             $width  = $width * 1.3;
             $height = $height * 2;
@@ -1428,11 +1431,13 @@ sub get_perf_image {
             $uri    =~ s|&amp;|&|gmx;
             $grafanaurl = $uri.$grafanaurl;
         }
+    } else {
+        $source = ($custvars->{'GRAPH_SOURCE'} || '0') unless defined $source;
     }
 
     my $exporter = $c->config->{home}.'/script/pnp_export.sh';
-    $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
     $exporter    = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'};
+    $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
 
     # create fake session
     my $sessionid = get_fake_session($c);
