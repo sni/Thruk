@@ -1082,7 +1082,7 @@ var TP = {
 
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) {
-            if(tab && tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+            if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
             return;
         }
         var req = statusReq.req,
@@ -1103,7 +1103,7 @@ var TP = {
             callback: function(options, success, response) {
                 TP.iconUpdateRunning[tab.id] = false;
                 if(reschedule) { reschedule.unmask(); }
-                if(tab && tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+                if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
                     TP.refresh_errors++;

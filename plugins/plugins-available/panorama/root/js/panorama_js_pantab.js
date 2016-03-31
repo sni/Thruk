@@ -426,7 +426,7 @@ Ext.define('TP.Pantab', {
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
         if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
-        /* do not change zindex if there are modal windows and masks on screen */
+        /* do not change zindex if there are masks on screen */
         var masks = Ext.Element.select('.x-mask');
         if(masks.elements.length > 0) { return }
 
@@ -815,7 +815,7 @@ Ext.define('TP.Pantab', {
         var mask;
         var panels = TP.getAllPanel(tab);
         if(tab.locked != val && panels.length > 0) {
-            tab.mask = tab.body.mask((val ? "" : "un")+"locking dashboard...");
+            tab.mask = Ext.getBody().mask((val ? "" : "un")+"locking dashboard...");
         }
         var changed = (tab.xdata.locked != val);
         tab.xdata.locked   = val;
