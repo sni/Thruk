@@ -653,7 +653,7 @@ Ext.define('TP.SmallWidget', {
             el.on("dblclick", function(evt) {
                 window.clearTimeout(TP.timeouts['click'+This.id]);
                 if(!This.locked) {
-                    tab.body.mask("loading settings");
+                    Ext.getBody().mask("loading settings");
                     window.setTimeout(function() {
                         TP.iconShowEditDialog(This);
                     }, 50);

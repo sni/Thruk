@@ -1566,7 +1566,7 @@ TP.iconShowEditDialog = function(panel) {
             }
         }
     }).show();
-    tab.body.unmask();
+    Ext.getBody().unmask();
 
     TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
