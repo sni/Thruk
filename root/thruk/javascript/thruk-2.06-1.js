@@ -3635,7 +3635,7 @@ function toggle_comment(event) {
 
         var inside = false;
         jQuery("TR.clickable").each(function(nr, elem) {
-          if(elem.style.display == 'none') {
+          if(! jQuery(elem).is(":visible")) {
             return true;
           }
           if(inside == true) {
