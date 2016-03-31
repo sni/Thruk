@@ -294,10 +294,14 @@ Ext.define('TP.SmallWidget', {
     /* queue label renderer */
     setIconLabel: function(cfg, force_perfdata) {
         var panel = this;
+        if(force_perfdata) {
+            return(panel.setIconLabelDo(cfg, force_perfdata));
+        }
         TP.reduceDelayEvents(panel, function() {
             panel.setIconLabelDo(cfg, force_perfdata);
         }, 300, panel.id+'setIconLabel');
     },
+
     /* render label for this widget */
     setIconLabelDo: function(cfg, force_perfdata) {
         var panel = this;
@@ -423,7 +427,7 @@ Ext.define('TP.SmallWidget', {
         if(!panel.labelEl) { return; }
         var el    = panel.labelEl.el.dom;
         var style = el.style;
-        style.zIndex       = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
+        style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
         var oldTxt = panel.labelEl.el.dom.innerHTML;
         if(oldTxt != txt) {
             panel.labelEl.update(txt);

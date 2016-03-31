@@ -425,7 +425,6 @@ Ext.define('TP.Pantab', {
     applyZindex: function() {
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
-        var maxZindex;
         if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
         /* do not change zindex if there are modal windows and masks on screen */
         var masks = Ext.Element.select('.x-mask');
@@ -459,12 +458,11 @@ Ext.define('TP.Pantab', {
                 var panel = Ext.getCmp(this.window_ids[nr]);
                 if(panel && panel.labelEl && panel.labelEl.el && panel.labelEl.el.dom) {
                     panel.labelEl.el.dom.style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
-                    if(maxZindex < panel.labelEl.el.dom.style.zIndex) { maxZindex = panel.labelEl.el.dom.style.zIndex; }
                 }
             }
         }
 
-        TP.checkModalWindows(maxZindex);
+        TP.checkModalWindows();
     },
 
     hidePanlets: function() {
