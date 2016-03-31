@@ -55,6 +55,8 @@ TP.iconShowEditDialog = function(panel) {
         // ensure fresh and correct performance data
         window.perfdata = {};
 
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        panel.setIconLabel(xdata.label || {}, true);
         // update speedo
         var data = [['number of problems',                  'problems'],
                     ['number of problems (incl. warnings)', 'problems_warn']];
@@ -65,7 +67,6 @@ TP.iconShowEditDialog = function(panel) {
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
         /* use availability data as source */
-        var xdata = TP.get_icon_form_xdata(settingsWindow);
         if(xdata.label && xdata.label.labeltext && TP.availabilities && TP.availabilities[panel.id]) {
             var avail = TP.availabilities[panel.id];
             for(var key in avail) {
@@ -79,7 +80,6 @@ TP.iconShowEditDialog = function(panel) {
                 data.push(['Availability: '+last+'% ('+options+')', 'avail:'+key]);
             }
         }
-        panel.setIconLabel(xdata.label || {}, true);
         var cbo = Ext.getCmp('speedosourceStore');
         TP.updateArrayStoreKV(cbo.store, data);
 
