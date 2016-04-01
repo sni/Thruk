@@ -70,7 +70,7 @@ Can be set to specify location of the thruk binary used for tests.
 Specify location of config files.
 
 
-==== THRUK_DEBUG
+==== THRUK_VERBOSE
 Set debug level.
 
 ==== THRUK_DEMO_MODE
