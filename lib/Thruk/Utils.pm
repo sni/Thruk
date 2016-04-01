@@ -687,8 +687,7 @@ sub read_ssi {
     my $page = shift;
     my $type = shift;
     my $dir  = $c->config->{ssi_path};
-    my $re = qr{\A${page}-${type}(-.*)?.ssi\z};
-    my @files = sort grep { /$re/ } keys %{ $c->config->{ssi_includes} };
+    my @files = sort grep { /\A${page}-${type}(-.*)?.ssi\z/mx } keys %{ $c->config->{ssi_includes} };
     my $output = "";
     for my $inc (@files) {
         $output .= "\n<!-- BEGIN SSI $dir/$inc -->\n" if Thruk->verbose;
@@ -701,7 +700,7 @@ sub read_ssi {
           }
         } elsif ( -r "$dir/$inc" ) {
             my $content = read_file("$dir/$inc");
-            unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") };
+            unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
             $output .= $content;
         } else {
             $c->log->warn("$dir/$inc is no longer accessible, please restart thruk to initialize ssi information");
