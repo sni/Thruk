@@ -13,17 +13,21 @@ end of the body.
 IMPORTANT: This has *nothing to do* with the Apache module 'mod_include'
 and just implements the nagios way of SSIs.
 
-There are two global includes, which will be included in every cgi
+There are global includes, which will be included in every cgi
 page:
 
-* ssi/common-footer.ssi
-* ssi/common-header.ssi
+* pass:[ssi/common-footer.ssi]
+* pass:[ssi/common-footer-*.ssi]
+* pass:[ssi/common-header.ssi]
+* pass:[ssi/common-header-*.ssi]
 
 and there are page specific includes, which will only be placed in the
 specific page:
 
-* ssi/status-footer.ssi
-* ssi/status-header.ssi
+* pass:[ssi/status-footer.ssi]
+* pass:[ssi/status-footer-*.ssi]
+* pass:[ssi/status-header.ssi]
+* pass:[ssi/status-header-*.ssi]
 
 Files will be statically placed inside the output of the normal cgi
 output. Executables will be executed and the output will then be used

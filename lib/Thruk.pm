@@ -537,7 +537,7 @@ sub _set_ssi {
         for my $entry (readdir($dh)) {
             next if $entry eq '.' or $entry eq '..';
             next if $entry !~ /\.ssi$/mx;
-            $ssi{$entry} = { name => $entry };
+            $ssi{$entry} = 1;
         }
         closedir $dh;
     }

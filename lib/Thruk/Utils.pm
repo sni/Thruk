@@ -661,24 +661,11 @@ puts the ssi templates into the stash
 sub ssi_include {
     my($c, $page) = @_;
     $page = $c->stash->{'page'} unless defined $page;
-    my $global_header_file = "common-header.ssi";
-    my $header_file        = $page."-header.ssi";
-    my $global_footer_file = "common-footer.ssi";
-    my $footer_file        = $page."-footer.ssi";
 
-    if ( defined $c->config->{ssi_includes}->{$global_header_file} ){
-        $c->stash->{ssi_header} = Thruk::Utils::read_ssi($c, $global_header_file);
-    }
-    if ( defined $c->config->{ssi_includes}->{$header_file} ){
-        $c->stash->{ssi_header} .= Thruk::Utils::read_ssi($c, $header_file);
-    }
-    # Footer
-    if ( defined $c->config->{ssi_includes}->{$global_footer_file} ){
-        $c->stash->{ssi_footer} = Thruk::Utils::read_ssi($c, $global_footer_file);
-    }
-    if ( defined $c->config->{ssi_includes}->{$footer_file} ){
-        $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $footer_file);
-    }
+    $c->stash->{ssi_header}  = Thruk::Utils::read_ssi($c, 'common', 'header');
+    $c->stash->{ssi_header} .= Thruk::Utils::read_ssi($c, $page, 'header');
+    $c->stash->{ssi_footer}  = Thruk::Utils::read_ssi($c, 'common', 'footer');
+    $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $page, 'footer');
 
     return 1;
 }
@@ -688,27 +675,40 @@ sub ssi_include {
 
 =head2 read_ssi
 
-  read_ssi($c, $file)
+  read_ssi($c, $page, $type)
 
-reads a ssi file or executes it if its executable
+finds all ssi files for a page of the specified type and returns the ssi content.
+Executable ssi files are executed and the output is appended to the ssi content.
+Otherwise the content of the ssi file is appende to the ssi content.
 
 =cut
 sub read_ssi {
     my $c    = shift;
-    my $file = shift;
-    # retun if file is executable
-    if( -x $c->config->{'ssi_path'}."/".$file ){
-       open(my $ph, '-|', $c->config->{'ssi_path'}."/".$file.' 2>&1') or carp("cannot execute ssi: $!");
-       my $output = '';
-       while(my $line = <$ph>) { $output .= $line; }
-       CORE::close($ph);
-       return $output;
+    my $page = shift;
+    my $type = shift;
+    my $dir  = $c->config->{ssi_path};
+    my $re = qr{\A${page}-${type}(-.*)?.ssi\z};
+    my @files = sort grep { /$re/ } keys %{ $c->config->{ssi_includes} };
+    my $output = "";
+    for my $inc (@files) {
+        $output .= "\n<!-- BEGIN SSI $dir/$inc -->\n" if Thruk->verbose;
+        if ( -x "$dir/$inc" ) {
+          if(open(my $ph, '-|', "$dir/$inc 2>&1")) {
+            while(defined(my $line = <$ph>)) { $output .= $line; }
+            CORE::close($ph);
+          } else {
+            carp("cannot execute ssi $dir/$inc: $!");
+          }
+        } elsif ( -r "$dir/$inc" ) {
+            my $content = read_file("$dir/$inc");
+            unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") };
+            $output .= $content;
+        } else {
+            $c->log->warn("$dir/$inc is no longer accessible, please restart thruk to initialize ssi information");
+        }
+        $output .= "\n<!-- END SSI $dir/$inc -->\n" if Thruk->verbose;
     }
-    elsif( -r $c->config->{'ssi_path'}."/".$file ){
-        return(read_file($c->config->{'ssi_path'}."/".$file) || carp("cannot open ssi: $!"));
-    }
-    $c->log->warn($c->config->{'ssi_path'}."/".$file." is no longer accessible, please restart thruk to initialize ssi information");
-    return "";
+    return $output;
 }
 
 ########################################
