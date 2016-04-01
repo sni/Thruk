@@ -43,6 +43,8 @@ try {
     click(_span("Clone"));
     mouseClickXY(150,150);
 
+    screenRegion.waitForImage("island_map_green.png", 3).mouseMove();
+
     testCase.endOfStep("panorama geo map switch I", 60);
 
     thruk_panorama_exit();
