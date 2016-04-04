@@ -82,6 +82,8 @@ sub cmd {
         $SIG{CHLD} = 'DEFAULT';
         ## use critic
 
+        POSIX::close(0);
+        POSIX::close(1);
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
 
@@ -565,7 +567,7 @@ sub _do_child_stuff {
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
     # close open filehandles
-    for my $fd (0..1024) {
+    for my $fd (2..1024) {
         POSIX::close($fd);
     }
 
