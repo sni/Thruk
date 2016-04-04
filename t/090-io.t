@@ -53,4 +53,12 @@ like($output, '/thruk.conf/', "ls returned something");
 is($rc, 0, "ls returned with rc: 0");
 like($output, '/thruk.conf/', "ls array args returned something");
 
+($rc, $output) = Thruk::Utils::IO::cmd(undef, ['/bin/false']);
+ok($rc != 0, "/bin/false returned with anything but 0");
+like($output, '/^$/', "false returned nothing");
+
+($rc, $output) = Thruk::Utils::IO::cmd(undef, '/bin/false');
+ok($rc != 0, "/bin/false returned with anything but 0");
+like($output, '/^$/', "false returned nothing");
+
 done_testing();

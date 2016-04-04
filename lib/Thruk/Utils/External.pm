@@ -158,13 +158,18 @@ sub perl {
                 # some db drivers need reconnect after forking
                 _reconnect($c);
 
-                eval($conf->{'expr'});
+                my $rc = eval($conf->{'expr'});
                 ## use critic
 
                 if($@) {
                     print STDERR $@;
                     exit(1);
                 }
+
+                $rc = -1 unless defined $rc;
+                open(my $fh, '>>', $dir."/rc");
+                print $fh $rc;
+                Thruk::Utils::IO::close($fh, $dir."/rc");
 
                 close(STDOUT);
                 close(STDERR);
