@@ -8,6 +8,7 @@ next
           - fix using non-standard webserver ports with cookie authentication (#576)
           - Config Tool:
             - add list wizard to drop down
+            - add user defined custom variables to attribute list, extra_custom_var_host and extra_custom_var_service
             - fix encodig when raw editing files (#572)
           - Panorama View:
             - reload dashboards if server was updated

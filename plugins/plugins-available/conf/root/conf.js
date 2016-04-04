@@ -1,8 +1,10 @@
 var running_number = 0;
 function add_conf_attribute(table, key, rt) {
 
+    var value = "";
     if(fields[key] == undefined) {
-        key = 'customvariable';
+        value = key;
+        key   = 'customvariable';
     }
 
     running_number--;
@@ -27,16 +29,16 @@ function add_conf_attribute(table, key, rt) {
     newObj.cells[3].abbr      = unescape(unescapeHTML(fields[key].help).replace(/&quot;/g, '"'));
 
     if(key == 'customvariable' || key == 'exception') {
-        var value = "";
-        if(key == 'customvariable') {
-            value = "_";
+        if(key == 'customvariable' && value.substr(0,1) != '_') {
+            value = "_"+value.toUpperCase();
         }
-        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"jQuery('.obj_" + running_number + "').attr('name', 'obj.'+this.value)\">";
+        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"jQuery('.obj_" + running_number + "').attr('name', 'obj.'+this.value)\" id='id_customvariable0_key'>";
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_'+running_number);
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/class="obj_customvariable"/g, 'class="obj_customvariable obj_'+running_number+'"');
     }
     if(key == 'customvariable') {
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id="id_customvariable0"/g, 'id="id_customvariable'+running_number+'"');
+        newObj.cells[0].innerHTML = newObj.cells[0].innerHTML.replace(/id_customvariable0_key/g, 'id_customvariable'+running_number+'_key');
     }
 
     // insert row at 3rd last position
@@ -646,11 +648,20 @@ function new_attr_filter(str) {
 }
 
 /* new attribute onselect */
-var newid, inp;
 function on_attr_select() {
-    newid = "#"+add_conf_attribute('attr_table', jQuery('#newattr').val(),true).replace(/"/g, '');
+    var key = jQuery('#newattr').val();
+    var newid = "#"+add_conf_attribute('attr_table', key,true).replace(/"/g, '');
     ajax_search.reset();
-    window.setTimeout('ajax_search.hide_results(null, 1);jQuery(\''+newid+'\').focus();', 300);
+    if(key == "customvariable") {
+        newid = newid+"_key";
+    }
+    window.setTimeout(function() {
+        ajax_search.hide_results(null, 1);
+        jQuery(newid).focus();
+        /* move cursor to end of input */
+        setCaretToPos(jQuery(newid)[0], jQuery(newid).val().length);
+    }
+    , 200);
     return newid;
 }
 
@@ -659,7 +670,7 @@ function on_empty_click(inp) {
     var input = document.getElementById(ajax_search.input_field);
     var v = input.value;
     input.value = 'customvariable';
-    newid = on_attr_select();
+    var newid = on_attr_select();
     newid = newid.replace(/^#/, '');
     var newin = document.getElementById(newid);
     var tr = newin.parentNode.parentNode;
