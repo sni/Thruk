@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: Server Side Includes
+lightbox: true
 breadcrumb: [ "advanced.html", "Advanced" ]
 ---
 
@@ -13,6 +14,8 @@ end of the body.
 IMPORTANT: This has *nothing to do* with the Apache module 'mod_include'
 and just implements the nagios way of SSIs.
 
+=== Common Includes
+
 There are global includes, which will be included in every cgi
 page:
 
@@ -21,14 +24,26 @@ page:
 * pass:[ssi/common-header.ssi]
 * pass:[ssi/common-header-*.ssi]
 
-and there are page specific includes, which will only be placed in the
+
+=== Page Specific Includes
+
+And there are page specific includes, which will only be placed in the
 specific page:
 
-* pass:[ssi/status-footer.ssi]
-* pass:[ssi/status-footer-*.ssi]
-* pass:[ssi/status-header.ssi]
-* pass:[ssi/status-header-*.ssi]
+* pass:[ssi/&lt;page&gt;-footer.ssi]
+* pass:[ssi/&lt;page&gt;-footer-*.ssi]
+* pass:[ssi/&lt;page&gt;-header.ssi]
+* pass:[ssi/&lt;page&gt;-header-*.ssi]
+
+Replace &lt;page&gt; with the name of the page. You can find the page name in the url (see screenshot). Includes are only possible for the cgi pages, not for static html pages like the index.html.
+
++++
+<a title="ssi page" rel="lightbox[ssi]" href="ssi_page.png"><img src="ssi_page.png" alt="ssi page" width="50%" height="50%" /></a>
++++
+
+=== Static and Dynamic Includes
 
 Files will be statically placed inside the output of the normal cgi
 output. Executables will be executed and the output will then be used
 as content.
+
