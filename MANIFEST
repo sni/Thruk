@@ -1290,6 +1290,7 @@ t/086-Test-Vars.t
 t/087-trailing_whitespace.t
 t/088-remove_after.t
 t/089-patches.t
+t/090-external.t
 t/090-io.t
 t/092-clean_debug.t
 t/092-stash-config.t
