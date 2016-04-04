@@ -17,6 +17,7 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Test::More;
+use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
 use File::Slurp qw/read_file/;
 use HTTP::Request::Common qw(GET POST);
@@ -278,7 +279,7 @@ sub test_page {
                 $found = 1;
                 last;
             }
-            sleep(1);
+            sleep(0.3);
             $now = time();
             $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
             $return->{'content'} = $request->content;
@@ -586,7 +587,7 @@ sub wait_for_job {
     alarm(300);
     eval {
         while(Thruk::Utils::External::_is_running($jobdir)) {
-            sleep(1);
+            sleep(0.1);
         }
     };
     alarm(0);
