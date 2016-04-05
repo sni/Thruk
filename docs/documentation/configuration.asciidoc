@@ -1616,7 +1616,8 @@ The menu item can have the following attributes:
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
-                        You may use `{% raw %}{{macros}}{% endraw %}` here too.
+                        You may use `{% raw %}{{macros}}{% endraw %}` here too. Also javascript: links are valid,
+                        for example `javascript:alert('$HOSTNAME$')`.
      ** `target`        Use '_blank' here to open link in a new window.
      ** `...`           arbitrary attributes will be used as attributes of the menu item link html element.
 
