@@ -27,11 +27,14 @@ use constant {
     ACCESS_READWRITE => 2,
     ACCESS_OWNER     => 3,
 
+    SOFT_STATE       => 0,
+    HARD_STATE       => 1,
+
     DASHBOARD_FILE_VERSION => 2,
 };
 
 use base 'Exporter';
-our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION/);
+our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/);
 
 ##########################################################
 
@@ -214,6 +217,8 @@ sub load_dashboard {
 
     if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
     if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = _get_default_tab_xdata($c) }
+    # set default state type
+    $dashboard->{'tab'}->{'xdata'}->{'state_type'} = 'soft' unless defined $dashboard->{'tab'}->{'xdata'}->{'state_type'};
     $dashboard->{'tab'}->{'xdata'}->{'owner'}    = $dashboard->{'user'};
     $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
     return $dashboard;

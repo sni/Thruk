@@ -13,6 +13,7 @@ next
           - Panorama View:
             - reload dashboards if server was updated
             - add factor for speedometers
+            - add support for hard states in icon states
             - update wms provider list
             - fix background image offset not working properly
             - fix mixed up label offset x/y

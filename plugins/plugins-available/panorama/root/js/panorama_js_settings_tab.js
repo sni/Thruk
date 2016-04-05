@@ -40,6 +40,12 @@ var wmsProvider = Ext.create('Ext.data.Store', {
 
 TP.getExportTab = function(options) {
     var exportItems = [{
+        xtype:      'panel',
+        html:       'Save / Load Dashboards',
+        style:      'text-align: center;',
+        padding:    '0 0 10 0',
+        border:      0
+    }, {
         xtype:      'fieldcontainer',
         fieldLabel: 'File Save',
         items: [{
@@ -276,7 +282,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 fieldLabel: 'Backends / Sites',
                 xtype:      'itemselector',
                 name:       'backends',
-                height:     160,
+                height:     200,
                 disabled:   !tab.xdata.select_backends,
                 buttons:   ['add', 'remove'],
                 store:     backends,
@@ -369,7 +375,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     }
                 }
             })],
-            height: 200,
+            height: 230,
             width:  300,
             fbar: [{
                 type: 'button',
@@ -646,6 +652,23 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             name:       'autohideheader',
             boxLabel:   ' (widget header will be displayed on mouse over)'
         }, {
+            fieldLabel:  'State Type',
+            xtype:       'fieldcontainer',
+            defaultType: 'radiofield',
+            layout:      'hbox',
+            items: [{
+                    boxLabel:   'Soft States',
+                    name:       'state_type',
+                    inputValue: 'soft',
+                    checked:    tab.xdata.state_type == 'soft' ? true : false
+                }, {
+                    boxLabel:   'Hard States Only',
+                    name:       'state_type',
+                    inputValue: 'hard',
+                    checked:    tab.xdata.state_type == 'hard' ? true : false,
+                    padding:    '0 0 0 30',
+            }]
+        }, {
             xtype:      'panel',
             html:       'Place background images in: '+usercontent_folder+'/backgrounds/ <a href="#" onclick="TP.uploadUserContent(\'image\', \'backgrounds/\')">(upload)</a>',
             style:      'text-align: center;',
@@ -773,7 +796,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     var tab_win_settings = new Ext.window.Window({
         modal:       true,
         width:       550,
-        height:      320,
+        height:      350,
         title:       'Settings',
         layout :     'fit',
         buttonAlign: 'center',

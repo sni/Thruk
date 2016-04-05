@@ -9,7 +9,7 @@ use File::Copy qw/move copy/;
 use Encode qw(decode_utf8);
 use Module::Load qw/load/;
 use Carp qw/confess/;
-use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION/;
+use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/;
 
 =head1 NAME
 
@@ -502,6 +502,11 @@ sub _task_status {
     }
     $servicefilter = Thruk::Utils::combine_filter('-or', $servicefilter);
 
+    my $state_type = SOFT_STATE;
+    if(defined $c->req->parameters->{'state_type'} && $c->req->parameters->{'state_type'} eq 'hard') {
+        $state_type = HARD_STATE;
+    }
+
     if($c->req->parameters->{'reschedule'}) {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
         # works only for a single host or service
@@ -554,19 +559,19 @@ sub _task_status {
             }
             $c->req->parameters->{'filter'} = $filter;
             my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
-            $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter);
+            $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter, $state_type);
         }
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     }
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
-        $data->{'hostgroups'} = [values %{_summarize_hostgroup_query($c, $types->{'hostgroups'})}];
+        $data->{'hostgroups'} = [values %{_summarize_hostgroup_query($c, $types->{'hostgroups'}, $state_type)}];
     }
     if(scalar keys %{$types->{'servicegroups'}} > 0) {
-        $data->{'servicegroups'} = [values %{_summarize_servicegroup_query($c, $types->{'servicegroups'})}];
+        $data->{'servicegroups'} = [values %{_summarize_servicegroup_query($c, $types->{'servicegroups'}, $state_type)}];
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
         $data->{'hosts'} = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
-                                                 columns => [qw/name state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output
+                                                 columns => [qw/name state state_type has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output
                                                                 last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
                                                                /]);
         if($c->config->{'shown_inline_pnp'}) {
@@ -577,7 +582,7 @@ sub _task_status {
     }
     if(scalar keys %{$types->{'services'}} > 0) {
         $data->{'services'} = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
-                                                       columns => [qw/host_name description state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check
+                                                       columns => [qw/host_name description state state_type has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check
                                                                       plugin_output last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
                                                                      /]);
         if($c->config->{'shown_inline_pnp'}) {
@@ -2648,9 +2653,9 @@ sub _long_plugin {
 
 ##########################################################
 sub _summarize_hostgroup_query {
-    my($c, $type_groups) = @_;
+    my($c, $type_groups, $state_type) = @_;
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $hostgroups = {};
     for my $hst (@{$hosts}) {
         for my $grp (@{$hst->{'groups'}}) {
@@ -2660,6 +2665,10 @@ sub _summarize_hostgroup_query {
                                         hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
                                         name     => $grp,
                                       };
+            }
+            if($state_type == HARD_STATE && $hst->{'state_type'} != HARD_STATE) {
+                $hostgroups->{$grp}->{'hosts'}->{'up'}++;
+                next;
             }
             if($hst->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'hosts'}->{'pending'}++;     }
             elsif($hst->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'up'}++;          }
@@ -2677,10 +2686,14 @@ sub _summarize_hostgroup_query {
         }
     }
     $filter      = Thruk::Utils::combine_filter('-or', [map {{ host_groups => { '>=' => $_ }}} keys %{$type_groups}]);
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description host_groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description host_groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     for my $svc (@{$services}) {
         for my $grp (@{$svc->{'host_groups'}}) {
             next unless defined $type_groups->{$grp};
+            if($state_type == HARD_STATE && $svc->{'state_type'} != HARD_STATE) {
+                $hostgroups->{$grp}->{'services'}->{'ok'}++;
+                next;
+            }
             if($svc->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'services'}->{'pending'}++;  }
             elsif($svc->{'state'} == 0)         { $hostgroups->{$grp}->{'services'}->{'ok'}++;       }
             elsif($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'services'}->{'warning'}++;  }
@@ -2704,9 +2717,9 @@ sub _summarize_hostgroup_query {
 
 ##########################################################
 sub _summarize_servicegroup_query {
-    my($c, $type_groups) = @_;
+    my($c, $type_groups, $state_type) = @_;
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $servicegroups = {};
     for my $svc (@{$services}) {
         for my $grp (@{$svc->{'groups'}}) {
@@ -2715,6 +2728,10 @@ sub _summarize_servicegroup_query {
                 $servicegroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                                            name     => $grp,
                                          };
+            }
+            if($state_type == HARD_STATE && $svc->{'state_type'} != HARD_STATE) {
+                $servicegroups->{$grp}->{'services'}->{'ok'}++;
+                next;
             }
             if($svc->{'has_been_checked'} == 0) { $servicegroups->{$grp}->{'services'}->{'pending'}++;  }
             elsif($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'services'}->{'ok'}++;       }
@@ -2739,7 +2756,7 @@ sub _summarize_servicegroup_query {
 
 ##########################################################
 sub _summarize_query {
-    my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter) = @_;
+    my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter, $state_type) = @_;
     my $sum   = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                   hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
                 };

@@ -1079,6 +1079,7 @@ var TP = {
     updateAllIconsDo: function(tab, id, xdata, reschedule) {
         if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
         if(TP.iconUpdateRunning[tab.id]) { return; }
+        if(xdata == undefined) { xdata = tab.xdata; }
 
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) {
@@ -1093,7 +1094,8 @@ var TP = {
             types:       Ext.JSON.encode(req),
             backends:    TP.getActiveBackendsPanel(tab),
             update_proc: TP.setUpdateProcInfo(),
-            reschedule:  reschedule ? 1 : ''
+            reschedule:  reschedule ? 1 : '',
+            state_type:  xdata.state_type
         };
         TP.iconUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
@@ -1138,6 +1140,7 @@ var TP = {
                             var state = data.hosts[x]['state'];
                             if(ref.hosts[name]) { // may be empty if we get the same host twice in a result
                                 if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
+                                if(data.hosts[x]['state_type'] == 0 && xdata.state_type == "hard") { state = 0; }
                                 for(var y=0; y<ref.hosts[name].length; y++) {
                                     ref.hosts[name][y].host = data.hosts[x];
                                     ref.hosts[name][y].refreshHandler(state);
@@ -1181,6 +1184,7 @@ var TP = {
                             var svc   = data.services[x]['description'];
                             var state = data.services[x]['state'];
                             if(data.services[x]['has_been_checked'] == 0) { state = 4; }
+                            if(data.services[x]['state_type'] == 0 && xdata.state_type == "hard") { state = 0; }
                             if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
                                 for(var y=0; y<ref.services[hst][svc].length; y++) {
                                     ref.services[hst][svc][y].service = data.services[x];
