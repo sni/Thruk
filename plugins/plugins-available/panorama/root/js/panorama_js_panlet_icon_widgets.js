@@ -359,7 +359,7 @@ Ext.define('TP.SmallWidget', {
             if(panel.host)         { for(var key in panel.host)    { window[key] = panel.host[key];    } window['performance_data'] = panel.host['perf_data']; }
             if(panel.service)      { for(var key in panel.service) { window[key] = panel.service[key]; } window['performance_data'] = panel.service['perf_data']; }
             if(window.perf_data) {
-                window.perf_data = parse_perf_data(window.perf_data);
+                window.perf_data = parse_perf_data(window['performance_data']);
                 window.perfdata = {};
                 for(var x = 0; x < window.perf_data.length; x++) {
                     var d = window.perf_data[x];
@@ -367,6 +367,9 @@ Ext.define('TP.SmallWidget', {
                 }
             } else {
                 window.perfdata = {};
+            }
+            if(force_perfdata) {
+                return(window.perfdata);
             }
             Ext.Array.each(matches, function(item, idx) {
                 var calc      = item.replace(/^\{\{/, '').replace(/\}\}$/, '');
@@ -1296,6 +1299,7 @@ Ext.define('TP.IconWidget', {
 
         // which source to use
         var state  = xdata.state, value = 0, min = 0, max = 100;
+        var warn_min, warn_max, crit_min, crit_max;
         var factor = xdata.appearance.speedofactor == '' ? Number(1) : Number(xdata.appearance.speedofactor);
         if(isNaN(factor)) { factor = 1; }
 
@@ -1304,14 +1308,17 @@ Ext.define('TP.IconWidget', {
         var matchesP = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
         var matchesA = xdata.appearance.speedosource.match(/^avail:(.*)$/);
         if(matchesP && matchesP[1]) {
-            window.perfdata = {};
-            panel.setIconLabel(undefined, true);
+            var perfdata = panel.setIconLabelText({}, true);
             if(perfdata[matchesP[1]]) {
                 var p = perfdata[matchesP[1]];
                 value = p.val;
                 var r = TP.getPerfDataMinMax(p, '?');
                 max   = r.max * factor;
                 min   = r.min * factor;
+                if(Ext.isNumeric(p.warn_min)) { warn_min = p.warn_min * factor; }
+                if(Ext.isNumeric(p.warn_max)) { warn_max = p.warn_max * factor; }
+                if(Ext.isNumeric(p.crit_min)) { crit_min = p.crit_min * factor; }
+                if(Ext.isNumeric(p.crit_max)) { crit_max = p.crit_max * factor; }
             }
         }
         else if(matchesA && matchesA[1]) {
@@ -1369,23 +1376,71 @@ Ext.define('TP.IconWidget', {
         var colorSet = [];
         if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
         Ext.Array.each([color_fg, colors['bg']], function(color,i) {
-            if(forceColor) { color = forceColor; }
-            if(xdata.appearance.speedogradient != 0) {
-                var gradient = TP.createGradient(color, xdata.appearance.speedogradient);
-                if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
-                    panel.chart.surface.existingGradients[gradient.id] = true;
-                    panel.chart.surface.addGradient(gradient);
-                }
-                colorSet.push('url(#'+gradient.id+')');
-            } else {
-                colorSet.push(color);
-            }
+            colorSet.push(panel.speedoGetColor(color, xdata.appearance.speedogradient, forceColor));
         });
         panel.chart.series.getAt(0).colorSet = colorSet;
+
+        /* warning / critical thresholds */
+        panel.chart.series.getAt(0).ranges = [];
+        panel.chart.series.getAt(0).ranges.push({
+            from:  min,
+            to:    max,
+            color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'ok')
+        });
+        if(warn_max != undefined) {
+            if(warn_min == undefined) {
+                warn_min = warn_max;
+                if(crit_min != undefined) {
+                    warn_max = crit_min;
+                }
+                else if(crit_max != undefined) {
+                    warn_max = crit_max;
+                }
+                else {
+                    warn_max = max;
+                }
+            }
+            panel.chart.series.getAt(0).ranges.push({
+                from:  warn_min,
+                to:    warn_max,
+                color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'warning')
+            });
+        }
+        if(crit_max != undefined) {
+            if(crit_min == undefined) { crit_min = crit_max; crit_max = max; }
+            panel.chart.series.getAt(0).ranges.push({
+                from:  crit_min,
+                to:    crit_max,
+                color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'critical')
+            });
+        }
+        panel.chart.series.getAt(0).drawSeries();
+
         if(panel.chart.series.getAt(0).setValue) {
             if(value == 0) { value = 0.0001; } // doesn't draw anything otherwise
             panel.chart.series.getAt(0).setValue(value);
         }
+    },
+
+    speedoGetColor: function(colors, gradient_val, forceColor, type) {
+        var panel = this;
+        var color;
+        if(type != undefined) {
+            color = colors[type];
+            if(forceColor && forceColor.scope.name == "speedocolor_"+type) { color = forceColor.color; }
+        } else {
+            color = colors;
+            if(forceColor) { color = forceColor.color; }
+        }
+        if(gradient_val != 0) {
+            var gradient = TP.createGradient(color, gradient_val);
+            if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
+                panel.chart.surface.existingGradients[gradient.id] = true;
+                panel.chart.surface.addGradient(gradient);
+            }
+            return('url(#'+gradient.id+')');
+        }
+        return(color);
     },
 
     /* renders pie chart */

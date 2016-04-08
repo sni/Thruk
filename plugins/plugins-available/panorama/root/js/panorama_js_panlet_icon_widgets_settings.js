@@ -1021,7 +1021,7 @@ TP.iconShowEditDialog = function(panel) {
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
                         listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
+                                     mouseover: function(color) { renderUpdateDo({color: color, scope: this }); },
                                      mouseout:  function(color) { renderUpdateDo();      }
                     },
                     items: [

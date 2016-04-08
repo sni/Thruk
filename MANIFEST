@@ -930,6 +930,7 @@ plugins/plugins-available/panorama/root/openlayer/theme/default/style.mobile.css
 plugins/plugins-available/panorama/root/OpenLayers-2.13.1.js
 plugins/plugins-available/panorama/root/panorama-2.06-1.css
 plugins/plugins-available/panorama/root/sprintf.js
+plugins/plugins-available/panorama/root/ux/chart/series/KPIGauge.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
 plugins/plugins-available/panorama/root/ux/form/MultiSelect.js
 plugins/plugins-available/panorama/routes
