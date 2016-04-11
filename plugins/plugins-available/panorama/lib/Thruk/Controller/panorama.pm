@@ -510,7 +510,7 @@ sub _task_status {
     if($c->req->parameters->{'reschedule'}) {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
         # works only for a single host or service
-        $c->stash->{'now'}                               = time();
+        $c->stash->{'now'}                   = time();
         $c->req->parameters->{'cmd_mod'}     = 2;
         $c->req->parameters->{'force_check'} = 0;
         $c->req->parameters->{'start_time'}  = time();
@@ -523,6 +523,8 @@ sub _task_status {
                 $c->req->parameters->{'cmd_typ'} = 96;
                 $c->req->parameters->{'host'}    = $hosts->[0]->{'name'};
                 $c->req->parameters->{'backend'} = [$hosts->[0]->{'peer_key'}];
+            } else {
+                Thruk::Utils::set_message($c, 'fail_message', 'Found '.(scalar @{$hosts}).' hosts. Cannot send reschedule command.');
             }
         }
         elsif(scalar keys %{$types->{'services'}} == 1) {
@@ -533,6 +535,8 @@ sub _task_status {
                 $c->req->parameters->{'host'}    = $services->[0]->{'host_name'};
                 $c->req->parameters->{'service'} = $services->[0]->{'description'};
                 $c->req->parameters->{'backend'} = [$services->[0]->{'peer_key'}];
+            } else {
+                Thruk::Utils::set_message($c, 'fail_message', 'Found '.(scalar @{$services}).' services. Cannot send reschedule command.');
             }
         }
         $c->stash->{'use_csrf'} = 0;
