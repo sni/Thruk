@@ -399,6 +399,7 @@ TP.iconShowEditDialog = function(panel) {
                                     values['speedocolor_critical']    = '#CA1414';
                                     values['speedocolor_unknown']     = '#CC740F';
                                     values['speedocolor_bg']          = '#DDDDDD';
+                                    values['speedo_thresholds']       = 'line';
                                 }
                                 Ext.getCmp('appearanceForm').getForm().setValues(values);
                             }
@@ -888,7 +889,7 @@ TP.iconShowEditDialog = function(panel) {
                         allowDecimals: false,
                         width:       60,
                         name:       'piedonut',
-                        unit:       'px'
+                        unit:       '%'
                     }]
                 }, {
                     fieldLabel: 'Colors',
@@ -987,7 +988,7 @@ TP.iconShowEditDialog = function(panel) {
                             { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
                             { xtype: 'checkbox', name: 'speedoneedle' },
                             { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberunit', allowDecimals: false, width: 60, name: 'speedodonut', unit: 'px' }
+                            { xtype: 'numberunit', allowDecimals: false, width: 60, name: 'speedodonut', unit: '%' }
                         ]
                 }, {
                     fieldLabel: 'Axis',
@@ -1000,7 +1001,7 @@ TP.iconShowEditDialog = function(panel) {
                     {
                         xtype:      'numberfield',
                         allowDecimals: false,
-                        width:       60,
+                        width:       40,
                         name:       'speedosteps',
                         step:        1,
                         minValue:    0,
@@ -1010,10 +1011,20 @@ TP.iconShowEditDialog = function(panel) {
                     {
                         xtype:      'numberunit',
                         allowDecimals: false,
-                        width:       60,
+                        width:       55,
                         name:       'speedomargin',
                         unit:       'px'
-                    }]
+                    },
+                    { xtype: 'label', text: 'Thresholds:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    {
+                        name:       'speedo_thresholds',
+                        xtype:      'combobox',
+                        store:      ['hide', 'line', 'fill'],
+                        value:      'line',
+                        editable:    false,
+                        width:       60
+                    }
+                    ]
                 }, {
                     fieldLabel: 'Colors',
                     cls:        'speedometer',

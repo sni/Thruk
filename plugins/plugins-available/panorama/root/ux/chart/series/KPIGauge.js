@@ -1,4 +1,4 @@
-// https://www.sencha.com/forum/showthread.php?159879-KPI-Gauge
+// based on https://www.sencha.com/forum/showthread.php?159879-KPI-Gauge
 Ext.define('Ext.ux.chart.series.KPIGauge', {
     extend: 'Ext.chart.series.Gauge',
     alias: 'series.kpigauge',
@@ -12,7 +12,8 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
             axis = me.chart.axes.get(0),
             minimum = axis && axis.minimum || me.minimum || 0,
             maximum = axis && axis.maximum || me.maximum || 0,
-            ranges = me.ranges,
+            ranges = me.ranges || [],
+            lines = me.lines || [],
             field = me.angleField || me.field || me.xField,
             surface = chart.surface,
             chartBBox = chart.chartBBox,
@@ -48,6 +49,8 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
         me.radius = Math.min(centerX - chartBBox.x, centerY - chartBBox.y);
         me.slices = slices = [];
         me.items = items = [];
+        me.line_slices = line_slices = [];
+        if(me.line_items == undefined) { me.line_items = []; }
 
         if (!me.value) {
             record = store.getAt(0);
@@ -65,13 +68,21 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
         for (r = 0, rl = ranges.length; r < rl; r++) {
             splitFromAngle = -180 * (1 - (ranges[r].from - minimum) / (maximum - minimum));
             splitToAngle = -180 * (1 - (ranges[r].to - minimum) / (maximum - minimum));
-            // sni: make threshold visible if its only a line
             if(splitToAngle == splitFromAngle) { splitToAngle = splitToAngle- 2;}
             slices.push ({
                 startAngle: splitFromAngle,
                 endAngle: splitToAngle,
                 rho: me.radius,
                 color: ranges[r].color
+            });
+        }
+
+        for (x = 0, ll = lines.length; x < ll; x++) {
+            lineAngle = (-180 * (1 - (lines[x].value - minimum) / (maximum - minimum))) * Math.PI / 180;
+            line_slices.push ({
+                lineAngle: lineAngle,
+                width: lines[x].width || 2,
+                color: lines[x].color || '#222'
             });
         }
 
@@ -126,18 +137,45 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
             }
         }
 
+        //render lines annotations
+        for (i = 0, ln = me.line_items.length; i < ln; i++) {
+            me.line_items[i].destroy();
+        }
+        me.line_items = [];
+        for (i = 0, ln = line_slices.length; i < ln; i++) {
+            line = line_slices[i];
+            rendererAttributes = {
+                type: "path",
+                path: [
+                    'M', centerX + (me.radius*(donut/100) * cos(line.lineAngle)),
+                        centerY + -Math.abs((me.radius*(donut/100)) * sin(line.lineAngle)),
+                    'L', centerX + me.radius * cos(line.lineAngle),
+                        centerY + -Math.abs(me.radius * sin(line.lineAngle))
+                ],
+                'stroke-width': line.width,
+                'stroke': line.color
+            };
+            sprite = surface.add(Ext.apply(rendererAttributes));
+            me.line_items.push(sprite);
+            if(me.needleSprite) { me.needleSprite.destroy(); delete me.needleSprite; }
+            sprite.setAttributes({
+                hidden: false
+            }, true);
+        }
 
-        if (me.needle) {
+        if (me.needle && value != undefined) {
             valueAngle = (-180 * (1 - (value - minimum) / (maximum - minimum))) * Math.PI / 180;
             pivotRadius = me.needle.pivotRadius || 7;
             if (!me.needleSprite) {
-                me.needlePivotSprite = me.chart.surface.add({
-                    type: 'circle',
-                    fill: me.needle.pivotFill || '#222',
-                    radius: pivotRadius,
-                    x: centerX,
-                    y: centerY
-                });
+                if (!me.needlePivotSprite) {
+                    me.needlePivotSprite = me.chart.surface.add({
+                        type: 'circle',
+                        fill: me.needle.pivotFill || '#222',
+                        radius: pivotRadius,
+                        x: centerX,
+                        y: centerY
+                    });
+                }
                 me.needleSprite = me.chart.surface.add({
                     type: 'path',
                     path: [
@@ -149,17 +187,6 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
                     'stroke-width': me.needle.width || 2,
                     'stroke': me.needle.pivotFill || '#222'
                 });
-                /*
-                me.valueSprite = me.chart.surface.add({
-                    type: 'text',
-                    //text: value, remark by Irfan Maulana -> change to temp value to give actual value of store
-                    text: tempValue,
-                    fill: me.needle.pivotFill || '#222',
-                    font: '14px Arial',
-                    x: centerX - (pivotRadius),
-                    y: centerY - (me.radius / 2)
-                });
-                */
             } else {
                 if (animate) {
                     me.onAnimate(me.needlePivotSprite, {
@@ -194,16 +221,6 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
                                     centerY + -Math.abs(me.radius * sin(valueAngle))]
                     });
                 }
-                /*
-                // Nothing to animate so we use a single call to update the Value Sprite's attributes no matter "animate" config
-                me.valueSprite.setAttributes({
-                    type: 'text',
-                    //text: value, remark by Irfan Maulana -> change to temp value to give actual value of store
-                    text: tempValue,
-                    x: centerX - (pivotRadius),
-                    y: centerY - (me.radius / 2)
-                });
-                */
             }
             me.needlePivotSprite.setAttributes({
                 hidden: false
@@ -211,12 +228,6 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
             me.needleSprite.setAttributes({
                 hidden: false
             }, true);
-            /*
-            me.valueSprite.setAttributes({
-                hidden: false
-            }, true);
-            */
         }
-        delete me.value;
     }
 });

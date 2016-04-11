@@ -1373,53 +1373,92 @@ Ext.define('TP.IconWidget', {
             if(state == 2) { color_fg = colors['warning'];  }
         }
 
-        var colorSet = [];
         if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
-        Ext.Array.each([color_fg, colors['bg']], function(color,i) {
-            colorSet.push(panel.speedoGetColor(color, xdata.appearance.speedogradient, forceColor));
-        });
-        panel.chart.series.getAt(0).colorSet = colorSet;
 
         /* warning / critical thresholds */
         panel.chart.series.getAt(0).ranges = [];
+        panel.chart.series.getAt(0).lines  = [];
+        if(xdata.appearance.speedo_thresholds == 'undefined') { xdata.appearance.speedo_thresholds = 'line'; }
+        if(value == 0) { value = 0.0001; } // doesn't draw anything otherwise
+        var color_bg = panel.speedoGetColor(colors, 0, forceColor, 'bg');
+        if(!!xdata.appearance.speedoneedle) {
+            if(xdata.appearance.speedo_thresholds == 'hide') {
+                color_bg = panel.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
+            }
+            else if(xdata.appearance.speedo_thresholds == 'filled') {
+                color_bg = panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'ok')
+            }
+        }
         panel.chart.series.getAt(0).ranges.push({
             from:  min,
             to:    max,
-            color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'ok')
+            color: color_bg
         });
         if(warn_max != undefined) {
-            if(warn_min == undefined) {
-                warn_min = warn_max;
-                if(crit_min != undefined) {
-                    warn_max = crit_min;
+            if(xdata.appearance.speedo_thresholds == 'fill') {
+                if(warn_min == undefined) {
+                    warn_min = warn_max;
+                    if(crit_min != undefined) {
+                        warn_max = crit_min;
+                    }
+                    else if(crit_max != undefined) {
+                        warn_max = crit_max;
+                    }
+                    else {
+                        warn_max = max;
+                    }
                 }
-                else if(crit_max != undefined) {
-                    warn_max = crit_max;
-                }
-                else {
-                    warn_max = max;
+                panel.chart.series.getAt(0).ranges.push({
+                    from:  warn_min,
+                    to:    warn_max,
+                    color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'warning')
+                });
+            }
+            else if(xdata.appearance.speedo_thresholds == 'line') {
+                panel.chart.series.getAt(0).lines.push({
+                    value: warn_max,
+                    color: panel.speedoGetColor(colors, 0, forceColor, 'warning')
+                });
+                if(warn_min != undefined && warn_min != warn_max) {
+                    panel.chart.series.getAt(0).lines.push({
+                        value: warn_min,
+                        color: panel.speedoGetColor(colors, 0, forceColor, 'warning')
+                    });
                 }
             }
-            panel.chart.series.getAt(0).ranges.push({
-                from:  warn_min,
-                to:    warn_max,
-                color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'warning')
-            });
         }
         if(crit_max != undefined) {
-            if(crit_min == undefined) { crit_min = crit_max; crit_max = max; }
+            if(xdata.appearance.speedo_thresholds == 'fill') {
+                if(crit_min == undefined) { crit_min = crit_max; crit_max = max; }
+                panel.chart.series.getAt(0).ranges.push({
+                    from:  crit_min,
+                    to:    crit_max,
+                    color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'critical')
+                });
+            }
+            else if(xdata.appearance.speedo_thresholds == 'line') {
+                panel.chart.series.getAt(0).lines.push({
+                    value: crit_max,
+                    color: panel.speedoGetColor(colors, 0, forceColor, 'critical')
+                });
+                if(crit_min != undefined && crit_min != crit_max) {
+                    panel.chart.series.getAt(0).lines.push({
+                        value: crit_min,
+                        color: panel.speedoGetColor(colors, 0, forceColor, 'critical')
+                    });
+                }
+            }
+        }
+
+        if(!xdata.appearance.speedoneedle) {
             panel.chart.series.getAt(0).ranges.push({
-                from:  crit_min,
-                to:    crit_max,
-                color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'critical')
+                from:  0,
+                to:    value,
+                color: panel.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
             });
         }
-        panel.chart.series.getAt(0).drawSeries();
-
-        if(panel.chart.series.getAt(0).setValue) {
-            if(value == 0) { value = 0.0001; } // doesn't draw anything otherwise
-            panel.chart.series.getAt(0).setValue(value);
-        }
+        if(panel.chart.series.getAt(0).setValue)   { panel.chart.series.getAt(0).setValue(value); }
+        if(panel.chart.series.getAt(0).drawSeries) { panel.chart.series.getAt(0).drawSeries();    }
     },
 
     speedoGetColor: function(colors, gradient_val, forceColor, type) {

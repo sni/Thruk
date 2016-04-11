@@ -529,21 +529,12 @@ Ext.define('TP.speedochart', {
     legend:  false,
     initComponent: function() {
         var me = this;
-        if(!!this.needle) {
-            this.series = [{
-                type:        'kpigauge',
-                field:       'value',
-                showInLegend: true,
-                ranges:    []
-            }];
-        } else {
-            this.series = [{
-                type:        'gauge',
-                field:       'value',
-                showInLegend: true,
-                colorSet:  [ '#00FF00' ]
-            }];
-        }
+        this.series = [{
+            type:        'kpigauge',
+            field:       'value',
+            showInLegend: true,
+            ranges:       []
+        }];
         this.series[0].donut  = this.donut  ? this.donut : false;
         this.series[0].needle = !!this.needle;
         this.axes[0].margin   = this.axis_margin != undefined ? this.axis_margin : -10;
