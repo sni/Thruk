@@ -53,16 +53,19 @@ TP.iconShowEditDialog = function(panel) {
     var defaultSpeedoSource = 'problems';
     var perfDataUpdate = function() {
         // ensure fresh and correct performance data
-        window.perfdata = {};
 
         var xdata = TP.get_icon_form_xdata(settingsWindow);
-        panel.setIconLabel(xdata.label || {}, true);
         // update speedo
-        var data = [['number of problems',                  'problems'],
-                    ['number of problems (incl. warnings)', 'problems_warn']];
-        for(var key in perfdata) {
+        var data = [];
+        var cls = panel.classChanged || panel.xdata.cls;
+        if(cls == "TP.HostgroupStatusIcon" || cls == "TP.ServicegroupStatusIcon" || cls == "TP.FilterStatusIcon") {
+            data.push(['number of problems',                  'problems']);
+            data.push(['number of problems (incl. warnings)', 'problems_warn']);
+        }
+        var macros = TP.getPanelMacros(panel);
+        for(var key in macros.perfdata) {
             if(defaultSpeedoSource == 'problems') { defaultSpeedoSource = 'perfdata:'+key; }
-            var r = TP.getPerfDataMinMax(perfdata[key], '?');
+            var r = TP.getPerfDataMinMax(macros.perfdata[key], '?');
             var options = r.min+" - "+r.max;
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
@@ -85,8 +88,8 @@ TP.iconShowEditDialog = function(panel) {
 
         // update shape
         var data = [['fixed', 'fixed']];
-        for(var key in perfdata) {
-            var r = TP.getPerfDataMinMax(perfdata[key], 100);
+        for(var key in macros.perfdata) {
+            var r = TP.getPerfDataMinMax(macros.perfdata[key], 100);
             var options = r.min+" - "+r.max;
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
@@ -1659,16 +1662,15 @@ TP.get_icon_form_xdata = function(settingsWindow) {
 TP.openLabelEditorWindow = function(panel) {
     var oldValue  = Ext.getCmp('label_textfield').getValue();
     var perf_data = '';
-    window.perfdata = {};
     // ensure fresh and correct performance data
-    panel.setIconLabel(undefined, true);
-    for(var key in perfdata) {
-        delete perfdata[key].perf;
-        delete perfdata[key].key;
-        for(var key2 in perfdata[key]) {
+    var macros = TP.getPanelMacros(panel);
+    for(var key in macros.perfdata) {
+        delete macros.perfdata[key].perf;
+        delete macros.perfdata[key].key;
+        for(var key2 in macros.perfdata[key]) {
             var keyname = '.'+key;
             if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
-            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+perfdata[key][key2]+'<\/td><\/tr>'
+            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
         }
     }
 

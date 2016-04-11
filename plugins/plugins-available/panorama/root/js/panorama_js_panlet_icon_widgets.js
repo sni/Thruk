@@ -305,8 +305,8 @@ Ext.define('TP.SmallWidget', {
     /* render label for this widget */
     setIconLabelDo: function(cfg, force_perfdata) {
         var panel = this;
-        if(cfg       == undefined) {
-            cfg       = panel.xdata.label;
+        if(cfg == undefined) {
+            cfg = panel.xdata.label;
             if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel.id == panel.id) {
                 var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
                 cfg       = xdata.label;
@@ -352,25 +352,8 @@ Ext.define('TP.SmallWidget', {
             var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
             if(TP.availabilities == undefined) { TP.availabilities = {}; }
             if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
-            var matches           = txt.match(/(\{\{.*?\}\})/g);
-            if(panel.servicegroup) { totals = panel.servicegroup; }
-            if(panel.hostgroup)    { totals = panel.hostgroup; }
-            if(panel.results)      { totals = panel.results; }
-            if(panel.host)         { for(var key in panel.host)    { window[key] = panel.host[key];    } window['performance_data'] = panel.host['perf_data']; }
-            if(panel.service)      { for(var key in panel.service) { window[key] = panel.service[key]; } window['performance_data'] = panel.service['perf_data']; }
-            if(window.perf_data) {
-                window.perf_data = parse_perf_data(window['performance_data']);
-                window.perfdata = {};
-                for(var x = 0; x < window.perf_data.length; x++) {
-                    var d = window.perf_data[x];
-                    window.perfdata[d.key] = d;
-                }
-            } else {
-                window.perfdata = {};
-            }
-            if(force_perfdata) {
-                return(window.perfdata);
-            }
+            var matches = txt.match(/(\{\{.*?\}\})/g);
+            var macros  = TP.getPanelMacros(panel);
             Ext.Array.each(matches, function(item, idx) {
                 var calc      = item.replace(/^\{\{/, '').replace(/\}\}$/, '');
                 var functions = calc.match(/[\w+_]+\(/g);
@@ -384,13 +367,18 @@ Ext.define('TP.SmallWidget', {
                     }
                 });
                 if(!ok) { return; }
-                var res = '';
+                var res;
                 calc = calc.replace(/availability\(/g, 'availability(panel, ');
-                try {
-                    res = eval(calc);
-                } catch(err) {
-                    TP.logError(panel.id, "labelEvalException", err);
-                    panel.el.dom.title = err;
+                if(macros[calc] != undefined) {
+                    // direct match, no need for eval
+                    res = macros[calc];
+                } else {
+                    try {
+                        res = TP.evalInContext(calc, macros);
+                    } catch(err) {
+                        TP.logError(panel.id, "labelEvalException", err);
+                        panel.el.dom.title = err;
+                    }
                 }
                 if(res == undefined) { res = ''; }
                 // replace not yet resolved availabilities
@@ -1308,9 +1296,9 @@ Ext.define('TP.IconWidget', {
         var matchesP = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
         var matchesA = xdata.appearance.speedosource.match(/^avail:(.*)$/);
         if(matchesP && matchesP[1]) {
-            var perfdata = panel.setIconLabelText({}, true);
-            if(perfdata[matchesP[1]]) {
-                var p = perfdata[matchesP[1]];
+            var macros  = TP.getPanelMacros(panel);
+            if(macros.perfdata[matchesP[1]]) {
+                var p = macros.perfdata[matchesP[1]];
                 value = p.val;
                 var r = TP.getPerfDataMinMax(p, '?');
                 max   = r.max * factor;
@@ -2990,10 +2978,10 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
 
     var matches = xdata.appearance[type+"source"].match(/^perfdata:(.*)$/);
     if(matches && matches[1]) {
-        window.perfdata = {};
+        var macros = TP.getPanelMacros(panel);
         panel.setIconLabel(undefined, true);
-        if(perfdata[matches[1]]) {
-            p      = perfdata[matches[1]];
+        if(macros.perfdata[matches[1]]) {
+            p      = macros.perfdata[matches[1]];
             r      = TP.getPerfDataMinMax(p, 100);
             color1 = xdata.appearance[type+"color_ok"];
             color2 = xdata.appearance[type+"color_ok"];
@@ -3058,4 +3046,42 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
     }
     /* fixed state color */
     return({color: fillcolor, value: p.val, perfdata: p, range: r});
+}
+
+TP.evalInContext = function(js, context) {
+    var restore = {};
+    for(key in context) { restore[key] = window[key]; window[key] = context[key]; }
+    var res, err;
+    try {
+        res = eval(js);
+    } catch(e) { err = e; }
+    for(key in restore) {
+        if(restore[key] == undefined) {
+            delete(window[key]);
+        } else {
+            window[key] = restore[key];
+        }
+    }
+    if(err) { throw(err); }
+    return(res);
+}
+
+TP.getPanelMacros = function(panel) {
+    var macros = { panel: panel };
+    if(panel.servicegroup) { macros.totals = panel.servicegroup; }
+    if(panel.hostgroup)    { macros.totals = panel.hostgroup; }
+    if(panel.results)      { macros.totals = panel.results; }
+    if(panel.host)         { for(var key in panel.host)    { macros[key] = panel.host[key];    } macros['performance_data'] = panel.host['perf_data']; }
+    if(panel.service)      { for(var key in panel.service) { macros[key] = panel.service[key]; } macros['performance_data'] = panel.service['perf_data']; }
+    if(macros.perf_data) {
+        macros.perf_data = parse_perf_data(macros['performance_data']);
+        macros.perfdata = {};
+        for(var x = 0; x < macros.perf_data.length; x++) {
+            var d = macros.perf_data[x];
+            macros.perfdata[d.key] = d;
+        }
+    } else {
+        macros.perfdata = {};
+    }
+    return(macros);
 }
