@@ -1,0 +1,415 @@
+{
+   "file_version" : 2,
+   "tab" : {
+      "xdata" : {
+         "autohideheader" : true,
+         "backends" : [],
+         "background" : "../usercontent/backgrounds/europa.png",
+         "backgroundoffset_x" : 0,
+         "backgroundoffset_y" : 0,
+         "backgroundscale" : 100,
+         "critical_repeat" : 0,
+         "critical_sound" : null,
+         "defaulticonset" : "default",
+         "down_repeat" : 0,
+         "down_sound" : null,
+         "groups" : [],
+         "maplat" : "",
+         "maplon" : "",
+         "mapzoom" : "",
+         "recovery_sound" : null,
+         "refresh" : 90,
+         "select_backends" : 0,
+         "state_type" : "soft",
+         "title" : "All In One",
+         "unknown_repeat" : 0,
+         "unknown_sound" : null,
+         "unreachable_repeat" : 0,
+         "unreachable_sound" : null,
+         "warning_repeat" : 0,
+         "warning_sound" : null
+      }
+   },
+   "tabpan-tab_99_panlet_1" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.HostStatusIcon",
+         "general" : {
+            "host" : "localhost"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Host Icon",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "rotation" : 0,
+            "scale" : 100,
+            "x" : 80,
+            "y" : 145,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_2" : {
+      "xdata" : {
+         "appearance" : {
+            "piecolor_critical" : "#CA1414",
+            "piecolor_down" : "#CA1414",
+            "piecolor_ok" : "#199C0F",
+            "piecolor_unknown" : "#CC740F",
+            "piecolor_unreachable" : "#CA1414",
+            "piecolor_up" : "#199C0F",
+            "piecolor_warning" : "#CDCD0A",
+            "piedonut" : 0,
+            "piegradient" : "0",
+            "pieheight" : 150,
+            "pielabel" : "on",
+            "pielabelval" : "on",
+            "pielocked" : "1",
+            "piewidth" : 150,
+            "type" : "pie"
+         },
+         "cls" : "TP.HostgroupStatusIcon",
+         "general" : {
+            "hostgroup" : "linux-servers",
+            "incl_hst" : "on",
+            "incl_svc" : "on"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Hostgroup Piechart",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "x" : 200,
+            "y" : 65,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "showlabel" : true,
+         "showlabelVal" : true
+      }
+   },
+   "tabpan-tab_99_panlet_3" : {
+      "xdata" : {
+         "appearance" : {
+            "speedo_thresholds" : "line",
+            "speedocolor_bg" : "#DDDDDD",
+            "speedocolor_critical" : "#CA1414",
+            "speedocolor_ok" : "#199C0F",
+            "speedocolor_unknown" : "#CC740F",
+            "speedocolor_warning" : "#CDCD0A",
+            "speedodonut" : 0,
+            "speedofactor" : "",
+            "speedogradient" : "0",
+            "speedomargin" : 5,
+            "speedomax" : "",
+            "speedomin" : "",
+            "speedosource" : "perfdata:x",
+            "speedosteps" : "12",
+            "speedowidth" : 180,
+            "type" : "speedometer"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "localhost",
+            "service" : "Example Check"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Service Speedometer",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "x" : 400,
+            "y" : 85,
+            "zindex" : "0"
+         },
+         "link" : {}
+      }
+   },
+   "tabpan-tab_99_panlet_4" : {
+      "xdata" : {
+         "appearance" : {
+            "speedo_thresholds" : "fill",
+            "speedocolor_bg" : "#DDDDDD",
+            "speedocolor_critical" : "#CA1414",
+            "speedocolor_ok" : "#199C0F",
+            "speedocolor_unknown" : "#CC740F",
+            "speedocolor_warning" : "#CDCD0A",
+            "speedodonut" : 50,
+            "speedofactor" : "",
+            "speedogradient" : "0",
+            "speedomargin" : 5,
+            "speedomax" : "",
+            "speedomin" : "",
+            "speedoneedle" : "on",
+            "speedosource" : "perfdata:x",
+            "speedosteps" : "6",
+            "speedowidth" : 180,
+            "type" : "speedometer"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "localhost",
+            "service" : "Example Check"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Service Speedometer",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "x" : 580,
+            "y" : 85,
+            "zindex" : "0"
+         },
+         "link" : {}
+      }
+   },
+   "tabpan-tab_99_panlet_5" : {
+      "xdata" : {
+         "appearance" : {
+            "speedo_thresholds" : "hide",
+            "speedocolor_bg" : "#DDDDDD",
+            "speedocolor_critical" : "#CA1414",
+            "speedocolor_ok" : "#199C0F",
+            "speedocolor_unknown" : "#CC740F",
+            "speedocolor_warning" : "#CDCD0A",
+            "speedodonut" : 0,
+            "speedofactor" : "",
+            "speedogradient" : "0",
+            "speedomargin" : 5,
+            "speedomax" : "",
+            "speedomin" : "",
+            "speedosource" : "perfdata:x",
+            "speedosteps" : "5",
+            "speedowidth" : 180,
+            "type" : "speedometer"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "localhost",
+            "service" : "Example Check"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Service Speedometer",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "x" : 760,
+            "y" : 85,
+            "zindex" : "0"
+         },
+         "link" : {}
+      }
+   },
+   "tabpan-tab_99_panlet_6" : {
+      "xdata" : {
+         "appearance" : {
+            "shapecolor_critical" : "#CA1414",
+            "shapecolor_ok" : "#199C0F",
+            "shapecolor_unknown" : "#CC740F",
+            "shapecolor_warning" : "#CDCD0A",
+            "shapegradient" : "0",
+            "shapelocked" : "true",
+            "shapename" : "arrow",
+            "shapesource" : "perfdata:rta",
+            "shapewidth" : 50,
+            "type" : "shape"
+         },
+         "cls" : "TP.HostStatusIcon",
+         "general" : {
+            "host" : "localhost"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Host Shape",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "x" : 69,
+            "y" : 296,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_7" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "none"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "localhost",
+            "service" : "Example Check"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Label Only x={{perfdata.x.val}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "x" : 260,
+            "y" : 305,
+            "zindex" : "0"
+         },
+         "link" : {}
+      }
+   },
+   "tabpan-tab_99_panlet_8" : {
+      "xdata" : {
+         "appearance" : {
+            "connectorarrowinset" : 2,
+            "connectorarrowlength" : 20,
+            "connectorarrowtype" : "both",
+            "connectorarrowwidth" : 10,
+            "connectorcolor_critical" : "#CA1414",
+            "connectorcolor_ok" : "#199C0F",
+            "connectorcolor_unknown" : "#CC740F",
+            "connectorcolor_warning" : "#CDCD0A",
+            "connectorfromx" : 392,
+            "connectorfromy" : 317,
+            "connectorgradient" : "0",
+            "connectormax" : "",
+            "connectormin" : "",
+            "connectorsource" : "perfdata:x",
+            "connectortox" : 592,
+            "connectortoy" : 317,
+            "connectorvariable" : "on",
+            "connectorwidth" : 3,
+            "type" : "connector"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "localhost",
+            "service" : "Example Check"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "Arrow x={{perfdata.x.val}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "x" : 392,
+            "y" : 306,
+            "zindex" : "0"
+         },
+         "link" : {}
+      }
+   },
+   "user" : "thrukadmin"
+}

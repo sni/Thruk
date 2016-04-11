@@ -1396,6 +1396,7 @@ t/data/userfiles/encoding_iso
 t/data/userfiles/encoding_ok
 t/docker/.dropbox_uploader.enc
 t/docker/0001-sahi_add_color_to_highlight.js.patch
+t/docker/99.tab
 t/docker/cases/0010_reschedule_all_services.js
 t/docker/cases/0050_sidebar_search.js
 t/docker/cases/0051_preferences_popup.js
@@ -1425,6 +1426,7 @@ t/docker/cases/0257_panorama_services_panel.js
 t/docker/cases/0258_panorama_services_totals_panel.js
 t/docker/cases/0259_panorama_services_graph_panel.js
 t/docker/cases/0260_panorama_mine_map_panel.js
+t/docker/cases/0261_panorama_all_in_one.js
 t/docker/cases/0299_panorama_show_case.js
 t/docker/cases/_dashboard_exports.js
 t/docker/cases/_images/applications.png
