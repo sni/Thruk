@@ -683,11 +683,6 @@ sub _after_dispatch {
     # last possible time to report/save profile
     Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
 
-    if($c->stash->{'debug_info'}) {
-        # save debug info into tmp file
-        Thruk::Action::AddDefaults::save_debug_information_to_tmp_file($c);
-    }
-
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
         my $elapsed = tv_interval($c->stash->{'time_begin'});
         $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();

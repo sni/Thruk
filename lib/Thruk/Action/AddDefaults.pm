@@ -294,6 +294,11 @@ sub end {
         return $c->detach('/error/index/13');
     }
 
+    if($c->stash->{'debug_info'}) {
+        # save debug info into tmp file
+        Thruk::Action::AddDefaults::save_debug_information_to_tmp_file($c);
+    }
+
     if($ENV{THRUK_LEAK_CHECK}) {
         eval {
             require Devel::Gladiator;
