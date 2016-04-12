@@ -50,6 +50,9 @@ sub cmd {
         $cmd = $conf->{'cmd'};
     }
 
+    # set additional environment variables but keep local env
+    local %ENV = (%{$conf->{'env'}}, %ENV) if $conf->{'env'};
+
     if(   $c->config->{'no_external_job_forks'}
        or $conf->{'nofork'}
        or exists $c->req->parameters->{'noexternalforks'}
@@ -68,15 +71,6 @@ sub cmd {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir, $id);
-
-        # set additional environment variables
-        if($conf->{'env'}) {
-            for my $key (keys %{$conf->{env}}) {
-                ## no critic
-                $ENV{$key} = $conf->{env}->{$key};
-                ## use critic
-            }
-        }
 
         ## no critic
         $SIG{CHLD} = 'DEFAULT';

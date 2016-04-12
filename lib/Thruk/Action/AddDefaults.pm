@@ -294,11 +294,6 @@ sub end {
         return $c->detach('/error/index/13');
     }
 
-    if($c->stash->{'debug_info'}) {
-        # save debug info into tmp file
-        save_debug_information_to_tmp_file($c);
-    }
-
     if($ENV{THRUK_LEAK_CHECK}) {
         eval {
             require Devel::Gladiator;
@@ -1229,6 +1224,7 @@ sub delayed_proc_info_update {
 sub save_debug_information_to_tmp_file {
     my($c) = @_;
 
+    $c->stats->profile(begin => "save_debug_information_to_tmp_file");
     my $tmp = $c->config->{'tmp_path'}.'/debug';
     Thruk::Utils::IO::mkdir_r($tmp);
     my $tmpfile = $tmp.'/'.POSIX::strftime('%Y-%m-%d_%H_%M_%S', localtime).'.log';
@@ -1252,6 +1248,7 @@ sub save_debug_information_to_tmp_file {
     Thruk::Utils::IO::close($fh, $tmpfile);
     $c->stash->{'debug_info_file'} = $tmpfile;
     Thruk::Utils::set_message( $c, 'success_message fixed', 'Debug Information written to: '.$tmpfile );
+    $c->stats->profile(end => "save_debug_information_to_tmp_file");
     return($tmpfile);
 }
 
