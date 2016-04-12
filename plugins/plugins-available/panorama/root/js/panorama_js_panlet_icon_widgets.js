@@ -292,18 +292,15 @@ Ext.define('TP.SmallWidget', {
     },
 
     /* queue label renderer */
-    setIconLabel: function(cfg, force_perfdata) {
+    setIconLabel: function(cfg) {
         var panel = this;
-        if(force_perfdata) {
-            return(panel.setIconLabelDo(cfg, force_perfdata));
-        }
         TP.reduceDelayEvents(panel, function() {
-            panel.setIconLabelDo(cfg, force_perfdata);
+            panel.setIconLabelDo(cfg);
         }, 300, panel.id+'setIconLabel');
     },
 
     /* render label for this widget */
-    setIconLabelDo: function(cfg, force_perfdata) {
+    setIconLabelDo: function(cfg) {
         var panel = this;
         if(cfg == undefined) {
             cfg = panel.xdata.label;
@@ -324,17 +321,17 @@ Ext.define('TP.SmallWidget', {
             TP.timeouts['remove_label_'+panel.id] = window.setTimeout(function() {
                 TP.removeLabel[panel.id].destroy();
                 delete TP.removeLabel[panel.id];
-                panel.setIconLabel(cfg, force_perfdata);
+                panel.setIconLabel(cfg);
             }, 100);
         }
         if(cfg == undefined) { return; }
 
-        panel.setIconLabelText(cfg, force_perfdata);
+        panel.setIconLabelText(cfg);
         panel.setIconLabelPosition(cfg);
         return;
     },
 
-    setIconLabelText: function(cfg, force_perfdata) {
+    setIconLabelText: function(cfg) {
         var panel = this;
         var txt = String(cfg.labeltext);
         if(txt == undefined) { txt = ''; }
@@ -348,7 +345,7 @@ Ext.define('TP.SmallWidget', {
         }
 
         /* dynamic label? */
-        if(force_perfdata || txt.match(/\{\{.*?\}\}/)) {
+        if(txt.match(/\{\{.*?\}\}/)) {
             var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
             if(TP.availabilities == undefined) { TP.availabilities = {}; }
             if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
@@ -2979,7 +2976,6 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
     var matches = xdata.appearance[type+"source"].match(/^perfdata:(.*)$/);
     if(matches && matches[1]) {
         var macros = TP.getPanelMacros(panel);
-        panel.setIconLabel(undefined, true);
         if(macros.perfdata[matches[1]]) {
             p      = macros.perfdata[matches[1]];
             r      = TP.getPerfDataMinMax(p, 100);

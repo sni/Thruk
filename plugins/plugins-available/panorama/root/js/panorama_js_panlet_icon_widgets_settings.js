@@ -1226,7 +1226,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}, true); };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}); };
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -1590,7 +1590,7 @@ TP.iconShowEditDialog = function(panel) {
 
     // move settings window next to panel itself
     var showAtPos = TP.getNextToPanelPos(panel, settingsWindow.width, settingsWindow.height);
-    panel.setIconLabel(undefined, true);
+    panel.setIconLabel();
     settingsWindow.showAt(showAtPos);
     TP.iconSettingsWindow.panel = panel;
 
