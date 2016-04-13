@@ -1430,6 +1430,9 @@ sub _htpasswd_password {
         if(_cmd($c, $cmd)) {
             return;
         }
+        $c->log->error("failed to remove password.");
+        $c->log->error("cmd: ".join(" ", @{$cmd}));
+        $c->log->error($c->stash->{'output'});
         return( 'failed to remove password, check the logfile!' );
     }
 
@@ -1463,6 +1466,13 @@ sub _htpasswd_password {
     if(_cmd($c, $cmd, $has_minus_i ? $password : undef)) {
         return;
     }
+    if(!$has_minus_i) {
+        pop @{$cmd};
+        push @{$cmd}, '****';
+    }
+    $c->log->error("failed to update password.");
+    $c->log->error("cmd: ".join(" ", @{$cmd}));
+    $c->log->error($c->stash->{'output'});
     return('failed to update password, check the logfile!');
 }
 

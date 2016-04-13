@@ -282,6 +282,8 @@ sub cmd {
         $rc = $?;
         push @lines, <$rdr>;
         chomp($output = join('', @lines) || '');
+        # restore original array
+        unshift @{$cmd}, $prog;
     } else {
         confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);
