@@ -7,6 +7,15 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 
 == Logfiles
 
+Logfiles are usually in `/var/log/thruk/thruk.log`. If you use OMD, then
+the logfiles are in `~/var/log/thruk.log`.
+
+Cronjobs have their own logfile in `~/var/thruk/cron.log` for OMD or
+`/var/lib/thruk/cron.log` for standalone installations.
+
+
+== Logfile Configuration
+
 Logging configuration takes place in the log4perl.conf. You can do whatever is
 possible in log4perl. Refer to the log4perl manual for detailed
 information:
