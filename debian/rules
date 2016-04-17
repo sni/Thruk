@@ -51,6 +51,7 @@ override_dh_auto_install:
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libpng"  >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: zlib"    >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libjpeg" >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: openssl" >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: hardening-no-relro usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"        >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "debian/thruk-plugin-reporting.lintian-overrides" >> MANIFEST
 
