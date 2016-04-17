@@ -4,21 +4,18 @@
 #
 # usage:
 #
-# grafana_export.sh <hostname> <servicedescription> <imgwidth> <imgheight> <start> <end> <pnpurl> <tempfile> [<source>]
+# grafana_export.sh <imgwidth> <imgheight> <start> <end> <grafanaurl> <tempfile>
 
 # read rc files if exist
 [ -e ~/.thruk   ] && . ~/.thruk
 [ -e ~/.profile ] && . ~/.profile
 
-HOST=$1
-SERVICE=$2
-WIDTH=$3
-HEIGHT=$4
-START=$(($5 * 1000))
-END=$(($6 * 1000))
-INPUT=$7
-TEMPFILE=$8
-SOURCE=$9
+WIDTH=$1
+HEIGHT=$2
+START=$(($3 * 1000))
+END=$(($4 * 1000))
+INPUT=$5
+TEMPFILE=$6
 
 DIR=$(dirname $0)
 

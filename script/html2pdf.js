@@ -64,7 +64,7 @@ if (system.args.length < 3) {
                 var retries = 0;
                 window.setInterval(function () {
                     retries++;
-                    if(checkGrafanaLoaded() || retries > 300) {
+                    if(checkGrafanaLoaded() || retries > 150) {
                         page.render(output, {format: options.format, quality: 100});
                         phantom.exit();
                     }

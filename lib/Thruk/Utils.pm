@@ -1401,11 +1401,19 @@ sub get_perf_image {
     my $custvars;
     if($svc) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
+        if(scalar @{$svcdata} == 0) {
+            $c->log->error("no such service $svc on host $hst");
+            return("");
+        }
         $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
         $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
         $custvars   = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
     } else {
         my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
+        if(scalar @{$hstdata} == 0) {
+            $c->log->error("no such host $hst");
+            return("");
+        }
         $pnpurl     = get_pnp_url($c, $hstdata->[0], 1);
         $grafanaurl = get_histou_url($c, $hstdata->[0], 1);
         $svc        = '_HOST_' if $pnpurl;
@@ -1438,13 +1446,19 @@ sub get_perf_image {
     $exporter    = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'};
     $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
 
+    if(!defined $end)   { $end   = time();       }
+    if(!defined $start) { $start = $end - 86400; }
+
     # create fake session
     my $sessionid = get_fake_session($c);
     local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
     my($fh, $filename) = tempfile();
     CORE::close($fh);
-    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||$grafanaurl).'" "'.$filename.'" "'.$source.'"';
-    `$cmd`;
+    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$source.'"';
+    if($grafanaurl) {
+        $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
+    }
+    Thruk::Utils::IO::cmd($c, $cmd);
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
