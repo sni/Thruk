@@ -2087,8 +2087,13 @@ function load_overlib_content(id, url, add_pre) {
 /* update permanent link of excel export */
 function updateExcelPermanentLink() {
     var inp  = jQuery('#excel_export_url');
-    var data = jQuery(inp).parents('FORM').find('input[name!=bookmark][name!=referer][name!=view_mode]').serialize();
-    jQuery(inp).val(jQuery('#excelexportlink')[0].href + (data ? '?' + data : ''));
+    var data = jQuery(inp).parents('FORM').find('input[name!=bookmark][name!=referer][name!=view_mode][name!=all_col]').serialize();
+    var base = jQuery('#excelexportlink')[0].href;
+    if(!data) {
+        jQuery(inp).val(base);
+        return;
+    }
+    jQuery(inp).val(base + (base.match(/\?/) ? '&' : '&') + data);
 }
 
 /* compare two objects and print diff
