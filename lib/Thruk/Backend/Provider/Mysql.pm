@@ -791,7 +791,7 @@ sub _quote {
         }
         return $list;
     }
-    if($_[0] =~ m/^[\d\.]+$/mx) {
+    if($_[0] =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
         return $_[0];
     }
     $_[0] =~ s/'/\'/gmx;
