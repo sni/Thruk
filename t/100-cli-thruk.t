@@ -81,12 +81,12 @@ if($test->{'exit'} == 0) {
         local $ENV{'THRUK_NO_COMMANDS'} = 1;
         TestUtils::test_command({
             cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0].' -b '.$backends[1],
-            errlike => ['/\['.$backends[0].','.$backends[1].'\]/', '/TESTMODE:/' ],
+            errlike => ['/\['.$backends[0].','.$backends[1].'\]/', '/TESTMODE:/', '/'.$host.'/' ],
             like => ['/Command request successfully submitted to the Backend for processing/'],
         });
         TestUtils::test_command({
             cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0],
-            errlike => ['/\['.$names[0].'\]/', '/TESTMODE:/' ],
+            errlike => ['/\['.$names[0].'\]/', '/TESTMODE:/', '/'.$host.'/' ],
             like => ['/Command request successfully submitted to the Backend for processing/'],
         });
     }

@@ -698,6 +698,7 @@ sub bulk_send {
         $testmode    = 1 if (defined $ENV{'THRUK_NO_COMMANDS'} or $c->req->parameters->{'test_only'});
 
         for my $cmd (@{$commands2send}) {
+            utf8::decode($cmd);
             my $logstr = sprintf('%s[%s][%s] cmd: %s%s',
                                     ($testmode ? 'TESTMODE: ' : ''),
                                     $c->user->get('username'),

@@ -367,6 +367,11 @@ sub _run {
         return $result->{'rc'};
     }
 
+    # fix encoding
+    if(!$result->{'content_type'} || $result->{'content_type'} =~ /^text/mx) {
+        $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
+    }
+
     # with output
     if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
@@ -586,7 +591,7 @@ sub _run_command_action {
 
     # request url
     elsif($action =~ /^url=(.*)$/mx) {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_url($c, $1, $opt);
+        $data = _cmd_url($c, $1, $opt);
     }
 
     # report or report mails
@@ -708,10 +713,7 @@ sub _cmd_listhosts {
         $output .= $host->{'name'}."\n";
     }
 
-    # fix encoding
-    utf8::decode($output);
-
-    return encode_utf8($output);
+    return($output);
 }
 
 ##############################################
@@ -722,10 +724,7 @@ sub _cmd_listservices {
         $output .= $svc->{'host_name'}.";".$svc->{'description'}."\n";
     }
 
-    # fix encoding
-    utf8::decode($output);
-
-    return encode_utf8($output);
+    return($output);
 }
 
 ##############################################
@@ -736,10 +735,7 @@ sub _cmd_listhostgroups {
         $output .= sprintf("%-30s %s\n", $group->{'name'}, join(',', @{$group->{'members'}}));
     }
 
-    # fix encoding
-    utf8::decode($output);
-
-    return encode_utf8($output);
+    return($output);
 }
 
 ##############################################
@@ -770,6 +766,7 @@ sub _cmd_listbackends {
         $output .= "\n";
     }
     $output .= sprintf("-------------------------------------------------\n");
+
     return $output;
 }
 
@@ -1136,9 +1133,9 @@ sub _cmd_downtimetask {
     return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
     if($downtime->{'service'}) {
-        $output = 'scheduled'.$flexible.' downtime for service \''.encode_utf8($downtime->{'service'}).'\' on host: \''.encode_utf8(join(', ', @{$downtime->{'host'}})).'\'';
+        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
     } else {
-        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.encode_utf8(join(', ', @{$downtime->{$downtime->{'target'}}})).'\'';
+        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
     }
     $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")";
     $output .= " (after $retries retries)\n" if $retries;
@@ -1208,7 +1205,7 @@ sub _cmd_url {
     $c->stats->profile(begin => "_cmd_url()");
 
     if($opt->{'all_inclusive'} && !$c->config->{'use_feature_reports'}) {
-        return("all-inclusive options requires the reports plugin to be enabled", 1);
+        return({output => "all-inclusive options requires the reports plugin to be enabled", rc => 1});
     }
 
     if($url =~ m|^\w+\.cgi|gmx) {
@@ -1223,13 +1220,18 @@ sub _cmd_url {
         $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
     }
 
+    my $content_type;
+    if($res[1] && $res[1]->{'headers'}) {
+        $content_type = $res[1]->{'headers'}->{'content-type'};
+    }
+
     $c->stats->profile(end => "_cmd_url()");
     my $rc = $res[0] >= 400 ? 1 : 0;
-    return($res[2], $rc) if $res[2];
+    return({output => $res[2], rc => $rc, 'content_type' => $content_type}) if $res[2];
     if($res[1]->{'result'} =~ m/\Q<div class='infoMessage'>Your command request was successfully submitted to the Backend for processing.\E/gmx) {
-        return("Command request successfully submitted to the Backend for processing\n", $rc);
+        return({output => "Command request successfully submitted to the Backend for processing\n", rc => $rc});
     }
-    return($res[1]->{'result'}, $rc);
+    return({output => $res[1]->{'result'}, rc => $rc, 'content_type' => $content_type});
 }
 
 ##############################################
