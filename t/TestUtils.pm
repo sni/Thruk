@@ -653,13 +653,13 @@ sub test_command {
     # exit code?
     $test->{'exit'} = 0 unless exists $test->{'exit'};
     if(defined $test->{'exit'} and $test->{'exit'} != -1) {
-        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) or do { diag("command failed with rc: ".$rc." - ".$t->stdout); $return = 0 };
+        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) or do { diag("command failed with rc: ".$rc." - ".$t->stdout."\n"._caller_info()); $return = 0 };
     }
 
     # matches on stdout?
     if(defined $test->{'like'}) {
         for my $expr (@{_list($test->{'like'})}) {
-            like($t->stdout, $expr, "stdout like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"); $return = 0 };
+            like($t->stdout, $expr, "stdout like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
         }
     }
 
@@ -667,7 +667,7 @@ sub test_command {
     $test->{'errlike'} = '/^\s*$/' unless exists $test->{'errlike'};
     if(defined $test->{'errlike'}) {
         for my $expr (@{_list($test->{'errlike'})}) {
-            like($stderr, $expr, "stderr like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed"); $return = 0 };
+            like($stderr, $expr, "stderr like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
         }
     }
 
@@ -1001,6 +1001,12 @@ sub _check_marker {
         }
     }
     $errors_js = 0;
+}
+
+#################################################
+sub _caller_info {
+    my @caller = caller(1);
+    return(sprintf("%s() in %s:%i", $caller[0], $caller[1], $caller[2]));
 }
 
 #################################################
