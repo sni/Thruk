@@ -120,8 +120,8 @@ sub index {
         elsif($action eq 'update') {
             return report_update($c, $report_nr);
         }
-        elsif($action eq 'save') {
-            return report_save($c, $report_nr);
+        elsif($action eq 'save' || $action eq 'clone') {
+            return report_save($c, $report_nr, $action);
         }
         elsif($action eq 'remove') {
             return report_remove($c, $report_nr);
@@ -235,7 +235,7 @@ sub report_edit_step2 {
 
 =cut
 sub report_save {
-    my($c, $report_nr) = @_;
+    my($c, $report_nr, $action) = @_;
 
     return unless Thruk::Utils::check_csrf($c);
 
@@ -245,7 +245,8 @@ sub report_save {
 
     my($data) = Thruk::Utils::Reports::get_report_data_from_param($params);
     my $msg = 'report updated';
-    if($report_nr eq 'new') { $msg = 'report created'; }
+    if($action eq 'clone')  { $report_nr = "new";}
+    if($report_nr eq 'new') { $msg       = 'report created'; }
     my $report;
     if($report = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
         if(Thruk::Utils::Reports::update_cron_file($c)) {

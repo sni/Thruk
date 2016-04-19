@@ -913,6 +913,9 @@ SPAN.deleteicon INPUT {
 .ui-error-button {
   background-image: url(../images/error.png) !important;
 }
+.ui-clone-button {
+  background-image: url(../images/page_copy.png) !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }

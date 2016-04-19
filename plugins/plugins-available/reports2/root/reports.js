@@ -10,6 +10,9 @@ function init_report_tool_buttons() {
     jQuery('.report_save_button').button({
         icons: {primary: 'ui-save-button'}
     });
+    jQuery('.report_clone_button').button({
+        icons: {primary: 'ui-clone-button'}
+    });
 
     jQuery('.report_email_button').button({
         icons: {primary: 'ui-email-button'}
