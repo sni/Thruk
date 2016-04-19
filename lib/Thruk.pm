@@ -662,6 +662,7 @@ sub _after_dispatch {
         print STDERR $@ if $@ && $c->config->{'thruk_debug'};
         unless($@) {
             my $counter = 0;
+            $Devel::Cycle::already_warned{'GLOB'}++;
             Devel::Cycle::find_cycle($c, sub {
                 my($path) = @_;
                 $counter++;
