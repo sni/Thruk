@@ -7,6 +7,7 @@ next
           - fix using negated comment/downtime filter
           - fix 'bad file descriptor' error when trying to log in subprocesses
           - fix using non-standard webserver ports with cookie authentication (#576)
+          - fix url decoding problem on login page
           - Config Tool:
             - add list wizard to drop down
             - add user defined custom variables to attribute list, extra_custom_var_host and extra_custom_var_service
