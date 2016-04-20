@@ -310,13 +310,15 @@ var TP = {
         } else {
             panel.refreshHandler();
         }
-        /* ensure the panel gets where it should be */
-        window.setTimeout(function() {
-            panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
-            if(panel.xdata.layout) {
-                TP.iconMoveHandler(panel, config.conf.pos[0], config.conf.pos[1]);
-            }
-        }, 200);
+        /* ensure the panel gets where it should be, breaks connector, so make an exception */
+        if(!config.conf.xdata || !config.conf.xdata.appearance || config.conf.xdata.appearance.type != "connector") {
+            window.setTimeout(function() {
+                panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
+                if(panel.xdata.layout) {
+                    TP.iconMoveHandler(panel, config.conf.pos[0], config.conf.pos[1]);
+                }
+            }, 200);
+        }
     },
 
     /* add panel, but let the user choose position */
