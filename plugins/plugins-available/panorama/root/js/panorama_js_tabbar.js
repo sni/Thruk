@@ -30,6 +30,7 @@ Ext.define('TP.TabBar', {
             style:    'margin-top: 3px',
             hidden:    true,
             listeners: {
+                /*
                 show: function(This, eOpts) {
                     TP.timeouts['interval_global_dom_elements'] = window.setInterval(
                         function() {
@@ -49,6 +50,7 @@ Ext.define('TP.TabBar', {
                         2000
                     );
                 }
+                */
             }
         }, {
             id:       'debug_tab',
