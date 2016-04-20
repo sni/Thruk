@@ -8,6 +8,17 @@ function test1() {
     return 1;
 }
 
+function test1a() {
+    str = 'a=1&b=&c=3&c=4&d=5&d=6&d=7&e';
+    exp = 'a=1&b=%3D&c=3&c=4&d=5&d=6&d=7&e';
+    var obj = toQueryParams(str);
+    if(str != toQueryString(obj)) {
+        diag("failed: " + str + " != " + toQueryString(obj));
+        return 0;
+    }
+    return 1;
+}
+
 var theme         = 'Thruk';
 var perf_bar_mode = 'match';
 function custom_perf_bar_adjustments(perf_bar_mode) {
