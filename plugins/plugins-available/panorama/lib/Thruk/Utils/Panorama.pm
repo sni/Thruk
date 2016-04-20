@@ -166,7 +166,7 @@ sub load_dashboard {
     my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
     return unless -s $file;
     my $dashboard  = Thruk::Utils::read_data_file($file);
-    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -2;
+
     my $permission = is_authorized_for_dashboard($c, $nr, $dashboard);
     return unless $permission >= ACCESS_READONLY;
     if($permission == ACCESS_READONLY) {
@@ -187,7 +187,7 @@ sub load_dashboard {
         push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
     }
 
-    $dashboard->{'file_version'} = 1 unless defined $dashboard->{'dashboard_version'};
+    $dashboard->{'file_version'} = 1 unless defined $dashboard->{'file_version'};
     if($dashboard->{'file_version'} == 1) {
         # convert label x/y from old dashboard versions which had them mixed up
         for my $id (keys %{$dashboard}) {
@@ -221,6 +221,8 @@ sub load_dashboard {
     $dashboard->{'tab'}->{'xdata'}->{'state_type'} = 'soft' unless defined $dashboard->{'tab'}->{'xdata'}->{'state_type'};
     $dashboard->{'tab'}->{'xdata'}->{'owner'}    = $dashboard->{'user'};
     $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
+
+    $dashboard->{'objects'} = scalar grep(/^tabpan-tab_/mx, keys %{$dashboard});
     return $dashboard;
 }
 
