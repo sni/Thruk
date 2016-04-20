@@ -553,7 +553,12 @@ sub get_graph_source {
     }
     if($data) {
         my $custvars = Thruk::Utils::get_custom_vars($c, $data);
-        return($custvars->{'GRAPH_SOURCE'} || '0');
+        return($custvars->{'GRAPH_SOURCE'}) if defined $custvars->{'GRAPH_SOURCE'};
+        my $grafanaurl = Thruk::Utils::get_histou_url($c, $data, 1);
+        if($grafanaurl) {
+            return($c->config->{'grafana_default_panelId'}) if defined $c->config->{'grafana_default_panelId'};
+            return 1;
+        }
     }
     return 0;
 }
