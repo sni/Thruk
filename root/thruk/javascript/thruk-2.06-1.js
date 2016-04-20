@@ -509,7 +509,12 @@ function toQueryParams(str) {
     str = str.replace(/#.*$/g, '');
     str = str.split('&');
     for (var i = 0; i < str.length; ++i) {
-        var p=str[i].split('=', 2);
+        var p = [str[i]];
+        // cannot use split('=', 2) here since it ignores everything after the limit
+        var b = str[i].indexOf("=");
+        if(b != -1) {
+            p = [str[i].substr(0, b), str[i].substr(b+1)];
+        }
         var val;
         if (p.length == 1) {
             val = undefined;
