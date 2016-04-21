@@ -34,6 +34,7 @@ use POSIX ":sys_wait_h";
             background   => "return $jobid if set, or redirect otherwise"
             nofork       => "don't fork"
             no_shell     => "wrap command in a shell unless no_shell is set"
+            env          => hash with extra environment variables
         }
     );
 
@@ -48,6 +49,9 @@ sub cmd {
     if($conf->{'no_shell'}) {
         $cmd = $conf->{'cmd'};
     }
+
+    # set additional environment variables but keep local env
+    local %ENV = (%{$conf->{'env'}}, %ENV) if $conf->{'env'};
 
     if(   $c->config->{'no_external_job_forks'}
        or $conf->{'nofork'}
@@ -72,6 +76,8 @@ sub cmd {
         $SIG{CHLD} = 'DEFAULT';
         ## use critic
 
+        POSIX::close(0);
+        POSIX::close(1);
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
 
@@ -148,13 +154,18 @@ sub perl {
                 # some db drivers need reconnect after forking
                 _reconnect($c);
 
-                eval($conf->{'expr'});
+                my $rc = eval($conf->{'expr'});
                 ## use critic
 
                 if($@) {
                     print STDERR $@;
                     exit(1);
                 }
+
+                $rc = -1 unless defined $rc;
+                open(my $fh, '>>', $dir."/rc");
+                print $fh $rc;
+                Thruk::Utils::IO::close($fh, $dir."/rc");
 
                 close(STDOUT);
                 close(STDERR);
@@ -550,9 +561,12 @@ sub _do_child_stuff {
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
     # close open filehandles
-    for my $fd (0..1024) {
+    for my $fd (2..1024) {
         POSIX::close($fd);
     }
+
+    # logging must be reset after closing the filehandles
+    $c->app->reset_logging();
 
     $c->stats->enable(1) if $c;
 

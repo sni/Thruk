@@ -194,6 +194,7 @@ DOCKERRESULTS=$(shell pwd)/t/docker/results/$(shell date +'%Y-%m-%d_%H.%M')
 DOCKERCMD=cd t/docker && \
             docker run \
                 -p 5901:5901 \
+                $(shell [ -t 0 ] && echo '-ti') \
                 --rm \
                 -v $(shell pwd)/.:/src \
                 -v $(shell pwd)/t/docker/cases:/root/cases \

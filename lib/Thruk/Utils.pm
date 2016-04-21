@@ -661,24 +661,11 @@ puts the ssi templates into the stash
 sub ssi_include {
     my($c, $page) = @_;
     $page = $c->stash->{'page'} unless defined $page;
-    my $global_header_file = "common-header.ssi";
-    my $header_file        = $page."-header.ssi";
-    my $global_footer_file = "common-footer.ssi";
-    my $footer_file        = $page."-footer.ssi";
 
-    if ( defined $c->config->{ssi_includes}->{$global_header_file} ){
-        $c->stash->{ssi_header} = Thruk::Utils::read_ssi($c, $global_header_file);
-    }
-    if ( defined $c->config->{ssi_includes}->{$header_file} ){
-        $c->stash->{ssi_header} .= Thruk::Utils::read_ssi($c, $header_file);
-    }
-    # Footer
-    if ( defined $c->config->{ssi_includes}->{$global_footer_file} ){
-        $c->stash->{ssi_footer} = Thruk::Utils::read_ssi($c, $global_footer_file);
-    }
-    if ( defined $c->config->{ssi_includes}->{$footer_file} ){
-        $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $footer_file);
-    }
+    $c->stash->{ssi_header}  = Thruk::Utils::read_ssi($c, 'common', 'header');
+    $c->stash->{ssi_header} .= Thruk::Utils::read_ssi($c, $page, 'header');
+    $c->stash->{ssi_footer}  = Thruk::Utils::read_ssi($c, 'common', 'footer');
+    $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $page, 'footer');
 
     return 1;
 }
@@ -688,27 +675,39 @@ sub ssi_include {
 
 =head2 read_ssi
 
-  read_ssi($c, $file)
+  read_ssi($c, $page, $type)
 
-reads a ssi file or executes it if its executable
+finds all ssi files for a page of the specified type and returns the ssi content.
+Executable ssi files are executed and the output is appended to the ssi content.
+Otherwise the content of the ssi file is appende to the ssi content.
 
 =cut
 sub read_ssi {
     my $c    = shift;
-    my $file = shift;
-    # retun if file is executable
-    if( -x $c->config->{'ssi_path'}."/".$file ){
-       open(my $ph, '-|', $c->config->{'ssi_path'}."/".$file.' 2>&1') or carp("cannot execute ssi: $!");
-       my $output = '';
-       while(my $line = <$ph>) { $output .= $line; }
-       CORE::close($ph);
-       return $output;
+    my $page = shift;
+    my $type = shift;
+    my $dir  = $c->config->{ssi_path};
+    my @files = sort grep { /\A${page}-${type}(-.*)?.ssi\z/mx } keys %{ $c->config->{ssi_includes} };
+    my $output = "";
+    for my $inc (@files) {
+        $output .= "\n<!-- BEGIN SSI $dir/$inc -->\n" if Thruk->verbose;
+        if ( -x "$dir/$inc" ) {
+          if(open(my $ph, '-|', "$dir/$inc 2>&1")) {
+            while(defined(my $line = <$ph>)) { $output .= $line; }
+            CORE::close($ph);
+          } else {
+            carp("cannot execute ssi $dir/$inc: $!");
+          }
+        } elsif ( -r "$dir/$inc" ) {
+            my $content = read_file("$dir/$inc");
+            unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
+            $output .= $content;
+        } else {
+            $c->log->warn("$dir/$inc is no longer accessible, please restart thruk to initialize ssi information");
+        }
+        $output .= "\n<!-- END SSI $dir/$inc -->\n" if Thruk->verbose;
     }
-    elsif( -r $c->config->{'ssi_path'}."/".$file ){
-        return(read_file($c->config->{'ssi_path'}."/".$file) || carp("cannot open ssi: $!"));
-    }
-    $c->log->warn($c->config->{'ssi_path'}."/".$file." is no longer accessible, please restart thruk to initialize ssi information");
-    return "";
+    return $output;
 }
 
 ########################################
@@ -1388,7 +1387,7 @@ sub get_graph_url {
 
   get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format)
 
-return base64 encoded pnp/grafana image if possible.
+return raw pnp/grafana image if possible.
 An empty string will be returned if no graph can be exported.
 
 =cut
@@ -1396,19 +1395,29 @@ sub get_perf_image {
     my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format) = @_;
     my $pnpurl     = "";
     my $grafanaurl = "";
-    $source        = 0 unless defined $source;
     $format        = 'png' unless $format;
     $svc           = ''    unless defined $svc;
 
+    my $custvars;
     if($svc) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
+        if(scalar @{$svcdata} == 0) {
+            $c->log->error("no such service $svc on host $hst");
+            return("");
+        }
         $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
         $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
+        $custvars   = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
     } else {
         my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
+        if(scalar @{$hstdata} == 0) {
+            $c->log->error("no such host $hst");
+            return("");
+        }
         $pnpurl     = get_pnp_url($c, $hstdata->[0], 1);
         $grafanaurl = get_histou_url($c, $hstdata->[0], 1);
-        $svc = '_HOST_' if $pnpurl;
+        $svc        = '_HOST_' if $pnpurl;
+        $custvars   = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
@@ -1416,7 +1425,8 @@ sub get_perf_image {
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
-        $grafanaurl .= '&panelId='.($source || $c->config->{'grafana_default_panelId'} || 1);
+        $source = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $source;
+        $grafanaurl .= '&panelId='.$source;
         if($resize_grafana_images) {
             $width  = $width * 1.3;
             $height = $height * 2;
@@ -1428,19 +1438,27 @@ sub get_perf_image {
             $uri    =~ s|&amp;|&|gmx;
             $grafanaurl = $uri.$grafanaurl;
         }
+    } else {
+        $source = ($custvars->{'GRAPH_SOURCE'} || '0') unless defined $source;
     }
 
     my $exporter = $c->config->{home}.'/script/pnp_export.sh';
-    $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
     $exporter    = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'};
+    $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
+
+    if(!defined $end)   { $end   = time();       }
+    if(!defined $start) { $start = $end - 86400; }
 
     # create fake session
     my $sessionid = get_fake_session($c);
     local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
     my($fh, $filename) = tempfile();
     CORE::close($fh);
-    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||$grafanaurl).'" "'.$filename.'" "'.$source.'"';
-    `$cmd`;
+    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$source.'"';
+    if($grafanaurl) {
+        $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
+    }
+    Thruk::Utils::IO::cmd($c, $cmd);
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
@@ -1983,8 +2001,9 @@ sub wait_after_reload {
         $c->cache->clear();
     } else {
         $c->log->error('waiting for core reload failed');
+        return(0);
     }
-    return;
+    return(1);
 }
 
 ##############################################
@@ -2496,9 +2515,16 @@ returns array of backend ids converted as list of hashes
 sub backends_list_to_hash {
     my($c, $backends) = @_;
     my $hashlist = [];
-    for my $b (@{list($backends)}) {
-        my $backend = $c->{'db'}->get_peer_by_key($b);
-        push @{$hashlist}, { $b => $backend->{'name'} };
+    for my $back (@{list($backends)}) {
+        my $name;
+        if(ref $back eq 'HASH') {
+            my $key  = (keys %{$back})[0];
+            $name    = $back->{$key};
+            $back    = $key;
+        }
+        my $backend = $c->{'db'}->get_peer_by_key($back);
+        $name = $backend->{'name'} if $backend;
+        push @{$hashlist}, { $back => $name };
     }
     return($hashlist);
 }

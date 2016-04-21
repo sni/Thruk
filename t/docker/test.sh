@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# use latest test.sh from src folder
+if [ $0 != "/src/t/docker/test.sh" ]; then
+    exec "/src/t/docker/test.sh" $*;
+    exit 1;
+fi
+
 CASEDIR="/root/cases"
 
 # install latest thruk from source

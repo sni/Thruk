@@ -16,6 +16,7 @@ RUN sed -e 's|#broker_module=/usr/lib/naemon/naemon-livestatus/livestatus.so|bro
 RUN sed -e 's|incognito|incognito --no-sandbox --no-default-browser-check --no-first-run --disable-infobars|g' -i /root/sakuli/sahi/config/browser_types/linux.xml
 RUN rm -rf /etc/naemon/conf.d/*
 RUN mkdir -p /root/cases/
+RUN IP=$(/sbin/ifconfig | grep addr | grep -v Link | head -n 1 | awk '{ print $2}' | sed -e 's/addr://'); echo "ServerName $IP" >> /etc/apache2/sites-available/000-default.conf
 
 COPY *.sh               /root/
 COPY *.pl               /root/

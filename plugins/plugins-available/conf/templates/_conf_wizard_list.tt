@@ -1,4 +1,4 @@
-﻿<button class="conf_button members_wzd_button" id="[% id %]_btn" name="[% wzd_args %]">&nbsp;</button>
+﻿<button class="conf_button members_wzd_button" id="[% id %]_btn" name="[% wzd_args %]" style="display: none;">&nbsp;</button>
 
 <div id="[% id %]_dialog" title="List Wizzard" style="display: none;">
 <table><tr><td class="filter">

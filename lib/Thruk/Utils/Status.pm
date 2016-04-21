@@ -1403,11 +1403,13 @@ sub get_comments_filter {
         if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
 
         my $comment_op = '!>=';
+        my $combine    = '-and';
         if($op eq '=' or $op eq '~~') {
             $comment_op = '>=';
+            $combine    = '-or';
         }
-        push @hostfilter,          { -or => [ comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
-        push @servicefilter,       { -or => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
+        push @hostfilter,          { $combine => [ comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
+        push @servicefilter,       { $combine => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
     }
 
     return(\@hostfilter, \@servicefilter);

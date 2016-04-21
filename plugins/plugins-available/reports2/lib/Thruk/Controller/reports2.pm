@@ -120,8 +120,8 @@ sub index {
         elsif($action eq 'update') {
             return report_update($c, $report_nr);
         }
-        elsif($action eq 'save') {
-            return report_save($c, $report_nr);
+        elsif($action eq 'save' || $action eq 'clone') {
+            return report_save($c, $report_nr, $action);
         }
         elsif($action eq 'remove') {
             return report_remove($c, $report_nr);
@@ -135,6 +135,9 @@ sub index {
         elsif($action eq 'profile') {
             return report_profile($c, $report_nr);
         }
+        elsif($action eq 'download_debug') {
+            return report_download_debug($c, $report_nr);
+        }
     }
 
     if($c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'}) {
@@ -143,6 +146,7 @@ sub index {
     }
 
     # show list of configured reports
+    $c->stash->{'debug'}          = $c->req->parameters->{'debug'} || 0;
     $c->stash->{'no_auto_reload'} = 0;
     $c->stash->{'highlight'}      = $highlight;
     $c->stash->{'reports'}        = Thruk::Utils::Reports::get_report_list($c);
@@ -231,7 +235,7 @@ sub report_edit_step2 {
 
 =cut
 sub report_save {
-    my($c, $report_nr) = @_;
+    my($c, $report_nr, $action) = @_;
 
     return unless Thruk::Utils::check_csrf($c);
 
@@ -241,7 +245,8 @@ sub report_save {
 
     my($data) = Thruk::Utils::Reports::get_report_data_from_param($params);
     my $msg = 'report updated';
-    if($report_nr eq 'new') { $msg = 'report created'; }
+    if($action eq 'clone')  { $report_nr = "new";}
+    if($report_nr eq 'new') { $msg       = 'report created'; }
     my $report;
     if($report = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
         if(Thruk::Utils::Reports::update_cron_file($c)) {
@@ -265,14 +270,15 @@ sub report_save {
 sub report_update {
     my($c, $report_nr) = @_;
 
+    my $debug = $c->req->parameters->{'debug'};
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if($report) {
-        Thruk::Utils::Reports::generate_report_background($c, $report_nr, undef, $report);
+        Thruk::Utils::Reports::generate_report_background($c, $report_nr, undef, $report, undef, $debug);
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi".($debug ? '?debug=1' : ''));
 }
 
 ##########################################################
@@ -341,6 +347,32 @@ sub report_profile {
     }
     my $json = { 'data' => $data };
     return $c->render(json => $json);
+}
+
+##########################################################
+
+=head2 report_download_debug
+
+=cut
+sub report_download_debug{
+    my($c, $report_nr) = @_;
+
+    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    if($report) {
+        if($report->{'var'}->{'debug_file'}) {
+            my $name = $report->{'var'}->{'debug_file'};
+            $name =~ s|^.*/||gmx;
+            $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
+            $c->res->headers->content_type('text/plain');
+            open(my $fh, '<', $report->{'var'}->{'debug_file'});
+            binmode $fh;
+            $c->res->body($fh);
+            $c->{'rendered'} = 1;
+            return 1;
+        }
+    }
+    Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
 ##########################################################

@@ -53,20 +53,23 @@ TP.iconShowEditDialog = function(panel) {
     var defaultSpeedoSource = 'problems';
     var perfDataUpdate = function() {
         // ensure fresh and correct performance data
-        window.perfdata = {};
-        panel.setIconLabel(undefined, true);
 
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
         // update speedo
-        var data = [['number of problems',                  'problems'],
-                    ['number of problems (incl. warnings)', 'problems_warn']];
-        for(var key in perfdata) {
+        var data = [];
+        var cls = panel.classChanged || panel.xdata.cls;
+        if(cls == "TP.HostgroupStatusIcon" || cls == "TP.ServicegroupStatusIcon" || cls == "TP.FilterStatusIcon") {
+            data.push(['number of problems',                  'problems']);
+            data.push(['number of problems (incl. warnings)', 'problems_warn']);
+        }
+        var macros = TP.getPanelMacros(panel);
+        for(var key in macros.perfdata) {
             if(defaultSpeedoSource == 'problems') { defaultSpeedoSource = 'perfdata:'+key; }
-            var r = TP.getPerfDataMinMax(perfdata[key], '?');
+            var r = TP.getPerfDataMinMax(macros.perfdata[key], '?');
             var options = r.min+" - "+r.max;
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
         /* use availability data as source */
-        var xdata = TP.get_icon_form_xdata(settingsWindow);
         if(xdata.label && xdata.label.labeltext && TP.availabilities && TP.availabilities[panel.id]) {
             var avail = TP.availabilities[panel.id];
             for(var key in avail) {
@@ -85,8 +88,8 @@ TP.iconShowEditDialog = function(panel) {
 
         // update shape
         var data = [['fixed', 'fixed']];
-        for(var key in perfdata) {
-            var r = TP.getPerfDataMinMax(perfdata[key], 100);
+        for(var key in macros.perfdata) {
+            var r = TP.getPerfDataMinMax(macros.perfdata[key], 100);
             var options = r.min+" - "+r.max;
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
@@ -399,6 +402,7 @@ TP.iconShowEditDialog = function(panel) {
                                     values['speedocolor_critical']    = '#CA1414';
                                     values['speedocolor_unknown']     = '#CC740F';
                                     values['speedocolor_bg']          = '#DDDDDD';
+                                    values['speedo_thresholds']       = 'line';
                                 }
                                 Ext.getCmp('appearanceForm').getForm().setValues(values);
                             }
@@ -535,7 +539,7 @@ TP.iconShowEditDialog = function(panel) {
                             name:           'shapecolor_ok',
                             value:           panel.xdata.appearance.shapecolor_ok,
                             width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
+                            tdAttrs:       { style: 'padding-right: 11px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
                         { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
@@ -888,7 +892,7 @@ TP.iconShowEditDialog = function(panel) {
                         allowDecimals: false,
                         width:       60,
                         name:       'piedonut',
-                        unit:       'px'
+                        unit:       '%'
                     }]
                 }, {
                     fieldLabel: 'Colors',
@@ -987,7 +991,7 @@ TP.iconShowEditDialog = function(panel) {
                             { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
                             { xtype: 'checkbox', name: 'speedoneedle' },
                             { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberunit', allowDecimals: false, width: 60, name: 'speedodonut', unit: 'px' }
+                            { xtype: 'numberunit', allowDecimals: false, width: 60, name: 'speedodonut', unit: '%' }
                         ]
                 }, {
                     fieldLabel: 'Axis',
@@ -1000,7 +1004,7 @@ TP.iconShowEditDialog = function(panel) {
                     {
                         xtype:      'numberfield',
                         allowDecimals: false,
-                        width:       60,
+                        width:       40,
                         name:       'speedosteps',
                         step:        1,
                         minValue:    0,
@@ -1010,10 +1014,20 @@ TP.iconShowEditDialog = function(panel) {
                     {
                         xtype:      'numberunit',
                         allowDecimals: false,
-                        width:       60,
+                        width:       55,
                         name:       'speedomargin',
                         unit:       'px'
-                    }]
+                    },
+                    { xtype: 'label', text: 'Thresholds:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    {
+                        name:       'speedo_thresholds',
+                        xtype:      'combobox',
+                        store:      ['hide', 'line', 'fill'],
+                        value:      'line',
+                        editable:    false,
+                        width:       60
+                    }
+                    ]
                 }, {
                     fieldLabel: 'Colors',
                     cls:        'speedometer',
@@ -1021,7 +1035,7 @@ TP.iconShowEditDialog = function(panel) {
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
                         listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
+                                     mouseover: function(color) { renderUpdateDo({color: color, scope: this }); },
                                      mouseout:  function(color) { renderUpdateDo();      }
                     },
                     items: [
@@ -1095,15 +1109,18 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel: 'Options',
                     xtype:      'fieldcontainer',
                     cls:        'speedometer',
-                    layout:     'table',
+                    layout:      { type: 'table', columns: 6, tableAttrs: { style: { width: '100%' } } },
                     defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [{ xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'checkbox', name: 'speedoinvert' },
-                            { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
-                            { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 }
-                        ]
+                    items: [
+                        { xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
+                        { xtype: 'checkbox', name: 'speedoinvert' },
+                        { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
+                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
+                        { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
+                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 },
+                        { xtype: 'label', text: 'Factor:', style: 'margin-left: 0; margin-right: 2px;' },
+                        { xtype: 'textfield', width: 120, name: 'speedofactor', colspan: 5, emptyText: '100, 0.01, 1e3, 1e-6 ...' }
+                    ]
                 }]
             }]
         }]
@@ -1209,7 +1226,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}, true); };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}); };
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -1563,7 +1580,7 @@ TP.iconShowEditDialog = function(panel) {
             }
         }
     }).show();
-    tab.body.unmask();
+    Ext.getBody().unmask();
 
     TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
@@ -1573,7 +1590,7 @@ TP.iconShowEditDialog = function(panel) {
 
     // move settings window next to panel itself
     var showAtPos = TP.getNextToPanelPos(panel, settingsWindow.width, settingsWindow.height);
-    panel.setIconLabel(undefined, true);
+    panel.setIconLabel();
     settingsWindow.showAt(showAtPos);
     TP.iconSettingsWindow.panel = panel;
 
@@ -1600,7 +1617,9 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     window.setTimeout(function() {
-        TP.iconSettingsWindow.toFront();
+        if(TP.iconSettingsWindow) {
+            TP.iconSettingsWindow.toFront();
+        }
     }, 100);
     TP.modalWindows.push(settingsWindow);
 };
@@ -1643,16 +1662,15 @@ TP.get_icon_form_xdata = function(settingsWindow) {
 TP.openLabelEditorWindow = function(panel) {
     var oldValue  = Ext.getCmp('label_textfield').getValue();
     var perf_data = '';
-    window.perfdata = {};
     // ensure fresh and correct performance data
-    panel.setIconLabel(undefined, true);
-    for(var key in perfdata) {
-        delete perfdata[key].perf;
-        delete perfdata[key].key;
-        for(var key2 in perfdata[key]) {
+    var macros = TP.getPanelMacros(panel);
+    for(var key in macros.perfdata) {
+        delete macros.perfdata[key].perf;
+        delete macros.perfdata[key].key;
+        for(var key2 in macros.perfdata[key]) {
             var keyname = '.'+key;
             if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
-            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+perfdata[key][key2]+'<\/td><\/tr>'
+            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
         }
     }
 

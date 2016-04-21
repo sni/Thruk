@@ -2091,3 +2091,7 @@ select#quick_command {
   line-height: 1.1;
   font-size: 1.0em;
 }
+
+td.dataVal.eventHandler {
+  width: auto;
+}

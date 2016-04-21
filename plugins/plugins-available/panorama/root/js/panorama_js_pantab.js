@@ -426,7 +426,7 @@ Ext.define('TP.Pantab', {
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
         if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
-        /* do not change zindex if there are modal windows and masks on screen */
+        /* do not change zindex if there are masks on screen */
         var masks = Ext.Element.select('.x-mask');
         if(masks.elements.length > 0) { return }
 
@@ -713,12 +713,15 @@ Ext.define('TP.Pantab', {
         if(background != undefined && background != 'none' && !xdata.map) {
             if(!tab.bgImgEl) {
                 tab.bgImgEl  = bodyView.createChild('<img>', bodyView.dom.childNodes[0]);
-                tab.bgImgEl.on({
-                    load: function (evt, ele, opts) {
-                        tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
-                    }
-                });
             }
+            tab.bgImgEl.on('load',
+                            function (evt, ele, opts) {
+                                tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
+                            },
+                            undefined, {
+                                single: true    // remove event handler after first occurence
+                            }
+            );
             tab.bgImgEl.dom.src            = background;
             tab.bgImgEl.dom.style.position = "absolute";
             tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
@@ -812,8 +815,9 @@ Ext.define('TP.Pantab', {
         var mask;
         var panels = TP.getAllPanel(tab);
         if(tab.locked != val && panels.length > 0) {
-            tab.mask = tab.body.mask((val ? "" : "un")+"locking dashboard...");
+            tab.mask = Ext.getBody().mask((val ? "" : "un")+"locking dashboard...");
         }
+        var changed = (tab.xdata.locked != val);
         tab.xdata.locked   = val;
         tab.locked         = val;
         TP.suppressIconTip = !val;
@@ -835,7 +839,9 @@ Ext.define('TP.Pantab', {
             tab.disableMapControls();
         }
         /* schedule update, which also remove the mask from above */
-        TP.updateAllIcons(tab);
+        if(changed) { /* leads to double status update on inital page render */
+            TP.updateAllIcons(tab);
+        }
     },
     contextmenu: function(evt, hidePasteAndNew) {
         var tab = this;

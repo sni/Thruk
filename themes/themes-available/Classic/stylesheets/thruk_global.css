@@ -38,6 +38,9 @@ a img {
 td.dataVal {
   text-align: left;
 }
+td.dataVal.eventHandler {
+  width: 500px;
+}
 td.dataVar {
   text-align: left;
 }
@@ -715,6 +718,13 @@ DIV#search-results ul li a.ajax_search_selected, DIV#search-results ul li a:hove
   cursor: pointer;
 }
 
+DIV#search-results ul li.wzd A IMG {
+    width: 12px;
+    height: 12px;
+    margin-right: 3px;
+    vertical-align: top;
+}
+
 /* generic rules */
 .no_margin {
   margin: 0px;
@@ -902,6 +912,9 @@ SPAN.deleteicon INPUT {
 }
 .ui-error-button {
   background-image: url(../images/error.png) !important;
+}
+.ui-clone-button {
+  background-image: url(../images/page_copy.png) !important;
 }
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;

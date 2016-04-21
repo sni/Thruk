@@ -72,7 +72,7 @@ TR.commentEven TD, TR.downtimeEven TD, TR.queueEven TD.queueEven {
 }
 
 /* feature states on Process Info page */
-DIV.notificationsENABLED, DIV.checksENABLED, DIV.eventhandlersENABLED, DIV.flapdetectionENABLED, DIV.notflapping, DIV.downtimeINACTIVE {
+DIV.notificationsENABLED, DIV.checksENABLED, DIV.eventhandlersENABLED, DIV.flapdetectionENABLED {
  color: #669866;
  background-color: #fafafa;
  background-image: url("images/gradShortVertGreen.png");
@@ -80,9 +80,11 @@ DIV.notificationsENABLED, DIV.checksENABLED, DIV.eventhandlersENABLED, DIV.flapd
  background-repeat: repeat-x;
  font-size: 0.9em;
  text-align: left;
+ float: left;
  font-weight: bold;
+ width: 70px;
 }
-DIV.notificationsDISABLED, DIV.checksDISABLED, DIV.eventhandlersDISABLED, DIV.flapdetectionDISABLED, DIV.flapping, DIV.downtimeACTIVE {
+DIV.notificationsDISABLED, DIV.checksDISABLED, DIV.eventhandlersDISABLED, DIV.flapdetectionDISABLED {
  color: #fff;
  background-color: #ff0000;
  background-image: url("images/gradShortVertRed.png");
@@ -90,11 +92,37 @@ DIV.notificationsDISABLED, DIV.checksDISABLED, DIV.eventhandlersDISABLED, DIV.fl
  background-repeat: repeat-x;
  font-size: 0.9em;
  text-align: left;
+ float: left;
  font-weight: bold;
+ width: 70px;
 }
 
-DIV.notflapping, DIV.flapping, DIV.downtimeACTIVE, DIV.downtimeINACTIVE {
-float: left;
+DIV.eventhandlersCOMMAND {
+ position: absolute;
+ margin-left: 85px;
+}
+
+DIV.notflapping, DIV.downtimeINACTIVE {
+ color: #669866;
+ background-color: #fafafa;
+ background-image: url("images/gradShortVertGreen.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ font-size: 0.9em;
+ text-align: left;
+ float: left;
+ font-weight: bold;
+}
+DIV.flapping, DIV.downtimeACTIVE {
+ color: #fff;
+ background-color: #ff0000;
+ background-image: url("images/gradShortVertRed.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ font-size: 0.9em;
+ text-align: left;
+ float: left;
+ font-weight: bold;
 }
 
 /* labels on Performance Info */

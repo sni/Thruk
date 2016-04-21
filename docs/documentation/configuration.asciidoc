@@ -1600,7 +1600,8 @@ Sample menu with two items and a seperator:
 
 A menu has the following attributes:
 
-     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url
+                        and `{% raw %}{{remote_user}}{% endraw %}` for the user name. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
      ** `title`         title of the menu, will be display on mouse over.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
      ** `...`           arbitrary attributes will be used as attributes of the menu icon html element.
@@ -1610,11 +1611,13 @@ A single `"-"` item can be used as a menu item seperator.
 
 The menu item can have the following attributes:
 
-     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
+     ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
+     ** `label`         label name of the menu item.
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
-                        You may use `{% raw %}{{macros}}{% endraw %}` here too.
+                        You may use `{% raw %}{{macros}}{% endraw %}` here too. Also javascript: links are valid,
+                        for example `javascript:alert('$HOSTNAME$')`.
      ** `target`        Use '_blank' here to open link in a new window.
      ** `...`           arbitrary attributes will be used as attributes of the menu item link html element.
 
@@ -1934,6 +1937,8 @@ ex.:
     post_obj_save_cmd         = .../hook.sh
     git_base_dir              = /etc/naemon/conf.d/custom/
     edit_files                = some/extra/files/to.edit
+    extra_custom_var_host     = _WORKER
+    extra_custom_var_service  = _SNMP_COMMUNITY, _OTHER_CUSTOM_VARIABLE
   </Component>
 
 
@@ -1974,6 +1979,15 @@ Specify some extra files which can then be edited by the Thruk configtool
 text editor. Can be used multiple times. When used with a directory, all
 files below can be edited.
 
+=== extra_custom_var_host
+Extra custom variable attribute for hosts which will be available in the dropdown
+list when editing a host. Can be used multiple time and accepts comma separated
+lists.
+
+=== extra_custom_var_service
+Extra custom variable attribute for services which will be available in the dropdown
+list when editing a service. Can be used multiple time and accepts comma separated
+lists.
 
 
 

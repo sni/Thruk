@@ -57,17 +57,19 @@ TH.downtime { font-family: arial,serif;  font-size: 10pt;  background-color: whi
 .downtimeOdd { font-family: arial,serif;  font-size: 9pt;  background-color: #DBDBDB; }
 .downtimeEven { font-family: arial,serif;  font-size: 9pt;  background-color: #C4C2C2; }
 
-.notificationsENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold; }
-.notificationsDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold; }
+.notificationsENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold;  width: 86px; }
+.notificationsDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold;  width: 86px; }
 
-.checksENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold; }
-.checksDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold; }
+.checksENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold;  width: 86px; }
+.checksDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold;  width: 86px; }
 
-.eventhandlersENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold; }
-.eventhandlersDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold; }
+.eventhandlersENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold;  width: 86px;  float: left; }
+.eventhandlersDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold;  width: 86px;  float: left; }
 
-.flapdetectionENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold; }
-.flapdetectionDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold; }
+.flapdetectionENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold;  width: 86px; }
+.flapdetectionDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold;  width: 86px; }
+
+.eventhandlersCOMMAND { position: absolute;  margin-left: 95px; }
 
 .notflapping { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #00FF80;  font-weight: bold; float: left; }
 .flapping { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FA5858;  font-weight: bold; float: left; }

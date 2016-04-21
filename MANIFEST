@@ -15,7 +15,6 @@ debian/thruk-base.prerm
 debian/thruk-plugin-reporting.install
 debian/thruk-plugin-reporting.postinst
 debian/thruk-plugin-reporting.prerm
-debian/thruk.lintian-overrides
 dist.ini
 docs/documentation/configuration.asciidoc
 docs/manpages/nagexp.3
@@ -931,6 +930,7 @@ plugins/plugins-available/panorama/root/openlayer/theme/default/style.mobile.css
 plugins/plugins-available/panorama/root/OpenLayers-2.13.1.js
 plugins/plugins-available/panorama/root/panorama-2.06-1.css
 plugins/plugins-available/panorama/root/sprintf.js
+plugins/plugins-available/panorama/root/ux/chart/series/KPIGauge.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
 plugins/plugins-available/panorama/root/ux/form/MultiSelect.js
 plugins/plugins-available/panorama/routes
@@ -1286,10 +1286,12 @@ t/002-config.t
 t/010-Thruk-Utils.t
 t/011-Thruk-Backend.t
 t/020-Log-Log4perl.t
+t/021-Log-Log4perl-Forks.t
 t/086-Test-Vars.t
 t/087-trailing_whitespace.t
 t/088-remove_after.t
 t/089-patches.t
+t/090-external.t
 t/090-io.t
 t/092-clean_debug.t
 t/092-stash-config.t
@@ -1319,6 +1321,7 @@ t/101-cli-thruk.t
 t/102-thruk_utils.t
 t/103-thruk_utils_io.t
 t/104-thruk_utils_cache.t
+t/105-thruk-utils-ssi.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t
@@ -1393,6 +1396,7 @@ t/data/userfiles/encoding_iso
 t/data/userfiles/encoding_ok
 t/docker/.dropbox_uploader.enc
 t/docker/0001-sahi_add_color_to_highlight.js.patch
+t/docker/99.tab
 t/docker/cases/0010_reschedule_all_services.js
 t/docker/cases/0050_sidebar_search.js
 t/docker/cases/0051_preferences_popup.js
@@ -1407,9 +1411,11 @@ t/docker/cases/0205_panorama_panel_clone.js
 t/docker/cases/0210_panorama_hostgroup_icon.js
 t/docker/cases/0211_panorama_service_icon_speedometer.js
 t/docker/cases/0212_panorama_text_label_widget.js
+t/docker/cases/0213_panorama_arrow_element.js
 t/docker/cases/0220_panorama_geo_map.js
 t/docker/cases/0221_panorama_geo_switch.js
 t/docker/cases/0222_panorama_geo_map_cancel.js
+t/docker/cases/0223_panorama_background_image.js
 t/docker/cases/0250_panorama_site_status_panel.js
 t/docker/cases/0251_panorama_core_performance_metrics_panel.js
 t/docker/cases/0252_panorama_server_status_panel.js
@@ -1421,13 +1427,17 @@ t/docker/cases/0257_panorama_services_panel.js
 t/docker/cases/0258_panorama_services_totals_panel.js
 t/docker/cases/0259_panorama_services_graph_panel.js
 t/docker/cases/0260_panorama_mine_map_panel.js
+t/docker/cases/0261_panorama_all_in_one.js
+t/docker/cases/0299_panorama_show_case.js
 t/docker/cases/_dashboard_exports.js
 t/docker/cases/_images/applications.png
+t/docker/cases/_images/arrow_map.png
 t/docker/cases/_images/controls_unlock.png
 t/docker/cases/_images/dropdown.png
 t/docker/cases/_images/green.png
 t/docker/cases/_images/island_green.png
 t/docker/cases/_images/island_map_green.png
+t/docker/cases/_images/island_map_green_offset.png
 t/docker/cases/_images/speedometer.png
 t/docker/cases/_include.js
 t/docker/cases/testsuite.properties

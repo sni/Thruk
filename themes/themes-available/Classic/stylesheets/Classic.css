@@ -277,3 +277,7 @@ A:hover {
   line-height: 1.1;
   font-size: 0.9em;
 }
+
+td.dataVal.eventHandler {
+  width: auto;
+}

@@ -372,6 +372,8 @@ sub generate_report {
         }
     }
 
+    $c->req->parameters->{'debug'} = 1 if $ENV{'THRUK_REPORT_DEBUG'};
+
     Thruk::Utils::set_user($c, $options->{'user'});
     local $ENV{'REMOTE_USER'} = $options->{'user'};
     $c->stash->{'remote_user'} = $options->{'user'};
@@ -381,6 +383,11 @@ sub generate_report {
 
     # update report runtime data
     set_running($c, $nr, $$, time());
+
+    if($options->{'var'}->{'debug_file'}) {
+        unlink($options->{'var'}->{'debug_file'});
+        undef($options->{'var'}->{'debug_file'});
+    }
 
     # do we have errors in our options, ex.: missing required fields?
     if(defined $options->{'var'}->{'opt_errors'}) {
@@ -524,6 +531,15 @@ sub generate_report {
         unlink($file);
     }
 
+    if($c->stash->{'debug_info'}) {
+        my $debug_file = Thruk::Action::AddDefaults::save_debug_information_to_tmp_file($c);
+        if($debug_file) {
+            my $options = _read_report_file($c, $nr);
+            $options->{'var'}->{'debug_file'} = $debug_file;
+            _report_save($c, $nr, $options);
+        }
+    }
+
     # restore tt cache settings
     $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = $orig_stat_ttl;
 
@@ -617,13 +633,13 @@ sub process_queue_file {
 
 =head2 generate_report_background
 
-  generate_report_background($c, $report_nr, $with_mails, $report, $force)
+  generate_report_background($c, $report_nr, $with_mails, $report, $force, $debug)
 
 start a report in the background and queue it if all slots are busy
 
 =cut
 sub generate_report_background {
-    my($c, $report_nr, $with_mails, $report, $force) = @_;
+    my($c, $report_nr, $with_mails, $report, $force, $debug) = @_;
 
     # using queue
     if(!$force && queue_report_if_busy($c, $report_nr)) {
@@ -634,7 +650,14 @@ sub generate_report_background {
     set_running($c, $report_nr, -1, time());
     my $cmd = _get_report_cmd($c, $report->{'nr'}, 0);
     clean_report_tmp_files($c, $report_nr);
-    my $job = Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1, 'no_shell' => 1 });
+    my $job = Thruk::Utils::External::cmd($c, {
+                                               'cmd'        => $cmd,
+                                               'background' => 1,
+                                               'no_shell'   => 1,
+                                               'env'        => {
+                                                                THRUK_REPORT_DEBUG => $debug,
+                                                            },
+                                            });
     set_running($c, $report_nr, undef, undef, undef, $job);
     return;
 }
@@ -994,9 +1017,13 @@ sub _report_save {
     delete $report->{'failed'};
 
     # save backends as hash with name
-    $report->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $report->{'backends'});
+    $report->{'backends'} = Thruk::Utils::backends_list_to_hash($c, ($report->{'backends_hash'} || $report->{'backends'}));
+    delete $report->{'backends_hash'};
 
     Thruk::Utils::write_data_file($file, $report);
+
+    $report->{'backends_hash'} = $report->{'backends'};
+
     return $report;
 }
 
@@ -1089,6 +1116,10 @@ sub _read_report_file {
         $report->{'var'}->{'profile'} = $profile;
         $needs_save = 1;
     }
+    if($report->{'var'}->{'debug_file'} && !-e $report->{'var'}->{'debug_file'}) {
+        delete $report->{'var'}->{'debug_file'};
+        $needs_save = 1;
+    }
 
     # failed?
     $report->{'failed'} = 0;
@@ -1123,9 +1154,10 @@ sub _read_report_file {
         }
     }
 
-    $report->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $report->{'backends'});
-
     _report_save($c, $nr, $report) if $needs_save;
+
+    $report->{'backends_hash'} = $report->{'backends'};
+    $report->{'backends'}      = Thruk::Utils::backends_hash_to_list($c, $report->{'backends'});
 
     return $report;
 }

@@ -43,7 +43,7 @@ js_eval_ok($jsfiles[0]);
 
 #################################################
 # tests from javascript_tests file
-my @functions = read_file('t/data/javascript_tests.js') =~ m/^\s*function\s+(test\d+)/gmx;
+my @functions = read_file('t/data/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/data/javascript_tests.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");
@@ -55,7 +55,7 @@ js_ok("var top = { location: '' };", "defined top fake object");
 js_ok("var location = '';"         , "defined location fake object");
 js_ok("window.location = '';"      , "defined window.location fake object");
 _eval_extracted_js('templates/login.tt');
-@functions = read_file('t/data/javascript_tests_login_tt.js') =~ m/^\s*function\s+(test\d+)/gmx;
+@functions = read_file('t/data/javascript_tests_login_tt.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/data/javascript_tests_login_tt.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");

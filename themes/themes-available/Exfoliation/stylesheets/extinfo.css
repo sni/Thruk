@@ -60,14 +60,14 @@ th.downtime    { font-size: 9pt; center; padding: 0 3px 0 3px; background-color:
 
 .notflapping           { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
 .flapping              { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
-.notificationsENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
-.notificationsDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
-.checksENABLED         { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
-.checksDISABLED        { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
-.eventhandlersENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
-.eventhandlersDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
-.flapdetectionENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
-.flapdetectionDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
+.notificationsENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.notificationsDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.checksENABLED         { background-color: #88d066; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.checksDISABLED        { background-color: #f88888; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.eventhandlersENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; width: 74px; float: left; }
+.eventhandlersDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; width: 74px; float: left; }
+.flapdetectionENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.flapdetectionDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; width: 74px; }
 .downtimeACTIVE        { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
 .downtimeINACTIVE      { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
 .processOK             { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
@@ -76,6 +76,8 @@ th.downtime    { font-size: 9pt; center; padding: 0 3px 0 3px; background-color:
 .processCRITICAL       { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
 .modeACTIVE            { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
 .modeSTANDBY           { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; }
+
+.eventhandlersCOMMAND  { position: absolute; margin-left: 90px; }
 
 .hostUP           { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
 .hostDOWN         { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }

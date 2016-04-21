@@ -26,10 +26,15 @@ use constant {
     ACCESS_READONLY  => 1,
     ACCESS_READWRITE => 2,
     ACCESS_OWNER     => 3,
+
+    SOFT_STATE       => 0,
+    HARD_STATE       => 1,
+
+    DASHBOARD_FILE_VERSION => 2,
 };
 
 use base 'Exporter';
-our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER/);
+our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/);
 
 ##########################################################
 
@@ -161,7 +166,7 @@ sub load_dashboard {
     my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
     return unless -s $file;
     my $dashboard  = Thruk::Utils::read_data_file($file);
-    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -2;
+
     my $permission = is_authorized_for_dashboard($c, $nr, $dashboard);
     return unless $permission >= ACCESS_READONLY;
     if($permission == ACCESS_READONLY) {
@@ -174,11 +179,29 @@ sub load_dashboard {
     $dashboard->{'nr'}   = $nr;
     $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
     $dashboard->{'file'} = $file;
+
+    # convert old public flag to group based permissions
     my $public = delete $dashboard->{'public'};
     $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
     if($public) {
         push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
     }
+
+    $dashboard->{'file_version'} = 1 unless defined $dashboard->{'file_version'};
+    if($dashboard->{'file_version'} == 1) {
+        # convert label x/y from old dashboard versions which had them mixed up
+        for my $id (keys %{$dashboard}) {
+            my $tab = $dashboard->{$id};
+            if($id =~ m|^tabpan\-tab_|mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
+                my $offsetx = $tab->{'xdata'}->{'label'}->{'offsetx'};
+                my $offsety = $tab->{'xdata'}->{'label'}->{'offsety'};
+                $tab->{'xdata'}->{'label'}->{'offsety'} = $offsetx;
+                $tab->{'xdata'}->{'label'}->{'offsetx'} = $offsety;
+            }
+        }
+        $dashboard->{'file_version'} = 2;
+    }
+    $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
     # merge runtime data
     my $runtime = {};
@@ -194,8 +217,12 @@ sub load_dashboard {
 
     if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
     if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = _get_default_tab_xdata($c) }
+    # set default state type
+    $dashboard->{'tab'}->{'xdata'}->{'state_type'} = 'soft' unless defined $dashboard->{'tab'}->{'xdata'}->{'state_type'};
     $dashboard->{'tab'}->{'xdata'}->{'owner'}    = $dashboard->{'user'};
     $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
+
+    $dashboard->{'objects'} = scalar grep(/^tabpan-tab_/mx, keys %{$dashboard});
     return $dashboard;
 }
 

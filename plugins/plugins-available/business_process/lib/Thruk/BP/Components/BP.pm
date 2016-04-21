@@ -446,6 +446,7 @@ sub commit {
         move($self->{'editfile'}, $self->{'file'}) or die('cannot commit changes to '.$self->{'file'}.': '.$!);
         unlink($self->{'editfile'});
     }
+    unlink($self->{'datafile'}.'.edit');
 
     # run post hook
     if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {

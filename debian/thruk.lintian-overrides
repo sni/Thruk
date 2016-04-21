@@ -1,2 +1,0 @@
-thruk: arch-dependent-file-in-usr-share ./usr/share/thruk/script/phantomjs
-thruk: arch-dependent-file-in-usr-share usr/share/thruk/script/phantomjs

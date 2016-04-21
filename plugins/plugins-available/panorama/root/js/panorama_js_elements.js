@@ -529,6 +529,12 @@ Ext.define('TP.speedochart', {
     legend:  false,
     initComponent: function() {
         var me = this;
+        this.series = [{
+            type:        'kpigauge',
+            field:       'value',
+            showInLegend: true,
+            ranges:       []
+        }];
         this.series[0].donut  = this.donut  ? this.donut : false;
         this.series[0].needle = !!this.needle;
         this.axes[0].margin   = this.axis_margin != undefined ? this.axis_margin : -10;
@@ -568,12 +574,7 @@ Ext.define('TP.speedochart', {
         steps:    10,
         margin:   10
     }],
-    series: [{
-        type:        'gauge',
-        field:       'value',
-        showInLegend: true,
-        colorSet:  [ '#00FF00' ]
-    }]
+    series: []
 });
 
 Ext.define('TP.dragEl', {

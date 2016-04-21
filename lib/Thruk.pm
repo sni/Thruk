@@ -354,6 +354,28 @@ sub log {
 
 ###################################################
 
+=head2 reset_logging
+
+    reset logging system, for example after starting child processes
+
+=cut
+sub reset_logging {
+    my($self) = @_;
+
+    my $appenders = Log::Log4perl::appenders();
+    for my $name (keys %{$appenders}) {
+        my $appender = $appenders->{$name};
+        if($appender->{'appender'} && $appender->{'appender'}->{'fh'}) {
+            # enable closing logs for forked childs
+            $appender->{'appender'}->{'close'} = 1;
+        }
+    }
+
+    return;
+}
+
+###################################################
+
 =head2 verbose
 
     make verbose accessible via Thruk->verbose
@@ -515,7 +537,7 @@ sub _set_ssi {
         for my $entry (readdir($dh)) {
             next if $entry eq '.' or $entry eq '..';
             next if $entry !~ /\.ssi$/mx;
-            $ssi{$entry} = { name => $entry };
+            $ssi{$entry} = 1;
         }
         closedir $dh;
     }
@@ -640,6 +662,7 @@ sub _after_dispatch {
         print STDERR $@ if $@ && $c->config->{'thruk_debug'};
         unless($@) {
             my $counter = 0;
+            $Devel::Cycle::already_warned{'GLOB'}++;
             Devel::Cycle::find_cycle($c, sub {
                 my($path) = @_;
                 $counter++;

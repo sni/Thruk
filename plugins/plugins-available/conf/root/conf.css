@@ -28,11 +28,8 @@ BODY.bare_tree {
 }
 
 /* input fields with wizards */
-INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members, INPUT.obj_host_hostgroups {
+TD.conf_row INPUT[type=text].wizard {
   width: 375px !important;
-}
-INPUT.obj_servicegroup_servicegroup_members {
-  width: 400px !important;
 }
 
 TABLE.command_line_wzd {

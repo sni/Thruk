@@ -15,6 +15,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
+use File::Slurp qw/read_file/;
 use POSIX ();
 use Monitoring::Availability;
 
@@ -636,6 +637,14 @@ sub calculate_availability {
     if($c->req->parameters->{'debug'}) {
         $c->stash->{'debug_info'} .= "\$ma_options\n";
         $c->stash->{'debug_info'} .= Dumper($ma_options);
+        if($ma_options->{'log_file'}) {
+            $c->stash->{'debug_info'} .= $ma_options->{'log_file'}.":\n";
+            if(-s $ma_options->{'log_file'} < (1024*1024*100)) { # append files smaller than 100MB
+                $c->stash->{'debug_info'} .= read_file($ma_options->{'log_file'});
+            } else {
+                $c->stash->{'debug_info'} .= sprintf("file too large (%.2fMB)\n", (-s $ma_options->{'log_file'})/1024/1024);
+            }
+        }
     } else {
         unlink($file) if $file;
     }

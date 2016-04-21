@@ -134,8 +134,11 @@
   <tr>
     <td class="dataEven" align="center" colspan=3>
       <span class="required" style="float: left;">* - required</span>
-      [% IF r.nr != "new" %]<button name="action" value="remove" class="report_remove_button report_button" style="width: 80px;">Delete</button>[% END %]
+      [% IF r.nr != "new" %]<button name="action" value="remove" class="report_remove_button report_button" style="width: 80px; float: left; margin-left: 65px;">Delete</button>[% END %]
       <button class="report_save_button report_button" style="width: 160px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
+      [% IF r.nr != "new" %]
+      <button name="action" value="clone" class="report_clone_button report_button" style="width: 120px; float: right;">Clone Report</button>
+      [% END %]
     </td>
   </tr>
 </table>

@@ -15,6 +15,7 @@ eval "use Config::General";
 if(!$@) {
     for my $file (qw|thruk.conf thruk_local.conf cgi.cfg support/naglint.conf.example t/data/test_hash_comments.cfg|) {
         next unless -f $file;
+        ok(1, "reading: ".$file);
         my %general_conf = Config::General::ParseConfig(-ConfigFile => $file,
                                                         -UTF8       => 1,
                                                         -CComments  => 0,

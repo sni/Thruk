@@ -367,6 +367,11 @@ sub _run {
         return $result->{'rc'};
     }
 
+    # fix encoding
+    if(!$result->{'content_type'} || $result->{'content_type'} =~ /^text/mx) {
+        $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
+    }
+
     # with output
     if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
@@ -574,6 +579,11 @@ sub _run_command_action {
         $data->{'output'} = _cmd_listhosts($c);
     }
 
+    # list services
+    elsif($action eq 'listservices') {
+        $data->{'output'} = _cmd_listservices($c);
+    }
+
     # list hostgroups
     elsif($action eq 'listhostgroups') {
         $data->{'output'} = _cmd_listhostgroups($c);
@@ -581,7 +591,7 @@ sub _run_command_action {
 
     # request url
     elsif($action =~ /^url=(.*)$/mx) {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_url($c, $1, $opt);
+        $data = _cmd_url($c, $1, $opt);
     }
 
     # report or report mails
@@ -674,6 +684,11 @@ sub _run_command_action {
         ($data->{'output'}, $data->{'rc'}) = _cmd_fix_scheduling($c, $1);
     }
 
+    # graph actions
+    elsif($action eq 'graph') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_graph($c, $opt);
+    }
+
     # nothing matched...
     else {
         $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
@@ -698,10 +713,18 @@ sub _cmd_listhosts {
         $output .= $host->{'name'}."\n";
     }
 
-    # fix encoding
-    utf8::decode($output);
+    return($output);
+}
 
-    return encode_utf8($output);
+##############################################
+sub _cmd_listservices {
+    my($c) = @_;
+    my $output = '';
+    for my $svc (@{$c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], sort => {'ASC' => [ 'host_name', 'description' ] })}) {
+        $output .= $svc->{'host_name'}.";".$svc->{'description'}."\n";
+    }
+
+    return($output);
 }
 
 ##############################################
@@ -712,10 +735,7 @@ sub _cmd_listhostgroups {
         $output .= sprintf("%-30s %s\n", $group->{'name'}, join(',', @{$group->{'members'}}));
     }
 
-    # fix encoding
-    utf8::decode($output);
-
-    return encode_utf8($output);
+    return($output);
 }
 
 ##############################################
@@ -746,6 +766,7 @@ sub _cmd_listbackends {
         $output .= "\n";
     }
     $output .= sprintf("-------------------------------------------------\n");
+
     return $output;
 }
 
@@ -1112,9 +1133,9 @@ sub _cmd_downtimetask {
     return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
     if($downtime->{'service'}) {
-        $output = 'scheduled'.$flexible.' downtime for service \''.encode_utf8($downtime->{'service'}).'\' on host: \''.encode_utf8(join(', ', @{$downtime->{'host'}})).'\'';
+        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
     } else {
-        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.encode_utf8(join(', ', @{$downtime->{$downtime->{'target'}}})).'\'';
+        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
     }
     $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")";
     $output .= " (after $retries retries)\n" if $retries;
@@ -1184,7 +1205,7 @@ sub _cmd_url {
     $c->stats->profile(begin => "_cmd_url()");
 
     if($opt->{'all_inclusive'} && !$c->config->{'use_feature_reports'}) {
-        return("all-inclusive options requires the reports plugin to be enabled", 1);
+        return({output => "all-inclusive options requires the reports plugin to be enabled", rc => 1});
     }
 
     if($url =~ m|^\w+\.cgi|gmx) {
@@ -1199,13 +1220,18 @@ sub _cmd_url {
         $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
     }
 
+    my $content_type;
+    if($res[1] && $res[1]->{'headers'}) {
+        $content_type = $res[1]->{'headers'}->{'content-type'};
+    }
+
     $c->stats->profile(end => "_cmd_url()");
     my $rc = $res[0] >= 400 ? 1 : 0;
-    return($res[2], $rc) if $res[2];
+    return({output => $res[2], rc => $rc, 'content_type' => $content_type}) if $res[2];
     if($res[1]->{'result'} =~ m/\Q<div class='infoMessage'>Your command request was successfully submitted to the Backend for processing.\E/gmx) {
-        return("Command request successfully submitted to the Backend for processing\n", $rc);
+        return({output => "Command request successfully submitted to the Backend for processing\n", rc => $rc});
     }
-    return($res[1]->{'result'}, $rc);
+    return({output => $res[1]->{'result'}, rc => $rc, 'content_type' => $content_type});
 }
 
 ##############################################
@@ -1476,6 +1502,7 @@ sub _cmd_configtool {
         # changed and new files
         for my $f (@{$changed}) {
             my($path,$content, $mtime) = @{$f};
+            $content = encode_utf8(Thruk::Utils::decode_any($content));
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
             my $saved;
@@ -1627,6 +1654,67 @@ sub _cmd_selfcheck {
 
     $c->stats->profile(end => "_cmd_selfcheck()");
     return($msg."\n".$details."\n", $rc);
+}
+
+##############################################
+sub _cmd_graph {
+    my($c, $opt) = @_;
+    my $now = time();
+    if(!defined $c->stash->{'remote_user'}) {
+        $c->stash->{'remote_user'} = 'cli';
+    }
+    my $start  = ($opt->{'start'} || $now-86400);
+    my $end    = ($opt->{'end'}   || $now);
+    # if no start / end given, round to nearest 10 seconds which makes caching more effective
+    if(!$opt->{'start'} && !$opt->{'end'}) {
+        $start = $start - $start % 10;
+        $end   = $end   - $end   % 10;
+    }
+    my $format = $opt->{'format'} || 'png';
+    my $width  = $opt->{'width'}  || 800;
+    my $height = $opt->{'height'} || 300;
+    if($format ne 'png' && $format ne 'base64') {
+        return("ERROR: please use either 'png' or 'base64' format.", 1);
+    }
+    # use cached version?
+    Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/graphs/');
+    my $cache_file = $opt->{'host'}.'_'.($opt->{'service'} || '_HOST_');
+    $cache_file =~ s|[^\a-zA-A_-]|.|gmx;
+    $cache_file = $cache_file.'-'.$start.'-'.$end.'-'.($opt->{'source'}||'').'-'.$width.'-'.$height.'.'.$format;
+    $cache_file = $c->config->{'tmp_path'}.'/graphs/'.$cache_file;
+    if(-e $cache_file) {
+        _debug("cache hit from ".$cache_file) if $Thruk::Utils::CLI::verbose >= 2;
+        return(scalar read_file($cache_file), 0);
+    }
+
+    # create new image
+    my $img = Thruk::Utils::get_perf_image($c,
+                                           $opt->{'host'},
+                                           $opt->{'service'},
+                                           $start,
+                                           $end,
+                                           $width,
+                                           $height,
+                                           $opt->{'source'},
+                                        );
+    return("", 1) unless $img;
+    if($format eq 'base64') {
+        require MIME::Base64;
+        $img = MIME::Base64::encode_base64($img);
+    }
+    Thruk::Utils::IO::write($cache_file, $img);
+    _debug("cached graph to ".$cache_file) if $Thruk::Utils::CLI::verbose >= 2;
+
+    # clean old cached files, threshold is 5minutes, since we mainly
+    # want to cache files used from many seriel notifications
+    for my $file (glob($c->config->{'tmp_path'}.'/graphs/*')) {
+        my $mtime = (stat($file))[9];
+        if($mtime < $now - 300) {
+            _debug("removed old cached file (mtime: ".scalar($mtime)."): ".$file) if $Thruk::Utils::CLI::verbose >= 2;
+            unlink($file);
+        }
+    }
+    return($img, 0);
 }
 
 ##############################################

@@ -41,7 +41,7 @@
 <table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px; width: 1000px;">
   <tr>
     <th class="status" nowrap width="200">Name</th>
-    <th class="status" nowrap>Description</th>
+    <th class="status" nowrap width="200">Description</th>
     <th class="status" nowrap width="40">Public</th>
     <th class="status usercol" nowrap width="60">Owner</th>
     <th class="status" nowrap width="40">Mail</th>
@@ -57,7 +57,7 @@
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
     <td class="status [% rowclass %]" align="left">[% r.name %]</td>
-    <td class="status [% rowclass %]" align="left">[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
+    <td class="status [% rowclass %]" align="left" style="overflow: hidden;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %] usercol">[% r.user %]</td>
     <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
@@ -101,11 +101,17 @@
         [% END %]
       [% END %]
     </td>
-    <td class="status [% rowclass %]">
+    <td class="status [% rowclass %]" nowrap align="left">
       [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=cancel" class="is_running"><img src='[% url_prefix %]themes/[% theme %]/images/stop.png' border="0" alt='Cancel Report' title='Cancel Report' width=16 height=16></a>
       [% ELSE %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
+        [% IF debug %]
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update&debug=1" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/wand.png' border="0" alt='Create Report in Debug Mode' title='Create Report in Debug Mode' width=16 height=16></a>
+        [% IF r.var.exists("debug_file") %]
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_debug" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_white_text.png' border="0" alt='Download Debug Report' title='Download Debug Report' width=16 height=16></a>
+        [% END %]
+        [% END %]
       [% END %]
     </td>
     <td class="status [% rowclass %]">

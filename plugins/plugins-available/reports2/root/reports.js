@@ -10,6 +10,9 @@ function init_report_tool_buttons() {
     jQuery('.report_save_button').button({
         icons: {primary: 'ui-save-button'}
     });
+    jQuery('.report_clone_button').button({
+        icons: {primary: 'ui-clone-button'}
+    });
 
     jQuery('.report_email_button').button({
         icons: {primary: 'ui-email-button'}
@@ -114,10 +117,14 @@ function reports_update_affected_sla_objects(input) {
     var span2 = form.find('TR.report_type_affected_sla_objects SPAN.value');
     showElement('reports_waiting');
     hideElement(span2[0].id);
+    var backends = form.find('SELECT[name=report_backends]').val();
     try {
-        // only select all backends if using the _backend_select_multi.tt
+        // only get all backends if using the _backend_select_multi.tt
         if(document.getElementById('available_backends') != undefined) {
-            select_all_options('report_backends');
+            var options = jQuery('#report_backends option');
+            var backends = jQuery.map(options ,function(option) {
+                return option.value;
+            });
         }
     } catch(e) {
         debug(e);
@@ -131,7 +138,7 @@ function reports_update_affected_sla_objects(input) {
                 hostgroup:       form.find('INPUT[name="params.hostgroup"]').val(),
                 servicegroup:    form.find('INPUT[name="params.servicegroup"]').val(),
                 template:        form.find('SELECT[name=template]').val(),
-                backends:        form.find('SELECT[name=report_backends]').val(),
+                backends:        backends,
                 backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val()),
                 param:           form.serialize()
         },

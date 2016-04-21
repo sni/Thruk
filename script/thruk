@@ -54,6 +54,12 @@ Getopt::Long::GetOptions (
    "f|force"            => \$options->{'force'},
    "i|all-inclusive"    => \$options->{'all_inclusive'},
    "s|start=s"          => \$options->{'start'},
+     "end=s"            => \$options->{'end'},
+     "format=s"         => \$options->{'format'},
+     "host=s"           => \$options->{'host'},
+     "service=s"        => \$options->{'service'},
+     "width=i"          => \$options->{'width'},
+     "height=i"         => \$options->{'height'},
    "<>"                 => sub { push @{$options->{'url'}}, "".shift },
 ) or do {
     print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
@@ -176,8 +182,17 @@ script has the following arguments
     Data Commands
       - listbackends                list all backends
       - listhosts                   list hostnames
+      - listservices                list servicesnames
       - listhostgroups              list hostgroupnames
       - command <host> <service>    print used command line for this host/service
+
+    Graph Commands
+      - graph                       print graph to stdout. Options are
+                                    --host, --service, --width, --height, --source, --format
+                                    --start and --end.
+                                    --format can bei either 'png' or 'base64'.
+                                    this export will export the exact same graph as used in the
+                                    reports or on the details page.
 
     Selfcheck Commands
       - selfcheck(=subtype)         run self check(s)

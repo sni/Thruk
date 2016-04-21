@@ -291,12 +291,26 @@ Ext.define('TP.SmallWidget', {
         }
     },
 
-    /* render label for this widget */
-    setIconLabel: function(cfg, force_perfdata) {
+    /* queue label renderer */
+    setIconLabel: function(cfg) {
         var panel = this;
-        if(cfg       == undefined) { cfg       = this.xdata.label; }
-        if(!this.el || !this.el.dom)  { return; }
-        if(!this.el.dom.style.zIndex && cfg && cfg.labeltext) {
+        TP.reduceDelayEvents(panel, function() {
+            panel.setIconLabelDo(cfg);
+        }, 300, panel.id+'setIconLabel');
+    },
+
+    /* render label for this widget */
+    setIconLabelDo: function(cfg) {
+        var panel = this;
+        if(cfg == undefined) {
+            cfg = panel.xdata.label;
+            if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel.id == panel.id) {
+                var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+                cfg       = xdata.label;
+            }
+        }
+        if(!panel.el || !panel.el.dom)  { return; }
+        if(!panel.el.dom.style.zIndex && cfg && cfg.labeltext) {
             var tab  = Ext.getCmp(panel.panel_id);
             tab.scheduleApplyZindex();
             return;
@@ -307,13 +321,21 @@ Ext.define('TP.SmallWidget', {
             TP.timeouts['remove_label_'+panel.id] = window.setTimeout(function() {
                 TP.removeLabel[panel.id].destroy();
                 delete TP.removeLabel[panel.id];
-                panel.setIconLabel(cfg, force_perfdata);
+                panel.setIconLabel(cfg);
             }, 100);
         }
         if(cfg == undefined) { return; }
+
+        panel.setIconLabelText(cfg);
+        panel.setIconLabelPosition(cfg);
+        return;
+    },
+
+    setIconLabelText: function(cfg) {
+        var panel = this;
         var txt = String(cfg.labeltext);
         if(txt == undefined) { txt = ''; }
-        this.el.dom.title = '';
+        panel.el.dom.title = '';
 
         /* hide the icon element for label only appearance */
         if(panel.locked && panel.el) {
@@ -323,26 +345,12 @@ Ext.define('TP.SmallWidget', {
         }
 
         /* dynamic label? */
-        if(force_perfdata || txt.match(/\{\{.*?\}\}/)) {
+        if(txt.match(/\{\{.*?\}\}/)) {
             var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
             if(TP.availabilities == undefined) { TP.availabilities = {}; }
             if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
-            var matches           = txt.match(/(\{\{.*?\}\})/g);
-            if(this.servicegroup) { totals = this.servicegroup; }
-            if(this.hostgroup)    { totals = this.hostgroup; }
-            if(this.results)      { totals = this.results; }
-            if(this.host)         { for(var key in this.host)    { window[key] = this.host[key];    } window['performance_data'] = this.host['perf_data']; }
-            if(this.service)      { for(var key in this.service) { window[key] = this.service[key]; } window['performance_data'] = this.service['perf_data']; }
-            if(window.perf_data) {
-                window.perf_data = parse_perf_data(window.perf_data);
-                window.perfdata = {};
-                for(var x = 0; x < window.perf_data.length; x++) {
-                    var d = window.perf_data[x];
-                    window.perfdata[d.key] = d;
-                }
-            } else {
-                window.perfdata = {};
-            }
+            var matches = txt.match(/(\{\{.*?\}\})/g);
+            var macros  = TP.getPanelMacros(panel);
             Ext.Array.each(matches, function(item, idx) {
                 var calc      = item.replace(/^\{\{/, '').replace(/\}\}$/, '');
                 var functions = calc.match(/[\w+_]+\(/g);
@@ -356,13 +364,18 @@ Ext.define('TP.SmallWidget', {
                     }
                 });
                 if(!ok) { return; }
-                var res = '';
+                var res;
                 calc = calc.replace(/availability\(/g, 'availability(panel, ');
-                try {
-                    res = eval(calc);
-                } catch(err) {
-                    TP.logError(panel.id, "labelEvalException", err);
-                    panel.el.dom.title = err;
+                if(macros[calc] != undefined) {
+                    // direct match, no need for eval
+                    res = macros[calc];
+                } else {
+                    try {
+                        res = TP.evalInContext(calc, macros);
+                    } catch(err) {
+                        TP.logError(panel.id, "labelEvalException", err);
+                        panel.el.dom.title = err;
+                    }
                 }
                 if(res == undefined) { res = ''; }
                 // replace not yet resolved availabilities
@@ -393,175 +406,193 @@ Ext.define('TP.SmallWidget', {
         }
         /* no label at all */
         if(!cfg.labeltext) {
-            if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
+            if(panel.labelEl) { panel.labelEl.destroy(); panel.labelEl = undefined; }
             return;
         }
-        if(!this.labelEl) {
-            var panel = this;
-            if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
-            this.labelEl = Ext.create('Ext.Component', {
-                'html':     ' ',
-                panel:       panel,
-                draggable:  !panel.locked,
-                shadow:     false,
-                renderTo:  "bodyview",
-                cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
-                style:      {
-                    whiteSpace: 'nowrap'
-                },
-                autoEl: {
-                    tag:     'a',
-                    href:    panel.xdata.link ? panel.xdata.link.link : '',
-                    target:  '',
-                    onclick: "return(false);"
-                },
-                listeners: {
-                    /* move parent element according to our drag / drop */
-                    move: function(This, x, y, eOpts) {
-                        var diffX = 0, diffY = 0;
-                        if(x != undefined && This.oldX != undefined) { diffX = x - This.oldX; }
-                        if(y != undefined && This.oldY != undefined) { diffY = y - This.oldY; }
-                        if(x != undefined) { This.oldX = x; }
-                        if(y != undefined) { This.oldY = y; }
-                        if(diffX != 0 || diffY != 0) {
-                            var pos = panel.getPosition();
-                            var newX = pos[0]+diffX;
-                            var newY = pos[1]+diffY;
-                            panel.setRawPosition(newX, newY);
-                            // update settings window
-                            if(TP.iconSettingsWindow) {
-                                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:newX, y:newY});
-                            } else if(panel.iconType == "text" && !panel.readonly) {
-                                panel.xdata.layout.x = newX;
-                                panel.xdata.layout.y = newY;
-                                panel.saveState();
-                            }
-                        }
-                    },
-                    boxready: function( This, width, height, eOpts ) {
-                        panel.addDDListener(This);
-                    },
-                    afterrender: function(This, eOpts) {
-                        panel.addClickEventhandler(This.el);
-                        panel.addDDListener(This);
-                        if(!panel.locked) {
-                            This.el.on('mouseover', function(evt,t,a) {
-                                if(!panel.el) { return; }
-                                if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
-                                    This.el.dom.style.outline = "1px dashed grey";
-                                    if(panel.iconType != "text") {
-                                        panel.el.dom.style.outline = "1px dashed grey";
-                                    }
-                                }
-                            });
-                            This.el.on('mouseout', function(evt,t,a) {
-                                if(This.el.dom.style.outline.match("grey")) {
-                                    This.el.dom.style.outline = "";
-                                }
-                                if(panel.el && panel.el.dom && panel.el.dom.style.outline.match("grey")) {
-                                    panel.el.dom.style.outline = "";
-                                }
-                            });
-                        }
-                    },
-                    show: function( This, eOpts ) {
-                        panel.addDDListener(This);
-                        /* make sure we don't overlap dashboard settings window */
-                        TP.checkModalWindows();
-                    }
-                }
-            });
-            if(panel.rotateLabel) {
-                panel.rotateEl = panel.labelEl.el;
-            }
-            panel.applyRotation(panel.xdata.layout.rotation);
+        if(!panel.labelEl) {
+            panel.createLabelEl();
         }
-        var el = this.labelEl.el.dom;
-        el.style.zIndex       = Number(this.el.dom.style.zIndex)+1; /* keep above icon */
-        this.labelEl.update(txt);
-        el.style.color        = cfg.fontcolor;
-        el.style.fontFamily   = cfg.fontfamily;
-        el.style.background   = cfg.bgcolor;
-        el.style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
-        el.style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
-        el.style.paddingLeft  = "3px";
-        el.style.paddingRight = "3px";
-        if(cfg.orientation == 'vertical') { this.labelEl.addCls('vertical');    }
-        else                              { this.labelEl.removeCls('vertical'); }
+        if(!panel.labelEl) { return; }
+        var el    = panel.labelEl.el.dom;
+        var style = el.style;
+        style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
+        var oldTxt = panel.labelEl.el.dom.innerHTML;
+        if(oldTxt != txt) {
+            panel.labelEl.update(txt);
+        }
+        style.color        = cfg.fontcolor;
+        style.fontFamily   = cfg.fontfamily;
+        style.background   = cfg.bgcolor;
+        style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
+        style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
+        style.paddingLeft  = "3px";
+        style.paddingRight = "3px";
+        if(cfg.orientation == 'vertical') { panel.labelEl.addCls('vertical');    }
+        else                              { panel.labelEl.removeCls('vertical'); }
 
-        var left          = TP.extract_number_with_unit({ value: this.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
-        var top           = TP.extract_number_with_unit({ value: this.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
-        var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,            unit:' px', floor: true, defaultValue:   0 });
-        var offsety       = TP.extract_number_with_unit({ value: cfg.offsety,            unit:' px', floor: true, defaultValue:   0 });
-        var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize,           unit:' px', floor: true, defaultValue:  14 });
-        var elWidth       = TP.extract_number_with_unit({ value: this.width,             unit:'',    floor: true, defaultValue:   0 });
-        var elHeight      = TP.extract_number_with_unit({ value: this.height,            unit:'',    floor: true, defaultValue:   0 });
-        var bordersize    = TP.extract_number_with_unit({ value: cfg.bordersize,         unit:' px', floor: true, defaultValue:   0 });
+        return;
+    },
+
+    setIconLabelPosition: function(cfg) {
+        var panel = this;
+        if(!panel.labelEl) { return; }
+        var left          = TP.extract_number_with_unit({ value: panel.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
+        var top           = TP.extract_number_with_unit({ value: panel.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
+        var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,             unit:' px', floor: true, defaultValue:   0 });
+        var offsety       = TP.extract_number_with_unit({ value: cfg.offsety,             unit:' px', floor: true, defaultValue:   0 });
+        var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize,            unit:' px', floor: true, defaultValue:  14 });
+        var elWidth       = TP.extract_number_with_unit({ value: panel.width,             unit:'',    floor: true, defaultValue:   0 });
+        var elHeight      = TP.extract_number_with_unit({ value: panel.height,            unit:'',    floor: true, defaultValue:   0 });
+        var bordersize    = TP.extract_number_with_unit({ value: cfg.bordersize,          unit:' px', floor: true, defaultValue:   0 });
+
+        var el    = panel.labelEl.el.dom;
+        var style = el.style;
 
         if(cfg.bordercolor && bordersize > 0) {
-            el.style.border = bordersize+"px solid "+cfg.bordercolor;
+            style.border = bordersize+"px solid "+cfg.bordercolor;
         } else {
-            el.style.border = "";
+            style.border = "";
         }
 
         if(cfg.width == undefined || cfg.width == '') {
-            el.style.width = '';
+            style.width = '';
         } else {
-            el.style.width = cfg.width+"px";
+            style.width = cfg.width+"px";
         }
         if(cfg.height == undefined || cfg.height == '') {
-            el.style.height = '';
+            style.height = '';
         } else {
-            el.style.height = cfg.height+"px";
+            style.height = cfg.height+"px";
         }
 
-        el.style.fontSize = fontsize+'px';
-        var size          = this.labelEl.getSize();
+        style.fontSize = fontsize+'px';
+        var size          = panel.labelEl.getSize();
         if(size.width == 0) { return; }
 
         if(cfg.position == 'above') {
-            top = top - offsetx - size.height;
+            top = top - offsety - size.height;
             if(cfg.orientation == 'horizontal') {
                 left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
-            left = left - offsety;
+            left = left - offsetx;
         }
-        if(cfg.position == 'below') {
-            top = top + offsetx + elHeight;
+        else if(cfg.position == 'below') {
+            top = top + offsety + elHeight;
             if(cfg.orientation == 'horizontal') {
                 left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
-            left = left - offsety;
+            left = left - offsetx;
         }
-        if(cfg.position == 'right') {
-            left = left + offsetx + elWidth + 2;
+        else if(cfg.position == 'right') {
+            left = left + offsety + elWidth + 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
-            top = top - offsety;
+            top = top - offsetx;
         }
-        if(cfg.position == 'left') {
-            left = left - offsetx - size.width - 2;
+        else if(cfg.position == 'left') {
+            left = left - offsety - size.width - 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
-            top = top - offsety;
+            top = top - offsetx;
         }
-        if(cfg.position == 'center') {
-            top  = top + offsetx + (elHeight/2) - (size.height/2);
-            left = left + (elWidth / 2) - (size.width / 2) - offsety;
+        else if(cfg.position == 'center') {
+            top  = top + offsety + (elHeight/2) - (size.height/2);
+            left = left + (elWidth / 2) - (size.width / 2) - offsetx;
         }
-        if(cfg.position == 'top-left') {
-            top  = top + offsetx;
-            left = left + offsety;
+        else if(cfg.position == 'top-left') {
+            top  = top + offsety;
+            left = left + offsetx;
         }
-        el.style.left = left+"px";
-        el.style.top  = top+"px";
-        this.labelEl.oldX = left;
-        this.labelEl.oldY = top;
+        style.left = left+"px";
+        style.top  = top+"px";
+        panel.labelEl.oldX = left;
+        panel.labelEl.oldY = top;
     },
 
-    /* add dbl click and context menu events */
+    /* creates the label element */
+    createLabelEl: function() {
+        var panel = this;
+        if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
+        this.labelEl = Ext.create('Ext.Component', {
+            'html':     ' ',
+            panel:       panel,
+            draggable:  !panel.locked,
+            shadow:     false,
+            renderTo:  "bodyview",
+            cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
+            style:      {
+                whiteSpace: 'nowrap'
+            },
+            autoEl: {
+                tag:     'a',
+                href:    panel.xdata.link ? panel.xdata.link.link : '',
+                target:  '',
+                onclick: "return(false);"
+            },
+            listeners: {
+                /* move parent element according to our drag / drop */
+                move: function(This, x, y, eOpts) {
+                    var diffX = 0, diffY = 0;
+                    if(x != undefined && This.oldX != undefined) { diffX = x - This.oldX; }
+                    if(y != undefined && This.oldY != undefined) { diffY = y - This.oldY; }
+                    if(x != undefined) { This.oldX = x; }
+                    if(y != undefined) { This.oldY = y; }
+                    if(diffX != 0 || diffY != 0) {
+                        var pos = panel.getPosition();
+                        var newX = pos[0]+diffX;
+                        var newY = pos[1]+diffY;
+                        panel.setRawPosition(newX, newY);
+                        // update settings window
+                        if(TP.iconSettingsWindow) {
+                            TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:newX, y:newY});
+                        } else if(panel.iconType == "text" && !panel.readonly) {
+                            panel.xdata.layout.x = newX;
+                            panel.xdata.layout.y = newY;
+                            panel.saveState();
+                        }
+                    }
+                },
+                boxready: function( This, width, height, eOpts ) {
+                    panel.addDDListener(This);
+                },
+                afterrender: function(This, eOpts) {
+                    panel.addClickEventhandler(This.el);
+                    panel.addDDListener(This);
+                    if(!panel.locked) {
+                        This.el.on('mouseover', function(evt,t,a) {
+                            if(!panel.el) { return; }
+                            if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
+                                This.el.dom.style.outline = "1px dashed grey";
+                                if(panel.iconType != "text") {
+                                    panel.el.dom.style.outline = "1px dashed grey";
+                                }
+                            }
+                        });
+                        This.el.on('mouseout', function(evt,t,a) {
+                            if(This.el.dom.style.outline.match("grey")) {
+                                This.el.dom.style.outline = "";
+                            }
+                            if(panel.el && panel.el.dom && panel.el.dom.style.outline.match("grey")) {
+                                panel.el.dom.style.outline = "";
+                            }
+                        });
+                    }
+                },
+                show: function( This, eOpts ) {
+                    panel.addDDListener(This);
+                    /* make sure we don't overlap dashboard settings window */
+                    TP.checkModalWindows();
+                }
+            }
+        });
+        if(panel.rotateLabel) {
+            panel.rotateEl = panel.labelEl.el;
+        }
+        panel.applyRotation(panel.xdata.layout.rotation);    /* add dbl click and context menu events */
+    },
+
     addClickEventhandler: function(el) {
         var This = this;
         var tab  = Ext.getCmp(This.panel_id);
@@ -610,7 +641,7 @@ Ext.define('TP.SmallWidget', {
             el.on("dblclick", function(evt) {
                 window.clearTimeout(TP.timeouts['click'+This.id]);
                 if(!This.locked) {
-                    tab.body.mask("loading settings");
+                    Ext.getBody().mask("loading settings");
                     window.setTimeout(function() {
                         TP.iconShowEditDialog(This);
                     }, 50);
@@ -1253,19 +1284,26 @@ Ext.define('TP.IconWidget', {
 
         // which source to use
         var state  = xdata.state, value = 0, min = 0, max = 100;
+        var warn_min, warn_max, crit_min, crit_max;
+        var factor = xdata.appearance.speedofactor == '' ? Number(1) : Number(xdata.appearance.speedofactor);
+        if(isNaN(factor)) { factor = 1; }
+
         if(state == undefined) { state = panel.xdata.state; }
         if(xdata.appearance.speedosource == undefined) { xdata.appearance.speedosource = 'problems'; }
         var matchesP = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
         var matchesA = xdata.appearance.speedosource.match(/^avail:(.*)$/);
         if(matchesP && matchesP[1]) {
-            window.perfdata = {};
-            panel.setIconLabel(undefined, true);
-            if(perfdata[matchesP[1]]) {
-                var p = perfdata[matchesP[1]];
+            var macros  = TP.getPanelMacros(panel);
+            if(macros.perfdata[matchesP[1]]) {
+                var p = macros.perfdata[matchesP[1]];
                 value = p.val;
                 var r = TP.getPerfDataMinMax(p, '?');
-                max   = r.max;
-                min   = r.min;
+                max   = r.max * factor;
+                min   = r.min * factor;
+                if(Ext.isNumeric(p.warn_min)) { warn_min = p.warn_min * factor; }
+                if(Ext.isNumeric(p.warn_max)) { warn_max = p.warn_max * factor; }
+                if(Ext.isNumeric(p.crit_min)) { crit_min = p.crit_min * factor; }
+                if(Ext.isNumeric(p.crit_max)) { crit_max = p.crit_max * factor; }
             }
         }
         else if(matchesA && matchesA[1]) {
@@ -1298,6 +1336,9 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
+
+        value *= factor;
+
         /* inverted value? */
         if(xdata.appearance.speedoinvert) {
             value = max - value;
@@ -1317,26 +1358,113 @@ Ext.define('TP.IconWidget', {
             if(state == 2) { color_fg = colors['warning'];  }
         }
 
-        var colorSet = [];
         if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
-        Ext.Array.each([color_fg, colors['bg']], function(color,i) {
-            if(forceColor) { color = forceColor; }
-            if(xdata.appearance.speedogradient != 0) {
-                var gradient = TP.createGradient(color, xdata.appearance.speedogradient);
-                if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
-                    panel.chart.surface.existingGradients[gradient.id] = true;
-                    panel.chart.surface.addGradient(gradient);
-                }
-                colorSet.push('url(#'+gradient.id+')');
-            } else {
-                colorSet.push(color);
+
+        /* warning / critical thresholds */
+        panel.chart.series.getAt(0).ranges = [];
+        panel.chart.series.getAt(0).lines  = [];
+        if(xdata.appearance.speedo_thresholds == 'undefined') { xdata.appearance.speedo_thresholds = 'line'; }
+        if(value == 0) { value = 0.0001; } // doesn't draw anything otherwise
+        var color_bg = panel.speedoGetColor(colors, 0, forceColor, 'bg');
+        if(!!xdata.appearance.speedoneedle) {
+            if(xdata.appearance.speedo_thresholds == 'hide') {
+                color_bg = panel.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
             }
-        });
-        panel.chart.series.getAt(0).colorSet = colorSet;
-        if(panel.chart.series.getAt(0).setValue) {
-            if(value == 0) { value = 0.0001; } // doesn't draw anything otherwise
-            panel.chart.series.getAt(0).setValue(value);
+            else if(xdata.appearance.speedo_thresholds == 'filled') {
+                color_bg = panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'ok')
+            }
         }
+        panel.chart.series.getAt(0).ranges.push({
+            from:  min,
+            to:    max,
+            color: color_bg
+        });
+        if(warn_max != undefined) {
+            if(xdata.appearance.speedo_thresholds == 'fill') {
+                if(warn_min == undefined) {
+                    warn_min = warn_max;
+                    if(crit_min != undefined) {
+                        warn_max = crit_min;
+                    }
+                    else if(crit_max != undefined) {
+                        warn_max = crit_max;
+                    }
+                    else {
+                        warn_max = max;
+                    }
+                }
+                panel.chart.series.getAt(0).ranges.push({
+                    from:  warn_min,
+                    to:    warn_max,
+                    color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'warning')
+                });
+            }
+            else if(xdata.appearance.speedo_thresholds == 'line') {
+                panel.chart.series.getAt(0).lines.push({
+                    value: warn_max,
+                    color: panel.speedoGetColor(colors, 0, forceColor, 'warning')
+                });
+                if(warn_min != undefined && warn_min != warn_max) {
+                    panel.chart.series.getAt(0).lines.push({
+                        value: warn_min,
+                        color: panel.speedoGetColor(colors, 0, forceColor, 'warning')
+                    });
+                }
+            }
+        }
+        if(crit_max != undefined) {
+            if(xdata.appearance.speedo_thresholds == 'fill') {
+                if(crit_min == undefined) { crit_min = crit_max; crit_max = max; }
+                panel.chart.series.getAt(0).ranges.push({
+                    from:  crit_min,
+                    to:    crit_max,
+                    color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'critical')
+                });
+            }
+            else if(xdata.appearance.speedo_thresholds == 'line') {
+                panel.chart.series.getAt(0).lines.push({
+                    value: crit_max,
+                    color: panel.speedoGetColor(colors, 0, forceColor, 'critical')
+                });
+                if(crit_min != undefined && crit_min != crit_max) {
+                    panel.chart.series.getAt(0).lines.push({
+                        value: crit_min,
+                        color: panel.speedoGetColor(colors, 0, forceColor, 'critical')
+                    });
+                }
+            }
+        }
+
+        if(!xdata.appearance.speedoneedle) {
+            panel.chart.series.getAt(0).ranges.push({
+                from:  0,
+                to:    value,
+                color: panel.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
+            });
+        }
+        if(panel.chart.series.getAt(0).setValue)   { panel.chart.series.getAt(0).setValue(value); }
+        if(panel.chart.series.getAt(0).drawSeries) { panel.chart.series.getAt(0).drawSeries();    }
+    },
+
+    speedoGetColor: function(colors, gradient_val, forceColor, type) {
+        var panel = this;
+        var color;
+        if(type != undefined) {
+            color = colors[type];
+            if(forceColor && forceColor.scope.name == "speedocolor_"+type) { color = forceColor.color; }
+        } else {
+            color = colors;
+            if(forceColor) { color = forceColor.color; }
+        }
+        if(gradient_val != 0) {
+            var gradient = TP.createGradient(color, gradient_val);
+            if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
+                panel.chart.surface.existingGradients[gradient.id] = true;
+                panel.chart.surface.addGradient(gradient);
+            }
+            return('url(#'+gradient.id+')');
+        }
+        return(color);
     },
 
     /* renders pie chart */
@@ -1721,8 +1849,8 @@ Ext.define('TP.IconWidget', {
             // image size has changed
             if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight || panel.lastScale != scale) {
                 panel.setRenderItem(xdata, true);
+                panel.setIconLabel();
             }
-            this.setIconLabel();
         }
     },
     iconCheckBorder: function(xdata, isError) {
@@ -2847,10 +2975,9 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
 
     var matches = xdata.appearance[type+"source"].match(/^perfdata:(.*)$/);
     if(matches && matches[1]) {
-        window.perfdata = {};
-        panel.setIconLabel(undefined, true);
-        if(perfdata[matches[1]]) {
-            p      = perfdata[matches[1]];
+        var macros = TP.getPanelMacros(panel);
+        if(macros.perfdata[matches[1]]) {
+            p      = macros.perfdata[matches[1]];
             r      = TP.getPerfDataMinMax(p, 100);
             color1 = xdata.appearance[type+"color_ok"];
             color2 = xdata.appearance[type+"color_ok"];
@@ -2915,4 +3042,42 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
     }
     /* fixed state color */
     return({color: fillcolor, value: p.val, perfdata: p, range: r});
+}
+
+TP.evalInContext = function(js, context) {
+    var restore = {};
+    for(key in context) { restore[key] = window[key]; window[key] = context[key]; }
+    var res, err;
+    try {
+        res = eval(js);
+    } catch(e) { err = e; }
+    for(key in restore) {
+        if(restore[key] == undefined) {
+            delete(window[key]);
+        } else {
+            window[key] = restore[key];
+        }
+    }
+    if(err) { throw(err); }
+    return(res);
+}
+
+TP.getPanelMacros = function(panel) {
+    var macros = { panel: panel };
+    if(panel.servicegroup) { macros.totals = panel.servicegroup; }
+    if(panel.hostgroup)    { macros.totals = panel.hostgroup; }
+    if(panel.results)      { macros.totals = panel.results; }
+    if(panel.host)         { for(var key in panel.host)    { macros[key] = panel.host[key];    } macros['performance_data'] = panel.host['perf_data']; }
+    if(panel.service)      { for(var key in panel.service) { macros[key] = panel.service[key]; } macros['performance_data'] = panel.service['perf_data']; }
+    if(macros.perf_data) {
+        macros.perf_data = parse_perf_data(macros['performance_data']);
+        macros.perfdata = {};
+        for(var x = 0; x < macros.perf_data.length; x++) {
+            var d = macros.perf_data[x];
+            macros.perfdata[d.key] = d;
+        }
+    } else {
+        macros.perfdata = {};
+    }
+    return(macros);
 }

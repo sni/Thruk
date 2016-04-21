@@ -262,6 +262,8 @@ sub cmd {
 
     local $SIG{CHLD} = '';
     local $SIG{PIPE} = 'DEFAULT';
+    local $SIG{INT}  = 'DEFAULT';
+    local $SIG{TERM} = 'DEFAULT';
     local $ENV{REMOTE_USER}=$c->stash->{'remote_user'} if $c;
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
@@ -280,6 +282,8 @@ sub cmd {
         $rc = $?;
         push @lines, <$rdr>;
         chomp($output = join('', @lines) || '');
+        # restore original array
+        unshift @{$cmd}, $prog;
     } else {
         confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);

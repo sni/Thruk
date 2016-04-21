@@ -323,7 +323,7 @@ DIV.msg {
     position:absolute;
     left:35%;
     top:10px;
-    width:350px;
+    width:400px;
     z-index: 1000001;
 }
 #msg-div .msg {

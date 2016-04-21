@@ -310,13 +310,15 @@ var TP = {
         } else {
             panel.refreshHandler();
         }
-        /* ensure the panel gets where it should be */
-        window.setTimeout(function() {
-            panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
-            if(panel.xdata.layout) {
-                TP.iconMoveHandler(panel, config.conf.pos[0], config.conf.pos[1]);
-            }
-        }, 200);
+        /* ensure the panel gets where it should be, breaks connector, so make an exception */
+        if(!config.conf.xdata || !config.conf.xdata.appearance || config.conf.xdata.appearance.type != "connector") {
+            window.setTimeout(function() {
+                panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
+                if(panel.xdata.layout) {
+                    TP.iconMoveHandler(panel, config.conf.pos[0], config.conf.pos[1]);
+                }
+            }, 200);
+        }
     },
 
     /* add panel, but let the user choose position */
@@ -799,6 +801,20 @@ var TP = {
                     }
                 }
             }
+
+            if(data && !TP.already_reloading) {
+                if(data.server_version != undefined && thruk_version != data.server_version) {
+                    TP.already_reloading = true;
+                    TP.Msg.msg("info_message~~Server version has changed: "+thruk_version+" -> "+data.server_version+"<br>Panorama dashboard will be reloaded...");
+                    window.setTimeout(TP.fullReload, 5000);
+                }
+                else if(data.server_extra_version != undefined && thruk_extra_version != data.server_extra_version) {
+                    TP.already_reloading = true;
+                    TP.Msg.msg("info_message~~Server version has changed: "+thruk_version+"~"+thruk_extra_version+" -> "+data.server_version+"~"+data.server_extra_version+"<br>Panorama dashboard will be reloaded...");
+                    window.setTimeout(TP.fullReload, 5000);
+                }
+            }
+
             var tab = Ext.getCmp('tabpan').getActiveTab();
             if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
                 var old = tab.ts ? tab.ts : '';
@@ -1068,7 +1084,7 @@ var TP = {
 
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) {
-            if(tab && tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+            if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
             return;
         }
         var req = statusReq.req,
@@ -1079,7 +1095,8 @@ var TP = {
             types:       Ext.JSON.encode(req),
             backends:    TP.getActiveBackendsPanel(tab),
             update_proc: TP.setUpdateProcInfo(),
-            reschedule:  reschedule ? 1 : ''
+            reschedule:  reschedule ? 1 : '',
+            state_type:  tab.xdata.state_type
         };
         TP.iconUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
@@ -1089,7 +1106,7 @@ var TP = {
             callback: function(options, success, response) {
                 TP.iconUpdateRunning[tab.id] = false;
                 if(reschedule) { reschedule.unmask(); }
-                if(tab && tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+                if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
                     TP.refresh_errors++;
@@ -1124,6 +1141,7 @@ var TP = {
                             var state = data.hosts[x]['state'];
                             if(ref.hosts[name]) { // may be empty if we get the same host twice in a result
                                 if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
+                                if(data.hosts[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
                                 for(var y=0; y<ref.hosts[name].length; y++) {
                                     ref.hosts[name][y].host = data.hosts[x];
                                     ref.hosts[name][y].refreshHandler(state);
@@ -1167,6 +1185,7 @@ var TP = {
                             var svc   = data.services[x]['description'];
                             var state = data.services[x]['state'];
                             if(data.services[x]['has_been_checked'] == 0) { state = 4; }
+                            if(data.services[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
                             if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
                                 for(var y=0; y<ref.services[hst][svc].length; y++) {
                                     ref.services[hst][svc][y].service = data.services[x];

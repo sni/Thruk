@@ -1056,6 +1056,17 @@ TABLE.extdetails DIV.flapdetectionENABLED
   text-align: center;
 }
 
+TABLE.extdetails DIV.eventhandlersDISABLED,
+TABLE.extdetails DIV.eventhandlersENABLED
+{
+  float: left;
+}
+
+TABLE.extdetails DIV.eventhandlersCOMMAND
+{
+  margin-left: 130px;
+}
+
 TABLE.extdetails TD.extdetails {
   border-bottom: 1px solid #444444;
 }

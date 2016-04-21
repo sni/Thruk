@@ -164,6 +164,7 @@ returns peer by key
 
 sub get_peer_by_key {
     my($self, $key) = @_;
+    confess("missing argument") unless defined $key;
     my $peer = $self->{'by_key'}->{$key};
     return $peer if $peer;
     $peer = $self->{'by_name'}->{$key};

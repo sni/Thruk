@@ -79,6 +79,7 @@
     } else {
       var ref = clean_ref(window.location.search + window.location.hash);
       var el  = document.getElementById('referer');
+      ref = decodeURIComponent(ref).replace(/\+/g, " ");
       if(el) { el.value = ref; }
     }
   -->

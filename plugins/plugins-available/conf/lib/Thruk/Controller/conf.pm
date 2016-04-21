@@ -300,6 +300,12 @@ sub _process_json_page {
         my $for  = $c->req->parameters->{'obj'};
         my $attr = $c->{'obj_db'}->get_default_keys($for, { no_alias => 1 });
         push @{$attr}, 'customvariable';
+        if($c->stash->{conf_config}->{'extra_custom_var_'.$for}) {
+            for my $extra (@{Thruk::Utils::list($c->stash->{conf_config}->{'extra_custom_var_'.$for})}) {
+                my @extras = split/\s*,\s*/mx, $extra;
+                push @{$attr}, @extras;
+            }
+        }
         my $json = [{ 'name' => $type.'s',
                       'data' => [ sort @{Thruk::Utils::array_uniq($attr)} ],
                    }];
@@ -1424,6 +1430,9 @@ sub _htpasswd_password {
         if(_cmd($c, $cmd)) {
             return;
         }
+        $c->log->error("failed to remove password.");
+        $c->log->error("cmd: ".join(" ", @{$cmd}));
+        $c->log->error($c->stash->{'output'});
         return( 'failed to remove password, check the logfile!' );
     }
 
@@ -1457,6 +1466,13 @@ sub _htpasswd_password {
     if(_cmd($c, $cmd, $has_minus_i ? $password : undef)) {
         return;
     }
+    if(!$has_minus_i) {
+        pop @{$cmd};
+        push @{$cmd}, '****';
+    }
+    $c->log->error("failed to update password.");
+    $c->log->error("cmd: ".join(" ", @{$cmd}));
+    $c->log->error($c->stash->{'output'});
     return('failed to update password, check the logfile!');
 }
 
@@ -2420,7 +2436,11 @@ sub _config_reload {
     }
 
     # wait until core responds again
-    Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if $wait;
+    if($wait) {
+        if(!Thruk::Utils::wait_after_reload($c, $pkey, $time-1)) {
+            $c->stash->{'output'} .= "\n<font color='red'>Warning: waiting for core reload failed.</font>";
+        }
+    }
 
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;
