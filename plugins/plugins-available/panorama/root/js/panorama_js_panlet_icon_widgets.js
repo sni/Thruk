@@ -1979,19 +1979,33 @@ TP.get_group_status = function(options) {
     var downtime     = false;
     if(group.hosts    == undefined) { group.hosts    = {} }
     if(group.services == undefined) { group.services = {} }
-         if(incl_svc && group.services.unknown > 0)                              { s = 3; }
+
+    var totals = { services: {}, hosts: {} };
+    if(incl_svc) {
+        totals.services.ok       = group.services.ok       -                               group.services.downtime_ok;
+        totals.services.critical = group.services.critical - group.services.ack_critical - group.services.downtime_critical;
+        totals.services.warning  = group.services.warning  - group.services.ack_warning  - group.services.downtime_warning;
+        totals.services.unknown  = group.services.unknown  - group.services.ack_unknown  - group.services.downtime_unknown;
+    }
+    if(incl_hst) {
+        totals.hosts.up          = group.hosts.up          -                               group.hosts.downtime_up;
+        totals.hosts.down        = group.hosts.down        - group.hosts.ack_down        - group.hosts.downtime_down;
+        totals.hosts.unreachable = group.hosts.unreachable - group.hosts.ack_unreachable - group.hosts.downtime_unreachable;
+    }
+
+         if(incl_svc && totals.services.unknown > 0)                             { s = 3; }
     else if(incl_svc && incl_ack && group.services.ack_unknown > 0)              { s = 3; }
     else if(incl_svc && incl_downtimes && group.services.downtimes_unknown > 0)  { s = 3; }
-    else if(incl_hst && group.hosts.unreachable > 0)                             { s = 2; }
-    else if(incl_hst && group.hosts.down        > 0)                             { s = 2; }
+    else if(incl_hst && totals.hosts.unreachable > 0)                            { s = 2; }
+    else if(incl_hst && totals.hosts.down        > 0)                            { s = 2; }
     else if(incl_ack && group.hosts.ack_unreachable > 0)                         { s = 2; }
     else if(incl_ack && group.hosts.ack_down        > 0)                         { s = 2; }
     else if(incl_hst && incl_downtimes && group.hosts.downtime_down        > 0)  { s = 2; }
     else if(incl_hst && incl_downtimes && group.hosts.downtime_unreachable > 0)  { s = 2; }
-    else if(incl_svc && group.services.critical > 0)                             { s = 2; }
+    else if(incl_svc && totals.services.critical > 0)                            { s = 2; }
     else if(incl_svc && incl_ack && group.services.ack_critical > 0)             { s = 2; }
     else if(incl_svc && incl_downtimes && group.services.downtimes_critical > 0) { s = 2; }
-    else if(incl_svc && group.services.warning > 0)                              { s = 1; }
+    else if(incl_svc && totals.services.warning > 0)                             { s = 1; }
     else if(incl_svc && incl_ack && group.services.ack_warning > 0)              { s = 1; }
     else if(incl_svc && incl_downtimes && group.services.downtimes_warning > 0)  { s = 1; }
     else                                                                         { s = 0; }
