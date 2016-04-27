@@ -2767,21 +2767,25 @@ sub _summarize_query {
     if($incl_hst) {
         my $host_sum = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         for my $k (qw/up down unreachable pending/) {
-            $sum->{'hosts'}->{$k}             = $host_sum->{$k};
+            $sum->{'hosts'}->{$k} = $host_sum->{$k};
             if($k ne 'up' and $k ne 'pending') {
-                $sum->{'hosts'}->{'ack_'.$k}  = $host_sum->{$k.'_and_ack'};
+                $sum->{'hosts'}->{'ack_'.$k} = $host_sum->{$k.'_and_ack'};
             }
-            $sum->{'hosts'}->{'downtime_'.$k} = $host_sum->{$k.'_and_scheduled'};
+            if($k ne 'pending') {
+                $sum->{'hosts'}->{'downtime_'.$k} = $host_sum->{$k.'_and_scheduled'};
+            }
         }
     }
     if($incl_svc) {
         my $service_sum = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         for my $k (qw/ok warning critical unknown pending/) {
-            $sum->{'services'}->{$k}             = $service_sum->{$k};
+            $sum->{'services'}->{$k} = $service_sum->{$k};
             if($k ne 'ok' and $k ne 'pending') {
-                $sum->{'services'}->{'ack_'.$k}  = $service_sum->{$k.'_and_ack'};
+                $sum->{'services'}->{'ack_'.$k} = $service_sum->{$k.'_and_ack'};
             }
-            $sum->{'services'}->{'downtime_'.$k} = $service_sum->{$k.'_and_scheduled'};
+            if($k ne 'pending') {
+                $sum->{'services'}->{'downtime_'.$k} = $service_sum->{$k.'_and_scheduled'};
+            }
         }
     }
     return($sum);
