@@ -72,10 +72,16 @@ while [ "$#" -gt 0 ]; do
             ;;
         *)
             file=$1
+            orig=$file
             file="${file%.js}"
             if [ -f $CASEDIR/$file.js ]; then
                 echo "$file/$file.js http://127.0.0.1/thruk/" >> $CASEDIR/testsuite.suite
                 mkdir -p $CASEDIR/$file && cp $CASEDIR/$file.js $CASEDIR/$file/
+                HAS_CASE=1
+            elif [ -f $orig ]; then
+                file=$(basename $file)
+                echo "$file/$file.js http://127.0.0.1/thruk/" >> $CASEDIR/testsuite.suite
+                mkdir -p $CASEDIR/$file && cp $orig $CASEDIR/$file/
                 HAS_CASE=1
             else
                 NEW_ARGS+=($1)
