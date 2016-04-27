@@ -1249,7 +1249,7 @@ Ext.define('TP.IconWidget', {
                         panel.chart = This;
                         panel.updateRender(xdata);
                     },
-                    resize: function(This, eOpts) {
+                    resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
                         panel.updateRender(xdata);
                     }
                 }
@@ -1298,7 +1298,9 @@ Ext.define('TP.IconWidget', {
                 var p = macros.perfdata[matchesP[1]];
                 value = p.val;
                 var r = TP.getPerfDataMinMax(p, '?');
-                max   = r.max * factor;
+                if(Ext.isNumeric(r.max)) {
+                    max   = r.max * factor;
+                }
                 min   = r.min * factor;
                 if(Ext.isNumeric(p.warn_min)) { warn_min = p.warn_min * factor; }
                 if(Ext.isNumeric(p.warn_max)) { warn_max = p.warn_max * factor; }
@@ -1331,10 +1333,12 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.speedomax != undefined && xdata.appearance.speedomax != '') { max = Number(xdata.appearance.speedomax); }
 
         if(panel.chart.axes.getAt(0).minimum != min || panel.chart.axes.getAt(0).maximum != max) {
-            xdata.appearance.speedoaxis_min = min;
-            xdata.appearance.speedoaxis_max = max;
-            panel.setRenderItem(xdata);
-            return;
+            if(!isNaN(min) && !isNaN(max)) {
+                xdata.appearance.speedoaxis_min = min;
+                xdata.appearance.speedoaxis_max = max;
+                panel.setRenderItem(xdata);
+                return;
+            }
         }
 
         value *= factor;
@@ -1442,6 +1446,7 @@ Ext.define('TP.IconWidget', {
                 color: panel.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
             });
         }
+        panel.chart.series.getAt(0).value = value;
         if(panel.chart.series.getAt(0).setValue)   { panel.chart.series.getAt(0).setValue(value); }
         if(panel.chart.series.getAt(0).drawSeries) { panel.chart.series.getAt(0).drawSeries();    }
     },
