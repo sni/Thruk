@@ -72,6 +72,426 @@
          "size" : 23
       }
    },
+   "tabpan-tab_99_panlet_10" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "ok_downtime"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 80,
+            "y" : 465,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_11" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "warning"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 200,
+            "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_12" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "warning_downtime"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 200,
+            "y" : 465,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_13" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "warning_ack"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 200,
+            "y" : 525,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_14" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "critical"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 320,
+            "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_15" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "critical_downtime"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 320,
+            "y" : 465,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_16" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "critical_ack"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 320,
+            "y" : 525,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_17" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "unknown"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 440,
+            "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_18" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "unknown_downtime"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 440,
+            "y" : 465,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_19" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "unknown_ack"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 440,
+            "y" : 525,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
    "tabpan-tab_99_panlet_2" : {
       "xdata" : {
          "appearance" : {
@@ -122,6 +542,48 @@
          "link" : {},
          "showlabel" : true,
          "showlabelVal" : true
+      }
+   },
+   "tabpan-tab_99_panlet_20" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "pending"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 560,
+            "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
       }
    },
    "tabpan-tab_99_panlet_3" : {
@@ -409,6 +871,48 @@
             "zindex" : "0"
          },
          "link" : {}
+      }
+   },
+   "tabpan-tab_99_panlet_9" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.ServiceStatusIcon",
+         "general" : {
+            "host" : "test",
+            "service" : "ok"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "{{description}}",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "scale" : 100,
+            "x" : 80,
+            "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
       }
    },
    "user" : "thrukadmin"
