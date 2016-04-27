@@ -30,12 +30,12 @@ Ext.define('TP.TabBar', {
             style:    'margin-top: 3px',
             hidden:    true,
             listeners: {
-                /*
                 show: function(This, eOpts) {
                     TP.timeouts['interval_global_dom_elements'] = window.setInterval(
                         function() {
                             var elements = Ext.Array.toArray(document.getElementsByTagName('*')).filter(function(v, i, a) { if(v.className && v.className.match && v.className.match("firebug")) {return(false)}; return(true); });
                             Ext.getCmp('debug_dom_elements').el.dom.innerHTML = 'DOM:'+elements.length;
+                            /*
                             if(old_elements && old_elements.length != elements.length) {
                                 var diff = Ext.Array.difference(elements, old_elements);
                                 if(diff.length > 0) {
@@ -46,11 +46,11 @@ Ext.define('TP.TabBar', {
                                 }
                             }
                             old_elements = elements;
+                            */
                         },
                         2000
                     );
                 }
-                */
             }
         }, {
             id:       'debug_tab',
