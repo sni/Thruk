@@ -94,7 +94,7 @@ Ext.define('TP.SmallWidget', {
                         if(This.iconType != 'text') {
                             TP.iconShowEditDialog(This);
                         }
-                    }, 50);
+                    }, 250);
                 }
             }
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
@@ -643,6 +643,7 @@ Ext.define('TP.SmallWidget', {
                 if(!This.locked) {
                     Ext.getBody().mask("loading settings");
                     window.setTimeout(function() {
+                        This.firstRun = false;
                         TP.iconShowEditDialog(This);
                     }, 50);
                 }
@@ -679,7 +680,7 @@ Ext.define('TP.SmallWidget', {
                 menu_items = menu_items.concat([{
                         text:   'Settings',
                         icon:   url_prefix+'plugins/panorama/images/cog.png',
-                        handler: function() { TP.iconShowEditDialog(This) },
+                        handler: function() { This.firstRun = false; TP.iconShowEditDialog(This) },
                         disabled: This.locked
                     }, '-', {
                         text:   'Copy',
