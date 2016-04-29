@@ -2665,8 +2665,16 @@ sub _summarize_hostgroup_query {
         for my $grp (@{$hst->{'groups'}}) {
             next unless defined $type_groups->{$grp};
             if(!defined $hostgroups->{$grp}) {
-                $hostgroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
-                                        hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
+                $hostgroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0,
+                                                      plain_ok => 0, plain_warning => 0, plain_critical => 0, plain_unknown => 0, plain_pending => 0,
+                                                      ack_warning => 0, ack_critical => 0, ack_unknown => 0,
+                                                      downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0,
+                                                    },
+                                        hosts    => { up => 0, down => 0, unreachable => 0, pending => 0,
+                                                      plain_up => 0, plain_down => 0, plain_unreachable => 0, plain_pending => 0,
+                                                      ack_down => 0, ack_unreachable => 0,
+                                                      downtime_up => 0, downtime_down => 0, downtime_unreachable => 0,
+                                                    },
                                         name     => $grp,
                                       };
             }
@@ -2674,6 +2682,8 @@ sub _summarize_hostgroup_query {
                 $hostgroups->{$grp}->{'hosts'}->{'up'}++;
                 if($hst->{'scheduled_downtime_depth'}) {
                     $hostgroups->{$grp}->{'hosts'}->{'downtime_up'}++;
+                } else {
+                    $hostgroups->{$grp}->{'hosts'}->{'plain_up'}++;
                 }
                 next;
             }
@@ -2690,6 +2700,12 @@ sub _summarize_hostgroup_query {
                 elsif($hst->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_down'}++;        }
                 elsif($hst->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_unreachable'}++; }
             }
+            if(!$hst->{'acknowledged'} && !$hst->{'scheduled_downtime_depth'}) {
+                if($hst->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'hosts'}->{'plain_pending'}++;     }
+                elsif($hst->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'plain_up'}++;          }
+                elsif($hst->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'plain_down'}++;        }
+                elsif($hst->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'plain_unreachable'}++; }
+            }
         }
     }
     $filter      = Thruk::Utils::combine_filter('-or', [map {{ host_groups => { '>=' => $_ }}} keys %{$type_groups}]);
@@ -2700,7 +2716,9 @@ sub _summarize_hostgroup_query {
             if($state_type == HARD_STATE && $svc->{'state_type'} != HARD_STATE) {
                 $hostgroups->{$grp}->{'services'}->{'ok'}++;
                 if($svc->{'scheduled_downtime_depth'}) {
-                       $hostgroups->{$grp}->{'services'}->{'downtime_ok'}++;
+                   $hostgroups->{$grp}->{'services'}->{'downtime_ok'}++;
+                } else {
+                    $hostgroups->{$grp}->{'services'}->{'plain_ok'}++;
                 }
                 next;
             }
@@ -2720,6 +2738,13 @@ sub _summarize_hostgroup_query {
                 elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'services'}->{'downtime_critical'}++; }
                 elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'services'}->{'downtime_unknown'}++;  }
             }
+            if(!$svc->{'acknowledged'} && !$svc->{'scheduled_downtime_depth'}) {
+                if($svc->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'services'}->{'plain_pending'}++;  }
+                elsif($svc->{'state'} == 0)         { $hostgroups->{$grp}->{'services'}->{'plain_ok'}++;       }
+                elsif($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'services'}->{'plain_warning'}++;  }
+                elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'services'}->{'plain_critical'}++; }
+                elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'services'}->{'plain_unknown'}++;  }
+            }
         }
     }
     return($hostgroups);
@@ -2735,7 +2760,11 @@ sub _summarize_servicegroup_query {
         for my $grp (@{$svc->{'groups'}}) {
             next unless defined $type_groups->{$grp};
             if(!defined $servicegroups->{$grp}) {
-                $servicegroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
+                $servicegroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0,
+                                                         plain_ok => 0, plain_warning => 0, plain_critical => 0, plain_unknown => 0, plain_pending => 0,
+                                                         ack_warning => 0, ack_critical => 0, ack_unknown => 0,
+                                                         downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0,
+                                                       },
                                            name     => $grp,
                                          };
             }
@@ -2743,6 +2772,8 @@ sub _summarize_servicegroup_query {
                 $servicegroups->{$grp}->{'services'}->{'ok'}++;
                 if($svc->{'scheduled_downtime_depth'}) {
                     $servicegroups->{$grp}->{'services'}->{'downtime_ok'}++;
+                } else {
+                    $servicegroups->{$grp}->{'services'}->{'plain_ok'}++;
                 }
                 next;
             }
@@ -2762,6 +2793,13 @@ sub _summarize_servicegroup_query {
                 elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'services'}->{'downtime_critical'}++;  }
                 elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'services'}->{'downtime_unknown'}++;   }
             }
+            if(!$svc->{'acknowledged'} && !$svc->{'scheduled_downtime_depth'}) {
+                if($svc->{'has_been_checked'} == 0) { $servicegroups->{$grp}->{'services'}->{'plain_pending'}++;  }
+                elsif($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'services'}->{'plain_ok'}++;       }
+                elsif($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'services'}->{'plain_warning'}++;  }
+                elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'services'}->{'plain_critical'}++; }
+                elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'services'}->{'plain_unknown'}++;  }
+            }
         }
     }
     return($servicegroups);
@@ -2770,13 +2808,22 @@ sub _summarize_servicegroup_query {
 ##########################################################
 sub _summarize_query {
     my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter, $state_type) = @_;
-    my $sum   = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
-                  hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
+    my $sum   = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0,
+                                plain_ok => 0, plain_warning => 0, plain_critical => 0, plain_unknown => 0, plain_pending => 0,
+                                ack_warning => 0, ack_critical => 0, ack_unknown => 0,
+                                downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0,
+                              },
+                  hosts    => { up => 0, down => 0, unreachable => 0, pending => 0,
+                                plain_up => 0, plain_down => 0, plain_unreachable => 0, plain_pending => 0,
+                                ack_down => 0, ack_unreachable => 0,
+                                downtime_up => 0, downtime_down => 0, downtime_unreachable => 0,
+                              },
                 };
     if($incl_hst) {
         my $host_sum = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         for my $k (qw/up down unreachable pending/) {
             $sum->{'hosts'}->{$k} = $host_sum->{$k};
+            $sum->{'hosts'}->{'plain_'.$k} = $host_sum->{'plain_'.$k};
             if($k ne 'up' and $k ne 'pending') {
                 $sum->{'hosts'}->{'ack_'.$k} = $host_sum->{$k.'_and_ack'};
             }
@@ -2789,6 +2836,7 @@ sub _summarize_query {
         my $service_sum = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         for my $k (qw/ok warning critical unknown pending/) {
             $sum->{'services'}->{$k} = $service_sum->{$k};
+            $sum->{'services'}->{'plain_'.$k} = $service_sum->{'plain_'.$k};
             if($k ne 'ok' and $k ne 'pending') {
                 $sum->{'services'}->{'ack_'.$k} = $service_sum->{$k.'_and_ack'};
             }

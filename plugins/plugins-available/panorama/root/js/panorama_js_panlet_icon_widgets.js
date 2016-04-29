@@ -1982,15 +1982,15 @@ TP.get_group_status = function(options) {
 
     var totals = { services: {}, hosts: {} };
     if(incl_svc) {
-        totals.services.ok       = group.services.ok       -                               group.services.downtime_ok;
-        totals.services.critical = group.services.critical - group.services.ack_critical - group.services.downtime_critical;
-        totals.services.warning  = group.services.warning  - group.services.ack_warning  - group.services.downtime_warning;
-        totals.services.unknown  = group.services.unknown  - group.services.ack_unknown  - group.services.downtime_unknown;
+        totals.services.ok       = group.services.plain_ok;;
+        totals.services.critical = group.services.plain_critical;
+        totals.services.warning  = group.services.plain_warning;
+        totals.services.unknown  = group.services.plain_unknown;
     }
     if(incl_hst) {
-        totals.hosts.up          = group.hosts.up          -                               group.hosts.downtime_up;
-        totals.hosts.down        = group.hosts.down        - group.hosts.ack_down        - group.hosts.downtime_down;
-        totals.hosts.unreachable = group.hosts.unreachable - group.hosts.ack_unreachable - group.hosts.downtime_unreachable;
+        totals.hosts.up          = group.hosts.plain_up;
+        totals.hosts.down        = group.hosts.plain_down;
+        totals.hosts.unreachable = group.hosts.plain_unreachable;
     }
 
          if(incl_svc && totals.services.unknown > 0)                             { s = 3; }
