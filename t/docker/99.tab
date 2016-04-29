@@ -3,7 +3,11 @@
    "tab" : {
       "xdata" : {
          "autohideheader" : true,
-         "backends" : [],
+         "backends" : [
+            {
+               "97bd4" : "naemon"
+            }
+         ],
          "background" : "../usercontent/backgrounds/europa.png",
          "backgroundoffset_x" : 0,
          "backgroundoffset_y" : 0,
@@ -19,7 +23,7 @@
          "mapzoom" : "",
          "recovery_sound" : null,
          "refresh" : 90,
-         "select_backends" : 0,
+         "select_backends" : true,
          "state_type" : "soft",
          "title" : "All In One",
          "unknown_repeat" : 0,
@@ -101,6 +105,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 80,
             "y" : 465,
@@ -143,6 +148,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 200,
             "y" : 405,
@@ -185,6 +191,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 200,
             "y" : 465,
@@ -227,6 +234,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 200,
             "y" : 525,
@@ -269,6 +277,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 320,
             "y" : 405,
@@ -311,6 +320,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 320,
             "y" : 465,
@@ -353,6 +363,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 320,
             "y" : 525,
@@ -395,6 +406,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 440,
             "y" : 405,
@@ -437,6 +449,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 440,
             "y" : 465,
@@ -479,6 +492,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 440,
             "y" : 525,
@@ -573,9 +587,231 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 560,
             "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_21" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.FilterStatusIcon",
+         "general" : {
+            "backends" : [],
+            "filter" : "[{\"hoststatustypes\":15,\"hostprops\":0,\"servicestatustypes\":31,\"serviceprops\":0,\"type\":[\"Service\",\"Service\"],\"val_pre\":[\"\",\"\"],\"op\":[\"~\",\"!=\"],\"value\":[\"downtime\",\"warning_ack_downtime\"],\"value_date\":[\"2016-04-27T13:53:02\",\"2016-04-27T15:59:19\"],\"displayfield-2105-inputEl\":\"\",\"displayfield-2123-inputEl\":\"\"}]",
+            "incl_svc" : "on",
+            "name" : "downtime"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "downtimes only filter",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "rotation" : 0,
+            "scale" : 100,
+            "x" : 700,
+            "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_22" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.HostgroupStatusIcon",
+         "general" : {
+            "hostgroup" : "linux-servers",
+            "incl_svc" : "on"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "hostgroup green",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "rotation" : 0,
+            "scale" : 100,
+            "x" : 860,
+            "y" : 405,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_23" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.HostgroupStatusIcon",
+         "general" : {
+            "hostgroup" : "test",
+            "incl_svc" : "on"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "hostgroup unknown",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "rotation" : 0,
+            "scale" : 100,
+            "x" : 860,
+            "y" : 465,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_24" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.FilterStatusIcon",
+         "general" : {
+            "backends" : [],
+            "filter" : "[{\"hoststatustypes\":15,\"hostprops\":0,\"servicestatustypes\":31,\"serviceprops\":0,\"type\":\"Service\",\"val_pre\":\"\",\"op\":\"~\",\"value\":\"downtime|ack\",\"value_date\":\"2016-04-27T13:53:02\",\"displayfield-5912-inputEl\":\"\"}]",
+            "incl_svc" : "on",
+            "name" : "downtime / ack"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "downtimes ack filter",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "rotation" : 0,
+            "scale" : 100,
+            "x" : 700,
+            "y" : 465,
+            "zindex" : "0"
+         },
+         "link" : {},
+         "nsize" : [
+            16,
+            16
+         ],
+         "size" : 23
+      }
+   },
+   "tabpan-tab_99_panlet_25" : {
+      "xdata" : {
+         "appearance" : {
+            "iconset" : "",
+            "type" : "icon"
+         },
+         "cls" : "TP.FilterStatusIcon",
+         "general" : {
+            "backends" : [],
+            "filter" : "[{\"hoststatustypes\":15,\"hostprops\":0,\"servicestatustypes\":31,\"serviceprops\":0,\"type\":\"Service\",\"val_pre\":\"\",\"op\":\"~\",\"value\":\"^warning\",\"value_date\":\"2016-04-27T13:53:02\",\"displayfield-1526-inputEl\":\"\"}]",
+            "incl_svc" : "on",
+            "name" : "warning"
+         },
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "should be warning",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "below",
+            "width" : ""
+         },
+         "layout" : {
+            "rotation" : 0,
+            "scale" : 100,
+            "x" : 700,
+            "y" : 525,
             "zindex" : "0"
          },
          "link" : {},
@@ -590,6 +826,8 @@
       "xdata" : {
          "appearance" : {
             "speedo_thresholds" : "line",
+            "speedoaxis_max" : 50,
+            "speedoaxis_min" : 0,
             "speedocolor_bg" : "#DDDDDD",
             "speedocolor_critical" : "#CA1414",
             "speedocolor_ok" : "#199C0F",
@@ -600,7 +838,7 @@
             "speedogradient" : "0",
             "speedomargin" : 5,
             "speedomax" : "",
-            "speedomin" : "",
+            "speedomin" : "0",
             "speedosource" : "perfdata:x",
             "speedosteps" : "12",
             "speedowidth" : 180,
@@ -640,6 +878,8 @@
       "xdata" : {
          "appearance" : {
             "speedo_thresholds" : "fill",
+            "speedoaxis_max" : 50,
+            "speedoaxis_min" : 0,
             "speedocolor_bg" : "#DDDDDD",
             "speedocolor_critical" : "#CA1414",
             "speedocolor_ok" : "#199C0F",
@@ -691,6 +931,8 @@
       "xdata" : {
          "appearance" : {
             "speedo_thresholds" : "hide",
+            "speedoaxis_max" : 50,
+            "speedoaxis_min" : 0,
             "speedocolor_bg" : "#DDDDDD",
             "speedocolor_critical" : "#CA1414",
             "speedocolor_ok" : "#199C0F",
@@ -902,6 +1144,7 @@
             "width" : ""
          },
          "layout" : {
+            "rotation" : 0,
             "scale" : 100,
             "x" : 80,
             "y" : 405,
