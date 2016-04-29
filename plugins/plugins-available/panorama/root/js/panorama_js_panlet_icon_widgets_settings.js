@@ -1611,7 +1611,9 @@ TP.iconShowEditDialog = function(panel) {
         panel.dragEl1.el.dom.style.outline = "2px dotted orange";
         panel.dragEl2.el.dom.style.outline = "2px dotted orange";
     } else if (panel.iconType == "text") {
-        panel.labelEl.el.dom.style.outline = "2px dotted orange";
+        if(panel.labelEl && panel.labelEl.el) {
+            panel.labelEl.el.dom.style.outline = "2px dotted orange";
+        }
     } else {
         panel.el.dom.style.outline = "2px dotted orange";
     }
