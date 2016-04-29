@@ -319,6 +319,7 @@ var TP = {
                 }
             }, 200);
         }
+        tb.scheduleApplyZindex();
     },
 
     /* add panel, but let the user choose position */
