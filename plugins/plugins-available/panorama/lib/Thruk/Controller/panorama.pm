@@ -2672,6 +2672,9 @@ sub _summarize_hostgroup_query {
             }
             if($state_type == HARD_STATE && $hst->{'state_type'} != HARD_STATE) {
                 $hostgroups->{$grp}->{'hosts'}->{'up'}++;
+                if($hst->{'scheduled_downtime_depth'}) {
+                    $hostgroups->{$grp}->{'hosts'}->{'downtime_up'}++;
+                }
                 next;
             }
             if($hst->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'hosts'}->{'pending'}++;     }
@@ -2696,6 +2699,9 @@ sub _summarize_hostgroup_query {
             next unless defined $type_groups->{$grp};
             if($state_type == HARD_STATE && $svc->{'state_type'} != HARD_STATE) {
                 $hostgroups->{$grp}->{'services'}->{'ok'}++;
+                if($svc->{'scheduled_downtime_depth'}) {
+                       $hostgroups->{$grp}->{'services'}->{'downtime_ok'}++;
+                }
                 next;
             }
             if($svc->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'services'}->{'pending'}++;  }
@@ -2704,15 +2710,15 @@ sub _summarize_hostgroup_query {
             elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'services'}->{'critical'}++; }
             elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'services'}->{'unknown'}++;  }
             if($svc->{'acknowledged'}) {
-                   if($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'ack_warning'}++;    }
-                elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'ack_critical'}++;   }
-                elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'hosts'}->{'ack_unknown'}++;    }
+                   if($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'services'}->{'ack_warning'}++;  }
+                elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'services'}->{'ack_critical'}++; }
+                elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'services'}->{'ack_unknown'}++;  }
             }
             if($svc->{'scheduled_downtime_depth'}) {
-                   if($svc->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_ok'}++;        }
-                elsif($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_warning'}++;   }
-                elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_critical'}++;  }
-                elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_unknown'}++;   }
+                   if($svc->{'state'} == 0)         { $hostgroups->{$grp}->{'services'}->{'downtime_ok'}++;       }
+                elsif($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'services'}->{'downtime_warning'}++;  }
+                elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'services'}->{'downtime_critical'}++; }
+                elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'services'}->{'downtime_unknown'}++;  }
             }
         }
     }
@@ -2735,6 +2741,9 @@ sub _summarize_servicegroup_query {
             }
             if($state_type == HARD_STATE && $svc->{'state_type'} != HARD_STATE) {
                 $servicegroups->{$grp}->{'services'}->{'ok'}++;
+                if($svc->{'scheduled_downtime_depth'}) {
+                    $servicegroups->{$grp}->{'services'}->{'downtime_ok'}++;
+                }
                 next;
             }
             if($svc->{'has_been_checked'} == 0) { $servicegroups->{$grp}->{'services'}->{'pending'}++;  }
@@ -2743,15 +2752,15 @@ sub _summarize_servicegroup_query {
             elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'services'}->{'critical'}++; }
             elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'services'}->{'unknown'}++;  }
             if($svc->{'acknowledged'}) {
-                   if($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'hosts'}->{'ack_warning'}++;    }
-                elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'hosts'}->{'ack_critical'}++;   }
-                elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'hosts'}->{'ack_unknown'}++;    }
+                   if($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'services'}->{'ack_warning'}++;    }
+                elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'services'}->{'ack_critical'}++;   }
+                elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'services'}->{'ack_unknown'}++;    }
             }
             if($svc->{'scheduled_downtime_depth'}) {
-                   if($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_ok'}++;        }
-                elsif($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_warning'}++;   }
-                elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_critical'}++;  }
-                elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_unknown'}++;   }
+                   if($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'services'}->{'downtime_ok'}++;        }
+                elsif($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'services'}->{'downtime_warning'}++;   }
+                elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'services'}->{'downtime_critical'}++;  }
+                elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'services'}->{'downtime_unknown'}++;   }
             }
         }
     }
