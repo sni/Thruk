@@ -3,11 +3,7 @@
    "tab" : {
       "xdata" : {
          "autohideheader" : true,
-         "backends" : [
-            {
-               "97bd4" : "naemon"
-            }
-         ],
+         "backends" : [],
          "background" : "../usercontent/backgrounds/europa.png",
          "backgroundoffset_x" : 0,
          "backgroundoffset_y" : 0,
@@ -23,7 +19,7 @@
          "mapzoom" : "",
          "recovery_sound" : null,
          "refresh" : 90,
-         "select_backends" : true,
+         "select_backends" : 0,
          "state_type" : "soft",
          "title" : "All In One",
          "unknown_repeat" : 0,
