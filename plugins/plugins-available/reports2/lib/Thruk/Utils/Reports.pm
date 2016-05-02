@@ -1111,7 +1111,7 @@ sub _read_report_file {
     if(!$report->{'var'}->{'is_running'} && $report->{'var'}->{'job'} && !Thruk::Utils::External::is_running($c, $report->{'var'}->{'job'}, 1)) {
         my $jobid = delete $report->{'var'}->{'job'};
         my($out,$err,$time, $dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $jobid, 1);
-        if($err) {
+        if($err && $err !~ m/\Qno such job:\E/mx) {
             # append job error to report logfile
             open(my $fh, '>>', $log);
             print $fh $err;
