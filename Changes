@@ -23,6 +23,7 @@ next
           - Reports:
             - add report clone button
             - create debug information more easily
+            - fix content type in url reports emails
           - CLI
             - add new graph command to export graphs from cli
             - add new listservices command

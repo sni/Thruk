@@ -236,7 +236,11 @@ sub report_send {
             if(!-s $attachment) {
                 $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
             }
-            $msg->attach(Type    => 'text/html',
+            my $ctype = 'text/html';
+            if($report->{'var'}->{'ctype'} && $report->{'var'}->{'ctype'} ne 'html2pdf') {
+                $ctype = $report->{'var'}->{'ctype'};
+            }
+            $msg->attach(Type    => $ctype,
                      Path        => $attachment,
                      Filename    => $report->{'var'}->{'attachment'},
                      Disposition => 'attachment',
