@@ -2161,7 +2161,7 @@ sub _sum_answer {
             $return->{$key} .= ','.join(',', @peers);
         }
         elsif ( looks_like_number( $data->{$first}->{$key} ) ) {
-            for my $peername ( @peers ) { $return->{$key} += $data->{$peername}->{$key}; }
+            for my $peername ( @peers ) { $return->{$key} += ($data->{$peername}->{$key} // 0); }
         }
     }
 
