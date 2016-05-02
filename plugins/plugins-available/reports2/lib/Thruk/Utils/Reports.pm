@@ -213,7 +213,7 @@ sub report_send {
                  To      => $to,
                  Cc      => $cc,
                  Bcc     => $bcc,
-                 Subject => encode("MIME-B", $subject),
+                 Subject => encode("MIME-B", decode_utf8($subject)),
                  Type    => 'multipart/mixed',
         );
         for my $key (keys %{$mailheader}) {
@@ -227,7 +227,7 @@ sub report_send {
             $msg->add($key => $mailheader->{$key});
         }
         $msg->attach(Type     => 'text/plain; charset=UTF-8',
-                     Data     => encode_utf8($mailbody),
+                     Data     => $mailbody,
         );
 
         # url reports as html
