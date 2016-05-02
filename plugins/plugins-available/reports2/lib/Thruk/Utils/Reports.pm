@@ -242,14 +242,14 @@ sub report_send {
             }
             $msg->attach(Type    => $ctype,
                      Path        => $attachment,
-                     Filename    => $report->{'var'}->{'attachment'},
+                     Filename    => encode_utf8($report->{'var'}->{'attachment'}),
                      Disposition => 'attachment',
             );
         }
         elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
             $msg->attach(Type    => $report->{'var'}->{'ctype'},
                      Path        => $attachment,
-                     Filename    => $report->{'var'}->{'attachment'},
+                     Filename    => encode_utf8($report->{'var'}->{'attachment'}),
                      Disposition => 'attachment',
             );
         } else {
