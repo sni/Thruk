@@ -22,6 +22,12 @@ Ext.define('TP.TabBar', {
     stateful:       true,
     tabBar:{
         id:        'maintabbar',
+        listeners: {
+            afterlayout: function(This, eOpts) {
+                // move this html element to the body so it can have its own zindex stack and stay in front
+                Ext.getBody().appendChild(Ext.get('maintabbar'));
+            }
+        },
         items:[{ xtype: 'tbfill' },{
             id:       'debug_dom_elements',
             xtype:    'label',

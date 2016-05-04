@@ -27,6 +27,7 @@ HTML, BODY {
 }
 #maintabbar {
     z-index: 1000000;
+    position: fixed !important;
 }
 
 .tabbarbody {
