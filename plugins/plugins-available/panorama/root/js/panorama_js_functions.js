@@ -303,6 +303,8 @@ var TP = {
             config.conf.pos = [evt.getX()+offsetX, evt.getY()+offsetY];
         }
         el.dom.style.cursor = '';
+        el.dom.style.zIndex = el.oldZindex;
+        delete el.oldZindex;
         var panel = TP.add_panlet(config);
         panel.firstRun = true;
         if(panel.iconType) {
@@ -342,6 +344,8 @@ var TP = {
             el = tb.bgDragEl;
         }
         el.dom.style.cursor = 'crosshair';
+        el.oldZindex = el.dom.style.zIndex;
+        el.dom.style.zIndex = 100000;
         el.on('click', TP.add_panlet_handler, tb, [tb, config, offsetX, offsetY, undefined, el]);
         window.setTimeout(function() {
             tb.disableMapControlsTemp();
