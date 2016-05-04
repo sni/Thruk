@@ -746,9 +746,17 @@ Ext.define('TP.SmallWidget', {
                         menu.destroy();
                         tab.enableMapControlsTemp();
                         TP.suppressIconTip = false;
+                        This.el.dom.style.outline = "";
+                        if(This.labelEl && This.labelEl.el) {
+                            This.labelEl.el.dom.style.outline = "";
+                        }
                     }
                 }
-            }).showBy(This);
+            }).showAt(evt.getXY());
+            This.el.dom.style.outline = "1px dashed grey";
+            if(This.labelEl && This.labelEl.el) {
+                This.labelEl.el.dom.style.outline = "1px dashed grey";
+            }
         });
     },
     addDDListener: function(el) {
