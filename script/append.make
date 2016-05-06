@@ -1,5 +1,6 @@
 ### THRUK
 
+SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
 
@@ -60,21 +61,21 @@ local_patches:
 	cp -rp support/*.patch                      blib/replace
 	cp -rp support/thruk_cookie_auth_vhost.conf blib/replace
 	cp -rp support/thruk_cookie_auth.include    blib/replace
-	sed -i blib/replace/* -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
-	sed -i blib/replace/* -e 's+@DATADIR@+${DATADIR}+g'
-	sed -i blib/replace/* -e 's+@LOGDIR@+${LOGDIR}+g'
-	sed -i blib/replace/* -e 's+@TMPDIR@+${TMPDIR}+g'
-	sed -i blib/replace/* -e 's+@LOCALSTATEDIR@+${LOCALSTATEDIR}+g'
-	sed -i blib/replace/* -e 's+@BINDIR@+${BINDIR}+g'
-	sed -i blib/replace/* -e 's+@INITDIR@+${INITDIR}+g'
-	sed -i blib/replace/* -e 's+@LIBDIR@+${LIBDIR}+g'
-	sed -i blib/replace/* -e 's+@CHECKRESULTDIR@+${CHECKRESULTDIR}+g'
-	sed -i blib/replace/* -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
-	sed -i blib/replace/* -e 's+@THRUKUSER@+${THRUKUSER}+g'
-	sed -i blib/replace/* -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
-	sed -i blib/replace/* -e 's+@HTMLURL@+${HTMLURL}+g'
-	sed -i blib/replace/* -e 's+@HTTPDCONF@+${HTTPDCONF}+g'
-	sed -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
+	${SED} -i blib/replace/* -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
+	${SED} -i blib/replace/* -e 's+@DATADIR@+${DATADIR}+g'
+	${SED} -i blib/replace/* -e 's+@LOGDIR@+${LOGDIR}+g'
+	${SED} -i blib/replace/* -e 's+@TMPDIR@+${TMPDIR}+g'
+	${SED} -i blib/replace/* -e 's+@LOCALSTATEDIR@+${LOCALSTATEDIR}+g'
+	${SED} -i blib/replace/* -e 's+@BINDIR@+${BINDIR}+g'
+	${SED} -i blib/replace/* -e 's+@INITDIR@+${INITDIR}+g'
+	${SED} -i blib/replace/* -e 's+@LIBDIR@+${LIBDIR}+g'
+	${SED} -i blib/replace/* -e 's+@CHECKRESULTDIR@+${CHECKRESULTDIR}+g'
+	${SED} -i blib/replace/* -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
+	${SED} -i blib/replace/* -e 's+@THRUKUSER@+${THRUKUSER}+g'
+	${SED} -i blib/replace/* -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
+	${SED} -i blib/replace/* -e 's+@HTMLURL@+${HTMLURL}+g'
+	${SED} -i blib/replace/* -e 's+@HTTPDCONF@+${HTTPDCONF}+g'
+	${SED} -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
 
 local_install: local_patches
 	mkdir -p ${DESTDIR}${TMPDIR}
@@ -91,7 +92,7 @@ local_install: local_patches
 	echo "do '${DATADIR}/menu.conf';" > ${DESTDIR}${SYSCONFDIR}/menu_local.conf
 	cp -p support/thruk_local.conf.example ${DESTDIR}${SYSCONFDIR}/thruk_local.conf
 	cp -p cgi.cfg ${DESTDIR}${SYSCONFDIR}/cgi.cfg
-	sed -e 's/^default_user_name=.*$$/default_user_name=/' -i ${DESTDIR}${SYSCONFDIR}/cgi.cfg
+	${SED} -e 's/^default_user_name=.*$$/default_user_name=/' -i ${DESTDIR}${SYSCONFDIR}/cgi.cfg
 	cp -p log4perl.conf.example ${DESTDIR}${SYSCONFDIR}/log4perl.conf
 	cp -p support/naglint.conf.example ${DESTDIR}${SYSCONFDIR}/naglint.conf
 	cp -p support/htpasswd ${DESTDIR}${SYSCONFDIR}/htpasswd
@@ -108,7 +109,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${DATADIR}/themes
 	mkdir -p ${DESTDIR}${DATADIR}/script
 	cp -rp lib root templates ${DESTDIR}${DATADIR}/
-	rm -f ${DESTDIR}${DATADIR}/root/thruk/themes
+	rm -rf ${DESTDIR}${DATADIR}/root/thruk/themes
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/usercontent/
 	rm -rf ${DESTDIR}${DATADIR}/root/thruk/usercontent
 	ln -fs ${SYSCONFDIR}/usercontent ${DESTDIR}${DATADIR}/root/thruk/
