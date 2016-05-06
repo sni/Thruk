@@ -3,6 +3,7 @@
 SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
+DAILYTARBALL=$(shell ./get_version | tr ' ' '~')
 
 newversion: versionprecheck
 	test -e .git
@@ -15,7 +16,7 @@ dailydist: cleandist
 	$(MAKE) newversion
 	$(MAKE) dist
 	$(MAKE) resetdaily
-	mv Thruk-*.tar.gz Thruk-$$(echo "$(DAILYVERSION)" | tr ' ' '~').tar.gz
+	mv thruk-*.tar.gz thruk-$(DAILYTARBALL).tar.gz
 	rm -f plugins/plugins-available/panorama/root/all_in_one-$(DAILYVERSIONFILES)_panorama.js \
 		root/thruk/javascript/all_in_one-$(DAILYVERSIONFILES).js \
 		themes/themes-available/Thruk/stylesheets/all_in_one-$(DAILYVERSIONFILES).css \
@@ -24,13 +25,11 @@ dailydist: cleandist
 
 releasedist: cleandist dist
 	git describe --tag --exact-match
-	if [ "$(VERSION)" != "$(DAILYVERSION)" ]; then \
-	    tar zxf Thruk-$(VERSION).tar.gz; \
-	    mv Thruk-$(VERSION) Thruk-$(DAILYVERSION); \
-	    tar cfz Thruk-$(DAILYVERSION).tar.gz Thruk-$(DAILYVERSION); \
-	    rm -f Thruk-$(VERSION).tar.gz; \
-	    rm -rf Thruk-$(DAILYVERSION); \
-	fi
+	#tar zxf thruk-$(VERSION).tar.gz
+	#mv thruk-$(VERSION) thruk-$(DAILYVERSION)
+	#tar cfz thruk-$(DAILYVERSION).tar.gz thruk-$(DAILYVERSION)
+	#rm -f thruk-$(VERSION).tar.gz
+	#rm -rf thruk-$(DAILYVERSION)
 	ls -la *.gz
 
 cleandist:
