@@ -27,7 +27,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use strict;
 use warnings;
 
-our $VERSION = '2.06';
+our $VERSION = '2.08';
 my $branch       = '';
 
 my $nagimp = Thruk::nagimp->new();
