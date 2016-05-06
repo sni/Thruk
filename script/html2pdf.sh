@@ -10,6 +10,7 @@
 [ -e ~/.profile ] && . ~/.profile
 
 DIR=$(dirname "$BASH_SOURCE")
+export PATH=$PATH:$DIR
 
 LOGFILE="$3";
 if [ "$LOGFILE" != "" ]; then

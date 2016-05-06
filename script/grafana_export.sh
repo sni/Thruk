@@ -18,6 +18,7 @@ INPUT=$5
 TEMPFILE=$6
 
 DIR=$(dirname $0)
+export PATH=$PATH:$DIR
 
 [ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
 
