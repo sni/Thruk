@@ -52,7 +52,7 @@ use constant {
     ADD_SAFE_DEFAULTS   => 1,
     ADD_CACHED_DEFAULTS => 2,
 };
-use Carp qw/confess/;
+use Carp qw/confess longmess/;
 use File::Slurp qw(read_file);
 use Module::Load qw/load/;
 use Data::Dumper qw/Dumper/;
@@ -94,7 +94,9 @@ sub startup {
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
-                    path         => sub { $_ = Thruk::Context::translate_request_path($_, $class->config); return($_ =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf)$/mx); },
+                    path         => sub { my $p = Thruk::Context::translate_request_path($_, $class->config);
+                                          return($p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf)$/mx);
+                                        },
                     root         => './root/',
                     pass_through => 1,
         );
@@ -260,8 +262,8 @@ sub _dispatcher {
     ###############################################
     # route cgi request
     unless($c->{'errored'}) {
+        my $path_info = $c->req->path_info;
         eval {
-            my $path_info = $c->req->path_info;
             my $rc;
             if($thruk->{'routes'}->{$path_info}) {
                 my $route = $thruk->{'routes'}->{$path_info};
@@ -290,7 +292,8 @@ sub _dispatcher {
         };
         if($@) {
             $c->error($@);
-            $c->log->error($@);
+            $c->log->error("Error in: ".$path_info);
+            $c->log->error(longmess($@));
             Thruk::Controller::error::index($c, 13);
         }
     }
