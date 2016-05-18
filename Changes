@@ -1,7 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
-          - support reading action_menu_items from file
+          - support reading action_menu_items from file/folder
 
 2.08     Fri May  6 11:29:14 CEST 2016
           - add status column to performance map excel export

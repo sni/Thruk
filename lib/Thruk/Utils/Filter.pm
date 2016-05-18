@@ -488,6 +488,14 @@ sub get_action_menu {
         }
         if($new =~ m%^file://(.*)$%mx) {
             $sourcefile = $1;
+            if(!-r $sourcefile) {
+                my $err = $new.': '.$!;
+                unless(exists $already_checked_action_menus->{$menu}) {
+                    $c->log->error("error in action menu ".$menu.": ".$err);
+                    $already_checked_action_menus->{$menu} = $err;
+                }
+                return([$already_checked_action_menus->{$menu}, $new]);
+            }
             $new = read_file($sourcefile);
             $c->config->{'action_menu_items'}->{$menu} = $new;
         }

@@ -34,6 +34,7 @@
 /usr/share/thruk/plugins/plugins-available/core_scheduling
 /etc/thruk/plugins/plugins-available/core_scheduling
 /etc/thruk/ssi
+/etc/thruk/action_menus
 /etc/thruk/themes
 /etc/thruk/thruk.conf
 /etc/thruk/thruk_local.conf

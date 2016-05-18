@@ -87,6 +87,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/ssi
+	mkdir -p ${DESTDIR}${SYSCONFDIR}/action_menus
 	cp -p thruk.conf ${DESTDIR}${SYSCONFDIR}/thruk.conf
 	echo "do '${DATADIR}/menu.conf';" > ${DESTDIR}${SYSCONFDIR}/menu_local.conf
 	cp -p support/thruk_local.conf.example ${DESTDIR}${SYSCONFDIR}/thruk_local.conf

@@ -232,6 +232,7 @@ case "$*" in
           /usr/share/thruk \
           /usr/lib/thruk \
           /etc/thruk/ssi \
+          /etc/thruk/action_menus \
           /etc/thruk/bp \
           /etc/thruk \
           2>/dev/null
@@ -290,6 +291,7 @@ exit 0
 %attr(0755,root,root) %{_bindir}/nagexp
 %attr(0755,root,root) %{_initrddir}/thruk
 %config %{_sysconfdir}/thruk/ssi
+%config %{_sysconfdir}/thruk/action_menus
 %config %{_sysconfdir}/thruk/thruk.conf
 %attr(0644,%{apacheuser},%{apachegroup}) %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %attr(0644,%{apacheuser},%{apachegroup}) %config(noreplace) %{_sysconfdir}/thruk/cgi.cfg

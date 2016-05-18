@@ -1651,7 +1651,19 @@ Sample icons with two action icons:
 .....
 
 
-Variant 1 - reference a menu from an external file:
+Variant 1 - put your action menus into a separate folder:
+{% include new_since.ad version="2.10" %}
+
+{% raw %}
+  *thruk_local.conf:*
+
+    action_menu_items_folder /etc/thruk/action_menus/
+{% endraw %}
+.....
+
+
+Variant 2 - reference a menu from an external file:
+{% include new_since.ad version="2.10" %}
 
 .....
 {% raw %}
@@ -1664,7 +1676,7 @@ Variant 1 - reference a menu from an external file:
 .....
 
 
-Variant 2 - reference to a pre defined menu:
+Variant 3 - reference to a pre defined menu:
 
 .....
 {% raw %}
@@ -1692,7 +1704,7 @@ Variant 2 - reference to a pre defined menu:
 .....
 
 
-Variant 3 - define the menu in object config only:
+Variant 4 - define the menu in object config only:
 
 This obviously adds some overhead to your objects, so better use the other variants
 unless you want to change the menu from external commands.
@@ -1710,6 +1722,27 @@ unless you want to change the menu from external commands.
 .....
 
 
+=== action_menu_items_folder
+{% include new_since.ad version="2.10" %}
+Organize action_menu_items in a folder. Each file in this folder will be read as
+action menu.
+
+Both examples are equivalent and result in the same menu assuming there is
+a `/etc/thruk/action_menus/hostmenu.json` file.
+
+.....
+{% raw %}
+    action_menu_items_folder    =  /etc/thruk/action_menus/
+{% endraw %}
+.....
+
+.....
+{% raw %}
+    <action_menu_items>
+        hostmenu      = file:///etc/thruk/action_menus/hostmenu.json
+    </action_menu_items>
+{% endraw %}
+.....
 
 === action_menu_apply
 {% include new_since.ad version="1.86" %}

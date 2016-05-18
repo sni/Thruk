@@ -81,3 +81,4 @@ t/docker/cases/.*/.sakuli-steps-cache
 t/docker/cases/testsuite.suite
 t/docker/cases/.*/.*.js
 .gem/
+.*\.json

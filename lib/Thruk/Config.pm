@@ -909,6 +909,18 @@ sub _do_finalize_config {
         $config->{'expand_user_macros'} = $new_expand_user_macros;
     }
 
+    # expand action_menu_items_folder
+    my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{home}."/action_menus";
+    for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
+        next unless -d $folder.'/.';
+        my @files = glob($folder.'/*.json');
+        for my $file (@files) {
+            if($file =~ m%([^/]+\.json$)%mx) {
+                my $basename = $1;
+                $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
+            }
+        }
+    }
 
     # set default config
     set_default_config($config);
