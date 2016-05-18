@@ -1651,7 +1651,20 @@ Sample icons with two action icons:
 .....
 
 
-Variant 1 - reference to a pre defined menu:
+Variant 1 - reference a menu from an external file:
+
+.....
+{% raw %}
+  *thruk_local.conf:*
+
+    <action_menu_items>
+        standardmenu      = file:///etc/thruk/action_menus/standardmenu.json
+    </action_menu_items>
+{% endraw %}
+.....
+
+
+Variant 2 - reference to a pre defined menu:
 
 .....
 {% raw %}
@@ -1679,7 +1692,10 @@ Variant 1 - reference to a pre defined menu:
 .....
 
 
-Variant 2 - define the menu in object config only:
+Variant 3 - define the menu in object config only:
+
+This obviously adds some overhead to your objects, so better use the other variants
+unless you want to change the menu from external commands.
 
 .....
 {% raw %}
@@ -1693,23 +1709,6 @@ Variant 2 - define the menu in object config only:
 {% endraw %}
 .....
 
-
-=== action_menu_actions
-{% include new_since.ad version="1.86" %}
-Defines the available server commands from action_menu_items. Key/Value pair of the name
-of the script and the corresponding command. The command has to be a full path program
-and *not* just a shell command. Therefor you do not have to use quotes because the arguments
-are not interpreted by a shell before execution due to security reasons.
-
-It is possible to use most standard link:macros.html[Macros] and the username is available in the `REMOTE_USER`
-environment variable.
-
-ex.:
-
-  <action_menu_actions>
-      example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$ $USER20$
-      refresh   = /usr/local/bin/refresh.sh otherargs
-  </action_menu_actions>
 
 
 === action_menu_apply
@@ -1731,6 +1730,24 @@ ex.:
     demomenu    = ^Test;           # a menu name can be used multiple times
   </action_menu_apply>
 
+
+
+=== action_menu_actions
+{% include new_since.ad version="1.86" %}
+Defines the available server commands from action_menu_items. Key/Value pair of the name
+of the script and the corresponding command. The command has to be a full path program
+and *not* just a shell command. Therefor you do not have to use quotes because the arguments
+are not interpreted by a shell before execution due to security reasons.
+
+It is possible to use most standard link:macros.html[Macros] and the username is available in the `REMOTE_USER`
+environment variable.
+
+ex.:
+
+  <action_menu_actions>
+      example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$ $USER20$
+      refresh   = /usr/local/bin/refresh.sh otherargs
+  </action_menu_actions>
 
 
 

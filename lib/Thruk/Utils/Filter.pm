@@ -18,6 +18,7 @@ use URI::Escape qw/uri_escape/;
 use JSON::XS ();
 use Encode qw/decode_utf8/;
 use Digest::MD5 qw(md5_hex);
+use File::Slurp qw/read_file/;
 
 ##############################################
 # use faster HTML::Escape if available
@@ -479,17 +480,24 @@ sub get_action_menu {
     our $already_checked_action_menus;
     $already_checked_action_menus = {} unless defined $already_checked_action_menus;
 
+    my $sourcefile;
     if($menu !~ m/^[\[\{]/mx) {
         my $new = $c->config->{'action_menu_items'}->{$menu};
         if(!$new) {
             return(["no $menu in action_menu_items", "{}"]);
         }
+        if($new =~ m%^file://(.*)$%mx) {
+            $sourcefile = $1;
+            $new = read_file($sourcefile);
+            $c->config->{'action_menu_items'}->{$menu} = $new;
+        }
         # fix trailing commas in menu
         $new =~ s/\,\s*([\}\]\)]+)/$1/gmx;
         unless(exists $already_checked_action_menus->{$menu}) {
-            $already_checked_action_menus->{$menu} = validate_json($new);
-            if($already_checked_action_menus->{$menu}) {
-                $c->log->error("error in action menu: ".$already_checked_action_menus->{$menu}."\nsource:\n".$new);
+            my $err = validate_json($new);
+            $already_checked_action_menus->{$menu} = $err;
+            if($err) {
+                $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$new);
             }
         }
         return([$already_checked_action_menus->{$menu}, $new]);
@@ -500,7 +508,7 @@ sub get_action_menu {
 
     my $err = validate_json($menu);
     if($err) {
-        $c->log->error("error in action menu: ".$err."\nsource:\n".$menu);
+        $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$menu);
     }
     return([$err, $menu]);
 }
