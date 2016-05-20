@@ -1492,6 +1492,12 @@ sub _import_peer_logfiles {
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
     }
 
+    # add import filter?
+    my $import_filter = [];
+    for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_filter'})}) {
+        push @{$import_filter}, { message => { '~~' => $f } }
+    }
+
     my @columns = qw/class time type state host_name service_description plugin_output message state_type contact_name/;
     while($time <= $end) {
         my $stime = scalar localtime $time;
@@ -1505,7 +1511,7 @@ sub _import_peer_logfiles {
                                                  filter  => [{ '-and' => [
                                                                     { time => { '>=' => $time } },
                                                                     { time => { '<'  => $time + $blocksize } },
-                                                            ]}],
+                                                            ]}, @{$import_filter} ],
                                                  columns => \@columns,
                                                 );
             if($mode eq 'update') {
