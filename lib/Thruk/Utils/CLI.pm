@@ -1306,6 +1306,11 @@ sub _cmd_import_logs {
         }
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs()");
+        my $plugin_ref_count;
+        if($mode eq 'clean') {
+            $plugin_ref_count = $log_count->[1];
+            $log_count        = $log_count->[0];
+        }
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
         $action    = "removed" if $mode eq 'clean';
@@ -1322,15 +1327,16 @@ sub _cmd_import_logs {
             # already printed if verbose
             $details = join("\n", @{$errors})."\n";
         }
-        return(sprintf("%s - %s %i log items from %i site%s %s in %.2fs (%i/s)\n%s",
+        return(sprintf("%s - %s %i log items %sfrom %i site%s %s in %.2fs (%i/s)\n%s",
                        $msg,
                        $action,
                        $log_count,
+                       $plugin_ref_count > 0 ? "(and ".$plugin_ref_count." plugin ouput references) " : '',
                        $backend_count,
                        ($backend_count == 1 ? '' : 's'),
                        $res,
                        ($elapsed),
-                       (($elapsed) > 0 ? ($log_count / ($elapsed)) : $log_count),
+                       (($elapsed > 0 && $log_count > 0) ? ($log_count / ($elapsed)) : $log_count),
                        $details,
                        ), $rc);
     }
