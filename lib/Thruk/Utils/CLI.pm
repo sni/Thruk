@@ -1331,7 +1331,7 @@ sub _cmd_import_logs {
                        $msg,
                        $action,
                        $log_count,
-                       $plugin_ref_count > 0 ? "(and ".$plugin_ref_count." plugin ouput references) " : '',
+                       $plugin_ref_count ? "(and ".$plugin_ref_count." plugin ouput references) " : '',
                        $backend_count,
                        ($backend_count == 1 ? '' : 's'),
                        $res,
