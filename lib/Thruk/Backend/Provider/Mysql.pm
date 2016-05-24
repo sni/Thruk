@@ -1033,7 +1033,9 @@ sub _update_logcache {
         $log_count += $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
         # clean old plugin outputs
         print "cleaning old orphaned plugin outputs\n" if $verbose;
-        my $used_ids = $dbh->selectcol_arrayref("SELECT DISTINCT plugin_output FROM `".$prefix."_log`");
+        my $used_ids1 = $dbh->selectcol_arrayref("SELECT DISTINCT plugin_output FROM `".$prefix."_log`");
+        my $used_ids2 = $dbh->selectcol_arrayref("SELECT DISTINCT message FROM `".$prefix."_log`");
+        my $used_ids = Thruk::Utils::array_uniq([@{$used_ids1}, @{$used_ids2}]);
         if(scalar @{$used_ids} > 0) {
             $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id NOT IN (".join(",", @{$used_ids}).")");
         }
