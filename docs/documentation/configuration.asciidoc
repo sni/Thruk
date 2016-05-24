@@ -1206,7 +1206,7 @@ ex.:
   logcache = mongodb://localhost:27017/thruk_log_cache
 
 
-=== logcache_import_filter
+=== logcache_import_exclude
 {% include new_since.ad version="2.10" %}
 Define filter which prevents the logcache from overgrowing with useless
 log messages. Since the main reason for the logcache are availability reports
@@ -1214,7 +1214,7 @@ it is ok to remove some entries. Can be used multiple times.
 
 ex.:
 
-  logcache_import_filter = "Warning: Passive check result was received for"
+  logcache_import_exclude = "Warning: Passive check result was received for"
 
 
 === delay_pages_after_backend_reload

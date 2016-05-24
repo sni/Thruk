@@ -3,7 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - support reading action_menu_items from file/folder
           - Logcache:
-            - add logcache_import_filter option
+            - add logcache_import_exclude option
             - remove orphaned plugin output references on logcacheclean
           - Reports:
             - include any ok event always in availability calculation
