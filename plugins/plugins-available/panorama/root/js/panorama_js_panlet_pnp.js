@@ -75,6 +75,7 @@ Ext.define('TP.PanletPNP', {
                                 };
                             }
                         }
+                        if(!panel.gearitem || !panel.gearitem.down('form')) { return; }
                         var source_combo = TP.getFormField(panel.gearitem.down('form'), 'source');
                         source_combo.store.removeAll();
                         for(var nr=0; nr<data.length; nr++) {
