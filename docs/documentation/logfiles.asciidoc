@@ -58,11 +58,18 @@ Then put in the following settings inside:
 
 to increase the loglevel: (valid loglevels are 0-4 with 4 being most verbose)
 
-  export THRUK_VERBOSE=1
+  export THRUK_VERBOSE=4
 
 to track all requests with their cpu and memory usage:
 
   export THRUK_PERFORMANCE_DEBUG=1
 
 
-NOTE: You might have to adjust the loglevel threshold (see above). Also some log output will end up in the apache errorlog.
+.increase log threshold
+=======
+NOTE: You also have to adjust the loglevel threshold in `/etc/thruk/log4perl.conf`.
+
+ex.: log4perl.appender.ThrukLog.Threshold=DEBUG
+
+Also some log output will end up in the apache errorlog.
+=======
