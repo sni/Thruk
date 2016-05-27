@@ -1480,7 +1480,8 @@ sub _htpasswd_password {
 # returns htpasswd path
 sub _get_htpasswd {
     # htpasswd is usually somewhere in sbin
-    local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin';
+    # SLES11: htpasswd2 /usr/bin
+    local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin:/usr/bin';
     my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
     return($htpasswd);
 }
