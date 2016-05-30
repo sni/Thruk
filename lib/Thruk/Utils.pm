@@ -495,7 +495,7 @@ sub get_dynamic_roles {
     if(defined $data) {
         for my $dat (@{$data}) {
             $alias               = $dat->{'alias'}               if defined $dat->{'alias'};
-            if(defined $dat->{'can_submit_commands'} && (!defined $dat->{'can_submit_commands'} || $dat->{'can_submit_commands'} == 0)) {
+            if(defined $dat->{'can_submit_commands'} && (!defined $can_submit_commands || $dat->{'can_submit_commands'} == 0)) {
                 $can_submit_commands = $dat->{'can_submit_commands'};
             }
         }
