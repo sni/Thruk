@@ -373,7 +373,7 @@ mkdir -p hello/{lib/Thruk/Controller,templates}
 </pre>
 ++++
 
-Next we need to create some files:
+.Next we need to create some files:
 - hello/description.txt
 - hello/preview.png
 - hello/routes
