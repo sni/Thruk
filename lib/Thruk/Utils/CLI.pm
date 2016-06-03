@@ -490,13 +490,15 @@ sub _from_fcgi {
             $msg = "authorization failed, no auth key specified for ". $c->req->url."\n";
         }
         $res = {
-            'version' => $c->config->{'version'},
-            'branch'  => $c->config->{'branch'},
             'output'  => $msg,
             'rc'      => 1,
         };
     } else {
         $res = _run_commands($c, $data->{'options'}, 'fcgi');
+    }
+    if(ref $res eq 'HASH') {
+        $res->{'version'} = $c->config->{'version'} unless defined $res->{'version'};
+        $res->{'branch'}  = $c->config->{'branch'}  unless defined $res->{'branch'};
     }
     my $res_json;
     eval {
@@ -527,7 +529,6 @@ sub _run_commands {
     }
 
     my $data = {
-        'version' => $c->config->{'version'},
         'output'  => '',
         'rc'      => 0,
     };

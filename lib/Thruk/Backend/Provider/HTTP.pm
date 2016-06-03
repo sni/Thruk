@@ -719,12 +719,13 @@ sub _req {
             my $remote_version = $data->{'version'};
             $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
             if($data->{'output'} =~ m/no\ such\ command/mx) {
-                die('backend too old, version returned: '.$remote_version);
+                die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
-            if($data->{'version'} < $self->{'min_backend_version'}) {
-                die('backend too old, version returned: '.$remote_version);
+            if(defined $data->{'version'} && ($data->{'version'} < $self->{'min_backend_version'})) {
+                die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
-            die('protocol error: '.$data->{'output'});
+            die('internal error: '.$data->{'output'}) if $data->{'output'};
+            die('protocol error: '.Dumper($data));
         }
         if(ref $data->{'output'} eq 'ARRAY') {
             # type, size, data
