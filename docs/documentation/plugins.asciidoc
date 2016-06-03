@@ -470,8 +470,8 @@ it under the same terms as Perl itself.
 This file is the template that builds our HTML for the hello.cgi page. It mostly
 consists of HTML with some variables accessed via the [% variable_name %] notation.
 
-++++
-<pre style="line-height:18px;">
+[source,html]
+----
 <!DOCTYPE html>
 <html>
 	<head>
@@ -484,9 +484,7 @@ consists of HTML with some variables accessed via the [% variable_name %] notati
 		<h1>[% hello_var %]</h1> <!-- This is where we access our variable -->
 	</body>
 </html>
-</pre>
-++++
-
+----
 That's it! With these files in place you can restart your webserver and you will have
 a link to hello.cgi in your Thruk sidebar.
 
