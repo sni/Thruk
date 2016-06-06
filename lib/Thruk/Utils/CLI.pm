@@ -1436,8 +1436,14 @@ sub _cmd_configtool {
     $c->req->parameters->{'backend'} = $peerkey;
 
     require Thruk::Utils::Conf;
-    if(!Thruk::Utils::Conf::set_object_model($c) || $peerkey ne $c->stash->{'param_backend'}) {
+    if(!Thruk::Utils::Conf::set_object_model($c)) {
+        if($c->stash->{set_object_model_err}) {
+            return("failed to set objects model: ".$c->stash->{set_object_model_err}, 1);
+        }
         return("failed to set objects model", 1);
+    }
+    if($peerkey ne $c->stash->{'param_backend'}) {
+        return("failed to set objects model, got configtool section for wrong backend", 1);
     }
     # outgoing file sync
     elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {
