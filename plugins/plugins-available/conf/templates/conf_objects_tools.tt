@@ -21,7 +21,11 @@
     <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Warnings' title='Warnings' width="16" height="16" style="vertical-align: text-bottom"> found [% results.size %] possible improvements:
       [% IF results.size > 1 %]
         <div align="right" style="position: absolute; right: 15px; top: 30px;">
+          [% IF toolobj.defined("fix_all_serial") && toolobj.defined("fix_all_serial") %]
+            [% button('#', toolobj.fixlink _ " all", 'conf_cut_button conf_cleanup_button width_80', 'return conf_tool_cleanup(this, \'fix_all_serial\')', "padding-left: 3px;") %]
+          [% ELSE %]
             [% link = "conf.cgi?sub=objects&amp;tools=" _ tool _ "&amp;cleanup=1&amp;ident=all"; button(link, toolobj.fixlink _ " all", 'conf_cleanup_button') %]
+          [% END %]
         </div>
       [% END %]
     <table class="conf_tool_results hoverTable">
@@ -43,7 +47,7 @@
           [% IF r.id  && r.obj.file.readonly %]
             file is read-only
           [% ELSIF r.cleanable %]
-            [% link = "conf.cgi?sub=objects&amp;tools=" _ tool _ "&amp;cleanup=1&amp;ident=" _ r.ident; button(link, toolobj.fixlink, 'conf_cleanup_button width_80', 'return conf_tool_cleanup(this, \'' _ link _ '\')') %]
+            [% link = "conf.cgi?sub=objects&amp;tools=" _ tool _ "&amp;cleanup=1&amp;ident=" _ r.ident; button(link, toolobj.fixlink, 'conf_cleanup_button width_80 conf_cleanup_button_fix', 'return conf_tool_cleanup(this, \'' _ link _ '\')') %]
           [% END %]
         </td>
       </tr>

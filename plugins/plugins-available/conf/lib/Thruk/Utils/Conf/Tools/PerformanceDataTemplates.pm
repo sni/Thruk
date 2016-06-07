@@ -27,11 +27,12 @@ returns new instance of this tool
 sub new {
     my($class) = @_;
     my $self = {
-        category    => 'Templates',
-        link        => 'Performance Data Templates',
-        title       => 'Check Performance Data Templates',
-        description => 'Fixes common mistakes with performance data templates',
-        fixlink     => 'fix',
+        category       => 'Templates',
+        link           => 'Performance Data Templates',
+        title          => 'Check Performance Data Templates',
+        description    => 'Fixes common mistakes with performance data templates',
+        fixlink        => 'fix',
+        fix_all_serial => 1,
     };
     bless($self, $class);
     return($self);
