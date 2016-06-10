@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 use Test::More;
+use File::Temp qw/tempfile/;
+use File::Slurp qw/read_file/;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -60,5 +62,23 @@ like($output, '/^$/', "false returned nothing");
 ($rc, $output) = Thruk::Utils::IO::cmd(undef, '/bin/false');
 ok($rc != 0, "/bin/false returned with anything but 0");
 like($output, '/^$/', "false returned nothing");
+
+my($tfh, $tmpfilename) = tempfile();
+$rc = Thruk::Utils::IO::json_lock_store($tmpfilename, {'a' => 'b' });
+is($rc, 1, "json_lock_store succeeded on tmpfile");
+my $content = read_file($tmpfilename);
+like($content, '/{"a":"b"}/', 'file contains json');
+unlink($tmpfilename);
+
+# some tests for full disks
+if(-e '/dev/full') {
+    eval {
+        Thruk::Utils::IO::json_lock_store('/dev/full', {'a' => 'b' }, undef, undef, '/dev/full');
+    };
+    my $err = $@;
+    like($err, '/cannot write to/', "json_lock_store failed on full filesystem");
+    like($err, '/No space left on device/', "json_lock_store failed on full filesystem, no space error message");
+}
+
 
 done_testing();
