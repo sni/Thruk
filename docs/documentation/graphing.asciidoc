@@ -32,6 +32,50 @@ define service {
 Often you can use the templates 'host-pnp' or 'srv-pnp' which set the right action_url automatically.
 =======
 
+==== Cookie Authentication
+
+If you want to use the cookie authentication for PNP4Nagios as well (for single sign-on) some additional changes need to be made. Modify every occurance of the following RewriteCond statement inside the cookie auth include file (usually located at '/usr/share/thruk/thruk_cookie_auth.include') from:
+
+------
+RewriteCond %{REQUEST_URI}           ^/thruk
+------
+
+to:
+
+------
+RewriteCond %{REQUEST_URI}           ^/(thruk|pnp4nagios)
+------
+
+Then add the path used for cookies to your local thruk configuration. This should be the default anyway but just to make sure.
+
+ex.:
+
+------
+cookie_path = /
+------
+
+And last but not least, change the authorization settings provided by the default PNP4nagios httpd config from:
+
+------
+AllowOverride None
+Order allow,deny
+Allow from all
+#
+# Use the same value as defined in nagios.conf
+#
+AuthName "Nagios Access"
+AuthType Basic
+AuthUserFile /usr/local/nagios/etc/htpasswd.users
+Require valid-user
+------
+
+to:
+
+------
+AllowOverride None
+Require all granted
+------
+
 Read more about the integration in web interfaces on link:http://docs.pnp4nagios.org/pnp-0.6/webfe[pnp4nagios.org].
 
 ==== Popups
