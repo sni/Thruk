@@ -34,7 +34,7 @@ Often you can use the templates 'host-pnp' or 'srv-pnp' which set the right acti
 
 ==== Cookie Authentication
 
-If you want to use the cookie authentication for PNP4Nagios as well (for single sign-on) some additional changes need to be made. Modify every occurance of the following RewriteCond statement inside the cookie auth include file (usually located at '/usr/share/thruk/thruk_cookie_auth.include') from:
+If you want to use the cookie authentication for PNP4Nagios as well (for single sign-on) some additional changes need to be made. Therefor copy the cookie auth include file (usually located at '/usr/share/thruk/thruk_cookie_auth.include') to your httpd config directory and modify every occurance of the following RewriteCond statement from:
 
 ------
 RewriteCond %{REQUEST_URI}           ^/thruk
@@ -45,6 +45,8 @@ to:
 ------
 RewriteCond %{REQUEST_URI}           ^/(thruk|pnp4nagios)
 ------
+
+Make sure to include the updated file instead of the default. Either by editing 'thruk_cookie_auth_vhost.conf' or your custom virtual host configuration.
 
 Then add the path used for cookies to your local thruk configuration. This should be the default anyway but just to make sure.
 
