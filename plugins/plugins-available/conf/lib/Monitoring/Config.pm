@@ -217,10 +217,11 @@ sub commit {
     my $rc    = 1;
 
     my $filesroot    = $self->get_files_root();
-    my $backend_name = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
+    my $backend_name = '';
 
     # run pre hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
+        $backend_name = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
         local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
