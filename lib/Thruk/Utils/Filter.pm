@@ -905,6 +905,7 @@ sub button {
     }
 
     my $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>';
+    $args = '' unless defined $args;
     for my $a (split/\&/mx, $args) {
         my($k,$v) = split(/=/mx,$a,2);
         $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
