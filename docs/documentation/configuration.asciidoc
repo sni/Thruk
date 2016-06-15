@@ -2021,12 +2021,24 @@ Path to your htpasswd. Enables user management based an Apaches basic auth with 
 Run a command before saving object config files. Save will be canceled
 if the command returns non-zero exit code. Command will be run with
 'pre' as first argument and the root config folder as second argument.
-REMOTE_USER will be set in the environment.
+
+The following environment variables will be set:
+
+     ** `REMOTE_USER`          username of the logged in user
+     ** `THRUK_BACKEND_ID`     internal id of the current edited backend
+     ** `THRUK_BACKEND_NAME`   name of the current edited backend
 
 === post_obj_save_cmd
 Run a command after saving object config files. Command will be run with
 'post' as first argument and the root config folder as second
-argument. REMOTE_USER will be set in the environment.
+argument.
+
+The following environment variables will be set:
+
+     ** `REMOTE_USER`          username of the logged in user
+     ** `THRUK_BACKEND_ID`     internal id of the current edited backend
+     ** `THRUK_BACKEND_NAME`   name of the current edited backend
+
 
 === git_base_dir
 If not all config folders are managed by git, then you can specify a

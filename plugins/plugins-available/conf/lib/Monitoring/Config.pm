@@ -216,12 +216,15 @@ sub commit {
     my($self, $c) = @_;
     my $rc    = 1;
 
-    my $filesroot = $self->get_files_root();
+    my $filesroot    = $self->get_files_root();
+    my $backend_name = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
 
     # run pre hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
+        local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
+        local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
+        local $ENV{THRUK_BACKEND_NAME} = $backend_name;
+        local $SIG{CHLD}               = 'DEFAULT';
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
         $c->log->debug('pre save hook: '.$cmd);
         my $out = `$cmd`;
@@ -284,8 +287,10 @@ sub commit {
 
     # run post hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
+        local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
+        local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
+        local $ENV{THRUK_BACKEND_NAME} = $backend_name;
+        local $SIG{CHLD}               = 'DEFAULT';
         system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
         if($? == -1) {
             Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );
