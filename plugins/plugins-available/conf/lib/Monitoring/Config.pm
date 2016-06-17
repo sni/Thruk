@@ -227,16 +227,15 @@ sub commit {
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         local $SIG{CHLD}               = 'DEFAULT';
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
-        $c->log->debug('pre save hook: '.$cmd);
         my $out = `$cmd`;
         my $rc  = $?>>8;
+        $c->log->info("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
-            $c->log->info('pre save hook: '.$rc);
-            $c->log->info('pre save hook: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre save hook!\n".$out );
+            $c->log->info('pre save hook out: '.$out);
+            Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre_obj_save_cmd hook!\n".$out );
             return;
         }
-        $c->log->debug('pre save hook: '.$out);
+        $c->log->debug('pre save hook out: '.$out);
     }
 
     my $files = { changed => [], deleted => []};
@@ -292,11 +291,16 @@ sub commit {
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         local $SIG{CHLD}               = 'DEFAULT';
-        system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
-        if($? == -1) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );
+        my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}." post '".$filesroot."' 2>&1";
+        my $out = `$cmd`;
+        my $rc  = $?>>8;
+        $c->log->info("post save hook: '" . $cmd . "', rc: " . $rc);
+        if($rc != 0) {
+            $c->log->info('post save hook out: '.$out);
+            Thruk::Utils::set_message( $c, 'fail_message', "post_obj_save_cmd hook failed!\n".$out );
             return;
         }
+        $c->log->debug('post save hook out: '.$out);
     }
 
     return $rc;
