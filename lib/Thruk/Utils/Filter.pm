@@ -1002,10 +1002,10 @@ sub split_perfdata {
             'crit'      => $crit,
             'orig'      => $orig,
         } if defined $var;
-        $has_warn = 1 if $warn ne '';
-        $has_crit = 1 if $crit ne '';
-        $has_min  = 1 if $min  ne '';
-        $has_max  = 1 if $max  ne '';
+        $has_warn = 1 if(defined $warn && $warn ne '');
+        $has_crit = 1 if(defined $crit && $crit ne '');
+        $has_min  = 1 if(defined $min  && $min  ne '');
+        $has_max  = 1 if(defined $max  && $max  ne '');
     }
     return($data, $has_parents, $has_warn, $has_crit, $has_min, $has_max);
 }
