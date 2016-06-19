@@ -901,7 +901,7 @@ sub button {
         $args = "";
     } else {
         ($page, $args) = split(/\?/mx, $link, 2);
-        $args =~ s/&amp;/&/gmx;
+        $args =~ s/&amp;/&/gmx if defined $args;
     }
 
     my $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>';
