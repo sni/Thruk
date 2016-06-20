@@ -1662,18 +1662,25 @@ Sample icons with two action icons:
 .....
 
 
-Variant 1 - put your action menus into a separate folder:
+*Variant 1* - put your action menus into a separate folder.
 {% include new_since.ad version="2.10" %}
 
+.....
 {% raw %}
   *thruk_local.conf:*
 
     action_menu_items_folder /etc/thruk/action_menus/
+
 {% endraw %}
 .....
 
+Menu files must have the .json file extension and contain the raw json
+definition of the action menu. One menu per file. The menu can be referenced
+by the filename later. For example if you filename is `/etc/thruk/action_menus/somemenu.json` then
+you can access the menu by the name `somemenu`.
 
-Variant 2 - reference a menu from an external file:
+
+*Variant 2* - reference a menu from an external file:
 {% include new_since.ad version="2.10" %}
 
 .....
@@ -1681,27 +1688,29 @@ Variant 2 - reference a menu from an external file:
   *thruk_local.conf:*
 
     <action_menu_items>
-        standardmenu      = file:///etc/thruk/action_menus/standardmenu.json
+        standardmenu      = file:///etc/thruk/standardmenu.json
     </action_menu_items>
 {% endraw %}
 .....
 
+Menu files must contain the raw json definition of the action menu.
 
-Variant 3 - reference to a pre defined menu:
+
+*Variant 3* - reference to a pre defined menu:
 
 .....
 {% raw %}
   *thruk_local.conf:*
 
     <action_menu_items>
-        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
-                             "title": "test title",\
-                             "menu":[\
-                                {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
-                                 "label":"refresh",\
-                                 "action":"server://refresh/$HOSTNAME$"}\
-                             ]\
-                            }
+        standardmenu = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
+                        "title": "test title",\
+                        "menu":[\
+                           {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
+                            "label":"refresh",\
+                            "action":"server://refresh/$HOSTNAME$"}\
+                        ]\
+                       }
     </action_menu_items>
 
   *host.cfg:*
@@ -1715,7 +1724,7 @@ Variant 3 - reference to a pre defined menu:
 .....
 
 
-Variant 4 - define the menu in object config only:
+*Variant 4* - define the menu in object config only:
 
 This obviously adds some overhead to your objects, so better use the other variants
 unless you want to change the menu from external commands.
