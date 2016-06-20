@@ -10,6 +10,8 @@ Ext.onReady(function() {
         width:     400,
         manageHeight: false,
         maxWidth:  400,
+        hideDelay: 300,
+        closable:  true,
         //closable:  true, hideDelay: 6000000, // enable for easier css debuging
         style:    'background: #E5E5E5',
         bodyStyle:'background: #E5E5E5',
@@ -17,9 +19,8 @@ Ext.onReady(function() {
         html:      '',
         listeners: {
             beforeshow: function(This, eOpts) {
-                if(TP.suppressIconTipForce) {
-                    return false;
-                }
+                if(!TP.iconTipTarget)       { return(false); }
+                if(TP.suppressIconTipForce) { return(false); }
                 TP.suppressIconTipForce = true;
                 if(TP.suppressIconTip) {
                     This.hide();
@@ -38,24 +39,34 @@ Ext.onReady(function() {
                     This.showAt(showAtPos);
                 }
                 TP.modalWindows.push(TP.iconTip);
+
+                This.el.on('mouseover', function() {
+                    window.clearTimeout(This.hideTimer);
+                    delete This.hideTimer;
+                });
+                This.el.on('mouseout', function() {
+                    This.delayHide();
+                });
             },
             hide:    function(This) {
                 delete TP.iconTip.last_id;
+                delete TP.iconTipTarget;
                 TP.modalWindows = TP.removeFromList(TP.modalWindows, TP.iconTip);
             },
-            destroy: function(This) { delete TP.iconTip; }
+            destroy: function(This) { delete TP.iconTip; delete TP.iconTipTarget; }
         }
     });
 
     var tipRenderer = function (evt, el, eOpts) {
-        if(TP.suppressIconTip) { return; }
+        if(TP.suppressIconTip) { delete TP.iconTipTarget; return; }
         evt.stopEvent();
-        if(evt.target.tagName == "rect") { return; } /* skip canvas elements and only popup on actual paths */
+        if(evt.target.tagName == "rect") { delete TP.iconTipTarget; return; } /* skip canvas elements and only popup on actual paths */
         var img = Ext.getCmp(el.id);
-        if(!img || !img.el || !img.el.dom) { return; }
+        if(!img || !img.el || !img.el.dom) { delete TP.iconTipTarget; return; }
         try {
             if(img.panel) { img = img.panel; el = img.el.dom }
-        } catch(e) {return;} // errors with img.el not defined sometimes
+        } catch(e) { delete TP.iconTipTarget; return;} // errors with img.el not defined sometimes
+        TP.iconTipTarget = img;
         if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
         TP.iconTip.panel   = img;
         /* hide when in edit mode */
@@ -98,6 +109,9 @@ Ext.onReady(function() {
         var showAtPos = TP.getNextToPanelPos(img, size.width, size.height);
         TP.suppressIconTipForce = false;
         TP.iconTip.showAt(showAtPos);
+        img.el.dom.onmouseout = function() {
+            TP.iconTip.delayHide();
+        };
         if(link && TP.iconTip.panel) {
             var style = 'detail';
             if(!(TP.iconTip.panel.iconType == 'servicegroup' || TP.iconTip.panel.xdata.general.incl_svc) || TP.iconTip.panel.iconType == 'host') {
