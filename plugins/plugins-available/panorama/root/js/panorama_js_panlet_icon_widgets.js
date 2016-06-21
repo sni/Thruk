@@ -346,59 +346,8 @@ Ext.define('TP.SmallWidget', {
 
         /* dynamic label? */
         if(txt.match(/\{\{.*?\}\}/)) {
-            var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
-            if(TP.availabilities == undefined) { TP.availabilities = {}; }
-            if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
-            var matches = txt.match(/(\{\{.*?\}\})/g);
-            var macros  = TP.getPanelMacros(panel);
-            Ext.Array.each(matches, function(item, idx) {
-                var calc      = item.replace(/^\{\{/, '').replace(/\}\}$/, '');
-                var functions = calc.match(/[\w+_]+\(/g);
-                var ok        = true;
-                // only run a few allow functions
-                Ext.Array.each(functions, function(f, idx) {
-                    f = f.replace(/\($/, '');
-                    if(!Ext.Array.contains(allowed_functions, f)) {
-                        debug("function "+f+" is not allowed");
-                        ok = false;
-                    }
-                });
-                if(!ok) { return; }
-                var res;
-                calc = calc.replace(/availability\(/g, 'availability(panel, ');
-                if(macros[calc] != undefined) {
-                    // direct match, no need for eval
-                    res = macros[calc];
-                } else {
-                    try {
-                        res = TP.evalInContext(calc, macros);
-                    } catch(err) {
-                        TP.logError(panel.id, "labelEvalException", err);
-                        panel.el.dom.title = err;
-                    }
-                }
-                if(res == undefined) { res = ''; }
-                // replace not yet resolved availabilities
-                if(calc.match(/availability\(/)) {
-                    if(TP.lastAvailError) {
-                        TP.lastAvailError = TP.lastAvailError.replace(/'/g, '');
-                        TP.lastAvailError = TP.lastAvailError.replace(/ at .*?\/Thruk/g, ' at Thruk');
-                        res = "<span class='avail_result_error' title='"+TP.lastAvailError+"'>error<\/span>";
-                    }
-                    else if(res.match(/\-1/)) {
-                        res = res.replace(/\-1[\.0]*/g, '...');
-                        res = "<span class='avail_result_not_ready' title='not yet ready'>"+res+"<\/span>";
-                    }
-                }
-                txt = txt.replace(item, res);
-            });
-            /* remove inactive availabilities */
-            var remove_older = (Math.floor(new Date().getTime()/1000)) - 120;
-            for(var key in TP.availabilities[panel.id]) {
-                if(TP.availabilities[panel.id][key]['active'] < remove_older) {
-                    delete TP.availabilities[panel.id][key];
-                }
-            }
+            txt = panel.setIconLabelDynamicText(txt);
+
             /* update value since it might have changed */
             if(panel.xdata.appearance.type == 'speedometer' && panel.xdata.appearance.speedosource.match(/^avail:(.*)$/)) {
                 panel.updateRender(panel.xdata);
@@ -431,6 +380,64 @@ Ext.define('TP.SmallWidget', {
         else                              { panel.labelEl.removeCls('vertical'); }
 
         return;
+    },
+
+    setIconLabelDynamicText: function(txt) {
+        var panel = this;
+        var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
+        if(TP.availabilities == undefined) { TP.availabilities = {}; }
+        if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
+        var matches = txt.match(/(\{\{.*?\}\})/g);
+        var macros  = TP.getPanelMacros(panel);
+        Ext.Array.each(matches, function(item, idx) {
+            var calc      = item.replace(/^\{\{/, '').replace(/\}\}$/, '');
+            var functions = calc.match(/[\w+_]+\(/g);
+            var ok        = true;
+            // only run a few allow functions
+            Ext.Array.each(functions, function(f, idx) {
+                f = f.replace(/\($/, '');
+                if(!Ext.Array.contains(allowed_functions, f)) {
+                    debug("function "+f+" is not allowed");
+                    ok = false;
+                }
+            });
+            if(!ok) { return; }
+            var res;
+            calc = calc.replace(/availability\(/g, 'availability(panel, ');
+            if(macros[calc] != undefined) {
+                // direct match, no need for eval
+                res = macros[calc];
+            } else {
+                try {
+                    res = TP.evalInContext(calc, macros);
+                } catch(err) {
+                    TP.logError(panel.id, "labelEvalException", err);
+                    panel.el.dom.title = err;
+                }
+            }
+            if(res == undefined) { res = ''; }
+            // replace not yet resolved availabilities
+            if(calc.match(/availability\(/)) {
+                if(TP.lastAvailError) {
+                    TP.lastAvailError = TP.lastAvailError.replace(/'/g, '');
+                    TP.lastAvailError = TP.lastAvailError.replace(/ at .*?\/Thruk/g, ' at Thruk');
+                    res = "<span class='avail_result_error' title='"+TP.lastAvailError+"'>error<\/span>";
+                }
+                else if(res.match(/\-1/)) {
+                    res = res.replace(/\-1[\.0]*/g, '...');
+                    res = "<span class='avail_result_not_ready' title='not yet ready'>"+res+"<\/span>";
+                }
+            }
+            txt = txt.replace(item, res);
+        });
+        /* remove inactive availabilities */
+        var remove_older = (Math.floor(new Date().getTime()/1000)) - 120;
+        for(var key in TP.availabilities[panel.id]) {
+            if(TP.availabilities[panel.id][key]['active'] < remove_older) {
+                delete TP.availabilities[panel.id][key];
+            }
+        }
+        return(txt);
     },
 
     setIconLabelPosition: function(cfg) {
@@ -1936,7 +1943,7 @@ Ext.define('TP.HostStatusIcon', {
             var url = this.host.pnp_url+'/image?host='+this.xdata.general.host+'&srv=_HOST_&view=1&source=0&graph_width=300&graph_height=100';
             url    += '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds('24h'));
             url    += '&end='   + Math.round(now.getTime()/1000);
-            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;" onload="TP.iconTip.syncShadow()">']);
+            details.push([ '*Graph', '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;" onload="TP.iconTip.syncShadow()">']);
         }
         return(details);
     },
@@ -2179,7 +2186,7 @@ Ext.define('TP.ServiceStatusIcon', {
             var url = this.service.pnp_url+'/image?host='+this.xdata.general.host+'&srv='+this.xdata.general.service+'&view=1&source=0&graph_width=300&graph_height=100';
             url    += '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds('24h'));
             url    += '&end='   + Math.round(now.getTime()/1000);
-            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;" onload="TP.iconTip.syncShadow()">']);
+            details.push([ '*Graph', '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;" onload="TP.iconTip.syncShadow()">']);
         }
         return(details);
     },

@@ -9,6 +9,8 @@ next:
             - remove orphaned plugin output references on logcacheclean
           - Reports:
             - include any ok event always in availability calculation
+          - Panorama View:
+            - make popup completly customizable
 
 2.08     Fri May  6 11:29:14 CEST 2016
           - add status column to performance map excel export

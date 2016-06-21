@@ -108,6 +108,13 @@ TP.iconShowEditDialog = function(panel) {
         perfDataUpdate();
     }
 
+    var popupPreviewUpdate = function() {
+        window.clearTimeout(TP.timeouts['timeout_popup_preview']);
+        TP.timeouts['timeout_popup_preview'] = window.setTimeout(function() {
+            TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
+        }, 200);
+    }
+
     var generalItems = panel.getGeneralItems();
     if(generalItems != undefined && panel.xdata.cls != 'TP.StaticIcon') {
         generalItems.unshift({
@@ -1406,6 +1413,93 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
+    /* Popup Tab */
+    var popupTab = {
+        title: 'Popup',
+        type:  'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            bodyPadding: 2,
+            items: [{
+                xtype:           'form',
+                id:              'popupForm',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 50 },
+                items: [{
+                    fieldLabel:     'Popup',
+                    xtype:          'combobox',
+                    name:           'type',
+                    value:          'default',
+                    store:         ['default', 'off', 'custom'],
+                    editable:        false,
+                    listeners:     {
+                        change: function(This, newValue, oldValue, eOpts) {
+                            var defaults = '{{ '+TP.getPanelDetailsHeader(panel).join(' }}\n{{ ')+' }}';
+                            if(newValue == 'default') {
+                                Ext.getCmp('popup_textfield').setValue(defaults);
+                                Ext.getCmp('popup_textfield').setDisabled(true);
+                            }
+                            if(newValue == 'off') {
+                                Ext.getCmp('popup_textfield').setValue('');
+                                Ext.getCmp('popup_textfield').setDisabled(true);
+                            }
+                            if(newValue == 'custom') {
+                                var old = Ext.getCmp('popup_textfield').getValue();
+                                if(old == '' || old == defaults) {
+                                    Ext.getCmp('popup_textfield')
+                                        .setValue(defaults
+                                                 +"\ncustom:\nadditional text with placeholders just\n"
+                                                 +"like in labels. ex.: {{ name }}\n"
+                                                 //+"read more in the <a href='https://thruk.org/documentation/dashboard.html#lable-editing' target='_blank'>thruk documentation<\/a>\n"
+                                        );
+                                }
+                                Ext.getCmp('popup_textfield').setDisabled(false);
+                            }
+                        }
+                    }
+                  }, {
+                    fieldLabel:     'Custom',
+                    xtype:          'textarea',
+                    name:           'content',
+                    id:             'popup_textfield',
+                    autoScroll:      true,
+                    height:          220,
+                    disabled:       (panel.xdata.popup && panel.xdata.popup.type == "custom") ? false : true,
+                    fieldStyle:     { 'whiteSpace': 'pre' },
+                    value:          '{{ '+TP.getPanelDetailsHeader(panel).join(' }}\n{{ ')+' }}',
+                    listeners:      { change: popupPreviewUpdate }
+                  }]
+            }]
+        }],
+        listeners: {
+            activate: function(This, eOpts) {
+                TP.iconTipTarget = panel;
+                TP.suppressIconTip = false;
+                panel.locked = true;
+
+                TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
+                TP.iconTip.show();
+                window.clearTimeout(TP.iconTip.hideTimer);
+                delete TP.iconTip.hideTimer;
+
+                panel.locked = false;
+                TP.suppressIconTip = true;
+
+                TP.iconTip.alignToSettingsWindow();
+            },
+            deactivate: function(This, eOpts) {
+                if(TP.iconTip) {
+                    TP.iconTip.hide();
+                }
+            }
+        }
+    };
+
     /* Source Tab */
     var sourceTab = {
         title: 'Source',
@@ -1479,6 +1573,7 @@ TP.iconShowEditDialog = function(panel) {
             appearanceTab,
             linkTab,
             labelTab,
+            popupTab,
             sourceTab
         ]
     });
@@ -1492,7 +1587,7 @@ TP.iconShowEditDialog = function(panel) {
 
     var settingsWindow = new Ext.Window({
         height:  350,
-        width:   400,
+        width:   450,
         layout: 'fit',
         items:   tabPanel,
         panel:   panel,
@@ -1513,6 +1608,7 @@ TP.iconShowEditDialog = function(panel) {
                     panel.stateful = true;
                     delete panel.xdata.label;
                     delete panel.xdata.link;
+                    delete panel.xdata.popup;
                     var xdata = TP.get_icon_form_xdata(settingsWindow);
                     TP.log('['+this.id+'] icon config updated: '+Ext.JSON.encode(xdata));
                     for(var key in xdata) { panel.xdata[key] = xdata[key]; }
@@ -1547,6 +1643,7 @@ TP.iconShowEditDialog = function(panel) {
                 delete TP.iconSettingsWindow;
                 panel.stateful = true;
 
+                if(TP.iconTip) { TP.iconTip.hide(); }
                 if(!settingsWindow.skipRestore) {
                     // if we cancel directly after adding a new icon, destroy it
                     tab.enableMapControlsTemp();
@@ -1577,6 +1674,11 @@ TP.iconShowEditDialog = function(panel) {
                 if(panel.dragEl2 && panel.dragEl2.el) { panel.dragEl2.el.dom.style.outline = ""; }
                 if(panel.labelEl && panel.labelEl.el) { panel.labelEl.el.dom.style.outline = ""; }
                 TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
+            },
+            move: function() {
+                if(TP.iconTip) {
+                    TP.iconTip.alignToSettingsWindow();
+                }
             }
         }
     }).show();
@@ -1632,11 +1734,13 @@ TP.get_icon_form_xdata = function(settingsWindow) {
         layout:     Ext.getCmp('layoutForm').getForm().getValues(),
         appearance: Ext.getCmp('appearanceForm').getForm().getValues(),
         link:       Ext.getCmp('linkForm').getForm().getValues(),
-        label:      Ext.getCmp('labelForm').getForm().getValues()
+        label:      Ext.getCmp('labelForm').getForm().getValues(),
+        popup:      Ext.getCmp('popupForm').getForm().getValues()
     }
     // clean up
-    if(xdata.label.labeltext == '') { delete xdata.label; }
-    if(xdata.link.link == '')       { delete xdata.link;  }
+    if(xdata.label.labeltext == '')   { delete xdata.label; }
+    if(xdata.link.link == '')         { delete xdata.link;  }
+    if(xdata.popup.type == 'default') { delete xdata.popup; }
     if(xdata.layout.rotation == 0)  { delete xdata.layout.rotation; }
     Ext.getCmp('appearance_types').store.each(function(data, i) {
         var t = data.raw[0];
@@ -1810,11 +1914,13 @@ TP.setIconSettingsValues = function(xdata) {
     if(!xdata.label)            { xdata.label = { labeltext: '' }; }
     if(!xdata.label.fontsize)   { xdata.label.fontsize   = 14; }
     if(!xdata.label.bordersize) { xdata.label.bordersize =  1; }
+    if(!xdata.popup)            { xdata.popup = { type: 'default' }; }
     Ext.getCmp('generalForm').getForm().setValues(xdata.general);
     Ext.getCmp('layoutForm').getForm().setValues(xdata.layout);
     Ext.getCmp('appearanceForm').getForm().setValues(xdata.appearance);
     Ext.getCmp('linkForm').getForm().setValues(xdata.link);
     Ext.getCmp('labelForm').getForm().setValues(xdata.label);
+    Ext.getCmp('popupForm').getForm().setValues(xdata.popup);
 }
 
 TP.getNextToPanelPos = function(panel, width, height) {
@@ -1847,4 +1953,13 @@ TP.getNextToPanelPos = function(panel, width, height) {
     if(panelPos[0] <  0) { panelPos[0] =  0; }
     if(panelPos[1] < 20) { panelPos[1] = 20; }
     return(panelPos);
+}
+
+TP.getPanelDetailsHeader = function(panel) {
+    var d = panel.getDetails();
+    var header = [];
+    for(var x=0; x<d.length; x++) {
+        header.push(d[x][0]);
+    }
+    return(header);
 }

@@ -1010,6 +1010,7 @@ sub _avail_update {
     my $types = {};
 
     my $tab_backends = $c->req->parameters->{'backends'};
+    return $c->render(json => {status => 'ok', msg => 'nothing to do'}) if(!defined $c->req->parameters->{'avail'} || $c->req->parameters->{'avail'} eq 'null');
     if($c->req->parameters->{'avail'}) { $in    = decode_json($c->req->parameters->{'avail'}); }
     if($c->req->parameters->{'types'}) { $types = decode_json($c->req->parameters->{'types'}); }
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/availability.cache');
