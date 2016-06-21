@@ -80,7 +80,7 @@ Ext.onReady(function() {
                 var size = TP.iconSettingsWindow.getSize();
                 var pos  = TP.iconSettingsWindow.getPosition();
                 TP.suppressIconTipForce = false;
-                this.showAt([pos[0] + size.width + 20, pos[1]]);
+                this.showAt([pos[0] + size.width + 10, pos[1]]);
             }
         }
     });

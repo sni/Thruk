@@ -1491,11 +1491,28 @@ TP.iconShowEditDialog = function(panel) {
                 TP.suppressIconTip = true;
 
                 TP.iconTip.alignToSettingsWindow();
+                if(TP.iconLabelHelpWindow == undefined) {
+                    TP.iconLabelHelpWindow = new Ext.Window({
+                        height:     350,
+                        width:      450,
+                        layout:    'fit',
+                        autoScroll: true,
+                        title:     'Help',
+                        bodyStyle: 'background:white;',
+                        items:      TP.iconLabelHelp(panel, 'popup_textfield').items[0],
+                        listeners: { destroy: function() { delete TP.iconLabelHelpWindow; } },
+                        alignToSettingsWindow: function() {
+                            var pos  = TP.iconSettingsWindow.getPosition();
+                            this.showAt([pos[0] - 460, pos[1]]);
+                        }
+                    }).show();
+                    TP.iconLabelHelpWindow.alignToSettingsWindow();
+                    TP.modalWindows.push(TP.iconLabelHelpWindow);
+                }
             },
             deactivate: function(This, eOpts) {
-                if(TP.iconTip) {
-                    TP.iconTip.hide();
-                }
+                if(TP.iconTip) { TP.iconTip.hide(); }
+                if(TP.iconLabelHelpWindow) { TP.iconLabelHelpWindow.destroy(); }
             }
         }
     };
@@ -1644,6 +1661,7 @@ TP.iconShowEditDialog = function(panel) {
                 panel.stateful = true;
 
                 if(TP.iconTip) { TP.iconTip.hide(); }
+                if(TP.iconLabelHelpWindow) { TP.iconLabelHelpWindow.destroy(); }
                 if(!settingsWindow.skipRestore) {
                     // if we cancel directly after adding a new icon, destroy it
                     tab.enableMapControlsTemp();
@@ -1676,9 +1694,8 @@ TP.iconShowEditDialog = function(panel) {
                 TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
             },
             move: function() {
-                if(TP.iconTip) {
-                    TP.iconTip.alignToSettingsWindow();
-                }
+                if(TP.iconTip) { TP.iconTip.alignToSettingsWindow(); }
+                if(TP.iconLabelHelpWindow) { TP.iconLabelHelpWindow.alignToSettingsWindow(); }
             }
         }
     }).show();
@@ -1767,19 +1784,6 @@ TP.get_icon_form_xdata = function(settingsWindow) {
 
 TP.openLabelEditorWindow = function(panel) {
     var oldValue  = Ext.getCmp('label_textfield').getValue();
-    var perf_data = '';
-    // ensure fresh and correct performance data
-    var macros = TP.getPanelMacros(panel);
-    for(var key in macros.perfdata) {
-        delete macros.perfdata[key].perf;
-        delete macros.perfdata[key].key;
-        for(var key2 in macros.perfdata[key]) {
-            var keyname = '.'+key;
-            if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
-            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
-        }
-    }
-
     var labelEditorWindow = new Ext.Window({
         height:  500,
         width:   650,
@@ -1825,81 +1829,7 @@ TP.openLabelEditorWindow = function(panel) {
                         Ext.getCmp('label_textfield').setValue(This.getValue())
                     }
                 }
-            }, {
-                fieldLabel: 'Help',
-                xtype:      'fieldcontainer',
-                items:      [{
-                    xtype:   'label',
-                    cls:     'labelhelp',
-                    html:    '<p>Use HTML to format your label<br>'
-                            +'Ex.: <i>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
-                            +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
-                            +'Ex.: <i>Host {{name}}: {{plugin_output}}<\/i><\/p>'
-                            +'<p>You may also do calculations inside placeholders like this:<br>'
-                            +'Ex.: <i>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/i><\/p>'
-                            +'<p>use sprintf to format numbers:<br>'
-                            +'Ex.: <i>{{sprintf("%.2f %s",perfdata.rta.val, perfdata.rta.unit)}}<\/i><\/p>'
-                            +'<p>use strftime to format timestamps:<br>'
-                            +'Ex.: <i>{{strftime("%Y-%m-%d",last_check)}}<\/i><\/p>'
-                            +'<p>conditionals are possible:<br>'
-                            +'Ex.: <i>{{ if(acknowledged) {...} else {...} }}<\/i><\/p>'
-
-                            +'<p>There are different variables available depending on the type of icon/widget:<br>'
-                            +'<table><tr><th>Groups/Filters:<\/th><td><i>totals.services.ok<\/i><\/td><td>totals number of ok services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>totals number of warning services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>totals number of critical services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>totals number of unknown services<\/td><\/tr>'
-
-                            +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>totals number of up hosts<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>totals number of down hosts<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>totals number of unreachable hosts<\/td><\/tr>'
-
-                            +'<tr><th>Hosts:<\/th><td><i>name<\/i><\/td><td>Hostname<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>state<\/i><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>performance_data<\/i><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>has_been_checked<\/i><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>scheduled_downtime_depth<\/i><\/td><td>Downtime: 0 - No, &gtl;=1 - Yes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>acknowledged<\/i><\/td><td>Has this host been acknowledged: 0 - No, 1 - Yes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>last_check<\/i><\/td><td>Timestamp of last check<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>last_state_change<\/i><\/td><td>Timestamp of last state change<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>last_notification<\/i><\/td><td>Timestamp of last notification<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
-
-                            +'<tr><th>Services:<\/th><td><i>host_name<\/i><\/td><td>Hostname<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>description<\/i><\/td><td>Servicename<\/td><\/tr>'
-                            +'<tr><td><\/td><td colspan=2>(other attributes are identical to hosts)<\/td><\/tr>'
-
-                            +'<tr><th>Performance Data:<\/th><td colspan=2>(available performance data with their current values)<\/td><\/tr>'
-                            +perf_data
-
-                            +'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "60m"})) }}%<\/i><\/td><td>availability for the last 60 minutes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "24h"})) }}%<\/i><\/td><td>availability for the last 24 hours<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "7d"})) }}%<\/i><\/td><td>availability for the last 7 days<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
-                            +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
-                            +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
-
-                            +'<\/table>',
-                        listeners: {
-                            afterrender: function(This) {
-                                var examples = This.el.dom.getElementsByTagName('i');
-                                Ext.Array.each(examples, function(el, i) {
-                                    el.className = "clickable";
-                                    el.onclick   = function(i) {
-                                        var cur = Ext.getCmp('label_textfield_edit').getValue();
-                                        var val = Ext.htmlDecode(el.innerHTML);
-                                        if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
-                                        if(val.match(/<br>/)) { val += "\n"; }
-                                        Ext.getCmp('label_textfield_edit').setValue(cur+val);
-                                        Ext.getCmp('label_textfield_edit').up('form').body.dom.scrollTop=0;
-                                        Ext.getCmp('label_textfield_edit').focus();
-                                    }
-                                });
-                            }
-                        }
-                }]
-            }]
+            }, TP.iconLabelHelp(panel, 'label_textfield_edit')]
         }]
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
@@ -1907,6 +1837,98 @@ TP.openLabelEditorWindow = function(panel) {
     TP.modalWindows.push(labelEditorWindow);
     labelEditorWindow.toFront();
 }
+
+TP.iconLabelHelp = function(panel, textarea_id) {
+    var perf_data = '';
+    // ensure fresh and correct performance data
+    var macros = TP.getPanelMacros(panel);
+    for(var key in macros.perfdata) {
+        delete macros.perfdata[key].perf;
+        delete macros.perfdata[key].key;
+        for(var key2 in macros.perfdata[key]) {
+            var keyname = '.'+key;
+            if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
+            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
+        }
+    }
+    var help = {
+        fieldLabel: 'Help',
+        xtype:      'fieldcontainer',
+        items:      [{
+            xtype:   'label',
+            cls:     'labelhelp',
+            html:    '<p>Use HTML to format your label<br>'
+                    +'Ex.: <i>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
+                    +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
+                    +'Ex.: <i>Host {{name}}: {{plugin_output}}<\/i><\/p>'
+                    +'<p>You may also do calculations inside placeholders like this:<br>'
+                    +'Ex.: <i>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/i><\/p>'
+                    +'<p>use sprintf to format numbers:<br>'
+                    +'Ex.: <i>{{sprintf("%.2f %s",perfdata.rta.val, perfdata.rta.unit)}}<\/i><\/p>'
+                    +'<p>use strftime to format timestamps:<br>'
+                    +'Ex.: <i>{{strftime("%Y-%m-%d",last_check)}}<\/i><\/p>'
+                    +'<p>conditionals are possible:<br>'
+                    +'Ex.: <i>{{ if(acknowledged) {...} else {...} }}<\/i><\/p>'
+
+                    +'<p>There are different variables available depending on the type of icon/widget:<br>'
+                    +'<table><tr><th>Groups/Filters:<\/th><td><i>totals.services.ok<\/i><\/td><td>totals number of ok services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>totals number of warning services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>totals number of critical services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>totals number of unknown services<\/td><\/tr>'
+
+                    +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>totals number of up hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>totals number of down hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>totals number of unreachable hosts<\/td><\/tr>'
+
+                    +'<tr><th>Hosts:<\/th><td><i>name<\/i><\/td><td>Hostname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>state<\/i><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>performance_data<\/i><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>has_been_checked<\/i><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>scheduled_downtime_depth<\/i><\/td><td>Downtime: 0 - No, &gtl;=1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>acknowledged<\/i><\/td><td>Has this host been acknowledged: 0 - No, 1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>last_check<\/i><\/td><td>Timestamp of last check<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>last_state_change<\/i><\/td><td>Timestamp of last state change<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>last_notification<\/i><\/td><td>Timestamp of last notification<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
+
+                    +'<tr><th>Services:<\/th><td><i>host_name<\/i><\/td><td>Hostname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>description<\/i><\/td><td>Servicename<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2>(other attributes are identical to hosts)<\/td><\/tr>'
+
+                    +'<tr><th>Performance Data:<\/th><td colspan=2>(available performance data with their current values)<\/td><\/tr>'
+                    +perf_data
+
+                    +'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "60m"})) }}%<\/i><\/td><td>availability for the last 60 minutes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "24h"})) }}%<\/i><\/td><td>availability for the last 24 hours<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "7d"})) }}%<\/i><\/td><td>availability for the last 7 days<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
+                    +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
+
+                    +'<\/table>',
+                listeners: {
+                    afterrender: function(This) {
+                        var examples = This.el.dom.getElementsByTagName('i');
+                        Ext.Array.each(examples, function(el, i) {
+                            el.className = "clickable";
+                            el.onclick   = function(i) {
+                                var cur = Ext.getCmp(textarea_id).getValue();
+                                var val = Ext.htmlDecode(el.innerHTML);
+                                if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
+                                if(val.match(/<br>/)) { val += "\n"; }
+                                Ext.getCmp(textarea_id).setValue(cur+val);
+                                Ext.getCmp(textarea_id).up('form').body.dom.scrollTop=0;
+                                Ext.getCmp(textarea_id).focus();
+                            }
+                        });
+                    }
+                }
+        }]
+    };
+    return(help);
+}
+
 
 TP.setIconSettingsValues = function(xdata) {
     xdata = TP.clone(xdata);
