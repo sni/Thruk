@@ -1504,7 +1504,7 @@ TP.iconShowEditDialog = function(panel) {
                         autoScroll: true,
                         title:     'Help',
                         bodyStyle: 'background:white;',
-                        items:      TP.iconLabelHelp(panel, 'popup_textfield').items[0],
+                        items:      TP.iconLabelHelp(panel, 'popup_textfield', [{name: 'Popup Sections', items: TP.getPanelDetailsHeader(panel)}]).items[0],
                         listeners: { destroy: function() { delete TP.iconLabelHelpWindow; } },
                         alignToSettingsWindow: function() {
                             var pos  = TP.iconSettingsWindow.getPosition();
@@ -1843,7 +1843,7 @@ TP.openLabelEditorWindow = function(panel) {
     labelEditorWindow.toFront();
 }
 
-TP.iconLabelHelp = function(panel, textarea_id) {
+TP.iconLabelHelp = function(panel, textarea_id, extra) {
     var perf_data = '';
     // ensure fresh and correct performance data
     var macros = TP.getPanelMacros(panel);
@@ -1854,6 +1854,16 @@ TP.iconLabelHelp = function(panel, textarea_id) {
             var keyname = '.'+key;
             if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
             perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
+        }
+    }
+    var extra_items = "";
+    if(extra) {
+        for(var x=0; x<extra.length; x++) {
+            extra_items += '<tr><th>'+extra[x].name+':<\/th><td colspan=2><\/td><\/tr>';
+            var data = extra[x].items;
+            for(var y=0; y<data.length; y++) {
+                extra_items += '<tr><td><\/td><td><i>{{ '+data[y]+' }}<\/i><\/td><td><\/td><\/tr>';
+            }
         }
     }
     var help = {
@@ -1910,6 +1920,7 @@ TP.iconLabelHelp = function(panel, textarea_id) {
                     +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
                     +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
+                    +extra_items
 
                     +'<\/table>',
                 listeners: {
