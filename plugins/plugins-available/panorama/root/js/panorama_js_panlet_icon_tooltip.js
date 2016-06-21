@@ -18,6 +18,13 @@ Ext.onReady(function() {
         shadow:   'drop',
         html:      '',
         listeners: {
+            move: function(This, x, y, eOpts) {
+                if(TP.iconSettingsWindow && TP.iconTip.isVisible()) {
+                    This.suspendEvents(false);
+                    TP.iconTip.alignToSettingsWindow();
+                    This.resumeEvents(false);
+                }
+            },
             beforeshow: function(This, eOpts) {
                 if(!TP.iconTipTarget)       { return(false); }
                 if(TP.suppressIconTipForce) { return(false); }
