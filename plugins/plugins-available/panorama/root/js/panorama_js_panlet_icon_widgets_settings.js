@@ -1478,6 +1478,11 @@ TP.iconShowEditDialog = function(panel) {
         }],
         listeners: {
             activate: function(This, eOpts) {
+                /* move to window center so the side panels fit onto the window */
+                TP.iconSettingsWindow.center();
+                var pos = TP.iconSettingsWindow.getPosition();
+                TP.iconSettingsWindow.setPosition(pos[0], 50);
+
                 TP.iconTipTarget = panel;
                 TP.suppressIconTip = false;
                 panel.locked = true;
@@ -1493,7 +1498,7 @@ TP.iconShowEditDialog = function(panel) {
                 TP.iconTip.alignToSettingsWindow();
                 if(TP.iconLabelHelpWindow == undefined) {
                     TP.iconLabelHelpWindow = new Ext.Window({
-                        height:     350,
+                        height:     550,
                         width:      450,
                         layout:    'fit',
                         autoScroll: true,
