@@ -1060,6 +1060,16 @@ sub _cmd_downtimetask {
         $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
     }
 
+    my $output     = '';
+    if(!$downtime->{'target'}) {
+        $downtime->{'target'} = 'host';
+        $downtime->{'target'} = 'service' if $downtime->{'service'};
+    }
+
+    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
+    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
+    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
+
     # do quick self check
     Thruk::Utils::RecurringDowntimes::check_downtime($c, $downtime, $file);
 
@@ -1074,16 +1084,6 @@ sub _cmd_downtimetask {
         $hours    = int($downtime->{'duration'} / 60);
         $minutes  = $downtime->{'duration'}%60;
     }
-
-    my $output     = '';
-    if(!$downtime->{'target'}) {
-        $downtime->{'target'} = 'host';
-        $downtime->{'target'} = 'service' if $downtime->{'service'};
-    }
-
-    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
-    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
-    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
 
     my $done = {hosts => {}, groups => {}};
     my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
