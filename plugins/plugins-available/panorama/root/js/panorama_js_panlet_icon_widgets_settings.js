@@ -1917,9 +1917,12 @@ TP.iconLabelHelp = function(panel, textarea_id) {
                                 var val = Ext.htmlDecode(el.innerHTML);
                                 if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
                                 if(val.match(/<br>/)) { val += "\n"; }
-                                Ext.getCmp(textarea_id).setValue(cur+val);
+                                var pos = getCaret(Ext.get(textarea_id+'-inputEl').dom);
+                                var txt = cur.substr(0, pos) + val + cur.substr(pos);
+                                Ext.getCmp(textarea_id).setValue(txt);
                                 Ext.getCmp(textarea_id).up('form').body.dom.scrollTop=0;
                                 Ext.getCmp(textarea_id).focus();
+                                setCaretToPos(Ext.get(textarea_id+'-inputEl').dom, pos+val.length);
                             }
                         });
                     }

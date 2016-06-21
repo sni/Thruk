@@ -126,14 +126,15 @@ Ext.onReady(function() {
                 var line = content[x];
                 var m = line.match(/^\{\{\s*(.*)\s*\}\}\s*$/);
                 if(m && m[1]) {
-                    if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
                     m[1] = m[1].replace(/^\s+/, '');
                     m[1] = m[1].replace(/\s+$/, '');
                     if(dHash[m[1]]) {
+                        if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
                         d.push(dHash[m[1]]);
                         continue;
                     }
                     if(dHash['*'+m[1]]) {
+                        if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
                         /* make it possible to show a title for sections which use colspan usually */
                         d.push([m[1], dHash['*'+m[1]][1]]);
                         continue;
@@ -142,12 +143,11 @@ Ext.onReady(function() {
                         /* search for existing items without a leading asterix to hide sections which are not with a colspan by default */
                         var key = m[1].replace(/^\*/, '');
                         if(dHash[key]) {
+                            if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
                             d.push([m[1], dHash[key][1]]);
                             continue;
                         }
                     }
-                    d.push(["<font color='red'>unknown key<\/font>", m[1]]);
-                    continue;
                 }
                 m = line.match(/^(.*):$/);
                 if(m && m[1]) {
@@ -163,7 +163,7 @@ Ext.onReady(function() {
                 }
                 if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
                 curBlock[0] = '';
-                curBlock[1] = line+'<br>';
+                curBlock[1] = img.setIconLabelDynamicText(line)+'<br>';
             }
             if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
         }
