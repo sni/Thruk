@@ -119,7 +119,7 @@ Ext.onReady(function() {
         /* hide when in edit mode */
         if(!force && !img.locked) { return; }
         TP.iconTip.last_id = el.id;
-        if(!img.getName) { return; }
+        if(!img.getName) { delete TP.iconTipTarget; return; }
         if(img.iconType == 'filtered') {
             TP.iconTip.setTitle(img.getName());
         } else {
