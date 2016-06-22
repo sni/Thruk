@@ -33,6 +33,10 @@ Ext.onReady(function() {
                     This.hide();
                     return false;
                 }
+                if(!TP.iconSettingsWindow && TP.iconTipTarget.xdata.popup && TP.iconTipTarget.xdata.popup.type == "off") {
+                    This.hide();
+                    return false;
+                }
                 return true;
             },
             show: function(This) {
@@ -86,15 +90,30 @@ Ext.onReady(function() {
     });
 
     TP.tipRenderer = function (evt, el, eOpts, force) {
-        if(!force && TP.suppressIconTip) { delete TP.iconTipTarget; return; }
-        evt.stopEvent();
         if(evt.target.tagName == "rect") { delete TP.iconTipTarget; return; } /* skip canvas elements and only popup on actual paths */
         var img = Ext.getCmp(el.id);
         if(!img || !img.el || !img.el.dom) { delete TP.iconTipTarget; return; }
         try {
             if(img.panel) { img = img.panel; el = img.el.dom }
         } catch(e) { delete TP.iconTipTarget; return;} // errors with img.el not defined sometimes
+
+        var xdata = img.xdata;
+        if(TP.iconSettingsWindow) {
+            xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+        }
+
+        /* activate label mouseover */
+        if(img.labelEl && xdata.label.display && xdata.label.display == 'mouseover') {
+            img.labelEl.mouseover = true;
+            img.labelEl.show();
+            delete img.labelEl.mouseover;
+            TP.mouseoverLabel = img.labelEl;
+        }
+
+        if(!force && TP.suppressIconTip) { delete TP.iconTipTarget; return; }
+        evt.stopEvent();
         TP.iconTipTarget = img;
+
         if(!force && ( TP.iconTip.last_id && TP.iconTip.last_id == el.id)) { return; }
         TP.iconTip.panel   = img;
         /* hide when in edit mode */
@@ -108,10 +127,6 @@ Ext.onReady(function() {
         }
         var link;
         var d = img.getDetails();
-        var xdata = img.xdata;
-        if(TP.iconSettingsWindow) {
-            xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
-        }
         /* custom popup details */
         if(xdata.popup && xdata.popup.type == "custom") {
             /* convert current details into hash */
@@ -254,6 +269,13 @@ Ext.onReady(function() {
 
     Ext.getBody().on('mouseover', function(evt,t,a) {
         TP.tipRenderer(evt,t,a);
+    }, null, {delegate:'A.tooltipTarget'});
+
+    Ext.getBody().on('mouseout', function(evt,t,a) {
+        if(TP.mouseoverLabel && !TP.iconSettingsWindow) {
+            TP.mouseoverLabel.hide();
+            delete TP.mouseoverLabel;
+        }
     }, null, {delegate:'A.tooltipTarget'});
 });
 

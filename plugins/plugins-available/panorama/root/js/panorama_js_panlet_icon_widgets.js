@@ -528,6 +528,9 @@ Ext.define('TP.SmallWidget', {
             draggable:  !panel.locked,
             shadow:     false,
             renderTo:  "bodyview",
+            hidden:     (!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == 'mouseover'),
+            hideMode:  'visibility',
+            autoRender: true,
             cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
             style:      {
                 whiteSpace: 'nowrap'
@@ -586,6 +589,12 @@ Ext.define('TP.SmallWidget', {
                             }
                         });
                     }
+                },
+                beforeshow: function( This, eOpts ) {
+                    if(!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == "mouseover" && !This.mouseover) {
+                        return(false);
+                    }
+                    return(true);
                 },
                 show: function( This, eOpts ) {
                     panel.addDDListener(This);

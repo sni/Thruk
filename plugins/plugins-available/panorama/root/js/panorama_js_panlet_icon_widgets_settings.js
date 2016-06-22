@@ -1407,6 +1407,18 @@ TP.iconShowEditDialog = function(panel) {
                                 }
                             }}
                         ]
+                    }, {
+                    fieldLabel: 'Options',
+                    xtype:      'fieldcontainer',
+                    layout:     'table',
+                    items: [{ xtype: 'label', text:  'display:', style: 'margin-left: 0; margin-right: 2px;' },
+                            {
+                                xtype:          'combobox',
+                                name:           'display',
+                                value:          'always',
+                                store:         ['always', 'mouseover'],
+                                editable:        false
+                            }]
                     }
                 ]
             }]
@@ -1697,6 +1709,8 @@ TP.iconShowEditDialog = function(panel) {
                 if(panel.dragEl2 && panel.dragEl2.el) { panel.dragEl2.el.dom.style.outline = ""; }
                 if(panel.labelEl && panel.labelEl.el) { panel.labelEl.el.dom.style.outline = ""; }
                 TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
+
+                if(panel.labelEl && panel.xdata.label.display && panel.xdata.label.display == 'mouseover') { panel.labelEl.hide(); }
             },
             move: function() {
                 if(TP.iconTip) { TP.iconTip.alignToSettingsWindow(); }
