@@ -2470,7 +2470,7 @@ Ext.define('TP.StaticIcon', {
     extend: 'TP.IconWidget',
 
     iconType:         'image',
-    cls:              'statciconWidget',
+    cls:              'statciconWidget tooltipTarget',
     hideAppearanceTab: true,
     generalLabelWidth: 50,
     hasScale:          true,
