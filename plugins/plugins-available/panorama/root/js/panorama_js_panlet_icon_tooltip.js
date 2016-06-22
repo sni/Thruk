@@ -73,8 +73,6 @@ Ext.onReady(function() {
                 ) { return(false); }
             },
             hide: function(This) {
-                delete TP.iconTip.last_id;
-                delete TP.iconTipTarget;
                 TP.modalWindows = TP.removeFromList(TP.modalWindows, TP.iconTip);
             },
             destroy: function(This) { delete TP.iconTip; delete TP.iconTipTarget; }
@@ -268,6 +266,10 @@ Ext.onReady(function() {
     };
 
     Ext.getBody().on('mouseover', function(evt,t,a) {
+        /* cancel previous hide timer */
+        window.clearTimeout(TP.iconTip.hideTimer);
+        delete TP.iconTip.hideTimer;
+
         TP.tipRenderer(evt,t,a);
     }, null, {delegate:'A.tooltipTarget'});
 
