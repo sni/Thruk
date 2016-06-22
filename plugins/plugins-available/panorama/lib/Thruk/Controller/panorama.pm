@@ -856,9 +856,9 @@ sub _task_load_dashboard {
             my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
             next if($size && length($content) == $size);
             my $dir     = $file;
-            $dir        =~ s|/.*?$||gmx;
+            $dir        =~ s|/[^/]+$||mx;
             eval {
-                Thruk::Utils::IO::mkdir_r($dir);
+                Thruk::Utils::IO::mkdir_r($usercontent_folder.$dir);
                 Thruk::Utils::IO::write($usercontent_folder.$file,$content);
             };
             if($@) {
