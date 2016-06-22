@@ -1086,8 +1086,11 @@ TP.loadDashboardWindow = function() {
                         params: { task: 'load_dashboard' },
                         waitMsg: 'Loading Dashboard...',
                         success: function(form, action) {
-                            TP.add_pantab(action.result.newid);
-                            TP.Msg.msg("success_message~~dashboard loaded successfully.");
+                            /* refresh icon sets, there might be new ones now */
+                            TP.iconsetsStore.load({callback: function() {
+                                TP.add_pantab(action.result.newid);
+                                TP.Msg.msg("success_message~~dashboard loaded successfully.");
+                            }});
                             win.destroy();
                         },
                         failure: function(form, action) {
