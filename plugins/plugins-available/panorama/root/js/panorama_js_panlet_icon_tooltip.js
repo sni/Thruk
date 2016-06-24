@@ -118,7 +118,7 @@ Ext.onReady(function() {
         if(!force && !img.locked) { return; }
         TP.iconTip.last_id = el.id;
         if(!img.getName) { delete TP.iconTipTarget; return; }
-        if(img.iconType == 'filtered') {
+        if(img.iconType == 'filtered' || img.iconType == 'image') {
             TP.iconTip.setTitle(img.getName());
         } else {
             TP.iconTip.setTitle(ucfirst(img.iconType)+': '+img.getName());

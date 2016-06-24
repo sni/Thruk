@@ -2522,6 +2522,8 @@ Ext.define('TP.StaticIcon', {
             border:      0
         }]);
     },
+    getDetails: function() { return([]); },
+    getName: function() { return(""); },
     refreshHandler: function(newStatus) {},
     setRenderItem: function(xdata, forceRecreate) {
         if(xdata == undefined) { xdata = this.xdata; }

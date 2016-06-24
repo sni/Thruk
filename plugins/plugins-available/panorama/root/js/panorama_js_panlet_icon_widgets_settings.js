@@ -45,6 +45,7 @@ TP.iconShowEditDialog = function(panel) {
     if(TP.iconSettingsWindow != undefined) {
         TP.iconSettingsWindow.destroy();
     }
+    if(TP.iconTip) { TP.iconTip.hide(); }
     tab.disableMapControlsTemp();
 
     TP.resetMoveIcons();
@@ -1428,7 +1429,7 @@ TP.iconShowEditDialog = function(panel) {
 
     /* Popup Tab */
     var popupTab;
-    if(panel.xdata.cls != 'TP.StaticIcon' && panel.xdata.cls == 'TP.TextLabelWidget') {
+    if(panel.xdata.cls != 'TP.TextLabelWidget') {
         popupTab = {
             title: 'Popup',
             type:  'panel',
@@ -1454,7 +1455,7 @@ TP.iconShowEditDialog = function(panel) {
                         editable:        false,
                         listeners:     {
                             change: function(This, newValue, oldValue, eOpts) {
-                                var defaults = '{{ '+TP.getPanelDetailsHeader(panel).join(' }}\n{{ ')+' }}';
+                                var defaults = TP.getPanelDetailsHeader(panel, true);
                                 if(newValue == 'default') {
                                     Ext.getCmp('popup_textfield').setValue(defaults);
                                     Ext.getCmp('popup_textfield').setDisabled(true);
@@ -1486,7 +1487,7 @@ TP.iconShowEditDialog = function(panel) {
                         height:          220,
                         disabled:       (panel.xdata.popup && panel.xdata.popup.type == "custom") ? false : true,
                         fieldStyle:     { 'whiteSpace': 'pre' },
-                        value:          '{{ '+TP.getPanelDetailsHeader(panel).join(' }}\n{{ ')+' }}',
+                        value:          TP.getPanelDetailsHeader(panel, true),
                         listeners:      { change: popupPreviewUpdate }
                       }]
                 }]
@@ -1502,7 +1503,7 @@ TP.iconShowEditDialog = function(panel) {
                     TP.suppressIconTip = false;
                     panel.locked = true;
 
-                    TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
+                    popupPreviewUpdate();
                     TP.iconTip.show();
                     window.clearTimeout(TP.iconTip.hideTimer);
                     delete TP.iconTip.hideTimer;
@@ -2014,11 +2015,18 @@ TP.getNextToPanelPos = function(panel, width, height) {
     return(panelPos);
 }
 
-TP.getPanelDetailsHeader = function(panel) {
+TP.getPanelDetailsHeader = function(panel, asText) {
     var d = panel.getDetails();
     var header = [];
     for(var x=0; x<d.length; x++) {
         header.push(d[x][0]);
+    }
+    if(asText) {
+        var txt = '';
+        if(header.length > 0) {
+            txt = '{{ ' + header.join(' }}\n{{ ')+' }}';
+        }
+        return(txt);
     }
     return(header);
 }
