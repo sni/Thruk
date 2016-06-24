@@ -548,6 +548,15 @@ TABLE.ministatus TH {
     background-color: #CEC7C7;
 }
 
+.item-disabled {
+  opacity: 0.5;
+  cursor: inherit;
+}
+.item-disabled.x-boundlist-item-over {
+  background: inherit;
+  border-color: inherit;
+}
+
 DIV.iconlabel, A.iconlabel {
   text-decoration: none;
   position: absolute;

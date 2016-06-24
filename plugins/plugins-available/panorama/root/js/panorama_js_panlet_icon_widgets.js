@@ -1032,6 +1032,7 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
         if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
+        if(xdata.appearance.type == 'perfbar')     { panel.perfbarRender(xdata);          }
 
         /* update zIndex order if no mask is present only */
         var masks = Ext.Element.select('.x-mask');
@@ -1767,6 +1768,32 @@ Ext.define('TP.IconWidget', {
                     TP.suppressIconTip = true;
                 });
             }
+        }
+    },
+    /* renders performance bar */
+    perfbarRender: function(xdata, forceColor) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.appearance.type != 'perfbar') { return }
+        panel.setSize(75, 20);
+        var data;
+        if(panel.service) {
+            data = panel.service;
+        }
+        else if(panel.host) {
+            data = panel.host;
+        }
+        if(data) {
+            var r =  perf_table(false, data.state, data.plugin_output, data.perf_data, data.check_command, "", !!panel.host, true);
+            if(r == false) { r= ""; }
+            panel.update(r);
+        } else {
+            if(TP.iconSettingsWindow) {
+                xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+            }
+            var tab = Ext.getCmp(panel.panel_id);
+            TP.updateAllIcons(tab, panel.id, xdata);
+            panel.update("<div class='perf_bar_bg notclickable' style='width:75px;'>");
         }
     },
     iconSetSourceFromState: function(xdata) {

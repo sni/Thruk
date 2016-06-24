@@ -306,6 +306,9 @@ TP.iconShowEditDialog = function(panel) {
         if(xdata.appearance.type == 'connector') {
             panel.connectorRender(xdata, forceColor);
         }
+        if(xdata.appearance.type == 'perfbar') {
+            panel.perfbarRender(xdata);
+        }
         labelUpdate();
         updateDisabledFields(xdata);
     }
@@ -331,10 +334,40 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'combobox',
                     fieldLabel: 'Type',
                     name:       'type',
-                    store:      [['none','Label Only'], ['icon','Icon'], ['connector', 'Line / Arrow / Watermark'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer'], ['shape', 'Shape']],
                     id:         'appearance_types',
                     editable:    false,
+                    valueField: 'value',
+                    displayField: 'name',
+                    store        : Ext.create('Ext.data.Store', {
+                        fields: ['value', 'name'],
+                        data:   [
+                            {"value":"none",        "name":"Label Only"},
+                            {"value":"icon",        "name":"Icon"},
+                            {"value":"connector",   "name":"Line / Arrow / Watermark"},
+                            {"value":"pie",         "name":"Pie Chart"},
+                            {"value":"speedometer", "name":"Speedometer"},
+                            {"value":"shape",       "name":"Shape"},
+                            {"value":"perfbar",     "name":"Performance Bar"}
+                        ]
+                    }),
+                    listConfig : {
+                        tpl : ((panel.iconType != 'host' && panel.iconType != 'service') ?
+                                '<tpl for="."><div class="x-boundlist-item <tpl if="value == \'perfbar\'"> item-disabled</tpl>">'
+                                +'{name}'
+                                +'<tpl if="value == \'perfbar\'"><span style="margin-left:30px;">(Host/Service only)</span></tpl>'
+                                +'</div></tpl>'
+                               :
+                                '<tpl for="."><div class="x-boundlist-item">{name}</div></tpl>')
+                    },
                     listeners: {
+                        beforeselect: function(This, record, index, eOpts ) {
+                            if(panel.iconType != 'host' && panel.iconType != 'service') {
+                                if(record.get('value') == 'perfbar') {
+                                    return(false);
+                                }
+                            }
+                            return(true);
+                        },
                         change: function(This, newValue, oldValue, eOpts) {
                             Ext.getCmp('appearanceForm').items.each(function(f, i) {
                                 if(f.cls != undefined) {

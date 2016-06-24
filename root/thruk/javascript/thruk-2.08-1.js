@@ -2464,7 +2464,7 @@ function parse_perf_data(perfdata) {
 }
 
 /* write/return table with performance data */
-function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url, is_host) {
+function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url, is_host, no_title) {
     if(is_host == undefined) { is_host = false; }
     if(is_host && state == 1) { state = 2; } // set critical state for host checks
     var perf_data = parse_perf_data(perfdata);
@@ -2480,7 +2480,7 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
         for(var nr=0; nr<res.length; nr++) {
             if(res[nr] != undefined) {
                 var graph = res[nr];
-                result += '<div class="perf_bar_bg '+cls+'" style="width:'+graph.div_width+'px;" title="'+graph.title+'">';
+                result += '<div class="perf_bar_bg '+cls+'" style="width:'+graph.div_width+'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'>';
                 if(graph.warn_width_min != null) {
                     result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width_min+'px;">&nbsp;<\/div>';
                 }
@@ -2493,7 +2493,7 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
                 if(graph.crit_width_max != null) {
                     result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width_max+'px;">&nbsp;<\/div>';
                 }
-                result += '<img class="perf_bar" src="' + url_prefix + 'themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'">';
+                result += '<img class="perf_bar" src="' + url_prefix + 'themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'>';
                 result += '<\/div>';
             }
         }
