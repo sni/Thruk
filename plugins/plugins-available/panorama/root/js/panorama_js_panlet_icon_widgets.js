@@ -798,10 +798,10 @@ Ext.define('TP.SmallWidget', {
                 }
                 if(!panel.ddShadow) {
                     var size = panel.getSize();
-                    panel.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
+                    panel.ddShadow = Ext.DomHelper.append(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 9999999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
                 }
                 if(!panel.dragHint) {
-                    panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
+                    panel.dragHint = Ext.DomHelper.append(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 9999999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
                 }
             });
             el.dd.addListener('drag', function(This, evt) {
@@ -1269,6 +1269,21 @@ Ext.define('TP.IconWidget', {
                 axis_steps:   xdata.appearance.speedosteps,
                 axis_min:     xdata.appearance.speedoaxis_min ? xdata.appearance.speedoaxis_min : 0,
                 axis_max:     xdata.appearance.speedoaxis_max ? xdata.appearance.speedoaxis_max : 0,
+                listeners: {
+                    afterrender: function(This, eOpts) {
+                        panel.itemRendering = false;
+                        panel.chart = This;
+                        panel.updateRender(xdata);
+                    },
+                    resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
+                        panel.updateRender(xdata);
+                    }
+                }
+            });
+        }
+        else if(xdata.appearance.type == 'perfbar') {
+            panel.add({
+                xtype:       'panel',
                 listeners: {
                     afterrender: function(This, eOpts) {
                         panel.itemRendering = false;
@@ -1776,6 +1791,10 @@ Ext.define('TP.IconWidget', {
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.appearance.type != 'perfbar') { return }
         panel.setSize(75, 20);
+        if(!panel.items.getAt(0)) {
+            panel.setRenderItem(xdata);
+            return;
+        }
         var data;
         if(panel.service) {
             data = panel.service;
@@ -1786,14 +1805,14 @@ Ext.define('TP.IconWidget', {
         if(data) {
             var r =  perf_table(false, data.state, data.plugin_output, data.perf_data, data.check_command, "", !!panel.host, true);
             if(r == false) { r= ""; }
-            panel.update(r);
+            panel.items.getAt(0).update(r);
         } else {
             if(TP.iconSettingsWindow) {
                 xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
             }
             var tab = Ext.getCmp(panel.panel_id);
             TP.updateAllIcons(tab, panel.id, xdata);
-            panel.update("<div class='perf_bar_bg notclickable' style='width:75px;'>");
+            panel.items.getAt(0).update("<div class='perf_bar_bg notclickable' style='width:75px;'>");
         }
     },
     iconSetSourceFromState: function(xdata) {
