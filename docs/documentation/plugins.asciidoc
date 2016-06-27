@@ -542,5 +542,5 @@ a link to hello.cgi in your Thruk sidebar.
 <br style="clear: both;">
 ++++
 
-TIP: You can also try to copy an existing plugin and change it to your
-needs.
+TIP: Try to copy an existing plugin, change it to your needs
+or copy/paste ideas from it to your own.
