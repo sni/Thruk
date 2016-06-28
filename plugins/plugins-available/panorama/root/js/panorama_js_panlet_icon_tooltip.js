@@ -76,6 +76,10 @@ Ext.onReady(function() {
                    && TP.iconSettingsWindow.items.getAt(0)
                    && TP.iconSettingsWindow.items.getAt(0).getActiveTab().title == "Popup"
                 ) { return(false); }
+                if(!This.hideTimer) {
+                    This.delayHide();
+                    return(false);
+                }
             },
             hide: function(This) {
                 TP.modalWindows = TP.removeFromList(TP.modalWindows, TP.iconTip);
