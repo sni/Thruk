@@ -268,6 +268,25 @@ sub get_config {
     my %config  = %Thruk::Config::config;
     my $first_backend_from_thruk_locals = 0;
     for my $file (@files) {
+        my $ext;
+        if($file =~ m/\.([^.]+)$/mx) { $ext = $1; }
+        if(!$ext) {
+            if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                print STDERR "skipped config file: ".$file.", file has no extension, please use either cfg, conf or the hostname\n";
+            }
+            next;
+        }
+        if($ext ne 'conf' && $ext ne 'cfg') {
+            # only read if the extension matches the hostname
+            our $hostname;
+            if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
+            if($ext ne $hostname) {
+                if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                    print STDERR "skipped config file: ".$file.", extension '$ext' does not match our hostname '$hostname'\n";
+                }
+                next;
+            }
+        }
         if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
             print STDERR "reading config file: ".$file."\n";
         }

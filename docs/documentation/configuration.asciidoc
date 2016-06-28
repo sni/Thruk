@@ -66,7 +66,10 @@ thruk_local.d/ instead.
 === thruk_local.d
 {% include new_since.ad version="2.00" %}
 Local settings drop directory. All files in here override settings from the
-thruk.conf file.
+thruk.conf file. Besides the standard file extension 'cfg' and 'conf' it is
+also possible to use the hostname. Those files are only used if the hostname
+matches the actual system hostname. This is a good way to separate test and
+production configuration.
 
 === thruk_local.conf
 

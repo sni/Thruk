@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - support reading action_menu_items from file/folder
+          - support thruk_local.d/file.$hostname files to separate host specific configs
           - fix can_submit_commands setting not used from contact (#597)
           - fix corrupting datafiles when trying to write to full filesystems
           - Logcache:
