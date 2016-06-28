@@ -112,6 +112,7 @@ TP.iconShowEditDialog = function(panel) {
     var popupPreviewUpdate = function() {
         window.clearTimeout(TP.timeouts['timeout_popup_preview']);
         TP.timeouts['timeout_popup_preview'] = window.setTimeout(function() {
+            TP.iconTipTarget = panel;
             TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
         }, 200);
     }
@@ -1532,7 +1533,6 @@ TP.iconShowEditDialog = function(panel) {
                     var pos = TP.iconSettingsWindow.getPosition();
                     TP.iconSettingsWindow.setPosition(pos[0], 50);
 
-                    TP.iconTipTarget = panel;
                     TP.suppressIconTip = false;
                     panel.locked = true;
 
@@ -1793,6 +1793,8 @@ TP.iconShowEditDialog = function(panel) {
     } else {
         panel.el.dom.style.outline = "2px dotted orange";
     }
+
+    popupPreviewUpdate();
 
     window.setTimeout(function() {
         if(TP.iconSettingsWindow) {

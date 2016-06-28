@@ -37,6 +37,11 @@ Ext.onReady(function() {
                     This.hide();
                     return false;
                 }
+                var tabpan = Ext.getCmp('tabpan');
+                var tab = tabpan.getActiveTab();
+                if(!tab.locked && !TP.iconSettingsWindow) {
+                    return(false);
+                }
                 return true;
             },
             show: function(This) {
@@ -98,6 +103,8 @@ Ext.onReady(function() {
         var xdata = img.xdata;
         if(TP.iconSettingsWindow) {
             xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+            img   = TP.iconSettingsWindow.panel;
+            TP.iconTipTarget = TP.iconSettingsWindow.panel;
         }
 
         /* activate label mouseover */
@@ -107,6 +114,10 @@ Ext.onReady(function() {
             delete img.labelEl.mouseover;
             TP.mouseoverLabel = img.labelEl;
         }
+
+        var tabpan = Ext.getCmp('tabpan');
+        var tab = tabpan.getActiveTab();
+        if(!tab.locked && !TP.iconSettingsWindow) { delete TP.iconTipTarget; return; }
 
         if(!force && TP.suppressIconTip) { delete TP.iconTipTarget; return; }
         evt.stopEvent();
