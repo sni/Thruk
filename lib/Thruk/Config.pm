@@ -280,9 +280,9 @@ sub get_config {
             # only read if the extension matches the hostname
             our $hostname;
             if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
-            if($ext ne $hostname) {
+            if($file !~ m/\Q$hostname\E$/mx) {
                 if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
-                    print STDERR "skipped config file: ".$file.", extension '$ext' does not match our hostname '$hostname'\n";
+                    print STDERR "skipped config file: ".$file.", file does not end with our hostname '$hostname'\n";
                 }
                 next;
             }
