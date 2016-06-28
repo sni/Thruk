@@ -455,6 +455,14 @@ Ext.define('TP.SmallWidget', {
         var el    = panel.labelEl.el.dom;
         var style = el.style;
 
+        /* use original reference coordinates for shrinked icons */
+        if(panel.shrinked) {
+            left     = panel.shrinked.x;
+            top      = panel.shrinked.y;
+            elWidth  = panel.shrinked.size;
+            elHeight = panel.shrinked.size;
+        }
+
         if(cfg.bordercolor && bordersize > 0) {
             style.border = bordersize+"px solid "+cfg.bordercolor;
         } else {
@@ -1151,7 +1159,6 @@ Ext.define('TP.IconWidget', {
             y        = (xdata.size - xdata.nsize[1]) / 2;
             width    = xdata.nsize[0];
             height   = xdata.nsize[1];
-            size     = xdata.size;
             size     = Math.ceil((Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)))*scale);
             panel.setSize(size, size);
         } else if(panel.xdata.size && panel.xdata.nsize && panel.xdata.nsize[0] > 1) {
@@ -1159,7 +1166,6 @@ Ext.define('TP.IconWidget', {
             y        = (panel.xdata.size - panel.xdata.nsize[1]) / 2;
             width    = panel.xdata.nsize[0];
             height   = panel.xdata.nsize[1];
-            size     = panel.xdata.size;
             size     = Math.ceil((Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)))*scale);
             panel.setSize(size, size);
         } else {
@@ -1176,6 +1182,18 @@ Ext.define('TP.IconWidget', {
                 drawWidth  = width;
                 drawHeight = height;
             }
+            /* shrink panel size to icon size if possible (non-edit mode and not rotated) */
+            delete panel.shrinked;
+            if(xdata.appearance.type == 'icon' && xdata.layout.rotation == 0 && panel.locked) {
+                panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y };
+                x=0;
+                y=0;
+                drawWidth  = width;
+                drawHeight = height;
+                panel.setSize(drawWidth, drawHeight);
+                panel.setPosition(panel.xdata.layout.x+((size-width)/2), panel.xdata.layout.y+((size-height)/2));
+            }
+
             var items = [];
             if(xdata.appearance.type == 'icon') {
                 if(xdata.layout.rotation == undefined) { xdata.layout.rotation = 0; }
@@ -1914,7 +1932,11 @@ Ext.define('TP.IconWidget', {
             var scale = xdata.layout.scale != undefined ? xdata.layout.scale / 100 : 1;
             if(scale <= 0) { scale = 1; }
             size = Math.ceil(size * scale);
-            panel.setSize(size, size);
+            if(panel.shrinked) {
+                panel.setSize(naturalWidth, naturalHeight);
+            } else {
+                panel.setSize(size, size);
+            }
             if(panel.items.getAt && panel.items.getAt(0)) {
                 panel.items.getAt(0).setSize(size, size);
             }
@@ -1933,6 +1955,7 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         var src = panel.src || xdata.general.src;
         if(!panel.el) { return; }
+        if(xdata == undefined) { xdata = panel.xdata; }
         if(TP.isThisTheActiveTab(panel) && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
             panel.el.dom.style.border    = "1px dashed black";
             panel.el.dom.style.minWidth  = 20;
@@ -2991,8 +3014,10 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     /* moving with closed settings window */
     if(icon.stateful) {
         if(icon.setIconLabel) {
-            icon.xdata.layout.x = Math.floor(x);
-            icon.xdata.layout.y = Math.floor(y);
+            if(!icon.locked) {
+                icon.xdata.layout.x = Math.floor(x);
+                icon.xdata.layout.y = Math.floor(y);
+            }
 
             if(icon.xdata.appearance.type == "connector" && icon.xdata.appearance.connectorfromx != undefined) {
                 icon.xdata.appearance.connectorfromx += deltaX;
