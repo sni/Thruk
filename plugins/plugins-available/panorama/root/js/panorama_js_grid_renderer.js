@@ -74,6 +74,12 @@ TP.text_host_status = function(v) {
     return(state);
 }
 
+/* return text status */
+TP.text_status = function(v, isHost) {
+    if(isHost) { return(TP.text_host_status(v)); }
+    return(TP.text_service_status(v));
+}
+
 /* render host status */
 TP.render_host_status = function(v, td, item) {
     var state;

@@ -14,6 +14,7 @@ next:
             - add performance bar icon type
             - icon label can be mouseover only now
             - do not overlap icons which are placed close together
+            - host status beats service status for group/filter icons
 
 2.08     Fri May  6 11:29:14 CEST 2016
           - add status column to performance map excel export

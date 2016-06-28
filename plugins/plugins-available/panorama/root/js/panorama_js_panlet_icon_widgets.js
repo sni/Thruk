@@ -1864,7 +1864,7 @@ Ext.define('TP.IconWidget', {
                 newSrc = xdata.general.src;
             }
         }
-        else if(panel.iconType == 'host') {
+        else if(panel.iconType == 'host' || panel.hostProblem) {
             if(panel.acknowledged) {
                      if(xdata.state == 1) { newSrc = 'acknowledged_down';        }
                 else if(xdata.state == 2) { newSrc = 'acknowledged_unreachable'; }
@@ -2071,6 +2071,7 @@ TP.get_group_status = function(options) {
     var s;
     var acknowledged = false;
     var downtime     = false;
+    var hostProblem  = false;
     if(group.hosts    == undefined) { group.hosts    = {} }
     if(group.services == undefined) { group.services = {} }
 
@@ -2087,15 +2088,15 @@ TP.get_group_status = function(options) {
         totals.hosts.unreachable = group.hosts.plain_unreachable;
     }
 
-         if(incl_svc && totals.services.unknown > 0)                             { s = 3; }
+         if(incl_hst && totals.hosts.down        > 0)                            { s = 1; hostProblem = true; }
+    else if(incl_hst && totals.hosts.unreachable > 0)                            { s = 2; hostProblem = true; }
+    else if(incl_svc && totals.services.unknown > 0)                             { s = 3; }
     else if(incl_svc && incl_ack && group.services.ack_unknown > 0)              { s = 3; }
     else if(incl_svc && incl_downtimes && group.services.downtimes_unknown > 0)  { s = 3; }
-    else if(incl_hst && totals.hosts.unreachable > 0)                            { s = 2; }
-    else if(incl_hst && totals.hosts.down        > 0)                            { s = 2; }
     else if(incl_ack && group.hosts.ack_unreachable > 0)                         { s = 2; }
     else if(incl_ack && group.hosts.ack_down        > 0)                         { s = 2; }
-    else if(incl_hst && incl_downtimes && group.hosts.downtime_down        > 0)  { s = 2; }
-    else if(incl_hst && incl_downtimes && group.hosts.downtime_unreachable > 0)  { s = 2; }
+    else if(incl_hst && incl_downtimes && group.hosts.downtime_down        > 0)  { s = 1; hostProblem = true; }
+    else if(incl_hst && incl_downtimes && group.hosts.downtime_unreachable > 0)  { s = 2; hostProblem = true; }
     else if(incl_svc && totals.services.critical > 0)                            { s = 2; }
     else if(incl_svc && incl_ack && group.services.ack_critical > 0)             { s = 2; }
     else if(incl_svc && incl_downtimes && group.services.downtimes_critical > 0) { s = 2; }
@@ -2105,21 +2106,21 @@ TP.get_group_status = function(options) {
     else                                                                         { s = 0; }
     if(s == 0) {
         var a = 0;
-             if(incl_svc && group.services.ack_unknown       > 0) { a = 3; acknowledged = true; }
-        else if(incl_hst && group.hosts.ack_unreachable      > 0) { a = 2; acknowledged = true; }
-        else if(incl_hst && group.hosts.ack_down             > 0) { a = 2; acknowledged = true; }
+             if(incl_hst && group.hosts.ack_down             > 0) { a = 1; acknowledged = true; hostProblem = true; }
+        else if(incl_hst && group.hosts.ack_unreachable      > 0) { a = 2; acknowledged = true; hostProblem = true; }
+        else if(incl_svc && group.services.ack_unknown       > 0) { a = 3; acknowledged = true; }
         else if(incl_svc && group.services.ack_critical      > 0) { a = 2; acknowledged = true; }
         else if(incl_svc && group.services.ack_warning       > 0) { a = 1; acknowledged = true; }
 
         var d = 0;
-             if(incl_svc && group.services.downtimes_unknown > 0) { d = 3; downtime     = true; }
-        else if(incl_hst && group.hosts.downtime_unreachable > 0) { d = 2; downtime     = true; }
-        else if(incl_hst && group.hosts.downtime_down        > 0) { d = 2; downtime     = true; }
+             if(incl_hst && group.hosts.downtime_down        > 0) { d = 1; downtime     = true; hostProblem = true; }
+        else if(incl_hst && group.hosts.downtime_unreachable > 0) { d = 2; downtime     = true; hostProblem = true; }
+        else if(incl_svc && group.services.downtimes_unknown > 0) { d = 3; downtime     = true; }
         else if(incl_svc && group.services.downtime_critical > 0) { d = 2; downtime     = true; }
         else if(incl_svc && group.services.downtime_warning  > 0) { d = 1; downtime     = true; }
         s = Ext.Array.max([a,s,d]);
     }
-    return({state: s, downtime: downtime, acknowledged: acknowledged});
+    return({state: s, downtime: downtime, acknowledged: acknowledged, hostProblem: hostProblem });
 }
 
 
@@ -2181,6 +2182,7 @@ Ext.define('TP.HostgroupStatusIcon', {
             newStatus         = res.state;
             this.downtime     = res.downtime;
             this.acknowledged = res.acknowledged;
+            this.hostProblem  = res.hostProblem;
         }
         this.callParent([newStatus]);
     },
@@ -2193,7 +2195,7 @@ Ext.define('TP.HostgroupStatusIcon', {
         if(!this.hostgroup) {
             return([['Status', 'No status information available']]);
         }
-        var statename = TP.text_service_status(this.xdata.state);
+        var statename = TP.text_status(this.xdata.state, this.hostProblem);
         details.push([ 'Summarized Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
                                             +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
                                             +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
@@ -2322,6 +2324,7 @@ Ext.define('TP.ServicegroupStatusIcon', {
             newStatus         = res.state;
             this.downtime     = res.downtime;
             this.acknowledged = res.acknowledged;
+            this.hostProblem  = res.hostProblem;
         }
         this.callParent([newStatus]);
     },
@@ -2413,6 +2416,7 @@ Ext.define('TP.FilterStatusIcon', {
             newStatus         = res.state;
             this.downtime     = res.downtime;
             this.acknowledged = res.acknowledged;
+            this.hostProblem  = res.hostProblem;
         }
         this.callParent([newStatus]);
     },
@@ -2429,7 +2433,7 @@ Ext.define('TP.FilterStatusIcon', {
         if(this.xdata.general.incl_svc == false) {
             statename = TP.text_host_status(this.xdata.state);
         } else {
-            statename = TP.text_service_status(this.xdata.state);
+            statename = TP.text_status(this.xdata.state, this.hostProblem);
         }
         details.push([ 'Summarized Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
                                             +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
