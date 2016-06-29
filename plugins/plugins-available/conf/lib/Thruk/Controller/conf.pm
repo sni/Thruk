@@ -1819,6 +1819,7 @@ sub _object_disable {
     $obj->{'disabled'}               = 1;
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
+    $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
 
     # create log message
@@ -1840,6 +1841,7 @@ sub _object_enable {
     $obj->{'disabled'}               = 0;
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
+    $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
 
     # create log message
