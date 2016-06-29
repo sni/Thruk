@@ -586,7 +586,8 @@ sub store_model_retention {
             'version'      => $c->config->{'version'},
         };
         store($data, $file);
-        $c->config->{'conf_retention'} = [stat($file)];
+        $c->config->{'conf_retention'}      = [stat($file)];
+        $c->config->{'conf_retention_file'} = $file;
         $c->stash->{'obj_model_changed'} = 0;
         $c->log->debug('saved object retention data');
     };
@@ -627,7 +628,8 @@ sub get_model_retention {
     ) {
        return 1;
     }
-    $c->config->{'conf_retention'} = \@stat;
+    $c->config->{'conf_retention'}      = \@stat;
+    $c->config->{'conf_retention_file'} = $file;
 
     # try to retrieve retention data
     eval {
