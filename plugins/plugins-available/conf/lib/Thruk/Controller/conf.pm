@@ -1867,6 +1867,7 @@ sub _object_delete {
         }
     }
     $c->{'obj_db'}->delete_object($obj);
+    $c->stash->{'obj_model_changed'} = 1;
 
     # create log message
     $c->log->info(sprintf("[config][%s][%s] removed %s '%s'",
