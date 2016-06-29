@@ -174,7 +174,7 @@ sub store_objects {
     $c->{'obj_db'}->{'needs_commit'} = 1;
     $c->{'obj_db'}->{'last_changed'} = time();
     require Thruk::Utils::Conf;
-    Thruk::Utils::Conf::store_model_retention($c) or die("failed to store objects model");
+    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'}) or die("failed to store objects model");
     return;
 }
 

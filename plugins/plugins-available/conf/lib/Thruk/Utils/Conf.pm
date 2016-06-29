@@ -65,7 +65,7 @@ sub set_object_model {
 
     # already parsed?
     my $jobid = $model->currently_parsing($c->stash->{'param_backend'});
-    if(    Thruk::Utils::Conf::get_model_retention($c)
+    if(    Thruk::Utils::Conf::get_model_retention($c, $c->stash->{'param_backend'})
        and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model)
     ) {
         # objects initialized
@@ -142,7 +142,7 @@ sub read_objects {
     my $model         = $c->app->obj_db_model;
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
     my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, undef, $c->{'stats'}, $peer_conftool);
-    store_model_retention($c);
+    store_model_retention($c, $c->stash->{'param_backend'});
     $c->stash->{model_type} = 'Objects';
     $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, $obj_db, $c->{'stats'} ];
     $c->stats->profile(end => "read_objects()");
@@ -567,21 +567,22 @@ store object model in storable
 
 =cut
 sub store_model_retention {
-    my($c) = @_;
-    $c->stats->profile(begin => "store_model_retention()");
+    my($c, $backend) = @_;
+    confess("no backend") unless $backend;
+    $c->stats->profile(begin => "store_model_retention($backend)");
 
     my $model = $c->app->obj_db_model;
-    my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
+    my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+
+    confess("no such backend") unless defined $model->{'configs'}->{$backend};
 
     # try to save retention data
     eval {
         # delete some useless references
-        for my $conf (values %{$model->{'configs'}}) {
-            delete $conf->{'stats'};
-            delete $conf->{'remotepeer'};
-        }
+        delete $model->{'configs'}->{$backend}->{'stats'};
+        delete $model->{'configs'}->{$backend}->{'remotepeer'};
         my $data = {
-            'configs'      => $model->{'configs'},
+            'configs'      => {$backend => $model->{'configs'}->{$backend}},
             'release_date' => $c->config->{'released'},
             'version'      => $c->config->{'version'},
         };
@@ -593,11 +594,11 @@ sub store_model_retention {
     };
     if($@) {
         $c->log->error($@);
-        $c->stats->profile(end => "store_model_retention()");
+        $c->stats->profile(end => "store_model_retention($backend)");
         return;
     }
 
-    $c->stats->profile(end => "store_model_retention()");
+    $c->stats->profile(end => "store_model_retention($backend)");
     return 1;
 }
 
@@ -609,20 +610,24 @@ restore object model from storable
 
 =cut
 sub get_model_retention {
-    my($c) = @_;
-    $c->stats->profile(begin => "get_model_retention()");
+    my($c, $backend) = @_;
+    $c->stats->profile(begin => "get_model_retention($backend)");
 
     my $model = $c->app->obj_db_model;
-    my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
+
+    my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+    if(! -f $file) {
+        $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
+    }
 
     if(! -f $file) {
-        return 1 if $model->cache_exists($c->stash->{'param_backend'});
+        return 1 if $model->cache_exists($backend);
         return;
     }
 
     # don't read retention file when current data is newer
     my @stat = stat($file);
-    if( $model->cache_exists($c->stash->{'param_backend'}) and
+    if( $model->cache_exists($backend) and
         defined $c->config->{'conf_retention'}
         and $stat[9] <= $c->config->{'conf_retention'}->[9]
     ) {
@@ -660,7 +665,7 @@ sub get_model_retention {
 
     $c->log->debug('model retention file '.$file.' loaded.');
 
-    $c->stats->profile(end => "get_model_retention()");
+    $c->stats->profile(end => "get_model_retention($backend)");
     return 1;
 }
 

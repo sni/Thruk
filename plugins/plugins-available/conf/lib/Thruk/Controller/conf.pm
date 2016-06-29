@@ -136,7 +136,7 @@ sub index {
     elsif($subcat eq 'objects') {
         $c->stash->{'obj_model_changed'} = 0;
         _process_objects_page($c);
-        Thruk::Utils::Conf::store_model_retention($c) if $c->stash->{'obj_model_changed'};
+        Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'}) if $c->stash->{'obj_model_changed'};
         $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
     }
 
@@ -1189,6 +1189,7 @@ sub _apply_config_changes {
             return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
         }
         if($c->{'obj_db'}->commit($c)) {
+            $c->stash->{'obj_model_changed'} = 1;
             Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
         }
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
