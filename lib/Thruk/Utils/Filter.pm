@@ -887,13 +887,13 @@ sub has_business_process {
 
 =head2 button
 
-  my $html = button($link, $value, $class, [$onclick], [$formstyle], [$keeplink])
+  my $html = button($link, $value, $class, [$onclick], [$formstyle], [$keeplink], [$skipform])
 
 returns button html source
 
 =cut
 sub button {
-    my($link, $value, $class, $onclick, $formstyle, $keeplink) = @_;
+    my($link, $value, $class, $onclick, $formstyle, $keeplink, $skipform) = @_;
 
     my($page, $args);
     if($keeplink) {
@@ -904,7 +904,8 @@ sub button {
         $args =~ s/&amp;/&/gmx if defined $args;
     }
 
-    my $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>';
+    my $html = '';
+    $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>' unless $skipform;
     $args = '' unless defined $args;
     for my $a (split/\&/mx, $args) {
         my($k,$v) = split(/=/mx,$a,2);
@@ -913,7 +914,7 @@ sub button {
     $html   .= '<button class="'.$class.'"';
     $html   .= ' onclick="'.$onclick.'"' if $onclick;
     $html   .= '>'.$value.'</button>';
-    $html   .= '</form>';
+    $html   .= '</form>' unless $skipform;
     return $html;
 }
 
