@@ -967,6 +967,11 @@ sub delete_object {
     }
     $file->{'objects'} = \@new_objects;
 
+    # file can be removed if its empty now
+    if(scalar @new_objects == 0) {
+        $self->file_delete($file, 0);
+    }
+
     $self->_rebuild_index() if $rebuild;
 
     return 1;
@@ -1036,9 +1041,7 @@ remove a file from the config
 
 =cut
 sub file_delete {
-    my $self    = shift;
-    my $file    = shift;
-    my $rebuild = shift;
+    my($self, $file, $rebuild) = @_;
     $rebuild                = 1 unless defined $rebuild;
     $file->{'deleted'}      = 1;
     $file->{'changed'}      = 1;
