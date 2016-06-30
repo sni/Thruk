@@ -242,6 +242,9 @@ sub commit {
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
         my $is_new_file = $file->{'is_new_file'};
+        if(scalar @{$file->{'objects'}} == 0) {
+            $self->file_delete($file);
+        }
         unless($file->save()) {
             $rc = 0;
         } else {
@@ -966,11 +969,6 @@ sub delete_object {
         push @new_objects, $o;
     }
     $file->{'objects'} = \@new_objects;
-
-    # file can be removed if its empty now
-    if(scalar @new_objects == 0) {
-        $self->file_delete($file, 0);
-    }
 
     $self->_rebuild_index() if $rebuild;
 
