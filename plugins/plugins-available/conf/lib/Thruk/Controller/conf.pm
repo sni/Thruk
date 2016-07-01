@@ -1862,7 +1862,6 @@ sub _object_delete {
     my $refs = $c->{'obj_db'}->get_references($obj);
     if(!$c->req->parameters->{'force'}) {
         if(scalar keys %{$refs}) {
-            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($obj->get_type()).' has remaining references' );
             return $c->redirect_to('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id().'&show_force=1');
         }
     }
