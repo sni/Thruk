@@ -40,6 +40,7 @@ TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
     var tab      = Ext.getCmp(panel.panel_id);
     var lastType = panel.xdata.appearance.type;
+    TP.iconShowEditDialogPanel = panel;
 
     // make sure only one window is open at a time
     if(TP.iconSettingsWindow != undefined) {
@@ -570,9 +571,10 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
+                        listeners: { change:    function()      { renderUpdate(undefined, undefined, 0); },
+                                     mouseover: function(color) { renderUpdate(color,     undefined, 0); },
+                                     mouseout:  function(color) { renderUpdate(undefined, undefined, 0); }
+                                   }
                     },
                     items: [
                         { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
@@ -805,9 +807,10 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
+                        listeners: { change:    function()      { renderUpdate(undefined, undefined, 0)  },
+                                     mouseover: function(color) { renderUpdate(color,     undefined, 0); },
+                                     mouseout:  function(color) { renderUpdate(undefined, undefined, 0); }
+                                   }
                     },
                     items: [
                         { xtype: 'label', text: panel.iconType == 'host' ? 'Up ' : 'Ok ' },
@@ -942,9 +945,10 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
+                        listeners: { change:    function()      { renderUpdate(undefined, undefined, 0)  },
+                                     mouseover: function(color) { renderUpdate(color,     undefined, 0); },
+                                     mouseout:  function(color) { renderUpdate(undefined, undefined, 0); }
+                                   }
                     },
                     items: [
                         { xtype: 'label', text: 'Ok:' },
@@ -1076,9 +1080,10 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo({color: color, scope: this }); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
+                        listeners: { change:    function()      { renderUpdate(undefined,                    undefined, 0)  },
+                                     mouseover: function(color) { renderUpdate({color: color, scope: this }, undefined, 0); },
+                                     mouseout:  function(color) { renderUpdate(undefined,                    undefined, 0); }
+                                   }
                     },
                     items: [
                         { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
@@ -1268,7 +1273,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}); };
+    var labelUpdate = Ext.emptyFn;
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -1710,6 +1715,7 @@ TP.iconShowEditDialog = function(panel) {
                     ignoreInputFields: true,
                     scope: panel
                 });
+                TP.setIconSettingsValues(panel.xdata);
             },
             destroy: function() {
                 delete TP.iconSettingsWindow;
@@ -1761,6 +1767,8 @@ TP.iconShowEditDialog = function(panel) {
     TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
 
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}); };
+
     // new mouseover tips while settings are open
     TP.iconTip.hide();
 
@@ -1771,13 +1779,18 @@ TP.iconShowEditDialog = function(panel) {
     TP.iconSettingsWindow.panel = panel;
 
     settingsWindow.renderUpdateDo = renderUpdateDo;
-    renderUpdate = function(forceColor, forceRenderItem) {
+    renderUpdate = function(forceColor, forceRenderItem, delay) {
+        if(delay == undefined) { delay = 100; }
+        if(delay == 0) {
+            TP.iconSettingsWindow.renderUpdateDo(forceColor, forceRenderItem);
+            return;
+        }
         if(TP.skipRender) { return; }
         TP.reduceDelayEvents(TP.iconSettingsWindow, function() {
             if(TP.skipRender)          { return; }
             if(!TP.iconSettingsWindow) { return; }
             TP.iconSettingsWindow.renderUpdateDo(forceColor, forceRenderItem);
-        }, 100, 'timeout_settings_render_update');
+        }, delay, 'timeout_settings_render_update');
     };
     settingsWindow.renderUpdate = renderUpdate;
     renderUpdate();
