@@ -1184,7 +1184,7 @@ Ext.define('TP.IconWidget', {
             }
             /* shrink panel size to icon size if possible (non-edit mode and not rotated) */
             delete panel.shrinked;
-            if(xdata.appearance.type == 'icon' && xdata.layout.rotation == 0 && panel.locked) {
+            if(xdata.appearance.type == 'icon' && xdata.layout.rotation == 0 && (xdata.layout.scale == undefined || xdata.layout.scale == 1) && panel.locked) {
                 panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y };
                 x=0;
                 y=0;
