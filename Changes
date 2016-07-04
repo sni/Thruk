@@ -19,6 +19,8 @@ next:
           - Config Tool:
             - support recursive object removal
             - empty files will be deleted when the last object is removed
+          - Business Process:
+            - translate host states to correct states
 
 2.08     Fri May  6 11:29:14 CEST 2016
           - add status column to performance map excel export

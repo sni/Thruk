@@ -65,6 +65,9 @@ sub status {
     }
     elsif($hostname) {
         $data = $livedata->{'hosts'}->{$hostname};
+        # translate host downs to critical
+        $data->{'state'}           = 2 if $data->{'state'} == 1;
+        $data->{'last_hard_state'} = 2 if $data->{'last_hard_state'} == 1;
     }
 
     # only hard states?
