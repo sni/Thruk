@@ -196,8 +196,12 @@ Ext.onReady(function() {
             if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
         }
 
-        var details = '<table class="iconDetails">';
         TP.iconTip.panel = undefined;
+        if(d.length == 0) {
+            TP.iconTip.hide();
+            return;
+        }
+        var details = '<table class="iconDetails">';
         for(var x=0; x<d.length; x++) {
             if(d[x].length == 2 && d[x][0] == '')        { d[x] = [d[x][1]]; }
             if(d[x].length == 2 && d[x][0].match(/^\*/)) { d[x] = [d[x][1]]; }
