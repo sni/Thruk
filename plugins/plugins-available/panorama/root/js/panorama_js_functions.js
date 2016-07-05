@@ -1836,6 +1836,18 @@ var TP = {
         var activeTab = tabpan.getActiveTab();
         if(activeTab && panel.panel_id != activeTab.id) { return(false); }
         return(true);
+    },
+    /* return true if there are any masks visible */
+    masksVisible: function() {
+        var masks = Ext.Element.select('.x-mask');
+        if(masks.elements.length > 0) {
+            for(var nr=0; nr<masks.elements.length; nr++) {
+                if(masks.elements[nr].style.display != "none") {
+                    return(true);
+                }
+            }
+        }
+        return(false);
     }
 }
 TP.log('[global] starting');

@@ -427,8 +427,7 @@ Ext.define('TP.Pantab', {
         var activeTab = tabpan.getActiveTab();
         if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
         /* do not change zindex if there are masks on screen */
-        var masks = Ext.Element.select('.x-mask');
-        if(masks.elements.length > 0) { return }
+        if(TP.masksVisible()) { return; }
 
         if(this.window_ids) {
             var zIndexList = [];

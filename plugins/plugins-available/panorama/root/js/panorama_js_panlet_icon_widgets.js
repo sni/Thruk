@@ -1043,8 +1043,7 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'perfbar')     { panel.perfbarRender(xdata);          }
 
         /* update zIndex order if no mask is present only */
-        var masks = Ext.Element.select('.x-mask');
-        if(masks.elements.length > 0) { return }
+        if(TP.masksVisible()) { return; }
         if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(err) {} }
         TP.checkModalWindows();
     },
