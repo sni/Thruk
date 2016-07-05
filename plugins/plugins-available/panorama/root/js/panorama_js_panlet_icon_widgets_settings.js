@@ -102,21 +102,8 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     /* General Settings Tab */
-    var stateUpdate = function() {
-        var xdata = TP.get_icon_form_xdata(settingsWindow);
-        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
-        labelUpdate();
-        // update performance data stores
-        perfDataUpdate();
-    }
-
-    var popupPreviewUpdate = function() {
-        window.clearTimeout(TP.timeouts['timeout_popup_preview']);
-        TP.timeouts['timeout_popup_preview'] = window.setTimeout(function() {
-            TP.iconTipTarget = panel;
-            TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
-        }, 200);
-    }
+    var stateUpdate = Ext.emptyFn;
+    var popupPreviewUpdate = Ext.emptyFn;
 
     var generalItems = panel.getGeneralItems();
     if(generalItems != undefined && panel.xdata.cls != 'TP.StaticIcon') {
@@ -1767,7 +1754,25 @@ TP.iconShowEditDialog = function(panel) {
     TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
 
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}); };
+    var labelUpdate = function() {
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        panel.setIconLabel(xdata.label || {});
+    };
+    var stateUpdate = function() {
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
+        labelUpdate();
+        // update performance data stores
+        perfDataUpdate();
+    }
+
+    var popupPreviewUpdate = function() {
+        window.clearTimeout(TP.timeouts['timeout_popup_preview']);
+        TP.timeouts['timeout_popup_preview'] = window.setTimeout(function() {
+            TP.iconTipTarget = panel;
+            TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
+        }, 200);
+    }
 
     // new mouseover tips while settings are open
     TP.iconTip.hide();
