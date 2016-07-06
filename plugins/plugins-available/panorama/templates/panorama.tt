@@ -36,7 +36,6 @@
     [% END %]
 </head>
 <body onunload="TP.unload()">
-<div id="bodyview"></div>
 <script type="text/javascript">
 <!--
 /*

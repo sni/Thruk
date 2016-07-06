@@ -9,8 +9,8 @@ Ext.define('TP.Panlet', {
     constrain: false,
     hideMode:  'visibility',
     autoShow:  false,
+    autoRender: false,
     stateful:  true,
-    renderTo: "bodyview",
     focusOnToFront: false,
     toFrontOnShow: false,
     initComponent: function() {

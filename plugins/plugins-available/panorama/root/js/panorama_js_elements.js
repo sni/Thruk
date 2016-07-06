@@ -590,7 +590,6 @@ Ext.define('TP.dragEl', {
     floating:   true,
     width:      24,
     height:     24,
-    renderTo:  "bodyview",
     cls:       "clickable",
     x:          0,
     y:          0,

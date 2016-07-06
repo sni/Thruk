@@ -675,3 +675,7 @@ SPAN.avail_result_error {
 .monospaced textarea {
     font-family: monospace;
 }
+
+.displayTable {
+  display: table;
+}

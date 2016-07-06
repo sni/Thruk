@@ -4,9 +4,10 @@ Ext.define('TP.SmallWidget', {
         Ext.apply(me, config);
 
         this.shadow   = false;
-        this.floating = true;
         this.stateful = true;
         this.stateId  = this.id;
+        this.floating = true;
+        this.renderTo = TP.iconContainer.getEl();
         if(this.xdata == undefined) {
             this.xdata = {};
         } else {
@@ -19,7 +20,6 @@ Ext.define('TP.SmallWidget', {
         }
         this.redrawOnly = false;
         this.animations = 0;
-        this.renderTo   = "bodyview";
 
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
@@ -361,7 +361,7 @@ Ext.define('TP.SmallWidget', {
         if(!panel.labelEl) {
             panel.createLabelEl();
         }
-        if(!panel.labelEl) { return; }
+        if(!panel.labelEl || !panel.labelEl.el) { return; }
         var el    = panel.labelEl.el.dom;
         var style = el.style;
         style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
@@ -442,7 +442,7 @@ Ext.define('TP.SmallWidget', {
 
     setIconLabelPosition: function(cfg) {
         var panel = this;
-        if(!panel.labelEl) { return; }
+        if(!panel.labelEl || !panel.labelEl.el) { return; }
         var left          = TP.extract_number_with_unit({ value: panel.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
         var top           = TP.extract_number_with_unit({ value: panel.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
         var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,             unit:' px', floor: true, defaultValue:   0 });
@@ -530,15 +530,16 @@ Ext.define('TP.SmallWidget', {
     createLabelEl: function() {
         var panel = this;
         if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
-        this.labelEl = Ext.create('Ext.Component', {
+        this.labelEl = TP.iconContainer.add({
+            xtype:      'component',
             'html':     ' ',
             panel:       panel,
             draggable:  !panel.locked,
+            floating:   true,
+            renderTo:   TP.iconContainer.getEl(),
             shadow:     false,
-            renderTo:  "bodyview",
             hidden:     (!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == 'mouseover'),
             hideMode:  'visibility',
-            autoRender: true,
             cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
             style:      {
                 whiteSpace: 'nowrap'
@@ -1234,7 +1235,8 @@ Ext.define('TP.IconWidget', {
             });
 
             if(xdata.appearance.type == 'connector' && !panel.locked) {
-                panel.dragEl1 = Ext.create('TP.dragEl', {
+                panel.dragEl1 = TP.iconContainer.add({
+                    xtype:     'TP.dragEl',
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectorfromx",
@@ -1242,7 +1244,8 @@ Ext.define('TP.IconWidget', {
                     offsetX:    -12,
                     offsetY:    -12
                 });
-                panel.dragEl2 = Ext.create('TP.dragEl', {
+                panel.dragEl2 = TP.iconContainer.add({
+                    xtype:     'TP.dragEl',
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectortox",
