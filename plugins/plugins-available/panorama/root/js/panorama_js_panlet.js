@@ -9,7 +9,7 @@ Ext.define('TP.Panlet', {
     constrain: false,
     hideMode:  'visibility',
     autoShow:  false,
-    autoRender: false,
+    autoRender: true,
     floating:   false,
     style:    { position: 'absolute', zIndex: 30 },
     stateful:  true,
@@ -244,6 +244,7 @@ Ext.define('TP.Panlet', {
             div.on("mouseover", function() { This.showHeader(global); });
         },
         afterrender: function(This, eOpts) {
+            Ext.fly('iconContainer').appendChild(Ext.get(This.id));
             /* start refresh interval */
             TP.log('['+this.id+'] rendered');
             this.startTimeouts();

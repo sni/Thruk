@@ -7,7 +7,7 @@ Ext.define('TP.SmallWidget', {
         this.stateful = true;
         this.stateId  = this.id;
         this.floating = false;
-        this.autoRender = false;
+        this.autoRender = true;
         this.autoShow = false;
         this.style    = { position: 'absolute', 'z-index': 30 };
         if(this.xdata == undefined) {
@@ -82,6 +82,7 @@ Ext.define('TP.SmallWidget', {
     },
     listeners: {
         afterrender: function(This, eOpts) {
+            Ext.fly('iconContainer').appendChild(Ext.get(This.id));
             TP.log('['+this.id+'] rendered');
             This.addClickEventhandler(This.el);
 
@@ -530,14 +531,11 @@ Ext.define('TP.SmallWidget', {
     createLabelEl: function() {
         var panel = this;
         if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
-        this.labelEl = TP.iconContainer.add({
-            xtype:      'component',
+        this.labelEl = Ext.create("Ext.Component", {
             'html':     ' ',
             panel:       panel,
             draggable:  !panel.locked,
-            floating:   false,
-            autoRender: false,
-            autoShow:   false,
+            renderTo:  "iconContainer",
             style:     { position: 'absolute' },
             shadow:     false,
             hidden:     (!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == 'mouseover'),

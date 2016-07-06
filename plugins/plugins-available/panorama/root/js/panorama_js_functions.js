@@ -264,7 +264,7 @@ var TP = {
         }
         config.conf.panel_id = tb.id;
         TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
-        var win = TP.iconContainer.add(Ext.create(config.type, config.conf));
+        var win = Ext.create(config.type, config.conf);
         if(smartPlacement == undefined || smartPlacement == true) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
             if(config.conf.pos) {

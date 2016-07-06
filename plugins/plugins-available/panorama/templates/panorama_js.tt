@@ -36,21 +36,6 @@ Ext.onReady(function() {
 
     Ext.QuickTips.init();
 
-    TP.iconContainer = Ext.create('Ext.container.Container', {
-        layout: { type: 'auto' },
-        renderTo:   Ext.getBody(),
-        autoShow:   true,
-        autoRender: true,
-        floating:   true,
-        border:     false,
-        shadow:     false,
-        x:          0,
-        y:          0,
-        width:     '100%',
-        height:    '100%',
-        cls:       'displayTable'
-    });
-
     /* main viewport */
     if(one_tab_only) {
         TP.viewport = new Ext.Viewport({

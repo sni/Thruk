@@ -650,7 +650,8 @@ Ext.define('TP.Pantab', {
         tab.setBaseHtmlClass();
 
         if(!tab.bgDragEl) {
-            tab.bgDragEl = TP.iconContainer.el.createChild('<img>', TP.iconContainer.el.dom.childNodes[0]);
+            var iconContainer = Ext.fly('iconContainer');
+            tab.bgDragEl = iconContainer.createChild('<img>', iconContainer.dom.childNodes[0]);
             tab.bgDragEl.dom.style.position = "fixed";
             tab.bgDragEl.dom.style.width    = "100%";
             tab.bgDragEl.dom.style.height   = "100%";
@@ -672,7 +673,8 @@ Ext.define('TP.Pantab', {
 
         if(background != undefined && background != 'none' && !xdata.map) {
             if(!tab.bgImgEl) {
-                tab.bgImgEl  = TP.iconContainer.el.createChild('<img>', TP.iconContainer.el.dom.childNodes[0]);
+                var iconContainer = Ext.fly('iconContainer');
+                tab.bgImgEl  = iconContainer.createChild('<img>', iconContainer.dom.childNodes[0]);
             }
             tab.bgImgEl.on('load',
                             function (evt, ele, opts) {
