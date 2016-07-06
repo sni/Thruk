@@ -548,7 +548,8 @@ Ext.define('TP.Pantab', {
         var background = xdata.background,
             scale      = xdata.backgroundscale,
             offset_x   = xdata.backgroundoffset_x,
-            offset_y   = xdata.backgroundoffset_y;
+            offset_y   = xdata.backgroundoffset_y,
+            bg_color   = xdata.background_color;
         if(retries == undefined) { retries = 0; }
         if(retries >= 5)         { return;      }
         var body = tab.body;
@@ -732,6 +733,11 @@ Ext.define('TP.Pantab', {
                 tab.bgImgEl.destroy();
                 tab.bgImgEl = undefined;
             }
+        }
+        if(bg_color != undefined && !xdata.map) {
+            tab.el.dom.style.background = bg_color;
+        } else {
+            tab.el.dom.style.background = '';
         }
     },
     applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y) {

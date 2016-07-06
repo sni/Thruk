@@ -14,6 +14,7 @@ next:
             - make popup completely customizable
             - add performance bar icon type
             - icon label can be mouseover only now
+            - background color of dashboards can be changed now
             - do not overlap icons which are placed close together
             - host status beats service status for group/filter icons
           - Config Tool:

@@ -420,15 +420,23 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             if(values.map) {
                 values.map_choose = 'geomap';
             }
+            if(values.background_color) {
+                values.map_choose = 'color';
+            }
         }
+
+        Ext.getCmp('background_color').hide();
+        Ext.getCmp('background_choose').hide();
+        Ext.getCmp('background_offset_choose').hide();
+        Ext.getCmp('wms_choose').hide();
+        Ext.getCmp('mapcenter').hide();
         if(values.map_choose == 'geomap') {
+            delete values.background_color;
             if(tab.xdata.map) {
                 values.map = tab.xdata.map;
             } else {
                 values.map = {};
             }
-            Ext.getCmp('background_choose').hide();
-            Ext.getCmp('background_offset_choose').hide();
             Ext.getCmp('wms_choose').show();
             Ext.getCmp('mapcenter').show();
             if(values.wms_provider == undefined || values.wms_provider == "") {
@@ -445,14 +453,27 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 Ext.getCmp('maplat').setRawValue(values.maplat);
                 Ext.getCmp('mapzoom').setRawValue(values.mapzoom);
             }
+            delete values['background_color'];
+        }
+        else if(values.map_choose == 'color') {
+            Ext.getCmp('background_color').show();
+            delete values['map'];
+            values['background'] = 'none';
         } else {
             Ext.getCmp('background_choose').show();
             Ext.getCmp('background_offset_choose').show();
-            Ext.getCmp('wms_choose').hide();
-            Ext.getCmp('mapcenter').hide();
             delete values['map'];
+            delete values['background_color'];
         }
         tab.setBackground(values);
+    }
+
+    var map_choose = "static";
+    if(tab.xdata.background_color != undefined) {
+        map_choose = "color";
+    }
+    if(tab.xdata.map != undefined) {
+        map_choose = "map";
     }
 
     /* Dashboard Settings Tab */
@@ -487,16 +508,35 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             },
             layout:      'hbox',
             items: [{
+                    boxLabel:   'Color',
+                    name:       'map_choose',
+                    inputValue: 'color',
+                    checked:     map_choose == 'color' ? true : false
+                }, {
                     boxLabel:   'Static Image',
                     name:       'map_choose',
                     inputValue: 'static',
-                    checked:     tab.xdata.map == undefined ? true : false
+                    checked:     map_choose == 'static' ? true : false
                 }, {
                     boxLabel:   'Geo Map',
                     name:       'map_choose',
                     inputValue: 'geomap',
-                    checked:     tab.xdata.map != undefined ? true : false
+                    checked:     map_choose == 'map' ? true : false
             }]
+        }, {
+            fieldLabel: ' ',
+            labelSeparator: '',
+            id:         'background_color',
+            hidden:      map_choose != 'color' ? true : false,
+            xtype:      'fieldcontainer',
+            layout:     'hbox',
+            items: [{
+                xtype:          'colorcbo',
+                name:           'background_color',
+                flex:            1,
+                value:           tab.xdata.background_color || '',
+                listeners:     { change: function() { applyBackground() } }
+            }],
         }, {
             fieldLabel:     'WMS Provider',
             xtype:          'combobox',
@@ -509,7 +549,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             valueField:     'name',
             editable:        false,
             forceSelection:  true,
-            hidden:          tab.xdata.map == undefined ? true : false,
+            hidden:          map_choose != 'map' ? true : false,
             listeners:     { change: function(This) { applyBackground() } }
         }, {
             fieldLabel:  'Map Center',
@@ -546,7 +586,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             fieldLabel: ' ',
             labelSeparator: '',
             id:         'background_choose',
-            hidden:      tab.xdata.map != undefined ? true : false,
+            hidden:      map_choose != 'static' ? true : false,
             xtype:      'fieldcontainer',
             layout:     'hbox',
             defaults: {
@@ -564,6 +604,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 displayField:   'image',
                 flex:            1,
                 valueField:     'path',
+                value:           tab.xdata.background || 'none',
                 listConfig : {
                     getInnerTpl: function(displayField) {
                         return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
@@ -591,14 +632,14 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 maxValue:        10000,
                 step:            1,
                 width:           70,
-                value:           100,
+                value:           tab.xdata.backgroundscale || 100,
                 fieldStyle:     'text-align: right;'
             }]
         }, {
             fieldLabel:     ' ',
             labelSeparator: '',
             id:             'background_offset_choose',
-            hidden:          tab.xdata.map != undefined ? true : false,
+            hidden:          map_choose != 'static' ? true : false,
             xtype:          'fieldcontainer',
             layout:         'hbox',
             defaults: {
@@ -615,7 +656,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 maxValue:        10000,
                 step:            1,
                 width:           70,
-                value:           0,
+                value:           tab.xdata.backgroundoffset_x || 0,
                 fieldStyle:     'text-align: right;'
             },
             { xtype: 'label', text: 'Y:', style: 'margin-left: 10px; margin-right: 2px;', cls: 'x-form-item-label' },
@@ -628,7 +669,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 maxValue:        10000,
                 step:            1,
                 width:           70,
-                value:           0,
+                value:           tab.xdata.backgroundoffset_y || 0,
                 fieldStyle:     'text-align: right;'
             }]
 
@@ -850,6 +891,12 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                                 delete p.xdata.map;
                                 p.forceSaveState();
                             }
+                        }
+                        if(values['map_choose'] == 'static') {
+                            delete values['background_color'];
+                        }
+                        if(values['map_choose'] == 'color') {
+                            values['background'] = 'none';
                         }
                         delete values['refresh_txt'];
                         delete values['map_choose'];
