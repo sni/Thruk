@@ -363,5 +363,4 @@ thruk_debug_window_handler = function() {
             }
         }
     }).toFront();
-    TP.modalWindows.push(debug_win);
 };

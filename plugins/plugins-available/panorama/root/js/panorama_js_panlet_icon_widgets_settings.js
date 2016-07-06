@@ -1553,7 +1553,6 @@ TP.iconShowEditDialog = function(panel) {
                             }
                         }).show();
                         TP.iconLabelHelpWindow.alignToSettingsWindow();
-                        TP.modalWindows.push(TP.iconLabelHelpWindow);
                     }
                 },
                 deactivate: function(This, eOpts) {
@@ -1819,7 +1818,6 @@ TP.iconShowEditDialog = function(panel) {
             TP.iconSettingsWindow.toFront();
         }
     }, 100);
-    TP.modalWindows.push(settingsWindow);
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
@@ -1911,7 +1909,6 @@ TP.openLabelEditorWindow = function(panel) {
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
     Ext.getCmp('label_textfield').setValue(Ext.getCmp('label_textfield_edit').getValue());
-    TP.modalWindows.push(labelEditorWindow);
     labelEditorWindow.toFront();
 }
 

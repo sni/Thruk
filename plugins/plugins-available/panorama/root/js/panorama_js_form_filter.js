@@ -570,5 +570,4 @@ TP.filterWindow = function(ftype, base_el, panel) {
     /* show the window */
     win.show();
     win.toFront();
-    TP.modalWindows.push(win);
 }

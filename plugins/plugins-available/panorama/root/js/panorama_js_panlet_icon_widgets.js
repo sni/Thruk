@@ -125,8 +125,6 @@ Ext.define('TP.SmallWidget', {
             /* update label */
             This.setIconLabel();
             if(This.labelEl) { This.labelEl.show(); }
-            /* make sure we don't overlap dashboard settings window */
-            TP.checkModalWindows();
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }
@@ -607,8 +605,6 @@ Ext.define('TP.SmallWidget', {
                 },
                 show: function( This, eOpts ) {
                     panel.addDDListener(This);
-                    /* make sure we don't overlap dashboard settings window */
-                    TP.checkModalWindows();
                 }
             }
         });
@@ -1046,7 +1042,6 @@ Ext.define('TP.IconWidget', {
         /* update zIndex order if no mask is present only */
         if(TP.masksVisible()) { return; }
         if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(err) {} }
-        TP.checkModalWindows();
     },
 
     /* rotates this thing */

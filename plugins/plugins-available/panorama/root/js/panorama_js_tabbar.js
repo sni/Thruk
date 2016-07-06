@@ -376,7 +376,7 @@ Ext.define('TP.TabBar', {
         delete this.xdata['autohideheader'];
         delete this.xdata['backends'];
         if(TP.reload_required) {
-            TP.modalWindows.push(Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format..."));
+            Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format...");
             TP.timeouts['timeout_'+this.id+'_window_reload'] = window.setTimeout(function() { TP.cp.saveChanges(false); window.location = 'panorama.cgi'; }, 3000);
             return;
         }
@@ -634,5 +634,4 @@ TP.openLogWindow = function() {
             }
         }
     }).toFront();
-    TP.modalWindows.push(debug_win);
 }

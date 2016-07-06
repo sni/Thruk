@@ -222,20 +222,18 @@ Ext.define('TP.Panlet', {
                 };
                 This.dd_overriden = true;
             }
-            /* make sure we don't overlap dashboard settings window */
-            TP.checkModalWindows();
         },
         render: function(This, eOpts) {
             /* make title editable */
             if(this.locked) {
                 var head = Ext.get(This.id + '_header_hd');
                 head.on("dblclick", function() {
-                    TP.modalWindows.push(Ext.Msg.prompt('Change Title', '', function(btn, text) {
+                    Ext.Msg.prompt('Change Title', '', function(btn, text) {
                         if(btn == 'ok') {
                             This.setTitle(text);
                             This.saveState();
                         }
-                    }, undefined, undefined, This.title));
+                    }, undefined, undefined, This.title);
                 });
             }
             /* make header show on mouseover only */

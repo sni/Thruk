@@ -478,8 +478,6 @@ Ext.define('TP.Pantab', {
                 }
             }
         }
-
-        TP.checkModalWindows();
     },
 
     hidePanlets: function() {
@@ -545,7 +543,6 @@ Ext.define('TP.Pantab', {
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();
         }
-        TP.checkModalWindows();
     },
 
     /* stop all timed actions for this tab and its panels */
@@ -1154,7 +1151,7 @@ TP.lassoMarkIcons = function(x, y) {
 
 /* restore dashboard to given timestamp */
 TP.restoreDashboard = function(tab, timestamp, mode) {
-    TP.modalWindows.push(Ext.Msg.confirm('Reset to previous save point?', 'Do you really want to replace the current dashboard with the previous save version?', function(button) {
+    Ext.Msg.confirm('Reset to previous save point?', 'Do you really want to replace the current dashboard with the previous save version?', function(button) {
         if (button === 'yes') {
             Ext.Ajax.request({
                 url:      'panorama.cgi?task=dashboard_restore&nr='+tab+'&timestamp='+timestamp+"&mode="+mode,
@@ -1173,7 +1170,7 @@ TP.restoreDashboard = function(tab, timestamp, mode) {
                 }
             });
         }
-    }));
+    });
 }
 
 

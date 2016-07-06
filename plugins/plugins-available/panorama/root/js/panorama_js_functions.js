@@ -23,7 +23,6 @@ var TP = {
     num_panels:   0,
     cur_panels:   1,
     logHistory:   [],
-    modalWindows: [],
 
     /* called once the initialization */
     initComplete: function() {
@@ -50,7 +49,6 @@ var TP = {
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.mask('loading...');
         }
-        TP.checkModalWindows();
 
         if(one_tab_only) {
             if(replace_id && id != replace_id) {
@@ -109,7 +107,6 @@ var TP = {
                             if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
                                 TP.dashboardsSettingGrid.getView().refresh();
                             }
-                            TP.checkModalWindows();
                         } else {
                             TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
                             tabpan.saveState();
@@ -407,7 +404,6 @@ var TP = {
                 handler: function() { this.up('window').destroy() }
             }]
         });
-        TP.modalWindows.push(win);
     },
 
     /* get box coordinates for given object */
@@ -706,7 +702,7 @@ var TP = {
         }
         catch(err) {
             TP.logError("global", "importAllTabsException", err);
-            TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
+            Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
             return(false);
         }
         if(decoded == null) {
@@ -715,12 +711,12 @@ var TP = {
             }
             catch(err) {
                 TP.logError("global", "jsonDecodeException", err);
-                TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
+                Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
                 return(false);
             }
         }
         if(decoded == undefined || decoded == '') {
-            TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
+            Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
             return(false);
         }
         if(decoded == '') { decoded = {}; }
@@ -731,7 +727,7 @@ var TP = {
         if(decoded.tabpan) {
             /* old export with all tabs*/
             TP.cp.saveChanges(false);
-            TP.modalWindows.push(Ext.Msg.confirm(
+            Ext.Msg.confirm(
                 'Confirm Import',
                 'This is a complete import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and can be added again afterwards.',
                 function(button) {
@@ -739,12 +735,12 @@ var TP = {
                         tabpan.stopTimeouts();
                         TP.cp.loadData(decoded, false);
                         TP.cp.saveChanges(false, {replace: 1});
-                        TP.modalWindows.push(Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...'));
+                        Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
                         TP.initialized = false; // prevents onUnload saving over our imported tabs
                         TP.timeouts['timeout_window_reload'] = window.setTimeout("window.location.reload()", 1000);
                     }
                 }
-            ));
+            );
         } else {
             /* new single tab export */
             var param = {
@@ -764,7 +760,7 @@ var TP = {
                         TP.initial_active_tab = resp.newid;
                         TP.add_pantab(resp.newid);
                     } else {
-                        TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
+                        Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
                         return(false);
                     }
                 }
@@ -1423,7 +1419,6 @@ var TP = {
         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
             TP.dashboardsSettingGrid.getView().refresh();
         }
-        TP.checkModalWindows();
 
         var tab = Ext.getCmp(nr);
         if(tab == undefined) { return; }
@@ -1462,11 +1457,11 @@ var TP = {
         var nr     = record.data.nr;
         if(action == 'remove') {
             if(confirmed == undefined || confirmed == 0) {
-                TP.modalWindows.push(Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
+                Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
                     if(button === 'yes') {
                         TP.dashboardActionHandler(grid, rowIndex, colIndex, item, evt, record, row, 1);
                     }
-                }));
+                });
                 return false;
             }
             Ext.Ajax.request({
@@ -1776,37 +1771,6 @@ var TP = {
         nr = String(nr).replace(/^tabpan-tab_/, '');
         nr = "tabpan-tab_"+nr;
         return(nr);
-    },
-    /* make sure our modal windows are still in front */
-    checkModalWindows: function() {
-        if(TP.modalWindows.length == 0) { return; }
-        TP.modalWindows = Ext.Array.unique(TP.modalWindows);
-        var newModelWindows = [];
-        var zIndex = 0;
-        var length = TP.modalWindows.length;
-        var first  = true;
-        for(var x=length-1; x>=0; x--) {
-            var win = TP.modalWindows[x];
-            if(win && win.el && !win.isHidden()) {
-                if(first) {
-                    try { win.toFront(); } catch(err) {}
-                    var masks = Ext.Element.select('.x-mask');
-                    if(masks.elements.length > 0) {
-                        for(var k = 0; k < masks.elements.length; k++) {
-                            var tmp = Number(masks.elements[k].style.zIndex);
-                            if(tmp > zIndex) { zIndex = tmp; }
-                        }
-                    } else {
-                        zIndex = Number(win.el.dom.style.zIndex);
-                    }
-                    first  = false;
-                } else {
-                    win.el.dom.style.zIndex = zIndex - length + x;
-                }
-                newModelWindows.unshift(win);
-            }
-        }
-        TP.modalWindows = newModelWindows;
     },
     reduceDelayEvents: function(scope, callback, delay, timeoutName) {
         var now = (new Date()).getTime();
