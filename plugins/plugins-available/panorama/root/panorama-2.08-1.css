@@ -25,6 +25,10 @@ HTML, BODY {
 #tabpan {
     position: fixed !important;
 }
+#maintabbar {
+    z-index: 50000;
+    position: fixed !important;
+}
 
 .tabbarbody {
   border-right: 1px solid white;

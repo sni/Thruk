@@ -145,7 +145,6 @@ Ext.define('TP.Pantab', {
             if(This.bgImgEl)  { This.bgImgEl.show();  }
             if(This.mapEl)    { This.mapEl.show();    }
             if(This.map)      { This.map.controlsDiv.dom.style.display = ""; }
-            This.applyZindex();
             This.setBackground(This.xdata);
             if(TP.initialized && missingPanlets > 0) {
                 TP.initial_create_delay_active = 0;
@@ -427,59 +426,6 @@ Ext.define('TP.Pantab', {
         }
     },
 
-    /* schedule apply zindex */
-    scheduleApplyZindex: function() {
-        var tab       = this;
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
-        if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
-        window.clearTimeout(TP.timeouts['timeout_' + tab.id + '_applyZindex']);
-        TP.timeouts['timeout_' + tab.id + '_applyZindex'] = window.setTimeout(function() {
-            tab.applyZindex();
-        }, 100);
-    },
-
-    /* order icons by z-index */
-    applyZindex: function() {
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
-        if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
-        /* do not change zindex if there are masks on screen */
-        if(TP.masksVisible()) { return; }
-
-        if(this.window_ids) {
-            var zIndexList = [];
-            for(var nr=0; nr<this.window_ids.length; nr++) {
-                var panlet = Ext.getCmp(this.window_ids[nr]);
-                if(panlet) { // may not yet exists due to delayed rendering
-                    var zIndex = panlet.effectiveZindex || 0;
-                    zIndex = Number(zIndex) + 10;
-                    if(zIndexList[zIndex] == undefined) { zIndexList[zIndex] = []; }
-                    zIndexList[zIndex].push(panlet);
-                }
-            }
-            Ext.Array.each(zIndexList, function(panels, id1) {
-                if(panels != undefined) {
-                    Ext.Array.each(panels, function(panel, id2) {
-                        // may fail when not yet rendered
-                        try { panel.toFront(); } catch(err) {}
-                        if(panel.setIconLabel) { panel.setIconLabel(); }
-                        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(err) {} }
-                        if(panel.dragEl1) { try { panel.dragEl1.toFront(); } catch(err) {} }
-                        if(panel.dragEl2) { try { panel.dragEl2.toFront(); } catch(err) {} }
-                    });
-                }
-            });
-            /* update label zIndex */
-            for(var nr=0; nr<this.window_ids.length; nr++) {
-                var panel = Ext.getCmp(this.window_ids[nr]);
-                if(panel && panel.labelEl && panel.labelEl.el && panel.labelEl.el.dom) {
-                    panel.labelEl.el.dom.style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
-                }
-            }
-        }
-    },
-
     hidePanlets: function() {
         var This = this;
         for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -699,7 +645,7 @@ Ext.define('TP.Pantab', {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
             /* add chrome workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "21", "important");
         }
         tab.setBaseHtmlClass();
 
@@ -710,7 +656,7 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.dom.style.height   = "100%";
             tab.bgDragEl.dom.style.top      = TP.offset_y+"px";
             tab.bgDragEl.dom.style.left     = "0px";
-            tab.bgDragEl.dom.style.zIndex   = 2001;
+            tab.bgDragEl.dom.style.zIndex   = 21;
             tab.bgDragEl.dom.src            = url_prefix+"plugins/panorama/images/s.gif";
             tab.bgDragEl.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);

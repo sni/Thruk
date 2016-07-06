@@ -6,8 +6,10 @@ Ext.define('TP.SmallWidget', {
         this.shadow   = false;
         this.stateful = true;
         this.stateId  = this.id;
-        this.floating = true;
-        this.renderTo = TP.iconContainer.getEl();
+        this.floating = false;
+        this.autoRender = false;
+        this.autoShow = false;
+        this.style    = { position: 'absolute', 'z-index': 30 };
         if(this.xdata == undefined) {
             this.xdata = {};
         } else {
@@ -255,10 +257,15 @@ Ext.define('TP.SmallWidget', {
     },
     /* apply z-index */
     applyZindex: function(value) {
+        value = Number(value);
         var This = this;
-        This.effectiveZindex = value;
-        var tab = Ext.getCmp(This.panel_id);
-        tab.scheduleApplyZindex();
+        This.style['z-index'] = 30+(value+10)*2;
+        if(This.el && This.el.dom) {
+            This.el.dom.style.zIndex = This.style['z-index'];
+        }
+        if(This.labelEl && This.labelEl.el && This.labelEl.el.dom) {
+            This.labelEl.el.dom.style.zIndex = This.style['z-index']+1;
+        }
     },
     /* rotates this thing */
     applyRotation: function(value, xdata) {
@@ -308,11 +315,6 @@ Ext.define('TP.SmallWidget', {
             }
         }
         if(!panel.el || !panel.el.dom)  { return; }
-        if(!panel.el.dom.style.zIndex && cfg && cfg.labeltext) {
-            var tab  = Ext.getCmp(panel.panel_id);
-            tab.scheduleApplyZindex();
-            return;
-        }
         if(TP.removeLabel && TP.removeLabel[panel.id]) {
             /* remove later to avoid flickering during redraw */
             window.clearTimeout(TP.timeouts['remove_label_'+panel.id]);
@@ -533,8 +535,10 @@ Ext.define('TP.SmallWidget', {
             'html':     ' ',
             panel:       panel,
             draggable:  !panel.locked,
-            floating:   true,
-            renderTo:   TP.iconContainer.getEl(),
+            floating:   false,
+            autoRender: false,
+            autoShow:   false,
+            style:     { position: 'absolute' },
             shadow:     false,
             hidden:     (!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == 'mouseover'),
             hideMode:  'visibility',
@@ -987,8 +991,7 @@ Ext.define('TP.IconWidget', {
             this.updateRender(xdata);
         }
         this.lastType = xdata.appearance.type;
-        var tab   = Ext.getCmp(this.panel_id);
-        tab.scheduleApplyZindex();
+        this.applyZindex(this.xdata.layout.zindex);
     },
     refreshHandler: function(newStatus) {
         var tab   = Ext.getCmp(this.panel_id);

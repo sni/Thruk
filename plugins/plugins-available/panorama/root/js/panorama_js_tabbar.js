@@ -21,6 +21,13 @@ Ext.define('TP.TabBar', {
     deferredRender: false,
     stateful:       true,
     tabBar:{
+        id:        'maintabbar',
+        listeners: {
+            afterlayout: function(This, eOpts) {
+                // move this html element to the body so it can have its own zindex stack and stay in front
+                Ext.getBody().appendChild(Ext.get('maintabbar'));
+            }
+        },
         items:[{ xtype: 'tbfill' },{
             id:       'debug_dom_elements',
             xtype:    'label',
@@ -406,7 +413,7 @@ Ext.define('TP.TabBar', {
             Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
         } else {
             /* apply chrome background workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "21", "important");
         }
     }
 });
