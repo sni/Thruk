@@ -1038,10 +1038,6 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
         if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
         if(xdata.appearance.type == 'perfbar')     { panel.perfbarRender(xdata);          }
-
-        /* update zIndex order if no mask is present only */
-        if(TP.masksVisible()) { return; }
-        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(err) {} }
     },
 
     /* rotates this thing */

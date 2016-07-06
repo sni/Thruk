@@ -1812,12 +1812,6 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     popupPreviewUpdate();
-
-    window.setTimeout(function() {
-        if(TP.iconSettingsWindow) {
-            TP.iconSettingsWindow.toFront();
-        }
-    }, 100);
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
@@ -1909,7 +1903,6 @@ TP.openLabelEditorWindow = function(panel) {
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
     Ext.getCmp('label_textfield').setValue(Ext.getCmp('label_textfield_edit').getValue());
-    labelEditorWindow.toFront();
 }
 
 TP.iconLabelHelp = function(panel, textarea_id, extra) {

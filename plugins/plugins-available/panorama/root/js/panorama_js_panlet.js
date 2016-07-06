@@ -23,6 +23,7 @@ Ext.define('TP.Panlet', {
         this.xdata.refresh  = -1;
         this.xdata.cls      = this.$className;
         this.xdata.backends = [];
+        this.renderTo       = TP.iconContainer.getEl();
 
         var tab     = Ext.getCmp(this.panel_id);
         if(tab == undefined) {
@@ -218,7 +219,6 @@ Ext.define('TP.Panlet', {
                     This.win_shadow.moveTo(newpos[0], newpos[1]);
                     This.win_shadow.setSize(This.getSize());
                     This.win_shadow.show();
-                    This.win_shadow.setZIndex(100000);
                 };
                 This.dd_overriden = true;
             }

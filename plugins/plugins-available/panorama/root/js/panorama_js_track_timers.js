@@ -362,5 +362,5 @@ thruk_debug_window_handler = function() {
                 window.clearInterval(TP.timeouts['debug_log_refresh']);
             }
         }
-    }).toFront();
+    });
 };

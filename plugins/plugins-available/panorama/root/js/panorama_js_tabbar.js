@@ -21,13 +21,6 @@ Ext.define('TP.TabBar', {
     deferredRender: false,
     stateful:       true,
     tabBar:{
-        id:        'maintabbar',
-        listeners: {
-            afterlayout: function(This, eOpts) {
-                // move this html element to the body so it can have its own zindex stack and stay in front
-                Ext.getBody().appendChild(Ext.get('maintabbar'));
-            }
-        },
         items:[{ xtype: 'tbfill' },{
             id:       'debug_dom_elements',
             xtype:    'label',
@@ -296,12 +289,6 @@ Ext.define('TP.TabBar', {
     },
     applyState: function(state) {
         TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
-        var tmp = Ext.dom.Query.select('.x-mask');
-        if(tmp.length > 0) {
-            // make sure our mask covers new windows...
-            Ext.dom.Query.select('.x-mask')[0].style.zIndex         = 100000;
-            Ext.dom.Query.select('.x-mask-loading')[0].style.zIndex = 100001;
-        }
         try {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
             TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
@@ -633,5 +620,5 @@ TP.openLogWindow = function() {
                 window.clearInterval(TP.timeouts['debug_log_keep_top']);
             }
         }
-    }).toFront();
+    });
 }

@@ -25,10 +25,6 @@ HTML, BODY {
 #tabpan {
     position: fixed !important;
 }
-#maintabbar {
-    z-index: 1000000;
-    position: fixed !important;
-}
 
 .tabbarbody {
   border-right: 1px solid white;
@@ -325,7 +321,6 @@ DIV.msg {
     left:35%;
     top:10px;
     width:400px;
-    z-index: 1000001;
 }
 #msg-div .msg {
     border-radius: 8px;
@@ -463,6 +458,7 @@ DIV.autohideheader.autohideheaderover.gearopen .x-window-header-default-top {
 }
 DIV.autohideheader DIV.x-window-header {
   opacity: 0.9;
+  /* TODO: check */
   z-index: 20;
 }
 
