@@ -42,8 +42,12 @@ Ext.onReady(function() {
         autoShow:   true,
         autoRender: true,
         floating:   true,
+        border:     false,
+        shadow:     false,
         x:          0,
         y:          0,
+        width:     '100%',
+        height:    '100%',
         cls:       'displayTable'
     });
 
