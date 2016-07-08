@@ -4,6 +4,7 @@ Ext.define('TP.Pantab', {
     tooltip:     (readonly || dashboard_ignore_changes) ? undefined : 'double click to open settings',
     closable:    (readonly || dashboard_ignore_changes) ? false : true,
     bodyCls:     'pantabbody',
+    border:      false,
     stateful:    true,
     stateEvents: ['add', 'titlechange'],
     locked:      start_unlocked, // lock it by default
@@ -976,7 +977,9 @@ Ext.define('TP.Pantab', {
         /* required for showing the background */
         tab.setSize(body.getSize());
         /* required due to missing tabbar */
-        TP.iconContainer.setPosition(0,-25);
+        var iconContainer = Ext.fly('iconContainer');
+        iconContainer.dom.style.top      = "-25px";
+        iconContainer.dom.style.position = "absolute";
     }
 });
 

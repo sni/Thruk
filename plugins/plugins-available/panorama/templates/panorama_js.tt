@@ -43,6 +43,7 @@ Ext.onReady(function() {
             layout:   'border',
             renderTo: Ext.getBody(),
             margins:  '0 0 0 0',
+            border:   false,
             items:    [],
             xdata:    {},
             getActiveTab: function() {

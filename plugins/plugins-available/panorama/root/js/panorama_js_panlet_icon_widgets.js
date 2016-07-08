@@ -1229,8 +1229,8 @@ Ext.define('TP.IconWidget', {
             });
 
             if(xdata.appearance.type == 'connector' && !panel.locked) {
-                panel.dragEl1 = TP.iconContainer.add({
-                    xtype:     'TP.dragEl',
+                panel.dragEl1 = Ext.create('TP.dragEl', {
+                    renderTo:  'iconContainer',
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectorfromx",
@@ -1238,8 +1238,8 @@ Ext.define('TP.IconWidget', {
                     offsetX:    -12,
                     offsetY:    -12
                 });
-                panel.dragEl2 = TP.iconContainer.add({
-                    xtype:     'TP.dragEl',
+                panel.dragEl2 = Ext.create('TP.dragEl', {
+                    renderTo:  'iconContainer',
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectortox",
