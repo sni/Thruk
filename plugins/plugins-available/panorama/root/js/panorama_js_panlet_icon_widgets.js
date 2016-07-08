@@ -91,11 +91,13 @@ Ext.define('TP.SmallWidget', {
                     This.firstRun = true;
                     TP.timeouts['timeout_' + This.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
-                        var pos = This.getPosition();
-                        This.xdata.layout.x = pos[0];
-                        This.xdata.layout.y = pos[1];
-                        if(This.iconType != 'text') {
-                            TP.iconShowEditDialog(This);
+                        if(This && This.el) {
+                            var pos = This.getPosition();
+                            This.xdata.layout.x = pos[0];
+                            This.xdata.layout.y = pos[1];
+                            if(This.iconType != 'text') {
+                                TP.iconShowEditDialog(This);
+                            }
                         }
                     }, 250);
                 }

@@ -31,7 +31,8 @@ TP.iconTypesStore = Ext.create('Ext.data.Store', {
             {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',     icon:url_prefix+'plugins/panorama/images/server_link.png'},
             {value:'TP.ServiceStatusIcon',      name:'Service',       icon:url_prefix+'plugins/panorama/images/computer.png'},
             {value:'TP.ServicegroupStatusIcon', name:'Service Group', icon:url_prefix+'plugins/panorama/images/computer_link.png'},
-            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:url_prefix+'plugins/panorama/images/page_find.png'}
+            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:url_prefix+'plugins/panorama/images/page_find.png'},
+            {value:'TP.SiteStatusIcon',         name:'Site Status',   icon:url_prefix+'plugins/panorama/images/accept.png'}
     ]
 });
 

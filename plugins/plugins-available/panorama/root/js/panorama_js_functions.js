@@ -265,6 +265,7 @@ var TP = {
         config.conf.panel_id = tb.id;
         TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
         var win = Ext.create(config.type, config.conf);
+        if(config.conf.autoShow) { win.show(); }
         if(smartPlacement == undefined || smartPlacement == true) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
             if(config.conf.pos) {
@@ -302,6 +303,7 @@ var TP = {
         el.dom.style.cursor = '';
         el.dom.style.zIndex = el.oldZindex;
         delete el.oldZindex;
+        config.autoshow = true;
         var panel = TP.add_panlet(config);
         panel.firstRun = true;
         if(panel.iconType) {

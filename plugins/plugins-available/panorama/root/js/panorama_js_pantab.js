@@ -752,7 +752,9 @@ Ext.define('TP.Pantab', {
         tab.lockButton.addCls('locked');
         var panels = TP.getAllPanel(this);
         for(var nr=0; nr<panels.length; nr++) {
-            panels[nr].el.dom.style.pointerEvents = "";
+            if(panels[nr].el) {
+                panels[nr].el.dom.style.pointerEvents = "";
+            }
         }
         tab.map.el.dom.style.display = "";
     },

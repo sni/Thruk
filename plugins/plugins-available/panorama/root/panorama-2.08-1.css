@@ -325,6 +325,7 @@ DIV.msg {
     left:35%;
     top:10px;
     width:400px;
+    z-index: 100000;
 }
 #msg-div .msg {
     border-radius: 8px;
