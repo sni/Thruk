@@ -85,6 +85,12 @@ Ext.define('TP.Pantab', {
                 This.disableMapControls();
             }
             This.setBaseHtmlClass();
+            /* scroll to top, otherwise geomap icons would be at wrong position */
+            try {
+                document.documentElement.scrollIntoView();
+            } catch(e) {
+                TP.Msg.msg("fail_message~~scroll failed: "+e);
+            }
             return(true);
         },
         activate: function(This, eOpts) {
@@ -152,6 +158,12 @@ Ext.define('TP.Pantab', {
                 This.createInitialPanlets(0, true);
             }
             This.moveMapIcons(true);
+            /* scroll to top, otherwise geomap icons would be at wrong position */
+            try {
+                document.documentElement.scrollIntoView();
+            } catch(e) {
+                TP.Msg.msg("fail_message~~scroll failed: "+e);
+            }
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
