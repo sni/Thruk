@@ -11,7 +11,7 @@ try {
     click(_button("add"));
     click(_span("Icons & Widgets"));
     click(_span("Hostgroup Status"));
-    mouseClickXY(100,100);
+    mouseClickXY(50,50);
     isVisible(_textbox('hostgroup'));
     click(_div('/trigger/', _rightOf(_textbox('hostgroup'))));
     click(_listItem(0));
@@ -19,7 +19,7 @@ try {
 
     screenRegion.find("green.png").rightClick();
     click(_span("Clone"));
-    mouseClickXY(100,150);
+    mouseClickXY(100,100);
 
     // rename dashboard and change to geo map
     mouseRightClickXY(200,100);
@@ -33,7 +33,7 @@ try {
     click(_button("add"));
     click(_span("Icons & Widgets"));
     click(_span("Hostgroup Status"));
-    mouseClickXY(150,100);
+    mouseClickXY(50,100);
     isVisible(_textbox('hostgroup'));
     click(_div('/trigger/', _rightOf(_textbox('hostgroup'))));
     click(_listItem(0));
@@ -41,7 +41,7 @@ try {
 
     screenRegion.find("green.png").rightClick();
     click(_span("Clone"));
-    mouseClickXY(150,150);
+    mouseClickXY(100,50);
 
     screenRegion.waitForImage("island_map_green.png", 3).mouseMove();
 
