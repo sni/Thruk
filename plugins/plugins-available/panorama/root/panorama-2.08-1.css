@@ -463,7 +463,6 @@ DIV.autohideheader.autohideheaderover.gearopen .x-window-header-default-top {
 }
 DIV.autohideheader DIV.x-window-header {
   opacity: 0.9;
-  /* TODO: check */
   z-index: 20;
 }
 
