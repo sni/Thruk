@@ -57,7 +57,6 @@ Ext.onReady(function() {
                         This.showAt(showAtPos);
                     }
                 }
-                TP.modalWindows.push(TP.iconTip);
 
                 This.el.on('mouseover', function() {
                     window.clearTimeout(This.hideTimer);
@@ -80,9 +79,6 @@ Ext.onReady(function() {
                     This.delayHide();
                     return(false);
                 }
-            },
-            hide: function(This) {
-                TP.modalWindows = TP.removeFromList(TP.modalWindows, TP.iconTip);
             },
             destroy: function(This) { delete TP.iconTip; delete TP.iconTipTarget; }
         },

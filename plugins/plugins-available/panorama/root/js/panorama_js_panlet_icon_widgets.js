@@ -4,9 +4,12 @@ Ext.define('TP.SmallWidget', {
         Ext.apply(me, config);
 
         this.shadow   = false;
-        this.floating = true;
         this.stateful = true;
         this.stateId  = this.id;
+        this.floating = false;
+        this.autoRender = true;
+        this.autoShow = false;
+        this.style    = { position: 'absolute', 'z-index': 30 };
         if(this.xdata == undefined) {
             this.xdata = {};
         } else {
@@ -19,7 +22,6 @@ Ext.define('TP.SmallWidget', {
         }
         this.redrawOnly = false;
         this.animations = 0;
-        this.renderTo   = "bodyview";
 
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
@@ -80,6 +82,7 @@ Ext.define('TP.SmallWidget', {
     },
     listeners: {
         afterrender: function(This, eOpts) {
+            Ext.fly('iconContainer').appendChild(Ext.get(This.id));
             TP.log('['+this.id+'] rendered');
             This.addClickEventhandler(This.el);
 
@@ -88,11 +91,13 @@ Ext.define('TP.SmallWidget', {
                     This.firstRun = true;
                     TP.timeouts['timeout_' + This.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
-                        var pos = This.getPosition();
-                        This.xdata.layout.x = pos[0];
-                        This.xdata.layout.y = pos[1];
-                        if(This.iconType != 'text') {
-                            TP.iconShowEditDialog(This);
+                        if(This && This.el) {
+                            var pos = This.getPosition();
+                            This.xdata.layout.x = pos[0];
+                            This.xdata.layout.y = pos[1];
+                            if(This.iconType != 'text') {
+                                TP.iconShowEditDialog(This);
+                            }
                         }
                     }, 250);
                 }
@@ -125,8 +130,6 @@ Ext.define('TP.SmallWidget', {
             /* update label */
             This.setIconLabel();
             if(This.labelEl) { This.labelEl.show(); }
-            /* make sure we don't overlap dashboard settings window */
-            TP.checkModalWindows();
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }
@@ -257,10 +260,15 @@ Ext.define('TP.SmallWidget', {
     },
     /* apply z-index */
     applyZindex: function(value) {
+        value = Number(value);
         var This = this;
-        This.effectiveZindex = value;
-        var tab = Ext.getCmp(This.panel_id);
-        tab.scheduleApplyZindex();
+        This.style['z-index'] = 30+(value+10)*2;
+        if(This.el && This.el.dom) {
+            This.el.dom.style.zIndex = This.style['z-index'];
+        }
+        if(This.labelEl && This.labelEl.el && This.labelEl.el.dom) {
+            This.labelEl.el.dom.style.zIndex = This.style['z-index']+1;
+        }
     },
     /* rotates this thing */
     applyRotation: function(value, xdata) {
@@ -310,11 +318,6 @@ Ext.define('TP.SmallWidget', {
             }
         }
         if(!panel.el || !panel.el.dom)  { return; }
-        if(!panel.el.dom.style.zIndex && cfg && cfg.labeltext) {
-            var tab  = Ext.getCmp(panel.panel_id);
-            tab.scheduleApplyZindex();
-            return;
-        }
         if(TP.removeLabel && TP.removeLabel[panel.id]) {
             /* remove later to avoid flickering during redraw */
             window.clearTimeout(TP.timeouts['remove_label_'+panel.id]);
@@ -361,7 +364,7 @@ Ext.define('TP.SmallWidget', {
         if(!panel.labelEl) {
             panel.createLabelEl();
         }
-        if(!panel.labelEl) { return; }
+        if(!panel.labelEl || !panel.labelEl.el) { return; }
         var el    = panel.labelEl.el.dom;
         var style = el.style;
         style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
@@ -442,7 +445,7 @@ Ext.define('TP.SmallWidget', {
 
     setIconLabelPosition: function(cfg) {
         var panel = this;
-        if(!panel.labelEl) { return; }
+        if(!panel.labelEl || !panel.labelEl.el) { return; }
         var left          = TP.extract_number_with_unit({ value: panel.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
         var top           = TP.extract_number_with_unit({ value: panel.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
         var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,             unit:' px', floor: true, defaultValue:   0 });
@@ -530,15 +533,15 @@ Ext.define('TP.SmallWidget', {
     createLabelEl: function() {
         var panel = this;
         if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
-        this.labelEl = Ext.create('Ext.Component', {
+        this.labelEl = Ext.create("Ext.Component", {
             'html':     ' ',
             panel:       panel,
             draggable:  !panel.locked,
+            renderTo:  "iconContainer",
+            style:     { position: 'absolute' },
             shadow:     false,
-            renderTo:  "bodyview",
             hidden:     (!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == 'mouseover'),
             hideMode:  'visibility',
-            autoRender: true,
             cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
             style:      {
                 whiteSpace: 'nowrap'
@@ -606,8 +609,6 @@ Ext.define('TP.SmallWidget', {
                 },
                 show: function( This, eOpts ) {
                     panel.addDDListener(This);
-                    /* make sure we don't overlap dashboard settings window */
-                    TP.checkModalWindows();
                 }
             }
         });
@@ -806,10 +807,10 @@ Ext.define('TP.SmallWidget', {
                 }
                 if(!panel.ddShadow) {
                     var size = panel.getSize();
-                    panel.ddShadow = Ext.DomHelper.append(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 9999999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
+                    panel.ddShadow = Ext.DomHelper.append(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 10000; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
                 }
                 if(!panel.dragHint) {
-                    panel.dragHint = Ext.DomHelper.append(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 9999999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
+                    panel.dragHint = Ext.DomHelper.append(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 10000; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
                 }
             });
             el.dd.addListener('drag', function(This, evt) {
@@ -990,8 +991,7 @@ Ext.define('TP.IconWidget', {
             this.updateRender(xdata);
         }
         this.lastType = xdata.appearance.type;
-        var tab   = Ext.getCmp(this.panel_id);
-        tab.scheduleApplyZindex();
+        this.applyZindex(this.xdata.layout.zindex);
     },
     refreshHandler: function(newStatus) {
         var tab   = Ext.getCmp(this.panel_id);
@@ -1041,11 +1041,6 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
         if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
         if(xdata.appearance.type == 'perfbar')     { panel.perfbarRender(xdata);          }
-
-        /* update zIndex order if no mask is present only */
-        if(TP.masksVisible()) { return; }
-        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(err) {} }
-        TP.checkModalWindows();
     },
 
     /* rotates this thing */
@@ -1235,6 +1230,7 @@ Ext.define('TP.IconWidget', {
 
             if(xdata.appearance.type == 'connector' && !panel.locked) {
                 panel.dragEl1 = Ext.create('TP.dragEl', {
+                    renderTo:  'iconContainer',
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectorfromx",
@@ -1243,6 +1239,7 @@ Ext.define('TP.IconWidget', {
                     offsetY:    -12
                 });
                 panel.dragEl2 = Ext.create('TP.dragEl', {
+                    renderTo:  'iconContainer',
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectortox",

@@ -296,12 +296,6 @@ Ext.define('TP.TabBar', {
     },
     applyState: function(state) {
         TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
-        var tmp = Ext.dom.Query.select('.x-mask');
-        if(tmp.length > 0) {
-            // make sure our mask covers new windows...
-            Ext.dom.Query.select('.x-mask')[0].style.zIndex         = 100000;
-            Ext.dom.Query.select('.x-mask-loading')[0].style.zIndex = 100001;
-        }
         try {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
             TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
@@ -376,7 +370,7 @@ Ext.define('TP.TabBar', {
         delete this.xdata['autohideheader'];
         delete this.xdata['backends'];
         if(TP.reload_required) {
-            TP.modalWindows.push(Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format..."));
+            Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format...");
             TP.timeouts['timeout_'+this.id+'_window_reload'] = window.setTimeout(function() { TP.cp.saveChanges(false); window.location = 'panorama.cgi'; }, 3000);
             return;
         }
@@ -419,7 +413,7 @@ Ext.define('TP.TabBar', {
             Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
         } else {
             /* apply chrome background workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "21", "important");
         }
     }
 });
@@ -633,6 +627,5 @@ TP.openLogWindow = function() {
                 window.clearInterval(TP.timeouts['debug_log_keep_top']);
             }
         }
-    }).toFront();
-    TP.modalWindows.push(debug_win);
+    });
 }

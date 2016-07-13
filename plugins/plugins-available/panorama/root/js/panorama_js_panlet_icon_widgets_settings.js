@@ -31,7 +31,8 @@ TP.iconTypesStore = Ext.create('Ext.data.Store', {
             {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',     icon:url_prefix+'plugins/panorama/images/server_link.png'},
             {value:'TP.ServiceStatusIcon',      name:'Service',       icon:url_prefix+'plugins/panorama/images/computer.png'},
             {value:'TP.ServicegroupStatusIcon', name:'Service Group', icon:url_prefix+'plugins/panorama/images/computer_link.png'},
-            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:url_prefix+'plugins/panorama/images/page_find.png'}
+            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:url_prefix+'plugins/panorama/images/page_find.png'},
+            {value:'TP.SiteStatusIcon',         name:'Site Status',   icon:url_prefix+'plugins/panorama/images/accept.png'}
     ]
 });
 
@@ -1553,7 +1554,6 @@ TP.iconShowEditDialog = function(panel) {
                             }
                         }).show();
                         TP.iconLabelHelpWindow.alignToSettingsWindow();
-                        TP.modalWindows.push(TP.iconLabelHelpWindow);
                     }
                 },
                 deactivate: function(This, eOpts) {
@@ -1813,13 +1813,6 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     popupPreviewUpdate();
-
-    window.setTimeout(function() {
-        if(TP.iconSettingsWindow) {
-            TP.iconSettingsWindow.toFront();
-        }
-    }, 100);
-    TP.modalWindows.push(settingsWindow);
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
@@ -1911,8 +1904,6 @@ TP.openLabelEditorWindow = function(panel) {
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
     Ext.getCmp('label_textfield').setValue(Ext.getCmp('label_textfield_edit').getValue());
-    TP.modalWindows.push(labelEditorWindow);
-    labelEditorWindow.toFront();
 }
 
 TP.iconLabelHelp = function(panel, textarea_id, extra) {
