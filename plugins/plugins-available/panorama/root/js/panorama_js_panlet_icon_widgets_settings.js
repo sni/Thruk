@@ -1,29 +1,3 @@
-/* Shape Settings Tab */
-TP.shapesStore = Ext.create('Ext.data.Store', {
-    fields: ['name', 'data'],
-    proxy: {
-        type: 'ajax',
-        url:  'panorama.cgi?task=userdata_shapes',
-        reader: {
-            type: 'json',
-            root: 'data'
-        }
-    },
-    data : thruk_shape_data
-});
-TP.iconsetsStore = Ext.create('Ext.data.Store', {
-    fields: ['name', 'sample', 'value', 'fileset'],
-    proxy: {
-        type: 'ajax',
-        url:  'panorama.cgi?task=userdata_iconsets&withempty=1',
-        reader: {
-            type: 'json',
-            root: 'data'
-        }
-    },
-    autoLoad: true,
-    data : thruk_iconset_data
-});
 TP.iconTypesStore = Ext.create('Ext.data.Store', {
     fields: ['name', 'value', 'icon'],
     autoLoad: false,
@@ -53,9 +27,13 @@ TP.iconShowEditDialog = function(panel) {
     TP.resetMoveIcons();
     TP.skipRender = false;
 
-    var defaultSpeedoSource = 'problems';
-    var perfDataUpdate = function() {
-        // ensure fresh and correct performance data
+    TP.iconSettingsGlobals = {
+        renderUpdate       : Ext.emptyFn,
+        stateUpdate        : Ext.emptyFn,
+        popupPreviewUpdate : Ext.emptyFn
+    };
+    // ensure fresh and correct performance data
+    TP.iconSettingsGlobals.perfDataUpdate = function() {
 
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         // update speedo
@@ -67,7 +45,6 @@ TP.iconShowEditDialog = function(panel) {
         }
         var macros = TP.getPanelMacros(panel);
         for(var key in macros.perfdata) {
-            if(defaultSpeedoSource == 'problems') { defaultSpeedoSource = 'perfdata:'+key; }
             var r = TP.getPerfDataMinMax(macros.perfdata[key], '?');
             var options = r.min+" - "+r.max;
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
@@ -103,9 +80,6 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     /* General Settings Tab */
-    var stateUpdate = Ext.emptyFn;
-    var popupPreviewUpdate = Ext.emptyFn;
-
     var generalItems = panel.getGeneralItems();
     if(generalItems != undefined && panel.xdata.cls != 'TP.StaticIcon') {
         generalItems.unshift({
@@ -165,15 +139,15 @@ TP.iconShowEditDialog = function(panel) {
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
-                    defaults:      { anchor: '-12', labelWidth: panel.generalLabelWidth || 132, listeners: { change: function(This, newValue, oldValue, eOpts) { if(newValue != "") { stateUpdate() } } } },
+                    defaults:      { anchor: '-12', labelWidth: panel.generalLabelWidth || 132, listeners: { change: function(This, newValue, oldValue, eOpts) { if(newValue != "") { TP.iconSettingsGlobals.stateUpdate() } } } },
                     items:           generalItems
             }]
         }]
     };
 
     var updateDisabledFields = function(xdata) {
-        var originalRenderUpdate = renderUpdate;
-        renderUpdate = Ext.emptyFn;
+        var originalRenderUpdate = TP.iconSettingsGlobals.renderUpdate;
+        TP.iconSettingsGlobals.renderUpdate = Ext.emptyFn;
         Ext.getCmp('shapeheightfield').setDisabled(xdata.appearance.shapelocked);
         Ext.getCmp('shapetogglelocked').toggle(xdata.appearance.shapelocked);
         Ext.getCmp('pieheightfield').setDisabled(xdata.appearance.pielocked);
@@ -183,7 +157,7 @@ TP.iconShowEditDialog = function(panel) {
         } else {
             Ext.getCmp('rotationfield').setVisible(true);
         }
-        renderUpdate = originalRenderUpdate;
+        TP.iconSettingsGlobals.renderUpdate = originalRenderUpdate;
     };
 
     /* Layout Settings Tab */
@@ -272,7 +246,6 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     TP.shapesStore.load();
-    var renderUpdate   = Ext.emptyFn;
     var renderUpdateDo = function(forceColor, forceRenderItem) {
         if(TP.skipRender) { return; }
         var xdata = TP.get_icon_form_xdata(settingsWindow);
@@ -284,29 +257,82 @@ TP.iconShowEditDialog = function(panel) {
             if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem); }
         }
         lastType = xdata.appearance.type;
-        if(xdata.appearance.type == 'shape') {
-            panel.shapeRender(xdata, forceColor);
-        }
-        if(xdata.appearance.type == 'pie') {
-            panel.pieRender(xdata, forceColor);
-        }
-        if(xdata.appearance.type == 'speedometer') {
-            panel.speedoRender(xdata, forceColor);
-        }
-        if(xdata.appearance.type == 'connector') {
-            panel.connectorRender(xdata, forceColor);
-        }
-        if(xdata.appearance.type == 'perfbar') {
-            panel.perfbarRender(xdata);
-        }
+
+        if(panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata, forceColor); }
+        if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
+
         labelUpdate();
         updateDisabledFields(xdata);
     }
+
+    var appearanceItems = [{
+        /* appearance type */
+        xtype:      'combobox',
+        fieldLabel: 'Type',
+        name:       'type',
+        id:         'appearance_types',
+        editable:    false,
+        valueField: 'value',
+        displayField: 'name',
+        store        : Ext.create('Ext.data.Store', {
+            fields: ['value', 'name'],
+            data:   TP.iconAppearanceTypes
+        }),
+        listConfig : {
+            tpl : ((panel.iconType != 'host' && panel.iconType != 'service') ?
+                    '<tpl for="."><div class="x-boundlist-item <tpl if="value == \'perfbar\'"> item-disabled</tpl>">'
+                    +'{name}'
+                    +'<tpl if="value == \'perfbar\'"><span style="margin-left:30px;">(Host/Service only)</span></tpl>'
+                    +'</div></tpl>'
+                   :
+                    '<tpl for="."><div class="x-boundlist-item">{name}</div></tpl>')
+        },
+        listeners: {
+            beforeselect: function(This, record, index, eOpts ) {
+                if(panel.iconType != 'host' && panel.iconType != 'service') {
+                    if(record.get('value') == 'perfbar') {
+                        return(false);
+                    }
+                }
+                return(true);
+            },
+            change: function(This, newValue, oldValue, eOpts) {
+                Ext.getCmp('appearanceForm').items.each(function(f, i) {
+                    if(f.cls != undefined) {
+                        if(f.cls.match(newValue)) {
+                            f.show();
+                        } else {
+                            f.hide();
+                        }
+                    }
+                });
+                if(newValue == 'icon' || panel.hasScale) {
+                    Ext.getCmp('layoutscale').setDisabled(false);
+                } else {
+                    Ext.getCmp('layoutscale').setDisabled(true);
+                }
+
+                panel.appearance = Ext.create('tp.icon.appearance.'+newValue, { panel: panel });
+
+                var originalRenderUpdate = TP.iconSettingsGlobals.renderUpdate;
+                TP.iconSettingsGlobals.renderUpdate = Ext.emptyFn;
+                if(panel.appearance.settingsWindowAppearanceTypeChanged) { panel.appearance.settingsWindowAppearanceTypeChanged(); }
+                TP.iconSettingsGlobals.renderUpdate = originalRenderUpdate;
+                TP.iconSettingsGlobals.renderUpdate();
+            }
+        }
+    }];
+    Ext.Array.each(TP.iconAppearanceTypes, function(t, i) {
+        var cls = Ext.ClassManager.getByAlias('tp.icon.appearance.'+t.value);
+        if(cls && cls.prototype.getAppearanceTabItems) {
+            appearanceItems = appearanceItems.concat(cls.prototype.getAppearanceTabItems(panel));
+        }
+    });
     var appearanceTab = {
         title: 'Appearance',
         type:  'panel',
         hidden: panel.hideAppearanceTab,
-        listeners: { show: perfDataUpdate },
+        listeners: { show: TP.iconSettingsGlobals.perfDataUpdate },
         items: [{
             xtype : 'panel',
             layout: 'fit',
@@ -318,845 +344,8 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 60, listeners: { change: function() { renderUpdate(); } } },
-                items: [{
-                    /* appearance type */
-                    xtype:      'combobox',
-                    fieldLabel: 'Type',
-                    name:       'type',
-                    id:         'appearance_types',
-                    editable:    false,
-                    valueField: 'value',
-                    displayField: 'name',
-                    store        : Ext.create('Ext.data.Store', {
-                        fields: ['value', 'name'],
-                        data:   [
-                            {"value":"none",        "name":"Label Only"},
-                            {"value":"icon",        "name":"Icon"},
-                            {"value":"connector",   "name":"Line / Arrow / Watermark"},
-                            {"value":"pie",         "name":"Pie Chart"},
-                            {"value":"speedometer", "name":"Speedometer"},
-                            {"value":"shape",       "name":"Shape"},
-                            {"value":"perfbar",     "name":"Performance Bar"}
-                        ]
-                    }),
-                    listConfig : {
-                        tpl : ((panel.iconType != 'host' && panel.iconType != 'service') ?
-                                '<tpl for="."><div class="x-boundlist-item <tpl if="value == \'perfbar\'"> item-disabled</tpl>">'
-                                +'{name}'
-                                +'<tpl if="value == \'perfbar\'"><span style="margin-left:30px;">(Host/Service only)</span></tpl>'
-                                +'</div></tpl>'
-                               :
-                                '<tpl for="."><div class="x-boundlist-item">{name}</div></tpl>')
-                    },
-                    listeners: {
-                        beforeselect: function(This, record, index, eOpts ) {
-                            if(panel.iconType != 'host' && panel.iconType != 'service') {
-                                if(record.get('value') == 'perfbar') {
-                                    return(false);
-                                }
-                            }
-                            return(true);
-                        },
-                        change: function(This, newValue, oldValue, eOpts) {
-                            Ext.getCmp('appearanceForm').items.each(function(f, i) {
-                                if(f.cls != undefined) {
-                                    if(f.cls.match(newValue)) {
-                                        f.show();
-                                    } else {
-                                        f.hide();
-                                    }
-                                }
-                            });
-                            if(newValue == 'icon' || panel.hasScale) {
-                                Ext.getCmp('layoutscale').setDisabled(false);
-                            } else {
-                                Ext.getCmp('layoutscale').setDisabled(true);
-                            }
-                            if(newValue == 'shape') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['shapename']) {
-                                    values['shapename']           = 'arrow';
-                                    values['shapelocked']         = true;
-                                    values['shapewidth']          = 50;
-                                    values['shapeheight']         = 50;
-                                    values['shapecolor_ok']       = '#199C0F';
-                                    values['shapecolor_warning']  = '#CDCD0A';
-                                    values['shapecolor_critical'] = '#CA1414';
-                                    values['shapecolor_unknown']  = '#CC740F';
-                                    values['shapegradient']       =  0;
-                                    values['shapesource']         =  'fixed';
-                                }
-                                var originalRenderUpdate = renderUpdate;
-                                renderUpdate = Ext.emptyFn;
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                                renderUpdate = originalRenderUpdate;
-                            }
-
-                            if(newValue == 'pie') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['piewidth']) {
-                                    values['piewidth']             = 50;
-                                    values['pieheight']            = 50;
-                                    values['pielocked']            = true;
-                                    values['pieshadow']            = false;
-                                    values['piedonut']             = 0;
-                                    values['pielabel']             = false;
-                                    values['piegradient']          = 0;
-                                    values['piecolor_ok']          = '#199C0F';
-                                    values['piecolor_warning']     = '#CDCD0A';
-                                    values['piecolor_critical']    = '#CA1414';
-                                    values['piecolor_unknown']     = '#CC740F';
-                                    values['piecolor_up']          = '#199C0F';
-                                    values['piecolor_down']        = '#CA1414';
-                                    values['piecolor_unreachable'] = '#CA1414';
-                                }
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                            }
-
-                            if(newValue == 'speedometer') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['speedowidth']) {
-                                    values['speedowidth']             = 180;
-                                    values['speedoshadow']            = false;
-                                    values['speedoneedle']            = false;
-                                    values['speedodonut']             = 0;
-                                    values['speedogradient']          = 0;
-                                    values['speedosource']            = defaultSpeedoSource;
-                                    values['speedomargin']            =  5;
-                                    values['speedosteps']             = 10;
-                                    values['speedocolor_ok']          = '#199C0F';
-                                    values['speedocolor_warning']     = '#CDCD0A';
-                                    values['speedocolor_critical']    = '#CA1414';
-                                    values['speedocolor_unknown']     = '#CC740F';
-                                    values['speedocolor_bg']          = '#DDDDDD';
-                                    values['speedo_thresholds']       = 'line';
-                                }
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                            }
-
-                            if(newValue == 'connector') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['connectorwidth']) {
-                                    var pos = panel.getPosition();
-                                    values['connectorfromx']             = pos[0]-100;
-                                    values['connectorfromy']             = pos[1];
-                                    values['connectortox']               = pos[0]+100;
-                                    values['connectortoy']               = pos[1];
-                                    values['connectorwidth']             = 3;
-                                    values['connectorarrowtype']         = 'both';
-                                    values['connectorarrowwidth']        = 10;
-                                    values['connectorarrowlength']       = 20;
-                                    values['connectorarrowinset']        = 2;
-                                    values['connectorcolor_ok']          = '#199C0F';
-                                    values['connectorcolor_warning']     = '#CDCD0A';
-                                    values['connectorcolor_critical']    = '#CA1414';
-                                    values['connectorcolor_unknown']     = '#CC740F';
-                                    values['connectorgradient']          =  0;
-                                    values['connectorsource']            = 'fixed';
-                                }
-                                var originalRenderUpdate = renderUpdate;
-                                renderUpdate = Ext.emptyFn;
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                                renderUpdate = originalRenderUpdate;
-                            }
-
-                            renderUpdate();
-                        }
-                    }
-                },
-
-                /* Icons */
-                {
-                    fieldLabel:   'Icon Set',
-                    id:           'iconset_field',
-                    xtype:        'combobox',
-                    name:         'iconset',
-                    cls:          'icon',
-                    store:         TP.iconsetsStore,
-                    value:        '',
-                    emptyText:    'use dashboards default icon set',
-                    displayField: 'name',
-                    valueField:   'value',
-                    listConfig : {
-                        getInnerTpl: function(displayField) {
-                            return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
-                        }
-                    },
-                    listeners: {
-                        change: function(This) { renderUpdate(undefined, true); }
-                    }
-                }, {
-                    xtype:      'panel',
-                    cls:        'icon',
-                    html:       'Place image sets in: '+usercontent_folder+'/images/status/',
-                    style:      'text-align: center;',
-                    bodyCls:    'form-hint',
-                    padding:    '10 0 0 0',
-                    border:      0
-                },
-
-
-                /* Shapes */
-                {
-                    fieldLabel:   'Shape',
-                    xtype:        'combobox',
-                    name:         'shapename',
-                    cls:          'shape',
-                    store:         TP.shapesStore,
-                    displayField: 'name',
-                    valueField:   'name',
-                    listConfig : {
-                        getInnerTpl: function(displayField) {
-                            TP.tmpid = 0;
-                            return '<div class="x-combo-list-item"><span name="{name}" height=16 width=16 style="vertical-align:top; margin-right: 3px;"><\/span>{name}<\/div>';
-                        }
-                    },
-                    listeners: {
-                        afterrender: function(This) {
-                            var me = This;
-                            me.shapes = [];
-                            This.getPicker().addListener('show', function(This) {
-                                Ext.Array.each(This.el.dom.getElementsByTagName('SPAN'), function(item, idx) {
-                                    TP.show_shape_preview(item, panel, me.shapes);
-                                });
-                            });
-                            This.getPicker().addListener('refresh', function(This) {
-                                Ext.Array.each(This.el.dom.getElementsByTagName('SPAN'), function(item, idx) {
-                                    TP.show_shape_preview(item, panel, me.shapes);
-                                });
-                            });
-                        },
-                        destroy: function(This) {
-                            // clean up
-                            Ext.Array.each(This.shapes, function(item, idx) { item.destroy() });
-                        },
-                        change: function(This) { renderUpdate(); }
-                    }
-                }, {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    name:       'shapesize',
-                    cls:        'shape',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate() } } },
-                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'shapewidth', unit: 'px', width: 65, value: panel.xdata.appearance.shapewidth },
-                            { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'shapeheight', unit: 'px', width: 65, value: panel.xdata.appearance.shapeheight, id: 'shapeheightfield' },
-                            { xtype: 'button', width: 22, icon: url_prefix+'plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'shapetogglelocked',
-                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({shapelocked: state ? '1' : '' }); renderUpdate(); }
-                            },
-                            { xtype: 'hidden', name: 'shapelocked' }
-                    ]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'shape',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdate(undefined, undefined, 0); },
-                                     mouseover: function(color) { renderUpdate(color,     undefined, 0); },
-                                     mouseout:  function(color) { renderUpdate(undefined, undefined, 0); }
-                                   }
-                    },
-                    items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_ok',
-                            value:           panel.xdata.appearance.shapecolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 11px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_warning',
-                            value:           panel.xdata.appearance.shapecolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_critical',
-                            value:           panel.xdata.appearance.shapecolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown: ', hidden: panel.iconType == 'host' ? true : false },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_unknown',
-                            value:           panel.xdata.appearance.shapecolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' },
-                            hidden:          panel.iconType == 'host' ? true : false
-                    }]
-                }, {
-                    fieldLabel: 'Gradient',
-                    cls:        'shape',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'hbox', align: 'stretch' },
-                    items: [{
-                        xtype:        'numberfield',
-                        allowDecimals: true,
-                        name:         'shapegradient',
-                        maxValue:      1,
-                        minValue:     -1,
-                        step:          0.05,
-                        value:         panel.xdata.appearance.shapegradient,
-                        width:         55,
-                        listeners:   { change: function() { renderUpdate(); } }
-                    },
-                    { xtype: 'label', text: 'Source:', margins: {top: 2, right: 2, bottom: 0, left: 10} },
-                    {
-                        name:         'shapesource',
-                        xtype:        'combobox',
-                        id:           'shapesourceStore',
-                        displayField: 'name',
-                        valueField:   'value',
-                        queryMode:    'local',
-                        store:       { fields: ['name', 'value'], data: [] },
-                        editable:      false,
-                        value:         panel.xdata.appearance.shapesource,
-                        listeners:   { focus: perfDataUpdate, change: function() { renderUpdate(); } },
-                        flex:          1
-                    }]
-                }, {
-                    xtype:      'panel',
-                    cls:        'shape',
-                    html:       'Place shapes in: '+usercontent_folder+'/shapes/',
-                    style:      'text-align: center;',
-                    bodyCls:    'form-hint',
-                    padding:    '10 0 0 0',
-                    border:      0
-                },
-
-
-                /* Connector */
-                {
-                    fieldLabel: 'From',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorfrom',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'x',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorfromx',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorfromx
-                    }, {
-                        xtype:        'label',
-                        text:         'y',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorfromy',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorfromy
-                    },{
-                        xtype:        'label',
-                        text:         'Endpoints',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'combobox',
-                        name:         'connectorarrowtype',
-                        width:         70,
-                        matchFieldWidth: false,
-                        value:         panel.xdata.appearance.connectorarrowtype,
-                        store:         ['both', 'left', 'right', 'none'],
-                        listConfig : {
-                            getInnerTpl: function(displayField) {
-                                return '<div class="x-combo-list-item"><img src="'+url_prefix+'plugins/panorama/images/connector_type_{field1}.png" height=16 width=77 style="vertical-align:top; margin-right: 3px;"> {field1}<\/div>';
-                            }
-                        }
-                    }]
-                },
-                {
-                    fieldLabel: 'To',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorto',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'x',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectortox',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectortox
-                    }, {
-                        xtype:        'label',
-                        text:         'y',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectortoy',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectortoy
-                    }]
-                },
-                {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorsize',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'Width',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorwidth',
-                        width:         60,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorwidth
-                    }, {
-                        xtype:        'label',
-                        text:         'Variable Width',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'checkbox',
-                        name:         'connectorvariable'
-                    }]
-                },
-                {
-                    fieldLabel: 'Endpoints',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorarrow',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'Width',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorarrowwidth',
-                        width:         60,
-                        unit:         'px',
-                        minValue:      0,
-                        value:         panel.xdata.appearance.connectorarrowwidth
-                    }, {
-                        xtype:        'label',
-                        text:         'Length',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorarrowlength',
-                        width:         60,
-                        minValue:      0,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorarrowlength
-                    }, {
-                        xtype:        'label',
-                        text:         'Inset',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorarrowinset',
-                        width:         60,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorarrowinset
-                    }]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'connector',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdate(undefined, undefined, 0)  },
-                                     mouseover: function(color) { renderUpdate(color,     undefined, 0); },
-                                     mouseout:  function(color) { renderUpdate(undefined, undefined, 0); }
-                                   }
-                    },
-                    items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up ' : 'Ok ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_ok',
-                            value:           panel.xdata.appearance.connectorcolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable ' : 'Warning ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_warning',
-                            value:           panel.xdata.appearance.connectorcolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down ' : 'Critical ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_critical',
-                            value:           panel.xdata.appearance.connectorcolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown ', hidden: panel.iconType == 'host' ? true : false },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_unknown',
-                            value:           panel.xdata.appearance.connectorcolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' },
-                            hidden:          panel.iconType == 'host' ? true : false
-                    }]
-                }, {
-                    fieldLabel: 'Gradient',
-                    cls:        'connector',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'hbox', align: 'stretch' },
-                    items: [{
-                        xtype:        'numberfield',
-                        allowDecimals: true,
-                        name:         'connectorgradient',
-                        maxValue:      1,
-                        minValue:     -1,
-                        step:          0.05,
-                        value:         panel.xdata.appearance.connectorgradient,
-                        width:         55,
-                        listeners:   { change: function() { renderUpdate(); } }
-                    },
-                    { xtype: 'label', text: 'Source', margins: {top: 2, right: 2, bottom: 0, left: 10} },
-                    {
-                        name:         'connectorsource',
-                        xtype:        'combobox',
-                        id:           'connectorsourceStore',
-                        displayField: 'name',
-                        valueField:   'value',
-                        queryMode:    'local',
-                        store:       { fields: ['name', 'value'], data: [] },
-                        editable:      false,
-                        value:         panel.xdata.appearance.connectorsource,
-                        listeners:   { focus: perfDataUpdate, change: function() { renderUpdate(); } },
-                        flex:          1
-                    }]
-                }, {
-                    fieldLabel: 'Options',
-                    xtype:      'fieldcontainer',
-                    cls:        'connector',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                            { xtype: 'label', text: 'Cust. Perf. Data Min', style: 'margin-left: 0px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormin', step: 100 },
-                            { xtype: 'label', text: 'Max', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormax', step: 100 }
-                        ]
-                },
-
-
-                /* Pie Chart */
-                {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    cls:        'pie',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate() } } },
-                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'piewidth', unit: 'px', width: 65, value: panel.xdata.appearance.piewidth },
-                            { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'pieheight', unit: 'px', width: 65, value: panel.xdata.appearance.pieheight, id: 'pieheightfield' },
-                            { xtype: 'button', width: 22, icon: url_prefix+'plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'pietogglelocked',
-                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({pielocked: state ? '1' : '' }); renderUpdate(); }
-                            },
-                            { xtype: 'hidden', name: 'pielocked' }
-                    ]
-                }, {
-                    fieldLabel: 'Options',
-                    xtype:      'fieldcontainer',
-                    cls:        'pie',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
-                    {
-                        xtype:      'checkbox',
-                        name:       'pieshadow',
-                        hidden:      true
-                    },
-                    { xtype: 'label', text: 'Label Name:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'checkbox',
-                        name:       'pielabel'
-                    },
-                    { xtype: 'label', text: 'Label Value:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'checkbox',
-                        name:       'pielabelval'
-                    },
-                    { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'numberunit',
-                        allowDecimals: false,
-                        width:       60,
-                        name:       'piedonut',
-                        unit:       '%'
-                    }]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'pie',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdate(undefined, undefined, 0)  },
-                                     mouseover: function(color) { renderUpdate(color,     undefined, 0); },
-                                     mouseout:  function(color) { renderUpdate(undefined, undefined, 0); }
-                                   }
-                    },
-                    items: [
-                        { xtype: 'label', text: 'Ok:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_ok',
-                            value:           panel.xdata.appearance.piecolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: 'Warning:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_warning',
-                            value:           panel.xdata.appearance.piecolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: 'Critical:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_critical',
-                            value:           panel.xdata.appearance.piecolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_unknown',
-                            value:           panel.xdata.appearance.piecolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' }
-                        },
-                        { xtype: 'label', text: 'Up:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_up',
-                            value:           panel.xdata.appearance.piecolor_up,
-                            width:           80,
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: 'Down:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_down',
-                            value:           panel.xdata.appearance.piecolor_down,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unreachable:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_unreachable',
-                            value:           panel.xdata.appearance.piecolor_unreachable,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Gradient:' },
-                        {
-                            xtype:      'numberfield',
-                            allowDecimals: true,
-                            width:       80,
-                            name:       'piegradient',
-                            maxValue:    1,
-                            minValue:   -1,
-                            step:        0.05,
-                            value:       panel.xdata.appearance.piegradient
-                        }
-                    ]
-                },
-
-
-                /* Speedometer Chart */
-                {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    cls:        'speedometer',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'speedowidth', unit: 'px', width: 65, value: panel.xdata.appearance.speedowidth },
-                            { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
-                            { xtype: 'checkbox', name: 'speedoshadow', hidden: true },
-                            { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'checkbox', name: 'speedoneedle' },
-                            { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberunit', allowDecimals: false, width: 60, name: 'speedodonut', unit: '%' }
-                        ]
-                }, {
-                    fieldLabel: 'Axis',
-                    xtype:      'fieldcontainer',
-                    cls:        'speedometer',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                    { xtype: 'label', text: 'Steps:', style: 'margin-left: 0px; margin-right: 2px;' },
-                    {
-                        xtype:      'numberfield',
-                        allowDecimals: false,
-                        width:       40,
-                        name:       'speedosteps',
-                        step:        1,
-                        minValue:    0,
-                        maxValue:    1000
-                    },
-                    { xtype: 'label', text: 'Margin:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'numberunit',
-                        allowDecimals: false,
-                        width:       55,
-                        name:       'speedomargin',
-                        unit:       'px'
-                    },
-                    { xtype: 'label', text: 'Thresholds:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        name:       'speedo_thresholds',
-                        xtype:      'combobox',
-                        store:      ['hide', 'line', 'fill'],
-                        value:      'line',
-                        editable:    false,
-                        width:       60
-                    }
-                    ]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'speedometer',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdate(undefined,                    undefined, 0)  },
-                                     mouseover: function(color) { renderUpdate({color: color, scope: this }, undefined, 0); },
-                                     mouseout:  function(color) { renderUpdate(undefined,                    undefined, 0); }
-                                   }
-                    },
-                    items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_ok',
-                            value:           panel.xdata.appearance.speedocolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_warning',
-                            value:           panel.xdata.appearance.speedocolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_critical',
-                            value:           panel.xdata.appearance.speedocolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_unknown',
-                            value:           panel.xdata.appearance.speedocolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' }
-                        },
-                        { xtype: 'label', text: 'Background:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_bg',
-                            value:           panel.xdata.appearance.speedocolor_bg,
-                            width:           80
-                        },
-                        { xtype: 'label', text: 'Gradient:' },
-                        {
-                            xtype:      'numberfield',
-                            allowDecimals: true,
-                            width:       80,
-                            name:       'speedogradient',
-                            maxValue:    1,
-                            minValue:   -1,
-                            step:        0.05,
-                            value:       panel.xdata.appearance.speedogradient
-                        }
-                    ]
-                }, {
-                    fieldLabel:   'Source',
-                    name:         'speedosource',
-                    xtype:        'combobox',
-                    cls:          'speedometer',
-                    id:           'speedosourceStore',
-                    displayField: 'name',
-                    valueField:   'value',
-                    queryMode:    'local',
-                    store:       { fields: ['name', 'value'], data: [] },
-                    editable:      false,
-                    listeners: { focus:  perfDataUpdate,
-                                 change: function() { renderUpdate(undefined, true) }
-                    }
-                }, {
-                    fieldLabel: 'Options',
-                    xtype:      'fieldcontainer',
-                    cls:        'speedometer',
-                    layout:      { type: 'table', columns: 6, tableAttrs: { style: { width: '100%' } } },
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                        { xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
-                        { xtype: 'checkbox', name: 'speedoinvert' },
-                        { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
-                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
-                        { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
-                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 },
-                        { xtype: 'label', text: 'Factor:', style: 'margin-left: 0; margin-right: 2px;' },
-                        { xtype: 'textfield', width: 120, name: 'speedofactor', colspan: 5, emptyText: '100, 0.01, 1e3, 1e-6 ...' }
-                    ]
-                }]
+                defaults:      { anchor: '-12', labelWidth: 60, listeners: { change: function() { TP.iconSettingsGlobals.renderUpdate(); } } },
+                items:           appearanceItems
             }]
         }]
     };
@@ -1515,7 +704,7 @@ TP.iconShowEditDialog = function(panel) {
                         disabled:       (panel.xdata.popup && panel.xdata.popup.type == "custom") ? false : true,
                         fieldStyle:     { 'whiteSpace': 'pre' },
                         value:          TP.getPanelDetailsHeader(panel, true),
-                        listeners:      { change: function() { popupPreviewUpdate() } }
+                        listeners:      { change: function() { TP.iconSettingsGlobals.popupPreviewUpdate() } }
                       }]
                 }]
             }],
@@ -1525,8 +714,7 @@ TP.iconShowEditDialog = function(panel) {
                     TP.iconSettingsWindow.center();
                     var pos = TP.iconSettingsWindow.getPosition();
                     TP.iconSettingsWindow.setPosition(pos[0], 50);
-
-                    popupPreviewUpdate();
+                    TP.iconSettingsGlobals.popupPreviewUpdate();
 
                     if(TP.iconLabelHelpWindow == undefined) {
                         TP.iconLabelHelpWindow = new Ext.Window({
@@ -1643,6 +831,7 @@ TP.iconShowEditDialog = function(panel) {
         height:  350,
         width:   450,
         layout: 'fit',
+        hidden:  true,
         items:   tabPanel,
         panel:   panel,
         title:  'Icon Settings',
@@ -1744,19 +933,19 @@ TP.iconShowEditDialog = function(panel) {
     TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
 
-    var labelUpdate = function() {
+    labelUpdate = function() {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         panel.setIconLabel(xdata.label || {});
     };
-    var stateUpdate = function() {
+    TP.iconSettingsGlobals.stateUpdate = function() {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
         labelUpdate();
         // update performance data stores
-        perfDataUpdate();
+        TP.iconSettingsGlobals.perfDataUpdate();
     }
 
-    var popupPreviewUpdate = function() {
+    TP.iconSettingsGlobals.popupPreviewUpdate = function() {
         window.clearTimeout(TP.timeouts['timeout_popup_preview']);
         TP.timeouts['timeout_popup_preview'] = window.setTimeout(function() {
             TP.suppressIconTip = false;
@@ -1786,7 +975,7 @@ TP.iconShowEditDialog = function(panel) {
     TP.iconSettingsWindow.panel = panel;
 
     settingsWindow.renderUpdateDo = renderUpdateDo;
-    renderUpdate = function(forceColor, forceRenderItem, delay) {
+    TP.iconSettingsGlobals.renderUpdate = function(forceColor, forceRenderItem, delay) {
         if(delay == undefined) { delay = 100; }
         if(delay == 0) {
             TP.iconSettingsWindow.renderUpdateDo(forceColor, forceRenderItem);
@@ -1799,8 +988,7 @@ TP.iconShowEditDialog = function(panel) {
             TP.iconSettingsWindow.renderUpdateDo(forceColor, forceRenderItem);
         }, delay, 'timeout_settings_render_update');
     };
-    settingsWindow.renderUpdate = renderUpdate;
-    renderUpdate();
+    TP.iconSettingsGlobals.renderUpdate();
 
     /* highlight current icon */
     if(panel.xdata.appearance.type == "connector") {

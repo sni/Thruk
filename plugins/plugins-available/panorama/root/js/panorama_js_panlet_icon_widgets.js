@@ -1,3 +1,13 @@
+TP.iconAppearanceTypes = [
+    {"value":"none",        "name":"Label Only"},
+    {"value":"icon",        "name":"Icon"},
+    {"value":"connector",   "name":"Line / Arrow / Watermark"},
+    {"value":"pie",         "name":"Pie Chart"},
+    {"value":"speedometer", "name":"Speedometer"},
+    {"value":"shape",       "name":"Shape"},
+    {"value":"perfbar",     "name":"Performance Bar"}
+];
+
 Ext.define('TP.SmallWidget', {
     mixins: {
         iconLabel: 'TP.IconLabel'
@@ -207,6 +217,7 @@ Ext.define('TP.SmallWidget', {
         this.locked   = oldLocked;
     },
     applyXdata: function(xdata) {
+        var panel = this;
         if(xdata == undefined) { xdata = this.xdata; }
 
         /* restore missing sections */
@@ -705,28 +716,6 @@ Ext.define('TP.IconWidget', {
         tab.saveIconsStates();
     },
 
-    /* update shapes and stuff */
-    updateRender: function(xdata) {
-        var panel = this;
-        window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_updaterender']);
-        TP.timeouts['timeout_' + panel.id + '_updaterender'] = window.setTimeout(function() {
-            panel.updateRenderDo(xdata);
-        }, 100);
-    },
-    updateRenderDo: function(xdata) {
-        var panel = this;
-        if(xdata == undefined) { xdata = panel.xdata; }
-        /* static icons must be refreshed, even when inactive, because they won't be updated later on */
-        if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
-        /* no need for changes if we are not the active tab */
-        if(!TP.isThisTheActiveTab(panel)) { return; }
-        if(xdata.appearance.type == 'shape')       { panel.shapeRender(xdata);            }
-        if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
-        if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
-        if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
-        if(xdata.appearance.type == 'perfbar')     { panel.perfbarRender(xdata);          }
-    },
-
     /* rotates this thing */
     applyRotation: function(value, xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
@@ -778,6 +767,24 @@ Ext.define('TP.IconWidget', {
         return(totals);
     },
 
+    /* update shapes and stuff */
+    updateRender: function(xdata) {
+        var panel = this;
+        window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_updaterender']);
+        TP.timeouts['timeout_' + panel.id + '_updaterender'] = window.setTimeout(function() {
+            panel.updateRenderDo(xdata);
+        }, 100);
+    },
+    updateRenderDo: function(xdata) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        /* static icons must be refreshed, even when inactive, because they won't be updated later on */
+        if(panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata); }
+        /* no need for changes if we are not the active tab */
+        if(!TP.isThisTheActiveTab(panel)) { return; }
+        if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata); }
+    },
+
     /* set main render item*/
     setRenderItem: function(xdata, forceRecreate) {
         var panel = this;
@@ -788,6 +795,8 @@ Ext.define('TP.IconWidget', {
         panel.surface  = undefined;
         panel.icon     = undefined;
         panel.chart    = undefined;
+
+        panel.appearance = Ext.create('tp.icon.appearance.'+xdata.appearance['type'], { panel: panel });
 
         if(panel.dragEl1) { panel.dragEl1.destroy(); }
         if(panel.dragEl2) { panel.dragEl2.destroy(); }
@@ -933,664 +942,14 @@ Ext.define('TP.IconWidget', {
                 });
             }
         }
-        else if(xdata.appearance.type == 'pie') {
-            var pieStore = Ext.create('Ext.data.Store', {
-                fields: ['name','value'],
-                data:  []
-            });
-            panel.add({
-                xtype:  'tp_piechart',
-                store:   pieStore,
-                panel:   panel,
-                animate: false,
-                shadow:  false, // xdata.appearance.pieshadow, // not working atm
-                donut:   xdata.appearance.piedonut,
-                listeners: {
-                    afterrender: function(This, eOpts) {
-                        panel.itemRendering = false;
-                        panel.chart = This;
-                        panel.updateRender(xdata);
-                    }
-                }
-            });
-        }
-        else if(xdata.appearance.type == 'speedometer') {
-            panel.add({
-                xtype:       'tp_speedochart',
-                store:        [0],
-                panel:        panel,
-                insetPadding: xdata.appearance.speedomargin > 0 ? xdata.appearance.speedomargin + 20 : 10,
-                shadow:       xdata.appearance.speedoshadow,
-                donut:        xdata.appearance.speedodonut,
-                needle:       xdata.appearance.speedoneedle,
-                axis_margin:  xdata.appearance.speedomargin == 0 ? 0.1 : xdata.appearance.speedomargin,
-                axis_steps:   xdata.appearance.speedosteps,
-                axis_min:     xdata.appearance.speedoaxis_min ? xdata.appearance.speedoaxis_min : 0,
-                axis_max:     xdata.appearance.speedoaxis_max ? xdata.appearance.speedoaxis_max : 0,
-                listeners: {
-                    afterrender: function(This, eOpts) {
-                        panel.itemRendering = false;
-                        panel.chart = This;
-                        panel.updateRender(xdata);
-                    },
-                    resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
-                        panel.updateRender(xdata);
-                    }
-                }
-            });
-        }
-        else if(xdata.appearance.type == 'perfbar') {
-            panel.add({
-                xtype:       'panel',
-                listeners: {
-                    afterrender: function(This, eOpts) {
-                        panel.itemRendering = false;
-                        panel.chart = This;
-                        panel.updateRender(xdata);
-                    },
-                    resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
-                        panel.updateRender(xdata);
-                    }
-                }
-            });
+        else if(panel.appearance.setRenderItem) {
+            panel.appearance.setRenderItem(xdata);
         }
         else {
             panel.itemRendering = false;
         }
     },
 
-    /* renders speedometer chart */
-    speedoRender: function(xdata, forceColor) {
-        var panel = this;
-        if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'speedometer') { return }
-        if(!panel.chart) {
-            panel.setRenderItem(xdata);
-            return;
-        }
-        var extraSpace = 0;
-        if(!panel.items.getAt || !panel.items.getAt(0)) { return; }
-        panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
-        panel.setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
-        var colors = {
-            pending:  xdata.appearance.speedocolor_pending  ? xdata.appearance.speedocolor_pending  : '#ACACAC',
-            ok:       xdata.appearance.speedocolor_ok       ? xdata.appearance.speedocolor_ok       : '#00FF33',
-            warning:  xdata.appearance.speedocolor_warning  ? xdata.appearance.speedocolor_warning  : '#FFDE00',
-            unknown:  xdata.appearance.speedocolor_unknown  ? xdata.appearance.speedocolor_unknown  : '#FF9E00',
-            critical: xdata.appearance.speedocolor_critical ? xdata.appearance.speedocolor_critical : '#FF5B33',
-            bg:       xdata.appearance.speedocolor_bg       ? xdata.appearance.speedocolor_bg       : '#DDDDDD'
-        };
-
-        // which source to use
-        var state  = xdata.state, value = 0, min = 0, max = 100;
-        var warn_min, warn_max, crit_min, crit_max;
-        var factor = xdata.appearance.speedofactor == '' ? Number(1) : Number(xdata.appearance.speedofactor);
-        if(isNaN(factor)) { factor = 1; }
-
-        if(state == undefined) { state = panel.xdata.state; }
-        if(xdata.appearance.speedosource == undefined) { xdata.appearance.speedosource = 'problems'; }
-        var matchesP = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
-        var matchesA = xdata.appearance.speedosource.match(/^avail:(.*)$/);
-        if(matchesP && matchesP[1]) {
-            var macros  = TP.getPanelMacros(panel);
-            if(macros.perfdata[matchesP[1]]) {
-                var p = macros.perfdata[matchesP[1]];
-                value = p.val;
-                var r = TP.getPerfDataMinMax(p, '?');
-                if(Ext.isNumeric(r.max)) {
-                    max   = r.max * factor;
-                }
-                min   = r.min * factor;
-                if(Ext.isNumeric(p.warn_min)) { warn_min = p.warn_min * factor; }
-                if(Ext.isNumeric(p.warn_max)) { warn_max = p.warn_max * factor; }
-                if(Ext.isNumeric(p.crit_min)) { crit_min = p.crit_min * factor; }
-                if(Ext.isNumeric(p.crit_max)) { crit_max = p.crit_max * factor; }
-            }
-        }
-        else if(matchesA && matchesA[1]) {
-            if(TP.availabilities && TP.availabilities[panel.id] && TP.availabilities[panel.id][matchesA[1]] && TP.availabilities[panel.id][matchesA[1]].last != undefined) {
-                value = Number(TP.availabilities[panel.id][matchesA[1]].last);
-                max   = 100;
-                min   = 0;
-            }
-        }
-        else if(xdata.appearance.speedosource == 'problems' || xdata.appearance.speedosource == 'problems_warn') {
-            var totals = this.getTotals(xdata, colors);
-            max = 0;
-            Ext.Array.each(totals, function(t,i) {
-                max += t.value;
-                if(t.name == 'critical' || t.name == 'unknown' || t.name == 'down' || t.name == 'unreachable') {
-                    value += t.value;
-                }
-                if(xdata.appearance.speedosource == 'problems_warn' && t.name == 'warning') {
-                    value += t.value;
-                }
-            });
-        }
-        // override min / max by option
-        if(xdata.appearance.speedomin != undefined && xdata.appearance.speedomin != '') { min = Number(xdata.appearance.speedomin); }
-        if(xdata.appearance.speedomax != undefined && xdata.appearance.speedomax != '') { max = Number(xdata.appearance.speedomax); }
-
-        if(panel.chart.axes.getAt(0).minimum != min || panel.chart.axes.getAt(0).maximum != max) {
-            if(!isNaN(min) && !isNaN(max)) {
-                xdata.appearance.speedoaxis_min = min;
-                xdata.appearance.speedoaxis_max = max;
-                panel.setRenderItem(xdata);
-                return;
-            }
-        }
-
-        value *= factor;
-
-        /* inverted value? */
-        if(xdata.appearance.speedoinvert) {
-            value = max - value;
-        }
-        if(value > max) { value = max; } // value cannot exceed speedo
-        if(value < min) { value = min; } // value cannot exceed speedo
-        var color_fg = colors['unknown'];
-        if(state == 0) { color_fg = colors['ok'];       }
-        if(state == 1) { color_fg = colors['warning'];  }
-        if(state == 2) { color_fg = colors['critical']; }
-        if(state == 3) { color_fg = colors['unknown'];  }
-        if(state == 4) { color_fg = colors['pending'];  }
-
-        /* translate host state */
-        if(panel.iconType == 'host') {
-            if(state == 1) { color_fg = colors['critical']; }
-            if(state == 2) { color_fg = colors['warning'];  }
-        }
-
-        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
-
-        /* warning / critical thresholds */
-        panel.chart.series.getAt(0).ranges = [];
-        panel.chart.series.getAt(0).lines  = [];
-        if(xdata.appearance.speedo_thresholds == 'undefined') { xdata.appearance.speedo_thresholds = 'line'; }
-        if(value == 0) { value = 0.0001; } // doesn't draw anything otherwise
-        var color_bg = panel.speedoGetColor(colors, 0, forceColor, 'bg');
-        if(!!xdata.appearance.speedoneedle) {
-            if(xdata.appearance.speedo_thresholds == 'hide') {
-                color_bg = panel.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
-            }
-            else if(xdata.appearance.speedo_thresholds == 'filled') {
-                color_bg = panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'ok')
-            }
-        }
-        panel.chart.series.getAt(0).ranges.push({
-            from:  min,
-            to:    max,
-            color: color_bg
-        });
-        if(warn_max != undefined) {
-            if(xdata.appearance.speedo_thresholds == 'fill') {
-                if(warn_min == undefined) {
-                    warn_min = warn_max;
-                    if(crit_min != undefined) {
-                        warn_max = crit_min;
-                    }
-                    else if(crit_max != undefined) {
-                        warn_max = crit_max;
-                    }
-                    else {
-                        warn_max = max;
-                    }
-                }
-                panel.chart.series.getAt(0).ranges.push({
-                    from:  warn_min,
-                    to:    warn_max,
-                    color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'warning')
-                });
-            }
-            else if(xdata.appearance.speedo_thresholds == 'line') {
-                panel.chart.series.getAt(0).lines.push({
-                    value: warn_max,
-                    color: panel.speedoGetColor(colors, 0, forceColor, 'warning')
-                });
-                if(warn_min != undefined && warn_min != warn_max) {
-                    panel.chart.series.getAt(0).lines.push({
-                        value: warn_min,
-                        color: panel.speedoGetColor(colors, 0, forceColor, 'warning')
-                    });
-                }
-            }
-        }
-        if(crit_max != undefined) {
-            if(xdata.appearance.speedo_thresholds == 'fill') {
-                if(crit_min == undefined) { crit_min = crit_max; crit_max = max; }
-                panel.chart.series.getAt(0).ranges.push({
-                    from:  crit_min,
-                    to:    crit_max,
-                    color: panel.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'critical')
-                });
-            }
-            else if(xdata.appearance.speedo_thresholds == 'line') {
-                panel.chart.series.getAt(0).lines.push({
-                    value: crit_max,
-                    color: panel.speedoGetColor(colors, 0, forceColor, 'critical')
-                });
-                if(crit_min != undefined && crit_min != crit_max) {
-                    panel.chart.series.getAt(0).lines.push({
-                        value: crit_min,
-                        color: panel.speedoGetColor(colors, 0, forceColor, 'critical')
-                    });
-                }
-            }
-        }
-
-        if(!xdata.appearance.speedoneedle) {
-            panel.chart.series.getAt(0).ranges.push({
-                from:  0,
-                to:    value,
-                color: panel.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
-            });
-        }
-        panel.chart.series.getAt(0).value = value;
-        if(panel.chart.series.getAt(0).setValue)   { panel.chart.series.getAt(0).setValue(value); }
-        if(panel.chart.series.getAt(0).drawSeries) { panel.chart.series.getAt(0).drawSeries();    }
-    },
-
-    speedoGetColor: function(colors, gradient_val, forceColor, type) {
-        var panel = this;
-        var color;
-        if(type != undefined) {
-            color = colors[type];
-            if(forceColor && forceColor.scope.name == "speedocolor_"+type) { color = forceColor.color; }
-        } else {
-            color = colors;
-            if(forceColor) { color = forceColor.color; }
-        }
-        if(gradient_val != 0) {
-            var gradient = TP.createGradient(color, gradient_val);
-            if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
-                panel.chart.surface.existingGradients[gradient.id] = true;
-                panel.chart.surface.addGradient(gradient);
-            }
-            return('url(#'+gradient.id+')');
-        }
-        return(color);
-    },
-
-    /* renders pie chart */
-    pieRender: function(xdata, forceColor) {
-        var panel = this;
-        if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'pie') { return }
-        if(!panel.chart) {
-            panel.setRenderItem(xdata);
-            return;
-        }
-        if(panel.itemRendering) { return; }
-        if(xdata.appearance.pielocked) { xdata.appearance.pieheight = xdata.appearance.piewidth; }
-        if(!panel.items.getAt || !panel.items.getAt(0)) { return; }
-        panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
-        panel.setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
-        var colors = {
-            up:          xdata.appearance.piecolor_up          ? xdata.appearance.piecolor_up          : '#00FF33',
-            down:        xdata.appearance.piecolor_down        ? xdata.appearance.piecolor_down        : '#FF5B33',
-            unreachable: xdata.appearance.piecolor_unreachable ? xdata.appearance.piecolor_unreachable : '#FF7A59',
-            pending:     xdata.appearance.piecolor_pending     ? xdata.appearance.piecolor_pending     : '#ACACAC',
-            ok:          xdata.appearance.piecolor_ok          ? xdata.appearance.piecolor_ok          : '#00FF33',
-            warning:     xdata.appearance.piecolor_warning     ? xdata.appearance.piecolor_warning     : '#FFDE00',
-            unknown:     xdata.appearance.piecolor_unknown     ? xdata.appearance.piecolor_unknown     : '#FF9E00',
-            critical:    xdata.appearance.piecolor_critical    ? xdata.appearance.piecolor_critical    : '#FF5B33'
-        };
-        var totals   = this.getTotals(xdata, colors);
-        var colorSet = [];
-        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
-        Ext.Array.each(totals, function(t,i) {
-            var color = t.color;
-            if(forceColor) { color = forceColor; }
-            if(xdata.appearance.piegradient != 0) {
-                var gradient = TP.createGradient(color, xdata.appearance.piegradient);
-                if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
-                    panel.chart.surface.existingGradients[gradient.id] = true;
-                    panel.chart.surface.addGradient(gradient);
-                }
-                colorSet.push('url(#'+gradient.id+')');
-            } else {
-                colorSet.push(color);
-            }
-        });
-        panel.chart.series.getAt(0).colorSet = colorSet;
-        var pieStore = Ext.create('Ext.data.Store', {
-            fields: ['name','value'],
-            data:  []
-        });
-        TP.updateArrayStoreHash(pieStore, totals);
-        panel.chart.bindStore(pieStore);
-        panel.chart.panel.xdata.showlabel    = !!xdata.appearance.pielabel;
-        panel.chart.panel.xdata.showlabelVal = !!xdata.appearance.pielabelval;
-        panel.chart.setShowLabel();
-    },
-
-    /* renders shape */
-    shapeRender: function(xdata, forceColor, panel) {
-        if(panel == undefined) { panel = this; }
-        if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'shape') { return }
-
-        if(xdata.appearance.shapename == undefined) { return; }
-        if(!panel.surface) {
-            panel.setRenderItem(xdata);
-            return;
-        }
-        if(!panel.surface.el) { return };
-        var shapeData;
-        TP.shapesStore.findBy(function(rec, id) {
-            if(rec.data.name == xdata.appearance.shapename) {
-                shapeData = rec.data.data;
-            }
-        });
-        if(shapeData == undefined) {
-            if(initial_shapes[xdata.appearance.shapename]) {
-                shapeData = initial_shapes[xdata.appearance.shapename];
-            } else {
-                TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: no such shape");
-                return;
-            }
-        }
-
-        shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
-        shapeData += ",fill:'"+(TP.getShapeColor("shape", panel, xdata, forceColor).color)+"'";
-        var spriteData;
-        try {
-            eval("spriteData = {"+shapeData+"};");
-        }
-        catch(err) {
-            TP.logError(panel.id, "labelSpriteEvalException", err);
-            TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+err);
-            return;
-        }
-        panel.surface.removeAll();
-        sprite = panel.surface.add(spriteData);
-        var box = sprite.getBBox();
-        var xScale = xdata.appearance.shapewidth/box.width;
-        var yScale = xdata.appearance.shapeheight/box.height;
-        if(xdata.appearance.shapelocked) { yScale = xScale; }
-        if(isNaN(xScale) || isNaN(yScale) || isNaN(box.x)) { return; }
-        sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
-        box = sprite.getBBox();
-        sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
-        panel.setSize(Math.ceil(box.width), Math.ceil(box.height));
-        if(panel.items.getAt && panel.items.getAt(0)) {
-            panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
-        }
-        sprite.show(true);
-    },
-    /* renders connector */
-    connectorRender: function(xdata, forceColor, panel) {
-        if(panel == undefined) { panel = this; }
-        if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'connector') { return }
-
-        if(!panel.surface) {
-            panel.setRenderItem(xdata);
-            return;
-        }
-
-        var fromX     = xdata.appearance.connectorfromx;
-        var fromY     = xdata.appearance.connectorfromy;
-        var toX       = xdata.appearance.connectortox;
-        var toY       = xdata.appearance.connectortoy;
-        var arrowtype = xdata.appearance.connectorarrowtype;
-        if(isNaN(fromX)) { return; }
-
-        if(!panel.surface.el) { return };
-
-        if(fromX > toX) {
-            fromX = xdata.appearance.connectortox;
-            fromY = xdata.appearance.connectortoy;
-            toX   = xdata.appearance.connectorfromx;
-            toY   = xdata.appearance.connectorfromy;
-            if(     arrowtype == "right") { arrowtype = "left"; }
-            else if(arrowtype == "left")  { arrowtype = "right"; }
-        }
-        var connectorarrowwidth = xdata.appearance.connectorarrowwidth;
-
-        /* variable arrow sizes */
-        var shapeColor = TP.getShapeColor("connector", panel, xdata, forceColor);
-        var connectorwidth = xdata.appearance.connectorwidth;
-        if(xdata.appearance.connectorvariable) {
-            var percent = 100;
-            var state   = xdata.state != undefined ? xdata.state : panel.xdata.state;
-            if(shapeColor.value != undefined) {
-                var min   = shapeColor.range.min;
-                var max   = shapeColor.range.max;
-                if(xdata.appearance.connectormin != undefined) { min = xdata.appearance.connectormin; }
-                if(xdata.appearance.connectormax != undefined) { max = xdata.appearance.connectormax; }
-                if(min == undefined) { min = 0; }
-                percent = ((shapeColor.value-min) / (max-min)) * 100;
-                if(percent > 100) { percent = 100 }
-            }
-            else if(state == 0) { percent =   0; }
-            else if(state == 1) { percent =  50; }
-            else if(state == 2) { percent = 100; }
-            else if(state == 3) { percent =  50; }
-            else if(state == 4) { percent =   0; }
-            connectorwidth = connectorwidth * (percent/100);
-            if(connectorwidth < 1)    { connectorwidth = 1; }
-            if(isNaN(connectorwidth)) { connectorwidth = 1; }
-        }
-
-        /* calculate distance, draw horizontal arrow with that length and rotate it later. save a lot of work to rotate by ourselves */
-        var distance  = Math.ceil(Math.sqrt(Math.pow(toX-fromX, 2)
-                                          + Math.pow(toY-fromY, 2)));
-        if(isNaN(distance) || distance == 0) {
-            return;
-        }
-        var start = [ 0, 0 ];
-        var end   = [ distance, 0 ];
-
-        /* get angle between points */
-        var angle = Math.atan((toY-fromY)/(toX-fromX))*180/Math.PI;
-
-        var points = [[start[0],start[1]]];
-        /* top half of left arrow */
-        if(arrowtype == "both" || arrowtype == "left") {
-            points.push(
-                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]-connectorwidth/2-connectorarrowwidth)],
-                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]-connectorwidth/2)]
-            );
-        } else {
-            points.push(
-                [start[0], (start[1]-connectorwidth/2)]
-            );
-        }
-
-        /* right arrow */
-        if(arrowtype == "both" || arrowtype == "right") {
-            points.push(
-                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]-connectorwidth/2)],
-                [end[0]-xdata.appearance.connectorarrowlength, (end[1]-connectorwidth/2-connectorarrowwidth)],
-                [end[0], end[1]],
-                [end[0]-xdata.appearance.connectorarrowlength, (end[1]+connectorwidth/2+connectorarrowwidth)],
-                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]+connectorwidth/2)]
-            );
-        } else {
-            points.push(
-                [end[0], (end[1]-connectorwidth/2)],
-                [end[0], (end[1]+connectorwidth/2)]
-            );
-        }
-
-        /* bottom half of left arrow */
-        if(arrowtype == "both" || arrowtype == "left") {
-            points.push(
-                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]+connectorwidth/2)],
-                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]+connectorwidth/2+connectorarrowwidth)]
-            );
-        } else {
-            points.push(
-                [start[0], (start[1]+connectorwidth/2)]
-            );
-        }
-
-        panel.surface.removeAll();
-        sprite = panel.surface.add({
-            type: "path",
-            path: TP.pointsToPath(points),
-            fill: shapeColor.color
-        });
-        sprite.setAttributes({rotate:{degrees: angle, x:0, y:0}}, true);
-        var box = sprite.getBBox();
-        sprite.setAttributes({translate:{x:-box.x,y:-box.y+(arrowtype == "none" ? connectorarrowwidth : 0)}}, true);
-        var newHeight = Math.ceil(Ext.Array.max([connectorarrowwidth+connectorwidth, box.height]));
-        panel.setSize(Math.ceil(box.width), newHeight);
-        panel.surface.setSize(Math.ceil(box.width), newHeight);
-        panel.surface.el.dom.parentNode.style.width  = Math.ceil(box.width)+"px";
-        panel.surface.el.dom.parentNode.style.height = newHeight+"px";
-        sprite.show(true);
-        /* adjust position: first point in path is the rotated start point, so we can get our current offset from there */
-        xdata.layout.x = Math.ceil(fromX-box.path[0][1]+box.x);
-        xdata.layout.y = Math.ceil(fromY-box.path[0][2]+box.y);
-        panel.setRawPosition(xdata.layout.x, xdata.layout.y);
-        panel.updateMapLonLat(true);
-
-        /* adjust drag elements position */
-        Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {
-            if(dragEl != undefined) {
-                dragEl.suspendEvents();
-                dragEl.setPosition(xdata.appearance[dragEl.keyX]+dragEl.offsetX, xdata.appearance[dragEl.keyY]+dragEl.offsetY);
-                dragEl.resumeEvents();
-                try { dragEl.toFront(); } catch(err) {}
-            }
-        });
-
-        /* enable popups only over the actual arrow */
-        if(!TP.suppressIconTip) {
-            sprite.on('mouseover', function(el, evt, eOpts) {
-                TP.suppressIconTip = false;
-            });
-            sprite.on('mouseout', function(el, evt, eOpts) {
-                TP.suppressIconTip = true;
-            });
-            panel.el.on('mouseover', function(evt, el, eOpts) {
-                if(evt.target.tagName != "rect") { return; }
-                TP.suppressIconTip = true;
-            });
-            panel.el.on('mouseout', function(evt, el, eOpts) {
-                if(evt.target.tagName != "rect") { return; }
-                TP.suppressIconTip = false;
-            });
-            if(panel.labelEl && panel.labelEl.el) {
-                panel.labelEl.el.on('mouseover', function(evt, el, eOpts) {
-                    TP.suppressIconTip = false;
-                });
-                panel.labelEl.el.on('mouseout', function(evt, el, eOpts) {
-                    TP.suppressIconTip = true;
-                });
-            }
-        }
-    },
-    /* renders performance bar */
-    perfbarRender: function(xdata, forceColor) {
-        var panel = this;
-        if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'perfbar') { return }
-        panel.setSize(75, 20);
-        if(!panel.items.getAt(0)) {
-            panel.setRenderItem(xdata);
-            return;
-        }
-        var data;
-        if(panel.service) {
-            data = panel.service;
-        }
-        else if(panel.host) {
-            data = panel.host;
-        }
-        if(data) {
-            var r =  perf_table(false, data.state, data.plugin_output, data.perf_data, data.check_command, "", !!panel.host, true);
-            if(r == false) { r= ""; }
-            panel.items.getAt(0).update(r);
-        } else {
-            if(TP.iconSettingsWindow) {
-                xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
-            }
-            var tab = Ext.getCmp(panel.panel_id);
-            TP.updateAllIcons(tab, panel.id, xdata);
-            panel.items.getAt(0).update("<div class='perf_bar_bg notclickable' style='width:75px;'>");
-        }
-    },
-    iconSetSourceFromState: function(xdata) {
-        var panel = this;
-        if(xdata       == undefined) { xdata = panel.xdata; }
-        if(xdata.state == undefined) { xdata.state = panel.xdata.state; }
-        if(xdata.state == undefined) { xdata.state = 4; }
-        var tab   = Ext.getCmp(panel.panel_id);
-        if(!panel.icon) {
-            panel.setRenderItem(xdata);
-            return;
-        }
-        var iconsetName = xdata.appearance.iconset;
-        if(iconsetName == '' || iconsetName == undefined) {
-            if(!tab) { return; }
-            iconsetName = tab.xdata.defaulticonset || 'default';
-        }
-
-        var newSrc;
-
-        // get iconset from store
-        var rec = TP.iconsetsStore.findRecord('value', iconsetName);
-        if(rec == null) {
-            newSrc = Ext.BLANK_IMAGE_URL;
-        }
-        else if(panel.iconType == 'image') {
-            panel.iconCheckBorder(xdata);
-            if(xdata.general.src == undefined || xdata.general.src == "" || xdata.general.src.match(/\/panorama\/images\/s\.gif$/)) {
-                newSrc = Ext.BLANK_IMAGE_URL;
-            } else {
-                newSrc = xdata.general.src;
-            }
-        }
-        else if(panel.iconType == 'host' || panel.hostProblem) {
-            if(panel.acknowledged) {
-                     if(xdata.state == 1) { newSrc = 'acknowledged_down';        }
-                else if(xdata.state == 2) { newSrc = 'acknowledged_unreachable'; }
-                else                      { newSrc = 'acknowledged_unknown';     }
-            }
-            else if(panel.downtime) {
-                if(     xdata.state == 0) { newSrc = 'downtime_up';          }
-                else if(xdata.state == 1) { newSrc = 'downtime_down';        }
-                else if(xdata.state == 2) { newSrc = 'downtime_unreachable'; }
-                else if(xdata.state == 4) { newSrc = 'downtime_pending';     }
-                else                      { newSrc = 'downtime_unknown';     }
-            } else {
-                if(     xdata.state == 0) { newSrc = 'up';          }
-                else if(xdata.state == 1) { newSrc = 'down';        }
-                else if(xdata.state == 2) { newSrc = 'unreachable'; }
-                else if(xdata.state == 4) { newSrc = 'pending';     }
-                else                      { newSrc = 'unknown';     }
-            }
-        } else {
-            if(panel.acknowledged) {
-                     if(xdata.state == 1) { newSrc = 'acknowledged_warning';  }
-                else if(xdata.state == 2) { newSrc = 'acknowledged_critical'; }
-                else                      { newSrc = 'acknowledged_unknown';  }
-            }
-            else if(panel.downtime) {
-                if(     xdata.state == 0) { newSrc = 'downtime_ok';       }
-                else if(xdata.state == 1) { newSrc = 'downtime_warning';  }
-                else if(xdata.state == 2) { newSrc = 'downtime_critical'; }
-                else if(xdata.state == 4) { newSrc = 'downtime_pending';  }
-                else                      { newSrc = 'downtime_unknown';  }
-            } else {
-                if(     xdata.state == 0) { newSrc = 'ok';       }
-                else if(xdata.state == 1) { newSrc = 'warning';  }
-                else if(xdata.state == 2) { newSrc = 'critical'; }
-                else if(xdata.state == 4) { newSrc = 'pending';  }
-                else                      { newSrc = 'unknown';  }
-            }
-        }
-        if(rec != null && rec.data.fileset[newSrc]) {
-            newSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset[newSrc];
-        }
-        panel.src = newSrc;
-        panel.icon.setAttributes({src: newSrc}).redraw();
-        panel.iconFixSize(xdata);
-        if(!TP.isThisTheActiveTab(panel)) { panel.hide(); }
-    },
     iconFixSize: function(xdata) {
         var panel = this;
         if(!panel.icon)    { return; }
@@ -1631,6 +990,7 @@ Ext.define('TP.IconWidget', {
             }
         }
     },
+
     iconCheckBorder: function(xdata, isError) {
         var panel = this;
         var src = panel.src || xdata.general.src;
