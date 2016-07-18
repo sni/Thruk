@@ -867,8 +867,10 @@ plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_server.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_services.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_host.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_tooltip.js
+plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_widget_label.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_widgets.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_widgets_settings.js
+plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_widgets_types.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_piechart.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_piechart_stats.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_pnp.js
