@@ -1515,7 +1515,7 @@ TP.iconShowEditDialog = function(panel) {
                         disabled:       (panel.xdata.popup && panel.xdata.popup.type == "custom") ? false : true,
                         fieldStyle:     { 'whiteSpace': 'pre' },
                         value:          TP.getPanelDetailsHeader(panel, true),
-                        listeners:      { change: popupPreviewUpdate }
+                        listeners:      { change: function() { popupPreviewUpdate() } }
                       }]
                 }]
             }],
@@ -1526,18 +1526,8 @@ TP.iconShowEditDialog = function(panel) {
                     var pos = TP.iconSettingsWindow.getPosition();
                     TP.iconSettingsWindow.setPosition(pos[0], 50);
 
-                    TP.suppressIconTip = false;
-                    panel.locked = true;
-
                     popupPreviewUpdate();
-                    TP.iconTip.show();
-                    window.clearTimeout(TP.iconTip.hideTimer);
-                    delete TP.iconTip.hideTimer;
 
-                    panel.locked = false;
-                    TP.suppressIconTip = true;
-
-                    TP.iconTip.alignToSettingsWindow();
                     if(TP.iconLabelHelpWindow == undefined) {
                         TP.iconLabelHelpWindow = new Ext.Window({
                             height:     550,
@@ -1769,9 +1759,21 @@ TP.iconShowEditDialog = function(panel) {
     var popupPreviewUpdate = function() {
         window.clearTimeout(TP.timeouts['timeout_popup_preview']);
         TP.timeouts['timeout_popup_preview'] = window.setTimeout(function() {
+            TP.suppressIconTip = false;
+            panel.locked = true;
             TP.iconTipTarget = panel;
+
             TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
-        }, 200);
+
+            TP.iconTip.show();
+            window.clearTimeout(TP.iconTip.hideTimer);
+            delete TP.iconTip.hideTimer;
+
+            panel.locked = false;
+            TP.suppressIconTip = true;
+
+             TP.iconTip.alignToSettingsWindow();
+        }, 100);
     }
 
     // new mouseover tips while settings are open
@@ -1811,8 +1813,6 @@ TP.iconShowEditDialog = function(panel) {
     } else {
         panel.el.dom.style.outline = "2px dotted orange";
     }
-
-    popupPreviewUpdate();
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
