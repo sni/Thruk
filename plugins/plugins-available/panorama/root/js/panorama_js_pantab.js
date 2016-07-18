@@ -104,7 +104,7 @@ Ext.define('TP.Pantab', {
                         if(panlet.rendered == false) {
                             /* delay initial show when its not yet rendered */
                             window.setTimeout(Ext.bind(panlet.show, panlet, []), delay);
-                            delay = delay + 50;
+                            delay = delay + 25;
                         } else {
                             panlet.show(false);
                         }
@@ -400,9 +400,9 @@ Ext.define('TP.Pantab', {
                     TP.timeouts['timeout_' + panel_id + '_render'] = window.setTimeout(Ext.bind(TP.add_panlet, tab, [{id:panel_id, skip_state:true, tb:tab, autoshow:autoshow}, false]), delay);
 
                     if(autoshow) {
-                       TP.initial_create_delay_active   = TP.initial_create_delay_active   + 50;
+                       TP.initial_create_delay_active   = TP.initial_create_delay_active   + 25;
                     } else {
-                       TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 30;
+                       TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 50;
                     }
                 });
             }
