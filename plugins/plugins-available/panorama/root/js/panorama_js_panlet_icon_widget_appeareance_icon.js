@@ -16,6 +16,10 @@ Ext.define('TP.IconWidgetAppearanceIcon', {
 
     alias:  'tp.icon.appearance.icon',
 
+    defaultDrawItem: true,
+    defaultDrawIcon: true,
+    shrinkable:      true,
+
     constructor: function(config) {
         var me = this;
         Ext.apply(me, config);

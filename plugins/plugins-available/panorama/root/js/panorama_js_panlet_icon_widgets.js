@@ -718,10 +718,11 @@ Ext.define('TP.IconWidget', {
 
     /* rotates this thing */
     applyRotation: function(value, xdata) {
+        var panel = this;
         if(xdata == undefined) { xdata = this.xdata; }
         if(value == undefined) { return; }
         if(isNaN(value)) { return; }
-        if(xdata.appearance && xdata.appearance.type == "icon") {
+        if(xdata.appearance && panel.appearance.defaultDrawIcon) {
             if(this.surface == undefined) { return; }
             if(this.surface.items.getAt(0) == undefined) { return; }
             this.surface.items.getAt(0).setAttributes({rotate:{degrees: -1*value}}, true);
@@ -862,7 +863,7 @@ Ext.define('TP.IconWidget', {
         }
         panel.lastScale = scale;
 
-        if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape' || xdata.appearance.type == 'connector') {
+        if(panel.appearance.defaultDrawItem) {
             var drawWidth  = size;
             var drawHeight = size;
             if(xdata.appearance.type == 'connector') {
@@ -871,7 +872,7 @@ Ext.define('TP.IconWidget', {
             }
             /* shrink panel size to icon size if possible (non-edit mode and not rotated) */
             delete panel.shrinked;
-            if(xdata.appearance.type == 'icon' && xdata.layout.rotation == 0 && scale == 1 && panel.locked) {
+            if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && scale == 1 && panel.locked) {
                 panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y };
                 x=0;
                 y=0;
@@ -882,7 +883,7 @@ Ext.define('TP.IconWidget', {
             }
 
             var items = [];
-            if(xdata.appearance.type == 'icon') {
+            if(panel.appearance.defaultDrawIcon) {
                 if(xdata.layout.rotation == undefined) { xdata.layout.rotation = 0; }
                 items = [{
                     type:      'image',
@@ -905,7 +906,7 @@ Ext.define('TP.IconWidget', {
                     afterrender: function(This, eOpts) {
                         panel.itemRendering = false;
                         panel.surface = panel.items.getAt(0).surface;
-                        if(xdata.appearance.type == 'icon') {
+                        if(panel.appearance.defaultDrawIcon) {
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                             if(This.el.down('image')) {
                                 This.el.down('image').on("load", function (evt, ele, opts) {

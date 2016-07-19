@@ -2,6 +2,8 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
 
     alias:  'tp.icon.appearance.connector',
 
+    defaultDrawItem: true,
+
     constructor: function(config) {
         var me = this;
         Ext.apply(me, config);
