@@ -11,7 +11,7 @@ Ext.define('TP.Panlet', {
     autoShow:  false,
     autoRender: true,
     floating:   false,
-    style:    { position: 'absolute', zIndex: 50 },
+    style:    { position: 'absolute', zIndex: 52 },
     stateful:  true,
     focusOnToFront: false,
     toFrontOnShow: false,
