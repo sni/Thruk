@@ -262,6 +262,10 @@ Ext.define('TP.Pantab', {
                 allStates[panel.id] = { state: panel.xdata.state };
                 found++;
             }
+            if(panel.xdata && panel.xdata.stateHist != undefined) {
+                allStates[panel.id] = { state: panel.xdata.state, stateHist: panel.xdata.stateHist };
+                found++;
+            }
         }
         if(found) {
             Ext.Ajax.request({

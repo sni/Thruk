@@ -13,6 +13,7 @@ next:
           - Panorama View:
             - make popup completely customizable
             - add performance bar icon type
+            - add trend / forecast icon type
             - icon label can be mouseover only now
             - background color of dashboards can be changed now
             - do not overlap icons which are placed close together

@@ -5,7 +5,8 @@ TP.iconAppearanceTypes = [
     {"value":"pie",         "name":"Pie Chart"},
     {"value":"speedometer", "name":"Speedometer"},
     {"value":"shape",       "name":"Shape"},
-    {"value":"perfbar",     "name":"Performance Bar"}
+    {"value":"perfbar",     "name":"Performance Bar"},
+    {"value":"trend",       "name":"Trend Icon"}
 ];
 
 Ext.define('TP.SmallWidget', {
@@ -722,7 +723,7 @@ Ext.define('TP.IconWidget', {
         if(xdata == undefined) { xdata = this.xdata; }
         if(value == undefined) { return; }
         if(isNaN(value)) { return; }
-        if(xdata.appearance && panel.appearance.defaultDrawIcon) {
+        if(xdata.appearance && panel.appearance && panel.appearance.defaultDrawIcon) {
             if(this.surface == undefined) { return; }
             if(this.surface.items.getAt(0) == undefined) { return; }
             this.surface.items.getAt(0).setAttributes({rotate:{degrees: -1*value}}, true);
@@ -974,11 +975,14 @@ Ext.define('TP.IconWidget', {
             size = Math.ceil(size * scale);
             if(panel.shrinked) {
                 panel.setSize(naturalWidth, naturalHeight);
+                if(panel.items.getAt && panel.items.getAt(0)) {
+                    panel.items.getAt(0).setSize(naturalWidth, naturalHeight);
+                }
             } else {
                 panel.setSize(size, size);
-            }
-            if(panel.items.getAt && panel.items.getAt(0)) {
-                panel.items.getAt(0).setSize(size, size);
+                if(panel.items.getAt && panel.items.getAt(0)) {
+                    panel.items.getAt(0).setSize(size, size);
+                }
             }
             xdata.size  = size;
             xdata.nsize = [naturalWidth, naturalHeight];

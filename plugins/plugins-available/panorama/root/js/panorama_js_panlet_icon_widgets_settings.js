@@ -37,19 +37,22 @@ TP.iconShowEditDialog = function(panel) {
 
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         // update speedo
-        var data = [];
+        var dataProblems = [];
         var cls = panel.classChanged || panel.xdata.cls;
         if(cls == "TP.HostgroupStatusIcon" || cls == "TP.ServicegroupStatusIcon" || cls == "TP.FilterStatusIcon") {
-            data.push(['number of problems',                  'problems']);
-            data.push(['number of problems (incl. warnings)', 'problems_warn']);
+            dataProblems.push(['number of problems',                  'problems']);
+            dataProblems.push(['number of problems (incl. warnings)', 'problems_warn']);
         }
         var macros = TP.getPanelMacros(panel);
+        var dataPerf = [];
         for(var key in macros.perfdata) {
-            var r = TP.getPerfDataMinMax(macros.perfdata[key], '?');
-            var options = r.min+" - "+r.max;
-            data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
+            var p = macros.perfdata[key];
+            var r = TP.getPerfDataMinMax(p, '?');
+            var options = sprintf("%.0f%s in %s - %s", p.val, p.unit, r.min, r.max);
+            dataPerf.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
         /* use availability data as source */
+        var dataAvail = [];
         if(xdata.label && xdata.label.labeltext && TP.availabilities && TP.availabilities[panel.id]) {
             var avail = TP.availabilities[panel.id];
             for(var key in avail) {
@@ -60,23 +63,24 @@ TP.iconShowEditDialog = function(panel) {
                 if(d.opts['tm']) {
                     options    += '/'+d.opts['tm'];
                 }
-                data.push(['Availability: '+last+'% ('+options+')', 'avail:'+key]);
+                dataAvail.push(['Availability: '+last+'% ('+options+')', 'avail:'+key]);
             }
         }
         var cbo = Ext.getCmp('speedosourceStore');
-        TP.updateArrayStoreKV(cbo.store, data);
+        TP.updateArrayStoreKV(cbo.store, [].concat(dataProblems, dataPerf, dataAvail));
 
-        // update shape
-        var data = [['fixed', 'fixed']];
-        for(var key in macros.perfdata) {
-            var r = TP.getPerfDataMinMax(macros.perfdata[key], 100);
-            var options = r.min+" - "+r.max;
-            data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
-        }
+        // update shape source store
+        var dataShape = [['fixed', 'fixed']];
         var cbo = Ext.getCmp('shapesourceStore');
-        TP.updateArrayStoreKV(cbo.store, data);
+        TP.updateArrayStoreKV(cbo.store, [].concat(dataShape, dataPerf));
+
+        // update connector source store
         var cbo = Ext.getCmp('connectorsourceStore');
-        TP.updateArrayStoreKV(cbo.store, data);
+        TP.updateArrayStoreKV(cbo.store, [].concat(dataShape, dataPerf));
+
+        // update trend icon source store
+        var cbo = Ext.getCmp('trendsourceStore');
+        TP.updateArrayStoreKV(cbo.store, dataPerf);
     }
 
     /* General Settings Tab */

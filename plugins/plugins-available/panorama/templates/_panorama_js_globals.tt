@@ -39,6 +39,7 @@ var usercontent_folder       = '[% usercontent_folder %]';
 var thruk_wms_provider       = [% json_encode(wms_provider) %];
 var thruk_shape_data         = [% json_encode(shape_data) %];
 var thruk_iconset_data       = [% json_encode(iconset_data) %];
+var thruk_trendiconset_data  = [% json_encode(trendiconset_data) %];
 var action_menu_actions      = [% json_encode(action_menu_actions) %];
 var action_menu_items        = [% json_encode(action_menu_items) %];
 var default_map_zoom         = [% default_map_zoom %];
