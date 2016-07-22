@@ -1224,6 +1224,12 @@ root/thruk/usercontent/images/status/tfl/unknown.gif
 root/thruk/usercontent/images/status/tfl/unreachable.png
 root/thruk/usercontent/images/status/tfl/up.png
 root/thruk/usercontent/images/status/tfl/warning.png
+root/thruk/usercontent/images/trend/chart_26/bad.png
+root/thruk/usercontent/images/trend/chart_26/good.png
+root/thruk/usercontent/images/trend/chart_26/neutral.png
+root/thruk/usercontent/images/trend/chart_26/unknown.png
+root/thruk/usercontent/images/trend/chart_26/very_bad.png
+root/thruk/usercontent/images/trend/chart_26/very_good.png
 root/thruk/usercontent/images/trend/default_16/bad.png
 root/thruk/usercontent/images/trend/default_16/good.png
 root/thruk/usercontent/images/trend/default_16/neutral.png
@@ -1242,6 +1248,12 @@ root/thruk/usercontent/images/trend/default_64/neutral.png
 root/thruk/usercontent/images/trend/default_64/unknown.png
 root/thruk/usercontent/images/trend/default_64/very_bad.png
 root/thruk/usercontent/images/trend/default_64/very_good.png
+root/thruk/usercontent/images/trend/weather_16/bad.png
+root/thruk/usercontent/images/trend/weather_16/good.png
+root/thruk/usercontent/images/trend/weather_16/neutral.png
+root/thruk/usercontent/images/trend/weather_16/unknown.png
+root/thruk/usercontent/images/trend/weather_16/very_bad.png
+root/thruk/usercontent/images/trend/weather_16/very_good.png
 root/thruk/usercontent/shapes/arrow-double.js
 root/thruk/usercontent/shapes/arrow.js
 root/thruk/usercontent/shapes/circle.js
