@@ -469,7 +469,7 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: labelUpdate } },
+                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: function() { labelUpdate(); } } },
                 items: [{
                     fieldLabel:   'Labeltext',
                     xtype:        'fieldcontainer',
@@ -479,7 +479,7 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'labeltext',
                         flex:          1,
                         id:           'label_textfield',
-                        listeners:   { change: labelUpdate }
+                        listeners:   { change: function() { labelUpdate(); } }
                     }, {
                         xtype:        'button',
                         icon:         url_prefix+'plugins/panorama/images/lightning_go.png',
@@ -500,7 +500,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Font',
                     layout:      { type: 'hbox', align: 'stretch' },
-                    defaults:    { listeners: { change: labelUpdate } },
+                    defaults:    { listeners: { change: function() { labelUpdate(); } } },
                     items:        [{
                         name:         'fontfamily',
                         xtype:        'fontcbo',
@@ -548,7 +548,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Position',
                     layout:      { type: 'hbox', align: 'stretch' },
-                    defaults:    { listeners: { change: labelUpdate } },
+                    defaults:    { listeners: { change: function() { labelUpdate(); } } },
                     items:        [{
                         name:         'position',
                         xtype:        'combobox',
@@ -595,7 +595,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Border',
                     layout:      { type: 'hbox', align: 'stretch' },
-                    defaults:    { listeners: { change: labelUpdate } },
+                    defaults:    { listeners: { change: function() { labelUpdate(); } } },
                     items:        [{
                         xtype:        'colorcbo',
                         name:         'bordercolor',
