@@ -452,6 +452,8 @@ Hello World!.
 sub index {
         my ( $c ) = @_;
         $c->stash->{title}           = 'Hello World!';
+        $c->stash->{'subtitle'}              = 'Hello World!';
+        $c->stash->{'infoBoxTitle'}          = 'Hello World!';
         $c->stash->{template} = 'hello.tt';
         $c->stash->{hello_var} = 'Hello World!'; # This is our magic variable
 }
@@ -485,6 +487,53 @@ consists of HTML with some variables accessed via the [% variable_name %] notati
 	</body>
 </html>
 ----
+Now if you want a more stylish plugin you can add some Thruk-common css and make your template look like this:
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>[% title_prefix %][% title %]</title>
+		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		[% PROCESS _common_css.tt use_frames=1 %]
+		[% PROCESS _header.tt overlib=1
+			css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
+			js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
+		%]
+	</head>
+	<body>
+		<h1>[% hello_var %]</h1> <!-- This is where we access our variable -->
+	</body>
+</html>
+----
+
+You can also add some info boxes and your plugin will look like all the rest:
+
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>[% title_prefix %][% title %]</title>
+		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		[% PROCESS _common_css.tt use_frames=1 %]
+		[% PROCESS _header.tt overlib=1
+			css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
+			js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
+		%]
+	</head>
+	<body>
+		[% PROCESS _message.tt %]
+		[% PROCESS _overdiv.tt %]
+		[% PROCESS _infobox.tt %]
+		<h1>[% hello_var %]</h1> <!-- This is where we access our variable -->
+	</body>
+</html>
+----
 That's it! With these files in place you can restart your webserver and you will have
 a link to hello.cgi in your Thruk sidebar.
 
@@ -493,5 +542,5 @@ a link to hello.cgi in your Thruk sidebar.
 <br style="clear: both;">
 ++++
 
-TIP: You can also try to copy an existing plugin and change it to your
-needs.
+TIP: Try to copy an existing plugin, change it to your needs
+or copy/paste ideas from it to your own.
