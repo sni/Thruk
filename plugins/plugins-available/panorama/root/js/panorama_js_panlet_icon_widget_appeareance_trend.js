@@ -215,22 +215,6 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         return({base: base, count: count});
     },
 
-    checkFormVisibility: function() {
-        var panel = this;
-        var trendfunctionin = Ext.getCmp('trendfunctionin').getValue();
-        if(trendfunctionin == 'current' || trendfunctionin == '') {
-            Ext.getCmp('trendrangein').setDisabled(true);
-            if(Ext.getCmp('trendrangeinlabel').el && Ext.getCmp('trendrangeinlabel').el.dom) {
-                Ext.getCmp('trendrangeinlabel').el.dom.style.opacity = 0.3;
-            }
-        } else {
-            Ext.getCmp('trendrangein').setDisabled(false);
-            if(Ext.getCmp('trendrangeinlabel').el && Ext.getCmp('trendrangeinlabel').el.dom) {
-                Ext.getCmp('trendrangeinlabel').el.dom.style.opacity = 1;
-            }
-        }
-    },
-
     getAppearanceTabItems: function(panel) {
         return([{
             fieldLabel:   'Icon Set',
@@ -278,11 +262,11 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             defaults: {
                 listeners: {
                     change: function() {
-                        panel.appearance.checkFormVisibility();
+                        TP.trendCheckFormVisibility(panel);
                         TP.iconSettingsGlobals.renderUpdate();
                     },
                     afterrender: function() {
-                        panel.appearance.checkFormVisibility();
+                        TP.trendCheckFormVisibility(panel);
                     }
                 }
             },
@@ -411,3 +395,18 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
          }]);
     }
 });
+
+TP.trendCheckFormVisibility = function(panel) {
+    var trendfunctionin = Ext.getCmp('trendfunctionin').getValue();
+    if(trendfunctionin == 'current' || trendfunctionin == '') {
+        Ext.getCmp('trendrangein').setDisabled(true);
+        if(Ext.getCmp('trendrangeinlabel').el && Ext.getCmp('trendrangeinlabel').el.dom) {
+            Ext.getCmp('trendrangeinlabel').el.dom.style.opacity = 0.3;
+        }
+    } else {
+        Ext.getCmp('trendrangein').setDisabled(false);
+        if(Ext.getCmp('trendrangeinlabel').el && Ext.getCmp('trendrangeinlabel').el.dom) {
+            Ext.getCmp('trendrangeinlabel').el.dom.style.opacity = 1;
+        }
+    }
+}
