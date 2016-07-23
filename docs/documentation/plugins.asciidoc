@@ -451,6 +451,9 @@ Hello World!.
 
 sub index {
         my ( $c ) = @_;
+
+        return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+
         $c->stash->{title}           = 'Hello World!';
         $c->stash->{'subtitle'}              = 'Hello World!';
         $c->stash->{'infoBoxTitle'}          = 'Hello World!';
@@ -497,8 +500,8 @@ Now if you want a more stylish plugin you can add some Thruk-common css and make
 		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-		[% PROCESS _common_css.tt use_frames=1 %]
-		[% PROCESS _header.tt overlib=1
+		[% PROCESS _common_css.tt  %]
+		[% PROCESS _header.tt
 			css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
 			js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
 		%]
@@ -520,8 +523,8 @@ You can also add some info boxes and your plugin will look like all the rest:
 		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-		[% PROCESS _common_css.tt use_frames=1 %]
-		[% PROCESS _header.tt overlib=1
+		[% PROCESS _common_css.tt %]
+		[% PROCESS _header.tt
 			css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
 			js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
 		%]
