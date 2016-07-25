@@ -104,7 +104,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     var countin = tmp.count;
 
                     /* calculate `against` value with given function */
-                    tmp         = panel.appearance.getBaseValue(xdata.appearance.trendfunctionvs, data, startvs, endvs);
+                    tmp         = panel.appearance.getBaseValue(xdata.appearance.trendfunctionvs, data, startvs, endvs, xdata.appearance.trendfixedvs);
                     var countvs = tmp.count;
                     var base    = tmp.base;
 
@@ -153,15 +153,22 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                                                            unit
                                                 );
                         }
-                        trendcalculationhint += sprintf("against %s over %d value%s in timerange (%s - %s) -> "+baseFormat+"%s<br>",
-                                                       xdata.appearance.trendfunctionvs,
-                                                       countvs,
-                                                       countvs != 1 ? 's' : '',
-                                                       strftime("%H:%M", startvs),
-                                                       strftime("%H:%M", endin),
-                                                       base,
-                                                       unit
-                                            );
+                        if(xdata.appearance.trendfunctionvs == 'fixed') {
+                            trendcalculationhint += sprintf("against fixed value -> "+baseFormat+"%s<br>",
+                                                           base,
+                                                           unit
+                                                );
+                        } else {
+                            trendcalculationhint += sprintf("against %s over %d value%s in timerange (%s - %s) -> "+baseFormat+"%s<br>",
+                                                           xdata.appearance.trendfunctionvs,
+                                                           countvs,
+                                                           countvs != 1 ? 's' : '',
+                                                           strftime("%H:%M", startvs),
+                                                           strftime("%H:%M", endin),
+                                                           base,
+                                                           unit
+                                                );
+                        }
                         trendcalculationhint += sprintf("= %.2f%% -> %s",
                                                        change,
                                                        newSrc.replace('_', '')
@@ -185,11 +192,15 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         if(!TP.isThisTheActiveTab(panel)) { panel.hide(); }
     },
 
-    getBaseValue: function(func, data, start, end) {
+    getBaseValue: function(func, data, start, end, fixed) {
         var count = 0;
         var base  = 0;
         if(func == 'current') {
             base = data[data.length-1][1];
+            count++;
+        }
+        else if(func == 'fixed') {
+            base = fixed;
             count++;
         }
         else if(func == "average") {
@@ -310,24 +321,26 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             xtype:      'fieldcontainer',
             cls:        'trend',
             layout:    { type: 'hbox', align: 'stretch' },
-            defaults: { listeners: { change: function() { TP.iconSettingsGlobals.renderUpdate() } } },
+            defaults: { listeners: { change: function() { TP.trendCheckFormVisibility(panel); TP.iconSettingsGlobals.renderUpdate() } } },
             items: [{
                     xtype:      'combobox',
                     name:       'trendfunctionvs',
+                    id:         'trendfunctionvs',
                     editable:    false,
                     valueField: 'value',
                     displayField: 'name',
                     value:       panel.xdata.appearance.trendfunctionvs || 'average',
                     store        : Ext.create('Ext.data.Store', {
                         fields: ['value', 'name'],
-                        data:   [{name: 'average', value: 'average'}, {name: 'median', value: 'median'}]
+                        data:   [{name: 'average', value: 'average'}, {name: 'median', value: 'median'}, {name: 'fixed', value: 'fixed'}]
                     }),
                     flex: 1
                 },
-                { xtype: 'label', text: 'over:', margins: {top: 3, right: 2, bottom: 0, left: 10} },
+                { xtype: 'label', text: 'over:', margins: {top: 3, right: 2, bottom: 0, left: 10}, id: 'trendoverlabelvs' },
                 {
                     xtype:      'combobox',
                     name:       'trendrangevs',
+                    id:         'trendrangevs',
                     valueField: 'value',
                     displayField: 'name',
                     value:       panel.xdata.appearance.trendrangevs || '60m',
@@ -345,10 +358,11 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     }),
                     flex: 1
                 },
-                { xtype: 'label', text: 'with an offset of:', margins: {top: 3, right: 2, bottom: 0, left: 10} },
+                { xtype: 'label', text: 'with an offset of:', margins: {top: 3, right: 2, bottom: 0, left: 10}, id: 'trendoffsetlabelvs' },
                 {
                     xtype:      'combobox',
                     name:       'trendoffsetvs',
+                    id:         'trendoffsetvs',
                     valueField: 'value',
                     displayField: 'name',
                     value:       panel.xdata.appearance.trendoffsetvs || '0m',
@@ -366,7 +380,9 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                                 ]
                     }),
                     flex: 1
-                }]
+                },
+                { xtype: 'label', text: 'of:', margins: {top: 3, right: 2, bottom: 0, left: 10}, id: 'trendfixedlabelvs' },
+                { xtype: 'numberfield', name: 'trendfixedvs', id: 'trendfixedvs', value: panel.xdata.appearance.trendfixedvs || '1' }]
         }, {
             xtype:      'panel',
             cls:        'trend',
@@ -408,5 +424,22 @@ TP.trendCheckFormVisibility = function(panel) {
         if(Ext.getCmp('trendrangeinlabel').el && Ext.getCmp('trendrangeinlabel').el.dom) {
             Ext.getCmp('trendrangeinlabel').el.dom.style.opacity = 1;
         }
+    }
+
+    var trendfunctionvs = Ext.getCmp('trendfunctionvs').getValue();
+    if(trendfunctionvs == 'fixed') {
+        Ext.getCmp('trendfixedvs').show();
+        Ext.getCmp('trendfixedlabelvs').show();
+        Ext.getCmp('trendoffsetlabelvs').hide();
+        Ext.getCmp('trendoffsetvs').hide();
+        Ext.getCmp('trendoverlabelvs').hide();
+        Ext.getCmp('trendrangevs').hide();
+    } else {
+        Ext.getCmp('trendfixedvs').hide();
+        Ext.getCmp('trendfixedlabelvs').hide();
+        Ext.getCmp('trendoffsetlabelvs').show();
+        Ext.getCmp('trendoffsetvs').show();
+        Ext.getCmp('trendoverlabelvs').show();
+        Ext.getCmp('trendrangevs').show();
     }
 }
