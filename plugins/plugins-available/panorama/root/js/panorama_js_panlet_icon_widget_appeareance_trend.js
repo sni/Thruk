@@ -73,6 +73,14 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                 var startin  = now - rangein;
                 var endin    = now;
 
+                var delete_before = now;
+                if(xdata.appearance.trendfunctionin != 'current') {
+                    delete_before = startin;
+                }
+                if(xdata.appearance.trendfunctionvs != 'fixed' && delete_before > startvs) {
+                    delete_before = startvs;
+                }
+
                 if(macros.perfdata[key]) {
                     var p = macros.perfdata[key];
                     var r = TP.getPerfDataMinMax(p, 100);
@@ -83,11 +91,13 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         // cleanup old values (only in locked mode, so we do not delete the history just because someone trys different settings)
                         if(panel.locked) {
                             var newStateHist = {};
-                            var data = xdata.stateHist[key];
-                            newStateHist[key] = [];
-                            for(var nr=0; nr<data.length; nr++) {
-                                if(data[nr][0] > startvs) {
-                                    newStateHist[key].push(data[nr]);
+                            if(xdata.appearance.trendfunctionin != 'current' || xdata.appearance.trendfunctionvs != 'fixed') {
+                                var data = xdata.stateHist[key];
+                                newStateHist[key] = [];
+                                for(var nr=0; nr<data.length; nr++) {
+                                    if(data[nr][0] > delete_before) {
+                                        newStateHist[key].push(data[nr]);
+                                    }
                                 }
                             }
                             xdata.stateHist = newStateHist;
