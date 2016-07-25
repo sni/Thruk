@@ -1453,6 +1453,8 @@ t/docker/cases/0210_panorama_hostgroup_icon.js
 t/docker/cases/0211_panorama_service_icon_speedometer.js
 t/docker/cases/0212_panorama_text_label_widget.js
 t/docker/cases/0213_panorama_arrow_element.js
+t/docker/cases/0214_panorama_service_icon_perfbar.js
+t/docker/cases/0215_panorama_service_icon_trend.js
 t/docker/cases/0220_panorama_geo_map.js
 t/docker/cases/0221_panorama_geo_switch.js
 t/docker/cases/0222_panorama_geo_map_cancel.js
@@ -1473,13 +1475,18 @@ t/docker/cases/0299_panorama_show_case.js
 t/docker/cases/_dashboard_exports.js
 t/docker/cases/_images/applications.png
 t/docker/cases/_images/arrow_map.png
+t/docker/cases/_images/bad.png
 t/docker/cases/_images/controls_unlock.png
 t/docker/cases/_images/dropdown.png
+t/docker/cases/_images/good.png
 t/docker/cases/_images/green.png
 t/docker/cases/_images/island_green.png
 t/docker/cases/_images/island_map_green.png
 t/docker/cases/_images/island_map_green_offset.png
+t/docker/cases/_images/neutral_trend.png
+t/docker/cases/_images/perfbar.png
 t/docker/cases/_images/speedometer.png
+t/docker/cases/_images/very_good.png
 t/docker/cases/_include.js
 t/docker/cases/testsuite.properties
 t/docker/Dockerfile.in
