@@ -193,6 +193,11 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                 }
                 /* make calculation hints available in labels */
                 if(obj) {
+                    if(!obj.trend) {
+                        /* first run, reschedule label update */
+                        var tab = Ext.getCmp(panel.panel_id);
+                        tab.scheduleRedrawAllLabels();
+                    }
                     obj.trend = labelValues;
                 }
             }

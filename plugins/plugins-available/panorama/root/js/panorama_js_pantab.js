@@ -996,6 +996,15 @@ Ext.define('TP.Pantab', {
         var iconContainer = Ext.fly('iconContainer');
         iconContainer.dom.style.top      = "-25px";
         iconContainer.dom.style.position = "absolute";
+    },
+    scheduleRedrawAllLabels: function() {
+        var This = this;
+        for(var nr=0; nr<This.window_ids.length; nr++) {
+            var panlet = Ext.getCmp(This.window_ids[nr]);
+            if(panlet && panlet.setIconLabel) {
+                panlet.setIconLabel();
+            }
+        }
     }
 });
 
