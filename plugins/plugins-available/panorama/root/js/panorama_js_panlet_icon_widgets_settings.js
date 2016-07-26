@@ -1111,6 +1111,15 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
             perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
         }
     }
+
+    var trend_data = '';
+    if(macros.trend && macros.trend.against) {
+        trend_data += '<tr><th>Trend Icon Data:<\/th><td colspan=2><\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><i>trend.compare<\/i><\/td><td>'+macros.trend.compare+'<\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><i>trend.against<\/i><\/td><td>'+macros.trend.against+'<\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><i>trend.result<\/i><\/td><td>'+macros.trend.result+'<\/td><\/tr>'
+    }
+
     var extra_items = "";
     if(extra) {
         for(var x=0; x<extra.length; x++) {
@@ -1165,6 +1174,8 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                     +'<tr><td><\/td><td><i>description<\/i><\/td><td>Servicename<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2>(other attributes are identical to hosts)<\/td><\/tr>'
 
+                    +trend_data
+
                     +'<tr><th>Performance Data:<\/th><td colspan=2>(available performance data with their current values)<\/td><\/tr>'
                     +perf_data
 
@@ -1186,7 +1197,7 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                             el.onclick   = function(i) {
                                 var cur = Ext.getCmp(textarea_id).getValue();
                                 var val = Ext.htmlDecode(el.innerHTML);
-                                if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
+                                if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^trend\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
                                 if(val.match(/<br>/)) { val += "\n"; }
                                 var pos = getCaret(Ext.get(textarea_id+'-inputEl').dom);
                                 var txt = cur.substr(0, pos) + val + cur.substr(pos);

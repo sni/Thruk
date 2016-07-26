@@ -105,6 +105,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         panel.saveIconsStates();
                     }
                 }
+                var labelValues = {};
                 if(xdata.stateHist[key]) {
                     var data = xdata.stateHist[key];
 
@@ -147,6 +148,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         if(base < 1       && base > -1)       { baseFormat = '%.3f'; }
                         if(base < 10      && base > -10)      { baseFormat = '%.2f'; }
                         if(base < 100     && base > -100)     { baseFormat = '%.1f'; }
+                        labelValues = { against: sprintf(baseFormat, base), compare: sprintf(baseFormat, cur), result: sprintf("%.2f", change) };
                         if(xdata.appearance.trendfunctionin == 'current') {
                             trendcalculationhint = sprintf("compare current value -> "+baseFormat+"%s<br>",
                                                            cur,
@@ -188,6 +190,10 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     if(trendcalculationhint && TP.iconSettingsWindow && TP.iconSettingsWindow.panel.id == panel.id) {
                         Ext.getCmp('trendcalculationhint').update(trendcalculationhint);
                     }
+                }
+                /* make calculation hints available in labels */
+                if(obj) {
+                    obj.trend = labelValues;
                 }
             }
         }

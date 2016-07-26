@@ -1145,6 +1145,12 @@ var TP = {
                                 if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
                                 if(data.hosts[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
                                 for(var y=0; y<ref.hosts[name].length; y++) {
+                                    /* update host object but keep trend values */
+                                    if(ref.hosts[name][y].host) {
+                                        var lastTrend = ref.hosts[name][y].host.trend;
+                                        if(lastTrend) { data.hosts[x].trend = lastTrend; }
+                                    }
+
                                     ref.hosts[name][y].host = data.hosts[x];
                                     ref.hosts[name][y].refreshHandler(state);
                                 }
@@ -1190,6 +1196,12 @@ var TP = {
                             if(data.services[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
                             if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
                                 for(var y=0; y<ref.services[hst][svc].length; y++) {
+                                    /* update service object but keep trend values */
+                                    if(ref.services[hst][svc][y].service) {
+                                        var lastTrend = ref.services[hst][svc][y].service.trend;
+                                        if(lastTrend) { data.services[x].trend = lastTrend; }
+                                    }
+
                                     ref.services[hst][svc][y].service = data.services[x];
                                     ref.services[hst][svc][y].refreshHandler(state);
                                 }
