@@ -30,8 +30,9 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         this.iconSetSourceFromState(xdata);
     },
 
-    iconSetSourceFromState: function(xdata) {
+    iconSetSourceFromState: function(xdata, retries) {
         var panel = this.panel;
+        if(retries == undefined) { retries = 0; }
         if(xdata       == undefined) { xdata = panel.xdata; }
         if(xdata.stateHist == undefined) { xdata.stateHist = panel.xdata.stateHist; }
         var tab   = Ext.getCmp(panel.panel_id);
@@ -59,6 +60,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         if(xdata.appearance["trendsource"]) {
             var matches = xdata.appearance["trendsource"].match(/^perfdata:(.*)$/);
             if(matches && matches[1]) {
+
                 var key = matches[1];
                 var macros = TP.getPanelMacros(panel);
                 var unit;
@@ -105,6 +107,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         panel.saveIconsStates();
                     }
                 }
+
                 var labelValues = {};
                 if(xdata.stateHist[key]) {
                     var data = xdata.stateHist[key];
@@ -118,6 +121,15 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     tmp         = panel.appearance.getBaseValue(xdata.appearance.trendfunctionvs, data, startvs, endvs, xdata.appearance.trendfixedvs);
                     var countvs = tmp.count;
                     var base    = tmp.base;
+
+                    /* try to fetch initial data from pnp4nagios */
+                    if(countvs == 0 && retries == 0) {
+                        var appearance = this;
+                        appearance.fetchGraphValues(key, panel, obj, xdata.stateHist, delete_before, now, function() {
+                            appearance.iconSetSourceFromState(xdata, 1);
+                        });
+                        return;
+                    }
 
                     var trendcalculationhint = '';
                     /* select image from base */
@@ -248,6 +260,48 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             base = TP.median(raw);
         }
         return({base: base, count: count});
+    },
+
+    fetchGraphValues: function(key, panel, obj, stateHist, start, end, callback) {
+        if(!obj) { return; }
+        var url = obj.action_url_expanded;
+        if(!url) { return; }
+        url = url.replace(/'.*$/, '');
+        url = url.replace(/\/graph\?/, '/xport/json/?');
+        if(!url.match(/pnp/)) { return; }
+        var now = Number(new Date().getTime() / 1000).toFixed(0);
+        if(start == undefined) { start = now-(86400*3); }
+        if(end   == undefined) { end   = now; }
+        url += '&start='+start;
+        url += '&end='+end;
+        Ext.Ajax.cors                = true;
+        Ext.Ajax.withCredentials     = true;
+        Ext.Ajax.useDefaultXhrHeader = false;
+        Ext.Ajax.request({
+            url:     url,
+            method: 'POST',
+            callback: function(options, success, response) {
+                var data = [];
+                var tmp  = TP.getResponse(panel, response);
+                if(tmp.meta && tmp.meta.legend && tmp.meta.legend.entry) {
+                    for(var nr=0; nr<tmp.meta.legend.entry.length; nr++) {
+                        var legend = tmp.meta.legend.entry[nr];
+                        var start  = Number(tmp.meta.start);
+                        var step   = Number(tmp.meta.step);
+                        var matches = legend.match(/^(.*)_AVERAGE$/);
+                        if(matches && matches[1] == key) {
+                            stateHist[key] = [];
+                            for(var x=0; x<tmp.data.row.length; x++) {
+                                stateHist[key].push([start, Number(tmp.data.row[x].v[nr])]);
+                                start = start+step;
+                            }
+                        }
+                    }
+                    panel.saveIconsStates();
+                    callback();
+                }
+            }
+        });
     },
 
     getAppearanceTabItems: function(panel) {
