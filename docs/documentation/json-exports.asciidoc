@@ -43,7 +43,7 @@ Parameters:
     rpttimeperiod=
 ------
 
-See http://search.cpan.org/~nierlein/Monitoring-Availability-0.40/lib/Monitoring/Availability.pm#CONSTRUCTOR[Monitoring::Availability]
+See http://search.cpan.org/perldoc?Monitoring%3A%3AAvailability#CONSTRUCTOR[Monitoring::Availability]
 for a detailed description of all parameters.
 
 
