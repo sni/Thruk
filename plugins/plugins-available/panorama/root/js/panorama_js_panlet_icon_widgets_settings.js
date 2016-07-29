@@ -728,7 +728,7 @@ TP.iconShowEditDialog = function(panel) {
                             autoScroll: true,
                             title:     'Help',
                             bodyStyle: 'background:white;',
-                            items:      TP.iconLabelHelp(panel, 'popup_textfield', [{name: 'Popup Sections', items: TP.getPanelDetailsHeader(panel)}]).items[0],
+                            items:      TP.iconLabelHelp(panel, 'popup_textfield', [{name: 'Popup Sections', items: TP.getPanelDetailsHeader(panel)}]),
                             listeners: { destroy: function() { delete TP.iconLabelHelpWindow; } },
                             alignToSettingsWindow: function() {
                                 var pos  = TP.iconSettingsWindow.getPosition();
@@ -1049,7 +1049,6 @@ TP.openLabelEditorWindow = function(panel) {
     var labelEditorWindow = new Ext.Window({
         height:  500,
         width:   650,
-        layout: 'fit',
         title:  'Label Editor',
         modal:  true,
         buttonAlign: 'center',
@@ -1073,25 +1072,45 @@ TP.openLabelEditorWindow = function(panel) {
                }
         ],
         items:   [{
-            xtype:           'form',
-            bodyPadding:     2,
-            border:          0,
-            bodyStyle:       'overflow-y: auto;',
-            submitEmptyText: false,
-            layout:          'anchor',
-            defaults:      { width: '99%', labelWidth: 40 },
-            items:        [{
-                xtype:      'textarea',
-                fieldLabel: 'Label',
-                value:       Ext.getCmp('label_textfield').getValue().replace(/<br>/g,"<br>\n"),
-                id:         'label_textfield_edit',
-                height:      90,
-                listeners: {
-                    change: function(This) {
-                        Ext.getCmp('label_textfield').setValue(This.getValue())
-                    }
+            xtype: 'panel',
+            height: 120,
+            border: 0,
+            items: [{
+                    xtype:           'form',
+                    bodyPadding:     2,
+                    border:          0,
+                    submitEmptyText: false,
+                    layout:          'anchor',
+                    defaults:      { width: '99%', labelWidth: 40 },
+                    items:        [{
+                        xtype:      'textarea',
+                        value:       Ext.getCmp('label_textfield').getValue().replace(/<br>/g,"<br>\n"),
+                        id:         'label_textfield_edit',
+                        height:      115,
+                        listeners: {
+                            change: function(This) {
+                                Ext.getCmp('label_textfield').setValue(This.getValue())
+                            }
+                        }
+                    }]
                 }
-            }, TP.iconLabelHelp(panel, 'label_textfield_edit')]
+            ]
+        }, {
+            xtype: 'panel',
+            layout: 'fit',
+            height: 320,
+            border: 0,
+            items: [{
+                    xtype:           'form',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:       'overflow-y: auto;',
+                    submitEmptyText: false,
+                    layout:          'anchor',
+                    defaults:      { width: '99%', labelWidth: 40 },
+                    items:        [TP.iconLabelHelp(panel, 'label_textfield_edit')]
+                }
+            ]
         }]
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
@@ -1131,9 +1150,6 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
         }
     }
     var help = {
-        fieldLabel: 'Help',
-        xtype:      'fieldcontainer',
-        items:      [{
             xtype:   'label',
             cls:     'labelhelp',
             html:    '<p>Use HTML to format your label<br>'
@@ -1209,7 +1225,6 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                         });
                     }
                 }
-        }]
     };
     return(help);
 }
