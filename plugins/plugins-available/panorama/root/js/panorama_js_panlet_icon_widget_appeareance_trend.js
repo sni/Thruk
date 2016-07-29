@@ -125,8 +125,9 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     /* try to fetch initial data from pnp4nagios */
                     if(countvs == 0 && retries == 0) {
                         var appearance = this;
+                        retries = retries + 1;
                         appearance.fetchGraphValues(key, panel, obj, xdata.stateHist, delete_before, now, function() {
-                            appearance.iconSetSourceFromState(xdata, 1);
+                            appearance.iconSetSourceFromState(xdata, retries);
                         });
                         return;
                     }
@@ -262,7 +263,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         return({base: base, count: count});
     },
 
-    fetchGraphValues: function(key, panel, obj, stateHist, start, end, callback) {
+    fetchGraphValues: function(key, panel, obj, stateHist, start, end, onSuccessCallback) {
         if(!obj) { return; }
         var url = obj.action_url_expanded;
         if(!url) { return; }
@@ -298,7 +299,9 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         }
                     }
                     panel.saveIconsStates();
-                    callback();
+                    if(onSuccessCallback) {
+                        onSuccessCallback();
+                    }
                 }
             }
         });
