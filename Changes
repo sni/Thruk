@@ -5,6 +5,7 @@ next:
           - support thruk_local.d/file.$hostname files to separate host specific configs
           - fix can_submit_commands setting not used from contact (#597)
           - fix corrupting datafiles when trying to write to full filesystems
+          - support curl/wget scripts when cookie auth is enabled
           - Logcache:
             - add logcache_import_exclude option
             - remove orphaned plugin output references on logcacheclean

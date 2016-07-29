@@ -1341,6 +1341,19 @@ ex.:
   cookie_auth_login_hook = ./bin/hook.sh
 
 
+=== cookie_auth_direct_agents
+{% include new_since.ad version="2.10" %}
+This is a regular expression to set user agents which are allowed to request
+pages with normal basic auth.
+Use it to allow scripts easy access with bypassing the cookie auth and directly
+accessing pages.
+
+Default: (curl|wget)
+
+ex.:
+
+  cookie_auth_direct_agents = (curl|wget)
+
 
 
 
