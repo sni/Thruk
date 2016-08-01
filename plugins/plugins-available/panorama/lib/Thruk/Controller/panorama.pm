@@ -2980,12 +2980,16 @@ sub _get_default_tab_xdata {
 
 ##########################################################
 sub _add_json_dashboard_timestamps {
-    my($c, $json) = @_;
-    my $data = Thruk::Utils::get_user_data($c);
-    if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'}) {
-        $json->{'dashboard_ts'} = {};
-        my $tab = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'};
+    my($c, $json, $tab) = @_;
+    if(!defined $tab) {
+        my $data = Thruk::Utils::get_user_data($c);
+        if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'}) {
+            $tab = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'};
+        }
+    }
+    if($tab) {
         my $nr = $tab;
+        $json->{'dashboard_ts'} = {};
         $nr =~ s/^tabpan-tab_//gmx;
         my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
         my @stat = stat($file);
@@ -3012,6 +3016,9 @@ sub _add_misc_details {
         $json->{'server_version'}      .= '~'.$c->config->{'branch'} if $c->config->{'branch'};
         $json->{'server_extra_version'} = $c->config->{'extra_version'};
         $c->stats->profile(end => "_add_misc_details");
+    }
+    elsif($c->req->parameters->{'current_tab'}) {
+        _add_json_dashboard_timestamps($c, $json, $c->req->parameters->{'current_tab'});
     }
     return;
 }

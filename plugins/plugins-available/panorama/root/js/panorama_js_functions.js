@@ -659,6 +659,7 @@ var TP = {
 
             // update proc info?
             baseParams['update_proc'] = TP.setUpdateProcInfo();
+            baseParams['current_tab'] = panel.panel_id;
         }
         TP.log('['+panel.id+'] loading '+url);
         panel.loader.load({url:url, baseParams: baseParams});
