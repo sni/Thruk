@@ -73,7 +73,7 @@ sub new {
     }
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
-    if(-e $file) {
+    if(-s $file) {
         $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
         return unless $bpdata;
         return unless $bpdata->{'name'};
@@ -121,7 +121,7 @@ sub load_runtime_data {
         $file = $self->{'datafile'}.'.edit';
     }
 
-    return unless -e $file;
+    return unless -s $file;
 
     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     for my $key (@stateful_keys) {
