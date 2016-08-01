@@ -220,7 +220,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         if(rec != null && rec.data.fileset[newSrc]) {
             newSrc = '../usercontent/images/trend/'+iconsetName+'/'+rec.data.fileset[newSrc];
         }
-        if(panel.src != undefined && panel.src != newSrc && panel.locked) {
+        if(panel.src != undefined && panel.src != newSrc && panel.locked && panel.el) {
             TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
         }
         panel.src = newSrc;
