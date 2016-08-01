@@ -232,7 +232,11 @@ Ext.define('TP.SmallWidget', {
         xdata.layout.y = Number(xdata.layout.y);
         if(xdata.layout.x == null || isNaN(xdata.layout.x)) { xdata.layout.x = 0; }
         if(xdata.layout.y == null || isNaN(xdata.layout.y)) { xdata.layout.y = 0; }
-        this.setRawPosition(xdata.layout.x, xdata.layout.y);
+        if(panel.shrinked) {
+            this.setRawPosition(xdata.layout.x + panel.shrinked.offsetX, xdata.layout.y + panel.shrinked.offsetY);
+        } else {
+            this.setRawPosition(xdata.layout.x, xdata.layout.y);
+        }
         if(xdata.layout.rotation) {
             this.applyRotation(Number(xdata.layout.rotation), xdata);
         } else {
@@ -270,7 +274,13 @@ Ext.define('TP.SmallWidget', {
             // ex.: rotated shapes return wrong position on getPosition()
             return;
         }
-        animated.to = {x:layout.x, y:layout.y};
+        if(win.shrinked) {
+            win.shrinked.x = layout.x;
+            win.shrinked.y = layout.y;
+            animated.to = {x:layout.x+win.shrinked.offsetX, y:layout.y+win.shrinked.offsetY};
+        } else {
+            animated.to = {x:layout.x, y:layout.y};
+        }
         this.animate(animated);
     },
     /* apply z-index */
@@ -874,13 +884,15 @@ Ext.define('TP.IconWidget', {
             /* shrink panel size to icon size if possible (non-edit mode and not rotated) */
             delete panel.shrinked;
             if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && scale == 1 && panel.locked) {
-                panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y };
+                var offsetX = (size-width)/2;
+                var offsetY = (size-height)/2;
+                panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y, offsetX: offsetX, offsetY: offsetY };
                 x=0;
                 y=0;
                 drawWidth  = width;
                 drawHeight = height;
                 panel.setSize(drawWidth, drawHeight);
-                panel.setPosition(panel.xdata.layout.x+((size-width)/2), panel.xdata.layout.y+((size-height)/2));
+                panel.setPosition(panel.xdata.layout.x+offsetX, panel.xdata.layout.y+offsetY);
             }
 
             var items = [];
