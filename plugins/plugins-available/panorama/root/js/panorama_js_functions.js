@@ -1641,10 +1641,14 @@ var TP = {
                     var data = TP.getResponse(undefined, response);
                     data = data.data;
                     var old_window_ids = TP.clone(tab.window_ids);
+
+                    /* make sure tab itself is updated first */
+                    var mapChanged = false;
                     for(var key in data) {
                         var cfg = Ext.JSON.decode(data[key]);
                         var p   = Ext.getCmp(key);
                         if(p && key.search(/tabpan-tab_\d+$/) != -1) {
+                            if((p.xdata.map && !cfg.xdata.map) || (!p.xdata.map && cfg.xdata.map)) { mapChanged = true; }
                             /* changes in our dashboard itself */
                             Ext.apply(p, cfg);
                             delete cfg['readonly'];
@@ -1654,9 +1658,23 @@ var TP = {
                             p.applyXdata();
                             TP.cp.set(key, cfg);
                         }
+                    }
+
+                    if(mapChanged) {
+                        tab.destroyPanlets();
+                    }
+
+                    for(var key in data) {
+                        var cfg = Ext.JSON.decode(data[key]);
+                        var p   = Ext.getCmp(key);
+
+                        if(key.search(/tabpan-tab_\d+$/) != -1) {
+                            /* tab has been updated already */
+                            continue;
+                        }
 
                         /* panel class changed */
-                        if(p && cfg.xdata.cls != p.xdata.cls) {
+                        if(p && (cfg.xdata.cls != p.xdata.cls || mapChanged)) {
                             TP.cp.set(p.id, cfg);
                             TP.redraw_panlet(p, tab);
                             continue;
@@ -1672,7 +1690,7 @@ var TP = {
                             /* position and size changes can be applied by animation */
                             Ext.apply(p, cfg);
                             TP.cp.set(key, cfg);
-                            if(p.applyAnimated) {
+                            if(p.applyAnimated && !p.xdata.map) {
                                 p.applyAnimated({duration:duration});
                             }
                             if(p.applyXdata) {
@@ -1689,10 +1707,6 @@ var TP = {
                     }
                     /* update stateproviders last data to prevent useless updates */
                     TP.cp.lastdata = setStateByTab(ExtState);
-                    if(!tab.xdata.map) {
-                        if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
-                        if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
-                    }
                     tab.renewInProgress = false;
                 } else {
                     tab.renewInProgress = false;
