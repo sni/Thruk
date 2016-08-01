@@ -146,6 +146,7 @@ Ext.define('TP.IconLabel', {
     setIconLabelPosition: function(cfg) {
         var panel = this;
         if(!panel.labelEl || !panel.labelEl.el) { return; }
+        if(cfg == undefined) { cfg = panel.xdata.label; }
         var left          = TP.extract_number_with_unit({ value: panel.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
         var top           = TP.extract_number_with_unit({ value: panel.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
         var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,             unit:' px', floor: true, defaultValue:   0 });
