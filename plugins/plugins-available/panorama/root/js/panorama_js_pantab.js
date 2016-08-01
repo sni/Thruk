@@ -54,13 +54,7 @@ Ext.define('TP.Pantab', {
             TP.log('['+This.id+'] destroy');
             This.stopTimeouts();
             var tabpan = Ext.getCmp('tabpan');
-            var window_ids = TP.clone(This.window_ids);
-            for(var nr=0; nr<window_ids.length; nr++) {
-                var panel = Ext.getCmp(window_ids[nr]);
-                if(panel) {
-                    panel.destroy();
-                }
-            }
+            This.destroyPanlets();
             TP.cp.clear(This.id);
             // activate first tab
             if(!tabpan.getActiveTab()) {
@@ -450,6 +444,17 @@ Ext.define('TP.Pantab', {
             var panlet = Ext.getCmp(This.window_ids[nr]);
             if(panlet) {
                 panlet.hide(false);
+            }
+        }
+    },
+
+    destroyPanlets: function() {
+        var This = this;
+        var window_ids = TP.clone(This.window_ids);
+        for(var nr=0; nr<window_ids.length; nr++) {
+            var panel = Ext.getCmp(window_ids[nr]);
+            if(panel) {
+                panel.destroy();
             }
         }
     },
