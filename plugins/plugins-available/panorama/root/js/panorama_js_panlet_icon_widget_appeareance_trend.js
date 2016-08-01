@@ -284,7 +284,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             callback: function(options, success, response) {
                 var data = [];
                 var tmp  = TP.getResponse(panel, response);
-                if(tmp.meta && tmp.meta.legend && tmp.meta.legend.entry) {
+                if(tmp && tmp.meta && tmp.meta.legend && tmp.meta.legend.entry) {
                     for(var nr=0; nr<tmp.meta.legend.entry.length; nr++) {
                         var legend = tmp.meta.legend.entry[nr];
                         var start  = Number(tmp.meta.start);
@@ -299,9 +299,9 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         }
                     }
                     panel.saveIconsStates();
-                    if(onSuccessCallback) {
-                        onSuccessCallback();
-                    }
+                }
+                if(onSuccessCallback) {
+                    onSuccessCallback();
                 }
             }
         });
