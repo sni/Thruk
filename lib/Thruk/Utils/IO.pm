@@ -215,9 +215,16 @@ sub json_lock_retrieve {
     alarm(30);
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_sh: ".$file); };
     flock($fh, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
-    my $data = $json->decode(<$fh>);
+    my $data;
+    eval {
+        $data = $json->decode(<$fh>);
+    };
+    my $err = $@;
     CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     alarm(0);
+    if($err && !$data) {
+        die("error while reading $file: ".$@);
+    }
     return $data;
 }
 
