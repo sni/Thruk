@@ -1098,6 +1098,7 @@ var TP = {
             types:       Ext.JSON.encode(req),
             backends:    TP.getActiveBackendsPanel(tab),
             update_proc: TP.setUpdateProcInfo(),
+            current_tab: tab.id,
             reschedule:  reschedule ? 1 : '',
             state_type:  tab.xdata.state_type
         };

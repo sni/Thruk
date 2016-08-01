@@ -273,7 +273,8 @@ Ext.define('TP.Pantab', {
                 method:  'POST',
                 params:  {
                     nr:     tab.id,
-                    states: Ext.JSON.encode(allStates)
+                    states: Ext.JSON.encode(allStates),
+                    current_tab: tab.id
                 },
                 callback: function(options, success, response) {
                     if(!success) {
