@@ -134,15 +134,16 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
 
                     var trendcalculationhint = '';
                     /* select image from base */
-                    if(base === 0 && cur === 0) {
-                        newSrc = 'neutral';
-                        trendcalculationhint = 'not enough data to calculate current image -> neutral';
-                    }
-                    else if(base != undefined) {
+                    if(base != undefined) {
                         /* getting trend with zero base is hard because the change would be unlimited */
-                        if(base === 0) { base = 0.000001; }
-                        var change = ((cur - base) / base) * 100;
                         newSrc = 'neutral';
+                        var change;
+                        if(base === 0 && cur === 0) {
+                            change = 0;
+                        } else {
+                            if(base === 0) { base = 0.000001; }
+                        }
+                        change = ((cur - base) / base) * 100;
                         if(     xdata.appearance.trendverybad  > 0 && change > xdata.appearance.trendverybad)  { newSrc = 'very_bad'; }
                         else if(xdata.appearance.trendverybad  < 0 && change < xdata.appearance.trendverybad)  { newSrc = 'very_bad'; }
                         else if(xdata.appearance.trendbad      > 0 && change > xdata.appearance.trendbad)      { newSrc = 'bad'; }
@@ -198,6 +199,9 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                                                        change,
                                                        newSrc.replace('_', '')
                                             );
+                    } else {
+                        newSrc = 'neutral';
+                        trendcalculationhint = 'not enough data to calculate current image -> neutral';
                     }
 
                     if(trendcalculationhint && TP.iconSettingsWindow && TP.iconSettingsWindow.panel.id == panel.id) {
