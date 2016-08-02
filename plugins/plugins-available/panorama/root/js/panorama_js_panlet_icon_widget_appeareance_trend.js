@@ -281,7 +281,6 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             url:     url,
             method: 'POST',
             callback: function(options, success, response) {
-                var data = [];
                 var tmp  = TP.getResponse(panel, response);
                 if(tmp && tmp.meta && tmp.meta.legend && tmp.meta.legend.entry) {
                     for(var nr=0; nr<tmp.meta.legend.entry.length; nr++) {
