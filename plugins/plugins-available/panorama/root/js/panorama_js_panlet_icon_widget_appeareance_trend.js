@@ -276,7 +276,6 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         url += '&start='+start;
         url += '&end='+end;
         Ext.Ajax.cors                = true;
-        Ext.Ajax.withCredentials     = true;
         Ext.Ajax.useDefaultXhrHeader = false;
         Ext.Ajax.request({
             url:     url,

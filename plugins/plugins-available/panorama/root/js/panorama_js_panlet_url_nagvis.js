@@ -94,7 +94,6 @@ Ext.define('TP.PanletNagvis', {
             var now    = new Date();
             var url    = panel.xdata.base_url+'/server/core/ajax_handler.php?mod=Multisite&act=getMaps&_ajaxid='+Math.floor(now.getTime()/1000);
             Ext.Ajax.cors                = true;
-            Ext.Ajax.withCredentials     = true;
             Ext.Ajax.useDefaultXhrHeader = false;
             try {
                 Ext.Ajax.request({

@@ -81,7 +81,6 @@ Ext.define('TP.PanletGrafana', {
 
                 url = url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?');
                 Ext.Ajax.cors                = true;
-                Ext.Ajax.withCredentials     = true;
                 Ext.Ajax.useDefaultXhrHeader = false;
                 Ext.Ajax.request({
                     url:     url,
