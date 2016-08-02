@@ -154,14 +154,14 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         else if(xdata.appearance.trendgood     < 0 && change < xdata.appearance.trendgood)     { newSrc = 'good'; }
 
                         var baseFormat = '%d';
-                        if(base < 0.00001 && base > -0.00001) { baseFormat = '%s';   }
-                        if(base < 0.0001  && base > -0.0001)  { baseFormat = '%.7f'; }
-                        if(base < 0.001   && base > -0.001)   { baseFormat = '%.6f'; }
-                        if(base < 0.01    && base > -0.01)    { baseFormat = '%.5f'; }
-                        if(base < 0.1     && base > -0.1)     { baseFormat = '%.4f'; }
-                        if(base < 1       && base > -1)       { baseFormat = '%.3f'; }
-                        if(base < 10      && base > -10)      { baseFormat = '%.2f'; }
-                        if(base < 100     && base > -100)     { baseFormat = '%.1f'; }
+                        if(     base < 0.00001 && base > -0.00001) { baseFormat = '%s';   }
+                        else if(base < 0.0001  && base > -0.0001)  { baseFormat = '%.7f'; }
+                        else if(base < 0.001   && base > -0.001)   { baseFormat = '%.6f'; }
+                        else if(base < 0.01    && base > -0.01)    { baseFormat = '%.5f'; }
+                        else if(base < 0.1     && base > -0.1)     { baseFormat = '%.4f'; }
+                        else if(base < 1       && base > -1)       { baseFormat = '%.3f'; }
+                        else if(base < 10      && base > -10)      { baseFormat = '%.2f'; }
+                        else if(base < 100     && base > -100)     { baseFormat = '%.1f'; }
                         labelValues = { against: sprintf(baseFormat, base), compare: sprintf(baseFormat, cur), result: sprintf("%.2f", change) };
                         if(xdata.appearance.trendfunctionin == 'current') {
                             trendcalculationhint = sprintf("compare current value -> "+baseFormat+"%s<br>",
