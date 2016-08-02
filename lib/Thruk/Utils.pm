@@ -1461,6 +1461,7 @@ sub get_perf_image {
         $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
     Thruk::Utils::IO::cmd($c, $cmd);
+    unlink($c->stash->{'fake_session_file'});
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
@@ -1469,7 +1470,6 @@ sub get_perf_image {
         }
         return $imgdata;
     }
-    unlink($c->stash->{'fake_session_file'});
     return "";
 }
 
