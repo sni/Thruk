@@ -1788,8 +1788,9 @@ sub _check_files_changed {
 #   1 if file is new / created
 #   2 if md5 sum changed
 sub _check_file_changed {
-    my $self = shift;
-    my $file = shift;
+    my($self, $file) = @_;
+
+    confess("no file given") unless($file && $file->{'path'});
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
