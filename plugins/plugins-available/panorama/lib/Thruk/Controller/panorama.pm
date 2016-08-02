@@ -399,6 +399,7 @@ sub _stateprovider {
         my $newid   = delete $param->{'nr'} || '';
         for my $key (keys %{$param}) {
             next if !$param->{$key};
+            next if $key eq 'current_tab';
             my $param_data = $param->{$key};
             if(ref $param_data eq '') {
                 $param_data = decode_json($param->{$key});
@@ -2937,6 +2938,7 @@ sub _save_dashboard {
     Thruk::Utils::backup_data_file($file, 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
+    $dashboard->{'ts'} = [stat($file)]->[9];
     return $dashboard;
 }
 
@@ -2993,7 +2995,7 @@ sub _add_json_dashboard_timestamps {
         $nr =~ s/^tabpan-tab_//gmx;
         my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
         my @stat = stat($file);
-        $json->{'dashboard_ts'}->{$tab} = $stat[9];
+        $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
     }
     return;
 }
@@ -3010,7 +3012,7 @@ sub _add_misc_details {
     my($c, $always, $json) = @_;
     if($always || $c->req->parameters->{'update_proc'}) {
         $c->stats->profile(begin => "_add_misc_details");
-        _add_json_dashboard_timestamps($c, $json);
+        _add_json_dashboard_timestamps($c, $json, $c->req->parameters->{'current_tab'});
         _add_json_pi_detail($c, $json);
         $json->{'server_version'}       = $c->config->{'version'};
         $json->{'server_version'}      .= '~'.$c->config->{'branch'} if $c->config->{'branch'};

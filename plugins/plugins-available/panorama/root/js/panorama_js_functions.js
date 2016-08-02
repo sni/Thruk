@@ -183,6 +183,9 @@ var TP = {
             tab.adjustTabHeaderOffset();
         }
 
+        /* set initial timestamp */
+        Ext.getCmp(id).ts = TP.cp.state[id].ts;
+
         /* save tabs state */
         Ext.getCmp('tabpan').saveState();
 
