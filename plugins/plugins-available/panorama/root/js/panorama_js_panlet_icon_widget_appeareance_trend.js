@@ -134,7 +134,11 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
 
                     var trendcalculationhint = '';
                     /* select image from base */
-                    if(base != undefined) {
+                    if(obj == undefined || !macros.perfdata[key]) {
+                        newSrc = 'unknown';
+                        trendcalculationhint = 'got no performance data -> unknown';
+                    }
+                    else if(base != undefined) {
                         /* getting trend with zero base is hard because the change would be unlimited */
                         newSrc = 'neutral';
                         var change;
@@ -166,7 +170,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                         if(xdata.appearance.trendfunctionin == 'current') {
                             trendcalculationhint = sprintf("compare current value -> "+baseFormat+"%s<br>",
                                                            cur,
-                                                           unit
+                                                           (unit || '')
                                                 );
                         } else {
                             trendcalculationhint = sprintf("compare %s value over %d value%s in timerange (%s - %s) -> "+baseFormat+"%s<br>",
@@ -176,13 +180,13 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                                                            strftime("%H:%M", startin),
                                                            strftime("%H:%M", endin),
                                                            cur,
-                                                           unit
+                                                           (unit || '')
                                                 );
                         }
                         if(xdata.appearance.trendfunctionvs == 'fixed') {
                             trendcalculationhint += sprintf("against fixed value -> "+baseFormat+"%s<br>",
                                                            base,
-                                                           unit
+                                                           (unit || '')
                                                 );
                         } else {
                             trendcalculationhint += sprintf("against %s over %d value%s in timerange (%s - %s) -> "+baseFormat+"%s<br>",
@@ -192,7 +196,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                                                            strftime("%H:%M", startvs),
                                                            strftime("%H:%M", endin),
                                                            base,
-                                                           unit
+                                                           (unit || '')
                                                 );
                         }
                         trendcalculationhint += sprintf("= %.2f%% -> %s",
