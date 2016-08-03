@@ -252,13 +252,17 @@ Ext.define('TP.Pantab', {
         var found     = 0;
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
+            var saveData = {};
             if(panel.xdata && panel.xdata.state != undefined) {
-                allStates[panel.id] = { state: panel.xdata.state };
+                saveData.state = panel.xdata.state;
                 found++;
             }
             if(panel.xdata && panel.xdata.stateHist != undefined) {
-                allStates[panel.id] = { state: panel.xdata.state, stateHist: panel.xdata.stateHist };
+                saveData.stateHist = panel.xdata.stateHist;
                 found++;
+            }
+            if(found) {
+                allStates[panel.id] = saveData;
             }
         }
         if(found) {
