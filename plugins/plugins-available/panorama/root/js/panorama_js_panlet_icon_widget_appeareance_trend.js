@@ -126,10 +126,10 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     if(countvs == 0 && retries == 0) {
                         var appearance = this;
                         retries = retries + 1;
-                        appearance.fetchGraphValues(key, panel, obj, xdata.stateHist, delete_before, now, function() {
+                        var pnp = appearance.fetchGraphValues(key, panel, obj, xdata.stateHist, delete_before, now, function() {
                             appearance.iconSetSourceFromState(xdata, retries);
                         });
-                        return;
+                        if(pnp) { return; }
                     }
 
                     var trendcalculationhint = '';
@@ -224,7 +224,6 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             }
         }
 
-
         if(rec != null && rec.data.fileset[newSrc]) {
             newSrc = '../usercontent/images/trend/'+iconsetName+'/'+rec.data.fileset[newSrc];
         }
@@ -271,13 +270,13 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         return({base: base, count: count});
     },
 
-    fetchGraphValues: function(key, panel, obj, stateHist, start, end, onSuccessCallback) {
-        if(!obj) { return; }
+    fetchGraphValues: function(key, panel, obj, stateHist, start, end, finishCallback) {
+        if(!obj) { return(false); }
         var url = obj.action_url_expanded;
-        if(!url) { return; }
+        if(!url) { return(false); }
         url = url.replace(/'.*$/, '');
         url = url.replace(/\/graph\?/, '/xport/json/?');
-        if(!url.match(/pnp/)) { return; }
+        if(!url.match(/pnp/)) { return(false); }
         var now = Number(new Date().getTime() / 1000).toFixed(0);
         if(start == undefined) { start = now-(86400*3); }
         if(end   == undefined) { end   = now; }
@@ -306,11 +305,12 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     }
                     panel.saveIconsStates();
                 }
-                if(onSuccessCallback) {
-                    onSuccessCallback();
+                if(finishCallback) {
+                    finishCallback();
                 }
             }
         });
+        return(true);
     },
 
     getAppearanceTabItems: function(panel) {
