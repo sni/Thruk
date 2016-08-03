@@ -708,8 +708,7 @@ Ext.define('TP.IconWidget', {
             panel.xdata.state = newStatus;
         }
         this.updateRender();
-        if(newStatus != undefined && oldState != newStatus) {
-            panel.xdata.state = newStatus;
+        if(panel.xdata.state != undefined && oldState != panel.xdata.state) {
             if(panel.locked && panel.el && (oldState != 4 && oldState != undefined)) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
                 panel.saveIconsStates();
