@@ -141,9 +141,13 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
 
                     var trendcalculationhint = '';
                     /* select image from base */
-                    if(obj == undefined || !macros.perfdata[key]) {
+                    if(obj == undefined && xdata.state == 3) {
                         newSrc = 'unknown';
-                        trendcalculationhint = 'got no performance data -> unknown';
+                        trendcalculationhint = 'host/service not found -> unknown';
+                    }
+                    else if(!macros.perfdata[key] && obj != undefined) {
+                        newSrc = 'unknown';
+                        trendcalculationhint = 'got no performance data for '+key+' -> unknown';
                     }
                     else if(base != undefined) {
                         /* getting trend with zero base is hard because the change would be unlimited */
