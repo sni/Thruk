@@ -30,9 +30,10 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         this.iconSetSourceFromState(xdata);
     },
 
-    iconSetSourceFromState: function(xdata, retries) {
-        var panel = this.panel;
-        if(retries == undefined) { retries = 0; }
+    iconSetSourceFromState: function(xdata, retry) {
+        var This  = this;
+        var panel = This.panel;
+        if(retry == undefined) { retry = 0; } else { retry++; }
         if(xdata       == undefined) { xdata = panel.xdata; }
         if(xdata.stateHist == undefined) { xdata.stateHist = panel.xdata.stateHist; }
         var tab   = Ext.getCmp(panel.panel_id);
@@ -83,6 +84,14 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     delete_before = startvs;
                 }
 
+                /* try to fill performance data stateHist from pnp4nagios (every hour) */
+                if(This.lastFetch == undefined || This.lastFetch < (now - 3600)) {
+                    var pnp = This.fetchGraphValues(key, panel, obj, xdata.stateHist, delete_before, now, function() {
+                        This.iconSetSourceFromState(xdata, retry);
+                    });
+                    if(pnp) { return; }
+                }
+
                 if(macros.perfdata[key]) {
                     var p = macros.perfdata[key];
                     var r = TP.getPerfDataMinMax(p, 100);
@@ -113,21 +122,19 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                     var data = xdata.stateHist[key];
 
                     /* calculate `compare` value with given function */
-                    var tmp     = panel.appearance.getBaseValue(xdata.appearance.trendfunctionin, data, startin, endin);
+                    var tmp     = This.getBaseValue(xdata.appearance.trendfunctionin, data, startin, endin);
                     var cur     = tmp.base;
                     var countin = tmp.count;
 
                     /* calculate `against` value with given function */
-                    tmp         = panel.appearance.getBaseValue(xdata.appearance.trendfunctionvs, data, startvs, endvs, xdata.appearance.trendfixedvs);
+                    tmp         = This.getBaseValue(xdata.appearance.trendfunctionvs, data, startvs, endvs, xdata.appearance.trendfixedvs);
                     var countvs = tmp.count;
                     var base    = tmp.base;
 
-                    /* try to fetch initial data from pnp4nagios */
-                    if(countvs == 0 && retries == 0) {
-                        var appearance = this;
-                        retries = retries + 1;
-                        var pnp = appearance.fetchGraphValues(key, panel, obj, xdata.stateHist, delete_before, now, function() {
-                            appearance.iconSetSourceFromState(xdata, retries);
+                    /* try to fetch performance data from pnp4nagios if none matched (not more than every 5 minutes) */
+                    if(countvs == 0 && retry == 0 && This.lastFetch < (now - 300)) {
+                        var pnp = This.fetchGraphValues(key, panel, obj, xdata.stateHist, delete_before, now, function() {
+                            This.iconSetSourceFromState(xdata, retry);
                         });
                         if(pnp) { return; }
                     }
@@ -282,6 +289,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         if(end   == undefined) { end   = now; }
         url += '&start='+start;
         url += '&end='+end;
+        this.lastFetch = Number(new Date().getTime() / 1000).toFixed(0);
         Ext.Ajax.cors                = true;
         Ext.Ajax.useDefaultXhrHeader = false;
         Ext.Ajax.request({
