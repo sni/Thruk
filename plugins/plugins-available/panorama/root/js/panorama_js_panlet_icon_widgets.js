@@ -726,6 +726,11 @@ Ext.define('TP.IconWidget', {
             panel.moveToMapLonLat(undefined, false);
         }
         panel.setIconLabel();
+
+        /* update tooltip */
+        if(TP.iconTipTarget && TP.iconTipTarget.id == panel.id) {
+            TP.tipRenderer({ target: TP.iconTipTarget, stopEvent: function() {} }, TP.iconTipTarget, undefined, true);
+        }
     },
 
     /* save state of icons back to servers runtime file */
