@@ -43,7 +43,7 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function(id, replace_id, hidden, callback, extraConf) {
+    add_pantab: function(id, replace_id, hidden, callback, extraConf, skipAutoShow) {
         var tabpan = Ext.getCmp('tabpan');
 
         /* if previously added as hidden tab, destroy it and add it normal */
@@ -139,7 +139,10 @@ var TP = {
         if(hidden) {
             Ext.create("TP.Pantab", {id: id, hidden: true});
         } else {
-            tabpan.add(new TP.Pantab({id: id})).show();
+            var tab = tabpan.add(new TP.Pantab({id: id}));
+            if(!skipAutoShow) {
+                tab.show();
+            }
 
             /* move new-tab button at the end */
             if(!one_tab_only) {

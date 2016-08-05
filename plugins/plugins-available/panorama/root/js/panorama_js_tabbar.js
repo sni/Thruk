@@ -310,20 +310,20 @@ Ext.define('TP.TabBar', {
                 // REMOVE AFTER: 01.01.2017
                 if(state.item_ids) {
                     for(var nr=0; nr<state.item_ids.length; nr++) {
-                        TP.add_pantab(state.item_ids[nr]);
+                        TP.add_pantab(state.item_ids[nr], undefined, undefined, undefined, undefined, true);
                     };
                 }
 
                 if(state.open_tabs) {
                     for(var nr=0; nr<state.open_tabs.length; nr++) {
                         var name = state.open_tabs[nr];
-                        TP.add_pantab(state.open_tabs[nr]);
+                        TP.add_pantab(state.open_tabs[nr], undefined, undefined, undefined, undefined, true);
                     };
                 }
 
                 /* open tab from url */
                 if(!Ext.getCmp(TP.initial_active_tab)) {
-                    TP.add_pantab(TP.initial_active_tab);
+                    TP.add_pantab(TP.initial_active_tab, undefined, undefined, undefined, undefined, true);
                     state.activeTab = TP.initial_active_tab;
                 }
 
