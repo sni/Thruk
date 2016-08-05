@@ -162,6 +162,8 @@ Ext.define('TP.Pantab', {
             } catch(e) {
                 TP.Msg.msg("fail_message~~scroll failed: "+e);
             }
+            /* set id from active tab, otherwise adding new background tabs might become visible (they set autoshow if this id matches) */
+            TP.initial_active_tab = This.id;
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
