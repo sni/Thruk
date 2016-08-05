@@ -644,39 +644,46 @@ Ext.define('TP.DashboardStatusIcon', {
             var panels = TP.getAllPanel(tab);
             /* sort by type */
             var lastType;
-            var shown = 0;
+            var skipped = 0;
+            var shown   = 0;
             panels = panels.sort(function(a,b) { return(a.iconType > b.iconType) });
             for(var nr=0; nr<panels.length; nr++) {
                 var p = panels[nr];
-                if(p.iconType && p.xdata
-                   && this.xdata.state <= p.xdata.state         /* show only problems if the map has one */
-                   && (this.xdata.state == 0 || p.xdata.state != 4) /* skip pending icons if there is a problem */
-                   && (!this.hostProblem || (p.hostProblem || p.iconType == 'host')) /* if the map is a hostproblem, show only hosts */
-                   && shown < 10)       /* show only first 10 matches */
-                {
-                    var pstatename = TP.text_status(p.xdata.state, p.hostProblem);
-                    var type = ucfirst(p.iconType);
-                    table += '<tr>';
-                    table += '<th class="'+(type != lastType ? 'newType' : '')+'">'+(type != lastType ? type : '')+'<\/th>';
-                    table += '<td>'+(p.getName ? p.getName() : '')+'<\/td>';
-                    table += '<td><div class="extinfostate '+pstatename.toUpperCase()+'">'+pstatename+'</div>';
-                    table += p.acknowledged ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom">'     : '';
-                    table += p.downtime     ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom">' : '';
-                    table += '<\/td>';
-                    table += '<\/tr>';
-                    lastType = type;
-                    shown++;
+                if(p.iconType && p.xdata) {
+                    if(this.xdata.state <= p.xdata.state         /* show only problems if the map has one */
+                       && (this.xdata.state == 0 || p.xdata.state != 4) /* skip pending icons if there is a problem */
+                       && (!this.hostProblem || (p.hostProblem || p.iconType == 'host')) /* if the map is a hostproblem, show only hosts */
+                       && shown < 10)       /* show only first 10 matches */
+                    {
+                        var pstatename = TP.text_status(p.xdata.state, p.hostProblem);
+                        var type = ucfirst(p.iconType);
+                        table += '<tr>';
+                        table += '<th class="'+(type != lastType ? 'newType' : '')+'">'+(type != lastType ? type : '')+'<\/th>';
+                        table += '<td><a href="'+TP.getIconDetailsLink(p)+'" target="_blank">'+(p.getName ? p.getName() : '')+'</a><\/td>';
+                        table += '<td><div class="extinfostate '+pstatename.toUpperCase()+'">'+pstatename+'</div>';
+                        table += p.acknowledged ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom">'     : '';
+                        table += p.downtime     ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom">' : '';
+                        table += '<\/td>';
+                        table += '<\/tr>';
+                        lastType = type;
+                        shown++;
+                    } else {
+                        skipped++;
+                    }
                 }
             }
             if(shown != panels.length) {
-                var skipped = panels.length - shown;
                 table += '<tr>';
                 table += '<th><\/th>';
                 table += '<td class="more_hosts" colspan=2>'+(skipped)+' more item'+(skipped > 1 ? 's' : '')+'...<\/td>';
                 table += '<\/tr>';
             }
             table += '<\/td><\/tr><\/table>';
-            details.push(['*Details', table]);
+            if(shown == 0) {
+                details.push(['Details', 'No status icons available on that dashboard']);
+            } else {
+                details.push(['*Details', table]);
+            }
         }
         return(details);
     },
