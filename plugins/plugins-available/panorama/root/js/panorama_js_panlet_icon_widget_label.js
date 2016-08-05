@@ -2,6 +2,7 @@ Ext.define('TP.IconLabel', {
     /* queue label renderer */
     setIconLabel: function(cfg) {
         var panel = this;
+        if(!panel.el || !panel.el.dom)  { return; }
         TP.reduceDelayEvents(panel, function() {
             panel.setIconLabelDo(cfg);
         }, 300, panel.id+'setIconLabel');
@@ -10,6 +11,7 @@ Ext.define('TP.IconLabel', {
     /* render label for this widget */
     setIconLabelDo: function(cfg) {
         var panel = this;
+        if(!panel.el || !panel.el.dom)  { return; }
         if(cfg == undefined) {
             cfg = panel.xdata.label;
             if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel.id == panel.id) {
@@ -17,7 +19,6 @@ Ext.define('TP.IconLabel', {
                 cfg       = xdata.label;
             }
         }
-        if(!panel.el || !panel.el.dom)  { return; }
         if(TP.removeLabel && TP.removeLabel[panel.id]) {
             /* remove later to avoid flickering during redraw */
             window.clearTimeout(TP.timeouts['remove_label_'+panel.id]);
