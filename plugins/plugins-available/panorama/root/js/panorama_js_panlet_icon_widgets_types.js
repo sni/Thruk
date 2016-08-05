@@ -680,9 +680,19 @@ Ext.define('TP.DashboardStatusIcon', {
         }
         return(details);
     },
-    refreshHandler: function(newStatus) {
-        var This = this;
-        var res = TP.getTabState('tabpan-tab_'+This.xdata.general.dashboard, !This.xdata.general.hide_ack, !This.xdata.general.hide_downtimes);
+    refreshHandler: function(newStatus, skipUpdate) {
+        var This   = this;
+        var tab_id = 'tabpan-tab_'+This.xdata.general.dashboard;
+        var tab    = Ext.getCmp(tab_id);
+        if(!tab) {
+            TP.add_pantab(tab_id, undefined, true, Ext.bind(This.refreshHandler, This, [newStatus, skipUpdate]));
+            return;
+        }
+        if(!skipUpdate) {
+            TP.updateAllIcons(tab, undefined, undefined, undefined, Ext.bind(This.refreshHandler, This, [newStatus, true]));
+            return;
+        }
+        var res = TP.getTabState(tab_id, !This.xdata.general.hide_ack, !This.xdata.general.hide_downtimes);
         if(res) {
             This.downtime     = res.downtime;
             This.acknowledged = res.acknowledged;

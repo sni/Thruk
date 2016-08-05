@@ -1084,18 +1084,18 @@ var TP = {
             tab.saveState();
         }
     },
-    updateAllIcons: function(tab, id, xdata, reschedule) {
+    updateAllIcons: function(tab, id, xdata, reschedule, callback) {
         if(id != undefined) {
-            TP.updateAllIconsDo(tab, id, xdata, reschedule);
+            TP.updateAllIconsDo(tab, id, xdata, reschedule, callback);
         } else {
             /* avoid duplicate updates */
             window.clearTimeout(TP.timeouts['timeout_global_icon_update'+tab.id]);
             TP.timeouts['timeout_global_icon_update'+tab.id] = window.setTimeout(function() {
-                TP.updateAllIconsDo(tab);
+                TP.updateAllIconsDo(tab, undefined, undefined, undefined, callback);
             }, 300);
         }
     },
-    updateAllIconsDo: function(tab, id, xdata, reschedule) {
+    updateAllIconsDo: function(tab, id, xdata, reschedule, callback) {
         if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
         if(TP.iconUpdateRunning[tab.id]) { return; }
 
@@ -1264,7 +1264,7 @@ var TP = {
                             }
                         }
                     }
-                    // mark unknown services
+                    /* mark unknown services */
                     for(var key in ref.services) {
                         for(var key2 in ref.services[key]) {
                             for(var y=0; y<ref.services[key][key2].length; y++) {
@@ -1275,6 +1275,9 @@ var TP = {
                     }
                 }
                 TP.checkSoundAlerts(tab);
+
+                /* run callback */
+                if(callback) { callback(); }
             }
         });
     },
@@ -1648,16 +1651,13 @@ var TP = {
         }
     },
     /* calculate state for tab */
-    getTabState: function(tab_id, incl_ack, incl_downtimes, callback) {
+    getTabState: function(tab_id, incl_ack, incl_downtimes) {
         var tab = Ext.getCmp(tab_id);
         if(!tab) {
-            TP.add_pantab(tab_id, undefined, true, callback);
             return;
         }
-        TP.updateAllIcons(tab);
         var group = TP.getTabTotals(tab);
         var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes});
-        if(callback) { callback(); }
         return(res);
     },
     getTabTotals: function(tab) {
