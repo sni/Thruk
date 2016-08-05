@@ -832,13 +832,21 @@ var TP = {
                 }
             }
 
-            var tab = Ext.getCmp('tabpan').getActiveTab();
-            if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
-                var old = tab.ts ? tab.ts : '';
-                tab.ts = data.dashboard_ts[tab.id];
-                if((no_ts == undefined || no_ts == false) && old < tab.ts) {
-                    TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[tab.id]);
-                    TP.renewDashboard(tab);
+            if(data && data.dashboard_ts != undefined) {
+                for(var tab_id in data.dashboard_ts) {
+                    var tab = Ext.getCmp(tab_id);
+                    if(data.dashboard_ts[tab_id] != tab.ts) {
+                        var old = tab.ts ? tab.ts : '';
+                        tab.ts = data.dashboard_ts[tab.id];
+                        if((no_ts == undefined || no_ts == false) && old < tab.ts) {
+                            TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[tab.id]);
+                            if(tab.rendered) {
+                                TP.renewDashboard(tab);
+                            } else {
+                                TP.add_pantab(tab.id, undefined, true);
+                            }
+                        }
+                    }
                 }
             }
             /* contains a message? */
