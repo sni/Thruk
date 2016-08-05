@@ -688,6 +688,7 @@ Ext.define('TP.DashboardStatusIcon', {
             TP.add_pantab(tab_id, undefined, true, Ext.bind(This.refreshHandler, This, [newStatus, skipUpdate]));
             return;
         }
+        if(tab.rendered) { skipUpdate = true; }
         if(!skipUpdate) {
             TP.updateAllIcons(tab, undefined, undefined, undefined, Ext.bind(This.refreshHandler, This, [newStatus, true]));
             return;
