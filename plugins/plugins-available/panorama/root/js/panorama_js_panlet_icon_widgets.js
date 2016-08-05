@@ -728,7 +728,7 @@ Ext.define('TP.IconWidget', {
         panel.setIconLabel();
 
         /* update tooltip */
-        if(TP.iconTipTarget && TP.iconTipTarget.id == panel.id) {
+        if(TP.iconTipTarget && TP.iconTipTarget.id == panel.id && !TP.iconTip.hidden) {
             TP.tipRenderer({ target: TP.iconTipTarget, stopEvent: function() {} }, TP.iconTipTarget, undefined, true);
         }
     },

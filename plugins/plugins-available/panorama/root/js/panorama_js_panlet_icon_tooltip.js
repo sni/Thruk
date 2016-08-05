@@ -69,12 +69,14 @@ Ext.onReady(function() {
                 if(TP.iconSettingsWindow) {
                     this.alignToSettingsWindow();
                 }
+                This.hidden = false;
             },
             beforehide: function(This) {
                 if(TP.iconSettingsWindow
                    && TP.iconSettingsWindow.items.getAt(0)
                    && TP.iconSettingsWindow.items.getAt(0).getActiveTab().title == "Popup"
                 ) { return(false); }
+                This.hidden = true;
                 if(!This.hideTimer) {
                     This.delayHide();
                     return(false);
