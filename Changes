@@ -13,6 +13,7 @@ next:
             - include any ok event always in availability calculation
           - Panorama View:
             - make popup completely customizable
+            - add dashboard status icon type
             - add performance bar icon type
             - add trend / forecast icon type
             - icon label can be mouseover only now

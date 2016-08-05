@@ -46,6 +46,14 @@ var TP = {
     add_pantab: function(id, replace_id, hidden, callback, extraConf) {
         var tabpan = Ext.getCmp('tabpan');
 
+        /* if previously added as hidden tab, destroy it and add it normal */
+        if(id && Ext.getCmp(id)) {
+            var tab = Ext.getCmp(id);
+            if(!tab.rendered) {
+                tab.destroy();
+            }
+        }
+
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.mask('loading...');
         }
@@ -129,58 +137,58 @@ var TP = {
 
         /* add new tab panel */
         if(hidden) {
-            tabpan.add(new TP.Pantab({id: id}));
+            Ext.create("TP.Pantab", {id: id, hidden: true});
         } else {
             tabpan.add(new TP.Pantab({id: id})).show();
-        }
 
-        /* move new-tab button at the end */
-        if(!one_tab_only) {
-            tabpan.getTabBar().move(size-1, size);
+            /* move new-tab button at the end */
+            if(!one_tab_only) {
+                tabpan.getTabBar().move(size-1, size);
 
-            /* make tab title editable */
-            if(!readonly && !dashboard_ignore_changes) {
-                var tabhead = tabpan.getTabBar().items.getAt(size-1);
-                if(tabhead.rendered == false) {
-                    tabhead.addListener('afterrender', function(This, eOpts) {
-                        TP.addTabBarMouseEvents(This.getEl(), id);
-                    });
-                } else {
-                    TP.addTabBarMouseEvents(tabhead.getEl(), id);
+                /* make tab title editable */
+                if(!readonly && !dashboard_ignore_changes) {
+                    var tabhead = tabpan.getTabBar().items.getAt(size-1);
+                    if(tabhead.rendered == false) {
+                        tabhead.addListener('afterrender', function(This, eOpts) {
+                            TP.addTabBarMouseEvents(This.getEl(), id);
+                        });
+                    } else {
+                        TP.addTabBarMouseEvents(tabhead.getEl(), id);
+                    }
                 }
             }
-        }
 
-        /* replace existing tab with current one */
-        if(replace_id) {
-            if(one_tab_only) {
-                if(id != replace_id) {
-                    Ext.getCmp(replace_id).destroy();
-                    if(history.replaceState) {
-                        var tab    = tabpan.getActiveTab();
-                        var newloc = new String(window.document.location);
-                        newloc     = newloc.replace(/\?map=.*$/g, '');
-                        newloc     = newloc + "?map="+tab.xdata.title;
-                        history.replaceState({}, "", newloc);
-                    }
-                }
-            } else {
-                var replace_nr;
-                var tabState = tabpan.getState();
-                for(var x=0; x<tabState.open_tabs.length; x++) {
-                    if(tabState.open_tabs[x] == replace_id) {
-                        replace_nr = x+1;
-                    }
-                }
-                if(replace_nr != undefined) {
-                    tabpan.getTabBar().move(size-1, replace_nr);
+            /* replace existing tab with current one */
+            if(replace_id) {
+                if(one_tab_only) {
                     if(id != replace_id) {
                         Ext.getCmp(replace_id).destroy();
+                        if(history.replaceState) {
+                            var tab    = tabpan.getActiveTab();
+                            var newloc = new String(window.document.location);
+                            newloc     = newloc.replace(/\?map=.*$/g, '');
+                            newloc     = newloc + "?map="+tab.xdata.title;
+                            history.replaceState({}, "", newloc);
+                        }
+                    }
+                } else {
+                    var replace_nr;
+                    var tabState = tabpan.getState();
+                    for(var x=0; x<tabState.open_tabs.length; x++) {
+                        if(tabState.open_tabs[x] == replace_id) {
+                            replace_nr = x+1;
+                        }
+                    }
+                    if(replace_nr != undefined) {
+                        tabpan.getTabBar().move(size-1, replace_nr);
+                        if(id != replace_id) {
+                            Ext.getCmp(replace_id).destroy();
+                        }
                     }
                 }
+                var tab = tabpan.getActiveTab();
+                tab.adjustTabHeaderOffset();
             }
-            var tab = tabpan.getActiveTab();
-            tab.adjustTabHeaderOffset();
         }
 
         /* set initial timestamp */
@@ -1228,6 +1236,15 @@ var TP = {
                         }
                     }
 
+                    /* update all dashboard icons */
+                    for(var d in ref.dashboards) {
+                        for(var x=0; x<ref.dashboards[d].length; x++) {
+                            ref.dashboards[d][x].refreshHandler();
+                        }
+                        delete ref.dashboards[d];
+                    }
+
+
                     /* mark remaining as unknown */
                     var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites', 'filter'];
                     for(var x=0; x<keys.length; x++) {
@@ -1318,7 +1335,7 @@ var TP = {
     getStatusReq: function(tab, id, xdata) {
         var panels   = TP.getAllPanel(tab);
         var req      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
-        var ref      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
+        var ref      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
         var count  = 0;
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
@@ -1379,6 +1396,12 @@ var TP = {
                 else if(p.xdata.general.site) {
                     if(ref.sites[p.xdata.general.site] == undefined) { ref.sites[p.xdata.general.site] = []; }
                     ref.sites[p.xdata.general.site].push(p);
+                    count++;
+                }
+                /* update dashboards */
+                else if(p.xdata.general.dashboard) {
+                    if(ref.dashboards[p.xdata.general.dashboard] == undefined) { ref.dashboards[p.xdata.general.dashboard] = []; }
+                    ref.dashboards[p.xdata.general.dashboard].push(p);
                     count++;
                 }
             }
@@ -1620,6 +1643,95 @@ var TP = {
                 TP.alertNumbers[tab_id].name = 0;
             }
         }
+    },
+    /* calculate state for tab */
+    getTabState: function(tab_id, incl_ack, incl_downtimes, callback) {
+        var tab = Ext.getCmp(tab_id);
+        if(!tab) {
+            TP.add_pantab(tab_id, undefined, true, callback);
+            return;
+        }
+        TP.updateAllIcons(tab);
+        var group = TP.getTabTotals(tab);
+        var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes});
+        if(callback) { callback(); }
+        return(res);
+    },
+    getTabTotals: function(tab) {
+        /* convert icon states into a hash used by hostgroup icons so we can use that state calculation later */
+        var group = { services: {      total: 0,
+                                          ok: 0,          warning: 0,          critical: 0,          unknown: 0,       pending: 0,
+                                    plain_ok: 0,    plain_warning: 0,    plain_critical: 0,    plain_unknown: 0, plain_pending: 0,
+                                                      ack_warning: 0,      ack_critical: 0,      ack_unknown: 0,
+                                 downtime_ok: 0, downtime_warning: 0, downtime_critical: 0, downtime_unknown: 0
+                                },
+                      hosts:    {      total: 0,
+                                          up: 0,          down: 0,          unreachable: 0,       pending: 0,
+                                    plain_up: 0,    plain_down: 0,    plain_unreachable: 0, plain_pending: 0,
+                                                      ack_down: 0,      ack_unreachable: 0,
+                                 downtime_up: 0, downtime_down: 0, downtime_unreachable: 0
+                                }
+        };
+
+        var panels = TP.getAllPanel(tab);
+        if(tab.window_ids.length != panels.length) {
+            tab.createInitialPanlets(0, false);
+        }
+        for(var nr=0; nr<panels.length; nr++) {
+            var p = panels[nr];
+            if(p.iconType && p.xdata) {
+                if(p.iconType == 'host' || p.hostProblem) {
+                    group.hosts.total++;
+                         if(p.xdata.state == 0) { group.hosts.up++; }
+                    else if(p.xdata.state == 1) { group.hosts.down++; }
+                    else if(p.xdata.state == 2) { group.hosts.unreachable++; }
+                    else if(p.xdata.state == 3) { group.services.unknown++; } /* there is no unknown host state but the icon might be unknown for missing hosts */
+                    else if(p.xdata.state == 4) { group.hosts.pending++; }
+                    if(p.acknowledged) {
+                            if(p.xdata.state == 1) { group.hosts.ack_down++; }
+                       else if(p.xdata.state == 2) { group.hosts.ack_unreachable++; }
+                    }
+                    if(p.downtime) {
+                            if(p.xdata.state == 0) { group.hosts.downtime_up++; }
+                       else if(p.xdata.state == 1) { group.hosts.downtime_down++; }
+                       else if(p.xdata.state == 2) { group.hosts.downtime_unreachable++; }
+                    }
+                    if(!p.acknowledged && !p.downtime) {
+                            if(p.xdata.state == 0) { group.hosts.plain_up++; }
+                       else if(p.xdata.state == 1) { group.hosts.plain_down++; }
+                       else if(p.xdata.state == 2) { group.hosts.plain_unreachable++; }
+                       else if(p.xdata.state == 3) { group.services.plain_unknown++; } /* same as above, count missing hosts as unknown */
+                       else if(p.xdata.state == 4) { group.hosts.plain_pending++; }
+                    }
+                } else {
+                    group.services.total++;
+                         if(p.xdata.state == 0) { group.services.ok++; }
+                    else if(p.xdata.state == 1) { group.services.warning++; }
+                    else if(p.xdata.state == 2) { group.services.critical++; }
+                    else if(p.xdata.state == 3) { group.services.unknown++; }
+                    else if(p.xdata.state == 4) { group.services.pending++; }
+                    if(p.acknowledged) {
+                            if(p.xdata.state == 1) { group.services.ack_warning++; }
+                       else if(p.xdata.state == 2) { group.services.ack_critical++; }
+                       else if(p.xdata.state == 3) { group.services.ack_unknown++; }
+                    }
+                    if(p.downtime) {
+                            if(p.xdata.state == 0) { group.services.downtime_ok++; }
+                       else if(p.xdata.state == 1) { group.services.downtime_warning++; }
+                       else if(p.xdata.state == 2) { group.services.downtime_critical++; }
+                       else if(p.xdata.state == 3) { group.services.downtime_unknown++; }
+                    }
+                    if(!p.acknowledged && !p.downtime) {
+                            if(p.xdata.state == 0) { group.services.plain_ok++; }
+                       else if(p.xdata.state == 1) { group.services.plain_warning++; }
+                       else if(p.xdata.state == 2) { group.services.plain_critical++; }
+                       else if(p.xdata.state == 3) { group.services.plain_unknown++; }
+                       else if(p.xdata.state == 4) { group.services.plain_pending++; }
+                    }
+                }
+            }
+        }
+        return(group);
     },
     /* renew dashboards on the fly, delayed */
     renewDashboard: function(tab) {

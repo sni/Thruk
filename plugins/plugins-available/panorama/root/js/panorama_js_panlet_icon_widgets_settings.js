@@ -1,12 +1,13 @@
 TP.iconTypesStore = Ext.create('Ext.data.Store', {
     fields: ['name', 'value', 'icon'],
     autoLoad: false,
-    data : [{value:'TP.HostStatusIcon',         name:'Host',          icon:url_prefix+'plugins/panorama/images/server.png'},
-            {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',     icon:url_prefix+'plugins/panorama/images/server_link.png'},
-            {value:'TP.ServiceStatusIcon',      name:'Service',       icon:url_prefix+'plugins/panorama/images/computer.png'},
-            {value:'TP.ServicegroupStatusIcon', name:'Service Group', icon:url_prefix+'plugins/panorama/images/computer_link.png'},
-            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:url_prefix+'plugins/panorama/images/page_find.png'},
-            {value:'TP.SiteStatusIcon',         name:'Site Status',   icon:url_prefix+'plugins/panorama/images/accept.png'}
+    data : [{value:'TP.HostStatusIcon',         name:'Host',             icon:url_prefix+'plugins/panorama/images/server.png'},
+            {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',        icon:url_prefix+'plugins/panorama/images/server_link.png'},
+            {value:'TP.ServiceStatusIcon',      name:'Service',          icon:url_prefix+'plugins/panorama/images/computer.png'},
+            {value:'TP.ServicegroupStatusIcon', name:'Service Group',    icon:url_prefix+'plugins/panorama/images/computer_link.png'},
+            {value:'TP.FilterStatusIcon',       name:'Custom Filter',    icon:url_prefix+'plugins/panorama/images/page_find.png'},
+            {value:'TP.SiteStatusIcon',         name:'Site Status',      icon:url_prefix+'plugins/panorama/images/accept.png'},
+            {value:'TP.DashboardStatusIcon',    name:'Dashboard Status', icon:url_prefix+'plugins/panorama/images/map.png'}
     ]
 });
 

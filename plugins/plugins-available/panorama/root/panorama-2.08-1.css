@@ -646,6 +646,9 @@ TABLE.TipDetails TD.more_hosts {
 TABLE.TipDetails TD.more_services {
     padding-left: 135px;
 }
+TABLE.TipDetails TH.newType {
+  border-top: 1px solid #AAAAAA;
+}
 
 SPAN.avail_result_not_ready {
     opacity: 0.2;

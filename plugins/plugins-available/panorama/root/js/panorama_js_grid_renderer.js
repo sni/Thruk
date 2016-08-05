@@ -411,7 +411,8 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
 /* toggle visibility of dashboards */
 TP.render_dashboard_toggle_visible = function(v, td, item, row, col, store, view) {
     var actions = "";
-    if(Ext.getCmp(item.data.id)) {
+    var tab = Ext.getCmp(item.data.id);
+    if(tab && tab.rendered) {
         actions += "<div class='clickable' title='removes dashboard from current view' onclick='Ext.getCmp(\""+item.data.id+"\").destroy(); TP.dashboardsSettingGrid.getView().refresh(); return false;' style='margin-left: -5px; width:20px;height:20px;background-image:url(../plugins/panorama/images/eye.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
     } else {
         actions += "<div class='clickable' title='adds this dashboard to current view' onclick='TP.add_pantab(\""+item.data.id+"\"); return false;' style='margin-left: -5px; width:20px;height:20px;background-image:url(../plugins/panorama/images/bullet_white.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";

@@ -1,4 +1,3 @@
-var old_elements;
 Ext.define('TP.TabBar', {
     extend: 'Ext.tab.Panel',
     plugins: [
@@ -42,8 +41,8 @@ Ext.define('TP.TabBar', {
                             var elements = Ext.Array.toArray(document.getElementsByTagName('*')).filter(function(v, i, a) { if(v.className && v.className.match && v.className.match("firebug")) {return(false)}; return(true); });
                             Ext.getCmp('debug_dom_elements').el.dom.innerHTML = 'DOM:'+elements.length;
                             /*
-                            if(old_elements && old_elements.length != elements.length) {
-                                var diff = Ext.Array.difference(elements, old_elements);
+                            if(TP.old_dom_elements && TP.old_dom_elements.length != elements.length) {
+                                var diff = Ext.Array.difference(elements, TP.old_dom_elements);
                                 if(diff.length > 0) {
                                     console.log("found "+diff.length+" new dom elements");
                                     if(diff.length < 20) {
@@ -51,7 +50,7 @@ Ext.define('TP.TabBar', {
                                     }
                                 }
                             }
-                            old_elements = elements;
+                            TP.old_dom_elements = elements;
                             */
                         },
                         2000
@@ -260,7 +259,7 @@ Ext.define('TP.TabBar', {
         var open_tabs = [];
         this.items.each(function(item, idx, length) {
             var stateId = item.getStateId();
-            if(stateId) {
+            if(stateId && item.rendered) {
                 open_tabs.push(stateId);
             }
         });
@@ -436,7 +435,7 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                 menu.removeAll();
                 var found = 0;
                 for(var x=0; x<data.length; x++) {
-                    if(all || !Ext.getCmp(data[x].id)) {
+                    if(all || (!Ext.getCmp(data[x].id)) || !Ext.getCmp(data[x].id).rendered) {
                         found++;
                         menu.add({text:    data[x].name,
                                   val:     data[x].id,

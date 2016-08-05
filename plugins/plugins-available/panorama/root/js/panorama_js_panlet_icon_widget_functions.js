@@ -156,7 +156,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target) {
             var tabpan = Ext.getCmp('tabpan');
             var tab_id = "tabpan-tab_"+special[1];
             var tab    = Ext.getCmp(tab_id);
-            if(tab) {
+            if(tab && tab.rendered) {
                 tabpan.setActiveTab(tab);
             } else {
                 var replace;
@@ -429,7 +429,7 @@ TP.getNatural = function(src) {
 /* calculates availability used in labels */
 function availability(panel, opts) {
     TP.lastAvailError = undefined;
-    if(panel.iconType == 'hostgroup' || panel.iconType == 'filtered') {
+    if(panel.iconType == 'hostgroup' || panel.iconType == 'filter') {
         if(panel.xdata.general.incl_hst) { opts['incl_hst'] = 1; }
         if(panel.xdata.general.incl_svc) { opts['incl_svc'] = 1; }
     }

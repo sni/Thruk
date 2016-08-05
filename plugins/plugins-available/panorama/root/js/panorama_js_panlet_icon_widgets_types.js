@@ -38,8 +38,8 @@ Ext.define('TP.HostStatusIcon', {
         var statename = TP.text_host_status(this.xdata.state);
         details.push([ 'Current Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
                                         +' (for ' + TP.render_duration('', '', {data:this.host})+')<br>'
-                                        +(this.acknowledged ?' (<img src='+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
-                                        +(this.downtime     ?' (<img src='+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
+                                        +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
+                                        +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
         details.push([ 'Status Information', this.host.plugin_output]);
         details.push([ 'Last Check', this.host.last_check ? TP.date_format(this.host.last_check) : 'never']);
@@ -294,7 +294,7 @@ Ext.define('TP.ServicegroupStatusIcon', {
 Ext.define('TP.FilterStatusIcon', {
     extend: 'TP.IconWidget',
 
-    iconType: 'filtered',
+    iconType: 'filter',
     initComponent: function() {
         var panel = this;
         this.callParent();
@@ -543,5 +543,153 @@ Ext.define('TP.StaticIcon', {
         if(xdata == undefined) { xdata = this.xdata; }
         xdata.appearance = { type: 'icon'};
         this.callParent([xdata, forceRecreate]);
+    }
+});
+
+/* Dashboard Status Icon */
+var dashboardStore = Ext.create('Ext.data.Store', {
+    fields: ['nr', 'name'],
+    proxy: {
+        type: 'ajax',
+        url:  'panorama.cgi?task=dashboard_list&list=all',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    autoLoad: false,
+    data : []
+});
+Ext.define('TP.DashboardStatusIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'dashboard',
+    iconName: 'Dashboard',
+    initComponent: function() {
+        var panel = this;
+        this.xdata.general.hide_downtimes = false;
+        this.xdata.general.hide_ack       = false;
+        this.callParent();
+    },
+    getGeneralItems: function() {
+        dashboardStore.load();
+        var panel = this;
+        return([{
+                xtype:          'combobox',
+                name:           'dashboard',
+                fieldLabel:     'Dashboard',
+                store:           dashboardStore,
+                queryMode:      'remote',
+                triggerAction:  'all',
+                pageSize:        true,
+                selectOnFocus:   true,
+                typeAhead:       true,
+                displayField:   'name',
+                valueField:     'nr',
+                listConfig : {
+                    minWidth: 300,
+                    maxWidth: 800
+                },
+                matchFieldWidth: false,
+                listeners: {
+                    change: function(This, newValue, oldValue, eOpts) {
+                        /* set icon link automatically */
+                        Ext.getCmp('linkForm').getForm().setValues({link: 'dashboard://'+newValue});
+                    }
+                }
+            },{
+                fieldLabel: 'Hide Downtimes',
+                xtype:      'checkbox',
+                name:       'hide_downtimes',
+                boxLabel:   '(problems in downtime will be ok if checked)'
+            }, {
+                fieldLabel: 'Hide Acknowledged',
+                xtype:      'checkbox',
+                name:       'hide_ack',
+                boxLabel:   '(acknowledged problems will be ok if checked)'
+        }]);
+    },
+    getName: function() {
+        var tab = Ext.getCmp('tabpan-tab_'+this.xdata.general.dashboard);
+        if(tab) {
+            return(tab.title);
+        }
+        return("");
+    },
+    getDetails: function() {
+        var details = [];
+        var statename = TP.text_status(this.xdata.state, this.hostProblem);
+        details.push([ 'Current Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
+                                        +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
+                                        +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
+                     ]);
+        var tab = Ext.getCmp('tabpan-tab_'+this.xdata.general.dashboard);
+        if(tab) {
+            /* Totals */
+            var group = TP.getTabTotals(tab);
+            var totals = '';
+            if(group.hosts.total > 0) {
+                totals += TP.get_summarized_hoststatus(group.hosts);
+            }
+            if(group.services.total > 0) {
+                totals += TP.get_summarized_servicestatus(group.services);
+            }
+            if(totals != '') {
+                details.push([ 'Totals', totals]);
+            }
+
+            /* Details */
+            var table  = '<\/tr><tr><td colspan=3><table class="TipDetails">';
+                table += '<tr><th colspan=3>Details:<\/th><\/tr>';
+            var panels = TP.getAllPanel(tab);
+            /* sort by type */
+            var lastType;
+            var shown = 0;
+            panels = panels.sort(function(a,b) { return(a.iconType > b.iconType) });
+            for(var nr=0; nr<panels.length; nr++) {
+                var p = panels[nr];
+                if(p.iconType && p.xdata
+                   && this.xdata.state <= p.xdata.state         /* show only problems if the map has one */
+                   && (this.xdata.state == 0 || p.xdata.state != 4) /* skip pending icons if there is a problem */
+                   && (!this.hostProblem || (p.hostProblem || p.iconType == 'host')) /* if the map is a hostproblem, show only hosts */
+                   && shown < 10)       /* show only first 10 matches */
+                {
+                    var pstatename = TP.text_status(p.xdata.state, p.hostProblem);
+                    var type = ucfirst(p.iconType);
+                    table += '<tr>';
+                    table += '<th class="'+(type != lastType ? 'newType' : '')+'">'+(type != lastType ? type : '')+'<\/th>';
+                    table += '<td>'+(p.getName ? p.getName() : '')+'<\/td>';
+                    table += '<td><div class="extinfostate '+pstatename.toUpperCase()+'">'+pstatename+'</div>';
+                    table += p.acknowledged ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom">'     : '';
+                    table += p.downtime     ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom">' : '';
+                    table += '<\/td>';
+                    table += '<\/tr>';
+                    lastType = type;
+                    shown++;
+                }
+            }
+            if(shown != panels.length) {
+                var skipped = panels.length - shown;
+                table += '<tr>';
+                table += '<th><\/th>';
+                table += '<td class="more_hosts" colspan=2>'+(skipped)+' more item'+(skipped > 1 ? 's' : '')+'...<\/td>';
+                table += '<\/tr>';
+            }
+            table += '<\/td><\/tr><\/table>';
+            details.push(['*Details', table]);
+        }
+        return(details);
+    },
+    refreshHandler: function(newStatus) {
+        var This = this;
+        var res = TP.getTabState('tabpan-tab_'+This.xdata.general.dashboard, !This.xdata.general.hide_ack, !This.xdata.general.hide_downtimes);
+        if(res) {
+            This.downtime     = res.downtime;
+            This.acknowledged = res.acknowledged;
+            This.hostProblem  = res.hostProblem;
+            This.xdata.state  = res.state;
+            newStatus         = res.state;
+        }
+        This.callParent([newStatus]);
     }
 });
