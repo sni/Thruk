@@ -1110,6 +1110,7 @@ var TP = {
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) {
             if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
+            if(callback) { callback(); }
             return;
         }
         var req = statusReq.req,
@@ -1148,7 +1149,10 @@ var TP = {
                     TP.refresh_errors = 0;
                     if(TP.iconTip) { TP.iconTip.lastUrl = undefined; }
                     var data = TP.getResponse(undefined, response);
-                    if(!data || !data.data) { return; }
+                    if(!data || !data.data) {
+                        if(callback) { callback(); }
+                        return;
+                    }
                     data = data.data;
                     /* update custom filter */
                     if(data.filter) {
@@ -1254,7 +1258,6 @@ var TP = {
                         }
                         delete ref.dashboards[d];
                     }
-
 
                     /* mark remaining as unknown */
                     var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites', 'filter'];
@@ -1666,6 +1669,7 @@ var TP = {
         }
         var group = TP.getTabTotals(tab);
         var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes});
+        if(group.hosts.total == 0 && group.services.total == 0) { res.state = 3; }
         return(res);
     },
     getTabTotals: function(tab) {
