@@ -402,7 +402,15 @@ Ext.define('TP.SmallWidget', {
                     href:       'status.cgi',
                     hrefTarget: '_blank',
                     listeners: {
-                        afterrender: function(btn, eOpts) { btn.el.dom.children[0].href = TP.getIconDetailsLink(This); }
+                        afterrender: function(btn, eOpts) {
+                            var newLink = TP.getIconDetailsLink(This);
+                            if(newLink != '#') {
+                                btn.el.dom.children[0].href = newLink;
+                                btn.setDisabled(false);
+                            } else {
+                                btn.setDisabled(true);
+                            }
+                        }
                     },
                     hidden:  This.xdata.state == undefined ? true : false
                 }

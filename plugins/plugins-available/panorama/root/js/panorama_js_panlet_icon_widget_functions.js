@@ -342,6 +342,11 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
         options.filter = cfg.filter;
         options.task   = 'redirect_status';
         base           = 'panorama.cgi';
+    }
+    else if(cfg.dashboard) {
+        options.map    = cfg.dashboard;
+        base           = 'panorama.cgi';
+        relativeUrl    = true;
     } else {
         return('#');
     }
