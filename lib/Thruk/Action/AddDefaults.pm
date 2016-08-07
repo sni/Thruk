@@ -37,6 +37,7 @@ our @stash_config_keys = qw/
     status_color_background show_logout_button use_feature_recurring_downtime
     use_service_description force_sticky_ack force_send_notification force_persistent_ack
     force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
+    useragentcompat
 /;
 
 use constant {
