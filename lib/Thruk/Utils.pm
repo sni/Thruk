@@ -2430,10 +2430,7 @@ return base etc folder
 =cut
 sub base_folder {
     my($c) = @_;
-    if($ENV{'THRUK_CONFIG'}) {
-        return($ENV{'THRUK_CONFIG'});
-    }
-    return($c->config->{'home'});
+    return($c->config->{'etc_path'});
 }
 
 ########################################
