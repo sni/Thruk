@@ -1820,11 +1820,15 @@ var TP = {
                             /* position and size changes can be applied by animation */
                             Ext.apply(p, cfg);
                             TP.cp.set(key, cfg);
-                            if(p.applyAnimated && !p.xdata.map) {
+                            if(p.applyAnimated && p.rendered && !p.xdata.map) {
                                 p.applyAnimated({duration:duration});
-                            }
-                            if(p.applyXdata) {
-                                window.setTimeout(Ext.bind(p.applyXdata, p, [cfg.xdata]), duration+100);
+                                if(p.applyXdata) {
+                                    window.setTimeout(Ext.bind(p.applyXdata, p, [cfg.xdata]), duration+100);
+                                }
+                            } else {
+                                if(p.applyXdata) {
+                                    p.applyXdata(cfg.xdata);
+                                }
                             }
                         }
                     }

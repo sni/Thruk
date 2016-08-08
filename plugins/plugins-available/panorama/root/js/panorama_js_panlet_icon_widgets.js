@@ -274,6 +274,8 @@ Ext.define('TP.SmallWidget', {
             // ex.: rotated shapes return wrong position on getPosition()
             return;
         }
+        layout.x = Number(layout.x);
+        layout.y = Number(layout.y);
         if(win.shrinked) {
             win.shrinked.x = layout.x;
             win.shrinked.y = layout.y;
