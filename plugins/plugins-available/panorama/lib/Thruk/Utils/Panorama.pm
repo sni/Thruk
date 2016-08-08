@@ -2,6 +2,7 @@ package Thruk::Utils::Panorama;
 
 use strict;
 use warnings;
+use Thruk::Utils::Panorama::Scripted;
 use JSON::XS;
 
 =head1 NAME
@@ -165,17 +166,27 @@ sub load_dashboard {
     $nr       =~ s/^tabpan-tab_//gmx;
     my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
     return unless -s $file;
-    my $dashboard  = Thruk::Utils::read_data_file($file);
+    my $dashboard;
+    my $scripted = 0;
+    if(-x $file) {
+        # scripted dashboard
+        $dashboard = Thruk::Utils::Panorama::Scripted::load_dashboard($c, $nr, $file);
+        $scripted = 1;
+    } else {
+        # static dashboard
+        $dashboard = Thruk::Utils::read_data_file($file);
+    }
+    return unless $dashboard;
 
     my $permission = is_authorized_for_dashboard($c, $nr, $dashboard);
     return unless $permission >= ACCESS_READONLY;
-    if($permission == ACCESS_READONLY) {
+    if($scripted || $permission == ACCESS_READONLY) {
         $dashboard->{'readonly'} = 1;
     } else {
         $dashboard->{'readonly'} = 0;
     }
     my @stat = stat($file);
-    $dashboard->{'ts'}   = $stat[9];
+    $dashboard->{'ts'}   = $stat[9] unless ($scripted && $dashboard->{'ts'});
     $dashboard->{'nr'}   = $nr;
     $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
     $dashboard->{'file'} = $file;
@@ -212,7 +223,7 @@ sub load_dashboard {
     for my $tab (keys %{$runtime}) {
         next if !defined $dashboard->{$tab};
         for my $key (keys %{$runtime->{$tab}}) {
-            $dashboard->{$tab}->{'xdata'}->{$key} = $runtime->{$tab}->{$key};
+            $dashboard->{$tab}->{'xdata'}->{$key} = $runtime->{$tab}->{$key} unless($scripted && defined $dashboard->{$tab}->{'xdata'}->{$key});
         }
     }
 

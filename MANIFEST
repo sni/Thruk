@@ -354,6 +354,7 @@ plugins/plugins-available/panorama/description.txt
 plugins/plugins-available/panorama/DEV.txt
 plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama.pm
+plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama/Scripted.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/PanoramaCpuStats.pm
 plugins/plugins-available/panorama/preview.png
 plugins/plugins-available/panorama/README

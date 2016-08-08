@@ -2895,6 +2895,9 @@ sub _save_dashboard {
     $nr      =~ s/^tabpan-tab_//gmx;
     my $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
 
+    # do not overwrite dynmic dashboards
+    return if -x $file;
+
     my $existing = $nr eq 'new' ? $dashboard : Thruk::Utils::Panorama::load_dashboard($c, $nr);
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
 
@@ -3002,7 +3005,16 @@ sub _add_json_dashboard_timestamps {
         $nr =~ s/^tabpan-tab_//gmx;
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         my @stat = stat($file);
-        $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
+        if(-x $file) {
+            my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+            if($dashboard->{'ts'}) {
+                $json->{'dashboard_ts'}->{$tab} = $dashboard->{'ts'};
+            } else {
+                $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
+            }
+        } else {
+            $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
+        }
     }
     return;
 }
