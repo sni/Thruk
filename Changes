@@ -20,6 +20,8 @@ next:
             - background color of dashboards can be changed now
             - do not overlap icons which are placed close together
             - host status beats service status for group/filter icons
+            - add dynamic dashboard support
+            - dashboard files moved to /etc/thruk/panorama
           - Config Tool:
             - support recursive object removal
             - empty files will be deleted when the last object is removed

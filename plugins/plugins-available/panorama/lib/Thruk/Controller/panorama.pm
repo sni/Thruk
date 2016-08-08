@@ -74,6 +74,13 @@ sub index {
 
     $c->{'panorama_var'} = $c->config->{'var_path'}.'/panorama';
     Thruk::Utils::IO::mkdir_r($c->{'panorama_var'});
+    $c->{'panorama_etc'} = $c->config->{'etc_path'}.'/panorama';
+    Thruk::Utils::IO::mkdir_r($c->{'panorama_etc'});
+
+    # REMOVE AFTER: 01.01.2019
+    for my $oldfile (glob($c->{'panorama_var'}.'/*.tab')) {
+        move($oldfile, $c->{'panorama_etc'}) or confess("cannot move dashboard $oldfile to ".$c->{'panorama_etc'}.": ".$!);
+    }
 
     if(defined $c->req->uri->query) {
         if($c->req->uri->query eq 'state') {
@@ -2294,7 +2301,6 @@ sub _task_dashboard_save_states {
     my($c) = @_;
     my $nr   = $c->req->parameters->{'nr'} || die('no number supplied');
     $nr      =~ s/^tabpan-tab_//gmx;
-    my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
     my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard) >= ACCESS_READWRITE;
@@ -2313,7 +2319,7 @@ sub _task_dashboard_save_states {
             $runtime->{$id}->{$key} = $states->{$id}->{$key} if defined $states->{$id}->{$key};
         }
     }
-    Thruk::Utils::write_data_file($file.'.runtime', $runtime, 1);
+    Thruk::Utils::write_data_file($c->{'panorama_var'}.'/'.$nr.'.tab.runtime', $runtime, 1);
 
     my $json = { 'status' => 'ok' };
     _add_misc_details($c, undef, $json);
@@ -2373,7 +2379,7 @@ sub _get_dashboard_by_name {
     my($c, $name) = @_;
     return unless $name;
 
-    for my $file (glob($c->{'panorama_var'}.'/*.tab')) {
+    for my $file (glob($c->{'panorama_etc'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
             my $d = Thruk::Utils::Panorama::load_dashboard($c, $1);
             if($d) {
@@ -2506,13 +2512,14 @@ sub _task_dashboard_restore_point {
     my $mode       = $c->req->parameters->{'mode'} || 'm';
     my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
     my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $etc_file   = $c->{'panorama_etc'}.'/'.$nr.'.tab';
+    my $var_file   = $c->{'panorama_var'}.'/'.$nr.'.tab';
     if($permission >= ACCESS_READWRITE) {
         $nr =~ s/^tabpan-tab_//gmx;
-        my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
         if(!$mode || $mode eq 'm') {
-            Thruk::Utils::backup_data_file($file, 'm', 5, 0, 1);
+            Thruk::Utils::backup_data_file($etc_file, $var_file, 'm', 5, 0, 1);
         } else {
-            Thruk::Utils::backup_data_file($file, 'a', 5, 600, 1);
+            Thruk::Utils::backup_data_file($etc_file, $var_file, 'a', 5, 600, 1);
         }
     }
 
@@ -2532,10 +2539,10 @@ sub _task_dashboard_restore {
     my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
     my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
-        die("no such dashboard") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab';
+        die("no such dashboard") unless -e $c->{'panorama_etc'}.'/'.$nr.'.tab';
         die("no such restore point") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
-        unlink($c->{'panorama_var'}.'/'.$nr.'.tab');
-        copy($c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $c->{'panorama_var'}.'/'.$nr.'.tab');
+        unlink($c->{'panorama_etc'}.'/'.$nr.'.tab');
+        copy($c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $c->{'panorama_etc'}.'/'.$nr.'.tab');
     }
     my $json = {};
     _add_misc_details($c, 1, $json);
@@ -2886,7 +2893,7 @@ sub _save_dashboard {
 
     my $nr   = delete $dashboard->{'id'};
     $nr      =~ s/^tabpan-tab_//gmx;
-    my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
+    my $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
 
     my $existing = $nr eq 'new' ? $dashboard : Thruk::Utils::Panorama::load_dashboard($c, $nr);
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
@@ -2894,10 +2901,10 @@ sub _save_dashboard {
     if($nr eq 'new') {
         # find next free number
         $nr = 1;
-        $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
+        $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         while(-e $file) {
             $nr++;
-            $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
+            $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         }
     }
 
@@ -2935,7 +2942,7 @@ sub _save_dashboard {
 
     Thruk::Utils::write_data_file($file, $dashboard, 1);
     Thruk::Utils::write_data_file($file.'.runtime', $runtime, 1);
-    Thruk::Utils::backup_data_file($file, 'a', 5, 600);
+    Thruk::Utils::backup_data_file($c->{'panorama_etc'}.'/'.$nr.'.tab', $c->{'panorama_var'}.'/'.$nr.'.tab', 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
     $dashboard->{'ts'} = [stat($file)]->[9];
@@ -2993,7 +3000,7 @@ sub _add_json_dashboard_timestamps {
         my $nr = $tab;
         $json->{'dashboard_ts'} = {};
         $nr =~ s/^tabpan-tab_//gmx;
-        my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
+        my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         my @stat = stat($file);
         $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
     }

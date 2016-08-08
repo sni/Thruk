@@ -2111,16 +2111,16 @@ sub write_data_file {
 
 =head2 backup_data_file
 
-  backup_data_file($filename, $mode, $max_backups, [$save_interval], [$force])
+  backup_data_file($filename, $targetfile, $mode, $max_backups, [$save_interval], [$force])
 
 write data to datafile
 
 =cut
 
 sub backup_data_file {
-    my($filename, $mode, $max_backups, $save_interval, $force) = @_;
+    my($filename, $targetfile, $mode, $max_backups, $save_interval, $force) = @_;
 
-    my @backups     = sort glob($filename.'.*.'.$mode);
+    my @backups     = sort glob($targetfile.'.*.'.$mode);
     @backups        = grep(!/\.runtime$/mx, @backups);
     my $num         = scalar @backups;
     my $last_backup = $backups[$num-1];
@@ -2136,7 +2136,7 @@ sub backup_data_file {
     my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
     my $new_md5 = md5_hex(read_file($filename));
     if($force || $new_md5 ne $old_md5) {
-        copy($filename, $filename.'.'.$now.'.'.$mode);
+        copy($filename, $targetfile.'.'.$now.'.'.$mode);
 
         # cleanup old backups
         while($num > $max_backups) {

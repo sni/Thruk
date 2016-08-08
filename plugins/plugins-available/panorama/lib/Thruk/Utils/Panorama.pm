@@ -103,7 +103,7 @@ sub get_dashboard_list {
     }
 
     my $dashboards = [];
-    for my $file (glob($c->{'panorama_var'}.'/*.tab')) {
+    for my $file (glob($c->{'panorama_etc'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
             my $nr = $1;
             my $d  = load_dashboard($c, $nr);
@@ -163,7 +163,7 @@ return dashboard data.
 sub load_dashboard {
     my($c, $nr) = @_;
     $nr       =~ s/^tabpan-tab_//gmx;
-    my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
+    my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
     return unless -s $file;
     my $dashboard  = Thruk::Utils::read_data_file($file);
 
@@ -205,8 +205,9 @@ sub load_dashboard {
 
     # merge runtime data
     my $runtime = {};
-    if(-e $file.'.runtime') {
-       $runtime = Thruk::Utils::read_data_file($file.'.runtime');
+    my $runtimefile  = $c->{'panorama_var'}.'/'.$nr.'.tab.runtime';
+    if(-e $runtimefile) {
+       $runtime = Thruk::Utils::read_data_file($runtimefile);
     }
     for my $tab (keys %{$runtime}) {
         next if !defined $dashboard->{$tab};
@@ -244,7 +245,7 @@ returns:
 sub is_authorized_for_dashboard {
     my($c, $nr, $dashboard) = @_;
     $nr =~ s/^tabpan-tab_//gmx;
-    my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
+    my $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
 
     # super user have permission for all reports
     return ACCESS_OWNER if $c->stash->{'is_admin'};
