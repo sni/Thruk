@@ -1251,10 +1251,14 @@ var TP = {
                         }
                     }
 
-                    /* update all dashboard icons */
+                    /* update all dashboard/map icons */
+                    var delay = 0;
                     for(var d in ref.dashboards) {
                         for(var x=0; x<ref.dashboards[d].length; x++) {
-                            ref.dashboards[d][x].refreshHandler();
+                            var p = ref.dashboards[d][x];
+                            window.clearTimeout(TP.timeouts['timeout_' + p.id + '_refresh']);
+                            TP.timeouts['timeout_' + p.id + '_refresh'] = window.setTimeout(Ext.bind(p.refreshHandler, p, []), delay);
+                            delay = delay + 200;
                         }
                         delete ref.dashboards[d];
                     }
