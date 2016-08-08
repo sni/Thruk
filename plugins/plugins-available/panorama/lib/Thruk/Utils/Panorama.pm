@@ -74,7 +74,7 @@ sub clean_old_dashboards {
     my $dashboards = get_dashboard_list($c, 'all');
     for my $d (@{$dashboards}) {
         next unless $d->{'objects'} == 0;
-        my $dashboard = load_dashboard($c, $d->{'nr'});
+        my $dashboard = load_dashboard($c, $d->{'nr'}, 1);
         my @stat      = stat($dashboard->{'file'});
         if(($stat[9] < time() - 86400 && $d->{'name'} eq 'Dashboard') || $stat[9] < time() - (86400 * 14)) {
             delete_dashboard($c, $d->{'nr'}, $dashboard);
@@ -107,7 +107,7 @@ sub get_dashboard_list {
     for my $file (glob($c->{'panorama_etc'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
             my $nr = $1;
-            my $d  = load_dashboard($c, $nr);
+            my $d  = load_dashboard($c, $nr, 1);
             if($d) {
                 if($type eq 'all') {
                     # all
@@ -140,6 +140,8 @@ sub get_dashboard_list {
                     objects     => $d->{'objects'},
                 };
             }
+        } else {
+            $c->log->warn("panorama dashboard with unusual name skipped: ".$file);
         }
     }
 
@@ -156,13 +158,13 @@ sub get_dashboard_list {
 
 =head2 load_dashboard
 
-    load_dashboard($c, $nr)
+    load_dashboard($c, $nr, [$meta_data_only])
 
 return dashboard data.
 
 =cut
 sub load_dashboard {
-    my($c, $nr) = @_;
+    my($c, $nr, $meta_data_only) = @_;
     $nr       =~ s/^tabpan-tab_//gmx;
     my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
     return unless -s $file;
@@ -170,11 +172,17 @@ sub load_dashboard {
     my $scripted = 0;
     if(-x $file) {
         # scripted dashboard
-        $dashboard = Thruk::Utils::Panorama::Scripted::load_dashboard($c, $nr, $file);
+        $dashboard = Thruk::Utils::Panorama::Scripted::load_dashboard($c, $nr, $file, $meta_data_only);
         $scripted = 1;
     } else {
         # static dashboard
         $dashboard = Thruk::Utils::read_data_file($file);
+        if(!defined $dashboard) {
+            my $content = Thruk::Utils::IO::read($file);
+            if($content =~ m/^\#\s*title:/mx) {
+                $c->log->warn("non-executable scripted dashboard found in $file, forgot to chmod +x");
+            }
+        }
     }
     return unless $dashboard;
 
@@ -186,31 +194,35 @@ sub load_dashboard {
         $dashboard->{'readonly'} = 0;
     }
     my @stat = stat($file);
-    $dashboard->{'ts'}   = $stat[9] unless ($scripted && $dashboard->{'ts'});
-    $dashboard->{'nr'}   = $nr;
-    $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
-    $dashboard->{'file'} = $file;
+    $dashboard->{'ts'}       = $stat[9] unless ($scripted && $dashboard->{'ts'});
+    $dashboard->{'nr'}       = $nr;
+    $dashboard->{'id'}       = 'tabpan-tab_'.$nr;
+    $dashboard->{'file'}     = $file;
+    $dashboard->{'scripted'} = $scripted;
 
-    # convert old public flag to group based permissions
-    my $public = delete $dashboard->{'public'};
-    $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
-    if($public) {
-        push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
-    }
-
-    $dashboard->{'file_version'} = 1 unless defined $dashboard->{'file_version'};
-    if($dashboard->{'file_version'} == 1) {
-        # convert label x/y from old dashboard versions which had them mixed up
-        for my $id (keys %{$dashboard}) {
-            my $tab = $dashboard->{$id};
-            if($id =~ m|^tabpan\-tab_|mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
-                my $offsetx = $tab->{'xdata'}->{'label'}->{'offsetx'};
-                my $offsety = $tab->{'xdata'}->{'label'}->{'offsety'};
-                $tab->{'xdata'}->{'label'}->{'offsety'} = $offsetx;
-                $tab->{'xdata'}->{'label'}->{'offsetx'} = $offsety;
-            }
+    # assume scripted dashboards use always the latest syntax
+    if(!$scripted) {
+        # convert old public flag to group based permissions
+        my $public = delete $dashboard->{'public'};
+        $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
+        if($public) {
+            push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
         }
-        $dashboard->{'file_version'} = 2;
+
+        $dashboard->{'file_version'} = 1 unless defined $dashboard->{'file_version'};
+        if($dashboard->{'file_version'} == 1) {
+            # convert label x/y from old dashboard versions which had them mixed up
+            for my $id (keys %{$dashboard}) {
+                my $tab = $dashboard->{$id};
+                if($id =~ m|^tabpan\-tab_|mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
+                    my $offsetx = $tab->{'xdata'}->{'label'}->{'offsetx'};
+                    my $offsety = $tab->{'xdata'}->{'label'}->{'offsety'};
+                    $tab->{'xdata'}->{'label'}->{'offsety'} = $offsetx;
+                    $tab->{'xdata'}->{'label'}->{'offsetx'} = $offsety;
+                }
+            }
+            $dashboard->{'file_version'} = 2;
+        }
     }
     $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
@@ -263,7 +275,7 @@ sub is_authorized_for_dashboard {
 
     # does that dashboard already exist?
     if(-s $file) {
-        $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr) unless $dashboard;
+        $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1) unless $dashboard;
         if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
             return ACCESS_READONLY if $c->stash->{'readonly'};
             return ACCESS_OWNER;
@@ -302,10 +314,10 @@ return dashboard data.
 =cut
 sub delete_dashboard {
     my($c, $nr, $dashboard) = @_;
-    $dashboard = load_dashboard($c, $nr) unless $dashboard;
+    $dashboard = load_dashboard($c, $nr, 1) unless $dashboard;
     unlink($dashboard->{'file'});
     # and also all backups
-    unlink(glob($dashboard->{'file'}.'.*'));
+    unlink(glob($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.*'));
     return;
 }
 

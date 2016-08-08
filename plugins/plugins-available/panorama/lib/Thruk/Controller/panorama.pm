@@ -2302,7 +2302,7 @@ sub _task_dashboard_save_states {
     my $nr   = $c->req->parameters->{'nr'} || die('no number supplied');
     $nr      =~ s/^tabpan-tab_//gmx;
 
-    my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard) >= ACCESS_READWRITE;
 
     my $runtime = _extract_runtime_data($dashboard);
@@ -2381,7 +2381,7 @@ sub _get_dashboard_by_name {
 
     for my $file (glob($c->{'panorama_etc'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
-            my $d = Thruk::Utils::Panorama::load_dashboard($c, $1);
+            my $d = Thruk::Utils::Panorama::load_dashboard($c, $1, 1);
             if($d) {
                 if(  ($d->{'tab'}->{'xdata'}->{'title'} && $d->{'tab'}->{'xdata'}->{'title'} eq $name)
                    || $d->{'nr'} eq $name) {
@@ -2447,7 +2447,7 @@ sub _task_dashboard_update {
     my $json   = { 'status' => 'failed' };
     my $nr     = $c->req->parameters->{'nr'};
     my $action = $c->req->parameters->{'action'};
-    my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     if($action && $dashboard && !$dashboard->{'readonly'}) {
         $json = { 'status' => 'ok' };
         if($action eq 'remove') {
@@ -2478,10 +2478,10 @@ sub _task_dashboard_restore_list {
     my($c) = @_;
 
     my $nr         = $c->req->parameters->{'nr'};
-    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
     my $json;
-    if($permission >= ACCESS_READWRITE) {
+    if($permission >= ACCESS_READWRITE && !$dashboard->{'scripted'}) {
         my $list = {
             a => [],
             m => [],
@@ -2509,13 +2509,13 @@ sub _task_dashboard_restore_point {
     my($c) = @_;
 
     my $nr         = $c->req->parameters->{'nr'};
+       $nr         =~ s/^tabpan-tab_//gmx;
     my $mode       = $c->req->parameters->{'mode'} || 'm';
-    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
     my $etc_file   = $c->{'panorama_etc'}.'/'.$nr.'.tab';
     my $var_file   = $c->{'panorama_var'}.'/'.$nr.'.tab';
-    if($permission >= ACCESS_READWRITE) {
-        $nr =~ s/^tabpan-tab_//gmx;
+    if($permission >= ACCESS_READWRITE && !$dashboard->{'scripted'}) {
         if(!$mode || $mode eq 'm') {
             Thruk::Utils::backup_data_file($etc_file, $var_file, 'm', 5, 0, 1);
         } else {
@@ -2536,9 +2536,9 @@ sub _task_dashboard_restore {
     my $mode       = $c->req->parameters->{'mode'};
        $nr         =~ s/^tabpan-tab_//gmx;
     my $timestamp  = $c->req->parameters->{'timestamp'};
-    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
-    if($permission >= ACCESS_READWRITE) {
+    if($permission >= ACCESS_READWRITE && !$dashboard->{'scripted'}) {
         die("no such dashboard") unless -e $c->{'panorama_etc'}.'/'.$nr.'.tab';
         die("no such restore point") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
         unlink($c->{'panorama_etc'}.'/'.$nr.'.tab');
@@ -2891,15 +2891,17 @@ sub _summarize_query {
 sub _save_dashboard {
     my($c, $dashboard, $extra_settings) = @_;
 
-    my $nr   = delete $dashboard->{'id'};
-    $nr      =~ s/^tabpan-tab_//gmx;
-    my $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
+    my $nr      = delete $dashboard->{'id'};
+    $nr         =~ s/^tabpan-tab_//gmx;
+    my $file    = $c->{'panorama_etc'}.'/'.$nr.'.tab';
+    my $varfile = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
-    # do not overwrite dynmic dashboards
-    return if -x $file;
-
-    my $existing = $nr eq 'new' ? $dashboard : Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $existing = $nr eq 'new' ? $dashboard : Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
+
+    # do not overwrite scripted dashboards
+    return if $dashboard->{'scripted'};
+    return if -x $file;
 
     if($nr eq 'new') {
         # find next free number
@@ -2944,7 +2946,7 @@ sub _save_dashboard {
     my $runtime = _extract_runtime_data($dashboard);
 
     Thruk::Utils::write_data_file($file, $dashboard, 1);
-    Thruk::Utils::write_data_file($file.'.runtime', $runtime, 1);
+    Thruk::Utils::write_data_file($varfile.'.runtime', $runtime, 1);
     Thruk::Utils::backup_data_file($c->{'panorama_etc'}.'/'.$nr.'.tab', $c->{'panorama_var'}.'/'.$nr.'.tab', 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;

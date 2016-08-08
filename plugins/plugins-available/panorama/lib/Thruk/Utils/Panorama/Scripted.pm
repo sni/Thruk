@@ -21,23 +21,42 @@ use JSON::XS qw/decode_json encode_json/;
 
 =head2 load_dashboard
 
-  load_dashboard($c, $file)
+  load_dashboard($c, $nr, $file, [$meta_data_only])
 
 read dynamic dashboard
 
 =cut
 sub load_dashboard {
-    my($c, $nr, $file) = @_;
+    my($c, $nr, $file, $meta_data_only) = @_;
 
     $c->stats->profile(begin => "Utils::Panorama::Scripted::load_dashboard($file)");
 
-    $Thruk::Utils::Panorama::Scripted::c  = $c;
-    $Thruk::Utils::Panorama::Scripted::nr = $nr;
-
-    my $dashboard;
+    my $dashboard = {};
     my($code, $data) = split(/__DATA__/mx, join("", read_file($file)), 2);
 
-    $Thruk::Utils::Panorama::Scripted::data = $data;
+    # set meta data
+    my $meta = { nr => $nr, groups => '[]', title => 'Dashboard', user => '' };
+    if($code =~ m/^\#\s*title:\s*(.*?)$/mx) {
+        $meta->{'title'} = $1;
+    }
+    if($code =~ m/^\#\s*groups:\s*(.*?)$/mx) {
+        $meta->{'groups'} = decode_json($1);
+    }
+    if($code =~ m/^\#\s*user:\s*(.*?)$/mx) {
+        $meta->{'user'} = $1;
+    }
+    _merge_meta($dashboard, $meta);
+
+    if($meta_data_only) {
+        $c->stats->profile(end => "Utils::Panorama::Scripted::load_dashboard($file)");
+        return($dashboard);
+    }
+
+    $Thruk::Utils::Panorama::Scripted::c    = $c;
+    $Thruk::Utils::Panorama::Scripted::nr   = $nr;
+    $Thruk::Utils::Panorama::Scripted::data = $data || '{}';
+    $Thruk::Utils::Panorama::Scripted::meta = $meta;
+
     ## no critic
     eval("#line 1 $file\n".$code);
     ## use critic
@@ -46,10 +65,14 @@ sub load_dashboard {
         confess($@);
     }
 
+    _merge_meta($dashboard, $meta);
     $dashboard = _cleanup_dashboard($dashboard, $nr);
 
     # cleanup
-    $Thruk::Utils::Panorama::Scripted::c = undef;
+    $Thruk::Utils::Panorama::Scripted::c    = undef;
+    $Thruk::Utils::Panorama::Scripted::nr   = undef;
+    $Thruk::Utils::Panorama::Scripted::data = undef;
+    $Thruk::Utils::Panorama::Scripted::meta = undef;
 
     $c->stats->profile(end => "Utils::Panorama::Scripted::load_dashboard($file)");
 
@@ -69,6 +92,15 @@ sub _cleanup_dashboard {
     }
     return($dashboard);
 }
+##############################################
+sub _merge_meta {
+    my($dashboard, $meta) = @_;
+    $dashboard->{'tab'}->{'xdata'}->{'title'}  = $meta->{'title'}  unless defined $dashboard->{'tab'}->{'xdata'}->{'title'};
+    $dashboard->{'tab'}->{'xdata'}->{'groups'} = $meta->{'groups'} unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
+    $dashboard->{'user'}                       = $meta->{'user'}   unless defined $dashboard->{'user'};
+    $dashboard->{'nr'}                         = $meta->{'nr'};
+    return($dashboard);
+}
 
 ##############################################
 
@@ -83,6 +115,7 @@ sub load_data {
     my $json = JSON::XS->new->utf8;
     $json->relaxed();
     my $dashboard = $json->decode($Thruk::Utils::Panorama::Scripted::data);
+    _merge_meta($dashboard, $Thruk::Utils::Panorama::Scripted::meta);
     return($dashboard);
 }
 

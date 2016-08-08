@@ -175,9 +175,11 @@ Ext.define('TP.IconLabel', {
         }
 
         if(cfg.width == undefined || cfg.width == '') {
-            style.width = '';
+            style.width    = '';
+            style.overflow = '';
         } else {
-            style.width = cfg.width+"px";
+            style.width    = cfg.width+"px";
+            style.overflow = 'hidden';
         }
         if(cfg.height == undefined || cfg.height == '') {
             style.height = '';

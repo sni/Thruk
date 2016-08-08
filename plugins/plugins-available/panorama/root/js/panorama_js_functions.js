@@ -1669,7 +1669,6 @@ var TP = {
         }
         var group = TP.getTabTotals(tab);
         var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes});
-        if(group.hosts.total == 0 && group.services.total == 0) { res.state = 3; }
         return(res);
     },
     getTabTotals: function(tab) {
