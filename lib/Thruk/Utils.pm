@@ -2082,7 +2082,7 @@ sub read_data_file {
 
     my $VAR1;
     ## no critic
-    eval('$VAR1 = '.$cont.';');
+    eval("#line 1 $filename\n".'$VAR1 = '.$cont.';');
     ## use critic
 
     warn($@) if $@;

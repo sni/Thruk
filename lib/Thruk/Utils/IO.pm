@@ -85,6 +85,22 @@ sub mkdir_r {
 
 ##############################################
 
+=head2 read
+
+  read($path)
+
+read file and return content
+
+=cut
+
+sub read {
+    my($path) = @_;
+    my $content = read_file($path);
+    return($content);
+}
+
+##############################################
+
 =head2 write
 
   write($path, $content, [ $mtime ], [ $append ])
