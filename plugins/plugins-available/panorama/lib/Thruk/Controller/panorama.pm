@@ -2900,6 +2900,7 @@ sub _save_dashboard {
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
 
     # do not overwrite scripted dashboards
+    return if $nr == 0;
     return if $dashboard->{'scripted'};
     return if -x $file;
 
@@ -2934,6 +2935,7 @@ sub _save_dashboard {
     delete $dashboard->{'tab'}->{'user'};
     delete $dashboard->{'tab'}->{'ts'};
     delete $dashboard->{'tab'}->{'public'};
+    delete $dashboard->{'tab'}->{'scripted'};
 
     # set file version
     $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
@@ -2968,8 +2970,8 @@ sub _merge_dashboard_into_hash {
         }
         elsif($key eq 'tab') {
             # add some values to the tab
-            for my $k (qw/user public readonly ts/) {
-                $dashboard->{'tab'}->{$k} = $dashboard->{$k};
+            for my $k (qw/user public readonly ts scripted/) {
+                $dashboard->{'tab'}->{$k} = $dashboard->{$k} if defined $dashboard->{$k};
             }
             $data->{$id} = decode_utf8(encode_json($dashboard->{$key}));
         }
@@ -3006,6 +3008,9 @@ sub _add_json_dashboard_timestamps {
         $json->{'dashboard_ts'} = {};
         $nr =~ s/^tabpan-tab_//gmx;
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
+        if($nr == 0 && !-s $file) {
+            $file = $c->config->{'plugin_path'}.'/plugins-available/panorama/0.tab';
+        }
         my @stat = stat($file);
         if(-x $file) {
             my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
