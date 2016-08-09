@@ -1269,6 +1269,7 @@ var TP = {
                     for(var d in ref.dashboards) {
                         for(var x=0; x<ref.dashboards[d].length; x++) {
                             var p = ref.dashboards[d][x];
+                            p.refreshHandler(undefined, true);
                             window.clearTimeout(TP.timeouts['timeout_' + p.id + '_refresh']);
                             TP.timeouts['timeout_' + p.id + '_refresh'] = window.setTimeout(Ext.bind(p.refreshHandler, p, []), delay);
                             delay = delay + 200;

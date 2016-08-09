@@ -692,6 +692,10 @@ Ext.define('TP.DashboardStatusIcon', {
         var tab_id = 'tabpan-tab_'+This.xdata.general.dashboard;
         var tab    = Ext.getCmp(tab_id);
         if(!tab) {
+            if(skipUpdate) {
+                This.callParent([newStatus]);
+                return;
+            }
             TP.add_pantab(tab_id, undefined, true, Ext.bind(This.refreshHandler, This, [newStatus, skipUpdate]));
             return;
         }
