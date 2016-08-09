@@ -54,6 +54,11 @@ var TP = {
             }
         }
 
+        if(id == 'new_geo') {
+            id = 'new';
+            extraConf = {map: {}};
+        }
+
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.mask('loading...');
         }

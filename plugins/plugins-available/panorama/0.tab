@@ -192,7 +192,7 @@ __DATA__
             "y" : 60,
          },
          "link" : {
-            "link" : "javascript:TP.add_pantab('new', undefined, undefined, undefined, {map: {}})"
+            "link" : "javascript:TP.add_pantab('new_geo')"
          },
         "nsize" : [ 64, 64 ],
         "size" : 64
