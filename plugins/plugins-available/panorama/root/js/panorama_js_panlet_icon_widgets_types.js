@@ -506,6 +506,7 @@ Ext.define('TP.StaticIcon', {
             selectOnFocus:  true,
             typeAhead:      true,
             displayField: 'image',
+            minChars:      2,
             valueField: 'path',
             listConfig : {
                 getInnerTpl: function(displayField) {
@@ -525,7 +526,9 @@ Ext.define('TP.StaticIcon', {
                     return(true);
                 },
                 change: function() {
-                TP.iconSettingsWindow.renderUpdate();
+                if(TP.iconSettingsWindow.renderUpdate) {
+                    TP.iconSettingsWindow.renderUpdate();
+                }
             }}
         }, {
             xtype:      'panel',
