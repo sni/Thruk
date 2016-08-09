@@ -73,8 +73,8 @@ Ext.define('TP.IconLabel', {
         if(oldTxt != txt) {
             panel.labelEl.update(txt);
         }
-        style.color        = cfg.fontcolor;
-        style.fontFamily   = cfg.fontfamily;
+        style.color        = cfg.fontcolor || '#000000';
+        style.fontFamily   = cfg.fontfamily || 'inherit';
         style.background   = cfg.bgcolor;
         style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
         style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
