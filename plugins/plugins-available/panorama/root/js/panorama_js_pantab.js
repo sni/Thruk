@@ -136,7 +136,12 @@ Ext.define('TP.Pantab', {
             if(tabpan.xdata.rotate_tabs <= 0) {
                 tabpan.saveState();
             }
-            set_hash(this.id.replace(/^tabpan-tab_/, ''), 1);
+            var curNr = this.id.replace(/^tabpan-tab_/, '');
+            if(curNr != 0) {
+                set_hash(curNr, 1);
+            } else {
+                set_hash("");
+            }
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
