@@ -104,7 +104,7 @@ sub get_dashboard_list {
     }
 
     my $dashboards = [];
-    for my $file (glob($c->{'panorama_etc'}.'/*.tab')) {
+    for my $file (glob($c->config->{'etc_path'}.'/panorama/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
             my $nr = $1;
             my $d  = load_dashboard($c, $nr, 1);

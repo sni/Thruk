@@ -29,6 +29,7 @@ my($host,$service) = TestUtils::get_test_service();
 
 my $config   = Thruk::Config::get_config();
 my $var_path = $config->{'var_path'};
+my $etc_path = $config->{'etc_path'};
 
 #################################################
 my $raw  = `grep task_ plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm | grep ^sub | sort | awk '{ print \$2}'`;
@@ -66,7 +67,7 @@ $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_data', post => { nr => 'new', title => $test_dashboard_name }, callback => sub {
        if($_[0] =~ m|"newid"\s*:\s*"[^"0-9]*?(\d+)"|) { $test_dashboard_nr = $1; }
        isnt($test_dashboard_nr, 0, 'got a dashboard number: '.$test_dashboard_nr);
-       ok(-e $var_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file exists: '.$var_path.'/panorama/'.$test_dashboard_nr.'.tab');
+       ok(-e $etc_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file exists: '.$etc_path.'/panorama/'.$test_dashboard_nr.'.tab');
     }},
     '/thruk/cgi-bin/panorama.cgi?task=dashboard_list',
     '/thruk/cgi-bin/panorama.cgi?task=dashboard_list&list=my',
@@ -177,7 +178,7 @@ isnt($res->{'data'}->{'tabpan-tab_12_panlet_22'}->{'{\\"d\\":\\"31d\\",\\"incl_h
 #################################################
 # make sure all tasks are covered with tests
 is(scalar keys %{$subs}, 0, 'all tasks tested') or diag("untested tasks:\n".join(",\n", keys %{$subs})."\n");
-ok(!-e $var_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file removed: '.$var_path.'/panorama/'.$test_dashboard_nr.'.tab');
+ok(!-e $etc_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file removed: '.$etc_path.'/panorama/'.$test_dashboard_nr.'.tab');
 
 #################################################
 sub _test_json_page {
