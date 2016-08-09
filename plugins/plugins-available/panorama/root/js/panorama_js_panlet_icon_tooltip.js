@@ -192,6 +192,7 @@ Ext.onReady(function() {
 
         TP.iconTip.panel = undefined;
         if(d.length == 0) {
+            delete TP.iconTipTarget;
             TP.iconTip.hide();
             return;
         }
