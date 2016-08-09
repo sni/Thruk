@@ -350,6 +350,7 @@ plugins/plugins-available/mobile/templates/mobile_options.tt
 plugins/plugins-available/mobile/templates/mobile_problems.tt
 plugins/plugins-available/mobile/templates/mobile_services.tt
 plugins/plugins-available/mobile/templates/mobile_services_list.tt
+plugins/plugins-available/panorama/0.tab
 plugins/plugins-available/panorama/description.txt
 plugins/plugins-available/panorama/DEV.txt
 plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm

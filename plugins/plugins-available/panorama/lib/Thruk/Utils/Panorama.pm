@@ -107,6 +107,7 @@ sub get_dashboard_list {
     for my $file (glob($c->config->{'etc_path'}.'/panorama/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
             my $nr = $1;
+            next if $nr == 0;
             my $d  = load_dashboard($c, $nr, 1);
             if($d) {
                 if($type eq 'all') {
@@ -167,6 +168,12 @@ sub load_dashboard {
     my($c, $nr, $meta_data_only) = @_;
     $nr       =~ s/^tabpan-tab_//gmx;
     my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
+
+    # startpage can be overridden, only load original file if there is nonen in etc/
+    if($nr == 0 && !-s $file) {
+        $file = $c->config->{'plugin_path'}.'/plugins-available/panorama/0.tab';
+    }
+
     return unless -s $file;
     my $dashboard;
     my $scripted = 0;

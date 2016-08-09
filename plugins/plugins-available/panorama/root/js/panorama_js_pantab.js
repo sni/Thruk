@@ -48,8 +48,7 @@ Ext.define('TP.Pantab', {
             var tabpan = Ext.getCmp('tabpan');
             var tabState = tabpan.getState(); // recalculate open_tabs
             if(tabState.open_tabs.length <= 1) {
-                TP.Msg.msg("info_message~~cannot close last dashboard.");
-                return false;
+                TP.add_pantab("tabpan-tab_0");
             }
             TP.log('['+This.id+'] closing tab');
             return true;
@@ -92,6 +91,16 @@ Ext.define('TP.Pantab', {
             return(true);
         },
         activate: function(This, eOpts) {
+
+            /* close start page */
+            var startPage = Ext.getCmp('tabpan-tab_0');
+            if(startPage && startPage.id != This.id) {
+                startPage.destroy();
+            }
+
+            /* close tooltip */
+            if(TP.iconTip) { TP.iconTip.hide() }
+
             TP.resetMoveIcons();
             var delay = 0;
             var missingPanlets = 0;
@@ -186,6 +195,9 @@ Ext.define('TP.Pantab', {
                 tab.contextmenu(evt);
             });
             tab.el.on("click", tab.tabBodyClick);
+            if(This.xdata.hide_tab_header) {
+                This.tab.hide();
+            }
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -442,6 +454,9 @@ Ext.define('TP.Pantab', {
             if(This.map)   { This.map.destroy();   This.map   = undefined; }
         }
         if(!This.rendered) { return; }
+        if(xdata.hide_tab_header) {
+            This.tab.hide();
+        }
         This.setBaseHtmlClass();
         This.setBackground(xdata);
         if(startTimeouts != false) {

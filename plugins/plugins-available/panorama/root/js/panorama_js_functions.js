@@ -133,8 +133,6 @@ var TP = {
             return;
         }
 
-        var size = tabpan.items.length;
-
         /* add new tab panel */
         if(hidden) {
             Ext.create("TP.Pantab", {id: id, hidden: true});
@@ -144,13 +142,23 @@ var TP = {
                 tab.show();
             }
 
+            var tabbar = tabpan.getTabBar();
+            var tabPos;
+            for(var x=0; x<tabbar.items.items.length; x++) {
+                if(tabbar.items.items[x].card.id == id) {
+                    tabPos = x;
+                    break;
+                }
+            }
+
             /* move new-tab button at the end */
             if(!one_tab_only) {
-                tabpan.getTabBar().move(size-1, size);
+                /* switch added tab with "new tab" */
+                tabbar.move(tabPos-1, tabPos);
 
                 /* make tab title editable */
                 if(!readonly && !dashboard_ignore_changes) {
-                    var tabhead = tabpan.getTabBar().items.getAt(size-1);
+                    var tabhead = tabpan.getTabBar().items.getAt(tabPos-1);
                     if(tabhead.rendered == false) {
                         tabhead.addListener('afterrender', function(This, eOpts) {
                             TP.addTabBarMouseEvents(This.getEl(), id);
@@ -183,7 +191,7 @@ var TP = {
                         }
                     }
                     if(replace_nr != undefined) {
-                        tabpan.getTabBar().move(size-1, replace_nr);
+                        tabpan.getTabBar().move(tabPos-1, replace_nr);
                         if(id != replace_id) {
                             Ext.getCmp(replace_id).destroy();
                         }
@@ -1252,7 +1260,7 @@ var TP = {
                     }
 
                     /* update all dashboard/map icons */
-                    var delay = 0;
+                    var delay = 1000;
                     for(var d in ref.dashboards) {
                         for(var x=0; x<ref.dashboards[d].length; x++) {
                             var p = ref.dashboards[d][x];

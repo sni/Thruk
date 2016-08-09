@@ -247,7 +247,7 @@ Ext.define('TP.TabBar', {
                     TP.add_pantab(default_dashboard[x], undefined, x == 0 ? false : true);
                 }
             } else if(open_tabs.length == 0) {
-                TP.add_pantab('first_or_new');
+                TP.add_pantab("tabpan-tab_0");
             }
             TP.startServerTime();
         });

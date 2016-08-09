@@ -1,0 +1,201 @@
+# title:  Startpage
+# user:   thrukadmin
+# groups: [{"*" : "read-only"}]
+
+$dashboard = load_data();
+
+my $_add_panlet = sub {
+    my($x, $y, $nr, $title) = @_;
+    return({
+        "xdata" => {
+            "appearance" => {
+                "iconset" => "default_64",
+                "type" => "icon"
+            },
+            "cls" => "TP.DashboardStatusIcon",
+            "general" => {
+                "dashboard" => $nr,
+            },
+            "label" => {
+                "bgcolor" => "#cccccc",
+                "bordercolor" => "#aaaaaa",
+                "bordersize" => 1,
+                "fontbold" => "",
+                "fontcolor" => "#000000",
+                "fontfamily" => "inherit",
+                "fontitalic" => "",
+                "fontsize" => 10,
+                "height" => "",
+                "labeltext" => "<center>".$title."</center>",
+                "offsetx" => 0,
+                "offsety" => 42,
+                "orientation" => "horizontal",
+                "position" => "center",
+                "width" => "60"
+            },
+            "layout" => {
+                "x" => $x,
+                "y" => $y,
+            },
+            "link" => {
+               "link" => "dashboard://".$nr,
+                "newtab" => "on"
+            },
+            "nsize" => [ 64, 64 ],
+            "size" => 64
+        }
+    });
+};
+
+my $_add_label = sub {
+    my($x, $y, $text) = @_;
+    return({
+        "xdata" => {
+            "cls" => "TP.TextLabelWidget",
+            "label" => {
+                "bgcolor" => "",
+                "bordercolor" => "",
+                "bordersize" => 1,
+                "display" => "always",
+                "fontbold" => "1",
+                "fontcolor" => "#000000",
+                "fontfamily" => "",
+                "fontitalic" => "",
+                "fontsize" => 18,
+                "height" => "",
+                "labeltext" => $text,
+                "offsetx" => 0,
+                "offsety" => 0,
+                "orientation" => "horizontal",
+                "position" => "top-left",
+                "width" => ""
+            },
+            "layout" => {
+                "x" => $x,
+                "y" => $y,
+            }
+        }
+    });
+};
+
+
+my $nr = 1;
+$dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, 40, "Create New Dashboard:");
+
+# fetch my maps
+my $x  = 20;
+my $y  = 210;
+my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'my');
+if(scalar @{$dashboards} > 0) {
+    $dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, 190, "Open Existing Dashboards:");
+    for my $d (@{$dashboards}) {
+        next if $d->{'nr'} == $dashboard->{'nr'}; # avoid recursion
+        if($x > 800) {
+            $x = 20;
+            $y = $y + 90;
+        }
+        $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d->{'nr'}, $d->{'name'});
+        $x = $x + 70;
+    }
+    $y = $y + 130;
+}
+
+# fetch public maps
+$dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, $y, "Public Dashboards:");
+$y = $y + 20;
+$x = 20;
+$dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'public');
+for my $d (@{$dashboards}) {
+    next if $d->{'nr'} == $dashboard->{'nr'}; # avoid recursion
+    if($x > 800) {
+        $x = 20;
+        $y = $y + 90;
+    }
+    $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d->{'nr'}, $d->{'name'});
+    $x = $x + 70;
+}
+
+__DATA__
+{
+   "tab" : {
+      "xdata" : {
+         "refresh" : 120,
+         "background_color" : "#EEE",
+         "hide_tab_header" : 1,
+      }
+   },
+   "panlet_0" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "icon"
+         },
+         "cls" : "TP.StaticIcon",
+         "general" : {
+            "src" : "../usercontent/images/status/default_64/ok.png"
+         },
+         "label" : {
+            "bgcolor" : "#cccccc",
+            "bordercolor" : "#aaaaaa",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 10,
+            "height" : "",
+            "labeltext" : "<center>Create New</center>",
+            "offsetx" : 0,
+            "offsety" : 42,
+            "orientation" : "horizontal",
+            "position" : "center",
+            "width" : "60"
+         },
+         "layout" : {
+            "x" : 20,
+            "y" : 60,
+         },
+         "link" : {
+            "link" : "javascript:TP.add_pantab('new')"
+         },
+        "nsize" : [ 64, 64 ],
+        "size" : 64
+      }
+   },
+   "panlet_1" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "icon"
+         },
+         "cls" : "TP.StaticIcon",
+         "general" : {
+            "src" : "../plugins/panorama/images/map_64.png"
+         },
+         "label" : {
+            "bgcolor" : "#cccccc",
+            "bordercolor" : "#aaaaaa",
+            "bordersize" : 1,
+            "fontbold" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "inherit",
+            "fontitalic" : "",
+            "fontsize" : 10,
+            "height" : "",
+            "labeltext" : "<center>Geomap</center>",
+            "offsetx" : 0,
+            "offsety" : 42,
+            "orientation" : "horizontal",
+            "position" : "center",
+            "width" : "60"
+         },
+         "layout" : {
+            "x" : 90,
+            "y" : 60,
+         },
+         "link" : {
+            "link" : "javascript:TP.add_pantab('new', undefined, undefined, undefined, {map: {}})"
+         },
+        "nsize" : [ 64, 64 ],
+        "size" : 64
+      }
+   }
+}
