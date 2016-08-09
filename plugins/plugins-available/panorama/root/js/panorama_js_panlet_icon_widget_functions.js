@@ -307,9 +307,11 @@ TP.iconClickHandlerClickLink = function(panel, link, target) {
     }
     panel.el.dom.click();
     window.setTimeout(function() {
-        panel.el.dom.href=panel.xdata.link.link;
-        panel.el.dom.onclick=oldOnClick;
-        panel.passClick = false;
+        if(panel && panel.el) {
+            panel.el.dom.href=panel.xdata.link.link;
+            panel.el.dom.onclick=oldOnClick;
+            panel.passClick = false;
+        }
     }, 300);
 }
 
