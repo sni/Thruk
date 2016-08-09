@@ -251,7 +251,7 @@ sub set_file {
     my($self, $c, $file) = @_;
     my $basename = $file;
     $basename    =~ s/^.*\///mx;
-    $self->{'file'}     = Thruk::BP::Utils::base_folder($c).'/'.$basename;
+    $self->{'file'}     = Thruk::BP::Utils::bp_base_folder($c).'/'.$basename;
     $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
     $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
     if($basename =~ m/(\d+).tbp/mx) {

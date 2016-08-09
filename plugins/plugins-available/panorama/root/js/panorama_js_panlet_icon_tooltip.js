@@ -77,10 +77,6 @@ Ext.onReady(function() {
                    && TP.iconSettingsWindow.items.getAt(0).getActiveTab().title == "Popup"
                 ) { return(false); }
                 This.hidden = true;
-                if(!This.hideTimer) {
-                    This.delayHide();
-                    return(false);
-                }
             },
             destroy: function(This) { delete TP.iconTip; delete TP.iconTipTarget; }
         },
