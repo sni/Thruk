@@ -614,7 +614,14 @@ Ext.define('TP.Pantab', {
             if(!tab.mapEl) {
                 tab.mapEl = body.createChild('<div id="'+tab.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
             }
-            if(tab.mapEl.lastWMSProvider != undefined && tab.mapEl.lastWMSProvider == xdata.wms_provider) { return; }
+            var changed = false;
+            if(tab.mapEl.lastWMSProvider != undefined && tab.mapEl.lastWMSProvider == xdata.wms_provider) {
+                if(!tab.mapEl.lastCenter || tab.mapEl.lastCenter[0] != xdata.map.lon || tab.mapEl.lastCenter[1] != xdata.map.lat || tab.mapEl.lastCenter[2] != xdata.map.zoom) {
+                    tab.map.map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom);
+                    tab.mapEl.lastCenter = [tab.xdata.map.lon, tab.xdata.map.lat, tab.xdata.map.zoom];
+                }
+                return;
+            }
             Ext.Loader.setConfig({
                 enabled: true,
                 disableCaching: false,
@@ -678,6 +685,7 @@ Ext.define('TP.Pantab', {
                 mapData.zoom   = Number(tab.xdata.map.zoom);
                 mapData.center = [Number(tab.xdata.map.lon), Number(tab.xdata.map.lat)];
             }
+            tab.mapEl.lastCenter = [mapData.center[0], mapData.center[1], mapData.zoom];
             tab.map = Ext.create('GeoExt.panel.Map', mapData);
             map.events.register("movestart", map, function() {
                 tab.fixMapIcons();
