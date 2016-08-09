@@ -284,6 +284,14 @@ Ext.define('TP.Pantab', {
                 saveData.stateHist = panel.xdata.stateHist;
                 found++;
             }
+            if(panel.downtime || panel.acknowledged || panel.hostProblem) {
+                saveData.stateDetails = {
+                    downtime     : panel.downtime,
+                    acknowledged : panel.acknowledged,
+                    hostProblem  : panel.hostProblem
+                };
+                found++;
+            }
             if(found) {
                 allStates[panel.id] = saveData;
             }

@@ -103,6 +103,9 @@ Ext.define('TP.IconWidgetAppearanceIcon', {
         if(rec != null && rec.data.fileset[newSrc]) {
             newSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset[newSrc];
         }
+        if(panel.src != undefined && panel.src != newSrc) {
+            panel.saveIconsStates();
+        }
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
         panel.iconFixSize(xdata);

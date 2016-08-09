@@ -28,7 +28,7 @@ BEGIN {
 }
 
 ##########################################################
-my @runtime_keys = qw/state stateHist/;
+my @runtime_keys = qw/state stateHist stateDetails/;
 
 ##########################################################
 

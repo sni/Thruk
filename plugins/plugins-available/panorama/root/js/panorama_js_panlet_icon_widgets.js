@@ -694,6 +694,14 @@ Ext.define('TP.IconWidget', {
     applyXdata: function(xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
         this.mixins.smallWidget.applyXdata.call(this, xdata);
+
+        /* restore acknowledged / downtime / hostProblem state */
+        if(xdata.stateDetails) {
+            for(var key in xdata.stateDetails) {
+                this[key] = xdata.stateDetails[key];
+            }
+        }
+
         if(this.xdata.appearance.type == "connector") {
             this.draggable = false;
         }
@@ -713,15 +721,19 @@ Ext.define('TP.IconWidget', {
         var tab   = Ext.getCmp(this.panel_id);
         var panel = this;
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) { return; }
-        var oldState = panel.xdata.state;
+        var oldState = {
+            state        : panel.xdata.state,
+            downtime     : panel.downtime,
+            acknowledged : panel.acknowledged,
+            hostProblem  : panel.hostProblem
+        };
         if(newStatus != undefined) {
             panel.xdata.state = newStatus;
         }
         this.updateRender();
-        if(panel.xdata.state != undefined && oldState != panel.xdata.state) {
-            if(panel.locked && panel.el && (oldState != 4 && oldState != undefined)) { // not when initial state was pending
+        if(panel.xdata.state != undefined && oldState.state != panel.xdata.state) {
+            if(panel.locked && panel.el && (oldState.state != 4 && oldState.state != undefined)) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
-                panel.saveIconsStates();
             }
         }
         if(panel.xdata.map) {
