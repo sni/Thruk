@@ -200,6 +200,10 @@ Ext.define('TP.TabBar', {
                     text:   'Dashboard Management',
                     icon:   url_prefix+'plugins/panorama/images/new_tab.gif',
                     handler: function() { TP.dashboardsWindow() }
+                }, {
+                    text:   'Dashboard Overview',
+                    icon:   url_prefix+'plugins/panorama/images/dashboard_overview.png',
+                    handler: function() { TP.add_pantab("tabpan-tab_0"); }
                 }, '-', {
                     text: 'My Dashboards',
                     icon: url_prefix+'plugins/panorama/images/user_suit.png',
@@ -226,8 +230,8 @@ Ext.define('TP.TabBar', {
                     }
                 }
             }).showBy(This);
-            TP.load_dashboard_menu_items(menu.items.get(5).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
-            TP.load_dashboard_menu_items(menu.items.get(6).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(6).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(7).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
         });
 
         this.addListener('afterrender', function(This, eOpts) {
