@@ -2900,7 +2900,7 @@ sub _save_dashboard {
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
 
     # do not overwrite scripted dashboards
-    return if $nr == 0;
+    return if $nr eq "0"; # may be non-numeric too
     return if $dashboard->{'scripted'};
     return if -x $file;
 
