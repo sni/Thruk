@@ -228,14 +228,18 @@ Ext.define('TP.SmallWidget', {
         if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon' };
 
         /* restore position */
-        xdata.layout.x = Number(xdata.layout.x);
-        xdata.layout.y = Number(xdata.layout.y);
-        if(xdata.layout.x == null || isNaN(xdata.layout.x)) { xdata.layout.x = 0; }
-        if(xdata.layout.y == null || isNaN(xdata.layout.y)) { xdata.layout.y = 0; }
-        if(panel.shrinked) {
-            this.setRawPosition(xdata.layout.x + panel.shrinked.offsetX, xdata.layout.y + panel.shrinked.offsetY);
+        if(panel.xdata.map) {
+            panel.moveToMapLonLat(undefined, false, xdata);
         } else {
-            this.setRawPosition(xdata.layout.x, xdata.layout.y);
+            xdata.layout.x = Number(xdata.layout.x);
+            xdata.layout.y = Number(xdata.layout.y);
+            if(xdata.layout.x == null || isNaN(xdata.layout.x)) { xdata.layout.x = 0; }
+            if(xdata.layout.y == null || isNaN(xdata.layout.y)) { xdata.layout.y = 0; }
+            if(panel.shrinked) {
+                this.setRawPosition(xdata.layout.x + panel.shrinked.offsetX, xdata.layout.y + panel.shrinked.offsetY);
+            } else {
+                this.setRawPosition(xdata.layout.x, xdata.layout.y);
+            }
         }
         if(xdata.layout.rotation) {
             this.applyRotation(Number(xdata.layout.rotation), xdata);
@@ -274,14 +278,20 @@ Ext.define('TP.SmallWidget', {
             // ex.: rotated shapes return wrong position on getPosition()
             return;
         }
-        layout.x = Number(layout.x);
-        layout.y = Number(layout.y);
+        var x = Number(layout.x);
+        var y = Number(layout.y);
+        layout.x = x;
+        layout.y = y;
+        if(win.xdata.map) {
+            win.moveToMapLonLat(undefined, false);
+            return;
+        }
         if(win.shrinked) {
-            win.shrinked.x = layout.x;
-            win.shrinked.y = layout.y;
-            animated.to = {x:layout.x+win.shrinked.offsetX, y:layout.y+win.shrinked.offsetY};
+            win.shrinked.x = x;
+            win.shrinked.y = y;
+            animated.to = {x:x+win.shrinked.offsetX, y:y+win.shrinked.offsetY};
         } else {
-            animated.to = {x:layout.x, y:layout.y};
+            animated.to = {x:x, y:y};
         }
         this.animate(animated);
     },
@@ -597,40 +607,41 @@ Ext.define('TP.SmallWidget', {
         }
         panel.saveState();
     },
-    moveToMapLonLat: function(maxSize, movedOnly) {
+    moveToMapLonLat: function(maxSize, movedOnly, xdata) {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
+        if(xdata == undefined) { xdata = panel.xdata; }
         if(tab.map == undefined || tab.map.map == undefined) { return; }
-        if(panel.xdata.map == undefined)                     { return; }
+        if(xdata.map == undefined)                     { return; }
         panel.noUpdateLonLat++;
-        if(panel.xdata.appearance.type == "connector" && !movedOnly) {
-            var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon),  lat: Number(panel.xdata.map.lat)});
-            var pixel1 = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon1), lat: Number(panel.xdata.map.lat1)});
-            var pixel2 = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon2), lat: Number(panel.xdata.map.lat2)});
-            panel.xdata.layout.x                  = pixel.x;
-            panel.xdata.layout.y                  = pixel.y+TP.offset_y;
-            panel.xdata.appearance.connectorfromx = pixel1.x;
-            panel.xdata.appearance.connectorfromy = pixel1.y+TP.offset_y;
-            panel.xdata.appearance.connectortox   = pixel2.x;
-            panel.xdata.appearance.connectortoy   = pixel2.y+TP.offset_y;
+        if(xdata.appearance.type == "connector" && !movedOnly) {
+            var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon),  lat: Number(xdata.map.lat)});
+            var pixel1 = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon1), lat: Number(xdata.map.lat1)});
+            var pixel2 = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon2), lat: Number(xdata.map.lat2)});
+            xdata.layout.x                  = pixel.x;
+            xdata.layout.y                  = pixel.y+TP.offset_y;
+            xdata.appearance.connectorfromx = pixel1.x;
+            xdata.appearance.connectorfromy = pixel1.y+TP.offset_y;
+            xdata.appearance.connectortox   = pixel2.x;
+            xdata.appearance.connectortoy   = pixel2.y+TP.offset_y;
             if(panel.el) {
                 panel.updateRender();
             }
         } else {
-            var pixel = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon), lat: Number(panel.xdata.map.lat)});
+            var pixel = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon), lat: Number(xdata.map.lat)});
             var s;
             if(!panel.el) {
-                s     = {width: panel.xdata.size, height: panel.xdata.size};
+                s     = {width: xdata.size, height: xdata.size};
             } else {
                 s     = panel.getSize();
             }
             var x     = (pixel.x-s.width/2);
             var y     = (pixel.y-s.height/2)+TP.offset_y;
-            panel.xdata.layout.x = x;
-            panel.xdata.layout.y = y;
+            xdata.layout.x = x;
+            xdata.layout.y = y;
             panel.setRawPosition(x, y);
             if(panel.el && TP.isThisTheActiveTab(panel)) {
-                if(panel.xdata.appearance.type == "connector") {
+                if(xdata.appearance.type == "connector") {
                     if(panel.isHidden()) { panel.show(); }
                 } else {
                     if(maxSize != undefined && (x < 0 || y < 0 || x > maxSize.width || y > maxSize.height)) {
@@ -909,7 +920,7 @@ Ext.define('TP.IconWidget', {
             }
             /* shrink panel size to icon size if possible (non-edit mode and not rotated) */
             delete panel.shrinked;
-            if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && scale == 1 && panel.locked) {
+            if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && scale == 1 && panel.locked && !panel.xdata.map) {
                 var offsetX = (size-width)/2;
                 var offsetY = (size-height)/2;
                 panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y, offsetX: offsetX, offsetY: offsetY };
