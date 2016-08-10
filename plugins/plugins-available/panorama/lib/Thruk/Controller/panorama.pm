@@ -2891,10 +2891,9 @@ sub _summarize_query {
 sub _save_dashboard {
     my($c, $dashboard, $extra_settings) = @_;
 
-    my $nr      = delete $dashboard->{'id'};
-    $nr         =~ s/^tabpan-tab_//gmx;
-    my $file    = $c->{'panorama_etc'}.'/'.$nr.'.tab';
-    my $varfile = $c->{'panorama_var'}.'/'.$nr.'.tab';
+    my $nr   = delete $dashboard->{'id'};
+    $nr      =~ s/^tabpan-tab_//gmx;
+    my $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
 
     my $existing = $nr eq 'new' ? $dashboard : Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
@@ -2913,6 +2912,7 @@ sub _save_dashboard {
             $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         }
     }
+    my $varfile = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
     # preserve some settings
     if($existing) {
