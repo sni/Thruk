@@ -10,7 +10,7 @@ _set($waitTimeout,  $waitTimeout);
 testCase.addImagePaths("../_images/");
 
 _setSpeed(50);              // default is 100ms
-env.setSimilarity(0.90);    // default is 0.7
+env.setSimilarity(0.92);    // default is 0.7
 
 function mouseClickXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
@@ -29,12 +29,12 @@ function thruk_login() {
     _setValue(_textbox("login"), $testUser);
     _setValue(_password("password"), $testPassword);
 
+    click(_submit("Login"));
+    isVisible(_link("Home"));
+
     // ensure fullscreen mode
     tryMultiple('!screenRegion.exists("applications.png", 1)', 'env.type(Key.F11)', 3, false);
 
-    click(_submit("Login"));
-
-    isVisible(_link("Home"));
     testCase.endOfStep("login", 20);
 }
 

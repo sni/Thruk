@@ -233,7 +233,6 @@ Ext.define('TP.DashboardManagementWindow', {
 TP.dashboardsWindow = function() {
     var win = Ext.create('TP.DashboardManagementWindow', {});
     TP.dashboardsSettingWindow = win;
-    TP.modalWindows.push(win);
 
     // somehow new tabbar elements occur when opening window again, so we just remove them
     var toDelete = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getCount() - 7;

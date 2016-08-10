@@ -153,7 +153,7 @@ sub get_processinfo {
     }
 
     $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
-    $self->{'naemon_optimizations'} = 0;
+    $self->{'naemon_optimizations'} = 0 unless defined $self->{'naemon_optimizations'};
     $self->{'naemon_optimizations'} = 1 if $data->{$key}->{'data_source_version'} =~ m/\-naemon$/mx;
 
     # naemon checks external commands on arrival

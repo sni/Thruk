@@ -45,6 +45,10 @@ TP.addPanletsMenu = function(options) {
                         text:   'Site Status',
                         icon:   url_prefix+'plugins/panorama/images/accept.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.SiteStatusIcon'}, -8, -8) }
+                    }, {
+                        text:   'Dashboard Status',
+                        icon:   url_prefix+'plugins/panorama/images/map.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.DashboardStatusIcon'}, -8, -8) }
                     }, '-', {
                         text:   'Text Label',
                         icon:   url_prefix+'plugins/panorama/images/text_align_left.png',

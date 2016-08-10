@@ -50,6 +50,8 @@ $loginurl               =~ s|//|/|gmx;
 my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
 my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
 my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|images|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
+my $direct_auth_agents  = $config->{'cookie_auth_direct_agents'} || '(curl|wget)';
+my $direct_auth_regex   = qr#$direct_auth_agents#mxi;
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $session_split       = qr/~~~/mx;
 my $last_cache_clean    = 0;
@@ -72,7 +74,9 @@ sub process {
     my($in) = @_;
 
     if($in =~ $line_regex) {
-        my($cookies, $remote, $path) = ($1, $2, $3);
+        my($cookies, $extra, $path) = ($1, $2, $3);
+
+        $extra = [split(/~~/mx, $extra)];
 
         # remove last &
         $path =~ s|/____/|?|mxo;
@@ -82,6 +86,22 @@ sub process {
         if($path =~ $pass_regex) {
             print STDERR "thruk_auth: pass $path" if $verbose;
             return "/pass/$path\n";
+        }
+
+        # direct access
+        if($extra->[1] && $extra->[2] =~ $direct_auth_regex) { # TODO: make configurable
+            print STDERR "thruk_auth: script bypass cookie auth for $path" if $verbose;
+            my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
+            if($session && $session ne '-1') {
+                print STDERR "thruk_auth: script login successful" if $verbose;
+                my $sessionfile = $spath.'/'.$session;
+                chomp(my $cont = read_file($sessionfile));
+                my($basicauth, $ip, $user) = split($session_split, $cont, 3);
+                unlink($sessionfile);
+                return "/loginok/".$user."/".$path."\n";
+            } else {
+                print STDERR "thruk_auth: script login failed" if $verbose;
+            }
         }
 
         # did we get a cookie
@@ -119,12 +139,6 @@ sub process {
 
         chomp(my $cont = read_file($sessionfile));
         my($basicauth, $ip, $user) = split($session_split, $cont, 3);
-
-        # won't work in omds own apache mode
-        #if($ip ne $remote) {
-        #    return "/loginok/".$guest."/",$path."\n" if $guest;
-        #    return $loginurl."?".$path."\n";
-        #}
 
         # revalidation disabled
         if($sessioncachetimeout == 0 || ($basicauth && $basicauth eq 'none')) {

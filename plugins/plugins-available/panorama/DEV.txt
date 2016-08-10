@@ -1,0 +1,15 @@
+= Panorama View Development Information
+
+== Zindex
+
+  - 21:     Tab Background
+  - 21:     Tab Background DragEl
+  - 30-70:  Icons
+  - 100:    Ext.Mask (automatically)
+  - 10000:  Tabbar
+  - 10000:  DragHint
+  - 10000:  DragElement Shadow
+  - 10001:  MapContols
+  - 19000:  Modal Windows
+  - 100000: Tab BG when placing an icon
+  - 100000: Msg Windows

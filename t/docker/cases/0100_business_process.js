@@ -38,7 +38,7 @@ try {
     click(_link("Delete this Business Process"));
     isVisible(_span("business process sucessfully removed"));
 
-    testCase.endOfStep("business process", 40);
+    testCase.endOfStep("business process", 60);
 } catch (e) {
     testCase.handleException(e);
 } finally {
