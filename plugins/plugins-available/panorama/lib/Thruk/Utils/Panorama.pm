@@ -167,7 +167,7 @@ return dashboard data.
 sub load_dashboard {
     my($c, $nr, $meta_data_only) = @_;
     $nr       =~ s/^tabpan-tab_//gmx;
-    my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
+    my $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
     # startpage can be overridden, only load original file if there is nonen in etc/
     if($nr == 0 && !-s $file) {
@@ -235,7 +235,7 @@ sub load_dashboard {
 
     # merge runtime data
     my $runtime = {};
-    my $runtimefile  = $c->{'panorama_var'}.'/'.$nr.'.tab.runtime';
+    my $runtimefile  = $c->config->{'var_path'}.'/panorama/'.$nr.'.tab.runtime';
     if(-e $runtimefile) {
        $runtime = Thruk::Utils::read_data_file($runtimefile);
     }
@@ -275,7 +275,7 @@ returns:
 sub is_authorized_for_dashboard {
     my($c, $nr, $dashboard) = @_;
     $nr =~ s/^tabpan-tab_//gmx;
-    my $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
+    my $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
     # super user have permission for all reports
     return ACCESS_OWNER if $c->stash->{'is_admin'};
