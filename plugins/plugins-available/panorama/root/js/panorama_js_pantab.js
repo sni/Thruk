@@ -879,7 +879,7 @@ Ext.define('TP.Pantab', {
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].setLock(val);
         }
-        if(val) {
+        if(val && changed) {
             tab.disableMapControls();
         }
         /* schedule update, which also remove the mask from above */
