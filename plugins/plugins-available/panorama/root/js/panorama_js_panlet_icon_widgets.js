@@ -635,6 +635,9 @@ Ext.define('TP.SmallWidget', {
             } else {
                 s     = panel.getSize();
             }
+            if(s.width == undefined) {
+                s     = {width: 16, height: 16};
+            }
             var x     = (pixel.x-s.width/2);
             var y     = (pixel.y-s.height/2)+TP.offset_y;
             xdata.layout.x = x;
