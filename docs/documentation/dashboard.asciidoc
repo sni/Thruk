@@ -61,7 +61,7 @@ Changing permissions is possible in the permissions tab of a dashboard. Double c
 dashboard title to open the settings or choose settings from the context menu.
 
 ++++
-<a title="dashboard" rel="lightbox[dashboard]" href="dashboard/permissions.png"><img src="dashboard/permissions.png" alt="context menu" width="35%" height="35%" /></a>
+<a title="dashboard" rel="lightbox[dashboard]" href="dashboard/permissions.png"><img src="dashboard/permissions.png" alt="dashboard permissions" width="35%" height="35%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -113,9 +113,9 @@ clicking the icon itself or by opening the context menu with the right
 mouse button.
 
 ++++
-<a title="context menu" rel="lightbox[dashboard]" href="dashboard/contextmenu.png"><img src="dashboard/contextmenu.png" alt="context menu" width="10%" height="10%" /></a>
-<a title="dynmic label" rel="lightbox[dashboard]" href="dashboard/dynlabel.png"><img src="dashboard/dynlabel.png" alt="context menu" width="30%" height="30%" /></a>
-<a title="dynmic label" rel="lightbox[dashboard]" href="dashboard/dynlabel2.png"><img src="dashboard/dynlabel2.png" alt="context menu" width="15%" height="15%" /></a>
+<a title="context menu" rel="lightbox[dashboard]" href="dashboard/contextmenu.png"><img src="dashboard/contextmenu.png" alt="labels 1" width="10%" height="10%" /></a>
+<a title="dynmic label" rel="lightbox[dashboard]" href="dashboard/dynlabel.png"><img src="dashboard/dynlabel.png" alt="labels 2" width="30%" height="30%" /></a>
+<a title="dynmic label" rel="lightbox[dashboard]" href="dashboard/dynlabel2.png"><img src="dashboard/dynlabel2.png" alt="labels 3" width="15%" height="15%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -230,7 +230,7 @@ Shapes gradient color can be based on performance data when using a
 single host or service as icon source.
 
 ++++
-<a title="icon" rel="lightbox[dashboard]" href="dashboard/shape.png"><img src="dashboard/shape.png" alt="icon" width="10%" height="10%" /></a>
+<a title="icon" rel="lightbox[dashboard]" href="dashboard/shape.png"><img src="dashboard/shape.png" alt="shape" width="10%" height="10%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -283,7 +283,7 @@ Source:
 Pie Charts are perfect for visualizing group and filtered states.
 
 ++++
-<a title="pie" rel="lightbox[dashboard]" href="dashboard/pie.png"><img src="dashboard/pie.png" alt="icon" width="10%" height="10%" /></a>
+<a title="pie" rel="lightbox[dashboard]" href="dashboard/pie.png"><img src="dashboard/pie.png" alt="pie chart" width="10%" height="10%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -325,7 +325,7 @@ host or service. Best used in combination with a label showing the actual
 value in numeric form.
 
 ++++
-<a title="speedometer" rel="lightbox[dashboard]" href="dashboard/dynlabel2.png"><img src="dashboard/dynlabel2.png" alt="context menu" width="15%" height="15%" /></a>
+<a title="speedometer" rel="lightbox[dashboard]" href="dashboard/dynlabel2.png"><img src="dashboard/dynlabel2.png" alt="speedometer" width="15%" height="15%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -357,6 +357,81 @@ Source:
 ------------
 
 
+
+
+
+=== Performance Bar
+
+A Performance Bar is the exact same performance bar as on the normal Thruk status pages.
+
+
+++++
+<a title="trend icon" rel="lightbox[dashboard]" href="dashboard/performancebar.png"><img src="dashboard/performancebar.png" alt="performance bar" width="15%" height="15%" /></a>
+<br style="clear: both;">
+++++
+
+Source:
+------------
+{
+  "general": {
+    "host": "",
+    "service": "PING"
+  },
+  "layout": {
+    "x": "100",
+    "y": "100",
+    "zindex": "0"
+  },
+  "appearance": {
+    "type": "perfbar"
+  }
+}
+------------
+
+
+
+
+=== Trend Icon
+
+The Trend Icon determines the current trend based on collected performance data
+and displays an arrow (or other icons) if the current delta value hits certain
+thresholds. The Trend Icon can fetch initial performance data from pnp4nagios
+and will then collect performance data with every status refresh.
+
+++++
+<a title="trend icon" rel="lightbox[dashboard]" href="dashboard/trendicon.png"><img src="dashboard/trendicon.png" alt="trend icon" width="8%" height="8%" /></a>
+<br style="clear: both;">
+++++
+
+Source:
+------------
+{
+  "general": {
+    "host": "",
+    "service": "PING"
+  },
+  "layout": {
+    "x": "100",
+    "y": "100",
+    "zindex": "0"
+  },
+  "appearance": {
+    "type": "trend",
+    "trendiconset": "default_64",
+    "trendsource": "perfdata:rta",
+    "trendfunctionin": "average",
+    "trendrangein": "5m",
+    "trendfunctionvs": "average",
+    "trendrangevs": "12h",
+    "trendoffsetvs": "0m",
+    "trendfixedvs": "1",
+    "trendverygood": -10,
+    "trendgood": -5,
+    "trendverybad": 10,
+    "trendbad": 5
+  }
+}
+------------
 
 
 
