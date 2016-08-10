@@ -84,13 +84,19 @@ case "$1" in
         rm -rf /tmp/thruk_update
 
         # set permissions
-        mkdir -p /var/lib/thruk /var/log/thruk /var/cache/thruk/reports /etc/thruk/bp /etc/thruk/thruk_local.d
+        mkdir -p /var/lib/thruk \
+                 /var/log/thruk \
+                 /var/cache/thruk/reports \
+                 /etc/thruk/bp \
+                 /etc/thruk/panorama \
+                 /etc/thruk/thruk_local.d
         chown -R www-data: /var/lib/thruk \
                            /var/cache/thruk \
                            /var/log/thruk \
                            /etc/thruk/plugins/plugins-enabled \
                            /etc/thruk/thruk_local.conf \
                            /etc/thruk/bp \
+                           /etc/thruk/panorama \
                            /etc/thruk/thruk_local.d
         chmod 755 /usr/share/thruk/fcgid_env.sh
         chmod 755 /usr/bin/thruk
