@@ -29,7 +29,7 @@ my($host,$service) = TestUtils::get_test_service();
 
 my $config   = Thruk::Config::get_config();
 my $var_path = $config->{'var_path'};
-my $etc_path = $config->{'etc_path'};
+my $etc_path = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} ? '/etc/thruk' : $config->{'etc_path'};
 
 #################################################
 my $raw  = `grep task_ plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm | grep ^sub | sort | awk '{ print \$2}'`;
