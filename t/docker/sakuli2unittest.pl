@@ -13,6 +13,7 @@ my $cur_case_num    = 0;
 my $print_result    = 0;
 my $in_results      = 0;
 my $exitcode        = 0;
+my $min_similarity  = [-1 , ""];
 my $latest_case;
 my $counting_cases;
 while(my $line = <STDIN>) {
@@ -71,6 +72,20 @@ while(my $line = <STDIN>) {
     elsif($latest_case) {
         push @{$cur_case_logs}, $line;
 
+        if($line =~ m/Region\.waitForImage/) {
+            my($img, $similarity);
+            if($line =~ m/.*\[(.*?)\]/m) {
+                $img = $1;
+                $img =~ s/,.*$//;
+            }
+            if($line =~ m/S:([\d\.]+)\s+/m) {
+                $similarity = $1;
+            }
+            if($img && $similarity && ($min_similarity->[0] == -1 || $min_similarity->[0] > $similarity)) {
+                $min_similarity = [$similarity, $img];
+            }
+        }
+
         if($line =~ m/\QCertificate not found:\E/mx) {
         }
         elsif($line =~ m/^----$/mx) {
@@ -102,6 +117,9 @@ while(my $line = <STDIN>) {
             print $line;
         }
     }
+}
+if($min_similarity->[0] != -1) {
+    printf("Minimum similarity: %s in file %s\n", @{$min_similarity});
 }
 exit($exitcode);
 

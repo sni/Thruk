@@ -1461,6 +1461,7 @@ sub get_perf_image {
         $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
     Thruk::Utils::IO::cmd($c, $cmd);
+    unlink($c->stash->{'fake_session_file'});
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
@@ -1469,7 +1470,6 @@ sub get_perf_image {
         }
         return $imgdata;
     }
-    unlink($c->stash->{'fake_session_file'});
     return "";
 }
 
@@ -2082,7 +2082,7 @@ sub read_data_file {
 
     my $VAR1;
     ## no critic
-    eval('$VAR1 = '.$cont.';');
+    eval("#line 1 $filename\n".'$VAR1 = '.$cont.';');
     ## use critic
 
     warn($@) if $@;
@@ -2111,16 +2111,16 @@ sub write_data_file {
 
 =head2 backup_data_file
 
-  backup_data_file($filename, $mode, $max_backups, [$save_interval], [$force])
+  backup_data_file($filename, $targetfile, $mode, $max_backups, [$save_interval], [$force])
 
 write data to datafile
 
 =cut
 
 sub backup_data_file {
-    my($filename, $mode, $max_backups, $save_interval, $force) = @_;
+    my($filename, $targetfile, $mode, $max_backups, $save_interval, $force) = @_;
 
-    my @backups     = sort glob($filename.'.*.'.$mode);
+    my @backups     = sort glob($targetfile.'.*.'.$mode);
     @backups        = grep(!/\.runtime$/mx, @backups);
     my $num         = scalar @backups;
     my $last_backup = $backups[$num-1];
@@ -2136,7 +2136,7 @@ sub backup_data_file {
     my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
     my $new_md5 = md5_hex(read_file($filename));
     if($force || $new_md5 ne $old_md5) {
-        copy($filename, $filename.'.'.$now.'.'.$mode);
+        copy($filename, $targetfile.'.'.$now.'.'.$mode);
 
         # cleanup old backups
         while($num > $max_backups) {
@@ -2430,10 +2430,7 @@ return base etc folder
 =cut
 sub base_folder {
     my($c) = @_;
-    if($ENV{'THRUK_CONFIG'}) {
-        return($ENV{'THRUK_CONFIG'});
-    }
-    return($c->config->{'home'});
+    return($c->config->{'etc_path'});
 }
 
 ########################################

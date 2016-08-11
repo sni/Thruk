@@ -57,7 +57,6 @@ Ext.onReady(function() {
                         This.showAt(showAtPos);
                     }
                 }
-                TP.modalWindows.push(TP.iconTip);
 
                 This.el.on('mouseover', function() {
                     window.clearTimeout(This.hideTimer);
@@ -70,19 +69,14 @@ Ext.onReady(function() {
                 if(TP.iconSettingsWindow) {
                     this.alignToSettingsWindow();
                 }
+                This.hidden = false;
             },
             beforehide: function(This) {
                 if(TP.iconSettingsWindow
                    && TP.iconSettingsWindow.items.getAt(0)
                    && TP.iconSettingsWindow.items.getAt(0).getActiveTab().title == "Popup"
                 ) { return(false); }
-                if(!This.hideTimer) {
-                    This.delayHide();
-                    return(false);
-                }
-            },
-            hide: function(This) {
-                TP.modalWindows = TP.removeFromList(TP.modalWindows, TP.iconTip);
+                This.hidden = true;
             },
             destroy: function(This) { delete TP.iconTip; delete TP.iconTipTarget; }
         },
@@ -133,7 +127,7 @@ Ext.onReady(function() {
         if(!force && !img.locked) { return; }
         TP.iconTip.last_id = el.id;
         if(!img.getName) { delete TP.iconTipTarget; return; }
-        if(img.iconType == 'filtered' || img.iconType == 'image') {
+        if(img.iconType == 'filter' || img.iconType == 'image') {
             TP.iconTip.setTitle(img.getName());
         } else {
             TP.iconTip.setTitle(ucfirst(img.iconType)+': '+img.getName());
@@ -198,6 +192,7 @@ Ext.onReady(function() {
 
         TP.iconTip.panel = undefined;
         if(d.length == 0) {
+            delete TP.iconTipTarget;
             TP.iconTip.hide();
             return;
         }

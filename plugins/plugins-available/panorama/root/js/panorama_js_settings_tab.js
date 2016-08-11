@@ -71,7 +71,7 @@ TP.getExportTab = function(options) {
             iconCls:'text-btn',
             width:   150,
             handler: function() {
-                TP.modalWindows.push(Ext.MessageBox.prompt({
+                Ext.MessageBox.prompt({
                     title:      'Import Tab(s)',
                     id:         'importdialog',
                     multiline:  true,
@@ -90,7 +90,7 @@ TP.getExportTab = function(options) {
                             }
                         }
                     }
-                }));
+                });
             }
         }, {
             xtype: 'button',
@@ -100,7 +100,7 @@ TP.getExportTab = function(options) {
             margin: '0 0 0 10',
             handler: function() {
                 var exportText = '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(Ext.JSON.encode(TP.cp.lastdata[options.tab.id])).match(/.{1,65}/g).join("\n")+"\n# End Export";
-                TP.modalWindows.push(Ext.MessageBox.show({
+                Ext.MessageBox.show({
                     cls:        'monospaced',
                     title:      'Current Tab Export',
                     multiline:  true,
@@ -118,7 +118,7 @@ TP.getExportTab = function(options) {
                             params: {text: exportText, task: 'textsave', file: options.tab.title+'.panorama'}
                         });
                     }
-                }));
+                });
             }
         }, {
             xtype:  'form',
@@ -135,13 +135,13 @@ TP.getExportTab = function(options) {
             width:  150,
             text: 'Reset to Default View',
             handler: function() {
-                TP.modalWindows.push(Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
+                Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
                     if (button === 'yes') {
                         if(options.close_handler) { options.close_handler(); }
-                        TP.modalWindows.push(Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...'));
+                        Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...');
                         window.location = 'panorama.cgi?clean=1';
                     }
-                }));
+                });
             }
         }]
     }];
@@ -986,7 +986,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
     tab_win_settings.show();
     mask.destroy();
-    TP.modalWindows.push(tab_win_settings);
 };
 
 TP.tabSettingsWindowLocked = function(tab, val) {
@@ -1042,7 +1041,7 @@ TP.tabSettingsWindowLocked = function(tab, val) {
 };
 
 TP.uploadUserContent = function(type, location, onSuccess) {
-    TP.modalWindows.push(Ext.create('Ext.window.Window', {
+    Ext.create('Ext.window.Window', {
         title: 'Usercontent Upload',
         height: 100,
         width:  300,
@@ -1094,11 +1093,11 @@ TP.uploadUserContent = function(type, location, onSuccess) {
                 }
             }
         }]
-    }).show());
+    }).show();
 };
 
 TP.loadDashboardWindow = function() {
-    TP.modalWindows.push(Ext.create('Ext.window.Window', {
+    Ext.create('Ext.window.Window', {
         title: 'Load Dashboard From File',
         height: 100,
         width:  300,
@@ -1148,5 +1147,5 @@ TP.loadDashboardWindow = function() {
                 }
             }
         }]
-    }).show());
+    }).show();
 }

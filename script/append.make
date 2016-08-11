@@ -135,6 +135,11 @@ local_install: local_patches
 	cp -p script/thruk   ${DESTDIR}${BINDIR}/
 	cp -p script/naglint ${DESTDIR}${BINDIR}/
 	cp -p script/nagexp  ${DESTDIR}${BINDIR}/
+	# rpmlint requires absolute perl path
+	${SED} -e 's+/usr/bin/env perl+/usr/bin/perl+g' \
+		-i ${DESTDIR}${BINDIR}/nagexp \
+		-i ${DESTDIR}${DATADIR}/script/thruk_fastcgi.pl \
+		-i ${DESTDIR}${DATADIR}/script/thruk.psgi
 	############################################################################
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3

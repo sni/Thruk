@@ -73,7 +73,7 @@ sub new {
     }
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
-    if(-e $file) {
+    if(-s $file) {
         $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
         return unless $bpdata;
         return unless $bpdata->{'name'};
@@ -121,7 +121,7 @@ sub load_runtime_data {
         $file = $self->{'datafile'}.'.edit';
     }
 
-    return unless -e $file;
+    return unless -s $file;
 
     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     for my $key (@stateful_keys) {
@@ -251,7 +251,7 @@ sub set_file {
     my($self, $c, $file) = @_;
     my $basename = $file;
     $basename    =~ s/^.*\///mx;
-    $self->{'file'}     = Thruk::BP::Utils::base_folder($c).'/'.$basename;
+    $self->{'file'}     = Thruk::BP::Utils::bp_base_folder($c).'/'.$basename;
     $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
     $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
     if($basename =~ m/(\d+).tbp/mx) {

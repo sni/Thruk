@@ -230,7 +230,7 @@ TP.render_plugin_output = function(v, td, item) {
         long_plugin_output     = long_plugin_output.replace(/\\n/g, "<br>");
         long_plugin_output     = long_plugin_output.replace(/(\r\n|\n|\r)/gm,"");
         long_plugin_output     = long_plugin_output.replace(/&/g, "&amp;");
-        return "<div class='clickable' style='color:blue;' onClick=\"TP.modalWindows.push(Ext.Msg.alert('Plugin Output', '"+long_plugin_output+"'))\">"+v+"<\/div>";
+        return "<div class='clickable' style='color:blue;' onClick=\"Ext.Msg.alert('Plugin Output', '"+long_plugin_output+"')\">"+v+"<\/div>";
     }
     return v;
 }
@@ -411,7 +411,8 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
 /* toggle visibility of dashboards */
 TP.render_dashboard_toggle_visible = function(v, td, item, row, col, store, view) {
     var actions = "";
-    if(Ext.getCmp(item.data.id)) {
+    var tab = Ext.getCmp(item.data.id);
+    if(tab && tab.rendered) {
         actions += "<div class='clickable' title='removes dashboard from current view' onclick='Ext.getCmp(\""+item.data.id+"\").destroy(); TP.dashboardsSettingGrid.getView().refresh(); return false;' style='margin-left: -5px; width:20px;height:20px;background-image:url(../plugins/panorama/images/eye.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
     } else {
         actions += "<div class='clickable' title='adds this dashboard to current view' onclick='TP.add_pantab(\""+item.data.id+"\"); return false;' style='margin-left: -5px; width:20px;height:20px;background-image:url(../plugins/panorama/images/bullet_white.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";

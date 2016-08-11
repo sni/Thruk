@@ -66,12 +66,12 @@ sub status {
     elsif($hostname) {
         $data = $livedata->{'hosts'}->{$hostname};
         # translate host downs to critical
-        $data->{'state'}           = 2 if ($data->{'state'}                && $data->{'state'} == 1);
-        $data->{'last_hard_state'} = 2 if ($data->{'last_hard_state'} == 1 && $data->{'last_hard_state'} == 1);
+        $data->{'state'}           = 2 if (defined $data->{'state'}           && $data->{'state'} == 1);
+        $data->{'last_hard_state'} = 2 if (defined $data->{'last_hard_state'} && $data->{'last_hard_state'} == 1);
     }
 
     # only hard states?
-    if($data and $bp->{'state_type'} eq 'hard' and $data->{'state_type'} != 1) {
+    if($data && $bp->{'state_type'} eq 'hard' && defined $data->{'last_hard_state'} && (defined $data->{'state_type'} && $data->{'state_type'} != 1)) {
         return($data->{'last_hard_state'},
                ($n->{'status_text'} || 'no plugin output yet'), # return last status text
                undef,
@@ -79,7 +79,7 @@ sub status {
         );
     }
 
-    if($data) {
+    if($data && defined $data->{'state'}) {
         return($data->{'state'}, $data->{'plugin_output'}, undef, $data);
     }
     if($description) {

@@ -498,7 +498,7 @@ sub set_default_config {
     }
 
     # make a nice path
-    for my $key (qw/tmp_path var_path/) {
+    for my $key (qw/tmp_path var_path etc_path/) {
         $config->{$key} =~ s/\/$//mx if $config->{$key};
     }
 
@@ -785,6 +785,15 @@ sub _do_finalize_config {
     $config->{'var_path'} = $config->{'home'}.'/var' unless defined $config->{'var_path'};
     $config->{'var_path'} =~ s|/$||mx;
 
+    if(!defined $config->{'etc_path'}) {
+        if($ENV{'THRUK_CONFIG'}) {
+            $config->{'etc_path'} = $ENV{'THRUK_CONFIG'};
+        } else {
+            $config->{'etc_path'} = $config->{'home'};
+        }
+    }
+    $config->{'etc_path'} =~ s|/$||mx;
+
     ###################################################
     # switch user when running as root
     my $var_path = $config->{'var_path'} or die("no var path!");
@@ -887,7 +896,7 @@ sub _do_finalize_config {
     $config->{'tmp_path'} =~ s|/$||mx;
     $config->{'View::TT'}->{'COMPILE_DIR'} = $config->{'tmp_path'}.'/ttc_'.$>;
 
-    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{home}.'/ssi';
+    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
 
     ###################################################
     # when using shadow naemon, some settings don't make sense
@@ -930,7 +939,7 @@ sub _do_finalize_config {
     }
 
     # expand action_menu_items_folder
-    my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{home}."/action_menus";
+    my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
     for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
         next unless -d $folder.'/.';
         my @files = glob($folder.'/*.json');

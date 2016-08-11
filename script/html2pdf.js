@@ -80,6 +80,24 @@ if (system.args.length < 3) {
 }
 
 function checkGrafanaLoaded() {
+    var textErrorEl = page.evaluate(function() {
+        return [].map.call(document.querySelectorAll('p.panel-text-content'), function(el) {
+            console.log('p.panel-text-content found, export finished');
+            return el.className;
+        });
+    });
+    if(textErrorEl.length > 0) {
+        return(true);
+    }
+    var textErrorEl = page.evaluate(function() {
+        return [].map.call(document.querySelectorAll('div.alert-error'), function(el) {
+            return el.className;
+        });
+    });
+    if(textErrorEl.length > 0) {
+        console.log('div.alert-error found, export failed');
+        return(true);
+    }
     var chartEl = page.evaluate(function() {
         return [].map.call(document.querySelectorAll('DIV.flot-text'), function(el) {
             return el.className;

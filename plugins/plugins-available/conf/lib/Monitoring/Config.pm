@@ -852,7 +852,7 @@ sub check_files_changed {
     $self->{'needs_update'} = 0;
     $self->{'last_changed'} = 0 if $reload;
 
-    if($self->{'_corefile'} and $self->_check_file_changed($self->{'_corefile'})) {
+    if($self->{'_corefile'} && $self->{'_corefile'}->{'path'} && $self->_check_file_changed($self->{'_corefile'})) {
         # maybe core type has changed
         $self->_set_coretype();
     }
@@ -1788,8 +1788,9 @@ sub _check_files_changed {
 #   1 if file is new / created
 #   2 if md5 sum changed
 sub _check_file_changed {
-    my $self = shift;
-    my $file = shift;
+    my($self, $file) = @_;
+
+    confess("no file given") unless($file && $file->{'path'});
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,

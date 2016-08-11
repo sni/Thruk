@@ -57,7 +57,6 @@ Ext.define('TP.PanletPNP', {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.cors                = true;
-                Ext.Ajax.withCredentials     = true;
                 Ext.Ajax.useDefaultXhrHeader = false;
                 Ext.Ajax.request({
                     url:     url,

@@ -39,6 +39,9 @@ ln /dev/null /dev/raw1394 >/dev/null 2>&1
     /etc/init.d/apache2 restart
 }
 
+# make sure new libs are loaded
+[ "x$NO_APACHE_RELOAD" != "x" ] || service apache2 reload
+
 # clean previous runs
 rsync -a --delete /src/t/docker/cases/. $CASEDIR/.
 rm -f $CASEDIR/*/.sakuli-steps-cache

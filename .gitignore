@@ -46,9 +46,11 @@ plugins/plugins-available/panorama/root/all_in_one-2.08-1_panorama.js
 themes/themes-available/Thruk/stylesheets/all_in_one-2.08-1.css
 themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.08-1.css
 test_hook.sh
+panorama/*.tab
 bp/*.tbp
 bp/*.tbp.edit
 bp/*.tbp-*
+bp/*.pm
 root/tests/
 script/append.make.options
 .rps_results
