@@ -377,6 +377,7 @@ sub set_default_config {
         use_pager                       => 1,
         start_page                      => $config->{'url_prefix'}.'main.html',
         documentation_link              => $config->{'url_prefix'}.'docs/index.html',
+        useragentcompat                 => '',
         show_notification_number        => 1,
         strict_passive_mode             => 1,
         hide_passive_icon               => 0,
