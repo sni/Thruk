@@ -465,8 +465,8 @@ Ext.define('TP.Pantab', {
             if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
             if(This.map)   { This.map.destroy();   This.map   = undefined; }
         }
-        if(!This.rendered) { return; }
-        if(xdata.hide_tab_header) {
+        if(This.hidden) { return; }
+        if(xdata.hide_tab_header && This.tab) {
             This.tab.hide();
         }
         This.setBaseHtmlClass();
