@@ -23,6 +23,7 @@ var TP = {
     num_panels:   0,
     cur_panels:   1,
     logHistory:   [],
+    lastFullIconRefresh: {},
 
     /* called once the initialization */
     initComplete: function() {
