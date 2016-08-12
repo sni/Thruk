@@ -1140,7 +1140,7 @@ var TP = {
         };
         TP.iconUpdateRunning[tab.id] = true;
         if(!id) {
-            tab.lastIconRefresh = new Date();
+            TP.lastFullIconRefresh[tab.id] = new Date();
         }
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
@@ -1273,9 +1273,19 @@ var TP = {
                         for(var x=0; x<ref.dashboards[d].length; x++) {
                             var p = ref.dashboards[d][x];
                             p.refreshHandler(undefined, true);
-                            window.clearTimeout(TP.timeouts['timeout_' + p.id + '_refresh']);
-                            TP.timeouts['timeout_' + p.id + '_refresh'] = window.setTimeout(Ext.bind(p.refreshHandler, p, []), delay);
-                            delay = delay + 200;
+                            var tab_id = 'tabpan-tab_'+p.xdata.general.dashboard;
+                            var skipUpdate = false;
+                            if(TP.lastFullIconRefresh[tab_id]) {
+                                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[tab_id].getTime())/1000;
+                                if(deltaRefresh < 15) {
+                                    skipUpdate = true;
+                                }
+                            }
+                            if(!skipUpdate) {
+                                window.clearTimeout(TP.timeouts['timeout_' + p.id + '_refresh']);
+                                TP.timeouts['timeout_' + p.id + '_refresh'] = window.setTimeout(Ext.bind(p.refreshHandler, p, []), delay);
+                                delay = delay + 200;
+                            }
                         }
                         delete ref.dashboards[d];
                     }
