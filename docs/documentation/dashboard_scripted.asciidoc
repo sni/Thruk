@@ -5,14 +5,15 @@ lightbox: true
 ---
 
 
-= Scripted Dashboards
+== Scripted Dashboards
+
 {% include new_since.ad version="2.10" %}
 Static Dashboards are a good solution is most cases, but sometimes you need some
 extra dynamic and a way to constantly update the dashboard. Scripted Dashboards
 can be used to dynamically generate dashboards on the fly.
 
 
-== Basics
+=== Basics
 
 A scripted dashboard is written in perl and the dashboard file must be executable.
 Scripted dashboards cannot be edited through the web gui, instead the json source
@@ -66,7 +67,7 @@ The perl code section usually starts with `$dashboard` which will be loaded from
 the `__DATA__` section. Then you can add panels and icons.
 At the end of the code section, `$dashboard` must contain the complete dashboard.
 
-=== Functions
+==== Functions
 You can create your own functions but they have to be a anonymous function.
 
 ------
@@ -80,11 +81,11 @@ my $_functionname = sub { ... };
 Besides that, you can of course load perl modules and use functions from them.
 
 
-=== Refresh
+==== Refresh
 
 There are two types of refresh.
 
-==== Icon Refresh Interval
+===== Icon Refresh Interval
 
 The icon refresh interval can be changed like this:
 
@@ -94,7 +95,7 @@ $dashboard->{'tab'}->{'xdata'}->{'refresh'} = 30;
 
 Which sets every icon to a 30 second refresh interval.
 
-==== Dashboard Refresh Interval
+===== Dashboard Refresh Interval
 
 The second refresh interval is the dashboard itself. If a dashboard is already
 open in a browser, it does not refresh the dashboard json automatically. Instead
@@ -113,9 +114,9 @@ This will make open dashboards reload the dashboard source every 30 seconds.
 
 
 
-== Examples
+=== Examples
 
-=== ISS Position
+==== ISS Position
 
 The first real example creates a geo map with the actual position of the ISS Spacestation.
 This example also shows how to use base64 decoded inline images for static icons.
@@ -200,7 +201,7 @@ __DATA__
 ------
 
 
-=== Hostgroups Overview
+==== Hostgroups Overview
 
 This example fetches the list of hostgroups and creates an icon for each of it.
 This dashboard does not even have a __DATA__ structure and creates the dashboard
