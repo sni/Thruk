@@ -766,7 +766,9 @@ Ext.define('TP.IconWidget', {
     /* save state of icons back to servers runtime file */
     saveIconsStates: function() {
         var tab = Ext.getCmp(this.panel_id);
-        tab.saveIconsStates();
+        if(tab) { /* may be closed already*/
+            tab.saveIconsStates();
+        }
     },
 
     /* rotates this thing */
