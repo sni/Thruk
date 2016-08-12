@@ -111,13 +111,13 @@ sub get_list {
 
         my $live_objects;
         if($type eq 'host') {
-            my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )], columns => [qw/name perf_data state/]);
+            my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )], columns => [qw/name perf_data state has_been_checked/]);
             for my $hst (@{$hosts}) {
                 $live_objects->{$hst->{'name'}} = $hst;
             }
         }
         elsif($type eq 'service') {
-            my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => [qw/host_name description perf_data state/]);
+            my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => [qw/host_name description perf_data state has_been_checked/]);
             for my $svc (@{$services}) {
                 $live_objects->{$svc->{'host_name'}}->{$svc->{'description'}} = $svc;
             }
@@ -158,6 +158,11 @@ sub get_list {
 
             # failed checks may lead to wrong assumptions
             if(!$liveobj->{'perf_data'} && $liveobj->{'state'} != 0) {
+                next;
+            }
+
+            # pending checks never have performance data, ignore them
+            if(!$liveobj->{has_been_checked}) {
                 next;
             }
 
