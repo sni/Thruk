@@ -24,6 +24,7 @@ next:
             - add scripted dashboard support
             - dashboard files moved to /etc/thruk/panorama
             - add dashboard overview as start page
+            - last dashboard can be closed now
           - Config Tool:
             - support recursive object removal
             - empty files will be deleted when the last object is removed
