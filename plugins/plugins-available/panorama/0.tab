@@ -4,6 +4,8 @@
 
 $dashboard = load_data();
 
+$dashboard->{'ts'} = [stat($c->config->{etc_path}.'/panorama/.')]->[9];
+
 my $_add_panlet = sub {
     my($x, $y, $d) = @_;
     if($d->{'ts'} && $dashboard->{'ts'} < $d->{'ts'}) {
@@ -34,7 +36,7 @@ my $_add_panlet = sub {
                 "y" => $y,
             },
             "link" => {
-               "link" => "dashboard://".$d->{'nr'},
+                "link" => "dashboard://".$d->{'nr'},
                 "newtab" => "on"
             },
             "nsize" => [ 64, 64 ],
