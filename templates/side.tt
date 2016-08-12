@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     [% PROCESS _common_css.tt %]
     [% PROCESS _common_js_files.tt %]
-    [% IF useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% useragentcompat %]">[% END %]
+    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
     <style type="text/css">
     <!--
     HTML {

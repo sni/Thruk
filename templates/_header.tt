@@ -9,7 +9,7 @@
     [% PROCESS _common_js_files.tt %]
     [% PROCESS extra_headers.tt %]
     [% IF extra_header %][% extra_header %][% END %]
-    [% IF useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% useragentcompat %]">[% END %]
+    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
 
   <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %][% IF iframed %] iframed[% END %]' id='[% page %]'>
