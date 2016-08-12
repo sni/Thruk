@@ -1387,7 +1387,9 @@ var TP = {
         var ref      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
         var count  = 0;
         if(ids && typeof(ids) == "string") {
-            ids = {ids: true};
+            var id = ids;
+            ids = {};
+            ids[id] = true;
         }
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
