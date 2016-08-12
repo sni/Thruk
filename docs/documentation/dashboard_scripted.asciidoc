@@ -6,7 +6,7 @@ lightbox: true
 
 
 = Scripted Dashboards
-
+{% include new_since.ad version="2.10" %}
 Static Dashboards are a good solution is most cases, but sometimes you need some
 extra dynamic and a way to constantly update the dashboard. Scripted Dashboards
 can be used to dynamically generate dashboards on the fly.
@@ -118,6 +118,12 @@ This will make open dashboards reload the dashboard source every 30 seconds.
 === ISS Position
 
 The first real example creates a geo map with the actual position of the ISS Spacestation.
+This example also shows how to use base64 decoded inline images for static icons.
+
+++++
+<a title="dashboard" rel="lightbox[dashboard]" href="dashboard/iss.png"><img src="dashboard/iss.png" alt="context menu" width="35%" height="35%" /></a>
+<br style="clear: both;">
+++++
 
 ------
 # title:  ISS Position
@@ -199,6 +205,11 @@ __DATA__
 This example fetches the list of hostgroups and creates an icon for each of it.
 This dashboard does not even have a __DATA__ structure and creates the dashboard
 completely from the script.
+
+++++
+<a title="dashboard" rel="lightbox[dashboard]" href="dashboard/hostgroups.png"><img src="dashboard/hostgroups.png" alt="context menu" width="35%" height="35%" /></a>
+<br style="clear: both;">
+++++
 
 ------
 # title:  Scripted Hostgroups
