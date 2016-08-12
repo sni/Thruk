@@ -546,7 +546,17 @@ Ext.define('TP.Pantab', {
         var This = this;
         if(This.xdata && This.xdata.refresh > 0) {
             TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
-            TP.updateAllIcons(This);
+            var skipUpdate = false;
+            if(This.lastIconRefresh) {
+                var deltaRefresh = ((new Date).getTime() - This.lastIconRefresh.getTime())/1000;
+                /* no update neccessary if the last update is not older than half of the usual refresh interval */
+                if(deltaRefresh < (This.xdata.refresh / 2)) {
+                    skipUpdate = true;
+                }
+            }
+            if(!skipUpdate) {
+                TP.updateAllIcons(This);
+            }
         }
 
         if(TP.initMask && !this.keepMask) { TP.initMask.destroy(); delete TP.initMask; }

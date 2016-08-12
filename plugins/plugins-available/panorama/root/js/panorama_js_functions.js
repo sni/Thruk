@@ -1139,6 +1139,9 @@ var TP = {
             state_type:  tab.xdata.state_type
         };
         TP.iconUpdateRunning[tab.id] = true;
+        if(!id) {
+            tab.lastIconRefresh = new Date();
+        }
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
             method: 'POST',
