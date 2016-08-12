@@ -1450,6 +1450,7 @@ var TP = {
     /* let this element flicker and make it a little bit bigger */
     flickerImg: function(dom_id) {
         var el     = Ext.get(dom_id);
+        if(!el) { return; }
         el.animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })

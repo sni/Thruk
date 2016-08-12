@@ -30,6 +30,7 @@ Ext.define('TP.SmallWidget', {
             this.xdata = TP.clone(this.xdata);
         }
         var tab     = Ext.getCmp(this.panel_id);
+        if(!tab) { return(false); } /* tab may be closed already */
         this.locked = tab.xdata.locked;
         if(readonly) {
             this.locked = true;
@@ -577,7 +578,7 @@ Ext.define('TP.SmallWidget', {
         var panel = this;
         if(forceCenter && panel.noUpdateLonLat > 0) { return; }
         var tab   = Ext.getCmp(panel.panel_id);
-        if(tab.map == undefined || tab.map.map == undefined) { return; }
+        if(tab == undefined || tab.map == undefined || tab.map.map == undefined) { return; }
         var s;
         if(!panel.el) {
             s     = {width: panel.xdata.size, height: panel.xdata.size};
