@@ -507,3 +507,10 @@ Source:
   }
 }
 ------------
+
+
+
+== Scripted Dashboards
+
+
+Besides the hand-crafted dashboards, it is possible to use link:dashboard_scripted.html[Scripted Dashboards] as well.
