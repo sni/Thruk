@@ -5,7 +5,10 @@
 $dashboard = load_data();
 
 my $_add_panlet = sub {
-    my($x, $y, $nr, $title) = @_;
+    my($x, $y, $d) = @_;
+    if($d->{'ts'} && $dashboard->{'ts'} < $d->{'ts'}) {
+        $dashboard->{'ts'} = $d->{'ts'};
+    }
     return({
         "xdata" => {
             "appearance" => {
@@ -14,14 +17,14 @@ my $_add_panlet = sub {
             },
             "cls" => "TP.DashboardStatusIcon",
             "general" => {
-                "dashboard" => $nr,
+                "dashboard" => $d->{'nr'},
             },
             "label" => {
                 "bgcolor" => "#cccccc",
                 "bordercolor" => "#aaaaaa",
                 "bordersize" => 1,
                 "fontsize" => 10,
-                "labeltext" => "<center>".$title."</center>",
+                "labeltext" => "<center>".$d->{'name'}."</center>",
                 "offsety" => 42,
                 "position" => "center",
                 "width" => "60"
@@ -31,7 +34,7 @@ my $_add_panlet = sub {
                 "y" => $y,
             },
             "link" => {
-               "link" => "dashboard://".$nr,
+               "link" => "dashboard://".$d->{'nr'},
                 "newtab" => "on"
             },
             "nsize" => [ 64, 64 ],
@@ -75,7 +78,7 @@ if(scalar @{$dashboards} > 0) {
             $x = 20;
             $y = $y + 90;
         }
-        $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d->{'nr'}, $d->{'name'});
+        $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d);
         $x = $x + 70;
     }
     $y = $y + 130;
@@ -92,12 +95,13 @@ for my $d (@{$dashboards}) {
         $x = 20;
         $y = $y + 90;
     }
-    $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d->{'nr'}, $d->{'name'});
+    $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d);
     $x = $x + 70;
 }
 
 __DATA__
 {
+   "ts" : 0,
    "tab" : {
       "xdata" : {
          "refresh" : 120,
