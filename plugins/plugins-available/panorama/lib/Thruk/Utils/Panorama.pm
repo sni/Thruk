@@ -139,6 +139,7 @@ sub get_dashboard_list {
                     readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
                     description => $d->{'description'} || '',
                     objects     => $d->{'objects'},
+                    ts          => $d->{'ts'},
                 };
             }
         } else {
