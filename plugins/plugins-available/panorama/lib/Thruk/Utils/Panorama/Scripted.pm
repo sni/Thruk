@@ -62,7 +62,7 @@ sub load_dashboard {
     ## use critic
     if($@) {
         $c->log->error("error while loading dynamic dashboard from ".$file.": ".$@);
-        confess($@);
+        return;
     }
 
     _merge_meta($dashboard, $meta);
