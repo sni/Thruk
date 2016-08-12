@@ -1023,11 +1023,11 @@ TP.get_icon_form_xdata = function(settingsWindow) {
     if(xdata.popup && xdata.popup.type == 'default') { delete xdata.popup; }
     if(xdata.layout.rotation == 0)  { delete xdata.layout.rotation; }
     Ext.getCmp('appearance_types').store.each(function(data, i) {
-        var t = data.raw[0];
+        var t = data.data.value;
+        var t2 = t;
+        if(t == 'speedometer') { t2 = 'speedo'; }
+        var p = new RegExp('^'+t2, 'g');
         for(var key in xdata.appearance) {
-            var t2 = t;
-            if(t == 'speedometer') { t2 = 'speedo'; }
-            var p = new RegExp('^'+t2, 'g');
             if(key.match(p) && t != xdata.appearance.type) {
                 delete xdata.appearance[key];
             }
