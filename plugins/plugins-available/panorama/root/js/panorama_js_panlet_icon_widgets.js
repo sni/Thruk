@@ -729,6 +729,7 @@ Ext.define('TP.IconWidget', {
         } else {
             this.updateRender(xdata);
         }
+        this.setLinkData(xdata);
         this.lastType = xdata.appearance.type;
         this.applyZindex(this.xdata.layout.zindex);
     },
@@ -855,29 +856,7 @@ Ext.define('TP.IconWidget', {
         if(panel.dragEl2) { panel.dragEl2.destroy(); }
 
         /* add link (link will only work on labels for connectors) */
-        if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
-            panel.addCls('clickable');
-            panel.removeCls('notclickable');
-            if(panel.el) { panel.el.dom.href=xdata.link.link; }
-            panel.autoEl.href=xdata.link.link;
-            if(panel.labelEl && panel.labelEl.el) {
-                panel.labelEl.el.dom.href=xdata.link.link;
-                panel.labelEl.removeCls('notclickable');
-                panel.labelEl.addCls('clickable');
-            }
-        } else {
-            if(panel.el) {
-                panel.removeCls('clickable');
-                panel.addCls('notclickable');
-            }
-            if(panel.el) { panel.el.dom.href=''; }
-            panel.autoEl.href='';
-            if(panel.labelEl && panel.labelEl.el) {
-                panel.labelEl.el.dom.href='';
-                panel.labelEl.removeCls('clickable');
-                panel.labelEl.addCls('notclickable');
-            }
-        }
+        panel.setLinkData(xdata);
 
         var x       = 0;
         var y       = 0;
@@ -1002,6 +981,34 @@ Ext.define('TP.IconWidget', {
         }
         else {
             panel.itemRendering = false;
+        }
+    },
+
+    setLinkData: function(xdata) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
+            panel.addCls('clickable');
+            panel.removeCls('notclickable');
+            if(panel.el) { panel.el.dom.href=xdata.link.link; }
+            panel.autoEl.href=xdata.link.link;
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href=xdata.link.link;
+                panel.labelEl.removeCls('notclickable');
+                panel.labelEl.addCls('clickable');
+            }
+        } else {
+            if(panel.el) {
+                panel.removeCls('clickable');
+                panel.addCls('notclickable');
+            }
+            if(panel.el) { panel.el.dom.href=''; }
+            panel.autoEl.href='';
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href='';
+                panel.labelEl.removeCls('clickable');
+                panel.labelEl.addCls('notclickable');
+            }
         }
     },
 
