@@ -262,7 +262,6 @@ Ext.define('TP.Pantab', {
     },
     saveIconsStates: function() {
         var tab = this;
-        if(tab.readonly && !tab.scripted) { return; }
         window.clearTimeout(TP.timeouts['timeout_' + tab.id + '_saveIconsStates']);
         TP.timeouts['timeout_' + tab.id + '_saveIconsStates'] = window.setTimeout(function() {
             tab.saveIconsStatesDo();
@@ -270,7 +269,6 @@ Ext.define('TP.Pantab', {
     },
     saveIconsStatesDo: function() {
         var tab       = this;
-        if(tab.readonly && !tab.scripted) { return; }
         var panels    = TP.getAllPanel(tab);
         var allStates = {};
         var found     = 0;

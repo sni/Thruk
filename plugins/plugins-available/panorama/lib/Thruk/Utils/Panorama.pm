@@ -234,8 +234,8 @@ sub load_dashboard {
     $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
     # merge runtime data
-    my $runtime = {};
-    my $runtimefile  = $c->config->{'var_path'}.'/panorama/'.$nr.'.tab.runtime';
+    my $runtime      = {};
+    my $runtimefile  = Thruk::Utils::Panorama::_get_runtime_file($c, $nr);
     if(-e $runtimefile) {
        $runtime = Thruk::Utils::read_data_file($runtimefile);
     }
@@ -326,6 +326,19 @@ sub delete_dashboard {
     # and also all backups
     unlink(glob($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.*'));
     return;
+}
+
+##########################################################
+sub _get_runtime_file {
+    my($c, $nr) = @_;
+    my $user = '';
+    if(!$c->stash->{'is_admin'}) {
+        # save runtime data to user file
+        $user = $c->stash->{'remote_user'};
+        $user =~ s/[^a-zA-Z\d_\-]/_/gmx;
+        $user = $user.'.';
+    }
+    return($c->{'panorama_var'}.'/'.$nr.'.tab.'.$user.'runtime');
 }
 
 ##########################################################

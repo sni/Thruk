@@ -2303,9 +2303,7 @@ sub _task_dashboard_save_states {
     $nr      =~ s/^tabpan-tab_//gmx;
 
     my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
-    return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard) >= ACCESS_READWRITE;
-
-    my $runtime = _extract_runtime_data($dashboard);
+    my $runtime   = _extract_runtime_data($dashboard);
     my $states;
     eval {
         $states = decode_json($c->req->parameters->{'states'});
@@ -2319,7 +2317,7 @@ sub _task_dashboard_save_states {
             $runtime->{$id}->{$key} = $states->{$id}->{$key} if defined $states->{$id}->{$key};
         }
     }
-    Thruk::Utils::write_data_file($c->{'panorama_var'}.'/'.$nr.'.tab.runtime', $runtime, 1);
+    Thruk::Utils::write_data_file(Thruk::Utils::Panorama::_get_runtime_file($c, $nr), $runtime, 1);
 
     my $json = { 'status' => 'ok' };
     _add_misc_details($c, undef, $json);
@@ -2912,7 +2910,6 @@ sub _save_dashboard {
             $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         }
     }
-    my $varfile = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
     # preserve some settings
     if($existing) {
@@ -2948,7 +2945,7 @@ sub _save_dashboard {
     my $runtime = _extract_runtime_data($dashboard);
 
     Thruk::Utils::write_data_file($file, $dashboard, 1);
-    Thruk::Utils::write_data_file($varfile.'.runtime', $runtime, 1);
+    Thruk::Utils::write_data_file(Thruk::Utils::Panorama::_get_runtime_file($c, $nr), $runtime, 1);
     Thruk::Utils::backup_data_file($c->{'panorama_etc'}.'/'.$nr.'.tab', $c->{'panorama_var'}.'/'.$nr.'.tab', 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
