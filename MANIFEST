@@ -353,6 +353,8 @@ plugins/plugins-available/mobile/templates/mobile_services_list.tt
 plugins/plugins-available/panorama/0.tab
 plugins/plugins-available/panorama/description.txt
 plugins/plugins-available/panorama/DEV.txt
+plugins/plugins-available/panorama/examples/hostgroups.tab
+plugins/plugins-available/panorama/examples/iss.tab
 plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama/Scripted.pm

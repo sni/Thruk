@@ -1,0 +1,71 @@
+# title:  ISS Position
+# user:   thrukadmin
+# groups: [{"*" : "read-only"}]
+
+# get actual position
+$dashboard = load_data();
+my $panlet_1 = $dashboard->{'panlet_1'}->{'xdata'};
+
+# get actual position
+my $raw = `curl -s http://api.open-notify.org/iss-now.json`;
+my $data = decode_json($raw);
+
+# set current iss position
+$panlet_1->{'map'}->{'lat'} = $data->{'iss_position'}->{'latitude'};
+$panlet_1->{'map'}->{'lon'} = $data->{'iss_position'}->{'longitude'};
+$panlet_1->{'label'}->{'labeltext'} = sprintf("<center>Lat: %.3f / Lon: %.3f<br>Last Update: %s</center>",
+                                               $panlet_1->{'map'}->{'lat'},
+                                               $panlet_1->{'map'}->{'lon'},
+                                               POSIX::strftime("%H:%M:%S UTC", gmtime($data->{'timestamp'})),
+                                               );
+
+# set map center
+my $_nearest_int = sub {
+    my($x, $val) = @_;
+    $x = int($x);
+    my $rem = $x % $val;
+    return($x-$rem);
+};
+$dashboard->{'tab'}->{'xdata'}->{'map'}->{'lat'}  = &{$_nearest_int}($data->{'iss_position'}->{'latitude'},  20);
+$dashboard->{'tab'}->{'xdata'}->{'map'}->{'lon'}  = &{$_nearest_int}($data->{'iss_position'}->{'longitude'}, 20);
+$dashboard->{'tab'}->{'xdata'}->{'map'}->{'zoom'} = 4;
+
+# make dashboard update every x seconds
+$dashboard->{'ts'} = time() - time() % 10;
+
+__DATA__
+{
+   "tab" : {
+      "xdata" : {
+         "refresh" : 10,
+         "map" : {},
+      }
+   },
+   "panlet_1" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "icon"
+         },
+         "cls" : "TP.StaticIcon",
+         "general" : {
+            "src" : "data:image/png;base64,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"
+         },
+         "label" : {
+            "bgcolor" : "#7eb4d9",
+            "bordercolor" : "#71a4c9",
+            "bordersize" : 1,
+            "fontcolor" : "#000000",
+            "fontitalic" : "",
+            "fontsize" : 12,
+            "labeltext" : "",
+            "orientation" : "horizontal",
+            "position" : "below",
+         },
+         "popup" : {
+            "type" : "off"
+         },
+         "layout" : {},
+         "map" : {}
+      }
+   }
+}
