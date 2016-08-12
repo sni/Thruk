@@ -2542,7 +2542,8 @@ sub backends_hash_to_list {
     my $backends = [];
     for my $b (@{list($hashlist)}) {
         if(ref $b eq '') {
-            push @{$backends}, $b;
+            my $backend = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
+            push @{$backends}, ($backend->peer_key() || $b);
         } else {
             for my $key (keys %{$b}) {
                 my $backend = $c->{'db'}->get_peer_by_key($key) || $c->{'db'}->get_peer_by_key($b->{$key});
