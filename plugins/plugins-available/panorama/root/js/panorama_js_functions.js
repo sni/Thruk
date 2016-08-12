@@ -1370,15 +1370,18 @@ var TP = {
     },
 
     /* get request parameters for status requests */
-    getStatusReq: function(tab, id, xdata) {
+    getStatusReq: function(tab, ids, xdata) {
         var panels   = TP.getAllPanel(tab);
         var req      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
         var ref      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
         var count  = 0;
+        if(ids && typeof(ids) == "string") {
+            ids = {ids: true};
+        }
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
-            if(id && p.id != id) { continue; }
-            if(id && xdata) { p.oldXdata = p.xdata; p.xdata = xdata; }
+            if(ids && !ids[p.id]) { continue; }
+            if(ids && xdata) { p.oldXdata = p.xdata; p.xdata = xdata; }
             if(p.xdata && p.xdata.general) {
                 /* custom filter */
                 if(p.xdata.general.filter) {
@@ -1443,7 +1446,7 @@ var TP = {
                     count++;
                 }
             }
-            if(id && p.oldXdata) { p.xdata = p.oldXdata; delete p.oldXdata; }
+            if(ids && p.oldXdata) { p.xdata = p.oldXdata; delete p.oldXdata; }
         };
         var tabpan = Ext.getCmp('tabpan');
         if(count == 0 && tab != tabpan.getActiveTab()) { return; }
@@ -1792,6 +1795,7 @@ var TP = {
                     var data = TP.getResponse(undefined, response);
                     data = data.data;
                     var old_window_ids = TP.clone(tab.window_ids);
+                    var panlet_added_ids = {};
 
                     /* make sure tab itself is updated first */
                     var mapChanged = false;
@@ -1836,6 +1840,7 @@ var TP = {
                             TP.cp.set(key, cfg);
                             TP.add_panlet({id:key, tb:tab, autoshow:true, conf: { firstRun:false }}, false);
                             tab.saveState();
+                            panlet_added_ids[key] = true;
                         }
                         else if(p && !TP.JSONequals(ExtState[key], data[key])) {
                             /* position and size changes can be applied by animation */
@@ -1863,6 +1868,10 @@ var TP = {
                     /* update stateproviders last data to prevent useless updates */
                     TP.cp.lastdata = setStateByTab(ExtState);
                     tab.renewInProgress = false;
+
+                    if(panlet_added_ids.length > 0) {
+                        TP.updateAllIcons(tab, panlet_added_ids);
+                    }
                 } else {
                     tab.renewInProgress = false;
                 }
