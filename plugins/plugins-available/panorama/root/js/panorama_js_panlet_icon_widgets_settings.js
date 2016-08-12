@@ -544,6 +544,20 @@ TP.iconShowEditDialog = function(panel) {
                         listeners: {
                             afterrender: function() { if(panel.xdata.label.fontbold) { this.toggle(); } }
                         }
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontcenter',
+                        value:         panel.xdata.label.fontcenter
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        name:         'fontcenter',
+                        icon:         url_prefix+'plugins/panorama/images/text_align_center.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontcenter: state ? '1' : '' }); },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontcenter) { this.toggle(); } }
+                        }
                     }]
                 }, {
                     xtype:        'fieldcontainer',
@@ -617,13 +631,19 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:     'table',
                     items: [{ xtype: 'label', text:  'width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'width', width: 55, value: panel.xdata.label.width, listeners: {
+                            { xtype: 'numberfield', name:  'width', width: 53, value: panel.xdata.label.width, minValue: 0, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     labelUpdate();
                                 }
                             }},
                             { xtype: 'label', text:  'height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'height', width: 55, value: panel.xdata.label.height, listeners: {
+                            { xtype: 'numberfield', name:  'height', width: 53, value: panel.xdata.label.height, minValue: 0, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    labelUpdate();
+                                }
+                            }},
+                            { xtype: 'label', text:  'round corners:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'roundcorners', width: 50, value: panel.xdata.label.roundcorners, minValue: 0, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     labelUpdate();
                                 }

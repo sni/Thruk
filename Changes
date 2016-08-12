@@ -25,6 +25,8 @@ next:
             - dashboard files moved to /etc/thruk/panorama
             - add dashboard overview as start page
             - last dashboard can be closed now
+            - add text center option to labels
+            - add round corners option to labels
           - Config Tool:
             - support recursive object removal
             - empty files will be deleted when the last object is removed
