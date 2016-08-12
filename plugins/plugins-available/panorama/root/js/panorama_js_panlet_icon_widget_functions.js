@@ -43,11 +43,13 @@ TP.get_group_status = function(options) {
         totals.services.critical = group.services.plain_critical;
         totals.services.warning  = group.services.plain_warning;
         totals.services.unknown  = group.services.plain_unknown;
+        totals.services.pending  = group.services.plain_pending;
     }
     if(incl_hst) {
         totals.hosts.up          = group.hosts.plain_up;
         totals.hosts.down        = group.hosts.plain_down;
         totals.hosts.unreachable = group.hosts.plain_unreachable;
+        totals.hosts.pending     = group.hosts.plain_pending;
     }
 
          if(incl_hst && totals.hosts.down        > 0)                            { s = 1; hostProblem = true; }
