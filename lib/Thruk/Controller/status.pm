@@ -870,7 +870,7 @@ sub _process_summary_page {
 
     if( $c->stash->{substyle} eq 'host' ) {
         # we need the hosts data
-        my $host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address has_been_checked name state display_name custom_variable_names custom_variable_values/ ] );
+        my $host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address has_been_checked name state display_name custom_variable_names custom_variable_values groups/ ] );
         for my $host ( @{$host_data} ) {
             for my $group ( @{ $host->{'groups'} } ) {
                 next if !defined $all_groups->{$group};
