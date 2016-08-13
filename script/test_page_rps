@@ -18,6 +18,8 @@ test_page_rps - command line utility for testing Thruks page requests per second
   -a, --all                     Run for normal commits too instead of just tags.
   -n, --number=<n>              Limit tests to this number
 
+      --url=<url>               Run tests against different url
+
 =head1 DESCRIPTION
 
 This script runs apache ab tool against a few sample pages and renders a
@@ -28,6 +30,10 @@ result html page with the cpu and memory usage as well as the requests per secon
 Update for the last 15 commits
 
   %> test_page_rps -u -a -n 15
+
+Test specific page between the current master and the last two tags
+
+  %> test_page_rps -n 2 --url="/thruk/cgi-bin/status.cgi?servicegroup=all&style=summary"
 
 =head1 AUTHOR
 
@@ -55,6 +61,7 @@ Getopt::Long::GetOptions (
    "u|update"           => \$options->{'update_only'},
    "a|all"              => \$options->{'all'},
    "n|number=i"         => \$options->{'number'},
+     "url=s"            => \$options->{'url'},
    "<>"                 => sub { push @{$tags}, "".shift },
 ) or do {
     print "usage: $0 [<options>] [<commit|tag> ...]\nsee --help for detailed help.\n";
@@ -77,7 +84,7 @@ cleanup();
 my $result_html = 'rpsresults.html';
 my $results_file = '.rps_results';
 my $results = {};
-if(-s $results_file) {
+if(-s $results_file && !$options->{'url'}) {
     $results = JSON::XS::decode_json(read_file($results_file));
 }
 
@@ -93,9 +100,15 @@ unlink('.author');
 
 #################################################
 # run tests
-print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
-print("| Branch      | Startup | 1st Req | Static HTML     | Tactical CGI    | Status CGI      | JSON CGI        | Business P. CGI | Memory                | Load  | Dur  |\n");
-print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+if($options->{'url'}) {
+    print( "+-------------+---------+---------+-----------------------------------------------------------------------------------------+-----------------------+-------+------+\n");
+    printf("| Branch      | Startup | 1st Req | %-87s | Memory                | Load  | Dur  |\n", $options->{'url'});
+    print( "+-------------+---------+---------+-----------------------------------------------------------------------------------------+-----------------------+-------+------+\n");
+} else {
+    print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+    print("| Branch      | Startup | 1st Req | Static HTML     | Tactical CGI    | Status CGI      | JSON CGI        | Business P. CGI | Memory                | Load  | Dur  |\n");
+    print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+}
 chomp(my $branch = `git branch --no-color 2>/dev/null | grep ^\*`);
 $branch =~ s|^\*\s+||mx;
 
@@ -143,7 +156,11 @@ for my $tag (@{$tags}) {
     }
     test_tag($tag);
 }
-print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+if($options->{'url'}) {
+    print("+-------------+---------+---------+-----------------------------------------------------------------------------------------+-----------------------+-------+------+\n");
+} else {
+    print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
+}
 cleanup();
 exit;
 
@@ -164,6 +181,7 @@ sub cleanup {
 #################################################
 sub _safe_results {
     return unless $results;
+    return if $options->{'url'};
     if(scalar keys %{$results}) {
         open(my $fh, '>', $results_file) or die("couldn't write results $results_file: $!");
         print $fh JSON::XS->new->canonical(1)->encode($results);
@@ -180,7 +198,8 @@ sub test_page {
     my $cmd      = "ab -l -c $CONCURRENCY -n $REQUESTS $url 2>&1";
     my $pageres  = `$cmd`;
     my($page)    = $pageres =~ m/\QRequests per second:\E\s+([\d\.]+)/mx;
-    my($pageerr) = $pageres =~ m/\QNon-2xx responses:\E|\QFailed requests:\E\s+([\d\.]+)/mx;
+    my($pageerr) = $pageres =~ m/\QNon-2xx responses:\E\s+([\d\.]+)/mx;
+      ($pageerr) = $pageres =~ m/\QFailed requests:\E\s+([\d\.]+)/mx unless $pageerr;
     if($pageerr && $pageerr >= 5) {
         printf "errored           | ";
         if($currenttag !~ m/^v/mx) {
@@ -188,7 +207,12 @@ sub test_page {
             exit;
         }
     } else {
-        printf("%6s #/sec    | ", $page);
+        if($options->{'url'}) {
+            printf("%6s #/sec ", $page);
+            print(" " x 74, " | ");
+        } else {
+            printf("%6s #/sec    | ", $page);
+        }
     }
     our $cur_pages;
     $cur_pages->{$name} = $page;
@@ -257,14 +281,24 @@ sub test_tag {
     `ab -c $CONCURRENCY -n 10 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1`;
 
     our $cur_pages = {};
-    test_page('main',   "$BASEURL/changes.html");
-    test_page('tac',    "$BASEURL/cgi-bin/tac.cgi");
-    test_page('status', "$BASEURL/cgi-bin/status.cgi");
-    chomp(my $mem  = `cat /proc/$pid/status | grep VmRSS:  | awk '{print \$2}'`);
-    test_page('json',   "$BASEURL/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json");
-    test_page('bp',     "$BASEURL/cgi-bin/bp.cgi");
-    chomp(my $max  = `cat /proc/$pid/status | grep VmPeak: | awk '{print \$2}'`);
-    chomp(my $load = `cat /proc/loadavg | awk '{ print \$1 }'`);
+    my($mem, $max, $load);
+    if($options->{'url'}) {
+        my $url = $options->{'url'};
+        $url    =~ s%^/thruk/%%gmx;
+        test_page($options->{'url'}, $BASEURL.'/'.$url);
+        chomp($mem  = `cat /proc/$pid/status | grep VmRSS:  | awk '{print \$2}'`);
+        chomp($max  = `cat /proc/$pid/status | grep VmPeak: | awk '{print \$2}'`);
+        chomp($load = `cat /proc/loadavg | awk '{ print \$1 }'`);
+    } else {
+        test_page('main',   "$BASEURL/changes.html");
+        test_page('tac',    "$BASEURL/cgi-bin/tac.cgi");
+        test_page('status', "$BASEURL/cgi-bin/status.cgi");
+        chomp($mem  = `cat /proc/$pid/status | grep VmRSS:  | awk '{print \$2}'`);
+        test_page('json',   "$BASEURL/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json");
+        test_page('bp',     "$BASEURL/cgi-bin/bp.cgi");
+        chomp($max  = `cat /proc/$pid/status | grep VmPeak: | awk '{print \$2}'`);
+        chomp($load = `cat /proc/loadavg | awk '{ print \$1 }'`);
+    }
 
     kill('TERM', $pid);
     printf(" %3d MB (max. %4dMB) | %5s |", $mem/1000, $max/1000, $load);
