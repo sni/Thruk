@@ -59,8 +59,12 @@ function thruk_panorama_logout() {
 function thruk_open_panorama() {
     click(_link("Panorama View"));
 
-    if(_isVisible(_link("Create New"))) {
+    isVisible(_button($testUser));
+    if(_isVisible(_link("Create New"), true)) {
         click(_link("Create New"));
+        /* tests expect dashboard to be locked */
+        rightClick(_emphasis("Dashboard"));
+        click(_span("Lock Dashboard"));
     }
 
     isVisible(_emphasis("Dashboard"));
