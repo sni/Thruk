@@ -148,12 +148,14 @@ var TP = {
                 tab.show();
             }
 
-            var tabbar = tabpan.getTabBar();
-            var tabPos;
-            for(var x=0; x<tabbar.items.items.length; x++) {
-                if(tabbar.items.items[x].card.id == id) {
-                    tabPos = x;
-                    break;
+            var tabPos, tabbar;
+            if(tabpan.getTabBar) {
+                tabbar = tabpan.getTabBar();
+                for(var x=0; x<tabbar.items.items.length; x++) {
+                    if(tabbar.items.items[x].card.id == id) {
+                        tabPos = x;
+                        break;
+                    }
                 }
             }
 
