@@ -59,6 +59,10 @@ function thruk_panorama_logout() {
 function thruk_open_panorama() {
     click(_link("Panorama View"));
 
+    if(_isVisible(_link("Create New"))) {
+        click(_link("Create New"));
+    }
+
     isVisible(_emphasis("Dashboard"));
     _assertEqual("Dashboard", _getText(_emphasis("Dashboard")));
     _assertContainsText("Dashboard", _emphasis("Dashboard"));
