@@ -879,7 +879,7 @@ sub _process_summary_page {
         }
     }
     # create a hash of all services
-    my $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description state host_name acknowledged has_been_checked host_state checks_enabled check_type scheduled_downtime_depth host_groups groups/] );
+    my $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description state host_name acknowledged has_been_checked host_state host_has_been_checked host_acknowledged host_scheduled_downtime_depth host_checks_enabled checks_enabled check_type scheduled_downtime_depth host_groups groups/] );
 
     my $groupsname = "host_groups";
     if( $c->stash->{substyle} eq 'service' ) {
