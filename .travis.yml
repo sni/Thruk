@@ -22,6 +22,7 @@ before_install:
   - cpanm -n Perl::Critic::Policy::Dynamic::NoIndirect Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData List::Compare Devel::Gladiator PadWalker Perl::Critic::Policy::Modules::ProhibitPOSIXimport
   - sed -i '/Test::JavaScript/d' ./Makefile.PL
   - cpanm -q -f --installdeps --notest --no-man-pages .
+  - find ~/perl5/
   - git config --global user.email "travis@localhost"
   - git config --global user.name "Travis Testuser"
   - echo 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)' > ~/.thruk
