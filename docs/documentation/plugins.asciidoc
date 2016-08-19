@@ -569,8 +569,10 @@ sub index {
 That's it! With these files in place you can restart your webserver and you will have
 a link to hello.cgi in your Thruk sidebar.
 
+++++
 <a title="hello" rel="lightbox[plugins]" href="plugins/hello1.png"><img src="plugins/hello1.png" alt="Hello World Plugin" width="30%" height="30%" /></a>
 <br style="clear: both;">
+++++
 
 TIP: Try to copy an existing plugin, change it to your needs
 or copy/paste ideas from it to your own.
