@@ -537,12 +537,12 @@ You can also add some info boxes and your plugin will look like all the rest:
 	</body>
 </html>
 ----
-You can also protect your cgi page using the settings from cgi.cfg. 
+You can also protect your cgi page using the authorization settings from cgi.cfg. 
 
 Lets say you want to limit access to users with both the permissions
 'authorized_for_configuration_information' and 'authorized_for_system_commands'
-then you can use the function $c->check_user_roles with the appropriate parameters to check the permissions.
-You can modify your index function in hello/lib/Thruk/Controller/hello.pm to look like this
+then you can use the function '$c->check_user_roles' with the appropriate parameters to check permissions.
+You can modify your index function in 'hello/lib/Thruk/Controller/hello.pm' to look like this
 to stop anyone from accessing your cgi without proper permissions:
 
 ++++
@@ -564,14 +564,13 @@ sub index {
 }
 
 </pre>
+++++
 
 That's it! With these files in place you can restart your webserver and you will have
 a link to hello.cgi in your Thruk sidebar.
 
-++++
 <a title="hello" rel="lightbox[plugins]" href="plugins/hello1.png"><img src="plugins/hello1.png" alt="Hello World Plugin" width="30%" height="30%" /></a>
 <br style="clear: both;">
-++++
 
 TIP: Try to copy an existing plugin, change it to your needs
 or copy/paste ideas from it to your own.
