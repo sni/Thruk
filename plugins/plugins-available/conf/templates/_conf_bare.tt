@@ -8,6 +8,7 @@
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/conf/conf.css' />
     [% PROCESS _common_js_files.tt %]
     <script type="text/javascript" src="[% url_prefix %]plugins/conf/conf.js"></script>
+    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
   <body id="config" class="config[% IF body_class %] [%+ body_class %][% END %]" style="background: inherit;">
   [% PROCESS _common_js.tt %]
