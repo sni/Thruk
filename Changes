@@ -30,6 +30,7 @@ next:
           - Config Tool:
             - support recursive object removal
             - empty files will be deleted when the last object is removed
+            - fix showing custom variables attribute for some objects
             - fix nested additive templates (#630)
           - Business Process:
             - translate host states to correct states

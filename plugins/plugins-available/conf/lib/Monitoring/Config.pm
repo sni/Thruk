@@ -1344,6 +1344,10 @@ sub get_default_keys {
         push @keys, $key;
     }
 
+    if($obj->{'has_custom'}) {
+        push @keys, 'customvariable';
+    }
+
     if($options->{'sort'}) {
         @keys = @{Monitoring::Config::Object::Parent::get_sorted_keys(undef, \@keys)};
     }

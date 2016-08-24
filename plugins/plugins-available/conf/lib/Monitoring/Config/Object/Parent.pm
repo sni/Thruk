@@ -461,7 +461,9 @@ sub get_default_keys {
         push @result, { name => $cat, keys => \@keys };
     }
 
-    push @result, { name => 'Custom Variables', keys => ['customvariable'] };
+    if($self->{'has_custom'}) {
+        push @result, { name => 'Custom Variables', keys => ['customvariable'] };
+    }
 
     return \@result;
 }

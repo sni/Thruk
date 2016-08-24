@@ -51,7 +51,7 @@
   [% END %]
   <tr class="[% loopclass %]">
     <td class='dataVar [% loopclass +%] conf_row' align="left">
-      <input type="text" class="attrkey new_attr" name="newattr" id="newattr" value="new attribute..." [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'attribute', { url:'conf.cgi?action=json&amp;type=attribute&amp;obj=[% type %]', autosubmit:false, empty: true, emptytxt: 'new attribute...', emptyclass:'new_attr', filter:new_attr_filter, emptymsg:'add custom variable', onselect:function() { on_attr_select(); return false; }, onemptyclick: function() { on_empty_click(); } })"[% END %]>
+      <input type="text" class="attrkey new_attr" name="newattr" id="newattr" value="new attribute..." [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'attribute', { url:'conf.cgi?action=json&amp;type=attribute&amp;obj=[% type %]', autosubmit:false, empty: true, emptytxt: 'new attribute...', emptyclass:'new_attr', filter:new_attr_filter[% IF obj.defined("has_custom") %], emptymsg:'add custom variable'[% END %], onselect:function() { on_attr_select(); return false; }, onemptyclick: function() { on_empty_click(); } })"[% END %]>
     </td>
     <td class='dataVar [% loopclass +%] conf_row' align="left"></td>
     <td class='dataVal [% loopclass %] conf_row' colspan=2></td>
