@@ -982,8 +982,14 @@ sub _import_logs {
 
         # backends maybe down, we still want to continue updates
         eval {
-            if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
+            if($mode eq 'update' or $mode eq 'import') {
                 $log_count += $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+            }
+            elsif($mode eq 'clean') {
+                my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+                $log_count = [0,0] unless ref $log_count eq 'ARRAY';
+                $log_count->[0] += $tmp->[0];
+                $log_count->[1] += $tmp->[1];
             }
             elsif($mode eq 'authupdate') {
                 $log_count += $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
@@ -1018,14 +1024,23 @@ sub _update_logcache {
         $blocksize = 365 if $mode eq 'clean';
     }
 
-    my $log_count = 0;
+    my $log_count        = 0;
+    my $plugin_ref_count = 0;
 
     if($mode eq 'clean') {
         my $start = time() - ($blocksize * 86400);
         print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
         $log_count += $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
+        # clean old plugin outputs
+        print "cleaning old orphaned plugin outputs\n" if $verbose;
+        my $used_ids1 = $dbh->selectcol_arrayref("SELECT DISTINCT plugin_output FROM `".$prefix."_log`");
+        my $used_ids2 = $dbh->selectcol_arrayref("SELECT DISTINCT message FROM `".$prefix."_log`");
+        my $used_ids = Thruk::Utils::array_uniq([@{$used_ids1}, @{$used_ids2}]);
+        if(scalar @{$used_ids} > 0) {
+            $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id NOT IN (".join(",", @{$used_ids}).")");
+        }
         $dbh->commit or die $dbh->errstr;
-        return $log_count;
+        return([$log_count, $plugin_ref_count]);
     }
 
     # check if our tables exist
@@ -1492,6 +1507,12 @@ sub _import_peer_logfiles {
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
     }
 
+    # add import filter?
+    my $import_filter = [];
+    for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_exclude'})}) {
+        push @{$import_filter}, { message => { '!~~' => $f } }
+    }
+
     my @columns = qw/class time type state host_name service_description plugin_output message state_type contact_name/;
     while($time <= $end) {
         my $stime = scalar localtime $time;
@@ -1505,7 +1526,7 @@ sub _import_peer_logfiles {
                                                  filter  => [{ '-and' => [
                                                                     { time => { '>=' => $time } },
                                                                     { time => { '<'  => $time + $blocksize } },
-                                                            ]}],
+                                                            ]}, @{$import_filter} ],
                                                  columns => \@columns,
                                                 );
             if($mode eq 'update') {

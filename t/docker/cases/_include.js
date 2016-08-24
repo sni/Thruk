@@ -29,12 +29,12 @@ function thruk_login() {
     _setValue(_textbox("login"), $testUser);
     _setValue(_password("password"), $testPassword);
 
+    click(_submit("Login"));
+    isVisible(_link("Home"));
+
     // ensure fullscreen mode
     tryMultiple('!screenRegion.exists("applications.png", 1)', 'env.type(Key.F11)', 3, false);
 
-    click(_submit("Login"));
-
-    isVisible(_link("Home"));
     testCase.endOfStep("login", 20);
 }
 
@@ -58,6 +58,14 @@ function thruk_panorama_logout() {
 /* open panorama dashboard */
 function thruk_open_panorama() {
     click(_link("Panorama View"));
+
+    isVisible(_button($testUser));
+    if(_isVisible(_link("Create New"), true)) {
+        click(_link("Create New"));
+        /* tests expect dashboard to be locked */
+        rightClick(_emphasis("Dashboard"));
+        click(_span("Lock Dashboard"));
+    }
 
     isVisible(_emphasis("Dashboard"));
     _assertEqual("Dashboard", _getText(_emphasis("Dashboard")));

@@ -216,29 +216,35 @@ sub commit {
     my($self, $c) = @_;
     my $rc    = 1;
 
-    my $filesroot = $self->get_files_root();
+    my $filesroot    = $self->get_files_root();
+    my $backend_name = '';
 
     # run pre hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
+        $backend_name = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
+        local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
+        local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
+        local $ENV{THRUK_BACKEND_NAME} = $backend_name;
+        local $SIG{CHLD}               = 'DEFAULT';
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
-        $c->log->debug('pre save hook: '.$cmd);
         my $out = `$cmd`;
         my $rc  = $?>>8;
+        $c->log->info("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
-            $c->log->info('pre save hook: '.$rc);
-            $c->log->info('pre save hook: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre save hook!\n".$out );
+            $c->log->info('pre save hook out: '.$out);
+            Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre_obj_save_cmd hook!\n".$out );
             return;
         }
-        $c->log->debug('pre save hook: '.$out);
+        $c->log->debug('pre save hook out: '.$out);
     }
 
     my $files = { changed => [], deleted => []};
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
         my $is_new_file = $file->{'is_new_file'};
+        if(scalar @{$file->{'objects'}} == 0) {
+            $self->file_delete($file);
+        }
         unless($file->save()) {
             $rc = 0;
         } else {
@@ -284,13 +290,20 @@ sub commit {
 
     # run post hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
-        system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
-        if($? == -1) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );
+        local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
+        local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
+        local $ENV{THRUK_BACKEND_NAME} = $backend_name;
+        local $SIG{CHLD}               = 'DEFAULT';
+        my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}." post '".$filesroot."' 2>&1";
+        my $out = `$cmd`;
+        my $rc  = $?>>8;
+        $c->log->info("post save hook: '" . $cmd . "', rc: " . $rc);
+        if($rc != 0) {
+            $c->log->info('post save hook out: '.$out);
+            Thruk::Utils::set_message( $c, 'fail_message', "post_obj_save_cmd hook failed!\n".$out );
             return;
         }
+        $c->log->debug('post save hook out: '.$out);
     }
 
     return $rc;
@@ -839,7 +852,7 @@ sub check_files_changed {
     $self->{'needs_update'} = 0;
     $self->{'last_changed'} = 0 if $reload;
 
-    if($self->{'_corefile'} and $self->_check_file_changed($self->{'_corefile'})) {
+    if($self->{'_corefile'} && $self->{'_corefile'}->{'path'} && $self->_check_file_changed($self->{'_corefile'})) {
         # maybe core type has changed
         $self->_set_coretype();
     }
@@ -1026,9 +1039,7 @@ remove a file from the config
 
 =cut
 sub file_delete {
-    my $self    = shift;
-    my $file    = shift;
-    my $rebuild = shift;
+    my($self, $file, $rebuild) = @_;
     $rebuild                = 1 unless defined $rebuild;
     $file->{'deleted'}      = 1;
     $file->{'changed'}      = 1;
@@ -1777,8 +1788,9 @@ sub _check_files_changed {
 #   1 if file is new / created
 #   2 if md5 sum changed
 sub _check_file_changed {
-    my $self = shift;
-    my $file = shift;
+    my($self, $file) = @_;
+
+    confess("no file given") unless($file && $file->{'path'});
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,

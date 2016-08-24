@@ -41,14 +41,16 @@ panorama_default_view
 notes.txt
 themes/themes-available/*/images/logos/*.png
 .~ko-*-perllint~
-root/thruk/javascript/all_in_one-2.06-1.js
-plugins/plugins-available/panorama/root/all_in_one-2.06-1_panorama.js
-themes/themes-available/Thruk/stylesheets/all_in_one-2.06-1.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.06-1.css
+root/thruk/javascript/all_in_one-2.08-1.js
+plugins/plugins-available/panorama/root/all_in_one-2.08-1_panorama.js
+themes/themes-available/Thruk/stylesheets/all_in_one-2.08-1.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.08-1.css
 test_hook.sh
+panorama/*.tab
 bp/*.tbp
 bp/*.tbp.edit
 bp/*.tbp-*
+bp/*.pm
 root/tests/
 script/append.make.options
 .rps_results
@@ -59,3 +61,4 @@ t/docker/cases/*/.sakuli-steps-cache
 t/docker/cases/testsuite.suite
 t/docker/cases/*/*.js
 .gem/
+*.json

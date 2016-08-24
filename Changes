@@ -1,9 +1,43 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next
+next:
+          - add useragentcompat option for IE compatibility mode (ofosos #626)
+          - support reading action_menu_items from file/folder
+          - support thruk_local.d/file.$hostname files to separate host specific configs
+          - fix can_submit_commands setting not used from contact (#597)
+          - fix corrupting datafiles when trying to write to full filesystems
+          - support curl/wget scripts when cookie auth is enabled
+          - Logcache:
+            - add logcache_import_exclude option
+            - remove orphaned plugin output references on logcacheclean
+          - Reports:
+            - include any ok event always in availability calculation
+          - Panorama View:
+            - make popup completely customizable
+            - add dashboard status icon type
+            - add performance bar icon type
+            - add trend / forecast icon type
+            - icon label can be mouseover only now
+            - background color of dashboards can be changed now
+            - do not overlap icons which are placed close together
+            - host status beats service status for group/filter icons
+            - add scripted dashboard support
+            - dashboard files moved to /etc/thruk/panorama
+            - add dashboard overview as start page
+            - last dashboard can be closed now
+            - add text center option to labels
+            - add round corners option to labels
+          - Config Tool:
+            - support recursive object removal
+            - empty files will be deleted when the last object is removed
+          - Business Process:
+            - translate host states to correct states
+
+2.08     Fri May  6 11:29:14 CEST 2016
           - add status column to performance map excel export
           - accept filter changes on body clicks too
           - support wildcards for ssi files
+          - use worst can_submit_commands value when having multiple backends
           - fix using negated comment/downtime filter
           - fix 'bad file descriptor' error when trying to log in subprocesses
           - fix using non-standard webserver ports with cookie authentication (#576)
@@ -23,6 +57,7 @@ next
           - Reports:
             - add report clone button
             - create debug information more easily
+            - fix content type in url reports emails
           - CLI
             - add new graph command to export graphs from cli
             - add new listservices command

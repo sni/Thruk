@@ -81,7 +81,6 @@ Ext.define('TP.PanletGrafana', {
 
                 url = url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?');
                 Ext.Ajax.cors                = true;
-                Ext.Ajax.withCredentials     = true;
                 Ext.Ajax.useDefaultXhrHeader = false;
                 Ext.Ajax.request({
                     url:     url,
@@ -109,6 +108,7 @@ Ext.define('TP.PanletGrafana', {
                                 }
                             }
                         }
+                        if(!panel.gearitem || !panel.gearitem.down('form')) { return; }
                         var source_combo = TP.getFormField(panel.gearitem.down('form'), 'source');
                         source_combo.store.removeAll();
                         for(var nr=0; nr<sources.length; nr++) {

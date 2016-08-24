@@ -1,37 +1,13 @@
-/* Shape Settings Tab */
-TP.shapesStore = Ext.create('Ext.data.Store', {
-    fields: ['name', 'data'],
-    proxy: {
-        type: 'ajax',
-        url:  'panorama.cgi?task=userdata_shapes',
-        reader: {
-            type: 'json',
-            root: 'data'
-        }
-    },
-    data : thruk_shape_data
-});
-TP.iconsetsStore = Ext.create('Ext.data.Store', {
-    fields: ['name', 'sample', 'value', 'fileset'],
-    proxy: {
-        type: 'ajax',
-        url:  'panorama.cgi?task=userdata_iconsets&withempty=1',
-        reader: {
-            type: 'json',
-            root: 'data'
-        }
-    },
-    autoLoad: true,
-    data : thruk_iconset_data
-});
 TP.iconTypesStore = Ext.create('Ext.data.Store', {
     fields: ['name', 'value', 'icon'],
     autoLoad: false,
-    data : [{value:'TP.HostStatusIcon',         name:'Host',          icon:url_prefix+'plugins/panorama/images/server.png'},
-            {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',     icon:url_prefix+'plugins/panorama/images/server_link.png'},
-            {value:'TP.ServiceStatusIcon',      name:'Service',       icon:url_prefix+'plugins/panorama/images/computer.png'},
-            {value:'TP.ServicegroupStatusIcon', name:'Service Group', icon:url_prefix+'plugins/panorama/images/computer_link.png'},
-            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:url_prefix+'plugins/panorama/images/page_find.png'}
+    data : [{value:'TP.HostStatusIcon',         name:'Host',             icon:url_prefix+'plugins/panorama/images/server.png'},
+            {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',        icon:url_prefix+'plugins/panorama/images/server_link.png'},
+            {value:'TP.ServiceStatusIcon',      name:'Service',          icon:url_prefix+'plugins/panorama/images/computer.png'},
+            {value:'TP.ServicegroupStatusIcon', name:'Service Group',    icon:url_prefix+'plugins/panorama/images/computer_link.png'},
+            {value:'TP.FilterStatusIcon',       name:'Custom Filter',    icon:url_prefix+'plugins/panorama/images/page_find.png'},
+            {value:'TP.SiteStatusIcon',         name:'Site Status',      icon:url_prefix+'plugins/panorama/images/accept.png'},
+            {value:'TP.DashboardStatusIcon',    name:'Dashboard Status', icon:url_prefix+'plugins/panorama/images/map.png'}
     ]
 });
 
@@ -40,36 +16,44 @@ TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
     var tab      = Ext.getCmp(panel.panel_id);
     var lastType = panel.xdata.appearance.type;
+    TP.iconShowEditDialogPanel = panel;
 
     // make sure only one window is open at a time
     if(TP.iconSettingsWindow != undefined) {
         TP.iconSettingsWindow.destroy();
     }
+    if(TP.iconTip) { TP.iconTip.hide(); }
     tab.disableMapControlsTemp();
 
     TP.resetMoveIcons();
     TP.skipRender = false;
 
-    var defaultSpeedoSource = 'problems';
-    var perfDataUpdate = function() {
-        // ensure fresh and correct performance data
+    TP.iconSettingsGlobals = {
+        renderUpdate       : Ext.emptyFn,
+        stateUpdate        : Ext.emptyFn,
+        popupPreviewUpdate : Ext.emptyFn
+    };
+    // ensure fresh and correct performance data
+    TP.iconSettingsGlobals.perfDataUpdate = function() {
 
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         // update speedo
-        var data = [];
+        var dataProblems = [];
         var cls = panel.classChanged || panel.xdata.cls;
         if(cls == "TP.HostgroupStatusIcon" || cls == "TP.ServicegroupStatusIcon" || cls == "TP.FilterStatusIcon") {
-            data.push(['number of problems',                  'problems']);
-            data.push(['number of problems (incl. warnings)', 'problems_warn']);
+            dataProblems.push(['number of problems',                  'problems']);
+            dataProblems.push(['number of problems (incl. warnings)', 'problems_warn']);
         }
         var macros = TP.getPanelMacros(panel);
+        var dataPerf = [];
         for(var key in macros.perfdata) {
-            if(defaultSpeedoSource == 'problems') { defaultSpeedoSource = 'perfdata:'+key; }
-            var r = TP.getPerfDataMinMax(macros.perfdata[key], '?');
-            var options = r.min+" - "+r.max;
-            data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
+            var p = macros.perfdata[key];
+            var r = TP.getPerfDataMinMax(p, '?');
+            var options = sprintf("%.0f%s in %s - %s", p.val, p.unit, r.min, r.max);
+            dataPerf.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
         /* use availability data as source */
+        var dataAvail = [];
         if(xdata.label && xdata.label.labeltext && TP.availabilities && TP.availabilities[panel.id]) {
             var avail = TP.availabilities[panel.id];
             for(var key in avail) {
@@ -80,34 +64,27 @@ TP.iconShowEditDialog = function(panel) {
                 if(d.opts['tm']) {
                     options    += '/'+d.opts['tm'];
                 }
-                data.push(['Availability: '+last+'% ('+options+')', 'avail:'+key]);
+                dataAvail.push(['Availability: '+last+'% ('+options+')', 'avail:'+key]);
             }
         }
         var cbo = Ext.getCmp('speedosourceStore');
-        TP.updateArrayStoreKV(cbo.store, data);
+        TP.updateArrayStoreKV(cbo.store, [].concat(dataProblems, dataPerf, dataAvail));
 
-        // update shape
-        var data = [['fixed', 'fixed']];
-        for(var key in macros.perfdata) {
-            var r = TP.getPerfDataMinMax(macros.perfdata[key], 100);
-            var options = r.min+" - "+r.max;
-            data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
-        }
+        // update shape source store
+        var dataShape = [['fixed', 'fixed']];
         var cbo = Ext.getCmp('shapesourceStore');
-        TP.updateArrayStoreKV(cbo.store, data);
+        TP.updateArrayStoreKV(cbo.store, [].concat(dataShape, dataPerf));
+
+        // update connector source store
         var cbo = Ext.getCmp('connectorsourceStore');
-        TP.updateArrayStoreKV(cbo.store, data);
+        TP.updateArrayStoreKV(cbo.store, [].concat(dataShape, dataPerf));
+
+        // update trend icon source store
+        var cbo = Ext.getCmp('trendsourceStore');
+        TP.updateArrayStoreKV(cbo.store, dataPerf);
     }
 
     /* General Settings Tab */
-    var stateUpdate = function() {
-        var xdata = TP.get_icon_form_xdata(settingsWindow);
-        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
-        labelUpdate();
-        // update performance data stores
-        perfDataUpdate();
-    }
-
     var generalItems = panel.getGeneralItems();
     if(generalItems != undefined && panel.xdata.cls != 'TP.StaticIcon') {
         generalItems.unshift({
@@ -167,15 +144,15 @@ TP.iconShowEditDialog = function(panel) {
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
-                    defaults:      { anchor: '-12', labelWidth: panel.generalLabelWidth || 132, listeners: { change: function(This, newValue, oldValue, eOpts) { if(newValue != "") { stateUpdate() } } } },
+                    defaults:      { anchor: '-12', labelWidth: panel.generalLabelWidth || 132, listeners: { change: function(This, newValue, oldValue, eOpts) { if(newValue != "") { TP.iconSettingsGlobals.stateUpdate() } } } },
                     items:           generalItems
             }]
         }]
     };
 
     var updateDisabledFields = function(xdata) {
-        var originalRenderUpdate = renderUpdate;
-        renderUpdate = Ext.emptyFn;
+        var originalRenderUpdate = TP.iconSettingsGlobals.renderUpdate;
+        TP.iconSettingsGlobals.renderUpdate = Ext.emptyFn;
         Ext.getCmp('shapeheightfield').setDisabled(xdata.appearance.shapelocked);
         Ext.getCmp('shapetogglelocked').toggle(xdata.appearance.shapelocked);
         Ext.getCmp('pieheightfield').setDisabled(xdata.appearance.pielocked);
@@ -185,7 +162,7 @@ TP.iconShowEditDialog = function(panel) {
         } else {
             Ext.getCmp('rotationfield').setVisible(true);
         }
-        renderUpdate = originalRenderUpdate;
+        TP.iconSettingsGlobals.renderUpdate = originalRenderUpdate;
     };
 
     /* Layout Settings Tab */
@@ -274,7 +251,6 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     TP.shapesStore.load();
-    var renderUpdate   = Ext.emptyFn;
     var renderUpdateDo = function(forceColor, forceRenderItem) {
         if(TP.skipRender) { return; }
         var xdata = TP.get_icon_form_xdata(settingsWindow);
@@ -286,26 +262,82 @@ TP.iconShowEditDialog = function(panel) {
             if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem); }
         }
         lastType = xdata.appearance.type;
-        if(xdata.appearance.type == 'shape') {
-            panel.shapeRender(xdata, forceColor);
-        }
-        if(xdata.appearance.type == 'pie') {
-            panel.pieRender(xdata, forceColor);
-        }
-        if(xdata.appearance.type == 'speedometer') {
-            panel.speedoRender(xdata, forceColor);
-        }
-        if(xdata.appearance.type == 'connector') {
-            panel.connectorRender(xdata, forceColor);
-        }
+
+        if(panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata, forceColor); }
+        if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
+
         labelUpdate();
         updateDisabledFields(xdata);
     }
+
+    var appearanceItems = [{
+        /* appearance type */
+        xtype:      'combobox',
+        fieldLabel: 'Type',
+        name:       'type',
+        id:         'appearance_types',
+        editable:    false,
+        valueField: 'value',
+        displayField: 'name',
+        store        : Ext.create('Ext.data.Store', {
+            fields: ['value', 'name'],
+            data:   TP.iconAppearanceTypes
+        }),
+        listConfig : {
+            tpl : ((panel.iconType != 'host' && panel.iconType != 'service') ?
+                    '<tpl for="."><div class="x-boundlist-item <tpl if="value == \'perfbar\'"> item-disabled</tpl>">'
+                    +'{name}'
+                    +'<tpl if="value == \'perfbar\'"><span style="margin-left:30px;">(Host/Service only)</span></tpl>'
+                    +'</div></tpl>'
+                   :
+                    '<tpl for="."><div class="x-boundlist-item">{name}</div></tpl>')
+        },
+        listeners: {
+            beforeselect: function(This, record, index, eOpts ) {
+                if(panel.iconType != 'host' && panel.iconType != 'service') {
+                    if(record.get('value') == 'perfbar') {
+                        return(false);
+                    }
+                }
+                return(true);
+            },
+            change: function(This, newValue, oldValue, eOpts) {
+                Ext.getCmp('appearanceForm').items.each(function(f, i) {
+                    if(f.cls != undefined) {
+                        if(f.cls.match(newValue)) {
+                            f.show();
+                        } else {
+                            f.hide();
+                        }
+                    }
+                });
+                if(newValue == 'icon' || panel.hasScale) {
+                    Ext.getCmp('layoutscale').setDisabled(false);
+                } else {
+                    Ext.getCmp('layoutscale').setDisabled(true);
+                }
+
+                panel.appearance = Ext.create('tp.icon.appearance.'+newValue, { panel: panel });
+
+                var originalRenderUpdate = TP.iconSettingsGlobals.renderUpdate;
+                TP.iconSettingsGlobals.renderUpdate = Ext.emptyFn;
+                if(panel.appearance.settingsWindowAppearanceTypeChanged) { panel.appearance.settingsWindowAppearanceTypeChanged(); }
+                TP.iconSettingsGlobals.renderUpdate = originalRenderUpdate;
+                TP.iconSettingsGlobals.renderUpdate();
+            }
+        }
+    }];
+    Ext.Array.each(TP.iconAppearanceTypes, function(t, i) {
+        var cls = Ext.ClassManager.getByAlias('tp.icon.appearance.'+t.value);
+        if(cls && cls.prototype.getAppearanceTabItems) {
+            appearanceItems = appearanceItems.concat(cls.prototype.getAppearanceTabItems(panel));
+        }
+    });
     var appearanceTab = {
         title: 'Appearance',
         type:  'panel',
         hidden: panel.hideAppearanceTab,
-        listeners: { show: perfDataUpdate },
+        listeners: { show: TP.iconSettingsGlobals.perfDataUpdate },
         items: [{
             xtype : 'panel',
             layout: 'fit',
@@ -317,811 +349,8 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 60, listeners: { change: function() { renderUpdate(); } } },
-                items: [{
-                    /* appearance type */
-                    xtype:      'combobox',
-                    fieldLabel: 'Type',
-                    name:       'type',
-                    store:      [['none','Label Only'], ['icon','Icon'], ['connector', 'Line / Arrow / Watermark'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer'], ['shape', 'Shape']],
-                    id:         'appearance_types',
-                    editable:    false,
-                    listeners: {
-                        change: function(This, newValue, oldValue, eOpts) {
-                            Ext.getCmp('appearanceForm').items.each(function(f, i) {
-                                if(f.cls != undefined) {
-                                    if(f.cls.match(newValue)) {
-                                        f.show();
-                                    } else {
-                                        f.hide();
-                                    }
-                                }
-                            });
-                            if(newValue == 'icon' || panel.hasScale) {
-                                Ext.getCmp('layoutscale').setDisabled(false);
-                            } else {
-                                Ext.getCmp('layoutscale').setDisabled(true);
-                            }
-                            if(newValue == 'shape') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['shapename']) {
-                                    values['shapename']           = 'arrow';
-                                    values['shapelocked']         = true;
-                                    values['shapewidth']          = 50;
-                                    values['shapeheight']         = 50;
-                                    values['shapecolor_ok']       = '#199C0F';
-                                    values['shapecolor_warning']  = '#CDCD0A';
-                                    values['shapecolor_critical'] = '#CA1414';
-                                    values['shapecolor_unknown']  = '#CC740F';
-                                    values['shapegradient']       =  0;
-                                    values['shapesource']         =  'fixed';
-                                }
-                                var originalRenderUpdate = renderUpdate;
-                                renderUpdate = Ext.emptyFn;
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                                renderUpdate = originalRenderUpdate;
-                            }
-
-                            if(newValue == 'pie') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['piewidth']) {
-                                    values['piewidth']             = 50;
-                                    values['pieheight']            = 50;
-                                    values['pielocked']            = true;
-                                    values['pieshadow']            = false;
-                                    values['piedonut']             = 0;
-                                    values['pielabel']             = false;
-                                    values['piegradient']          = 0;
-                                    values['piecolor_ok']          = '#199C0F';
-                                    values['piecolor_warning']     = '#CDCD0A';
-                                    values['piecolor_critical']    = '#CA1414';
-                                    values['piecolor_unknown']     = '#CC740F';
-                                    values['piecolor_up']          = '#199C0F';
-                                    values['piecolor_down']        = '#CA1414';
-                                    values['piecolor_unreachable'] = '#CA1414';
-                                }
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                            }
-
-                            if(newValue == 'speedometer') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['speedowidth']) {
-                                    values['speedowidth']             = 180;
-                                    values['speedoshadow']            = false;
-                                    values['speedoneedle']            = false;
-                                    values['speedodonut']             = 0;
-                                    values['speedogradient']          = 0;
-                                    values['speedosource']            = defaultSpeedoSource;
-                                    values['speedomargin']            =  5;
-                                    values['speedosteps']             = 10;
-                                    values['speedocolor_ok']          = '#199C0F';
-                                    values['speedocolor_warning']     = '#CDCD0A';
-                                    values['speedocolor_critical']    = '#CA1414';
-                                    values['speedocolor_unknown']     = '#CC740F';
-                                    values['speedocolor_bg']          = '#DDDDDD';
-                                    values['speedo_thresholds']       = 'line';
-                                }
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                            }
-
-                            if(newValue == 'connector') {
-                                // fill in defaults
-                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['connectorwidth']) {
-                                    var pos = panel.getPosition();
-                                    values['connectorfromx']             = pos[0]-100;
-                                    values['connectorfromy']             = pos[1];
-                                    values['connectortox']               = pos[0]+100;
-                                    values['connectortoy']               = pos[1];
-                                    values['connectorwidth']             = 3;
-                                    values['connectorarrowtype']         = 'both';
-                                    values['connectorarrowwidth']        = 10;
-                                    values['connectorarrowlength']       = 20;
-                                    values['connectorarrowinset']        = 2;
-                                    values['connectorcolor_ok']          = '#199C0F';
-                                    values['connectorcolor_warning']     = '#CDCD0A';
-                                    values['connectorcolor_critical']    = '#CA1414';
-                                    values['connectorcolor_unknown']     = '#CC740F';
-                                    values['connectorgradient']          =  0;
-                                    values['connectorsource']            = 'fixed';
-                                }
-                                var originalRenderUpdate = renderUpdate;
-                                renderUpdate = Ext.emptyFn;
-                                Ext.getCmp('appearanceForm').getForm().setValues(values);
-                                renderUpdate = originalRenderUpdate;
-                            }
-
-                            renderUpdate();
-                        }
-                    }
-                },
-
-                /* Icons */
-                {
-                    fieldLabel:   'Icon Set',
-                    id:           'iconset_field',
-                    xtype:        'combobox',
-                    name:         'iconset',
-                    cls:          'icon',
-                    store:         TP.iconsetsStore,
-                    value:        '',
-                    emptyText:    'use dashboards default icon set',
-                    displayField: 'name',
-                    valueField:   'value',
-                    listConfig : {
-                        getInnerTpl: function(displayField) {
-                            return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
-                        }
-                    },
-                    listeners: {
-                        change: function(This) { renderUpdate(undefined, true); }
-                    }
-                }, {
-                    xtype:      'panel',
-                    cls:        'icon',
-                    html:       'Place image sets in: '+usercontent_folder+'/images/status/',
-                    style:      'text-align: center;',
-                    bodyCls:    'form-hint',
-                    padding:    '10 0 0 0',
-                    border:      0
-                },
-
-
-                /* Shapes */
-                {
-                    fieldLabel:   'Shape',
-                    xtype:        'combobox',
-                    name:         'shapename',
-                    cls:          'shape',
-                    store:         TP.shapesStore,
-                    displayField: 'name',
-                    valueField:   'name',
-                    listConfig : {
-                        getInnerTpl: function(displayField) {
-                            TP.tmpid = 0;
-                            return '<div class="x-combo-list-item"><span name="{name}" height=16 width=16 style="vertical-align:top; margin-right: 3px;"><\/span>{name}<\/div>';
-                        }
-                    },
-                    listeners: {
-                        afterrender: function(This) {
-                            var me = This;
-                            me.shapes = [];
-                            This.getPicker().addListener('show', function(This) {
-                                Ext.Array.each(This.el.dom.getElementsByTagName('SPAN'), function(item, idx) {
-                                    TP.show_shape_preview(item, panel, me.shapes);
-                                });
-                            });
-                            This.getPicker().addListener('refresh', function(This) {
-                                Ext.Array.each(This.el.dom.getElementsByTagName('SPAN'), function(item, idx) {
-                                    TP.show_shape_preview(item, panel, me.shapes);
-                                });
-                            });
-                        },
-                        destroy: function(This) {
-                            // clean up
-                            Ext.Array.each(This.shapes, function(item, idx) { item.destroy() });
-                        },
-                        change: function(This) { renderUpdate(); }
-                    }
-                }, {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    name:       'shapesize',
-                    cls:        'shape',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate() } } },
-                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'shapewidth', unit: 'px', width: 65, value: panel.xdata.appearance.shapewidth },
-                            { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'shapeheight', unit: 'px', width: 65, value: panel.xdata.appearance.shapeheight, id: 'shapeheightfield' },
-                            { xtype: 'button', width: 22, icon: url_prefix+'plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'shapetogglelocked',
-                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({shapelocked: state ? '1' : '' }); renderUpdate(); }
-                            },
-                            { xtype: 'hidden', name: 'shapelocked' }
-                    ]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'shape',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
-                    },
-                    items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_ok',
-                            value:           panel.xdata.appearance.shapecolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 11px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_warning',
-                            value:           panel.xdata.appearance.shapecolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_critical',
-                            value:           panel.xdata.appearance.shapecolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown: ', hidden: panel.iconType == 'host' ? true : false },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'shapecolor_unknown',
-                            value:           panel.xdata.appearance.shapecolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' },
-                            hidden:          panel.iconType == 'host' ? true : false
-                    }]
-                }, {
-                    fieldLabel: 'Gradient',
-                    cls:        'shape',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'hbox', align: 'stretch' },
-                    items: [{
-                        xtype:        'numberfield',
-                        allowDecimals: true,
-                        name:         'shapegradient',
-                        maxValue:      1,
-                        minValue:     -1,
-                        step:          0.05,
-                        value:         panel.xdata.appearance.shapegradient,
-                        width:         55,
-                        listeners:   { change: function() { renderUpdate(); } }
-                    },
-                    { xtype: 'label', text: 'Source:', margins: {top: 2, right: 2, bottom: 0, left: 10} },
-                    {
-                        name:         'shapesource',
-                        xtype:        'combobox',
-                        id:           'shapesourceStore',
-                        displayField: 'name',
-                        valueField:   'value',
-                        queryMode:    'local',
-                        store:       { fields: ['name', 'value'], data: [] },
-                        editable:      false,
-                        value:         panel.xdata.appearance.shapesource,
-                        listeners:   { focus: perfDataUpdate, change: function() { renderUpdate(); } },
-                        flex:          1
-                    }]
-                }, {
-                    xtype:      'panel',
-                    cls:        'shape',
-                    html:       'Place shapes in: '+usercontent_folder+'/shapes/',
-                    style:      'text-align: center;',
-                    bodyCls:    'form-hint',
-                    padding:    '10 0 0 0',
-                    border:      0
-                },
-
-
-                /* Connector */
-                {
-                    fieldLabel: 'From',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorfrom',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'x',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorfromx',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorfromx
-                    }, {
-                        xtype:        'label',
-                        text:         'y',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorfromy',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorfromy
-                    },{
-                        xtype:        'label',
-                        text:         'Endpoints',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'combobox',
-                        name:         'connectorarrowtype',
-                        width:         70,
-                        matchFieldWidth: false,
-                        value:         panel.xdata.appearance.connectorarrowtype,
-                        store:         ['both', 'left', 'right', 'none'],
-                        listConfig : {
-                            getInnerTpl: function(displayField) {
-                                return '<div class="x-combo-list-item"><img src="'+url_prefix+'plugins/panorama/images/connector_type_{field1}.png" height=16 width=77 style="vertical-align:top; margin-right: 3px;"> {field1}<\/div>';
-                            }
-                        }
-                    }]
-                },
-                {
-                    fieldLabel: 'To',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorto',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'x',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectortox',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectortox
-                    }, {
-                        xtype:        'label',
-                        text:         'y',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectortoy',
-                        width:         70,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectortoy
-                    }]
-                },
-                {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorsize',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'Width',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorwidth',
-                        width:         60,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorwidth
-                    }, {
-                        xtype:        'label',
-                        text:         'Variable Width',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'checkbox',
-                        name:         'connectorvariable'
-                    }]
-                },
-                {
-                    fieldLabel: 'Endpoints',
-                    xtype:      'fieldcontainer',
-                    name:       'connectorarrow',
-                    cls:        'connector',
-                    layout:     { type: 'hbox', align: 'stretch' },
-                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
-                    items:        [{
-                        xtype:        'label',
-                        text:         'Width',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorarrowwidth',
-                        width:         60,
-                        unit:         'px',
-                        minValue:      0,
-                        value:         panel.xdata.appearance.connectorarrowwidth
-                    }, {
-                        xtype:        'label',
-                        text:         'Length',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorarrowlength',
-                        width:         60,
-                        minValue:      0,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorarrowlength
-                    }, {
-                        xtype:        'label',
-                        text:         'Inset',
-                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
-                    }, {
-                        xtype:        'numberunit',
-                        allowDecimals: false,
-                        name:         'connectorarrowinset',
-                        width:         60,
-                        unit:         'px',
-                        value:         panel.xdata.appearance.connectorarrowinset
-                    }]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'connector',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
-                    },
-                    items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up ' : 'Ok ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_ok',
-                            value:           panel.xdata.appearance.connectorcolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable ' : 'Warning ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_warning',
-                            value:           panel.xdata.appearance.connectorcolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down ' : 'Critical ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_critical',
-                            value:           panel.xdata.appearance.connectorcolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown ', hidden: panel.iconType == 'host' ? true : false },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'connectorcolor_unknown',
-                            value:           panel.xdata.appearance.connectorcolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' },
-                            hidden:          panel.iconType == 'host' ? true : false
-                    }]
-                }, {
-                    fieldLabel: 'Gradient',
-                    cls:        'connector',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'hbox', align: 'stretch' },
-                    items: [{
-                        xtype:        'numberfield',
-                        allowDecimals: true,
-                        name:         'connectorgradient',
-                        maxValue:      1,
-                        minValue:     -1,
-                        step:          0.05,
-                        value:         panel.xdata.appearance.connectorgradient,
-                        width:         55,
-                        listeners:   { change: function() { renderUpdate(); } }
-                    },
-                    { xtype: 'label', text: 'Source', margins: {top: 2, right: 2, bottom: 0, left: 10} },
-                    {
-                        name:         'connectorsource',
-                        xtype:        'combobox',
-                        id:           'connectorsourceStore',
-                        displayField: 'name',
-                        valueField:   'value',
-                        queryMode:    'local',
-                        store:       { fields: ['name', 'value'], data: [] },
-                        editable:      false,
-                        value:         panel.xdata.appearance.connectorsource,
-                        listeners:   { focus: perfDataUpdate, change: function() { renderUpdate(); } },
-                        flex:          1
-                    }]
-                }, {
-                    fieldLabel: 'Options',
-                    xtype:      'fieldcontainer',
-                    cls:        'connector',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                            { xtype: 'label', text: 'Cust. Perf. Data Min', style: 'margin-left: 0px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormin', step: 100 },
-                            { xtype: 'label', text: 'Max', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormax', step: 100 }
-                        ]
-                },
-
-
-                /* Pie Chart */
-                {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    cls:        'pie',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate() } } },
-                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'piewidth', unit: 'px', width: 65, value: panel.xdata.appearance.piewidth },
-                            { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'pieheight', unit: 'px', width: 65, value: panel.xdata.appearance.pieheight, id: 'pieheightfield' },
-                            { xtype: 'button', width: 22, icon: url_prefix+'plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'pietogglelocked',
-                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({pielocked: state ? '1' : '' }); renderUpdate(); }
-                            },
-                            { xtype: 'hidden', name: 'pielocked' }
-                    ]
-                }, {
-                    fieldLabel: 'Options',
-                    xtype:      'fieldcontainer',
-                    cls:        'pie',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
-                    {
-                        xtype:      'checkbox',
-                        name:       'pieshadow',
-                        hidden:      true
-                    },
-                    { xtype: 'label', text: 'Label Name:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'checkbox',
-                        name:       'pielabel'
-                    },
-                    { xtype: 'label', text: 'Label Value:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'checkbox',
-                        name:       'pielabelval'
-                    },
-                    { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'numberunit',
-                        allowDecimals: false,
-                        width:       60,
-                        name:       'piedonut',
-                        unit:       '%'
-                    }]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'pie',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo(color); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
-                    },
-                    items: [
-                        { xtype: 'label', text: 'Ok:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_ok',
-                            value:           panel.xdata.appearance.piecolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: 'Warning:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_warning',
-                            value:           panel.xdata.appearance.piecolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: 'Critical:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_critical',
-                            value:           panel.xdata.appearance.piecolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_unknown',
-                            value:           panel.xdata.appearance.piecolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' }
-                        },
-                        { xtype: 'label', text: 'Up:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_up',
-                            value:           panel.xdata.appearance.piecolor_up,
-                            width:           80,
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: 'Down:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_down',
-                            value:           panel.xdata.appearance.piecolor_down,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unreachable:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'piecolor_unreachable',
-                            value:           panel.xdata.appearance.piecolor_unreachable,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Gradient:' },
-                        {
-                            xtype:      'numberfield',
-                            allowDecimals: true,
-                            width:       80,
-                            name:       'piegradient',
-                            maxValue:    1,
-                            minValue:   -1,
-                            step:        0.05,
-                            value:       panel.xdata.appearance.piegradient
-                        }
-                    ]
-                },
-
-
-                /* Speedometer Chart */
-                {
-                    fieldLabel: 'Size',
-                    xtype:      'fieldcontainer',
-                    cls:        'speedometer',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'speedowidth', unit: 'px', width: 65, value: panel.xdata.appearance.speedowidth },
-                            { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
-                            { xtype: 'checkbox', name: 'speedoshadow', hidden: true },
-                            { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'checkbox', name: 'speedoneedle' },
-                            { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
-                            { xtype: 'numberunit', allowDecimals: false, width: 60, name: 'speedodonut', unit: '%' }
-                        ]
-                }, {
-                    fieldLabel: 'Axis',
-                    xtype:      'fieldcontainer',
-                    cls:        'speedometer',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                    { xtype: 'label', text: 'Steps:', style: 'margin-left: 0px; margin-right: 2px;' },
-                    {
-                        xtype:      'numberfield',
-                        allowDecimals: false,
-                        width:       40,
-                        name:       'speedosteps',
-                        step:        1,
-                        minValue:    0,
-                        maxValue:    1000
-                    },
-                    { xtype: 'label', text: 'Margin:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'numberunit',
-                        allowDecimals: false,
-                        width:       55,
-                        name:       'speedomargin',
-                        unit:       'px'
-                    },
-                    { xtype: 'label', text: 'Thresholds:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        name:       'speedo_thresholds',
-                        xtype:      'combobox',
-                        store:      ['hide', 'line', 'fill'],
-                        value:      'line',
-                        editable:    false,
-                        width:       60
-                    }
-                    ]
-                }, {
-                    fieldLabel: 'Colors',
-                    cls:        'speedometer',
-                    xtype:      'fieldcontainer',
-                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    {
-                        listeners: { change:    function()      { renderUpdateDo() }     },
-                                     mouseover: function(color) { renderUpdateDo({color: color, scope: this }); },
-                                     mouseout:  function(color) { renderUpdateDo();      }
-                    },
-                    items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_ok',
-                            value:           panel.xdata.appearance.speedocolor_ok,
-                            width:           80,
-                            tdAttrs:       { style: 'padding-right: 10px;'},
-                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_warning',
-                            value:           panel.xdata.appearance.speedocolor_warning,
-                            width:           80,
-                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
-                        },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_critical',
-                            value:           panel.xdata.appearance.speedocolor_critical,
-                            width:           80,
-                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
-                        },
-                        { xtype: 'label', text: 'Unknown:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_unknown',
-                            value:           panel.xdata.appearance.speedocolor_unknown,
-                            width:           80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' }
-                        },
-                        { xtype: 'label', text: 'Background:' },
-                        {
-                            xtype:          'colorcbo',
-                            name:           'speedocolor_bg',
-                            value:           panel.xdata.appearance.speedocolor_bg,
-                            width:           80
-                        },
-                        { xtype: 'label', text: 'Gradient:' },
-                        {
-                            xtype:      'numberfield',
-                            allowDecimals: true,
-                            width:       80,
-                            name:       'speedogradient',
-                            maxValue:    1,
-                            minValue:   -1,
-                            step:        0.05,
-                            value:       panel.xdata.appearance.speedogradient
-                        }
-                    ]
-                }, {
-                    fieldLabel:   'Source',
-                    name:         'speedosource',
-                    xtype:        'combobox',
-                    cls:          'speedometer',
-                    id:           'speedosourceStore',
-                    displayField: 'name',
-                    valueField:   'value',
-                    queryMode:    'local',
-                    store:       { fields: ['name', 'value'], data: [] },
-                    editable:      false,
-                    listeners: { focus:  perfDataUpdate,
-                                 change: function() { renderUpdate(undefined, true) }
-                    }
-                }, {
-                    fieldLabel: 'Options',
-                    xtype:      'fieldcontainer',
-                    cls:        'speedometer',
-                    layout:      { type: 'table', columns: 6, tableAttrs: { style: { width: '100%' } } },
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                        { xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
-                        { xtype: 'checkbox', name: 'speedoinvert' },
-                        { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
-                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
-                        { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
-                        { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 },
-                        { xtype: 'label', text: 'Factor:', style: 'margin-left: 0; margin-right: 2px;' },
-                        { xtype: 'textfield', width: 120, name: 'speedofactor', colspan: 5, emptyText: '100, 0.01, 1e3, 1e-6 ...' }
-                    ]
-                }]
+                defaults:      { anchor: '-12', labelWidth: 60, listeners: { change: function() { TP.iconSettingsGlobals.renderUpdate(); } } },
+                items:           appearanceItems
             }]
         }]
     };
@@ -1226,7 +455,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}); };
+    var labelUpdate = Ext.emptyFn;
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -1241,7 +470,7 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: labelUpdate } },
+                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: function() { labelUpdate(); } } },
                 items: [{
                     fieldLabel:   'Labeltext',
                     xtype:        'fieldcontainer',
@@ -1251,7 +480,7 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'labeltext',
                         flex:          1,
                         id:           'label_textfield',
-                        listeners:   { change: labelUpdate }
+                        listeners:   { change: function() { labelUpdate(); } }
                     }, {
                         xtype:        'button',
                         icon:         url_prefix+'plugins/panorama/images/lightning_go.png',
@@ -1272,7 +501,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Font',
                     layout:      { type: 'hbox', align: 'stretch' },
-                    defaults:    { listeners: { change: labelUpdate } },
+                    defaults:    { listeners: { change: function() { labelUpdate(); } } },
                     items:        [{
                         name:         'fontfamily',
                         xtype:        'fontcbo',
@@ -1315,12 +544,26 @@ TP.iconShowEditDialog = function(panel) {
                         listeners: {
                             afterrender: function() { if(panel.xdata.label.fontbold) { this.toggle(); } }
                         }
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontcenter',
+                        value:         panel.xdata.label.fontcenter
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        name:         'fontcenter',
+                        icon:         url_prefix+'plugins/panorama/images/text_align_center.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontcenter: state ? '1' : '' }); },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontcenter) { this.toggle(); } }
+                        }
                     }]
                 }, {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Position',
                     layout:      { type: 'hbox', align: 'stretch' },
-                    defaults:    { listeners: { change: labelUpdate } },
+                    defaults:    { listeners: { change: function() { labelUpdate(); } } },
                     items:        [{
                         name:         'position',
                         xtype:        'combobox',
@@ -1367,7 +610,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Border',
                     layout:      { type: 'hbox', align: 'stretch' },
-                    defaults:    { listeners: { change: labelUpdate } },
+                    defaults:    { listeners: { change: function() { labelUpdate(); } } },
                     items:        [{
                         xtype:        'colorcbo',
                         name:         'bordercolor',
@@ -1388,23 +631,141 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:     'table',
                     items: [{ xtype: 'label', text:  'width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'width', width: 55, value: panel.xdata.label.width, listeners: {
+                            { xtype: 'numberfield', name:  'width', width: 53, value: panel.xdata.label.width, minValue: 0, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     labelUpdate();
                                 }
                             }},
                             { xtype: 'label', text:  'height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'height', width: 55, value: panel.xdata.label.height, listeners: {
+                            { xtype: 'numberfield', name:  'height', width: 53, value: panel.xdata.label.height, minValue: 0, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    labelUpdate();
+                                }
+                            }},
+                            { xtype: 'label', text:  'round corners:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'roundcorners', width: 50, value: panel.xdata.label.roundcorners, minValue: 0, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     labelUpdate();
                                 }
                             }}
                         ]
+                    }, {
+                    fieldLabel: 'Options',
+                    xtype:      'fieldcontainer',
+                    layout:     'table',
+                    hidden:      panel.xdata.cls == 'TP.TextLabelWidget',
+                    items: [{ xtype: 'label', text:  'display:', style: 'margin-left: 0; margin-right: 2px;' },
+                            {
+                                xtype:          'combobox',
+                                name:           'display',
+                                value:          'always',
+                                store:         ['always', 'mouseover'],
+                                editable:        false
+                            }]
                     }
                 ]
             }]
         }]
     };
+
+    /* Popup Tab */
+    var popupTab;
+    if(panel.xdata.cls != 'TP.TextLabelWidget') {
+        popupTab = {
+            title: 'Popup',
+            type:  'panel',
+            items: [{
+                xtype : 'panel',
+                layout: 'fit',
+                border: 0,
+                bodyPadding: 2,
+                items: [{
+                    xtype:           'form',
+                    id:              'popupForm',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:       'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults:      { anchor: '-12', labelWidth: 50 },
+                    items: [{
+                        fieldLabel:     'Popup',
+                        xtype:          'combobox',
+                        name:           'type',
+                        value:          'default',
+                        store:         ['default', 'off', 'custom'],
+                        editable:        false,
+                        listeners:     {
+                            change: function(This, newValue, oldValue, eOpts) {
+                                var defaults = TP.getPanelDetailsHeader(panel, true);
+                                if(newValue == 'default') {
+                                    Ext.getCmp('popup_textfield').setValue(defaults);
+                                    Ext.getCmp('popup_textfield').setDisabled(true);
+                                }
+                                if(newValue == 'off') {
+                                    Ext.getCmp('popup_textfield').setValue('');
+                                    Ext.getCmp('popup_textfield').setDisabled(true);
+                                }
+                                if(newValue == 'custom') {
+                                    var old = Ext.getCmp('popup_textfield').getValue();
+                                    if(old == '' || old == defaults) {
+                                        Ext.getCmp('popup_textfield')
+                                            .setValue(defaults
+                                                     +"\ncustom:\nadditional text with placeholders just\n"
+                                                     +"like in labels. ex.: {{ name }}\n"
+                                                     //+"read more in the <a href='https://thruk.org/documentation/dashboard.html#lable-editing' target='_blank'>thruk documentation<\/a>\n"
+                                            );
+                                    }
+                                    Ext.getCmp('popup_textfield').setDisabled(false);
+                                }
+                            }
+                        }
+                      }, {
+                        fieldLabel:     'Custom',
+                        xtype:          'textarea',
+                        name:           'content',
+                        id:             'popup_textfield',
+                        autoScroll:      true,
+                        height:          220,
+                        disabled:       (panel.xdata.popup && panel.xdata.popup.type == "custom") ? false : true,
+                        fieldStyle:     { 'whiteSpace': 'pre' },
+                        value:          TP.getPanelDetailsHeader(panel, true),
+                        listeners:      { change: function() { TP.iconSettingsGlobals.popupPreviewUpdate() } }
+                      }]
+                }]
+            }],
+            listeners: {
+                activate: function(This, eOpts) {
+                    /* move to window center so the side panels fit onto the window */
+                    TP.iconSettingsWindow.center();
+                    var pos = TP.iconSettingsWindow.getPosition();
+                    TP.iconSettingsWindow.setPosition(pos[0], 50);
+                    TP.iconSettingsGlobals.popupPreviewUpdate();
+
+                    if(TP.iconLabelHelpWindow == undefined) {
+                        TP.iconLabelHelpWindow = new Ext.Window({
+                            height:     550,
+                            width:      450,
+                            layout:    'fit',
+                            autoScroll: true,
+                            title:     'Help',
+                            bodyStyle: 'background:white;',
+                            items:      TP.iconLabelHelp(panel, 'popup_textfield', [{name: 'Popup Sections', items: TP.getPanelDetailsHeader(panel)}]),
+                            listeners: { destroy: function() { delete TP.iconLabelHelpWindow; } },
+                            alignToSettingsWindow: function() {
+                                var pos  = TP.iconSettingsWindow.getPosition();
+                                this.showAt([pos[0] - 460, pos[1]]);
+                            }
+                        }).show();
+                        TP.iconLabelHelpWindow.alignToSettingsWindow();
+                    }
+                },
+                deactivate: function(This, eOpts) {
+                    if(TP.iconTip) { TP.iconTip.hide(); }
+                    if(TP.iconLabelHelpWindow) { TP.iconLabelHelpWindow.destroy(); }
+                }
+            }
+        };
+    }
 
     /* Source Tab */
     var sourceTab = {
@@ -1479,6 +840,7 @@ TP.iconShowEditDialog = function(panel) {
             appearanceTab,
             linkTab,
             labelTab,
+            popupTab,
             sourceTab
         ]
     });
@@ -1492,8 +854,9 @@ TP.iconShowEditDialog = function(panel) {
 
     var settingsWindow = new Ext.Window({
         height:  350,
-        width:   400,
+        width:   450,
         layout: 'fit',
+        hidden:  true,
         items:   tabPanel,
         panel:   panel,
         title:  'Icon Settings',
@@ -1513,6 +876,7 @@ TP.iconShowEditDialog = function(panel) {
                     panel.stateful = true;
                     delete panel.xdata.label;
                     delete panel.xdata.link;
+                    delete panel.xdata.popup;
                     var xdata = TP.get_icon_form_xdata(settingsWindow);
                     TP.log('['+this.id+'] icon config updated: '+Ext.JSON.encode(xdata));
                     for(var key in xdata) { panel.xdata[key] = xdata[key]; }
@@ -1542,11 +906,14 @@ TP.iconShowEditDialog = function(panel) {
                     ignoreInputFields: true,
                     scope: panel
                 });
+                TP.setIconSettingsValues(panel.xdata);
             },
             destroy: function() {
                 delete TP.iconSettingsWindow;
                 panel.stateful = true;
 
+                if(TP.iconTip) { TP.iconTip.hide(); }
+                if(TP.iconLabelHelpWindow) { TP.iconLabelHelpWindow.destroy(); }
                 if(!settingsWindow.skipRestore) {
                     // if we cancel directly after adding a new icon, destroy it
                     tab.enableMapControlsTemp();
@@ -1577,6 +944,12 @@ TP.iconShowEditDialog = function(panel) {
                 if(panel.dragEl2 && panel.dragEl2.el) { panel.dragEl2.el.dom.style.outline = ""; }
                 if(panel.labelEl && panel.labelEl.el) { panel.labelEl.el.dom.style.outline = ""; }
                 TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
+
+                if(panel.labelEl && panel.xdata.label.display && panel.xdata.label.display == 'mouseover') { panel.labelEl.hide(); }
+            },
+            move: function() {
+                if(TP.iconTip) { TP.iconTip.alignToSettingsWindow(); }
+                if(TP.iconLabelHelpWindow) { TP.iconLabelHelpWindow.alignToSettingsWindow(); }
             }
         }
     }).show();
@@ -1584,6 +957,38 @@ TP.iconShowEditDialog = function(panel) {
 
     TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
+
+    labelUpdate = function() {
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        panel.setIconLabel(xdata.label || {});
+    };
+    TP.iconSettingsGlobals.stateUpdate = function() {
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
+        labelUpdate();
+        // update performance data stores
+        TP.iconSettingsGlobals.perfDataUpdate();
+    }
+
+    TP.iconSettingsGlobals.popupPreviewUpdate = function() {
+        window.clearTimeout(TP.timeouts['timeout_popup_preview']);
+        TP.timeouts['timeout_popup_preview'] = window.setTimeout(function() {
+            TP.suppressIconTip = false;
+            panel.locked = true;
+            TP.iconTipTarget = panel;
+
+            TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
+
+            TP.iconTip.show();
+            window.clearTimeout(TP.iconTip.hideTimer);
+            delete TP.iconTip.hideTimer;
+
+            panel.locked = false;
+            TP.suppressIconTip = true;
+
+             TP.iconTip.alignToSettingsWindow();
+        }, 100);
+    }
 
     // new mouseover tips while settings are open
     TP.iconTip.hide();
@@ -1595,33 +1000,32 @@ TP.iconShowEditDialog = function(panel) {
     TP.iconSettingsWindow.panel = panel;
 
     settingsWindow.renderUpdateDo = renderUpdateDo;
-    renderUpdate = function(forceColor, forceRenderItem) {
+    TP.iconSettingsGlobals.renderUpdate = function(forceColor, forceRenderItem, delay) {
+        if(delay == undefined) { delay = 100; }
+        if(delay == 0) {
+            TP.iconSettingsWindow.renderUpdateDo(forceColor, forceRenderItem);
+            return;
+        }
         if(TP.skipRender) { return; }
         TP.reduceDelayEvents(TP.iconSettingsWindow, function() {
             if(TP.skipRender)          { return; }
             if(!TP.iconSettingsWindow) { return; }
             TP.iconSettingsWindow.renderUpdateDo(forceColor, forceRenderItem);
-        }, 100, 'timeout_settings_render_update');
+        }, delay, 'timeout_settings_render_update');
     };
-    settingsWindow.renderUpdate = renderUpdate;
-    renderUpdate();
+    TP.iconSettingsGlobals.renderUpdate();
 
     /* highlight current icon */
     if(panel.xdata.appearance.type == "connector") {
         panel.dragEl1.el.dom.style.outline = "2px dotted orange";
         panel.dragEl2.el.dom.style.outline = "2px dotted orange";
     } else if (panel.iconType == "text") {
-        panel.labelEl.el.dom.style.outline = "2px dotted orange";
+        if(panel.labelEl && panel.labelEl.el) {
+            panel.labelEl.el.dom.style.outline = "2px dotted orange";
+        }
     } else {
         panel.el.dom.style.outline = "2px dotted orange";
     }
-
-    window.setTimeout(function() {
-        if(TP.iconSettingsWindow) {
-            TP.iconSettingsWindow.toFront();
-        }
-    }, 100);
-    TP.modalWindows.push(settingsWindow);
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
@@ -1630,18 +1034,20 @@ TP.get_icon_form_xdata = function(settingsWindow) {
         layout:     Ext.getCmp('layoutForm').getForm().getValues(),
         appearance: Ext.getCmp('appearanceForm').getForm().getValues(),
         link:       Ext.getCmp('linkForm').getForm().getValues(),
-        label:      Ext.getCmp('labelForm').getForm().getValues()
+        label:      Ext.getCmp('labelForm').getForm().getValues(),
+        popup:      Ext.getCmp('popupForm') && Ext.getCmp('popupForm').getForm().getValues()
     }
     // clean up
-    if(xdata.label.labeltext == '') { delete xdata.label; }
-    if(xdata.link.link == '')       { delete xdata.link;  }
+    if(xdata.label.labeltext == '')   { delete xdata.label; }
+    if(xdata.link.link == '')         { delete xdata.link;  }
+    if(xdata.popup && xdata.popup.type == 'default') { delete xdata.popup; }
     if(xdata.layout.rotation == 0)  { delete xdata.layout.rotation; }
     Ext.getCmp('appearance_types').store.each(function(data, i) {
-        var t = data.raw[0];
+        var t = data.data.value;
+        var t2 = t;
+        if(t == 'speedometer') { t2 = 'speedo'; }
+        var p = new RegExp('^'+t2, 'g');
         for(var key in xdata.appearance) {
-            var t2 = t;
-            if(t == 'speedometer') { t2 = 'speedo'; }
-            var p = new RegExp('^'+t2, 'g');
             if(key.match(p) && t != xdata.appearance.type) {
                 delete xdata.appearance[key];
             }
@@ -1661,23 +1067,9 @@ TP.get_icon_form_xdata = function(settingsWindow) {
 
 TP.openLabelEditorWindow = function(panel) {
     var oldValue  = Ext.getCmp('label_textfield').getValue();
-    var perf_data = '';
-    // ensure fresh and correct performance data
-    var macros = TP.getPanelMacros(panel);
-    for(var key in macros.perfdata) {
-        delete macros.perfdata[key].perf;
-        delete macros.perfdata[key].key;
-        for(var key2 in macros.perfdata[key]) {
-            var keyname = '.'+key;
-            if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
-            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
-        }
-    }
-
     var labelEditorWindow = new Ext.Window({
         height:  500,
         width:   650,
-        layout: 'fit',
         title:  'Label Editor',
         modal:  true,
         buttonAlign: 'center',
@@ -1701,106 +1093,163 @@ TP.openLabelEditorWindow = function(panel) {
                }
         ],
         items:   [{
-            xtype:           'form',
-            bodyPadding:     2,
-            border:          0,
-            bodyStyle:       'overflow-y: auto;',
-            submitEmptyText: false,
-            layout:          'anchor',
-            defaults:      { width: '99%', labelWidth: 40 },
-            items:        [{
-                xtype:      'textarea',
-                fieldLabel: 'Label',
-                value:       Ext.getCmp('label_textfield').getValue().replace(/<br>/g,"<br>\n"),
-                id:         'label_textfield_edit',
-                height:      90,
-                listeners: {
-                    change: function(This) {
-                        Ext.getCmp('label_textfield').setValue(This.getValue())
-                    }
-                }
-            }, {
-                fieldLabel: 'Help',
-                xtype:      'fieldcontainer',
-                items:      [{
-                    xtype:   'label',
-                    cls:     'labelhelp',
-                    html:    '<p>Use HTML to format your label<br>'
-                            +'Ex.: <i>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
-                            +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
-                            +'Ex.: <i>Host {{name}}: {{plugin_output}}<\/i><\/p>'
-                            +'<p>You may also do calculations inside placeholders like this:<br>'
-                            +'Ex.: <i>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/i><\/p>'
-                            +'<p>use sprintf to format numbers:<br>'
-                            +'Ex.: <i>{{sprintf("%.2f %s",perfdata.rta.val, perfdata.rta.unit)}}<\/i><\/p>'
-                            +'<p>use strftime to format timestamps:<br>'
-                            +'Ex.: <i>{{strftime("%Y-%m-%d",last_check)}}<\/i><\/p>'
-                            +'<p>conditionals are possible:<br>'
-                            +'Ex.: <i>{{ if(acknowledged) {...} else {...} }}<\/i><\/p>'
-
-                            +'<p>There are different variables available depending on the type of icon/widget:<br>'
-                            +'<table><tr><th>Groups/Filters:<\/th><td><i>totals.services.ok<\/i><\/td><td>totals number of ok services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>totals number of warning services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>totals number of critical services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>totals number of unknown services<\/td><\/tr>'
-
-                            +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>totals number of up hosts<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>totals number of down hosts<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>totals number of unreachable hosts<\/td><\/tr>'
-
-                            +'<tr><th>Hosts:<\/th><td><i>name<\/i><\/td><td>Hostname<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>state<\/i><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>performance_data<\/i><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>has_been_checked<\/i><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>scheduled_downtime_depth<\/i><\/td><td>Downtime: 0 - No, &gtl;=1 - Yes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>acknowledged<\/i><\/td><td>Has this host been acknowledged: 0 - No, 1 - Yes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>last_check<\/i><\/td><td>Timestamp of last check<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>last_state_change<\/i><\/td><td>Timestamp of last state change<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>last_notification<\/i><\/td><td>Timestamp of last notification<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
-
-                            +'<tr><th>Services:<\/th><td><i>host_name<\/i><\/td><td>Hostname<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>description<\/i><\/td><td>Servicename<\/td><\/tr>'
-                            +'<tr><td><\/td><td colspan=2>(other attributes are identical to hosts)<\/td><\/tr>'
-
-                            +'<tr><th>Performance Data:<\/th><td colspan=2>(available performance data with their current values)<\/td><\/tr>'
-                            +perf_data
-
-                            +'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "60m"})) }}%<\/i><\/td><td>availability for the last 60 minutes<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "24h"})) }}%<\/i><\/td><td>availability for the last 24 hours<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "7d"})) }}%<\/i><\/td><td>availability for the last 7 days<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
-                            +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
-                            +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
-
-                            +'<\/table>',
+            xtype: 'panel',
+            height: 120,
+            border: 0,
+            items: [{
+                    xtype:           'form',
+                    bodyPadding:     2,
+                    border:          0,
+                    submitEmptyText: false,
+                    layout:          'anchor',
+                    defaults:      { width: '99%', labelWidth: 40 },
+                    items:        [{
+                        xtype:      'textarea',
+                        value:       Ext.getCmp('label_textfield').getValue().replace(/<br>/g,"<br>\n"),
+                        id:         'label_textfield_edit',
+                        height:      115,
                         listeners: {
-                            afterrender: function(This) {
-                                var examples = This.el.dom.getElementsByTagName('i');
-                                Ext.Array.each(examples, function(el, i) {
-                                    el.className = "clickable";
-                                    el.onclick   = function(i) {
-                                        var cur = Ext.getCmp('label_textfield_edit').getValue();
-                                        var val = Ext.htmlDecode(el.innerHTML);
-                                        if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
-                                        if(val.match(/<br>/)) { val += "\n"; }
-                                        Ext.getCmp('label_textfield_edit').setValue(cur+val);
-                                        Ext.getCmp('label_textfield_edit').up('form').body.dom.scrollTop=0;
-                                        Ext.getCmp('label_textfield_edit').focus();
-                                    }
-                                });
+                            change: function(This) {
+                                Ext.getCmp('label_textfield').setValue(This.getValue())
                             }
                         }
-                }]
-            }]
+                    }]
+                }
+            ]
+        }, {
+            xtype: 'panel',
+            layout: 'fit',
+            height: 320,
+            border: 0,
+            items: [{
+                    xtype:           'form',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:       'overflow-y: auto;',
+                    submitEmptyText: false,
+                    layout:          'anchor',
+                    defaults:      { width: '99%', labelWidth: 40 },
+                    items:        [TP.iconLabelHelp(panel, 'label_textfield_edit')]
+                }
+            ]
         }]
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
     Ext.getCmp('label_textfield').setValue(Ext.getCmp('label_textfield_edit').getValue());
-    TP.modalWindows.push(labelEditorWindow);
-    labelEditorWindow.toFront();
 }
+
+TP.iconLabelHelp = function(panel, textarea_id, extra) {
+    var perf_data = '';
+    // ensure fresh and correct performance data
+    var macros = TP.getPanelMacros(panel);
+    for(var key in macros.perfdata) {
+        delete macros.perfdata[key].perf;
+        delete macros.perfdata[key].key;
+        for(var key2 in macros.perfdata[key]) {
+            var keyname = '.'+key;
+            if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
+            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
+        }
+    }
+
+    var trend_data = '';
+    if(macros.trend && macros.trend.against) {
+        trend_data += '<tr><th>Trend Icon Data:<\/th><td colspan=2><\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><i>trend.compare<\/i><\/td><td>'+macros.trend.compare+'<\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><i>trend.against<\/i><\/td><td>'+macros.trend.against+'<\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><i>trend.result<\/i><\/td><td>'+macros.trend.result+'<\/td><\/tr>'
+    }
+
+    var extra_items = "";
+    if(extra) {
+        for(var x=0; x<extra.length; x++) {
+            extra_items += '<tr><th>'+extra[x].name+':<\/th><td colspan=2><\/td><\/tr>';
+            var data = extra[x].items;
+            for(var y=0; y<data.length; y++) {
+                extra_items += '<tr><td><\/td><td><i>{{ '+data[y]+' }}<\/i><\/td><td><\/td><\/tr>';
+            }
+        }
+    }
+    var help = {
+            xtype:   'label',
+            cls:     'labelhelp',
+            html:    '<p>Use HTML to format your label<br>'
+                    +'Ex.: <i>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
+                    +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
+                    +'Ex.: <i>Host {{name}}: {{plugin_output}}<\/i><\/p>'
+                    +'<p>You may also do calculations inside placeholders like this:<br>'
+                    +'Ex.: <i>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/i><\/p>'
+                    +'<p>use sprintf to format numbers:<br>'
+                    +'Ex.: <i>{{sprintf("%.2f %s",perfdata.rta.val, perfdata.rta.unit)}}<\/i><\/p>'
+                    +'<p>use strftime to format timestamps:<br>'
+                    +'Ex.: <i>{{strftime("%Y-%m-%d",last_check)}}<\/i><\/p>'
+                    +'<p>conditionals are possible:<br>'
+                    +'Ex.: <i>{{ if(acknowledged) {...} else {...} }}<\/i><\/p>'
+
+                    +'<p>There are different variables available depending on the type of icon/widget:<br>'
+                    +'<table><tr><th>Groups/Filters:<\/th><td><i>totals.services.ok<\/i><\/td><td>totals number of ok services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>totals number of warning services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>totals number of critical services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>totals number of unknown services<\/td><\/tr>'
+
+                    +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>totals number of up hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>totals number of down hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>totals number of unreachable hosts<\/td><\/tr>'
+
+                    +'<tr><th>Hosts:<\/th><td><i>name<\/i><\/td><td>Hostname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>state<\/i><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>performance_data<\/i><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>has_been_checked<\/i><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>scheduled_downtime_depth<\/i><\/td><td>Downtime: 0 - No, &gtl;=1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>acknowledged<\/i><\/td><td>Has this host been acknowledged: 0 - No, 1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>last_check<\/i><\/td><td>Timestamp of last check<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>last_state_change<\/i><\/td><td>Timestamp of last state change<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>last_notification<\/i><\/td><td>Timestamp of last notification<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
+
+                    +'<tr><th>Services:<\/th><td><i>host_name<\/i><\/td><td>Hostname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>description<\/i><\/td><td>Servicename<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2>(other attributes are identical to hosts)<\/td><\/tr>'
+
+                    +trend_data
+
+                    +'<tr><th>Performance Data:<\/th><td colspan=2>(available performance data with their current values)<\/td><\/tr>'
+                    +perf_data
+
+                    +'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "60m"})) }}%<\/i><\/td><td>availability for the last 60 minutes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "24h"})) }}%<\/i><\/td><td>availability for the last 24 hours<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "7d"})) }}%<\/i><\/td><td>availability for the last 7 days<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
+                    +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
+                    +extra_items
+
+                    +'<\/table>',
+                listeners: {
+                    afterrender: function(This) {
+                        var examples = This.el.dom.getElementsByTagName('i');
+                        Ext.Array.each(examples, function(el, i) {
+                            el.className = "clickable";
+                            el.onclick   = function(i) {
+                                var cur = Ext.getCmp(textarea_id).getValue();
+                                var val = Ext.htmlDecode(el.innerHTML);
+                                if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^trend\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
+                                if(val.match(/<br>/)) { val += "\n"; }
+                                var pos = getCaret(Ext.get(textarea_id+'-inputEl').dom);
+                                var txt = cur.substr(0, pos) + val + cur.substr(pos);
+                                Ext.getCmp(textarea_id).setValue(txt);
+                                Ext.getCmp(textarea_id).up('form').body.dom.scrollTop=0;
+                                Ext.getCmp(textarea_id).focus();
+                                setCaretToPos(Ext.get(textarea_id+'-inputEl').dom, pos+val.length);
+                            }
+                        });
+                    }
+                }
+    };
+    return(help);
+}
+
 
 TP.setIconSettingsValues = function(xdata) {
     xdata = TP.clone(xdata);
@@ -1808,11 +1257,13 @@ TP.setIconSettingsValues = function(xdata) {
     if(!xdata.label)            { xdata.label = { labeltext: '' }; }
     if(!xdata.label.fontsize)   { xdata.label.fontsize   = 14; }
     if(!xdata.label.bordersize) { xdata.label.bordersize =  1; }
+    if(!xdata.popup)            { xdata.popup = { type: 'default' }; }
     Ext.getCmp('generalForm').getForm().setValues(xdata.general);
     Ext.getCmp('layoutForm').getForm().setValues(xdata.layout);
     Ext.getCmp('appearanceForm').getForm().setValues(xdata.appearance);
     Ext.getCmp('linkForm').getForm().setValues(xdata.link);
     Ext.getCmp('labelForm').getForm().setValues(xdata.label);
+    Ext.getCmp('popupForm') && Ext.getCmp('popupForm').getForm().setValues(xdata.popup);
 }
 
 TP.getNextToPanelPos = function(panel, width, height) {
@@ -1845,4 +1296,20 @@ TP.getNextToPanelPos = function(panel, width, height) {
     if(panelPos[0] <  0) { panelPos[0] =  0; }
     if(panelPos[1] < 20) { panelPos[1] = 20; }
     return(panelPos);
+}
+
+TP.getPanelDetailsHeader = function(panel, asText) {
+    var d = panel.getDetails();
+    var header = [];
+    for(var x=0; x<d.length; x++) {
+        header.push(d[x][0]);
+    }
+    if(asText) {
+        var txt = '';
+        if(header.length > 0) {
+            txt = '{{ ' + header.join(' }}\n{{ ')+' }}';
+        }
+        return(txt);
+    }
+    return(header);
 }

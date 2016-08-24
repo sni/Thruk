@@ -1,7 +1,9 @@
 ### THRUK
 
+SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
+DAILYTARBALL=$(shell ./get_version | tr ' ' '~')
 
 newversion: versionprecheck
 	test -e .git
@@ -14,7 +16,7 @@ dailydist: cleandist
 	$(MAKE) newversion
 	$(MAKE) dist
 	$(MAKE) resetdaily
-	mv Thruk-*.tar.gz Thruk-$$(echo "$(DAILYVERSION)" | tr ' ' '~').tar.gz
+	mv thruk-*.tar.gz thruk-$(DAILYTARBALL).tar.gz
 	rm -f plugins/plugins-available/panorama/root/all_in_one-$(DAILYVERSIONFILES)_panorama.js \
 		root/thruk/javascript/all_in_one-$(DAILYVERSIONFILES).js \
 		themes/themes-available/Thruk/stylesheets/all_in_one-$(DAILYVERSIONFILES).css \
@@ -23,13 +25,11 @@ dailydist: cleandist
 
 releasedist: cleandist dist
 	git describe --tag --exact-match
-	if [ "$(VERSION)" != "$(DAILYVERSION)" ]; then \
-	    tar zxf Thruk-$(VERSION).tar.gz; \
-	    mv Thruk-$(VERSION) Thruk-$(DAILYVERSION); \
-	    tar cfz Thruk-$(DAILYVERSION).tar.gz Thruk-$(DAILYVERSION); \
-	    rm -f Thruk-$(VERSION).tar.gz; \
-	    rm -rf Thruk-$(DAILYVERSION); \
-	fi
+	#tar zxf thruk-$(VERSION).tar.gz
+	#mv thruk-$(VERSION) thruk-$(DAILYVERSION)
+	#tar cfz thruk-$(DAILYVERSION).tar.gz thruk-$(DAILYVERSION)
+	#rm -f thruk-$(VERSION).tar.gz
+	#rm -rf thruk-$(DAILYVERSION)
 	ls -la *.gz
 
 cleandist:
@@ -60,21 +60,21 @@ local_patches:
 	cp -rp support/*.patch                      blib/replace
 	cp -rp support/thruk_cookie_auth_vhost.conf blib/replace
 	cp -rp support/thruk_cookie_auth.include    blib/replace
-	sed -i blib/replace/* -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
-	sed -i blib/replace/* -e 's+@DATADIR@+${DATADIR}+g'
-	sed -i blib/replace/* -e 's+@LOGDIR@+${LOGDIR}+g'
-	sed -i blib/replace/* -e 's+@TMPDIR@+${TMPDIR}+g'
-	sed -i blib/replace/* -e 's+@LOCALSTATEDIR@+${LOCALSTATEDIR}+g'
-	sed -i blib/replace/* -e 's+@BINDIR@+${BINDIR}+g'
-	sed -i blib/replace/* -e 's+@INITDIR@+${INITDIR}+g'
-	sed -i blib/replace/* -e 's+@LIBDIR@+${LIBDIR}+g'
-	sed -i blib/replace/* -e 's+@CHECKRESULTDIR@+${CHECKRESULTDIR}+g'
-	sed -i blib/replace/* -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
-	sed -i blib/replace/* -e 's+@THRUKUSER@+${THRUKUSER}+g'
-	sed -i blib/replace/* -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
-	sed -i blib/replace/* -e 's+@HTMLURL@+${HTMLURL}+g'
-	sed -i blib/replace/* -e 's+@HTTPDCONF@+${HTTPDCONF}+g'
-	sed -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
+	${SED} -i blib/replace/* -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
+	${SED} -i blib/replace/* -e 's+@DATADIR@+${DATADIR}+g'
+	${SED} -i blib/replace/* -e 's+@LOGDIR@+${LOGDIR}+g'
+	${SED} -i blib/replace/* -e 's+@TMPDIR@+${TMPDIR}+g'
+	${SED} -i blib/replace/* -e 's+@LOCALSTATEDIR@+${LOCALSTATEDIR}+g'
+	${SED} -i blib/replace/* -e 's+@BINDIR@+${BINDIR}+g'
+	${SED} -i blib/replace/* -e 's+@INITDIR@+${INITDIR}+g'
+	${SED} -i blib/replace/* -e 's+@LIBDIR@+${LIBDIR}+g'
+	${SED} -i blib/replace/* -e 's+@CHECKRESULTDIR@+${CHECKRESULTDIR}+g'
+	${SED} -i blib/replace/* -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
+	${SED} -i blib/replace/* -e 's+@THRUKUSER@+${THRUKUSER}+g'
+	${SED} -i blib/replace/* -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
+	${SED} -i blib/replace/* -e 's+@HTMLURL@+${HTMLURL}+g'
+	${SED} -i blib/replace/* -e 's+@HTTPDCONF@+${HTTPDCONF}+g'
+	${SED} -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
 
 local_install: local_patches
 	mkdir -p ${DESTDIR}${TMPDIR}
@@ -87,11 +87,12 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/ssi
+	mkdir -p ${DESTDIR}${SYSCONFDIR}/action_menus
 	cp -p thruk.conf ${DESTDIR}${SYSCONFDIR}/thruk.conf
 	echo "do '${DATADIR}/menu.conf';" > ${DESTDIR}${SYSCONFDIR}/menu_local.conf
 	cp -p support/thruk_local.conf.example ${DESTDIR}${SYSCONFDIR}/thruk_local.conf
 	cp -p cgi.cfg ${DESTDIR}${SYSCONFDIR}/cgi.cfg
-	sed -e 's/^default_user_name=.*$$/default_user_name=/' -i ${DESTDIR}${SYSCONFDIR}/cgi.cfg
+	${SED} -e 's/^default_user_name=.*$$/default_user_name=/' -i ${DESTDIR}${SYSCONFDIR}/cgi.cfg
 	cp -p log4perl.conf.example ${DESTDIR}${SYSCONFDIR}/log4perl.conf
 	cp -p support/naglint.conf.example ${DESTDIR}${SYSCONFDIR}/naglint.conf
 	cp -p support/htpasswd ${DESTDIR}${SYSCONFDIR}/htpasswd
@@ -108,7 +109,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${DATADIR}/themes
 	mkdir -p ${DESTDIR}${DATADIR}/script
 	cp -rp lib root templates ${DESTDIR}${DATADIR}/
-	rm -f ${DESTDIR}${DATADIR}/root/thruk/themes
+	rm -rf ${DESTDIR}${DATADIR}/root/thruk/themes
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/usercontent/
 	rm -rf ${DESTDIR}${DATADIR}/root/thruk/usercontent
 	ln -fs ${SYSCONFDIR}/usercontent ${DESTDIR}${DATADIR}/root/thruk/
@@ -134,6 +135,11 @@ local_install: local_patches
 	cp -p script/thruk   ${DESTDIR}${BINDIR}/
 	cp -p script/naglint ${DESTDIR}${BINDIR}/
 	cp -p script/nagexp  ${DESTDIR}${BINDIR}/
+	# rpmlint requires absolute perl path
+	${SED} -e 's+/usr/bin/env perl+/usr/bin/perl+g' \
+		-i ${DESTDIR}${BINDIR}/nagexp \
+		-i ${DESTDIR}${DATADIR}/script/thruk_fastcgi.pl \
+		-i ${DESTDIR}${DATADIR}/script/thruk.psgi
 	############################################################################
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3

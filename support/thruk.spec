@@ -9,7 +9,7 @@
 %endif
 
 Name:          thruk
-Version:       2.06
+Version:       2.08
 Release: 1
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
@@ -147,7 +147,12 @@ exit 0
 
 %post base
 chkconfig --add thruk
-mkdir -p /var/cache/thruk/reports /var/log/thruk /etc/thruk/bp /var/lib/thruk /etc/thruk/thruk_local.d
+mkdir -p /var/cache/thruk/reports \
+         /var/log/thruk \
+         /etc/thruk/bp \
+         /etc/thruk/panorama \
+         /var/lib/thruk \
+         /etc/thruk/thruk_local.d
 touch /var/log/thruk/thruk.log
 chown -R %{apacheuser}:%{apachegroup} \
                 /var/lib/thruk \
@@ -156,6 +161,7 @@ chown -R %{apacheuser}:%{apachegroup} \
                 /etc/thruk/plugins/plugins-enabled \
                 /etc/thruk/thruk_local.conf \
                 /etc/thruk/bp \
+                /etc/thruk/panorama \
                 /etc/thruk/thruk_local.d
 /usr/bin/crontab -l -u %{apacheuser} 2>/dev/null | /usr/bin/crontab -u %{apacheuser} -
 %if %{defined suse_version}
@@ -222,6 +228,7 @@ case "$*" in
     rmdir /etc/thruk/plugins/plugins-enabled 2>/dev/null
     rmdir /etc/thruk/plugins 2>/dev/null
     rmdir /etc/thruk/bp 2>/dev/null
+    rmdir /etc/thruk/panorama 2>/dev/null
     rmdir /etc/thruk/thruk_local.d 2>/dev/null
     rmdir /etc/thruk 2>/dev/null
     rmdir /usr/share/thruk/plugins/plugins-available 2>/dev/null
@@ -232,7 +239,9 @@ case "$*" in
           /usr/share/thruk \
           /usr/lib/thruk \
           /etc/thruk/ssi \
+          /etc/thruk/action_menus \
           /etc/thruk/bp \
+          /etc/thruk/panorama \
           /etc/thruk \
           2>/dev/null
     ;;
@@ -290,6 +299,7 @@ exit 0
 %attr(0755,root,root) %{_bindir}/nagexp
 %attr(0755,root,root) %{_initrddir}/thruk
 %config %{_sysconfdir}/thruk/ssi
+%config %{_sysconfdir}/thruk/action_menus
 %config %{_sysconfdir}/thruk/thruk.conf
 %attr(0644,%{apacheuser},%{apachegroup}) %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %attr(0644,%{apacheuser},%{apachegroup}) %config(noreplace) %{_sysconfdir}/thruk/cgi.cfg

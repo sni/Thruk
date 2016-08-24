@@ -66,7 +66,10 @@ thruk_local.d/ instead.
 === thruk_local.d
 {% include new_since.ad version="2.00" %}
 Local settings drop directory. All files in here override settings from the
-thruk.conf file.
+thruk.conf file. Besides the standard file extension 'cfg' and 'conf' it is
+also possible to use the hostname. Those files are only used if the hostname
+matches the actual system hostname. This is a good way to separate test and
+production configuration.
 
 === thruk_local.conf
 
@@ -977,6 +980,11 @@ ex.:
   perf_bar_pnp_popup = 1
 
 
+=== useragentcompat
+If set, a Internet Explorer (IE) compatibility header will be added to the html
+header.
+
+
 === shown_inline_pnp
 Show inline pnp graph if available. If a service or host has a
 pnp4nagios action or notes url set. Thruk will show a inline graph on the
@@ -1206,6 +1214,17 @@ ex.:
   logcache = mongodb://localhost:27017/thruk_log_cache
 
 
+=== logcache_import_exclude
+{% include new_since.ad version="2.10" %}
+Define filter which prevents the logcache from overgrowing with useless
+log messages. Since the main reason for the logcache are availability reports
+it is ok to remove some entries. Can be used multiple times.
+
+ex.:
+
+  logcache_import_exclude = "Warning: Passive check result was received for"
+
+
 === delay_pages_after_backend_reload
 
 Delay the page delivery until the backends uptime is at least this
@@ -1326,6 +1345,20 @@ ex.:
 
   cookie_auth_login_hook = ./bin/hook.sh
 
+
+=== cookie_auth_direct_agents
+{% include new_since.ad version="2.10" %}
+This is a regular expression to set user agents which are allowed to request
+pages with normal basic auth.
+Use it to allow scripts easy access with bypassing the cookie auth and directly
+accessing pages.
+See an example in the link:cli.html#curl_wget[cli section].
+
+Default: (curl|wget)
+
+ex.:
+
+  cookie_auth_direct_agents = (curl|wget)
 
 
 
@@ -1651,21 +1684,55 @@ Sample icons with two action icons:
 .....
 
 
-Variant 1 - reference to a pre defined menu:
+*Variant 1* - put your action menus into a separate folder.
+{% include new_since.ad version="2.10" %}
+
+.....
+{% raw %}
+  *thruk_local.conf:*
+
+    action_menu_items_folder /etc/thruk/action_menus/
+
+{% endraw %}
+.....
+
+Menu files must have the .json file extension and contain the raw json
+definition of the action menu. One menu per file. The menu can be referenced
+by the filename later. For example if you filename is `/etc/thruk/action_menus/somemenu.json` then
+you can access the menu by the name `somemenu`.
+
+
+*Variant 2* - reference a menu from an external file:
+{% include new_since.ad version="2.10" %}
 
 .....
 {% raw %}
   *thruk_local.conf:*
 
     <action_menu_items>
-        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
-                             "title": "test title",\
-                             "menu":[\
-                                {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
-                                 "label":"refresh",\
-                                 "action":"server://refresh/$HOSTNAME$"}\
-                             ]\
-                            }
+        standardmenu      = file:///etc/thruk/standardmenu.json
+    </action_menu_items>
+{% endraw %}
+.....
+
+Menu files must contain the raw json definition of the action menu.
+
+
+*Variant 3* - reference to a pre defined menu:
+
+.....
+{% raw %}
+  *thruk_local.conf:*
+
+    <action_menu_items>
+        standardmenu = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
+                        "title": "test title",\
+                        "menu":[\
+                           {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
+                            "label":"refresh",\
+                            "action":"server://refresh/$HOSTNAME$"}\
+                        ]\
+                       }
     </action_menu_items>
 
   *host.cfg:*
@@ -1679,7 +1746,10 @@ Variant 1 - reference to a pre defined menu:
 .....
 
 
-Variant 2 - define the menu in object config only:
+*Variant 4* - define the menu in object config only:
+
+This obviously adds some overhead to your objects, so better use the other variants
+unless you want to change the menu from external commands.
 
 .....
 {% raw %}
@@ -1692,6 +1762,49 @@ Variant 2 - define the menu in object config only:
     }
 {% endraw %}
 .....
+
+
+=== action_menu_items_folder
+{% include new_since.ad version="2.10" %}
+Organize action_menu_items in a folder. Each file in this folder will be read as
+action menu.
+
+Both examples are equivalent and result in the same menu assuming there is
+a `/etc/thruk/action_menus/hostmenu.json` file.
+
+.....
+{% raw %}
+    action_menu_items_folder    =  /etc/thruk/action_menus/
+{% endraw %}
+.....
+
+.....
+{% raw %}
+    <action_menu_items>
+        hostmenu      = file:///etc/thruk/action_menus/hostmenu.json
+    </action_menu_items>
+{% endraw %}
+.....
+
+=== action_menu_apply
+{% include new_since.ad version="1.86" %}
+With apply rules adding action menus is made easy and independant from the actual
+object configuration. You can setup a few regular expression rules which then add
+the corresponding action menu to matching hosts and services. The syntax is
+`menu_name = Hostpattern;Servicepattern`
+
+ex.:
+
+  <action_menu_apply>
+    hostmenu    = .*;$             # matches all hosts only
+    servicemenu = .*;.+$           # matches all services on all hosts
+    specialmenu = ^Host;Service$   # matches an exact service on one host only
+    cpu_menu    = .*;CPU           # matches all services starting with 'CPU'
+    hostmenu    = ^Host            # matches all hosts starting with 'Host' (incl. services)
+    demomenu    = ^Demo;.*$        # matches all services on the 'Demo' host
+    demomenu    = ^Test;           # a menu name can be used multiple times
+  </action_menu_apply>
+
 
 
 === action_menu_actions
@@ -1710,27 +1823,6 @@ ex.:
       example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$ $USER20$
       refresh   = /usr/local/bin/refresh.sh otherargs
   </action_menu_actions>
-
-
-=== action_menu_apply
-{% include new_since.ad version="1.86" %}
-With apply rules adding action menus is made easy and independant from the actual
-object configuration. You can setup a few regular expression rules which then add
-the corresponding action menu to matching hosts and services. The syntax is
-`menu_name = Hostpattern;Servicepattern`
-
-ex.:
-
-  <action_menu_apply>
-    hostmenu    = .*;$             # matches all hosts only
-    servicemenu = .*;.+$           # matches all services on all hosts
-    specialmenu = ^Host;Service$   # matches an exact service on one host only
-    cpu_menu    = .*;CPU           # matches all services starting with 'CPU'
-    hostmenu    = ^Host            # matches all hosts starting with 'Host'
-    demomenu    = ^Demo;           # matches all services on the 'Demo' host
-    demomenu    = ^Test;           # a menu name can be used multiple times
-  </action_menu_apply>
-
 
 
 
@@ -1960,12 +2052,24 @@ Path to your htpasswd. Enables user management based an Apaches basic auth with 
 Run a command before saving object config files. Save will be canceled
 if the command returns non-zero exit code. Command will be run with
 'pre' as first argument and the root config folder as second argument.
-REMOTE_USER will be set in the environment.
+
+The following environment variables will be set:
+
+     ** `REMOTE_USER`          username of the logged in user
+     ** `THRUK_BACKEND_ID`     internal id of the current edited backend
+     ** `THRUK_BACKEND_NAME`   name of the current edited backend
 
 === post_obj_save_cmd
 Run a command after saving object config files. Command will be run with
 'post' as first argument and the root config folder as second
-argument. REMOTE_USER will be set in the environment.
+argument.
+
+The following environment variables will be set:
+
+     ** `REMOTE_USER`          username of the logged in user
+     ** `THRUK_BACKEND_ID`     internal id of the current edited backend
+     ** `THRUK_BACKEND_NAME`   name of the current edited backend
+
 
 === git_base_dir
 If not all config folders are managed by git, then you can specify a

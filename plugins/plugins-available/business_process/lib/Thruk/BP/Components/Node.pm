@@ -55,7 +55,7 @@ sub new {
         'acknowledged'              => 0,
         'testmode'                  => 0,
 
-        'status'                    => defined $data->{'status'} ? $data->{'status'} : 4,
+        'status'                    => $data->{'status'} // 4,
         'status_text'               => $data->{'status_text'} || '',
         'short_desc'                => $data->{'short_desc'}  || '',
         'last_check'                => 0,
@@ -357,7 +357,7 @@ set status of node
 sub set_status {
     my($self, $state, $text, $bp, $extra) = @_;
 
-    my $last_state = $self->{'status'};
+    my $last_state = $self->{'status'} // 4;
 
     # update last check time
     my $now = time();

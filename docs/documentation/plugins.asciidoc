@@ -359,5 +359,220 @@ TIP: Let me know if you want to get your plugin listed here.
 * 't' keep the tests here
 * 'templates' contains all template files for dynamic pages
 
-TIP: Easiest way would be to copy an existing plugin and change it to your
-needs.
+Hello World Plugin
+~~~~~~~~~~~~~~~~~~
+In this example we will create a small Plugin that displays the words 
+"Hello World!" on the plugin page hello.cgi. 
+
+First we create a minimal directory structure the plugin directory, 
+in linux it might be done like this:
+
+++++
+<pre style="line-height:18px;">
+mkdir -p hello/{lib/Thruk/Controller,templates} 
+</pre>
+++++
+
+.Next we need to create some files:
+- hello/description.txt
+- hello/preview.png
+- hello/routes
+- hello/lib/Thruk/Controller/hello.pm
+- hello/templates/hello.tt
+
+.hello/description.txt
+This file contains some basic information about your plugin displayed
+on the plugin overview page. For example
+
+++++
+<pre style="line-height:18px;">
+The 'Hello World' plugin displays the words "Hello World!" on the
+plugin page hello.cgi.
+
+Url: hello.cgi
+</pre>
+++++
+
+.hello/preview.png
+This is an image file that is also displayed on the plugin overview.
+
+.hello/routes
+This file is a snippet part of a perl module and contains a menu item
+for the sidebar:
+
+++++
+<pre style="line-height:18px;">
+##########################################################
+
+=head2 add_routes
+
+page: /thruk/cgi-bin/hello.cgi
+
+=cut
+
+$routes->{'/thruk/cgi-bin/hello.cgi'} = 'Thruk::Controller::hello::index';
+
+# add new menu item
+Thruk::Utils::Menu::insert_item('System', {
+                                'href'  => '/thruk/cgi-bin/hello.cgi',
+                                'name'  => 'Hello World!',
+}); 
+</pre>
+++++
+
+.hello/lib/Thruk/Controller/hello.pm
+This file is a perl module and contains the actual perl code that is run.
+In this case we only set a variable called hello_var in our Thruk::Context
+that we will access from the template later:
+
+++++
+<pre style="line-height:18px;">
+package Thruk::Controller::hello;
+
+use strict;
+use warnings;
+
+=head1 NAME
+
+Thruk::Controller::hello - Hello World!
+
+=head1 DESCRIPTION
+
+Hello World!.
+
+=head1 METHODS
+
+=cut
+
+
+=head2 index
+
+=cut
+
+sub index {
+        my ( $c ) = @_;
+
+        return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+
+        $c->stash->{title}           = 'Hello World!';
+        $c->stash->{'subtitle'}              = 'Hello World!';
+        $c->stash->{'infoBoxTitle'}          = 'Hello World!';
+        $c->stash->{template} = 'hello.tt';
+        $c->stash->{hello_var} = 'Hello World!'; # This is our magic variable
+}
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+1;
+</pre>
+++++
+.hello/templates/hello.tt
+This file is the template that builds our HTML for the hello.cgi page. It mostly
+consists of HTML with some variables accessed via the [% variable_name %] notation.
+
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>[% title_prefix %][% title %]</title>
+		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	</head>
+	<body>
+		<h1>[% hello_var %]</h1> <!-- This is where we access our variable -->
+	</body>
+</html>
+----
+Now if you want a more stylish plugin you can add some Thruk-common css and make your template look like this:
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>[% title_prefix %][% title %]</title>
+		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		[% PROCESS _common_css.tt  %]
+		[% PROCESS _header.tt
+			css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
+			js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
+		%]
+	</head>
+	<body>
+		<h1>[% hello_var %]</h1> <!-- This is where we access our variable -->
+	</body>
+</html>
+----
+
+You can also add some info boxes and your plugin will look like all the rest:
+
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>[% title_prefix %][% title %]</title>
+		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		[% PROCESS _common_css.tt %]
+		[% PROCESS _header.tt
+			css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
+			js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
+		%]
+	</head>
+	<body>
+		[% PROCESS _message.tt %]
+		[% PROCESS _overdiv.tt %]
+		[% PROCESS _infobox.tt %]
+		<h1>[% hello_var %]</h1> <!-- This is where we access our variable -->
+	</body>
+</html>
+----
+You can also protect your cgi page using the authorization settings from cgi.cfg. 
+
+Lets say you want to limit access to users with both the permissions
+'authorized_for_configuration_information' and 'authorized_for_system_commands'
+then you can use the function '$c->check_user_roles' with the appropriate parameters to check permissions.
+You can modify your index function in 'hello/lib/Thruk/Controller/hello.pm' to look like this
+to stop anyone from accessing your cgi without proper permissions:
+
+++++
+<pre style="line-height:18px;">
+
+sub index {
+        my ( $c ) = @_;
+
+        return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+        if( !$c->check_user_roles("authorized_for_configuration_information") || !$c->check_user_roles("authorized_for_system_commands")) {
+                return $c->detach('/error/index/8');
+        }
+
+        $c->stash->{title}           = 'Hello World!';
+        $c->stash->{'subtitle'}              = 'Hello World!';
+        $c->stash->{'infoBoxTitle'}          = 'Hello World!';
+        $c->stash->{template} = 'hello.tt';
+        $c->stash->{hello_var} = 'Hello World!'; # This is our magic variable
+}
+
+</pre>
+++++
+
+That's it! With these files in place you can restart your webserver and you will have
+a link to hello.cgi in your Thruk sidebar.
+
+++++
+<a title="hello" rel="lightbox[plugins]" href="plugins/hello1.png"><img src="plugins/hello1.png" alt="Hello World Plugin" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+TIP: Try to copy an existing plugin, change it to your needs
+or copy/paste ideas from it to your own.

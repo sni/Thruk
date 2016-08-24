@@ -136,7 +136,7 @@ sub index {
     elsif($subcat eq 'objects') {
         $c->stash->{'obj_model_changed'} = 0;
         _process_objects_page($c);
-        Thruk::Utils::Conf::store_model_retention($c) if $c->stash->{'obj_model_changed'};
+        Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'}) if $c->stash->{'obj_model_changed'};
         $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
     }
 
@@ -1189,6 +1189,7 @@ sub _apply_config_changes {
             return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
         }
         if($c->{'obj_db'}->commit($c)) {
+            $c->stash->{'obj_model_changed'} = 1;
             Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
         }
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
@@ -1480,7 +1481,8 @@ sub _htpasswd_password {
 # returns htpasswd path
 sub _get_htpasswd {
     # htpasswd is usually somewhere in sbin
-    local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin';
+    # SLES11: htpasswd2 /usr/bin
+    local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin:/usr/bin';
     my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
     return($htpasswd);
 }
@@ -1817,6 +1819,7 @@ sub _object_disable {
     $obj->{'disabled'}               = 1;
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
+    $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
 
     # create log message
@@ -1838,6 +1841,7 @@ sub _object_enable {
     $obj->{'disabled'}               = 0;
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
+    $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
 
     # create log message
@@ -1855,14 +1859,39 @@ sub _object_enable {
 sub _object_delete {
     my($c, $obj) = @_;
 
+    my $refs = $c->{'obj_db'}->get_references($obj);
     if(!$c->req->parameters->{'force'}) {
-        my $refs = $c->{'obj_db'}->get_references($obj);
         if(scalar keys %{$refs}) {
-            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($obj->get_type()).' has remaining references' );
             return $c->redirect_to('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id().'&show_force=1');
         }
     }
+
+    if($c->req->parameters->{'ref'}) {
+        my $name        = $obj->get_name();
+        my $refs_delete = Thruk::Utils::list($c->req->parameters->{'ref'});
+        for my $id (@{$refs_delete}) {
+            for my $type (keys %{$refs}) {
+                if($refs->{$type}->{$id}) {
+                    my $ref_obj = $c->{'obj_db'}->get_object_by_id($id);
+                    for my $attr (keys %{$refs->{$type}->{$id}}) {
+                        if(ref $ref_obj->{'conf'}->{$attr} eq 'ARRAY') {
+                            $ref_obj->{'conf'}->{$attr} = [grep(!/^\Q$name\E$/mx, @{$ref_obj->{'conf'}->{$attr}})];
+                        } elsif(ref $ref_obj->{'conf'}->{$attr} eq '') {
+                            delete $ref_obj->{'conf'}->{$attr};
+                        }
+                        $c->{'obj_db'}->update_object($ref_obj, $ref_obj->{'conf'});
+                        $ref_obj->{'file'}->{'changed'}  = 1;
+                        $c->{'obj_db'}->{'needs_commit'} = 1;
+                        # remove if its unused now
+                        $c->{'obj_db'}->delete_object($ref_obj) if($ref_obj->can('is_unused') && $ref_obj->is_unused($c->{'obj_db'}));
+                    }
+                }
+            }
+        }
+    }
+
     $c->{'obj_db'}->delete_object($obj);
+    $c->stash->{'obj_model_changed'} = 1;
 
     # create log message
     $c->log->info(sprintf("[config][%s][%s] removed %s '%s'",

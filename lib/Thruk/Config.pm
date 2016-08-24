@@ -27,7 +27,7 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.06';
+our $VERSION = '2.08';
 
 my $project_root = home('Thruk::Config');
 my $branch       = '';
@@ -45,7 +45,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'March 02, 2016',
+              'released'               => 'May 06, 2016',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -268,6 +268,25 @@ sub get_config {
     my %config  = %Thruk::Config::config;
     my $first_backend_from_thruk_locals = 0;
     for my $file (@files) {
+        my $ext;
+        if($file =~ m/\.([^.]+)$/mx) { $ext = $1; }
+        if(!$ext) {
+            if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                print STDERR "skipped config file: ".$file.", file has no extension, please use either cfg, conf or the hostname\n";
+            }
+            next;
+        }
+        if($ext ne 'conf' && $ext ne 'cfg') {
+            # only read if the extension matches the hostname
+            our $hostname;
+            if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
+            if($file !~ m/\Q$hostname\E$/mx) {
+                if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                    print STDERR "skipped config file: ".$file.", file does not end with our hostname '$hostname'\n";
+                }
+                next;
+            }
+        }
         if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
             print STDERR "reading config file: ".$file."\n";
         }
@@ -358,6 +377,7 @@ sub set_default_config {
         use_pager                       => 1,
         start_page                      => $config->{'url_prefix'}.'main.html',
         documentation_link              => $config->{'url_prefix'}.'docs/index.html',
+        useragentcompat                 => '',
         show_notification_number        => 1,
         strict_passive_mode             => 1,
         hide_passive_icon               => 0,
@@ -478,7 +498,7 @@ sub set_default_config {
     }
 
     # make a nice path
-    for my $key (qw/tmp_path var_path/) {
+    for my $key (qw/tmp_path var_path etc_path/) {
         $config->{$key} =~ s/\/$//mx if $config->{$key};
     }
 
@@ -765,6 +785,15 @@ sub _do_finalize_config {
     $config->{'var_path'} = $config->{'home'}.'/var' unless defined $config->{'var_path'};
     $config->{'var_path'} =~ s|/$||mx;
 
+    if(!defined $config->{'etc_path'}) {
+        if($ENV{'THRUK_CONFIG'}) {
+            $config->{'etc_path'} = $ENV{'THRUK_CONFIG'};
+        } else {
+            $config->{'etc_path'} = $config->{'home'};
+        }
+    }
+    $config->{'etc_path'} =~ s|/$||mx;
+
     ###################################################
     # switch user when running as root
     my $var_path = $config->{'var_path'} or die("no var path!");
@@ -867,7 +896,7 @@ sub _do_finalize_config {
     $config->{'tmp_path'} =~ s|/$||mx;
     $config->{'View::TT'}->{'COMPILE_DIR'} = $config->{'tmp_path'}.'/ttc_'.$>;
 
-    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{home}.'/ssi';
+    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
 
     ###################################################
     # when using shadow naemon, some settings don't make sense
@@ -909,6 +938,18 @@ sub _do_finalize_config {
         $config->{'expand_user_macros'} = $new_expand_user_macros;
     }
 
+    # expand action_menu_items_folder
+    my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
+    for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
+        next unless -d $folder.'/.';
+        my @files = glob($folder.'/*.json');
+        for my $file (@files) {
+            if($file =~ m%([^/]+\.json$)%mx) {
+                my $basename = $1;
+                $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
+            }
+        }
+    }
 
     # set default config
     set_default_config($config);

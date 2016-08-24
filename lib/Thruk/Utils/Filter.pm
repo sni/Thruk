@@ -18,6 +18,7 @@ use URI::Escape qw/uri_escape/;
 use JSON::XS ();
 use Encode qw/decode_utf8/;
 use Digest::MD5 qw(md5_hex);
+use File::Slurp qw/read_file/;
 
 ##############################################
 # use faster HTML::Escape if available
@@ -479,17 +480,32 @@ sub get_action_menu {
     our $already_checked_action_menus;
     $already_checked_action_menus = {} unless defined $already_checked_action_menus;
 
+    my $sourcefile;
     if($menu !~ m/^[\[\{]/mx) {
         my $new = $c->config->{'action_menu_items'}->{$menu};
         if(!$new) {
             return(["no $menu in action_menu_items", "{}"]);
         }
+        if($new =~ m%^file://(.*)$%mx) {
+            $sourcefile = $1;
+            if(!-r $sourcefile) {
+                my $err = $new.': '.$!;
+                unless(exists $already_checked_action_menus->{$menu}) {
+                    $c->log->error("error in action menu ".$menu.": ".$err);
+                    $already_checked_action_menus->{$menu} = $err;
+                }
+                return([$already_checked_action_menus->{$menu}, $new]);
+            }
+            $new = read_file($sourcefile);
+            $c->config->{'action_menu_items'}->{$menu} = $new;
+        }
         # fix trailing commas in menu
         $new =~ s/\,\s*([\}\]\)]+)/$1/gmx;
         unless(exists $already_checked_action_menus->{$menu}) {
-            $already_checked_action_menus->{$menu} = validate_json($new);
-            if($already_checked_action_menus->{$menu}) {
-                $c->log->error("error in action menu: ".$already_checked_action_menus->{$menu}."\nsource:\n".$new);
+            my $err = validate_json($new);
+            $already_checked_action_menus->{$menu} = $err;
+            if($err) {
+                $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$new);
             }
         }
         return([$already_checked_action_menus->{$menu}, $new]);
@@ -500,7 +516,7 @@ sub get_action_menu {
 
     my $err = validate_json($menu);
     if($err) {
-        $c->log->error("error in action menu: ".$err."\nsource:\n".$menu);
+        $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$menu);
     }
     return([$err, $menu]);
 }
@@ -871,13 +887,13 @@ sub has_business_process {
 
 =head2 button
 
-  my $html = button($link, $value, $class, [$onclick], [$formstyle], [$keeplink])
+  my $html = button($link, $value, $class, [$onclick], [$formstyle], [$keeplink], [$skipform])
 
 returns button html source
 
 =cut
 sub button {
-    my($link, $value, $class, $onclick, $formstyle, $keeplink) = @_;
+    my($link, $value, $class, $onclick, $formstyle, $keeplink, $skipform) = @_;
 
     my($page, $args);
     if($keeplink) {
@@ -885,10 +901,12 @@ sub button {
         $args = "";
     } else {
         ($page, $args) = split(/\?/mx, $link, 2);
-        $args =~ s/&amp;/&/gmx;
+        $args =~ s/&amp;/&/gmx if defined $args;
     }
 
-    my $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>';
+    my $html = '';
+    $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>' unless $skipform;
+    $args = '' unless defined $args;
     for my $a (split/\&/mx, $args) {
         my($k,$v) = split(/=/mx,$a,2);
         $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
@@ -896,7 +914,7 @@ sub button {
     $html   .= '<button class="'.$class.'"';
     $html   .= ' onclick="'.$onclick.'"' if $onclick;
     $html   .= '>'.$value.'</button>';
-    $html   .= '</form>';
+    $html   .= '</form>' unless $skipform;
     return $html;
 }
 
@@ -985,10 +1003,10 @@ sub split_perfdata {
             'crit'      => $crit,
             'orig'      => $orig,
         } if defined $var;
-        $has_warn = 1 if $warn ne '';
-        $has_crit = 1 if $crit ne '';
-        $has_min  = 1 if $min  ne '';
-        $has_max  = 1 if $max  ne '';
+        $has_warn = 1 if(defined $warn && $warn ne '');
+        $has_crit = 1 if(defined $crit && $crit ne '');
+        $has_min  = 1 if(defined $min  && $min  ne '');
+        $has_max  = 1 if(defined $max  && $max  ne '');
     }
     return($data, $has_parents, $has_warn, $has_crit, $has_min, $has_max);
 }

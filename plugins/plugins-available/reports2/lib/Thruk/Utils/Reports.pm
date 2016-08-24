@@ -213,7 +213,7 @@ sub report_send {
                  To      => $to,
                  Cc      => $cc,
                  Bcc     => $bcc,
-                 Subject => encode("MIME-B", $subject),
+                 Subject => encode("MIME-B", decode_utf8($subject)),
                  Type    => 'multipart/mixed',
         );
         for my $key (keys %{$mailheader}) {
@@ -227,7 +227,7 @@ sub report_send {
             $msg->add($key => $mailheader->{$key});
         }
         $msg->attach(Type     => 'text/plain; charset=UTF-8',
-                     Data     => encode_utf8($mailbody),
+                     Data     => $mailbody,
         );
 
         # url reports as html
@@ -236,16 +236,20 @@ sub report_send {
             if(!-s $attachment) {
                 $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
             }
-            $msg->attach(Type    => 'text/html',
+            my $ctype = 'text/html';
+            if($report->{'var'}->{'ctype'} && $report->{'var'}->{'ctype'} ne 'html2pdf') {
+                $ctype = $report->{'var'}->{'ctype'};
+            }
+            $msg->attach(Type    => $ctype,
                      Path        => $attachment,
-                     Filename    => $report->{'var'}->{'attachment'},
+                     Filename    => encode_utf8($report->{'var'}->{'attachment'}),
                      Disposition => 'attachment',
             );
         }
         elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
             $msg->attach(Type    => $report->{'var'}->{'ctype'},
                      Path        => $attachment,
-                     Filename    => $report->{'var'}->{'attachment'},
+                     Filename    => encode_utf8($report->{'var'}->{'attachment'}),
                      Disposition => 'attachment',
             );
         } else {
@@ -1107,7 +1111,7 @@ sub _read_report_file {
     if(!$report->{'var'}->{'is_running'} && $report->{'var'}->{'job'} && !Thruk::Utils::External::is_running($c, $report->{'var'}->{'job'}, 1)) {
         my $jobid = delete $report->{'var'}->{'job'};
         my($out,$err,$time, $dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $jobid, 1);
-        if($err) {
+        if($err && $err !~ m/\Qno such job:\E/mx) {
             # append job error to report logfile
             open(my $fh, '>>', $log);
             print $fh $err;

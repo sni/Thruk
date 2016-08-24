@@ -155,6 +155,21 @@ sub get_macros {
 
 ##########################################################
 
+=head2 is_unused
+
+returns true if service has no references to hosts or hostgroups
+
+=cut
+sub is_unused {
+    my($self, $objects) = @_;
+    my($svc_conf_keys, $svc_config) = $self->get_computed_config($objects);
+    return(0) if($svc_config->{'host_name'} && scalar @{$svc_config->{'host_name'}} > 0);
+    return(0) if($svc_config->{'hostgroup_name'} && scalar @{$svc_config->{'hostgroup_name'}} > 0);
+    return(1);
+}
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2009-present, <sven@nierlein.org>

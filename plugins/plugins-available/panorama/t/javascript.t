@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use File::Temp qw/tempfile/;
+use File::Slurp qw/read_file/;
 
 use lib('t');
 require TestUtils;
@@ -103,6 +104,8 @@ for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
     $file =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
     ok($file, $file);
     js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
+    my $content = read_file($file);
+    ok($content =~ m/\n$/s, "file $file must end with a newline");
 }
 #################################################
 # add dynamic js

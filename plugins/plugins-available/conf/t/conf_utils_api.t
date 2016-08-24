@@ -60,10 +60,12 @@ BEGIN {
     open(my $fh, '>>', $local_dir.'/thruk_local.conf') or die("open failed: ".$!);
     print $fh "var_path  = ".$local_dir."/var\n";
     print $fh "tmp_path  = ".$local_dir."/tmp\n";
+    print $fh "ssi_path  = ".$local_dir."/tmp\n";
     close($fh);
     open($fh, '>>', $http_dir.'/thruk_local.conf') or die("open failed: ".$!);
     print $fh "var_path  = ".$http_dir."/var\n";
     print $fh "tmp_path  = ".$http_dir."/tmp\n";
+    print $fh "ssi_path  = ".$http_dir."/tmp\n";
     close($fh);
     my $cmd = "cat $local_dir/thruk_local.conf | sed -e 's|/tmp/live|$local_dir/tmp/live|g' -e 's|= plugins/.*\$|$local_dir/$input_dir|g' > $local_dir/thruk_local.conf2 && mv $local_dir/thruk_local.conf2 $local_dir/thruk_local.conf";
     ok($cmd, $cmd);

@@ -174,7 +174,7 @@ sub store_objects {
     $c->{'obj_db'}->{'needs_commit'} = 1;
     $c->{'obj_db'}->{'last_changed'} = time();
     require Thruk::Utils::Conf;
-    Thruk::Utils::Conf::store_model_retention($c) or die("failed to store objects model");
+    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'}) or die("failed to store objects model");
     return;
 }
 
@@ -490,13 +490,15 @@ sub _from_fcgi {
             $msg = "authorization failed, no auth key specified for ". $c->req->url."\n";
         }
         $res = {
-            'version' => $c->config->{'version'},
-            'branch'  => $c->config->{'branch'},
             'output'  => $msg,
             'rc'      => 1,
         };
     } else {
         $res = _run_commands($c, $data->{'options'}, 'fcgi');
+    }
+    if(ref $res eq 'HASH') {
+        $res->{'version'} = $c->config->{'version'} unless defined $res->{'version'};
+        $res->{'branch'}  = $c->config->{'branch'}  unless defined $res->{'branch'};
     }
     my $res_json;
     eval {
@@ -527,7 +529,6 @@ sub _run_commands {
     }
 
     my $data = {
-        'version' => $c->config->{'version'},
         'output'  => '',
         'rc'      => 0,
     };
@@ -1059,6 +1060,16 @@ sub _cmd_downtimetask {
         $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
     }
 
+    my $output     = '';
+    if(!$downtime->{'target'}) {
+        $downtime->{'target'} = 'host';
+        $downtime->{'target'} = 'service' if $downtime->{'service'};
+    }
+
+    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
+    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
+    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
+
     # do quick self check
     Thruk::Utils::RecurringDowntimes::check_downtime($c, $downtime, $file);
 
@@ -1073,16 +1084,6 @@ sub _cmd_downtimetask {
         $hours    = int($downtime->{'duration'} / 60);
         $minutes  = $downtime->{'duration'}%60;
     }
-
-    my $output     = '';
-    if(!$downtime->{'target'}) {
-        $downtime->{'target'} = 'host';
-        $downtime->{'target'} = 'service' if $downtime->{'service'};
-    }
-
-    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
-    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
-    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
 
     my $done = {hosts => {}, groups => {}};
     my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
@@ -1306,6 +1307,11 @@ sub _cmd_import_logs {
         }
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs()");
+        my $plugin_ref_count;
+        if($mode eq 'clean') {
+            $plugin_ref_count = $log_count->[1];
+            $log_count        = $log_count->[0];
+        }
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
         $action    = "removed" if $mode eq 'clean';
@@ -1322,15 +1328,16 @@ sub _cmd_import_logs {
             # already printed if verbose
             $details = join("\n", @{$errors})."\n";
         }
-        return(sprintf("%s - %s %i log items from %i site%s %s in %.2fs (%i/s)\n%s",
+        return(sprintf("%s - %s %i log items %sfrom %i site%s %s in %.2fs (%i/s)\n%s",
                        $msg,
                        $action,
                        $log_count,
+                       $plugin_ref_count ? "(and ".$plugin_ref_count." plugin ouput references) " : '',
                        $backend_count,
                        ($backend_count == 1 ? '' : 's'),
                        $res,
                        ($elapsed),
-                       (($elapsed) > 0 ? ($log_count / ($elapsed)) : $log_count),
+                       (($elapsed > 0 && $log_count > 0) ? ($log_count / ($elapsed)) : $log_count),
                        $details,
                        ), $rc);
     }
@@ -1429,8 +1436,14 @@ sub _cmd_configtool {
     $c->req->parameters->{'backend'} = $peerkey;
 
     require Thruk::Utils::Conf;
-    if(!Thruk::Utils::Conf::set_object_model($c) || $peerkey ne $c->stash->{'param_backend'}) {
+    if(!Thruk::Utils::Conf::set_object_model($c)) {
+        if($c->stash->{set_object_model_err}) {
+            return("failed to set objects model: ".$c->stash->{set_object_model_err}, 1);
+        }
         return("failed to set objects model", 1);
+    }
+    if($peerkey ne $c->stash->{'param_backend'}) {
+        return("failed to set objects model, got configtool section for wrong backend", 1);
     }
     # outgoing file sync
     elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {

@@ -1,6 +1,6 @@
---- a/thruk.conf	2015-05-04 11:38:01.000000000 +0200
-+++ b/thruk.conf	2015-05-04 11:38:37.000000000 +0200
-@@ -91,7 +91,7 @@
+--- a/thruk.conf	2016-05-18 17:01:31.415926931 +0200
++++ b/thruk.conf	2016-05-18 17:33:42.366387445 +0200
+@@ -101,7 +101,7 @@
  
  ######################################
  # location of your cgi.cfg
@@ -9,7 +9,7 @@
  
  ######################################
  # use frames, can be useful for addons
-@@ -197,11 +197,11 @@
+@@ -207,11 +207,11 @@
  
  ######################################
  # temporary directory, used for template cache...
@@ -23,7 +23,7 @@
  
  ######################################
  # mode used when creating or saving files
-@@ -210,24 +210,24 @@
+@@ -220,24 +220,24 @@
  
  ######################################
  # files owners for new / changed files
@@ -53,7 +53,7 @@
  
  ######################################
  # custom templates
-@@ -235,7 +235,7 @@
+@@ -245,7 +245,7 @@
  
  ######################################
  # log4perl config
@@ -62,7 +62,7 @@
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -490,23 +490,23 @@
+@@ -514,23 +514,23 @@
  # Specifiy a file which is then completly under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
@@ -91,7 +91,7 @@
  
  # Set first day of week. Used in reports.
  # Sunday: 0
-@@ -616,6 +616,20 @@
+@@ -650,6 +650,20 @@
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
  #    <peer>
@@ -112,7 +112,7 @@
  #        name   = Local Naemon
  #        type   = livestatus
  #        hidden = 1             # make this backend hidden by default
-@@ -667,9 +681,9 @@
+@@ -701,9 +715,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
@@ -125,7 +125,7 @@
  
      #pre_obj_save_cmd   =
      #post_obj_save_cmd  =
-@@ -718,7 +732,7 @@
+@@ -759,7 +773,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  
      # phantomjs is used to convert html pages into pdf
@@ -134,3 +134,12 @@
  
      # pnp export script is used to export pnp graphs into reports
      #pnp_export = /path/to/pnp_export.sh
+@@ -822,7 +836,7 @@
+ 
+ #####################################
+ # Action Menus
+-#action_menu_items_folder = ./action_menus/
++action_menu_items_folder = @SYSCONFDIR@/action_menus/
+ 
+ <action_menu_items>
+     #hostmenu = {\

@@ -709,9 +709,32 @@ function save_reload_apply(formid) {
     return false;
 }
 
+var continue_cb;
 function conf_tool_cleanup(btn, link, hide) {
     if(jQuery(btn).hasClass('done')) {
         return(false);
+    }
+    if(link == "fix_all_serial") {
+        jQuery(btn).button({
+            icons: {primary: 'ui-waiting-button'},
+            disabled: true
+        })
+        var fix_buttons = jQuery('BUTTON.conf_cleanup_button_fix');
+        if(fix_buttons.length > 0) {
+            continue_cb = function() {
+                conf_tool_cleanup(btn, "fix_all_serial", hide);
+            }
+            fix_buttons[0].click();
+        }
+        if(fix_buttons.length == 0) {
+            continue_cb = undefined;
+            jQuery(btn).button({
+                icons: {primary: 'ui-ok-button'},
+                label:   'done',
+                disabled: false
+            }).addClass('done');
+        }
+        return false;
     }
     jQuery(btn).button({
         icons: {primary: 'ui-waiting-button'},
@@ -752,6 +775,8 @@ function conf_tool_cleanup(btn, link, hide) {
                 }
                 jQuery('#apply_config_changes_icon').show();
             }
+            jQuery(btn).removeClass('conf_cleanup_button_fix');
+            if(continue_cb) { continue_cb(); }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             jQuery(btn).button({
@@ -759,6 +784,7 @@ function conf_tool_cleanup(btn, link, hide) {
                 label:   'failed',
                 disabled: false
             })
+            jQuery(btn).removeClass('conf_cleanup_button_fix');
         }
     });
 

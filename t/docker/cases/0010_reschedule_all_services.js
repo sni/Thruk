@@ -7,24 +7,39 @@ try {
     click(_link("Hosts"));
     click(_link("select all[1]"));
     _assertNotTrue(_checkbox("force_check").checked);
-    click(_checkbox("force_check"));
-    click(_submit("submit command for 1 host"));
+    click(_submit("submit command for 2 hosts"));
     click(_link("Services"));
     click(_link("select all[1]"));
     _assertNotTrue(_checkbox("force_check").checked);
-    click(_checkbox("force_check"));
-    click(_submit("submit command for 7 services"));
+    click(_submit("submit command for 20 services"));
 
-    env.sleep(5);
+    click(_cell("ok_downtime"));
+    click(_cell("critical_downtime"));
+    click(_cell("warning_downtime"));
+    click(_cell("unknown_downtime"));
+    click(_cell("warning_ack_downtime"));
+    isVisible(_select("quick_command"));
+    _setSelected(_select("quick_command"), "Add Downtime");
+    _setValue(_textbox("com_data"), "Test Downtime");
+    click(_submit("submit command for 5 services"));
+
+    click(_cell("critical_ack"));
+    click(_cell("warning_ack"));
+    click(_cell("unknown_ack"));
+    click(_cell("warning_ack_downtime"));
+    isVisible(_select("quick_command"));
+    _setSelected(_select("quick_command"), "Add Acknowledgement");
+    _setValue(_textbox("com_data"), "Test Acknowledgement");
+    click(_submit("submit command for 4 services"));
 
     click(_link("Pending[1]"));
-    isVisible(_div("0 Matching Service Entries Displayed"));
+    isVisible(_div("1 of 1 Matching Service Entries Displayed"));
 
     click(_link("Problems"));
-    isVisible(_div("0 of 0 Matching Service Entries Displayed"));
+    isVisible(_div("3 of 3 Matching Service Entries Displayed"));
     isVisible(_div("0 of 0 Matching Host Entries Displayed"));
 
-    testCase.endOfStep("reschedule all services", 30);
+    testCase.endOfStep("reschedule all services", 60);
 
     thruk_logout();
 } catch (e) {

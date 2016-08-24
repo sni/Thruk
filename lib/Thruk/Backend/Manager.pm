@@ -1164,11 +1164,14 @@ sub _do_on_peers {
     $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for}));
 
     # send query to selected backends
-    my $selected_backends = scalar @{$get_results_for};
-    $c->stash->{'num_selected_backends'} = $selected_backends;
+    my $num_selected_backends = scalar @{$get_results_for};
+    if($function ne 'send_command' && $function ne 'get_processinfo') {
+        $c->stash->{'num_selected_backends'} = $num_selected_backends;
+        $c->stash->{'selected_backends'}     = $get_results_for;
+    }
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     #&timing_breakpoint('_get_result: '.$function);
-    if(!defined $result && $selected_backends != 0) {
+    if(!defined $result && $num_selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
@@ -2161,7 +2164,7 @@ sub _sum_answer {
             $return->{$key} .= ','.join(',', @peers);
         }
         elsif ( looks_like_number( $data->{$first}->{$key} ) ) {
-            for my $peername ( @peers ) { $return->{$key} += $data->{$peername}->{$key}; }
+            for my $peername ( @peers ) { $return->{$key} += ($data->{$peername}->{$key} // 0); }
         }
     }
 

@@ -9,7 +9,8 @@ try {
     click(_button("add"));
     click(_span("Services Graph"));
 
-    isVisible(_div("Ok"));
+
+    isVisible(_div("OkWarningUnknownCriticalPending"));
 
     click(_image("x-tool-refresh"));
     click(_image("x-tool-gear"));

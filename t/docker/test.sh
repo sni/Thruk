@@ -39,10 +39,19 @@ ln /dev/null /dev/raw1394 >/dev/null 2>&1
     /etc/init.d/apache2 restart
 }
 
+# make sure new libs are loaded
+[ "x$NO_APACHE_RELOAD" != "x" ] || service apache2 reload
+
 # clean previous runs
 rsync -a --delete /src/t/docker/cases/. $CASEDIR/.
 rm -f $CASEDIR/*/.sakuli-steps-cache
-rm -rf /var/cache/thruk/* /var/lib/thruk/*
+rm -rf /var/cache/thruk/* \
+       /var/lib/thruk/* \
+       /etc/thruk/panorama/*
+
+if [ -e /var/log/thruk/thruk.log ]; then
+    >/var/log/thruk/thruk.log
+fi
 
 function finish {
     # clean up
@@ -72,10 +81,16 @@ while [ "$#" -gt 0 ]; do
             ;;
         *)
             file=$1
+            orig=$file
             file="${file%.js}"
             if [ -f $CASEDIR/$file.js ]; then
                 echo "$file/$file.js http://127.0.0.1/thruk/" >> $CASEDIR/testsuite.suite
                 mkdir -p $CASEDIR/$file && cp $CASEDIR/$file.js $CASEDIR/$file/
+                HAS_CASE=1
+            elif [ -f $orig ]; then
+                file=$(basename $file)
+                echo "$file/$file.js http://127.0.0.1/thruk/" >> $CASEDIR/testsuite.suite
+                mkdir -p $CASEDIR/$file && cp $orig $CASEDIR/$file/
                 HAS_CASE=1
             else
                 NEW_ARGS+=($1)
@@ -99,5 +114,12 @@ fi
 $SAKULI_HOME/bin/sakuli run $CASEDIR $*
 res=$?
 echo "SAKULI_RETURN_VAL: $res"
+
+# check for errors in the thruk.log
+if [ $(grep -c ERROR /var/log/thruk/thruk.log) -gt 0 ]; then
+    cat /var/log/thruk/thruk.log
+    echo "got errors in the thruk.log"
+    res=1
+fi
 
 exit $res

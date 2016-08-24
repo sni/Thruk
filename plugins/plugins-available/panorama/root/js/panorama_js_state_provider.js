@@ -211,6 +211,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(extraParams) {
             Ext.apply(params, extraParams);
         }
+        params.current_tab = Ext.getCmp('tabpan').getActiveTab().id;
         var conn      = new Ext.data.Connection();
         TP.log('[global] state provider saved to server');
         conn.request({

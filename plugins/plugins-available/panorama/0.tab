@@ -1,0 +1,174 @@
+# title:  Startpage
+# user:   thrukadmin
+# groups: [{"*" : "read-only"}]
+
+$dashboard = load_data();
+
+$dashboard->{'ts'} = [stat($c->config->{etc_path}.'/panorama/.')]->[9];
+
+my $_add_panlet = sub {
+    my($x, $y, $d) = @_;
+    if($d->{'ts'} && $dashboard->{'ts'} < $d->{'ts'}) {
+        $dashboard->{'ts'} = $d->{'ts'};
+    }
+    return({
+        "xdata" => {
+            "appearance" => {
+                "iconset" => "default_64",
+                "type" => "icon"
+            },
+            "cls" => "TP.DashboardStatusIcon",
+            "general" => {
+                "dashboard" => $d->{'nr'},
+            },
+            "label" => {
+                "bgcolor" => "#cccccc",
+                "bordercolor" => "#aaaaaa",
+                "bordersize" => 1,
+                "fontsize" => 10,
+                "labeltext" => "<center>".$d->{'name'}."</center>",
+                "offsety" => 42,
+                "position" => "center",
+                "width" => "60"
+            },
+            "layout" => {
+                "x" => $x,
+                "y" => $y,
+            },
+            "link" => {
+                "link" => "dashboard://".$d->{'nr'},
+                "newtab" => "on"
+            },
+            "nsize" => [ 64, 64 ],
+            "size" => 64
+        }
+    });
+};
+
+my $_add_label = sub {
+    my($x, $y, $text) = @_;
+    return({
+        "xdata" => {
+            "cls" => "TP.TextLabelWidget",
+            "label" => {
+                "fontbold" => "1",
+                "fontsize" => 18,
+                "labeltext" => $text,
+                "position" => "top-left",
+            },
+            "layout" => {
+                "x" => $x,
+                "y" => $y,
+            }
+        }
+    });
+};
+
+
+my $nr = 1;
+$dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, 40, "Create New Dashboard:");
+
+# fetch my maps
+my $x  = 20;
+my $y  = 210;
+my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'my');
+if(scalar @{$dashboards} > 0) {
+    $dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, 190, "Open Existing Dashboards:");
+    for my $d (@{$dashboards}) {
+        next if $d->{'nr'} == $dashboard->{'nr'}; # avoid recursion
+        if($x > 800) {
+            $x = 20;
+            $y = $y + 90;
+        }
+        $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d);
+        $x = $x + 70;
+    }
+    $y = $y + 130;
+}
+
+# fetch public maps
+$dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, $y, "Public Dashboards:");
+$y = $y + 20;
+$x = 20;
+$dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'public');
+for my $d (@{$dashboards}) {
+    next if $d->{'nr'} == $dashboard->{'nr'}; # avoid recursion
+    if($x > 800) {
+        $x = 20;
+        $y = $y + 90;
+    }
+    $dashboard->{'panlet_'.++$nr} = &{$_add_panlet}($x, $y, $d);
+    $x = $x + 70;
+}
+
+__DATA__
+{
+   "ts" : 0,
+   "tab" : {
+      "xdata" : {
+         "refresh" : 120,
+         "background_color" : "#EEE",
+         "hide_tab_header" : 1,
+      }
+   },
+   "panlet_0" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "icon"
+         },
+         "cls" : "TP.StaticIcon",
+         "general" : {
+            "src" : "../usercontent/images/status/default_64/ok.png"
+         },
+         "label" : {
+            "bgcolor" : "#cccccc",
+            "bordercolor" : "#aaaaaa",
+            "bordersize" : 1,
+            "fontsize" : 10,
+            "labeltext" : "<center>Create New</center>",
+            "offsety" : 42,
+            "position" : "center",
+            "width" : "60"
+         },
+         "layout" : {
+            "x" : 20,
+            "y" : 60,
+         },
+         "link" : {
+            "link" : "javascript:TP.add_pantab('new')"
+         },
+        "nsize" : [ 64, 64 ],
+        "size" : 64
+      }
+   },
+   "panlet_1" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "icon"
+         },
+         "cls" : "TP.StaticIcon",
+         "general" : {
+            "src" : "../plugins/panorama/images/map_64.png"
+         },
+         "label" : {
+            "bgcolor" : "#cccccc",
+            "bordercolor" : "#aaaaaa",
+            "bordersize" : 1,
+            "fontsize" : 10,
+            "labeltext" : "<center>Geomap</center>",
+            "offsety" : 42,
+            "position" : "center",
+            "width" : "60"
+         },
+         "layout" : {
+            "x" : 90,
+            "y" : 60,
+         },
+         "link" : {
+            "link" : "javascript:TP.add_pantab('new_geo')"
+         },
+        "nsize" : [ 64, 64 ],
+        "size" : 64
+      }
+   }
+}

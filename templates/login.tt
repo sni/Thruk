@@ -6,6 +6,7 @@
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     [% PROCESS _common_css.tt use_frames=1 %]
     [% PROCESS _common_js_files.tt %]
+    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
   <body class='[% page %] loginpage' id='[% page %]' onload="javascript:document.getElementById('loginuser').focus();">
   [% PROCESS _common_js.tt %]

@@ -26,7 +26,8 @@ HTML, BODY {
     position: fixed !important;
 }
 #maintabbar {
-    z-index: 1000000;
+    z-index: 10000;
+    position: fixed !important;
 }
 
 .tabbarbody {
@@ -324,7 +325,7 @@ DIV.msg {
     left:35%;
     top:10px;
     width:400px;
-    z-index: 1000001;
+    z-index: 100000;
 }
 #msg-div .msg {
     border-radius: 8px;
@@ -547,6 +548,15 @@ TABLE.ministatus TH {
     background-color: #CEC7C7;
 }
 
+.item-disabled {
+  opacity: 0.5;
+  cursor: inherit;
+}
+.item-disabled.x-boundlist-item-over {
+  background: inherit;
+  border-color: inherit;
+}
+
 DIV.iconlabel, A.iconlabel {
   text-decoration: none;
   position: absolute;
@@ -636,6 +646,9 @@ TABLE.TipDetails TD.more_hosts {
 TABLE.TipDetails TD.more_services {
     padding-left: 135px;
 }
+TABLE.TipDetails TH.newType {
+  border-top: 1px solid #AAAAAA;
+}
 
 SPAN.avail_result_not_ready {
     opacity: 0.2;
@@ -664,4 +677,8 @@ SPAN.avail_result_error {
 
 .monospaced textarea {
     font-family: monospace;
+}
+
+.displayTable {
+  display: table;
 }

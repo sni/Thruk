@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use inc::Module::Install;
 
-name 'Thruk';
+name 'thruk';
 all_from 'lib/Thruk.pm';
 
 license 'gpl3';

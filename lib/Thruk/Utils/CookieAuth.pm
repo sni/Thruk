@@ -79,13 +79,20 @@ sub external_authentication {
         if($realm =~ m/Basic\ realm=\"([^"]+)\"/mx) {
             $realm = $1;
             # LWP requires perl internal format
-            $login = encode_utf8(Thruk::Utils::ensure_utf8($login));
-            $pass  = encode_utf8(Thruk::Utils::ensure_utf8($pass));
-            $ua->credentials( $netloc, $realm, $login, $pass );
+            if(ref $login eq 'HASH') {
+                for my $header (keys %{$login}) {
+                    $ua->default_header( $header => $login->{$header} );
+                }
+            } else {
+                $login = encode_utf8(Thruk::Utils::ensure_utf8($login));
+                $pass  = encode_utf8(Thruk::Utils::ensure_utf8($pass));
+                $ua->credentials( $netloc, $realm, $login, $pass );
+            }
             $stats->profile(begin => "ext::auth: post2 ".$authurl) if $stats;
             $res = $ua->post($authurl);
             $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
+                if(ref $login eq 'HASH') { $login = $1; }
                 if($1 eq $login) {
                     my $sessionid = md5_hex(rand(1000).time());
                     chomp($sessionid);
@@ -99,6 +106,7 @@ sub external_authentication {
                     return $sessionid;
                 }
             } else {
+                $login = '(unknown)' if ref $login eq 'HASH';
                 print STDERR 'authorization failed for user ', $login,' got rc ', $res->code;
                 return 0;
             }

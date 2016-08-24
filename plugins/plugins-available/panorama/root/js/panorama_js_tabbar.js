@@ -1,4 +1,3 @@
-var old_elements;
 Ext.define('TP.TabBar', {
     extend: 'Ext.tab.Panel',
     plugins: [
@@ -22,6 +21,12 @@ Ext.define('TP.TabBar', {
     stateful:       true,
     tabBar:{
         id:        'maintabbar',
+        listeners: {
+            afterlayout: function(This, eOpts) {
+                // move this html element to the body so it can have its own zindex stack and stay in front
+                Ext.getBody().appendChild(Ext.get('maintabbar'));
+            }
+        },
         items:[{ xtype: 'tbfill' },{
             id:       'debug_dom_elements',
             xtype:    'label',
@@ -30,14 +35,14 @@ Ext.define('TP.TabBar', {
             style:    'margin-top: 3px',
             hidden:    true,
             listeners: {
-                /*
                 show: function(This, eOpts) {
                     TP.timeouts['interval_global_dom_elements'] = window.setInterval(
                         function() {
                             var elements = Ext.Array.toArray(document.getElementsByTagName('*')).filter(function(v, i, a) { if(v.className && v.className.match && v.className.match("firebug")) {return(false)}; return(true); });
                             Ext.getCmp('debug_dom_elements').el.dom.innerHTML = 'DOM:'+elements.length;
-                            if(old_elements && old_elements.length != elements.length) {
-                                var diff = Ext.Array.difference(elements, old_elements);
+                            /*
+                            if(TP.old_dom_elements && TP.old_dom_elements.length != elements.length) {
+                                var diff = Ext.Array.difference(elements, TP.old_dom_elements);
                                 if(diff.length > 0) {
                                     console.log("found "+diff.length+" new dom elements");
                                     if(diff.length < 20) {
@@ -45,12 +50,12 @@ Ext.define('TP.TabBar', {
                                     }
                                 }
                             }
-                            old_elements = elements;
+                            TP.old_dom_elements = elements;
+                            */
                         },
                         2000
                     );
                 }
-                */
             }
         }, {
             id:       'debug_tab',
@@ -190,11 +195,15 @@ Ext.define('TP.TabBar', {
                 }, {
                     text:   'New Geo Map',
                     icon:   url_prefix+'plugins/panorama/images/map.png',
-                    handler: function() { TP.log('[global] adding new geo map from menu'); TP.add_pantab('new', undefined, undefined, undefined, {map: {}}) }
+                    handler: function() { TP.log('[global] adding new geo map from menu'); TP.add_pantab('new_geo') }
                 }, '-', {
                     text:   'Dashboard Management',
                     icon:   url_prefix+'plugins/panorama/images/new_tab.gif',
                     handler: function() { TP.dashboardsWindow() }
+                }, {
+                    text:   'Dashboard Overview',
+                    icon:   url_prefix+'plugins/panorama/images/dashboard_overview.png',
+                    handler: function() { TP.add_pantab("tabpan-tab_0"); }
                 }, '-', {
                     text: 'My Dashboards',
                     icon: url_prefix+'plugins/panorama/images/user_suit.png',
@@ -221,8 +230,8 @@ Ext.define('TP.TabBar', {
                     }
                 }
             }).showBy(This);
-            TP.load_dashboard_menu_items(menu.items.get(5).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
-            TP.load_dashboard_menu_items(menu.items.get(6).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(6).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(7).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
         });
 
         this.addListener('afterrender', function(This, eOpts) {
@@ -242,7 +251,7 @@ Ext.define('TP.TabBar', {
                     TP.add_pantab(default_dashboard[x], undefined, x == 0 ? false : true);
                 }
             } else if(open_tabs.length == 0) {
-                TP.add_pantab('first_or_new');
+                TP.add_pantab("tabpan-tab_0");
             }
             TP.startServerTime();
         });
@@ -254,7 +263,7 @@ Ext.define('TP.TabBar', {
         var open_tabs = [];
         this.items.each(function(item, idx, length) {
             var stateId = item.getStateId();
-            if(stateId) {
+            if(stateId && item.rendered) {
                 open_tabs.push(stateId);
             }
         });
@@ -290,12 +299,6 @@ Ext.define('TP.TabBar', {
     },
     applyState: function(state) {
         TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
-        var tmp = Ext.dom.Query.select('.x-mask');
-        if(tmp.length > 0) {
-            // make sure our mask covers new windows...
-            Ext.dom.Query.select('.x-mask')[0].style.zIndex         = 100000;
-            Ext.dom.Query.select('.x-mask-loading')[0].style.zIndex = 100001;
-        }
         try {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
             TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
@@ -311,20 +314,20 @@ Ext.define('TP.TabBar', {
                 // REMOVE AFTER: 01.01.2017
                 if(state.item_ids) {
                     for(var nr=0; nr<state.item_ids.length; nr++) {
-                        TP.add_pantab(state.item_ids[nr]);
+                        TP.add_pantab(state.item_ids[nr], undefined, undefined, undefined, undefined, true);
                     };
                 }
 
                 if(state.open_tabs) {
                     for(var nr=0; nr<state.open_tabs.length; nr++) {
                         var name = state.open_tabs[nr];
-                        TP.add_pantab(state.open_tabs[nr]);
+                        TP.add_pantab(state.open_tabs[nr], undefined, undefined, undefined, undefined, true);
                     };
                 }
 
                 /* open tab from url */
                 if(!Ext.getCmp(TP.initial_active_tab)) {
-                    TP.add_pantab(TP.initial_active_tab);
+                    TP.add_pantab(TP.initial_active_tab, undefined, undefined, undefined, undefined, true);
                     state.activeTab = TP.initial_active_tab;
                 }
 
@@ -370,7 +373,7 @@ Ext.define('TP.TabBar', {
         delete this.xdata['autohideheader'];
         delete this.xdata['backends'];
         if(TP.reload_required) {
-            TP.modalWindows.push(Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format..."));
+            Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format...");
             TP.timeouts['timeout_'+this.id+'_window_reload'] = window.setTimeout(function() { TP.cp.saveChanges(false); window.location = 'panorama.cgi'; }, 3000);
             return;
         }
@@ -413,7 +416,7 @@ Ext.define('TP.TabBar', {
             Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
         } else {
             /* apply chrome background workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "2001", "important");
+            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "21", "important");
         }
     }
 });
@@ -436,7 +439,7 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                 menu.removeAll();
                 var found = 0;
                 for(var x=0; x<data.length; x++) {
-                    if(all || !Ext.getCmp(data[x].id)) {
+                    if(all || (!Ext.getCmp(data[x].id)) || !Ext.getCmp(data[x].id).rendered) {
                         found++;
                         menu.add({text:    data[x].name,
                                   val:     data[x].id,
@@ -627,6 +630,5 @@ TP.openLogWindow = function() {
                 window.clearInterval(TP.timeouts['debug_log_keep_top']);
             }
         }
-    }).toFront();
-    TP.modalWindows.push(debug_win);
+    });
 }

@@ -35,7 +35,7 @@ close filehandle and ensure permissions and ownership
 =cut
 sub close {
     my($fh, $filename, $just_close) = @_;
-    my $rc = CORE::close($fh);
+    my $rc = CORE::close($fh) or confess("cannot write to $filename: $!");
     ensure_permissions('file', $filename) unless $just_close;
     return $rc;
 }
@@ -85,6 +85,22 @@ sub mkdir_r {
 
 ##############################################
 
+=head2 read
+
+  read($path)
+
+read file and return content
+
+=cut
+
+sub read {
+    my($path) = @_;
+    my $content = read_file($path);
+    return($content);
+}
+
+##############################################
+
 =head2 write
 
   write($path, $content, [ $mtime ], [ $append ])
@@ -96,9 +112,9 @@ creates file and ensure permissions
 sub write {
     my($path,$content,$mtime,$append) = @_;
     my $mode = $append ? '>>' : '>';
-    open(my $fh, $mode, $path) or die('cannot create file '.$path.': '.$!);
+    open(my $fh, $mode, $path) or confess('cannot create file '.$path.': '.$!);
     print $fh $content;
-    Thruk::Utils::IO::close($fh, $path) or die("cannot close file ".$path.": ".$!);
+    Thruk::Utils::IO::close($fh, $path) or confess("cannot close file ".$path.": ".$!);
     utime($mtime, $mtime, $path) if $mtime;
     return 1;
 }
@@ -117,7 +133,7 @@ sub ensure_permissions {
     my($mode, $path) = @_;
     return if defined $ENV{'THRUK_NO_TOUCH_PERM'};
 
-    die("need a path") unless defined $path;
+    confess("need a path") unless defined $path;
     return unless -e $path;
 
     my @stat = stat($path);
@@ -168,28 +184,28 @@ stores data json encoded
 =cut
 
 sub json_lock_store {
-    my($file, $data, $pretty, $changed_only) = @_;
+    my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
 
     my $json = JSON::XS->new->utf8;
     $json = $json->pretty if $pretty;
+    $json = $json->canonical; # keys will be randomly ordered otherwise
 
     my $write_out;
     if($changed_only && -f $file) {
-        $json = $json->canonical; # keys will be randomly ordered otherwise
         $write_out = $json->encode($data);
         my $old = read_file($file);
         return 1 if $old eq $write_out;
     }
 
-    my $newfile = $file.'.new';
-    open(my $fh, '>', $file) or die('cannot write file '.$file.': '.$!);
+    $tmpfile = $file.'.new' unless $tmpfile;
+    open(my $fh, '>', $file) or confess('cannot write file '.$file.': '.$!);
     alarm(30);
-    local $SIG{'ALRM'} = sub { die("timeout while trying to lock_ex: ".$file); };
-    flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
-    open(my $fh2, '>', $newfile) or die('cannot write file '.$newfile.': '.$!);
-    print $fh2 ($write_out || $json->encode($data));
-    Thruk::Utils::IO::close($fh2, $newfile) or die("cannot close file ".$newfile.": ".$!);
-    move($newfile, $file) or die("cannot replace $file with $newfile: $!");
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to lock_ex: ".$file); };
+    flock($fh, LOCK_EX) or confess 'Cannot lock '.$file.': '.$!;
+    open(my $fh2, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
+    print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
+    Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
+    move($tmpfile, $file) or confess("cannot replace $file with $tmpfile: $!");
     alarm(0);
     return 1;
 }
@@ -215,9 +231,16 @@ sub json_lock_retrieve {
     alarm(30);
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_sh: ".$file); };
     flock($fh, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
-    my $data = $json->decode(<$fh>);
+    my $data;
+    eval {
+        $data = $json->decode(<$fh>);
+    };
+    my $err = $@;
     CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     alarm(0);
+    if($err && !$data) {
+        die("error while reading $file: ".$@);
+    }
     return $data;
 }
 

@@ -9,8 +9,10 @@ Ext.define('TP.Panlet', {
     constrain: false,
     hideMode:  'visibility',
     autoShow:  false,
+    autoRender: true,
+    floating:   false,
+    style:    { position: 'absolute', zIndex: 52 },
     stateful:  true,
-    renderTo: "bodyview",
     focusOnToFront: false,
     toFrontOnShow: false,
     initComponent: function() {
@@ -218,24 +220,21 @@ Ext.define('TP.Panlet', {
                     This.win_shadow.moveTo(newpos[0], newpos[1]);
                     This.win_shadow.setSize(This.getSize());
                     This.win_shadow.show();
-                    This.win_shadow.setZIndex(100000);
                 };
                 This.dd_overriden = true;
             }
-            /* make sure we don't overlap dashboard settings window */
-            TP.checkModalWindows();
         },
         render: function(This, eOpts) {
             /* make title editable */
             if(this.locked) {
                 var head = Ext.get(This.id + '_header_hd');
                 head.on("dblclick", function() {
-                    TP.modalWindows.push(Ext.Msg.prompt('Change Title', '', function(btn, text) {
+                    Ext.Msg.prompt('Change Title', '', function(btn, text) {
                         if(btn == 'ok') {
                             This.setTitle(text);
                             This.saveState();
                         }
-                    }, undefined, undefined, This.title));
+                    }, undefined, undefined, This.title);
                 });
             }
             /* make header show on mouseover only */
@@ -245,6 +244,7 @@ Ext.define('TP.Panlet', {
             div.on("mouseover", function() { This.showHeader(global); });
         },
         afterrender: function(This, eOpts) {
+            Ext.fly('iconContainer').appendChild(Ext.get(This.id));
             /* start refresh interval */
             TP.log('['+this.id+'] rendered');
             this.startTimeouts();

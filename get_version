@@ -19,7 +19,7 @@ if [ $? -eq 0 ]; then
   version=`echo "$version" | awk -F "-" '{ print $1 }'`
   date=`date +%Y-%m-%d`
   major=` echo $version | cut -d . -f 1`
-  minor=`echo $version | cut -d . -f 2`
+  minor=`echo $version | cut -d . -f 2 | sed -e 's/^0*//g'`
 
   # do we have a even minor version?
   let mod=$minor%2

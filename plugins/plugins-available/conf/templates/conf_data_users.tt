@@ -144,7 +144,12 @@
               [% FOREACH r = contact_roles.list.sort %]
               <tr>
                 <td>[% r %]</td>
-                <td style="padding-left: 8px;">[% IF roles_by_group.exists(r) %](from group: [% roles_by_group.$r.join(', ') %])[% ELSE %](from cgi.cfg)[% END %]</td>
+                <td style="padding-left: 8px;">
+                  [% IF roles_by_group.exists(r) %](from group: [% roles_by_group.$r.join(', ') %])
+                  [% ELSIF r == "authorized_for_read_only" && !contact_can_submit_commands %](from can_submit_commands)
+                  [% ELSE %](from cgi.cfg)
+                  [% END %]
+                </td>
               </tr>
               [% END %]
             </table>
