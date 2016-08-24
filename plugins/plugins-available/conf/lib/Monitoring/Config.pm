@@ -1231,9 +1231,18 @@ sub gather_references {
         if(ref $refs eq '') { $refs = [$refs]; }
         if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
             my $type = $obj->{'default'}->{$attr}->{'link'};
+            my $count = 0;
             for my $r (@{$refs}) {
-                if($type eq 'command') { $r =~ s/\!.*$//mx; }
-                $outgoing->{$type}->{$r} = '';
+                my $r2 = "$r";
+                if($type eq 'command') {
+                    $r2 =~ s/\!.*$//mx;
+                }
+                if($count == 0) {
+                    $r2 =~ s/^\+//gmx;
+                    $r2 =~ s/^\!//gmx;
+                }
+                $outgoing->{$type}->{$r2} = '';
+                $count++;
             }
         }
     }
