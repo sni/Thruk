@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# use latest failsafe.sh from src folder
+if [ $0 != "/src/t/docker/failsafe.sh" ]; then
+    exec "/src/t/docker/failsafe.sh" $*;
+    exit 1;
+fi
+
 CASEDIR="/root/cases"
 
 # install latest thruk from source
