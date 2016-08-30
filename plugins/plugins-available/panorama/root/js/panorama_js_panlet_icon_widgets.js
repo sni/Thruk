@@ -914,7 +914,17 @@ Ext.define('TP.IconWidget', {
                 drawWidth  = width;
                 drawHeight = height;
                 panel.setSize(drawWidth, drawHeight);
-                panel.setPosition(panel.xdata.layout.x+offsetX, panel.xdata.layout.y+offsetY);
+                var newX = panel.xdata.layout.x+offsetX;
+                var newY = panel.xdata.layout.y+offsetY;
+                panel.setPosition(newX, newY);
+
+                // chrome gets position totally wrong when going back to start dashboard otherwise
+                if(panel.el && panel.el.dom && panel.getPosition()[0] != Number(newX).toFixed()) {
+                    window.setTimeout(Ext.bind(function(x, y) {
+                        panel.el.dom.style.left = x+"px";
+                        panel.el.dom.style.top = y+"px";
+                    }, panel, [newX, newY]), 200);
+                }
             }
 
             var items = [];
