@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - mark disabled eventhandler red on process info page
           - Panorama View:
             - fix start page not found when using OMD
 
