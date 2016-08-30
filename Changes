@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Panorama View:
+            - fix start page not found when using OMD
+
 2.10     Wed Aug 24 14:59:03 CEST 2016
           - add useragentcompat option for IE compatibility mode (ofosos #626)
           - support reading action_menu_items from file/folder

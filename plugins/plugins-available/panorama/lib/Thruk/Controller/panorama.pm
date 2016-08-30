@@ -3006,7 +3006,7 @@ sub _add_json_dashboard_timestamps {
         $nr =~ s/^tabpan-tab_//gmx;
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         if($nr == 0 && !-s $file) {
-            $file = $c->config->{'plugin_path'}.'/plugins-available/panorama/0.tab';
+            $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
         }
         my @stat = stat($file);
         if(-x $file) {
