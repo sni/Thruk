@@ -853,6 +853,10 @@ var TP = {
             if(data && data.dashboard_ts != undefined) {
                 for(var tab_id in data.dashboard_ts) {
                     var tab = Ext.getCmp(tab_id);
+                    if(!tab) {
+                        // dashboard has been closed already
+                        return;
+                    }
                     if(data.dashboard_ts[tab_id] != tab.ts) {
                         var old = tab.ts ? tab.ts : '';
                         tab.ts = data.dashboard_ts[tab.id];
