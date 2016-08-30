@@ -2109,6 +2109,7 @@ ex.:
     geo_map_default_center = 13.74,47.77
     geo_map_default_zoom   = 5
     extra_fonts            = CompanyFont1, CompanyFont2
+    new_files_start_at     = 1
   </Component>
 
 
@@ -2128,6 +2129,11 @@ send according to the user permissions.
 === full_reload_interval
 Full page reload every 3 hours to prevent memory
 leaks. Disabled when set to 0.
+
+=== new_files_start_at
+Normally new files start at index 1 but this can be changed here. This helps in
+situations when more than one Thruk installation has to create dashboards in
+the same folder.
 
 === geo_map_default_center
 Default coordinates (lon,lat) for new geo maps.
