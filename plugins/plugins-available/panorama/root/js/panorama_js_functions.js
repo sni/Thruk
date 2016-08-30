@@ -167,7 +167,9 @@ var TP = {
                 /* make tab title editable */
                 if(!readonly && !dashboard_ignore_changes) {
                     var tabhead = tabpan.getTabBar().items.getAt(tabPos-1);
-                    if(tabhead.rendered == false) {
+                    if(tabhead == undefined) {
+                        // do nothing
+                    } else if(tabhead.rendered == false) {
                         tabhead.addListener('afterrender', function(This, eOpts) {
                             TP.addTabBarMouseEvents(This.getEl(), id);
                         });
