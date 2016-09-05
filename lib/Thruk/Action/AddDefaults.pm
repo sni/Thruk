@@ -1101,8 +1101,12 @@ sub _set_enabled_backends {
                 }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
-                die("got no peer for: ".$b) unless defined $peer;
-                $disabled_backends->{$peer->{'key'}} = 0;
+                if($peer) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                } else {
+                    # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
+                    #die("got no peer for: ".$b)
+                }
             }
         }
     }
