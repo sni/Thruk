@@ -86,8 +86,8 @@ if(scalar @{$dashboards} > 0) {
     $y = $y + 130;
 }
 
-# fetch public maps
-$dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, $y, "Public Dashboards:");
+# fetch shared maps
+$dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, $y, "Shared Dashboards:");
 $y = $y + 20;
 $x = 20;
 $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'public');

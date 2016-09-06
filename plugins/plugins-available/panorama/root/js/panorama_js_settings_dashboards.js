@@ -86,11 +86,11 @@ Ext.define('TP.DashboardManagementWindow', {
         });
         win.items.get(0).add(win.grid_my);
 
-        /* Public Dasboards */
+        /* Shared Dasboards */
         win.grid_public = Ext.create('Ext.grid.Panel', {
             tabConfig: {
-                title:   'Public',
-                tooltip: 'Public Dashboards'
+                title:   'Shared',
+                tooltip: 'Shared Dashboards'
             },
             columns:     [],
             listeners:   listeners,
