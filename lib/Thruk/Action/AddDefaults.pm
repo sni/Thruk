@@ -533,30 +533,21 @@ sub add_defaults {
     ###############################
     die_when_no_backends($c);
 
-    ###############################
-    # do we have only shinken backends?
-    unless(exists $c->config->{'enable_shinken_features'}) {
-        if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH' and scalar keys %{$c->stash->{'pi_detail'}} > 0) {
-            $c->stash->{'enable_shinken_features'} = 1;
-            my($selected) = $c->{'db'}->select_backends('get_status');
-            for my $key (@{$selected}) {
-                my $b   = $c->stash->{'pi_detail'}->{$key};
-                next unless defined $b;
-                next unless defined $c->stash->{'backend_detail'}->{$key};
-                if(defined $b->{'data_source_version'} and $b->{'data_source_version'} !~ m/\-shinken/mx) {
-                    $c->stash->{'enable_shinken_features'} = 0;
-                    last;
-                }
-            }
-        }
-    }
-
-    ###############################
-    # do we have only icinga backends?
-    if(!exists $c->config->{'enable_icinga_features'} && defined $ENV{'OMD_ROOT'}) {
+    if(defined $ENV{'OMD_ROOT'}) {
         # get core from init script link (omd)
+        my $core = '';
         if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
-            my $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
+            $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
+        }
+        ###############################
+        # do we have only shinken backends?
+        if(!exists $c->config->{'enable_shinken_features'}) {
+            $c->stash->{'enable_shinken_features'} = 1 if $core eq 'shinken';
+        }
+
+        ###############################
+        # do we have only icinga backends?
+        if(!exists $c->config->{'enable_icinga_features'}) {
             $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga';
             $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga2';
         }
