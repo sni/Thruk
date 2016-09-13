@@ -900,7 +900,7 @@ sub _do_finalize_config {
 
     ###################################################
     # when using shadow naemon, some settings don't make sense
-    if($config->{'use_shadow_naemon'}) {
+    if($config->{'use_shadow_naemon'} || $config->{'use_lmd_core'}) {
         $config->{'connection_pool_size'} = 1; # no pool required when using caching
         $config->{'check_local_states'}   = 0; # local state checking not required
     }

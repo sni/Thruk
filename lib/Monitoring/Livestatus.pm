@@ -899,10 +899,10 @@ Useful when using select based io.
 sub post_processing {
     my($self, $result, $opt, $keys) = @_;
 
-    my $total_count;
+    my $orig_result;
     if($opt->{'wrapped_json'}) {
-        $total_count = $result->{'total_count'};
-        $result      = $result->{'data'};
+        $orig_result = $result;
+        $result = $result->{'data'};
     }
 
     # add peer information?
@@ -929,9 +929,14 @@ sub post_processing {
 
     # set some metadata
     $self->{'meta_data'} = {
-        'total_count'  => $total_count,
         'result_count' => scalar @{$result},
     };
+    if($opt->{'wrapped_json'}) {
+        for my $key (keys %{$orig_result}) {
+            next if $key eq 'data';
+            $self->{'meta_data'}->{$key} = $orig_result->{$key};
+        }
+    }
 
     return({ keys => $keys, result => $result });
 }

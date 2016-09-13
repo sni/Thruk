@@ -62,3 +62,5 @@ t/docker/cases/testsuite.suite
 t/docker/cases/*/*.js
 .gem/
 *.json
+.idea/
+lmd.ini

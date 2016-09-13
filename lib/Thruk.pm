@@ -82,6 +82,7 @@ sub startup {
     require Thruk::Utils::Auth;
     require Thruk::Utils::External;
     require Thruk::Utils::Livecache;
+    require Thruk::Utils::LMD;
     require Thruk::Utils::Menu;
     require Thruk::Utils::Status;
     require Thruk::Action::AddDefaults;
@@ -226,6 +227,8 @@ sub _build_app {
     ###################################################
     # start shadownaemons in background
     Thruk::Utils::Livecache::check_initial_start(undef, $config, 1);
+    my $c = Thruk::Context->new($self, {});
+    Thruk::Utils::LMD::check_initial_start($c, $config, 1);
 
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");
