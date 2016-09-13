@@ -223,8 +223,8 @@ Always returns true.
 =cut
 
 sub do {
-    my($self, $statement) = @_;
-    $self->_send($statement);
+    my($self, $statement, $opt) = @_;
+    $self->_send($statement, $opt);
     return(1);
 }
 

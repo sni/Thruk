@@ -114,7 +114,12 @@ send a command
 sub send_command {
     my($self, %options) = @_;
     cluck("empty command") if (!defined $options{'command'} || $options{'command'} eq '');
-    $self->{'live'}->{'backend_obj'}->do($options{'command'});
+    if($options{'backend'} && $self->{'lmd_optimizations'}) {
+        $options{'header'} = {
+            Backends => join(" ", @{$options{'backend'}}),
+        };
+    }
+    $self->{'live'}->{'backend_obj'}->do($options{'command'}, \%options);
     return;
 }
 
