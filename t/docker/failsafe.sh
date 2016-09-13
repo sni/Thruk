@@ -30,7 +30,7 @@ for case in $(cd $CASEDIR && ls -1 *.js); do
             echo "thruk.log:"
             tail -30 /var/log/thruk/thruk.log
             echo "apache error.log:"
-            tail -30 /var/log/apache/error.log
+            tail -30 /var/log/apache2/error.log
             exit $rc
         fi
     fi
