@@ -472,10 +472,11 @@ sub fill_totals_box {
     # host status box
     my $host_stats    = {};
     my $service_stats = {};
-    if(   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
+    if((   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
        or ( $c->stash->{'servicegroup'}
             and ( defined $c->stash->{style} and ($c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' ))
-          )
+          ))
+        and $servicefilter
       ) {
         # set host status from service query
         my $services = $c->{'db'}->get_hosts_by_servicequery( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
