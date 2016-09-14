@@ -106,6 +106,21 @@ sub peer_name {
 
 ##########################################################
 
+=head2 _raw_query
+
+send a raw query to the backend
+
+=cut
+sub _raw_query {
+    my($self, $query) = @_;
+    my $socket = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
+    local $/ = undef;
+    my $res = <$socket>;
+    return($res);
+}
+
+##########################################################
+
 =head2 send_command
 
 send a command
