@@ -227,7 +227,7 @@ sub _build_app {
     ###################################################
     # start shadownaemons in background
     Thruk::Utils::Livecache::check_initial_start(undef, $config, 1);
-    my $c = Thruk::Context->new($self, {});
+    my $c = Thruk::Context->new($self, {'PATH_INFO' => '/'});
     Thruk::Utils::LMD::check_initial_start($c, $config, 1);
 
     binmode(STDOUT, ":encoding(UTF-8)");
