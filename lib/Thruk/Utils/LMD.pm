@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep/;
+use File::Copy qw/copy/;
 use Thruk::Utils::External;
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -33,6 +34,11 @@ sub check_proc {
     local $SIG{CHLD} = 'DEFAULT';
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
+    my $logfile = $lmd_dir.'/lmd.log';
+    if(-s $logfile > 10*1024*1024) { # rotate logfile if its more than 10mb
+        copy($logfile, $logfile.'.1');
+        Thruk::Utils::IO::write($logfile, '');
+    }
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
         return;
     }
