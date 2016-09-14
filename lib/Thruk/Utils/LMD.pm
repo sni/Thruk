@@ -194,10 +194,15 @@ sub _write_lmd_config {
         $site_config .= "name   = '".$peer->peer_name()."'\n";
         $site_config .= "id     = '".$key."'\n";
         if($peer->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
-            $site_config .= "source = ['".$peer->{'class'}->{'config'}->{'options'}->{'fallback_peer'}."', '".$peer->{'addr'}."']\n\n";
+            $site_config .= "source = ['".$peer->{'config'}->{'options'}->{'fallback_peer'}."', '".$peer->{'addr'}."']\n";
         } else {
-            $site_config .= "source = ['".$peer->{'addr'}."']\n\n";
+            $site_config .= "source = ['".$peer->{'addr'}."']\n";
         }
+        if($peer->{'type'} eq 'http') {
+            $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
+            $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};
+        }
+        $site_config .= "\n";
     }
 
     eval {
