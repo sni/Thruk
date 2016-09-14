@@ -115,9 +115,12 @@ sub send_command {
     my($self, %options) = @_;
     cluck("empty command") if (!defined $options{'command'} || $options{'command'} eq '');
     if($options{'backend'} && $self->{'lmd_optimizations'}) {
-        $options{'header'} = {
-            Backends => join(" ", @{$options{'backend'}}),
-        };
+        my $backend_header = 'Backends: '.join(" ", @{$options{'backend'}});
+        my $new_commands = [];
+        for my $cmd (split/\n+/mx, $options{'command'}) {
+            push @{$new_commands}, $cmd."\n".$backend_header;
+        }
+        $options{'command'} = join("\n\n", @{$new_commands});
     }
     $self->{'live'}->{'backend_obj'}->do($options{'command'}, \%options);
     return;
