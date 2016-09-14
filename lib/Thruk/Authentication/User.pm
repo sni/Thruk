@@ -46,10 +46,10 @@ sub new {
         $username = $c->stash->{'remote_user'};
     }
     # basic authentication
-    elsif(defined $env->{'REMOTE_USER'}) {
+    elsif(defined $env->{'REMOTE_USER'} and $env->{'REMOTE_USER'} ne '' ) {
         $username = $env->{'REMOTE_USER'};
     }
-    elsif(defined $ENV{'REMOTE_USER'}) {
+    elsif(defined $ENV{'REMOTE_USER'}and $ENV{'REMOTE_USER'} ne '' ) {
         $username = $ENV{'REMOTE_USER'};
     }
 

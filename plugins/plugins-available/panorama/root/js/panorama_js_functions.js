@@ -167,7 +167,9 @@ var TP = {
                 /* make tab title editable */
                 if(!readonly && !dashboard_ignore_changes) {
                     var tabhead = tabpan.getTabBar().items.getAt(tabPos-1);
-                    if(tabhead.rendered == false) {
+                    if(tabhead == undefined) {
+                        // do nothing
+                    } else if(tabhead.rendered == false) {
                         tabhead.addListener('afterrender', function(This, eOpts) {
                             TP.addTabBarMouseEvents(This.getEl(), id);
                         });
@@ -851,6 +853,10 @@ var TP = {
             if(data && data.dashboard_ts != undefined) {
                 for(var tab_id in data.dashboard_ts) {
                     var tab = Ext.getCmp(tab_id);
+                    if(!tab) {
+                        // dashboard has been closed already
+                        return;
+                    }
                     if(data.dashboard_ts[tab_id] != tab.ts) {
                         var old = tab.ts ? tab.ts : '';
                         tab.ts = data.dashboard_ts[tab.id];

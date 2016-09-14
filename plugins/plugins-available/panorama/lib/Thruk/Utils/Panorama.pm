@@ -172,7 +172,7 @@ sub load_dashboard {
 
     # startpage can be overridden, only load original file if there is nonen in etc/
     if($nr == 0 && !-s $file) {
-        $file = $c->config->{'plugin_path'}.'/plugins-available/panorama/0.tab';
+        $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }
 
     return unless -s $file;

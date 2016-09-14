@@ -2546,7 +2546,10 @@ sub backends_hash_to_list {
             push @{$backends}, ($backend ? $backend->peer_key() : $b);
         } else {
             for my $key (keys %{$b}) {
-                my $backend = $c->{'db'}->get_peer_by_key($key) || $c->{'db'}->get_peer_by_key($b->{$key});
+                my $backend = $c->{'db'}->get_peer_by_key($key);
+                if(!defined $backend && defined $b->{$key}) {
+                    $backend = $c->{'db'}->get_peer_by_key($b->{$key});
+                }
                 if($backend) {
                     push @{$backends}, $backend->peer_key();
                 } else {

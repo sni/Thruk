@@ -6,12 +6,13 @@ Ext.onReady(function() {
         itemId:   'iconTip',
         target:    Ext.getBody(),
         delegate: 'A.tooltipTarget', // the cell class in which the tooltip has to be triggered
-        dismissDelay: 0,
-        width:     400,
+        dismissDelay:    0,
+        width:         400,
         manageHeight: false,
-        maxWidth:  400,
-        hideDelay: 300,
-        closable:  true,
+        maxWidth:      400,
+        hideDelay:     300,
+        closable:     true,
+        showDelay:    1000,
         //closable:  true, hideDelay: 6000000, // enable for easier css debuging
         style:    'background: #E5E5E5',
         bodyStyle:'background: #E5E5E5',
@@ -41,6 +42,18 @@ Ext.onReady(function() {
                 var tab = tabpan.getActiveTab();
                 if(!tab.locked && !TP.iconSettingsWindow) {
                     return(false);
+                }
+                if(!TP.iconSettingsWindow) {
+                    // check if the mouse is still over the icon after the showDelay
+                    var pos = TP.iconTipTarget.getPosition();
+                    var size = TP.iconTipTarget.getSize();
+                    if(   cursorX < pos[0] || cursorX > pos[0]+size.width
+                       || cursorY < pos[1] || cursorY > pos[1]+size.height) {
+                        if(TP.iconTip) {
+                            TP.iconTip.last_id = "";
+                        }
+                        return(false);
+                    }
                 }
                 return true;
             },
@@ -284,6 +297,9 @@ Ext.onReady(function() {
         window.clearTimeout(TP.iconTip.hideTimer);
         delete TP.iconTip.hideTimer;
 
+        cursorX = evt.pageX;
+        cursorY = evt.pageY;
+
         TP.tipRenderer(evt,t,a);
     }, null, {delegate:'A.tooltipTarget'});
 
@@ -398,4 +414,12 @@ TP.renderTipDetails = function(data) {
     }
     TP.iconTip.syncShadow();
     return;
+}
+
+// save cursor position
+var cursorX;
+var cursorY;
+document.onmousemove = function(e){
+    cursorX = e.pageX;
+    cursorY = e.pageY;
 }

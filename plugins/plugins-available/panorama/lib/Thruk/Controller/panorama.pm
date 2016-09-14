@@ -2903,7 +2903,7 @@ sub _save_dashboard {
 
     if($nr eq 'new') {
         # find next free number
-        $nr = 1;
+        $nr = $c->config->{'Thruk::Plugin::Panorama'}->{'new_files_start_at'} || 1;
         $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         while(-e $file) {
             $nr++;
@@ -3006,7 +3006,7 @@ sub _add_json_dashboard_timestamps {
         $nr =~ s/^tabpan-tab_//gmx;
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         if($nr == 0 && !-s $file) {
-            $file = $c->config->{'plugin_path'}.'/plugins-available/panorama/0.tab';
+            $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
         }
         my @stat = stat($file);
         if(-x $file) {

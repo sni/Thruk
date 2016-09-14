@@ -42,6 +42,7 @@ sub new {
         'live'                 => Monitoring::Livestatus::Class::Lite->new($peer_config),
         'config'               => $config,
         'naemon_optimizations' => 0,
+        'lmd_optimizations'    => 0,
     };
     bless $self, $class;
 
@@ -113,7 +114,15 @@ send a command
 sub send_command {
     my($self, %options) = @_;
     cluck("empty command") if (!defined $options{'command'} || $options{'command'} eq '');
-    $self->{'live'}->{'backend_obj'}->do($options{'command'});
+    if($options{'backend'} && $self->{'lmd_optimizations'}) {
+        my $backend_header = 'Backends: '.join(" ", @{$options{'backend'}});
+        my $new_commands = [];
+        for my $cmd (split/\n+/mx, $options{'command'}) {
+            push @{$new_commands}, $cmd."\n".$backend_header;
+        }
+        $options{'command'} = join("\n\n", @{$new_commands});
+    }
+    $self->{'live'}->{'backend_obj'}->do($options{'command'}, \%options);
     return;
 }
 
@@ -144,12 +153,18 @@ sub get_processinfo {
             }
         }
 
-        $data = $self->{'live'}
+        $options{'options'}->{AddPeer} = 1;
+        $options{'options'}->{rename}  = { 'livestatus_version' => 'data_source_version' };
+        $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
+
+        $data = $self->_optimize(
+                $self->{'live'}
                      ->table('status')
                      ->columns(@{$options{'columns'}})
-                     ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
+                     ->options($options{'options'}))
                      ->hashref_pk('peer_key');
         return $data if $ENV{'THRUK_SELECT'};
+        return $data if $self->{'lmd_optimizations'};
     }
 
     $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
@@ -172,12 +187,13 @@ sub get_can_submit_commands {
     my($self, $user, $data) = @_;
     confess("no user") unless defined $user;
     return $data if $data;
-    $data = $self->{'live'}
+    $data = $self->_optimize(
+            $self->{'live'}
                     ->table('contacts')
                     ->columns(qw/can_submit_commands
                                  alias/)
                     ->filter({ name => $user })
-                    ->options({AddPeer => 1})
+                    ->options({AddPeer => 1}))
                     ->hashref_array();
     return($data);
 }
@@ -206,11 +222,12 @@ sub get_contactgroups_by_contact {
     confess("no user") unless defined $username;
     return $data if $data;
 
-    $data = $self->{'live'}
+    $data = $self->_optimize(
+            $self->{'live'}
                     ->table('contactgroups')
                     ->columns(qw/name/)
                     ->filter({ members => { '>=' => $username }})
-                    ->options({AddPeer => 1})
+                    ->options({AddPeer => 1}))
                     ->hashref_array();
 
     return $data;
@@ -235,7 +252,7 @@ sub get_hosts {
     }
 
     # optimized naemon with wrapped_json output
-    if($self->{'naemon_optimizations'}) {
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options);
         #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
     }
@@ -276,8 +293,12 @@ sub get_hosts {
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
-        my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
-        $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
+        if($self->{'lmd_optimizations'}) {
+            push @{$options{'columns'}}, 'last_state_change_order';
+        } else {
+            my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
+            $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
+        }
     }
 
     # get result
@@ -420,7 +441,7 @@ sub get_services {
     return($options{'data'}) if($options{'data'});
 
     # optimized naemon with wrapped_json output
-    if($self->{'naemon_optimizations'}) {
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options);
         #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
     }
@@ -472,11 +493,19 @@ sub get_services {
     }
 
 
-    my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
-    $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
-    # make it possible to order by state
-    if(grep {/^state$/mx} @{$options{'columns'}}) {
-        $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
+    if($self->{'lmd_optimizations'}) {
+        push @{$options{'columns'}}, 'last_state_change_order';
+        if(grep {/^state$/mx} @{$options{'columns'}}) {
+            push @{$options{'columns'}}, 'state_order';
+        }
+    } else {
+        my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
+        $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
+
+        # make it possible to order by state
+        if(grep {/^state$/mx} @{$options{'columns'}}) {
+            $options{'options'}->{'callbacks'}->{'state_order'} = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
+        }
     }
 
     # workaround a problem with services beeing reverse sorted if the only filter is a host_name filter
@@ -674,6 +703,11 @@ sub get_logs {
     if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
+    }
+    # optimized naemon with wrapped_json output
+    if($self->{'lmd_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options);
+        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
     }
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
@@ -1021,7 +1055,9 @@ sub get_performance_stats {
         # add stats for active checks
         $stats = [
             $type.'_execution_time_sum'      => { -isa => [ -sum => 'execution_time' ]},
+            $type.'_execution_time_avg'      => { -isa => [ -avg => 'execution_time' ]},
             $type.'_latency_sum'             => { -isa => [ -sum => 'latency' ]},
+            $type.'_latency_avg'             => { -isa => [ -avg => 'latency' ]},
             $type.'_active_state_change_sum' => { -isa => [ -sum => 'percent_state_change' ]},
             $type.'_execution_time_min'      => { -isa => [ -min => 'execution_time' ]},
             $type.'_latency_min'             => { -isa => [ -min => 'latency' ]},
@@ -1146,6 +1182,7 @@ sub _get_class {
     }
 
     $options->{'options'}->{'AddPeer'} = 0 if(!defined $options->{'AddPeer'} || $options->{'AddPeer'} == 0);
+
     $class = $class->options($options->{'options'});
 
     return $class;
@@ -1162,10 +1199,31 @@ generic function to return a table with options
 =cut
 sub _get_table {
     my($self, $table, $options) = @_;
-    my $class = $self->_get_class($table, $options);
+    my $class = $self->_optimize($self->_get_class($table, $options));
     my $data  = $class->hashref_array() || [];
 
     return $data;
+}
+
+##########################################################
+
+=head2 _optimize
+
+  _optimize
+
+return livestatus::lite class with enhanced options
+
+=cut
+sub _optimize {
+    my($self, $class) = @_;
+
+    return $class unless $self->{'lmd_optimizations'};
+
+    if($class->{'_columns'} && $class->{'_options'}) {
+        $class->{'_options'}->{'AddPeer'} = 0;
+        push @{$class->{'_columns'}}, 'peer_key';
+    }
+    return $class;
 }
 
 ##########################################################
@@ -1312,12 +1370,19 @@ sub _optimized_for_wrapped_json {
             }
             for my $key (@{$options->{'sort'}->{$order}}) {
                 push @{$options->{'options'}->{'sort'}}, $key.' '.(lc $order);
-                if(   $key eq 'last_state_change_order'
-                   || $key eq 'state_order'
-                   || $key eq 'peer_name'
-                ) {
-                    delete $options->{'options'}->{'sort'};
-                    return;
+                if($self->{'lmd_optimizations'}) {
+                    if($key eq 'peer_name') {
+                        $options->{'extra_columns'} = [] unless $options->{'extra_columns'};
+                        push @{$options->{'extra_columns'}}, "peer_name";
+                    }
+                } else {
+                    if(   $key eq 'last_state_change_order'
+                       || $key eq 'state_order'
+                       || $key eq 'peer_name'
+                    ) {
+                        delete $options->{'options'}->{'sort'};
+                        return;
+                    }
                 }
             }
         }
@@ -1332,8 +1397,12 @@ sub _optimized_for_wrapped_json {
         $page = $options->{'pager'}->{'pages'} if $options->{'pager'}->{'last'};
         # offset can only be used if this is the only backend...
         # so use the minimal limit for now
-        #$options->{'options'}->{'offset'} = $page * $options->{'pager'}->{'entries'};
-        $options->{'options'}->{'limit'}  = $page * $options->{'pager'}->{'entries'};
+        if($self->{'lmd_optimizations'}) {
+            $options->{'options'}->{'offset'} = ($page-1) * $options->{'pager'}->{'entries'};
+            $options->{'options'}->{'limit'} = $options->{'pager'}->{'entries'};
+        } else {
+            $options->{'options'}->{'limit'}  = $page * $options->{'pager'}->{'entries'};
+        }
     }
     $self->{'optimized'} = 1;
     return;
