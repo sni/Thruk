@@ -1196,6 +1196,35 @@ ex.:
   connection_pool_size = 5
 
 
+=== use_lmd_core
+{% include new_since.ad version="2.12" %}
+Enable lmd connection handling. Set to 1 to enable.
+LMD handles all backend connections in a separate process
+which will be started automatically with thruk if enabled.
+Read more on lmd at: https://github.com/sni/lmd
+
+ex.:
+
+  use_lmd_core = 0
+
+=== lmd_core_bin
+Path to lmd binary.
+
+ex.:
+
+  lmd_core_bin = /usr/local/go/src/github.com/sni/lmd/lmd/lmd
+
+=== lmd_core_config
+Path to additional lmd configuration. The sites will be automatically
+generated.
+
+ex.:
+
+  lmd_core_config = /etc/thruk/lmd.ini
+
+
+
+
 === logcache
 Enables caching logfiles for faster access and less memory usage for
 the naemon process. Cache supports MongoDB and Mysql only. Prefered
@@ -1252,6 +1281,8 @@ ex.:
 
 
 === use_shadow_naemon
+
+*shadownaemon is deprecated, use lmd instead*
 
 Enable usage of shadownaemon. This is a daemon which shadows a remote
 core via livestatus and therefor removes network latency from accessing
