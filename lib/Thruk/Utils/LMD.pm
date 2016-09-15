@@ -188,6 +188,10 @@ sub _write_lmd_config {
     $site_config .= "LogFile = '".$lmd_dir."/lmd.log'\n\n";
     $site_config .= "LogLevel = 'Info'\n\n";
 
+    if(!$config->{'ssl_verify_hostnames'}) {
+        $site_config .= "SkipSSLCheck = 1\n\n";
+    }
+
     for my $key (@{$Thruk::Backend::Pool::peer_order}) {
         my $peer = $Thruk::Backend::Pool::peers->{$key};
         $site_config .= "[[Connections]]\n";
