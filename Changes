@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - mark disabled eventhandler red on process info page
           - add lmd support
+          - get uid/groups with POSIX:getgroups if possible (mickenordin #634)
           - fix xss issue on login page
           - Panorama View:
             - increase popups delay to 1second
