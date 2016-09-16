@@ -956,6 +956,7 @@ sub set_processinfo {
     } else {
         $fetch = 1;
     }
+    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $safe == Thruk::ADD_CACHED_DEFAULTS;
     $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
     if($fetch) {

@@ -256,7 +256,9 @@
                           [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
                           [% IF real_pi_detail.exists(pd) %])[% END %]
                         [% ELSE %]
-                          [% backend_detail.$pd.last_error %]
+                          [% IF backend_detail.$pd.last_error != "OK" %]
+                            [% escape_html(backend_detail.$pd.last_error) %]
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]
