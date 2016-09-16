@@ -45,6 +45,9 @@ Ext.onReady(function() {
                 }
                 if(!TP.iconSettingsWindow) {
                     // check if the mouse is still over the icon after the showDelay
+                    if(!TP.iconTipTarget || !TP.iconTipTarget.el) {
+                        return(false);
+                    }
                     var pos = TP.iconTipTarget.getPosition();
                     var size = TP.iconTipTarget.getSize();
                     if(   cursorX < pos[0] || cursorX > pos[0]+size.width
