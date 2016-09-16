@@ -1707,7 +1707,8 @@ sub _get_results_xs_pool {
         # iterate over original peers to retain order
         # this keeps identical results in the order of our backends
         for my $peer ( @{ $self->get_peers() } ) {
-            my $key = $peer->{'key'};
+            my $key  = $peer->{'key'};
+            my $name = $peer->{'name'};
             my $sorted   = $sorted_results->{$key};
             next if !defined $sorted;
             if($sorted->{'failed'}) {
@@ -1734,10 +1735,10 @@ sub _get_results_xs_pool {
                             'opts'     => $sorted->{'opts'}->[$x],
                             'keys'     => $sorted->{'keys'}->[$x],
                         };
-                        push @{$sorted->{'keys'}->[$x]}, 'peer_key';
+                        push @{$sorted->{'keys'}->[$x]}, ('peer_key', 'peer_name');
                     }
                     # add peer key
-                    map { push(@{$_}, $key) } @{$sorted->{'res'}->[$x]->{'result'}};
+                    map { push(@{$_}, ($key, $name)) } @{$sorted->{'res'}->[$x]->{'result'}};
                     push @{$post_process->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
                     $optimized = 1;
                 } else {
@@ -2052,14 +2053,18 @@ sub _merge_answer {
 
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
-        my $key = $peer->{'key'};
+        my $key  = $peer->{'key'};
+        my $name = $peer->{'name'};
         next if !defined $data->{$key};
         confess("not a hash") unless ref $data eq 'HASH';
 
         if( ref $data->{$key} eq 'ARRAY' ) {
             $return = [] unless defined $return;
             if(defined $data->{$key}->[0] && ref $data->{$key}->[0] eq 'HASH') {
-                map { $_->{'peer_key'} = $key } @{$data->{$key}};
+                map {
+                    $_->{'peer_key'}  = $key;
+                    $_->{'peer_name'} = $name;
+                } @{$data->{$key}};
             }
             $return = [ @{$return}, @{$data->{$key}} ];
         }
@@ -2067,7 +2072,10 @@ sub _merge_answer {
             $return = {} unless defined $return;
             $return = {} unless ref $return eq 'HASH';
             my $tmp = $data->{$key};
-            map { $tmp->{$_}->{'peer_key'} = $key } keys %{$data->{$key}};
+            map {
+                $tmp->{$_}->{'peer_key'} = $key;
+                $tmp->{$_}->{'peer_name'} = $name;
+            } keys %{$data->{$key}};
             $return = { %{$return}, %{$data->{$key} } };
         }
         else {
