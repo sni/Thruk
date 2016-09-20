@@ -156,6 +156,8 @@ ex.:
 
 Changes the timezone from the systems default to this timezone.
 Only set this if you have trouble with displaying the right timestamps.
+Use /usr/share/zoneinfo on most linux systems for reference, as some
+timezones are set using the Region/Country format.
 
 ex.:
 
