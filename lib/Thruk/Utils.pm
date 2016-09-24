@@ -1543,7 +1543,6 @@ sub get_action_url {
                     eval('$new_host =~ '.$regex);
                     ## use critic
                 }
-                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
                 if ($svc) {
                     my $new_svc = $svc;
@@ -1554,6 +1553,7 @@ sub get_action_url {
                     }
                     $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
                 }
+                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
                 last;
             }
