@@ -1288,7 +1288,7 @@ sub _do_on_peers {
             $totalsize = scalar @{$data};
         }
 
-        if(!$ENV{'THRUK_USE_LMD'}) {
+        if(!$ENV{'THRUK_USE_LMD'} || $arg{'remove_duplicates'}) {
             if( $arg{'sort'} ) {
                 if($type ne 'sorted' or scalar keys %{$result} > 1) {
                     $data = $self->_sort( $data, $arg{'sort'} );
@@ -1806,29 +1806,24 @@ sub _remove_duplicates {
     # calculate md5 sums
     my $uniq = {};
     for my $dat ( @{$data} ) {
-        my $peer_key = $dat->{'peer_key'};
-        delete $dat->{'peer_key'};
+        my $peer_key = delete $dat->{'peer_key'};
         my $peer_name = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_name'};
-        my $peer_addr = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_addr'};
-        my $str       = join( ';', grep(defined, values %{$dat}));
+        my $str       = join( ';', grep(defined, sort values %{$dat}));
         utf8::encode($str);
         my $md5       = md5_hex($str);
         if( !defined $uniq->{$md5} ) {
             $dat->{'peer_key'}  = $peer_key;
             $dat->{'peer_name'} = $peer_name;
-            $dat->{'peer_addr'} = $peer_addr;
 
             $uniq->{$md5} = {
                 'data'      => $dat,
                 'peer_key'  => [$peer_key],
                 'peer_name' => [$peer_name],
-                'peer_addr' => [$peer_addr],
             };
         }
         else {
             push @{ $uniq->{$md5}->{'peer_key'} },  $peer_key;
             push @{ $uniq->{$md5}->{'peer_name'} }, $peer_name;
-            push @{ $uniq->{$md5}->{'peer_addr'} }, $peer_addr;
         }
     }
 
@@ -1837,7 +1832,6 @@ sub _remove_duplicates {
         $data->{'data'}->{'backend'} = {
             'peer_key'  => $data->{'peer_key'},
             'peer_name' => $data->{'peer_name'},
-            'peer_addr' => $data->{'peer_addr'},
         };
         push @{$return}, $data->{'data'};
 
