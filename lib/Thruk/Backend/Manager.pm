@@ -1255,7 +1255,7 @@ sub _do_on_peers {
     }
 
     # howto merge the answers?
-    my $data;
+    my($data, $must_resort);
     if( $type eq 'file' ) {
         $data = $result;
     }
@@ -1273,9 +1273,11 @@ sub _do_on_peers {
     }
     elsif ( $function eq 'get_hostgroups' ) {
         $data = $self->_merge_hostgroup_answer($result);
+        $must_resort = 1;
     }
     elsif ( $function eq 'get_servicegroups' ) {
         $data = $self->_merge_servicegroup_answer($result);
+        $must_resort = 1;
     }
     else {
         $data = $self->_merge_answer( $result, $type );
@@ -1286,9 +1288,10 @@ sub _do_on_peers {
         if( $arg{'remove_duplicates'} ) {
             $data = $self->_remove_duplicates($data);
             $totalsize = scalar @{$data};
+            $must_resort = 1;
         }
 
-        if(!$ENV{'THRUK_USE_LMD'} || $arg{'remove_duplicates'}) {
+        if(!$ENV{'THRUK_USE_LMD'} || $must_resort) {
             if( $arg{'sort'} ) {
                 if($type ne 'sorted' or scalar keys %{$result} > 1) {
                     $data = $self->_sort( $data, $arg{'sort'} );
