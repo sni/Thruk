@@ -9,9 +9,9 @@ Base configuration is managed in these configuration files (in the order in
 which they are read):
 
 -------
-  * thruk.conf          # shipped default Thruk config
-  * thruk_local.d/*     # local override drop dir
-  * thruk_local.conf    # local override of Thruks settings
+  * thruk.conf                     # shipped default Thruk config
+  * thruk_local.d/*.{cfg,conf}     # local override drop dir
+  * thruk_local.conf               # local override of Thruks settings
 -------
 
 WARNING: All configuration options described in this file should go into the
@@ -65,11 +65,21 @@ thruk_local.d/ instead.
 
 === thruk_local.d
 {% include new_since.ad version="2.00" %}
-Local settings drop directory. All files in here override settings from the
-thruk.conf file. Besides the standard file extension 'cfg' and 'conf' it is
+Local settings drop directory. All `*.cfg` and `*.conf` files in here override settings from the
+thruk.conf file. Besides the standard file extension `cfg` and `conf` it is
 also possible to use the hostname. Those files are only used if the hostname
 matches the actual system hostname. This is a good way to separate test and
 production configuration.
+
+example:
+
+-------
+    /etc
+    `-- thruk
+        `-- thruk_local.d
+            |-- my.cfg              # will be read on every host
+            `-- test.test-machine   # will only be read on a host named `test-machine`
+-------
 
 === thruk_local.conf
 
