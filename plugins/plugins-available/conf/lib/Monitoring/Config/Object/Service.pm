@@ -119,6 +119,7 @@ sub BUILD {
         'primary_key' => [ 'service_description', [ 'host_name', 'hostgroup_name' ] ],
         'default'     => $Monitoring::Config::Object::Service::Defaults,
         'standard'    => [ 'service_description', 'use', 'host_name', 'check_command', 'contact_groups' ],
+        'has_custom'  => 1,
     };
     bless $self, $class;
     return $self;

@@ -262,7 +262,6 @@ Ext.define('TP.Pantab', {
     },
     saveIconsStates: function() {
         var tab = this;
-        if(tab.readonly && !tab.scripted) { return; }
         window.clearTimeout(TP.timeouts['timeout_' + tab.id + '_saveIconsStates']);
         TP.timeouts['timeout_' + tab.id + '_saveIconsStates'] = window.setTimeout(function() {
             tab.saveIconsStatesDo();
@@ -270,7 +269,6 @@ Ext.define('TP.Pantab', {
     },
     saveIconsStatesDo: function() {
         var tab       = this;
-        if(tab.readonly && !tab.scripted) { return; }
         var panels    = TP.getAllPanel(tab);
         var allStates = {};
         var found     = 0;
@@ -467,8 +465,8 @@ Ext.define('TP.Pantab', {
             if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
             if(This.map)   { This.map.destroy();   This.map   = undefined; }
         }
-        if(!This.rendered) { return; }
-        if(xdata.hide_tab_header) {
+        if(This.hidden) { return; }
+        if(xdata.hide_tab_header && This.tab) {
             This.tab.hide();
         }
         This.setBaseHtmlClass();
@@ -548,7 +546,17 @@ Ext.define('TP.Pantab', {
         var This = this;
         if(This.xdata && This.xdata.refresh > 0) {
             TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
-            TP.updateAllIcons(This);
+            var skipUpdate = false;
+            if(TP.lastFullIconRefresh[This.id]) {
+                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[This.id].getTime())/1000;
+                /* no update neccessary if the last update is not older than half of the usual refresh interval */
+                if(deltaRefresh < (This.xdata.refresh / 2)) {
+                    skipUpdate = true;
+                }
+            }
+            if(!skipUpdate) {
+                TP.updateAllIcons(This);
+            }
         }
 
         if(TP.initMask && !this.keepMask) { TP.initMask.destroy(); delete TP.initMask; }

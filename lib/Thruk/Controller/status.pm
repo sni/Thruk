@@ -870,7 +870,11 @@ sub _process_summary_page {
 
     if( $c->stash->{substyle} eq 'host' ) {
         # we need the hosts data
-        my $host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+        my $host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                              columns => [ qw/action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address has_been_checked name
+                                                              state display_name custom_variable_names custom_variable_values groups scheduled_downtime_depth acknowledged
+                                                              checks_enabled check_type/ ],
+                                             );
         for my $host ( @{$host_data} ) {
             for my $group ( @{ $host->{'groups'} } ) {
                 next if !defined $all_groups->{$group};
@@ -879,7 +883,11 @@ sub _process_summary_page {
         }
     }
     # create a hash of all services
-    my $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+    my $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                                 columns => [ qw/description state host_name acknowledged has_been_checked
+                                                                 host_state host_has_been_checked host_acknowledged host_scheduled_downtime_depth host_checks_enabled host_groups
+                                                                 checks_enabled check_type scheduled_downtime_depth groups/ ],
+                                                );
 
     my $groupsname = "host_groups";
     if( $c->stash->{substyle} eq 'service' ) {

@@ -15,7 +15,7 @@ use warnings;
 
 use 5.008000;
 
-our $VERSION = '2.08';
+our $VERSION = '2.10';
 
 ###################################################
 # create connection pool
@@ -82,6 +82,7 @@ sub startup {
     require Thruk::Utils::Auth;
     require Thruk::Utils::External;
     require Thruk::Utils::Livecache;
+    require Thruk::Utils::LMD;
     require Thruk::Utils::Menu;
     require Thruk::Utils::Status;
     require Thruk::Action::AddDefaults;
@@ -226,6 +227,8 @@ sub _build_app {
     ###################################################
     # start shadownaemons in background
     Thruk::Utils::Livecache::check_initial_start(undef, $config, 1);
+    my $c = Thruk::Context->new($self, {'PATH_INFO' => '/'});
+    Thruk::Utils::LMD::check_initial_start($c, $config, 1);
 
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");

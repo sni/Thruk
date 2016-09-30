@@ -6,6 +6,9 @@ function add_conf_attribute(table, key, rt) {
         value = key;
         key   = 'customvariable';
     }
+    if(fields[key] == undefined) {
+        return false;
+    }
 
     running_number--;
     if(key != 'customvariable' && key != 'exception') {
@@ -650,8 +653,10 @@ function new_attr_filter(str) {
 /* new attribute onselect */
 function on_attr_select() {
     var key = jQuery('#newattr').val();
-    var newid = "#"+add_conf_attribute('attr_table', key,true).replace(/"/g, '');
+    var newid = add_conf_attribute('attr_table', key,true);
     ajax_search.reset();
+    if(!newid) { return false; }
+    newid = "#"+(newid.replace(/"/g, ''));
     if(key == "customvariable") {
         newid = newid+"_key";
     }
@@ -671,6 +676,7 @@ function on_empty_click(inp) {
     var v = input.value;
     input.value = 'customvariable';
     var newid = on_attr_select();
+    if(!newid) { return(false); }
     newid = newid.replace(/^#/, '');
     var newin = document.getElementById(newid);
     var tr = newin.parentNode.parentNode;

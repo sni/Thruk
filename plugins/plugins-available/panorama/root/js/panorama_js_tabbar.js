@@ -214,7 +214,7 @@ Ext.define('TP.TabBar', {
                         disabled: true
                     }]
                 }, {
-                    text: 'Public Dashboards',
+                    text: 'Shared Dashboards',
                     icon: url_prefix+'plugins/panorama/images/world.png',
                     hideOnClick: false,
                     menu: [{

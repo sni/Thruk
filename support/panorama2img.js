@@ -12,7 +12,7 @@ page.onResourceTimeout = function(e) {
 };
 
 if (system.args.length != 8) {
-    console.log('Usage: html2pdf.js SITE SESSIONCOOKIE WIDTH HEIGHT MAPURL OUTPUT.png');
+    console.log('Usage: panorama2img.js SITE SESSIONCOOKIE WIDTH HEIGHT MAPURL OUTPUT.png');
     phantom.exit(1);
 } else {
     site    = system.args[1];
@@ -27,10 +27,11 @@ if (system.args.length != 8) {
     output  = system.args[7];
 
     phantom.addCookie({
-      'name'     : 'thruk_auth',   /* required property */
-      'value'    : cookie,  /* required property */
-      'path'     : site,                /* required property */
-      'expires'  : 'Session'
+      'name'     : 'thruk_auth',
+      'value'    : cookie,
+      'domain'   : 'localhost',
+      'path'     : site,
+      'expires'  : (new Date()).getTime() + (1000 * 60 * 60)
     });
 
     page.viewportSize = { width: width, height: height };
@@ -42,10 +43,31 @@ if (system.args.length != 8) {
             console.log('Unable to load the input file!');
             phantom.exit(1);
         } else {
-            window.setTimeout(function () {
-                page.render(output);
-                phantom.exit();
-            }, 200);
+            var retries = 0;
+            window.setInterval(function () {
+                retries++;
+                if(checkPanoramaLoaded() || retries > 150) {
+                    window.setTimeout(function () {
+                        page.render(output, {format: 'png', quality: 100});
+                        phantom.exit();
+                    }, 3000);
+                }
+            }, 100);
         }
     });
+}
+
+function checkPanoramaLoaded() {
+    var initialized = page.evaluate(function() {
+        return TP.initialized;
+    });
+    if(initialized) {
+        var mask = page.evaluate(function() {
+            return(Ext.dom.Query.select('.x-mask-loading DIV'));
+        });
+        if(mask.length == 0) {
+            return true;
+        }
+    }
+    return false;
 }

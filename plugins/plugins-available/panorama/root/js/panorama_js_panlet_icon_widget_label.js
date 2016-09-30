@@ -78,6 +78,7 @@ Ext.define('TP.IconLabel', {
         style.background   = cfg.bgcolor;
         style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
         style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
+        style.textAlign    = cfg.fontcenter ? 'center' : 'unset';
         style.paddingLeft  = "3px";
         style.paddingRight = "3px";
         if(cfg.orientation == 'vertical') { panel.labelEl.addCls('vertical');    }
@@ -185,6 +186,11 @@ Ext.define('TP.IconLabel', {
             style.height = '';
         } else {
             style.height = cfg.height+"px";
+        }
+        if(cfg.roundcorners && cfg.roundcorners != '' && cfg.roundcorners > 0) {
+            style.borderRadius = cfg.roundcorners+"px";
+        } else {
+            style.borderRadius = '';
         }
 
         style.fontSize = fontsize+'px';

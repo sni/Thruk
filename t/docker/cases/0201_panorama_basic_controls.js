@@ -23,7 +23,7 @@ try {
     mouseClickXY(50,100);
     isNotVisible(_span("Icons & Widgets"));
 
-    testCase.endOfStep("panorama basic controls", 20);
+    testCase.endOfStep("panorama basic controls", 30);
 } catch (e) {
     testCase.handleException(e);
 } finally {

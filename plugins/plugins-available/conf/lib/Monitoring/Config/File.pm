@@ -486,7 +486,7 @@ sub save {
         return;
     }
 
-    my $content = $self->get_new_file_content();
+    my $content = $self->get_new_file_content(1);
     open(my $fh, '>', $self->{'path'}) or do {
         push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
         return;
@@ -552,7 +552,7 @@ returns the current raw file content
 
 =cut
 sub get_new_file_content {
-    my($self) = @_;
+    my($self, $update_linenr) = @_;
     my $new_content = '';
 
     return $new_content if $self->{'deleted'};
@@ -575,7 +575,10 @@ sub get_new_file_content {
         $linenr      += $nr_comment_lines;
 
         # update line number of object
-        $obj->{'line'} = $linenr;
+        if($update_linenr) {
+            $obj->{'line'}  = $linenr;
+            $obj->{'line2'} = $linenr+$nr_object_lines;
+        }
 
         $linenr += $nr_object_lines;
     }

@@ -190,7 +190,11 @@
                       [% FOREACH pd IN tmpbackends %]
                       <td class='dataVal'>
                         [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.enable_event_handlers %]Yes[% ELSE %]No[% END %]
+                          [% IF pi_detail.$pd.enable_event_handlers %]
+                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                          [% ELSE %]
+                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]
@@ -252,7 +256,9 @@
                           [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
                           [% IF real_pi_detail.exists(pd) %])[% END %]
                         [% ELSE %]
-                          [% backend_detail.$pd.last_error %]
+                          [% IF backend_detail.$pd.last_error != "OK" %]
+                            [% escape_html(backend_detail.$pd.last_error) %]
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]

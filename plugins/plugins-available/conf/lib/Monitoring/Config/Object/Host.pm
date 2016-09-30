@@ -129,6 +129,7 @@ sub BUILD {
         'primary_key' => 'host_name',
         'default'     => $Monitoring::Config::Object::Host::Defaults,
         'standard'    => [ 'host_name', 'use', 'alias', 'address', 'contact_groups' ],
+        'has_custom'  => 1,
     };
     bless $self, $class;
     return $self;

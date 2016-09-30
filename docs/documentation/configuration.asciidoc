@@ -9,9 +9,9 @@ Base configuration is managed in these configuration files (in the order in
 which they are read):
 
 -------
-  * thruk.conf          # shipped default Thruk config
-  * thruk_local.d/*     # local override drop dir
-  * thruk_local.conf    # local override of Thruks settings
+  * thruk.conf                     # shipped default Thruk config
+  * thruk_local.d/*.{cfg,conf}     # local override drop dir
+  * thruk_local.conf               # local override of Thruks settings
 -------
 
 WARNING: All configuration options described in this file should go into the
@@ -65,11 +65,21 @@ thruk_local.d/ instead.
 
 === thruk_local.d
 {% include new_since.ad version="2.00" %}
-Local settings drop directory. All files in here override settings from the
-thruk.conf file. Besides the standard file extension 'cfg' and 'conf' it is
+Local settings drop directory. All `*.cfg` and `*.conf` files in here override settings from the
+thruk.conf file. Besides the standard file extension `cfg` and `conf` it is
 also possible to use the hostname. Those files are only used if the hostname
 matches the actual system hostname. This is a good way to separate test and
 production configuration.
+
+example:
+
+-------
+    /etc
+    `-- thruk
+        `-- thruk_local.d
+            |-- my.cfg              # will be read on every host
+            `-- test.test-machine   # will only be read on a host named `test-machine`
+-------
 
 === thruk_local.conf
 
@@ -156,6 +166,8 @@ ex.:
 
 Changes the timezone from the systems default to this timezone.
 Only set this if you have trouble with displaying the right timestamps.
+Use /usr/share/zoneinfo on most linux systems for reference, as some
+timezones are set using the Region/Country format.
 
 ex.:
 
@@ -1196,6 +1208,35 @@ ex.:
   connection_pool_size = 5
 
 
+=== use_lmd_core
+{% include new_since.ad version="2.12" %}
+Enable lmd connection handling. Set to 1 to enable.
+LMD handles all backend connections in a separate process
+which will be started automatically with thruk if enabled.
+Read more on lmd at: https://github.com/sni/lmd
+
+ex.:
+
+  use_lmd_core = 0
+
+=== lmd_core_bin
+Path to lmd binary.
+
+ex.:
+
+  lmd_core_bin = /usr/local/go/src/github.com/sni/lmd/lmd/lmd
+
+=== lmd_core_config
+Path to additional lmd configuration. The sites will be automatically
+generated.
+
+ex.:
+
+  lmd_core_config = /etc/thruk/lmd.ini
+
+
+
+
 === logcache
 Enables caching logfiles for faster access and less memory usage for
 the naemon process. Cache supports MongoDB and Mysql only. Prefered
@@ -1252,6 +1293,8 @@ ex.:
 
 
 === use_shadow_naemon
+
+*shadownaemon is deprecated, use lmd instead*
 
 Enable usage of shadownaemon. This is a daemon which shadows a remote
 core via livestatus and therefor removes network latency from accessing
@@ -2109,6 +2152,7 @@ ex.:
     geo_map_default_center = 13.74,47.77
     geo_map_default_zoom   = 5
     extra_fonts            = CompanyFont1, CompanyFont2
+    new_files_start_at     = 1
   </Component>
 
 
@@ -2128,6 +2172,11 @@ send according to the user permissions.
 === full_reload_interval
 Full page reload every 3 hours to prevent memory
 leaks. Disabled when set to 0.
+
+=== new_files_start_at
+Normally new files start at index 1 but this can be changed here. This helps in
+situations when more than one Thruk installation has to create dashboards in
+the same folder.
 
 === geo_map_default_center
 Default coordinates (lon,lat) for new geo maps.

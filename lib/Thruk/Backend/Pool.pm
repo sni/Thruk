@@ -42,7 +42,7 @@ init thread connection pool
 
 sub init_backend_thread_pool {
     my($extra_backends) = @_;
-    our($peer_order, $peers, $pool, $pool_size, $xs);
+    our($peer_order, $peers, $pool, $pool_size, $xs, $lmd_peer);
     return if(defined $peers && !$extra_backends);
     #&timing_breakpoint('creating pool');
 
@@ -104,6 +104,24 @@ sub init_backend_thread_pool {
                 $pool_size = 1; # no pool required when using xs caching
             }
         }
+    }
+    if($config->{'use_lmd_core'}) {
+        $pool_size = 1; # no pool required when using lmd core
+        $use_shadow_naemon = "";
+        ## no critic
+        $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
+        $ENV{'THRUK_USE_LMD'} = 1;
+        ## use critic
+        eval {
+            Thruk::Utils::IO::mkdir_r($config->{'tmp_path'}.'/lmd') ;
+        };
+        die("could not create lmd ".$config->{'tmp_path'}.'/lmd'.': '.$@) if $@;
+        $lmd_peer = Thruk::Backend::Provider::Livestatus->new({
+                                                peer      => $config->{'tmp_path'}.'/lmd/live.sock',
+                                                peer_key  => 'lmdpeer',
+                                            });
+        $lmd_peer->peer_key('lmdpeer');
+        $lmd_peer->{'lmd_optimizations'} = 1;
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {

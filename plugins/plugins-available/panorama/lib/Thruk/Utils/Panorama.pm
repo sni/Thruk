@@ -139,6 +139,7 @@ sub get_dashboard_list {
                     readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
                     description => $d->{'description'} || '',
                     objects     => $d->{'objects'},
+                    ts          => $d->{'ts'},
                 };
             }
         } else {
@@ -171,7 +172,7 @@ sub load_dashboard {
 
     # startpage can be overridden, only load original file if there is nonen in etc/
     if($nr == 0 && !-s $file) {
-        $file = $c->config->{'plugin_path'}.'/plugins-available/panorama/0.tab';
+        $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }
 
     return unless -s $file;
@@ -234,8 +235,8 @@ sub load_dashboard {
     $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
     # merge runtime data
-    my $runtime = {};
-    my $runtimefile  = $c->config->{'var_path'}.'/panorama/'.$nr.'.tab.runtime';
+    my $runtime      = {};
+    my $runtimefile  = Thruk::Utils::Panorama::_get_runtime_file($c, $nr);
     if(-e $runtimefile) {
        $runtime = Thruk::Utils::read_data_file($runtimefile);
     }
@@ -326,6 +327,19 @@ sub delete_dashboard {
     # and also all backups
     unlink(glob($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.*'));
     return;
+}
+
+##########################################################
+sub _get_runtime_file {
+    my($c, $nr) = @_;
+    my $user = '';
+    if(!$c->stash->{'is_admin'}) {
+        # save runtime data to user file
+        $user = $c->stash->{'remote_user'};
+        $user =~ s/[^a-zA-Z\d_\-]/_/gmx;
+        $user = $user.'.';
+    }
+    return($c->{'panorama_var'}.'/'.$nr.'.tab.'.$user.'runtime');
 }
 
 ##########################################################

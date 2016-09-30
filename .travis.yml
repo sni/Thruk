@@ -1,5 +1,5 @@
 sudo: required
-language: perl
+language: generic
 services:
   - docker
 before_install:
@@ -15,7 +15,6 @@ before_install:
   - sudo apt-get -y install mysql-client mysql-server
   - sudo apt-get -y install naemon-core naemon-livestatus
   - sudo /etc/init.d/naemon restart
-  - perlbrew off || echo
   - cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
   # newer version are broken when using symlinks
   - cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz
@@ -24,7 +23,7 @@ before_install:
   - cpanm -q -f --installdeps --notest --no-man-pages .
   - git config --global user.email "travis@localhost"
   - git config --global user.name "Travis Testuser"
-  - echo 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)' > ~/.thruk
+  - echo "export PERL5LIB=\$PERL5LIB:$HOME/perl5/lib/perl5" > ~/.thruk
   # ensure we have a test database in place for tests
   - mysql -e "create database IF NOT EXISTS test;" -uroot
   # ensure we have all modules loaded

@@ -30,6 +30,7 @@ Ext.define('TP.SmallWidget', {
             this.xdata = TP.clone(this.xdata);
         }
         var tab     = Ext.getCmp(this.panel_id);
+        if(!tab) { return(false); } /* tab may be closed already */
         this.locked = tab.xdata.locked;
         if(readonly) {
             this.locked = true;
@@ -577,7 +578,7 @@ Ext.define('TP.SmallWidget', {
         var panel = this;
         if(forceCenter && panel.noUpdateLonLat > 0) { return; }
         var tab   = Ext.getCmp(panel.panel_id);
-        if(tab.map == undefined || tab.map.map == undefined) { return; }
+        if(tab == undefined || tab.map == undefined || tab.map.map == undefined) { return; }
         var s;
         if(!panel.el) {
             s     = {width: panel.xdata.size, height: panel.xdata.size};
@@ -728,6 +729,7 @@ Ext.define('TP.IconWidget', {
         } else {
             this.updateRender(xdata);
         }
+        this.setLinkData(xdata);
         this.lastType = xdata.appearance.type;
         this.applyZindex(this.xdata.layout.zindex);
     },
@@ -764,7 +766,9 @@ Ext.define('TP.IconWidget', {
     /* save state of icons back to servers runtime file */
     saveIconsStates: function() {
         var tab = Ext.getCmp(this.panel_id);
-        tab.saveIconsStates();
+        if(tab) { /* may be closed already*/
+            tab.saveIconsStates();
+        }
     },
 
     /* rotates this thing */
@@ -854,29 +858,7 @@ Ext.define('TP.IconWidget', {
         if(panel.dragEl2) { panel.dragEl2.destroy(); }
 
         /* add link (link will only work on labels for connectors) */
-        if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
-            panel.addCls('clickable');
-            panel.removeCls('notclickable');
-            if(panel.el) { panel.el.dom.href=xdata.link.link; }
-            panel.autoEl.href=xdata.link.link;
-            if(panel.labelEl && panel.labelEl.el) {
-                panel.labelEl.el.dom.href=xdata.link.link;
-                panel.labelEl.removeCls('notclickable');
-                panel.labelEl.addCls('clickable');
-            }
-        } else {
-            if(panel.el) {
-                panel.removeCls('clickable');
-                panel.addCls('notclickable');
-            }
-            if(panel.el) { panel.el.dom.href=''; }
-            panel.autoEl.href='';
-            if(panel.labelEl && panel.labelEl.el) {
-                panel.labelEl.el.dom.href='';
-                panel.labelEl.removeCls('clickable');
-                panel.labelEl.addCls('notclickable');
-            }
-        }
+        panel.setLinkData(xdata);
 
         var x       = 0;
         var y       = 0;
@@ -932,7 +914,17 @@ Ext.define('TP.IconWidget', {
                 drawWidth  = width;
                 drawHeight = height;
                 panel.setSize(drawWidth, drawHeight);
-                panel.setPosition(panel.xdata.layout.x+offsetX, panel.xdata.layout.y+offsetY);
+                var newX = panel.xdata.layout.x+offsetX;
+                var newY = panel.xdata.layout.y+offsetY;
+                panel.setPosition(newX, newY);
+
+                // chrome gets position totally wrong when going back to start dashboard otherwise
+                if(panel.el && panel.el.dom && panel.getPosition()[0] != Number(newX).toFixed()) {
+                    window.setTimeout(Ext.bind(function(x, y) {
+                        panel.el.dom.style.left = x+"px";
+                        panel.el.dom.style.top = y+"px";
+                    }, panel, [newX, newY]), 200);
+                }
             }
 
             var items = [];
@@ -1001,6 +993,34 @@ Ext.define('TP.IconWidget', {
         }
         else {
             panel.itemRendering = false;
+        }
+    },
+
+    setLinkData: function(xdata) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
+            panel.addCls('clickable');
+            panel.removeCls('notclickable');
+            if(panel.el) { panel.el.dom.href=xdata.link.link; }
+            panel.autoEl.href=xdata.link.link;
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href=xdata.link.link;
+                panel.labelEl.removeCls('notclickable');
+                panel.labelEl.addCls('clickable');
+            }
+        } else {
+            if(panel.el) {
+                panel.removeCls('clickable');
+                panel.addCls('notclickable');
+            }
+            if(panel.el) { panel.el.dom.href=''; }
+            panel.autoEl.href='';
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href='';
+                panel.labelEl.removeCls('clickable');
+                panel.labelEl.addCls('notclickable');
+            }
         }
     },
 

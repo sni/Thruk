@@ -27,7 +27,7 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.08';
+our $VERSION = '2.10';
 
 my $project_root = home('Thruk::Config');
 my $branch       = '';
@@ -45,7 +45,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'May 06, 2016',
+              'released'               => 'August 24, 2016',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -900,7 +900,7 @@ sub _do_finalize_config {
 
     ###################################################
     # when using shadow naemon, some settings don't make sense
-    if($config->{'use_shadow_naemon'}) {
+    if($config->{'use_shadow_naemon'} || $config->{'use_lmd_core'}) {
         $config->{'connection_pool_size'} = 1; # no pool required when using caching
         $config->{'check_local_states'}   = 0; # local state checking not required
     }
@@ -966,15 +966,34 @@ sub _do_finalize_config {
 return user and groups thruk runs with
 
 =cut
-
 sub get_user {
+    # Discover which user we want to be
     my($from_folder) = @_;
     confess($from_folder." ".$!) unless -d $from_folder;
+    # This is the user we want to be
     my $uid = (stat $from_folder)[4];
-    my($name,$gid) = (getpwuid($uid))[0, 3];
-    my @groups = ( $gid );
-    while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
-        $users =~ /\b$name\b/mx and push @groups, $gid;
+    # This is the current user
+    my $cuid = (getpwuid($<))[2];
+    # For now just initialize the array
+    my @groups = ( );
+
+    # If we are the user we want to be we use getgroups
+    # Which is fast and non intrusive against ldap/nis
+    if($cuid eq $uid) {
+        # Get the grous from getgroups
+        my @gids = POSIX::getgroups;
+        foreach my $egid (@gids) {
+            # Add zero to convert egid to an int like it is in the old function
+            push @groups, $egid  + 0;
+        }
+    }
+    # Otherwise we fall back on getgrent which will loop all groups in an intrusive way
+    else {
+        my($name,$gid) = (getpwuid($uid))[0, 3];
+        @groups = ( $gid );
+        while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
+            $users =~ /\b$name\b/mx and push @groups, $gid;
+        }
     }
     return($uid, \@groups);
 }

@@ -381,7 +381,7 @@ return computed config for this object
 
 =cut
 sub get_computed_config {
-    my($self, $objects) = @_;
+    my($self, $objects, $keep_plus) = @_;
 
     my $cache = $self->{'cache'}->{'computed'}->{$self->{'id'}};
     return(@{$cache}) if defined $cache;
@@ -391,21 +391,24 @@ sub get_computed_config {
     for my $tname (@{$templates}) {
         my $t = $objects->get_template_by_name($self->{'type'}, $tname);
         if(defined $t) {
-            my($tconf_keys, $tconf) = $t->get_computed_config($objects);
+            my($tconf_keys, $tconf) = $t->get_computed_config($objects, 1);
             for my $key (keys %{$tconf}) {
                 next if $key eq 'name';
+                next if $key eq 'register';
                 if(!defined $conf->{$key}) {
                     $conf->{$key} = $tconf->{$key};
                 }
-                elsif(defined $self->{'default'}->{$key}
+                if(defined $self->{'default'}->{$key}
                          and  $self->{'default'}->{$key}->{'type'} eq 'LIST')
                 {
                     if(substr($conf->{$key}->[0], 0, 1) eq '+') {
                         # merge uniq list elements together
                         my $list           = dclone($tconf->{$key});
+                        $tconf->{$key}->[0] =~ s/^\+//gmx;
                         $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
                         @{$conf->{$key}}   = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
                         $conf->{$key}->[0] = '+'.$conf->{$key}->[0];
+                        $conf->{$key}->[0] =~ s/^\++/+/gmx;
                     }
                 }
             }
@@ -414,13 +417,15 @@ sub get_computed_config {
     delete $conf->{'use'};
 
     # remove + signs
-    for my $key (keys %{$conf}) {
-        if( defined $self->{'default'}->{$key}
-                and $self->{'default'}->{$key}->{'type'} eq 'LIST'
-                and defined $conf->{$key}->[0]
-                and substr($conf->{$key}->[0], 0, 1) eq '+')
-        {
-            $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
+    if(!$keep_plus) {
+        for my $key (keys %{$conf}) {
+            if( defined $self->{'default'}->{$key}
+                    and $self->{'default'}->{$key}->{'type'} eq 'LIST'
+                    and defined $conf->{$key}->[0]
+                    and substr($conf->{$key}->[0], 0, 1) eq '+')
+            {
+                $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
+            }
         }
     }
 
@@ -456,7 +461,9 @@ sub get_default_keys {
         push @result, { name => $cat, keys => \@keys };
     }
 
-    push @result, { name => 'Custom Variables', keys => ['customvariable'] };
+    if($self->{'has_custom'}) {
+        push @result, { name => 'Custom Variables', keys => ['customvariable'] };
+    }
 
     return \@result;
 }
