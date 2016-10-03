@@ -25,11 +25,14 @@ dailydist: cleandist
 
 releasedist: cleandist dist
 	git describe --tag --exact-match
-	#tar zxf thruk-$(VERSION).tar.gz
-	#mv thruk-$(VERSION) thruk-$(DAILYVERSION)
-	#tar cfz thruk-$(DAILYVERSION).tar.gz thruk-$(DAILYVERSION)
-	#rm -f thruk-$(VERSION).tar.gz
-	#rm -rf thruk-$(DAILYVERSION)
+	# required for servicepack releases, like 2.10-2
+	if [ "$(VERSION)" != "$(DAILYVERSION)" ]; then \
+		tar zxf thruk-$(VERSION).tar.gz; \
+		mv thruk-$(VERSION) thruk-$(DAILYVERSION); \
+		tar cfz thruk-$(DAILYVERSION).tar.gz thruk-$(DAILYVERSION); \
+		rm -f thruk-$(VERSION).tar.gz; \
+		rm -rf thruk-$(DAILYVERSION); \
+	fi
 	ls -la *.gz
 
 cleandist:

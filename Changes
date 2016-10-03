@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.10-2   Mon Oct  3 20:43:02 CEST 2016
           - mark disabled eventhandler red on process info page
           - add lmd support
           - get uid/groups with POSIX:getgroups if possible (mickenordin #634)
