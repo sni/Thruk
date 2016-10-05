@@ -1027,8 +1027,10 @@ return parsed config file
 
 sub read_config_file {
     my($file) = @_;
-    # this seems to be the fastest way to trim comments
-    my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file, binmode => ':utf8')));
+    # since perl 5.23 sysread on utf-8 handles is deprecated, so we need to open the file manually
+    open my $fh, '<:encoding(UTF-8)', $file or die "Can't open '$file' for reading: $!";
+    my @config_lines = grep(!/^\s*\#/mxo, <$fh>);
+    CORE::close($fh);
     my $conf = {};
     _parse_rows($file, \@config_lines, $conf);
     return($conf);
