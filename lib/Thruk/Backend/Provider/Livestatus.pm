@@ -116,6 +116,7 @@ sub _raw_query {
     my $socket = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
     local $/ = undef;
     my $res = <$socket>;
+    $self->{'live'}->{'backend_obj'}->_close();
     return($res);
 }
 
