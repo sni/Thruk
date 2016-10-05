@@ -96,7 +96,7 @@ sub startup {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
                     path         => sub { my $p = Thruk::Context::translate_request_path($_, $class->config);
-                                          return($p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf)$/mx);
+                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf)$/mx;
                                         },
                     root         => './root/',
                     pass_through => 1,
@@ -376,6 +376,10 @@ sub reset_logging {
         if($appender->{'appender'} && $appender->{'appender'}->{'fh'}) {
             # enable closing logs for forked childs
             $appender->{'appender'}->{'close'} = 1;
+
+            # result in write on close fh otherwise
+            CORE::close($appender->{'appender'}->{'fh'});
+            undef $appender->{'appender'}->{'fh'};
         }
     }
 
