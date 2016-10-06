@@ -1299,7 +1299,7 @@ sub _do_on_peers {
             }
 
             if( $arg{'limit'} ) {
-                $data = $self->_limit( $data, $arg{'limit'} );
+                $data = _limit( $data, $arg{'limit'} );
             }
         }
 
@@ -1776,7 +1776,7 @@ sub _get_results_xs_pool {
                 $post_process->{'results'} = _sort_nr($post_process->{'results'}, $sortkeys);
             }
             # apply limit
-            $post_process->{'results'}  = $self->_limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
+            $post_process->{'results'}  = _limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
             # splice result, callbacks are missing...
             $post_process->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $post_process->{keys}, result => $post_process->{'results'}});
             $result->{'_all_'} = $post_process->{'results'};
@@ -2445,7 +2445,7 @@ returns data limited by limit
 =cut
 
 sub _limit {
-    my($self, $data, $limit) = @_;
+    my($data, $limit) = @_;
 
     return $data unless defined $limit and $limit > 0;
 

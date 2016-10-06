@@ -30,7 +30,7 @@ BEGIN {
 our $VERSION = '2.10';
 
 my $project_root = home('Thruk::Config');
-my $branch       = '';
+my $branch       = '2';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
 if($branch) {
@@ -45,7 +45,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'August 24, 2016',
+              'released'               => 'October 03, 2016',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -1027,8 +1027,10 @@ return parsed config file
 
 sub read_config_file {
     my($file) = @_;
-    # this seems to be the fastest way to trim comments
-    my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file, binmode => ':utf8')));
+    # since perl 5.23 sysread on utf-8 handles is deprecated, so we need to open the file manually
+    open my $fh, '<:encoding(UTF-8)', $file or die "Can't open '$file' for reading: $!";
+    my @config_lines = grep(!/^\s*\#/mxo, <$fh>);
+    CORE::close($fh);
     my $conf = {};
     _parse_rows($file, \@config_lines, $conf);
     return($conf);
