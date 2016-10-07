@@ -1961,10 +1961,12 @@ sub _page_data {
         $c->stash->{'data'} = $data;
     }
     else {
-        if($page == $pages) {
-            $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
-        } else {
-            $data = [splice(@{$data}, $entries*($page-1), $entries)];
+        if(!$ENV{'THRUK_USE_LMD'}) {
+            if($page == $pages) {
+                $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
+            } else {
+                $data = [splice(@{$data}, $entries*($page-1), $entries)];
+            }
         }
         $c->stash->{'data'} = $data;
     }
