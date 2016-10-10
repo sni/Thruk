@@ -4495,6 +4495,7 @@ var ajax_search = {
     regex_matching  : false,
     backend_select  : false,
     button_links    : [],
+    search_for_cb   : undefined,
 
     /* initialize search
      *
@@ -4516,6 +4517,8 @@ var ajax_search = {
      *   filter:            run this function as additional filter
      *   backend_select:    append value of this backend selector
      *   button_links:      prepend links to buttons on top of result
+     *   regex_matching:    match with regular expressions
+     *   search_for_cb:     callback to alter the search input
      * }
      */
     init: function(elem, type, options) {
@@ -4600,6 +4603,10 @@ var ajax_search = {
         if(options.filter != undefined) {
             ajax_search.filter = options.filter;
         }
+        ajax_search.search_for_cb = undefined;
+        if(options.search_for_cb != undefined) {
+            ajax_search.search_for_cb = options.search_for_cb;
+        }
 
         var input = document.getElementById(ajax_search.input_field);
         if(input.disabled) { return false; }
@@ -4640,6 +4647,9 @@ var ajax_search = {
             if(val == '~' || val == '!~') {
                 ajax_search.regex_matching = true;
             }
+        }
+        if(options.regex_matching != undefined) {
+            ajax_search.regex_matching = options.regex_matching;
         }
 
         search_url = ajax_search.url;
@@ -4906,6 +4916,9 @@ var ajax_search = {
         }
 
         pattern = input.value;
+        if(ajax_search.search_for_cb) {
+            pattern = ajax_search.search_for_cb(pattern)
+        }
         if(ajax_search.list) {
             /* only use the last list element for search */
             var regex  = new RegExp(ajax_search.list, 'g');
@@ -4953,13 +4966,6 @@ var ajax_search = {
                       var found = 0;
                       jQuery.each(pattern, function(i, sub_pattern) {
                           var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
-                          var re;
-                          try {
-                            re = new RegExp(sub_pattern, "gi");
-                          } catch(err) {
-                            debug('regex failed: ' + sub_pattern);
-                            debug(err);
-                          }
                           if(index != -1) {
                               found++;
                               if(index == 0) { // perfect match, starts with pattern
@@ -4967,9 +4973,20 @@ var ajax_search = {
                               } else {
                                   result_obj.relevance += 1;
                               }
-                          } else if(re != undefined && ajax_search.regex_matching && data.match(re)) {
-                              found++;
-                              result_obj.relevance += 1;
+                          } else {
+                              var re;
+                              try {
+                                re = new RegExp(sub_pattern, "gi");
+                              } catch(err) {
+                                console.log('regex failed: ' + sub_pattern);
+                                console.log(err);
+                                ajax_search.error = "regex failed: "+err;
+                                return(false);
+                              }
+                              if(re != undefined && ajax_search.regex_matching && data.match(re)) {
+                                  found++;
+                                  result_obj.relevance += 1;
+                              }
                           }
                       });
                       // additional filter?
