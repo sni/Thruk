@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Panorama View:
+            - fix display error in speedometer with overlaping thresholds
+
 2.10-2   Mon Oct  3 20:43:02 CEST 2016
           - mark disabled eventhandler red on process info page
           - add lmd support
