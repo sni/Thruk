@@ -34,20 +34,18 @@ sub status {
     if($hostname and $description) {
         $data = $livedata->{'services'}->{$hostname}->{$description};
 
-        # description may contain wildcards, return worst function in that case
-        if($description =~ m/\*/mx) {
-            my $orig_description = $description;
+        # description may contain regular expressions, return worst/best function in that case
+        if($bp->looks_like_regex($description)) {
             my $function = 'worst';
             if($description =~ m/^(b|w):(.*)$/mx) {
-                if($1 eq 'b') { $function = 'worst' }
+                if($1 eq 'b') { $function = 'best' }
                 $description = $2;
             }
-            $description =~ s/\*/.*/gmx;
 
             # create hash which can be used by internal calculation function
             my $depends = [];
             for my $sname (keys %{$livedata->{'services'}->{$hostname}}) {
-                if($sname =~ m/$description/mx) {
+                if($sname =~ m/$description/mxi) {
                     my $s = $livedata->{'services'}->{$hostname}->{$sname};
                     next if($bp->{'state_type'} eq 'hard' and $s->{'state_type'} != 1);
                     push @{$depends}, { label => $sname, status => $s->{'state'} };
@@ -59,7 +57,7 @@ sub status {
             } else {
                 @res = best($c, $bp, { depends => $depends });
             }
-            $res[1] = $hostname.':'.$orig_description;
+            $res[1] = $function.' of '.$hostname.':'.$description;
             return(@res);
         }
     }

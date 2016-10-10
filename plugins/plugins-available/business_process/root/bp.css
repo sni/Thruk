@@ -63,6 +63,11 @@ DIV.ui-dialog INPUT[type=text] {
     font-size: smaller;
 }
 
+.bp_help_cmd {
+    background: #CCCCCC;
+    color: #FE4071;
+}
+
 .bp_type_desc A {
     border-bottom: 1px dotted grey;
 }
