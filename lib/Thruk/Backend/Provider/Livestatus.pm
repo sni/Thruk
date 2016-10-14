@@ -293,7 +293,7 @@ sub get_hosts {
             first_notification_delay flap_detection_enabled groups has_been_checked
             high_flap_threshold icon_image icon_image_alt icon_image_expanded
             is_executing is_flapping last_check last_notification last_state_change
-            latency long_plugin_output low_flap_threshold max_check_attempts name
+            latency low_flap_threshold max_check_attempts name
             next_check notes notes_expanded notes_url notes_url_expanded notification_interval
             notification_period notifications_enabled num_services_crit num_services_ok
             num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
@@ -488,7 +488,7 @@ sub get_services {
             host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
             host_last_state_change
             icon_image icon_image_alt icon_image_expanded is_executing is_flapping
-            last_check last_notification last_state_change latency long_plugin_output
+            last_check last_notification last_state_change latency
             low_flap_threshold max_check_attempts next_check notes notes_expanded
             notes_url notes_url_expanded notification_interval notification_period
             notifications_enabled obsess_over_service percent_state_change perf_data

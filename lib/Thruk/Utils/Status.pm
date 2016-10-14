@@ -1883,8 +1883,15 @@ sub get_service_matrix {
         $combined_filter = Thruk::Utils::combine_filter( '-and', [ $servicefilter, $hostfilter ] );
     }
 
+    my $extra_columns = [];
+    if($c->config->{'use_lmd_core'} && $c->stash->{'show_long_plugin_output'} ne 'inline') {
+        push @{$extra_columns}, 'has_long_plugin_output';
+    } else {
+        push @{$extra_columns}, 'long_plugin_output';
+    }
+
     # get real services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $combined_filter ] );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $combined_filter], extra_columns => $extra_columns );
 
     # build matrix
     my $matrix        = {};

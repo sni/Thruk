@@ -1612,7 +1612,7 @@ sub _task_hosts {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1);
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1, extra_columns => [qw/long_plugin_output/]);
 
     my $json = {
         columns => [
@@ -1682,7 +1682,7 @@ sub _task_services {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], pager => 1);
+    $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], pager => 1, extra_columns => [qw/long_plugin_output/]);
 
     my $json = {
         columns => [
@@ -2226,7 +2226,7 @@ sub _task_userdata_shapes {
 sub _task_host_list {
     my($c) = @_;
 
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], columns => [qw/name/]);
     my $data = [];
     for my $hst (@{$hosts}) {
         push @{$data}, { name => $hst->{'name'} };
@@ -2243,7 +2243,7 @@ sub _task_host_detail {
 
     my $host        = $c->req->parameters->{'host'}    || '';
     my $json      = {};
-    my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }]);
+    my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }], extra_columns => [qw/long_plugin_output/]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
         sort => { 'DESC' => 'id' },
@@ -2263,7 +2263,7 @@ sub _task_service_list {
     my($c) = @_;
 
     my $host     = $c->req->parameters->{'host'} || '';
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }]);
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }], columns => [qw/description/]);
     my $data = [];
     for my $svc (@{$services}) {
         push @{$data}, { description => $svc->{'description'} };
@@ -2281,7 +2281,7 @@ sub _task_service_detail {
     my $host        = $c->req->parameters->{'host'}    || '';
     my $description = $c->req->parameters->{'service'} || '';
     my $json        = {};
-    my $services    = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
+    my $services    = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }], extra_columns => [qw/long_plugin_output/]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
         sort => { 'DESC' => 'id' },

@@ -2163,6 +2163,20 @@ function generic_downtimes_popup(title, url) {
     jQuery('#comments_downtimes_popup').load(url);
 }
 
+function fetch_long_plugin_output(td, host, service, backend, escape_html) {
+    jQuery('.long_plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
+    var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1&host='+host+"&service="+service+"&backend="+backend;
+    if(escape_html) {
+        jQuery.get(url, {}, function(text, status, req) {
+            text = jQuery("<div>").text(text).html().replace(/\\n/g, "<br>");
+            jQuery('.long_plugin_output').html(text)
+        });
+    } else {
+        jQuery('.long_plugin_output').load(url, {}, function(text, status, req) {
+        });
+    }
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88
