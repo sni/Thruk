@@ -214,8 +214,10 @@ sub _process_raw_request {
                     # get available custom variables
                     $data        = [];
                     my $vars     = {};
-                    my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    custom_variable_names => { '!=' => '' } ], columns => ['custom_variable_names'] );
-                    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), custom_variable_names => { '!=' => '' } ], columns => ['custom_variable_names'] );
+                    # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
+                    # this leads to: Sorry, Operator  for custom variable lists not implemented.
+                    my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
+                    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
                     for my $obj (@{$hosts}, @{$services}) {
                         for my $key (@{$obj->{custom_variable_names}}) {
                             $vars->{$key} = 1;
