@@ -661,13 +661,15 @@ sub single_search {
         my $value  = $filter->{'value'};
 
         # skip most empty filter
-        if(    $value =~ m/^\s*$/mx
-           and $filter->{'type'} ne 'next check'
-           and $filter->{'type'} ne 'last check'
-           and $filter->{'type'} ne 'event handler'
-        ) {
-            next;
-        }
+        # 2010-10-25: 3bc748da2 - fixes "livestatus: Sorry, Operator 4 for lists not implemented" error with blank searches
+        # 2016-10-14: cannot reproduce anymore, blank searches do what they should do
+        #if(    $value =~ m/^\s*$/mx
+        #   and $filter->{'type'} ne 'next check'
+        #   and $filter->{'type'} ne 'last check'
+        #   and $filter->{'type'} ne 'event handler'
+        #) {
+        #    next;
+        #}
 
         my $op     = '=';
         my $rop    = '=';
@@ -1387,8 +1389,8 @@ sub get_comments_filter {
 
     if($value eq '') {
         if($op eq '=' or $op eq '~~') {
-            push @hostfilter,          { -or => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
-            push @servicefilter,       { -or => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
+            push @hostfilter,          { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
+            push @servicefilter,       { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
         } else {
             push @hostfilter,          { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
             push @servicefilter,       { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
