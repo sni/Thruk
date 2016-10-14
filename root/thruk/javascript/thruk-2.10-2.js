@@ -4757,6 +4757,9 @@ var ajax_search = {
                 ajax_search.search_type = 'none';
             }
         }
+        if(input.id.match(/_value$/) && ajax_search.search_type == "custom variable") {
+            ajax_search.search_type = 'none';
+        }
         if(ajax_search.search_type == 'none') {
             removeEvent( input, 'keyup', ajax_search.suggest );
             return true;
