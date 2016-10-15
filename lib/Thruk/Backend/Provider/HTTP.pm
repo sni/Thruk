@@ -603,6 +603,22 @@ sub get_host_stats {
 
 ##########################################################
 
+=head2 get_host_totals_stats
+
+  get_host_totals_stats
+
+returns the host statistics used on the service/host details page
+
+=cut
+sub get_host_totals_stats {
+    my($self, @options) = @_;
+    my $res = $self->_req('get_host_totals_stats', \@options);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -613,6 +629,22 @@ returns the services statistics for the tac page
 sub get_service_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_service_stats', \@options);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
+}
+
+##########################################################
+
+=head2 get_service_totals_stats
+
+  get_service_totals_stats
+
+returns the services statistics used on the service/host details page
+
+=cut
+sub get_service_totals_stats {
+    my($self, @options) = @_;
+    my $res = $self->_req('get_service_totals_stats', \@options);
     #my($typ, $size, $data) = @{$res};
     return($res->[2], 'SUM');
 }

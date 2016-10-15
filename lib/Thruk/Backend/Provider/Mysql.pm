@@ -509,10 +509,38 @@ sub get_host_stats {
 
 ##########################################################
 
+=head2 get_host_totals_stats
+
+  get_host_totals_stats
+
+returns the host statistics used on the service/host details page
+
+=cut
+
+sub get_host_totals_stats {
+    confess("not implemented");
+}
+
+##########################################################
+
 =head2 get_service_stats
 
 =cut
 sub get_service_stats {
+    confess("not implemented");
+}
+
+##########################################################
+
+=head2 get_service_totals_stats
+
+  get_service_totals_stats
+
+returns the services statistics used on the service/host details page
+
+=cut
+
+sub get_service_totals_stats {
     confess("not implemented");
 }
 

@@ -943,6 +943,43 @@ sub get_host_stats {
 
 ##########################################################
 
+=head2 get_host_totals_stats
+
+  get_host_totals_stats
+
+returns the host statistics used on the service/host details page
+
+=cut
+sub get_host_totals_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('hosts', \%options);
+    if($class->apply_filter('hoststatstotals')) {
+        my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
+        unless(wantarray) {
+            confess("get_host_totals_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'down'                              => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
+        'unreachable'                       => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('hoststatstotals');
+    return($self->get_host_totals_stats(%options));
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -1014,6 +1051,44 @@ sub get_service_stats {
     ];
     $class->reset_filter()->stats($stats)->save_filter('servicestats');
     return($self->get_service_stats(%options));
+}
+
+##########################################################
+
+=head2 get_service_totals_stats
+
+  get_service_totals_stats
+
+returns the services statistics used on the service/host details page
+
+=cut
+sub get_service_totals_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicestatstotals')) {
+        my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
+        unless(wantarray) {
+            confess("get_service_totals_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'warning'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
+        'critical'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
+        'unknown'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('servicestatstotals');
+    return($self->get_service_totals_stats(%options));
 }
 
 ##########################################################
