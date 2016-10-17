@@ -1171,7 +1171,7 @@ sub _set_enabled_backends {
     $c->log->debug("backend groups filter enabled") if $has_groups;
 
     # renew state of connections
-    if($num_backends > 1 and $c->config->{'check_local_states'}) {
+    if($num_backends > 1 && $c->config->{'check_local_states'} && !$ENV{'THRUK_USE_LMD'}) {
         $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($disabled_backends, $safe, $cached_data);
     }
 
