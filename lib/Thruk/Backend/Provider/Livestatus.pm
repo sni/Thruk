@@ -1159,7 +1159,7 @@ sub get_performance_stats {
         ];
         $class = $self->_get_class($type, \%options);
         $rows = $class
-                    ->filter([ has_been_checked => 1, check_type => 0 ])
+                    ->filter([ check_type => 0, has_been_checked => 1 ])
                     ->stats($stats)->hashref_array();
         if($ENV{'THRUK_SELECT'}) {
             push @{$selects}, $rows;
@@ -1174,7 +1174,7 @@ sub get_performance_stats {
             $type.'_passive_state_change_max' => { -isa => [ -max => 'percent_state_change' ]},
         ];
         $class = $self->_get_class($type, \%options);
-        $rows  = $class->filter([ has_been_checked => 1, check_type => 1 ])
+        $rows  = $class->filter([ check_type => 1, has_been_checked => 1 ])
                        ->stats($stats)->hashref_array();
         if($ENV{'THRUK_SELECT'}) {
             push @{$selects}, $rows;
