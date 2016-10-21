@@ -2122,6 +2122,9 @@ only used for the history support in the configuration tool. The
 'git_base_dir' may be overriden by an per backend value.
 
 === edit_files
+
+**DEPRECATED:** please use the editor plugin now.
+
 Specify some extra files which can then be edited by the Thruk configtool
 text editor. Can be used multiple times. When used with a directory, all
 files below can be edited.

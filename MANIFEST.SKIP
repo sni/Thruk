@@ -85,3 +85,5 @@ t/docker/cases/.*/.*.js
 .*\.json
 .idea/
 lmd.ini
+plugins/plugins-available/editor
+plugins/plugins-enabled/editor
