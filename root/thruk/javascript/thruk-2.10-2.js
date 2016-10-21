@@ -2358,6 +2358,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
             }
         }
         link.onclick = function() {
+            var oldSrc = jQuery(link).find('IMG').attr('src');
             jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
             jQuery.ajax({
                 url: server_action_url,
@@ -2367,11 +2368,13 @@ function check_server_action(id, link, backend, host, service, server_action_url
                     thruk_message(data.rc, data.msg);
                     if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
                     reset_action_menu_icons();
+                    jQuery(link).find('IMG').attr('src', oldSrc);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     thruk_message(1, 'server action failed: '+ textStatus);
                     if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
                     reset_action_menu_icons();
+                    jQuery(link).find('IMG').attr('src', oldSrc);
                 }
             });
             return(false);
