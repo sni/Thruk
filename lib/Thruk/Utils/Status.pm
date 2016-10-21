@@ -952,7 +952,9 @@ sub single_search {
                                  };
         }
         else {
-            confess( "unknown filter: " . $filter->{'type'} );
+            if($filter->{'type'} ne '') {
+                confess( "unknown filter: " . $filter->{'type'} );
+            }
         }
     }
 
