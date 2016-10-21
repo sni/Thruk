@@ -2339,20 +2339,29 @@ function check_position_and_show_action_menu(id, icon, container, orientation) {
 }
 
 /* set onclick handler for server actions */
-function check_server_action(id, link, backend, host, service) {
+function check_server_action(id, link, backend, host, service, server_action_url, extra_param) {
     // server action urls
     if(link.href.match(/^server:\/\//)) {
+        if(server_action_url == undefined) {
+            server_action_url = url_prefix + 'cgi-bin/status.cgi?serveraction=1';
+        }
+        var data = {
+            host:    host,
+            service: service,
+            backend: backend,
+            link:    link.href,
+            token:   user_token
+        };
+        if(extra_param) {
+            for(var key in extra_param) {
+                data[key] = extra_param[key];
+            }
+        }
         link.onclick = function() {
             jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
             jQuery.ajax({
-                url: url_prefix + 'cgi-bin/status.cgi?serveraction=1',
-                data: {
-                    host:    host,
-                    service: service,
-                    backend: backend,
-                    link:    link.href,
-                    token:   user_token
-                },
+                url: server_action_url,
+                data: data,
                 type: 'POST',
                 success: function(data) {
                     thruk_message(data.rc, data.msg);

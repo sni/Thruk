@@ -1923,7 +1923,8 @@ run server action from custom action menu
 
 =cut
 sub serveraction {
-    my( $c ) = @_;
+    my($c, $macros) = @_;
+    $macros = {} unless defined $macros;
 
     return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
 
@@ -1965,7 +1966,7 @@ sub serveraction {
         return(1, 'no such object') unless $obj;
     }
 
-    my $macros = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0});
+    %{$macros} = (%{$macros}, %{$c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0})});
     $macros->{'$REMOTE_USER$'}    = $c->stash->{'remote_user'};
     $macros->{'$DASHBOARD_ID$'}   = $c->req->parameters->{'dashboard'} if $c->req->parameters->{'dashboard'};
     $macros->{'$DASHBOARD_ICON$'} = $c->req->parameters->{'icon'}      if $c->req->parameters->{'icon'};
