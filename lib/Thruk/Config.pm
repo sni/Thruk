@@ -944,7 +944,7 @@ sub _do_finalize_config {
         next unless -d $folder.'/.';
         my @files = glob($folder.'/*.json');
         for my $file (@files) {
-            if($file =~ m%([^/]+\.json$)%mx) {
+            if($file =~ m%([^/]+)\.json$%mx) {
                 my $basename = $1;
                 $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
             }
