@@ -2339,7 +2339,7 @@ function check_position_and_show_action_menu(id, icon, container, orientation) {
 }
 
 /* set onclick handler for server actions */
-function check_server_action(id, link, backend, host, service, server_action_url, extra_param) {
+function check_server_action(id, link, backend, host, service, server_action_url, extra_param, callback) {
     // server action urls
     if(link.href.match(/^server:\/\//)) {
         if(server_action_url == undefined) {
@@ -2369,6 +2369,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                     if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
                     reset_action_menu_icons();
                     jQuery(link).find('IMG').attr('src', oldSrc);
+                    if(callback) { callback(data); }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     thruk_message(1, 'server action failed: '+ textStatus);
