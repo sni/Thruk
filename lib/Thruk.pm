@@ -193,10 +193,13 @@ sub _build_app {
 
     ###################################################
     # load routes dynamically from plugins
+    our $routes_already_loaded;
+    $routes_already_loaded = {} unless defined $routes_already_loaded;
     for my $plugin_dir (glob($self->{'config'}->{'plugin_path'}.'/plugins-enabled/*/lib/Thruk/Controller/*.pm')) {
         my $route_file = $plugin_dir;
         $route_file =~ s|/lib/Thruk/Controller/.*\.pm$|/routes|gmx;
         if(-f $route_file) {
+            next if $routes_already_loaded->{$route_file};
             my $routes = $self->{'routes'};
             my $app    = $self;
             ## no critic
@@ -206,6 +209,7 @@ sub _build_app {
                 $self->log->error("error while loading routes from ".$route_file.": ".$@);
                 confess($@);
             }
+            $routes_already_loaded->{$route_file} = 1;
         }
         elsif($plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx) {
             my $plugin = $1;
