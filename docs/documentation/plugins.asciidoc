@@ -317,7 +317,7 @@ Editor
 ----
 
 The editor plugin allows you to edit all types of text files. And provides a
-way to define further custom actions for each file type, like syntaxt check
+way to define further custom actions for each file type, like syntax check
 etc...
 
 ++++
