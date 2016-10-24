@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - remove startup page, Thruk starts in less than a second now
           - Performance improvements on the host/service list page
+          - fix merging configuration from thruk_local.d
           - Panorama View:
             - fix display error in speedometer with overlaping thresholds
           - Business Process:
