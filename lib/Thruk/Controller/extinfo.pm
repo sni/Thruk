@@ -407,13 +407,16 @@ sub _process_host_page {
     $host = $hosts->[0];
 
     # we have more and backend param is used
-    if( scalar @{$hosts} == 1 and defined $backend ) {
+    if( scalar @{$hosts} == 1 and $backend ) {
         for my $h ( @{$hosts} ) {
             if( $h->{'peer_key'} eq $backend ) {
                 $host = $h;
                 last;
             }
         }
+    }
+    elsif( scalar @{$hosts} == 1) {
+        $c->stash->{'param_backend'} = $host->{'peer_key'};
     }
 
     return $c->detach('/error/index/5') unless defined $host;
