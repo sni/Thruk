@@ -363,6 +363,9 @@ sub _renew_navigation {
                 ## no critic
                 eval '$rc = '.$link->{'visible_cb'}.'($c);';
                 ## use critic
+                if($@) {
+                    $c->log->error("error while running callback ".$link->{'visible_cb'}.": ".$@);
+                }
                 next unless $rc;
             }
 
