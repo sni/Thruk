@@ -794,6 +794,7 @@ sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
     return unless defined $c->config->{'logcache'};
+    return if !$c->config->{'logcache_delta_updates'};
     eval {
         return $self->_renew_logcache($c, $noforks);
     };
@@ -851,7 +852,16 @@ sub _renew_logcache {
                                                       nofork    => $noforks,
                                                     });
         }
-        $self->_do_on_peers( 'renew_logcache', \@args, 1);
+        if($c->config->{'logcache_import_command'}) {
+            local $ENV{'THRUK_BACKENDS'} = join(',', @{$get_results_for});
+            local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
+            my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
+            if($rc != 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
+            }
+        } else {
+            $self->_do_on_peers( 'renew_logcache', \@args, 1);
+        }
     }
     return;
 }

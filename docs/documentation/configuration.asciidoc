@@ -1266,6 +1266,37 @@ ex.:
   logcache_import_exclude = "Warning: Passive check result was received for"
 
 
+=== logcache_delta_updates
+{% include new_since.ad version="2.12" %}
+This option enables/disables the delta updates of the logcache whenever somebody
+opens a page which requires logfiles, ex.: the showlog page. This improves
+the responsiveness of the page but you miss the latest log entries since the
+last manual update.
+
+ex.:
+
+  logcache_delta_updates = 1
+
+
+=== logcache_import_command
+The import command replaces the builtin logcache update with an external
+script which is then responsible for updating the logcache database.
+This might be useful if you pull the logfiles from a ndo/ido database
+and then manually import those files.
+
+There are some useful enviromenet variables set before the script is started:
+
+  - REMOTE_USER contains the current user.
+  - THRUK_BACKENDS is a comma separated list of the selected backends.
+  - THRUK_LOGCACHE is the connection string to the thruk logcache database.
+
+ex.:
+
+  logcache_import_command = .../importscript.sh
+
+
+
+
 === delay_pages_after_backend_reload
 
 Delay the page delivery until the backends uptime is at least this
