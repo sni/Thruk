@@ -8,6 +8,7 @@ next:
           - Panorama View:
             - fix display error in speedometer with overlaping thresholds
             - fix js error in shape dropdown
+            - fix error when using umlauts in dashboard title
           - Business Process:
             - fix regular expression in service state nodes
           - Logcache:

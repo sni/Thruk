@@ -6,7 +6,7 @@ use Data::Dumper qw/Dumper/;
 use JSON::XS qw/decode_json encode_json/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
-use Encode qw(decode_utf8);
+use Encode qw(decode_utf8 encode_utf8);
 use Module::Load qw/load/;
 use Carp qw/confess/;
 use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/;
@@ -424,6 +424,10 @@ sub _stateprovider {
                         $param_data->{$k2} = $param_data->{$k2};
                         if(ref $param_data->{$k2} eq '') {
                             eval {
+                                if($k2 eq 'tab') {
+                                    # throws encoding error when having a dashboad with umlaut in title
+                                    $param_data->{$k2} = encode_utf8($param_data->{$k2});
+                                }
                                 $param_data->{$k2} = decode_json($param_data->{$k2});
                             };
                             confess(Dumper("Error in parsing json:", $@, $k2, $param_data)) if $@;
