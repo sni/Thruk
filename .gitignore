@@ -67,3 +67,4 @@ lmd.ini
 plugins/plugins-available/editor
 plugins/plugins-enabled/editor
 thruk_local.d/
+!t/data/*
