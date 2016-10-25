@@ -1,26 +1,7 @@
 ﻿[% nr = uniqnumber() %]
 [% values = [] %]
-[% IF 0 %]
-[% IF type == 'host' %]
-  [% FOREACH hst = avail_data.hosts.keys.sort.reverse %]
-    [% c.req.parameters.host    = hst %]
-    [% c.req.parameters.service = "" %]
-    [% available = get_availability_percents() %]
-    [% values.push([available.total.percent, loop.count]) %]
-  [% END %]
-[% ELSE %]
-  [% x=1; FOREACH hst = avail_data.services.keys.sort.reverse %]
-    [% FOREACH svc = avail_data.services.$hst.keys.sort.reverse %]
-      [% c.req.parameters.host    = hst %]
-      [% c.req.parameters.service = svc %]
-      [% available = get_availability_percents() %]
-      [% values.push([available.total.percent, x]); x = x + 1; %]
-    [% END %]
-  [% END %]
-[% END %]
-[% END %]
-
 [% sla_averages_total = 0; sla_averages_num = 0; %]
+
 <div id="flotgraph[% nr %]" class="flotgraph"></div>
 <script type="text/javascript">
 <!--
