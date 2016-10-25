@@ -7,6 +7,7 @@ next:
           - fix merging configuration from thruk_local.d
           - Panorama View:
             - fix display error in speedometer with overlaping thresholds
+            - fix js error in shape dropdown
           - Business Process:
             - fix regular expression in service state nodes
           - Logcache:

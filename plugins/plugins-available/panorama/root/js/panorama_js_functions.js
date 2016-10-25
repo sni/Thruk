@@ -1925,7 +1925,7 @@ var TP = {
             }
         }).show(true);
         tmppanel.setFloatParent(item.el);
-        panel.shapeRender(tmppanel.xdata, panel.xdata.appearance.color_ok, tmppanel);
+        panel.appearance.shapeRender(tmppanel.xdata, panel.xdata.appearance.color_ok, tmppanel);
         list.push(tmppanel);
     },
     fullReload: function() {
