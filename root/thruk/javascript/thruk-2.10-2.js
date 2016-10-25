@@ -1929,7 +1929,7 @@ function thruk_message(rc, message) {
     cls = 'fail_message';
     if(rc == 0) { cls = 'success_message'; }
     var html = ''
-        +'<div id="thruk_message" class="thruk_message" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">'
+        +'<div id="thruk_message" class="thruk_message '+cls+'" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">'
         +'  <div class="shadow"><div class="shadowcontent">'
         +'  <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">'
         +'    <tr>'
