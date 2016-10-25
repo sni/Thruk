@@ -1453,6 +1453,8 @@ t/data/naglint/timeperiods/in.cfg
 t/data/naglint/timeperiods/out.cfg
 t/data/nested_config/thruk.conf
 t/data/nested_config/thruk_local.conf
+t/data/nested_config/thruk_local.d/a.conf
+t/data/nested_config/thruk_local.d/b.conf
 t/data/remove_duplicates/core.cfg
 t/data/remove_duplicates/expect.cfg
 t/data/remove_duplicates/test.cfg
