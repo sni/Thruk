@@ -17,9 +17,7 @@
         { 'initialassumedservicestate'   => [ 'Initial Assumed State',      'svc_initialassumedstate',          '0'            ] },
         { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                            ] },
         { 'unavailable'                  => [ 'Unavailable States',         'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
-        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '1'          ,'max. # pages', 1 ] },
-        { 'max_worst_pages'              => [ 'Worst Outages',              'int',             '1'          ,'max. # pages', 1 ] },
-        { 'max_pnp_sources'              => [ 'Maximum PNP Sources',        'int',             '1'          ,'max. # pnp images', 1 ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '50'          ,'max. # pages', 1 ] },
     ];
   %]
 [% END %]
@@ -58,15 +56,22 @@
         [% c.req.parameters.service = svc %]
         [% available = get_availability_percents() %]
         [% p = available.total.percent; IF p == -1; p = 100; END; IF param.details_max_level != -1 && p >= param.details_max_level; NEXT; END %]
-        [% pagetitle                    = loc("Service: %s on %s", svc, hst) %]
-
-        [% IF 0 %]
-        [% WRAPPER 'reports/comp/page_standard.tt'  %]
-          [% PROCESS 'reports/comp/sla_graph_page.tt' %]
+        [% IF p < param.sla %]
+          [% pagetitle                    = loc("Service: %s on %s", svc, hst) %]
+          [% out = outages(logs, start, end) %]
+          [% page_data = page_splice(out, 12, param.max_outages_pages)  %]
+          [% FOREACH datablock = page_data %]
+            [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = pagetitle %]
+              [% FOREACH o = datablock %]
+                <div class="outages">
+                    [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
+                    <span class="duration">([% duration(o.duration) %])</span>
+                </div>
+                <div class="output">[% o.plugin_output %]</div>
+              [% END %]
+            [% END %]
+          [% END %]
         [% END %]
-        [% END %]
-        [% PROCESS 'reports/comp/pnp_multiple_graph_page.tt' %]
-        [% PROCESS 'reports/comp/sla_outages.tt' %]
       [% END %]
     [% END %]
 
