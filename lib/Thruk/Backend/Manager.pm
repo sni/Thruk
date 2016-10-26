@@ -794,6 +794,7 @@ sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
     return unless defined $c->config->{'logcache'};
+    return if !$c->config->{'logcache_delta_updates'};
     eval {
         return $self->_renew_logcache($c, $noforks);
     };
@@ -851,7 +852,16 @@ sub _renew_logcache {
                                                       nofork    => $noforks,
                                                     });
         }
-        $self->_do_on_peers( 'renew_logcache', \@args, 1);
+        if($c->config->{'logcache_import_command'}) {
+            local $ENV{'THRUK_BACKENDS'} = join(',', @{$get_results_for});
+            local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
+            my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
+            if($rc != 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
+            }
+        } else {
+            $self->_do_on_peers( 'renew_logcache', \@args, 1);
+        }
     }
     return;
 }
@@ -1066,8 +1076,8 @@ sub _set_host_macros {
     $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
-    $macros->{'$HOSTDURATION$'}       = time() - $macros->{'$HOSTDURATION$'};
-    $macros->{'$HOSTSTATE$'}          = $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}};
+    $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
+    $macros->{'$HOSTSTATE$'}          = (defined $macros->{'$HOSTSTATEID$'})         ? $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}} : 0;
     $macros->{'$HOSTBACKENDID$'}      = $host->{'peer_key'};
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
@@ -1961,10 +1971,12 @@ sub _page_data {
         $c->stash->{'data'} = $data;
     }
     else {
-        if($page == $pages) {
-            $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
-        } else {
-            $data = [splice(@{$data}, $entries*($page-1), $entries)];
+        if(!$ENV{'THRUK_USE_LMD'}) {
+            if($page == $pages) {
+                $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
+            } else {
+                $data = [splice(@{$data}, $entries*($page-1), $entries)];
+            }
         }
         $c->stash->{'data'} = $data;
     }

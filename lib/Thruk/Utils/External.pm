@@ -676,6 +676,7 @@ return true if process is still running
 =cut
 sub _is_running {
     my $dir = shift;
+    $dir = Thruk::Utils::IO::untaint($dir);
 
     return 0 unless -s $dir."/pid";
 

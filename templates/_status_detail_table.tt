@@ -113,33 +113,37 @@
             </td>
           [% ELSE %]
             [% plugin_output      = remove_html_comments(s.plugin_output) %]
-            [% long_plugin_output = remove_html_comments(s.long_plugin_output) %]
+            [% on_demand_long_plugin_output = 0 %]
+            [% IF s.defined("has_long_plugin_output") %]
+              [% IF s.has_long_plugin_output %]
+                [% on_demand_long_plugin_output = 1 %]
+                [% long_plugin_output = "..." %]
+              [% ELSE %]
+                [% long_plugin_output = "" %]
+              [% END %]
+            [% ELSE %]
+              [% long_plugin_output = remove_html_comments(s.long_plugin_output) %]
+            [% END %]
+            [% IF escape_html_tags %]
+              [% long_plugin_output = escape_html(long_plugin_output) %]
+              [% plugin_output      = escape_html(plugin_output) %]
+            [% END %]
             <td align="left" class='[% serviceclass %] output'
             [% IF long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
-                [% IF escape_html_tags %]
-                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(plugin_output)) %]<br>[% escape_html(nl2br(escape_html(long_plugin_output))) %]'
-                [% ELSE %]
-                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(plugin_output) %]<br>[% nl2br(escape_html(long_plugin_output)) %]'
-                [% END %]
+                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(plugin_output) %]<br>[% IF on_demand_long_plugin_output %][% escape_html("<span class='long_plugin_output'></span>") %][% ELSE %][% escape_html(nl2br(long_plugin_output)) %][% END %]'
               [% END %]
             [% END %]
             >
             [% pnp_url = get_pnp_url(c, s, 1) %]
             [% PROCESS _perfdata_table write="true" state=s.state plugin_output=plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description %]
-
             [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
-              [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% plugin_output %]</span>[% END %]
+              <span class="has_long_plugin_output">[% plugin_output %]</span>
             [% ELSE %]
-              [% IF escape_html_tags %][% escape_html(plugin_output) %][% ELSE %][% plugin_output %][% END %]
+              [% plugin_output %]
             [% END %]
-
             [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
-              [% IF escape_html_tags %]
-                <br>[% nl2br(escape_html(long_plugin_output)) %]
-              [% ELSE %]
-                <br>[% nl2br(long_plugin_output) %]
-              [% END %]
+            <br>[% nl2br(long_plugin_output) %]
             [% END %]
             </td>
           [% END %]

@@ -66,6 +66,10 @@ sub index {
         return $c->render(json => $json);
     }
 
+    if($c->req->parameters->{'long_plugin_output'}) {
+        return _long_plugin_output($c);
+    }
+
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
 
@@ -210,8 +214,10 @@ sub _process_raw_request {
                     # get available custom variables
                     $data        = [];
                     my $vars     = {};
-                    my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    custom_variable_names => { '!=' => '' } ], columns => ['custom_variable_names'] );
-                    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), custom_variable_names => { '!=' => '' } ], columns => ['custom_variable_names'] );
+                    # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
+                    # this leads to: Sorry, Operator  for custom variable lists not implemented.
+                    my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
+                    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
                     for my $obj (@{$hosts}, @{$services}) {
                         for my $key (@{$obj->{custom_variable_names}}) {
                             $vars->{$key} = 1;
@@ -415,8 +421,15 @@ sub _process_details_page {
         @{$columns} = keys %{$col_hash};
     }
 
+    my $extra_columns = [];
+    if($c->config->{'use_lmd_core'} && $c->stash->{'show_long_plugin_output'} ne 'inline' && $view_mode eq 'html') {
+        push @{$extra_columns}, 'has_long_plugin_output';
+    } else {
+        push @{$extra_columns}, 'long_plugin_output';
+    }
+
     # get all services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns  );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns  );
 
     if(scalar @{$services} == 0 && !$c->stash->{'has_service_filter'}) {
         # try to find matching hosts, maybe we got some hosts without service
@@ -519,8 +532,15 @@ sub _process_hostdetails_page {
         @{$columns} = keys %{$col_hash};
     }
 
+    my $extra_columns = [];
+    if($c->config->{'use_lmd_core'} && $c->stash->{'show_long_plugin_output'} ne 'inline' && $view_mode eq 'html') {
+        push @{$extra_columns}, 'has_long_plugin_output';
+    } else {
+        push @{$extra_columns}, 'long_plugin_output';
+    }
+
     # get hosts
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns );
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns );
 
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
@@ -992,8 +1012,16 @@ sub _process_combined_page {
     $c->stash->{'svc_orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'svc_orderdir'} = $order;
 
+    my $extra_columns = [];
+    if($c->config->{'use_lmd_core'} && $c->stash->{'show_long_plugin_output'} ne 'inline' && $view_mode eq 'html') {
+        push @{$extra_columns}, 'has_long_plugin_output';
+    } else {
+        push @{$extra_columns}, 'long_plugin_output';
+    }
+
     my $services            = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
                                                         sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                                        extra_columns => $extra_columns,
                                                       );
     $c->stash->{'services'} = $services;
     if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
@@ -1018,6 +1046,7 @@ sub _process_combined_page {
 
     my $hosts            = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                                        extra_columns => $extra_columns,
                                                 );
     $c->stash->{'hosts'} = $hosts;
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
@@ -1337,6 +1366,28 @@ sub _fill_host_services_hashes {
     return($host_data, $services_data);
 }
 
+##########################################################
+# return long plugin output
+sub _long_plugin_output {
+    my( $c ) = @_;
+
+    my $host    = $c->req->parameters->{'host'};
+    my $service = $c->req->parameters->{'service'};
+
+    my $objs;
+    if($service) {
+        $objs = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ], columns => [qw/long_plugin_output/] );
+    } else {
+        $objs = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ], columns => [qw/long_plugin_output/] );
+    }
+    my $obj = $objs->[0];
+    return(1, 'no such object') unless $obj;
+
+    $c->stash->{text}     = Thruk::Utils::Filter::remove_html_comments($obj->{'long_plugin_output'});
+    $c->stash->{template} = 'passthrough.tt';
+
+    return 1;
+}
 
 ##########################################################
 

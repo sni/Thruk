@@ -6,6 +6,6 @@ var bug_email_rcpt      = "[% bug_email_rcpt %]";
 var error_count         = 0;
 var skip_js_errors      = [% json_encode(skip_js_errors.list) %];
 var show_error_reports  = "[% show_error_reports %]";
-var thruk_debug_details = "[% debug_details.replace('\n', '\\n') %]";
+var thruk_debug_details = "[% escape_js(debug_details.replace('\n', '\\n')) %]";
 window.onerror          = thruk_onerror;
 [%+ END +%]

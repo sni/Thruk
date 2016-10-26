@@ -293,7 +293,7 @@ sub get_hosts {
             first_notification_delay flap_detection_enabled groups has_been_checked
             high_flap_threshold icon_image icon_image_alt icon_image_expanded
             is_executing is_flapping last_check last_notification last_state_change
-            latency long_plugin_output low_flap_threshold max_check_attempts name
+            latency low_flap_threshold max_check_attempts name
             next_check notes notes_expanded notes_url notes_url_expanded notification_interval
             notification_period notifications_enabled num_services_crit num_services_ok
             num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
@@ -488,7 +488,7 @@ sub get_services {
             host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
             host_last_state_change
             icon_image icon_image_alt icon_image_expanded is_executing is_flapping
-            last_check last_notification last_state_change latency long_plugin_output
+            last_check last_notification last_state_change latency
             low_flap_threshold max_check_attempts next_check notes notes_expanded
             notes_url notes_url_expanded notification_interval notification_period
             notifications_enabled obsess_over_service percent_state_change perf_data
@@ -943,6 +943,43 @@ sub get_host_stats {
 
 ##########################################################
 
+=head2 get_host_totals_stats
+
+  get_host_totals_stats
+
+returns the host statistics used on the service/host details page
+
+=cut
+sub get_host_totals_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('hosts', \%options);
+    if($class->apply_filter('hoststatstotals')) {
+        my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
+        unless(wantarray) {
+            confess("get_host_totals_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'down'                              => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
+        'unreachable'                       => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('hoststatstotals');
+    return($self->get_host_totals_stats(%options));
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -1018,6 +1055,44 @@ sub get_service_stats {
 
 ##########################################################
 
+=head2 get_service_totals_stats
+
+  get_service_totals_stats
+
+returns the services statistics used on the service/host details page
+
+=cut
+sub get_service_totals_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicestatstotals')) {
+        my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
+        unless(wantarray) {
+            confess("get_service_totals_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'warning'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
+        'critical'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
+        'unknown'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('servicestatstotals');
+    return($self->get_service_totals_stats(%options));
+}
+
+##########################################################
+
 =head2 get_performance_stats
 
   get_performance_stats
@@ -1084,7 +1159,7 @@ sub get_performance_stats {
         ];
         $class = $self->_get_class($type, \%options);
         $rows = $class
-                    ->filter([ has_been_checked => 1, check_type => 0 ])
+                    ->filter([ check_type => 0, has_been_checked => 1 ])
                     ->stats($stats)->hashref_array();
         if($ENV{'THRUK_SELECT'}) {
             push @{$selects}, $rows;
@@ -1099,7 +1174,7 @@ sub get_performance_stats {
             $type.'_passive_state_change_max' => { -isa => [ -max => 'percent_state_change' ]},
         ];
         $class = $self->_get_class($type, \%options);
-        $rows  = $class->filter([ has_been_checked => 1, check_type => 1 ])
+        $rows  = $class->filter([ check_type => 1, has_been_checked => 1 ])
                        ->stats($stats)->hashref_array();
         if($ENV{'THRUK_SELECT'}) {
             push @{$selects}, $rows;

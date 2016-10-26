@@ -357,6 +357,17 @@ sub _renew_navigation {
                 }
                 next unless $has_access;
             }
+            # visibility defined by callback?
+            if(defined $link->{'visible_cb'}) {
+                my $rc;
+                ## no critic
+                eval '$rc = '.$link->{'visible_cb'}.'($c);';
+                ## use critic
+                if($@) {
+                    $c->log->error("error while running callback ".$link->{'visible_cb'}.": ".$@);
+                }
+                next unless $rc;
+            }
 
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};

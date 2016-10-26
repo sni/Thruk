@@ -307,6 +307,41 @@ Additional Plugins
 ------------------
 
 
+Editor
+~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Generic Text Editor
+ Download:    https://github.com/sni/thruk-plugin-editor
+----
+
+The editor plugin allows you to edit all types of text files. And provides a
+way to define further custom actions for each file type, like syntax check
+etc...
+
+++++
+<a title="omd" rel="lightbox[plugins]" href="plugins/editor1.png"><img src="plugins/editor1.png" alt="editor plugin" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+Hello World Plugin
+~~~~~~~~~~~~~~~~~~
+
+----
+ Author:      Mikael Nordin
+ Description: Hello World Plugin
+ Download:    https://github.com/mickenordin/thruk_hello
+----
+
+The hello world plugin should get you started if you want to
+write your own plugin.
+
+
+
 OMD
 ~~~
 
@@ -361,15 +396,15 @@ TIP: Let me know if you want to get your plugin listed here.
 
 Hello World Plugin
 ~~~~~~~~~~~~~~~~~~
-In this example we will create a small Plugin that displays the words 
-"Hello World!" on the plugin page hello.cgi. 
+In this example we will create a small Plugin that displays the words
+"Hello World!" on the plugin page hello.cgi.
 
-First we create a minimal directory structure the plugin directory, 
+First we create a minimal directory structure the plugin directory,
 in linux it might be done like this:
 
 ++++
 <pre style="line-height:18px;">
-mkdir -p hello/{lib/Thruk/Controller,templates} 
+mkdir -p hello/{lib/Thruk/Controller,templates}
 </pre>
 ++++
 

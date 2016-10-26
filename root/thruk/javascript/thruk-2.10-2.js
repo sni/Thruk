@@ -1929,7 +1929,7 @@ function thruk_message(rc, message) {
     cls = 'fail_message';
     if(rc == 0) { cls = 'success_message'; }
     var html = ''
-        +'<div id="thruk_message" class="thruk_message" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">'
+        +'<div id="thruk_message" class="thruk_message '+cls+'" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">'
         +'  <div class="shadow"><div class="shadowcontent">'
         +'  <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">'
         +'    <tr>'
@@ -2163,6 +2163,20 @@ function generic_downtimes_popup(title, url) {
     jQuery('#comments_downtimes_popup').load(url);
 }
 
+function fetch_long_plugin_output(td, host, service, backend, escape_html) {
+    jQuery('.long_plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
+    var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1&host='+host+"&service="+service+"&backend="+backend;
+    if(escape_html) {
+        jQuery.get(url, {}, function(text, status, req) {
+            text = jQuery("<div>").text(text).html().replace(/\\n/g, "<br>");
+            jQuery('.long_plugin_output').html(text)
+        });
+    } else {
+        jQuery('.long_plugin_output').load(url, {}, function(text, status, req) {
+        });
+    }
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88
@@ -2325,30 +2339,43 @@ function check_position_and_show_action_menu(id, icon, container, orientation) {
 }
 
 /* set onclick handler for server actions */
-function check_server_action(id, link, backend, host, service) {
+function check_server_action(id, link, backend, host, service, server_action_url, extra_param, callback) {
     // server action urls
     if(link.href.match(/^server:\/\//)) {
+        if(server_action_url == undefined) {
+            server_action_url = url_prefix + 'cgi-bin/status.cgi?serveraction=1';
+        }
+        var data = {
+            host:    host,
+            service: service,
+            backend: backend,
+            link:    link.href,
+            token:   user_token
+        };
+        if(extra_param) {
+            for(var key in extra_param) {
+                data[key] = extra_param[key];
+            }
+        }
         link.onclick = function() {
+            var oldSrc = jQuery(link).find('IMG').attr('src');
             jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
             jQuery.ajax({
-                url: url_prefix + 'cgi-bin/status.cgi?serveraction=1',
-                data: {
-                    host:    host,
-                    service: service,
-                    backend: backend,
-                    link:    link.href,
-                    token:   user_token
-                },
+                url: server_action_url,
+                data: data,
                 type: 'POST',
                 success: function(data) {
                     thruk_message(data.rc, data.msg);
                     if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
                     reset_action_menu_icons();
+                    jQuery(link).find('IMG').attr('src', oldSrc);
+                    if(callback) { callback(data); }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     thruk_message(1, 'server action failed: '+ textStatus);
                     if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
                     reset_action_menu_icons();
+                    jQuery(link).find('IMG').attr('src', oldSrc);
                 }
             });
             return(false);
@@ -4495,6 +4522,7 @@ var ajax_search = {
     regex_matching  : false,
     backend_select  : false,
     button_links    : [],
+    search_for_cb   : undefined,
 
     /* initialize search
      *
@@ -4516,6 +4544,8 @@ var ajax_search = {
      *   filter:            run this function as additional filter
      *   backend_select:    append value of this backend selector
      *   button_links:      prepend links to buttons on top of result
+     *   regex_matching:    match with regular expressions
+     *   search_for_cb:     callback to alter the search input
      * }
      */
     init: function(elem, type, options) {
@@ -4600,6 +4630,10 @@ var ajax_search = {
         if(options.filter != undefined) {
             ajax_search.filter = options.filter;
         }
+        ajax_search.search_for_cb = undefined;
+        if(options.search_for_cb != undefined) {
+            ajax_search.search_for_cb = options.search_for_cb;
+        }
 
         var input = document.getElementById(ajax_search.input_field);
         if(input.disabled) { return false; }
@@ -4640,6 +4674,9 @@ var ajax_search = {
             if(val == '~' || val == '!~') {
                 ajax_search.regex_matching = true;
             }
+        }
+        if(options.regex_matching != undefined) {
+            ajax_search.regex_matching = options.regex_matching;
         }
 
         search_url = ajax_search.url;
@@ -4732,6 +4769,9 @@ var ajax_search = {
             ) {
                 ajax_search.search_type = 'none';
             }
+        }
+        if(input.id.match(/_value$/) && ajax_search.search_type == "custom variable") {
+            ajax_search.search_type = 'none';
         }
         if(ajax_search.search_type == 'none') {
             removeEvent( input, 'keyup', ajax_search.suggest );
@@ -4906,6 +4946,9 @@ var ajax_search = {
         }
 
         pattern = input.value;
+        if(ajax_search.search_for_cb) {
+            pattern = ajax_search.search_for_cb(pattern)
+        }
         if(ajax_search.list) {
             /* only use the last list element for search */
             var regex  = new RegExp(ajax_search.list, 'g');
@@ -4953,13 +4996,6 @@ var ajax_search = {
                       var found = 0;
                       jQuery.each(pattern, function(i, sub_pattern) {
                           var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
-                          var re;
-                          try {
-                            re = new RegExp(sub_pattern, "gi");
-                          } catch(err) {
-                            debug('regex failed: ' + sub_pattern);
-                            debug(err);
-                          }
                           if(index != -1) {
                               found++;
                               if(index == 0) { // perfect match, starts with pattern
@@ -4967,9 +5003,20 @@ var ajax_search = {
                               } else {
                                   result_obj.relevance += 1;
                               }
-                          } else if(re != undefined && ajax_search.regex_matching && data.match(re)) {
-                              found++;
-                              result_obj.relevance += 1;
+                          } else {
+                              var re;
+                              try {
+                                re = new RegExp(sub_pattern, "gi");
+                              } catch(err) {
+                                console.log('regex failed: ' + sub_pattern);
+                                console.log(err);
+                                ajax_search.error = "regex failed: "+err;
+                                return(false);
+                              }
+                              if(re != undefined && ajax_search.regex_matching && data.match(re)) {
+                                  found++;
+                                  result_obj.relevance += 1;
+                              }
                           }
                       });
                       // additional filter?

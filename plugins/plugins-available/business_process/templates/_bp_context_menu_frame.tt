@@ -1,6 +1,7 @@
 ﻿<table width="100%" id="[% div_id %]" style="display: none;">
   <tr>
-    <td align="center" colspan=2 class="bp_type_desc">[% div_help %]</td>
+    <td></td>
+    <td align="left" class="bp_type_desc">[% div_help %]</td>
   </tr>
   <tr>
     <th align="right">Label</th>

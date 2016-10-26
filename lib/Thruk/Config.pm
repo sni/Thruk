@@ -252,59 +252,89 @@ make config available without loading complete dependencies
 
 sub get_config {
     my @files = @_;
+    my @local_files;
     if(scalar @files == 0) {
         for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
             push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
-                push @files, sort glob($path.'/thruk_local.d/*');
+                my @tmpfiles = sort glob($path.'/thruk_local.d/*');
+                for my $tmpfile (@tmpfiles) {
+                    my $ext;
+                    if($tmpfile =~ m/\.([^.]+)$/mx) { $ext = $1; }
+                    if(!$ext) {
+                        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                            print STDERR "skipped config file: ".$tmpfile.", file has no extension, please use either cfg, conf or the hostname\n";
+                        }
+                        next;
+                    }
+                    if($ext ne 'conf' && $ext ne 'cfg') {
+                        # only read if the extension matches the hostname
+                        our $hostname;
+                        if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
+                        if($tmpfile !~ m/\Q$hostname\E$/mx) {
+                            if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                                print STDERR "skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'\n";
+                            }
+                            next;
+                        }
+                    }
+                    push @local_files, $tmpfile;
+                }
             }
-            push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
+            push @local_files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
             last if scalar @files > 0;
         }
     }
 
-    my %configs = %{_load_any(\@files)};
+    my %configs = %{_load_any([@files, { 'thruk_local.conf' => \@local_files}])};
     my %config  = %Thruk::Config::config;
     my $first_backend_from_thruk_locals = 0;
-    for my $file (@files) {
-        my $ext;
-        if($file =~ m/\.([^.]+)$/mx) { $ext = $1; }
-        if(!$ext) {
-            if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
-                print STDERR "skipped config file: ".$file.", file has no extension, please use either cfg, conf or the hostname\n";
-            }
-            next;
-        }
-        if($ext ne 'conf' && $ext ne 'cfg') {
-            # only read if the extension matches the hostname
-            our $hostname;
-            if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
-            if($file !~ m/\Q$hostname\E$/mx) {
-                if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
-                    print STDERR "skipped config file: ".$file.", file does not end with our hostname '$hostname'\n";
-                }
-                next;
-            }
-        }
-        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
-            print STDERR "reading config file: ".$file."\n";
-        }
+    for my $file (@files, 'thruk_local.conf') {
         for my $key (keys %{$configs{$file}}) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
-                if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
                 if($key eq 'Thruk::Backend') {
                     # merge all backends from thruk_locals
                     if(!$first_backend_from_thruk_locals && $file =~ m|thruk_local\.|mx) {
                         $config{$key}->{'peer'} = [];
                         $first_backend_from_thruk_locals = 1;
                     }
-                    $config{$key}->{'peer'} = [ @{list($config{$key}->{'peer'})}, @{list($configs{$file}->{$key}->{'peer'})} ];
+                    for my $peer (@{list($configs{$file}->{$key})}) {
+                        $config{$key}->{'peer'} = [ @{list($config{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
+                    }
                 } else {
+                    if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
                     $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
                 }
             } else {
                 $config{$key} = $configs{$file}->{$key};
+            }
+        }
+    }
+
+    # merge users and groups
+    for my $type (qw/Group User/) {
+        if($config{$type}) {
+            for my $name (keys %{$config{$type}}) {
+                # if its a list of hashes, merge into one hash
+                if(ref $config{$type}->{$name} eq 'ARRAY') {
+                    my $data = {};
+                    for my $d (@{$config{$type}->{$name}}) {
+                        for my $key (keys %{$d}) {
+                            if(!defined $data->{$key}) {
+                                $data->{$key} = $d->{$key};
+                            }
+                            else {
+                                if(ref $data->{$key} eq 'ARRAY') {
+                                    push @{$data->{$key}}, $d->{$key};
+                                } else {
+                                    $data->{$key} = [$data->{$key}, $d->{$key}];
+                                }
+                            }
+                        }
+                    }
+                    $config{$type}->{$name} = $data;
+                }
             }
         }
     }
@@ -483,6 +513,7 @@ sub set_default_config {
         'user_password_min_length'          => 5,
         'grafana_default_panelId'           => 1,
         'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
+        'logcache_delta_updates'            => 1,
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
@@ -495,6 +526,11 @@ sub set_default_config {
 
     for my $key (keys %{$defaults}) {
         $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};
+
+        if(ref $defaults->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
+            my $l = scalar (@{$config->{$key}});
+            $config->{$key} = $config->{$key}->[$l-1];
+        }
     }
 
     # make a nice path
@@ -944,7 +980,7 @@ sub _do_finalize_config {
         next unless -d $folder.'/.';
         my @files = glob($folder.'/*.json');
         for my $file (@files) {
-            if($file =~ m%([^/]+\.json$)%mx) {
+            if($file =~ m%([^/]+)\.json$%mx) {
                 my $basename = $1;
                 $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
             }
@@ -1027,10 +1063,18 @@ return parsed config file
 
 sub read_config_file {
     my($file) = @_;
-    # since perl 5.23 sysread on utf-8 handles is deprecated, so we need to open the file manually
-    open my $fh, '<:encoding(UTF-8)', $file or die "Can't open '$file' for reading: $!";
-    my @config_lines = grep(!/^\s*\#/mxo, <$fh>);
-    CORE::close($fh);
+    $file = list($file);
+    my @config_lines;
+    for my $f (@{$file}) {
+        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
+            print STDERR "reading config file: ".$f."\n";
+        }
+        # since perl 5.23 sysread on utf-8 handles is deprecated, so we need to open the file manually
+        open my $fh, '<:encoding(UTF-8)', $f or die "Can't open '$f' for reading: $!";
+        my @rows = grep(!/^\s*\#/mxo, <$fh>);
+        push @config_lines, @rows;
+        CORE::close($fh);
+    }
     my $conf = {};
     _parse_rows($file, \@config_lines, $conf);
     return($conf);
@@ -1060,6 +1104,7 @@ sub _parse_rows {
 
         # nested structures
         if(substr($line,0,1) eq '<') {
+            # named hashes: <item name>
             if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
                 my($k,$v) = ($1,$2);
                 my $next  = {};
@@ -1073,6 +1118,7 @@ sub _parse_rows {
                 }
                 next;
             }
+            # direct hashes: <name>
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
@@ -1162,9 +1208,16 @@ sub load_any {
     my($options) = @_;
     my $result = {};
     for my $f (@{$options->{'files'}}) {
-        my $config = read_config_file($f);
+        my $name  = $f;
+        my $files = $f;
+        if(ref $f eq 'HASH') {
+            my @keys = keys %{$f};
+            $name = $keys[0];
+            $files = $f->{$name};
+        }
+        my $config = read_config_file($files);
         &{$options->{'filter'}}($config);
-        $result->{$f} = $config;
+        $result->{$name} = $config;
     }
     return($result);
 }

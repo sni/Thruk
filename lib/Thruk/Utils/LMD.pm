@@ -186,7 +186,7 @@ sub _write_lmd_config {
     my $site_config = "Listen = ['".$lmd_dir."/live.sock']\n\n";
 
     $site_config .= "LogFile = '".$lmd_dir."/lmd.log'\n\n";
-    $site_config .= "LogLevel = 'Info'\n\n";
+    $site_config .= "LogLevel = 'Warn'\n\n";
 
     if(!$config->{'ssl_verify_hostnames'}) {
         $site_config .= "SkipSSLCheck = 1\n\n";
