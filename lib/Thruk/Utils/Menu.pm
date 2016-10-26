@@ -83,6 +83,7 @@ sub add_link {
     $link{'links'}  = [] unless defined $link{'links'};
     $link{'target'} = _get_menu_target() unless defined $link{'target'};
     $link{'href'}   = _get_menu_link($link{'href'});
+    $link{'html'}   = $link{'html'};
     push(@{$last_section->{'links'}}, \%link);
     return;
 }
@@ -105,6 +106,7 @@ sub add_sub_link {
     $link{'links'}   = [] unless defined $link{'links'};
     $link{'href'}    = _get_menu_link($link{'href'});
     $link{'name'}    = "" unless defined $link{'name'};
+    $link{'html'}   = $link{'html'};
     push(@{$last_link->{'links'}}, \%link);
     return;
 }
@@ -372,6 +374,7 @@ sub _renew_navigation {
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});
+            $link->{'html'}   = $link->{'html'};
             push(@{$section->{'links'}}, $link);
         }
     }
@@ -399,6 +402,7 @@ sub _renew_navigation {
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});
+            $link->{'html'}   = $link->{'html'};
 
             push(@{$sublink->{'links'}}, $link);
         }

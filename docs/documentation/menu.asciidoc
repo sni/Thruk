@@ -75,6 +75,7 @@ add_link('name' => 'Home', 'href' => '/thruk/main.html');
 * href: This is the destination link optional you can add.
 * target: If Link shall open in a new window.
 * icon: Used for themes which support icons.
+* html: If set, all other attributes are ignored and the plain html data is inserted in the menu
 
 Then the config looks like this:
 
@@ -171,6 +172,16 @@ Just wrap your changes in a 'is_user' condition.
 if(is_user('thrukadmin')) {
   insert_item('Admins Only', { 'href' => '.../only_for_some_user.html', 'name' => 'Admin Link' });
 }
+-----
+
+
+=== Insert arbitrary HTML
+
+It is possible to insert arbitrary HTML in the menu by specifying the html
+attribute. You may have to use CSS to style the content to your needs.
+
+-----
+  insert_item("General", {html => "<a href='#test'>test: <img src='/thruk/themes/Thruk/images/arrow_refresh.png'></a>" })
 -----
 
 
