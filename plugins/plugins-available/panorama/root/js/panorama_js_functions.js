@@ -2033,6 +2033,39 @@ var TP = {
             return values[half];
         else
             return (values[half-1] + values[half]) / 2.0;
+    },
+    getAllUsedColors: function() {
+        var colors = {};
+        var tabpan = Ext.getCmp('tabpan');
+        var tab    = tabpan.getActiveTab();
+        if(!tab) { return; }
+        for(var nr=0; nr<tab.window_ids.length; nr++) {
+            var panel = Ext.getCmp(tab.window_ids[nr]);
+            if(panel) {
+                TP.getAllColorsInStructure(panel.xdata, colors);
+            }
+        }
+        if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel) {
+            var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+            TP.getAllColorsInStructure(xdata, colors);
+        }
+        return(Ext.Object.getKeys(colors).sort());
+    },
+    getAllColorsInStructure: function(val, colors) {
+        if(Ext.isArray(val)) {
+            for(var x; x < val.length; x++) {
+                TP.getAllColorsInStructure(val[x], colors);
+            }
+        }
+        else if(Ext.isObject(val)) {
+            for(var key in val) {
+                TP.getAllColorsInStructure(val[key], colors);
+            }
+        }
+        else if(Ext.isString(val) && val.length == 7 && val.match(/^#/)) {
+            var color = val.replace(/^#/, '');
+            colors[color] = 1;
+        }
     }
 }
 TP.log('[global] starting');

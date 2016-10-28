@@ -6,6 +6,7 @@ next:
           - allow arbitrary htmL in the side navigation
           - fix merging configuration from thruk_local.d
           - Panorama View:
+            - list already used colors in color picker
             - fix display error in speedometer with overlaping thresholds
             - fix js error in shape dropdown
             - fix error when using umlauts in dashboard title
