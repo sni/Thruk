@@ -23,8 +23,8 @@ Ext.define('TP.IconWidgetAppearanceShape', {
     },
 
     /* update render item on active tab only */
-    updateRenderActive: function(xdata) {
-        this.shapeRender(xdata);
+    updateRenderActive: function(xdata, forceColor) {
+        this.shapeRender(xdata, forceColor);
     },
 
     /* renders shape */
@@ -35,7 +35,7 @@ Ext.define('TP.IconWidgetAppearanceShape', {
 
         if(xdata.appearance.shapename == undefined) { return; }
         if(!panel.surface) {
-            panel.setRenderItem(xdata);
+            panel.setRenderItem(xdata, undefined, forceColor);
             return;
         }
         if(!panel.surface.el) { return };
@@ -159,9 +159,9 @@ Ext.define('TP.IconWidgetAppearanceShape', {
             layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
             defaults:    {
                 listeners: { change:    function()      { TP.iconSettingsGlobals.renderUpdate(undefined, undefined, 0); },
-                             mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate(color,     undefined, 0); },
-                             mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined, undefined, 0); }
-                           }
+                           },
+                mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate(color,     undefined, 0); },
+                mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined, undefined, 0); }
             },
             items: [
                 { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },

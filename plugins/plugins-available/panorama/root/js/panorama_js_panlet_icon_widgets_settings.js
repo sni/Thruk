@@ -259,7 +259,7 @@ TP.iconShowEditDialog = function(panel) {
         if(xdata.appearance.type == undefined) { return; }
         if(xdata.appearance.type == 'shape') { forceRenderItem = true; }
         if(xdata.appearance.type != lastType || forceRenderItem) {
-            if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem); }
+            if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem, forceColor); }
         }
         lastType = xdata.appearance.type;
 

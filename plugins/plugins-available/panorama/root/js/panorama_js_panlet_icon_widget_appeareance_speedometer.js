@@ -8,8 +8,8 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
     },
 
     /* update render item on active tab only */
-    updateRenderActive: function(xdata) {
-        this.speedoRender(xdata);
+    updateRenderActive: function(xdata, forceColor) {
+        this.speedoRender(xdata, forceColor);
     },
 
     setRenderItem: function(xdata) {
@@ -341,9 +341,9 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
             layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
             defaults:    {
                 listeners: { change:    function()      { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0)  },
-                             mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate({color: color, scope: this }, undefined, 0); },
-                             mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0); }
-                           }
+                           },
+                mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate({color: color, scope: this }, undefined, 0); },
+                mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0); }
             },
             items: [
                 { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
