@@ -1949,7 +1949,8 @@ sub serveraction {
     my @cmdline = split(/\s+/mx, $c->config->{'action_menu_actions'}->{$action});
     my $cmd = shift @cmdline;
     # expand ~ in $cmd
-    $cmd = glob($cmd);
+    my @cmd = glob($cmd);
+    if($cmd[0]) { $cmd = $cmd[0]; }
     $c->log->debug('raw cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
     if(!-x $cmd) {
         return(1, $cmd.' is not executable');
