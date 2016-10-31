@@ -33,27 +33,25 @@
       <div class="navsectionlinks"[% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
       [%+ FOREACH link = section.links %]
         <ul class="navsectionlinks">
-          [%+ IF link.defined("html") %]
-            <li>[% link.html %]</li>
-          [%+ ELSIF link.href %]
-          <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>
+          [%+ IF link.href %]
+          <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>[% IF link.defined("html") %][% link.html %][% END %]
             [% IF link.links.size > 0 %]
             <ul>
             [% FOREACH sublink = link.links %]
-              [%+ IF sublink.defined("html") %]
-                <li>[% sublink.html %]</li>
-              [% ELSE %]
-                <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>
+              [% IF sublink.defined("href") && sublink.href %]
+                <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>[% IF sublink.defined("html") %][% sublink.html %][% END %]
                 [% FOREACH addlink = sublink.links %]
                   (<a href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
                 [% END %]
                 </li>
+              [%+ ELSIF sublink.defined("html") %]
+                <li>[% sublink.html %]</li>
               [% END %]
             [%+ END %]
             </ul>
             [%+ END %]
           </li>
-          [%+ ELSIF link.search %]
+          [%+ ELSIF link.defined("search") && link.search %]
           <li class="navbarsearch">
           <div class="navbarsearch">
             <form method="get" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]">
@@ -73,6 +71,8 @@
             </form>
           </div>
           </li>
+          [%+ ELSIF link.defined("html") %]
+            <li>[% link.html %]</li>
           [%+ END %]
         </ul>
       [%+ END %]

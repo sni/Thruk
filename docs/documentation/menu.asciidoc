@@ -226,3 +226,19 @@ add_link('name' => "Nagvis",         'href' => '/nagvis/frontend/nagvis-js/index
 add_sub_link('name' => "demo",       'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo');
 add_sub_link('name' => "demo-map2",  'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo-map2');
 -----
+
+
+=== Add new item with arbitrary HTML
+
+This example adds a link to your company and adds a image icon behind that link.
+
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+
+insert_item('General', {
+                'href'   => 'http://your-company.com',
+                'name'   => 'Company',
+                'target' => '_blank',
+                'html'   => '<img src="/thruk/themes/Thruk/images/stop.gif" style="height:16px; width: 16px; vertical-align: bottom;">'
+});
+-----
