@@ -38,8 +38,8 @@ thruk_local.conf:
 =======
  #> mysql -u root -p
  mysql> CREATE USER 'thruk'@'localhost' IDENTIFIED BY '****';
- mysql> CREATE DATABASE IF NOT EXISTS `thruk`;
- mysql> GRANT ALL PRIVILEGES ON `thruk`.* TO 'thruk'@'localhost';
+ mysql> CREATE DATABASE IF NOT EXISTS `thruk_logs`;
+ mysql> GRANT ALL PRIVILEGES ON `thruk_logs`.* TO 'thruk'@'localhost';
 =======
 
 
