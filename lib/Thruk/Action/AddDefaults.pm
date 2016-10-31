@@ -263,6 +263,8 @@ sub begin {
         }
     }
 
+    $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
+
     $c->stats->profile(end => "Root begin");
     return 1;
 }
@@ -283,7 +285,12 @@ sub end {
     update_site_panel_hashes($c) unless $c->stash->{'hide_backends_chooser'};
 
     if(!defined $c->stash->{'navigation'} || $c->stash->{'navigation'} eq '') {
-        Thruk::Utils::Menu::read_navigation($c) unless $c->stash->{'skip_navigation'};
+        if(!$c->stash->{'skip_navigation'}) {
+            # we need the navigation only if we don't use frames or its the side.html
+            if($c->req->path =~ m/\/side\.html/mx || !$c->stash->{'use_frames'}) {
+                Thruk::Utils::Menu::read_navigation($c);
+            }
+        }
     }
 
     my @errors = @{ $c->error };

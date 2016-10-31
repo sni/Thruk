@@ -329,8 +329,7 @@ sub _renew_navigation {
         }
     }
 
-    my $globaldata = Thruk::Utils::get_global_user_data($c);
-    $c->stash->{global_user_data} = $globaldata;
+    my $globaldata = $c->stash->{global_user_data};
     if(defined $globaldata and defined $globaldata->{'bookmarks'}) {
         for my $section (keys %{$globaldata->{'bookmarks'}}) {
             for my $item (@{$globaldata->{'bookmarks'}->{$section}}) {

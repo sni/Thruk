@@ -5,6 +5,7 @@ next:
           - Performance improvements on the host/service list page
           - allow arbitrary html in the side navigation
           - fix merging configuration from thruk_local.d
+          - fix session logout problem when there is a syntax error in menu_local.conf
           - Panorama View:
             - list already used colors in color picker
             - fix display error in speedometer with overlaping thresholds

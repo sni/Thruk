@@ -1199,7 +1199,7 @@ sub _process_bookmarks {
     }
 
     my $data   = Thruk::Utils::get_user_data($c);
-    my $global = Thruk::Utils::get_global_user_data($c);
+    my $global = $c->stash->{global_user_data};
     my $done   = 0;
 
     # add new bookmark
