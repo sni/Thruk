@@ -4,12 +4,16 @@ TP.addPanletsMenu = function(options) {
             afterrender: function(menu, eOpts) {
                 var tabpan = Ext.getCmp('tabpan');
                 var tab    = tabpan.getActiveTab();
-                tab.disableMapControlsTemp();
+                if(tab) {
+                    tab.disableMapControlsTemp();
+                }
             },
             beforehide: function(menu, eOpts) {
                 var tabpan = Ext.getCmp('tabpan');
                 var tab    = tabpan.getActiveTab();
-                tab.enableMapControlsTemp();
+                if(tab) {
+                    tab.enableMapControlsTemp();
+                }
             }
         },
         items: [{

@@ -103,15 +103,16 @@ sub thruk_index_html {
     my( $c ) = @_;
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
-    unless($c->stash->{'use_frames'}) {
+    if(!$c->stash->{'use_frames'}) {
         return(thruk_main_html($c));
     }
 
-    $c->stash->{'title'}          = $c->config->{'name'};
-    $c->stash->{'main'}           = '';
-    $c->stash->{'target'}         = '';
-    $c->stash->{'template'}       = 'index.tt';
-    $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'title'}           = $c->config->{'name'};
+    $c->stash->{'main'}            = '';
+    $c->stash->{'target'}          = '';
+    $c->stash->{'template'}        = 'index.tt';
+    $c->stash->{'no_auto_reload'}  = 1;
+    $c->stash->{'skip_navigation'} = 1;
 
     return 1;
 }
@@ -181,6 +182,7 @@ sub thruk_frame_html {
     }
 
     $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'navigation'}     = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
 
     # no link or none matched, display the usual index.html
     return(thruk_index_html($c));

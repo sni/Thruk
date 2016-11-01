@@ -15,7 +15,7 @@ use warnings;
 
 use 5.008000;
 
-our $VERSION = '2.08';
+our $VERSION = '2.10';
 
 ###################################################
 # create connection pool
@@ -82,6 +82,7 @@ sub startup {
     require Thruk::Utils::Auth;
     require Thruk::Utils::External;
     require Thruk::Utils::Livecache;
+    require Thruk::Utils::LMD;
     require Thruk::Utils::Menu;
     require Thruk::Utils::Status;
     require Thruk::Action::AddDefaults;
@@ -95,7 +96,7 @@ sub startup {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
                     path         => sub { my $p = Thruk::Context::translate_request_path($_, $class->config);
-                                          return($p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf)$/mx);
+                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf)$/mx;
                                         },
                     root         => './root/',
                     pass_through => 1,
@@ -192,10 +193,13 @@ sub _build_app {
 
     ###################################################
     # load routes dynamically from plugins
+    our $routes_already_loaded;
+    $routes_already_loaded = {} unless defined $routes_already_loaded;
     for my $plugin_dir (glob($self->{'config'}->{'plugin_path'}.'/plugins-enabled/*/lib/Thruk/Controller/*.pm')) {
         my $route_file = $plugin_dir;
         $route_file =~ s|/lib/Thruk/Controller/.*\.pm$|/routes|gmx;
         if(-f $route_file) {
+            next if $routes_already_loaded->{$route_file};
             my $routes = $self->{'routes'};
             my $app    = $self;
             ## no critic
@@ -205,6 +209,7 @@ sub _build_app {
                 $self->log->error("error while loading routes from ".$route_file.": ".$@);
                 confess($@);
             }
+            $routes_already_loaded->{$route_file} = 1;
         }
         elsif($plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx) {
             my $plugin = $1;
@@ -226,6 +231,8 @@ sub _build_app {
     ###################################################
     # start shadownaemons in background
     Thruk::Utils::Livecache::check_initial_start(undef, $config, 1);
+    my $c = Thruk::Context->new($self, {'PATH_INFO' => '/'});
+    Thruk::Utils::LMD::check_initial_start($c, $config, 1);
 
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");
@@ -373,6 +380,10 @@ sub reset_logging {
         if($appender->{'appender'} && $appender->{'appender'}->{'fh'}) {
             # enable closing logs for forked childs
             $appender->{'appender'}->{'close'} = 1;
+
+            # result in write on close fh otherwise
+            CORE::close($appender->{'appender'}->{'fh'});
+            undef $appender->{'appender'}->{'fh'};
         }
     }
 

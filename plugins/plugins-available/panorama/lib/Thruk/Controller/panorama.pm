@@ -6,7 +6,7 @@ use Data::Dumper qw/Dumper/;
 use JSON::XS qw/decode_json encode_json/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
-use Encode qw(decode_utf8);
+use Encode qw(decode_utf8 encode_utf8);
 use Module::Load qw/load/;
 use Carp qw/confess/;
 use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/;
@@ -424,6 +424,10 @@ sub _stateprovider {
                         $param_data->{$k2} = $param_data->{$k2};
                         if(ref $param_data->{$k2} eq '') {
                             eval {
+                                if($k2 eq 'tab') {
+                                    # throws encoding error when having a dashboad with umlaut in title
+                                    $param_data->{$k2} = encode_utf8($param_data->{$k2});
+                                }
                                 $param_data->{$k2} = decode_json($param_data->{$k2});
                             };
                             confess(Dumper("Error in parsing json:", $@, $k2, $param_data)) if $@;
@@ -1612,7 +1616,7 @@ sub _task_hosts {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1);
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1, extra_columns => [qw/long_plugin_output/]);
 
     my $json = {
         columns => [
@@ -1682,7 +1686,7 @@ sub _task_services {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], pager => 1);
+    $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], pager => 1, extra_columns => [qw/long_plugin_output/]);
 
     my $json = {
         columns => [
@@ -2226,7 +2230,7 @@ sub _task_userdata_shapes {
 sub _task_host_list {
     my($c) = @_;
 
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], columns => [qw/name/]);
     my $data = [];
     for my $hst (@{$hosts}) {
         push @{$data}, { name => $hst->{'name'} };
@@ -2243,7 +2247,7 @@ sub _task_host_detail {
 
     my $host        = $c->req->parameters->{'host'}    || '';
     my $json      = {};
-    my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }]);
+    my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }], extra_columns => [qw/long_plugin_output/]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
         sort => { 'DESC' => 'id' },
@@ -2263,7 +2267,7 @@ sub _task_service_list {
     my($c) = @_;
 
     my $host     = $c->req->parameters->{'host'} || '';
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }]);
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }], columns => [qw/description/]);
     my $data = [];
     for my $svc (@{$services}) {
         push @{$data}, { description => $svc->{'description'} };
@@ -2281,7 +2285,7 @@ sub _task_service_detail {
     my $host        = $c->req->parameters->{'host'}    || '';
     my $description = $c->req->parameters->{'service'} || '';
     my $json        = {};
-    my $services    = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
+    my $services    = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }], extra_columns => [qw/long_plugin_output/]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
         sort => { 'DESC' => 'id' },
@@ -2903,7 +2907,7 @@ sub _save_dashboard {
 
     if($nr eq 'new') {
         # find next free number
-        $nr = 1;
+        $nr = $c->config->{'Thruk::Plugin::Panorama'}->{'new_files_start_at'} || 1;
         $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         while(-e $file) {
             $nr++;
@@ -3006,7 +3010,7 @@ sub _add_json_dashboard_timestamps {
         $nr =~ s/^tabpan-tab_//gmx;
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         if($nr == 0 && !-s $file) {
-            $file = $c->config->{'plugin_path'}.'/plugins-available/panorama/0.tab';
+            $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
         }
         my @stat = stat($file);
         if(-x $file) {

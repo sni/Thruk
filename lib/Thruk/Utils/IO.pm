@@ -259,6 +259,7 @@ sub save_logs_to_tempfile {
     require Encode;
     require File::Temp;
     my($fh, $filename) = File::Temp::tempfile();
+    $filename = $filename.'_tmplogs';
     open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     for my $r (@{$data}) {
         print $fh Encode::encode_utf8($r->{'message'}),"\n";

@@ -83,3 +83,8 @@ t/docker/cases/testsuite.suite
 t/docker/cases/.*/.*.js
 .gem/
 .*\.json
+.idea/
+lmd.ini
+plugins/plugins-available/editor
+plugins/plugins-enabled/editor
+^thruk_local.d/.*.conf

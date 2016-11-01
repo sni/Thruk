@@ -75,6 +75,7 @@ add_link('name' => 'Home', 'href' => '/thruk/main.html');
 * href: This is the destination link optional you can add.
 * target: If Link shall open in a new window.
 * icon: Used for themes which support icons.
+* html: If set, all other attributes are ignored and the plain html data is inserted in the menu
 
 Then the config looks like this:
 
@@ -174,6 +175,16 @@ if(is_user('thrukadmin')) {
 -----
 
 
+=== Insert arbitrary HTML
+
+It is possible to insert arbitrary HTML in the menu by specifying the html
+attribute. You may have to use CSS to style the content to your needs.
+
+-----
+  insert_item("General", {html => "<a href='#test'>test: <img src='/thruk/themes/Thruk/images/arrow_refresh.png'></a>" })
+-----
+
+
 == Examples
 
 === Hide Reporting for Non-Admins
@@ -214,4 +225,20 @@ add_section('name' => 'Nagvis');
 add_link('name' => "Nagvis",         'href' => '/nagvis/frontend/nagvis-js/index.php');
 add_sub_link('name' => "demo",       'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo');
 add_sub_link('name' => "demo-map2",  'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo-map2');
+-----
+
+
+=== Add new item with arbitrary HTML
+
+This example adds a link to your company and adds a image icon behind that link.
+
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+
+insert_item('General', {
+                'href'   => 'http://your-company.com',
+                'name'   => 'Company',
+                'target' => '_blank',
+                'html'   => '<img src="/thruk/themes/Thruk/images/stop.gif" style="height:16px; width: 16px; vertical-align: bottom;">'
+});
 -----

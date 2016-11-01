@@ -8,8 +8,8 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
     },
 
     /* update render item on active tab only */
-    updateRenderActive: function(xdata) {
-        this.speedoRender(xdata);
+    updateRenderActive: function(xdata, forceColor) {
+        this.speedoRender(xdata, forceColor);
     },
 
     setRenderItem: function(xdata) {
@@ -341,9 +341,9 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
             layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
             defaults:    {
                 listeners: { change:    function()      { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0)  },
-                             mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate({color: color, scope: this }, undefined, 0); },
-                             mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0); }
-                           }
+                           },
+                mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate({color: color, scope: this }, undefined, 0); },
+                mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0); }
             },
             items: [
                 { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
@@ -422,9 +422,9 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
                 { xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
                 { xtype: 'checkbox', name: 'speedoinvert' },
                 { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
-                { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
+                { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 1 },
                 { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
-                { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 },
+                { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 1 },
                 { xtype: 'label', text: 'Factor:', style: 'margin-left: 0; margin-right: 2px;' },
                 { xtype: 'textfield', width: 120, name: 'speedofactor', colspan: 5, emptyText: '100, 0.01, 1e3, 1e-6 ...' }
             ]

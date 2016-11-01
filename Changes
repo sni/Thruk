@@ -1,6 +1,35 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - remove startup page, Thruk starts in less than a second now
+          - Performance improvements on the host/service list page
+          - allow arbitrary html in the side navigation
+          - fix merging configuration from thruk_local.d
+          - fix session logout problem when there is a syntax error in menu_local.conf
+          - Panorama View:
+            - list already used colors in color picker
+            - fix display error in speedometer with overlaping thresholds
+            - fix js error in shape dropdown
+            - fix error when using umlauts in dashboard title
+          - Business Process:
+            - fix regular expression in service state nodes
+          - Logcache:
+            - add logcache_import_command option
+            - add logcache_delta_updates option
+
+2.10-2   Mon Oct  3 20:43:02 CEST 2016
+          - mark disabled eventhandler red on process info page
+          - add lmd support
+          - get uid/groups with POSIX:getgroups if possible (mickenordin #634)
+          - fix xss issue on login page
+          - Panorama View:
+            - increase popups delay to 1second
+            - fix popups showing when mouse moved over a icon
+            - fix start page not found when using OMD
+          - Mobile:
+            - fix sending reschedule command
+
+2.10     Wed Aug 24 14:59:03 CEST 2016
           - add useragentcompat option for IE compatibility mode (ofosos #626)
           - support reading action_menu_items from file/folder
           - support thruk_local.d/file.$hostname files to separate host specific configs
@@ -30,6 +59,8 @@ next:
           - Config Tool:
             - support recursive object removal
             - empty files will be deleted when the last object is removed
+            - fix showing custom variables attribute for some objects
+            - fix nested additive templates (#630)
           - Business Process:
             - translate host states to correct states
 

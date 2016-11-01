@@ -20,8 +20,9 @@ sub index {
     my ( $c ) = @_;
 
     $c->res->headers->content_type('text/plain');
-    $c->stash->{'template'} = 'passthrough.tt';
-    $c->stash->{'text'}     = 'FAIL';
+    $c->stash->{'template'}   = 'passthrough.tt';
+    $c->stash->{'text'}       = 'FAIL';
+    $c->stash->{'navigation'} = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
 
     unless ($c->user_exists) {
         return 1 unless ($c->authenticate( {} ));

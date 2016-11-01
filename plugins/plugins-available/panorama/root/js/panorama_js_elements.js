@@ -437,6 +437,19 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                         stop  = stop.getDarker(0.10);
                     }
                 }
+                // add two rows of additional colors
+                var additionalColors = TP.getAllUsedColors();
+                if(additionalColors) {
+                    for(var x=0; x<16; x++) {
+                        if(additionalColors[x]) {
+                            this.colors.push(additionalColors[x].replace('#'));
+                        } else {
+                            this.colors.push("DDDDDD");
+                        }
+                    }
+                    this.height = 127;
+                    this.maxHeight = 127;
+                }
                 this.callParent();
             },
             listeners: {

@@ -649,6 +649,7 @@ sub _do_send_command {
 
     my($backends_list) = $c->{'db'}->select_backends('send_command');
     for my $cmd_line ( split /\n/mx, $cmd ) {
+        utf8::decode($cmd_line);
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
         my $joined_backends = join(',', @{$backends_list});
         push @{$c->stash->{'commands2send'}->{$joined_backends}}, $cmd_line;

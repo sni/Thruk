@@ -263,6 +263,8 @@ sub begin {
         }
     }
 
+    $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
+
     $c->stats->profile(end => "Root begin");
     return 1;
 }
@@ -283,7 +285,12 @@ sub end {
     update_site_panel_hashes($c) unless $c->stash->{'hide_backends_chooser'};
 
     if(!defined $c->stash->{'navigation'} || $c->stash->{'navigation'} eq '') {
-        Thruk::Utils::Menu::read_navigation($c) unless $c->stash->{'skip_navigation'};
+        if(!$c->stash->{'skip_navigation'}) {
+            # we need the navigation only if we don't use frames or its the side.html
+            if($c->req->path =~ m/\/side\.html/mx || !$c->stash->{'use_frames'}) {
+                Thruk::Utils::Menu::read_navigation($c);
+            }
+        }
     }
 
     my @errors = @{ $c->error };
@@ -533,30 +540,21 @@ sub add_defaults {
     ###############################
     die_when_no_backends($c);
 
-    ###############################
-    # do we have only shinken backends?
-    unless(exists $c->config->{'enable_shinken_features'}) {
-        if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH' and scalar keys %{$c->stash->{'pi_detail'}} > 0) {
-            $c->stash->{'enable_shinken_features'} = 1;
-            my($selected) = $c->{'db'}->select_backends('get_status');
-            for my $key (@{$selected}) {
-                my $b   = $c->stash->{'pi_detail'}->{$key};
-                next unless defined $b;
-                next unless defined $c->stash->{'backend_detail'}->{$key};
-                if(defined $b->{'data_source_version'} and $b->{'data_source_version'} !~ m/\-shinken/mx) {
-                    $c->stash->{'enable_shinken_features'} = 0;
-                    last;
-                }
-            }
-        }
-    }
-
-    ###############################
-    # do we have only icinga backends?
-    if(!exists $c->config->{'enable_icinga_features'} && defined $ENV{'OMD_ROOT'}) {
+    if(defined $ENV{'OMD_ROOT'}) {
         # get core from init script link (omd)
+        my $core = '';
         if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
-            my $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
+            $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
+        }
+        ###############################
+        # do we have only shinken backends?
+        if(!exists $c->config->{'enable_shinken_features'}) {
+            $c->stash->{'enable_shinken_features'} = 1 if $core eq 'shinken';
+        }
+
+        ###############################
+        # do we have only icinga backends?
+        if(!exists $c->config->{'enable_icinga_features'}) {
             $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga';
             $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga2';
         }
@@ -965,6 +963,7 @@ sub set_processinfo {
     } else {
         $fetch = 1;
     }
+    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $safe == Thruk::ADD_CACHED_DEFAULTS;
     $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
     if($fetch) {
@@ -1101,8 +1100,12 @@ sub _set_enabled_backends {
                 }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
-                die("got no peer for: ".$b) unless defined $peer;
-                $disabled_backends->{$peer->{'key'}} = 0;
+                if($peer) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                } else {
+                    # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
+                    #die("got no peer for: ".$b)
+                }
             }
         }
     }
@@ -1175,7 +1178,7 @@ sub _set_enabled_backends {
     $c->log->debug("backend groups filter enabled") if $has_groups;
 
     # renew state of connections
-    if($num_backends > 1 and $c->config->{'check_local_states'}) {
+    if($num_backends > 1 && $c->config->{'check_local_states'} && !$ENV{'THRUK_USE_LMD'}) {
         $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($disabled_backends, $safe, $cached_data);
     }
 

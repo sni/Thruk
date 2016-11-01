@@ -433,6 +433,20 @@ sub get_host_stats {
 
 ##########################################################
 
+=head2 get_host_totals_stats
+
+  get_host_totals_stats
+
+returns the host statistics used on the service/host details page
+
+=cut
+
+sub get_host_totals_stats {
+    return;
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -442,6 +456,20 @@ returns service statistics used in the tac page
 =cut
 
 sub get_service_stats {
+    return;
+}
+
+##########################################################
+
+=head2 get_service_totals_stats
+
+  get_service_totals_stats
+
+returns the services statistics used on the service/host details page
+
+=cut
+
+sub get_service_totals_stats {
     return;
 }
 

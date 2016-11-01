@@ -1231,9 +1231,18 @@ sub gather_references {
         if(ref $refs eq '') { $refs = [$refs]; }
         if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
             my $type = $obj->{'default'}->{$attr}->{'link'};
+            my $count = 0;
             for my $r (@{$refs}) {
-                if($type eq 'command') { $r =~ s/\!.*$//mx; }
-                $outgoing->{$type}->{$r} = '';
+                my $r2 = "$r";
+                if($type eq 'command') {
+                    $r2 =~ s/\!.*$//mx;
+                }
+                if($count == 0) {
+                    $r2 =~ s/^\+//gmx;
+                    $r2 =~ s/^\!//gmx;
+                }
+                $outgoing->{$type}->{$r2} = '';
+                $count++;
             }
         }
     }
@@ -1333,6 +1342,10 @@ sub get_default_keys {
         next if $options->{'no_alias'} == 1 and $obj->{'default'}->{$key}->{'type'} eq 'ALIAS';
         next if $obj->{'default'}->{$key}->{'type'} eq 'DEPRECATED';
         push @keys, $key;
+    }
+
+    if($obj->{'has_custom'}) {
+        push @keys, 'customvariable';
     }
 
     if($options->{'sort'}) {

@@ -824,25 +824,25 @@ Ext.define('TP.IconWidget', {
     },
 
     /* update shapes and stuff */
-    updateRender: function(xdata) {
+    updateRender: function(xdata, forceColor) {
         var panel = this;
         window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_updaterender']);
         TP.timeouts['timeout_' + panel.id + '_updaterender'] = window.setTimeout(function() {
-            panel.updateRenderDo(xdata);
+            panel.updateRenderDo(xdata, forceColor);
         }, 100);
     },
-    updateRenderDo: function(xdata) {
+    updateRenderDo: function(xdata, forceColor) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         /* static icons must be refreshed, even when inactive, because they won't be updated later on */
         if(panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata); }
         /* no need for changes if we are not the active tab */
         if(!TP.isThisTheActiveTab(panel)) { return; }
-        if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata); }
+        if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
     },
 
     /* set main render item*/
-    setRenderItem: function(xdata, forceRecreate) {
+    setRenderItem: function(xdata, forceRecreate, forceColor) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(panel.itemRendering && !forceRecreate) { return; }
@@ -914,7 +914,17 @@ Ext.define('TP.IconWidget', {
                 drawWidth  = width;
                 drawHeight = height;
                 panel.setSize(drawWidth, drawHeight);
-                panel.setPosition(panel.xdata.layout.x+offsetX, panel.xdata.layout.y+offsetY);
+                var newX = panel.xdata.layout.x+offsetX;
+                var newY = panel.xdata.layout.y+offsetY;
+                panel.setPosition(newX, newY);
+
+                // chrome gets position totally wrong when going back to start dashboard otherwise
+                if(panel.el && panel.el.dom && panel.getPosition()[0] != Number(newX).toFixed()) {
+                    window.setTimeout(Ext.bind(function(x, y) {
+                        panel.el.dom.style.left = x+"px";
+                        panel.el.dom.style.top = y+"px";
+                    }, panel, [newX, newY]), 200);
+                }
             }
 
             var items = [];
@@ -952,7 +962,7 @@ Ext.define('TP.IconWidget', {
                                 });
                             }
                         }
-                        panel.updateRender(xdata);
+                        panel.updateRender(xdata, forceColor);
                     }
                 }
             });
@@ -979,7 +989,7 @@ Ext.define('TP.IconWidget', {
             }
         }
         else if(panel.appearance.setRenderItem) {
-            panel.appearance.setRenderItem(xdata);
+            panel.appearance.setRenderItem(xdata, forceColor);
         }
         else {
             panel.itemRendering = false;

@@ -114,8 +114,9 @@
     function='status'
     div_help='Uses status from the selected host or service.<br>'
            _ 'The hoststatus will be used if the service is left empty.<br>'
-           _ 'Wildcards in service descriptions are possible:<br>'
-           _ 'check_* (worst), w:check_* (worst), b:check_* (best)'
+           _ 'Regular expressions in service descriptions are possible, ex.:<br>'
+           _ 'Service: <span class="bp_help_cmd">w:^db_.*</span> (worst state of all db_* services),<br>'
+           _ 'Service: <span class="bp_help_cmd">b:^(db_|web_).*</span> (best state from all db_*  and web_* services)'
 %]
 <tr>
   <th align="right">Host</th>
@@ -123,7 +124,7 @@
 </tr>
 <tr>
   <th align="right">Service</th>
-  <td align="left"><input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'bp_arg1_status' })"[% END %]></td>
+  <td align="left"><input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })"[% END %]></td>
 </tr>
 [% END %]
 

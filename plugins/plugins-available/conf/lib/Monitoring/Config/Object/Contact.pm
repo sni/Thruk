@@ -81,6 +81,7 @@ sub BUILD {
         'primary_key' => 'contact_name',
         'default'     => $Monitoring::Config::Object::Contact::Defaults,
         'standard'    => [ 'contact_name', 'use', 'alias', 'email', 'can_submit_commands' ],
+        'has_custom'  => 1,
     };
     bless $self, $class;
     return $self;

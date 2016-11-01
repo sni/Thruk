@@ -21,7 +21,7 @@
     [% IF no_menu && n.create_obj %]
     <a href="extinfo.cgi?type=2&amp;host=[% bp.name | uri %]&service=[% n.label | uri %]&backend=[% bp_backend %]" target="_blank">
     [% END %]
-    <div id='[% n.id %]' class='bp_node [% UNLESS no_menu %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %]' [% UNLESS no_menu %]onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_mouse_over_node(event, this);" onmouseout="bp_mouse_out_node(event, this);"[% END %]>
+    <div id='[% n.id %]' class='bp_node [% UNLESS no_menu %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %]' [% UNLESS no_menu %]onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_mouse_over_node(event, this);" onmouseout="bp_mouse_out_node(event, this);"[% END %][% IF editmode %] ondblclick="bp_show_edit_node('current');return false;"[% END %]>
         <div class="bp_label"><span class="bp_label">[% n.label %]</span></div>
         <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
         [% UNLESS no_menu %]

@@ -8,8 +8,8 @@ Ext.define('TP.IconWidgetAppearancePie', {
     },
 
     /* update render item on active tab only */
-    updateRenderActive: function(xdata) {
-        this.pieRender(xdata);
+    updateRenderActive: function(xdata, forceColor) {
+        this.pieRender(xdata, forceColor);
     },
 
     setRenderItem: function(xdata) {
@@ -164,9 +164,9 @@ Ext.define('TP.IconWidgetAppearancePie', {
             layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
             defaults:    {
                 listeners: { change:    function()      { TP.iconSettingsGlobals.renderUpdate(undefined, undefined, 0)  },
-                             mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate(color,     undefined, 0); },
-                             mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined, undefined, 0); }
-                           }
+                           },
+                mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate(color,     undefined, 0); },
+                mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined, undefined, 0); }
             },
             items: [
                 { xtype: 'label', text: 'Ok:' },

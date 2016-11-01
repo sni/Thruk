@@ -25,4 +25,16 @@ if(!$@) {
     }
 }
 
+####################################################
+$ENV{'THRUK_CONFIG'} = 't/data/nested_config';
+$config = Thruk::Config::get_config();
+my $expected_backends = {
+    'peer' => [{ 'name' => 'local1' },
+                { 'name' => 'local2' },
+                { 'name' => 'local3' },
+                { 'name' => 'local4' }
+]};
+is_deeply($config->{'Thruk::Backend'}, $expected_backends, "parsing backends from thruk_local.d");
+is_deeply($config->{'backend_debug'}, 1, "parsing scalars from thruk_local.d");
+
 done_testing();

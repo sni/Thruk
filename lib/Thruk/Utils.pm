@@ -931,7 +931,7 @@ sub get_custom_vars {
     # add action menu from apply rules
     if($c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
         APPLY:
-        for my $menu (keys %{$c->config->{'action_menu_apply'}}) {
+        for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
             for my $pattern (ref $c->config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$c->config->{'action_menu_apply'}->{$menu}} : ($c->config->{'action_menu_apply'}->{$menu})) {
                 if(!$prefix && $data->{'description'}) {
                     my $test = $data->{'host_name'}.';'.$data->{'description'};
@@ -1543,7 +1543,6 @@ sub get_action_url {
                     eval('$new_host =~ '.$regex);
                     ## use critic
                 }
-                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
                 if ($svc) {
                     my $new_svc = $svc;
@@ -1554,6 +1553,7 @@ sub get_action_url {
                     }
                     $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
                 }
+                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
                 last;
             }
@@ -2546,7 +2546,10 @@ sub backends_hash_to_list {
             push @{$backends}, ($backend ? $backend->peer_key() : $b);
         } else {
             for my $key (keys %{$b}) {
-                my $backend = $c->{'db'}->get_peer_by_key($key) || $c->{'db'}->get_peer_by_key($b->{$key});
+                my $backend = $c->{'db'}->get_peer_by_key($key);
+                if(!defined $backend && defined $b->{$key}) {
+                    $backend = $c->{'db'}->get_peer_by_key($b->{$key});
+                }
                 if($backend) {
                     push @{$backends}, $backend->peer_key();
                 } else {

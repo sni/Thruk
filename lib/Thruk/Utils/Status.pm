@@ -472,10 +472,11 @@ sub fill_totals_box {
     # host status box
     my $host_stats    = {};
     my $service_stats = {};
-    if(   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
+    if((   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
        or ( $c->stash->{'servicegroup'}
             and ( defined $c->stash->{style} and ($c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' ))
-          )
+          ))
+        and $servicefilter
       ) {
         # set host status from service query
         my $services = $c->{'db'}->get_hosts_by_servicequery( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
@@ -539,8 +540,8 @@ sub fill_totals_box {
             }
         }
     } else {
-        $host_stats    = $c->{'db'}->get_host_stats(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    $hostfilter    ] );
-        $service_stats = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+        $host_stats    = $c->{'db'}->get_host_totals_stats(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    $hostfilter    ] );
+        $service_stats = $c->{'db'}->get_service_totals_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
     }
     $c->stash->{'host_stats'}    = $host_stats;
     $c->stash->{'service_stats'} = $service_stats;
@@ -660,13 +661,15 @@ sub single_search {
         my $value  = $filter->{'value'};
 
         # skip most empty filter
-        if(    $value =~ m/^\s*$/mx
-           and $filter->{'type'} ne 'next check'
-           and $filter->{'type'} ne 'last check'
-           and $filter->{'type'} ne 'event handler'
-        ) {
-            next;
-        }
+        # 2010-10-25: 3bc748da2 - fixes "livestatus: Sorry, Operator 4 for lists not implemented" error with blank searches
+        # 2016-10-14: cannot reproduce anymore, blank searches do what they should do
+        #if(    $value =~ m/^\s*$/mx
+        #   and $filter->{'type'} ne 'next check'
+        #   and $filter->{'type'} ne 'last check'
+        #   and $filter->{'type'} ne 'event handler'
+        #) {
+        #    next;
+        #}
 
         my $op     = '=';
         my $rop    = '=';
@@ -949,7 +952,9 @@ sub single_search {
                                  };
         }
         else {
-            confess( "unknown filter: " . $filter->{'type'} );
+            if($filter->{'type'} ne '') {
+                confess( "unknown filter: " . $filter->{'type'} );
+            }
         }
     }
 
@@ -1386,8 +1391,8 @@ sub get_comments_filter {
 
     if($value eq '') {
         if($op eq '=' or $op eq '~~') {
-            push @hostfilter,          { -or => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
-            push @servicefilter,       { -or => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
+            push @hostfilter,          { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
+            push @servicefilter,       { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
         } else {
             push @hostfilter,          { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
             push @servicefilter,       { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
@@ -1882,8 +1887,15 @@ sub get_service_matrix {
         $combined_filter = Thruk::Utils::combine_filter( '-and', [ $servicefilter, $hostfilter ] );
     }
 
+    my $extra_columns = [];
+    if($c->config->{'use_lmd_core'} && $c->stash->{'show_long_plugin_output'} ne 'inline') {
+        push @{$extra_columns}, 'has_long_plugin_output';
+    } else {
+        push @{$extra_columns}, 'long_plugin_output';
+    }
+
     # get real services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $combined_filter ] );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $combined_filter], extra_columns => $extra_columns );
 
     # build matrix
     my $matrix        = {};
@@ -1911,7 +1923,8 @@ run server action from custom action menu
 
 =cut
 sub serveraction {
-    my( $c ) = @_;
+    my($c, $macros) = @_;
+    $macros = {} unless defined $macros;
 
     return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
 
@@ -1935,6 +1948,9 @@ sub serveraction {
     }
     my @cmdline = split(/\s+/mx, $c->config->{'action_menu_actions'}->{$action});
     my $cmd = shift @cmdline;
+    # expand ~ in $cmd
+    my @cmd = glob($cmd);
+    if($cmd[0]) { $cmd = $cmd[0]; }
     $c->log->debug('raw cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
     if(!-x $cmd) {
         return(1, $cmd.' is not executable');
@@ -1953,7 +1969,7 @@ sub serveraction {
         return(1, 'no such object') unless $obj;
     }
 
-    my $macros = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0});
+    %{$macros} = (%{$macros}, %{$c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0})});
     $macros->{'$REMOTE_USER$'}    = $c->stash->{'remote_user'};
     $macros->{'$DASHBOARD_ID$'}   = $c->req->parameters->{'dashboard'} if $c->req->parameters->{'dashboard'};
     $macros->{'$DASHBOARD_ICON$'} = $c->req->parameters->{'icon'}      if $c->req->parameters->{'icon'};

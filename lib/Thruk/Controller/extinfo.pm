@@ -399,7 +399,7 @@ sub _process_host_page {
     my $hostname = $c->req->parameters->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output/] );
 
     return $c->detach('/error/index/5') unless defined $hosts;
 
@@ -407,13 +407,16 @@ sub _process_host_page {
     $host = $hosts->[0];
 
     # we have more and backend param is used
-    if( scalar @{$hosts} == 1 and defined $backend ) {
+    if( scalar @{$hosts} == 1 and $backend ) {
         for my $h ( @{$hosts} ) {
             if( $h->{'peer_key'} eq $backend ) {
                 $host = $h;
                 last;
             }
         }
+    }
+    elsif( scalar @{$hosts} == 1) {
+        $c->stash->{'param_backend'} = $host->{'peer_key'};
     }
 
     return $c->detach('/error/index/5') unless defined $host;
@@ -534,7 +537,7 @@ sub _process_service_page {
 
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename } ], extra_columns => [qw/long_plugin_output/] );
 
     return $c->detach('/error/index/15') unless defined $services;
 

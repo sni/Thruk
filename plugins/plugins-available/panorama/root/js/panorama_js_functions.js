@@ -167,7 +167,9 @@ var TP = {
                 /* make tab title editable */
                 if(!readonly && !dashboard_ignore_changes) {
                     var tabhead = tabpan.getTabBar().items.getAt(tabPos-1);
-                    if(tabhead.rendered == false) {
+                    if(tabhead == undefined) {
+                        // do nothing
+                    } else if(tabhead.rendered == false) {
                         tabhead.addListener('afterrender', function(This, eOpts) {
                             TP.addTabBarMouseEvents(This.getEl(), id);
                         });
@@ -851,6 +853,10 @@ var TP = {
             if(data && data.dashboard_ts != undefined) {
                 for(var tab_id in data.dashboard_ts) {
                     var tab = Ext.getCmp(tab_id);
+                    if(!tab) {
+                        // dashboard has been closed already
+                        return;
+                    }
                     if(data.dashboard_ts[tab_id] != tab.ts) {
                         var old = tab.ts ? tab.ts : '';
                         tab.ts = data.dashboard_ts[tab.id];
@@ -1919,7 +1925,7 @@ var TP = {
             }
         }).show(true);
         tmppanel.setFloatParent(item.el);
-        panel.shapeRender(tmppanel.xdata, panel.xdata.appearance.color_ok, tmppanel);
+        panel.appearance.shapeRender(tmppanel.xdata, panel.xdata.appearance.color_ok, tmppanel);
         list.push(tmppanel);
     },
     fullReload: function() {
@@ -2027,6 +2033,39 @@ var TP = {
             return values[half];
         else
             return (values[half-1] + values[half]) / 2.0;
+    },
+    getAllUsedColors: function() {
+        var colors = {};
+        var tabpan = Ext.getCmp('tabpan');
+        var tab    = tabpan.getActiveTab();
+        if(!tab) { return; }
+        for(var nr=0; nr<tab.window_ids.length; nr++) {
+            var panel = Ext.getCmp(tab.window_ids[nr]);
+            if(panel) {
+                TP.getAllColorsInStructure(panel.xdata, colors);
+            }
+        }
+        if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel) {
+            var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+            TP.getAllColorsInStructure(xdata, colors);
+        }
+        return(Ext.Object.getKeys(colors).sort());
+    },
+    getAllColorsInStructure: function(val, colors) {
+        if(Ext.isArray(val)) {
+            for(var x; x < val.length; x++) {
+                TP.getAllColorsInStructure(val[x], colors);
+            }
+        }
+        else if(Ext.isObject(val)) {
+            for(var key in val) {
+                TP.getAllColorsInStructure(val[key], colors);
+            }
+        }
+        else if(Ext.isString(val) && val.length == 7 && val.match(/^#/)) {
+            var color = val.replace(/^#/, '');
+            colors[color] = 1;
+        }
     }
 }
 TP.log('[global] starting');

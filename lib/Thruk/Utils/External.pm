@@ -566,9 +566,9 @@ sub _do_child_stuff {
     }
 
     # logging must be reset after closing the filehandles
-    $c->app->reset_logging();
+    $c && $c->app->reset_logging();
 
-    $c->stats->enable(1) if $c;
+    $c && $c->stats->enable(1);
 
     return;
 }
@@ -676,6 +676,7 @@ return true if process is still running
 =cut
 sub _is_running {
     my $dir = shift;
+    $dir = Thruk::Utils::IO::untaint($dir);
 
     return 0 unless -s $dir."/pid";
 
