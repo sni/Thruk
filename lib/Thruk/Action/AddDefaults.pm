@@ -264,6 +264,7 @@ sub begin {
     }
 
     $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
+    $c->stash->{user_data}        = Thruk::Utils::get_user_data($c);
 
     $c->stats->profile(end => "Root begin");
     return 1;

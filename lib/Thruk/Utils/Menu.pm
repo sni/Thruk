@@ -314,8 +314,7 @@ sub _renew_navigation {
 
     $c->stash->{user_menu_items} = {};
     my $user_items;
-    my $userdata = Thruk::Utils::get_user_data($c);
-    $c->stash->{user_data} = $userdata;
+    my $userdata = $c->stash->{user_data};
     if(defined $userdata and defined $userdata->{'bookmarks'}) {
         for my $section (keys %{$userdata->{'bookmarks'}}) {
             for my $item (@{$userdata->{'bookmarks'}->{$section}}) {
