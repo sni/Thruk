@@ -1,21 +1,53 @@
 ﻿[% PROCESS _blocks.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
 
-    <table border="0" width="100%" class='status servicestatus' id="statusTable" onmouseout='reset_all_hosts_and_services();'>
+    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/config.png" style="display: none; vertical-align: bottom; position: absolute; left: 10px;" name="columns" id="[% paneprefix %]_btn_columns_hover" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]_columns_table'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()"  onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
+    <div class="filter_pane" style="visibility:hidden; left: 50px;" id="[% paneprefix %]_columns_select">
+    <div class="shadow"><div class="shadowcontent">
+    <table border="1" class='filter' cellspacing="0" cellpadding="0">
       <tr>
-        <th class='status' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
+        <td class='filter' style="width: 140px;">
+          <table border="0" cellspacing="2" cellpadding="0">
+            <tr>
+              <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Columns:</td>
+              <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %]_accept_columns" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" alt="accept"></td>
+            </tr>
+          </table>
+          <table border=0 cellspacing=2 cellpadding=0 width="100%" id="[% paneprefix %]_columns_table">
+            [% FOREACH col = table_columns.$paneprefix %]
+            <tr>
+              <td valign="top" align="right" class='filterName clickable' id="[% paneprefix %]_col_[% col.field %]n" onclick="toggleFilterCheckBox(this.id); updateStatusColumns('[% paneprefix %]');" width="90%">[% col.title %]</td>
+              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]')"; [% IF col.checked %] checked[% END %]></td>
+            </tr>
+            [% END %]
+          </table>
+        </td>
+      </tr>
+    </table>
+    </div></div>
+    </div>
+
+    [% start_with = 7 %]
+    <table border="0" width="100%" class='status servicestatus [% paneprefix %]_table' id="statusTable" onmouseout='reset_all_hosts_and_services();'>
+      <tr onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
+        <th class='status col_host_name' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
         [% IF show_backends_in_table == 2 %]
-        <th class='status' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>
+        <th class='status col_peer_name' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>[% start_with = start_with + 1 %]
         [% END %]
-        <th class='status' nowrap>Service&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
-        <th class='status' nowrap>Status&nbsp;<a href='[%     short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service status (ascending)' title='Sort by service status (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service status (descending)' title='Sort by service status (descending)'></a></th>
-        <th class='status' nowrap>Last Check&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
-        <th class='status' nowrap>Duration&nbsp;<a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by state duration (ascending)' title='Sort by state duration (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by state duration time (descending)' title='Sort by state duration time (descending)'></a></th>
-        <th class='status' nowrap>Attempt&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by current attempt (ascending)' title='Sort by current attempt (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by current attempt (descending)' title='Sort by current attempt (descending)'></a></th>
+        <th class='status col_description' nowrap>Service&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
+        <th class='status col_state' nowrap>Status&nbsp;<a href='[%     short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service status (ascending)' title='Sort by service status (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service status (descending)' title='Sort by service status (descending)'></a></th>
+        <th class='status col_last_check' nowrap>Last Check&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
+        <th class='status col_duration' nowrap>Duration&nbsp;<a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by state duration (ascending)' title='Sort by state duration (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by state duration time (descending)' title='Sort by state duration time (descending)'></a></th>
+        <th class='status col_current_attempt' nowrap>Attempt&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by current attempt (ascending)' title='Sort by current attempt (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by current attempt (descending)' title='Sort by current attempt (descending)'></a></th>
         [% IF show_backends_in_table == 1 %]
-        <th class='status' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>
+        <th class='status col_peer_name' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>[% start_with = start_with + 1 %]
         [% END %]
-        <th class='status' nowrap>Status Information&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by status information (ascending)' title='Sort by status information (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by status information (descending)' title='Sort by status information (descending)'></a></th>
+        <th class='status col_plugin_output' nowrap>Status Information&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by status information (ascending)' title='Sort by status information (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by status information (descending)' title='Sort by status information (descending)'></a></th>
+        [% FOREACH col = default_columns.$paneprefix %]
+          [% IF loop.index >= start_with %]
+          <th class='status col_[% col.field %]' style="display: none;" nowrap>[% col.title %]&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => loop.index) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% col.title %] (ascending)' title='Sort by [% col.title %] (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => loop.index) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% col.title %] (descending)' title='Sort by [% col.title %] (descending)'></a></th>
+          [% END %]
+        [% END %]
       </tr>
 
       [% SET lasthost = '' %]
@@ -147,6 +179,22 @@
             [% END %]
             </td>
           [% END %]
+        [% IF has_columns %]
+        <td class='[% serviceclass %] host_address' style="display: none;" nowrap align="left">[% s.host_address %]</td>
+        <td class='[% serviceclass %] host_groups' style="display: none;" nowrap align="left">[% s.host_groups.join(', ') %]</td>
+        <td class='[% serviceclass %] check_command' style="display: none;" nowrap align="left">[% s.check_command.replace("\!.*$", "") %]</td>
+        <td class='[% serviceclass %] check_interval' style="display: none;" nowrap align="left">[% s.check_interval %]</td>
+        <td class='[% serviceclass %] check_period' style="display: none;" nowrap align="left">[% s.check_period %]</td>
+        <td class='[% serviceclass %] contacts' style="display: none;" nowrap align="left">[% s.contacts.join(', ') %]</td>
+        <td class='[% serviceclass %] comments' style="display: none;" nowrap align="left">not implemented</td>
+        <td class='[% serviceclass %] downtimes' style="display: none;" nowrap align="left">not implemented</td>
+        <td class='[% serviceclass %] execution_time' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.execution_time) %]s</td>
+        <td class='[% serviceclass %] groups' style="display: none;" nowrap align="left">[% s.groups.join(', ') %]</td>
+        <td class='[% serviceclass %] latency' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.latency) %]s</td>
+        <td class='[% serviceclass %] next_check' style="display: none;" nowrap align="left">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]not scheduled[% END %]</td>
+        <td class='[% serviceclass %] notification_period' style="display: none;" nowrap align="left">[% s.notification_period %]</td>
+        <td class='[% serviceclass %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.percent_state_change) %]%</td>
+        [% END %]
       </tr>
       [% END %]
 
@@ -166,3 +214,11 @@
       </div>
       <br>
     [% END %]
+
+<script type="text/javascript">
+<!--
+  if(!window.default_columns) { default_columns = {}; }
+  default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
+  updateStatusColumns("[% paneprefix %]");
+-->
+</script>

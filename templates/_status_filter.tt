@@ -9,6 +9,7 @@
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
+<input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
 [% END %]
 <table id="[% paneprefix %]all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
 [% FOR search = searches.$paneprefix %]
@@ -65,9 +66,12 @@
               [% END %]
              </select>
            [% END %]
+           [% IF loop.first %]
+              <input class="noprint" type="image" src="[% url_prefix %]themes/[% theme %]/images/config.png" style="padding-left: 25px; vertical-align: bottom;" name="columns" id="[% paneprefix %]_btn_columns" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]_columns_table'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;">
+           [% END %]
           </td>
           <td align="right">
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search" alt="accept">
+            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" style="vertical-align: bottom; display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search" alt="accept">
             <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)" alt="remove">
           </td>
           <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">

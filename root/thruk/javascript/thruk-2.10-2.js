@@ -13,6 +13,7 @@ var refreshPage      = 1;
 var cmdPaneState     = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Object();
+var removeParams     = new Object();
 var scrollToPos      = 0;
 var refreshTimer;
 var backendSelTimer;
@@ -559,14 +560,7 @@ function toQueryString(obj) {
     return str;
 }
 
-/* reloads the current page and adds some parameter from a hash */
-function reloadPage() {
-    window.clearTimeout(refreshTimer);
-    var obj = document.getElementById('refresh_rate');
-    if(obj) {
-        obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
-    }
-
+function getCurrentUrl() {
     var origHash = window.location.hash;
     var newUrl   = window.location.href;
     newUrl       = newUrl.replace(/#.*$/g, '');
@@ -577,6 +571,10 @@ function reloadPage() {
     var urlArgs  = toQueryParams();
     for(var key in additionalParams) {
         urlArgs[key] = additionalParams[key];
+    }
+
+    for(var key in removeParams) {
+        delete urlArgs[key];
     }
 
     if(urlArgs['highlight'] != undefined) {
@@ -597,6 +595,18 @@ function reloadPage() {
     if(origHash != '#' && origHash != '') {
         newUrl = newUrl + origHash;
     }
+    return(newUrl);
+}
+
+/* reloads the current page and adds some parameter from a hash */
+function reloadPage() {
+    window.clearTimeout(refreshTimer);
+    var obj = document.getElementById('refresh_rate');
+    if(obj) {
+        obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
+    }
+
+    var newUrl = getCurrentUrl();
 
     if(fav_counter) {
         updateFaviconCounter('Zz', '#F7DA64', true, "10px Bold Tahoma", "#BA2610");
@@ -2174,6 +2184,88 @@ function fetch_long_plugin_output(td, host, service, backend, escape_html) {
     } else {
         jQuery('.long_plugin_output').load(url, {}, function(text, status, req) {
         });
+    }
+}
+
+// make the columns sortable
+function initStatusTableColumnSorting(id) {
+    if(!has_jquery_ui) {
+        load_jquery_ui(function() {
+            initStatusTableColumnSorting(id);
+        });
+        return;
+    }
+    jQuery('#'+id+' tbody').sortable({
+        update: function( event, ui ) {
+            /* drag/drop changes the checkbox state, so just toggle it back */
+            ui.item[0].childNodes[1].onclick();
+        }
+    });
+}
+
+// apply status table columns
+function updateStatusColumns(id) {
+    resetRefresh();
+    var table = jQuery('.'+id+'_table')[0];
+    var changed = false;
+
+    var firstRow = table.rows[0];
+    var selected = [];
+    jQuery('.'+id+'_col').each(function(i, el) {
+        if(!jQuery(firstRow.cells[i]).hasClass("col_"+el.value)) {
+            // need to reorder column
+            var targetIndex = i;
+            var sourceIndex;
+            jQuery(firstRow.cells).each(function(j, c) {
+                if(jQuery(c).hasClass("col_"+el.value)) {
+                    sourceIndex = j;
+                    return false;
+                }
+            });
+            if(sourceIndex) {
+                jQuery(table.rows).each(function(j, row) {
+                    if(row.cells[sourceIndex]) {
+                        var cell = row.removeChild(row.cells[sourceIndex]);
+                        row.insertBefore(cell, row.cells[targetIndex]);
+                    }
+                });
+                changed = true;
+            }
+        }
+
+        // check visibility of this column
+        var display = "none";
+        if(el.checked) {
+            display = "";
+            selected.push(el.value);
+        }
+        if(table.rows[0].cells[i].style.display != display) {
+            changed = true;
+            jQuery(table.rows).each(function(j, row) {
+                if(row.cells[i]) {
+                    row.cells[i].style.display = display;
+                }
+            });
+        }
+    });
+    if(changed) {
+        var newVal = selected.join(",");
+        if(newVal != default_columns[id]) {
+            jQuery('#'+id+'columns').val(newVal);
+            additionalParams[id+'columns'] = newVal;
+            delete removeParams[id+'columns'];
+        } else {
+            jQuery('#'+id+'columns').val("");
+            delete additionalParams[id+'columns'];
+            removeParams[id+'columns'] = true;
+        }
+
+        if(table.rows[1] && table.rows[1].cells.length < 10) {
+            var url = getCurrentUrl();
+            jQuery('.'+id+'_table').load(url+' .'+id+'_table > tbody', undefined, function() {
+                updateStatusColumns(id);
+            });
+        }
     }
 }
 
@@ -4170,6 +4262,7 @@ function new_filter(cloneObj, parentObj, btnId) {
   hideBtn = document.getElementById(pane_prefix+new_prefix + 'filter_button_mini');
   if(hideBtn) { hideElement( hideBtn); }
   hideElement(pane_prefix + new_prefix + 'btn_accept_search');
+  hideElement(pane_prefix + new_prefix + 'btn_columns');
   showElement(pane_prefix + new_prefix + 'btn_del_search');
 
   hideBtn = document.getElementById(pane_prefix + new_prefix + 'filter_title');

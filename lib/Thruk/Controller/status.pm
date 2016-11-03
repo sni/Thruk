@@ -388,6 +388,14 @@ sub _process_details_page {
     my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
 
+    my $has_columns = 0;
+    $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_service_columns($c);
+    $c->stash->{'table_columns'}->{'dfl_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'});
+    if($c->req->parameters->{'dfl_columns'}) {
+        $has_columns = 1;
+    }
+    $c->stash->{'has_columns'} = $has_columns;
+
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 1;
@@ -427,6 +435,7 @@ sub _process_details_page {
     } else {
         push @{$extra_columns}, 'long_plugin_output';
     }
+    push @{$extra_columns}, 'contacts' if $has_columns;
 
     # get all services
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns  );
@@ -452,7 +461,7 @@ sub _process_details_page {
         $c->stash->{'template'} = 'excel/status_detail.tt';
         return $c->render_excel();
     }
-    if ( $view_mode eq 'json' ) {
+    elsif ( $view_mode eq 'json' ) {
         # remove unwanted colums
         if($columns) {
             for my $s (@{$services}) {
@@ -501,6 +510,15 @@ sub _process_hostdetails_page {
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
+
+    my $has_columns = 0;
+    $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
+    $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_host_columns($c);
+    $c->stash->{'table_columns'}->{'dfl_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'});
+    if($c->req->parameters->{'dfl_columns'}) {
+        $has_columns = 1;
+    }
+    $c->stash->{'has_columns'} = $has_columns;
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
@@ -570,9 +588,8 @@ sub _process_hostdetails_page {
         return $c->render(json => $hosts);
     }
 
-    $c->stash->{'orderby'}            = $sortoptions->{$sortoption}->[1];
-    $c->stash->{'orderdir'}           = $order;
-    $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
+    $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'orderdir'} = $order;
 
     return 1;
 }
@@ -993,6 +1010,18 @@ sub _process_combined_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
+
+    my $has_columns = 0;
+    $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
+    $c->stash->{'default_columns'}->{'hst_'} = Thruk::Utils::Status::get_host_columns($c);
+    $c->stash->{'default_columns'}->{'svc_'} = Thruk::Utils::Status::get_service_columns($c);
+    $c->stash->{'table_columns'}->{'hst_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'hst_'}, $c->req->parameters->{'hst_columns'});
+    $c->stash->{'table_columns'}->{'svc_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'svc_'}, $c->req->parameters->{'svc_columns'});
+    if($c->req->parameters->{'hst_columns'} || $c->req->parameters->{'svc_columns'}) {
+        $has_columns = 1;
+    }
+    $c->stash->{'has_columns'} = $has_columns;
+
     # services
     my $sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
@@ -1018,6 +1047,7 @@ sub _process_combined_page {
     } else {
         push @{$extra_columns}, 'long_plugin_output';
     }
+    push @{$extra_columns}, 'contacts' if $has_columns;
 
     my $services            = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
                                                         sort   => { $order => $sortoptions->{$sortoption}->[0] },
@@ -1049,7 +1079,6 @@ sub _process_combined_page {
                                                         extra_columns => $extra_columns,
                                                 );
     $c->stash->{'hosts'} = $hosts;
-    $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
     if( $view_mode eq 'xls' ) {
