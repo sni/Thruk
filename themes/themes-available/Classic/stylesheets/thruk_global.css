@@ -1221,3 +1221,17 @@ DIV.pnpSelector {
     filter: grayscale(100%);
     -webkit-filter: grayscale(100%);
 }
+
+TR.column-sortable-placeholder {
+  display: block;
+  border: 1px dashed grey;
+  background-color: #CCCCCC;
+  color: red;
+  height: 10px;
+}
+
+.drag_hint {
+    font-weight: normal;
+    font-style: italic;
+    font-size: smaller;
+}

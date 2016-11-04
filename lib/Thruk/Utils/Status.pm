@@ -2045,7 +2045,7 @@ sub get_host_columns {
         { title => "Site",                 "field" => "peer_name",            "checked" => 1 };
     }
     push @{$columns}, (
-        { title => "Host",                 "field" => "host_name",            "checked" => 1 },
+        { title => "Host",                 "field" => "name",                 "checked" => 1 },
         { title => "Status",               "field" => "state",                "checked" => 1 },
         { title => "Last Check",           "field" => "last_check",           "checked" => 1 },
         { title => "Duration",             "field" => "duration",             "checked" => 1 },

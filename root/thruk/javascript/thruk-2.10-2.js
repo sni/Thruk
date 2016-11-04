@@ -1910,8 +1910,9 @@ function fade(id, duration) {
     }
 }
 
+var ui_loading = false;
 function load_jquery_ui(callback) {
-    if(has_jquery_ui) {
+    if(has_jquery_ui || ui_loading) {
         return;
     }
     var css  = document.createElement('link');
@@ -1919,12 +1920,14 @@ function load_jquery_ui(callback) {
     css.rel  = 'stylesheet';
     css.type = 'text/css';
     document.body.appendChild(css);
+    ui_loading = true;
     jQuery.ajax({
         url:       jquery_ui_url,
         dataType: 'script',
         success:   function(script, textStatus, jqXHR) {
             has_jquery_ui = true;
             callback(script, textStatus, jqXHR);
+            ui_loading = false;
         },
         cache:     true
     });
@@ -2188,17 +2191,71 @@ function fetch_long_plugin_output(td, host, service, backend, escape_html) {
 }
 
 // make the columns sortable
-function initStatusTableColumnSorting(id) {
+var already_sortable = {};
+function initStatusTableColumnSorting(pane_prefix, table_id) {
     if(!has_jquery_ui) {
         load_jquery_ui(function() {
-            initStatusTableColumnSorting(id);
+            initStatusTableColumnSorting(pane_prefix, table_id);
         });
         return;
     }
-    jQuery('#'+id+' tbody').sortable({
-        update: function( event, ui ) {
-            /* drag/drop changes the checkbox state, so just toggle it back */
-            ui.item[0].childNodes[1].onclick();
+    if(already_sortable[pane_prefix]) {
+        return;
+    }
+    already_sortable[pane_prefix] = true;
+
+    jQuery('#'+table_id+' > tbody > tr:first-child').sortable({
+        items                : '> th',
+        helper                : 'clone',
+        update               : function( event, ui ) {
+            var oldIndexes = []
+            var rowsToSort = {};
+            var table;
+            // remove all current rows from the column selector, they will be later readded in the right order
+            jQuery('#'+pane_prefix+'_columns_table > tbody > tr').each(function(i, el) {
+                table = el.parentNode;
+                var row = el.parentNode.removeChild(el);
+                var field = jQuery(row).find("input").val();
+                rowsToSort[field] = row;
+                oldIndexes.push(field);
+            });
+            // fetch the target column order based on the current status table header
+            var target = [];
+            jQuery('#'+table_id+' > tbody > tr:first-child > th').each(function(i, el) {
+                var matches = el.className.match(/col_(.*)/);
+                if(matches[1]) {
+                    target.push(matches[1]);
+                }
+            });
+            jQuery(target).each(function(i, el) {
+                table.appendChild(rowsToSort[el]);
+            });
+            // remove the current column header and readd them in original order, so later ordering wont skip headers
+            var currentHeader = {};
+            jQuery('#'+table_id+' > tbody > tr:first-child > th').each(function(i, el) {
+                table = el.parentNode;
+                var row = el.parentNode.removeChild(el);
+                var matches = el.className.match(/col_(.*)/);
+                if(matches[1]) {
+                    currentHeader[matches[1]] = row;
+                }
+            });
+            jQuery(oldIndexes).each(function(i, el) {
+                table.appendChild(currentHeader[el]);
+            });
+            updateStatusColumns(pane_prefix);
+        }
+    });
+    jQuery('#'+pane_prefix+'_columns_table tbody').sortable({
+        items                : '> tr',
+        placeholder          : 'column-sortable-placeholder',
+        forcePlaceholderSize : true,
+        update               : function( event, ui ) {
+            /* drag/drop changes the checkbox state, so set checked flag assuming that a moved column should be visible */
+            window.setTimeout(function() {
+                jQuery(ui.item[0]).find("input").prop('checked', true);
+                updateStatusColumns(pane_prefix);
+            }, 100);
         }
     });
 }
@@ -2254,17 +2311,19 @@ function updateStatusColumns(id) {
             jQuery('#'+id+'columns').val(newVal);
             additionalParams[id+'columns'] = newVal;
             delete removeParams[id+'columns'];
+
+            if(table.rows[1] && table.rows[1].cells.length < 10) {
+                var url = getCurrentUrl();
+                jQuery('.'+id+'_table').load(url+' .'+id+'_table > tbody', undefined, function() {
+                    delete already_sortable[id];
+                    initStatusTableColumnSorting(id, table.id);
+                    updateStatusColumns(id);
+                });
+            }
         } else {
             jQuery('#'+id+'columns').val("");
             delete additionalParams[id+'columns'];
             removeParams[id+'columns'] = true;
-        }
-
-        if(table.rows[1] && table.rows[1].cells.length < 10) {
-            var url = getCurrentUrl();
-            jQuery('.'+id+'_table').load(url+' .'+id+'_table > tbody', undefined, function() {
-                updateStatusColumns(id);
-            });
         }
     }
 }

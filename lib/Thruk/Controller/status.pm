@@ -411,6 +411,12 @@ sub _process_details_page {
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
+    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
+        if(!defined $sortoptions->{$x}) {
+            my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
+            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+        }
+    }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
     # reverse order for duration
@@ -533,6 +539,12 @@ sub _process_hostdetails_page {
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
+    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
+        if(!defined $sortoptions->{$x}) {
+            my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
+            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+        }
+    }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
     # reverse order for duration
@@ -556,6 +568,7 @@ sub _process_hostdetails_page {
     } else {
         push @{$extra_columns}, 'long_plugin_output';
     }
+    push @{$extra_columns}, 'contacts' if $has_columns;
 
     # get hosts
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns );
