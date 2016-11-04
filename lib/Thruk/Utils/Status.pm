@@ -2053,7 +2053,7 @@ sub get_host_columns {
     if($c->stash->{'show_host_attempts'}) {
         push @{$columns},
         { title => "Attempt",              "field" => "current_attempt",      "checked" => 1 };
-    };
+    }
     if($c->stash->{'show_backends_in_table'} == 1) {
         push @{$columns},
         { title => "Site",                 "field" => "peer_name",            "checked" => 1 };
@@ -2068,7 +2068,7 @@ sub get_host_columns {
     if(!$c->stash->{'show_host_attempts'}) {
         push @{$columns},
         { title => "Attempt",              "field" => "current_attempt",      "checked" => 0 };
-    };
+    }
     push @{$columns}, (
         { title => "Address",              "field" => "address",              "checked" => 0 },
         { title => "Check Command",        "field" => "check_command",        "checked" => 0 },
