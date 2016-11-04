@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1025;
+    plan tests => 1097;
 }
 
 BEGIN {
@@ -42,6 +42,8 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=8&hostgroup=all&sorttype=1',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=4&hostgroup=all&sorttype=1',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=6&hostgroup=all&sorttype=1',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&dfl_columns=name%2Cstate%2Clast_check%2Cduration%2Cpeer_name%2Cplugin_output%2Clatency',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&dfl_columns=name%2Cstate%2Clast_check%2Cduration%2Cpeer_name%2Cplugin_output%2Ccomments',
 
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostoverview',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostsummary',
@@ -59,6 +61,8 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?sortoption=4&sorttype=1&host=all',
     '/thruk/cgi-bin/status.cgi?sortoption=6&sorttype=1&host=all',
     '/thruk/cgi-bin/status.cgi?sortoption=5&sorttype=1&host=all',
+    '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
+    '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
 
 # Servicegroups
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=detail',
@@ -80,6 +84,8 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42',
     '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems',
+    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&hidesearch=1&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
+    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&hidesearch=1&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
 # Search
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$hostgroup,
