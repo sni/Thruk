@@ -391,7 +391,10 @@ sub _process_details_page {
     my $has_columns = 0;
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_service_columns($c);
     $c->stash->{'table_columns'}->{'dfl_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'});
+    $c->stash->{'comments_by_host'}         = {};
+    $c->stash->{'comments_by_host_service'} = {};
     if($c->req->parameters->{'dfl_columns'}) {
+        Thruk::Utils::Status::set_comments_and_downtimes($c) if $c->req->parameters->{'dfl_columns'} =~ m/comments/mx;
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
@@ -521,7 +524,10 @@ sub _process_hostdetails_page {
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_host_columns($c);
     $c->stash->{'table_columns'}->{'dfl_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'});
+    $c->stash->{'comments_by_host'}         = {};
+    $c->stash->{'comments_by_host_service'} = {};
     if($c->req->parameters->{'dfl_columns'}) {
+        Thruk::Utils::Status::set_comments_and_downtimes($c) if $c->req->parameters->{'dfl_columns'} =~ m/comments/mx;
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
@@ -1030,8 +1036,13 @@ sub _process_combined_page {
     $c->stash->{'default_columns'}->{'svc_'} = Thruk::Utils::Status::get_service_columns($c);
     $c->stash->{'table_columns'}->{'hst_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'hst_'}, $c->req->parameters->{'hst_columns'});
     $c->stash->{'table_columns'}->{'svc_'} = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'svc_'}, $c->req->parameters->{'svc_columns'});
+    $c->stash->{'comments_by_host'}         = {};
+    $c->stash->{'comments_by_host_service'} = {};
     if($c->req->parameters->{'hst_columns'} || $c->req->parameters->{'svc_columns'}) {
         $has_columns = 1;
+        if($c->req->parameters->{'hst_columns'} =~ m/comments/mx || $c->req->parameters->{'svc_columns'} =~ m/comments/mx) {
+            Thruk::Utils::Status::set_comments_and_downtimes($c);
+        }
     }
     $c->stash->{'has_columns'} = $has_columns;
 

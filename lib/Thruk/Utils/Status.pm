@@ -2076,7 +2076,6 @@ sub get_host_columns {
         { title => "Check Period",         "field" => "check_period",         "checked" => 0 },
         { title => "Contacts",             "field" => "contacts",             "checked" => 0 },
         { title => "Comments",             "field" => "comments",             "checked" => 0 },
-        { title => "Downtimes",            "field" => "downtimes",            "checked" => 0 },
         { title => "Execution Time",       "field" => "execution_time",       "checked" => 0 },
         { title => "Groups",               "field" => "groups",               "checked" => 0 },
         { title => "Latency",              "field" => "latency",              "checked" => 0 },
@@ -2139,7 +2138,6 @@ sub get_service_columns {
         { title => "Check Period",         "field" => "check_period",         "checked" => 0 },
         { title => "Contacts",             "field" => "contacts",             "checked" => 0 },
         { title => "Comments",             "field" => "comments",             "checked" => 0 },
-        { title => "Downtimes",            "field" => "downtimes",            "checked" => 0 },
         { title => "Execution Time",       "field" => "execution_time",       "checked" => 0 },
         { title => "Groups",               "field" => "groups",               "checked" => 0 },
         { title => "Latency",              "field" => "latency",              "checked" => 0 },
@@ -2191,6 +2189,48 @@ sub sort_table_columns {
         }
     }
     return($sorted);
+}
+
+##############################################
+
+=head2 set_comments_and_downtimes
+
+  set_comments_and_downtimes($c)
+
+set comments / downtimes by host
+
+=cut
+sub set_comments_and_downtimes {
+    my($c) = @_;
+
+    # add comments and downtimes
+    my $comments  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
+    my $downtimes = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
+    my $comments_by_host         = {};
+    my $comments_by_host_service = {};
+    if($downtimes) {
+        for my $downtime ( @{$downtimes} ) {
+            if( defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '' ) {
+                push @{ $comments_by_host_service->{ $downtime->{'host_name'} }->{ $downtime->{'service_description'} } }, $downtime;
+            }
+            else {
+                push @{ $comments_by_host->{ $downtime->{'host_name'} } }, $downtime;
+            }
+        }
+    }
+    if($comments) {
+        for my $comment ( @{$comments} ) {
+            if( defined $comment->{'service_description'} and $comment->{'service_description'} ne '' ) {
+                push @{ $comments_by_host_service->{ $comment->{'host_name'} }->{ $comment->{'service_description'} } }, $comment;
+            }
+            else {
+                push @{ $comments_by_host->{ $comment->{'host_name'} } }, $comment;
+            }
+        }
+    }
+    $c->stash->{'comments_by_host'}         = $comments_by_host;
+    $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
+    return;
 }
 
 ##############################################

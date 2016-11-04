@@ -172,15 +172,24 @@
           [% END %]
         [% IF has_columns %]
         [% IF !show_host_attempts %]
-        <td class='[% class %] attempt' align="center">[% h.current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number %][% IF h.current_notification_number && h.current_notification_number > 0 %] <span title="This host has sent out [% h.current_notification_number %] notifications">#[% h.current_notification_number %]</span>[% END %][% IF h.first_notification_delay && h.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(h) %][% IF first_remaining >= 0 %] <span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
+        <td class='[% class %] attempt' style="display: none;" align="center">[% h.current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number %][% IF h.current_notification_number && h.current_notification_number > 0 %] <span title="This host has sent out [% h.current_notification_number %] notifications">#[% h.current_notification_number %]</span>[% END %][% IF h.first_notification_delay && h.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(h) %][% IF first_remaining >= 0 %] <span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% END %]
         <td class='[% class %] address' style="display: none;" nowrap align="left">[% h.address %]</td>
         <td class='[% class %] check_command' style="display: none;" nowrap align="left">[% h.check_command.replace("\!.*$", "") %]</td>
         <td class='[% class %] check_interval' style="display: none;" nowrap align="left">[% h.check_interval %]</td>
         <td class='[% class %] check_period' style="display: none;" nowrap align="left">[% h.check_period %]</td>
         <td class='[% class %] contacts' style="display: none;" nowrap align="left">[% h.contacts.join(', ') %]</td>
-        <td class='[% class %] comments' style="display: none;" nowrap align="left">not implemented</td>
-        <td class='[% class %] downtimes' style="display: none;" nowrap align="left">not implemented</td>
+        <td class='[% class %] comments' style="display: none;" nowrap align="left">
+        [% IF comments_by_host.defined(h.name) %]
+            [% host_name = h.name; FOREACH com = comments_by_host.$host_name %]
+            [% IF com.defined("start_time") %]
+            Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
+            [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
+            [% IF com.entry_type == 1 %]Comment[% ELSIF com.entry_type == 4 %]Acknowledgement[% END %]: [% com.author %]: [% com.comment %]<br>
+            [% END %]
+            [% END %]
+        [% END %]
+        </td>
         <td class='[% class %] execution_time' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.execution_time) %]s</td>
         <td class='[% class %] groups' style="display: none;" nowrap align="left">[% h.groups.join(', ') %]</td>
         <td class='[% class %] latency' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.latency) %]s</td>

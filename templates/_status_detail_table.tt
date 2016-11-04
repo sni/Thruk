@@ -103,7 +103,6 @@
         [% IF lasthost == s.host_name %]
         <td></td>
         [% ELSE %]
-        [% SET lasthost = s.host_name %]
         [% SET host_comment_count = 0 %]
         [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
         [% SET hostclass = 'statusOdd'  IF loop.even %]
@@ -195,8 +194,29 @@
         <td class='[% serviceclass %] check_interval' style="display: none;" nowrap align="left">[% s.check_interval %]</td>
         <td class='[% serviceclass %] check_period' style="display: none;" nowrap align="left">[% s.check_period %]</td>
         <td class='[% serviceclass %] contacts' style="display: none;" nowrap align="left">[% s.contacts.join(', ') %]</td>
-        <td class='[% serviceclass %] comments' style="display: none;" nowrap align="left">not implemented</td>
-        <td class='[% serviceclass %] downtimes' style="display: none;" nowrap align="left">not implemented</td>
+        <td class='[% serviceclass %] comments' style="display: none;" nowrap align="left">
+        [% host_name = s.host_name %]
+        [% IF lasthost != s.host_name %]
+        [% IF comments_by_host.defined(host_name) %]
+            [% FOREACH com = comments_by_host.$host_name %]
+            [% IF com.defined("start_time") %]
+            Host Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
+            [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
+            [% IF com.entry_type == 1 %]Host Comment[% ELSIF com.entry_type == 4 %]Host Acknowledgement[% END %]: [% com.author %]: [% com.comment %]<br>
+            [% END %]
+            [% END %]
+        [% END %]
+        [% END %]
+        [% service_description = s.description; IF comments_by_host_service.defined(host_name) && comments_by_host_service.$host_name.defined(service_description) %]
+            [% FOREACH com = comments_by_host_service.$host_name.$service_description %]
+            [% IF com.defined("start_time") %]
+            Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
+            [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
+            [% IF com.entry_type == 1 %]Comment[% ELSIF com.entry_type == 4 %]Acknowledgement[% END %]: [% com.author %]: [% com.comment %]<br>
+            [% END %]
+            [% END %]
+        [% END %]
+        </td>
         <td class='[% serviceclass %] execution_time' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.execution_time) %]s</td>
         <td class='[% serviceclass %] groups' style="display: none;" nowrap align="left">[% s.groups.join(', ') %]</td>
         <td class='[% serviceclass %] latency' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.latency) %]s</td>
@@ -205,6 +225,7 @@
         <td class='[% serviceclass %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.percent_state_change) %]%</td>
         [% END %]
       </tr>
+      [% SET lasthost = s.host_name %]
       [% END %]
 
     </table>
