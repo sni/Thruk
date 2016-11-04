@@ -389,7 +389,7 @@ sub _process_details_page {
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($c->req->parameters->{'dfl_columns'}) {
-        Thruk::Utils::Status::set_comments_and_downtimes($c) if $c->req->parameters->{'dfl_columns'} =~ m/comments/mx;
+        Thruk::Utils::Status::set_comments_and_downtimes($c) if($c->req->parameters->{'dfl_columns'} =~ m/comments/mx || $c->req->parameters->{'autoShow'});
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
@@ -522,7 +522,7 @@ sub _process_hostdetails_page {
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($c->req->parameters->{'dfl_columns'}) {
-        Thruk::Utils::Status::set_comments_and_downtimes($c) if $c->req->parameters->{'dfl_columns'} =~ m/comments/mx;
+        Thruk::Utils::Status::set_comments_and_downtimes($c) if($c->req->parameters->{'dfl_columns'} =~ m/comments/mx || $c->req->parameters->{'autoShow'});
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
@@ -1034,7 +1034,9 @@ sub _process_combined_page {
     $c->stash->{'comments_by_host_service'}  = {};
     if($c->req->parameters->{'hst_columns'} || $c->req->parameters->{'svc_columns'}) {
         $has_columns = 1;
-        if($c->req->parameters->{'hst_columns'} =~ m/comments/mx || $c->req->parameters->{'svc_columns'} =~ m/comments/mx) {
+        if($c->req->parameters->{'hst_columns'} =~ m/comments/mx
+           || $c->req->parameters->{'svc_columns'} =~ m/comments/mx
+           || $c->req->parameters->{'autoShow'}) {
             Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
     }
