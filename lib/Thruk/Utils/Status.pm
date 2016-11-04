@@ -2083,6 +2083,13 @@ sub get_host_columns {
         { title => "Notification Period",  "field" => "notification_period",  "checked" => 0 },
         { title => "Percent State Change", "field" => "percent_state_change", "checked" => 0 },
     );
+    if($c->config->{'show_custom_vars'}) {
+        for my $var (@{$c->config->{'show_custom_vars'}}) {
+            push @{$columns},
+            { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
+        }
+    }
+
     my @selected;
     for my $col (@{$columns}) {
         if($col->{'checked'}) {
@@ -2145,6 +2152,14 @@ sub get_service_columns {
         { title => "Notification Period",  "field" => "notification_period",  "checked" => 0 },
         { title => "Percent State Change", "field" => "percent_state_change", "checked" => 0 },
     );
+    if($c->config->{'show_custom_vars'}) {
+        for my $var (@{$c->config->{'show_custom_vars'}}) {
+            push @{$columns},
+            { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
+        }
+    }
+
+
     my @selected;
     for my $col (@{$columns}) {
         if($col->{'checked'}) {

@@ -196,6 +196,16 @@
         <td class='[% class %] next_check' style="display: none;" nowrap align="left">[% IF h.next_check %][% date_format(c, h.next_check) %][% ELSE %]not scheduled[% END %]</td>
         <td class='[% class %] notification_period' style="display: none;" nowrap align="left">[% h.notification_period %]</td>
         <td class='[% class %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.percent_state_change) %]%</td>
+        [% FOREACH col = table_columns.$paneprefix %]
+          [% IF col.field.match('^cust_') %]
+          [% val = "";
+             field = col.field.replace('^cust_+', '');
+             cust_vars = get_custom_vars(c, h);
+             IF cust_vars.exists(field); val = cust_vars.$field; END;
+          %]
+          <td class='[% class %] [% col.field %]' style="display: none;" nowrap align="left">[% val %]</td>
+          [% END %]
+        [% END %]
         [% END %]
         </tr>
         [% END %]
@@ -207,5 +217,8 @@
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_host_columns %]";
   updateStatusColumns("[% paneprefix %]");
+  [% IF c.req.parameters.defined("autoShow") %]
+  toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
+  [% END %]
 -->
 </script>

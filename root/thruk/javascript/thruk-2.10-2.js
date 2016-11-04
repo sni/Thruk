@@ -134,6 +134,8 @@ function cleanUnderscoreUrl() {
         newUrl = newUrl.replace(/\&_=\d+/g, '');
         newUrl = newUrl.replace(/\?scrollTo=\d+/g, '?');
         newUrl = newUrl.replace(/\&scrollTo=\d+/g, '');
+        newUrl = newUrl.replace(/\?autoShow=\w+/g, '?');
+        newUrl = newUrl.replace(/\&autoShow=\w+/g, '');
         newUrl = newUrl.replace(/\?$/g, '');
         newUrl = newUrl.replace(/\?&/g, '?');
         try {
@@ -2206,7 +2208,8 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
 
     jQuery('#'+table_id+' > tbody > tr:first-child').sortable({
         items                : '> th',
-        helper                : 'clone',
+        helper               : 'clone',
+        tolerance            : 'pointer',
         update               : function( event, ui ) {
             var oldIndexes = []
             var rowsToSort = {};
@@ -2267,6 +2270,8 @@ function updateStatusColumns(id) {
     var changed = false;
     table.style.display = "none";
 
+    removeParams['autoShow'] = true;
+
     var firstRow = table.rows[0];
     var selected = [];
     jQuery('.'+id+'_col').each(function(i, el) {
@@ -2314,12 +2319,9 @@ function updateStatusColumns(id) {
             delete removeParams[id+'columns'];
 
             if(table.rows[1] && table.rows[1].cells.length < 10) {
-                var url = getCurrentUrl();
-                jQuery('.'+id+'_table').load(url+' .'+id+'_table > tbody', undefined, function() {
-                    delete already_sortable[id];
-                    initStatusTableColumnSorting(id, table.id);
-                    updateStatusColumns(id);
-                });
+                additionalParams["autoShow"] = id+"_columns_select";
+                delete removeParams['autoShow'];
+                reloadPage();
             }
         } else {
             jQuery('#'+id+'columns').val("");

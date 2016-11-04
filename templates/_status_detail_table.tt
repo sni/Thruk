@@ -223,6 +223,18 @@
         <td class='[% serviceclass %] next_check' style="display: none;" nowrap align="left">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]not scheduled[% END %]</td>
         <td class='[% serviceclass %] notification_period' style="display: none;" nowrap align="left">[% s.notification_period %]</td>
         <td class='[% serviceclass %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.percent_state_change) %]%</td>
+        [% FOREACH col = table_columns.$paneprefix %]
+          [% IF col.field.match('^cust_') %]
+          [% val = "";
+             field = col.field.replace('^cust_+', '');
+             cust_vars = get_custom_vars(c, s, '', 1);
+             IF cust_vars.exists(field); val = cust_vars.$field;
+             ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
+             END;
+          %]
+          <td class='[% serviceclass %] [% col.field %]' style="display: none;" nowrap align="left">[% val %]</td>
+          [% END %]
+        [% END %]
         [% END %]
       </tr>
       [% SET lasthost = s.host_name %]
@@ -250,5 +262,8 @@
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
   updateStatusColumns("[% paneprefix %]");
+  [% IF c.req.parameters.defined("autoShow") %]
+  toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
+  [% END %]
 -->
 </script>
