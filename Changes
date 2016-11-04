@@ -2,7 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - remove startup page, Thruk starts in less than a second now
-          - make status details columns dynamic
+          - add adjustable status details columns
           - Performance improvements on the host/service list page
           - allow arbitrary html in the side navigation
           - fix merging configuration from thruk_local.d
