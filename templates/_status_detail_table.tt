@@ -1,6 +1,7 @@
 ﻿[% PROCESS _blocks.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
 
+    [% IF show_form %]<form action="#" method="POST">[% END %]
     <input type="image" src="[% url_prefix %]themes/[% theme %]/images/config.png" style="display: none; vertical-align: bottom; position: absolute; left: 10px;" name="columns" id="[% paneprefix %]_btn_columns_hover" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]_columns_table'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()"  onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
     <div class="filter_pane" style="visibility:hidden; left: 50px;" id="[% paneprefix %]_columns_select">
     <div class="shadow"><div class="shadowcontent">
@@ -17,7 +18,7 @@
             [% FOREACH col = table_columns.$paneprefix %]
             <tr>
               <td valign="top" align="right" class='filterName clickable' id="[% paneprefix %]_col_[% col.field %]n" onclick="toggleFilterCheckBox(this.id); updateStatusColumns('[% paneprefix %]');" width="90%">[% col.title %]</td>
-              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]')"; [% IF col.checked %] checked[% END %]></td>
+              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
             </tr>
             [% END %]
           </table>
@@ -26,6 +27,7 @@
     </table>
     </div></div>
     </div>
+    [% IF show_form %]</form>[% END %]
 
     [% start_with = 7 %]
     <table border="0" width="100%" class='status servicestatus [% paneprefix %]_table' id="statusTable" onmouseout='reset_all_hosts_and_services();'>
