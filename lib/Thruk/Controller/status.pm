@@ -415,7 +415,7 @@ sub _process_details_page {
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
     for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
-        if(!defined $sortoptions->{$x}) {
+        if(!defined $sortoptions->{$x+10}) {
             my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
             $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
         }
@@ -546,7 +546,7 @@ sub _process_hostdetails_page {
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
     for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
-        if(!defined $sortoptions->{$x}) {
+        if(!defined $sortoptions->{$x+10}) {
             my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
             $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
         }
@@ -1062,6 +1062,12 @@ sub _process_combined_page {
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
+    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'svc_'}}; $x++) {
+        if(!defined $sortoptions->{$x+10}) {
+            my $col = $c->stash->{'default_columns'}->{'svc_'}->[$x];
+            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+        }
+    }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'svc_orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'svc_orderdir'} = $order;
@@ -1095,6 +1101,12 @@ sub _process_combined_page {
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status'  ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
+    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'hst_'}}; $x++) {
+        if(!defined $sortoptions->{$x+10}) {
+            my $col = $c->stash->{'default_columns'}->{'hst_'}->[$x];
+            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+        }
+    }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'hst_orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'hst_orderdir'} = $order;
