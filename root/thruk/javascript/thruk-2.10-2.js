@@ -2265,6 +2265,7 @@ function updateStatusColumns(id) {
     resetRefresh();
     var table = jQuery('.'+id+'_table')[0];
     var changed = false;
+    table.style.display = "none";
 
     var firstRow = table.rows[0];
     var selected = [];
@@ -2326,6 +2327,7 @@ function updateStatusColumns(id) {
             removeParams[id+'columns'] = true;
         }
     }
+    table.style.display = "";
 }
 
 /*******************************************************************************
