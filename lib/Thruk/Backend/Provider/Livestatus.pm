@@ -269,7 +269,7 @@ sub get_hosts {
 
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
-        $self->_optimized_for_wrapped_json(\%options);
+        $self->_optimized_for_wrapped_json(\%options, "hosts");
         #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
     }
 
@@ -458,7 +458,7 @@ sub get_services {
 
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
-        $self->_optimized_for_wrapped_json(\%options);
+        $self->_optimized_for_wrapped_json(\%options, "services");
         #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
     }
 
@@ -722,7 +722,7 @@ sub get_logs {
     }
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'}) {
-        $self->_optimized_for_wrapped_json(\%options);
+        $self->_optimized_for_wrapped_json(\%options, "logs");
         #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
     }
     unless(defined $options{'columns'}) {
@@ -1444,7 +1444,7 @@ sub _replace_callbacks {
 
 ##########################################################
 sub _optimized_for_wrapped_json {
-    my($self, $options) = @_;
+    my($self, $options, $table) = @_;
     $self->{'optimized'} = 0;
 
     if($options->{'sort'}) {
@@ -1460,7 +1460,21 @@ sub _optimized_for_wrapped_json {
                 $options->{'sort'}->{$order} = [$options->{'sort'}->{$order}];
             }
             for my $key (@{$options->{'sort'}->{$order}}) {
-                push @{$options->{'options'}->{'sort'}}, $key.' '.(lc $order);
+                my $col = $key;
+                if($col =~ m/^cust__(.*)$/mx) {
+                    if($self->{'lmd_optimizations'}) {
+                        $col = "custom_variables ".$1;
+                        if($table && $table eq 'services') {
+                            push @{$options->{'options'}->{'sort'}}, 'host_'.$col.' '.(lc $order);
+                            push @{$options->{'extra_columns'}}, "host_custom_variables";
+                        }
+                        push @{$options->{'extra_columns'}}, "custom_variables";
+                    } else {
+                        delete $options->{'options'}->{'sort'};
+                        return;
+                    }
+                }
+                push @{$options->{'options'}->{'sort'}}, $col.' '.(lc $order);
                 if($self->{'lmd_optimizations'}) {
                     if($key eq 'peer_name') {
                         $options->{'extra_columns'} = [] unless $options->{'extra_columns'};
