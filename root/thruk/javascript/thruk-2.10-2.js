@@ -2321,6 +2321,7 @@ function updateStatusColumns(id) {
             if(table.rows[1] && table.rows[1].cells.length < 10) {
                 additionalParams["autoShow"] = id+"_columns_select";
                 delete removeParams['autoShow'];
+                jQuery('#'+id+"_columns_select").find("DIV.shadowcontent").append("<div class='overlay'></div>").append("<div class='overlay-text'><img class='overlay' src='"+url_prefix + 'themes/' +  theme + "/images/loading-icon.gif'><br>fetching table...</div>");
                 reloadPage();
             }
         } else {
