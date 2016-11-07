@@ -2345,6 +2345,17 @@ sub _sort {
         @keys = ($key);
     }
 
+    for my $key (@keys) {
+        # add extra column for custom variables
+        if($key =~ m/^cust__(.*)$/mx) {
+            my $cust = $1;
+            for my $d (@{$data}) {
+                my $vars = Thruk::Utils::get_custom_vars($c, $d, '', 1);
+                $d->{$key} = $vars->{$cust} || $vars->{'HOST'.$cust} || '';
+            }
+        }
+    }
+
     my @compares;
     for my $key (@keys) {
 
