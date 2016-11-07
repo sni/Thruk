@@ -2349,6 +2349,15 @@ function updateStatusColumns(id, reloadRequired) {
     table.style.display = "";
 }
 
+/* reload page with with sorting parameters set */
+function sort_by_columns(args) {
+    for(var key in args) {
+        additionalParams[key] = args[key];
+    }
+    reloadPage();
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

@@ -56,7 +56,7 @@
           [% IF loop.index >= start_with %]
           [% col_title = col.title %]
           [% IF col_title.substr(0,1) == "_"; col_title = col_title.replace('^_', '').lower.ucfirst; END %]
-          <th class='status col_[% col.field %]' style="display: none;" nowrap>[% col_title %]&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => loop.index + 10) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% col_title %] (ascending)' title='Sort by [% col_title %] (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => loop.index + 10) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% col_title %] (descending)' title='Sort by [% col_title %] (descending)'></a></th>
+          <th class='status col_[% col.field %]' style="display: none;" nowrap>[% col_title %]&nbsp;<a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 1, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% col_title %] (ascending)' title='Sort by [% col_title %] (ascending)'></a><a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 2, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% col_title %] (descending)' title='Sort by [% col_title %] (descending)'></a></th>
           [% END %]
         [% END %]
       </tr>
