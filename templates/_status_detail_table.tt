@@ -126,7 +126,7 @@
         </td>
         [% END %]
         [% IF show_backends_in_table == 2 %]
-        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='[% serviceclass %]'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
@@ -190,6 +190,9 @@
             </td>
           [% END %]
         [% IF has_columns %]
+        [% IF !show_backends_in_table %]
+        <td class='[% serviceclass %] backend_[% peer_key %] site' style="display: none;" align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        [% END %]
         <td class='[% serviceclass %] host_address' style="display: none;" nowrap align="left">[% s.host_address %]</td>
         <td class='[% serviceclass %] host_groups' style="display: none;" nowrap align="left">[% s.host_groups.join(', ') %]</td>
         <td class='[% serviceclass %] check_command' style="display: none;" nowrap align="left">[% s.check_command.replace("\!.*$", "") %]</td>

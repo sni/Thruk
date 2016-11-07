@@ -2286,6 +2286,10 @@ function updateStatusColumns(id, reloadRequired) {
     removeParams['autoShow'] = true;
 
     var firstRow = table.rows[0];
+    var firstDataRow = [];
+    if(table.rows.length > 1) {
+        var firstDataRow = table.rows[1];
+    }
     var selected = [];
     jQuery('.'+id+'_col').each(function(i, el) {
         if(!jQuery(firstRow.cells[i]).hasClass("col_"+el.value)) {
@@ -2298,10 +2302,24 @@ function updateStatusColumns(id, reloadRequired) {
                     return false;
                 }
             });
+            var dataSourceIndex;
+            jQuery(firstDataRow.cells).each(function(j, c) {
+                if(jQuery(c).hasClass(el.value)) {
+                    dataSourceIndex = j;
+                    return false;
+                }
+            });
             if(sourceIndex) {
+                if(firstRow.cells[sourceIndex]) {
+                    var cell = firstRow.removeChild(firstRow.cells[sourceIndex]);
+                    firstRow.insertBefore(cell, firstRow.cells[targetIndex]);
+                }
+                changed = true;
+            }
+            if(dataSourceIndex) {
                 jQuery(table.rows).each(function(j, row) {
-                    if(row.cells[sourceIndex]) {
-                        var cell = row.removeChild(row.cells[sourceIndex]);
+                    if(j > 0 && row.cells[dataSourceIndex]) {
+                        var cell = row.removeChild(row.cells[dataSourceIndex]);
                         row.insertBefore(cell, row.cells[targetIndex]);
                     }
                 });
