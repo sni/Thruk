@@ -2096,7 +2096,7 @@ sub get_host_columns {
             push @selected, $col->{'field'};
         }
     }
-    $c->stash->{'default_host_columns'} = join(",", @selected);
+    $c->stash->{'default_host_columns'} = $c->config->{'default_host_columns'} || join(",", @selected);
     return($columns);
 }
 
@@ -2166,7 +2166,7 @@ sub get_service_columns {
             push @selected, $col->{'field'};
         }
     }
-    $c->stash->{'default_service_columns'} = join(",", @selected);
+    $c->stash->{'default_service_columns'} = $c->config->{'default_service_columns'} || join(",", @selected);
     return($columns);
 }
 
