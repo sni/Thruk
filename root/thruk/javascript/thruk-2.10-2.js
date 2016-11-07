@@ -2309,11 +2309,11 @@ function updateStatusColumns(id, reloadRequired) {
                     return false;
                 }
             });
-            if(sourceIndex == undefined) {
+            if(sourceIndex == undefined && !reloadRequired) {
                 if(thruk_debug_js) { alert("ERROR: unknown header column in updateStatusColumns(): " + el.value); }
                 return;
             }
-            if(dataSourceIndex == undefined) {
+            if(dataSourceIndex == undefined && !reloadRequired) {
                 if(thruk_debug_js) { alert("ERROR: unknown data column in updateStatusColumns(): " + el.value); }
                 return;
             }
