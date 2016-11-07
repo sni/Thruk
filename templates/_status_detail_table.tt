@@ -225,7 +225,7 @@
         <td class='[% serviceclass %] next_check' style="display: none;" nowrap align="left">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]not scheduled[% END %]</td>
         <td class='[% serviceclass %] notification_period' style="display: none;" nowrap align="left">[% s.notification_period %]</td>
         <td class='[% serviceclass %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.percent_state_change) %]%</td>
-        [% FOREACH col = table_columns.$paneprefix %]
+        [% FOREACH col = default_columns.$paneprefix %]
           [% IF col.field.match('^cust_') %]
           [% val = "";
              field = col.field.replace('^cust_+', '');
