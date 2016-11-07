@@ -201,6 +201,7 @@
             [% END %]
         [% END %]
         </td>
+        <td class='[% class %] event_handler' style="display: none;" nowrap align="left">[% h.event_handler.replace("\!.*$", "") %]</td>
         <td class='[% class %] execution_time' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.execution_time) %]s</td>
         <td class='[% class %] groups' style="display: none;" nowrap align="left">[% h.groups.join(', ') %]</td>
         <td class='[% class %] latency' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.latency) %]s</td>
