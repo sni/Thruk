@@ -562,10 +562,12 @@ function toQueryString(obj) {
     return str;
 }
 
-function getCurrentUrl() {
+function getCurrentUrl(addTime) {
     var origHash = window.location.hash;
     var newUrl   = window.location.href;
     newUrl       = newUrl.replace(/#.*$/g, '');
+
+    if(addTime == undefined) { addTime = true; }
 
     // save scroll state
     saveScroll();
@@ -585,7 +587,9 @@ function getCurrentUrl() {
 
     // make url uniq, otherwise we would to do a reload
     // which reloads all images / css / js too
-    urlArgs['_'] = (new Date()).getTime();
+    if(addTime) {
+        urlArgs['_'] = (new Date()).getTime();
+    }
 
     var newParams = toQueryString(urlArgs);
 
@@ -598,6 +602,14 @@ function getCurrentUrl() {
         newUrl = newUrl + origHash;
     }
     return(newUrl);
+}
+
+/* update the url by using additionalParams */
+function updateUrl() {
+    var newUrl = getCurrentUrl(false);
+    try {
+        history.replaceState({}, "", newUrl);
+    } catch(err) { debug(err) }
 }
 
 /* reloads the current page and adds some parameter from a hash */
@@ -2246,7 +2258,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             jQuery(oldIndexes).each(function(i, el) {
                 table.appendChild(currentHeader[el]);
             });
-            updateStatusColumns(pane_prefix);
+            updateStatusColumns(pane_prefix, false);
         }
     });
     jQuery('#'+pane_prefix+'_columns_table tbody').sortable({
@@ -2257,17 +2269,18 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             /* drag/drop changes the checkbox state, so set checked flag assuming that a moved column should be visible */
             window.setTimeout(function() {
                 jQuery(ui.item[0]).find("input").prop('checked', true);
-                updateStatusColumns(pane_prefix);
+                updateStatusColumns(pane_prefix, false);
             }, 100);
         }
     });
 }
 
 // apply status table columns
-function updateStatusColumns(id) {
+function updateStatusColumns(id, reloadRequired) {
     resetRefresh();
     var table = jQuery('.'+id+'_table')[0];
     var changed = false;
+    if(reloadRequired == undefined) { reloadRequired = true; }
     table.style.display = "none";
 
     removeParams['autoShow'] = true;
@@ -2318,17 +2331,20 @@ function updateStatusColumns(id) {
             additionalParams[id+'columns'] = newVal;
             delete removeParams[id+'columns'];
 
-            if(table.rows[1] && table.rows[1].cells.length < 10) {
+            if(reloadRequired && table.rows[1] && table.rows[1].cells.length < 10) {
                 additionalParams["autoShow"] = id+"_columns_select";
                 delete removeParams['autoShow'];
                 jQuery('#'+id+"_columns_select").find("DIV.shadowcontent").append("<div class='overlay'></div>").append("<div class='overlay-text'><img class='overlay' src='"+url_prefix + 'themes/' +  theme + "/images/loading-icon.gif'><br>fetching table...</div>");
+                table.style.display = "";
                 reloadPage();
+                return;
             }
         } else {
             jQuery('#'+id+'columns').val("");
             delete additionalParams[id+'columns'];
             removeParams[id+'columns'] = true;
         }
+        updateUrl();
     }
     table.style.display = "";
 }
