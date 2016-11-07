@@ -2264,7 +2264,6 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
     jQuery('#'+pane_prefix+'_columns_table tbody').sortable({
         items                : '> tr',
         placeholder          : 'column-sortable-placeholder',
-        forcePlaceholderSize : true,
         update               : function( event, ui ) {
             /* drag/drop changes the checkbox state, so set checked flag assuming that a moved column should be visible */
             window.setTimeout(function() {
