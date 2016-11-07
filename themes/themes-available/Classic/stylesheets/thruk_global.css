@@ -1260,3 +1260,9 @@ DIV.overlay-text {
   height: 45px;
   text-align: center;
 }
+
+/* workaround to make jquery ui sortable work with absolute position */
+/* http://stackoverflow.com/questions/5791886/jquery-draggable-shows-helper-in-wrong-place-after-page-scrolled */
+TABLE.filter {
+  overflow: auto;
+}
