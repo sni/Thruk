@@ -230,6 +230,7 @@
   default_columns["[% paneprefix %]"] = "[% default_host_columns %]";
   updateStatusColumns("[% paneprefix %]", false);
   [% IF c.req.parameters.defined("autoShow") %]
+  initStatusTableColumnSorting('[% paneprefix %]', 'hoststatusTable');
   toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
   [% END %]
 -->
