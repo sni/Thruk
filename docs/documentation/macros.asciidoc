@@ -3,7 +3,7 @@ layout: docs
 title: Macros
 ---
 
-= Macros
+== Macros
 
 Macros are available in a few places, for example the link:action-menu.html[Action Menus]
 or in the action_url, notes_url or icon_url.

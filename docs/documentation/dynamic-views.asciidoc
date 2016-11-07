@@ -3,8 +3,7 @@ layout: docs
 title: Dynamic Views
 ---
 
-= Dynamic Views
-
+== Dynamic Views
 {% include new_since.ad version="2.14" %}
 Dynamic Views are a way to customize the columns and layout of the host and
 service list pages.
@@ -41,7 +40,7 @@ ex.:
 
   default_host_columns = name,state,last_check,duration,plugin_output
 
-See the link:#available_columns[available columns] list for a list of available columns.
+See the link:#_available-columns[available columns] list for a list of available columns.
 
 Another example which sets reduced view for the contact_group managers with
 an additional column for the comments.

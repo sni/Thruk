@@ -5,7 +5,7 @@ lightbox: true
 ---
 
 
-= Thruk Dashboard
+== Thruk Dashboard
 
 Thruks next generation Dashboard (also known as the panorama plugin)
 is a super flexible dashboard framework which allows you to place icons and widgets

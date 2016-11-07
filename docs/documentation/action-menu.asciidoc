@@ -3,7 +3,7 @@ layout: docs
 title: Action Items
 ---
 
-= Action Menu
+== Action Menu
 
 {% include new_since.ad version="1.86" %}
 The Action Menu is a way to create custom icons and menus for every host or
