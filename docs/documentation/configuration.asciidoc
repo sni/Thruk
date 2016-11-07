@@ -861,6 +861,29 @@ ex.:
   show_notification_number = 0
 
 
+=== default_host_columns
+{% include new_since.ad version="2.14" %}
+List of default columns on host details page.
+Determines which columns and the order of the displayed columns.
+See an example on the link:dynamic-views.html[Dynamic Views] page.
+
+ex.:
+
+  default_host_columns = name,state,last_check,duration,plugin_output
+
+
+=== default_service_columns
+{% include new_since.ad version="2.14" %}
+List of default columns on service details page.
+Determines which columns and the order of the displayed columns.
+See an example on the link:dynamic-views.html[Dynamic Views] page.
+
+ex.:
+
+  default_service_columns = host_name,description,state,last_check,duration,current_attempt,plugin_output
+
+
+
 === show_backends_in_table
 Display the backend/site name in the status table.
 This is useful if you have same hosts or services on different
