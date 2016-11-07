@@ -2309,6 +2309,14 @@ function updateStatusColumns(id, reloadRequired) {
                     return false;
                 }
             });
+            if(sourceIndex == undefined) {
+                if(thruk_debug_js) { alert("ERROR: unknown header column in updateStatusColumns(): " + el.value); }
+                return;
+            }
+            if(dataSourceIndex == undefined) {
+                if(thruk_debug_js) { alert("ERROR: unknown data column in updateStatusColumns(): " + el.value); }
+                return;
+            }
             if(sourceIndex) {
                 if(firstRow.cells[sourceIndex]) {
                     var cell = firstRow.removeChild(firstRow.cells[sourceIndex]);

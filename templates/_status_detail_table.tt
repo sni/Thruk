@@ -109,7 +109,7 @@
 
       <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">
         [% IF lasthost == s.host_name %]
-        <td></td>
+        <td class='host_name'></td>
         [% ELSE %]
         [% SET host_comment_count = 0 %]
         [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
@@ -120,7 +120,7 @@
         [% ELSIF s.host_state == 2 %]
           [% hostclass = 'statusHOSTUNREACHABLE' %]
         [% END %]
-        <td class='[% hostclass %]'>
+        <td class='[% hostclass %] host_name'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
               <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
@@ -134,7 +134,7 @@
         [% IF show_backends_in_table == 2 %]
         <td class='[% serviceclass %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
-        <td class='[% serviceclass %]'>
+        <td class='[% serviceclass %] description'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
             <tr>
               <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a></td>
@@ -144,15 +144,15 @@
             </tr>
           </table>
         </td>
-        <td class='status[% state %]'>[% state %]</td>
+        <td class='status[% state %] state'>[% state %]</td>
         <td class='[% serviceclass %] last_check' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
         <td class='[% serviceclass %] duration' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
-        <td class='[% serviceclass %] attempt' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
+        <td class='[% serviceclass %] current_attempt' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% IF show_backends_in_table == 1 %]
         <td class='[% serviceclass %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
           [% IF s.has_been_checked == 0 %]
-            <td class='[% serviceclass %] output' align="left">
+            <td class='[% serviceclass %] plugin_output' align="left">
               [% IF s.active_checks_enabled == 0 %]
               Service is not scheduled to be checked...
               [% ELSE %]
@@ -176,7 +176,7 @@
               [% long_plugin_output = escape_html(long_plugin_output) %]
               [% plugin_output      = escape_html(plugin_output) %]
             [% END %]
-            <td align="left" class='[% serviceclass %] output'
+            <td align="left" class='[% serviceclass %] plugin_output'
             [% IF long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(plugin_output) %]<br>[% IF on_demand_long_plugin_output %][% escape_html("<span class='long_plugin_output'></span>") %][% ELSE %][% escape_html(nl2br(long_plugin_output)) %][% END %]'
