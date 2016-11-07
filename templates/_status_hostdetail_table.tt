@@ -19,6 +19,12 @@
               <tr>
                 <th colspan=2 class="drag_hint">(reorder columns with drag/drop)</th>
               </tr>
+              <tr>
+                <th colspan=2 class="drag_hint"><input type="button" value="use as my default service columns" onclick='setDefaultColumns("hst", "[% paneprefix %]")'></th>
+              </tr>
+              <tr>
+                <th colspan=2 class="drag_hint"><input type="button" class="[% paneprefix %]_reset_columns_btn" value="reset my default service columns" onclick='setDefaultColumns("hst", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]></th>
+              </tr>
             </thead>
             <tbody>
             [% FOREACH col = table_columns.$paneprefix %]
@@ -101,7 +107,7 @@
 
         <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'host')"[% END %] class="[% rowclasses %]">
           [% IF show_backends_in_table == 2 %]
-          <td class='[% class %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+          <td class='[% class %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
           [% END %]
           <td class='[% class %]'>
             <table border="0" width='100%' cellpadding="0" cellspacing="0">
@@ -126,7 +132,7 @@
           <td class='[% class %] attempt' align="center">[% h.current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number %][% IF h.current_notification_number && h.current_notification_number > 0 %] <span title="This host has sent out [% h.current_notification_number %] notifications">#[% h.current_notification_number %]</span>[% END %][% IF h.first_notification_delay && h.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(h) %][% IF first_remaining >= 0 %] <span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
           [% END %]
           [% IF show_backends_in_table == 1 %]
-          <td class='[% class %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+          <td class='[% class %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
           [% END %]
           [% IF h.has_been_checked == 0 %]
             <td class='[% class %] output' valign='middle' align="left">
@@ -174,7 +180,7 @@
           [% END %]
         [% IF has_columns %]
         [% IF !show_backends_in_table %]
-        <td class='[% class %] backend_[% peer_key %] site' style="display: none;" align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% class %] backend_[% peer_key %] peer_name' style="display: none;" align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         [% IF !show_host_attempts %]
         <td class='[% class %] attempt' style="display: none;" align="center">[% h.current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number %][% IF h.current_notification_number && h.current_notification_number > 0 %] <span title="This host has sent out [% h.current_notification_number %] notifications">#[% h.current_notification_number %]</span>[% END %][% IF h.first_notification_delay && h.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(h) %][% IF first_remaining >= 0 %] <span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
@@ -221,7 +227,7 @@
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_host_columns %]";
-  updateStatusColumns("[% paneprefix %]");
+  updateStatusColumns("[% paneprefix %]", false);
   [% IF c.req.parameters.defined("autoShow") %]
   toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
   [% END %]

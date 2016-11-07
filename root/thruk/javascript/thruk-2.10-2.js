@@ -2376,6 +2376,40 @@ function sort_by_columns(args) {
     return(false);
 }
 
+function setDefaultColumns(type, pane_prefix, value) {
+    updateUrl();
+    if(value == undefined) {
+        var urlArgs  = toQueryParams();
+        value = urlArgs[pane_prefix+"columns"];
+    }
+
+    var data = {
+        action:  'set_default_columns',
+        type:    type,
+        value:   value,
+        token:   user_token
+    };
+    jQuery.ajax({
+        url: "status.cgi",
+        data: data,
+        type: 'POST',
+        success: function(data) {
+            thruk_message(data.rc, data.msg);
+            if(value == "") {
+                jQuery("."+pane_prefix+"_reset_columns_btn").attr({disabled: true});
+                removeParams[pane_prefix+'columns'] = true;
+                reloadPage();
+            } else {
+                jQuery("."+pane_prefix+"_reset_columns_btn").attr({disabled: false});
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            thruk_message(1, 'setting default failed: '+ textStatus);
+        }
+    });
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

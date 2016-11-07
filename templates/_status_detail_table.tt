@@ -19,6 +19,12 @@
               <tr>
                 <th colspan=2 class="drag_hint">(reorder columns with drag/drop)</th>
               </tr>
+              <tr>
+                <th colspan=2 class="drag_hint"><input type="button" value="use as my default service columns" onclick='setDefaultColumns("svc", "[% paneprefix %]")'></th>
+              </tr>
+              <tr>
+                <th colspan=2 class="drag_hint"><input type="button" class="[% paneprefix %]_reset_columns_btn" value="reset my default service columns" onclick='setDefaultColumns("svc", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]></th>
+              </tr>
             </thead>
             <tbody>
             [% FOREACH col = table_columns.$paneprefix %]
@@ -126,7 +132,7 @@
         </td>
         [% END %]
         [% IF show_backends_in_table == 2 %]
-        <td class='[% serviceclass %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='[% serviceclass %]'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
@@ -143,7 +149,7 @@
         <td class='[% serviceclass %] duration' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
         <td class='[% serviceclass %] attempt' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% IF show_backends_in_table == 1 %]
-        <td class='[% serviceclass %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
           [% IF s.has_been_checked == 0 %]
             <td class='[% serviceclass %] output' align="left">
@@ -191,7 +197,7 @@
           [% END %]
         [% IF has_columns %]
         [% IF !show_backends_in_table %]
-        <td class='[% serviceclass %] backend_[% peer_key %] site' style="display: none;" align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] peer_name' style="display: none;" align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='[% serviceclass %] host_address' style="display: none;" nowrap align="left">[% s.host_address %]</td>
         <td class='[% serviceclass %] host_groups' style="display: none;" nowrap align="left">[% s.host_groups.join(', ') %]</td>
@@ -266,7 +272,7 @@
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
-  updateStatusColumns("[% paneprefix %]");
+  updateStatusColumns("[% paneprefix %]", false);
   [% IF c.req.parameters.defined("autoShow") %]
   toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
   [% END %]

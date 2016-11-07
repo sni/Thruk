@@ -60,6 +60,14 @@ sub index {
         return $c->render(json => $json);
     }
 
+    if(defined $c->req->parameters->{'action'}) {
+        if($c->req->parameters->{'action'} eq "set_default_columns") {
+            my($rc, $data) = _process_set_default_columns($c);
+            my $json = { 'rc' => $rc, 'msg' => $data };
+            return $c->render(json => $json);
+        }
+    }
+
     if($c->req->parameters->{'replacemacros'}) {
         my($rc, $data) = _replacemacros($c);
         my $json = { 'rc' => $rc, 'data' => $data };
@@ -384,8 +392,9 @@ sub _process_details_page {
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     my $has_columns = 0;
+    my $user_data = Thruk::Utils::get_user_data($c);
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_service_columns($c);
-    $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'});
+    $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'svc'});
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($c->req->parameters->{'dfl_columns'}) {
@@ -393,6 +402,7 @@ sub _process_details_page {
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
+    $c->stash->{'has_user_columns'}->{'dfl_'} = $user_data->{'columns'}->{'svc'} ? 1 : 0;
 
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
@@ -516,9 +526,10 @@ sub _process_hostdetails_page {
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     my $has_columns = 0;
+    my $user_data = Thruk::Utils::get_user_data($c);
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_host_columns($c);
-    $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'});
+    $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'hst'});
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($c->req->parameters->{'dfl_columns'}) {
@@ -526,6 +537,7 @@ sub _process_hostdetails_page {
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
+    $c->stash->{'has_user_columns'}->{'dfl_'} = $user_data->{'columns'}->{'hst'} ? 1 : 0;
 
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
@@ -1025,11 +1037,12 @@ sub _process_combined_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     my $has_columns = 0;
+    my $user_data = Thruk::Utils::get_user_data($c);
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     $c->stash->{'default_columns'}->{'hst_'} = Thruk::Utils::Status::get_host_columns($c);
     $c->stash->{'default_columns'}->{'svc_'} = Thruk::Utils::Status::get_service_columns($c);
-    $c->stash->{'table_columns'}->{'hst_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'hst_'}, $c->req->parameters->{'hst_columns'});
-    $c->stash->{'table_columns'}->{'svc_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'svc_'}, $c->req->parameters->{'svc_columns'});
+    $c->stash->{'table_columns'}->{'hst_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'hst_'}, $c->req->parameters->{'hst_columns'} || $user_data->{'columns'}->{'hst'});
+    $c->stash->{'table_columns'}->{'svc_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'svc_'}, $c->req->parameters->{'svc_columns'} || $user_data->{'columns'}->{'svc'});
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($c->req->parameters->{'hst_columns'} || $c->req->parameters->{'svc_columns'}) {
@@ -1041,6 +1054,8 @@ sub _process_combined_page {
         }
     }
     $c->stash->{'has_columns'} = $has_columns;
+    $c->stash->{'has_user_columns'}->{'hst_'} = $user_data->{'columns'}->{'hst'} ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'svc_'} = $user_data->{'columns'}->{'svc'} ? 1 : 0;
 
     # which host to display?
     my( $hostfilter)           = Thruk::Utils::Status::do_filter($c, 'hst_');
@@ -1383,6 +1398,36 @@ sub _process_verify_time {
     return $c->render(json => $json);
 }
 
+##########################################################
+# check for search results
+sub _process_set_default_columns {
+    my( $c ) = @_;
+
+    return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
+
+    my $val  = $c->req->parameters->{'value'} || '';
+    my $type = $c->req->parameters->{'type'}  || '';
+    if($type ne 'svc' && $type ne 'hst') {
+        return(1, 'unknown type');
+    }
+
+    my $data = Thruk::Utils::get_user_data($c);
+
+    if($val eq "") {
+        delete $data->{'columns'}->{$type};
+    } else {
+        $data->{'columns'}->{$type} = $val;
+    }
+
+    if(Thruk::Utils::store_user_data($c, $data)) {
+        if($val eq "") {
+            return(0, 'Default columns restored' );
+        }
+        return(0, 'Default columns updated' );
+    }
+
+    return(1, "saving user data failed");
+}
 
 ##########################################################
 # replace macros in given string for a host/service
