@@ -137,6 +137,11 @@ sub _initialise_peer {
     confess "missing name in peer configuration" unless defined $config->{'name'};
     confess "missing type in peer configuration" unless defined $config->{'type'};
 
+    # parse list of peers for LMD
+    if($self->{'config'}->{'options'}->{'peer'} && ref $self->{'config'}->{'options'}->{'peer'} eq 'ARRAY') {
+        $self->{'peer_list'} = $self->{'config'}->{'options'}->{'peer'};
+        $self->{'config'}->{'options'}->{'peer'} = $self->{'config'}->{'options'}->{'peer'}->[0];
+    }
     $self->{'name'}          = $config->{'name'};
     $self->{'type'}          = $config->{'type'};
     $self->{'hidden'}        = defined $config->{'hidden'} ? $config->{'hidden'} : 0;
