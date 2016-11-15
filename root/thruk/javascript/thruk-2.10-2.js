@@ -2238,9 +2238,9 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             // fetch the target column order based on the current status table header
             var target = [];
             jQuery('#'+table_id+' > tbody > tr:first-child > th').each(function(i, el) {
-                var matches = el.className.match(/col_(.*)/);
-                if(matches[1]) {
-                    target.push(matches[1]);
+                var col = get_column_from_classname(el);
+                if(col) {
+                    target.push(col);
                 }
             });
             jQuery(target).each(function(i, el) {
@@ -2251,8 +2251,8 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             jQuery('#'+table_id+' > tbody > tr:first-child > th').each(function(i, el) {
                 table = el.parentNode;
                 var row = el.parentNode.removeChild(el);
-                var matches = el.className.match(/col_(.*)/);
-                if(matches[1]) {
+                var col = get_column_from_classname(el);
+                if(col) {
                     currentHeader[matches[1]] = row;
                 }
             });
@@ -2273,6 +2273,133 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             }, 100);
         }
     });
+    /* enable changing columns header name */
+    jQuery('#'+table_id+' > tbody > tr:first-child > th').dblclick(function(evt) {
+        var th = evt.target;
+        var text   = th.innerText.replace(/\s*$/, '');
+        var childs = removeChilds(th);
+        th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
+        window.setTimeout(function() {
+            jQuery(th).find('INPUT').focus();
+            var input = jQuery(th).find('INPUT')[0];
+            setCaretToPos(input, text.length);
+            jQuery(input).on('keyup', function (e) {
+                /* submit on enter/return */
+                if(e.keyCode == 13) {
+                    th.innerHTML = input.value+" ";
+                    // restore sort links
+                    addChilds(th, childs, 1);
+                    var col  = get_column_from_classname(th);
+                    var orig = jQuery('#'+pane_prefix+'_col_'+col)[0].title;
+
+                    var cols = default_columns[pane_prefix];
+                    if(additionalParams[pane_prefix+'columns']) {
+                        cols = additionalParams[pane_prefix+'columns'];
+                    }
+                    cols = cols.split(/,/);
+                    for(var x = 0; x < cols.length; x++) {
+                        var tmp = cols[x].split(/:/, 2);
+                        if(tmp[0] == col && orig != input.value) {
+                            cols[x] = tmp[0]+':'+input.value;
+                        } else {
+                            cols[x] = tmp[0];
+                        }
+                    }
+
+                    jQuery('#'+pane_prefix+'_col_'+col+'n')[0].innerHTML = input.value;
+
+                    var newVal = cols.join(',');
+                    jQuery('#'+pane_prefix+'columns').val(newVal);
+                    additionalParams[pane_prefix+'columns'] = newVal;
+                    updateUrl();
+                }
+                /* cancel on escape */
+                if(e.keyCode == 27) {
+                    th.innerHTML = text+" ";
+                    // restore sort links
+                    addChilds(th, childs, 1);
+                }
+            });
+        }, 100);
+    });
+    /* enable changing columns header name */
+    jQuery('#'+pane_prefix+'_columns_table tbody td.filterName').click(function(evt) {
+        var th = evt.target;
+        var text   = th.innerText.replace(/\s*$/, '');
+        th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
+        window.setTimeout(function() {
+            jQuery(th).find('INPUT').focus();
+            var input = jQuery(th).find('INPUT')[0];
+            setCaretToPos(input, text.length);
+            jQuery(input).on('keydown', function (e) {
+                /* submit on enter/return */
+                if(e.keyCode == 13) {
+                    e.preventDefault();
+                    th.innerHTML = input.value;
+                    var col  = get_column_from_classname(th);
+                    var orig = jQuery('#'+pane_prefix+'_col_'+col)[0].title;
+
+                    var cols = default_columns[pane_prefix];
+                    if(additionalParams[pane_prefix+'columns']) {
+                        cols = additionalParams[pane_prefix+'columns'];
+                    }
+                    cols = cols.split(/,/);
+                    for(var x = 0; x < cols.length; x++) {
+                        var tmp = cols[x].split(/:/, 2);
+                        if(tmp[0] == col && orig != input.value) {
+                            cols[x] = tmp[0]+':'+input.value;
+                        } else {
+                            cols[x] = tmp[0];
+                        }
+                    }
+
+                    var header = jQuery('.'+pane_prefix+'_table').find('th.status.col_'+col)[0];
+                    var childs = removeChilds(header);
+                    header.innerHTML = input.value+" ";
+                    addChilds(header, childs, 1);
+
+                    var newVal = cols.join(',');
+                    jQuery('#'+pane_prefix+'columns').val(newVal);
+                    additionalParams[pane_prefix+'columns'] = newVal;
+                    updateUrl();
+                }
+                /* cancel on escape */
+                if(e.keyCode == 27) {
+                    e.preventDefault();
+                    th.innerHTML = text+" ";
+                }
+            });
+        }, 100);
+    });
+}
+
+// remove and return all child nodes
+function removeChilds(el) {
+    var childs = [];
+    while(el.firstChild) {
+        childs.push(el.removeChild(el.firstChild));
+    }
+    return(childs);
+}
+
+// add all elements as child
+function addChilds(el, childs, startWith) {
+    if(startWith == undefined) { startWith = 0; }
+    for(var x = startWith; x < childs.length; x++) {
+        el.appendChild(childs[x]);
+    }
+}
+
+/* returns the value of the col_.* class */
+function get_column_from_classname(el) {
+    var classes = el.className.split(/\s+/);
+    for(var x = 0; x < classes.length; x++) {
+        var m = classes[x].match(/^col_(.*)$/);
+        if(m && m[1]) {
+            return(m[1]);
+        }
+    }
+    return;
 }
 
 // apply status table columns
@@ -2288,7 +2415,7 @@ function updateStatusColumns(id, reloadRequired) {
     var firstRow = table.rows[0];
     var firstDataRow = [];
     if(table.rows.length > 1) {
-        var firstDataRow = table.rows[1];
+        firstDataRow = table.rows[1];
     }
     var selected = [];
     jQuery('.'+id+'_col').each(function(i, el) {
@@ -2313,7 +2440,7 @@ function updateStatusColumns(id, reloadRequired) {
                 if(thruk_debug_js) { alert("ERROR: unknown header column in updateStatusColumns(): " + el.value); }
                 return;
             }
-            if(dataSourceIndex == undefined && !reloadRequired) {
+            if(firstDataRow.cells && dataSourceIndex == undefined && !reloadRequired) {
                 if(thruk_debug_js) { alert("ERROR: unknown data column in updateStatusColumns(): " + el.value); }
                 return;
             }
@@ -2335,11 +2462,25 @@ function updateStatusColumns(id, reloadRequired) {
             }
         }
 
+        // adjust table header text
+        var current = firstRow.cells[i].innerText.trim();
+        var newHead = jQuery('#'+el.id+'n')[0].innerHTML.trim();
+        if(current != newHead) {
+            var childs = removeChilds(firstRow.cells[i]);
+            firstRow.cells[i].innerHTML = newHead+" ";
+            addChilds(firstRow.cells[i], childs, 1);
+            changed = true;
+        }
+
         // check visibility of this column
         var display = "none";
         if(el.checked) {
             display = "";
-            selected.push(el.value);
+            if(newHead != el.title) {
+                selected.push(el.value+':'+newHead);
+            } else {
+                selected.push(el.value);
+            }
         }
         if(table.rows[0].cells[i].style.display != display) {
             changed = true;

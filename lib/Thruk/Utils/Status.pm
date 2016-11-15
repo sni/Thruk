@@ -2195,10 +2195,15 @@ sub sort_table_columns {
 
     my $sorted = [];
     for my $param (split/,/mx, $params) {
-        if($hashed->{$param}) {
-            $hashed->{$param}->{'checked'} = 1;
-            push @{$sorted}, $hashed->{$param};
-            delete $hashed->{$param};
+        my($key,$title) = split(/:/mx, $param, 2);
+        if($hashed->{$key}) {
+            $hashed->{$key}->{'checked'} = 1;
+            if(defined $title) {
+                $hashed->{$key}->{'orig'}  = $hashed->{$key}->{'title'};
+                $hashed->{$key}->{'title'} = $title;
+            }
+            push @{$sorted}, $hashed->{$key};
+            delete $hashed->{$key};
         }
     }
     # add missing

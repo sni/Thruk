@@ -10,14 +10,14 @@
         <td class='filter' style="width: 140px;">
           <table border="0" cellspacing="2" cellpadding="0">
             <tr>
-              <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Columns:</td>
+              <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Edit Columns:</td>
               <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %]_accept_columns" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" alt="accept"></td>
             </tr>
           </table>
           <table border=0 cellspacing=2 cellpadding=0 width="100%" id="[% paneprefix %]_columns_table">
             <thead>
               <tr>
-                <th colspan=2 class="drag_hint">(reorder columns with drag/drop)</th>
+                <th colspan=2 class="drag_hint">reorder columns with drag/drop<br>rename with double click</th>
               </tr>
               <tr>
                 <th colspan=2 class="drag_hint"><input type="button" value="use as my default service columns" onclick='setDefaultColumns("hst", "[% paneprefix %]")'></th>
@@ -29,8 +29,8 @@
             <tbody>
             [% FOREACH col = table_columns.$paneprefix %]
             <tr>
-              <td valign="top" align="right" class='filterName clickable' id="[% paneprefix %]_col_[% col.field %]n" onclick="toggleFilterCheckBox(this.id); updateStatusColumns('[% paneprefix %]');" width="90%">[% col.title %]</td>
-              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
+              <td valign="top" align="right" class='filterName clickable col_[% col.field %]' id="[% paneprefix %]_col_[% col.field %]n" width="90%">[% col.title %]</td>
+              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field %]" title="[% IF col.defined('orig'); col.orig; ELSE; col.title; END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
             </tr>
             [% END %]
             </tbody>
@@ -61,9 +61,7 @@
           <th class='status col_plugin_output' nowrap>Status Information&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by status information (ascending)' title='Sort by status information (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by status information (descending)' title='Sort by status information (descending)'></a></th>
           [% FOREACH col = default_columns.$paneprefix %]
             [% IF loop.index >= start_with %]
-            [% col_title = col.title %]
-            [% IF col_title.substr(0,1) == "_"; col_title = col_title.replace('^_', '').lower.ucfirst; END %]
-            <th class='status col_[% col.field %]' style="display: none;" nowrap>[% col_title %]&nbsp;<a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 1, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% col_title %] (ascending)' title='Sort by [% col_title %] (ascending)'></a><a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 2, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% col_title %] (descending)' title='Sort by [% col_title %] (descending)'></a></th>
+            <th class='status col_[% col.field %]' style="display: none;" nowrap>[% col.title %]&nbsp;<a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 1, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% col.title %] (ascending)' title='Sort by [% col.title %] (ascending)'></a><a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 2, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% col.title %] (descending)' title='Sort by [% col.title %] (descending)'></a></th>
             [% END %]
           [% END %]
         </tr>

@@ -1266,3 +1266,9 @@ DIV.overlay-text {
 TABLE.filter {
   overflow: auto;
 }
+
+.header_inline_edit {
+  line-height: 11px;
+  height: 10px;
+  background: transparent;
+}
