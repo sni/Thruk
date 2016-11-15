@@ -103,7 +103,7 @@ configuration like:
 </Component>
 ------
 
-The templates file can be optained from https://github.com/sni/Thruk/blob/master/support/thruk_templates_icinga2.conf[github]
+The Icinga 2 template file can be optained from https://github.com/sni/Thruk/blob/master/support/thruk_templates_icinga2.conf[github].
 Make sure Thruk is able to write to the `/etc/icinga2/conf.d/thruk_bp.conf` file.
 
 
