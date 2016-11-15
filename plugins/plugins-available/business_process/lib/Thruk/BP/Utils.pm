@@ -167,7 +167,7 @@ sub save_bp_objects {
     my $file   = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'};
     my $format = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_format'} || 'nagios';
     if($format ne 'icinga2') { $format = 'nagios'; }
-    return(1, 'no \'objects_save_file\' set') unless $file;
+    return(0, 'no \'objects_save_file\' set') unless $file;
 
     my($rc, $msg) = (0, 'reload ok');
     my $obj = {'hosts' => {}, 'services' => {}};
