@@ -1707,12 +1707,13 @@ possible conversions are
 =cut
 sub convert_time_amount {
     my $value = shift;
-    if($value =~ m/^(\d+)(y|w|d|h|m)/gmx) {
+    if($value =~ m/^(\d+)(y|w|d|h|m|s)/gmx) {
         if($2 eq 'y') { return $1 * 86400*365; }# year
-        if($2 eq 'w') { return $1 * 604800; }   # weeks
+        if($2 eq 'w') { return $1 * 86400*7; }  # weeks
         if($2 eq 'd') { return $1 * 86400; }    # days
         if($2 eq 'h') { return $1 * 3600; }     # hours
         if($2 eq 'm') { return $1 * 60; }       # minutes
+        if($2 eq 's') { return $1 }             # seconds
     }
     return $value;
 }
