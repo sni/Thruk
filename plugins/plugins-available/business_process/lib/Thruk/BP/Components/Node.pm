@@ -243,11 +243,13 @@ sub get_save_obj {
 
 =head2 get_objects_conf
 
+    get_objects_conf($bp)
+
 return objects config
 
 =cut
 sub get_objects_conf {
-    my ( $self, $bp ) = @_;
+    my($self, $bp) = @_;
 
     return unless $self->{'create_obj'};
 

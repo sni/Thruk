@@ -44,6 +44,9 @@ sub index {
     $c->stash->{testmodes}             = {};
     $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
     $c->stash->{'objects_save_file'}      = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'}      || '';
+    my $format = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_format'} || 'nagios';
+    if($format ne 'icinga2') { $format = 'nagios'; }
+    $c->stash->{'objects_save_format'}  = $format;
     my $id = $c->req->parameters->{'bp'} || '';
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     my $nodeid = $c->req->parameters->{'node'} || '';
@@ -71,6 +74,16 @@ sub index {
                 my $lasttype;
                 open(my $fh, '<', $c->stash->{'objects_templates_file'}) or die("failed to open ".$c->stash->{'objects_templates_file'}.": ".$!);
                 while(my $line = <$fh>) {
+                    if($line =~ m/^\s*template\s+(Service|Host)\s+"([^"]+)"\s*\{/mx) {
+                        $lasttype = lc($1);
+                        if($lasttype eq 'host') {
+                            push @{$host_templates}, $2;
+                        }
+                        if($lasttype eq 'service') {
+                            push @{$service_templates}, $2;
+                        }
+                        next;
+                    }
                     if($line =~ m/^\s*define\s+(.*?)(\s|{)/mx) {
                         $lasttype = $1;
                     }

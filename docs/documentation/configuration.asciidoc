@@ -2404,6 +2404,9 @@ this option.
 === objects_save_file
 Save objects to this file. Content will be overwritten.
 
+=== objects_save_format
+File format of the saved objects. Valid formats are 'nagios' and 'icinga2'.
+
 === objects_templates_file
 User maintained file containing templates used for business process services.
 

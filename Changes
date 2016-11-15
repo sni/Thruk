@@ -14,6 +14,7 @@ next:
             - fix js error in shape dropdown
             - fix error when using umlauts in dashboard title
           - Business Process:
+            - add icinga2 support
             - fix regular expression in service state nodes
           - Logcache:
             - add logcache_import_command option

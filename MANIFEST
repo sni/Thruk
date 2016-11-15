@@ -1348,6 +1348,7 @@ support/thruk_cookie_auth.include
 support/thruk_cookie_auth_vhost.conf
 support/thruk_local.conf.example
 support/thruk_templates.cfg
+support/thruk_templates_icinga2.conf
 t/001-app.t
 t/002-config.t
 t/010-Thruk-Utils.t

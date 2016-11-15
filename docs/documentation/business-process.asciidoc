@@ -91,6 +91,21 @@ if some internal error happens.
 =======
 
 
+==== Integration in Icinga2
+In order to integrate Thruk Business Processes in Icinga2 you will need a minimal
+configuration like:
+
+------
+<Component Thruk::Plugin::BP>
+    objects_save_file      = /etc/icinga2/conf.d/thruk_bp.conf
+    objects_templates_file = /etc/icinga2/conf.d/thruk_templates.conf
+    objects_save_format    = icinga2
+</Component>
+------
+
+The templates file can be optained from https://github.com/sni/Thruk/blob/master/support/thruk_templates_icinga2.conf[github]
+Make sure Thruk is able to write to the `/etc/icinga2/conf.d/thruk_bp.conf` file.
+
 
 
 === Creating New Business Processes

@@ -496,11 +496,13 @@ sub save {
 
 =head2 get_objects_conf
 
-return object config
+    get_objects_conf()
+
+return object config.
 
 =cut
 sub get_objects_conf {
-    my ( $self ) = @_;
+    my($self) = @_;
     my $obj = {
         'hosts'    => {},
         'services' => {},

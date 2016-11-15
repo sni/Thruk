@@ -353,9 +353,12 @@
       <th align="right" valign="top">Service Template</th>
       <td align="left">
         <input type="text" value="" id="bp_template" name="bp_template" placeholder="service template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+        [% IF objects_save_format == "nagios" %]
         [% IF use_feature_configtool %]<br><div style="padding-top: 2px;"><a href="conf.cgi?sub=objects&amp;action=editor&amp;file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a></div>[% END %]
+        [% END %]
       </td>
     </tr>
+    [% IF objects_save_format == "nagios" %]
     <tr class="supports_link">
       <th align="right" valign="top">Contact Groups</th>
       <td align="left">
@@ -398,6 +401,7 @@
         </form>
       </td>
     </tr>
+    [% END %]
     [% ELSE %]
     <tr>
       <td width="50"></td>
