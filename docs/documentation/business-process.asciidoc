@@ -17,7 +17,7 @@ In 'edit mode' nodes can be changed by right-clicking them and select
 'Edit Node'. General options, like using hard or soft states can be
 changed in the 'General' Tab of any node.
 
-=== How it works
+== How it works
 
 .Business Process Workflow
 image:source/bp_arch.png[Business Process Architecture]
@@ -29,7 +29,7 @@ image:source/bp_arch.png[Business Process Architecture]
  - Results are submited to Naemon by using the check_results folder or by livestatus.
  - 'Livestatus' will be used to fetch input data for the calculation itself.
 
-=== Setup
+== Setup
 If you are not using OMD, you will have to do some manual steps:
 
  - copy the <Component Thruk::Plugin::BP> block from your
@@ -57,7 +57,7 @@ If you are not using OMD, you will have to do some manual steps:
    /etc/sudoers.
 
 
-==== Integration in Naemon
+=== Integration in Naemon
 Thruk will create Hosts and Services for selected nodes of your business model.
 That way it is possible to send notifications, even for sub steps of the business
 process. The business process itself will be created as Naemon Host object and
@@ -91,7 +91,7 @@ if some internal error happens.
 =======
 
 
-==== Integration in Icinga2
+=== Integration in Icinga2
 In order to integrate Thruk Business Processes in Icinga2 you will need a minimal
 configuration like:
 
@@ -108,7 +108,7 @@ Make sure Thruk is able to write to the `/etc/icinga2/conf.d/thruk_bp.conf` file
 
 
 
-=== Creating New Business Processes
+== Creating New Business Processes
 In order to change or create business processes, you need these roles from the cgi.cfg.
 
  - authorized_for_configuration_information
@@ -117,13 +117,13 @@ In order to change or create business processes, you need these roles from the c
 Then simply model your business process from the web gui.
 
 
-=== Configuration
+== Configuration
 Configuration settings are covered by the
 link:configuration.html#component-thruk-plugin-bp[configuration sections].
 
 
 
-=== Custom Functions
+== Custom Functions
 Besides the normal functions you can write your own aggregation functions easily.
 Custom functions are written in Perl and are located in the <config dir>/bp/ with
 the .pm filename extension.
