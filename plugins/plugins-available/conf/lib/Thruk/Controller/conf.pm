@@ -817,16 +817,22 @@ sub _process_backends_page {
             next unless $backend->{'name'};
             delete $backend->{'id'} if $backend->{'id'} eq '';
 
-            if($backend->{'options'}->{'peer'} and $backend->{'type'} eq 'livestatus' and $backend->{'options'}->{'peer'} =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
-                $backend->{'options'}->{'peer'} .= ':6557';
+            $backend->{'options'}->{'peer'} = Thruk::Utils::list($backend->{'options'}->{'peer'});
+
+            for my $p (@{$backend->{'options'}->{'peer'}}) {
+                if($backend->{'type'} eq 'livestatus' and $p =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
+                    $p .= ':6557';
+                }
             }
 
             # add values from existing backend config
             if(defined $backend->{'id'}) {
                 my $peer = $c->{'db'}->get_peer_by_key($backend->{'id'});
                 $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
+                $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
+                $backend->{'state_host'} = $peer->{'state_host'} if defined $peer->{'state_host'};
             }
             $new = 1 if $x == 1;
             push @{$backends}, $backend;
@@ -892,7 +898,7 @@ sub _process_backends_page {
     # set ids
     for my $b (@{$backends}) {
         $b->{'type'}        = 'livestatus' unless defined $b->{'type'};
-        $b->{'key'}         = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
+        $b->{'id'}          = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'id'};
         $b->{'addr'}        = $b->{'options'}->{'peer'}  || '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
         $b->{'proxy'}       = $b->{'options'}->{'proxy'} || '';

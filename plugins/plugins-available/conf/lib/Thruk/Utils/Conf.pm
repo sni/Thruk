@@ -357,14 +357,18 @@ sub get_component_as_string {
         $string .= "        id      = ".$b->{'id'}."\n"      if $b->{'id'};
         $string .= "        type    = ".$b->{'type'}."\n";
         $string .= "        hidden  = ".$b->{'hidden'}."\n"  if $b->{'hidden'};
+        $string .= "        state_host  = ".$b->{'state_host'}."\n"  if $b->{'state_host'};
         $string .= "        groups  = ".$b->{'groups'}."\n"  if $b->{'groups'};
         $string .= "        section = ".$b->{'section'}."\n" if $b->{'section'};
         $string .= "        <options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
-        $string .= "            peer          = ".$b->{'options'}->{'peer'}."\n"          if $b->{'options'}->{'peer'};
+        for my $p (@{$b->{options}->{peer}}) {
+        $string .= "            peer          = ".$p."\n";
+        }
         $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if $b->{'options'}->{'resource_file'};
         $string .= "            auth          = ".$b->{'options'}->{'auth'}."\n"          if $b->{'options'}->{'auth'};
         $string .= "            proxy         = ".$b->{'options'}->{'proxy'}."\n"         if $b->{'options'}->{'proxy'};
         $string .= "            remote_name   = ".$b->{'options'}->{'remote_name'}."\n"   if $b->{'options'}->{'remote_name'};
+        $string .= "            fallback_peer = ".$b->{'options'}->{'fallback_peer'}."\n" if $b->{'options'}->{'fallback_peer'};
         $string .= "        </options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         if(defined $b->{'configtool'} and scalar keys %{$b->{'configtool'}} > 0 and $b->{'type'} ne 'http') {
             $string .= "        <configtool>\n";
