@@ -401,7 +401,7 @@ sub get_computed_config {
                 if(defined $self->{'default'}->{$key}
                          and  $self->{'default'}->{$key}->{'type'} eq 'LIST')
                 {
-                    if(substr($conf->{$key}->[0], 0, 1) eq '+') {
+                    if(scalar @{$conf->{$key}} > 0 && $conf->{$key}->[0] && substr($conf->{$key}->[0], 0, 1) eq '+') {
                         # merge uniq list elements together
                         my $list           = dclone($tconf->{$key});
                         $tconf->{$key}->[0] =~ s/^\+//gmx;
