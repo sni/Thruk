@@ -6,18 +6,18 @@
         { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                         ] },
         { 'host'                         => [ 'Host',                       'hosts',           ''                              ] },
         { 'service'                      => [ 'Service',                    'services',        ''                              ] },
-        { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'last12months'                  ] },
-        { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'months'                        ] },
+        { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'lastweek'                      ] },
+        { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'days'                          ] },
         { 'rpttimeperiod'                => [ 'Report Timeperiod',          'rpttimeperiod',   ''                              ] },
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
-        { 'details_max_level'            => [ 'Details SLA %',              'int',             '-1' ,'hide details if sla is above threshold', 1 ] },
+        { 'details_max_level'            => [ 'Details SLA %',              'int',             '99.9' ,'hide details if sla is above threshold', 1 ] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
         { 'initialassumedservicestate'   => [ 'Initial Assumed State',      'svc_initialassumedstate',          '0'            ] },
         { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                            ] },
         { 'unavailable'                  => [ 'Unavailable States',         'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
-        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '50'          ,'max. # pages', 1 ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '5'          ,'max. # pages per service', 1 ] },
     ];
   %]
 [% END %]

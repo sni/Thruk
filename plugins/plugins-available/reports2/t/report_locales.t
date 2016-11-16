@@ -5,7 +5,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 226;
+    plan tests => 231;
 }
 BEGIN {
     use lib('t');
