@@ -1128,7 +1128,10 @@ root/thruk/media/warning.wav
 root/thruk/startup.html
 root/thruk/themes
 root/thruk/usercontent/backgrounds/europa.png
+root/thruk/usercontent/backgrounds/europa.svg
+root/thruk/usercontent/backgrounds/germany.svg
 root/thruk/usercontent/backgrounds/world.png
+root/thruk/usercontent/backgrounds/world.svg
 root/thruk/usercontent/images/status/default/acknowledged_critical.png
 root/thruk/usercontent/images/status/default/acknowledged_down.png
 root/thruk/usercontent/images/status/default/acknowledged_unknown.png
@@ -2935,4 +2938,3 @@ themes/themes-enabled/Thruk
 themes/themes-enabled/Vautour
 themes/themes-enabled/Wakizashi
 thruk.conf
-thruk.conf-2016-11-16

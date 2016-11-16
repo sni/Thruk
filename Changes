@@ -10,6 +10,7 @@ next:
           - fix session logout problem when there is a syntax error in menu_local.conf
           - Panorama View:
             - list already used colors in color picker
+            - add support for svg vector graphics as background/static/status images
             - fix display error in speedometer with overlaping thresholds
             - fix js error in shape dropdown
             - fix error when using umlauts in dashboard title

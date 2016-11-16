@@ -701,7 +701,7 @@ sub _task_upload {
     }
 
     my $filename = $upload->{'filename'};
-    if($filename !~ m/^[a-z0-9_\- ]+\.(jpeg|jpg|gif|png)$/mxi) {
+    if($filename !~ m/^[a-z0-9_\- ]+\.(jpeg|jpg|gif|png|svg)$/mxi) {
         # must be text/html result, otherwise extjs form result handler dies
         $c->stash->{text} = encode_json({ 'msg' => 'Fileupload contains invalid characters (a-z0-9_- ) in filename.', success => JSON::XS::false });
         return;
@@ -785,6 +785,9 @@ sub _task_save_dashboard {
             if($file =~ s|^../usercontent/||mx && $file !~ m|\.\.|mx) {
                 next if $file eq 'backgrounds/europa.png';
                 next if $file eq 'backgrounds/world.png';
+                next if $file eq 'backgrounds/world.svg';
+                next if $file eq 'backgrounds/europa.svg';
+                next if $file eq 'backgrounds/germany.svg';
                 $images->{$file} = $c->stash->{'usercontent_folder'}.'/'.$file;
             }
         }
@@ -2066,7 +2069,7 @@ sub _task_userdata_backgroundimages {
     my $folder = $c->stash->{'usercontent_folder'}.'/backgrounds/';
     my $query  = $c->req->parameters->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
+    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;
@@ -2101,7 +2104,7 @@ sub _task_userdata_images {
     my $folder = $c->stash->{'usercontent_folder'}.'/images/';
     my $query  = $c->req->parameters->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
+    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;
@@ -2140,10 +2143,10 @@ sub _task_userdata_iconsets {
         $name    =~ s/^\///gmx;
         $name    =~ s/\/\.$//gmx;
         my $fileset = {};
-        for my $pic (glob("$folder/$name/*.gif $folder/$name/*.jpg $folder/$name/*.png")) {
+        for my $pic (glob("$folder/$name/*.gif $folder/$name/*.jpg $folder/$name/*.png $folder/$name/*.svg")) {
             $pic =~ s|\Q$folder/$name/\E||gmx;
             my $type = $pic;
-            $type =~ s/\.(png|gif|jpg)$//gmx;
+            $type =~ s/\.(png|gif|jpg|svg)$//gmx;
             $fileset->{$type} = $pic;
         }
         $fileset->{'ok'} = '' unless $fileset->{'ok'};
@@ -2169,10 +2172,10 @@ sub _task_userdata_trendiconsets {
         $name    =~ s/^\///gmx;
         $name    =~ s/\/\.$//gmx;
         my $fileset = {};
-        for my $pic (glob("$folder/$name/*.gif $folder/$name/*.jpg $folder/$name/*.png")) {
+        for my $pic (glob("$folder/$name/*.gif $folder/$name/*.jpg $folder/$name/*.png  $folder/$name/*.svg")) {
             $pic =~ s|\Q$folder/$name/\E||gmx;
             my $type = $pic;
-            $type =~ s/\.(png|gif|jpg)$//gmx;
+            $type =~ s/\.(png|gif|jpg|svg)$//gmx;
             $fileset->{$type} = $pic;
         }
         $fileset->{'good'} = '' unless $fileset->{'good'};
