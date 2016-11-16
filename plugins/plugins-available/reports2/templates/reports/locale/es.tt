@@ -22,6 +22,7 @@
     'Servicegroup:'                         => 'Grupo de Servicios:',
     'Event Report'                          => 'Informe de Eventos',
     'SLA Report'                            => 'Informe de SLA',
+    'SLA Outage Report'                     => 'Informe de SLA',
     'Business Process:'                     => 'Procesos de Negocio:',
     'Report Timeperiod:'                    => 'Periodo del Informe:',
     'Legend'                                => 'Leyenda',
