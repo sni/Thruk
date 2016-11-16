@@ -1008,6 +1008,7 @@ plugins/plugins-available/reports2/templates/reports/comp/sla_outages_worst.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_prepare.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_table.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_graph.tt
+plugins/plugins-available/reports2/templates/reports/comp/sla_total_graph_outage.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt
 plugins/plugins-available/reports2/templates/reports/eventlog.tt
 plugins/plugins-available/reports2/templates/reports/locale/de.tt
@@ -1020,6 +1021,7 @@ plugins/plugins-available/reports2/templates/reports/report_from_url.tt
 plugins/plugins-available/reports2/templates/reports/sla_host.tt
 plugins/plugins-available/reports2/templates/reports/sla_hostgroup.tt
 plugins/plugins-available/reports2/templates/reports/sla_service.tt
+plugins/plugins-available/reports2/templates/reports/sla_service_outage.tt
 plugins/plugins-available/reports2/templates/reports/sla_servicegroup.tt
 plugins/plugins-available/reports2/templates/reports/style/css.tt
 plugins/plugins-available/reports2/templates/reports/style/custom.tt
@@ -2932,3 +2934,4 @@ themes/themes-enabled/Thruk
 themes/themes-enabled/Vautour
 themes/themes-enabled/Wakizashi
 thruk.conf
+thruk.conf-2016-11-16
