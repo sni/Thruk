@@ -142,7 +142,7 @@ TestUtils::test_command({
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/file /tmp/services.xls',
-    like => ['/(Microsoft Office|CDF V2|Composite Document File V2) Document/' ],
+    like => ['/(Microsoft Office|CDF V2|CDFV2 Microsoft Excel|Composite Document File V2)/' ],
 });
 unlink('/tmp/allservices.xls');
 
