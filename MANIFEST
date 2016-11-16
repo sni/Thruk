@@ -1019,6 +1019,7 @@ plugins/plugins-available/reports2/templates/reports/locale/fr.tt
 plugins/plugins-available/reports2/templates/reports/locale/it.tt
 plugins/plugins-available/reports2/templates/reports/report_from_url.tt
 plugins/plugins-available/reports2/templates/reports/sla_host.tt
+plugins/plugins-available/reports2/templates/reports/sla_host_outage.tt
 plugins/plugins-available/reports2/templates/reports/sla_hostgroup.tt
 plugins/plugins-available/reports2/templates/reports/sla_service.tt
 plugins/plugins-available/reports2/templates/reports/sla_service_outage.tt

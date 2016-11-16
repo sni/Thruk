@@ -9,12 +9,18 @@ jQuery(document).ready(function() {
     var label = [];
     [%+ IF type == 'host' +%]
       [% x=0; FOREACH hst = avail_data.hosts.keys.sort.reverse %]
-        [% val = round_decimals(values.$x.0, param.decimals) %]
-        [% IF values.$x.0 == -1 %][%# no data at all... #%]
-        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
-        [% ELSE %]
-        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
-        [% sla_averages_total = sla_averages_total + val; sla_averages_num = sla_averages_num + 1; %]
+        [% c.req.parameters.host    = hst %]
+        [% c.req.parameters.service = "" %]
+        [% available = get_availability_percents() %]
+        [% IF available.total.percent < param.sla %]
+          [% values.push([available.total.percent, loop.count]) %]
+          [% val = round_decimals(values.$x.0, param.decimals) %]
+          [% IF values.$x.0 == -1 %][%# no data at all... #%]
+          label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
+          [% ELSE %]
+          label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+          [% sla_averages_total = sla_averages_total + val; sla_averages_num = sla_averages_num + 1; %]
+          [% END %]
         [% END %]
       [% END %]
     [% ELSE %]

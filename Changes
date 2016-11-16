@@ -16,6 +16,8 @@ next:
           - Business Process:
             - add icinga2 support
             - fix regular expression in service state nodes
+          - Reports:
+            - add outage report
           - Logcache:
             - add logcache_import_command option
             - add logcache_delta_updates option
