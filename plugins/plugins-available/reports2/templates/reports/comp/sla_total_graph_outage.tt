@@ -1,0 +1,66 @@
+﻿[% nr = uniqnumber() %]
+[% values = [] %]
+[% sla_averages_total = 0; sla_averages_num = 0; %]
+
+<div id="flotgraph[% nr %]" class="flotgraph"></div>
+<script type="text/javascript">
+<!--
+jQuery(document).ready(function() {
+    var label = [];
+    [%+ IF type == 'host' +%]
+      [% x=0; FOREACH hst = avail_data.hosts.keys.sort.reverse %]
+        [% val = round_decimals(values.$x.0, param.decimals) %]
+        [% IF values.$x.0 == -1 %][%# no data at all... #%]
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
+        [% ELSE %]
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+        [% sla_averages_total = sla_averages_total + val; sla_averages_num = sla_averages_num + 1; %]
+        [% END %]
+      [% END %]
+    [% ELSE %]
+      [% x=0; FOREACH hst = avail_data.services.keys.sort.reverse %]
+        [% FOREACH svc = avail_data.services.$hst.keys.sort.reverse %]
+          [% y = x + 1 %]
+          [% c.req.parameters.host    = hst %]
+          [% c.req.parameters.service = svc %]
+          [% available = get_availability_percents() %]
+
+          [% IF available.total.percent < param.sla %]
+            [% values.push([available.total.percent, y]) %]
+            label[[% x %]] = "";
+            [% val = round_decimals(values.$x.0, param.decimals) %]
+            [% IF loop.last %]
+            label[[% x %]] += "<span class='graph_svc_hst_legend'>[% hst %]<\/span>";
+            [% END %]
+            label[[% x %]] += "<span class='graph_svc_legend'> - [% svc %]<\/span>";
+            [% IF values.$x.0 == -1 %][%# no data at all... #%]
+            label[[% x %]] += "<span class='graph_percent_legend'>n/a<\/span>";
+            [% ELSE %]
+            label[[% x %]] += "<span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+            [% sla_averages_total = sla_averages_total + val; sla_averages_num = sla_averages_num + 1; %]
+            [% END %]
+            [% x = x + 1 %]
+          [% END %]
+        [% END %]
+      [% END %]
+    [%+ END +%]
+
+    var graph_data = [% encode_json_obj(values) %];
+    var max_entries_per_page = 32;
+    render_total_sla_graph([% nr %], "[% loc("Availability") %]", graph_data, [% param.sla %], [% param.graph_min_sla %], "[% type %]", label, max_entries_per_page);
+});
+-->
+</script>
+
+[% IF sla_averages_num > 0 %]
+<table class="availability_details split_pages_lastpage_only">
+  <tr>
+    <th>[% loc("Average Availability") %]</th>
+    <td>
+    [% val   = sla_averages_total / sla_averages_num %]
+    [% value = round_decimals(val, param.decimals) %]
+    <span class='[% IF value < param.sla %] sla_nok[% END %]'>[% value %] %</span>
+    </td>
+  </tr>
+</table>
+[% END %]
