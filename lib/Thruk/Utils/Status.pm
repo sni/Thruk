@@ -28,20 +28,20 @@ sets some default stash variables
 sub set_default_stash {
     my( $c ) = @_;
 
-    $c->stash->{'hoststatustypes'}      = $c->req->parameters->{'hoststatustypes'}    || '';
-    $c->stash->{'hostprops'}            = $c->req->parameters->{'hostprops'}          || '';
-    $c->stash->{'servicestatustypes'}   = $c->req->parameters->{'servicestatustypes'} || '';
-    $c->stash->{'serviceprops'}         = $c->req->parameters->{'serviceprops'}       || '';
-    $c->stash->{'nav'}                  = $c->req->parameters->{'nav'}                || '';
-    $c->stash->{'entries'}              = $c->req->parameters->{'entries'}            || '';
-    $c->stash->{'sortoption'}           = $c->req->parameters->{'sortoption'}         || '';
-    $c->stash->{'sortoption_hst'}       = $c->req->parameters->{'sortoption_hst'}     || '';
-    $c->stash->{'sortoption_svc'}       = $c->req->parameters->{'sortoption_svc'}     || '';
-    $c->stash->{'hidesearch'}           = $c->req->parameters->{'hidesearch'}         || 0;
-    $c->stash->{'hostgroup'}            = $c->req->parameters->{'hostgroup'}          || '';
-    $c->stash->{'servicegroup'}         = $c->req->parameters->{'servicegroup'}       || '';
-    $c->stash->{'host'}                 = $c->req->parameters->{'host'}               || '';
-    $c->stash->{'service'}              = $c->req->parameters->{'service'}            || '';
+    $c->stash->{'hoststatustypes'}      = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hoststatustypes'}    || '');
+    $c->stash->{'hostprops'}            = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostprops'}          || '');
+    $c->stash->{'servicestatustypes'}   = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicestatustypes'} || '');
+    $c->stash->{'serviceprops'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'serviceprops'}       || '');
+    $c->stash->{'nav'}                  = Thruk::Utils::Filter::escape_html($c->req->parameters->{'nav'}                || '');
+    $c->stash->{'entries'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'entries'}            || '');
+    $c->stash->{'sortoption'}           = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption'}         || '');
+    $c->stash->{'sortoption_hst'}       = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_hst'}     || '');
+    $c->stash->{'sortoption_svc'}       = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_svc'}     || '');
+    $c->stash->{'hidesearch'}           = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hidesearch'}         || 0);
+    $c->stash->{'hostgroup'}            = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostgroup'}          || '');
+    $c->stash->{'servicegroup'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicegroup'}       || '');
+    $c->stash->{'host'}                 = Thruk::Utils::Filter::escape_html($c->req->parameters->{'host'}               || '');
+    $c->stash->{'service'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'service'}            || '');
     $c->stash->{'data'}                = '';
     $c->stash->{'style'}                = '';
     $c->stash->{'has_error'}            = 0;
@@ -1539,7 +1539,7 @@ sub set_custom_title {
         my $custom_title          = $c->req->parameters->{'title'};
         if(ref $custom_title eq 'ARRAY') { $custom_title = pop @{$custom_title}; }
         $custom_title             =~ s/\+/\ /gmx;
-        $c->stash->{custom_title} = $custom_title;
+        $c->stash->{custom_title} = Thruk::Utils::Filter::escape_html($custom_title);
         $c->stash->{title}        = $custom_title;
         return 1;
     }
