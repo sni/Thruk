@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.12     Fri Nov 18 10:14:00 CET 2016
           - remove startup page, Thruk starts in less than a second now
           - add adjustable status details columns / dynamic views
           - add default_service_columns and default_host_columns config options

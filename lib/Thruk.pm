@@ -15,7 +15,7 @@ use warnings;
 
 use 5.008000;
 
-our $VERSION = '2.10';
+our $VERSION = '2.12';
 
 ###################################################
 # create connection pool
