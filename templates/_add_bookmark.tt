@@ -4,6 +4,7 @@
 
 [% IF style != 'combined' %]
 <form action='status.cgi' method="GET" id="bookmark_form">
+<input type="submit" value="add bookmark" name="addb" onclick="return checknonempty('newname', 'name')" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 [% END %]
 <input type="hidden" name="referer" value="[% clean_referer(short_uri(c)) %]">
 
