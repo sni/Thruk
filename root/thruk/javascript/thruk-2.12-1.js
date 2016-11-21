@@ -2253,7 +2253,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
                 var row = el.parentNode.removeChild(el);
                 var col = get_column_from_classname(el);
                 if(col) {
-                    currentHeader[matches[1]] = row;
+                    currentHeader[col] = row;
                 }
             });
             jQuery(oldIndexes).each(function(i, el) {
