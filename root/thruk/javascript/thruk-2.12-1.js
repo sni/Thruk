@@ -1456,6 +1456,11 @@ function unescapeHTML(html) {
     return jQuery("<div />").html(html).text();
 }
 
+/* return escaped html string */
+function escapeHTML(text) {
+    return jQuery("<div>").text(text).html();
+}
+
 /* reset table row classes */
 function reset_table_row_classes(table, c1, c2) {
     var x = 1;
@@ -2286,7 +2291,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             jQuery(input).on('keyup', function (e) {
                 /* submit on enter/return */
                 if(e.keyCode == 13) {
-                    th.innerHTML = input.value+" ";
+                    th.innerHTML = escapeHTML(input.value)+" ";
                     // restore sort links
                     addChilds(th, childs, 1);
                     var col  = get_column_from_classname(th);
@@ -2335,7 +2340,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
                 /* submit on enter/return */
                 if(e.keyCode == 13) {
                     e.preventDefault();
-                    th.innerHTML = input.value;
+                    th.innerHTML = escapeHTML(input.value);
                     var col  = get_column_from_classname(th);
                     var orig = jQuery('#'+pane_prefix+'_col_'+col)[0].title;
 

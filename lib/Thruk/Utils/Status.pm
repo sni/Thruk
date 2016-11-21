@@ -2199,6 +2199,7 @@ sub sort_table_columns {
         if($hashed->{$key}) {
             $hashed->{$key}->{'checked'} = 1;
             if(defined $title) {
+                $title = Thruk::Utils::Filter::escape_html($title);
                 $hashed->{$key}->{'orig'}  = $hashed->{$key}->{'title'};
                 $hashed->{$key}->{'title'} = $title;
             }
