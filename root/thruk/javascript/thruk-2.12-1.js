@@ -2304,10 +2304,12 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
                     cols = cols.split(/,/);
                     for(var x = 0; x < cols.length; x++) {
                         var tmp = cols[x].split(/:/, 2);
-                        if(tmp[0] == col && orig != input.value) {
-                            cols[x] = tmp[0]+':'+input.value;
-                        } else {
-                            cols[x] = tmp[0];
+                        if(tmp[0] == col) {
+                            if(orig != input.value) {
+                                cols[x] = tmp[0]+':'+input.value;
+                            } else {
+                                cols[x] = tmp[0];
+                            }
                         }
                     }
 
@@ -2351,10 +2353,12 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
                     cols = cols.split(/,/);
                     for(var x = 0; x < cols.length; x++) {
                         var tmp = cols[x].split(/:/, 2);
-                        if(tmp[0] == col && orig != input.value) {
-                            cols[x] = tmp[0]+':'+input.value;
-                        } else {
-                            cols[x] = tmp[0];
+                        if(tmp[0] == col) {
+                            if(orig != input.value) {
+                                cols[x] = tmp[0]+':'+input.value;
+                            } else {
+                                cols[x] = tmp[0];
+                            }
                         }
                     }
 
