@@ -2323,7 +2323,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
         }, 100);
     });
     /* enable changing columns header name */
-    jQuery('#'+pane_prefix+'_columns_table tbody td.filterName').click(function(evt) {
+    jQuery('#'+pane_prefix+'_columns_table tbody td.filterName').dblclick(function(evt) {
         var th = evt.target;
         var text   = th.innerText.replace(/\s*$/, '');
         th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
