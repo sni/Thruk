@@ -2415,6 +2415,9 @@ function get_column_from_classname(el) {
 function updateStatusColumns(id, reloadRequired) {
     resetRefresh();
     var table = jQuery('.'+id+'_table')[0];
+    if(!table) {
+        if(thruk_debug_js) { alert("ERROR: no table found in updateStatusColumns(): " + id); }
+    }
     var changed = false;
     if(reloadRequired == undefined) { reloadRequired = true; }
     table.style.display = "none";

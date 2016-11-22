@@ -271,10 +271,12 @@
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
-  updateStatusColumns("[% paneprefix %]", false);
-  [% IF c.req.parameters.defined("autoShow") %]
-  initStatusTableColumnSorting('[% paneprefix %]', 'statusTable');
-  toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
-  [% END %]
+  jQuery(document).ready(function() {
+    updateStatusColumns("[% paneprefix %]", false);
+    [% IF c.req.parameters.defined("autoShow") %]
+    initStatusTableColumnSorting('[% paneprefix %]', 'statusTable');
+    toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
+    [% END %]
+  });
 -->
 </script>
