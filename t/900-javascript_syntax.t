@@ -33,10 +33,14 @@ for my $file (@tplfiles) {
 
 use_ok("Thruk::Config");
 my $config = Thruk::Config::get_config();
-my $startup = read_file('root/thruk/startup.html');
-my @jquery = grep/^jquery-\d+.*\.js$/, @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}};
-is(scalar @jquery, 1, 'found jquery in config');
-like($startup, qr/$jquery[0]/, 'found jquery in startup.html');
+
+my $files = ['root/thruk/startup.html', 'plugins/plugins-available/mobile/templates/mobile.tt'];
+for my $file (@{$files}) {
+    my $content = read_file($file);
+    my @jquery = grep/^jquery-\d+.*\.js$/, @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}};
+    is(scalar @jquery, 1, 'found jquery in config');
+    like($content, qr/$jquery[0]/, 'found jquery in '.$file);
+}
 
 
 done_testing();
