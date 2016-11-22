@@ -2288,9 +2288,9 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             jQuery(th).find('INPUT').focus();
             var input = jQuery(th).find('INPUT')[0];
             setCaretToPos(input, text.length);
-            jQuery(input).on('keyup', function (e) {
+            jQuery(input).on('keyup blur', function (e) {
                 /* submit on enter/return */
-                if(e.keyCode == 13) {
+                if(e.keyCode == 13 || e.type == "blur") {
                     th.innerHTML = escapeHTML(input.value)+" ";
                     // restore sort links
                     addChilds(th, childs, 1);
@@ -2338,9 +2338,9 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
             jQuery(th).find('INPUT').focus();
             var input = jQuery(th).find('INPUT')[0];
             setCaretToPos(input, text.length);
-            jQuery(input).on('keydown', function (e) {
+            jQuery(input).on('keydown blur', function (e) {
                 /* submit on enter/return */
-                if(e.keyCode == 13) {
+                if(e.keyCode == 13 || e.type == "blur") {
                     e.preventDefault();
                     th.innerHTML = escapeHTML(input.value);
                     var col  = get_column_from_classname(th);
