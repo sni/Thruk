@@ -646,6 +646,24 @@ sub _do_send_command {
             return;
         }
     }
+    if($c->config->{downtime_max_duration}) {
+        if($c->req->parameters->{'cmd_typ'} == 55 or $c->req->parameters->{'cmd_typ'} == 56 or $c->req->parameters->{'cmd_typ'} == 84 or $c->req->parameters->{'cmd_typ'} == 121) {
+            my $max_duration = Thruk::Utils::Status::convert_time_amount($c->config->{downtime_max_duration});
+            my $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} );
+            if(($end_time_unix - $start_time_unix) > $max_duration) {
+                $c->stash->{'form_errors'} = [{ message => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration) }];
+                delete $c->req->parameters->{'cmd_mod'};
+                return;
+            }
+            my $duration = $c->req->parameters->{'hours'} * 3600 + $c->req->parameters->{'minutes'} * 60;
+            if($duration > $max_duration) {
+                $c->stash->{'form_errors'} = [{ message => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration) }];
+                delete $c->req->parameters->{'cmd_mod'};
+                return;
+            }
+        }
+    }
+
 
     my($backends_list) = $c->{'db'}->select_backends('send_command');
     for my $cmd_line ( split /\n/mx, $cmd ) {

@@ -1521,6 +1521,15 @@ ex.:
   downtime_duration = 7200
 
 
+=== downtime_max_duration
+Maximum duration of new downtimes. Use quantifiers like d=days, w=weeks,
+y=years to set human readable values. Default is unlimited.
+
+ex.:
+
+  downtime_max_duration = 4w
+
+
 === expire_ack_duration
 Default duration of acknowledgements with expire date. Default is one
 day.

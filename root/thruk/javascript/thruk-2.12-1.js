@@ -1419,20 +1419,29 @@ function hide_activity_icons() {
 }
 
 /* verify time */
-var verify_id;
 var verification_errors = new Object();
-function verify_time(id) {
-    verify_id = id;
+function verify_time(id, duration_id) {
     window.clearTimeout(verifyTimer);
-    verifyTimer = window.setTimeout("verify_time_do(verify_id)", 500);
+    verifyTimer = window.setTimeout(function() {
+        verify_time_do(id, duration_id);
+    }, 500);
 }
-function verify_time_do(id) {
-    var obj = document.getElementById(id);
-    debug(obj.value);
+function verify_time_do(id, duration_id) {
+    var obj  = document.getElementById(id);
+    var obj2 = document.getElementById(duration_id);
+    var duration = "";
+    if(obj2 && jQuery(obj2).is(":visible")) {
+        duration = obj2.value;
+    }
 
     jQuery.ajax({
-        url: url_prefix + 'cgi-bin/status.cgi?verify=time&time='+obj.value,
+        url: url_prefix + 'cgi-bin/status.cgi',
         type: 'POST',
+        data: {
+            verify:   'time',
+            time:     obj.value,
+            duration: duration
+        },
         success: function(data) {
             var next = jQuery(obj).next();
             if(next[0] && next[0].className == 'smallalert') {

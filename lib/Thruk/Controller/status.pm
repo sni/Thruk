@@ -1379,15 +1379,16 @@ sub _process_bookmarks {
 ##########################################################
 # check for search results
 sub _process_verify_time {
-    my( $c ) = @_;
+    my($c) = @_;
 
-    my $verified = 'false';
+    my $verified;
     my $error    = 'not a valid date';
     my $time = $c->req->parameters->{'time'};
+    my $start;
     if(defined $time) {
         eval {
-            if(Thruk::Utils::_parse_date($c, $time)) {
-                $verified = 'true';
+            if($start = Thruk::Utils::_parse_date($c, $time)) {
+                $verified = 1;
             }
         };
         if($@) {
@@ -1398,7 +1399,36 @@ sub _process_verify_time {
         }
     }
 
-    my $json = { 'verified' => $verified, 'error' => $error };
+    my $duration = $c->req->parameters->{'duration'};
+    my $end;
+    if($verified && $duration) {
+        undef $verified;
+        eval {
+            if($end = Thruk::Utils::_parse_date($c, $duration)) {
+                $verified = 1;
+            }
+        };
+        if($@) {
+            $error = $@;
+            chomp($error);
+            $error =~ s/\ at .*?\.pm\ line\ \d+//gmx;
+            $error =~ s/^Date::Calc::Mktime\(\):\ //gmx;
+        }
+    }
+
+    if($start && $end && $c->config->{downtime_max_duration}) {
+        if($start > $end) {
+            ($start, $end) = ($end, $start);
+        }
+        my $max_duration = Thruk::Utils::Status::convert_time_amount($c->config->{downtime_max_duration});
+        my $duration = $end - $start;
+        if($duration > $max_duration) {
+            $error = 'Duration exceeds maximum<br>allowed value: '.Thruk::Utils::Filter::duration($max_duration);
+            undef $verified;
+        }
+    }
+
+    my $json = { 'verified' => $verified ? 'true' : 'false', 'error' => $error };
     return $c->render(json => $json);
 }
 
