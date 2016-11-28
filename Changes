@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.12-2   Mon Nov 28 14:49:12 CET 2016
           - add downtime_max_duration option
           - fix glitch in column drag/drop
           - fix missing jquery in mobile view (#653)
