@@ -421,6 +421,17 @@ ex.:
 
 
 
+=== user_auth_login_hook
+
+Hook which will be called in the process when an user is about to be authorized.
+The hook enables integration with SSO services (e.g Shibboleth) since it is
+exposed to the web servers environment. If the hook exit anything but 0 the
+user will be denied.
+
+ex.:
+
+  user_auth_login_hook = /bin/false
+
 
 
 == Path Settings
