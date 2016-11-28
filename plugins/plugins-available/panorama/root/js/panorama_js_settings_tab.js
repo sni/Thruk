@@ -536,7 +536,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 flex:            1,
                 value:           tab.xdata.background_color || '',
                 listeners:     { change: function() { applyBackground() } }
-            }],
+            }]
         }, {
             fieldLabel:     'WMS Provider',
             xtype:          'combobox',
@@ -707,7 +707,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     name:       'state_type',
                     inputValue: 'hard',
                     checked:    tab.xdata.state_type == 'hard' ? true : false,
-                    padding:    '0 0 0 30',
+                    padding:    '0 0 0 30'
             }]
         }, {
             xtype:      'panel',

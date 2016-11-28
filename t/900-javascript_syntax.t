@@ -16,6 +16,7 @@ my @jsfiles = glob('root/thruk/javascript/thruk-*.js
                     plugins/plugins-available/*/root/*.js
                     plugins/plugins-available/panorama/templates/panorama_js.tt
                     plugins/plugins-available/panorama/templates/_panorama_js_*.tt
+                    plugins/plugins-available/panorama/root/js/*.js
                     ');
 for my $file (@jsfiles) {
     ok(1, "checking ".$file);

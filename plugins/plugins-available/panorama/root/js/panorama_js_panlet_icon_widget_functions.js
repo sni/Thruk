@@ -657,12 +657,12 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
 
 TP.evalInContext = function(js, context) {
     var restore = {};
-    for(key in context) { restore[key] = window[key]; window[key] = context[key]; }
+    for(var key in context) { restore[key] = window[key]; window[key] = context[key]; }
     var res, err;
     try {
         res = eval(js);
     } catch(e) { err = e; }
-    for(key in restore) {
+    for(var key in restore) {
         if(restore[key] == undefined) {
             delete(window[key]);
         } else {

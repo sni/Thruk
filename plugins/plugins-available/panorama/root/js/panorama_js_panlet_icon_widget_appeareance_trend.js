@@ -363,7 +363,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             store:       { fields: ['name', 'value'], data: [] },
             editable:      false,
             value:         panel.xdata.appearance.trendsource,
-            listeners:   { focus: function() { TP.iconSettingsGlobals.perfDataUpdate() }, change: function() { TP.iconSettingsGlobals.renderUpdate(); } },
+            listeners:   { focus: function() { TP.iconSettingsGlobals.perfDataUpdate() }, change: function() { TP.iconSettingsGlobals.renderUpdate(); } }
         }, {
             fieldLabel: 'Compare',
             xtype:      'fieldcontainer',
@@ -505,7 +505,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                 { xtype: 'label', text: 'very bad:', tdAttrs: { style: 'padding: 0 2px 0 0;' } },
                 { xtype: 'numberunit', name: 'trendverybad', unit: '%', width: 65, value: panel.xdata.appearance.trendverybad || '10%' },
                 { xtype: 'label', text: 'bad:', tdAttrs: { style: 'padding: 0 2px 0 20px;' } },
-                { xtype: 'numberunit', name: 'trendbad', unit: '%', width: 65, value: panel.xdata.appearance.trendbad || '5%' },
+                { xtype: 'numberunit', name: 'trendbad', unit: '%', width: 65, value: panel.xdata.appearance.trendbad || '5%' }
             ]
          }]);
     }

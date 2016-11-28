@@ -851,7 +851,8 @@ var TP = {
             }
 
             if(data && data.dashboard_ts != undefined) {
-                for(var tab_id in data.dashboard_ts) {
+                for(var key in data.dashboard_ts) {
+                    var tab_id = key;
                     var tab = Ext.getCmp(tab_id);
                     if(!tab) {
                         // dashboard has been closed already
@@ -1278,9 +1279,9 @@ var TP = {
 
                     /* update all dashboard/map icons */
                     var delay = 1000;
-                    for(var d in ref.dashboards) {
-                        for(var x=0; x<ref.dashboards[d].length; x++) {
-                            var p = ref.dashboards[d][x];
+                    for(var key in ref.dashboards) {
+                        for(var x=0; x<ref.dashboards[key].length; x++) {
+                            var p = ref.dashboards[key][x];
                             p.refreshHandler(undefined, true);
                             var tab_id = 'tabpan-tab_'+p.xdata.general.dashboard;
                             var skipUpdate = false;
@@ -1296,7 +1297,7 @@ var TP = {
                                 delay = delay + 200;
                             }
                         }
-                        delete ref.dashboards[d];
+                        delete ref.dashboards[key];
                     }
 
                     /* mark remaining as unknown */

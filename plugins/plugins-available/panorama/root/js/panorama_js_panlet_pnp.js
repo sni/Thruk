@@ -245,13 +245,13 @@ Ext.define('TP.PanletPNP', {
             fieldLabel: 'Hide Legend',
             xtype:      'checkbox',
             name:       'hide_legend',
-            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)'
         });
         this.addGearItems({
             fieldLabel: 'Graph Only',
             xtype:      'checkbox',
             name:       'graph_only',
-            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)'
         });
     },
     gearInitCallback: function(panel) {

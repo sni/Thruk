@@ -3,7 +3,7 @@ Ext.define('TP_Sources', {
     fields: [
         {name: 'image_url', type: 'string'},
         {name: 'name',      type: 'string'},
-        {name: 'source',    type: 'number'},
+        {name: 'source',    type: 'number'}
     ]
 });
 

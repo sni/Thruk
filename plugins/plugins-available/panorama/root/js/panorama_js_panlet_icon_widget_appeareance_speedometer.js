@@ -340,8 +340,7 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
             xtype:      'fieldcontainer',
             layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
             defaults:    {
-                listeners: { change:    function()      { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0)  },
-                           },
+                listeners: { change: function() { TP.iconSettingsGlobals.renderUpdate(undefined, undefined, 0)  } },
                 mouseover: function(color) { TP.iconSettingsGlobals.renderUpdate({color: color, scope: this }, undefined, 0); },
                 mouseout:  function(color) { TP.iconSettingsGlobals.renderUpdate(undefined,                    undefined, 0); }
             },
