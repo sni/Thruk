@@ -75,8 +75,8 @@ sub new {
         system($user_auth_login_hook);
         if ($? != 0) {
             return;
-        };
-    };
+        }
+    }
 
     # change case?
     $username = lc($username) if $c->config->{'make_auth_user_lowercase'};
