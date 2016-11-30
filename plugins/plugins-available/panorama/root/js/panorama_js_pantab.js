@@ -585,6 +585,8 @@ Ext.define('TP.Pantab', {
             scale      = xdata.backgroundscale,
             offset_x   = xdata.backgroundoffset_x,
             offset_y   = xdata.backgroundoffset_y,
+            size_x     = xdata.backgroundsize_x,
+            size_y     = xdata.backgroundsize_y,
             bg_color   = xdata.background_color;
         if(retries == undefined) { retries = 0; }
         if(retries >= 5)         { return;      }
@@ -761,7 +763,7 @@ Ext.define('TP.Pantab', {
             }
             tab.bgImgEl.on('load',
                             function (evt, ele, opts) {
-                                tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
+                                tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
                             },
                             undefined, {
                                 single: true    // remove event handler after first occurence
@@ -769,7 +771,7 @@ Ext.define('TP.Pantab', {
             );
             tab.bgImgEl.dom.src            = background;
             tab.bgImgEl.dom.style.position = "absolute";
-            tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y);
+            tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
             if(!tab.isActiveTab()) {
                 tab.bgImgEl.hide();
             }
@@ -785,9 +787,13 @@ Ext.define('TP.Pantab', {
             tab.el.dom.style.background = '';
         }
     },
-    applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y) {
+    applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y) {
         var tab = this;
-        if(scale == 100) {
+        if(size_x != undefined && size_x > 0 && size_y != undefined && size_y > 0) {
+            tab.bgImgEl.dom.style.width  = size_x+"px";
+            tab.bgImgEl.dom.style.height = size_y+"px";
+        }
+        else if(scale == 100) {
             tab.bgImgEl.dom.style.width  = "";
             tab.bgImgEl.dom.style.height = "";
         } else {

@@ -671,6 +671,28 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 width:           70,
                 value:           tab.xdata.backgroundoffset_y || 0,
                 fieldStyle:     'text-align: right;'
+            },
+            { xtype: 'label', text: 'Fixed Size', style: 'margin-left: 20px; margin-right: 2px;', cls: 'x-form-item-label' },
+            {
+                xtype:          'numberunit',
+                unit:           'px',
+                allowDecimals:   true,
+                name:           'backgroundsize_x',
+                step:            10,
+                width:           70,
+                value:           tab.xdata.backgroundsize_x || "0",
+                fieldStyle:     'text-align: right;'
+            },
+            { xtype: 'label', text: '/', style: 'margin-left: 2px; margin-right: 2px;', cls: 'x-form-item-label' },
+            {
+                xtype:          'numberunit',
+                unit:           'px',
+                allowDecimals:   true,
+                name:           'backgroundsize_y',
+                step:            10,
+                width:           70,
+                value:           tab.xdata.backgroundsize_y || "0",
+                fieldStyle:     'text-align: right;'
             }]
 
         }, {
@@ -836,7 +858,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     /* the actual settings window containing the panel */
     var tab_win_settings = new Ext.window.Window({
         modal:       true,
-        width:       550,
+        width:       600,
         height:      350,
         title:       'Settings',
         layout :     'fit',
