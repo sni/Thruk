@@ -509,6 +509,7 @@ sub _process_details_page {
 
     if($c->config->{'show_custom_vars'}
        and defined $c->stash->{'host_stats'}
+       and ref($c->stash->{'host_stats'}) eq 'HASH'
        and defined $c->stash->{'host_stats'}->{'up'}
        and $c->stash->{'host_stats'}->{'up'} + $c->stash->{'host_stats'}->{'down'} + $c->stash->{'host_stats'}->{'unreachable'} + $c->stash->{'host_stats'}->{'pending'} == 1) {
         # set allowed custom vars into stash
