@@ -301,6 +301,9 @@ sub translate_request_path {
     if($product_prefix ne 'thruk') {
         $path_info =~ s|^/\Q$product_prefix\E|/thruk|mx;
     }
+    if($ENV{'OMD_SITE'} and $ENV{'OMD_SITE'} eq 'thruk') {
+        $path_info =~ s|^\Q/cgi-bin/\E|/thruk/cgi-bin/|mx;
+    }
     return($path_info);
 }
 

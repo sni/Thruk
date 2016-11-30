@@ -1396,6 +1396,7 @@ t/102-thruk_utils.t
 t/103-thruk_utils_io.t
 t/104-thruk_utils_cache.t
 t/105-thruk-utils-ssi.t
+t/106-thruk_context.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t

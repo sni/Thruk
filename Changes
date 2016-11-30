@@ -4,6 +4,7 @@ next:
           - add downtime_max_duration option
           - fix glitch in column drag/drop
           - fix missing jquery in mobile view (#653)
+          - fix redirect issue when omd site is named 'thruk'
 
 2.12     Fri Nov 18 10:14:00 CET 2016
           - remove startup page, Thruk starts in less than a second now
