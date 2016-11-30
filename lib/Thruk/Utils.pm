@@ -1387,18 +1387,19 @@ sub get_graph_url {
 
 =head2 get_perf_image
 
-  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format)
+  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format, $showtitle)
 
 return raw pnp/grafana image if possible.
 An empty string will be returned if no graph can be exported.
 
 =cut
 sub get_perf_image {
-    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format) = @_;
+    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format, $showtitle) = @_;
     my $pnpurl     = "";
     my $grafanaurl = "";
     $format        = 'png' unless $format;
     $svc           = ''    unless defined $svc;
+    $showtitle     = 1     unless defined $showtitle;
 
     my $custvars;
     if($svc) {
@@ -1420,6 +1421,10 @@ sub get_perf_image {
         $grafanaurl = get_histou_url($c, $hstdata->[0], 1);
         $svc        = '_HOST_' if $pnpurl;
         $custvars   = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
+    }
+
+    if(!$showtitle) {
+        $grafanaurl .= '&disablePanelTitel';
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';

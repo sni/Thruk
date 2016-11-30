@@ -753,8 +753,9 @@ sub _process_grafana_page {
     my $width   = $c->req->parameters->{'width'}  || 800;
     my $height  = $c->req->parameters->{'height'} || 300;
     my $format  = $c->req->parameters->{'format'} || 'png';
+    my $title   = $c->req->parameters->{'disablePanelTitel'};
 
-    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format));
+    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format, !$title));
     $c->{'rendered'} = 1;
     if($format eq 'png') {
         $c->res->headers->content_type('image/png');

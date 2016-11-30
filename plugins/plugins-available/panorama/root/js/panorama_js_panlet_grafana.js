@@ -58,6 +58,7 @@ Ext.define('TP.PanletGrafana', {
         this.xdata.source     = grafana_default_panelId;
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
+        this.xdata.showtitle  = true;
         this.lastGraph        = '';
 
         /* update source selector */
@@ -136,6 +137,9 @@ Ext.define('TP.PanletGrafana', {
             url = url + '&to='    + Math.round(now.getTime()/1000);
             url = url + '&width=' + size.width;
             url = url + '&height='+ (size.height+30);
+            if(this.xdata.showtitle != undefined && !this.xdata.showtitle) {
+                url = url + '&disablePanelTitel=1';
+            }
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
         };
@@ -228,6 +232,12 @@ Ext.define('TP.PanletGrafana', {
             fieldLabel: 'Show Border',
             xtype:      'checkbox',
             name:       'showborder'
+        });
+        this.addGearItems({
+            fieldLabel: 'Show Title',
+            xtype:      'checkbox',
+            name:       'showtitle',
+            boxLabel:   '(requires histou 0.3.10 or newer)'
         });
     },
     gearInitCallback: function(panel) {
