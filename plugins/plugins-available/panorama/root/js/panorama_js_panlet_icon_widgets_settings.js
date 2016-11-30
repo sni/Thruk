@@ -186,7 +186,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:     'table',
                     items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'x', width: 55, value: panel.xdata.layout.x, listeners: {
+                            { xtype: 'numberfield', name:  'x', width: 70, value: panel.xdata.layout.x, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
@@ -197,7 +197,7 @@ TP.iconShowEditDialog = function(panel) {
                                 }
                             }},
                             { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'y', width: 55, value: panel.xdata.layout.y, listeners: {
+                            { xtype: 'numberfield', name:  'y', width: 70, value: panel.xdata.layout.y, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
@@ -245,6 +245,42 @@ TP.iconShowEditDialog = function(panel) {
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyScale(This.value, xdata); } },
                     disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
                     hidden:        panel.iconType == 'text' ? true : false
+                }, {
+                    fieldLabel:   'Size',
+                    id:           'layoutscale',
+                    xtype:        'fieldcontainer',
+                    layout:       'hbox',
+                    defaults:      {
+                        listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyScale(This.value, xdata); } }
+                    },
+                    items: [
+                        { xtype: 'label', text:  'x:', style: 'margin-left: 0px; margin-right: 2px; margin-top: 2px;' },
+                        {
+                            xtype:        'numberunit',
+                            unit:         'px',
+                            allowDecimals: true,
+                            name:         'size_x',
+                            minValue:        0,
+                            step:           10,
+                            width:          70,
+                            value:         panel.xdata.layout.size_x,
+                            disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
+                            hidden:        panel.iconType == 'text' ? true : false
+                        },
+                        { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 2px;' },
+                        {
+                            xtype:        'numberunit',
+                            unit:         'px',
+                            allowDecimals: true,
+                            name:         'size_y',
+                            minValue:        0,
+                            step:           10,
+                            width:          70,
+                            value:         panel.xdata.layout.size_y,
+                            disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
+                            hidden:        panel.iconType == 'text' ? true : false
+                        }
+                    ]
                 }]
             }]
         }]

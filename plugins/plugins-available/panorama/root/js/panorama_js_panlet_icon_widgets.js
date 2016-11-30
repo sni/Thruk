@@ -1030,7 +1030,11 @@ Ext.define('TP.IconWidget', {
         if(!panel.icon.el) { return; }
         if(TP.imageSizes == undefined) { TP.imageSizes = {} }
         var src = panel.icon.el.dom.href.baseVal || panel.src;
-        if(TP.imageSizes[src] == undefined) {
+        var hasFixedSize = false;
+        if(xdata.layout && xdata.layout.size_x != undefined && xdata.layout.size_x > 0 && xdata.layout.size_y != undefined && xdata.layout.size_y > 0) {
+            hasFixedSize = true;
+        }
+        else if(TP.imageSizes[src] == undefined) {
             var naturalSize = TP.getNatural(src);
             if(naturalSize && naturalSize.width > 1 && naturalSize.height > 1) {
                 TP.imageSizes[src] = [naturalSize.width, naturalSize.height];
@@ -1038,8 +1042,14 @@ Ext.define('TP.IconWidget', {
             }
             return;
         }
+        if(hasFixedSize) {
+            TP.imageSizes[src] = [xdata.layout.size_x, xdata.layout.size_y];
+        }
         var naturalWidth  = TP.imageSizes[src][0];
         var naturalHeight = TP.imageSizes[src][1];
+        if(hasFixedSize) {
+            delete TP.imageSizes[src];
+        }
         if(naturalWidth > 1 && naturalHeight > 1) {
             var size  = Math.ceil(Math.sqrt(Math.pow(naturalWidth, 2) + Math.pow(naturalHeight, 2)));
             var scale = xdata.layout.scale != undefined ? xdata.layout.scale / 100 : 1;
