@@ -1,10 +1,10 @@
-FROM consol/sakuli-ubuntu-xfce:v1.0.0
+FROM consol/sakuli-ubuntu-xfce:v1.0.2
 MAINTAINER Sven Nierlein "sven@nierlein.de"
-ENV REFRESHED_AT 2016-06-25
+ENV REFRESHED_AT 2016-12-02
 
 RUN apt-get update
 RUN apt-get install -y apt-transport-https rsync lsof patch bash-completion chromium-browser firefox
-RUN sh -c "echo 'deb https://labs.consol.de/repo/testing/ubuntu $(lsb_release -sc) main' >> /etc/apt/sources.list"
+RUN sh -c "echo 'deb https://labs.consol.de/repo/stable/ubuntu $(lsb_release -sc) main' >> /etc/apt/sources.list"
 RUN gpg --keyserver keys.gnupg.net --recv-keys F8C1CA08A57B9ED7
 RUN gpg --armor --export F8C1CA08A57B9ED7 | sudo apt-key add -
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
