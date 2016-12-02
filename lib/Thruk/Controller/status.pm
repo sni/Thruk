@@ -269,6 +269,13 @@ sub _process_raw_request {
                     push @{$data}, $b->{'name'};
                 }
                 @{$data} = sort @{$data};
+            }
+            elsif($type eq 'navsection') {
+                Thruk::Utils::Menu::read_navigation($c);
+                $data = [];
+                for my $section (@{$c->stash->{'navigation'}}) {
+                    push @{$data}, $section->{'name'};
+                }
             } else {
                 die("unknown type: " . $type);
             }

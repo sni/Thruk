@@ -2580,6 +2580,34 @@ function setDefaultColumns(type, pane_prefix, value) {
     return(false);
 }
 
+function refreshNavSections(id) {
+    jQuery.ajax({
+        url: "status.cgi?type=navsection&format=search",
+        type: 'POST',
+        success: function(data) {
+            if(data && data[0]) {
+                jQuery('#'+id).find('option').remove();
+                jQuery('#'+id).append(jQuery('<option>', {
+                    value: 'Bookmarks',
+                    text : 'Bookmarks'
+                }));
+                jQuery.each(data[0].data, function (i, item) {
+                    if(item != "Bookmarks") {
+                        jQuery('#'+id).append(jQuery('<option>', {
+                            value: item,
+                            text : item
+                        }));
+                    }
+                });
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            thruk_message(1, 'fetching side nav sections failed: '+ textStatus);
+        }
+    });
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

@@ -1,4 +1,4 @@
-﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page' width=16 height=16></a>&nbsp;
+﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page' width=16 height=16></a>&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:60px;z-index:100" id="add_bookmark">
   <div class="shadow"><div class="shadowcontent">
 
@@ -23,14 +23,8 @@
       Url <input type="text" size="60" value="[% clean_referer(uri(c)) %]" name="bookmark">
       <br>
       in category
-      <select name="section">
-        [% has_bookmarks = 0 %]
-        [% FOREACH section = navigation %]
-        <option value="[% section.name %]"[% IF section.name == "Bookmarks" %] selected[% has_bookmarks = 1 %][% END %]>[% section.name %]</option>
-        [% END %]
-        [% UNLESS has_bookmarks %]
+      <select name="section" id="bookmark_sections">
         <option value="Bookmarks" selected>Bookmarks</option>
-        [% END %]
       </select>
       with name <input type="text" size="15" value="" name="newname" id="newname">
       [% IF c.check_user_roles('authorized_for_system_commands') && c.check_user_roles('authorized_for_configuration_information') %]
