@@ -43,7 +43,7 @@
     [% IF show_form %]</form>[% END %]
 
       [% start_with = 5 %]
-      <table border="0" class='status [% paneprefix %]_table' width="100%" id="hoststatusTable" onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="display: none;"[% END %]>
+      <table border="0" class='status [% paneprefix %]_table' width="100%" id="hoststatusTable" onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="visibility: hidden;"[% END %]>
         <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'hoststatusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
           [% IF show_backends_in_table == 2 %]
           <th class='status col_peer_name' nowrap>Site&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site (ascending)' title='Sort by site (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site (descending)' title='Sort by site (descending)'></a></th>[% start_with = start_with + 1 %]

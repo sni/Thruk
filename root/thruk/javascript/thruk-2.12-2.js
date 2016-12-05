@@ -166,6 +166,10 @@ function saveScroll() {
     var scroll = getPageScroll();
     if(scroll > 0) {
         additionalParams['scrollTo'] = scroll;
+        delete removeParams['scrollTo'];
+    } else {
+        delete additionalParams['scrollTo'];
+        removeParams['scrollTo'] = true;
     }
 }
 
@@ -563,12 +567,12 @@ function toQueryString(obj) {
     return str;
 }
 
-function getCurrentUrl(addTime) {
+function getCurrentUrl(addTimeAndScroll) {
     var origHash = window.location.hash;
     var newUrl   = window.location.href;
     newUrl       = newUrl.replace(/#.*$/g, '');
 
-    if(addTime == undefined) { addTime = true; }
+    if(addTimeAndScroll == undefined) { addTimeAndScroll = true; }
 
     // save scroll state
     saveScroll();
@@ -588,8 +592,10 @@ function getCurrentUrl(addTime) {
 
     // make url uniq, otherwise we would to do a reload
     // which reloads all images / css / js too
-    if(addTime) {
+    if(addTimeAndScroll) {
         urlArgs['_'] = (new Date()).getTime();
+    } else {
+        delete urlArgs["scrollTo"];
     }
 
     var newParams = toQueryString(urlArgs);
@@ -2429,7 +2435,7 @@ function updateStatusColumns(id, reloadRequired) {
     }
     var changed = false;
     if(reloadRequired == undefined) { reloadRequired = true; }
-    table.style.display = "none";
+    table.style.visibility = "hidden";
 
     removeParams['autoShow'] = true;
 
@@ -2523,7 +2529,7 @@ function updateStatusColumns(id, reloadRequired) {
                 additionalParams["autoShow"] = id+"_columns_select";
                 delete removeParams['autoShow'];
                 jQuery('#'+id+"_columns_select").find("DIV.shadowcontent").append("<div class='overlay'></div>").append("<div class='overlay-text'><img class='overlay' src='"+url_prefix + 'themes/' +  theme + "/images/loading-icon.gif'><br>fetching table...</div>");
-                table.style.display = "";
+                table.style.visibility = "visible";
                 reloadPage();
                 return;
             }
@@ -2534,7 +2540,7 @@ function updateStatusColumns(id, reloadRequired) {
         }
         updateUrl();
     }
-    table.style.display = "";
+    table.style.visibility = "visible";
 }
 
 /* reload page with with sorting parameters set */
