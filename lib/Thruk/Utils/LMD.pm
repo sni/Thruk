@@ -31,7 +31,6 @@ makes sure lmd process is running
 
 sub check_proc {
     my($config, $c, $log_missing) = @_;
-    local $SIG{CHLD} = 'DEFAULT';
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     my $logfile = $lmd_dir.'/lmd.log';
@@ -45,7 +44,8 @@ sub check_proc {
 
     _write_lmd_config($config);
 
-    $c->log->error("lmd crashed, restarting...") if $log_missing;
+    $c->log->error("lmd not running, starting up...") if $log_missing;
+    local $SIG{CHLD} = 'DEFAULT';
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -pidfile '.$lmd_dir.'/pid'
               .' -config '.$lmd_dir.'/lmd.ini';
@@ -140,7 +140,10 @@ sub check_pid {
     my $pid = read_file($file);
     if($pid =~ m/^(\d+)\s*$/mx) {
         if(-d '/proc/'.$1) {
-            return 1;
+            my $cmd = read_file('/proc/'.$1.'/cmdline');
+            if($cmd =~ m/lmd/mxi) {
+                return 1;
+            }
         }
     }
     return 0;
