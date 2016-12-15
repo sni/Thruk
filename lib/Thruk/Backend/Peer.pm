@@ -80,6 +80,29 @@ sub peer_name {
 
 ##########################################################
 
+=head2 peer_list
+
+return peer address list
+
+=cut
+
+sub peer_list {
+    my($self) = @_;
+    if($self->{'peer_list'}) {
+        my $list = [@{$self->{'peer_list'}}];
+        if($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
+            push @{$list}, $self->{'class'}->{'config'}->{'options'}->{'fallback_peer'};
+        }
+        return($list);
+    }
+    elsif($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
+        return([$self->{'config'}->{'options'}->{'fallback_peer'}, $self->{'addr'}]);
+    }
+    return([$self->{'addr'}]);
+}
+
+##########################################################
+
 =head2 create_backend
 
   create_backend()

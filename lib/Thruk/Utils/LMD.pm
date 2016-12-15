@@ -200,18 +200,7 @@ sub _write_lmd_config {
         $site_config .= "[[Connections]]\n";
         $site_config .= "name   = '".$peer->peer_name()."'\n";
         $site_config .= "id     = '".$key."'\n";
-        if($peer->{'peer_list'}) {
-            my $list = [@{$peer->{'peer_list'}}];
-            if($peer->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
-                push @{$list}, $peer->{'class'}->{'config'}->{'options'}->{'fallback_peer'};
-            }
-            $site_config .= "source = ['".join("', '", @{$list})."']\n";
-        }
-        elsif($peer->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
-            $site_config .= "source = ['".$peer->{'config'}->{'options'}->{'fallback_peer'}."', '".$peer->{'addr'}."']\n";
-        } else {
-            $site_config .= "source = ['".$peer->{'addr'}."']\n";
-        }
+        $site_config .= "source = ['".join("', '", @{$peer->peer_list()})."']\n";
         if($peer->{'type'} eq 'http') {
             $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
             $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};

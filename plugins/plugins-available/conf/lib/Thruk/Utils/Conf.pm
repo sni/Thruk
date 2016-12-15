@@ -830,10 +830,13 @@ sub get_backends_with_obj_config {
     my @peers = @{$c->{'db'}->get_peers(1)};
     my @fetch;
     for my $peer (@peers) {
-        if($peer->{'addr'} && $peer->{'addr'} =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
-            if(!$c->stash->{'failed_backends'}->{$peer->{'key'}}) {
-                $peer->{'configtool'} = { remote => 1 };
-                push @fetch, $peer->{'key'};
+        for my $addr (@{$peer->peer_list()}) {
+            if($addr =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
+                if(!$c->stash->{'failed_backends'}->{$peer->{'key'}}) {
+                    $peer->{'configtool'} = { remote => 1 };
+                    push @fetch, $peer->{'key'};
+                    last;
+                }
             }
         }
     }
@@ -847,14 +850,15 @@ sub get_backends_with_obj_config {
                 delete $peer->{'configtool'}->{remote};
             }
         }
-        # when using shadownaemon, do fetch the real config data now
-        if($Thruk::Backend::Pool::xs && (!defined $ENV{'THRUK_USE_SHADOW'} || $ENV{'THRUK_USE_SHADOW'})) {
+        # when using lmd/shadownaemon, do fetch the real config data now
+        if($Thruk::Backend::Pool::xs && ($ENV{'THRUK_USE_LMD'} || !defined $ENV{'THRUK_USE_SHADOW'} || $ENV{'THRUK_USE_SHADOW'})) {
             for my $key (@fetch) {
                 my $peer = $c->{'db'}->get_peer_by_key($key);
                 delete $peer->{'configtool'}->{remote};
             }
             # make sure we have uptodate information about config section of http backends
             local $ENV{'THRUK_USE_SHADOW'} = 0;
+            local $ENV{'THRUK_USE_LMD'}    = 0;
             get_backends_with_obj_config($c);
         }
     }
