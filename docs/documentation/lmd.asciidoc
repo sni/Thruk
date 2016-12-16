@@ -1,0 +1,73 @@
+---
+layout: docs
+title: LMD - Livestatus Multitool Daemon
+---
+
+== LMD
+{% include new_since.ad version="2.12" %}
+link:https://github.com/sni/lmd[LMD] is a transparent livestatus proxy which fetches live data from several remote sites/backends and provides a aggregated livestatus API which can be used by Thruk. When enabled, LMD handles all the backend connection handling and livestatus aggregation.
+
+Using LMD has multiple advantages:
+
+    - It makes Thruk faster when connecting to many remote locations
+    - It makes Thruk more stable when having unstable connections
+    - LMD fixes some issues in backend specific livestatus implementations, ex.: Icinga 2
+
+
+There are some slides available (in german)
+
++++++++++
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/4Jc7ybErOqb510" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/SvenNierlein/lmd-livestatus-multitool-daemon" title="LMD - Livestatus Multitool Daemon" target="_blank">LMD - Livestatus Multitool Daemon</a> </strong> from <strong><a target="_blank" href="//www.slideshare.net/SvenNierlein">Sven Nierlein</a></strong> </div>
++++++++++
+
+
+== Installation
+
+LMD is written in golang, so we just need a single compiled binary to operate.
+It is included in OMD already or has to be build from source otherwise.
+
+=== Using OMD-Labs
+
+Having OMD-Labs in place is the easiest way to enabled LMD. OMD includes LMD
+since version 2.20. The setup just takes these 3 steps like documented here:
+
+link:https://labs.consol.de/omd/packages/lmd/[OMD-Labs]
+
+=== Using the Source
+
+The following steps assume you have installed Thruk from packages.
+
+First we need to install golang to compile the binary. Just grab go from the
+link:https://golang.org/dl/[official download page] and follow the instructions
+or use your package manager if golang already exists for your system. On
+Debian/Ubuntu its a simple
+
+    #> apt-get install golang
+
+Then lets create a golang environment in /opt/local
+
+    #> export GOPATH=/opt/local/go
+    #> mkdir -p $GOPATH
+
+And install LMD
+
+    #> go get github.com/sni/lmd/lmd
+
+You should now have a lmd binary in `/opt/local/go/bin/lmd`
+
+
+== Setup
+
+It is best practice to create a `lmd.conf` file in your
+`/etc/thruk/thruk_local.d` folder with the following config settings.
+
+    use_lmd_core=1
+    lmd_core_bin=/opt/local/go/bin/lmd
+
+Since LMD is totally transparent, there is no need to configure LMD, the
+lmd.ini file will be automatically generated and updated from Thruks backend
+configuration.
+
+Finally all you need to do is to restart apache and open Thruk in your browser.
+After the first request you should be able see a lmd process running.
+
