@@ -2490,8 +2490,14 @@ function updateStatusColumns(id, reloadRequired) {
         }
 
         // adjust table header text
-        var current = firstRow.cells[i].innerText.trim();
-        var newHead = jQuery('#'+el.id+'n')[0].innerHTML.trim();
+        var current   = firstRow.cells[i].innerText.trim();
+        var newHeadEl = document.getElementById(el.id+'n');
+        if(!newHeadEl) {
+            if(thruk_debug_js) { alert("ERROR: header element not found in updateStatusColumns(): " + el.id+'n'); }
+            table.style.visibility = "visible";
+            return;
+        }
+        var newHead = newHeadEl.innerHTML.trim();
         if(current != newHead) {
             var childs = removeChilds(firstRow.cells[i]);
             firstRow.cells[i].innerHTML = newHead+" ";
