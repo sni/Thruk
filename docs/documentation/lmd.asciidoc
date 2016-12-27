@@ -45,6 +45,11 @@ link:https://labs.consol.de/omd/packages/lmd/[OMD-Labs]
 
 The following steps assume you have installed Thruk from packages.
 
+[WARNING]
+=======
+You will need at least go version 1.5 or later. You can check the version with `go version`.
+=======
+
 First we need to install golang to compile the binary. Just grab go from the
 link:https://golang.org/dl/[official download page] and follow the instructions
 or use your package manager if golang already exists for your system. On
