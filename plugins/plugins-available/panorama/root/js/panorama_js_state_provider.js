@@ -100,22 +100,9 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
                 try {
                     state[key] = Ext.JSON.decode(ExtState[key]);
                 } catch(err) {
-                    // REMOVE AFTER: 01.01.2017
-                    // old style is just decoded
-                    if(state[key] == undefined) {
-                        state[key] = this.decodeValue(ExtState[key]);
-                        ExtState[key] = Ext.JSON.encode(state[key]);
-                        // save in new format
-                        this.queueChanges();
-                        TP.reload_required = true;
-                    }
+                    TP.Msg.msg("fail_message~~decode failed: "+err);
                 }
             }
-        }
-
-        // REMOVE AFTER: 01.01.2017
-        if(ExtStateSplit == false) {
-            this.lastdata = Ext.JSON.encode(ExtState);
         }
 
         this.queueChanges();
@@ -170,23 +157,6 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(readonly || dashboard_ignore_changes) { return; }
         if(!TP.initialized) { this.queueChanges(); return; }
         if(async == undefined) { async = true; }
-
-        // REMOVE AFTER: 01.01.2017
-        if(ExtStateSplit == false) {
-            var sum = Ext.JSON.encode(ExtState);
-            if(sum == this.lastdata) {
-                return;
-            }
-            this.lastdata = sum;
-            var params = { task:  'update' };
-            for (var key in ExtState) {
-                // save data json encoded
-                params[key] = ExtState[key];
-            }
-            var conn = new Ext.data.Connection();
-            conn.request({ url: this.url, params: params, async: async });
-            return;
-        }
 
         /* seperate state by dashboards */
         var data = setStateByTab(ExtState);

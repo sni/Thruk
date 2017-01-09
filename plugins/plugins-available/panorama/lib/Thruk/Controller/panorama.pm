@@ -267,51 +267,9 @@ sub _js {
     }
 
     $c->stash->{shapes} = {};
-    my $data = Thruk::Utils::get_user_data($c);
-    # split old format into new separated format
-    # REMOVE AFTER: 01.01.2017
-    $c->stash->{state} = '';
-    if(defined $data->{'panorama'}->{'state'} and defined $data->{'panorama'}->{'state'}->{'tabpan'}) {
-        $c->stash->{state} = encode_json($data->{'panorama'}->{'state'} || {});
-        if($data->{'panorama'}->{'state'}->{'tabpan'} && $data->{'panorama'}->{'state'}->{'tabpan'} !~ m/^o/mx) {
-            # migrate data, but make backup of user data before...
-            my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
-            copy($file, $file.'.backup_panorama_migration');
-
-            my $state  = delete $data->{'panorama'}->{'state'};
-            my $tabpan = decode_json($state->{'tabpan'});
-            $data->{'panorama'}->{'dashboards'}->{'tabpan'} = $tabpan;
-            $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{open_tabs} = [];
-            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'item_ids'};
-            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'xdata'}->{'backends'};
-            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'xdata'}->{'autohideheader'};
-            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'xdata'}->{'refresh'};
-            for my $key (keys %{$state}) {
-                if($key =~ m/^tabpan\-tab/mx) {
-                    my $tabdata = decode_json($state->{$key});
-                    my $dashboard = {
-                        'id'    => 'new',
-                        'tab'   => $tabdata,
-                    };
-                    my $window_ids = $tabdata->{'window_ids'} || $tabdata->{'xdata'}->{'window_ids'};
-                    for my $id (@{$window_ids}) {
-                        my $win = $state->{$id};
-                        next if !defined $win;
-                        next if $win eq 'null';
-                        $dashboard->{$id} = decode_json($win);
-                    }
-                    delete $tabdata->{'xdata'}->{'window_ids'};
-                    delete $tabdata->{'window_ids'};
-                    $dashboard = _save_dashboard($c, $dashboard);
-                    $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'} = $key if $key eq $tabpan->{'activeTab'};
-                    push @{$data->{'panorama'}->{'dashboards'}->{'tabpan'}->{open_tabs}}, $dashboard->{'id'};
-                }
-            }
-            Thruk::Utils::store_user_data($c, $data);
-        }
-    }
 
     # merge open dashboards into state
+    my $data = Thruk::Utils::get_user_data($c);
     if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
         my $shapes         = {};
         $c->stash->{state} = '';

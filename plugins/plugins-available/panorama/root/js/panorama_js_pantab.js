@@ -356,33 +356,6 @@ Ext.define('TP.Pantab', {
         this.applyXdata();
         if(state) {
             TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
-            // REMOVE AFTER: 01.01.2017
-            // migrate old settings
-            if(state.xdata == undefined) { state.xdata = {} }
-            var oldKeys = ['window_ids', 'background', 'title'];
-            for(var x=0; x<oldKeys.length; x++) {
-                var key = oldKeys[x];
-                if(state[key]) {
-                    state.xdata[key] = state[key];
-                    delete this[key];
-                    delete state[key];
-                }
-            }
-            // migrate some global settings
-            var global = Ext.getCmp('tabpan');
-            var oldGlobals = ['refresh', 'backends', 'autohideheader'];
-            for(var x=0; x<oldGlobals.length; x++) {
-                var key = oldGlobals[x];
-                if(global.xdata[key] != undefined) {
-                    state.xdata[key] = global.xdata[key];
-                }
-            }
-
-            // REMOVE AFTER: 01.01.2017
-            if(state.xdata.window_ids) {
-                this.window_ids = state.xdata.window_ids;
-            }
-
             /* create panlets */
             Ext.apply(this.xdata, state.xdata);
             this.createInitialPanlets();
