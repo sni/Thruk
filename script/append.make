@@ -232,3 +232,11 @@ dockertestfirefox:
 dockershell: t/docker/Dockerfile
 	mkdir -p $(DOCKERRESULTS)
 	$(DOCKERCMD) -it local/thruk_panorama_test /bin/bash
+
+rpm: $(NAME)-$(VERSION).tar.gz
+	rpmbuild -ta $(NAME)-$(VERSION).tar.gz
+
+deb: $(NAME)-$(VERSION).tar.gz
+	tar zxvf $(NAME)-$(VERSION).tar.gz
+	debuild -rfakeroot -i -us -uc -b
+	rm -rf $(NAME)-$(VERSION)
