@@ -267,12 +267,12 @@ sub _js {
     }
 
     $c->stash->{shapes} = {};
+    $c->stash->{state}  = '';
 
     # merge open dashboards into state
     my $data = Thruk::Utils::get_user_data($c);
     if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
         my $shapes         = {};
-        $c->stash->{state} = '';
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
         for my $nr (@{$open_tabs}) {
             my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
