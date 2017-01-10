@@ -247,12 +247,13 @@ TP.iconShowEditDialog = function(panel) {
                     hidden:        panel.iconType == 'text' ? true : false
                 }, {
                     fieldLabel:   'Size',
-                    id:           'layoutscale',
+                    id:           'layoutsize',
                     xtype:        'fieldcontainer',
                     layout:       'hbox',
                     defaults:      {
                         listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyScale(This.value, xdata); } }
                     },
+                    hidden:        panel.iconType == 'text' ? true : false,
                     items: [
                         { xtype: 'label', text:  'x:', style: 'margin-left: 0px; margin-right: 2px; margin-top: 2px;' },
                         {
@@ -264,8 +265,7 @@ TP.iconShowEditDialog = function(panel) {
                             step:           10,
                             width:          70,
                             value:         panel.xdata.layout.size_x,
-                            disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
-                            hidden:        panel.iconType == 'text' ? true : false
+                            disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true
                         },
                         { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 2px;' },
                         {
@@ -277,9 +277,9 @@ TP.iconShowEditDialog = function(panel) {
                             step:           10,
                             width:          70,
                             value:         panel.xdata.layout.size_y,
-                            disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
-                            hidden:        panel.iconType == 'text' ? true : false
-                        }
+                            disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true
+                        },
+                        { xtype: 'label', text: '(either use Scale or Size)', style: 'margin-left: 10px; margin-top: 4px;', cls: 'form-hint' }
                     ]
                 }]
             }]
@@ -349,8 +349,10 @@ TP.iconShowEditDialog = function(panel) {
                 });
                 if(newValue == 'icon' || panel.hasScale) {
                     Ext.getCmp('layoutscale').setDisabled(false);
+                    Ext.getCmp('layoutsize').setDisabled(false);
                 } else {
                     Ext.getCmp('layoutscale').setDisabled(true);
+                    Ext.getCmp('layoutsize').setDisabled(true);
                 }
 
                 panel.appearance = Ext.create('tp.icon.appearance.'+newValue, { panel: panel });
