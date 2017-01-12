@@ -1,0 +1,15 @@
+/* navbar */
+div.navbar {
+  background-color: black;
+  color: white;
+  font-family: verdana,arial,serif;
+  width: 172px;
+  height: 100%;
+  position:absolute;
+  z-index:100;
+  border: 5px solid black;
+  overflow:auto;
+  top: 0px;
+  left: 0px;
+  text-align: left;
+}

@@ -1,0 +1,28 @@
+/* navbar */
+div.navbar {
+  background-color: black;
+  color: white;
+  width: 172px;
+  height: 100%;
+  position:fixed;
+  z-index:100;
+  border-top: 0px solid black;
+  border-bottom: 0px solid black;
+  border-right: 0px solid black;
+  border-left: 2px solid black;
+  padding-right: 3px;
+  overflow:auto;
+  top: 0px;
+  left: 0px;
+  text-align: left;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0px;
+  margin-left: 183px;
+}
+
+DIV#site_panel {
+  left: 195px;
+}
