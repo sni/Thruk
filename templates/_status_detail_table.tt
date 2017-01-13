@@ -272,7 +272,7 @@
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
   jQuery(document).ready(function() {
-    [% IF c.req.parameters.defined(paneprefix _ "columns") %]
+    [% IF has_columns %]
     updateStatusColumns("[% paneprefix %]", false);
     [% END %]
     [% IF c.req.parameters.defined("autoShow") %]
