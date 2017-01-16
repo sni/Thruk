@@ -577,6 +577,8 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
     if(state == undefined) { state = panel.xdata.state; }
     if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }
     if(forceColor != undefined) { fillcolor = forceColor; }
+    else if(panel.acknowledged) { fillcolor = xdata.appearance[type+"color_ok"]; }
+    else if(panel.downtime)     { fillcolor = xdata.appearance[type+"color_ok"]; }
     else if(state == 0)         { fillcolor = xdata.appearance[type+"color_ok"]; }
     else if(state == 1)         { fillcolor = xdata.appearance[type+"color_warning"]; }
     else if(state == 2)         { fillcolor = xdata.appearance[type+"color_critical"]; }
