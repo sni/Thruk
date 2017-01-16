@@ -575,6 +575,13 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
     var p     = {};
     var perc  = 100;
     if(state == undefined) { state = panel.xdata.state; }
+
+    // host panels use warnings color for unreachable, just the label got changed in the settings menu
+    // all other panels must be mapped to service states because they can only define service colors
+    if(panel.iconType != 'host' && panel.hostProblem) {
+        if(state == 1) { state = 2 }
+    }
+
     if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }
     if(forceColor != undefined) { fillcolor = forceColor; }
     else if(panel.acknowledged) { fillcolor = xdata.appearance[type+"color_ok"]; }
