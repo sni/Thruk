@@ -2325,7 +2325,10 @@ sub _task_dashboard_data {
     }
     my $json;
     if(!$dashboard) {
-        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
+        if(!$c->req->parameters->{'hidden'}) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard' });
+        }
+        $c->res->code(404);
         $json = { 'status' => 'failed' };
     } else {
         my $data = {};

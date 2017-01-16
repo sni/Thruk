@@ -87,24 +87,26 @@ var TP = {
             Ext.Ajax.request({
                 url: 'panorama.cgi?task=dashboard_data',
                 method: 'POST',
-                params: { nr: id },
+                params: { nr: id, hidden: hidden },
                 async: false,
                 callback: function(options, success, response) {
                     if(id != 'new') {
                         id = TP.nr2TabId(id);
                     }
                     if(!success) {
-                        if(response.status == 0) {
-                            TP.Msg.msg("fail_message~~adding new dashboard failed");
-                        } else {
-                            TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                        if(!hidden) {
+                            if(response.status == 0) {
+                                TP.Msg.msg("fail_message~~adding new dashboard failed");
+                            } else {
+                                TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                            }
                         }
                         tabpan.saveState();
                     } else {
                         var data = TP.getResponse(undefined, response);
                         data = data.data;
                         TP.log('['+id+'] dashboard_data: '+Ext.JSON.encode(data));
-                        if(data.newid) { id = data.newid; delete data.newid; }
+                        if(data && data.newid) { id = data.newid; delete data.newid; }
                         if(extraConf) {
                             var tmp = Ext.JSON.decode(data[id]);
                             Ext.apply(tmp.xdata, extraConf);
@@ -122,7 +124,9 @@ var TP = {
                                 TP.dashboardsSettingGrid.getView().refresh();
                             }
                         } else {
-                            TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                            if(!hidden) {
+                                TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                            }
                             tabpan.saveState();
                         }
                     }
@@ -133,7 +137,7 @@ var TP = {
                         Ext.getCmp(id).setLock(false);
                     }
 
-                    if(callback) { callback(id); }
+                    if(callback) { callback(id, success, response); }
                 }
             });
             return;
@@ -1139,7 +1143,7 @@ var TP = {
         var req = statusReq.req,
             ref = statusReq.ref;
 
-        TP.log('['+tab.id+'] updateAllIconsDo');
+        TP.log('['+tab.id+'] updateAllIconsDo'+(id ? ' (id: '+id+')' : ''));
         var params = {
             types:       Ext.JSON.encode(req),
             backends:    TP.getActiveBackendsPanel(tab),
@@ -1205,6 +1209,7 @@ var TP = {
                                         if(lastTrend) { data.hosts[x].trend = lastTrend; }
                                     }
 
+                                    delete ref.hosts[name][y]['no_data'];
                                     ref.hosts[name][y].host = data.hosts[x];
                                     ref.hosts[name][y].refreshHandler(state);
                                 }
@@ -1219,6 +1224,7 @@ var TP = {
                             var state = data.hostgroups[x]['state'];
                             if(ref.hostgroups[name]) { // may be empty if we get the same hostgroup twice in a result
                                 for(var y=0; y<ref.hostgroups[name].length; y++) {
+                                    delete ref.hostgroups[name][y]['no_data'];
                                     ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
                                     ref.hostgroups[name][y].refreshHandler();
                                 }
@@ -1233,6 +1239,7 @@ var TP = {
                             var state = data.servicegroups[x]['state'];
                             if(ref.servicegroups[name]) { // may be empty if we get the same servicegroup twice in a result
                                 for(var y=0; y<ref.servicegroups[name].length; y++) {
+                                    delete ref.servicegroups[name][y]['no_data'];
                                     ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
                                     ref.servicegroups[name][y].refreshHandler();
                                 }
@@ -1256,6 +1263,7 @@ var TP = {
                                         if(lastTrend) { data.services[x].trend = lastTrend; }
                                     }
 
+                                    delete ref.services[hst][svc][y]['no_data'];
                                     ref.services[hst][svc][y].service = data.services[x];
                                     ref.services[hst][svc][y].refreshHandler(state);
                                 }
@@ -1269,6 +1277,7 @@ var TP = {
                             var name = data.backends[key].name;
                             if(ref.sites[name]) {
                                 for(var x=0; x<ref.sites[name].length; x++) {
+                                    delete ref.sites[name][x]['no_data'];
                                     ref.sites[name][x].site = data.backends[key];
                                     ref.sites[name][x].refreshHandler();
                                 }
@@ -1306,6 +1315,7 @@ var TP = {
                         var name = keys[x];
                         for(var key in ref[name]) {
                             for(var y=0; y<ref[name][key].length; y++) {
+                                ref[name][key][y]['no_data'] = true;
                                 delete ref[name][key][y]['hostgroup'];
                                 delete ref[name][key][y]['host'];
                                 delete ref[name][key][y]['servicegroup'];
@@ -1320,6 +1330,7 @@ var TP = {
                     for(var key in ref.services) {
                         for(var key2 in ref.services[key]) {
                             for(var y=0; y<ref.services[key][key2].length; y++) {
+                                ref.services[key][key2][y]['no_data'] = true;
                                 ref.services[key][key2][y].refreshHandler(3);
                                 delete ref.services[key][key2][y]['service'];
                             }

@@ -699,7 +699,20 @@ Ext.define('TP.DashboardStatusIcon', {
                 This.callParent([newStatus]);
                 return;
             }
-            TP.add_pantab(tab_id, undefined, true, Ext.bind(This.refreshHandler, This, [newStatus, skipUpdate]));
+            TP.add_pantab(tab_id, undefined, true, function(id, success, response) {
+                if(success) {
+                    This.refreshHandler(newStatus, skipUpdate);
+                } else {
+                    // pass unknown state back to the parent
+                    This.downtime     = false;
+                    This.acknowledged = false;
+                    This.hostProblem  = false;
+                    This.xdata.state  = 3;
+                    newStatus         = 3;
+                    skipUpdate        = true;
+                    This.refreshHandler(newStatus, skipUpdate);
+                }
+            });
             return;
         }
         if(tab.rendered) { skipUpdate = true; }
