@@ -1459,6 +1459,13 @@ sub get_perf_image {
     # create fake session
     my $sessionid = get_fake_session($c);
     local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
+
+    # call login hook, because it might transfer our sessions to remote graphers
+    if($c->config->{'cookie_auth_login_hook'}) {
+        my $cookie_hook = 'REMOTE_USER="'.$c->stash->{'remote_user'}.'" '.$c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &';
+        `$cookie_hook`;
+    }
+
     my($fh, $filename) = tempfile();
     CORE::close($fh);
     my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$source.'"';
