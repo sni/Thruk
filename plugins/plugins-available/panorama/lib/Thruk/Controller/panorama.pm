@@ -1578,7 +1578,11 @@ sub _task_hosts {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1, extra_columns => [qw/long_plugin_output/]);
+    my $data = $c->{'db'}->get_hosts(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
+                                     pager         => 1,
+                                     extra_columns => [qw/long_plugin_output/],
+                                     sort          => { ASC => [ 'name' ] },
+                                    );
 
     my $json = {
         columns => [
@@ -1648,7 +1652,11 @@ sub _task_services {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], pager => 1, extra_columns => [qw/long_plugin_output/]);
+    $c->{'db'}->get_services(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
+                             pager         => 1,
+                             extra_columns => [qw/long_plugin_output/],
+                             sort          => { ASC => [ 'host_name',   'description' ] },
+                            );
 
     my $json = {
         columns => [
