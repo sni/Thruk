@@ -2626,6 +2626,20 @@ sub _parse_date {
     return $timestamp;
 }
 
+########################################
+
+=head2 convert_wildcards_to_regex
+
+    convert_wildcards_to_regex($string)
+
+returns regular expression with wildcards replaced
+
+=cut
+sub convert_wildcards_to_regex {
+    my($str) = @_;
+    $str =~ s/^\*/.*/gmx;
+    return($str);
+}
 ##############################################
 
 1;

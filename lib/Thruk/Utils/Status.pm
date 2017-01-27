@@ -294,8 +294,7 @@ sub classic_filter {
         if( CORE::index( $host, '*' ) >= 0 ) {
             # convert wildcards into real regexp
             my $searchhost = $host;
-            $searchhost =~ s/\.\*/*/gmx;
-            $searchhost =~ s/\*/.*/gmx;
+            $searchhost = Thruk::Utils::convert_wildcards_to_regex($searchhost);
             $errors++ unless Thruk::Utils::is_valid_regular_expression( $c, $searchhost );
             push @hostfilter,    [ { 'name'      => { '~~' => $searchhost } } ];
             push @servicefilter, [ { 'host_name' => { '~~' => $searchhost } } ];
@@ -741,8 +740,7 @@ sub single_search {
 
                 # convert wildcards into real regexp
                 my $searchhost = $value;
-                $searchhost =~ s/\.\*/*/gmx;
-                $searchhost =~ s/\*/.*/gmx;
+                $searchhost = Thruk::Utils::convert_wildcards_to_regex($searchhost);
                 push @hostfilter,          { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
                 push @hosttotalsfilter,    { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
                 push @servicefilter,       { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };

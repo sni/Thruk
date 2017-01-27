@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Business Process:
+            - add support for simple wildcards, ex.: host:*
           - Panorama View:
             - honor acknowledgement and downtime status shape color calculation
             - fix shape color for host problems in group/dashboard panels

@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 69;
+    plan tests => 75;
 
     use lib('t');
     require TestUtils;
@@ -270,5 +270,13 @@ for my $l (@{$locations}) {
     is(Thruk::Utils::CookieAuth::get_netloc($l->[0]), $l->[1], "get_netloc for ".$l->[0]." is ".$l->[1]);
 }
 
+#########################
+# wildcard expansion
+is('',          Thruk::Utils::convert_wildcards_to_regex(''), 'empty wildcard');
+is('.*',        Thruk::Utils::convert_wildcards_to_regex('*'), 'simple wildcard');
+is('.*',        Thruk::Utils::convert_wildcards_to_regex('.*'), 'regex wildcard');
+is('a*',        Thruk::Utils::convert_wildcards_to_regex('a*'), 'letter wildcard');
+is('a+',        Thruk::Utils::convert_wildcards_to_regex('a+'), 'normal regex 1');
+is('^a(b|c)d*', Thruk::Utils::convert_wildcards_to_regex('^a(b|c)d*'), 'normal regex 2');
 
 #########################
