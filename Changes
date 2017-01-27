@@ -6,6 +6,7 @@ next:
           - Panorama View:
             - honor acknowledgement and downtime status shape color calculation
             - fix shape color for host problems in group/dashboard panels
+            - fix saving column width for grid panels
 
 2.12-3   Tue Dec 20 20:43:54 CET 2016
           - fix js error on status page

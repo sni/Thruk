@@ -132,7 +132,7 @@ Ext.define('TP.GridLoader', {
                 try {
                     this.grid.applyState(this.initialState);
                 } catch(err) {
-                    TP.logError(panel.id, "gridApplyStateException", err);
+                    //TP.logError(panel.id, "gridApplyStateException", err);
                 }
             }
             if(this.xdata.gridstate != undefined) {
@@ -147,9 +147,12 @@ Ext.define('TP.GridLoader', {
             if(changed && columns) {
                 for(var x=0; x<columns.length; x++) {
                     if(columns[x].hidden != undefined) {
-                        // toggle header once to workaround a display clitch
+                        // toggle header once to workaround a display glitch
                         this.grid.columns[x].setVisible(columns[x].hidden);
                         this.grid.columns[x].setVisible(!columns[x].hidden);
+                    }
+                    if(columns[x].width != undefined) {
+                        this.grid.columns[x].setWidth(columns[x].width);
                     }
                 }
             }
@@ -213,6 +216,14 @@ Ext.define('TP.PanletGrid', {
                     } else {
                         panlet.xdata.groupField = undefined;
                     }
+
+                    // save columns width explitcitly
+                    for(var x=0; x<panlet.grid.columns.length; x++) {
+                        if(!panlet.grid.columns[x].isHidden()) {
+                            state.columns[x].width = panlet.grid.columns[x].getWidth();
+                        }
+                    }
+
                     panlet.saveState();
                     return false;
                 },
