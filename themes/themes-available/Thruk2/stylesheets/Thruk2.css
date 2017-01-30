@@ -86,8 +86,8 @@
   margin:0 0 15px;
 }
 
-#search-results {
-  background:#FFCD00;
+#search-results,.navsectiontitle, input.top_nav_pref_button, button.top_nav_pref_button, .btn-round {
+  background:#ffcd00;
 }
 
 #splashpage #mainfooter {
@@ -175,7 +175,6 @@ DIV.infoMessage {
 }
 
 .navsectiontitle {
-  background-color:#FFCD00;
   font-size:14px;
   font-family: 'Roboto-Bold';
   height:30px;
@@ -1288,15 +1287,14 @@ body.avail TD.dataOdd, body.avail TD.dataEven {
 }
 
 DIV.health_bar_bg {
-    width:100px;
-    height: 20px;
-    background: #DDDDDD;
+  width:100px;
+  height: 20px;
+  background: #DDDDDD;
 }
 
 input.top_nav_pref_button, button.top_nav_pref_button {
-    background-color: #ffcd00;
-    border: none;
-    height: 16px;
+  border: none;
+  height: 16px;
 }
 
 .homepageURL, .checkforupdates, .disclaimer, DIV#mainfooter DIV.logos, SPAN.infoboxlinks {
@@ -1328,9 +1326,6 @@ TABLE.pref_pane TH {
   white-space: nowrap;
 }
 
-.btn-round{
-  background-color: #ffcd00;
-}
 .filter_button{
   background-color: #ffffff;
 }
