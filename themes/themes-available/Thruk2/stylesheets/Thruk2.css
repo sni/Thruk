@@ -177,7 +177,7 @@ DIV.infoMessage {
 .navsectiontitle {
   background-color:#FFCD00;
   font-size:14px;
-    font-family: 'Roboto-Bold';
+  font-family: 'Roboto-Bold';
   height:30px;
   line-height:30px;
   text-align:center;
@@ -1118,10 +1118,9 @@ TABLE.statusgroups {
   margin-bottom: 15px;
 }
 
-TABLE.status {
-  border-spacing: 0px;
-}
 TABLE.status TD {
+  padding-bottom: 0;
+  padding-top: 0;
   padding-left: 2px;
   padding-right: 2px;
 }
@@ -1407,6 +1406,10 @@ TABLE.site_panel_container {
   padding: 0;
 }
 
+#dfl_filterForm {
+  width: 99%;
+}
+
 TABLE.infoboxrow {
     margin-top: 2px;
 }
@@ -1425,4 +1428,19 @@ TABLE.top_nav {
 
 td.filterValue:hover, td.newfilter:hover, DIV#search-results ul li a.ajax_search_selected, DIV#search-results ul li a:hover, td.attrValue:hover {
   background-color:#ffcc80;
+}
+
+TD.plugin_output, TD.description, TD.name, TD.host_name {
+  white-space: nowrap;
+}
+TD.plugin_output {
+  overflow: hidden;
+  max-width: 50%;
+  width: 50%;
+  text-overflow: ellipsis;
+  max-width: 0;
+}
+
+TD.host_name > TABLE TD {
+  padding: 0;
 }
