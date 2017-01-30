@@ -101,8 +101,8 @@
       [% END%]
 
       [% IF lasthost != '' && lasthost != s.host_name %]
-      <tr><td colspan="6"></td></tr>
-      <tr><td colspan="6"></td></tr>
+      <tr class="spacerrow"><td colspan="6"></td></tr>
+      <tr class="spacerrow"><td colspan="6"></td></tr>
       [% END %]
 
       <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">

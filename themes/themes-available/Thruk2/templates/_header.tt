@@ -2,13 +2,14 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html[% IF minimal %] class='minimal'[% END %]>
   <head>
-    <title>[% title_prefix %][% title %]</title>
+    <title>[% title_prefix %][% escape_html(title) %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     [% SET page = 'status' IF page == '' %]
     [% PROCESS _common_css.tt %]
     [% PROCESS _common_js_files.tt %]
     [% PROCESS extra_headers.tt %]
     [% IF extra_header %][% extra_header %][% END %]
+    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
 
   <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %][% IF iframed %] iframed[% END %]' id='[% page %]'>
@@ -64,25 +65,21 @@
     <td>
       <input type="image" src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" class="btn-round top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
     </td>
-    <td>
-      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/settings.png" class="btn-round top_nav_pref_button noprint" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;">
+    <td class="top_nav_pref">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/settings.png" class="btn-round top_nav_pref_button noprint" title="preferences" alt="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;">
     </td>
-    [% IF show_top_pane %]
-    <td>
-      <input type="image" onClick="toggleTopPane(); return false;" src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn-round btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header">
-    <!--<a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>-->
-    </td>
-    [% END %]
     [% IF cookie_auth && show_logout_button %]
     <td class="top_nav_pref">
       <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top'>
-      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/logout.png" class="btn-round top_nav_pref_button noprint" title="logout" onMouseOver="button_over(this)" onMouseOut="button_out(this)">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/logout.png" class="btn-round top_nav_pref_button noprint" title="logout" alt="logout" onMouseOver="button_over(this)" onMouseOut="button_out(this)">
       </form>
+    </td>
+    [% END %]
+    [% IF show_top_pane %]
+    <td>
+      <input type="image" onClick="toggleTopPane(); return false;" src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn-round btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header">
     </td>
     [% END %]
   </tr>
 </table>
-[% IF show_top_pane %]
-<a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
-[% END %]
 [% END %]

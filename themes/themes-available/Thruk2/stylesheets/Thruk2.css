@@ -979,7 +979,7 @@ body {
   font-family: 'Roboto-Regular';
   font-size:11px;
   line-height:18px;
-  margin-top:25px;
+  margin-top:1px;
   margin-right:5px;
 }
 
@@ -1351,16 +1351,9 @@ body.avail TD.dataOdd, body.avail TD.dataEven {
     min-width: 160px;
 }
 
-.mainlogo {
-  width:  246px;
-  height: 246px;
-}
-
 .nav_small_logo {
-  margin: 10px;
+  margin: 5px;
   padding: 0px;
-  width:  128px;
-  height: 30px;
 }
 
 DIV.health_bar_bg {
@@ -1372,7 +1365,7 @@ DIV.health_bar_bg {
 input.top_nav_pref_button, button.top_nav_pref_button {
     background-color: #ffcd00;
     border: none;
-	height: 16px;
+    height: 16px;
 }
 
 .homepageURL, .checkforupdates, .disclaimer, DIV#mainfooter DIV.logos, SPAN.infoboxlinks {
@@ -1465,4 +1458,22 @@ TABLE.optBox{
 }
 DIV.bp_zoom_container{
     background-color:#ffffff;
+}
+
+TR.spacerrow {
+  display: none;
+}
+
+TABLE.site_panel_container {
+  margin-top: 25px;
+  padding: 0;
+}
+
+#dfl_filterForm, #hst_all_filter_table, #svc_all_filter_table {
+  position: absolute;
+  margin-top: 5px;
+}
+
+#top_pane {
+    margin-top: 2px;
 }
