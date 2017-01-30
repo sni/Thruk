@@ -2586,6 +2586,7 @@ themes/themes-available/Thruk2/images/extinfo.gif
 themes/themes-available/Thruk2/images/favicon.ico
 themes/themes-available/Thruk2/images/favicon_counter.png
 themes/themes-available/Thruk2/images/favicon_nocounter.png
+themes/themes-available/Thruk2/images/filter.png
 themes/themes-available/Thruk2/images/flapping.gif
 themes/themes-available/Thruk2/images/folder.png
 themes/themes-available/Thruk2/images/folder_brick.png
@@ -2696,7 +2697,6 @@ themes/themes-available/Thruk2/stylesheets/thruk_global.css
 themes/themes-available/Thruk2/stylesheets/thruk_noframes.css
 themes/themes-available/Thruk2/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Thruk2/stylesheets/trends.css
-themes/themes-available/Thruk2/templates/_header.tt
 themes/themes-available/Vautour/images/accept.png
 themes/themes-available/Vautour/images/ack.gif
 themes/themes-available/Vautour/images/action.gif

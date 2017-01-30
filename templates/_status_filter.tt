@@ -1,6 +1,6 @@
 ﻿[% SET show_filter_table = 0 IF hidesearch == "1" %]
 [% SET show_filter_table = 1 IF hidesearch == "2" %]
-<input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;">
+<button style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button open_filter_button" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
 [% IF show_form %]
 <form action="" method="GET" id="[% paneprefix %]filterForm">
 [%# make sure IE can submit form by pressing enter #%]

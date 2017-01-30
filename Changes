@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add new Thruk2 theme
           - Business Process:
             - add support for simple wildcards, ex.: host:*
           - Panorama View:

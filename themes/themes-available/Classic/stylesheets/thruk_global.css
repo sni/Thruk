@@ -1272,3 +1272,11 @@ TABLE.filter {
   height: 10px;
   background: transparent;
 }
+
+BUTTON.open_filter_button {
+  border: 0;
+  background: url('../images/icon_maximize.gif') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}

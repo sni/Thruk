@@ -55,13 +55,6 @@
       <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report" width="16" height="16"></a>
       [% END %]
     </td>
-    [% IF 0 %]
-    <!--
-    <td class="top_nav_pref">
-      <input type="button" class="top_nav_pref_button noprint" value="test error" title="test error" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="alert(nonexistant); return false;" style="margin-right: 30px;">
-    </td>
-    -->
-    [% END %]
     <td>
       <input type="image" src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
     </td>
@@ -71,7 +64,7 @@
     [% IF cookie_auth && show_logout_button %]
     <td class="top_nav_pref">
       <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top'>
-      <button class="top_nav_pref_button noprint" title="logout" onMouseOver="button_over(this)" onMouseOut="button_out(this)">logout</button>
+      <button class="top_nav_pref_button noprint top_nav_logout_button" title="logout" onMouseOver="button_over(this)" onMouseOut="button_out(this)">logout</button>
       </form>
     </td>
     [% END %]
