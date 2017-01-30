@@ -422,7 +422,7 @@ TABLE.cmd_pane th,TABLE.cmd_pane a,TABLE.cmd_pane a:hover {
 }
 
 
-.commandPanel {
+.commandPanel, .shadowcontent {
   border: 0px none;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
 }
@@ -631,6 +631,9 @@ TD.healthTitle,TD.perfTitle,TD.featureTitle,TD.outageTitle,TD.hostTitle,TD.servi
   margin:2px;
   text-align:center;
   vertical-align:middle;
+}
+TD.perfTitle A {
+  color:#f1f1f1;
 }
 TD.outageTitle {
   white-space: nowrap;
@@ -1335,7 +1338,7 @@ TABLE.pref_pane TH {
 .top_bug_button{
   background-color: #f0666c;
 }
-.btn-round,.filter_button,.top_bug_button{
+.btn-round,INPUT.filter_button,.top_bug_button{
   top:auto;
   bottom:auto;
   left:auto;
@@ -1400,7 +1403,8 @@ TABLE.site_panel_container {
 
 #dfl_filterForm, #hst_all_filter_table, #svc_all_filter_table {
   position: absolute;
-  margin-top: 5px;
+  margin: 0;
+  padding: 0;
 }
 
 TABLE.infoboxrow {
@@ -1409,4 +1413,16 @@ TABLE.infoboxrow {
 
 TABLE.logcache_stats TABLE {
   width: 560px;
+}
+
+TD.filter_button_cell {
+  height: 45px;
+}
+
+TABLE.top_nav {
+  margin-bottom: 5px;
+}
+
+td.filterValue:hover, td.newfilter:hover, DIV#search-results ul li a.ajax_search_selected, DIV#search-results ul li a:hover, td.attrValue:hover {
+  background-color:#ffcc80;
 }

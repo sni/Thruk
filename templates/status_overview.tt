@@ -47,7 +47,7 @@
     </table>
     <table border="0" width="100%" cellpadding=0 cellspacing=0>
       <tr>
-        <td valign="top" align="left" width="33%">
+        <td valign="top" align="left" width="33%" class="filter_button_cell">
           [% PROCESS _status_filter.tt %]
         </td>
 

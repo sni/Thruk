@@ -4516,7 +4516,6 @@ function add_new_filter(search_prefix, table) {
   var img            = document.createElement('input');
   img.type           = 'image';
   img.src            = url_prefix + "themes/"+theme+"/images/remove.png";
-  img.className      = 'filter_button';
   var newCell1       = newRow.insertCell(1);
   newCell1.onclick   = delete_filter_row;
   newCell1.className = "newfilter";

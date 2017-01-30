@@ -67,7 +67,7 @@
              </select>
            [% END %]
            [% IF loop.first %]
-              <input class="noprint" type="image" src="[% url_prefix %]themes/[% theme %]/images/config.png" style="padding-left: 25px; vertical-align: bottom;" name="columns" id="[% paneprefix %]_btn_columns" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]_columns_table'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;">
+              <input class="noprint" type="image" src="[% url_prefix %]themes/[% theme %]/images/config.png" style="padding-left: 25px; vertical-align: bottom;" name="columns" id="[% paneprefix %][% prefix %]_btn_columns" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]_columns_table'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;">
            [% END %]
           </td>
           <td align="right">
