@@ -40,7 +40,6 @@
 }
 /* roboto-condensed-700 - latin */
 @font-face {
-  /*font-family: 'Roboto Condensed Bold';*/
   font-family: 'Roboto-Bold';
   font-style: normal;
   font-weight: 700;
@@ -55,10 +54,10 @@
 
 
 #currentversioninfo {
-	font-size:14px;
-	background-color: #f1f1f1;
-	padding-top: 10px;
-	padding-bottom: 10px;
+  font-size:14px;
+  background-color: #f1f1f1;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 #currentversioninfo .product,#currentversioninfo .version {
@@ -101,14 +100,14 @@
 }
 
 #splashpage #mainfooter .logos {
-	border-top-width: 2px;
-	border-top-style: solid;
-	border-top-color: #738eb5;
-	margin-top: 15px;
-	margin-right: 0;
-	margin-bottom: 0;
-	margin-left: 0;
-	padding-top: 10px;
+  border-top-width: 2px;
+  border-top-style: solid;
+  border-top-color: #738eb5;
+  margin-top: 15px;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  padding-top: 10px;
 }
 
 #splashpage {
@@ -165,34 +164,28 @@ DIV.infoMessage {
 }
 
 .navsection {
-	line-height:16px;
-	margin:5px 0 10px;
+  line-height:16px;
+  margin:5px 0 10px;
 }
 
 .navsectionfooter {
-/*  background:#c9d4e3;*/
   background:#d9d9d9;
   height:7px;
   line-height:7px;
 }
 
 .navsectiontitle {
-	background-color:#FFCD00;
-	font-size:14px;
+  background-color:#FFCD00;
+  font-size:14px;
     font-family: 'Roboto-Bold';
-	height:30px;
-	line-height:30px;
-	text-align:center;
-	vertical-align:bottom;
-/*
-	border-top-width: 2px;
-	border-top-style: solid;
-	border-top-color: #FFCD00;
-*/
-	cursor: pointer;
+  height:30px;
+  line-height:30px;
+  text-align:center;
+  vertical-align:bottom;
+  cursor: pointer;
 }
 .navsectiontitle:hover {
-	background-color:#FFDC4F;
+  background-color:#FFDC4F;
 }
 
 .notificationsDISABLED,.queueDISABLED,.checksDISABLED,.eventhandlersDISABLED,.flapdetectionDISABLED,.flapping,.downtimeACTIVE,.processCRITICAL,.hostDOWN,.hostUNREACHABLE,.serviceCRITICAL,input.button_peerDOWN,.peerDOWN {
@@ -260,11 +253,6 @@ td.outageUnimportantProblem a,td.hostUnimportantProblem a,td.serviceUnimportantP
   background-color:#ffe57b;
 }
 
-/*
-td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:hover, .tableRowHover,td.newfilter:hover {
-	background-color:#deff00;
-}
-*/
 TD.statusEven.tableRowSelected {
   background:#ffdc4f !important;
   height:22px;
@@ -275,9 +263,6 @@ TD.statusOdd.tableRowSelected {
 }
 
 DIV.blockHead,DIV.commandTitle {
-  /*background-color:#eaeff6;*/
-  /*background-image:url(../images/border_big.gif);
-  background-repeat:repeat-x;*/
   font-size:14px;
   font-family: 'Roboto-Bold';
   line-height:16px;
@@ -339,7 +324,6 @@ DIV.errorMessage {
 
 DIV.hostTotals,DIV.serviceTotals,DIV.status {
   font-size:11px;
-  /*font-family: 'Roboto-Bold';*/
   margin-bottom:2px;
 }
 
@@ -377,28 +361,28 @@ DIV.statusTitle,DIV.dateSelectTitle,DIV.navBoxTitle {
 }
 
 DIV.dataTitle {
-	font-size:18px;
+  font-size:18px;
     font-family: 'Roboto-Bold';
 }
 
 DIV.commentTitle {
-	font-size:18px;
+  font-size:18px;
     font-family: 'Roboto-Bold';
 }
 
 DIV.downtimeTitle {
-	font-size:18px;
+  font-size:18px;
     font-family: 'Roboto-Bold';
 }
 
 DIV.reportSelectTitle {
-	font-size:18px;
+  font-size:18px;
     font-family: 'Roboto-Bold';
 }
 
 DIV.statusTitle {
     font-family: 'Roboto-Bold';
-	font-size: 18px;
+  font-size: 18px;
 }
 
 TABLE.cmd_pane {
@@ -504,13 +488,6 @@ TABLE.filter {
 TD.filterTitle {
   height: 28px;
 }
-/*TABLE.filter_table {
-  background-color:#fff;
-  border-bottom:1px #E2DECD outset;
-  border-left:1px #E2DECD outset;
-  border-right:1px #E2DECD outset;
-  padding-left:5px;
-}*/
 
 TABLE.infoBox {
   background-color:#ffffff;
@@ -525,21 +502,18 @@ TABLE.infoBox {
 }
 
 TABLE.linkBox {
-	background-color:#fff;
-    /* border:1px #5777A6 outset; */
-    border: 0px none;
-    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-	/*margin-top: 12px;*/
-	padding-top: 3px;
-	padding-right: 3px;
-	padding-bottom: 3px;
-	padding-left: 5px;
-	width: 280px;
-	margin-bottom: 12px;
+  background-color:#fff;
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  padding-top: 3px;
+  padding-right: 3px;
+  padding-bottom: 3px;
+  padding-left: 5px;
+  width: 280px;
+  margin-bottom: 12px;
 }
 
 TABLE.logEntries {
-/*  background-color:#eaeff6;*/
   background-color:#d9d9d9;
   border:1px #E2DECD outset;
   margin:2px;
@@ -556,12 +530,6 @@ TABLE.overDivHead {
   padding:3px;
 }
 
-/*TABLE.optBox {
-  padding: 2px;
-  padding-right: 5px;
-  background: rgba(255, 255, 255, 0.3);
-}*/
-
 TABLE.perfTitleTable,TABLE.perfTitleTable TD,TABLE.perfTitleTable TR {
   border-spacing:0;
   margin:0;
@@ -572,7 +540,6 @@ TABLE.serviceTotals,TABLE.hostTotals {
   color:#5f6268;
   background-color: #ffffff;
   border: 0px none;
-/*  border:1px #d9d9d9 outset; */
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
   margin:2px;
   text-align:center;
@@ -650,22 +617,11 @@ TD.filterName {
 
 TD.healthBox,TD.perfBox,TD.featureHeader,TD.outageHeader,TD.hostHeader,TD.serviceHeader {
   background-color:#ffffff;
-  /*border-bottom:1px #5778A6 outset;
-  border-left:1px #5778A6 outset;
-  border-right:1px #5778A6 outset;*/
   height:20px;
   padding-left:5px;
 }
 
 TD.healthTitle,TD.perfTitle,TD.featureTitle,TD.outageTitle,TD.hostTitle,TD.serviceTitle {
-  /*background-image:url(../images/border_big.gif);
-  background-repeat:repeat-x;*/
-/*  border-left:1px #5778A6 outset;
-  border-left:1px #5778A6 outset;
-  border-right:1px #5778A6 outset;*/
-/*  border-top:1px #d9d9d9 outset;
-  border-right:1px #d9d9d9 outset;
-  border-top:1px #d9d9d9 outset;*/
   background-color:#5f6268;
   color:#f1f1f1;
   font-size:12px;
@@ -764,7 +720,6 @@ TD.logEntriesWARNING {
 
 TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
   background-color:#f0666c;
-  /*font-family: 'Roboto-Bold';*/
   padding:2px;
   text-align:center;
   color:#ffffff;
@@ -775,7 +730,6 @@ TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
 
 TD.miniStatusPENDING {
   background-color:#ACACAC;
-  /*font-family: 'Roboto-Bold';*/
   padding:2px;
   text-align:center;
 }
@@ -788,7 +742,6 @@ TD.miniStatusUNKNOWN {
 
 TD.miniStatusUP,TD.miniStatusOK {
   background-color:#33cc66;
-  /*font-family: 'Roboto-Bold';*/
   padding:2px;
   text-align:center;
   color:#ffffff;
@@ -799,16 +752,13 @@ TD.miniStatusUP,TD.miniStatusOK {
 
 TD.miniStatusWARNING {
   background-color:#ffcd00;
-  /*font-family: 'Roboto-Bold';*/
   padding:2px;
   text-align:center;
 }
 
 TD.navBoxItem,TD.navBoxDate,TD.optBoxItem,TD.optBoxRequiredItem {
-	font-size:11px;
-    font-family: 'Roboto-Bold';
-	/*background-color: #f1f1f1;*/
-	/*background-color: #ffffff;*/
+  font-size:11px;
+  font-family: 'Roboto-Bold';
 }
 
 TD.optBoxRequiredItem {
@@ -859,7 +809,7 @@ TD.serviceTotalsWARNING {
 }
 
 TD.stateInfoTable1 > TABLE,TD.stateInfoTable2 > TABLE {
-	width: 260px;
+  width: 260px;
 }
 
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
@@ -941,7 +891,6 @@ TH.serviceTotals {
 TH.status,TH.data,TH.logEntries,TH.comment,TH.downtime,TH.queue,TH.notifications {
   font-family: 'Roboto-Bold';
   text-align:left;
-  /*background-color:#f1f1f1;*/
   background-color:#5f6268;
   color:#f1f1f1;
   border: 0px none;
@@ -973,7 +922,6 @@ a:hover {
 
 body {
   background:#f1f1f1 url(../images/bg.png) repeat-x;
-  /*background-size: cover;*/
   background-attachment: scroll;
   color:#5f6268;
   font-family: 'Roboto-Regular';
@@ -992,18 +940,12 @@ body.config TH.data {
   padding:5px;
 }
 
-/*body.navbar {
-  background-color:#d9d9d9;
-}*/
-
 div.navbar {
   background:#d9d9d9 url(../images/bg.png) repeat-x;
-  /*background-color:#f1f1f1;*/
   border:0 none;
   text-align: center;
   margin: 0px;
   line-height: 18px;
-  /*top: -6px*/
 }
 div.navbar img {
   position: relative;
@@ -1058,13 +1000,13 @@ TABLE.status tbody tr TABLE#multi_table td.tableRowHover {
 }
 
 ul.navsectionlinks {
-	background-color:#d9d9d9;
-	list-style:none;
-	margin:0;
-	padding:0;
-	border-bottom-width: 1px;
-	border-bottom-style: solid;
-	border-bottom-color: #b3b3b3;
+  background-color:#d9d9d9;
+  list-style:none;
+  margin:0;
+  padding:0;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #b3b3b3;
 }
 
 ul.navsectionlinks li a {
@@ -1126,22 +1068,14 @@ TD.extdetails > TABLE {
   width: 100%;
 }
 
-/*TH.conftoolheader {
-  border-bottom: 5px solid #eaeff6;
-}*/
-
 TABLE.blockHeadBorder, DIV.blockHeadBorder {
   border: 0px none;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-  /*border-top: 1px #5778A6 outset;
-  border-left: 1px #5778A6 outset;
-  border-right: 1px #5778A6 outset;*/
   line-height: 18px;
   height: 20px;
   font-size: 16px;
   font-family: 'Roboto-Bold';
   white-space: nowrap;
-  /*color: #06507f;*/
   background-color:#ffffff;
 }
 
@@ -1149,7 +1083,6 @@ TABLE.cmdOptBox,TABLE.commandDescription {
   background-color:#ffffff;
   border: 0px none;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-  /*border:1px #5778A6 outset;*/
   border-spacing:0;
   margin:0;
   padding:0;
@@ -1197,9 +1130,6 @@ TABLE.status {
   border-spacing: 0px;
   border: 0px none;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-}
-TABLE.servicestatus > TBODY > TR > TH {
-
 }
 
 TABLE.status > TBODY > TR > TD {
@@ -1262,7 +1192,6 @@ TABLE.extdetails DIV.flapdetectionENABLED
 }
 
 TABLE.extdetails TD.extdetails {
-/*  border-bottom: 1px solid #5778A6;*/
   border-bottom: 1px solid #d9d9d9;
 }
 
@@ -1309,8 +1238,8 @@ IMG.crit_icon {
   vertical-align: text-bottom;
 }
 
-DIV.extinfo4 TD {
- /*  white-space: nowrap; */
+DIV.extinfo4 td.stateInfoTable1 TD {
+  white-space: nowrap;
 }
 
 DIV.reportRange {
@@ -1474,6 +1403,10 @@ TABLE.site_panel_container {
   margin-top: 5px;
 }
 
-#top_pane {
+TABLE.infoboxrow {
     margin-top: 2px;
+}
+
+TABLE.logcache_stats TABLE {
+  width: 560px;
 }

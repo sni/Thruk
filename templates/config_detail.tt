@@ -1,6 +1,6 @@
 ﻿[% PROCESS _header.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
       <tr>
         <td align="left" valign="bottom" width="20%">
           [% PROCESS _infobox.tt %]

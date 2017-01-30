@@ -4,7 +4,7 @@
 [% PROCESS _sounds.tt %]
 [% PROCESS _blocks.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %] class="infoboxrow">
       <tr>
         <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]
