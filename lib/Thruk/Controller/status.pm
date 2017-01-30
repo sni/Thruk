@@ -367,7 +367,6 @@ sub _process_search_request {
 
     # search pattern is in host param
     my $host = $c->req->parameters->{'host'};
-    $c->req->parameters->{'hidesearch'} = 2;    # force show search
 
     return ('detail') unless defined $host;
 

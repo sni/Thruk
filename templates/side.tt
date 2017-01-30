@@ -58,7 +58,6 @@
               <fieldset>
                 <legend>[% link.name %]</legend>
                 [% IF use_new_search%]
-                <input type='hidden' name='hidesearch' value='2' />
                 <input type='hidden' name='s0_op' value='~' id="s0_to" />
                 <input type='hidden' name='s0_type' value='search' />
                 <input type='hidden' name='add_default_service_filter' value='1' />
