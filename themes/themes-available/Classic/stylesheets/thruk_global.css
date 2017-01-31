@@ -1023,6 +1023,7 @@ DIV.perf_bar_bg {
     -webkit-border-radius: 3px;
             border-radius: 3px;
     text-align: left;
+    position: relative; /* text is above background otherwise */
 }
 
 IMG.perf_bar {
