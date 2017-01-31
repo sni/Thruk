@@ -123,7 +123,7 @@ sub begin {
         $c->stash->{additional_template_paths} = [ $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates' ];
     }
     $c->stash->{all_in_one_css} = 0;
-    if($theme eq 'Thruk') {
+    if($theme eq 'Thruk' || $theme eq 'Thruk2') {
         $c->stash->{all_in_one_css} = 1;
     }
 

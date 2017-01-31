@@ -108,6 +108,8 @@ my $cmds = [
     'cd root/thruk/javascript && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one-'.$version.'.js',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$version.'.css',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$version.'.css',
+    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes2'}}).' > all_in_one_noframes-'.$version.'.css',
+    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames2'}}).' > all_in_one-'.$version.'.css',
     'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
 ];
 if($dos2unix) {
@@ -129,6 +131,8 @@ if($skip_compress) {
 my $files = [
     'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.'.css',
     'themes/themes-available/Thruk/stylesheets/all_in_one-'.$version.'.css',
+    'themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-'.$version.'.css',
+    'themes/themes-available/Thruk2/stylesheets/all_in_one-'.$version.'.css',
 ];
 for my $file (@{$files}) {
     my $cmd = $yuicompr.' -o compressed.css '.$file.' && mv compressed.css '.$file;
@@ -144,7 +148,6 @@ unlink('tmp.css');
 # try to minify js
 my $jsfiles = [
     'root/thruk/javascript/all_in_one-'.$version.'.js',
-#    $all_in_one_panorama,
 ];
 for my $file (@{$jsfiles}) {
     my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;

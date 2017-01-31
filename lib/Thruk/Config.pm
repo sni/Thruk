@@ -189,6 +189,15 @@ our %config = ('name'                   => 'Thruk',
                                               'thruk_noframes.css',
                                               'Thruk.css',
                                           ],
+                                          'all_in_one_css_frames2' => [
+                                               'thruk_global.css',
+                                               'Thruk2.css',
+                                          ],
+                                          'all_in_one_css_noframes2' => [
+                                              'thruk_global.css',
+                                              'thruk_noframes.css',
+                                              'Thruk2.css',
+                                          ],
                                           'jquery_ui' => '1.10.3',
                                           'all_in_one_javascript_panorama' => [
                                               'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',

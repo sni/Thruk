@@ -2,11 +2,11 @@
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/common.css' />
 [% IF page != "" %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />[% END %]
 [% END %]
-[% IF theme != 'Thruk' || thruk_debug %]
+[% IF !all_in_one_css || thruk_debug %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css' />
 [%+ END %]
 [% UNLESS use_frames %]
-  [% IF theme != 'Thruk' || thruk_debug %]
+  [% IF !all_in_one_css || thruk_debug %]
   <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes.css' />
   [%+ END %]
   <!--[if IE 5]>
@@ -16,10 +16,10 @@
   <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
   <![endif]-->
 [% END %]
-[% IF theme != 'Thruk' || thruk_debug %]
+[% IF !all_in_one_css || thruk_debug %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' />
 [%+ END %]
-[% IF theme == 'Thruk' && !thruk_debug %]
+[% IF all_in_one_css && !thruk_debug %]
   [% IF use_frames %]
   <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/all_in_one-[% version %]-[% filebranch %].css' />
   [%+ ELSE %]

@@ -85,12 +85,14 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
     if [ -e root/thruk/javascript/all_in_one-${VERSION}-${BRANCH}.js ]; then
         mv root/thruk/javascript/all_in_one-${VERSION}-${BRANCH}.js root/thruk/javascript/all_in_one-$fileversion.js
     fi
-    if [ -e themes/themes-available/Thruk/stylesheets/all_in_one-${VERSION}-${BRANCH}.css ]; then
-        mv themes/themes-available/Thruk/stylesheets/all_in_one-${VERSION}-${BRANCH}.css themes/themes-available/Thruk/stylesheets/all_in_one-$fileversion.css
-    fi
-    if [ -e themes/themes-available/Thruk/stylesheets/all_in_one_noframes-${VERSION}-${BRANCH}.css ]; then
-        mv themes/themes-available/Thruk/stylesheets/all_in_one_noframes-${VERSION}-${BRANCH}.css themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$fileversion.css
-    fi
+    for theme in Thruk Thruk2; do
+        if [ -e themes/themes-available/${theme}/stylesheets/all_in_one-${VERSION}-${BRANCH}.css ]; then
+            mv themes/themes-available/${theme}/stylesheets/all_in_one-${VERSION}-${BRANCH}.css themes/themes-available/${theme}/stylesheets/all_in_one-$fileversion.css
+        fi
+        if [ -e themes/themes-available/${theme}/stylesheets/all_in_one_noframes-${VERSION}-${BRANCH}.css ]; then
+            mv themes/themes-available/${theme}/stylesheets/all_in_one_noframes-${VERSION}-${BRANCH}.css themes/themes-available/${theme}/stylesheets/all_in_one_noframes-$fileversion.css
+        fi
+    done
     if [ -e plugins/plugins-available/panorama/root/all_in_one-${VERSION}-${BRANCH}_panorama.js ]; then
         mv plugins/plugins-available/panorama/root/all_in_one-${VERSION}-${BRANCH}_panorama.js plugins/plugins-available/panorama/root/all_in_one-${fileversion}_panorama.js
     fi
