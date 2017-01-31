@@ -1047,8 +1047,8 @@ sub _process_combined_page {
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
-    my $selected_hst_columns = $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
-    my $selected_svc_columns = $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
+    my $selected_hst_columns = $c->req->parameters->{'hst_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
+    my $selected_svc_columns = $c->req->parameters->{'svc_columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'};
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     $c->stash->{'default_columns'}->{'hst_'} = Thruk::Utils::Status::get_host_columns($c);
     $c->stash->{'default_columns'}->{'svc_'} = Thruk::Utils::Status::get_service_columns($c);
