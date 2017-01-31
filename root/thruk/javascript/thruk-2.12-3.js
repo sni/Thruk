@@ -4216,15 +4216,11 @@ function toggleFilterPane(prefix) {
     showElement(prefix+'all_filter_table');
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
-    additionalParams['hidesearch'] = 2;
-    document.getElementById('hidesearch').value = 2;
   }
   else {
     hideElement(prefix+'all_filter_table');
     img.style.display     = '';
     img.style.visibility  = 'visible';
-    additionalParams['hidesearch'] = 1;
-    document.getElementById('hidesearch').value = 1;
   }
 }
 
@@ -4821,6 +4817,17 @@ function verify_op(event) {
   if(selValue == 'execution time') {
     input.title = "Execution Time: Input type is seconds. You may use w (week) or d (day), h (hour) or m (minutes). Ex.: 10m for 10 minutes.";
   }
+}
+
+/* remove columns from get parameters when style has changed */
+function check_filter_style_changes(form, pageStyle, columnFieldId) {
+  var s_data = jQuery(form).serializeArray();
+  for(var i=0; i<s_data.length; i++){
+    if(s_data[i].name == "style" && s_data[i].value != pageStyle) {
+        jQuery('#'+columnFieldId).val("");
+    }
+  }
+  return true;
 }
 
 /* select option from a select by value*/

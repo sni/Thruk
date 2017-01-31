@@ -20,10 +20,10 @@
                 <th colspan=2 class="drag_hint">reorder columns with drag/drop<br>rename with double click</th>
               </tr>
               <tr>
-                <th colspan=2 class="drag_hint"><input type="button" value="use as my default service columns" onclick='setDefaultColumns("hst", "[% paneprefix %]")'></th>
+                <th colspan=2 class="drag_hint"><input type="button" value="use as my default host columns" onclick='setDefaultColumns("hst", "[% paneprefix %]")'></th>
               </tr>
               <tr>
-                <th colspan=2 class="drag_hint"><input type="button" class="[% paneprefix %]_reset_columns_btn" value="reset my default service columns" onclick='setDefaultColumns("hst", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]></th>
+                <th colspan=2 class="drag_hint"><input type="button" class="[% paneprefix %]_reset_columns_btn" value="reset my default host columns" onclick='setDefaultColumns("hst", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]></th>
               </tr>
             </thead>
             <tbody>

@@ -2,7 +2,7 @@
 [% SET show_filter_table = 1 IF hidesearch == "2" %]
 <button style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button open_filter_button" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
 [% IF show_form %]
-<form action="" method="GET" id="[% paneprefix %]filterForm">
+<form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns'));">
 [%# make sure IE can submit form by pressing enter #%]
 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="nav" value="[% nav %]">
