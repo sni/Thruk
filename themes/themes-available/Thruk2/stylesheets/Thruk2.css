@@ -890,7 +890,7 @@ TH.serviceTotals {
   width:20%;
 }
 
-TH.status,TH.data,TH.logEntries,TH.comment,TH.downtime,TH.queue,TH.notifications {
+TH.status,TH.data,TH.logEntries,TH.comment,TH.downtime,TH.queue,TH.notifications,TABLE.blockHeadBorder, DIV.blockHeadBorder {
   font-family: 'Roboto-Bold';
   text-align:left;
   background-color:#5f6268;
@@ -1073,12 +1073,7 @@ TD.extdetails > TABLE {
 TABLE.blockHeadBorder, DIV.blockHeadBorder {
   border: 0px none;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-  line-height: 18px;
-  height: 20px;
-  font-size: 16px;
-  font-family: 'Roboto-Bold';
-  white-space: nowrap;
-  background-color:#ffffff;
+  text-align: center;
 }
 
 TABLE.cmdOptBox,TABLE.commandDescription {
@@ -1382,6 +1377,8 @@ SPAN.deleteicon SPAN {
     width: 14px;
     height: 14px;
     background: url('../images/btn_close_small.png');
+    background-repeat: no-repeat;
+    background-position: center;
     cursor: pointer;
 }
 div.logEntries,TABLE.conftoolobj,TABLE.conftool,TABLE.conftoolusers{
