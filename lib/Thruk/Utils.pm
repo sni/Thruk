@@ -1432,6 +1432,7 @@ sub get_perf_image {
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
+        undef $source if(defined $source && $source eq 'null');
         $source = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $source;
         $grafanaurl .= '&panelId='.$source;
         if($resize_grafana_images) {
@@ -1462,7 +1463,7 @@ sub get_perf_image {
 
     # call login hook, because it might transfer our sessions to remote graphers
     if($c->config->{'cookie_auth_login_hook'}) {
-        my $cookie_hook = 'REMOTE_USER="'.$c->stash->{'remote_user'}.'" '.$c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &';
+        my $cookie_hook = 'REMOTE_USER="'.$c->stash->{'remote_user'}.'" '.$c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1';
         `$cookie_hook`;
     }
 
