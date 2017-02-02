@@ -194,10 +194,10 @@ exit 0
 # restore themes and plugins
 if [ -d /tmp/thruk_update/themes/. ]; then
   # do not remove the new default theme
-  mv /etc/thruk/themes/themes-enabled/Thruk2 /etc/thruk/themes/themes-enabled/.Thruk2
+  test -h /tmp/thruk_update/themes/Thruk2 || mv /etc/thruk/themes/themes-enabled/Thruk2 /etc/thruk/themes/themes-enabled/.Thruk2
   rm -f /etc/thruk/themes/themes-enabled/*
   cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
-  mv /etc/thruk/themes/themes-enabled/.Thruk2 /etc/thruk/themes/themes-enabled/Thruk2
+  test -h /etc/thruk/themes/themes-enabled/.Thruk2 && mv /etc/thruk/themes/themes-enabled/.Thruk2 /etc/thruk/themes/themes-enabled/Thruk2
 fi
 if [ -d /tmp/thruk_update/plugins/. ]; then
   rm -f /etc/thruk/plugins/plugins-enabled/*
