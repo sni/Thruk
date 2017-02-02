@@ -55,7 +55,6 @@
 
 #currentversioninfo {
   font-size:14px;
-  background-color: #f1f1f1;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -88,26 +87,6 @@
 
 #search-results,.navsectiontitle, input.top_nav_pref_button, .btn-round, input.top_refresh_button, BUTTON.top_nav_logout_button {
   background:#ffcd00;
-}
-
-#splashpage #mainfooter {
-  margin:100px 0 0;
-}
-
-#splashpage #mainfooter .disclaimer {
-  margin:auto;
-  width:80%;
-}
-
-#splashpage #mainfooter .logos {
-  border-top-width: 2px;
-  border-top-style: solid;
-  border-top-color: #738eb5;
-  margin-top: 15px;
-  margin-right: 0;
-  margin-bottom: 0;
-  margin-left: 0;
-  padding-top: 10px;
 }
 
 #splashpage {
@@ -1309,10 +1288,6 @@ BUTTON.top_nav_logout_button {
   overflow: hidden;
 }
 
-.homepageURL, .checkforupdates, .disclaimer, DIV#mainfooter DIV.logos, SPAN.infoboxlinks {
-  display:none;
-}
-
 BODY.splashpage DIV.infoBoxTitle {
     line-height: normal;
 }
@@ -1466,4 +1441,31 @@ BUTTON.open_filter_button {
   width: 40px !important;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+body.loginpage TABLE.infoBox {
+  border-radius: 5px;
+  background-color: #cfd8dc;
+}
+
+body.loginpage {
+  min-height: 99.5vh;
+  background: #f1f1f1;
+  background: -webkit-linear-gradient(#f1f1f1, #cfd8dc); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#f1f1f1, #cfd8dc); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#f1f1f1, #cfd8dc); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#f1f1f1, #cfd8dc); /* Standard syntax */
+}
+
+body.loginpage DIV#mainfooter {
+  opacity: 0.1;
+}
+
+body.loginpage DIV#mainfooter:hover {
+  opacity: 1;
+  filter:alpha(opacity=100);
+ -webkit-transition: all 0.5s ease-in-out;
+ -moz-transition: all 0.5s ease-in-out;
+ -o-transition: all 0.5s ease-in-out;
+ transition: all 0.5s ease-in-out;
 }
