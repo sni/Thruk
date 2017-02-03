@@ -55,11 +55,15 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}
     my @s   = stat('themes/themes-available/Thruk/stylesheets/'.$file);
     $newest = $s[9] if $newest < $s[9];
 }
-my $css_required = 1;
-if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.'.css') {
-    my @s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.'.css');
-    if($s[9] >= $newest) {
-        $css_required = 0;
+my $css_required = 0;
+for my $theme (qw/Thruk Thruk2/) {
+    if(!-e 'themes/themes-available/'.$theme.'/stylesheets/all_in_one_noframes-'.$version.'.css') {
+        $css_required = 1;
+    } else {
+        my @s = stat('themes/themes-available/'.$theme.'/stylesheets/all_in_one_noframes-'.$version.'.css');
+        if($s[9] < $newest) {
+            $css_required = 1;
+        }
     }
 }
 
