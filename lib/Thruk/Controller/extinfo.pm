@@ -693,7 +693,15 @@ sub _process_process_info_page {
     return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     if($view_mode eq 'json') {
-        return $c->render(json => $c->stash->{'pi_detail'});
+        my $merged = {};
+        for my $name (qw/pi_detail backend_detail/) {
+            for my $key (keys %{$c->stash->{$name}}) {
+                for my $attr (keys %{$c->stash->{$name}->{$key}}) {
+                    $merged->{$key}->{$attr} = $c->stash->{$name}->{$key}->{$attr};
+                }
+            }
+        }
+        return $c->render(json => $merged);
     }
     return 1;
 }
