@@ -1451,19 +1451,28 @@ body.loginpage TABLE.infoBox {
 body.loginpage {
   min-height: 99.5vh;
   background: #f1f1f1;
-  background: -webkit-linear-gradient(#f1f1f1, #cfd8dc); /* For Safari 5.1 to 6.0 */
-  background: -o-linear-gradient(#f1f1f1, #cfd8dc); /* For Opera 11.1 to 12.0 */
-  background: -moz-linear-gradient(#f1f1f1, #cfd8dc); /* For Firefox 3.6 to 15 */
-  background: linear-gradient(#f1f1f1, #cfd8dc); /* Standard syntax */
+
+  background: -moz-radial-gradient(center, ellipse cover, #f1f1f1 0%, #cfd8dc 65%, #cfd8dc 100%); /* FF3.6-15 */
+  background: -webkit-radial-gradient(center, ellipse cover, #f1f1f1 0%,#cfd8dc 65%,#cfd8dc 100%); /* Chrome10-25,Safari5.1-6 */
+  background: radial-gradient(ellipse at center, #f1f1f1 0%,#cfd8dc 65%,#cfd8dc 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
 body.loginpage DIV#mainfooter {
   opacity: 0.1;
 }
-
 body.loginpage DIV#mainfooter:hover {
   opacity: 1;
   filter:alpha(opacity=100);
+ -webkit-transition: all 0.5s ease-in-out;
+ -moz-transition: all 0.5s ease-in-out;
+ -o-transition: all 0.5s ease-in-out;
+ transition: all 0.5s ease-in-out;
+}
+
+/* fade out login page when submiting */
+body.loginpage.submitting > DIV {
+  opacity: 0;
+  filter:alpha(opacity=0);
  -webkit-transition: all 0.5s ease-in-out;
  -moz-transition: all 0.5s ease-in-out;
  -o-transition: all 0.5s ease-in-out;
