@@ -274,17 +274,6 @@ input.section_active {
   border-style: solid;
 }
 
-/* class to preload images */
-.hidepics {
-  width:0px;
-  height:0px;
-  visibility:hidden;
-  position:absolute;
-  top: 0px;
-  left: 0px;
-  z-index: 100;
-}
-
 div.navbarsearch form fieldset {
   border: 0px;
   padding-top: 0px;

@@ -80,9 +80,6 @@
     </div>
     [% END %]
 
-    <img src="[% url_prefix %]themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
-    <img src="[% url_prefix %]themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
-
 [% PROCESS _ajax_search.tt %]
 
 [% PROCESS _side_js.tt %]

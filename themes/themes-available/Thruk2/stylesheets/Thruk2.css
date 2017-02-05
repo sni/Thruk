@@ -6,52 +6,25 @@
   src: url('../fonts/roboto-v15-latin-regular.eot'); /* IE9 Compat Modes */
   src: local('Roboto'), local('Roboto-Regular'),
        url('../fonts/roboto-v15-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/roboto-v15-latin-regular.svg#Roboto') format('svg'), /* Legacy iOS */
        url('../fonts/roboto-v15-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
        url('../fonts/roboto-v15-latin-regular.woff') format('woff'), /* Modern Browsers */
-       url('../fonts/roboto-v15-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('../fonts/roboto-v15-latin-regular.svg#Roboto') format('svg'); /* Legacy iOS */
+       url('../fonts/roboto-v15-latin-regular.ttf') format('truetype'); /* Safari, Android, iOS */
 }
+
 /* roboto-700 - latin */
 @font-face {
-  font-family: 'Roboto Bold';
+  font-family: 'Roboto-Bold';
   font-style: normal;
   font-weight: 700;
   src: url('../fonts/roboto-v15-latin-700.eot'); /* IE9 Compat Modes */
   src: local('Roboto Bold'), local('Roboto-Bold'),
        url('../fonts/roboto-v15-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/roboto-v15-latin-700.svg#Roboto') format('svg'), /* Legacy iOS */
        url('../fonts/roboto-v15-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
        url('../fonts/roboto-v15-latin-700.woff') format('woff'), /* Modern Browsers */
-       url('../fonts/roboto-v15-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('../fonts/roboto-v15-latin-700.svg#Roboto') format('svg'); /* Legacy iOS */
+       url('../fonts/roboto-v15-latin-700.ttf') format('truetype'); /* Safari, Android, iOS */
 }
-
-/* roboto-condensed-regular - latin */
-@font-face {
-  font-family: 'Roboto Condensed Regular';
-  font-style: normal;
-  font-weight: 400;
-  src: url('../fonts/roboto-condensed-v13-latin-regular.eot'); /* IE9 Compat Modes */
-  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'),
-       url('../fonts/roboto-condensed-v13-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('../fonts/roboto-condensed-v13-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-       url('../fonts/roboto-condensed-v13-latin-regular.woff') format('woff'), /* Modern Browsers */
-       url('../fonts/roboto-condensed-v13-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('../fonts/roboto-condensed-v13-latin-regular.svg#RobotoCondensed') format('svg'); /* Legacy iOS */
-}
-/* roboto-condensed-700 - latin */
-@font-face {
-  font-family: 'Roboto-Bold';
-  font-style: normal;
-  font-weight: 700;
-  src: url('../fonts/roboto-condensed-v13-latin-700.eot'); /* IE9 Compat Modes */
-  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'),
-       url('../fonts/roboto-condensed-v13-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('../fonts/roboto-condensed-v13-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
-       url('../fonts/roboto-condensed-v13-latin-700.woff') format('woff'), /* Modern Browsers */
-       url('../fonts/roboto-condensed-v13-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('../fonts/roboto-condensed-v13-latin-700.svg#RobotoCondensed') format('svg'); /* Legacy iOS */
-}
-
 
 #currentversioninfo {
   font-size:14px;
@@ -333,33 +306,8 @@ DIV.perfTypeTitle {
   font-family: 'Roboto-Bold';
 }
 
-DIV.statusTitle,DIV.dateSelectTitle,DIV.navBoxTitle {
-  font-size:18px;
+DIV.statusTitle, DIV.dateSelectTitle, DIV.navBoxTitle, DIV.dataTitle, DIV.commentTitle, DIV.downtimeTitle, DIV.reportSelectTitle, DIV.statusTitle {
   font-family: 'Roboto-Bold';
-}
-
-DIV.dataTitle {
-  font-size:18px;
-    font-family: 'Roboto-Bold';
-}
-
-DIV.commentTitle {
-  font-size:18px;
-    font-family: 'Roboto-Bold';
-}
-
-DIV.downtimeTitle {
-  font-size:18px;
-    font-family: 'Roboto-Bold';
-}
-
-DIV.reportSelectTitle {
-  font-size:18px;
-    font-family: 'Roboto-Bold';
-}
-
-DIV.statusTitle {
-    font-family: 'Roboto-Bold';
   font-size: 18px;
 }
 
