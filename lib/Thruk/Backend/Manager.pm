@@ -1245,7 +1245,7 @@ sub _do_on_peers {
     $type = lc $type;
 
     # extract some extra data
-    if($function eq 'get_processinfo') {
+    if($function eq 'get_processinfo' && ref $result eq 'HASH') {
         # update configtool settings
         # and update last_program_starts
         # (set in Thruk::Utils::CLI::_cmd_raw)
@@ -2582,8 +2582,12 @@ set defaults for some results
 sub _set_result_defaults {
     my($self, $function, $data) = @_;
 
+    if(ref $data ne 'ARRAY') {
+        return($data);
+    }
+
     # set some defaults if no backends where selected
-    if($function eq "get_performance_stats" and ref $data eq 'ARRAY') {
+    if($function eq "get_performance_stats") {
         $data = {};
         for my $type (qw{hosts services}) {
             for my $key (qw{_active_sum _active_1_sum _active_5_sum _active_15_sum _active_60_sum _active_all_sum
@@ -2598,7 +2602,7 @@ sub _set_result_defaults {
             }
         }
     }
-    elsif($function eq "get_service_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_service_stats" || $function eq "get_service_totals_stats") {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
@@ -2613,7 +2617,7 @@ sub _set_result_defaults {
             $data->{$key} = 0;
         }
     }
-    elsif($function eq "get_host_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_host_stats" || $function eq "get_host_totals_stats") {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
@@ -2625,7 +2629,7 @@ sub _set_result_defaults {
             $data->{$key} = 0;
         }
     }
-    elsif($function eq "get_extra_perf_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_extra_perf_stats") {
         $data = {};
         for my $key (qw{
                         cached_log_messages connections connections_rate host_checks
