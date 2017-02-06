@@ -1041,7 +1041,6 @@ sub _process_combined_page {
     my( $c ) = @_;
 
     $c->stash->{hidetop}    = 1 unless $c->stash->{hidetop} ne '';
-    $c->stash->{hidesearch} = 1;
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 

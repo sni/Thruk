@@ -1,6 +1,4 @@
-﻿[% SET show_filter_table = 0 IF hidesearch == "1" %]
-[% SET show_filter_table = 1 IF hidesearch == "2" %]
-<button style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button open_filter_button" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
+﻿<button class="filter_button open_filter_button[% IF show_filter_table %] filter_active[% END %]" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
 [% IF show_form %]
 <form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns'));">
 [%# make sure IE can submit form by pressing enter #%]
@@ -11,7 +9,7 @@
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
 <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
 [% END %]
-<table id="[% paneprefix %]all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
+<table id="[% paneprefix %]all_filter_table" style="display:none;" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
 [% FOR search = searches.$paneprefix %]
 [% SET prefix = 's' _ loop.index %]
 <td valign="top" class="filter_table">

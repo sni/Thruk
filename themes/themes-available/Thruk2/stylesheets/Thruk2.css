@@ -1391,6 +1391,10 @@ BUTTON.open_filter_button {
   background-position: center;
 }
 
+BUTTON.open_filter_button.filter_active {
+  background-color: #ffcd00 !important;
+}
+
 body.loginpage TABLE.infoBox {
   border-radius: 5px;
   background-color: #cfd8dc;
@@ -1426,3 +1430,4 @@ body.loginpage.submitting > DIV {
  -o-transition: all 0.5s ease-in-out;
  transition: all 0.5s ease-in-out;
 }
+
