@@ -2830,7 +2830,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
             // no macros, no problems
             return;
         }
-        link.onclick = function() {
+        link.onmouseover = function() {
             if(!link.href.match(/\$/)) {
                 // no macros, no problems
                 return(true);
@@ -2842,30 +2842,16 @@ function check_server_action(id, link, backend, host, service, server_action_url
                 link.setAttribute('orighref', ""+link.href);
                 href = link.getAttribute('href');
             }
-            jQuery.ajax({
-                url: url_prefix + 'cgi-bin/status.cgi?replacemacros=1',
-                data: {
-                    host:    host,
-                    service: service,
-                    backend: backend,
-                    data:    href,
-                    token:   user_token
-                },
-                type: 'POST',
-                success: function(data) {
-                    if(data.rc != 0) {
-                        thruk_message(1, 'could not replace macros: '+ data.data);
-                    } else {
-                        link.href = data.data
-                        link.click();
-                        link.href = link.getAttribute('orighref');
-                    }
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    thruk_message(1, 'could not replace macros: '+ textStatus);
-                }
-            });
-            return(false);
+            var urlArgs = {
+                forward:        1,
+                replacemacros:  1,
+                host:           host,
+                service:        service,
+                backend:        backend,
+                data:           href
+            };
+            link.setAttribute('href', url_prefix + 'cgi-bin/status.cgi?'+toQueryString(urlArgs));
+            return(true);
         }
     }
 }

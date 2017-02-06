@@ -70,6 +70,16 @@ sub index {
 
     if($c->req->parameters->{'replacemacros'}) {
         my($rc, $data) = _replacemacros($c);
+        if($c->req->parameters->{'forward'}) {
+            if(!$rc) {
+                return $c->redirect_to($data);
+            }
+            die("replacing macros failed");
+        }
+
+        if(!Thruk::Utils::check_csrf($c)) {
+            ($rc, $data) = (1, 'invalid request');
+        }
         my $json = { 'rc' => $rc, 'data' => $data };
         return $c->render(json => $json);
     }
@@ -1473,8 +1483,6 @@ sub _process_set_default_columns {
 # replace macros in given string for a host/service
 sub _replacemacros {
     my( $c ) = @_;
-
-    return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
 
     my $host    = $c->req->parameters->{'host'};
     my $service = $c->req->parameters->{'service'};
