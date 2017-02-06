@@ -761,6 +761,7 @@ function create_site_panel_popup_panel() {
     panel += '  <tr>';
     jQuery(keys(section.subsections).sort()).each(function(i, subsection) {
         if(section.subsections[subsection].total == 0) { return; }
+        if(subsection == "Default" && keys(section.subsections).length == 1) { return; }
         panel += '<th class="site_panel '+(i==0 ? '' : "notfirst")+'">';
         panel += '  <a href="#" class="sites_subsection" onclick="toggleSection(\'Default/'+subsection+'\'); return false;" title="'+subsection+'">'+subsection+'</a>';
         panel += '</th>';
@@ -1062,13 +1063,14 @@ function updateSitePanelCheckBox() {
     var total = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
     jQuery(sections).each(function(i, section) {
         total['sections'][section] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
-        jQuery('INPUT.btn_sites_'+section).each(function(i, b) {
-            var subsection = b.value;
-            total = count_site_section_totals(total, section, subsection);
-        });
         if(jQuery('INPUT.btn_sites_'+section).length == 0) {
             total['sections']['Default'] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
-            total = count_site_section_totals(total, section, 'Default');
+            total = count_site_section_totals(total, 'Default', section);
+        } else {
+            jQuery('INPUT.btn_sites_'+section).each(function(i, b) {
+                var subsection = b.value;
+                total = count_site_section_totals(total, section, subsection);
+            });
         }
     });
     /* check all button */
