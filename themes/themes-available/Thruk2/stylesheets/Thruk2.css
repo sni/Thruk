@@ -1404,9 +1404,9 @@ body.loginpage {
   min-height: 99.5vh;
   background: #f1f1f1;
 
-  background: -moz-radial-gradient(center, ellipse cover, #f1f1f1 0%, #cfd8dc 65%, #cfd8dc 100%); /* FF3.6-15 */
-  background: -webkit-radial-gradient(center, ellipse cover, #f1f1f1 0%,#cfd8dc 65%,#cfd8dc 100%); /* Chrome10-25,Safari5.1-6 */
-  background: radial-gradient(ellipse at center, #f1f1f1 0%,#cfd8dc 65%,#cfd8dc 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: -moz-radial-gradient(center, ellipse cover,    #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* FF3.6-15 */
+  background: -webkit-radial-gradient(center, ellipse cover, #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* Chrome10-25,Safari5.1-6 */
+  background: radial-gradient(ellipse at center,             #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
 body.loginpage DIV#mainfooter {
