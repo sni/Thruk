@@ -66,7 +66,7 @@
   <tr id="input_service">
     <td class="dataEven" align="center"><b>Service</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="service" name="service" value="[% rd.service %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="service" name="service" value="[% rd.service.list.join(', ') %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_hostgroup">
