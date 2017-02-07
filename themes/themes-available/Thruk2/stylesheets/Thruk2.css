@@ -1443,3 +1443,11 @@ TH.pnpSelected {
   background-color: #f1f1f1;
 }
 
+TH.status input {
+  background-color: #5f6268;
+  border: 1px solid #f1f1f1;
+  color: #f1f1f1;
+  font-family: "Roboto-Bold";
+  font-size: 12px;
+  width: 95%;
+}
