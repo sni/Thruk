@@ -855,7 +855,7 @@ sub _cmd_command {
     my $msg;
     $msg .= 'Note:            '.$command->{'note'}."\n" if $command->{'note'};
     $msg .= 'Check Command:   '.$command->{'line'}."\n";
-    $msg .= 'Expaned Command: '.$command->{'line_expanded'}."\n";
+    $msg .= 'Expanded Command: '.$command->{'line_expanded'}."\n";
 
     $c->stats->profile(end => "_cmd_command()");
     return $msg;
