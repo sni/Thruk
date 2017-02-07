@@ -761,34 +761,34 @@ TD.statusEven {
   background-color:#33cc66 !important;
   color:#ffffff;
   height:22px;
-  padding:2px;
+  padding:1px;
 }
 
 .statusRECOVERY,.serviceOK {
   background-color:#33cc66 !important;
   color:#ffffff;
   height:22px;
-  padding:2px;
+  padding:1px;
 }
 
 .statusPENDING,.statusHOSTPENDING {
   background-color:#ACACAC !important;
   color:#ffffff;
   height:22px;
-  padding:2px;
+  padding:1px;
 }
 
 .statusUNKNOWN {
   background-color:#ffe57b !important;
   color:#5f6268;
   height:22px;
-  padding:2px;
+  padding:1px;
 }
 
 .statusWARNING,.serviceWarning {
   background-color:#ffcd00 !important;
   height:22px;
-  padding:2px;
+  padding:1px;
 }
 
 TD.statusOdd.tableRowSelected, TD.statusEven.tableRowSelected, TD.tableRowSelected, TH.tableRowSelected {
@@ -1430,4 +1430,3 @@ body.loginpage.submitting > DIV {
  -o-transition: all 0.5s ease-in-out;
  transition: all 0.5s ease-in-out;
 }
-
