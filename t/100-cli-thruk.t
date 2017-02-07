@@ -173,7 +173,7 @@ TestUtils::test_command({
 # test command
 TestUtils::test_command({
     cmd     => $BIN.' -a command "'.$host.'"',
-    like    => ['/Expaned Command:/'],
+    like    => ['/Expanded Command:/'],
 });
 
 # self check
