@@ -620,6 +620,8 @@ sub expand_command {
     my $rc;
     eval {
         ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args});
+        $expanded = $self->_obfuscate({string => $expanded, host => $host, service => $service, args => \@com_args});
+        $command_name = $self->_obfuscate({string => $command_name, host => $host, service => $service, args => \@com_args});
     };
 
     # does it still contain macros?
@@ -1035,21 +1037,48 @@ sub _get_replaced_string {
         }
         $res .= $block;
     }
-    ## no critic
+
+    $res = $self->_get_obfuscated_string($res, $macros);
+
+    return($res, $rc);
+}
+
+########################################
+sub _obfuscate {
+    my( $self, $args ) = @_;
+
+    my $string  = $args->{'string'};
+    my $macros  = $self->_get_macros($args);
+
+    return $self->_get_obfuscated_string($string, $macros);
+}
+
+########################################
+
+=head2 _get_obfuscated_string
+
+  _get_obfuscated_string
+
+replace sensitive data with ***
+
+=cut
+
+sub _get_obfuscated_string {
+    my( $self, $string, $macros ) = @_;
     if (defined $macros->{'$_SERVICEOBFUSCATE_ME$'}) {
         eval {
-            $res =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
+            $string =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
         };
     }
     if (defined $macros->{'$_HOSTOBFUSCATE_ME$'}) {
         eval {
-            $res =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
+            $string =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
         };
     }
-    ## use critic
 
-    return($res, $rc);
+    return $string;
 }
+
 ########################################
 
 =head2 _set_host_macros
