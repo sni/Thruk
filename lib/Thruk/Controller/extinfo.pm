@@ -267,7 +267,7 @@ sub _process_recurring_downtimes_page {
             'target'        => $target,
             'host'          => [split/\s*,\s*/mx,$host],
             'hostgroup'     => [split/\s*,\s*/mx,$hostgroup],
-            'service'       => $service,
+            'service'       => [split/\s*,\s*/mx,$service],
             'servicegroup'  => [split/\s*,\s*/mx,$servicegroup],
             'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->req->parameters),
             'duration'      => $c->req->parameters->{'duration'}        || 5,

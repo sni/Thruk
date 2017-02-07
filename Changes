@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - add new Thruk2 theme
           - support opening server actions in new tabs
+          - support service lists for recurring downtimes
           - Business Process:
             - add support for simple wildcards, ex.: host:*
           - Panorama View:

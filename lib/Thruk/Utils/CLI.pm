@@ -1068,6 +1068,7 @@ sub _cmd_downtimetask {
 
     $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
     $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
+    $downtime->{'service'}      = [$downtime->{'service'}]      unless ref $downtime->{'service'}      eq 'ARRAY';
     $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
 
     # do quick self check
@@ -1090,7 +1091,7 @@ sub _cmd_downtimetask {
     my $errors = 0;
     for($retries = 0; $retries < $total_retries; $retries++) {
         sleep(10) if $retries > 0;
-        if($downtime->{'target'} eq 'host' or $downtime->{'target'} eq 'service') {
+        if($downtime->{'target'} eq 'host') {
             my $hosts = $downtime->{'host'};
             for my $hst (@{$hosts}) {
                 next if $done->{'hosts'}->{$hst};
@@ -1108,6 +1109,30 @@ sub _cmd_downtimetask {
                 }
             }
             $downtime->{'host'} = $hosts;
+        }
+        elsif($downtime->{'target'} eq 'service') {
+            my $hosts    = $downtime->{'host'};
+            my $services = $downtime->{'service'};
+            for my $hst (@{$hosts}) {
+                for my $svc (@{$services}) {
+                    next if $done->{'services'}->{$hst}->{$svc};
+                    $downtime->{'host'}    = $hst;
+                    $downtime->{'service'} = $svc;
+                    my $rc;
+                    eval {
+                        $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                    };
+                    if($rc && !$@) {
+                        $errors-- if defined $done->{'services'}->{$hst}->{$svc};
+                        $done->{'services'}->{$hst}->{$svc} = 1;
+                    } else {
+                        $errors++ unless defined $done->{'services'}->{$hst}->{$svc};
+                        $done->{'services'}->{$hst}->{$svc} = 0;
+                    }
+                }
+            }
+            $downtime->{'service'} = $services;
+            $downtime->{'host'}    = $hosts;
         }
         elsif($downtime->{'target'} eq 'hostgroup' or $downtime->{'target'} eq 'servicegroup') {
             my $grps = $downtime->{$downtime->{'target'}};
@@ -1134,7 +1159,7 @@ sub _cmd_downtimetask {
     return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
     if($downtime->{'service'}) {
-        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
+        $output = 'scheduled'.$flexible.' downtime for service \''.join(', ', @{$downtime->{'service'}}).'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
     } else {
         $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
     }
