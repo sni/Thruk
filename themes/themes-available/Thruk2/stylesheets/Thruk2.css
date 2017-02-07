@@ -1430,3 +1430,16 @@ body.loginpage.submitting > DIV {
  -o-transition: all 0.5s ease-in-out;
  transition: all 0.5s ease-in-out;
 }
+
+TH.pnpSelected {
+  color: #5f6268;
+  background-color: #f1f1f1;
+  border: 1px inset #444444;
+  font-size: 12px;
+}
+
+#pnp_graph_pane {
+  min-height: 25px;
+  background-color: #f1f1f1;
+}
+
