@@ -1067,12 +1067,16 @@ sub _get_obfuscated_string {
     my( $self, $string, $macros ) = @_;
     if (defined $macros->{'$_SERVICEOBFUSCATE_ME$'}) {
         eval {
+            ## no critic
             $string =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
+            ## use critic
         };
     }
     if (defined $macros->{'$_HOSTOBFUSCATE_ME$'}) {
         eval {
+            ## no critic
             $string =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
+            ## use critic
         };
     }
 
