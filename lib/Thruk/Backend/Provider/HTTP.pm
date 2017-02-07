@@ -888,6 +888,9 @@ sub _clean_code_refs {
 sub _format_response_error {
     my($response) = @_;
     my $message = "";
+    if($response->decoded_content && $response->decoded_content =~ m|<h1>(OMD:.*?)</h1>|sxm) {
+        return($1);
+    }
     if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)\-\->|sxm) {
         $message = "\n".$1;
     }
