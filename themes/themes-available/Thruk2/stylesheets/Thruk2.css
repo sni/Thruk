@@ -204,11 +204,11 @@ td.outageUnimportantProblem a,td.hostUnimportantProblem a,td.serviceUnimportantP
   background-color:#ffe57b;
 }
 
-TD.statusEven.tableRowSelected {
+TD.statusEven.tableRowSelected, TR.commentEven TD.tableRowSelected, TR.downtimeEven TD.tableRowSelected {
   background:#ffdc4f !important;
   height:22px;
 }
-TD.statusOdd.tableRowSelected {
+TD.statusOdd.tableRowSelected, TR.commentOdd TD.tableRowSelected, TR.downtimeOdd TD.tableRowSelected {
   background:#ffe57b !important;
   height:22px;
 }
