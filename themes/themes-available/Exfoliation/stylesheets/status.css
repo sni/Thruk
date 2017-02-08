@@ -77,3 +77,10 @@ td.hostTotals          { font-size: 8pt; text-align: center; background-color: #
 .miniStatusUP          { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .miniStatusDOWN        { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .miniStatusUNREACHABLE { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5px 0 5px; }
+
+UL.headerBackends { display: inline; list-style-type: none; margin: 0; padding: 0; }
+UL.headerBackends LI { float: left; margin: 0 0 0 2px; }
+UL.headerBackends LI SPAN { display: block; padding: 2px 8px; white-space: nowrap; }
+.backendStatusUNKNOWN { font-size: 8pt; background: #ffbb55; border: 1px solid #777777; }
+.backendStatusUP      { font-size: 8pt; background: #88d066; border: 1px solid #777777; }
+.backendStatusDOWN    { font-size: 8pt; background: #f88888; border: 1px solid #777777; }

@@ -232,3 +232,9 @@ TD.hostTotals {} /* font-family: arial,serif;  font-size: 8pt;  text-align: cent
 .serviceImportantProblem { text-align: left;  font-family: arial;  font-size: 8pt;  background-color: #ff0000;  color: black; text-decoration: blink; }
 .serviceUnimportantProblem { text-align: left;  font-family: arial;  font-size: 8pt;  background-color: #ffcccc;  color: black; }
 
+UL.headerBackends { display: inline;  list-style-type: none;  margin: 0;  padding: 0; }
+UL.headerBackends LI { float: left;  margin: 0 2px; }
+UL.headerBackends LI SPAN { display: block;  padding: 2px 8px;  white-space: nowrap;  font-size: 12px;  font-weight: bold; }
+.backendStatusUNKNOWN { background: #FF9900; }
+.backendStatusUP { background: #00FF80/*ACFA58*/ }
+.backendStatusDOWN { background: #FA5858/*FAA*/; }

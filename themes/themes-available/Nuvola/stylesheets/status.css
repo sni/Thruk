@@ -152,3 +152,10 @@ white-space: nowrap;
 TABLE#statusTable tbody > tr > TD {
     padding-left: 2px;
 }
+
+UL.headerBackends { display: inline; list-style-type: none; margin: 0; padding: 0; }
+UL.headerBackends LI { float: left; margin: 0 0 0 2px; }
+UL.headerBackends LI SPAN { display: block; padding: 2px 8px; white-space: nowrap; }
+.backendStatusUNKNOWN { font-size: 8pt; background: #f0f1f5; }
+.backendStatusUP      { font-size: 8pt; background: #C0FFC0; }
+.backendStatusDOWN    { font-size: 8pt; background: #FFC0C0; }
