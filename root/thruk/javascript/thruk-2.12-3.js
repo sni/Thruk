@@ -2622,6 +2622,45 @@ function refreshNavSections(id) {
     return(false);
 }
 
+function news_show_list(incr) {
+    var news   = jQuery(".news_panel_container div.news");
+    var curIdx = 0;
+    jQuery(news).each(function(i, n) {
+        if(jQuery(n).is(":visible")) {
+            jQuery(n).hide();
+            curIdx = i;
+            return(false);
+        }
+    });
+    var newIdx = curIdx+incr;
+    jQuery(news[newIdx]).show();
+    jQuery(".news_panel_container BUTTON.next").css('visibility', '');
+    jQuery(".news_panel_container BUTTON.previous").css('visibility', '');
+    if(newIdx == news.length -1) {
+        jQuery(".news_panel_container BUTTON.next").css('visibility', 'hidden');
+    }
+    if(newIdx == 0) {
+        jQuery(".news_panel_container BUTTON.previous").css('visibility', 'hidden');
+    }
+}
+
+function news_dismiss() {
+    jQuery('.news_panel_container').hide();
+    jQuery.ajax({
+        url: url_prefix + 'cgi-bin/news.cgi',
+        data: {
+            action: 'dismiss',
+            token:  user_token
+        },
+        type: 'POST',
+        success: function(data) {},
+        error: function(jqXHR, textStatus, errorThrown) {
+            thruk_message(1, 'marking news as read failed: '+ textStatus);
+        }
+    });
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88
