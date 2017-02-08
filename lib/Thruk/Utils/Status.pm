@@ -703,6 +703,9 @@ sub single_search {
         }
 
         if ( $filter->{'type'} eq 'search' ) {
+            # skip empty searches
+            next if $value eq '';
+
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
 
             my $host_search_filter = [ { name               => { $op     => $value } },
