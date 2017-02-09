@@ -1293,13 +1293,13 @@ TABLE.broadcast_panel_container TD {
 TABLE.broadcast_panel_container div.dismiss {
   position: absolute;
   font-size: 10px;
-  bottom: 0px;
+  top: 6px;
   right: 5px;
 }
 
 TABLE.broadcast_panel_container div.controls {
   position: absolute;
-  bottom: 0;
+  top: 3px;
   right: 45px;
 }
 
