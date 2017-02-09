@@ -26,10 +26,7 @@ sub index {
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
         if($action eq 'dismiss') {
-            my $broadcasts = Thruk::Utils::Broadcast::get_broadcasts($c);
-            my $data = Thruk::Utils::get_user_data($c);
-            $data->{'broadcast'}->{'read'} = $broadcasts->[0]->{'basefile'};
-            Thruk::Utils::store_user_data($c, $data);
+            Thruk::Utils::Broadcast::update_dismiss($c);
             return $c->render(json => {'status' => 'ok'});
         }
     }
