@@ -1,12 +1,12 @@
-package Thruk::Utils::News;
+package Thruk::Utils::Broadcast;
 
 =head1 NAME
 
-Thruk::Utils::News - News Utilities Collection for Thruk
+Thruk::Utils::Broadcast - Broadcast Utilities Collection for Thruk
 
 =head1 DESCRIPTION
 
-News Utilities Collection for Thruk
+Broadcast Utilities Collection for Thruk
 
 =cut
 
@@ -17,44 +17,44 @@ use warnings;
 
 =head1 METHODS
 
-=head2 get_news($c)
+=head2 get_broadcasts($c)
 
-  get_news($c)
+  get_broadcasts($c)
 
-return list of news for this contact
+return list of broadcasts for this contact
 
 =cut
-sub get_news {
+sub get_broadcasts {
     my($c) = @_;
     my $list = [];
 
     my $now       = time();
     my $groups    = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'};
-    for my $file (reverse sort glob($c->config->{'var_path'}.'/news/*.json')) {
-        my $news = Thruk::Utils::read_data_file($file);
-        $news->{'file'} = $file;
+    for my $file (reverse sort glob($c->config->{'var_path'}.'/broadcast/*.json')) {
+        my $broadcast = Thruk::Utils::read_data_file($file);
+        $broadcast->{'file'} = $file;
         my $basename = $file;
         $basename =~ s%.*?([^/]+\.json)$%$1%mx;
-        $news->{'basefile'} = $basename;
+        $broadcast->{'basefile'} = $basename;
         my $allowed = 0;
 
-        $news->{'contacts'}      = Thruk::Utils::list($news->{'contacts'});
-        $news->{'contactgroups'} = Thruk::Utils::list($news->{'contactgroups'});
+        $broadcast->{'contacts'}      = Thruk::Utils::list($broadcast->{'contacts'});
+        $broadcast->{'contactgroups'} = Thruk::Utils::list($broadcast->{'contactgroups'});
 
         # not restriced at all
-        if(scalar @{$news->{'contacts'}} == 0 && scalar @{$news->{'contactgroups'}} == 0) {
+        if(scalar @{$broadcast->{'contacts'}} == 0 && scalar @{$broadcast->{'contactgroups'}} == 0) {
             $allowed = 1;
         }
         # allowed for specific contacts
-        if(scalar @{$news->{'contacts'}}) {
-            my $contacts = Thruk::Utils::array2hash($news->{'contacts'});
+        if(scalar @{$broadcast->{'contacts'}}) {
+            my $contacts = Thruk::Utils::array2hash($broadcast->{'contacts'});
             if($contacts->{$c->stash->{'remote_user'}}) {
                 $allowed = 1;
             }
         }
         # allowed for specific contactgroups
-        if(scalar @{$news->{'contactgroups'}}) {
-            my $contactgroups = Thruk::Utils::array2hash($news->{'contactgroups'});
+        if(scalar @{$broadcast->{'contactgroups'}}) {
+            my $contactgroups = Thruk::Utils::array2hash($broadcast->{'contactgroups'});
             for my $group (keys %{$groups}) {
                 if($contactgroups->{$group}) {
                     $allowed = 1;
@@ -64,28 +64,28 @@ sub get_news {
         }
 
         # date / time filter
-        if($news->{'expires'}) {
-            my $expires_ts = Thruk::Utils::_parse_date($c, $news->{'expires'});
+        if($broadcast->{'expires'}) {
+            my $expires_ts = Thruk::Utils::_parse_date($c, $broadcast->{'expires'});
             if($now > $expires_ts) {
                 next;
             }
         }
 
-        if($news->{'hide_before'}) {
-            my $hide_before_ts = Thruk::Utils::_parse_date($c, $news->{'hide_before'});
+        if($broadcast->{'hide_before'}) {
+            my $hide_before_ts = Thruk::Utils::_parse_date($c, $broadcast->{'hide_before'});
             if($now < $hide_before_ts) {
                 next;
             }
         }
 
         next unless $allowed;
-        push @{$list}, $news;
+        push @{$list}, $broadcast;
     }
 
     # marked as read already?
     if(scalar @{$list} > 0) {
         my $user_data = Thruk::Utils::get_user_data($c);
-        if($user_data->{'news'} && $user_data->{'news'}->{'read'} && $user_data->{'news'}->{'read'} eq $list->[0]->{'basefile'}) {
+        if($user_data->{'broadcast'} && $user_data->{'broadcast'}->{'read'} && $user_data->{'broadcast'}->{'read'} eq $list->[0]->{'basefile'}) {
             return([]);
         }
     }

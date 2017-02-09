@@ -8,7 +8,7 @@ use File::Slurp qw/read_file/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Thruk::Utils::Filter ();
-use Thruk::Utils::News ();
+use Thruk::Utils::Broadcast ();
 
 =head1 NAME
 
@@ -111,7 +111,7 @@ our %config = ('name'                   => 'Thruk',
                                           'validate_json'       => \&Thruk::Utils::Filter::validate_json,
                                           'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
                                           'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
-                                          'get_news'            => \&Thruk::Utils::News::get_news,
+                                          'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

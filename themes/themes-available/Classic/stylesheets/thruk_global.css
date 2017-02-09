@@ -1271,7 +1271,7 @@ BUTTON.open_filter_button {
   cursor: pointer;
 }
 
-TABLE.news_panel_container {
+TABLE.broadcast_panel_container {
   background-color: white;
   position: absolute;
   right: 150px;
@@ -1284,26 +1284,26 @@ TABLE.news_panel_container {
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
 }
 
-TABLE.news_panel_container TD {
+TABLE.broadcast_panel_container TD {
   width: 100%;
   height: 100%;
   padding: 3px;
 }
 
-TABLE.news_panel_container div.dismiss {
+TABLE.broadcast_panel_container div.dismiss {
   position: absolute;
   font-size: 10px;
   bottom: 0px;
   right: 5px;
 }
 
-TABLE.news_panel_container div.controls {
+TABLE.broadcast_panel_container div.controls {
   position: absolute;
   top: 8px;
   right: 45px;
 }
 
-TABLE.news_panel_container button.previous {
+TABLE.broadcast_panel_container button.previous {
   border: 0;
   background: url('../images/resultset_previous.png') no-repeat;
   width: 20px;
@@ -1311,7 +1311,7 @@ TABLE.news_panel_container button.previous {
   cursor: pointer;
 }
 
-TABLE.news_panel_container button.next {
+TABLE.broadcast_panel_container button.next {
   border: 0;
   background: url('../images/resultset_next.png') no-repeat;
   width: 20px;

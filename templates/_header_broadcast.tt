@@ -1,0 +1,13 @@
+﻿[% broadcasts = get_broadcasts(c) %]
+[% IF broadcasts.size > 0 %]
+<table border=0 cellpadding=0 cellspacing=0 class="broadcast_panel_container noprint"><tr><td>
+[% FOREACH n = broadcasts %]
+<div class="broadcast"[% IF !loop.first %] style="display: none;"[% END %]>[% n.text %]</div>
+[% END %]
+<div class="dismiss"><a href="#" onclick="broadcast_dismiss(); return(false);">dismiss</a></div>
+<div class="controls">
+  <button class="previous" style="visibility: hidden;" onclick="broadcast_show_list(-1);"></button>
+  <button class="next"[% IF broadcasts.size == 1 %] style="visibility: hidden;"[% END %] onclick="broadcast_show_list(1);"></button>
+</div>
+</td></tr></table>
+[% END %]

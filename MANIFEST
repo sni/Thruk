@@ -69,7 +69,7 @@ lib/Thruk/Controller/error.pm
 lib/Thruk/Controller/extinfo.pm
 lib/Thruk/Controller/history.pm
 lib/Thruk/Controller/login.pm
-lib/Thruk/Controller/news.pm
+lib/Thruk/Controller/broadcast.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/remote.pm
@@ -101,7 +101,7 @@ lib/Thruk/Utils/Livecache.pm
 lib/Thruk/Utils/LMD.pm
 lib/Thruk/Utils/Log.pm
 lib/Thruk/Utils/Menu.pm
-lib/Thruk/Utils/News.pm
+lib/Thruk/Utils/Broadcast.pm
 lib/Thruk/Utils/RecurringDowntimes.pm
 lib/Thruk/Utils/Scripts.pm
 lib/Thruk/Utils/SelfCheck.pm
@@ -1564,7 +1564,7 @@ templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt
 templates/_header_initial_states.tt
-templates/_header_news.tt
+templates/_header_broadcast.tt
 templates/_header_prefs.tt
 templates/_header_sites.tt
 templates/_help.tt

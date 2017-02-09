@@ -1,11 +1,11 @@
-package Thruk::Controller::news;
+package Thruk::Controller::broadcast;
 
 use strict;
 use warnings;
 
 =head1 NAME
 
-Thruk::Controller::news - Thruk Controller
+Thruk::Controller::broadcast - Thruk Controller
 
 =head1 DESCRIPTION
 
@@ -26,15 +26,15 @@ sub index {
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
         if($action eq 'dismiss') {
-            my $news = Thruk::Utils::News::get_news($c);
+            my $broadcasts = Thruk::Utils::Broadcast::get_broadcasts($c);
             my $data = Thruk::Utils::get_user_data($c);
-            $data->{'news'}->{'read'} = $news->[0]->{'basefile'};
+            $data->{'broadcast'}->{'read'} = $broadcasts->[0]->{'basefile'};
             Thruk::Utils::store_user_data($c, $data);
             return $c->render(json => {'status' => 'ok'});
         }
     }
 
-    $c->stash->{template} = 'news.tt';
+    $c->stash->{template} = 'broadcast.tt';
 
     Thruk::Utils::ssi_include($c);
 

@@ -2622,10 +2622,10 @@ function refreshNavSections(id) {
     return(false);
 }
 
-function news_show_list(incr) {
-    var news   = jQuery(".news_panel_container div.news");
+function broadcast_show_list(incr) {
+    var broadcasts = jQuery(".broadcast_panel_container div.broadcast");
     var curIdx = 0;
-    jQuery(news).each(function(i, n) {
+    jQuery(broadcasts).each(function(i, n) {
         if(jQuery(n).is(":visible")) {
             jQuery(n).hide();
             curIdx = i;
@@ -2633,21 +2633,21 @@ function news_show_list(incr) {
         }
     });
     var newIdx = curIdx+incr;
-    jQuery(news[newIdx]).show();
-    jQuery(".news_panel_container BUTTON.next").css('visibility', '');
-    jQuery(".news_panel_container BUTTON.previous").css('visibility', '');
-    if(newIdx == news.length -1) {
-        jQuery(".news_panel_container BUTTON.next").css('visibility', 'hidden');
+    jQuery(broadcasts[newIdx]).show();
+    jQuery(".broadcast_panel_container BUTTON.next").css('visibility', '');
+    jQuery(".broadcast_panel_container BUTTON.previous").css('visibility', '');
+    if(newIdx == broadcasts.length -1) {
+        jQuery(".broadcast_panel_container BUTTON.next").css('visibility', 'hidden');
     }
     if(newIdx == 0) {
-        jQuery(".news_panel_container BUTTON.previous").css('visibility', 'hidden');
+        jQuery(".broadcast_panel_container BUTTON.previous").css('visibility', 'hidden');
     }
 }
 
-function news_dismiss() {
-    jQuery('.news_panel_container').hide();
+function broadcast_dismiss() {
+    jQuery('.broadcast_panel_container').hide();
     jQuery.ajax({
-        url: url_prefix + 'cgi-bin/news.cgi',
+        url: url_prefix + 'cgi-bin/broadcast.cgi',
         data: {
             action: 'dismiss',
             token:  user_token
@@ -2655,7 +2655,7 @@ function news_dismiss() {
         type: 'POST',
         success: function(data) {},
         error: function(jqXHR, textStatus, errorThrown) {
-            thruk_message(1, 'marking news as read failed: '+ textStatus);
+            thruk_message(1, 'marking broadcast as read failed: '+ textStatus);
         }
     });
     return(false);
