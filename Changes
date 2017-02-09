@@ -2,8 +2,10 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add new Thruk2 theme
+          - add news system
           - support opening server actions in new tabs
           - support service lists for recurring downtimes
+          - fix livestatus "Operator !~~ for lists not implemented." issue when having an empty search filter
           - Business Process:
             - add support for simple wildcards, ex.: host:*
           - Panorama View:

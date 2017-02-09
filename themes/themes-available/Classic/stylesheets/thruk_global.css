@@ -1270,3 +1270,51 @@ BUTTON.open_filter_button {
   height: 20px;
   cursor: pointer;
 }
+
+TABLE.news_panel_container {
+  background-color: white;
+  position: absolute;
+  right: 150px;
+  top: -2px;
+  border: 1px solid black;
+  width: 500px;
+  height: 30px;
+  font-size: 14px;
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+}
+
+TABLE.news_panel_container TD {
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+}
+
+TABLE.news_panel_container div.dismiss {
+  position: absolute;
+  font-size: 10px;
+  bottom: 0px;
+  right: 5px;
+}
+
+TABLE.news_panel_container div.controls {
+  position: absolute;
+  top: 8px;
+  right: 45px;
+}
+
+TABLE.news_panel_container button.previous {
+  border: 0;
+  background: url('../images/resultset_previous.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+TABLE.news_panel_container button.next {
+  border: 0;
+  background: url('../images/resultset_next.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}

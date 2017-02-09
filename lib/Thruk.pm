@@ -178,6 +178,7 @@ sub _build_app {
         '/thruk/cgi-bin/extinfo.cgi'       => 'Thruk::Controller::extinfo::index',
         '/thruk/cgi-bin/history.cgi'       => 'Thruk::Controller::history::index',
         '/thruk/cgi-bin/login.cgi'         => 'Thruk::Controller::login::index',
+        '/thruk/cgi-bin/news.cgi'          => 'Thruk::Controller::news::index',
         '/thruk/cgi-bin/notifications.cgi' => 'Thruk::Controller::notifications::index',
         '/thruk/cgi-bin/outages.cgi'       => 'Thruk::Controller::outages::index',
         '/thruk/cgi-bin/remote.cgi'        => 'Thruk::Controller::remote::index',
