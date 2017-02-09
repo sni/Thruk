@@ -1299,7 +1299,7 @@ TABLE.broadcast_panel_container div.dismiss {
 
 TABLE.broadcast_panel_container div.controls {
   position: absolute;
-  top: 8px;
+  bottom: 0;
   right: 45px;
 }
 
