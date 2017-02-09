@@ -63,13 +63,13 @@ lib/Thruk/Backend/Provider/Mysql.pm
 lib/Thruk/Config.pm
 lib/Thruk/Context.pm
 lib/Thruk/Controller/avail.pm
+lib/Thruk/Controller/broadcast.pm
 lib/Thruk/Controller/cmd.pm
 lib/Thruk/Controller/config.pm
 lib/Thruk/Controller/error.pm
 lib/Thruk/Controller/extinfo.pm
 lib/Thruk/Controller/history.pm
 lib/Thruk/Controller/login.pm
-lib/Thruk/Controller/broadcast.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/remote.pm
@@ -91,6 +91,7 @@ lib/Thruk/UserAgent.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Avail.pm
+lib/Thruk/Utils/Broadcast.pm
 lib/Thruk/Utils/Cache.pm
 lib/Thruk/Utils/CLI.pm
 lib/Thruk/Utils/CookieAuth.pm
@@ -101,7 +102,6 @@ lib/Thruk/Utils/Livecache.pm
 lib/Thruk/Utils/LMD.pm
 lib/Thruk/Utils/Log.pm
 lib/Thruk/Utils/Menu.pm
-lib/Thruk/Utils/Broadcast.pm
 lib/Thruk/Utils/RecurringDowntimes.pm
 lib/Thruk/Utils/Scripts.pm
 lib/Thruk/Utils/SelfCheck.pm
@@ -1405,6 +1405,7 @@ t/200-view_GD.t
 t/200-view_JSON.t
 t/200-view_TT.t
 t/300-controller_avail.t
+t/300-controller_broadcast.t
 t/300-controller_cmd.t
 t/300-controller_config.t
 t/300-controller_cookie_auth.t
@@ -1563,8 +1564,8 @@ templates/_extinfo_cmd_pane.tt
 templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt
-templates/_header_initial_states.tt
 templates/_header_broadcast.tt
+templates/_header_initial_states.tt
 templates/_header_prefs.tt
 templates/_header_sites.tt
 templates/_help.tt

@@ -31,7 +31,14 @@ sub get_broadcasts {
     my $now       = time();
     my $groups    = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'};
     for my $file (reverse sort glob($c->config->{'var_path'}.'/broadcast/*.json')) {
-        my $broadcast = Thruk::Utils::read_data_file($file);
+        my $broadcast;
+        eval {
+            $broadcast = Thruk::Utils::IO::json_lock_retrieve($file);
+        };
+        if($@) {
+            $c->log->error("could not read broadcast file $file: ".$@);
+            next;
+        }
         $broadcast->{'file'} = $file;
         my $basename = $file;
         $basename =~ s%.*?([^/]+\.json)$%$1%mx;
