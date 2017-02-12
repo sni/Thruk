@@ -26,6 +26,17 @@
        url('../fonts/roboto-v15-latin-700.ttf') format('truetype'); /* Safari, Android, iOS */
 }
 
+body {
+  background:#f1f1f1 url(../images/bg.png) repeat-x;
+  background-attachment: scroll;
+  color:#5f6268;
+  font-family: 'Roboto-Regular';
+  font-size:11px;
+  line-height:18px;
+  margin-top:1px;
+  margin-right:5px;
+}
+
 #currentversioninfo {
   font-size:14px;
   padding-top: 10px;
@@ -61,6 +72,13 @@
 #search-results,.navsectiontitle, input.top_nav_pref_button, .btn-round, input.top_refresh_button, BUTTON.top_nav_logout_button {
   background:#ffcd00;
 }
+.navsectiontitle:hover {
+  background-color:#ffdc4f;
+}
+BUTTON.open_filter_button.filter_active {
+  background-color: #ffcd00 !important;
+}
+
 
 #splashpage {
   text-align:center;
@@ -135,20 +153,17 @@ DIV.infoMessage {
   vertical-align:bottom;
   cursor: pointer;
 }
-.navsectiontitle:hover {
-  background-color:#FFDC4F;
-}
 
 .notificationsDISABLED,.queueDISABLED,.checksDISABLED,.eventhandlersDISABLED,.flapdetectionDISABLED,.flapping,.downtimeACTIVE,.processCRITICAL,.hostDOWN,.hostUNREACHABLE,.serviceCRITICAL,input.button_peerDOWN,.peerDOWN {
   color:#ffffff;
-  background-color:#e12d56;
+  background-color:#f0666c;
 }
 .hostDOWN a {
   color:inherit;
 }
 
 .featureItemEnabledServiceHandlers,.featureItemEnabledHostHandlers,.featureItemEnabledHostNotifications,input.button_peerUP,.featureItemEnabledPassiveServiceChecks,.featureItemEnabledPassiveHostChecks,.serviceOK,.notflapping,.downtimeINACTIVE,.checksENABLED,.notificationsENABLED,.eventhandlersENABLED,.flapdetectionENABLED,.hostUP,.queueENABLED {
-  background-color:#33cc66;
+  background-color:#66bb6a;
   color:#ffffff;
   white-space: nowrap;
 }
@@ -157,7 +172,7 @@ DIV.infoMessage {
 }
 
 .processOK,.featureEnabled,.featureEnabledNotifications,.featureItemEnabledServiceNotifications,.featureEnabledFlapDetection,.featureItemEnabledServiceFlapDetection,.featureItemEnabledHostFlapDetection,.featureItemServicesNotFlapping,.featureItemHostsNotFlapping,.featureEnabledHandlers,.featureEnabledActiveChecks,.featureItemEnabledActiveServiceChecks,.featureItemEnabledActiveHostChecks,.featureEnabledPassiveChecks,TD.hostUP {
-  background-color:#33cc66;
+  background-color:#66bb6a;
   white-space: nowrap;
   color:#ffffff;
 }
@@ -193,7 +208,7 @@ td.outageUnimportantProblem a,td.hostUnimportantProblem a,td.serviceUnimportantP
 }
 
 .processWARNING,.serviceWARNING {
-  background-color:#ffcd00;
+  background-color:#ffe57b;
 }
 
 .servicePENDING,.hostPENDING {
@@ -201,7 +216,7 @@ td.outageUnimportantProblem a,td.hostUnimportantProblem a,td.serviceUnimportantP
 }
 
 .serviceUNKNOWN {
-  background-color:#ffe57b;
+  background-color:#ffcd00;
 }
 
 TD.statusEven.tableRowSelected, TR.commentEven TD.tableRowSelected, TR.downtimeEven TD.tableRowSelected {
@@ -590,7 +605,7 @@ TD.hostTotalsPENDING,TD.serviceTotalsPENDING {
 }
 
 TD.hostTotalsUP,TD.serviceTotalsOK {
-  background-color:#33cc66;
+  background-color:#66bb6a;
   color:#ffffff;
 }
 
@@ -664,13 +679,13 @@ TD.miniStatusPENDING {
 }
 
 TD.miniStatusUNKNOWN {
-  background-color:#ffe57b;
+  background-color:#ffcd00;
   padding:0;
   text-align:center;
 }
 
 TD.miniStatusUP,TD.miniStatusOK {
-  background-color:#33cc66;
+  background-color:#66bb6a;
   padding:2px;
   text-align:center;
   color:#ffffff;
@@ -680,7 +695,7 @@ TD.miniStatusUP,TD.miniStatusOK {
 }
 
 TD.miniStatusWARNING {
-  background-color:#ffcd00;
+  background-color:#ffe57b;
   padding:2px;
   text-align:center;
 }
@@ -703,13 +718,13 @@ TD.notificationsCRITICAL,TD.notificationsHOSTDOWN,TD.notificationsHOSTUNREACHABL
 }
 
 TD.notificationsOK,TD.notificationsHOSTUP {
-  background-color:#33cc66;
+  background-color:#66bb6a;
   height:22px;
   padding:1px;
 }
 
 TD.notificationsWARNING {
-  background-color:#ffcd00;
+  background-color:#ffe57b;
   height:22px;
   padding:1px;
 }
@@ -729,12 +744,12 @@ TD.notificationsWARNING {
   height:22px;
 }
 
-TD.serviceTotalsUNKNOWN,TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS {
-  background-color:#ffe57b;
+TD.serviceTotalsUNKNOWN {
+  background-color:#ffcd00;
 }
 
-TD.serviceTotalsWARNING {
-  background-color:#ffcd00;
+TD.serviceTotalsWARNING, TD.serviceTotalsPROBLEMS, TD.hostTotalsPROBLEMS {
+  background-color:#ffe57b;
 }
 
 TD.stateInfoTable1 > TABLE,TD.stateInfoTable2 > TABLE {
@@ -758,14 +773,14 @@ TD.statusEven {
 }
 
 .statusHOSTUP,.statusOK {
-  background-color:#33cc66 !important;
+  background-color:#66bb6a !important;
   color:#ffffff;
   height:22px;
   padding:1px;
 }
 
 .statusRECOVERY,.serviceOK {
-  background-color:#33cc66 !important;
+  background-color:#66bb6a !important;
   color:#ffffff;
   height:22px;
   padding:1px;
@@ -779,14 +794,14 @@ TD.statusEven {
 }
 
 .statusUNKNOWN {
-  background-color:#ffe57b !important;
+  background-color:#ffcd00 !important;
   color:#5f6268;
   height:22px;
   padding:1px;
 }
 
 .statusWARNING,.serviceWarning {
-  background-color:#ffcd00 !important;
+  background-color:#ffe57b !important;
   height:22px;
   padding:1px;
 }
@@ -847,17 +862,6 @@ a {
 
 a:hover {
   text-decoration:underline;
-}
-
-body {
-  background:#f1f1f1 url(../images/bg.png) repeat-x;
-  background-attachment: scroll;
-  color:#5f6268;
-  font-family: 'Roboto-Regular';
-  font-size:11px;
-  line-height:18px;
-  margin-top:1px;
-  margin-right:5px;
 }
 
 body.config TD.dataUserVar {
@@ -1391,13 +1395,10 @@ BUTTON.open_filter_button {
   background-position: center;
 }
 
-BUTTON.open_filter_button.filter_active {
-  background-color: #ffcd00 !important;
-}
-
 body.loginpage TABLE.infoBox {
   border-radius: 5px;
   background-color: #cfd8dc;
+  border: 1px solid #bbbbbb;
 }
 
 body.loginpage {
