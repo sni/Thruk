@@ -170,7 +170,7 @@ TABLE.site_panel .notfirst {
   padding-left: 5px;
 }
 
-button.thruk_button.top_refresh_button {
+button.thruk_btn.top_refresh_button {
   background-image: url(../images/arrow_refresh.png);
   background-repeat: no-repeat;
   width: 20px;
@@ -179,7 +179,7 @@ button.thruk_button.top_refresh_button {
   top: -2px;
 }
 
-button.thruk_button.top_nav_pref_button, button.thruk_button.top_nav_logout_button {
+button.thruk_btn.top_nav_pref_button, button.thruk_btn.top_nav_logout_button {
   color:#444444;
   background-color:#EEEEEE;
   border-style:double;
@@ -284,8 +284,8 @@ input.button_peerHID:hover,
 input.button_peerWARN:hover,
 input.button_peerUPDIS:hover,
 input.button_peerDOWNDIS:hover,
-button.thruk_button.top_nav_pref_button:hover,
-button.thruk_button.top_nav_logout_button:hover {
+button.thruk_btn.top_nav_pref_button:hover,
+button.thruk_btn.top_nav_logout_button:hover {
   border-color: #555555;
 }
 
@@ -947,7 +947,7 @@ TD.action_menu {
 body.splashpage button.top_refresh_button {
   display: none;
 }
-button.refreshing, button.thruk_button.top_refresh_button.refreshing {
+button.refreshing, button.thruk_btn.top_refresh_button.refreshing {
   background-image: url('../images/waiting.gif');
   background-position: center;
   background-repeat: no-repeat;
@@ -1335,7 +1335,7 @@ TABLE.broadcast_panel_container button.next {
   cursor: pointer;
 }
 
-BUTTON.thruk_button {
+BUTTON.thruk_btn {
   border: none;
   background-color: transparent;
   background-repeat: no-repeat;

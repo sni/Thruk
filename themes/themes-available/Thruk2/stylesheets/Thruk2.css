@@ -1225,7 +1225,7 @@ DIV.health_bar_bg {
   background: #DDDDDD;
 }
 
-BUTTON.thruk_button {
+BUTTON.thruk_btn {
   font-family: "Material Icons";
   background: transparent;
   line-height: 1px;
@@ -1239,14 +1239,14 @@ BUTTON.thruk_button {
   white-space: nowrap;
 }
 
-BUTTON.thruk_button.small {
+BUTTON.thruk_btn.small {
   font-size: 16px;
   width: 20px;
   height: 20px;
   padding: 0;
 }
 
-BUTTON.thruk_button.big {
+BUTTON.thruk_btn.big {
   font-size: 28px;
   width: 40px;
   height: 40px;
@@ -1291,18 +1291,18 @@ BUTTON.bugs {
 BUTTON.bugs::before {
   content: "bug_report";
 }
-button.refreshing, button.thruk_button.top_refresh_button.refreshing {
+button.refreshing, button.thruk_btn.top_refresh_button.refreshing {
   background-image: url('../images/waiting.gif');
   background-size: auto;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-button.thruk_button.top_refresh_button {
+button.thruk_btn.top_refresh_button {
   background-image: none;
   top: inherit;
 }
-button.thruk_button.top_nav_pref_button, button.thruk_button.top_nav_logout_button {
+button.thruk_btn.top_nav_pref_button, button.thruk_btn.top_nav_logout_button {
   background-color: #ffcd00;
   border-color: inherit;
   border-style: inherit;

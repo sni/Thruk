@@ -1706,26 +1706,25 @@ function do_table_search() {
 function showBugReport(id, text) {
     var link = document.getElementById('bug_report-btnEl');
     var raw  = text;
-    var href;
     if(link) {
         text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n" + text;
-        href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
+        link.href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
     }
 
     var obj = document.getElementById(id);
     try {
+        /* for extjs */
         Ext.getCmp(id).show();
         Ext.getCmp(id).el.dom.ondblclick    = function() { return showErrorTextPopup(raw) };
         Ext.getCmp(id).el.dom.oncontextmenu = function() { return showErrorTextPopup(raw) };
-        Ext.getCmp(id).el.dom.onclick       = function() { window_location_replace(href); };
     }
     catch(err) {
+        /* for all other pages */
         if(obj) {
             obj.style.display    = '';
             obj.style.visibility = 'visible';
             obj.ondblclick       = function() { return showErrorTextPopup(raw) };
             obj.oncontextmenu    = function() { return showErrorTextPopup(raw) };
-            obj.onclick          = function() { window_location_replace(href); };
         }
     }
 }

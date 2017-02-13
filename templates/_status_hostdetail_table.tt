@@ -2,7 +2,7 @@
 [% PROCESS custom_perf_bar_adjustments.tt %]
 
     [% IF show_form %]<form action="#" method="POST">[% END %]
-    <button class="thruk_button primary small wrench" style="display: none; position: absolute;" name="columns" id="[% paneprefix %]_btn_columns_hover" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]', 'hoststatusTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()"  onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()"></button>
+    <button class="thruk_btn primary small wrench" style="display: none; position: absolute;" name="columns" id="[% paneprefix %]_btn_columns_hover" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]', 'hoststatusTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()"  onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()"></button>
     <div class="filter_pane" style="visibility:hidden; left: 50px;" id="[% paneprefix %]_columns_select">
     <div class="shadow"><div class="shadowcontent">
     <table border="1" class='filter' cellspacing="0" cellpadding="0">
