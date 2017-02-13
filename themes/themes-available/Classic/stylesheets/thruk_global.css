@@ -1358,7 +1358,21 @@ BUTTON.wrench {
 BUTTON.bugs {
   background-image: url('../images/bug_error.png');
 }
+BUTTON.excel_export {
+  background-image: url('../images/page_white_excel.png');
+}
+BUTTON.json_export {
+  background-image: url('../images/json.png');
+}
+BUTTON.show_link {
+  background-image: url('../images/link.png');
+}
+BUTTON.add_bookmark {
+  background-image: url('../images/book_add.png');
+}
 
 BUTTON.small {
-  padding: 9px;
+  padding: 0;
+  width: 16px;
+  height: 16px;
 }

@@ -14,7 +14,7 @@
       </tr>
     </table>
 
-    <div align="right" style="padding-right: 20px;">
+    <div align="left" style="padding-left: 20px;">
     [% PROCESS _json_export.tt %]
     </div>
 

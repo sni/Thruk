@@ -22,7 +22,7 @@
   </table>
 [% END %]
 
-<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns', undefined, true); updateExcelPermanentLink(); return false;" id='excelexportlink'><img src='[% url_prefix %]themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel' width=16 height=16></a>&nbsp;&nbsp;&nbsp;
+<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns', undefined, true); updateExcelPermanentLink(); return false;" id='excelexportlink'><button class="thruk_btn small secondary excel_export" title="Export to Excel"></button></a>&nbsp;&nbsp;&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
 <div class="shadow"><div class="shadowcontent">
 [% IF style != 'combined' %]

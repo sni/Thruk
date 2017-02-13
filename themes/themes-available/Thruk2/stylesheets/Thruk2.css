@@ -1237,6 +1237,10 @@ BUTTON.thruk_btn {
   cursor: pointer;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
   white-space: nowrap;
+  -webkit-transition: background-color 0.3s ease-out 0s;
+  -moz-transition: background-color 0.3s ease-out 0s;
+  -o-transition: background-color 0.3s ease-out 0s;
+  transition: background-color 0.3s ease-out 0s;
 }
 
 BUTTON.thruk_btn.small {
@@ -1256,10 +1260,16 @@ BUTTON.primary {
   background-color: #ffcd00;
   color: #000000;
 }
+BUTTON.thruk_btn.primary:hover {
+  background-color: #ffdc4f;
+}
 
 BUTTON.secondary {
   background-color: #f1f1f1;
   color: #000000;
+}
+BUTTON.secondary:hover {
+  background-color: #fafafa;
 }
 
 BUTTON.wrench::before {
@@ -1297,7 +1307,6 @@ button.refreshing, button.thruk_btn.top_refresh_button.refreshing {
   background-position: center;
   background-repeat: no-repeat;
 }
-
 button.thruk_btn.top_refresh_button {
   background-image: none;
   top: inherit;
@@ -1307,6 +1316,19 @@ button.thruk_btn.top_nav_pref_button, button.thruk_btn.top_nav_logout_button {
   border-color: inherit;
   border-style: inherit;
   color: #000000;
+}
+
+BUTTON.excel_export::before {
+  content: "explicit";
+}
+BUTTON.json_export::before {
+  content: "queue_play_next";
+}
+BUTTON.show_link::before {
+  content: "link";
+}
+BUTTON.add_bookmark::before {
+  content: "chrome_reader_mode";
 }
 
 BODY.splashpage DIV.infoBoxTitle {
