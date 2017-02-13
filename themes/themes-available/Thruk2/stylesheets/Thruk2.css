@@ -296,8 +296,9 @@ DIV.errorMessage {
 }
 
 DIV.hostTotals,DIV.serviceTotals,DIV.status {
-  font-size:11px;
+  font-size:12px;
   margin-bottom:2px;
+  font-family: 'Roboto-Bold';
 }
 
 DIV.infoBoxTitle {
