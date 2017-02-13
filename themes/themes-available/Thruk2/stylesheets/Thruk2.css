@@ -1233,6 +1233,7 @@ BUTTON.thruk_btn {
   background-image: none;
   display: inline-block;
   font-feature-settings: "liga";
+  overflow: hidden;
   text-rendering: optimizelegibility;
   border-radius: 999em;
   cursor: pointer;
