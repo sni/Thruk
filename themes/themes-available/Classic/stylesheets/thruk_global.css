@@ -1297,6 +1297,7 @@ TABLE.broadcast_panel_container {
   border-radius: 0 0 3px 3px;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
   text-align: left;
+  z-index: 5;
 }
 
 TABLE.broadcast_panel_container TD {
