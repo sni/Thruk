@@ -26,6 +26,18 @@
        url('../fonts/roboto-v15-latin-700.ttf') format('truetype'); /* Safari, Android, iOS */
 }
 
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(../fonts/MaterialIcons-Regular.eot); /* For IE6-8 */
+  src: local('Material Icons'),
+       local('MaterialIcons-Regular'),
+       url(../fonts/MaterialIcons-Regular.woff2) format('woff2'),
+       url(../fonts/MaterialIcons-Regular.woff) format('woff'),
+       url(../fonts/MaterialIcons-Regular.ttf) format('truetype');
+}
+
 body {
   background:#f1f1f1 url(../images/bg.png) repeat-x;
   background-attachment: scroll;
@@ -69,16 +81,12 @@ body {
   margin:0 0 15px;
 }
 
-#search-results,.navsectiontitle, input.top_nav_pref_button, .btn-round, input.top_refresh_button, BUTTON.top_nav_logout_button {
+#search-results,.navsectiontitle {
   background:#ffcd00;
 }
 .navsectiontitle:hover {
   background-color:#ffdc4f;
 }
-BUTTON.open_filter_button.filter_active {
-  background-color: #ffcd00 !important;
-}
-
 
 #splashpage {
   text-align:center;
@@ -95,7 +103,6 @@ BUTTON.open_filter_button.filter_active {
 
 .filter_button_mini {
   left:-8px;
-  position:relative;
   top:-3px;
 }
 
@@ -1218,34 +1225,92 @@ DIV.health_bar_bg {
   background: #DDDDDD;
 }
 
-INPUT.top_nav_pref_button, BUTTON.top_nav_logout_button {
-  border: none;
-  background-image: url('../images/settings.png');
-  background-repeat: no-repeat;
+BUTTON.thruk_button {
+  font-family: "Material Icons";
+  background: transparent;
+  line-height: 1px;
+  background-image: none;
+  display: inline-block;
+  font-feature-settings: "liga";
+  text-rendering: optimizelegibility;
+  border-radius: 999em;
+  cursor: pointer;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  white-space: nowrap;
+}
+
+BUTTON.thruk_button.small {
+  font-size: 16px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+}
+
+BUTTON.thruk_button.big {
+  font-size: 28px;
+  width: 40px;
+  height: 40px;
+}
+
+BUTTON.primary {
+  background-color: #ffcd00;
+  color: #000000;
+}
+
+BUTTON.secondary {
+  background-color: #f1f1f1;
+  color: #000000;
+}
+
+BUTTON.wrench::before {
+  content: "build";
+}
+
+BUTTON.filter::before {
+  content: "tune";
+}
+
+BUTTON.logout::before {
+  content: "power_settings_new";
+}
+
+BUTTON.settings::before {
+  content: "settings";
+}
+
+BUTTON.refresh::before {
+  content: "autorenew";
+}
+
+BUTTON.refreshing::before {
+  content: "";
+}
+BUTTON.bugs {
+  background-color: #f0666c;
+}
+BUTTON.bugs::before {
+  content: "bug_report";
+}
+button.refreshing, button.thruk_button.top_refresh_button.refreshing {
+  background-image: url('../images/waiting.gif');
+  background-size: auto;
   background-position: center;
-  padding: 18px !important;
-  margin-top: 2px !important;
-  font-size: 1px;
+  background-repeat: no-repeat;
 }
 
-INPUT.top_nav_pref_button {
-  background-image: url('../images/settings.png');
-  text-indent: -200px;
-  overflow: hidden;
+button.thruk_button.top_refresh_button {
+  background-image: none;
+  top: inherit;
 }
-
-BUTTON.top_nav_logout_button {
-  background-image: url('../images/logout.png');
-  text-indent: -200px;
-  overflow: hidden;
+button.thruk_button.top_nav_pref_button, button.thruk_button.top_nav_logout_button {
+  background-color: #ffcd00;
+  border-color: inherit;
+  border-style: inherit;
+  color: #000000;
 }
 
 BODY.splashpage DIV.infoBoxTitle {
     line-height: normal;
-}
-
-td.top_nav_pref input, td.top_nav_pref button {
-  width: 90px;
 }
 
 TABLE.pref_pane {
@@ -1263,30 +1328,6 @@ TABLE.pref_pane tbody > tr > td {
 
 TABLE.pref_pane TH {
   white-space: nowrap;
-}
-
-.filter_button{
-  background-color: #ffffff;
-}
-.top_bug_button{
-  background-color: #f0666c;
-}
-.btn-round,INPUT.filter_button,.top_bug_button,.top_refresh_button,INPUT.top_nav_pref_button, BUTTON.top_nav_logout_button, BUTTON.open_filter_button {
-  top:auto;
-  bottom:auto;
-  left:auto;
-  right:auto;
-  margin-top:0px;
-  margin-right:4px;
-  border-radius: 999em;
-  width: 16px !important;
-  height: 16px !important;
-  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-  line-height: 1;
-  position: relative;
-  cursor: pointer;
-  display: inline-block;
-  padding:10px;
 }
 
 .has_long_plugin_output {
@@ -1387,14 +1428,6 @@ TD.host_name > TABLE TD {
   top: 53px;
 }
 
-BUTTON.open_filter_button {
-  background-image: url("../images/filter.png");
-  height: 40px !important;
-  width: 40px !important;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
 body.loginpage TABLE.infoBox {
   border-radius: 5px;
   background-color: #cfd8dc;
@@ -1451,4 +1484,9 @@ TH.status input {
   font-family: "Roboto-Bold";
   font-size: 12px;
   width: 95%;
+}
+
+td.top_nav_pref {
+  padding-top: 2px;
+  padding-right: 10px;
 }

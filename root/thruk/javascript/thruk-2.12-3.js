@@ -661,16 +661,6 @@ function window_location_replace(url) {
     window.location.replace(url);
 }
 
-/* set border color as mouse over for top row buttons */
-function button_over(button)
-{
-   button.style.borderColor = "#555555";
-}
-function button_out(button)
-{
-   button.style.borderColor = "";
-}
-
 function get_site_panel_backend_button(id, with_id, styles, onclick, section, subsection) {
     if(!initial_backends[id]['cls']) { return(""); }
     var btn = '<input type="button"';
@@ -682,8 +672,6 @@ function get_site_panel_backend_button(id, with_id, styles, onclick, section, su
     btn += ' class="button_peer'+initial_backends[id]['cls']+' backend_'+id+' section_'+section+' subsection_'+section+'_'+subsection+'"';
     btn += ' value="'+initial_backends[id]['name']+'"';
     btn += ' title="'+initial_backends[id]['last_error']+'"';
-    btn += ' onMouseOver="button_over(this)"';
-    btn += ' onMouseOut="button_out(this)"';
     if(initial_backends[id]['disabled'] == 5) {
         btn += ' disabled'
     } else {
@@ -706,14 +694,14 @@ function print_site_panel_header() {
             return;
         }
         if(backend_chooser == 'switch' && param_backend) {
-          dw("<div class='backend'><input type='button' class='button_peerUP' value='"+initial_backends[param_backend].name+"' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'>\</div>");
+          dw("<div class='backend'><input type='button' class='button_peerUP' value='"+initial_backends[param_backend].name+"' onClick='toggleSitePanel()'>\</div>");
           if(sites.disabled > 0) {
-            dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+ sites.disabled+" more' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
+            dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+ sites.disabled+" more' onClick='toggleSitePanel()'></div>");
           }
         } else {
-          dw("<div class='backend'><input type='button' class='"+(sites.up > 0 ? "button_peerUP" : "button_peerDIS")+"' value='"+sites.up+" up' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
-          dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+sites.disabled+" disabled' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
-          dw("<div class='backend'><input type='button' class='"+(sites.down > 0 ? "button_peerDOWN" : "button_peerDIS")+"' value='"+sites.down+" down' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
+          dw("<div class='backend'><input type='button' class='"+(sites.up > 0 ? "button_peerUP" : "button_peerDIS")+"' value='"+sites.up+" up' onClick='toggleSitePanel()'></div>");
+          dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+sites.disabled+" disabled' onClick='toggleSitePanel()'></div>");
+          dw("<div class='backend'><input type='button' class='"+(sites.down > 0 ? "button_peerDOWN" : "button_peerDIS")+"' value='"+sites.down+" down' onClick='toggleSitePanel()'></div>");
         }
         dw('<div id="site_panel" style="display: none;"><\/div>');
     }
@@ -814,7 +802,7 @@ function create_site_panel_popup_collapsed() {
             if(section.up  > 0 && subsection.down > 0) { cls = 'button_peerWARN'; }
             if(section.up  > 0 && subsection.disabled > 0 && subsection.down == 0) { cls = 'button_peerUPDIS'; }
             if(section.up == 0 && subsection.disabled > 0 && subsection.down > 0) { cls = 'button_peerDOWNDIS'; }
-            panel += '<div class="backend"><input id="btn_sites_'+sectionname+'_'+subsectionname+'" type="button" class="'+cls+' btn_sites btn_sites_'+sectionname+'" value="'+subsectionname+'" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleSubSection(\'sites_'+sectionname+'_'+subsectionname+'\')"></div>';
+            panel += '<div class="backend"><input id="btn_sites_'+sectionname+'_'+subsectionname+'" type="button" class="'+cls+' btn_sites btn_sites_'+sectionname+'" value="'+subsectionname+'" onClick="toggleSubSection(\'sites_'+sectionname+'_'+subsectionname+'\')"></div>';
         });
         panel += '    </td>';
         panel += '  </tr>';
@@ -1509,7 +1497,10 @@ function reset_table_row_classes(table, c1, c2) {
 /* set icon src and refresh page */
 function refresh_button(btn) {
     btn.src = url_prefix + 'themes/' + theme + '/images/waiting.gif';
-    reloadPage();
+    jQuery(btn).addClass('refreshing');
+    window.setTimeout(function() {
+        reloadPage();
+    }, 100);
 }
 
 /* reverse a string */
@@ -1715,9 +1706,10 @@ function do_table_search() {
 function showBugReport(id, text) {
     var link = document.getElementById('bug_report-btnEl');
     var raw  = text;
+    var href;
     if(link) {
         text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n" + text;
-        link.href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
+        href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
     }
 
     var obj = document.getElementById(id);
@@ -1725,6 +1717,7 @@ function showBugReport(id, text) {
         Ext.getCmp(id).show();
         Ext.getCmp(id).el.dom.ondblclick    = function() { return showErrorTextPopup(raw) };
         Ext.getCmp(id).el.dom.oncontextmenu = function() { return showErrorTextPopup(raw) };
+        Ext.getCmp(id).el.dom.onclick       = function() { window_location_replace(href); };
     }
     catch(err) {
         if(obj) {
@@ -1732,6 +1725,7 @@ function showBugReport(id, text) {
             obj.style.visibility = 'visible';
             obj.ondblclick       = function() { return showErrorTextPopup(raw) };
             obj.oncontextmenu    = function() { return showErrorTextPopup(raw) };
+            obj.onclick          = function() { window_location_replace(href); };
         }
     }
 }
