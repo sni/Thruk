@@ -193,7 +193,6 @@ function hideElement(id, icon) {
   if(img && img.src) {
     img.src = img.src.replace(/icon_minimize\.gif/g, "icon_maximize.gif");
   }
-  remove_close_element(id);
 }
 
 /* show a element by id */
@@ -219,6 +218,7 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   }
 
   if(bodyclose) {
+    remove_close_element(id);
     window.setTimeout(function() {
         addEvent(document, 'click', close_and_remove_event);
         var found = false;
