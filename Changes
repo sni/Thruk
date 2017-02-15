@@ -8,6 +8,7 @@ next:
           - fix livestatus "Operator !~~ for lists not implemented." issue when having an empty search filter
           - Business Process:
             - add support for simple wildcards, ex.: host:*
+            - support regular expressions in service details link
             - fix dropdown not being clickable
           - Panorama View:
             - honor acknowledgement and downtime status shape color calculation

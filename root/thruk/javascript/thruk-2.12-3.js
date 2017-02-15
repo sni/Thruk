@@ -2654,6 +2654,13 @@ function broadcast_dismiss() {
     return(false);
 }
 
+function looks_like_regex(str) {
+    if(str != undefined && str != null && str.match(/[\^\|\*\{\}\[\]]/)) {
+        return(true);
+    }
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

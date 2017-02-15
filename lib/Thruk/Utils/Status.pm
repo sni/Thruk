@@ -677,6 +677,7 @@ sub single_search {
         if( $filter->{'op'} eq '<=' ) { $op = '<='; $rop = '>='; $dateop = '<='; }
 
         if( $op eq '!~~' or $op eq '~~' ) {
+            $value = Thruk::Utils::convert_wildcards_to_regex($value);
             $errors++ unless Thruk::Utils::is_valid_regular_expression( $c, $value );
         }
 

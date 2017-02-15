@@ -873,7 +873,12 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     if(service) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        if(looks_like_regex(service)) {
+            var filter = service.replace(/^(w|b):/, '');
+            jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op=%7E&dfl_s0_value="+filter+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        } else {
+            jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        }
     }
 
     // host specific things...
