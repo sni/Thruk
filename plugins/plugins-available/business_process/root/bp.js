@@ -138,8 +138,8 @@ function bp_context_menu_open(evt, node) {
     // clicking the wrench icon counts as right click too
     if(evt.target && jQuery(evt.target).hasClass('ui-icon-wrench')) { rightclick = true; }
     if(rightclick && node) {
-        bp_context_menu = true;
         bp_unset_active_node();
+        bp_context_menu = true;
         jQuery(node).addClass('bp_node_active');
         bp_active_node = node.id;
         bp_update_status(evt, node);

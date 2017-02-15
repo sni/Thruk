@@ -10,6 +10,7 @@ next:
             - add support for simple wildcards, ex.: host:*
             - support regular expressions in service details link
             - fix dropdown not being clickable
+            - fix selecting nodes for edit (#682)
           - Panorama View:
             - honor acknowledgement and downtime status shape color calculation
             - fix shape color for host problems in group/dashboard panels
