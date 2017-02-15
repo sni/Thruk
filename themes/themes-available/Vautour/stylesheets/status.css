@@ -119,3 +119,10 @@ a.hostTotals:hover { color: #000; }
 TABLE#statusTable tbody > tr > TD {
     padding-left: 2px;
 }
+
+UL.headerBackends { display: inline; list-style-type: none; margin: 0; padding: 0; }
+UL.headerBackends LI { float: left; margin: 0 2px; }
+UL.headerBackends LI SPAN { display: block; padding: 2px 8px; white-space: nowrap; }
+.backendStatusUNKNOWN { color: #fff; background: #bf44b2; }
+.backendStatusUP { color: #fff; background: #00cc33; }
+.backendStatusDOWN { color: #fff; background: #ff3300; }

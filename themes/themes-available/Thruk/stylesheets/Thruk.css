@@ -744,6 +744,36 @@ TD.statusEven {
   height:22px;
 }
 
+UL.headerBackends {
+  display:inline;
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+
+UL.headerBackends LI {
+  float:left;
+  margin:0 0 0 2px;
+}
+
+UL.headerBackends LI SPAN {
+  display:block;
+  padding:2px 8px;
+  white-space:nowrap;
+}
+
+.backendStatusUNKNOWN {
+  background:#ff9e00;
+}
+
+.backendStatusUP {
+  background:#0f3;
+}
+
+.backendStatusDOWN {
+  background:#ff5b33;
+}
+
 TH.hostTotals {
   width:25%;
 }
