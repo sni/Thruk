@@ -227,8 +227,7 @@ sub do_filter {
 
         # complex filter search?
         push @{$searches}, Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s0', 1 );
-        # TODO: make that smarter
-        for ( my $x = 1; $x <= 99; $x++ ) {
+        for my $x (@{_get_search_ids($c->req->parameters, $prefix)}) {
             my $search = Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s' . $x );
             push @{$searches}, $search if defined $search;
         }
@@ -2258,6 +2257,19 @@ sub set_comments_and_downtimes {
     return;
 }
 
+##############################################
+sub _get_search_ids {
+    my($params, $prefix) = @_;
+    my $ids = {};
+    my $search = $prefix.'s';
+    for my $key (grep /^$prefix/mx, keys %{$params}) {
+        if($key =~ m/^$search(\d+)_/mx) {
+            $ids->{$1} = 1;
+        }
+    }
+    my @list = sort keys %{$ids};
+    return(\@list);
+}
 ##############################################
 
 =head1 AUTHOR
