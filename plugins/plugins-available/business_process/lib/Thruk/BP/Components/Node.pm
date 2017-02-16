@@ -20,7 +20,7 @@ Business Process Node
 =cut
 
 my @stateful_keys   = qw/status status_text last_check last_state_change short_desc
-                       scheduled_downtime_depth acknowledged/;
+                       scheduled_downtime_depth acknowledged bp_ref/;
 
 ##########################################################
 
@@ -54,6 +54,7 @@ sub new {
         'scheduled_downtime_depth'  => 0,
         'acknowledged'              => 0,
         'testmode'                  => 0,
+        'bp_ref'                    => undef,
 
         'status'                    => $data->{'status'} // 4,
         'status_text'               => $data->{'status_text'} || '',
@@ -379,6 +380,12 @@ sub set_status {
     }
 
     # update some extra attributes
+    my %custom_vars;
+    $self->{'bp_ref'} = undef;
+    if($extra) {
+        @custom_vars{@{$extra->{'host_custom_variable_names'}}} = @{$extra->{'host_custom_variable_values'}};
+        $self->{'bp_ref'} = $custom_vars{'THRUK_BP_ID'};
+    }
     for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged testmode/) {
         $self->{$key} = $extra->{$key} if defined $extra->{$key};
     }

@@ -104,6 +104,11 @@ DIV.ui-dialog INPUT[type=text] {
     right: 2px;
 }
 
+.bp_ref_link {
+    position: absolute;
+    top: 0;
+    right: 2px;
+}
 
 .bp_settings INPUT, .bp_settings SELECT {
     width: 240px;
@@ -210,6 +215,16 @@ SPAN.bp_label {
     display: none;
 }
 .bp_node:hover .bp_node_edit_icon {
+    display: inherit;
+}
+
+.bp_node_bp_ref_icon {
+    position: absolute;
+    bottom: 2px;
+    right: 0px;
+    display: none;
+}
+.bp_node:hover .bp_node_bp_ref_icon {
     display: inherit;
 }
 

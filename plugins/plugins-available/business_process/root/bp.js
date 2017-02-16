@@ -849,8 +849,6 @@ function bp_update_status(evt, node) {
         jQuery('#bp_status_icon_ack').css('display', 'none');
     }
 
-    jQuery('.bp_status_extinfo_link').css('display', 'none');
-
 
     var service, host;
     if(n.service) {
@@ -872,27 +870,40 @@ function bp_update_status(evt, node) {
     }
 
     // service specific things...
+    var link;
     if(service) {
         if(looks_like_regex(service)) {
             var filter = service.replace(/^(w|b):/, '');
-            jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op=%7E&dfl_s0_value="+filter+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op=%7E&dfl_s0_value="+filter+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
         } else {
-            jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
         }
     }
 
     // host specific things...
     else if(host) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>";
     }
     // hostgroup link
     else if(n.hostgroup) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>");
+        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>";
     }
 
     // servicegroup link
     else if(n.servicegroup) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>");
+        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>";
+    }
+
+    jQuery('.bp_status_extinfo_link').css('display', 'none');
+    if(link) {
+        jQuery('.bp_status_extinfo_link').css('display', '').html(link);
+    }
+
+    jQuery('.bp_ref_link').css('display', 'none');
+    jQuery("#"+n.id+" .bp_node_bp_ref_icon").css('visibility', 'hidden');
+    if(n.bp_ref) {
+        jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", "bp.cgi?action=details&bp="+n.bp_ref).css('visibility', '');
+        jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+n.bp_ref+"'><img src='"+url_prefix+"themes/"+theme+"/images/chart_organisation.png' border='0' alt='Show Business Process' title='Show Business Process' width='16' height='16'><\/a>");
     }
 
     return false;

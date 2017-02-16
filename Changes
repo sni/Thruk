@@ -9,6 +9,7 @@ next:
           - Business Process:
             - add support for simple wildcards, ex.: host:*
             - add link to all input hosts/services
+            - add link to referenced business process if node links to another bp
             - support regular expressions in service details link
             - fix dropdown not being clickable
             - fix selecting nodes for edit (#682)

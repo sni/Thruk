@@ -68,7 +68,12 @@
               </tr>
               <tr class='data'>
                 <th>Function</th>
-                <td id="bp_status_function"></td>
+                <td>
+                  <div style="position: relative;">
+                    <span id="bp_status_function"></span>
+                    <div class="bp_ref_link"></div>
+                  </div>
+                </td>
               </tr>
             </table>
           </td>

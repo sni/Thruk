@@ -302,6 +302,7 @@ sub get_json_nodes {
           duration                  => $n->{'last_state_change'} ? Thruk::Utils::Filter::duration(time() - $n->{'last_state_change'}) : '',
           acknowledged              => $n->{'acknowledged'}."",
           scheduled_downtime_depth  => $n->{'scheduled_downtime_depth'}."",
+          bp_ref                    => $n->{'bp_ref'},
           depends                   => $n->depends_list,
           func                      => $n->{'function'},
           func_args                 => $n->{'function_args'},

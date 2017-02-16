@@ -26,6 +26,7 @@
         <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
         [% UNLESS no_menu %]
         <a href="#" onclick="bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><span class="ui-icon ui-icon-wrench">&nbsp;</span></a>
+        <a href="#" class="bp_node_bp_ref_icon" style="visibility: hidden;"><span class="ui-icon ui-icon-shuffle">&nbsp;</span></a>
         [% END %]
         <div class="bp_node_icons">
           [% IF n.testmode %]
