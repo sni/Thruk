@@ -741,7 +741,7 @@ TD.notificationsWARNING {
   background-color:#f0666c !important;
   color:#f1f1f1;
   height:22px;
-  padding:2px;
+  padding:1px;
 }
 .statusHOSTDOWN a {
   color:inherit;

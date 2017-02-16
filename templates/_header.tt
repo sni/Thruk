@@ -79,6 +79,6 @@
   </tr>
 </table>
 [% IF show_top_pane %]
-<a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
+<img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane clickable" id="btn_toggle_top_pane" alt="toggle header" onClick="toggleTopPane(); return false;">
 [% END %]
 [% END %]

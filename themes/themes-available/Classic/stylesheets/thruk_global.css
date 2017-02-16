@@ -636,6 +636,7 @@ table.filter > tbody > tr > td {
   position: absolute;
   top: 21px;
   right: 0px;
+  z-index: 1;
 }
 
 .hidenav {
