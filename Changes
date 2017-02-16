@@ -8,6 +8,7 @@ next:
           - fix livestatus "Operator !~~ for lists not implemented." issue when having an empty search filter
           - Business Process:
             - add support for simple wildcards, ex.: host:*
+            - add link to all input hosts/services
             - support regular expressions in service details link
             - fix dropdown not being clickable
             - fix selecting nodes for edit (#682)

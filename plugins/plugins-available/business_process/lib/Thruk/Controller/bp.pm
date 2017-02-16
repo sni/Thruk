@@ -31,6 +31,11 @@ sub index {
         $c->config->{'bp_modules_loaded'} = 1;
     }
 
+    my $style = $c->req->parameters->{'style'};
+    if($style) {
+        return if Thruk::Utils::Status::redirect_view($c, $style);
+    }
+
     $c->stash->{title}                 = 'Business Process';
     $c->stash->{page}                  = 'status';
     $c->stash->{template}              = 'bp.tt';
@@ -334,6 +339,73 @@ sub index {
             }
             $c->stash->{template} = '_bp_graph.tt';
             return 1;
+        }
+        if($action eq 'list_objects') {
+            my $params = {};
+            my $hst = 0;
+            my $svc = 0;
+            for my $n (@{$bp->{'nodes'}}) {
+                if(lc $n->{'function'} eq 'status') {
+                    if($n->{'host'} and $n->{'service'}) {
+                        my $service = $n->{'service'};
+                        my $svc_op  = '=';
+                        if(Thruk::BP::Utils::looks_like_regex($service)) {
+                            $service =~ s/^(b|w)://gmx;
+                            $service = Thruk::Utils::convert_wildcards_to_regex($service);
+                            $svc_op  = '~';
+                        }
+                        $params->{'svc_s'.$svc.'_type'}   = ['host', 'service'];
+                        $params->{'svc_s'.$svc.'_op'}     = ['=', $svc_op];
+                        $params->{'svc_s'.$svc.'_value'}  = [$n->{'host'}, $service];
+                        $svc++;
+                    }
+                    elsif($n->{'host'}) {
+                        $params->{'hst_s'.$hst.'_type'}   = 'host';
+                        $params->{'hst_s'.$hst.'_op'}     = '=';
+                        $params->{'hst_s'.$hst.'_value'}  = $n->{'host'};
+                        $hst++;
+                    }
+                }
+                elsif(lc $n->{'function'} eq 'groupstatus') {
+                    if($n->{'hostgroup'}) {
+                        $params->{'hst_s'.$hst.'_type'}   = 'hostgroup';
+                        $params->{'hst_s'.$hst.'_op'}     = '=';
+                        $params->{'hst_s'.$hst.'_value'}  = $n->{'hostgroup'};
+                        $hst++;
+
+                        $params->{'svc_s'.$svc.'_type'}   = 'hostgroup';
+                        $params->{'svc_s'.$svc.'_op'}     = '=';
+                        $params->{'svc_s'.$svc.'_value'}  = $n->{'hostgroup'};
+                        $svc++;
+                    }
+                    elsif($n->{'servicegroup'}) {
+                        $params->{'svc_s'.$svc.'_type'}   = 'servicegroup';
+                        $params->{'svc_s'.$svc.'_op'}     = '=';
+                        $params->{'svc_s'.$svc.'_value'}  = $n->{'servicegroup'};
+                        $svc++;
+                    }
+                }
+            }
+            $params->{'title'} = $bp->{'name'};
+            $params->{'style'} = 'combined';
+            if($hst == 0) {
+                # only service filter -> show service list only
+                $params->{'style'} = 'detail';
+                for my $key (keys %{$params}) {
+                    my $newkey = $key;
+                    $newkey =~ s/^svc_/dfl_/gmx;
+                    $params->{$newkey} = delete $params->{$key};
+                }
+            }
+
+            for my $key (keys %{$c->req->parameters}) {
+                delete $c->req->parameters->{$key};
+            }
+            for my $key (keys %{$params}) {
+                $c->req->parameters->{$key} = $params->{$key};
+            }
+            require Thruk::Controller::status;
+            return(Thruk::Controller::status::index($c));
         }
     }
 

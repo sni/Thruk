@@ -103,7 +103,7 @@
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='Show Status' title='Show Status' width="16" height="16" style="vertical-align: top;"></td>
-                <td class='command'><a href='status.cgi?host=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Status</a></td>
+                <td class='command'><a href='status.cgi?host=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Status</a> <a href='bp.cgi?action=list_objects&amp;bp=[% bp.id %]'>(including all referenced objects)</a></td>
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='Show Trends' title='Show Trends' width="16" height="16" style="vertical-align: top;"></td>

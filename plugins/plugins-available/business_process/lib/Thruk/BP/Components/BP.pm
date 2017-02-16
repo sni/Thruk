@@ -607,7 +607,7 @@ sub bulk_fetch_live_data {
         my @filter;
         for my $hostname (keys %{$servicefilter}) {
             for my $description (keys %{$servicefilter->{$hostname}}) {
-                if($self->looks_like_regex($description)) {
+                if(Thruk::BP::Utils::looks_like_regex($description)) {
                     $description =~ s/^(b|w)://gmx;
                     $description = Thruk::Utils::convert_wildcards_to_regex($description);
                     push @filter, { host_name => $hostname, description => { '~~' => $description }};
@@ -749,23 +749,6 @@ sub TO_JSON {
         push @{$data->{'nodes'}}, $n->TO_JSON();
     }
     return $data;
-}
-
-##########################################################
-
-=head2 looks_like_regex
-
-    looks_like_regex($str)
-
-returns true if $string looks like a regular expression
-
-=cut
-sub looks_like_regex {
-    my($self, $str) = @_;
-    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
-        return(1);
-    }
-    return;
 }
 
 ##########################################################

@@ -517,6 +517,23 @@ sub bp_base_folder {
 }
 
 ##########################################################
+
+=head2 looks_like_regex
+
+    looks_like_regex($str)
+
+returns true if $string looks like a regular expression
+
+=cut
+sub looks_like_regex {
+    my($str) = @_;
+    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
+        return(1);
+    }
+    return;
+}
+
+##########################################################
 # return objects in nagios format
 sub _get_nagios_objects {
     my($c, $obj) = @_;

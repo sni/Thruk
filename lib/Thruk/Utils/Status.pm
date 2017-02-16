@@ -101,7 +101,7 @@ returns search parameter based on request parameters
 sub get_search_from_param {
     my( $c, $prefix, $force ) = @_;
 
-    unless ( $force || exists $c->req->parameters->{ $prefix . '_hoststatustypes' } ) {
+    unless ( $force || exists $c->req->parameters->{$prefix . '_hoststatustypes'} || exists $c->req->parameters->{$prefix . '_type'}) {
         return;
     }
 
@@ -227,6 +227,7 @@ sub do_filter {
 
         # complex filter search?
         push @{$searches}, Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s0', 1 );
+        # TODO: make that smarter
         for ( my $x = 1; $x <= 99; $x++ ) {
             my $search = Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s' . $x );
             push @{$searches}, $search if defined $search;
@@ -440,8 +441,9 @@ sub do_search {
     if(     scalar @{$searches} == 1
         and scalar @{ $searches->[0]->{'text_filter'} } == 1
         and defined $searches->[0]->{'text_filter'}->[0]->{'op'}
-        and $searches->[0]->{'text_filter'}->[0]->{'op'} eq '=' )
-    {
+        and $searches->[0]->{'text_filter'}->[0]->{'op'} eq '='
+        and $prefix eq 'dfl_'
+    ) {
         my $type  = $searches->[0]->{'text_filter'}->[0]->{'type'};
         my $value = $searches->[0]->{'text_filter'}->[0]->{'value'};
         if( $type eq 'host' ) {

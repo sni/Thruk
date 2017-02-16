@@ -35,7 +35,7 @@ sub status {
         $data = $livedata->{'services'}->{$hostname}->{$description};
 
         # description may contain regular expressions, return worst/best function in that case
-        if($bp->looks_like_regex($description)) {
+        if(Thruk::BP::Utils::looks_like_regex($description)) {
             my $function = 'worst';
             if($description =~ m/^(b|w):(.*)$/mx) {
                 if($1 eq 'b') { $function = 'best' }
