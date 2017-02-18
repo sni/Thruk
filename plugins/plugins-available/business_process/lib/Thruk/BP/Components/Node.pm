@@ -382,7 +382,7 @@ sub set_status {
     # update some extra attributes
     my %custom_vars;
     $self->{'bp_ref'} = undef;
-    if($extra) {
+    if($extra && $extra->{'host_custom_variable_names'}) {
         @custom_vars{@{$extra->{'host_custom_variable_names'}}} = @{$extra->{'host_custom_variable_values'}};
         $self->{'bp_ref'} = $custom_vars{'THRUK_BP_ID'};
     }
