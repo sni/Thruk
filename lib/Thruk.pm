@@ -381,6 +381,7 @@ sub reset_logging {
         if($appender->{'appender'} && $appender->{'appender'}->{'fh'}) {
             # enable closing logs for forked childs
             $appender->{'appender'}->{'close'} = 1;
+            $appender->{'appender'}->{'close_after_write'} = 1;
 
             # result in write on close fh otherwise
             CORE::close($appender->{'appender'}->{'fh'});
