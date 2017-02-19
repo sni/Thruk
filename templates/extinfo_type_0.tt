@@ -14,464 +14,462 @@
       </tr>
     </table>
 
-    <div align="left" style="padding-left: 20px;">
+    <div align="left" style="padding-left: 5px;">
     [% PROCESS _json_export.tt %]
     </div>
 
-    <div align="center">
-      <table border="0" cellpadding="20">
-        <tr>
-          <td valign="top">
-            <div class='dataTitle blockHead blockHeadBorder'>Process Information</div>
+    <table border="0" cellpadding="0">
+      <tr>
+        <td valign="top" style="padding-right: 20px;">
+          <div class='dataTitle blockHead blockHeadBorder'>Process Information</div>
 
 
-            [% nr = backends.size / 5 %]
-            [% x = 0 %]
-            [% y = 0 %]
-            [% WHILE x < nr %]
-                [% tmpbackends = [] %]
-                [% FOREACH z IN [1,2,3,4,5] %]
-                    [% IF backends.size > y %]
-                    [% tmpbackends.push(backends.$y) %]
+          [% nr = backends.size / 5 %]
+          [% x = 0 %]
+          [% y = 0 %]
+          [% WHILE x < nr %]
+              [% tmpbackends = [] %]
+              [% FOREACH z IN [1,2,3,4,5] %]
+                  [% IF backends.size > y %]
+                  [% tmpbackends.push(backends.$y) %]
+                  [% END %]
+                  [% y = y + 1 %]
+              [% END %]
+          <table border="1" cellspacing="0" cellpadding="0" class='data procInfoTable'>
+            <tr>
+              <td class='stateInfoTable1'>
+                <table border="0">
+                  <tr>
+                    <td class='dataVar' nowrap>Backend Name:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal' width="180" title="id: [% pd %]">
+                      [% IF backend_detail.$pd.name %]
+                        [% backend_detail.$pd.name %]
+                      [% ELSE %]
+                      unknown
+                      [% END %]
+                    </td>
                     [% END %]
-                    [% y = y + 1 %]
-                [% END %]
-            <table border="1" cellspacing="0" cellpadding="0" class='data procInfoTable'>
-              <tr>
-                <td class='stateInfoTable1'>
-                  <table border="0">
-                    <tr>
-                      <td class='dataVar' nowrap>Backend Name:</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal' width="180" title="id: [% pd %]">
-                        [% IF backend_detail.$pd.name %]
-                          [% backend_detail.$pd.name %]
-                        [% ELSE %]
-                        unknown
-                        [% END %]
-                      </td>
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Program Version:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                      [% IF backend_detail.$pd.running %]
+                        <td class='dataVal'>[% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.program_version %][% ELSE %][% pi_detail.$pd.program_version %][% END %]</td>
+                      [% ELSE %]
+                        <td class='dataVal'>&nbsp;</td>
                       [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Program Version:</td>
-                      [% FOREACH pd IN tmpbackends %]
-                        [% IF backend_detail.$pd.running %]
-                          <td class='dataVal'>[% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.program_version %][% ELSE %][% pi_detail.$pd.program_version %][% END %]</td>
-                        [% ELSE %]
-                          <td class='dataVal'>&nbsp;</td>
-                        [% END %]
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Program Start Time:</td>
-                      [% FOREACH pd IN tmpbackends %]
-                        <td class='dataVal' nowrap>
-                          [% IF backend_detail.$pd.running %]
-                            [% date_format(c, pi_detail.$pd.program_start) %]
-                          [% ELSIF backend_detail.$pd.disabled == 2 %]
-                          <div class='peerDIS'>&nbsp;&nbsp;HIDDEN</div>
-                          [% ELSE %]
-                          <div class='peerDOWN'>&nbsp;&nbsp;DOWN</div>
-                          [% END %]
-                        </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Total Running Time:</td>
-                      [% FOREACH pd IN tmpbackends %]
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Program Start Time:</td>
+                    [% FOREACH pd IN tmpbackends %]
                       <td class='dataVal' nowrap>
                         [% IF backend_detail.$pd.running %]
-                            [% duration(date.now - pi_detail.$pd.program_start) %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Last External Command Check:</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal' nowrap>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.last_command_check %][% date_format(c, pi_detail.$pd.last_command_check) %][% ELSE %]N/A[% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Last Log File Rotation:</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal' nowrap>
-                        [% IF backend_detail.$pd.running %]
-                        [% IF pi_detail.$pd.last_log_rotation %][% date_format(c, pi_detail.$pd.last_log_rotation) %][% ELSE %]N/A[% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Backend PID</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                        [% pi_detail.$pd.nagios_pid %]
-                        [% END %]</td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Notifications Enabled?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.enable_notifications %]
-                          <div class='notificationsENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                          [% ELSE %]
-                          <div class='notificationsDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                          [% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Service Checks Being Executed?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.execute_service_checks %]
-                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                          [% ELSE %]
-                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                          [% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Passive Service Checks Being Accepted?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.accept_passive_service_checks %]
-                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                          [% ELSE %]
-                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                          [% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Host Checks Being Executed?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.execute_host_checks %]
-                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                          [% ELSE %]
-                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                          [% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Passive Host Checks Being Accepted?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.accept_passive_host_checks %]
-                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                          [% ELSE %]
-                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                          [% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Event Handlers Enabled?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.enable_event_handlers %]
-                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                          [% ELSE %]
-                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                          [% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Obsessing Over Services?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.obsess_over_services %]Yes[% ELSE %]No[% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Obsessing Over Hosts?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.obsess_over_hosts %]Yes[% ELSE %]No[% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Flap Detection Enabled?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.enable_flap_detection %]Yes[% ELSE %]No[% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Performance Data Being Processed?</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF pi_detail.$pd.process_performance_data %]Yes[% ELSE %]No[% END %]
-                        [% END %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Data Source:</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal dataSource'>
-                        [% IF backend_detail.$pd.type == 'livestatus' %]live:[% ELSIF backend_detail.$pd.type == 'http' %][% ELSE %][% backend_detail.$pd.type %]:[% END %][% backend_detail.$pd.addr.replace('/thruk/cgi-bin/remote.cgi', '') %]
-                      </td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>Data Source Version:</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal dataValBackendVersion'>
-                        [% IF backend_detail.$pd.running %]
-                          [% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]<br>([% END %]
-                          [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
-                          [% IF real_pi_detail.exists(pd) %])[% END %]
+                          [% date_format(c, pi_detail.$pd.program_start) %]
+                        [% ELSIF backend_detail.$pd.disabled == 2 %]
+                        <div class='peerDIS'>&nbsp;&nbsp;HIDDEN</div>
                         [% ELSE %]
-                          [% IF backend_detail.$pd.last_error != "OK" %]
-                            [% escape_html(backend_detail.$pd.last_error) %]
-                          [% END %]
+                        <div class='peerDOWN'>&nbsp;&nbsp;DOWN</div>
                         [% END %]
                       </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Total Running Time:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal' nowrap>
+                      [% IF backend_detail.$pd.running %]
+                          [% duration(date.now - pi_detail.$pd.program_start) %]
                       [% END %]
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-            [% x = x + 1 %]
-            [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Last External Command Check:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal' nowrap>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.last_command_check %][% date_format(c, pi_detail.$pd.last_command_check) %][% ELSE %]N/A[% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Last Log File Rotation:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal' nowrap>
+                      [% IF backend_detail.$pd.running %]
+                      [% IF pi_detail.$pd.last_log_rotation %][% date_format(c, pi_detail.$pd.last_log_rotation) %][% ELSE %]N/A[% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Backend PID</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                      [% pi_detail.$pd.nagios_pid %]
+                      [% END %]</td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Notifications Enabled?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.enable_notifications %]
+                        <div class='notificationsENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                        [% ELSE %]
+                        <div class='notificationsDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Service Checks Being Executed?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.execute_service_checks %]
+                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                        [% ELSE %]
+                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Passive Service Checks Being Accepted?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.accept_passive_service_checks %]
+                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                        [% ELSE %]
+                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Host Checks Being Executed?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.execute_host_checks %]
+                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                        [% ELSE %]
+                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Passive Host Checks Being Accepted?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.accept_passive_host_checks %]
+                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                        [% ELSE %]
+                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Event Handlers Enabled?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.enable_event_handlers %]
+                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                        [% ELSE %]
+                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Obsessing Over Services?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.obsess_over_services %]Yes[% ELSE %]No[% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Obsessing Over Hosts?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.obsess_over_hosts %]Yes[% ELSE %]No[% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Flap Detection Enabled?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.enable_flap_detection %]Yes[% ELSE %]No[% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Performance Data Being Processed?</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF pi_detail.$pd.process_performance_data %]Yes[% ELSE %]No[% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Data Source:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal dataSource'>
+                      [% IF backend_detail.$pd.type == 'livestatus' %]live:[% ELSIF backend_detail.$pd.type == 'http' %][% ELSE %][% backend_detail.$pd.type %]:[% END %][% backend_detail.$pd.addr.replace('/thruk/cgi-bin/remote.cgi', '') %]
+                    </td>
+                    [% END %]
+                  </tr>
+                  <tr>
+                    <td class='dataVar' nowrap>Data Source Version:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal dataValBackendVersion'>
+                      [% IF backend_detail.$pd.running %]
+                        [% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]<br>([% END %]
+                        [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
+                        [% IF real_pi_detail.exists(pd) %])[% END %]
+                      [% ELSE %]
+                        [% IF backend_detail.$pd.last_error != "OK" %]
+                          [% escape_html(backend_detail.$pd.last_error) %]
+                        [% END %]
+                      [% END %]
+                    </td>
+                    [% END %]
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          [% x = x + 1 %]
+          [% END %]
 
 
 
-          </td>
-          <td valign="top">
-            <div class='commandTitle blockHead blockHeadBorder'>Process Commands</div>
-            <table border="1" cellpadding="0" cellspacing="0" class='command'>
-              <tr>
-                <td>
-                  [% UNLESS c.check_cmd_permissions('system') %]
-                  <div align=center class='infoMessage'>Your account does not have permissions to execute commands.<br>
-                  [% ELSE %]
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    [% UNLESS c.config.command_disabled.exists('14') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/stop.gif' border="0" alt='Shutdown the Backend Process' title='Shutdown the Backend Process' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=14'>Shutdown the Backend process</a></td>
-                    </tr>
-                    [% END %]
-                    [% UNLESS c.config.command_disabled.exists('13') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/restart.gif' border="0" alt='Restart the Backend Process' title='Restart the Backend Process' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=13'>Restart the Backend process</a></td>
-                    </tr>
-                    [% END %]
+        </td>
+        <td valign="top">
+          <div class='commandTitle blockHead blockHeadBorder'>Process Commands</div>
+          <table border="1" cellpadding="0" cellspacing="0" class='command'>
+            <tr>
+              <td>
+                [% UNLESS c.check_cmd_permissions('system') %]
+                <div align=center class='infoMessage'>Your account does not have permissions to execute commands.<br>
+                [% ELSE %]
+                <table border="0" cellpadding="0" cellspacing="0">
+                  [% UNLESS c.config.command_disabled.exists('14') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/stop.gif' border="0" alt='Shutdown the Backend Process' title='Shutdown the Backend Process' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=14'>Shutdown the Backend process</a></td>
+                  </tr>
+                  [% END %]
+                  [% UNLESS c.config.command_disabled.exists('13') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/restart.gif' border="0" alt='Restart the Backend Process' title='Restart the Backend Process' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=13'>Restart the Backend process</a></td>
+                  </tr>
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.enable_notifications != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('11') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=11'>Disable notifications</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.enable_notifications != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('12') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications' title='Enable Notifications' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=12'>Enable notifications</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.enable_notifications != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('11') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=11'>Disable notifications</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.enable_notifications != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('12') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications' title='Enable Notifications' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=12'>Enable notifications</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.execute_service_checks != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('36') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=36'>Stop executing service checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.execute_service_checks != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('35') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Executing Service Checks' title='Start Executing Service Checks' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=35'>Start executing service checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.execute_service_checks != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('36') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=36'>Stop executing service checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.execute_service_checks != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('35') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Executing Service Checks' title='Start Executing Service Checks' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=35'>Start executing service checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.accept_passive_service_checks != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('38') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.accept_passive_service_checks != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('37') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Service Checks' title='Start Accepting Passive Service Checks' width="20" height="20"></td>
-                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=37'>Start accepting passive service checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.accept_passive_service_checks != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('38') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.accept_passive_service_checks != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('37') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Service Checks' title='Start Accepting Passive Service Checks' width="20" height="20"></td>
+                    <td class='command' nowrap><a href='cmd.cgi?cmd_typ=37'>Start accepting passive service checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.execute_host_checks != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('89') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=89'>Stop executing host checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.execute_host_checks != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('88') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Executing Host Checks' title='Start Executing Host Checks' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=88'>Start executing host checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.execute_host_checks != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('89') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=89'>Stop executing host checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.execute_host_checks != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('88') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Executing Host Checks' title='Start Executing Host Checks' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=88'>Start executing host checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.accept_passive_host_checks != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('91') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=91'>Stop accepting passive host checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.accept_passive_host_checks != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('90') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Host Checks' title='Start Accepting Passive Host Checks' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=90'>Start accepting passive host checks</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.accept_passive_host_checks != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('91') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=91'>Stop accepting passive host checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.accept_passive_host_checks != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('90') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Host Checks' title='Start Accepting Passive Host Checks' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=90'>Start accepting passive host checks</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.enable_event_handlers != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('42') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=42'>Disable event handlers</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.enable_event_handlers != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('41') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handlers' title='Enable Event Handlers' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=41'>Enable event handlers</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.enable_event_handlers != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('42') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=42'>Disable event handlers</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.enable_event_handlers != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('41') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handlers' title='Enable Event Handlers' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=41'>Enable event handlers</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.obsess_over_services != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('50') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over Services' title='Stop Obsessing Over Services' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=50'>Stop obsessing over services</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.obsess_over_services != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('49') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=49'>Start obsessing over services</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.obsess_over_services != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('50') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over Services' title='Stop Obsessing Over Services' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=50'>Stop obsessing over services</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.obsess_over_services != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('49') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=49'>Start obsessing over services</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.obsess_over_hosts != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('95') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over Hosts' title='Stop Obsessing Over Hosts' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=95'>Stop obsessing over hosts</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.obsess_over_hosts != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('94') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=94'>Start obsessing over hosts</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.obsess_over_hosts != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('95') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over Hosts' title='Stop Obsessing Over Hosts' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=95'>Stop obsessing over hosts</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.obsess_over_hosts != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('94') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=94'>Start obsessing over hosts</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.enable_flap_detection != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('62') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=62'>Disable flap detection</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.enable_flap_detection != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('61') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection' title='Enable Flap Detection' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=61'>Enable flap detection</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
+                  [% IF pi.keys.size > 0 && pi.enable_flap_detection != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('62') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=62'>Disable flap detection</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.enable_flap_detection != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('61') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection' title='Enable Flap Detection' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=61'>Enable flap detection</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
 
-                    [% IF pi.keys.size > 0 && pi.process_performance_data != 0 %]
-                    [% UNLESS c.config.command_disabled.exists('83') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Performance Data' title='Disable Performance Data' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=83'>Disable performance data</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% IF pi.keys.size == 0 || pi.process_performance_data != 1 %]
-                    [% UNLESS c.config.command_disabled.exists('82') %]
-                    <tr class='command'>
-                      <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data' width="20" height="20"></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=82'>Enable performance data</a></td>
-                    </tr>
-                    [% END %]
-                    [% END %]
-                    [% END %]
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </div>
+                  [% IF pi.keys.size > 0 && pi.process_performance_data != 0 %]
+                  [% UNLESS c.config.command_disabled.exists('83') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Performance Data' title='Disable Performance Data' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=83'>Disable performance data</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% IF pi.keys.size == 0 || pi.process_performance_data != 1 %]
+                  [% UNLESS c.config.command_disabled.exists('82') %]
+                  <tr class='command'>
+                    <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data' width="20" height="20"></td>
+                    <td class='command'><a href='cmd.cgi?cmd_typ=82'>Enable performance data</a></td>
+                  </tr>
+                  [% END %]
+                  [% END %]
+                  [% END %]
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
 [% PROCESS _footer.tt %]

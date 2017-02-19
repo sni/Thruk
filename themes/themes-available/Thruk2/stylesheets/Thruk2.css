@@ -1361,17 +1361,8 @@ TABLE.pref_pane TH {
 }
 
 SPAN.deleteicon SPAN {
-    border: 0px none;
-    position: absolute;
-    display: block;
-    top: 4px;
-    right: 5px;
-    width: 14px;
-    height: 14px;
-    background: url('../images/btn_close_small.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: pointer;
+    top: 5px;
+    opacity: 0.4;
 }
 div.logEntries,TABLE.conftoolobj,TABLE.conftool,TABLE.conftoolusers{
     background-color:#ffffff;
@@ -1411,10 +1402,6 @@ TABLE.site_panel_container {
   width: 99%;
 }
 
-TABLE.infoboxrow {
-    margin-top: 2px;
-}
-
 TABLE.logcache_stats TABLE {
   width: 560px;
 }
@@ -1424,7 +1411,7 @@ TD.filter_button_cell {
 }
 
 TABLE.top_nav {
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 td.filterValue:hover, td.newfilter:hover, DIV#search-results ul li a.ajax_search_selected, DIV#search-results ul li a:hover, td.attrValue:hover {
