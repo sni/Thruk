@@ -408,7 +408,7 @@ sub set_default_config {
         group_paging_overview           => '*3, 10, 100, all',
         group_paging_grid               => '*5, 10, 50, all',
         group_paging_summary            => '*10, 50, 100, all',
-        default_theme                   => 'Thruk',
+        default_theme                   => 'Thruk2',
         datetime_format                 => '%Y-%m-%d  %H:%M:%S',
         datetime_format_long            => '%a %b %e %H:%M:%S %Z %Y',
         datetime_format_today           => '%H:%M:%S',
