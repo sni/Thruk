@@ -228,6 +228,7 @@ sub do_filter {
         # complex filter search?
         push @{$searches}, Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s0', 1 );
         for my $x (@{_get_search_ids($c->req->parameters, $prefix)}) {
+            next if $x == 0; # already added
             my $search = Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s' . $x );
             push @{$searches}, $search if defined $search;
         }
