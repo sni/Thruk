@@ -697,7 +697,10 @@ sub _process_plugins_page {
         if($pic !~ m/^[a-zA-Z0-9_\ \-]+$/gmx) {
             die("unknown pic: ".$pic);
         }
-        my $path = $plugin_available_dir.'/'.$pic.'/preview.png';
+        my $path = $plugin_enabled_dir.'/'.$pic.'/preview.png';
+        if(!-e $path) {
+            $path = $plugin_available_dir.'/'.$pic.'/preview.png';
+        }
         $c->res->headers->content_type('image/png');
         $c->stash->{'text'} = "";
         if(-e $path) {
@@ -744,11 +747,15 @@ sub _process_plugins_page {
     }
 
     my $plugins = {};
-    for my $addon (glob($plugin_available_dir.'/*/')) {
+    for my $addon (glob($plugin_available_dir.'/*/'), glob($plugin_enabled_dir.'/*/')) {
         my($addon_name, $dir) = _nice_addon_name($addon);
         $plugins->{$addon_name} = { enabled => 0, dir => $dir, description => '(no description available.)', url => '' };
-        if(-e $plugin_available_dir.'/'.$dir.'/description.txt') {
-            my $description = read_file($plugin_available_dir.'/'.$dir.'/description.txt');
+        my $desc_file = $plugin_available_dir.'/'.$dir.'/description.txt';
+        if(-e $plugin_enabled_dir.'/'.$dir.'/description.txt') {
+            $desc_file = $plugin_enabled_dir.'/'.$dir.'/description.txt';
+        }
+        if(-e $desc_file) {
+            my $description = read_file($desc_file);
             my $url         = "";
             if($description =~ s/^Url:\s*(.*)$//gmx) { $url = $1; }
             $plugins->{$addon_name}->{'description'} = $description;
