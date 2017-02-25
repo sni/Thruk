@@ -230,6 +230,10 @@ ex.:
 Include messages with class = 2 (program messages) in reports.
 Setting this to 0 allows the MySQL backend to use indexes efficiently
 
+    - 0 = off
+    - 1 = auto (default)
+    - 2 = on
+
 ex.:
 
   report_include_class2 = 1

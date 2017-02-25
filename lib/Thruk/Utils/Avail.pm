@@ -559,8 +559,13 @@ sub calculate_availability {
             push @typefilter, { -or => [ @logservicefilter ] };
         }
     }
-    if ($c->config->{'report_include_class2'} == 1) {
-        push @typefilter, { class => 2 }; # programm messages
+    if($c->config->{'report_include_class2'} != 0) { # 0 means force - off
+        if($c->config->{'report_include_class2'} == 2 # 2 means force on
+           || ($c->config->{'report_include_class2'} == 1 # 1 means default auto
+               && ($full_log_entries || $assumestatesduringnotrunning eq 'no'))
+        ) {
+            push @typefilter, { class => 2 }; # programm messages
+        }
     }
     if($rpttimeperiod) {
         push @typefilter, { '-or' => [
