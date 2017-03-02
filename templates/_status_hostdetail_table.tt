@@ -133,7 +133,7 @@
           <td class='[% class %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
           [% END %]
           [% IF h.has_been_checked == 0 %]
-            <td class='[% class %] plugin_output' valign='middle' align="left">
+            <td class='[% class %] plugin_output mightOverflow' valign='middle' align="left">
               [% IF h.active_checks_enabled == 0 %]
               Host is not scheduled to be checked...
               [% ELSE %]
@@ -157,7 +157,7 @@
               [% long_plugin_output = escape_html(long_plugin_output) %]
               [% plugin_output      = escape_html(plugin_output) %]
             [% END %]
-            <td align="left" class='[% class %] plugin_output'
+            <td align="left" class='[% class %] plugin_output mightOverflow'
             [% IF long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% h.display_name %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% h.name | uri %]', '', '[% h.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(plugin_output) %]<br>[% IF on_demand_long_plugin_output %][% escape_html("<span class='long_plugin_output'></span>") %][% ELSE %][% escape_html(nl2br(long_plugin_output)) %][% END %]'
@@ -187,7 +187,7 @@
         <td class='[% class %] check_command' style="display: none;" nowrap align="left">[% h.check_command.replace("\!.*$", "") %]</td>
         <td class='[% class %] check_interval' style="display: none;" nowrap align="left">[% h.check_interval %]</td>
         <td class='[% class %] check_period' style="display: none;" nowrap align="left">[% h.check_period %]</td>
-        <td class='[% class %] contacts' style="display: none;" nowrap align="left">[% h.contacts.join(', ') %]</td>
+        <td class='[% class %] contacts mightOverflow' style="display: none;" nowrap align="left">[% h.contacts.join(', ') %]</td>
         <td class='[% class %] comments' style="display: none;" nowrap align="left">
         [% IF comments_by_host.defined(h.name) %]
             [% host_name = h.name; FOREACH com = comments_by_host.$host_name %]

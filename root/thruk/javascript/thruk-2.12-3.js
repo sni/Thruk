@@ -91,6 +91,21 @@ function init_page() {
         cookieRemove('thruk_preserve_hash');
     }
 
+    // add title for things that might overflow
+    jQuery(document).on('mouseenter', '.mightOverflow', function() {
+      var This = jQuery(this);
+      var title = This.attr('title');
+      if(!title) {
+        if(this.offsetWidth < this.scrollWidth) {
+          This.attr('title', This.text().replace(/<\!\-\-[\s\S]*\-\->/, '').replace(/^\s*/, '').replace(/\s*$/, ''));
+        }
+      } else {
+        if(this.offsetWidth >= this.scrollWidth && title == This.text()) {
+          This.removeAttr('title');
+        }
+      }
+    });
+
     cleanUnderscoreUrl();
 }
 

@@ -150,7 +150,7 @@
         <td class='[% serviceclass %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
           [% IF s.has_been_checked == 0 %]
-            <td class='[% serviceclass %] plugin_output' align="left">
+            <td class='[% serviceclass %] plugin_output mightOverflow' align="left">
               [% IF s.active_checks_enabled == 0 %]
               Service is not scheduled to be checked...
               [% ELSE %]
@@ -174,7 +174,7 @@
               [% long_plugin_output = escape_html(long_plugin_output) %]
               [% plugin_output      = escape_html(plugin_output) %]
             [% END %]
-            <td align="left" class='[% serviceclass %] plugin_output'
+            <td align="left" class='[% serviceclass %] plugin_output mightOverflow'
             [% IF long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(plugin_output) %]<br>[% IF on_demand_long_plugin_output %][% escape_html("<span class='long_plugin_output'></span>") %][% ELSE %][% escape_html(nl2br(long_plugin_output)) %][% END %]'
@@ -202,7 +202,7 @@
         <td class='[% serviceclass %] check_command' style="display: none;" nowrap align="left">[% s.check_command.replace("\!.*$", "") %]</td>
         <td class='[% serviceclass %] check_interval' style="display: none;" nowrap align="left">[% s.check_interval %]</td>
         <td class='[% serviceclass %] check_period' style="display: none;" nowrap align="left">[% s.check_period %]</td>
-        <td class='[% serviceclass %] contacts' style="display: none;" nowrap align="left">[% s.contacts.join(', ') %]</td>
+        <td class='[% serviceclass %] contacts mightOverflow' style="display: none;" nowrap align="left">[% s.contacts.join(', ') %]</td>
         <td class='[% serviceclass %] comments' style="display: none;" nowrap align="left">
         [% host_name = s.host_name %]
         [% IF lasthost != s.host_name %]

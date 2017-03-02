@@ -1423,11 +1423,18 @@ TD.plugin_output, TD.description, TD.name, TD.host_name {
   white-space: nowrap;
 }
 TD.plugin_output {
-  overflow: hidden;
   max-width: 50%;
   width: 50%;
-  text-overflow: ellipsis;
   max-width: 0;
+}
+TD.contacts {
+  max-width: 50%;
+  width: 50%;
+  max-width: 0;
+}
+.mightOverflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 TD.host_name > TABLE TD {
