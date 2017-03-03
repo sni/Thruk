@@ -1493,6 +1493,7 @@ sub _fill_lookup_logs {
                                                    ]}],
                               );
     for my $l (@{$mlogs}) {
+        next unless defined $l->{'message'};
         $lookup->{$l->{'message'}} = 1;
     }
     return $lookup;
