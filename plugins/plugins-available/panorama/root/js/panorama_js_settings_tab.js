@@ -914,8 +914,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                                 p.forceSaveState();
                             }
                         }
+
                         if(values['map_choose'] == 'static') {
-                            delete values['background_color'];
+                            values['background_color'] = '';
                         }
                         if(values['map_choose'] == 'color') {
                             values['background'] = 'none';
