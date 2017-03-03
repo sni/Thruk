@@ -50,6 +50,7 @@ sub set_default_stash {
     $c->stash->{imgsize}                = 20;
     $c->stash->{'audiofile'}            = '';
     $c->stash->{'has_service_filter'}   = 0;
+    $c->stash->{'show_column_select'}   = 0;
 
     return;
 }

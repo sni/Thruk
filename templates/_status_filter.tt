@@ -31,7 +31,7 @@
            <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
           </td>
           <td align="left" class='filterTitle filterDisplayTitle' nowrap>
-           [% IF loop.first && show_form == '1' && show_substyle_selector == 1 %]
+           [% IF loop.first && show_substyle_selector == 1 %]
             <select name="style" id="[% paneprefix %][% prefix %]_style_selector">
               <optgroup label="Host">
                 <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
@@ -64,7 +64,7 @@
               [% END %]
              </select>
            [% END %]
-           [% IF loop.first %]
+           [% IF loop.first && show_column_select %]
               <input class="noprint" type="image" src="[% url_prefix %]themes/[% theme %]/images/config.png" style="padding-left: 25px; vertical-align: bottom;" name="columns" id="[% paneprefix %][% prefix %]_btn_columns" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]_columns_table'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;">
            [% END %]
           </td>

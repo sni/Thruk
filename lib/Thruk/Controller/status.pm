@@ -406,6 +406,7 @@ sub _process_details_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
+    $c->stash->{'show_column_select'} = 1;
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -542,6 +543,7 @@ sub _process_hostdetails_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
+    $c->stash->{'show_column_select'} = 1;
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -1051,6 +1053,8 @@ sub _process_combined_page {
     my( $c ) = @_;
 
     $c->stash->{hidetop}    = 1 unless $c->stash->{hidetop} ne '';
+    $c->stash->{show_substyle_selector} = 0;
+    $c->stash->{'show_column_select'}   = 1;
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
