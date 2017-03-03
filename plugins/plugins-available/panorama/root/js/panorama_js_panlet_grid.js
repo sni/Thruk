@@ -220,7 +220,12 @@ Ext.define('TP.PanletGrid', {
                     // save columns width explitcitly
                     for(var x=0; x<panlet.grid.columns.length; x++) {
                         if(!panlet.grid.columns[x].isHidden()) {
-                            state.columns[x].width = panlet.grid.columns[x].getWidth();
+                            var width = panlet.grid.columns[x].getWidth();
+                            // width is 1 if not yet completly rendered and we don't want to store that
+                            // width is 0 if the settings window is open
+                            if(width > 1) {
+                                state.columns[x].width = width;
+                            }
                         }
                     }
 
