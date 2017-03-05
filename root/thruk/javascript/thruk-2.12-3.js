@@ -2931,6 +2931,9 @@ function check_server_action(id, link, backend, host, service, server_action_url
 /* replace common macros */
 function replace_macros(input) {
     var out = input;
+    if(out == undefined) {
+        return(out);
+    }
     out = out.replace(/\{\{\s*theme\s*\}\}/g, theme);
     out = out.replace(/\{\{\s*remote_user\s*\}\}/g, remote_user);
     out = out.replace(/\{\{\s*site\s*\}\}/g, omd_site);
