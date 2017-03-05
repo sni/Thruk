@@ -78,8 +78,17 @@
             <tr>
               <th>Change Password:</th>
               <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_key.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="Change User Password" onClick="window.location='[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer='+full_uri; return false;">
+              </td>
+            </tr>
+            [% END %]
+            [% IF c.check_user_roles('authorized_for_configuration_information') && c.check_user_roles('authorized_for_system_information') %]
+            <tr>
+              <th>Create Broadcast:</th>
+              <td>
+                <img src="[% url_prefix %]themes/[% theme %]/images/page_world.png" alt="create new broadcast" width=16 height=16 style="vertical-align:top;">
+                <input type="button" name="submit" value="Create Broadcast" onClick="window.location='[% url_prefix %]cgi-bin/broadcast.cgi'; return false;">
               </td>
             </tr>
             [% END %]

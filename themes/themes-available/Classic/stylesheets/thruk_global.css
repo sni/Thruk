@@ -1377,3 +1377,10 @@ BUTTON.small {
   width: 16px;
   height: 16px;
 }
+
+
+.text_ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

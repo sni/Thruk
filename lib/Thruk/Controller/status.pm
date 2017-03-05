@@ -176,7 +176,7 @@ sub _process_raw_request {
             }
             my $type = $c->req->parameters->{'type'};
             my $data;
-            if($type eq 'contact') {
+            if($type eq 'contact' || $type eq 'contacts') {
                 if(!$c->check_user_roles("authorized_for_configuration_information")) {
                     $data = ["you are not authorized for configuration information"];
                 } else {
@@ -245,7 +245,7 @@ sub _process_raw_request {
                     @{$data} = grep(/$filter/mx, @{$data}) if $filter;
                 }
             }
-            elsif($type eq 'contactgroup') {
+            elsif($type eq 'contactgroup' || $type eq 'contactgroups') {
                 $data = [];
                 if($c->req->parameters->{'wildcards'}) {
                     push @{$data}, '*';

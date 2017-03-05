@@ -93,18 +93,18 @@
   [% IF edit %]
     [% has_wizard = 0 %]
     [% wzd_btn = BLOCK %]
-      [% IF    type == 'servicegroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicemembers,2" %]
-      [% ELSIF                           key == 'contact_groups' %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contactgroups,1" %]
-      [% ELSIF                           key == 'use'            %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ type _ ",1,templates" %]
-      [% ELSIF type == 'service' && key == 'host_name'           %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
-      [% ELSIF type == 'service' && key == 'hostgroup_name'      %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hostgroups,1" %]
-      [% ELSIF type == 'service' && key == 'servicegroups'       %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicegroups,1" %]
-      [% ELSIF type == 'contactgroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contacts,1" %]
-      [% ELSIF type == 'hostgroup'    && key == 'members'        %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
+      [% IF    type == 'servicegroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicemembers,2" %]
+      [% ELSIF                           key == 'contact_groups' %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contactgroups,1" %]
+      [% ELSIF                           key == 'use'            %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ type _ ",1,templates" %]
+      [% ELSIF type == 'service' && key == 'host_name'           %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
+      [% ELSIF type == 'service' && key == 'hostgroup_name'      %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hostgroups,1" %]
+      [% ELSIF type == 'service' && key == 'servicegroups'       %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicegroups,1" %]
+      [% ELSIF type == 'contactgroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contacts,1" %]
+      [% ELSIF type == 'hostgroup'    && key == 'members'        %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
       [% ELSIF key == 'hostgroups'
             || key == 'contacts'
             || key == 'contactgroups'
-      %][% has_wizard = 1 %][% PROCESS _conf_wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ key _ ",1" %]
+      %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ key _ ",1" %]
       [% END %]
     [% END %]
     <input type="text" class="obj_[% key %] obj_[% type %]_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false, list:'[ ,!\+]'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'wand.png',cls:'wzd' }][% END %]})"[% END %]>

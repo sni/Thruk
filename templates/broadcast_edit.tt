@@ -1,0 +1,115 @@
+﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+[% USE date %]
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="top" width="33%">
+      <br><br>
+      <div align="center" class='dataTitle'>Broadcast</div>
+    </td>
+    <td align="right" valign="bottom" width="33%">
+      [% PROCESS _help.tt topic = "broadcast" %]
+    </td>
+  </tr>
+</table>
+<br><br>
+
+<form action="broadcast.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+<input type="hidden" name="action" value="save">
+<input type="hidden" name="id" value="[% broadcast.id %]">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<table border="1" class='data'>
+  <tr>
+    <th class='data' style="width:125px;"><a href='broadcast.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class="data" nowrap>[% IF broadcast.id != "new" %]Edit[% ELSE%]Create[% END %] Broadcast</th>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Hide Before</b></td>
+    <td class="dataOdd" align="left">
+      <input type="text"
+             class="deletable"
+             value="[% IF broadcast.hide_before %][% format_date(broadcast.hide_before_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
+             id="hide_before"
+             name="hide_before"
+             onkeyup="if(this.value != '') { verify_time(this.id) }"
+             onclick="show_cal('hide_before'); return false;"
+      >
+      </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Expire After</b></td>
+    <td class="dataOdd" align="left">
+      <input type="text"
+             class="deletable"
+             value="[% IF broadcast.expires %][% format_date(broadcast.expires_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
+             id="expires"
+             name="expires"
+             onkeyup="if(this.value != '') { verify_time(this.id) }"
+             onclick="show_cal('expires'); return false;"
+      >
+      </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
+    <td class="dataOdd" align="left">
+      <textarea name="text" wrap="hard" cols=74 rows=10 style="width: 99%;">[% broadcast.text %]</textarea>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Contacts</b></td>
+    <td class="dataOdd" align="left">
+      [% PROCESS _wizard_list.tt id="id_contacts_wzd" wzd_args="contacts,contacts,1" %]
+      <input type="text"
+             name="contacts"
+             id="contacts"
+             style="width: 99%;"
+             value="[% broadcast.contacts.join(', ') %]"
+             [% IF use_ajax_search %]
+               onfocus="this.click()"
+               onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:true, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+             [% END %]
+      >
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Contactgroups</b></td>
+    <td class="dataOdd" align="left">
+      [% PROCESS _wizard_list.tt id="id_contactgroups_wzd" wzd_args="contactgroups,contactgroups,1" %]
+      <input type="text"
+             name="contactgroups"
+             id="contactgroups"
+             style="width: 99%;"
+             value="[% broadcast.contactgroups.join(', ') %]"
+             [% IF use_ajax_search %]
+               onfocus="this.click()"
+               onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:true, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+             [% END %]>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center" colspan=2>
+      <span class="required" style="float: left;">* - required</span>
+      <button class="thruk_button_save" style="width: 160px;">
+        [% IF broadcast.id != "new" %]Save[% ELSE%]Create[% END %] Broadcast
+      </button>
+    </td>
+  </tr>
+</table>
+</form>
+
+<script type="text/javascript">
+<!--
+  jQuery(document).ready(function() {
+    jQuery('.broadcast_panel_container DIV.control').hide();
+    jQuery('.broadcast_panel_container DIV.dismiss A').prop('onclick',null).off('click').on('click', function(e) { e.preventDefault(); alert("preview cannot be dismissed."); return false; })
+    jQuery('TEXTAREA[name=text]').on('keyup', function() {
+      jQuery('.broadcast_panel_container DIV.broadcast').html(this.value);
+    });
+  });
+-->
+</script>

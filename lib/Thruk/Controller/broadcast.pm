@@ -31,9 +31,81 @@ sub index {
         }
     }
 
-    $c->stash->{template} = 'broadcast.tt';
+    # only admins from here on
+    if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+        return $c->detach('/error/index/8');
+    }
 
     Thruk::Utils::ssi_include($c);
+
+    $c->stash->{has_jquery_ui}     = 1;
+    $c->stash->{disable_backspace} = 1;
+    $c->stash->{'no_auto_reload'}  = 1;
+
+    if(defined $c->req->parameters->{'action'}) {
+        my $action = $c->req->parameters->{'action'};
+        if($action eq 'edit' || $action eq 'clone') {
+            my $id        = $c->req->parameters->{'id'};
+            my $broadcast;
+            if($id eq 'new') {
+                $broadcast = Thruk::Utils::Broadcast::get_default_broadcast($c);
+            } else {
+                my $broadcasts = Thruk::Utils::Broadcast::get_broadcasts($c, 1, $id);
+                if($broadcasts->[0]) {
+                    $broadcast = $broadcasts->[0];
+                } else {
+                    $broadcast = Thruk::Utils::Broadcast::get_default_broadcast($c);
+                }
+            }
+            if($action eq 'clone') {
+                $broadcast->{'author'} = $c->stash->{'remote_user'};
+                delete $broadcast->{'basefile'};
+            }
+            $broadcast->{'id'} = $broadcast->{'basefile'} || 'new';
+            $c->stash->{template}  = 'broadcast_edit.tt';
+            $c->stash->{broadcast} = $broadcast;
+            return 1;
+        }
+        if($action eq 'delete') {
+            my $id = $c->req->parameters->{'id'};
+            if($id =~ m/^[\.\/]+/mx) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'Broadcast cannot be removed with that name' );
+            } else {
+                unlink($c->config->{'var_path'}.'/broadcast/'.$id);
+                Thruk::Utils::set_message( $c, 'success_message', 'Broadcast removed' );
+            }
+            return $c->redirect_to('broadcast.cgi');
+        }
+        if($action eq 'save') {
+            my $broadcast = {};
+            my $id = $c->req->parameters->{'id'};
+            if($id eq 'new') {
+                $id = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'.json', localtime);
+                my $x  = 1;
+                while(-e $c->config->{'var_path'}.'/broadcast/'.$id) {
+                    $id = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'_'.$x.'.json', localtime);
+                }
+            }
+            if($id =~ m/^[\.\/]+/mx) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'Broadcast cannot be saved with that name' );
+                return $c->redirect_to('broadcast.cgi');
+            }
+            $broadcast->{'author'}        = $c->stash->{'remote_user'};
+            $broadcast->{'contacts'}      = [split(/\s*,\s*/mx, $c->req->parameters->{'contacts'})];
+            $broadcast->{'contactgroups'} = [split(/\s*,\s*/mx, $c->req->parameters->{'contactgroups'})];
+            $broadcast->{'text'}          = $c->req->parameters->{'text'};
+            $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
+            $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
+
+            Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);
+
+            Thruk::Utils::set_message( $c, 'success_message', 'Broadcast saved' );
+            return $c->redirect_to('broadcast.cgi');
+        }
+    }
+
+    $c->stash->{template}       = 'broadcast.tt';
+    $c->stash->{all_broadcasts} = Thruk::Utils::Broadcast::get_broadcasts($c, 1);
 
     return 1;
 }

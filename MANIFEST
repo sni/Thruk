@@ -266,7 +266,6 @@ plugins/plugins-available/conf/templates/_conf_references_menu.tt
 plugins/plugins-available/conf/templates/_conf_tools_menu.tt
 plugins/plugins-available/conf/templates/_conf_wizard_command.tt
 plugins/plugins-available/conf/templates/_conf_wizard_commandline.tt
-plugins/plugins-available/conf/templates/_conf_wizard_list.tt
 plugins/plugins-available/conf/templates/conf.tt
 plugins/plugins-available/conf/templates/conf_backends.tt
 plugins/plugins-available/conf/templates/conf_choose_clone.tt
@@ -1599,6 +1598,7 @@ templates/_status_hostdetail_table.tt
 templates/_table_search_field.tt
 templates/_third_graph.tt
 templates/_timeperiods_select_options.tt
+templates/_wizard_list.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt
@@ -1614,6 +1614,8 @@ templates/avail_report_services_part.tt
 templates/avail_step_1.tt
 templates/avail_step_2.tt
 templates/avail_step_3.tt
+templates/broadcast.tt
+templates/broadcast_edit.tt
 templates/changes.tt
 templates/Changes.txt
 templates/cmd.tt

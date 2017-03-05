@@ -6,7 +6,7 @@ use JSON::XS;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 68;
+    plan tests => 90;
 }
 
 BEGIN {
@@ -54,7 +54,9 @@ Thruk::Utils::IO::write($test_file, $test_broadcast);
 TestUtils::test_page( 'url' => '/thruk/cgi-bin/tac.cgi', like => ["time:$now"] );
 TestUtils::test_page( 'url' => '/thruk/cgi-bin/broadcast.cgi?action=dismiss', like => ["ok"] );
 TestUtils::test_page( 'url' => '/thruk/cgi-bin/tac.cgi', unlike => ["time:$now"] );
+TestUtils::test_page( 'url' => '/thruk/cgi-bin/broadcast.cgi', like => ["test news:"] );
 unlink($test_file);
+TestUtils::test_page( 'url' => '/thruk/cgi-bin/broadcast.cgi?action=edit&id=new', like => ["Create Broadcast"] );
 
 #############################
 # broken files

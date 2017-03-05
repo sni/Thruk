@@ -17,15 +17,15 @@ use warnings;
 
 =head1 METHODS
 
-=head2 get_broadcasts($c)
+=head2 get_broadcasts($c, [$unfiltered], [$file])
 
-  get_broadcasts($c)
+  get_broadcasts($c, [$unfiltered], [$file])
 
 return list of broadcasts for this contact
 
 =cut
 sub get_broadcasts {
-    my($c) = @_;
+    my($c, $unfiltered, $filefilter) = @_;
     my $list = [];
 
     my $now    = time();
@@ -53,6 +53,7 @@ sub get_broadcasts {
         my $basename = $file;
         $basename =~ s%.*?([^/]+\.json)$%$1%mx;
         $broadcast->{'basefile'} = $basename;
+        next if $filefilter && $basename ne $filefilter;
         my $allowed = 0;
 
         $broadcast->{'contacts'}      = Thruk::Utils::list($broadcast->{'contacts'});
@@ -79,20 +80,24 @@ sub get_broadcasts {
                 }
             }
         }
-        next unless $allowed;
+        next if(!$allowed && !$unfiltered);
 
         # date / time filter
+        $broadcast->{'expires_ts'} = 0;
         if($broadcast->{'expires'}) {
             my $expires_ts = Thruk::Utils::_parse_date($c, $broadcast->{'expires'});
+            $broadcast->{'expires_ts'} = $expires_ts;
             if($now > $expires_ts) {
-                next;
+                next unless $unfiltered;
             }
         }
 
+        $broadcast->{'hide_before_ts'} = 0;
         if($broadcast->{'hide_before'}) {
             my $hide_before_ts = Thruk::Utils::_parse_date($c, $broadcast->{'hide_before'});
+            $broadcast->{'hide_before_ts'} = $hide_before_ts;
             if($now < $hide_before_ts) {
-                next;
+                next unless $unfiltered;
             }
         }
 
@@ -102,10 +107,14 @@ sub get_broadcasts {
             $new_count++;
         }
 
+        $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
+        $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';
+        $broadcast->{'hide_before'} = $broadcast->{'hide_before'}   // '';
+
         push @{$list}, $broadcast;
     }
 
-    return([]) unless $new_count > 0;
+    return([]) if($new_count == 0 && !$unfiltered);
 
     # sort by read status and filename
     @{$list} = sort { $b->{'new'} <=> $a->{'new'} || $b->{'basefile'} cmp $a->{'basefile'} } @{$list};
@@ -146,6 +155,29 @@ sub update_dismiss {
 
     Thruk::Utils::store_user_data($c, $data);
     return;
+}
+
+########################################
+
+=head2 get_default_broadcast($c)
+
+  get_default_broadcast($c)
+
+return empty default broadcast
+
+=cut
+sub get_default_broadcast {
+    my($c) = @_;
+    my $broadcast = {
+        author          => $c->stash->{'remote_user'},
+        id              => 'new',
+        text            => '',
+        expires         => '',
+        hide_before     => '',
+        contacts        => [],
+        contactgroups   => [],
+    };
+    return($broadcast);
 }
 
 ########################################
