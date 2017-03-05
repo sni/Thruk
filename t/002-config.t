@@ -37,4 +37,15 @@ my $expected_backends = {
 is_deeply($config->{'Thruk::Backend'}, $expected_backends, "parsing backends from thruk_local.d");
 is_deeply($config->{'backend_debug'}, 1, "parsing scalars from thruk_local.d");
 
+####################################################
+$ENV{'THRUK_CONFIG'} = 't/data/separated_hashes';
+$config = Thruk::Config::get_config();
+my $expected_actions = {
+    "a" => 1,
+    "b" => 2,
+    "c" => 3,
+    "d" => 4,
+};
+is_deeply($config->{'action_menu_actions'}, $expected_actions, "parsing backends from thruk_local.d");
+
 done_testing();

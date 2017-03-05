@@ -1470,6 +1470,10 @@ t/data/remove_duplicates/expect.cfg
 t/data/remove_duplicates/test.cfg
 t/data/resource.cfg
 t/data/resource2.cfg
+t/data/separated_hashes/thruk.conf
+t/data/separated_hashes/thruk_local.conf
+t/data/separated_hashes/thruk_local.d/a.conf
+t/data/separated_hashes/thruk_local.d/b.conf
 t/data/test_c_style.conf
 t/data/test_hash_comments.cfg
 t/data/userfiles/encoding_broken

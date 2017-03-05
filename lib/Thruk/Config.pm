@@ -1139,7 +1139,12 @@ sub _parse_rows {
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
                     push @{$conf->{$k}}, $next;
                 } else {
-                    $conf->{$k} = [$conf->{$k}, $next];
+                    # merge top level hashes
+                    if(!$until && ref($conf->{$k}) eq 'HASH' && ref($next) eq 'HASH') {
+                        $conf->{$k} = { %{$conf->{$k}}, %{$next} };
+                    } else {
+                        $conf->{$k} = [$conf->{$k}, $next];
+                    }
                 }
                 next;
             }
