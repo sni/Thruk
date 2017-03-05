@@ -14,14 +14,27 @@ user clicks the dismiss link.
 
 ++++
 <div align="center">
-<a title="thruk broadcast" rel="lightbox[broadcast]" href="advanced/broadcast.png"><img src="advanced/broadcast.png" alt="thruk broadcast" width="30%" height="30%" /></a>
+<a title="thruk broadcast" rel="lightbox[broadcast]" href="advanced/broadcast.png"><img src="advanced/broadcast.png" alt="thruk broadcast" width="50%" height="50%" /></a>
 </div>
 <br style="clear: both;">
 ++++
 
 === Create new Broadcast
 
-Broadcasts have to be created manually under the `var/broadcasts` folder. Each
+There is a broadcast editor available if you are admin (having the configuration_information and systems_command role). The editor
+can be found on the top right in the preferences menu.
+
+++++
+<div align="center">
+<a title="thruk broadcast editor" rel="lightbox[broadcast]" href="advanced/broadcast_editor.png"><img src="advanced/broadcast_editor.png" alt="thruk broadcast editor" width="50%" height="50%" /></a>
+</div>
+<br style="clear: both;">
+++++
+
+
+=== Create new Broadcast manually
+
+Broadcasts can be created manually under the `var/broadcasts` folder. Each
 news goes into one file with the `.json` extension. The var folder is usually
 `/var/lib/thruk/broadcast` or `~/var/thruk/broadcast` when using OMD. You might
 have to create the folder first.
