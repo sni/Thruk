@@ -97,6 +97,7 @@ sub index {
             $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
             $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
 
+            Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
             Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);
 
             Thruk::Utils::set_message( $c, 'success_message', 'Broadcast saved' );

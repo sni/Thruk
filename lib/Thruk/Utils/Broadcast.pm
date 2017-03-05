@@ -54,33 +54,58 @@ sub get_broadcasts {
         $basename =~ s%.*?([^/]+\.json)$%$1%mx;
         $broadcast->{'basefile'} = $basename;
         next if $filefilter && $basename ne $filefilter;
-        my $allowed = 0;
 
         $broadcast->{'contacts'}      = Thruk::Utils::list($broadcast->{'contacts'});
         $broadcast->{'contactgroups'} = Thruk::Utils::list($broadcast->{'contactgroups'});
 
-        # not restriced at all
-        if(scalar @{$broadcast->{'contacts'}} == 0 && scalar @{$broadcast->{'contactgroups'}} == 0) {
-            $allowed = 1;
-        }
-        # allowed for specific contacts
-        if(scalar @{$broadcast->{'contacts'}}) {
-            my $contacts = Thruk::Utils::array2hash($broadcast->{'contacts'});
-            if($contacts->{$c->stash->{'remote_user'}}) {
-                $allowed = 1;
-            }
-        }
-        # allowed for specific contactgroups
-        if(scalar @{$broadcast->{'contactgroups'}}) {
-            my $contactgroups = Thruk::Utils::array2hash($broadcast->{'contactgroups'});
-            for my $group (keys %{$groups}) {
-                if($contactgroups->{$group}) {
+        my $contacts           = [grep(!/^\!/mx, @{$broadcast->{'contacts'}})];
+        my $contactgroups      = [grep(!/^\!/mx, @{$broadcast->{'contactgroups'}})];
+
+        if(!$unfiltered && (scalar @{$contacts} > 0 || scalar @{$contactgroups} > 0)) {
+            my $allowed = 0;
+            # allowed for specific contacts
+            if(scalar @{$contacts}) {
+                my $contacts = Thruk::Utils::array2hash($contacts);
+                if($contacts->{$c->stash->{'remote_user'}}) {
                     $allowed = 1;
                     last;
                 }
             }
+            # allowed for specific contactgroups
+            if(scalar @{$contactgroups}) {
+                my $contactgroups = Thruk::Utils::array2hash($contactgroups);
+                for my $group (keys %{$groups}) {
+                    if($contactgroups->{$group}) {
+                        $allowed = 1;
+                        last;
+                    }
+                }
+            }
+            next if(!$allowed && !$unfiltered);
         }
-        next if(!$allowed && !$unfiltered);
+
+        # hide from certain contacts or groups by exclamation mark
+        if(!$unfiltered) {
+            my $contacts_hide      = [grep(/^\!/mx, @{$broadcast->{'contacts'}})];
+            if(scalar @{$contacts_hide}) {
+                my $contacts = Thruk::Utils::array2hash($contacts_hide);
+                if($contacts->{$c->stash->{'remote_user'}}) {
+                    next;
+                }
+            }
+            my $contactgroups_hide = [grep(/^\!/mx, @{$broadcast->{'contactgroups'}})];
+            if(scalar @{$contactgroups_hide}) {
+                my $contactgroups = Thruk::Utils::array2hash($contactgroups_hide);
+                my $hidden = 0;
+                for my $group (keys %{$groups}) {
+                    if($contactgroups->{$group}) {
+                        $hidden = 1;
+                        last;
+                    }
+                }
+                next if $hidden;
+            }
+        }
 
         # date / time filter
         $broadcast->{'expires_ts'} = 0;
@@ -102,7 +127,7 @@ sub get_broadcasts {
         }
 
         $broadcast->{'new'} = 0;
-        if(!defined $already_read->{$basename}) {
+        if(!$unfiltered && !defined $already_read->{$basename}) {
             $broadcast->{'new'} = 1;
             $new_count++;
         }

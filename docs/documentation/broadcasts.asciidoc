@@ -59,7 +59,8 @@ All attributes except the text itself are optional.
 === Authorization
 
 Broadcasts are public for all contacts and users except if `contacts` and/or
-`contactgroups` are specified.
+`contactgroups` are specified. Groups and Contacts can be negated by a leading
+`!`.
 
 
 === Examples
@@ -84,3 +85,11 @@ The next broadcast is limited to two contactgroups.
 ------
 
 
+This broadcast is for everyone except a Dashboard group.
+
+------
+{
+  "text":          "<b>Announcement:</b> this is a broadcased for everyone except dashboards.",
+  "contactgroups": ["!Dashboard"]
+}
+------
