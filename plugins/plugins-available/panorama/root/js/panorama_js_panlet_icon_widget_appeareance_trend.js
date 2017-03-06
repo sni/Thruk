@@ -251,8 +251,10 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         var count = 0;
         var base  = 0;
         if(func == 'current') {
-            base = data[data.length-1][1];
-            count++;
+            if(data.length > 0) {
+                base = data[data.length-1][1];
+                count++;
+            }
         }
         else if(func == 'fixed') {
             base = fixed;
