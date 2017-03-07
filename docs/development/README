@@ -35,6 +35,8 @@ Override 'no_external_job_forks' config setting.
 ==== REMOTE_USER
 Will be set to the current username.
 
+==== REMOTE_USER_GROUPS
+Will be set to the current contactgroups when running external hooks and scripts.
 
 ==== REMOTEURL
 Start url for init script.

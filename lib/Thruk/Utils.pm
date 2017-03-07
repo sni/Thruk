@@ -1463,8 +1463,7 @@ sub get_perf_image {
 
     # call login hook, because it might transfer our sessions to remote graphers
     if($c->config->{'cookie_auth_login_hook'}) {
-        my $cookie_hook = 'REMOTE_USER="'.$c->stash->{'remote_user'}.'" '.$c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1';
-        `$cookie_hook`;
+        Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'});
     }
 
     my($fh, $filename) = tempfile();

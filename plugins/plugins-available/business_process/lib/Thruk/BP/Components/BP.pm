@@ -434,11 +434,9 @@ sub commit {
 
     # run pre hook
     if($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
-        system($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}, 'pre', $self->{'file'});
-        if($? == -1) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$?.': '.$! );
+        my($rc, $out) = Thruk::Utils::IO::cmd($c, [$c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}, 'pre', $self->{'file'}]);
+        if($rc != 0) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$rc.': '.$out );
             return;
         }
     }
@@ -451,11 +449,9 @@ sub commit {
 
     # run post hook
     if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
-        system($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}, 'post', $self->{'file'});
-        if($? == -1) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );
+        my($rc, $out) = Thruk::Utils::IO::cmd($c, [$c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}, 'post', $self->{'file'}]);
+        if($rc != 0) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$rc.': '.$out );
             return;
         }
     }

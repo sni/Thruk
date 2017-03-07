@@ -68,10 +68,12 @@ Script output will be displayed as user response which allows the script
 to give feedback to the user. HTML is allowed and will be used in the output.
 =======
 
-=== Authorization
-The Script will be run when ever the user has access to the given host and service.
-If your script wants to do some further checking, it can use the `$REMOTE_USER`
-environment variable.
+=== Authorization / Security
+The Script will be run whenever the user has access to the given host and service.
+Its general good advice to check the `$REMOTE_USER` and/or `$REMOTE_USER_GROUPS`
+environment variables before running critical scripts. Macros used in the command
+line defined in your config and the REMOTE_USER variables can be trusted. Variables
+supplied by the url can easily be faked and are considered unsafe.
 
 
 

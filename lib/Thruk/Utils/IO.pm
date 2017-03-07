@@ -288,7 +288,8 @@ sub cmd {
     local $SIG{PIPE} = 'DEFAULT';
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
-    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'} if $c;
+    local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'} if $c;
+    local $ENV{REMOTE_USER_GROUPS} = join(';', sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}) if $c;
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};

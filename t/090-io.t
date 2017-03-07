@@ -56,12 +56,13 @@ like($output, '/thruk.conf/', "ls returned something");
 is($rc, 0, "ls returned with rc: 0");
 like($output, '/thruk.conf/', "ls array args returned something");
 
-($rc, $output) = Thruk::Utils::IO::cmd(undef, ['/bin/false']);
-ok($rc != 0, "/bin/false returned with anything but 0");
+my $false = -x '/usr/bin/false' ? '/usr/bin/false' : '/bin/false';
+($rc, $output) = Thruk::Utils::IO::cmd(undef, [$false]);
+ok($rc != 0, $false." returned with anything but 0");
 like($output, '/^$/', "false returned nothing");
 
-($rc, $output) = Thruk::Utils::IO::cmd(undef, '/bin/false');
-ok($rc != 0, "/bin/false returned with anything but 0");
+($rc, $output) = Thruk::Utils::IO::cmd(undef, $false);
+ok($rc != 0, $false." returned with anything but 0");
 like($output, '/^$/', "false returned nothing");
 
 my($tfh, $tmpfilename) = tempfile();

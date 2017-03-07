@@ -1522,12 +1522,8 @@ sub _cmd_configtool {
         my $filesroot = $c->{'obj_db'}->get_files_root();
 
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
-            local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-            local $SIG{CHLD}        = 'DEFAULT';
             my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
-            $c->log->debug('pre save hook: '.$cmd);
-            my $out = `$cmd`;
-            my $rc  = $?>>8;
+            my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
             if($rc != 0) {
                 $c->log->info('pre save hook: '.$rc);
                 $c->log->info('pre save hook: '.$out);
@@ -1587,9 +1583,7 @@ sub _cmd_configtool {
 
         # run post hook
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
-            local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-            local $SIG{CHLD}        = 'DEFAULT';
-            system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
+            Thruk::Utils::IO::cmd($c, [$c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot]);
         }
     } else {
         return("unknown configtool command", 1);

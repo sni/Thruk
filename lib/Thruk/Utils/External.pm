@@ -57,8 +57,8 @@ sub cmd {
        or $conf->{'nofork'}
        or exists $c->req->parameters->{'noexternalforks'}
     ) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        my $out = `$cmd`;
+        # $rc, $out
+        my(undef, $out) = Thruk::Utils::IO::cmd($c, $cmd);
         return _finished_job_page($c, $c->stash, undef, $out);
     }
 
@@ -552,7 +552,8 @@ sub _do_child_stuff {
     # make remote user available
     if($c) {
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
-        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
+        $ENV{REMOTE_USER_GROUPS} = join(';', sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}});
     }
 
     $|=1; # autoflush

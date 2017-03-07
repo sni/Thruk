@@ -211,10 +211,7 @@ sub save_bp_objects {
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         my $reloaded = 0;
         if($cmd) {
-            local $SIG{CHLD}='';
-            local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
-            my $out = `$cmd 2>&1`;
-            ($rc, $msg) = ($?, $out);
+            ($rc, $msg) = Thruk::Utils::IO::cmd($c, $cmd." 2>&1");
             $reloaded = 1;
         }
         elsif($result_backend) {

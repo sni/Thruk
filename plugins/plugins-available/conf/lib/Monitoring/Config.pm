@@ -222,13 +222,10 @@ sub commit {
     # run pre hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
         $backend_name = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
-        local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
-        local $SIG{CHLD}               = 'DEFAULT';
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
-        my $out = `$cmd`;
-        my $rc  = $?>>8;
+        my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
         $c->log->info("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('pre save hook out: '.$out);
@@ -290,13 +287,10 @@ sub commit {
 
     # run post hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
-        local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
-        local $SIG{CHLD}               = 'DEFAULT';
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}." post '".$filesroot."' 2>&1";
-        my $out = `$cmd`;
-        my $rc  = $?>>8;
+        my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
         $c->log->info("post save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('post save hook out: '.$out);
