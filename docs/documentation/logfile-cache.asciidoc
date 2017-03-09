@@ -14,7 +14,7 @@ Thruk may use a logfile cache to increase performance of logfile access and
 reports.
 
 [WARNING]
-The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
+The MongoDB logcache is deprecated and got removed from Thruk in 2016. Use the MySQL logcache instead.
 
 For maximum performance, the Logfile Cache Database should be installed on the
 same server as Thruk itself (or at least in the same network).
@@ -121,7 +121,7 @@ logfile cache:
 -------
 
 
-==== Maintainance
+=== Example Cronjobs
 Using the logfile cache needs some extra maintainance to work smoothly, the
 following cronjobs should cover that. When not using OMD, you will have to
 adjust the paths.
@@ -129,6 +129,50 @@ adjust the paths.
 -------
   # update logcache data
   */5 * * * * $OMD_ROOT/bin/thruk -a logcacheupdate     >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # update authentication data in our logcache
+  0   2 * * * $OMD_ROOT/bin/thruk -a logcacheauthupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # optimize and repair tables
+  0  20 * * * $OMD_ROOT/bin/thruk -a logcacheoptimize   >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # clean logfiles from cache after two years
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcacheclean=730  >>$OMD_ROOT/var/log/thruk.log 2>&1
+-------
+
+
+=== Icinga 2
+When using Icinga 2 it is highly recommended to use the logcache with a file
+import because the Livestatus API returns wrong results for the logs table in
+Icinga 2.
+
+Therefor we recommend the following settings (OMD-Labs):
+
+etc/thruk/thruk_local.d/logcache.conf:
+-------
+  logcache = mysql://root@tmp/run/mysqld/mysqld.sock/thruk_logs
+  logcache_delta_updates = 0
+  report_update_logcache = 0
+-------
+
+This disables on-demand updates which won't work.
+
+
+Then use a slightly changed crontab which imports the logfiles directly from the
+compat logfiles.
+
+etc/thruk/thruk_local.d/logcache.conf:
+-------
+  logcache = mysql://root@tmp/run/mysqld/mysqld.sock/thruk_logs
+  logcache_delta_updates = 0
+  report_update_logcache = 0
+-------
+
+etc/cron.d/thruk_logcache
+-------
+  # update logcache data
+  * * * * * $OMD_ROOT/bin/thruk -a logcacheupdate var/icinga2/log/icinga2/compat/icinga.log >>$OMD_ROOT/var/log/thruk.log 2>&1
+  5 0 * * * $OMD_ROOT/bin/thruk -a logcacheupdate $(ls -1tr var/icinga2/log/icinga2/compat/archives/*.log) >>$OMD_ROOT/var/log/thruk.log 2>&1
 
   # update authentication data in our logcache
   0   2 * * * $OMD_ROOT/bin/thruk -a logcacheauthupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
