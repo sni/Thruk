@@ -1025,10 +1025,14 @@ sub _get_replaced_string {
             if(defined $macros->{$block} or $block =~ m/^\$ARG\d+\$/mx) {
                 my $replacement = $macros->{$block};
                 $replacement    = '' unless defined $replacement;
-                if(!$skip_args && $block =~ m/\$ARG\d+\$$/mx) {
-                    my $sub_rc;
-                    ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
-                    $rc = 0 unless $sub_rc;
+                if($block =~ m/\$ARG\d+\$$/mx) {
+                    if($skip_args) {
+                        $replacement = $block;
+                    } else {
+                        my $sub_rc;
+                        ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
+                        $rc = 0 unless $sub_rc;
+                    }
                 }
                 $block = $replacement;
             } else {
