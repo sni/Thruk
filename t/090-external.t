@@ -35,7 +35,7 @@ is($out, "test", "test output");
 is($rc, 3, "exit code 3");
 
 my $false = -x '/usr/bin/false' ? '/usr/bin/false' : '/bin/false';
-$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd($c, $false); print $out; return $rc;', background => 1 });
+$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd($c, '.$false.'); print $out; return $rc;', background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $job);
 is($out, "", "output empty");
