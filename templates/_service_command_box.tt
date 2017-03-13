@@ -9,6 +9,7 @@
             <div align=center class='infoMessage'>Your account does not have permissions to execute commands.</div><br>
             [% ELSE %]
             <table border="0" cellspacing="0" cellpadding="0">
+              [% IF service.checks_enabled %]
               [% UNLESS c.config.command_disabled.exists('7') %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
@@ -28,6 +29,7 @@
                   </form>
                 </td>
               </tr>
+              [% END %]
               [% END %]
               [% IF service.accept_passive_checks %]
               [% UNLESS c.config.command_disabled.exists('30') %]

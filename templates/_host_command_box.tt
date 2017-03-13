@@ -17,7 +17,7 @@
                 <td class='command'><a href='statusmap.cgi?host=[% host.name | uri %]'>Locate host on map</a></td>
               </tr>
               [% END %]
-
+              [% IF host.checks_enabled %]
               [% UNLESS c.config.command_disabled.exists('96') %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check' width="20" height="20"></td>
@@ -36,6 +36,7 @@
                   </form>
                 </td>
               </tr>
+              [% END %]
               [% END %]
               [% IF host.accept_passive_checks %]
               [% UNLESS c.config.command_disabled.exists('87') %]
