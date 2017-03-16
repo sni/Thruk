@@ -1816,7 +1816,7 @@ sub _get_create_statements {
           contact_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
           name varchar(150) NOT NULL,
           PRIMARY KEY (contact_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # contact_host_rel
         "DROP TABLE IF EXISTS `".$prefix."_contact_host_rel`",
@@ -1824,7 +1824,7 @@ sub _get_create_statements {
           contact_id mediumint(9) unsigned NOT NULL,
           host_id mediumint(9) unsigned NOT NULL,
           PRIMARY KEY (contact_id,host_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # contact_service_rel
         "DROP TABLE IF EXISTS `".$prefix."_contact_service_rel`",
@@ -1832,7 +1832,7 @@ sub _get_create_statements {
           contact_id mediumint(9) unsigned NOT NULL,
           service_id mediumint(9) unsigned NOT NULL,
           PRIMARY KEY (contact_id,service_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # host
         "DROP TABLE IF EXISTS `".$prefix."_host`",
@@ -1840,7 +1840,7 @@ sub _get_create_statements {
           host_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
           host_name varchar(150) NOT NULL,
           PRIMARY KEY (host_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # log
         "DROP TABLE IF EXISTS `".$prefix."_log`",
@@ -1857,7 +1857,7 @@ sub _get_create_statements {
           message bigint(20) unsigned NOT NULL,
           KEY time (time),
           KEY host_id (host_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
 
     # plugin_output
         "DROP TABLE IF EXISTS `".$prefix."_plugin_output`",
@@ -1865,7 +1865,7 @@ sub _get_create_statements {
           output_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
           output mediumtext NOT NULL,
           PRIMARY KEY (output_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # service
         "DROP TABLE IF EXISTS `".$prefix."_service`",
@@ -1875,7 +1875,7 @@ sub _get_create_statements {
           service_description varchar(150) NOT NULL,
           PRIMARY KEY (service_id),
           KEY host_id (host_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # status
         "DROP TABLE IF EXISTS `".$prefix."_status`",
@@ -1884,7 +1884,7 @@ sub _get_create_statements {
           name varchar(150) NOT NULL,
           value varchar(150) DEFAULT NULL,
           PRIMARY KEY (status_id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(1, 'last_update', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(2, 'update_pid', '')",
