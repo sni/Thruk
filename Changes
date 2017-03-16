@@ -8,6 +8,7 @@ next:
           - fix livestatus "Operator !~~ for lists not implemented." issue when having an empty search filter
           - set contactgroups as REMOTE_USER_GROUPS into the environment for hooks and scripts
           - fix macro expansion with recursive args (#658)
+          - fix forcing logcache to myisam (#691)
           - Business Process:
             - add support for simple wildcards, ex.: host:*
             - add link to all input hosts/services
