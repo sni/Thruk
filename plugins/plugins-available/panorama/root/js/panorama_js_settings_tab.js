@@ -469,7 +469,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     }
 
     var map_choose = "static";
-    if(tab.xdata.background_color != undefined) {
+    if(tab.xdata.background_color != undefined && tab.xdata.background_color != "") {
         map_choose = "color";
     }
     if(tab.xdata.map != undefined) {
