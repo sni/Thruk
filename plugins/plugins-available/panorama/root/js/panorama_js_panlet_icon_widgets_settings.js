@@ -726,6 +726,58 @@ TP.iconShowEditDialog = function(panel) {
                     submitEmptyText: false,
                     defaults:      { anchor: '-12', labelWidth: 50 },
                     items: [{
+                        xtype:        'fieldcontainer',
+                        fieldLabel:   'Position',
+                        layout:      { type: 'hbox', align: 'stretch' },
+                        items:        [{
+                            xtype:          'combobox',
+                            name:           'popup_position',
+                            value:          'automatic',
+                            store:         ['automatic', 'absolute position', 'relative position'],
+                            flex:            1,
+                            editable:        false,
+                            listeners:     {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    var defaults = TP.getPanelDetailsHeader(panel, true);
+                                    if(newValue == 'automatic') {
+                                        Ext.getCmp('popup_x').setDisabled(true);
+                                        Ext.getCmp('popup_y').setDisabled(true);
+                                    }
+                                    else {
+                                        Ext.getCmp('popup_x').setDisabled(false);
+                                        Ext.getCmp('popup_y').setDisabled(false);
+                                    }
+                                    TP.iconSettingsGlobals.popupPreviewUpdate();
+                                }
+                            }
+                        }, {
+                            xtype:        'label',
+                            text:         'x',
+                            margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                        }, {
+                            xtype:        'numberunit',
+                            allowDecimals: false,
+                            id:           'popup_x',
+                            name:         'popup_x',
+                            width:         60,
+                            unit:         'px',
+                            disabled:      true,
+                            listeners:   { change: function() { TP.iconSettingsGlobals.popupPreviewUpdate() } }
+                        }, {
+                            xtype:        'label',
+                            text:         'y',
+                            margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                        }, {
+                            xtype:        'numberunit',
+                            allowDecimals: false,
+                            name:         'popup_y',
+                            id:           'popup_y',
+                            width:         60,
+                            unit:         'px',
+                            disabled:      true,
+                            listeners:   { change: function() { TP.iconSettingsGlobals.popupPreviewUpdate() } }
+                        }]
+                    },{
                         fieldLabel:     'Popup',
                         xtype:          'combobox',
                         name:           'type',
@@ -1024,7 +1076,7 @@ TP.iconShowEditDialog = function(panel) {
             panel.locked = false;
             TP.suppressIconTip = true;
 
-             TP.iconTip.alignToSettingsWindow();
+            TP.iconTip.alignToSettingsWindow();
         }, 100);
     }
 
@@ -1078,7 +1130,7 @@ TP.get_icon_form_xdata = function(settingsWindow) {
     // clean up
     if(xdata.label.labeltext == '')   { delete xdata.label; }
     if(xdata.link.link == '')         { delete xdata.link;  }
-    if(xdata.popup && xdata.popup.type == 'default') { delete xdata.popup; }
+    if(xdata.popup && xdata.popup.type == 'default' && xdata.popup.popup_position == 'automatic') { delete xdata.popup; }
     if(xdata.layout.rotation == 0)  { delete xdata.layout.rotation; }
     Ext.getCmp('appearance_types').store.each(function(data, i) {
         var t = data.data.value;

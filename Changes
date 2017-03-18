@@ -18,6 +18,7 @@ next:
             - fix selecting nodes for edit (#682)
           - Panorama View:
             - honor acknowledgement and downtime status shape color calculation
+            - add option for fixed positioned popups
             - fix shape color for host problems in group/dashboard panels
             - fix saving column width for grid panels
           - Reports:
