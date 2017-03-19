@@ -77,16 +77,15 @@ sub index {
         $host = 'all';
     }
 
-    if($service ne '') {
-        $c->stash->{infoBoxTitle}   = 'Service Notifications';
-        push @{$filter}, { host_name => $host } if $host ne 'all';
-        push @{$filter}, { service_description => $service };
-    }
-    elsif($host ne '') {
+    if($host ne '') {
         $c->stash->{infoBoxTitle}   = 'Host Notifications';
         push @{$filter}, { host_name => $host } if $host ne 'all';
     }
-    elsif($contact ne '') {
+    if($service ne '') {
+        $c->stash->{infoBoxTitle}   = 'Service Notifications';
+        push @{$filter}, { service_description => $service };
+    }
+    if($contact ne '') {
         $c->stash->{infoBoxTitle}   = 'Contact Notifications';
         push @{$filter}, { contact_name => $contact } if $contact ne 'all';
     }

@@ -83,27 +83,20 @@
               </td>
             </tr>
             <tr>
-              <td align="left" class='optBoxItem'>Older Entries First:</td>
-              <td><input type='checkbox' name='oldestfirst'[% IF oldestfirst %] checked[% END %]></td>
-            </tr>
-            <tr>
               <td align="left" class='optBoxItem'>Contacts:</td>
-              <td><input type='text' name='contact' value='[% contact %]'></td>
+              <td><input type='text' name='contact' id='contact' value='[% IF contact != "all"; contact; END %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, striped:true })"[% END %]></td>
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Host:</td>
-              <td><input type='text' name='host' value='[% host %]'></td>
+              <td><input type='text' name='host' id='host' value='[% IF host != "all"; host; END %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %]></td>
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Service:</td>
-              <td><input type='text' name='service' value='[% service %]'></td>
+              <td><input type='text' name='service' id='service' value='[% service %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"[% END %]></td>
             </tr>
             <tr>
-              <td align="left" valign="bottom" class='optBoxItem'>
-              </td>
-              <td align="right" class='optBoxItem'>
-                <input type='submit' value='Update'>
-              </td>
+              <td align="left" class='optBoxItem'>Older Entries First:</td>
+              <td><input type='checkbox' name='oldestfirst'[% IF oldestfirst %] checked[% END %]><input type='submit' value='Update' style="float: right"></td>
             </tr>
             <tr>
               <td></td>
