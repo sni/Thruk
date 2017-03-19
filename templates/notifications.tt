@@ -84,14 +84,22 @@
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Older Entries First:</td>
-              <td></td>
+              <td><input type='checkbox' name='oldestfirst'[% IF oldestfirst %] checked[% END %]></td>
+            </tr>
+            <tr>
+              <td align="left" class='optBoxItem'>Contacts:</td>
+              <td><input type='text' name='contact' value='[% contact %]'></td>
+            </tr>
+            <tr>
+              <td align="left" class='optBoxItem'>Host:</td>
+              <td><input type='text' name='host' value='[% host %]'></td>
+            </tr>
+            <tr>
+              <td align="left" class='optBoxItem'>Service:</td>
+              <td><input type='text' name='service' value='[% service %]'></td>
             </tr>
             <tr>
               <td align="left" valign="bottom" class='optBoxItem'>
-                [% IF contact %]<input type='hidden' name='contact' value='[% contact %]'>[% END %]
-                [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
-                [% IF host    %]<input type='hidden' name='host' value='[% host %]'>[% END %]
-                <input type='checkbox' name='oldestfirst'[% IF oldestfirst %] checked[% END %]>
               </td>
               <td align="right" class='optBoxItem'>
                 <input type='submit' value='Update'>
