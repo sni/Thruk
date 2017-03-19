@@ -219,6 +219,11 @@ dockerbuild:
 	rm -f t/docker/Dockerfile
 	$(MAKE) t/docker/Dockerfile
 
+dockerrebuild: dockerclean dockerbuild
+
+dockerclean:
+	-cd t/docker && docker rmi "local/thruk_panorama_test"
+
 dockertest: t/docker/Dockerfile dockertestfirefox dockertestchrome
 
 dockertestchrome:
