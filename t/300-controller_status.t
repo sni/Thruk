@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1097;
+    plan tests => 1098;
 }
 
 BEGIN {
@@ -52,7 +52,7 @@ my $pages = [
 # Services
     '/thruk/cgi-bin/status.cgi?host=all',
     '/thruk/cgi-bin/status.cgi?host=does_not_exist',
-    '/thruk/cgi-bin/status.cgi?host='.$host,
+    { url => '/thruk/cgi-bin/status.cgi?host='.$host, like => ['Service Status Details For Host \''.$host.'\'', 'Current Network Status', 'Matching Service Entries Displayed'] },
     '/thruk/cgi-bin/status.cgi?sortoption=1&sorttype=1&host=all',
     '/thruk/cgi-bin/status.cgi?sortoption=1&sorttype=2&host=all',
     '/thruk/cgi-bin/status.cgi?sortoption=2&sorttype=1&host=all',

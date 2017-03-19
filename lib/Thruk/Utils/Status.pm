@@ -443,7 +443,7 @@ sub do_search {
         and scalar @{ $searches->[0]->{'text_filter'} } == 1
         and defined $searches->[0]->{'text_filter'}->[0]->{'op'}
         and $searches->[0]->{'text_filter'}->[0]->{'op'} eq '='
-        and $prefix eq 'dfl_'
+        and ($prefix eq 'dfl_' or $prefix eq '')
     ) {
         my $type  = $searches->[0]->{'text_filter'}->[0]->{'type'};
         my $value = $searches->[0]->{'text_filter'}->[0]->{'value'};
