@@ -206,6 +206,8 @@
         <td class='[% class %] next_check' style="display: none;" nowrap align="left">[% IF h.next_check %][% date_format(c, h.next_check) %][% ELSE %]not scheduled[% END %]</td>
         <td class='[% class %] notification_period' style="display: none;" nowrap align="left">[% h.notification_period %]</td>
         <td class='[% class %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.percent_state_change) %]%</td>
+        <td class='[% class %] in_notification_period' style="display: none;" nowrap>[% IF h.in_notification_period %]Yes[% ELSE %]No[% END %]</td>
+        <td class='[% class %] in_check_period' style="display: none;" nowrap>[% IF h.in_check_period %]Yes[% ELSE %]No[% END %]</td>
         [% FOREACH col = default_columns.$paneprefix %]
           [% IF col.field.match('^cust_') %]
           [% val = "";
