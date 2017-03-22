@@ -1696,8 +1696,8 @@ sub _insert_logs {
         }
         my $state             = $l->{'state'};
         my $state_type        = $l->{'state_type'};
-        if($state eq '')      { $state      = 'NULL'; }
-        if($state_type eq '') { $state_type = 'NULL'; }
+        if($state eq '')      { $state   = 'NULL'; }
+        if($state_type eq '') { undef $state_type; } # if set to NULL then $dbh->quote($state_type) returns 'NULL' instead of NULL.
         my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
         if($l->{'service_description'}) {
             $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
@@ -1712,6 +1712,10 @@ sub _insert_logs {
         &_trim_log_entry($l);
         my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
         my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
+
+        # Set type to NULL to prevent SQL insert errors if type is not a special type.
+        undef $type if !defined $Thruk::Backend::Provider::Mysql::db_types->{$type};
+
         push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
         # commit every 1000th to avoid to large blocks
@@ -1752,15 +1756,17 @@ sub _safe_insert {
         $dbh->do($stm.join(',', @{$values}));
     };
     if($@) {
-        print "ERROR: ".$@."\n" if $verbose;
+        print "ERROR INSERT: ".$@."\n" if $verbose;
 
         # insert failed for some reason, try them one by one to see which one breaks
         for my $v (@{$values}) {
             eval {
                 $dbh->do($stm.$v);
             };
-            print "ERROR: ".$@."\n"                    if $verbose;
-            print "ERROR: insert failed for: ".$v."\n" if $verbose;
+            if ($@) {
+                print "ERROR DETAIL: ".$@."\n"   if $verbose;
+                print "ERROR SQL: ".$stm.$v."\n" if $verbose;
+            }
         }
     }
     $dbh->commit or die $dbh->errstr;
@@ -1849,7 +1855,7 @@ sub _get_create_statements {
           class tinyint(4) unsigned NOT NULL,
           type enum('CURRENT SERVICE STATE','CURRENT HOST STATE','SERVICE NOTIFICATION','HOST NOTIFICATION','SERVICE ALERT','HOST ALERT','SERVICE EVENT HANDLER','HOST EVENT HANDLER','EXTERNAL COMMAND','PASSIVE SERVICE CHECK','PASSIVE HOST CHECK','SERVICE FLAPPING ALERT','HOST FLAPPING ALERT','SERVICE DOWNTIME ALERT','HOST DOWNTIME ALERT','LOG ROTATION','INITIAL HOST STATE','INITIAL SERVICE STATE','TIMEPERIOD TRANSITION') DEFAULT NULL,
           state tinyint(4) unsigned DEFAULT NULL,
-          state_type enum('HARD','SOFT') NOT NULL,
+          state_type enum('ACKNOWLEDGEMENT (CRITICAL)','ACKNOWLEDGEMENT (WARNING)','CRITICAL','CUSTOM (OK)','DISABLED','DOWN','FLAPPINGSTART (CRITICAL)','FLAPPINGSTART (OK)','FLAPPINGSTART (UP)','FLAPPINGSTART (WARNING)','FLAPPINGSTOP (CRITICAL)','FLAPPINGSTOP (DOWN)','FLAPPINGSTOP (OK)','FLAPPINGSTOP (UP)','FLAPPINGSTOP (WARNING)','HARD','OK','SOFT','STARTED','STOPPED','UNKNOWN','UNREACHABLE','UP','WARNING') DEFAULT NULL,
           contact_id mediumint(9) unsigned DEFAULT NULL,
           host_id mediumint(9) unsigned DEFAULT NULL,
           service_id mediumint(9) unsigned DEFAULT NULL,
