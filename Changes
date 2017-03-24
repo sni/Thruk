@@ -10,6 +10,7 @@ next:
           - add basic filters to notifications page (#692)
           - fix macro expansion with recursive args (#658)
           - fix forcing logcache to myisam (#691)
+          - fix login hook not running in background
           - Business Process:
             - add support for simple wildcards, ex.: host:*
             - add link to all input hosts/services

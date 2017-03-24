@@ -119,7 +119,7 @@ sub index {
                 });
                 # call a script hook after successful login?
                 if($c->config->{'cookie_auth_login_hook'}) {
-                    Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' &');
+                    Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
                 }
                 return $c->redirect_to($referer);
             } else {

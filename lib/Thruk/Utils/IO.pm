@@ -12,7 +12,7 @@ IO Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Carp qw/confess/;
+use Carp qw/confess longmess/;
 use Fcntl qw/:mode :flock/;
 use JSON::XS ();
 use POSIX ":sys_wait_h";
@@ -318,7 +318,11 @@ sub cmd {
         confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);
         $c->log->debug( "running cmd: ". $cmd ) if $c;
-        $output = `$cmd 2>&1`;
+        local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx;
+        if($cmd =~ m/&\s*$/mx && $cmd !~ m|2>&1|mx) {
+            $c->log->warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
+        }
+        $output = `$cmd`;
         $rc = $?;
     }
     if($rc == -1) {

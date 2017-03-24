@@ -72,6 +72,7 @@ my $content = read_file($tmpfilename);
 like($content, '/{"a":"b"}/', 'file contains json');
 unlink($tmpfilename);
 
+#########################
 # some tests for full disks
 if(-e '/dev/full') {
     eval {
@@ -82,5 +83,13 @@ if(-e '/dev/full') {
     like($err, '/No space left on device/', "json_lock_store failed on full filesystem, no space error message");
 }
 
+#########################
+# background commands
+my $start = time();
+($rc, $output) = Thruk::Utils::IO::cmd(undef, "sleep 5 >/dev/null 2>&1 &");
+my $time = time()- $start;
+ok($time < 5, "runtime < 5 (".$time."s)");
+is($rc, -1, "exit code is: ".$rc);
 
+#########################
 done_testing();
