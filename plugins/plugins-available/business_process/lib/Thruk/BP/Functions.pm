@@ -269,6 +269,9 @@ sub at_least {
     if($warning !~ m/^\d+$/mx) {
         return(3, 'warning threshold must be numeric');
     }
+    if($critical !~ m/^\d+$/mx) {
+        return(3, 'critical threshold must be numeric');
+    }
     if($good <= $critical) {
         $state = 2;
     }
@@ -298,6 +301,9 @@ sub not_more {
     my($good, $bad) = _count_good_bad($n->{'depends'});
     if($warning !~ m/^\d+$/mx) {
         return(3, 'warning threshold must be numeric');
+    }
+    if($critical !~ m/^\d+$/mx) {
+        return(3, 'critical threshold must be numeric');
     }
     my $state = 0;
     if($good > $critical) {
