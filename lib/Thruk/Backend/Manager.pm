@@ -1319,10 +1319,12 @@ sub _do_on_peers {
         $data = $self->_sum_answer($result);
     }
     elsif ( $function eq 'get_hostgroups' ) {
+        $result = {} if $num_selected_backends == 0;
         $data = $self->_merge_hostgroup_answer($result);
         $must_resort = 1;
     }
     elsif ( $function eq 'get_servicegroups' ) {
+        $result = {} if $num_selected_backends == 0;
         $data = $self->_merge_servicegroup_answer($result);
         $must_resort = 1;
     }
