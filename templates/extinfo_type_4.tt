@@ -485,7 +485,7 @@
                       <td class='dataVal' colspan=6><div class="errorMessage">[% logcache_error %]</div></td>
                     </tr>
                     [% ELSE %]
-                    [% FOREACH peer_key = logcache_stats.keys %]
+                    [% FOREACH peer_key = logcache_stats.keys.sort %]
                     [% s = logcache_stats.$peer_key %]
                     <tr>
                       <td class='dataVal'>[% s.name %]</td>
