@@ -48,7 +48,7 @@ $Thruk::Backend::Provider::Mysql::db_types = {
     'LOG ROTATION'            => 0, # INFO
 };
 
-$Thruk::Backend::Provider::Mysql::cache_version = 3;
+$Thruk::Backend::Provider::Mysql::cache_version = 4;
 
 ##########################################################
 
@@ -1099,6 +1099,14 @@ sub _update_logcache {
     }
     return(-1) if $skip;
 
+    if($cache_version == 3) {
+        $cache_version = 4;
+        $dbh->do("ALTER TABLE `".$prefix."_log` CHANGE `state_type` `state_type` ENUM('HARD','SOFT') NULL DEFAULT NULL");
+        $dbh->do("UPDATE `".$prefix."_status` SET value = 4 WHERE status_id = 4");
+        print "WARNING: updated logcache to version 4\n" if $verbose;
+        $c->log->info("updated logcache to verbose 4");
+    }
+
     if($cache_version < $Thruk::Backend::Provider::Mysql::cache_version) {
         # only log message if not importing already
         if($mode ne 'import') {
@@ -1855,7 +1863,7 @@ sub _get_create_statements {
           class tinyint(4) unsigned NOT NULL,
           type enum('CURRENT SERVICE STATE','CURRENT HOST STATE','SERVICE NOTIFICATION','HOST NOTIFICATION','SERVICE ALERT','HOST ALERT','SERVICE EVENT HANDLER','HOST EVENT HANDLER','EXTERNAL COMMAND','PASSIVE SERVICE CHECK','PASSIVE HOST CHECK','SERVICE FLAPPING ALERT','HOST FLAPPING ALERT','SERVICE DOWNTIME ALERT','HOST DOWNTIME ALERT','LOG ROTATION','INITIAL HOST STATE','INITIAL SERVICE STATE','TIMEPERIOD TRANSITION') DEFAULT NULL,
           state tinyint(4) unsigned DEFAULT NULL,
-          state_type enum('HARD','SOFT') NOT NULL,
+          state_type enum('HARD','SOFT') DEFAULT NULL,
           contact_id mediumint(9) unsigned DEFAULT NULL,
           host_id mediumint(9) unsigned DEFAULT NULL,
           service_id mediumint(9) unsigned DEFAULT NULL,
