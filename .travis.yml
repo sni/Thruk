@@ -29,6 +29,9 @@ before_install:
   # ensure we have all modules loaded
   - if [ $(perl Makefile.PL 2>&1 | grep -c missing) -ne 0 ]; then exit 1; fi
   - '[ "$TRAVIS_SECURE_ENV_VARS" == "false" ] || openssl aes-256-cbc -K $encrypted_9c186b83851c_key -iv $encrypted_9c186b83851c_iv -in t/docker/.dropbox_uploader.enc -out ~/.dropbox_uploader -d'
+  - sudo cat /etc/profile.d/perlbrew.sh
+  - sudo cat /opt/jdk_switcher/jdk_switcher.sh
+  - sudo rm -f /etc/profile.d/perlbrew.sh /opt/jdk_switcher/jdk_switcher.sh
 
 install:
   - ./configure     || exit 1
