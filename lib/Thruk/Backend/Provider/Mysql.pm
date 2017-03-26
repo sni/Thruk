@@ -1104,7 +1104,7 @@ sub _update_logcache {
         $dbh->do("ALTER TABLE `".$prefix."_log` CHANGE `state_type` `state_type` ENUM('HARD','SOFT') NULL DEFAULT NULL");
         $dbh->do("UPDATE `".$prefix."_status` SET value = 4 WHERE status_id = 4");
         print "WARNING: updated logcache to version 4\n" if $verbose;
-        $c->log->info("updated logcache to verbose 4");
+        $c->log->info("updated logcache to version 4");
     }
 
     if($cache_version < $Thruk::Backend::Provider::Mysql::cache_version) {
