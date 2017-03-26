@@ -119,6 +119,7 @@ perf_table([% write %], [% state %], data[0], data[1], data[2], pnp_url, [% IF s
 [% SET has_type = 1 %]
 [% SET type = 'INFO' %]
 [% SET info = "" %]
+[% IF !l.defined("type"); l.type = ""; END %]
 
 [%    IF l.type == 'CURRENT SERVICE STATE'        %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% ELSIF l.type == 'CURRENT HOST STATE'           %][% SET pic = "info.png"          desc = "Informational Message" %]
