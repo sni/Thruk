@@ -633,6 +633,9 @@ Ext.define('TP.dragEl', {
             if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
             if(y == undefined) { y = This.xdata.appearance[This.keyY]; }
 
+            /* breaks connectors: items are moved to 0/0 when unlocking in single window mode */
+            if(x == 0 && y == 0) { return; }
+
             /* snap to roaster when shift key is hold */
             if(TP.isShift) {
                 var pos = TP.get_snap(x, y);
