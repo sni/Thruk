@@ -2084,7 +2084,7 @@ sub get_host_columns {
         { title => "Next Check",           "field" => "next_check",           "checked" => 0 },
         { title => "Notification Period",  "field" => "notification_period",  "checked" => 0 },
         { title => "Percent State Change", "field" => "percent_state_change", "checked" => 0 },
-        { title => "In Notifcaton Period", "field" => "in_notification_period", "checked" => 0 },
+        { title => "In Notificaton Period", "field" => "in_notification_period", "checked" => 0 },
         { title => "In Check Period",      "field" => "in_check_period",       "checked" => 0 },
     );
     if($c->config->{'show_custom_vars'}) {
@@ -2157,7 +2157,7 @@ sub get_service_columns {
         { title => "Next Check",           "field" => "next_check",           "checked" => 0 },
         { title => "Notification Period",  "field" => "notification_period",  "checked" => 0 },
         { title => "Percent State Change", "field" => "percent_state_change", "checked" => 0 },
-        { title => "In Notifcaton Period", "field" => "in_notification_period", "checked" => 0 },
+        { title => "In Notificaton Period", "field" => "in_notification_period", "checked" => 0 },
         { title => "In Check Period",      "field" => "in_check_period",       "checked" => 0 },
     );
     if($c->config->{'show_custom_vars'}) {
