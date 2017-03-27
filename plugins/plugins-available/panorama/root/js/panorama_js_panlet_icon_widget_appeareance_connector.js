@@ -34,7 +34,13 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         var toX       = xdata.appearance.connectortox;
         var toY       = xdata.appearance.connectortoy;
         var arrowtype = xdata.appearance.connectorarrowtype;
-        if(isNaN(fromX)) { return; }
+        if(isNaN(fromX)) {
+            // may happen if from and to is not yet calculated
+            if(panel.xdata.map) {
+                panel.moveToMapLonLat(undefined, false);
+            }
+            return;
+        }
 
         if(!panel.surface.el) { return };
 
