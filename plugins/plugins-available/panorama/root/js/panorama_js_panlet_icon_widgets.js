@@ -668,7 +668,8 @@ Ext.define('TP.SmallWidget', {
         panel.noUpdateLonLat++
         panel.suspendEvents();
         panel.setPosition(x, y);
-        if(panel.el && panel.el.dom) {
+        if(panel.xdata.map && panel.el && panel.el.dom) {
+            // connectors on maps in single tab mode are rendered wrong otherwise
             panel.setPagePosition(x, y);
         }
         panel.resumeEvents();
