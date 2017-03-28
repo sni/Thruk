@@ -2424,10 +2424,12 @@ sub _list_references {
 ##########################################################
 sub _config_check {
     my($c) = @_;
+    my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
+    $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
     if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
     }
-    elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
+    elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $obj_check_cmd)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
