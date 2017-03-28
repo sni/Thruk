@@ -25,6 +25,7 @@ next:
             - fix saving column width for grid panels
           - Reports:
             - hide program messages from reports by default, can be changed back by report_include_class2 = 2
+            - fix email report links from the preferences popup being cut off
           - Statusmap:
             - allow grouping by custom variable exposed by show_custom_vars
 

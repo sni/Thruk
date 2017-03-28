@@ -70,7 +70,7 @@
               <th>Report:</th>
               <td>
                 <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(original_uri ? original_uri : full_uri); return false;">
+                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(original_uri ? original_uri : encodeURIComponent(full_uri)); return false;">
               </td>
             </tr>
             [% END %]
