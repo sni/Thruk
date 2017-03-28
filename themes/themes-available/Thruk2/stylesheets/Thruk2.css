@@ -1245,6 +1245,17 @@ BUTTON.thruk_btn {
   transition: background-color 0.3s ease-out 0s;
 }
 
+/* reset some values when used in combination with jquery ui */
+BUTTON.thruk_btn.ui-button {
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+}
+BUTTON.thruk_btn.ui-button SPAN.ui-button-text {
+    padding: 0;
+    display: none;
+}
+
 BUTTON.thruk_btn.small {
   font-size: 16px;
   width: 20px;
