@@ -403,7 +403,7 @@ sub get_url {
             if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
                 $include_js = 0;
             }
-            #$result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
+            $result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);

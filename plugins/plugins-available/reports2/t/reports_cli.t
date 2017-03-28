@@ -71,8 +71,21 @@ my $test_pdf_reports = [{
         'params.minimal'        => 'yes',
         'params.js'             => 'no',
         'params.css'            => 'yes',
+        'params.pdf'            => 'yes',
         'params.theme'          => 'Thruk',
         'mail.like'             => [ @mail_like, '/report.pdf/' ],
+    }, {
+        'name'                  => 'HTML Report',
+        'type'                  => 'hmtl',
+        'template'              => 'report_from_url.tt',
+        'params.url'            => uri_escape('status.cgi?host=all'),
+        'params.minimal'        => 'yes',
+        'params.js'             => 'no',
+        'params.css'            => 'yes',
+        'params.pdf'            => 'no',
+        'params.theme'          => 'Thruk2',
+        'mail.like'             => [ @mail_like, '/status.html/' ],
+        'mail.unlike'           => [ '/<script/', '/report.pdf/' ],
     }, {
         'name'                  => 'Event Report',
         'template'              => 'eventlog.tt',
@@ -144,6 +157,11 @@ for my $report (@{$test_pdf_reports}) {
             my $mail = read_file($mailtestfile);
             for my $like (@{$report->{'mail.like'}}) {
                 like($mail, $like, 'Mail contains: '.$like);
+            }
+            if($report->{'mail.unlike'}) {
+                for my $unlike (@{$report->{'mail.unlike'}}) {
+                    unlike($mail, $unlike, 'Mail must not contain: '.$unlike);
+                }
             }
         }
     };
