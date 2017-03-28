@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.14     Tue Mar 28 10:09:25 CEST 2017
           - add new Thruk2 theme
           - add broadcast system
           - support opening server actions in new tabs
