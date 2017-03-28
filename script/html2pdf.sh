@@ -26,7 +26,7 @@ PHANTOMJS=$4
 EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true $PHANTOMJSOPTIONS"
 
 rm -f $OUTPUT
-$PHANTOMJS $EXTRAOPTIONS "$DIR/html2pdf.js" "$INPUT" "$OUTPUT" 2>&1
+$PHANTOMJS $EXTRAOPTIONS "$DIR/html2pdf.js" "$INPUT" "$OUTPUT" $PHANTOMJSSCRIPTOPTIONS 2>&1
 rc=$?
 
 # ensure file is not owned by root

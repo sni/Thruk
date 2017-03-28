@@ -351,7 +351,7 @@ sub get_url {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
         my $cmd = $c->config->{home}.'/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
-        local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
+        local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
         `$cmd`;
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
@@ -403,7 +403,10 @@ sub get_url {
             if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
                 $include_js = 0;
             }
-            $result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
+            # only for url_reports
+            if($c->stash->{'param'}->{'pdf'}) {
+                $result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
+            }
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);

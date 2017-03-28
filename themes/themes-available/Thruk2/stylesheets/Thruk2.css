@@ -49,6 +49,12 @@ body {
   margin-right:5px;
 }
 
+@media print {
+  body {
+    background:#f1f1f1;
+  }
+}
+
 #currentversioninfo {
   font-size:14px;
   padding-top: 10px;

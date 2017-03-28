@@ -1294,6 +1294,11 @@ sub _convert_to_pdf {
     }
 
     my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
+    my $autoscale = 0;
+    if($c->stash->{'param'}->{'pdf'}) {
+        $autoscale = 1;
+    }
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--autoscale=1' if $autoscale;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
     my $out = `$cmd 2>&1`;
 
