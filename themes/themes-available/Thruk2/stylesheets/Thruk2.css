@@ -1527,3 +1527,7 @@ div.listwizard.ui-dialog-content, table.listwizard td.filter {
 table.listwizard input, table.listwizard select {
   background-color: #ffffff;
 }
+
+TABLE.data.reports TABLE.filter {
+    box-shadow: none;
+}
