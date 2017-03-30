@@ -12,6 +12,11 @@ testCase.addImagePaths("../_images/");
 _setSpeed(50);              // default is 100ms
 env.setSimilarity(0.90);    // default is 0.7
 
+function openDebugConsole() {
+    _eval("_sahi.openController();");
+    env.sleep(99999);
+}
+
 function mouseClickXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
     region.click();
