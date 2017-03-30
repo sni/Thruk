@@ -445,6 +445,7 @@ sub add_defaults {
            or $c->req->path_info =~ m|$product_prefix\/cgi\-bin\/remote\.cgi|mx
            or $c->req->path_info =~ m|$product_prefix\/cgi\-bin\/login\.cgi|mx
            or $c->req->path_info =~ m|$product_prefix\/cgi\-bin\/restricted\.cgi|mx
+           or $c->req->path_info =~ m|$product_prefix\/cgi\-bin\/parts\.cgi|mx
            or $c->req->path_info eq '/'
            or $c->req->path_info eq $product_prefix
            or $c->req->path_info eq $product_prefix.'/docs'

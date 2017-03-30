@@ -277,13 +277,17 @@ page: /thruk/cgi-bin/parts.cgi
 
 sub parts_cgi {
     my($c) = @_;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
     my $part = $c->req->parameters->{'part'};
     return $c->detach('/error/index/25') unless $part;
+
     if($part eq '_header_prefs') {
+        Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
         $c->stash->{'template'} = '_header_prefs.tt';
+        return;
     }
-    elsif($part eq '_host_comments') {
+
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    if($part eq '_host_comments') {
         my $host = $c->req->parameters->{'host'};
         $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => '' } ] );
         $c->stash->{'type'}      = 'host';
