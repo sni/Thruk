@@ -1547,6 +1547,9 @@ sub _get_result_lmd {
             $peer->{'runnning'}   = 0;
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
+        if(scalar keys %{$meta->{'failed'}} == @{$peers}) {
+            die("did not get a valid response for at least any site");
+        }
     }
     if($meta && $meta->{'total'}) {
         $totalsize = $meta->{'total'};
