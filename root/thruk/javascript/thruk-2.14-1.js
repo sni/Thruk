@@ -702,7 +702,7 @@ function get_site_panel_backend_button(id, with_id, styles, onclick, section, su
     subsection = subsection.replace(/[^\w]/, '_');
     btn += ' class="button_peer'+initial_backends[id]['cls']+' backend_'+id+' section_'+section+' subsection_'+section+'_'+subsection+'"';
     btn += ' value="'+initial_backends[id]['name']+'"';
-    btn += ' title="'+initial_backends[id]['last_error']+'"';
+    btn += ' title="'+escapeHTML(initial_backends[id]['last_error']).replace(/"/, "'")+'"';
     if(initial_backends[id]['disabled'] == 5) {
         btn += ' disabled'
     } else {
