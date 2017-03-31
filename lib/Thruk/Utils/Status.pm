@@ -946,6 +946,8 @@ sub single_search {
             my $cop = '-or';
             if($op eq '!=')  { $cop = '-and' }
             if($op eq '!~~') { $cop = '-and' }
+            if($op eq '='  && $value eq '') { $cop = '-and' }
+            if($op eq '!=' && $value eq '') { $cop = '-or' }
             push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
                                                   custom_variables => { $op => $pre." ".$value },
                                           ],
