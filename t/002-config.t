@@ -5,9 +5,11 @@ use Test::More;
 
 use_ok("Thruk");
 use_ok("Thruk::Config");
+
 my $config = Thruk::Config::get_config();
 is(ref Thruk->config, 'HASH', "got a config");
 ok(defined Thruk->config->{'version'}, "got a version");
+
 $config = Thruk::Config::get_config('t/data/test_c_style.conf');
 is($config->{'Thruk::Backend'}->{'peer'}->{'configtool'}->{'obj_readonly'}, '^(?!.*/test)', 'parsing c style comments');
 
@@ -26,26 +28,41 @@ if(!$@) {
 }
 
 ####################################################
-$ENV{'THRUK_CONFIG'} = 't/data/nested_config';
-$config = Thruk::Config::get_config();
-my $expected_backends = {
-    'peer' => [{ 'name' => 'local1' },
-                { 'name' => 'local2' },
-                { 'name' => 'local3' },
-                { 'name' => 'local4' }
-]};
-is_deeply($config->{'Thruk::Backend'}, $expected_backends, "parsing backends from thruk_local.d");
-is_deeply($config->{'backend_debug'}, 1, "parsing scalars from thruk_local.d");
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/nested_config';
+    my $config = Thruk::Config::get_config();
+    my $expected_backends = {
+        'peer' => [{ 'name' => 'local1' },
+                    { 'name' => 'local2' },
+                    { 'name' => 'local3' },
+                    { 'name' => 'local4' }
+    ]};
+    is_deeply($config->{'Thruk::Backend'}, $expected_backends, "parsing backends from thruk_local.d");
+    is_deeply($config->{'backend_debug'}, 1, "parsing scalars from thruk_local.d");
+};
 
 ####################################################
-$ENV{'THRUK_CONFIG'} = 't/data/separated_hashes';
-$config = Thruk::Config::get_config();
-my $expected_actions = {
-    "a" => 1,
-    "b" => 2,
-    "c" => 3,
-    "d" => 4,
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/separated_hashes';
+    my $config = Thruk::Config::get_config();
+    my $expected_actions = {
+        "a" => 1,
+        "b" => 2,
+        "c" => 3,
+        "d" => 4,
+    };
+    is_deeply($config->{'action_menu_actions'}, $expected_actions, "parsing backends from thruk_local.d");
 };
-is_deeply($config->{'action_menu_actions'}, $expected_actions, "parsing backends from thruk_local.d");
+
+####################################################
+{
+    my $config = Thruk::Config::get_config('t/data/test_spaces.conf');
+    my $expected_user = {
+        'Test User' => {
+            'show_full_commandline' => '2'
+        }
+    };
+    is_deeply($config->{'User'}, $expected_user, "parsing blocks with space including names");
+};
 
 done_testing();

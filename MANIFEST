@@ -1476,6 +1476,7 @@ t/data/separated_hashes/thruk_local.d/a.conf
 t/data/separated_hashes/thruk_local.d/b.conf
 t/data/test_c_style.conf
 t/data/test_hash_comments.cfg
+t/data/test_spaces.conf
 t/data/userfiles/encoding_broken
 t/data/userfiles/encoding_iso
 t/data/userfiles/encoding_ok
