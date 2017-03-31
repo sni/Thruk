@@ -1002,7 +1002,6 @@ sub set_custom_vars {
     for my $test (@{$vars}) {
         for my $cust_name (sort keys %{$custom_vars}) {
             next if defined $already_added->{$cust_name};
-            my $cust_value = $custom_vars->{$cust_name};
             my $found      = 0;
             if($test eq $cust_name or $test eq '_'.$cust_name) {
                 $found = 1;
@@ -1017,6 +1016,7 @@ sub set_custom_vars {
             next unless $found;
 
             # expand macros in custom vars
+            my $cust_value = $custom_vars->{$cust_name};
             if(defined $host and defined $service) {
                     #($cust_value, $rc)...
                     ($cust_value, undef) = $c->{'db'}->_replace_macros({
@@ -1047,6 +1047,36 @@ sub set_custom_vars {
     return;
 }
 
+########################################
+
+=head2 check_custom_var_list
+
+  check_custom_var_list($varname, $allowed)
+
+returns true if custom variable name is in the list of allowed variable names
+
+=cut
+
+sub check_custom_var_list {
+    my($varname, $allowed) = @_;
+
+    $varname =~ s/^_//gmx;
+
+    for my $cust_name (@{$allowed}) {
+        $cust_name =~ s/^_//gmx;
+        if($varname eq $cust_name) {
+            return(1);
+        } else {
+            my $v = "".$varname;
+            next if CORE::index($v, '*') == -1;
+            $v =~ s/\*/.*/gmx;
+            if($cust_name =~ m/^$v$/mx) {
+                return(1);
+            }
+        }
+    }
+    return;
+}
 
 ########################################
 
