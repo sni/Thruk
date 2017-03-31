@@ -1751,7 +1751,7 @@ var TP = {
         }
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
-            if(p.iconType && p.xdata) {
+            if(p.iconType && p.xdata && p.iconType != "text" && p.iconType != "image") {
                 if(p.iconType == 'host' || p.hostProblem) {
                     group.hosts.total++;
                          if(p.xdata.state == 0) { group.hosts.up++; }
