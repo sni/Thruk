@@ -65,8 +65,9 @@ my $_add_label = sub {
 };
 
 
-my $nr = 1;
+my $nr = 2;
 $dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, 40, "Create New Dashboard:");
+$dashboard->{'panlet_'.++$nr} = &{$_add_label}(500, 40, "Load Dashboard:");
 
 # fetch my maps
 my $x  = 20;
@@ -166,6 +167,36 @@ __DATA__
          },
          "link" : {
             "link" : "javascript:TP.add_pantab('new_geo')"
+         },
+        "nsize" : [ 64, 64 ],
+        "size" : 64
+      }
+   },
+   "panlet_2" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "icon"
+         },
+         "cls" : "TP.StaticIcon",
+         "general" : {
+            "src" : "../plugins/panorama/images/folder_picture_64.png"
+         },
+         "label" : {
+            "bgcolor" : "#cccccc",
+            "bordercolor" : "#aaaaaa",
+            "bordersize" : 1,
+            "fontsize" : 10,
+            "labeltext" : "<center>Load Dashboard</center>",
+            "offsety" : 42,
+            "position" : "center",
+            "width" : "80"
+         },
+         "layout" : {
+            "x" : 500,
+            "y" : 60,
+         },
+         "link" : {
+            "link" : "javascript:TP.loadDashboardWindow()"
          },
         "nsize" : [ 64, 64 ],
         "size" : 64
