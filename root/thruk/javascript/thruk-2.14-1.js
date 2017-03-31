@@ -5282,7 +5282,13 @@ var ajax_search = {
             }
         }
         if(input.id.match(/_value$/) && ajax_search.search_type == "custom variable") {
-            ajax_search.search_type = 'none';
+            ajax_search.search_type = "none"
+            var varFieldId = input.id.replace(/_value$/, '_val_pre');
+            var varField   = document.getElementById(varFieldId);
+            if(varField) {
+                ajax_search.search_type = "custom value"
+                search_url = search_url + "&type=custom value&var=" + varField.value;
+            }
         }
         if(ajax_search.search_type == 'none') {
             removeEvent( input, 'keyup', ajax_search.suggest );

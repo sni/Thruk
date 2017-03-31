@@ -225,32 +225,52 @@ sub _process_raw_request {
                     }
                 }
             }
-            elsif($type eq 'custom variable') {
+            elsif($type eq 'custom variable' || $type eq 'custom value') {
                 # get available custom variables
                 $data        = [];
-                my $vars     = {};
-                # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
-                # this leads to: Sorry, Operator  for custom variable lists not implemented.
-                my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
-                my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
-                for my $obj (@{$hosts}, @{$services}) {
-                    for my $key (@{$obj->{custom_variable_names}}) {
-                        $vars->{$key} = 1;
-                    }
-                }
-                @{$data} = sort keys %{$vars};
-                @{$data} = grep(/$filter/mx, @{$data}) if $filter;
-
-                # filter all of them which are not listed by show_custom_vars unless we have extended permissions
-                if(!$c->check_user_roles("authorized_for_configuration_information")) {
-                    my $newlist = [];
-                    my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
-                    for my $varname (@{$data}) {
-                        if(Thruk::Utils::check_custom_var_list($varname, $allowed)) {
-                            push @{$newlist}, $varname;
+                if($type eq 'custom variable' || !$c->check_user_roles("authorized_for_configuration_information")) {
+                    my $vars     = {};
+                    # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
+                    # this leads to: Sorry, Operator  for custom variable lists not implemented.
+                    my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
+                    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
+                    for my $obj (@{$hosts}, @{$services}) {
+                        for my $key (@{$obj->{custom_variable_names}}) {
+                            $vars->{$key} = 1;
                         }
                     }
-                    $data = $newlist;
+                    @{$data} = sort keys %{$vars};
+                    @{$data} = grep(/$filter/mx, @{$data}) if $filter;
+
+                    # filter all of them which are not listed by show_custom_vars unless we have extended permissions
+                    if(!$c->check_user_roles("authorized_for_configuration_information")) {
+                        my $newlist = [];
+                        my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
+                        for my $varname (@{$data}) {
+                            if(Thruk::Utils::check_custom_var_list($varname, $allowed)) {
+                                push @{$newlist}, $varname;
+                            }
+                        }
+                        $data = $newlist;
+                    }
+                }
+                if($type eq 'custom value') {
+                    my $allowed = $data;
+                    my $varname = $c->req->parameters->{'var'} || '';
+                    if(!$c->check_user_roles("authorized_for_configuration_information") && !grep/^\Q$varname\E$/mx, @{$allowed}) {
+                        $data = ["you are not authorized for this custom variable"];
+                    } else {
+                        my $uniq = {};
+                        my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    { 'custom_variable_names' => { '>=' => $varname } }], columns => ['custom_variable_names', 'custom_variable_values'] );
+                        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'custom_variable_names' => { '>=' => $varname } }], columns => ['custom_variable_names', 'custom_variable_values'] );
+                        for my $obj (@{$hosts}, @{$services}) {
+                            my %vars;
+                            @vars{@{$obj->{custom_variable_names}}} = @{$obj->{custom_variable_values}};
+                            $uniq->{$vars{$varname}} = 1;
+                        }
+                        @{$data} = sort keys %{$uniq};
+                        @{$data} = grep(/$filter/mx, @{$data}) if $filter;
+                    }
                 }
             }
             elsif($type eq 'contactgroup' || $type eq 'contactgroups') {
