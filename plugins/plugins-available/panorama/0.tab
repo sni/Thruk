@@ -11,6 +11,8 @@ my $_add_panlet = sub {
     if($d->{'ts'} && $dashboard->{'ts'} < $d->{'ts'}) {
         $dashboard->{'ts'} = $d->{'ts'};
     }
+    my $name = $d->{'name'};
+    $name =~  s/['"]//gmx;
     return({
         "xdata" => {
             "appearance" => {
@@ -25,11 +27,11 @@ my $_add_panlet = sub {
                 "bgcolor" => "#cccccc",
                 "bordercolor" => "#aaaaaa",
                 "bordersize" => 1,
-                "fontsize" => 10,
-                "labeltext" => "<center>".$d->{'name'}."</center>",
+                "fontsize" => 9,
+                "labeltext" => "<center title='".$name."'>".$name."</center>",
                 "offsety" => 42,
                 "position" => "center",
-                "width" => "60"
+                "width" => "64"
             },
             "layout" => {
                 "x" => $x,
