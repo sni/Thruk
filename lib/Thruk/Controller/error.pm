@@ -276,6 +276,8 @@ sub index {
         }
     }
 
+    $c->stash->{errorDetails} = Thruk::Utils::Filter::escape_html($c->stash->{errorDetails}) if $c->stash->{errorDetails};
+
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 
