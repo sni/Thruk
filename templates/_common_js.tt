@@ -70,6 +70,28 @@
   });
   [% END %]
   init_page();
+
+  try {
+      if(window.parent.frames && top.frames['side']) {
+          top.frames['side'].is_reloading = undefined;
+          top.frames['side'].load_errors  = 0;
+      }
+  }
+  catch(e) { debug(e); }
+  /* favicon counter */
+  [%+ IF fav_counter +%]
+  [% totals = set_favicon_counter(c) %]
+    [%+ IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 +%]
+      updateFaviconCounter([% totals.red %], '#FF5B33');
+    [%+ ELSIF totals.red == 0 && totals.yellow > 0 && totals.orange == 0 +%]
+      updateFaviconCounter([% totals.yellow %], '#FFDE00');
+    [%+ ELSIF totals.red == 0 && totals.yellow == 0 && totals.orange > 0 +%]
+      updateFaviconCounter([% totals.orange %], '#FF9E00');
+    [%+ ELSE +%]
+      updateFaviconCounter([% totals.red + totals.yellow + totals.orange %], '#FF9E00');
+    [%+ END +%]
+  [%+ END +%]
+
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->

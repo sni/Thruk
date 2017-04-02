@@ -6254,8 +6254,17 @@ function updateFaviconCounter(value, color, fill, font, fontColor) {
 
 /* save settings in a cookie */
 function prefSubmitCounter(url, value) {
+  if(value == false) {
+      updateFaviconCounter(null);
+  }
+
   cookieSave('thruk_favicon', value);
-  reloadPage();
+  // favicon is created from the parent page, so reload that one if we use frames
+  try {
+    window.parent.location.reload();
+  } catch(e) {
+    reloadPage();
+  }
 }
 
 
