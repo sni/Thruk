@@ -395,16 +395,16 @@ sub set_status {
         my $text = $self->{'status_text'};
         if(scalar @{$self->{'depends'}} > 0 and $self->{'function'} ne 'custom') {
             my $sum = Thruk::BP::Functions::_get_nodes_grouped_by_state($self, $bp);
-            if($sum->{'3'}) {
+            if($sum->{'3'} && $self->{'status'} == 3) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'3'}).' unknown';
             }
-            elsif($sum->{'2'}) {
+            elsif($sum->{'2'} && $self->{'status'} == 2) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'2'}).' failed';
             }
-            elsif($sum->{'1'}) {
+            elsif($sum->{'1'} && $self->{'status'} == 1) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'1'}).' warning';
             }
-            else {
+            elsif($sum->{'0'} && $self->{'status'} == 0) {
                 $text = 'everything is fine';
             }
             $text = Thruk::BP::Utils::state2text($self->{'status'}).' - '.$text;
