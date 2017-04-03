@@ -250,6 +250,10 @@ sub _dispatcher {
 
     $Thruk::COUNT++;
     #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO});
+    # connection keep alive breaks IE in development server
+    if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
+        delete $env->{'HTTP_CONNECTION'};
+    }
     my $c = Thruk::Context->new($thruk, $env);
     $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
 
