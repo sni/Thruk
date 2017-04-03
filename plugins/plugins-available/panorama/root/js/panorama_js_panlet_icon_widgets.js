@@ -615,6 +615,7 @@ Ext.define('TP.SmallWidget', {
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         if(xdata.map == undefined)                     { return; }
         panel.noUpdateLonLat++;
+        if(xdata.layout == undefined) { xdata.layout = {}; }
         if(xdata.appearance.type == "connector" && !movedOnly) {
             var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon),  lat: Number(xdata.map.lat)});
             var pixel1 = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon1), lat: Number(xdata.map.lat1)});
