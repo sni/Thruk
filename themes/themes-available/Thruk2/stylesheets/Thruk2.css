@@ -1273,6 +1273,7 @@ BUTTON.thruk_btn.big {
   font-size: 28px;
   width: 40px;
   height: 40px;
+  padding: 6px;
 }
 
 BUTTON.primary {
