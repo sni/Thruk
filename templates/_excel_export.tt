@@ -8,6 +8,17 @@
       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% counter %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();" checked></td>
     </tr>
     [% END %]
+    [% IF c.config.defined('show_custom_vars') && c.config.show_custom_vars.list.size > 0 %]
+      [% FOREACH v IN c.config.show_custom_vars.list %]
+        [% counter = counter + 1 %]
+        [% IF !v.match('\*'); %]
+        <tr>
+          <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v %]</td>
+          <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% v %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
+        </tr>
+        [% END %]
+      [% END %]
+    [% END %]
   </table>
 [% END %]
 [% BLOCK checkall %]

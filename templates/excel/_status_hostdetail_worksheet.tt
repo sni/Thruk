@@ -19,6 +19,7 @@
         [% IF columns.10 %]<cell width='15'>Duration</cell>[% END %]
         [% IF columns.11 %]<cell width='80'>Status Information</cell>[% END %]
         [% IF columns.12 %]<cell width='80'>Extra Status Information</cell>[% END %]
+        [% FOREACH col = extracolumns %]<cell width='30'>[% col %]</cell>[% END %]
       </format>
     </row>
     [% FOREACH h = data %]
@@ -58,6 +59,12 @@
         [% IF columns.10 %]<cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>[% END %]
         [% IF columns.11 %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% escape_xml(h.plugin_output) %][% END %]</cell>[% END %]
         [% IF columns.12 %]<cell>[% IF h.has_been_checked == 1 %][% escape_xml(h.long_plugin_output) %][% END %]</cell>[% END %]
+        [% IF extracolumns.size > 0 %]
+          [% cust_vars = get_custom_vars(c, h) %]
+          [% FOREACH col = extracolumns; col = col.replace('^_', '') %]
+            <cell>[% IF cust_vars.exists(col); escape_xml(cust_vars.$col); END %]</cell>
+          [% END %]
+        [% END %]
       </row>
     [% END %]
   </worksheet>

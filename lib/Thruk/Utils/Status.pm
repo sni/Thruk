@@ -1508,18 +1508,24 @@ sub set_selected_columns {
     for my $prefix ('', 'host_', 'service_') {
         my $columns = {};
         my $last_col = 50;
+        my $extracolumns = [];
         for my $x (0..50) { $columns->{$x} = 1; }
         if(defined $c->req->parameters->{$prefix.'columns'}) {
             $last_col = 0;
             for my $x (0..50) { $columns->{$x} = 0; }
-            my $cols = $c->req->parameters->{$prefix.'columns'};
-            for my $nr (ref $cols eq 'ARRAY' ? @{$cols} : ($cols)) {
-                $columns->{$nr} = 1;
+            my $cols = Thruk::Utils::list($c->req->parameters->{$prefix.'columns'});
+            for my $nr (@{$cols}) {
+                if($nr !~ m/^\d+$/mx) {
+                    push @{$extracolumns}, $nr;
+                } else {
+                    $columns->{$nr} = 1;
+                }
                 $last_col++;
             }
         }
         $c->stash->{$prefix.'last_col'} = chr(65+$last_col-1);
         $c->stash->{$prefix.'columns'}  = $columns;
+        $c->stash->{$prefix.'extracolumns'} = $extracolumns;
     }
     return;
 }
@@ -2091,8 +2097,10 @@ sub get_host_columns {
     );
     if($c->config->{'show_custom_vars'}) {
         for my $var (@{$c->config->{'show_custom_vars'}}) {
-            push @{$columns},
-            { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
+            if($var !~ m/\*/mx) { # does not work with wildcards
+                push @{$columns},
+                { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
+            }
         }
     }
 
@@ -2164,8 +2172,10 @@ sub get_service_columns {
     );
     if($c->config->{'show_custom_vars'}) {
         for my $var (@{$c->config->{'show_custom_vars'}}) {
-            push @{$columns},
-            { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
+            if($var !~ m/\*/mx) { # does not work with wildcards
+                push @{$columns},
+                { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
+            }
         }
     }
 
