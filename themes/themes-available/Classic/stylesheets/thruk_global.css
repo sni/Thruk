@@ -119,13 +119,10 @@ table.top_nav {
   padding: 0px;
   font-size:8px;
 }
-.top_nav td {
+td.top_nav_pref {
   border: 0px none;
   padding: 0px;
   margin: 0px;
-}
-
-td.top_nav_pref {
   vertical-align: top;
 }
 td.top_nav_pref button {
@@ -175,8 +172,9 @@ button.thruk_btn.top_refresh_button {
   background-repeat: no-repeat;
   width: 20px;
   height: 16px;
+  display: block;
   position: relative;
-  top: -2px;
+  top: 2px;
 }
 
 button.thruk_btn.top_nav_pref_button, button.thruk_btn.top_nav_logout_button {
@@ -1342,6 +1340,7 @@ BUTTON.thruk_btn {
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
+  line-height: 1px;
 }
 
 BUTTON.filter_button {
