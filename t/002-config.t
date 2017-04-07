@@ -65,4 +65,11 @@ if(!$@) {
     is_deeply($config->{'User'}, $expected_user, "parsing blocks with space including names");
 };
 
+####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/scalar_values';
+    my $config = Thruk::Config::get_config();
+    is_deeply($config->{'cookie_auth_domain'}, 'test.local', "parsing cookie domain from thruk_local.d");
+};
+
 done_testing();

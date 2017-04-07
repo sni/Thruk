@@ -509,6 +509,7 @@ sub set_default_config {
         'cookie_auth_restricted_url'        => 'http://localhost/thruk/cgi-bin/restricted.cgi',
         'cookie_auth_session_timeout'       => 86400,
         'cookie_auth_session_cache_timeout' => 5,
+        'cookie_auth_domain'                => '',
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
         'ssl_verify_hostnames'              => 1,
@@ -538,6 +539,7 @@ sub set_default_config {
     for my $key (keys %{$defaults}) {
         $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};
 
+        # convert lists to scalars if the default is a scalar value
         if(ref $defaults->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
             my $l = scalar (@{$config->{$key}});
             $config->{$key} = $config->{$key}->[$l-1];
