@@ -518,6 +518,15 @@ sub get_action_menu {
     if($err) {
         $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$menu);
     }
+    if($ENV{THRUK_REPORT} && !$err) {
+        # workaround for images beeing placed by js document.write later
+        my $image_data = {};
+        my $items = JSON::XS->new->decode($menu);
+        for my $item (@{Thruk::Utils::list($items)}) {
+            $image_data->{$item->{'icon'}} = '' if $item->{'icon'};
+        }
+        return([$err, $menu, Thruk::Utils::Reports::Render::set_action_image_data_urls($c, $image_data)]);
+    }
     return([$err, $menu]);
 }
 

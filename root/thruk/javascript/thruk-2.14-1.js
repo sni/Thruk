@@ -2711,7 +2711,14 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
         src = is_array(src) ? src : [src];
         jQuery(src).each(function(i, el) {
             var icon       = document.createElement('img');
-            icon.src       = replace_macros(el.icon);
+            var icon_url   = replace_macros(el.icon);
+            icon.src       = icon_url;
+            try {
+                // use data url in reports
+                if(action_images[icon_url]) {
+                    icon.src = action_images[icon_url];
+                }
+            } catch(e) {}
             icon.className = 'action_icon '+(el.menu ? 'clickable' : '' );
             if(el.menu) {
                 icon.nr = menu_nr;

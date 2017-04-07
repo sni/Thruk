@@ -375,6 +375,7 @@ sub get_url {
     }
     if($url !~ m/\?/mx) { $url =~ s/\&/?/mx; }
 
+    local $ENV{THRUK_REPORT} = $url;
     my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $sessionid });
     my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
@@ -886,6 +887,27 @@ sub _replace_css_img {
     }
     croak("_replace_css_img($baseurl, ".($report_base_url||'').", $css) $file: unknown url format") if $ENV{'TEST_AUTHOR'};
     return($pre.$post);
+}
+
+##############################################
+
+=head2 set_action_image_data_urls
+
+  set_action_image_data_urls($c, $urls)
+
+replaces hash of urls with data urls
+
+=cut
+sub set_action_image_data_urls {
+    my($c, $urls) = @_;
+    my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
+    my $baseurl         = $ENV{THRUK_REPORT};
+    my $default_theme   = $c->config->{'default_theme'};
+    for my $url (sort keys %{$urls}) {
+        $url =~ s|{{theme}}|$default_theme|gmx;
+        $urls->{$url} = _replace_img($baseurl, $report_base_url, "","",$url,"","");
+    }
+    return($urls);
 }
 
 ##############################################
