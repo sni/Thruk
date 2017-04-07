@@ -612,8 +612,11 @@ sub html_all_inclusive {
     my($c, $url, $page, $include_js) = @_;
     $include_js = 0 unless defined $include_js;
     $c->stash->{'param'}->{'js'} = $include_js;
-    # remove html comments to not replace css and js from commented includes
+
+    # remove html comments to not replace css and js from commented includes, but make sure we don't wipe out js scripts
+    $page =~ s/(<script[^>]*>)\s*<\!\-\-(.*?)\-\->\s*(<\/script>)/$1\n$2\n$3/gsmxi;
     $page =~ s/<\!\-\-.*?\-\->//gsmxi;
+
     my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
     $page = _replace_css_and_images($page, $url, $report_base_url);
     $page = _replace_links($page, $url, $report_base_url);
@@ -692,7 +695,7 @@ sub _replace_css_and_images {
     my $c = $Thruk::Request::c or die("not initialized!");
     # replace images for already existing css
     while(
-    $text =~ s/(<style.*?)
+    $text =~ s/(<style[^>]*>)
               (url\()
               ([^:)]*)
               (\))
