@@ -448,6 +448,20 @@ sub _init_cache {
 }
 
 ###################################################
+# mod_fcgid sends a SIGTERM on timeouts, so try to determine if this is a normal
+# exit or not and print the stacktrace if not.
+sub _check_exit_reason {
+    my($sig) = @_;
+    my $reason = longmess();
+    # if we are in run_app, this means we are currently processing a request
+    if(defined $Thruk::Request::c || $reason =~ m|Plack::Util::run_app|gmx) {
+        my $url = $Thruk::Request::c ? $Thruk::Request::c->req->url : 'unknown url';
+        print STDERR "ERROR: got signal $sig while handling request, possible timeout in $url\n$reason";
+    }
+    return;
+}
+
+###################################################
 # save pid
 my $pidfile;
 sub _setup_pidfile {
@@ -461,6 +475,8 @@ sub _setup_pidfile {
     }
     return;
 }
+
+###################################################
 sub _remove_pid {
     return unless $pidfile;
     ## no critic
@@ -496,9 +512,10 @@ sub _remove_pid {
     }
     return;
 }
+
 ## no critic
-$SIG{INT}  = sub { _remove_pid(); exit; };
-$SIG{TERM} = sub { _remove_pid(); exit; };
+$SIG{INT}  = sub { _check_exit_reason("INT");  _remove_pid(); exit; };
+$SIG{TERM} = sub { _check_exit_reason("TERM"); _remove_pid(); exit; };
 ## use critic
 END {
     _remove_pid();
