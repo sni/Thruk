@@ -904,7 +904,7 @@ sub set_action_image_data_urls {
     my $baseurl         = $ENV{THRUK_REPORT};
     my $default_theme   = $c->config->{'default_theme'};
     for my $url (sort keys %{$urls}) {
-        $url =~ s|\Q{{theme}}\E|$default_theme|gmx;
+        $url =~ s|\{\{theme\}\}|$default_theme|gmx;
         $urls->{$url} = _replace_img($baseurl, $report_base_url, "","",$url,"","");
     }
     return($urls);
