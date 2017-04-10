@@ -161,13 +161,6 @@ This disables on-demand updates which won't work.
 Then use a slightly changed crontab which imports the logfiles directly from the
 compat logfiles.
 
-etc/thruk/thruk_local.d/logcache.conf:
--------
-  logcache = mysql://root@tmp/run/mysqld/mysqld.sock/thruk_logs
-  logcache_delta_updates = 0
-  report_update_logcache = 0
--------
-
 etc/cron.d/thruk_logcache
 -------
   # update logcache data
