@@ -2322,7 +2322,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
     /* enable changing columns header name */
     jQuery('#'+table_id+' > tbody > tr:first-child > th').dblclick(function(evt) {
         var th = evt.target;
-        var text   = th.innerText.replace(/\s*$/, '');
+        var text   = (th.innerText || '').replace(/\s*$/, '');
         var childs = removeChilds(th);
         th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
         window.setTimeout(function() {
@@ -2373,7 +2373,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
     /* enable changing columns header name */
     jQuery('#'+pane_prefix+'_columns_table tbody td.filterName').dblclick(function(evt) {
         var th = evt.target;
-        var text   = th.innerText.replace(/\s*$/, '');
+        var text   = (th.innerText || '').replace(/\s*$/, '');
         th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
         window.setTimeout(function() {
             jQuery(th).find('INPUT').focus();
@@ -2516,7 +2516,7 @@ function updateStatusColumns(id, reloadRequired) {
         }
 
         // adjust table header text
-        var current   = firstRow.cells[i].innerText.trim();
+        var current   = (firstRow.cells[i].innerText || '').trim();
         var newHeadEl = document.getElementById(el.id+'n');
         if(!newHeadEl) {
             if(thruk_debug_js) { alert("ERROR: header element not found in updateStatusColumns(): " + el.id+'n'); }
