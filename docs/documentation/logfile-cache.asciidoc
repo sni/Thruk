@@ -24,6 +24,10 @@ image:source/livestatus_mongodb.png[Logfile Cache Architecture]
 
 
 === Configuration
+
+[TIP]
+Starting with OMD-Labs 2.40 you can simply run `omd config set THRUK_LOGCACHE on` to enable the logcache.
+
 You will need to specify your mysql connection configuration in your
 thruk_local.conf. Make sure the user and database exists. The tables will then
 be created automatically.
