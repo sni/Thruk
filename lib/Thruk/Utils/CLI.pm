@@ -340,7 +340,7 @@ sub _run {
         }
     }
 
-    my $c;
+    my($c, $capture);
     unless(defined $result) {
         # initialize backend pool here to safe some memory
         require Thruk::Backend::Pool;
@@ -363,7 +363,7 @@ sub _run {
         if(!$terminal_attached && $log_timestamps) {
             my $tmp;
             ## no critic
-            open(my $capture, '>', \$tmp) or die("cannot open stdout capture: $!");
+            open($capture, '>', \$tmp) or die("cannot open stdout capture: $!");
             tie *$capture, 'Thruk::Utils::Log', (*STDOUT);
             select $capture;
             ## use critic
@@ -399,8 +399,8 @@ sub _run {
     }
 
     # with output
-    if(!$terminal_attached) {
-        _info($result->{'output'});
+    if($capture) {
+        print $capture $result->{'output'};
     }
     elsif($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
