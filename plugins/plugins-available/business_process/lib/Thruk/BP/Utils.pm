@@ -569,6 +569,7 @@ sub _get_icinga2_objects {
         my $keys = _get_sorted_keys([keys %{$obj->{'hosts'}->{$hostname}}]);
         for my $attr (@{$keys}) {
             next if $attr eq 'host_name';
+            next if $attr eq 'alias';
             $str .= _get_icinga2_object_attr('host', $attr, $obj->{'hosts'}->{$hostname}->{$attr});
         }
         $str .= "}\n";
@@ -579,6 +580,7 @@ sub _get_icinga2_objects {
             my $keys = _get_sorted_keys([keys %{$obj->{'services'}->{$hostname}->{$description}}]);
             for my $attr (@{$keys}) {
                 next if $attr eq 'service_description';
+                next if $attr eq 'alias';
                 $str .= _get_icinga2_object_attr('service', $attr, $obj->{'services'}->{$hostname}->{$description}->{$attr});
             }
             $str .= "}\n";
@@ -605,9 +607,6 @@ sub _get_icinga2_object_attr {
     }
     if($attr =~ m/_interval$/mx) {
         $val = $val.'m';
-    }
-    if($key eq 'alias') {
-        $key = "display_name";
     }
     return(' '. $key. ' = "'.$val. "\"\n");
 
