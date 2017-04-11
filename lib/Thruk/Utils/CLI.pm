@@ -323,6 +323,11 @@ sub _run {
     ## no critic
     my $terminal_attached = -t 0 ? 1 : 0;
     ## use critic
+    my $log_timestamps = 0;
+    my $action = $self->{'opt'}->{'action'} || '';
+    if($action =~ m/^(logcache|bp|report|downtimetask)/mx) {
+        $log_timestamps = 1;
+    }
 
     my($result, $response);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
@@ -355,7 +360,7 @@ sub _run {
 
         # catch prints when not attached to a terminal and redirect them to our logger
         local $| = 1;
-        if(!$terminal_attached) {
+        if(!$terminal_attached && $log_timestamps) {
             my $tmp;
             ## no critic
             open(my $capture, '>', \$tmp) or die("cannot open stdout capture: $!");
