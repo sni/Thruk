@@ -224,6 +224,23 @@ sub date_format {
     return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format'}));
 }
 
+##############################################
+
+=head2 last_check
+
+  my $string = last_check($c, $last_check);
+
+returns formated last check date
+
+=cut
+sub last_check {
+    my($c, $timestamp) = @_;
+    confess("no c") unless defined $c;
+    if(!$timestamp || $timestamp eq 'err:-1') {
+        return('never');
+    }
+    return(date_format($c, $timestamp));
+}
 
 ########################################
 

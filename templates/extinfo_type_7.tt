@@ -60,7 +60,7 @@
           <td class='[% class %]'></td>
           [% END %]
 
-          <td class='[% class %]'>[% date_format(c, q.last_check) %]</td>
+          <td class='[% class %]'>[% last_check(c, q.last_check) %]</td>
           <td class='[% class %]'>[% date_format(c, q.next_check) %]</td>
 
           [% IF q.check_options == 0 || q.check_options == '' %]

@@ -204,7 +204,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Check Time:</td>
-                            <td class='dataVal'>[% IF service.last_check %][% date_format(c, service.last_check) %][% ELSE %]never[% END %]</td>
+                            <td class='dataVal'>[% last_check(c, service.last_check) %]</td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Check Type:</td>
