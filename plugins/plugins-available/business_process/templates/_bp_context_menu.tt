@@ -63,7 +63,7 @@
 
 
 <div id="edit_dialog_[% bp.id %]" style="display: none;">
-  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;" style="height: 100%;">
+  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;" style="height: 99%;">
   <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
   <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
 

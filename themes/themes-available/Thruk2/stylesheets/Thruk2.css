@@ -1528,10 +1528,10 @@ td.top_nav_pref {
   padding-right: 10px;
 }
 
-div.listwizard.ui-dialog-content, table.listwizard td.filter {
+div.listwizard.ui-dialog-content, table.listwizard td.filter, div.ui-dialog-content td.filter {
   background-color: #f1f1f1;
 }
-table.listwizard input, table.listwizard select {
+table.listwizard input, table.listwizard select, div.ui-dialog-content  input, div.ui-dialog-content  select {
   background-color: #ffffff;
 }
 
