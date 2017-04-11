@@ -1588,7 +1588,6 @@ sub _import_peer_logfiles {
         $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup);
 
         $c->stats->profile(end => $stime);
-        print "\n" if $verbose;
     }
     return $log_count;
 }

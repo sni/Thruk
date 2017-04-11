@@ -320,6 +320,10 @@ sub _read_secret {
 sub _run {
     my($self) = @_;
 
+    ## no critic
+    my $terminal_attached = -t 0 ? 1 : 0;
+    ## use critic
+
     my($result, $response);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
@@ -348,6 +352,18 @@ sub _run {
             print STDERR "command failed";
             return 1;
         }
+
+        # catch prints when not attached to a terminal and redirect them to our logger
+        local $| = 1;
+        if(!$terminal_attached) {
+            my $tmp;
+            ## no critic
+            open(my $capture, '>', \$tmp) or die("cannot open stdout capture: $!");
+            tie *$capture, 'Thruk::Utils::Log', (*STDOUT);
+            select $capture;
+            ## use critic
+        }
+
         if(!$ENV{'THRUK_JOB_ID'} && $self->{'opt'}->{'action'} && $self->{'opt'}->{'action'} =~ /^report(\w*)=(.*)$/mx) {
             # create fake job
             my($id,$dir) = Thruk::Utils::External::_init_external($c);
@@ -360,6 +376,11 @@ sub _run {
             Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
         }
         $result = $self->_from_local($c, $self->{'opt'});
+
+        # remove print capture
+        ## no critic
+        select *STDOUT;
+        ## use critic
     }
 
     # no output?
@@ -373,7 +394,10 @@ sub _run {
     }
 
     # with output
-    if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
+    if(!$terminal_attached) {
+        _info($result->{'output'});
+    }
+    elsif($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
         print STDOUT $result->{'output'} unless $self->{'opt'}->{'quiet'};
     } else {

@@ -455,6 +455,7 @@ sub _check_exit_reason {
     my $reason = longmess();
     # if we are in run_app, this means we are currently processing a request
     if(defined $Thruk::Request::c || $reason =~ m|Plack::Util::run_app|gmx) {
+        local $| = 1;
         my $url = $Thruk::Request::c ? $Thruk::Request::c->req->url : 'unknown url';
         print STDERR "ERROR: got signal $sig while handling request, possible timeout in $url\n$reason";
     }
