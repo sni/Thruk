@@ -21,7 +21,7 @@ $BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 TestUtils::test_command({
     cmd  => $BIN.' -a bpd',
-    like => ['/^OK - \d+ business processes updated in/'],
+    like => ['/OK - \d+ business processes updated in/'],
 });
 
 done_testing();
