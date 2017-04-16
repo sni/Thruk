@@ -16,9 +16,9 @@ Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
 URL:           http://thruk.org
 %if "%{release}" == "1"
-%define fullname %{name}-%{version}
+%define fullname Thruk-%{version}
 %else
-%define fullname %{name}-%{version}-%{release}
+%define fullname Thruk-%{version}-%{release}
 %endif
 Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
