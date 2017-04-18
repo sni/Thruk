@@ -1989,13 +1989,13 @@ wait up to 60 seconds till the core responds
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
     $pkey = $c->stash->{'param_backend'} unless $pkey;
+    my $start = time();
     if(!$pkey && !$time) { sleep 5; }
 
     # wait until core responds again
-    my $start    = time();
     my $procinfo = {};
     my $done     = 0;
-    while($start > time() - 60) {
+    while($start > time() - 30) {
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
