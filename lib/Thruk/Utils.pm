@@ -1001,7 +1001,6 @@ sub set_custom_vars {
     my $already_added = {};
     for my $test (@{$vars}) {
         for my $cust_name (sort keys %{$custom_vars}) {
-            next if defined $already_added->{$cust_name};
             my $found      = 0;
             if($test eq $cust_name or $test eq '_'.$cust_name) {
                 $found = 1;
@@ -1033,14 +1032,14 @@ sub set_custom_vars {
             }
 
             # add to dest
-            $already_added->{$cust_name} = 1;
             my $is_host = defined $service ? 0 : 1;
             if($add_host) {
                 if($cust_name =~ s/^HOST//gmx) {
-                    $already_added->{$cust_name} = 1;
                     $is_host = 1;
                 }
             }
+            next if $already_added->{$cust_name};
+            $already_added->{$cust_name} = 1;
             push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
         }
     }
