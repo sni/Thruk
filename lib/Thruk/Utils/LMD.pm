@@ -34,7 +34,8 @@ sub check_proc {
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     my $logfile = $lmd_dir.'/lmd.log';
-    if(-s $logfile > 10*1024*1024) { # rotate logfile if its more than 10mb
+    my $size    = -s $logfile;
+    if($size && $size > 10*1024*1024) { # rotate logfile if its more than 10mb
         copy($logfile, $logfile.'.1');
         Thruk::Utils::IO::write($logfile, '');
     }
