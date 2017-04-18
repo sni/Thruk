@@ -19,7 +19,7 @@ fi
 
 INPUT=$1
 OUTPUT=$2
-PHANTOMJS=$4
+PHANTOMJS=$DIR/$4
 
 [ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
 
