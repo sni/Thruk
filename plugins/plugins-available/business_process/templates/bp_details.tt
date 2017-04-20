@@ -28,10 +28,10 @@
   <tr>
     <td align="center" valign="top" class='commandPanel'>
       <div class='dataTitle'>Information</div>
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel" style="width: 100%;">
         <tr>
           <td>
-            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info" style="width: 100%;">
               <tr class='data'>
                 <th>Label</th>
                 <td>
