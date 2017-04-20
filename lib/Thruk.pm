@@ -453,6 +453,13 @@ sub _init_cache {
 sub _check_exit_reason {
     my($sig) = @_;
     my $reason = longmess();
+    ## no critic
+    if($reason =~ m|Thruk::Utils::CLI::_from_local|mx && -t 0) {
+    ## use critic
+        # this means someone hit ctrl+c, no need for a stracktrace then
+        print STDERR "\nbailing out\n";
+        return;
+    }
     # if we are in run_app, this means we are currently processing a request
     if(defined $Thruk::Request::c || $reason =~ m|Plack::Util::run_app|gmx) {
         local $| = 1;
