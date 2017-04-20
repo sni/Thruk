@@ -1035,7 +1035,6 @@ sub _import_logs {
 
         $c->stats->profile(end => "$key");
         #&timing_breakpoint('_import_logs done '.$key);
-        print "\n" if $verbose;
     }
 
     $c->stats->profile(end => "Mysql::_import_logs($mode)");
@@ -1589,6 +1588,7 @@ sub _import_peer_logfiles {
 
         $c->stats->profile(end => $stime);
     }
+
     return $log_count;
 }
 
@@ -1732,7 +1732,7 @@ sub _insert_logs {
         }
     }
     $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
-    print '. '.$log_count . " entries added" if $verbose;
+    print '. '.$log_count . " entries added\n" if $verbose;
     return $log_count;
 }
 

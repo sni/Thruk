@@ -1377,6 +1377,7 @@ sub _cmd_import_logs {
             $res = 'with '.scalar @{$errors}.' errors';
             ($rc, $msg) = (1, 'ERROR');
         }
+
         my $details = '';
         if(!$verbose) {
             # already printed if verbose
