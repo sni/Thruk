@@ -53,7 +53,10 @@ sub status {
                 }
             }
             my @res;
-            if($function eq 'worst') {
+            if(scalar @{$depends} == 0) {
+                return(3, 'no matching hosts/services found');
+            }
+            elsif($function eq 'worst') {
                 @res = worst($c, $bp, { depends => $depends });
             } else {
                 @res = best($c, $bp, { depends => $depends });
