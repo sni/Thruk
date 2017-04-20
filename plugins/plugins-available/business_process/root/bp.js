@@ -1047,10 +1047,12 @@ function bp_zoom(zoom) {
 
     // center align inner container
     var zcontainer = document.getElementById('zoom'+bp_id);
-    var offset = ((graphW - maxX*zoom) / 2);
-    if(offset < 0) {offset = 0;}
-    zcontainer.style.left = offset+'px';
-    zcontainer.style.position = 'absolute';
+    if(zcontainer) {
+        var offset = ((graphW - maxX*zoom) / 2);
+        if(offset < 0) {offset = 0;}
+        zcontainer.style.left = offset+'px';
+        zcontainer.style.position = 'absolute';
+    }
 }
 
 /* draw connector between two nodes */
