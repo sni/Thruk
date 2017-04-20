@@ -710,7 +710,7 @@ sub home {
     if ( my $inc_entry = $INC{$file} ) {
         $inc_entry = Cwd::abs_path($inc_entry);
         $inc_entry =~ s/\Q\/$file\E$//mx;
-        $inc_entry =~ s/\/b?lib//gmx;
+        $inc_entry =~ s/\/b?lib$//mx;
         return $inc_entry;
     }
 
