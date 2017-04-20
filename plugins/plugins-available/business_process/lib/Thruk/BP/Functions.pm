@@ -266,10 +266,10 @@ sub at_least {
     $critical = $warning unless defined $critical;
     my($good, $bad) = _count_good_bad($n->{'depends'});
     my $state = 0;
-    if($warning !~ m/^\d+$/mx) {
+    if($warning !~ m/^\-?\d+$/mx) {
         return(3, 'warning threshold must be numeric');
     }
-    if($critical !~ m/^\d+$/mx) {
+    if($critical !~ m/^\-?\d+$/mx) {
         return(3, 'critical threshold must be numeric');
     }
     if($good <= $critical) {
@@ -299,10 +299,10 @@ sub not_more {
     my($c, $bp, $n, $args) = @_;
     my($warning, $critical) = @{$args};
     my($good, $bad) = _count_good_bad($n->{'depends'});
-    if($warning !~ m/^\d+$/mx) {
+    if($warning !~ m/^\-?\d+$/mx) {
         return(3, 'warning threshold must be numeric');
     }
-    if($critical !~ m/^\d+$/mx) {
+    if($critical !~ m/^\-?\d+$/mx) {
         return(3, 'critical threshold must be numeric');
     }
     my $state = 0;
@@ -333,7 +333,7 @@ sub equals {
     my($c, $bp, $n, $args) = @_;
     my($number) = @{$args};
     my($good, $bad) = _count_good_bad($n->{'depends'});
-    if($number !~ m/^\d+$/mx) {
+    if($number !~ m/^\-?\d+$/mx) {
         return(3, 'threshold must be numeric');
     }
     if($good == 0 and $bad == 0) {
