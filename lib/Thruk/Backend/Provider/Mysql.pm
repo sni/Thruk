@@ -1051,23 +1051,8 @@ sub _update_logcache {
         $blocksize = 365 if $mode eq 'clean';
     }
 
-    my $log_count        = 0;
-    my $plugin_ref_count = 0;
-
     if($mode eq 'clean') {
-        my $start = time() - ($blocksize * 86400);
-        print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
-        $log_count += $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
-        # clean old plugin outputs
-        print "cleaning old orphaned plugin outputs\n" if $verbose;
-        my $used_ids1 = $dbh->selectcol_arrayref("SELECT DISTINCT plugin_output FROM `".$prefix."_log`");
-        my $used_ids2 = $dbh->selectcol_arrayref("SELECT DISTINCT message FROM `".$prefix."_log`");
-        my $used_ids = Thruk::Utils::array_uniq([@{$used_ids1}, @{$used_ids2}]);
-        if(scalar @{$used_ids} > 0) {
-            $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id NOT IN (".join(",", @{$used_ids}).")");
-        }
-        $dbh->commit or die $dbh->errstr;
-        return([$log_count, $plugin_ref_count]);
+        return(_update_logcache_clean($dbh, $prefix, $verbose, $blocksize));
     }
 
     # check if our tables exist
@@ -1126,6 +1111,7 @@ sub _update_logcache {
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
     $dbh->commit or die $dbh->errstr;
 
+    my $log_count = 0;
     eval {
         my $stm            = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,plugin_output,message) VALUES";
         my $host_lookup    = _get_host_lookup(   $dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
@@ -1158,6 +1144,70 @@ sub _update_logcache {
     return $log_count;
 }
 
+##########################################################
+sub _update_logcache_clean {
+    my($dbh, $prefix, $verbose, $blocksize) = @_;
+
+    my $start = time() - ($blocksize * 86400);
+    print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
+    my $log_count = $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
+
+    # clean old plugin outputs
+    print "cleaning old orphaned plugin outputs\n" if $verbose;
+    my($db_id, $db_id2);
+    my($fh, $tempfile) = tempfile();
+    # get all used message / plugin_output ids (DISTINCT is slower than using sort -u later)
+    my $sth = $dbh->prepare("SELECT plugin_output, message FROM `".$prefix."_log`");
+    $sth->execute;
+    $sth->bind_columns(\$db_id, \$db_id2);
+    while($sth->fetch) {
+        print $fh $db_id, "\n", $db_id2, "\n";
+    }
+    CORE::close($fh);
+    print "fetched ids\n" if $verbose;
+
+    # sort all used ids
+    my $sortcmd = 'sort -nu -o '.$tempfile.'2 '.$tempfile.' && mv '.$tempfile.'2 '.$tempfile;
+    `$sortcmd`;
+    print "sorted used ids\n" if $verbose;
+
+    # iterate existing ids and bulk remove those not in use anymore
+    open($fh, '<', $tempfile) or die('cannot open '.$tempfile.' for reading: '.$!);
+    my $plugin_ref_count = 0;
+    my @bulk_delete;
+    $sth = $dbh->prepare("SELECT output_id FROM `".$prefix."_plugin_output` ORDER BY output_id");
+    $sth->execute;
+    my $to_delete = 0;
+    $sth->bind_columns(\$db_id);
+    while($sth->fetch) {
+        my $file_id = <$fh>;
+
+        # this means the id is not used anymore
+        while($db_id < $file_id) {
+            push @bulk_delete, $db_id;
+            $sth->fetch;
+            $to_delete++;
+            last unless $db_id;
+
+            if($to_delete > 100) {
+                $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id IN (".join(",", @bulk_delete).")");
+                @bulk_delete = ();
+                $to_delete   = 0;
+                $dbh->commit or die $dbh->errstr;
+            }
+        }
+    }
+    if($to_delete > 100) {
+        $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id IN (".join(",", @bulk_delete).")");
+        @bulk_delete = ();
+        $to_delete   = 0;
+        $dbh->commit or die $dbh->errstr;
+    }
+    unlink($tempfile);
+
+    $dbh->commit or die $dbh->errstr;
+    return([$log_count, $plugin_ref_count]);
+}
 
 ##########################################################
 sub _update_logcache_auth {
