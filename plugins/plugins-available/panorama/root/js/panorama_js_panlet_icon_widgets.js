@@ -612,7 +612,7 @@ Ext.define('TP.SmallWidget', {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(tab.map == undefined || tab.map.map == undefined) { return; }
+        if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
         if(xdata.map == undefined)                     { return; }
         panel.noUpdateLonLat++;
         if(xdata.layout == undefined) { xdata.layout = {}; }
