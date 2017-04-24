@@ -68,7 +68,10 @@ Ext.define('TP.PanletBP', {
                 }
                 if(panel.xdata.url != newUrl) {
                     panel.xdata.url = newUrl;
-                    panel.saveState();
+                    /* skip on background tabs, will crash because getState calls getSize which fails unless rendered */
+                    if(panel.el && panel.el.dom) {
+                        panel.saveState();
+                    }
                 }
                 var iframeObj = panel.items.getAt(0).getEl();
                 if(iframeObj && iframeObj.dom && panel.last_url != panel.xdata.url) {
