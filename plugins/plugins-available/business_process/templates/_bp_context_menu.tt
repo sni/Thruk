@@ -391,12 +391,12 @@
       <th align="right" valign="top" nowrap>Add Extra Options</th>
       <td align="left">
         <form>
-          <select>
-            <option disabled>--- add extra option ---</option>
-            <option onclick="bpAddAttribute('contactgroups');" value="contactgroups">Contact Groups</option>
-            <option onclick="bpAddAttribute('contacts');" value="contacts">Contacts</option>
-            <option onclick="bpAddAttribute('event_handler');" value="eventhander">Eventhandler</option>
-            <option onclick="bpAddAttribute('notification_period');" value="notification_period">Notification Period</option>
+          <select onchange="bpAddAttribute(this.value)">
+            <option>--- add extra option ---</option>
+            <option value="contactgroups">Contact Groups</option>
+            <option value="contacts">Contacts</option>
+            <option value="event_handler">Eventhandler</option>
+            <option value="notification_period">Notification Period</option>
           </select>
         </form>
       </td>
