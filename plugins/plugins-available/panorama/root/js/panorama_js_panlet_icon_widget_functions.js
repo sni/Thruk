@@ -230,7 +230,13 @@ TP.iconClickHandlerExec = function(id, link, panel, target) {
             TP.Msg.msg("fail_message~~no such menu: "+menu[1]);
             return(false);
         }
-        var menuData  = Ext.JSON.decode(menuRaw);
+        var menuData;
+        try {
+            menuData  = Ext.JSON.decode(menuRaw);
+        } catch(e) {
+            TP.Msg.msg("fail_message~~menu "+menu[1]+": failed to parse json - "+e);
+            return(false);
+        }
         var menuItems = [];
         Ext.Array.each(menuData['menu'], function(i, x) {
             if(Ext.isString(i)) {
