@@ -60,13 +60,15 @@ var TP = {
             extraConf = {map: {}};
         }
 
-        if(TP.dashboardsSettingWindow) {
-            TP.dashboardsSettingWindow.body.mask('loading...');
-        }
+        if(!hidden) {
+            if(TP.dashboardsSettingWindow) {
+                TP.dashboardsSettingWindow.body.mask('loading...');
+            }
 
-        if(one_tab_only) {
-            if(replace_id && id != replace_id) {
-                tabpan.getActiveTab().body.mask("loading");
+            if(one_tab_only) {
+                if(replace_id && id != replace_id) {
+                    tabpan.getActiveTab().body.mask("loading");
+                }
             }
         }
 

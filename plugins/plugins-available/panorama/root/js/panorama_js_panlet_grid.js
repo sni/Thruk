@@ -13,6 +13,11 @@ Ext.define('TP.GridLoader', {
             }
             this.loading = true;
             return true;
+        },
+        'load': function(This, response, options, eOpts) {
+            if(This.target && This.target.body) {
+                This.target.unmask();
+            }
         }
     },
     callback: function(This, success, response, options) {

@@ -181,7 +181,7 @@ Ext.onReady(function() {
 
         var tabpan = Ext.getCmp('tabpan');
         var tab = tabpan.getActiveTab();
-        if(!tab.locked && !TP.iconSettingsWindow) { delete TP.iconTipTarget; return; }
+        if(tab && !tab.locked && !TP.iconSettingsWindow) { delete TP.iconTipTarget; return; }
 
         if(!force && TP.suppressIconTip) { delete TP.iconTipTarget; return; }
         evt.stopEvent();
