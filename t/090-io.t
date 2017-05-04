@@ -86,10 +86,10 @@ if(-e '/dev/full') {
 #########################
 # background commands
 my $start = time();
-($rc, $output) = Thruk::Utils::IO::cmd(undef, "sleep 5 >/dev/null 2>&1 &");
+($rc, $output) = Thruk::Utils::IO::cmd(undef, "sleep 1 >/dev/null 2>&1 &");
 my $time = time()- $start;
 ok($time < 5, "runtime < 5 (".$time."s)");
-is($rc, -1, "exit code is: ".$rc);
+is($rc, 0, "exit code is: ".$rc);
 
 #########################
 done_testing();

@@ -326,6 +326,8 @@ sub cmd {
         }
         $output = `$cmd`;
         $rc = $?;
+        # rc will be -1 otherwise when ignoring SIGCHLD
+        $rc = 0 if($rc == -1 && $SIG{CHLD} eq 'IGNORE');
     }
     if($rc == -1) {
         $output .= "[".$!."]";
