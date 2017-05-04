@@ -75,6 +75,8 @@ environment variables before running critical scripts. Macros used in the comman
 line defined in your config and the REMOTE_USER variables can be trusted. Variables
 supplied by the url can easily be faked and are considered unsafe.
 
+Available standard environment variables are listed on the
+link:cli.html#_environment-variables[CLI Environment] page.
 
 
 == Examples

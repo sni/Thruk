@@ -480,7 +480,7 @@ sub get_dynamic_roles {
     $user = $c->user unless defined $user;
 
     # is the contact allowed to send commands?
-    my($can_submit_commands,$alias,$data);
+    my($can_submit_commands,$alias,$data,$email);
     my $cached_data = defined $username ? $c->cache->get->{'users'}->{$username} : {};
     if(defined $cached_data->{'can_submit_commands'}) {
         # got cached data
@@ -494,7 +494,8 @@ sub get_dynamic_roles {
 
     if(defined $data) {
         for my $dat (@{$data}) {
-            $alias               = $dat->{'alias'}               if defined $dat->{'alias'};
+            $alias = $dat->{'alias'} if defined $dat->{'alias'};
+            $email = $dat->{'email'} if defined $dat->{'email'};
             if(defined $dat->{'can_submit_commands'} && (!defined $can_submit_commands || $dat->{'can_submit_commands'} == 0)) {
                 $can_submit_commands = $dat->{'can_submit_commands'};
             }
@@ -558,7 +559,7 @@ sub get_dynamic_roles {
     # roles could be duplicated
     $roles = array_uniq($roles);
 
-    return($roles, $can_submit_commands, $alias, $roles_by_group);
+    return($roles, $can_submit_commands, $alias, $roles_by_group, $email);
 }
 
 ########################################
@@ -579,11 +580,13 @@ sub set_dynamic_roles {
 
     $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
 
-    #my($roles, $can_submit_commands, $alias)...
-    my($roles, undef, $alias) = get_dynamic_roles($c, $username, $c->user);
+    my($roles, undef, $alias, undef, $email) = get_dynamic_roles($c, $username, $c->user);
 
     if(defined $alias) {
         $c->user->{'alias'} = $alias;
+    }
+    if(defined $email) {
+        $c->user->{'email'} = $email;
     }
 
     for my $role (@{$roles}) {

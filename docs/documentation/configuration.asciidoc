@@ -1313,8 +1313,7 @@ and then manually import those files.
 
 There are some useful enviromenet variables set before the script is started:
 
-  - REMOTE_USER contains the current user.
-  - REMOTE_USER_GROUPS contains the current users contact_groups.
+  - standard macros as listed in link:cli.html#_environment-variables[CLI Environment]
   - THRUK_BACKENDS is a comma separated list of the selected backends.
   - THRUK_LOGCACHE is the connection string to the thruk logcache database.
 
@@ -1443,6 +1442,8 @@ Hook script which is called on every successful login. The REMOTE_USER
 environment variable will be set to the username of the current logged
 in user. Useful to do magic stuff on each login. The REMOTE_USER_GROUPS
 environment variable contains semicolon separated list of contactgroups.
+Available standard environment variables are listed on the
+link:cli.html#_environment-variables[CLI Environment] page.
 
 ex.:
 
@@ -2167,8 +2168,7 @@ if the command returns non-zero exit code. Command will be run with
 
 The following environment variables will be set:
 
-     ** `REMOTE_USER`          username of the logged in user
-     ** `REMOTE_USER_GROUPS`   contact groups of the current user
+     ** `standard macros`      as listed in link:cli.html#_environment-variables[CLI Environment]
      ** `THRUK_BACKEND_ID`     internal id of the current edited backend
      ** `THRUK_BACKEND_NAME`   name of the current edited backend
 
@@ -2179,8 +2179,7 @@ argument.
 
 The following environment variables will be set:
 
-     ** `REMOTE_USER`          username of the logged in user
-     ** `REMOTE_USER_GROUPS`   contact groups of the current user
+     ** `standard macros`      as listed in link:cli.html#_environment-variables[CLI Environment]
      ** `THRUK_BACKEND_ID`     internal id of the current edited backend
      ** `THRUK_BACKEND_NAME`   name of the current edited backend
 

@@ -207,7 +207,7 @@ sub get_can_submit_commands {
             $self->{'live'}
                     ->table('contacts')
                     ->columns(qw/can_submit_commands
-                                 alias/)
+                                 alias email/)
                     ->filter({ name => $user })
                     ->options({AddPeer => 1}))
                     ->hashref_array();

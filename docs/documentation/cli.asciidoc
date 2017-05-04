@@ -54,3 +54,16 @@ generator, you can export some additional information which is then
 displayed in the configuration section of each host or service.
 Just export the special custom variables: '_SRC', '_SRC2' or '_SRC3'.
 image:source/config_3rd_party.png[3rd Party Config Generator]
+
+
+== Environment Variables
+
+Most scripts, either `Server Actions` or `Hooks` have access to special environment
+variables.
+
+These are the standard variables available:
+
+    ** `REMOTE_USER`          username of the logged in user
+    ** `REMOTE_USER_GROUPS`   contact groups of the current user
+    ** `REMOTE_USER_ALIAS`    contact alias name (if available)
+    ** `REMOTE_USER_EMAIL`    contact email address (if available)

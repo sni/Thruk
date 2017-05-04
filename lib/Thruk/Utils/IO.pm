@@ -288,13 +288,15 @@ sub cmd {
     local $SIG{PIPE} = 'DEFAULT';
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
-    local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'} if $c;
+    local $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c;
     my $groups = [];
     if($c && $c->stash->{'remote_user'}) {
         my $cache = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
         $groups = [sort keys %{$cache->{'contactgroups'}}] if($cache && $cache->{'contactgroups'});
     }
     local $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
+    local $ENV{REMOTE_USER_EMAIL} = $c->user->{'email'} if $c && $c->user;
+    local $ENV{REMOTE_USER_ALIAS} = $c->user->{'alias'} if $c && $c->user;
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};

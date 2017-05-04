@@ -38,6 +38,12 @@ Will be set to the current username.
 ==== REMOTE_USER_GROUPS
 Will be set to the current contactgroups when running external hooks and scripts.
 
+==== REMOTE_USER_ALIAS
+Will be set to the current contacts alias name when running external hooks and scripts.
+
+==== REMOTE_USER_EMAIL
+Will be set to the current contacts email address when running external hooks and scripts.
+
 ==== REMOTEURL
 Start url for init script.
 

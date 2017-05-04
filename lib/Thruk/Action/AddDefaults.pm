@@ -1042,7 +1042,7 @@ sub set_processinfo {
                 'prev_last_program_restart' => time(),
                 'contactgroups'             => $contactgroups,
             };
-            $c->cache->set('users', $c->stash->{'remote_user'}, $cached_user_data) if defined $c->stash->{'remote_user'};
+            $c->cache->set('users', $c->stash->{'remote_user'}, $cached_user_data);
             $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
         }
     }
