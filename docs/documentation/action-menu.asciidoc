@@ -125,3 +125,21 @@ Thruk::Utils::write_data_file($file, $data);
 print "switched color to $color\n";
 {% endhighlight %}
 ++++++++++++++++++++++++
+
+
+=== Confirmation Dialog
+
+{% include new_since.ad version="2.14-2" %}
+Using arbitrary attributes, you can easily add a confirmation dialog to your
+server actions.
+
+.action_menus/confirm_restart.json
+-----
+{
+  "icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",
+  "label":"service restart",
+  "action":"server://restart_service",
+  "onclick": "return(confirm('Really restart service?'));"
+}
+-----
+

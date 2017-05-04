@@ -2719,7 +2719,7 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
                     icon.src = action_images[icon_url];
                 }
             } catch(e) {}
-            icon.className = 'action_icon '+(el.menu ? 'clickable' : '' );
+            icon.className = 'action_icon '+(el.menu || el.action ? 'clickable' : '' );
             if(el.menu) {
                 icon.nr = menu_nr;
                 jQuery(icon).bind("click", function() {
@@ -2736,14 +2736,29 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
                 if(el.target) { link.target = el.target; }
                 link.appendChild(icon);
                 item = link;
-                check_server_action(undefined, link, backend, host, service);
             }
 
             /* apply other attributes */
             for(var key in el) {
-                if(key != "icon" && key != "action") {
-                    icon[key] = el[key];
+                if(key != "icon" && key != "action" && key != "menu" && key != "label") {
+                    if(key.match(/^on/)) {
+                        var cmd = el[key];
+                        jQuery(item).bind(key.substring(2), {cmd: cmd}, function(evt) {
+                            var res = new Function(evt.data.cmd)();
+                            if(!res) {
+                                /* cancel default/other binds when callback returns false */
+                                evt.stopImmediatePropagation();
+                            }
+                            return(res);
+                        });
+                    } else {
+                        item[key] = el[key];
+                    }
                 }
+            }
+
+            if(el.action) {
+                check_server_action(undefined, item, backend, host, service);
             }
 
             /* obtain reference to current script tag so we could insert the icons here */
@@ -2830,8 +2845,20 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
 
         /* apply other attributes */
         for(var key in el) {
-            if(key != "icon" && key != "action" && key != "label") {
-                link[key] = el[key];
+            if(key != "icon" && key != "action" && key != "menu" && key != "label") {
+                if(key.match(/^on/)) {
+                    var cmd = el[key];
+                    jQuery(link).bind(key.substring(2), {cmd: cmd}, function(evt) {
+                        var res = new Function(evt.data.cmd)();
+                        if(!res) {
+                            /* cancel default/other binds when callback returns false */
+                            evt.stopImmediatePropagation();
+                        }
+                        return(res);
+                    });
+                } else {
+                    link[key] = el[key];
+                }
             }
         }
 
@@ -2879,7 +2906,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                 data[key] = extra_param[key];
             }
         }
-        link.onclick = function() {
+        jQuery(link).bind("click", function() {
             var oldSrc = jQuery(link).find('IMG').attr('src');
             jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
             jQuery.ajax({
@@ -2901,7 +2928,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                 }
             });
             return(false);
-        }
+        });
     }
     // normal urls
     else {
@@ -2909,7 +2936,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
             // no macros, no problems
             return;
         }
-        link.onmouseover = function() {
+        jQuery(link).bind("mouseover", function() {
             if(!link.href.match(/\$/)) {
                 // no macros, no problems
                 return(true);
@@ -2931,7 +2958,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
             };
             link.setAttribute('href', url_prefix + 'cgi-bin/status.cgi?'+toQueryString(urlArgs));
             return(true);
-        }
+        });
     }
 }
 

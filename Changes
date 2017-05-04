@@ -5,6 +5,7 @@ next:
           - make custom variables available in host/service excel export
           - write details into apache log on timeouts
           - make contacts email address available in enviroment for hooks and scripts
+          - action menus: support confirmation dialogs
           - logcache:
             - performance improvements for the logcacheclean command
           - fix filtering for empty custom variables
