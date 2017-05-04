@@ -2217,7 +2217,7 @@ sub _file_history {
 
     my $logs = _get_git_logs($c, $dir);
 
-    Thruk::Backend::Manager::_page_data(undef, $c, $logs);
+    Thruk::Backend::Manager::page_data($c, $logs);
     $c->stash->{'logs'} = $logs;
     $c->stash->{'dir'}  = $dir;
     return;

@@ -1898,6 +1898,23 @@ sub _remove_duplicates {
 
 ########################################
 
+=head2 page_data
+
+  page_data($c, $data)
+
+adds paged data set to the template stash.
+Data will be available as 'data'
+The pager itself as 'pager'
+
+=cut
+
+sub page_data {
+    local $ENV{'THRUK_USE_LMD'} = undef;
+    return(_page_data(undef, @_));
+}
+
+########################################
+
 =head2 _page_data
 
   _page_data($c, $data, [$result_size], [$total_size])

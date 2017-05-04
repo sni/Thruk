@@ -1970,7 +1970,7 @@ sub _task_pnp_graphs {
         }
     }
     $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
-    $c->{'db'}->_page_data($c, $graphs);
+    Thruk::Backend::Manager::page_data($c, $graphs);
 
     my $json = {
         data        => $c->stash->{'data'},
@@ -2018,7 +2018,7 @@ sub _task_grafana_graphs {
         }
     }
     $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
-    $c->{'db'}->_page_data($c, $graphs);
+    Thruk::Backend::Manager::page_data($c, $graphs);
 
     my $json = {
         data        => $c->stash->{'data'},
@@ -2055,7 +2055,7 @@ sub _task_userdata_backgroundimages {
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif',  image => 'none'};
     }
-    $c->{'db'}->_page_data($c, $images);
+    Thruk::Backend::Manager::page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
@@ -2089,7 +2089,7 @@ sub _task_userdata_images {
     if(!$query) {
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
     }
-    $c->{'db'}->_page_data($c, $images);
+    Thruk::Backend::Manager::page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},

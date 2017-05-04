@@ -320,7 +320,7 @@ sub _process_raw_request {
             my $json = [ { 'name' => $type."s", 'data' => $data } ];
             if($c->req->parameters->{'hash'}) {
                 my $total = scalar @{$data};
-                Thruk::Backend::Manager::_page_data(undef, $c, $data);
+                Thruk::Backend::Manager::page_data($c, $data);
                 my $list = [];
                 for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
                 $json = { 'data' => $list, 'total' => $total };
@@ -809,7 +809,7 @@ sub _process_overview_page {
 
     my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_overview'});
-    Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
+    Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
     return 1;
 }
@@ -883,7 +883,7 @@ sub _process_grid_page {
 
     my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_grid'});
-    Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
+    Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
     $host_data     = undef;
     $services_data = undef;
@@ -1069,7 +1069,7 @@ sub _process_summary_page {
 
     my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %{$all_groups})], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_summary'});
-    Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
+    Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
     return 1;
 }
@@ -1301,7 +1301,7 @@ sub _process_perfmap_page {
     }
 
     $c->stash->{'perf_keys'} = $keys;
-    Thruk::Backend::Manager::_page_data(undef, $c, $data);
+    Thruk::Backend::Manager::page_data($c, $data);
 
     $c->stash->{'orderby'}  = $sortoption;
     $c->stash->{'orderdir'} = $order;

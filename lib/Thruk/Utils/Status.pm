@@ -1884,7 +1884,7 @@ sub get_service_matrix {
     }
 
     my @keys = sort keys %{$uniq_hosts};
-    Thruk::Backend::Manager::_page_data(undef, $c, \@keys);
+    Thruk::Backend::Manager::page_data($c, \@keys);
     @keys = (); # empty
     my $filter = [];
     for my $host_name (@{$c->stash->{'data'}}) {
