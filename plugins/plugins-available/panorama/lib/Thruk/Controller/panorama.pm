@@ -321,7 +321,15 @@ sub _js {
     my $action_menu_items = [];
     if($c->config->{'action_menu_items'}) {
         for my $name (sort keys %{$c->config->{'action_menu_items'}}) {
-            push @{$action_menu_items}, [$name, $c->config->{'action_menu_items'}->{$name}];
+            my $data = $c->config->{'action_menu_items'}->{$name};
+            if($data =~ m%^file://(.*)$%mx) {
+                my $sourcefile = $1;
+                $data = "[]";
+                if(-r $sourcefile) {
+                    $data = read_file($sourcefile);
+                }
+            }
+            push @{$action_menu_items}, [$name, $data];
         }
     }
     $c->stash->{action_menu_items} = $action_menu_items;
