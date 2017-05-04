@@ -215,55 +215,31 @@ TP.iconClickHandlerExec = function(id, link, panel, target) {
         return(false);
     }
     if(menu && menu[1]) {
-        var tmp = menu[1].split(/\//);
-        var menuName = tmp.shift();
-        var menuArgs = tmp;
-        var menuRaw;
-        Ext.Array.each(action_menu_items, function(val, i) {
-            var name    = val[0];
-            if(name == menuName) {
-                menuRaw = val[1];
-                return(false);
-            }
-        });
-        if(!menuRaw) {
-            TP.Msg.msg("fail_message~~no such menu: "+menu[1]);
+        var menuData = TP.parseActionMenuItemsStr(menu[1], id, panel, target);
+        if(!menuData) {
             return(false);
         }
-        var menuData;
-        try {
-            menuData  = Ext.JSON.decode(menuRaw);
-        } catch(e) {
-            TP.Msg.msg("fail_message~~menu "+menu[1]+": failed to parse json - "+e);
-            return(false);
+        var autoOpen = false;
+        if(!Ext.isArray(menuData)) {
+            menuData = TP.parseActionMenuItems(menuData, id, panel, target);
+            autoOpen = true;
         }
-        var menuItems = [];
-        Ext.Array.each(menuData['menu'], function(i, x) {
-            if(Ext.isString(i)) {
-                menuItems.push(i);
-            } else {
-                menuItems.push({
-                    text:    i.label,
-                    icon:    replace_macros(i.icon),
-                    handler: function(This, evt) {
-                        if(i.target) {
-                            target = i.target;
-                        }
-                        return(TP.iconClickHandlerExec(id, i.action, panel, target));
-                    }
-                });
-            }
-        });
         TP.suppressIconTip = true;
-        Ext.create('Ext.menu.Menu', {
-            items: menuItems,
+        menu = Ext.create('Ext.menu.Menu', {
+            items: menuData,
             listeners: {
                 beforehide: function(This) {
                     TP.suppressIconTip = false;
                     This.destroy();
                 }
-            }
+            },
+            cls: autoOpen ? 'hidden' : ''
         }).showBy(panel);
+        if(autoOpen) {
+            link = menu.items.get(0);
+            link.fireEvent("click");
+            menu.hide();
+        }
         return(false);
     }
     if(link) {
@@ -304,6 +280,82 @@ TP.iconClickHandlerExec = function(id, link, panel, target) {
     }
     return(true);
 };
+
+/* parse action menu from json string data */
+TP.parseActionMenuItemsStr = function(str, id, panel, target) {
+    var tmp = str.split(/\//);
+    var menuName = tmp.shift();
+    var menuArgs = tmp;
+    var menuRaw;
+    Ext.Array.each(action_menu_items, function(val, i) {
+        var name    = val[0];
+        if(name == menuName) {
+            menuRaw = val[1];
+            return(false);
+        }
+    });
+    if(!menuRaw) {
+        TP.Msg.msg("fail_message~~no such menu: "+menu[1]);
+        return(false);
+    }
+    var menuData;
+    try {
+        menuData  = Ext.JSON.decode(menuRaw);
+    } catch(e) {
+        TP.Msg.msg("fail_message~~menu "+menu[1]+": failed to parse json - "+e);
+        return(false);
+    }
+    if(!menuData['menu']) {
+        return(menuData);
+    }
+    return(TP.parseActionMenuItems(menuData['menu'], id, panel, target));
+}
+
+TP.parseActionMenuItems = function(items, id, panel, target) {
+    var menuItems = [];
+    Ext.Array.each(items, function(i, x) {
+        if(Ext.isString(i)) {
+            menuItems.push(i);
+        } else {
+            var menuItem = {
+                text:    i.label,
+                icon:    replace_macros(i.icon)
+            };
+            var handler = function(This, evt) {
+                if(i.target) {
+                    target = i.target;
+                }
+                return(TP.iconClickHandlerExec(id, i.action, panel, target));
+            };
+            var listeners = {};
+            for(var key in i) {
+                if(key != "icon" && key != "action" && key != "menu" && key != "label") {
+                    if(key.match(/^on/)) {
+                        var fn = new Function(i[key]);
+                        if(key == "onclick") {
+                            listeners[key.substring(2)] = function() {
+                                if(fn()) {
+                                    handler();
+                                }
+                            }
+                        } else {
+                            listeners[key.substring(2)] = fn;
+                        }
+                    } else {
+                        menuItem[key] = i[key];
+                    }
+                }
+            }
+            if(!i.onclick) {
+                listeners["click"] = handler;
+            }
+            menuItem.listeners = listeners;
+            menuItems.push(menuItem);
+        }
+    });
+    return(menuItems);
+}
+
 
 TP.iconClickHandlerClickLink = function(panel, link, target) {
     var oldOnClick=panel.el.dom.onclick;
