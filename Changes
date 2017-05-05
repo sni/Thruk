@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.14-2   Fri May  5 12:31:42 CEST 2017
           - autocomplete custom variables values if exposed by show_custom_vars
           - make custom variables available in host/service excel export
           - write details into apache log on timeouts
