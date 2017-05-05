@@ -1642,9 +1642,6 @@ sub get_downtimes_filter {
         push @servicefilter,       { -or => [ downtimes => { $op => { '!=' => undef }} ]};
     }
     else {
-        # The value is on hours, convert to seconds
-        $value = $value * 3600;
-
         # Get all the downtimes
         my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
         my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
@@ -1657,10 +1654,9 @@ sub get_downtimes_filter {
             # Filter on the downtime duration
             foreach my $downtime (@{$downtimes}) {
                 my $downtime_duration = $downtime->{end_time} - $downtime->{start_time};
-
                 if ( $op eq '=' ) {
                     if ( not $downtime_duration == $value) {
-                    $downtime = undef;
+                        $downtime = undef;
                     }
                 } elsif ( $op eq '>=' ) {
                     if ( not $downtime_duration >= $value) {
@@ -1676,13 +1672,17 @@ sub get_downtimes_filter {
                     }
                 }
             }
+            # wipe out undefined downtimes
+            @{$downtimes} = grep { defined } @{$downtimes};
             @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
         }
 
         # Supress undef value if is present and not the only result, or replace undef by -1 if no results
-        if (scalar(@downtime_ids) == 1 and $downtime_ids[0] == undef) {
+        if (scalar(@downtime_ids) == 0) {
+            @downtime_ids = (-1);
+        } elsif (scalar(@downtime_ids) == 1 && !defined $downtime_ids[0]) {
             $downtime_ids[0] = -1;
-        } elsif ($downtime_ids[0] == undef or scalar(@downtime_ids) == 0) {
+        } elsif (!defined $downtime_ids[0]) {
             splice (@downtime_ids, 0, 1);
         }
 
