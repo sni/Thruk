@@ -54,7 +54,7 @@ sub new {
         env    => $env,
         config => $app->{'config'},
         stash  => {
-            time_begin   => $time_begin,
+            time_begin   => $time_begin || time(),
             memory_begin => $memory_begin,
         },
         req    => $req,

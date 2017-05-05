@@ -453,6 +453,7 @@ sub _init_cache {
 sub _check_exit_reason {
     my($sig) = @_;
     my $reason = longmess();
+    my $now    = time();
     ## no critic
     if($reason =~ m|Thruk::Utils::CLI::_from_local|mx && -t 0) {
     ## use critic
@@ -461,7 +462,8 @@ sub _check_exit_reason {
         return;
     }
     # if we are in run_app, this means we are currently processing a request
-    if(defined $Thruk::Request::c || $reason =~ m|Plack::Util::run_app|gmx) {
+    if((defined $Thruk::Request::c && $now - $Thruk::Request::c->stash->{'time_begin'} > 10)
+       || $reason =~ m|Plack::Util::run_app|gmx) {
         local $| = 1;
         my $url = $Thruk::Request::c ? $Thruk::Request::c->req->url : 'unknown url';
         print STDERR "ERROR: got signal $sig while handling request, possible timeout in $url\n$reason";
