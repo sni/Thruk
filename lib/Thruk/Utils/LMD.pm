@@ -104,19 +104,17 @@ sub check_initial_start {
         $SIG{CHLD} = 'IGNORE';
         ## use critic
         my $pid = fork();
-        if($pid) {
-            $config->{'_lmd_started'} = 1;
-        } else {
+        if(!$pid) {
             Thruk::Utils::External::_do_child_stuff();
             ## no critic
             $SIG{CHLD} = 'DEFAULT';
             ## use critic
-            check_proc($config, $c, 0, 1);
+            check_proc($config, $c, 0);
             _check_changed_lmd_config($config);
             exit;
         }
     } else {
-        check_proc($config, $c, 0, 1);
+        check_proc($config, $c, 0);
         _check_changed_lmd_config($config);
     }
 
