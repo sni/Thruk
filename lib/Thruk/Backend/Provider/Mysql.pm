@@ -400,7 +400,7 @@ sub get_logs {
     # logfiles into tmp file
     my($fh, $filename);
     if($options{'file'}) {
-        ($fh, $filename) = tempfile();
+        ($fh, $filename) = tempfile(DIR => ($c->config->{'tmp_path'} || '/tmp'));
         open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     }
 
