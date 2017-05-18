@@ -20,7 +20,7 @@ connection provider for Mysql connections
 
 =cut
 
-$Thruk::Backend::Provider::Mysql::cache_version = 4;
+$Thruk::Backend::Provider::Mysql::cache_version = 5;
 
 $Thruk::Backend::Provider::Mysql::db_types = {
     'INITIAL HOST STATE'      => 6, # LOGCLASS_STATE
@@ -1098,6 +1098,14 @@ sub _update_logcache {
         $dbh->do("UPDATE `".$prefix."_status` SET value = 4 WHERE status_id = 4");
         print "WARNING: updated logcache to version 4\n" if $verbose;
         $c->log->info("updated logcache to version 4");
+    }
+
+    if($cache_version == 4) {
+        $cache_version = 5;
+        $dbh->do("CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3));");
+        $dbh->do("UPDATE `".$prefix."_status` SET value = 5 WHERE status_id = 4");
+        print "WARNING: updated logcache to version 5\n" if $verbose;
+        $c->log->info("updated logcache to version 5");
     }
 
     if($cache_version < $Thruk::Backend::Provider::Mysql::cache_version) {
