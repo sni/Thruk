@@ -63,6 +63,26 @@ jQuery(document).ready(function(e){
         refresh_host_status(true, true);
         refresh_service_status(true, true);
     });
+    jQuery('#hosts_list_data').bind('filterablebeforefilter', function(event, data){
+        pagenr     = list_pager_init(null, 'hosts_list_data');
+        var params = get_params();
+        jQuery.get('mobile.cgi', {
+                data:           'hosts',
+                host:            data.input.val(),
+                hoststatustypes: params['hoststatustypes'],
+                hostprops:       params['hostprops'],
+                page:            pagenr,
+                _:               unixtime()
+            },
+            function(data, textStatus, XMLHttpRequest) {
+                list_pager_data(pagenr, data, 'hosts_list_data', function() { ThrukMobile.page_hosts_list(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
+                    var icons = get_list_icons(entry);
+                    jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+encoder(entry.name)+'&backend=' + entry.peer_key + '">' + entry.name +icons+'</a></li>');
+                });
+            },
+            'json'
+        );
+    });
 
     /* initialize numbers */
     refresh_host_status();
