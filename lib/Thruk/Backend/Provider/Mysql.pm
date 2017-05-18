@@ -1546,7 +1546,7 @@ sub _contact_lookup {
 }
 
 ##########################################################
-sub _trim_log_entry {
+sub _trim_log_entry_safe {
     my($l) = @_;
     # strip time
     $l->{'message'} =~ s/^\[$l->{'time'}\]\ //mx;
@@ -1573,6 +1573,51 @@ sub _trim_log_entry {
     if($l->{'plugin_output'}) {
         my $length = length $l->{'plugin_output'};
         $l->{'message'} = substr($l->{'message'}, 0, -$length);
+    }
+    return;
+}
+
+##########################################################
+sub _trim_log_entry {
+    my($l) = @_;
+
+    # strip time
+    my $length = 0;
+    if($l->{'message'} =~ m/^\[\d+/mxo) {
+        $length += length($l->{'time'}) + 3;
+
+        # strip type
+        if($l->{'type'}) {
+            $length += length($l->{'type'}) + 2;
+        }
+    }
+
+    # strip contact_name
+    if($l->{'contact_name'}) {
+        $length += length($l->{'contact_name'}) + 1;
+    }
+
+
+    # strip service description
+    if($l->{'service_description'}) {
+        $length += length($l->{'host_name'}) + length($l->{'service_description'}) + 2;
+    }
+    # strip host_name
+    elsif($l->{'host_name'}) {
+        $length += length($l->{'host_name'}) + 1;
+    }
+
+    if($length > 0) {
+        if(length($l->{'message'}) < $length) {
+            &_trim_log_entry_safe($l);
+            return;
+        }
+        $l->{'message'} = substr($l->{'message'}, $length);
+    }
+
+    # strip plugin output from the end
+    if($l->{'plugin_output'}) {
+        $l->{'message'} = substr($l->{'message'}, 0, -length($l->{'plugin_output'}));
     }
     return;
 }
@@ -1770,6 +1815,10 @@ sub _import_logcache_from_file {
             if($l->{'contact_name'}) {
                 $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
             }
+
+            # Set type to NULL to prevent SQL insert errors if type is not a special type.
+            undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'}};
+
             &_trim_log_entry($l);
             my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
             my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
@@ -1848,12 +1897,12 @@ sub _insert_logs {
             $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
         }
 
+        # Set type to NULL to prevent SQL insert errors if type is not a special type.
+        undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'}};
+
         &_trim_log_entry($l);
         my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
         my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-
-        # Set type to NULL to prevent SQL insert errors if type is not a special type.
-        undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'}};
 
         push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
