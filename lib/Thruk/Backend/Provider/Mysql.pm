@@ -20,6 +20,8 @@ connection provider for Mysql connections
 
 =cut
 
+$Thruk::Backend::Provider::Mysql::cache_version = 4;
+
 $Thruk::Backend::Provider::Mysql::db_types = {
     'INITIAL HOST STATE'      => 6, # LOGCLASS_STATE
     'CURRENT HOST STATE'      => 6, # LOGCLASS_STATE
@@ -48,7 +50,10 @@ $Thruk::Backend::Provider::Mysql::db_types = {
     'LOG ROTATION'            => 0, # INFO
 };
 
-$Thruk::Backend::Provider::Mysql::cache_version = 4;
+use constant {
+    MODE_IMPORT         => 1,
+    MODE_UPDATE         => 2,
+};
 
 ##########################################################
 
@@ -357,6 +362,10 @@ sub get_logs {
     my $sorted  = 0;
     if(defined $options{'sort'}->{'DESC'} and $options{'sort'}->{'DESC'} eq 'time') {
         $orderby = ' ORDER BY l.time DESC';
+        $sorted  = 1;
+    }
+    if(defined $options{'sort'}->{'ASC'} and $options{'sort'}->{'ASC'} eq 'time') {
+        $orderby = ' ORDER BY l.time ASC';
         $sorted  = 1;
     }
     my($where,$contact,$system,$strict) = $self->_get_filter($options{'filter'});
@@ -1120,7 +1129,7 @@ sub _update_logcache {
         my $plugin_lookup  = {};
 
         if(defined $files and scalar @{$files} > 0) {
-            $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$peer,$contact_lookup);
+            $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup);
         } else {
             $log_count += $self->_import_peer_logfiles($c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$forcestart);
         }
@@ -1132,6 +1141,7 @@ sub _update_logcache {
     };
     my $error = $@ || '';
 
+    _release_write_locks($dbh);
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
     $dbh->commit or $error .= $dbh->errstr;
@@ -1320,7 +1330,7 @@ sub _get_host_lookup {
 
 ##########################################################
 sub _get_service_lookup {
-    my($dbh,$peer,$prefix,$hosts_lookup,$noupdate) = @_;
+    my($dbh,$peer,$prefix,$hosts_lookup,$noupdate, $auto_increments, $foreign_key_stash) = @_;
 
     my $sth = $dbh->prepare("SELECT s.service_id, h.host_name, s.service_description FROM `".$prefix."_service` s, `".$prefix."_host` h WHERE s.host_id = h.host_id");
     $sth->execute;
@@ -1333,7 +1343,7 @@ sub _get_service_lookup {
     my @values;
     for my $s (@{$services}) {
         next if defined $services_lookup->{$s->{'host_name'}}->{$s->{'description'}};
-        my $host_id = &_host_lookup($hosts_lookup, $s->{'host_name'}, $dbh, $prefix);
+        my $host_id = &_host_lookup($hosts_lookup, $s->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
         push @values, '('.$host_id.','.$dbh->quote($s->{'description'}).')';
     }
     if(scalar @values > 0) {
@@ -1386,7 +1396,7 @@ sub _get_plugin_lookup {
 
 ##########################################################
 sub _plugin_lookup {
-    my($hash, $look, $dbh, $prefix) = @_;
+    my($hash, $look, $dbh, $prefix, $auto_increments, $foreign_key_stash) = @_;
     my $id = $hash->{$look};
     return $id if $id;
 
@@ -1402,6 +1412,13 @@ sub _plugin_lookup {
         }
     }
 
+    if($auto_increments) {
+        push @{$foreign_key_stash->{'plugin_output'}}, '('.$dbh->quote($look).')';
+        $id = $auto_increments->{$prefix.'_plugin_output'}->{'AUTO_INCREMENT'}++;
+        $hash->{$look} = $id;
+        return $id;
+    }
+
     $dbh->do("INSERT INTO `".$prefix."_plugin_output` (output) VALUES(".$dbh->quote($look).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $hash->{$look} = $id;
@@ -1410,11 +1427,18 @@ sub _plugin_lookup {
 
 ##########################################################
 sub _host_lookup {
-    my($host_lookup, $host_name, $dbh, $prefix) = @_;
+    my($host_lookup, $host_name, $dbh, $prefix, $auto_increments, $foreign_key_stash) = @_;
     return 'NULL' unless $host_name;
 
     my $id = $host_lookup->{$host_name};
     return $id if $id;
+
+    if($auto_increments) {
+        push @{$foreign_key_stash->{'host'}}, '('.$dbh->quote($host_name).')';
+        $id = $auto_increments->{$prefix.'_host'}->{'AUTO_INCREMENT'}++;
+        $host_lookup->{$host_name} = $id;
+        return $id;
+    }
 
     $dbh->do("INSERT INTO `".$prefix."_host` (host_name) VALUES(".$dbh->quote($host_name).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
@@ -1477,13 +1501,20 @@ sub _get_log_service_auth {
 
 ##########################################################
 sub _service_lookup {
-    my($service_lookup, $host_lookup, $host_name, $service_description, $dbh, $prefix, $host_id) = @_;
+    my($service_lookup, $host_lookup, $host_name, $service_description, $dbh, $prefix, $host_id, $auto_increments, $foreign_key_stash) = @_;
     return 'NULL' unless $service_description;
 
     my $id = $service_lookup->{$host_name}->{$service_description};
     return $id if $id;
 
-    $host_id = &_host_lookup($host_lookup, $host_name, $dbh, $prefix) unless $host_id;
+    $host_id = &_host_lookup($host_lookup, $host_name, $dbh, $prefix, $auto_increments, $foreign_key_stash) unless $host_id;
+
+    if($auto_increments) {
+        push @{$foreign_key_stash->{'service'}}, '('.$host_id.','.$dbh->quote($service_description).')';
+        $id = $auto_increments->{$prefix.'_service'}->{'AUTO_INCREMENT'}++;
+        $service_lookup->{$host_name}->{$service_description} = $id;
+        return $id;
+    }
 
     $dbh->do("INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES(".$host_id.", ".$dbh->quote($service_description).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
@@ -1494,11 +1525,18 @@ sub _service_lookup {
 
 ##########################################################
 sub _contact_lookup {
-    my($contact_lookup, $contact_name, $dbh, $prefix) = @_;
+    my($contact_lookup, $contact_name, $dbh, $prefix, $auto_increments, $foreign_key_stash) = @_;
     return 'NULL' unless $contact_name;
 
     my $id = $contact_lookup->{$contact_name};
     return $id if $id;
+
+    if($auto_increments) {
+        push @{$foreign_key_stash->{'contact'}}, '('.$dbh->quote($contact_name).')';
+        $id = $auto_increments->{$prefix.'_contact'}->{'AUTO_INCREMENT'}++;
+        $contact_lookup->{$contact_name} = $id;
+        return $id;
+    }
 
     $dbh->do("INSERT INTO `".$prefix."_contact` (name) VALUES(".$dbh->quote($contact_name).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
@@ -1541,18 +1579,20 @@ sub _trim_log_entry {
 
 ##########################################################
 sub _fill_lookup_logs {
-    my($self,$peer,$start,$end) = @_;
+    my($self,$prefix,$start,$end) = @_;
     my $lookup = {};
-    my($mlogs) = $peer->{'class'}->get_logs(
-                                        filter  => [{ '-and' => [
-                                                                { time => { '>=' => $start } },
-                                                                { time => { '<=' => $end } },
-                                                   ]}],
+    my($mlogs) = $self->get_logs(
+                                filter  => [{ '-and' => [
+                                                        { time => { '>=' => $start } },
+                                                        { time => { '<=' => $end } },
+                                           ]}],
+                                collection => $prefix,
                               );
     for my $l (@{$mlogs}) {
         next unless defined $l->{'message'};
         $lookup->{$l->{'message'}} = 1;
     }
+
     return $lookup;
 }
 
@@ -1575,12 +1615,16 @@ sub _import_peer_logfiles {
         $c->stats->profile(end => "get last mysql timestamp");
     }
 
+    #&timing_breakpoint('_import_peer_logfiles: got mysql timestamps');
+
     my $log_count = 0;
     $c->stats->profile(begin => "get livestatus timestamp");
     my($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
     if(!$start || !$end) {
         die("something went wrong, cannot get start/end from logfiles ($start / $end)");
     }
+    #&timing_breakpoint('_import_peer_logfiles: got livestatus timestamps');
+
     print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
     $c->stats->profile(end => "get livestatus timestamp");
     $start = $forcestart if $forcestart;
@@ -1597,6 +1641,11 @@ sub _import_peer_logfiles {
     my $import_filter = [];
     for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_exclude'})}) {
         push @{$import_filter}, { message => { '!~~' => $f } }
+    }
+
+    if($mode eq 'import') {
+        $dbh->do('SET foreign_key_checks = 0');
+        $dbh->do('ALTER TABLE '.$prefix.'_log DISABLE KEYS');
     }
 
     my @columns = qw/class time type state host_name service_description plugin_output message state_type contact_name/;
@@ -1617,7 +1666,7 @@ sub _import_peer_logfiles {
                                                 );
             if($mode eq 'update') {
                 # get already stored logs to filter duplicates
-                $duplicate_lookup = $self->_fill_lookup_logs($peer,$time,($time+$blocksize));
+                $duplicate_lookup = $self->_fill_lookup_logs($prefix,$time,($time+$blocksize));
             }
         };
         if($@) {
@@ -1639,12 +1688,17 @@ sub _import_peer_logfiles {
         $c->stats->profile(end => $stime);
     }
 
+    if($mode eq 'import') {
+        $dbh->do('SET foreign_key_checks = 1');
+        $dbh->do('ALTER TABLE '.$prefix.'_log ENABLE KEYS');
+    }
+
     return $log_count;
 }
 
 ##########################################################
 sub _import_logcache_from_file {
-    my($self,$mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$peer,$contact_lookup) = @_;
+    my($self,$mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup) = @_;
 
     # increase plugin output lookup performance for larger updates
     if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0) {
@@ -1654,6 +1708,11 @@ sub _import_logcache_from_file {
     }
 
     require Monitoring::Availability::Logs;
+
+    # get current auto increment values
+    _set_write_locks($dbh, $prefix);
+    my $auto_increments = _get_autoincrements($dbh, $prefix);
+    my $foreign_key_stash = {};
 
     my $log_count = 0;
     for my $f (@{$files}) {
@@ -1671,7 +1730,10 @@ sub _import_logcache_from_file {
 
             if($mode eq 'update') {
                 if($last_duplicate_ts < $l->{'time'}) {
-                    $duplicate_lookup = $self->_fill_lookup_logs($peer,$l->{'time'},$l->{'time'}+86400);
+                    $self->_safe_insert($dbh, $stm, \@values, $verbose);
+                    $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
+                    @values = ();
+                    $duplicate_lookup = $self->_fill_lookup_logs($prefix,$l->{'time'},$l->{'time'}+86400);
                     #print "duplicate output lookup filled with ".(scalar keys %{$duplicate_lookup})." entries (".(scalar localtime $l->{'time'})." till ".(scalar localtime $l->{'time'}+86400).")\n" if $verbose;
                     $last_duplicate_ts = $l->{'time'}+86400;
                 }
@@ -1699,32 +1761,36 @@ sub _import_logcache_from_file {
 
             my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
             if($l->{'service_description'}) {
-                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
-                $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host);
+                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+                $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host, $auto_increments, $foreign_key_stash);
             }
             elsif($l->{'host_name'}) {
-                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
             }
             if($l->{'contact_name'}) {
-                $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix);
+                $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
             }
             &_trim_log_entry($l);
-            my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
-            my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
+            my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+            my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
 
             push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
             # commit every 1000th to avoid to large blocks
-            if($log_count%1000) {
+            if($log_count%1000 == 0) {
                 $self->_safe_insert($dbh, $stm, \@values, $verbose);
+                $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
                 @values = ();
             }
-            print '.' if $log_count%100 == 0 and $verbose;
+            print '.' if $log_count%1000 == 0 and $verbose;
         }
-        $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
+        $self->_safe_insert($dbh, $stm, \@values, $verbose);
+        $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
         CORE::close($fh);
         print "\n" if $verbose;
     }
+
+    _release_write_locks($dbh);
 
     print "it is recommended to run logcacheoptimize after importing logfiles.\n" if $verbose;
 
@@ -1735,53 +1801,75 @@ sub _import_logcache_from_file {
 sub _insert_logs {
     my($self,$dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup) = @_;
     my $log_count = 0;
+
+    if($mode eq 'update') {
+        $mode = MODE_UPDATE;
+    } elsif($mode eq 'import') {
+        $mode = MODE_IMPORT;
+    }
+
+    # get current auto increment values
+    _set_write_locks($dbh, $prefix);
+    my $auto_increments = _get_autoincrements($dbh, $prefix);
+    my $foreign_key_stash = {};
+
     my @values;
     #&timing_breakpoint('_insert_logs');
     for my $l (@{$logs}) {
-        if($mode eq 'update') {
+        if($mode == MODE_UPDATE) {
             next if defined $duplicate_lookup->{$l->{'message'}};
         }
         $log_count++;
-        print '.' if $log_count%100 == 0 and $verbose;
-        my $type = $l->{'type'};
-        $type    = 'TIMEPERIOD TRANSITION' if $type =~ m/^TIMEPERIOD\ TRANSITION/mxo;
-        if($type eq 'TIMEPERIOD TRANSITION') {
+        print '.' if $log_count%1000 == 0 and $verbose;
+
+        $l->{'type'} = 'TIMEPERIOD TRANSITION' if $l->{'type'} =~ m/^TIMEPERIOD\ TRANSITION/mxo;
+        if($l->{'type'} eq 'TIMEPERIOD TRANSITION') {
             $l->{'plugin_output'} = '';
         }
-        elsif($type eq 'SERVICE NOTIFICATION' or $type eq 'HOST NOTIFICATION') {
+        elsif($l->{'type'} eq 'SERVICE NOTIFICATION' or $l->{'type'} eq 'HOST NOTIFICATION') {
             $l->{'plugin_output'} = ''; # would result in duplicate output otherwise
         }
+
         my $state             = $l->{'state'};
-        my $state_type        = $l->{'state_type'};
         if($state eq '')      { $state   = 'NULL'; }
+
+        my $state_type        = $l->{'state_type'};
         if(($state_type eq '') || (($state_type ne 'HARD') && ($state_type ne 'SOFT'))) { undef $state_type; } # if set to NULL then $dbh->quote($state_type) returns 'NULL' instead of NULL. Only accept HARD or SOFT state
+
         my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
         if($l->{'service_description'}) {
-            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
-            $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host);
+            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+            $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host, $auto_increments, $foreign_key_stash);
         }
         elsif($l->{'host_name'}) {
-            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
         }
         if($l->{'contact_name'}) {
-            $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix);
+            $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
         }
+
         &_trim_log_entry($l);
-        my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
-        my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
+        my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+        my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
 
         # Set type to NULL to prevent SQL insert errors if type is not a special type.
-        undef $type if !defined $Thruk::Backend::Provider::Mysql::db_types->{$type};
+        undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'}};
 
-        push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
+        push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
         # commit every 1000th to avoid to large blocks
         if($log_count%1000 == 0) {
+            #&timing_breakpoint('_insert_logs logs calculated');
             $self->_safe_insert($dbh, $stm, \@values, $verbose);
             @values = ();
+            #&timing_breakpoint('_insert_logs logs inserted');
+            $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
         }
     }
-    $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
+    $self->_safe_insert($dbh, $stm, \@values, $verbose);
+    $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
+    _release_write_locks($dbh);
+
     print '. '.$log_count . " entries added\n" if $verbose;
     return $log_count;
 }
@@ -1809,6 +1897,7 @@ sub _drop_tables {
 ##########################################################
 sub _safe_insert {
     my($self, $dbh, $stm, $values, $verbose) = @_;
+    return if scalar @{$values} == 0;
     eval {
         $dbh->do($stm.join(',', @{$values}));
     };
@@ -1827,6 +1916,76 @@ sub _safe_insert {
         }
     }
     $dbh->commit or die $dbh->errstr;
+    return;
+}
+
+##########################################################
+sub _safe_insert_stash {
+    my($self, $dbh, $prefix, $verbose, $foreign_key_stash) = @_;
+
+    if($foreign_key_stash->{'plugin_output'}) {
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_plugin_output` (output) VALUES", \@{$foreign_key_stash->{'plugin_output'}}, $verbose);
+        delete $foreign_key_stash->{'plugin_output'};
+    }
+
+    if($foreign_key_stash->{'host'}) {
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_host` (host_name) VALUES", \@{$foreign_key_stash->{'host'}}, $verbose);
+        delete $foreign_key_stash->{'host'};
+    }
+
+    if($foreign_key_stash->{'service'}) {
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES", \@{$foreign_key_stash->{'service'}}, $verbose);
+        delete $foreign_key_stash->{'service'};
+    }
+
+    if($foreign_key_stash->{'contact'}) {
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_contact` (name) VALUES", \@{$foreign_key_stash->{'contact'}}, $verbose);
+        delete $foreign_key_stash->{'contact'};
+    }
+
+    return;
+}
+
+##########################################################
+sub _get_autoincrements {
+    my($dbh, $prefix) = @_;
+    my $auto_increments = $dbh->selectall_hashref(
+        'SELECT
+            TABLE_NAME,
+            AUTO_INCREMENT
+         FROM
+            INFORMATION_SCHEMA.TABLES
+         WHERE
+            TABLE_SCHEMA = Database()
+            AND TABLE_NAME LIKE "%'.$prefix.'_%"
+        ', 'TABLE_NAME');
+    return($auto_increments);
+}
+
+##########################################################
+sub _set_write_locks {
+    my($dbh, $prefix) = @_;
+    $dbh->do(
+        'LOCK TABLES
+            '.$prefix.'_log l WRITE,
+            '.$prefix.'_log WRITE,
+            '.$prefix.'_plugin_output WRITE,
+            '.$prefix.'_plugin_output p1 WRITE,
+            '.$prefix.'_plugin_output p2 WRITE,
+            '.$prefix.'_host WRITE,
+            '.$prefix.'_host h WRITE,
+            '.$prefix.'_service WRITE,
+            '.$prefix.'_service s WRITE,
+            '.$prefix.'_contact c WRITE,
+            '.$prefix.'_contact WRITE
+    ');
+    return;
+}
+
+##########################################################
+sub _release_write_locks {
+    my($dbh) = @_;
+    $dbh->do('UNLOCK TABLES');
     return;
 }
 
