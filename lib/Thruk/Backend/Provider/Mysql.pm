@@ -800,9 +800,9 @@ sub _get_subfilter {
                 }
                 return $k.' '.$v;
             }
-            # contact_name must be threated differently
+            # contact_name must be renamed, cannot use column alias in where clause
             if($k eq 'contact_name') {
-                return('p1.output LIKE '._quote('%;'.$v.';%'));
+                $k = 'c.name';
             }
             return $k.' = '._quote($v);
         }
