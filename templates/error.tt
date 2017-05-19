@@ -49,7 +49,15 @@
   <div class='errorDescription'>
   <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]">
     <img src="[% url_prefix %]themes/[% theme %]/images/bug_error.png" alt="Send Bug Report" width="16" height="16" style="vertical-align: text-bottom;">
-    Help making Thruk better and send a bug report</a>.<br>
+    Help making Thruk better and send a bug report
+  </a>.<br>
+[% IF !make_test_mode && !thruk_debug %]
+  or<br>
+  <a href="#" onclick="document.getElementById('error_report_text').style.display=''; return false;">
+    <img src="[% url_prefix %]themes/[% theme %]/images/down.png" alt="show error report" style="vertical-align: middle">
+    Preview error report text first
+  </a>
+[% END %]
   </div>
   [% IF thruk_debug %]
   <pre style="margin-top: 50px;">[% stacktrace %]</pre>
@@ -61,6 +69,11 @@
 [%+ errorDetails +%]
 [%+ stacktrace +%]
 :error-->
+[% ELSE %]
+<div class="shadow" style="display: none; margin: 15px;" id="error_report_text"><div class="shadowcontent" style="padding: 10px;"><pre>
+<b>Please report this issue by mail to: <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]">[% bug_email_rcpt %]</a></b><br>
+[% PROCESS _error_report.tt %]
+</pre></div></div>
 [% END %]
 [% PROCESS _footer.tt %]
 [% END %]
