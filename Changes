@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - action menus: add close_timeout option
           - logcache:
             - performance improvements for the import and update commands
             - fix notifications filter by contact_name

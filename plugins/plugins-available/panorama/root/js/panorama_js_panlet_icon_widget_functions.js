@@ -147,7 +147,7 @@ TP.iconClickHandlerDo = function(id) {
 }
 
 /* open link or special action for given link */
-TP.iconClickHandlerExec = function(id, link, panel, target) {
+TP.iconClickHandlerExec = function(id, link, panel, target, config) {
     var special = link.match(/dashboard:\/\/(.+)$/);
     var action  = link.match(/server:\/\/(.+)$/);
     var menu    = link.match(/menu:\/\/(.+)$/);
@@ -194,6 +194,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target) {
             params:  params,
             method: 'POST',
             callback: function(options, success, response) {
+                if(config == undefined) { config = {}; }
                 if(!success) {
                     if(response.status == 0) {
                         TP.Msg.msg("fail_message~~server action failed");
@@ -204,10 +205,10 @@ TP.iconClickHandlerExec = function(id, link, panel, target) {
                     var data = TP.getResponse(undefined, response);
                     if(data.rc == 0) {
                         if(data.msg != "") {
-                            TP.Msg.msg("success_message~~"+data.msg);
+                            TP.Msg.msg("success_message~~"+data.msg, config.close_timeout);
                         }
                     } else {
-                        TP.Msg.msg("fail_message~~"+data.msg);
+                        TP.Msg.msg("fail_message~~"+data.msg, config.close_timeout);
                     }
                 }
             }
@@ -315,6 +316,7 @@ TP.parseActionMenuItems = function(items, id, panel, target) {
     var menuItems = [];
     Ext.Array.each(items, function(i, x) {
         if(Ext.isString(i)) {
+            /* probably a separator, like '-' */
             menuItems.push(i);
         } else {
             var menuItem = {
@@ -325,7 +327,7 @@ TP.parseActionMenuItems = function(items, id, panel, target) {
                 if(i.target) {
                     target = i.target;
                 }
-                return(TP.iconClickHandlerExec(id, i.action, panel, target));
+                return(TP.iconClickHandlerExec(id, i.action, panel, target, i));
             };
             var listeners = {};
             for(var key in i) {

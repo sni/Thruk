@@ -1997,7 +1997,7 @@ function load_jquery_ui(callback) {
 
 /* write/return table with performance data */
 var thruk_message_fade_timer;
-function thruk_message(rc, message) {
+function thruk_message(rc, message, close_timeout) {
     jQuery('#thruk_message').remove();
     window.clearInterval(thruk_message_fade_timer);
     cls = 'fail_message';
@@ -2026,6 +2026,12 @@ function thruk_message(rc, message) {
     var fade_away_in = 5000;
     if(rc != 0) {
         fade_away_in = 30000;
+    }
+    if(close_timeout != undefined) {
+        if(close_timeout == 0) {
+            return;
+        }
+        fade_away_in = close_timeout * 1000;
     }
     thruk_message_fade_timer = window.setTimeout("fade('thruk_message', 500)", fade_away_in);
 }
@@ -2758,7 +2764,7 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
             }
 
             if(el.action) {
-                check_server_action(undefined, item, backend, host, service);
+                check_server_action(undefined, item, backend, host, service, undefined, undefined, undefined, el);
             }
 
             /* obtain reference to current script tag so we could insert the icons here */
@@ -2863,7 +2869,7 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
         }
 
         item.appendChild(link);
-        check_server_action(id, link, backend, host, service);
+        check_server_action(id, link, backend, host, service, undefined, undefined, undefined, el);
         return(true);
     });
 
@@ -2888,7 +2894,7 @@ function check_position_and_show_action_menu(id, icon, container, orientation) {
 }
 
 /* set onclick handler for server actions */
-function check_server_action(id, link, backend, host, service, server_action_url, extra_param, callback) {
+function check_server_action(id, link, backend, host, service, server_action_url, extra_param, callback, config) {
     // server action urls
     if(link.href.match(/^server:\/\//)) {
         if(server_action_url == undefined) {
@@ -2909,19 +2915,20 @@ function check_server_action(id, link, backend, host, service, server_action_url
         jQuery(link).bind("click", function() {
             var oldSrc = jQuery(link).find('IMG').attr('src');
             jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
+            if(config == undefined) { config = {}; }
             jQuery.ajax({
                 url: server_action_url,
                 data: data,
                 type: 'POST',
                 success: function(data) {
-                    thruk_message(data.rc, data.msg);
+                    thruk_message(data.rc, data.msg, config.close_timeout);
                     if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
                     reset_action_menu_icons();
                     jQuery(link).find('IMG').attr('src', oldSrc);
                     if(callback) { callback(data); }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    thruk_message(1, 'server action failed: '+ textStatus);
+                    thruk_message(1, 'server action failed: '+ textStatus, config.close_timeout);
                     if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
                     reset_action_menu_icons();
                     jQuery(link).find('IMG').attr('src', oldSrc);

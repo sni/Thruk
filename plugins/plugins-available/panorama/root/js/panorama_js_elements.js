@@ -302,7 +302,7 @@ TP.Msg = function() {
         return '<div class="msg '+cls+'"><a class="x-tab-close-btn" title="" href="#"><\/a><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
     }
     return {
-        msg : function(s) {
+        msg : function(s, close_timeout) {
             if(TP.unloading) { return; }
             if(!msgCt){
                 msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div'}, true);
@@ -337,7 +337,13 @@ TP.Msg = function() {
                 debug(title + ': ' + p[1]);
                 delay = 30000;
             } else {
-                delay = 3000;
+                delay = 5000;
+            }
+            if(close_timeout != undefined) {
+                if(close_timeout == 0) {
+                    return;
+                }
+                delay = close_timeout * 1000;
             }
             TP.timeouts['timeout_global_msg_ghost'] = window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
         }
