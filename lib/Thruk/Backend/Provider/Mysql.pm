@@ -1698,7 +1698,6 @@ sub _import_peer_logfiles {
 
     if($mode eq 'import') {
         $dbh->do('SET foreign_key_checks = 0');
-        $dbh->do('ALTER TABLE '.$prefix.'_log DISABLE KEYS');
     }
 
     my @columns = qw/class time type state host_name service_description plugin_output message state_type contact_name/;
@@ -1743,7 +1742,6 @@ sub _import_peer_logfiles {
 
     if($mode eq 'import') {
         $dbh->do('SET foreign_key_checks = 1');
-        $dbh->do('ALTER TABLE '.$prefix.'_log ENABLE KEYS');
     }
 
     return $log_count;
