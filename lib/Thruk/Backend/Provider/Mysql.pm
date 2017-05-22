@@ -1102,7 +1102,7 @@ sub _update_logcache {
 
     if($cache_version == 4) {
         $cache_version = 5;
-        $dbh->do("CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3));");
+        $dbh->do("CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3))");
         $dbh->do("UPDATE `".$prefix."_status` SET value = 5 WHERE status_id = 4");
         print "WARNING: updated logcache to version 5\n" if $verbose;
         $c->log->info("updated logcache to version 5");
@@ -2135,6 +2135,7 @@ sub _get_create_statements {
           KEY time (time),
           KEY host_id (host_id)
         ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
+        "CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3))",
 
     # plugin_output
         "DROP TABLE IF EXISTS `".$prefix."_plugin_output`",
