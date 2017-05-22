@@ -1534,7 +1534,7 @@ sub _get_result_lmd {
     # update failed backends
     if($meta && $meta->{'failed'}) {
         for my $key (@{$peers}) {
-            $c->stash->{'failed_backends'}->{$key} = "";
+            delete $c->stash->{'failed_backends'}->{$key};
             my $peer = $self->get_peer_by_key($key);
             $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
             $peer->{'runnning'}   = 1;
