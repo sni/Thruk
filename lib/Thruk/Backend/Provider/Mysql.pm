@@ -2022,17 +2022,17 @@ sub _set_write_locks {
     my($dbh, $prefix) = @_;
     $dbh->do(
         'LOCK TABLES
-            '.$prefix.'_log l WRITE,
-            '.$prefix.'_log WRITE,
-            '.$prefix.'_plugin_output WRITE,
-            '.$prefix.'_plugin_output p1 WRITE,
-            '.$prefix.'_plugin_output p2 WRITE,
-            '.$prefix.'_host WRITE,
-            '.$prefix.'_host h WRITE,
-            '.$prefix.'_service WRITE,
-            '.$prefix.'_service s WRITE,
-            '.$prefix.'_contact c WRITE,
-            '.$prefix.'_contact WRITE
+            `'.$prefix.'_log` l WRITE,
+            `'.$prefix.'_log` WRITE,
+            `'.$prefix.'_plugin_output` WRITE,
+            `'.$prefix.'_plugin_output` p1 WRITE,
+            `'.$prefix.'_plugin_output` p2 WRITE,
+            `'.$prefix.'_host` WRITE,
+            `'.$prefix.'_host` h WRITE,
+            `'.$prefix.'_service` WRITE,
+            `'.$prefix.'_service` s WRITE,
+            `'.$prefix.'_contact` c WRITE,
+            `'.$prefix.'_contact` WRITE
     ');
     return;
 }
@@ -2135,7 +2135,6 @@ sub _get_create_statements {
           KEY time (time),
           KEY host_id (host_id)
         ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
-        "CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3))",
 
     # plugin_output
         "DROP TABLE IF EXISTS `".$prefix."_plugin_output`",
@@ -2144,6 +2143,7 @@ sub _get_create_statements {
           output mediumtext NOT NULL,
           PRIMARY KEY (output_id)
         ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        "CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3))",
 
     # service
         "DROP TABLE IF EXISTS `".$prefix."_service`",
