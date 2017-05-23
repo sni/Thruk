@@ -2499,9 +2499,8 @@ function updateStatusColumns(id, reloadRequired) {
                 if(thruk_debug_js) { alert("ERROR: unknown header column in updateStatusColumns(): " + el.value); }
                 return;
             }
-            if(firstDataRow.cells && dataSourceIndex == undefined && !reloadRequired) {
-                if(thruk_debug_js) { alert("ERROR: unknown data column in updateStatusColumns(): " + el.value); }
-                return;
+            if(firstDataRow.cells && dataSourceIndex == undefined) {
+                reloadRequired = true;
             }
             if(sourceIndex) {
                 if(firstRow.cells[sourceIndex]) {
