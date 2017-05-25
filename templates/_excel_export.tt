@@ -3,9 +3,11 @@
     [% counter = 0 %]
     [% FOR column IN columns %]
     [% counter = counter + 1 %]
+    [% meta = column.split(':'); column = meta.0 %]
+    [% IF meta.size == 1; meta.1 = 1; END %]
     <tr class="sortable_row">
       <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column %]</td>
-      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% column %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();" checked></td>
+      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% column %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
     </tr>
     [% END %]
     [% IF with_custom_vars && c.config.defined('show_custom_vars') && c.config.show_custom_vars.list.size > 0 %]
@@ -47,7 +49,7 @@
       <table border="0" cellspacing="2" cellpadding="0">
         <tr>
           <td valign="top" align="left" class='filterTitle' nowrap>Columns to Export</td>
-          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;" alt="update"></td>
+          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="document.getElementById('excel_form_btn').click(); return false;" alt="update"></td>
         </tr>
           [% IF columns != '' %]
           <tr>
@@ -82,7 +84,7 @@
           [% END %]
         <tr>
           <td colspan=2 align="center">
-            <input type="submit" name="export" value="export" onclick="toggleElement('excel_export_columns'); jQuery('#view_mode').val('xls'); jQuery(this).parents('FORM').submit(); return false;">
+            <input type="submit" name="export" id="excel_form_btn" value="export" onclick="toggleElement('excel_export_columns'); jQuery('#view_mode').val('xls'); jQuery(this).parents('FORM').submit(); return false;">
           </td>
         </tr>
         <tr>

@@ -7,6 +7,7 @@
         [% FOREACH col = columns %]
         [% IF    col == "Site"          %]<cell width='15'>Site</cell>
         [% ELSIF col == "Hostname"      %]<cell width='30'>Hostname</cell>
+        [% ELSIF col == "Displayname"   %]<cell width='30'>Hostname</cell>
         [% ELSIF col == "IP"            %]<cell width='10'>IP</cell>
         [% ELSIF col == "Status"        %]<cell width='20'>Status</cell>
         [% ELSIF col == "Acknowledged"  %]<cell width='14'>Acknowledged</cell>
@@ -44,6 +45,7 @@
         [% FOREACH col = columns %]
         [% IF    col == "Site"          %]<cell>[% pi_detail.$peer_key.peer_name %]</cell>
         [% ELSIF col == "Hostname"      %]<cell>[% h.name %]</cell>
+        [% ELSIF col == "Displayname"   %]<cell>[% h.display_name %]</cell>
         [% ELSIF col == "IP"            %]<cell>[% h.address %]</cell>
         [% ELSIF col == "Status"        %]<format bg_color='[% state_color %]'><cell>[% state %]</cell></format>
         [% ELSIF col == "Acknowledged"  %]<cell>[% IF h.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
