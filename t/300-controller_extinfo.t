@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 222;
+    plan tests => 240;
 }
 
 BEGIN {
@@ -65,8 +65,10 @@ for my $url (@{$pages}) {
 
 # excel pages
 $pages = [
-    '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=xls',
+    '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=xls', # all columns
+    '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=xls&columns=1&columns=2&columns=3&columns=4&columns=5&columns=6&columns=7&columns=8&columns=9', # old compat column selection
     '/thruk/cgi-bin/extinfo.cgi?type=6&view_mode=xls',
+    '/thruk/cgi-bin/extinfo.cgi?type=6&view_mode=xls&columns=1&columns=2&columns=3&columns=4&columns=5&columns=6&columns=7&columns=8&columns=9&columns=10&columns=11',
 ];
 
 for my $url (@{$pages}) {

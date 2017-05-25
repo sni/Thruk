@@ -161,18 +161,23 @@ function thruk_onerror(msg, url, line, col, error) {
 function cleanUnderscoreUrl() {
     var newUrl = window.location.href;
     if (history.replaceState) {
-        newUrl = newUrl.replace(/\?_=\d+/g, '?');
-        newUrl = newUrl.replace(/\&_=\d+/g, '');
-        newUrl = newUrl.replace(/\?scrollTo=\d+/g, '?');
-        newUrl = newUrl.replace(/\&scrollTo=\d+/g, '');
-        newUrl = newUrl.replace(/\?autoShow=\w+/g, '?');
-        newUrl = newUrl.replace(/\&autoShow=\w+/g, '');
-        newUrl = newUrl.replace(/\?$/g, '');
-        newUrl = newUrl.replace(/\?&/g, '?');
+        newUrl = cleanUnderscore(newUrl);
         try {
             history.replaceState({}, "", newUrl);
         } catch(err) { debug(err) }
     }
+}
+
+function cleanUnderscore(str) {
+    str = str.replace(/\?_=\d+/g, '?');
+    str = str.replace(/\&_=\d+/g, '');
+    str = str.replace(/\?scrollTo=\d+/g, '?');
+    str = str.replace(/\&scrollTo=\d+/g, '');
+    str = str.replace(/\?autoShow=\w+/g, '?');
+    str = str.replace(/\&autoShow=\w+/g, '');
+    str = str.replace(/\?$/g, '');
+    str = str.replace(/\?&/g, '?');
+    return(str);
 }
 
 function bodyOnLoad(refresh) {
@@ -2174,11 +2179,13 @@ function updateExcelPermanentLink() {
     var inp  = jQuery('#excel_export_url');
     var data = jQuery(inp).parents('FORM').find('input[name!=bookmark][name!=referer][name!=view_mode][name!=all_col]').serialize();
     var base = jQuery('#excelexportlink')[0].href;
+    base = cleanUnderscore(base);
     if(!data) {
         jQuery(inp).val(base);
         return;
     }
     jQuery(inp).val(base + (base.match(/\?/) ? '&' : '&') + data);
+    initExcelExportSorting();
 }
 
 /* compare two objects and print diff
@@ -2255,6 +2262,28 @@ function fetch_long_plugin_output(td, host, service, backend, escape_html) {
         jQuery('.long_plugin_output').load(url, {}, function(text, status, req) {
         });
     }
+}
+
+function initExcelExportSorting() {
+    if(!has_jquery_ui) {
+        load_jquery_ui(function() {
+            initExcelExportSorting();
+        });
+        return;
+    }
+    if(already_sortable["excel_export"]) {
+        return;
+    }
+    already_sortable["excel_export"] = true;
+
+    jQuery('TABLE.sortable_col_table').sortable({
+        items                : 'TR.sortable_row',
+        helper               : 'clone',
+        tolerance            : 'pointer',
+        update               : function( event, ui ) {
+            updateExcelPermanentLink();
+        }
+    });
 }
 
 // make the columns sortable

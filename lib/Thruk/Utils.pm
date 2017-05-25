@@ -1287,8 +1287,8 @@ save excel file by background job
 =cut
 
 sub logs2xls {
-    my($c) = @_;
-    Thruk::Utils::Status::set_selected_columns($c);
+    my($c, $type) = @_;
+    Thruk::Utils::Status::set_selected_columns($c, [''], ($type || 'log'));
     $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
     savexls($c);
     return;

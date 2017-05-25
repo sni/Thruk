@@ -4,22 +4,23 @@
   <worksheet name='[% name %]' autofilter='A1:[% last_col %][% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
-        [% IF show_backends_in_table %]
-          [% IF columns.13 %]<cell width='15'>Site</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Site"          %]<cell width='15'>Site</cell>
+        [% ELSIF col == "Hostname"      %]<cell width='30'>Hostname</cell>
+        [% ELSIF col == "IP"            %]<cell width='10'>IP</cell>
+        [% ELSIF col == "Status"        %]<cell width='20'>Status</cell>
+        [% ELSIF col == "Acknowledged"  %]<cell width='14'>Acknowledged</cell>
+        [% ELSIF col == "Downtime"      %]<cell width='12'>Downtime</cell>
+        [% ELSIF col == "Notifications" %]<cell width='12'>Notifications</cell>
+        [% ELSIF col == "Active Checks" %]<cell width='14'>Active Checks</cell>
+        [% ELSIF col == "Flapping"      %]<cell width='9'>Flapping</cell>
+        [% ELSIF col == "Last Check"    %]<cell width='20'>Last Check</cell>
+        [% ELSIF col == "Duration"      %]<cell width='15'>Duration</cell>
+        [% ELSIF col == "Status Information"       %]<cell width='80'>Status Information</cell>
+        [% ELSIF col == "Extra Status Information" %]<cell width='80'>Extra Status Information</cell>
+        [% ELSE %]<cell width='30'>[% col %]</cell>
         [% END %]
-        [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
-        [% IF columns.2  %]<cell width='10'>IP</cell>[% END %]
-        [% IF columns.3  %]<cell width='20'>Status</cell>[% END %]
-        [% IF columns.4  %]<cell width='14'>Acknowledged</cell>[% END %]
-        [% IF columns.5  %]<cell width='12'>Downtime</cell>[% END %]
-        [% IF columns.6  %]<cell width='12'>Notifications</cell>[% END %]
-        [% IF columns.7  %]<cell width='14'>Active Checks</cell>[% END %]
-        [% IF columns.8  %]<cell width='9'>Flapping</cell>[% END %]
-        [% IF columns.9  %]<cell width='20'>Last Check</cell>[% END %]
-        [% IF columns.10 %]<cell width='15'>Duration</cell>[% END %]
-        [% IF columns.11 %]<cell width='80'>Status Information</cell>[% END %]
-        [% IF columns.12 %]<cell width='80'>Extra Status Information</cell>[% END %]
-        [% FOREACH col = extracolumns %]<cell width='30'>[% col %]</cell>[% END %]
+        [% END %]
       </format>
     </row>
     [% FOREACH h = data %]
@@ -40,30 +41,24 @@
         [% state_color = 'red' %]
       [% END %]
       <row>
-        [% IF show_backends_in_table %]
-          [% IF columns.13 %]<cell>[% pi_detail.$peer_key.peer_name %]</cell>[% END %]
-        [% END %]
-        [% IF columns.1  %]<cell>[% h.name %]</cell>[% END %]
-        [% IF columns.2  %]<cell>[% h.address %]</cell>[% END %]
-        [% IF columns.3  %]<format bg_color='[% state_color %]'>
-          <cell>[% state %]</cell>
-        </format>[% END %]
-        [% IF columns.4  %]<cell>[% IF h.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.5  %]<cell>[% IF h.scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% IF h.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.7  %]<cell>[% IF h.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.8  %]<cell>[% IF h.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.9  %]<format num_format='yyyy-mm-dd hh:mm:ss'>
-          <cell type='date_time'>[% IF h.has_been_checked == 0 %][% ELSE %][% format_date(h.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
-        </format>[% END %]
-        [% IF columns.10 %]<cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>[% END %]
-        [% IF columns.11 %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% escape_xml(h.plugin_output) %][% END %]</cell>[% END %]
-        [% IF columns.12 %]<cell>[% IF h.has_been_checked == 1 %][% escape_xml(h.long_plugin_output) %][% END %]</cell>[% END %]
-        [% IF extracolumns.size > 0 %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Site"          %]<cell>[% pi_detail.$peer_key.peer_name %]</cell>
+        [% ELSIF col == "Hostname"      %]<cell>[% h.name %]</cell>
+        [% ELSIF col == "IP"            %]<cell>[% h.address %]</cell>
+        [% ELSIF col == "Status"        %]<format bg_color='[% state_color %]'><cell>[% state %]</cell></format>
+        [% ELSIF col == "Acknowledged"  %]<cell>[% IF h.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
+        [% ELSIF col == "Downtime"      %]<cell>[% IF h.scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>
+        [% ELSIF col == "Notifications" %]<cell>[% IF h.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>
+        [% ELSIF col == "Active Checks" %]<cell>[% IF h.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>
+        [% ELSIF col == "Flapping"      %]<cell>[% IF h.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
+        [% ELSIF col == "Last Check"    %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell type='date_time'>[% IF h.has_been_checked == 0 %][% ELSE %][% format_date(h.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell></format>
+        [% ELSIF col == "Status Information"       %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% escape_xml(h.plugin_output) %][% END %]</cell>
+        [% ELSIF col == "Extra Status Information" %]<cell>[% IF h.has_been_checked == 1 %][% escape_xml(h.long_plugin_output) %][% END %]</cell>
+        [% ELSE %]
           [% cust_vars = get_custom_vars(c, h) %]
-          [% FOREACH col = extracolumns; col = col.replace('^_', '') %]
-            <cell>[% IF cust_vars.exists(col); escape_xml(cust_vars.$col); END %]</cell>
-          [% END %]
+          [% col = col.replace('^_', '') %]
+          <cell>[% IF cust_vars.exists(col); escape_xml(cust_vars.$col); END %]</cell>
+        [% END %]
         [% END %]
       </row>
     [% END %]

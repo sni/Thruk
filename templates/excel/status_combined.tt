@@ -1,4 +1,4 @@
 ﻿<workbook>
-  [% PROCESS "excel/_status_hostdetail_worksheet.tt" data=hosts     name="Hosts"    columns=host_columns    last_col=host_last_col    extracolumns=host_extracolumns %]
-  [% PROCESS "excel/_status_detail_worksheet.tt"     data=services  name="Services" columns=service_columns last_col=service_last_col extracolumns=service_extracolumns %]
+  [% PROCESS "excel/_status_hostdetail_worksheet.tt" data=hosts     name="Hosts"    columns=host_columns    last_col=host_last_col    %]
+  [% PROCESS "excel/_status_detail_worksheet.tt"     data=services  name="Services" columns=service_columns last_col=service_last_col %]
 </workbook>

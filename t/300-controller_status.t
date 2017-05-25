@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1098;
+    plan tests => 1140;
 }
 
 BEGIN {
@@ -137,10 +137,16 @@ for my $url (@{$pages}) {
 $pages = [
 # Excel Export
     '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?host=all&view_mode=xls&columns=1&columns=2&columns=3&columns=12',
+    '/thruk/cgi-bin/status.cgi?host=all&view_mode=xls&columns=Hostname&columns=Service&columns=IP&columns=Status&columns=Host+Acknowledged',
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=xls',
-    '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&view_mode=xls&columns=1&columns=2&columns=3&columns=4&columns=5&columns=6&columns=7&columns=8&columns=9&columns=10&columns=11&columns=12',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&view_mode=xls&columns=IP&columns=Hostname&columns=Status',
     '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems&view_mode=xls',
     '/thruk/cgi-bin/status.cgi?style=perfmap&dfl_s0_type=service&dfl_s0_op=%3D&dfl_s0_value='.$service.'&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?style=perfmap&dfl_s0_type=service&dfl_s0_op=%3D&dfl_s0_value='.$service.'&view_mode=xls&columns=1&columns=2&columns=3',
+    '/thruk/cgi-bin/status.cgi?style=perfmap&dfl_s0_type=service&dfl_s0_op=%3D&dfl_s0_value='.$service.'&view_mode=xls&columns=Hostname&columns=Service&columns=Status',
 ];
 
 for my $url (@{$pages}) {

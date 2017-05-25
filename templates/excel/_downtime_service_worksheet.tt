@@ -4,32 +4,38 @@
   <worksheet name='[% name %]' autofilter='A1:[% last_col %][% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
-        [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
-        [% IF columns.2  %]<cell width='30'>Service</cell>[% END %]
-        [% IF columns.3  %]<cell width='20'>Entry Time</cell>[% END %]
-        [% IF columns.4  %]<cell width='16'>Author</cell>[% END %]
-        [% IF columns.5  %]<cell width='40'>Comment</cell>[% END %]
-        [% IF columns.6  %]<cell width='20'>Start Time</cell>[% END %]
-        [% IF columns.7  %]<cell width='20'>End Time</cell>[% END %]
-        [% IF columns.8  %]<cell width='14'>Type</cell>[% END %]
-        [% IF columns.9  %]<cell width='14'>Duration</cell>[% END %]
-        [% IF columns.10 %]<cell width='16'>Downtime ID</cell>[% END %]
-        [% IF columns.11 %]<cell width='16'>Trigger ID</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Hostname"    %]<cell width='30'>Hostname</cell>
+        [% ELSIF col == "Service"     %]<cell width='30'>Service</cell>
+        [% ELSIF col == "Entry Time"  %]<cell width='20'>Entry Time</cell>
+        [% ELSIF col == "Author"      %]<cell width='16'>Author</cell>
+        [% ELSIF col == "Comment"     %]<cell width='40'>Comment</cell>
+        [% ELSIF col == "Start Time"  %]<cell width='20'>Start Time</cell>
+        [% ELSIF col == "End Time"    %]<cell width='20'>End Time</cell>
+        [% ELSIF col == "Type"        %]<cell width='14'>Type</cell>
+        [% ELSIF col == "Duration"    %]<cell width='14'>Duration</cell>
+        [% ELSIF col == "Downtime ID" %]<cell width='16'>Downtime ID</cell>
+        [% ELSIF col == "Trigger ID"  %]<cell width='16'>Trigger ID</cell>
+        [% END %]
+        [% END %]
       </format>
     </row>
     [% FOREACH d = data %]
       <row>
-        [% IF columns.1  %]<cell>[% escape_xml(d.host_name) %]</cell>[% END %]
-        [% IF columns.2  %]<cell>[% escape_xml(d.service_description) %]</cell>[% END %]
-        [% IF columns.3  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
-        [% IF columns.4  %]<cell>[% escape_xml(d.author) %]</cell>[% END %]
-        [% IF columns.5  %]<cell>[% escape_xml(d.comment) %]</cell>[% END %]
-        [% IF columns.6  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.start_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
-        [% IF columns.7  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.end_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
-        [% IF columns.8  %]<cell>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</cell>[% END %]
-        [% IF columns.9  %]<cell>[% IF d.fixed %][% duration(d.end_time - d.start_time) %][% ELSE%][% duration(d.duration) %][% END %]</cell>[% END %]
-        [% IF columns.10 %]<cell>[% d.id %]</cell>[% END %]
-        [% IF columns.11 %]<cell>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Hostname"    %]<cell>[% escape_xml(d.host_name) %]</cell>
+        [% ELSIF col == "Service"     %]<cell>[% escape_xml(d.service_description) %]</cell>
+        [% ELSIF col == "Entry Time"  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
+        [% ELSIF col == "Author"      %]<cell>[% escape_xml(d.author) %]</cell>
+        [% ELSIF col == "Comment"     %]<cell>[% escape_xml(d.comment) %]</cell>
+        [% ELSIF col == "Start Time"  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.start_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
+        [% ELSIF col == "End Time"    %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.end_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
+        [% ELSIF col == "Type"        %]<cell>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</cell>
+        [% ELSIF col == "Duration"    %]<cell>[% IF d.fixed %][% duration(d.end_time - d.start_time) %][% ELSE%][% duration(d.duration) %][% END %]</cell>
+        [% ELSIF col == "Downtime ID" %]<cell>[% d.id %]</cell>
+        [% ELSIF col == "Trigger ID"  %]<cell>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</cell>
+        [% END %]
+        [% END %]
       </row>
     [% END %]
   </worksheet>

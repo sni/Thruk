@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - xls exports: add column reordering
           - action menus: add close_timeout option
           - logcache:
             - performance improvements for the import and update commands

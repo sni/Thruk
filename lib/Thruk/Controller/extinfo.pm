@@ -171,7 +171,7 @@ sub _process_comments_page {
                                                              );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_'], 'comment');
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="comments.xls"' );
         $c->stash->{'template'} = 'excel/comments.tt';
         return $c->render_excel();
@@ -220,7 +220,7 @@ sub _process_downtimes_page {
                                                                );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_'], 'downtime');
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="downtimes.xls"' );
         $c->stash->{'template'} = 'excel/downtimes.tt';
         return $c->render_excel();

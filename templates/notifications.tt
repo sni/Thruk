@@ -113,7 +113,7 @@
 <div align="right">
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
-  [% PROCESS _excel_export.tt columns=[ 'Host', 'Service', 'Type', 'Time', 'Contact', 'Command', 'Information' ] %]
+  [% PROCESS _excel_export.tt columns=[ 'Host', 'Service', 'Type', 'Time', 'Contact', 'Command', 'Information' ] with_custom_vars=0 %]
 </div>
 
 <div align="center">[% PROCESS _pager.tt %]</div>

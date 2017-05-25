@@ -41,7 +41,7 @@
           [% PROCESS _table_search_field.tt ids=["host_comments_table", "service_comments_table"] %]
           [% PROCESS _json_export.tt %]
           [% columns=[ 'Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ] %]
-          [% PROCESS _excel_export.tt columns=columns %]
+          [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
         </td>
       </tr>
       <tr>

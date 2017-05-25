@@ -1497,35 +1497,53 @@ sub get_groups_filter {
 
 =head2 set_selected_columns
 
-  set_selected_columns($c)
+  set_selected_columns($c, $prefixes, [$type])
 
 set selected columns for the excel export
 
 =cut
 sub set_selected_columns {
-    my($c) = @_;
+    my($c, $prefixes, $type, $default_cols) = @_;
 
-    for my $prefix ('', 'host_', 'service_') {
-        my $columns = {};
-        my $last_col = 50;
-        my $extracolumns = [];
-        for my $x (0..50) { $columns->{$x} = 1; }
-        if(defined $c->req->parameters->{$prefix.'columns'}) {
-            $last_col = 0;
-            for my $x (0..50) { $columns->{$x} = 0; }
-            my $cols = Thruk::Utils::list($c->req->parameters->{$prefix.'columns'});
-            for my $nr (@{$cols}) {
-                if($nr !~ m/^\d+$/mx) {
-                    push @{$extracolumns}, $nr;
-                } else {
-                    $columns->{$nr} = 1;
-                }
-                $last_col++;
+    confess("must set a prefix") unless $prefixes;
+
+    my $default_compat_columns = {
+        'host'             => ['Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Extra Status Information'],
+        'service'          => ['Hostname', 'IP', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information', 'Extra Status Information'],
+        'host_downtime'    => ['Hostname', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ],
+        'service_downtime' => ['Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ],
+        'host_comment'     => ['Hostname', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ],
+        'service_comment'  => ['Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ],
+        'log'              => ['Time', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ],
+        'notification'     => ['Host', 'Service', 'Type', 'Time', 'Contact', 'Command', 'Information'],
+    };
+
+    for my $prefix (@{$prefixes}) {
+        my $columns = [];
+        my $last_col = 0;
+        my $type = $type;
+        if(!$type) {
+            if($prefix eq 'host_') {
+                $type = "host";
+            } elsif($prefix eq 'service_') {
+                $type = "service";
             }
+        }
+        if(!$type) {
+            confess("must set a type");
+        }
+        my $ref_col = $default_cols || $default_compat_columns->{$type} || $default_compat_columns->{$prefix.$type};
+        my $cols    = Thruk::Utils::list($c->req->parameters->{$prefix.'columns'} || $ref_col);
+        for my $col (@{$cols}) {
+            if($col =~ m/^\d+$/mx) {
+                push @{$columns}, $ref_col->[$col-1];
+            } else {
+                push @{$columns}, $col;
+            }
+            $last_col++;
         }
         $c->stash->{$prefix.'last_col'} = chr(65+$last_col-1);
         $c->stash->{$prefix.'columns'}  = $columns;
-        $c->stash->{$prefix.'extracolumns'} = $extracolumns;
     }
     return;
 }

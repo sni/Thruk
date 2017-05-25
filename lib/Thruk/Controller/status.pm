@@ -520,7 +520,7 @@ sub _process_details_page {
     }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'service');
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
         $c->stash->{'template'} = 'excel/status_detail.tt';
@@ -641,7 +641,7 @@ sub _process_hostdetails_page {
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns );
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'host');
         my $filename = 'status.xls';
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
         $c->stash->{'data'}     = $hosts;
@@ -1186,7 +1186,7 @@ sub _process_combined_page {
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'hosts'}     = $hosts;
         $c->stash->{'services'}  = $services;
@@ -1265,15 +1265,12 @@ sub _process_perfmap_page {
     }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
-        $c->stash->{'last_col'} = chr(65+(scalar keys %{$keys})-1);
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'service', ['Hostname', 'Service', 'Status', sort keys %{$keys}]);
         my $filename = 'performancedata.xls';
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'name'}      = 'Performance';
-        $c->stash->{'data'}     = $data;
-        $c->stash->{'col_sel'}   = $c->stash->{'columns'};
-        $c->stash->{'col_tr'}    = { 'host_name' => 'Hostname', 'description' => 'Service', 'state' => 'Status' };
-        $c->stash->{'columns'}   = ['host_name', 'description', 'state', sort keys %{$keys}];
+        $c->stash->{'data'}      = $data;
+        $c->stash->{'col_tr'}    = { 'Hostname' => 'host_name', 'Service' => 'description', 'Status' => 'state' };
         $c->stash->{'template'}  = 'excel/generic.tt';
         return $c->render_excel();
     }

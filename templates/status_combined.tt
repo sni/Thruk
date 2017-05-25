@@ -66,7 +66,7 @@
       [% hostcolumns=[ 'Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Extra Status Information' ] %]
       [% servicecolumns=[ 'Hostname', 'IP', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information', 'Extra Status Information' ] %]
       [% IF show_backends_in_table != 0 %][% hostcolumns.push('Site'); servicecolumns.push('Site') %][% END %]
-      [% PROCESS _excel_export.tt hostcolumns=hostcolumns servicecolumns=servicecolumns columns='' %]
+      [% PROCESS _excel_export.tt hostcolumns=hostcolumns servicecolumns=servicecolumns columns='' with_custom_vars=1 %]
     </td>
   </tr>
 </table>
