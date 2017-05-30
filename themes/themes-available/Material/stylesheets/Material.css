@@ -1,0 +1,1468 @@
+/* roboto-regular - latin */
+@font-face {
+  font-family: 'Roboto-Regular';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/roboto-v15-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local('Roboto'), local('Roboto-Regular'),
+       url('../fonts/roboto-v15-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/roboto-v15-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/roboto-v15-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/roboto-v15-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/roboto-v15-latin-regular.svg#Roboto') format('svg'); /* Legacy iOS */
+}
+/* roboto-700 - latin */
+@font-face {
+  font-family: 'Roboto Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/roboto-v15-latin-700.eot'); /* IE9 Compat Modes */
+  src: local('Roboto Bold'), local('Roboto-Bold'),
+       url('../fonts/roboto-v15-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/roboto-v15-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/roboto-v15-latin-700.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/roboto-v15-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/roboto-v15-latin-700.svg#Roboto') format('svg'); /* Legacy iOS */
+}
+
+/* roboto-condensed-regular - latin */
+@font-face {
+  font-family: 'Roboto Condensed Regular';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/roboto-condensed-v13-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'),
+       url('../fonts/roboto-condensed-v13-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/roboto-condensed-v13-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/roboto-condensed-v13-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/roboto-condensed-v13-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/roboto-condensed-v13-latin-regular.svg#RobotoCondensed') format('svg'); /* Legacy iOS */
+}
+/* roboto-condensed-700 - latin */
+@font-face {
+  /*font-family: 'Roboto Condensed Bold';*/
+  font-family: 'Roboto-Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/roboto-condensed-v13-latin-700.eot'); /* IE9 Compat Modes */
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'),
+       url('../fonts/roboto-condensed-v13-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/roboto-condensed-v13-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/roboto-condensed-v13-latin-700.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/roboto-condensed-v13-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/roboto-condensed-v13-latin-700.svg#RobotoCondensed') format('svg'); /* Legacy iOS */
+}
+
+
+#currentversioninfo {
+	font-size:14px;
+	background-color: #f1f1f1;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+#currentversioninfo .product,#currentversioninfo .version {
+  font-size:16px;
+  font-family: 'Roboto-Bold';
+}
+
+#currentversioninfo .releasedate {
+  font-size:13px;
+  margin:5px 0 0;
+}
+
+#currentversioninfo .whatsnew {
+  font-size:13px;
+  font-family: 'Roboto-Bold';
+  margin:50px 0 0;
+}
+
+#mainbrandsplash {
+  font-size:14px;
+  font-family: 'Roboto-Bold';
+  margin:0 0 35px;
+}
+
+#maincopy {
+  margin:0 0 15px;
+}
+
+#search-results {
+  background:#FFCD00;
+}
+
+#splashpage #mainfooter {
+  margin:100px 0 0;
+}
+
+#splashpage #mainfooter .disclaimer {
+  margin:auto;
+  width:80%;
+}
+
+#splashpage #mainfooter .logos {
+	border-top-width: 2px;
+	border-top-style: solid;
+	border-top-color: #738eb5;
+	margin-top: 15px;
+	margin-right: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+	padding-top: 10px;
+}
+
+#splashpage {
+  text-align:center;
+}
+
+.featureDisabled,.featureDisabledNotifications,.featureItemDisabledServiceNotifications,.featureItemDisabledHostNotifications,.featureDisabledFlapDetection,.featureItemDisabledServiceFlapDetection,.featureItemDisabledHostFlapDetection,.featureItemServicesFlapping,.featureItemHostsFlapping,.featureDisabledHandlers,.featureItemDisabledServiceHandlers,.featureItemDisabledHostHandlers,.featureDisabledActiveChecks,.featureItemDisabledActiveServiceChecks,.featureItemDisabledActiveHostChecks,.featureDisabledPassiveChecks,.featureItemDisabledPassiveServiceChecks,.featureItemDisabledPassiveHostChecks {
+  color:#ffffff;
+  background-color:#f0666c;
+  white-space: nowrap;
+}
+.featureDisabled a,.featureDisabledNotifications a,.featureItemDisabledServiceNotifications a,.featureItemDisabledHostNotifications a,.featureDisabledFlapDetection a,.featureItemDisabledServiceFlapDetection a,.featureItemDisabledHostFlapDetection a,.featureItemServicesFlapping a,.featureItemHostsFlapping a,.featureDisabledHandlers a,.featureItemDisabledServiceHandlers a,.featureItemDisabledHostHandlers a,.featureDisabledActiveChecks a,.featureItemDisabledActiveServiceChecks a,.featureItemDisabledActiveHostChecks a,.featureDisabledPassiveChecks a,.featureItemDisabledPassiveServiceChecks a,.featureItemDisabledPassiveHostChecks a, .featureItemEnabledActiveServiceChecks a {
+  color:inherit;
+}
+
+.filter_button_mini {
+  left:-8px;
+  position:relative;
+  top:-3px;
+}
+
+.hostUNREACHABLE {
+  background-color:#e12d56;
+}
+
+.infoBoxBadProcStatus {
+  color:#e12d56;
+}
+
+.infoMessage,.optionBoxTitle,.dataTitle,.infoBoxTitle,.filterTitle,.statusTitle,.itemTotalsTitle,.queueTitle,.optBoxTitle,.descriptionTitle,.navBoxTitle {
+  font-family: 'Roboto-Bold';
+}
+
+DIV.infoMessage {
+  text-align: center;
+}
+
+.navbarlogo {
+  margin:0 0 10px;
+}
+
+.navbarsearch fieldset {
+  border: 0px none;
+}
+
+.navbarsearch fieldset legend {
+  line-height:0;
+  visibility:hidden;
+}
+
+.navbarsearch input {
+  font-size:12px;
+  width:120px;
+}
+
+.navsection {
+	line-height:16px;
+	margin:5px 0 10px;
+}
+
+.navsectionfooter {
+/*  background:#c9d4e3;*/
+  background:#d9d9d9;
+  height:7px;
+  line-height:7px;
+}
+
+.navsectiontitle {
+	background-color:#FFCD00;
+	font-size:14px;
+    font-family: 'Roboto-Bold';
+	height:30px;
+	line-height:30px;
+	text-align:center;
+	vertical-align:bottom;
+/*
+	border-top-width: 2px;
+	border-top-style: solid;
+	border-top-color: #FFCD00;
+*/
+	cursor: pointer;
+}
+.navsectiontitle:hover {
+	background-color:#FFDC4F;
+}
+
+.notificationsDISABLED,.queueDISABLED,.checksDISABLED,.eventhandlersDISABLED,.flapdetectionDISABLED,.flapping,.downtimeACTIVE,.processCRITICAL,.hostDOWN,.hostUNREACHABLE,.serviceCRITICAL,input.button_peerDOWN,.peerDOWN {
+  color:#ffffff;
+  background-color:#e12d56;
+}
+.hostDOWN a {
+  color:inherit;
+}
+
+.featureItemEnabledServiceHandlers,.featureItemEnabledHostHandlers,.featureItemEnabledHostNotifications,input.button_peerUP,.featureItemEnabledPassiveServiceChecks,.featureItemEnabledPassiveHostChecks,.serviceOK,.notflapping,.downtimeINACTIVE,.checksENABLED,.notificationsENABLED,.eventhandlersENABLED,.flapdetectionENABLED,.hostUP,.queueENABLED {
+  background-color:#33cc66;
+  color:#ffffff;
+  white-space: nowrap;
+}
+.hostUP a {
+  color:inherit;
+}
+
+.processOK,.featureEnabled,.featureEnabledNotifications,.featureItemEnabledServiceNotifications,.featureEnabledFlapDetection,.featureItemEnabledServiceFlapDetection,.featureItemEnabledHostFlapDetection,.featureItemServicesNotFlapping,.featureItemHostsNotFlapping,.featureEnabledHandlers,.featureEnabledActiveChecks,.featureItemEnabledActiveServiceChecks,.featureItemEnabledActiveHostChecks,.featureEnabledPassiveChecks,TD.hostUP {
+  background-color:#33cc66;
+  white-space: nowrap;
+  color:#ffffff;
+}
+
+td.outageImportantProblem a,td.hostImportantProblem a,td.serviceImportantProblem a {
+  background-color:#e12d56;
+  color:#ffffff;
+  white-space:nowrap;
+}
+.outageImportantProblem,.hostImportantProblem,.serviceImportantProblem {
+  background-color:#e12d56;
+  white-space:nowrap;
+}
+
+td.outageUnimportantProblem a,td.hostUnimportantProblem a,td.serviceUnimportantProblem a {
+  background-color:#f0666c;
+  color:#ffffff;
+  white-space:nowrap;
+}
+.outageUnimportantProblem,.hostUnimportantProblem,.serviceUnimportantProblem {
+  background-color:#f0666c;
+  white-space:nowrap;
+}
+
+.overDivContent {
+  background-color:#ffffff;
+  border:0 none #000000;
+}
+
+.overDivHead {
+  font-size:12px;
+  line-height:12px;
+}
+
+.processWARNING,.serviceWARNING {
+  background-color:#ffcd00;
+}
+
+.servicePENDING,.hostPENDING {
+  background-color:#ACACAC;
+}
+
+.serviceUNKNOWN {
+  background-color:#ffe57b;
+}
+
+/*
+td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:hover, .tableRowHover,td.newfilter:hover {
+	background-color:#deff00;
+}
+*/
+TD.statusEven.tableRowSelected {
+  background:#ffdc4f !important;
+  height:22px;
+}
+TD.statusOdd.tableRowSelected {
+  background:#ffe57b !important;
+  height:22px;
+}
+
+DIV.blockHead,DIV.commandTitle {
+  /*background-color:#eaeff6;*/
+  /*background-image:url(../images/border_big.gif);
+  background-repeat:repeat-x;*/
+  font-size:14px;
+  font-family: 'Roboto-Bold';
+  line-height:16px;
+  margin:0;
+  padding:0;
+}
+
+DIV.comment,DIV.downtime {
+  text-align:center;
+  vertical-align:top;
+}
+
+DIV.commentNav,DIV.downtimeNav {
+  font-family: 'Roboto-Bold';
+  text-align:center;
+}
+
+DIV.commentTitle,DIV.downtimeTitle {
+  font-family: 'Roboto-Bold';
+  padding-bottom:5px;
+  padding-top:15px;
+  text-align:center;
+}
+
+DIV.data {
+  font-size:12px;
+  font-family: 'Roboto-Bold';
+  height:20px;
+  padding:0;
+  text-align:center;
+}
+
+DIV.perfTypeTitle,DIV.commandTitle {
+  font-family: 'Roboto-Bold';
+  height:20px;
+  padding:0;
+  text-align:center;
+  vertical-align:middle;
+  line-height: 18px;
+}
+DIV.dataTitle {
+  font-family: 'Roboto-Bold';
+  padding:0;
+  text-align:center;
+  vertical-align:middle;
+  line-height: 18px;
+}
+
+DIV.errorDescription {
+  font-size:12px;
+  text-align:center;
+}
+
+DIV.errorMessage {
+  color:#e12d56;
+  font-size:14px;
+  text-align:center;
+}
+
+DIV.hostTotals,DIV.serviceTotals,DIV.status {
+  font-size:11px;
+  /*font-family: 'Roboto-Bold';*/
+  margin-bottom:2px;
+}
+
+DIV.infoBoxTitle {
+  font-size:12px;
+  font-family: 'Roboto-Bold';
+  height:20px;
+  line-height:13px;
+  text-align:center;
+  vertical-align:middle;
+}
+
+DIV.peerDIS,DIV.peerDOWN {
+  text-align:center;
+  width:100%;
+}
+DIV.peerDOWN {
+  background-color: #e12d56;
+}
+
+DIV.perfDataTitle {
+  background-color:transparent;
+  background-image:none;
+  border:1px none;
+}
+
+DIV.perfTypeTitle {
+  font-size:13px;
+  font-family: 'Roboto-Bold';
+}
+
+DIV.statusTitle,DIV.dateSelectTitle,DIV.navBoxTitle {
+  font-size:18px;
+  font-family: 'Roboto-Bold';
+}
+
+DIV.dataTitle {
+	font-size:18px;
+    font-family: 'Roboto-Bold';
+}
+
+DIV.commentTitle {
+	font-size:18px;
+    font-family: 'Roboto-Bold';
+}
+
+DIV.downtimeTitle {
+	font-size:18px;
+    font-family: 'Roboto-Bold';
+}
+
+DIV.reportSelectTitle {
+	font-size:18px;
+    font-family: 'Roboto-Bold';
+}
+
+DIV.statusTitle {
+    font-family: 'Roboto-Bold';
+	font-size: 18px;
+}
+
+TABLE.cmd_pane {
+  background-color:#ffffff;
+  border: 0px none;
+  box-shadow: 3px 6px 15px 3px rgba(0, 0, 0, 0.46);
+  margin:0;
+  padding:0;
+  border-spacing:0px;
+}
+.shadow {
+  background:transparent;
+}
+
+TABLE.cmd_pane tbody > tr > td {
+  background-color:#ffffff;
+  border:medium none;
+}
+
+TABLE.cmd_pane tbody > tr > th {
+  background-color:#5f6268;
+  border: 0px none;
+  font-size:12px;
+  height:20px;
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  white-space:nowrap;
+}
+
+TABLE.cmd_pane tbody > tr > th > A > IMG {
+  vertical-align: middle;
+}
+
+TABLE.cmd_pane th,TABLE.cmd_pane a,TABLE.cmd_pane a:hover {
+  color:#f1f1f1;
+}
+
+
+.commandPanel {
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+}
+
+TABLE.commandPanel TD,TD.statusOdd {
+  background-color:#ffffff;
+}
+TABLE.commandPanel TD {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+TABLE.commandPanel TH {
+  background-color:#ffffff;
+  background-image:none;
+  border:0 none;
+  vertical-align:top;
+}
+
+TABLE.comment,TABLE.downtime,TABLE.notifications {
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  background-color:#f1f1f1;
+  text-align:center;
+}
+
+TABLE.queue,TABLE.procInfoTable,TABLE#configtable,TABLE.confTable {
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+}
+TABLE.data,TABLE.queue {
+  border: 0px none;
+  background-color:#fff;
+  margin:0;
+  padding:0;
+  text-align:center;
+}
+TABLE.service_metrics,TABLE.host_metrics,TABLE.service_passive_metrics,TABLE.host_passive_metrics,TABLE.livestatus_metrics,TABLE.service_check_metrics,TABLE.services_passive_check_metrics,TABLE.host_check_metrics,TABLE.host_passive_check_metrics{
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+}
+DIV.blockHead + TABLE.command {
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  background-color:#fff;
+}
+TABLE.command {
+  border-spacing:0;
+  margin:0;
+  padding:0;
+  text-align:center;
+}
+
+TABLE.extdetails {
+  width:90%;
+  max-width: 1000px;
+}
+
+TABLE.filter {
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+}
+TD.filterTitle {
+  height: 28px;
+}
+/*TABLE.filter_table {
+  background-color:#fff;
+  border-bottom:1px #E2DECD outset;
+  border-left:1px #E2DECD outset;
+  border-right:1px #E2DECD outset;
+  padding-left:5px;
+}*/
+
+TABLE.infoBox {
+  background-color:#ffffff;
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  margin-left:0;
+  margin-right:2px;
+  padding:3px 3px 3px 5px;
+  width:280px;
+  white-space: nowrap;
+  margin-bottom: 12px;
+}
+
+TABLE.linkBox {
+	background-color:#fff;
+    /* border:1px #5777A6 outset; */
+    border: 0px none;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+	/*margin-top: 12px;*/
+	padding-top: 3px;
+	padding-right: 3px;
+	padding-bottom: 3px;
+	padding-left: 5px;
+	width: 280px;
+	margin-bottom: 12px;
+}
+
+TABLE.logEntries {
+/*  background-color:#eaeff6;*/
+  background-color:#d9d9d9;
+  border:1px #E2DECD outset;
+  margin:2px;
+  text-align:center;
+  width:100%;
+}
+
+TABLE.overDivHead {
+  font-family: 'Roboto-Bold';
+  background-color:#5f6268;
+  color:#f1f1f1;
+  border:0 none;
+  margin:0;
+  padding:3px;
+}
+
+/*TABLE.optBox {
+  padding: 2px;
+  padding-right: 5px;
+  background: rgba(255, 255, 255, 0.3);
+}*/
+
+TABLE.perfTitleTable,TABLE.perfTitleTable TD,TABLE.perfTitleTable TR {
+  border-spacing:0;
+  margin:0;
+  padding:0;
+}
+
+TABLE.serviceTotals,TABLE.hostTotals {
+  color:#5f6268;
+  background-color: #ffffff;
+  border: 0px none;
+/*  border:1px #d9d9d9 outset; */
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  margin:2px;
+  text-align:center;
+  width:280px;
+}
+
+TABLE.status {
+  background-color:#f5f8fc;
+  text-align:center;
+}
+
+TABLE.statusgroups TD {
+  font-weight:normal;
+}
+
+TD,TH {
+  border:medium none;
+}
+
+TD.commandPanel,TD.stateInfoPanel, TD.confPanel {
+  background-color:#fff;
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  margin:2px;
+  text-align:center;
+}
+
+TD.commandPanel {
+  min-width: 300px;
+}
+TD.confPanel TABLE.confPanel {
+  margin-top: 5px;
+  width: 100%;
+}
+TD.confPanel {
+  min-width: 200px;
+}
+
+TD.comment,TD.downtime,TD.notificationsEven,TD.status {
+  padding:0;
+}
+
+TD.dataEven,TD.queueEven {
+
+  border-bottom:2px solid #f5f8fc;
+  border-right:2px solid #f5f8fc;
+  height:22px;
+  padding:0 3px;
+}
+
+TD.dataOdd,TD.queueOdd {
+  background-color:#ffffff;
+  border-bottom:2px solid #f5f8fc;
+  border-right:2px solid #f5f8fc;
+  height:22px;
+  padding:0 3px;
+}
+
+TD.dataVar {
+  font-family: 'Roboto-Bold';
+  vertical-align:top;
+}
+
+TD.dataVar,TD.dataVal,TD.command {
+  height:22px;
+  padding:0 3px;
+}
+
+TD.filter_table,body.showlog td.filter,body.showlog td.filterName,body.showlog td.filterValue,body.showlog td.filterTitle, TD.filter {
+  background-color:#ffffff;
+}
+TD.filterName {
+  font-family: 'Roboto-Bold';
+}
+
+TD.healthBox,TD.perfBox,TD.featureHeader,TD.outageHeader,TD.hostHeader,TD.serviceHeader {
+  background-color:#ffffff;
+  /*border-bottom:1px #5778A6 outset;
+  border-left:1px #5778A6 outset;
+  border-right:1px #5778A6 outset;*/
+  height:20px;
+  padding-left:5px;
+}
+
+TD.healthTitle,TD.perfTitle,TD.featureTitle,TD.outageTitle,TD.hostTitle,TD.serviceTitle {
+  /*background-image:url(../images/border_big.gif);
+  background-repeat:repeat-x;*/
+/*  border-left:1px #5778A6 outset;
+  border-left:1px #5778A6 outset;
+  border-right:1px #5778A6 outset;*/
+/*  border-top:1px #d9d9d9 outset;
+  border-right:1px #d9d9d9 outset;
+  border-top:1px #d9d9d9 outset;*/
+  background-color:#5f6268;
+  color:#f1f1f1;
+  font-size:12px;
+  font-family: 'Roboto-Bold';
+  height:20px;
+  line-height:13px;
+  margin:2px;
+  text-align:center;
+  vertical-align:middle;
+}
+TD.outageTitle {
+  white-space: nowrap;
+  padding-right: 3px;
+}
+
+TD.hostDOWN {
+  background-color:#e12d56;
+  font-family: 'Roboto-Bold';
+  height:22px;
+}
+
+TD.hostTotalsUP,TD.serviceTotalsOK,TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS,TD.serviceTotalsUNKNOWN,TD.hostTotals,TD.serviceTotals,TD.hostTotalsUNREACHABLE,TD.hostTotalsPENDING,TD.serviceTotalsPENDING,TD.hostTotalsPROBLEMS,TD.serviceTotalsWARNING,TD.hostTotalsDOWN,TD.serviceTotalsCRITICAL {
+  background-position:center;
+  background-repeat:no-repeat;
+  height:20px;
+  padding:0 2px;
+}
+
+TD.hostTotalsDOWN,TD.hostTotalsUNREACHABLE,TD.serviceTotalsCRITICAL {
+  background-color:#f0666c;
+  color:#ffffff;
+}
+
+TD.hostTotalsPENDING,TD.serviceTotalsPENDING {
+  background-color:#ACACAC;
+  color:#ffffff;
+}
+
+TD.hostTotalsUP,TD.serviceTotalsOK {
+  background-color:#33cc66;
+  color:#ffffff;
+}
+
+TD.hostUNREACHABLE {
+  background-color:#f0666c;
+  font-family: 'Roboto-Bold';
+  height:22px;
+}
+
+TD.logEntriesCRITICAL,TD.logEntriesDOWN,TD.logEntriesUNREACHABLE {
+  background-color:#f0666c;
+  font-family: 'Roboto-Bold';
+  height:22px;
+  padding:1px;
+}
+
+/* extinfo.0 - process information */
+table.procInfoTable tbody tr td.stateInfoTable1 table tbody tr td.dataVal {
+  white-space: nowrap;
+}
+table.procInfoTable tbody tr td.stateInfoTable1 table tbody tr td.dataValBackendVersion {
+  white-space: inherit;
+}
+table.procInfoTable tbody tr td.stateInfoTable1 table tbody tr td.dataSource {
+  white-space: normal;
+  min-width: 120px;
+}
+
+TD.logEntriesEven,TD.commentEven,TD.downtimeEven,TD.reportDataEven {
+  height:22px;
+  padding:1px;
+}
+
+TD.logEntriesINDETERMINATE,TD.logEntriesUNKNOWN,TD.notificationsACKNOWLEDGEMENT,TD.notificationsHOSTACKNOWLEDGEMENT {
+  height:22px;
+  padding:1px;
+}
+
+TD.logEntriesOK,TD.logEntriesUP {
+  background-color:#C0FFC0;
+  height:22px;
+  padding:1px;
+}
+
+TD.logEntriesOdd,TD.commentOdd,TD.downtimeOdd,TD.notificationsOdd,TD.reportDataOdd {
+  background-color:#ffffff;
+  height:22px;
+  padding:1px;
+}
+
+TD.logEntriesWARNING {
+  background-color:#FFFFC0;
+  height:22px;
+  padding:1px;
+}
+
+TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
+  background-color:#f0666c;
+  /*font-family: 'Roboto-Bold';*/
+  padding:2px;
+  text-align:center;
+  color:#ffffff;
+}
+.miniStatusDOWN a,.miniStatusUNREACHABLE a,.miniStatusCRITICAL a {
+  color:#ffffff;
+}
+
+TD.miniStatusPENDING {
+  background-color:#ACACAC;
+  /*font-family: 'Roboto-Bold';*/
+  padding:2px;
+  text-align:center;
+}
+
+TD.miniStatusUNKNOWN {
+  background-color:#ffe57b;
+  padding:0;
+  text-align:center;
+}
+
+TD.miniStatusUP,TD.miniStatusOK {
+  background-color:#33cc66;
+  /*font-family: 'Roboto-Bold';*/
+  padding:2px;
+  text-align:center;
+  color:#ffffff;
+}
+.miniStatusUP a,.miniStatusOK a {
+  color:#ffffff;
+}
+
+TD.miniStatusWARNING {
+  background-color:#ffcd00;
+  /*font-family: 'Roboto-Bold';*/
+  padding:2px;
+  text-align:center;
+}
+
+TD.navBoxItem,TD.navBoxDate,TD.optBoxItem,TD.optBoxRequiredItem {
+	font-size:11px;
+    font-family: 'Roboto-Bold';
+	/*background-color: #f1f1f1;*/
+	/*background-color: #ffffff;*/
+}
+
+TD.optBoxRequiredItem {
+  color:#e12d56;
+}
+
+TD.notificationsCRITICAL,TD.notificationsHOSTDOWN,TD.notificationsHOSTUNREACHABLE {
+  background-color:#f0666c;
+  color:#ffffff;
+  font-family: 'Roboto-Bold';
+  height:22px;
+  padding:1px;
+}
+
+TD.notificationsOK,TD.notificationsHOSTUP {
+  background-color:#33cc66;
+  height:22px;
+  padding:1px;
+}
+
+TD.notificationsWARNING {
+  background-color:#ffcd00;
+  height:22px;
+  padding:1px;
+}
+
+.serviceCRITICAL,.statusCRITICAL,.statusHOSTDOWN,.statusHOSTDOWNACK,.statusHOSTDOWNSCHED {
+  background-color:#f0666c !important;
+  color:#f1f1f1;
+  height:22px;
+  padding:2px;
+}
+.statusHOSTDOWN a {
+  color:inherit;
+}
+.statusHOSTUNREACHABLE,.statusHOSTUNREACHABLEACK,.statusHOSTUNREACHABLESCHED {
+  background-color:#f0666c !important;
+  color:#ffffff;
+  height:22px;
+}
+
+TD.serviceTotalsUNKNOWN,TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS {
+  background-color:#ffe57b;
+}
+
+TD.serviceTotalsWARNING {
+  background-color:#ffcd00;
+}
+
+TD.stateInfoTable1 > TABLE,TD.stateInfoTable2 > TABLE {
+	width: 260px;
+}
+
+TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
+  height:22px;
+}
+
+TD.statusBGUNKNOWN {
+  height:22px;
+}
+
+TD.statusBGWARNING {
+  height:22px;
+}
+
+TD.statusEven {
+  background-color:#ECECEC;
+}
+
+.statusHOSTUP,.statusOK {
+  background-color:#33cc66 !important;
+  color:#ffffff;
+  height:22px;
+  padding:2px;
+}
+
+.statusRECOVERY,.serviceOK {
+  background-color:#33cc66 !important;
+  color:#ffffff;
+  height:22px;
+  padding:2px;
+}
+
+.statusPENDING,.statusHOSTPENDING {
+  background-color:#ACACAC !important;
+  color:#ffffff;
+  height:22px;
+  padding:2px;
+}
+
+.statusUNKNOWN {
+  background-color:#ffe57b !important;
+  color:#5f6268;
+  height:22px;
+  padding:2px;
+}
+
+.statusWARNING,.serviceWarning {
+  background-color:#ffcd00 !important;
+  height:22px;
+  padding:2px;
+}
+
+TD.statusOdd.tableRowSelected, TD.statusEven.tableRowSelected, TD.tableRowSelected, TH.tableRowSelected {
+  background-color:inherit;
+}
+
+/* first row in hosts table should have normal background */
+TABLE#hoststatusTable td:first-child.statusHOSTUP,
+TABLE#hoststatusTable td:first-child.statusHOSTPENDING,
+TABLE#hoststatusTable td:first-child.statusHOSTUNREACHABLE,
+TABLE#hoststatusTable td:first-child.statusHOSTDOWN {
+  background-color:inherit;
+}
+
+TH.hostTotals {
+  width:25%;
+}
+
+TH.hostTotals,TH.serviceTotals {
+  font-family: 'Roboto-Bold';
+  height:18px;
+  padding:0 5px;
+}
+
+TH.serviceTotals {
+  width:20%;
+}
+
+TH.status,TH.data,TH.logEntries,TH.comment,TH.downtime,TH.queue,TH.notifications {
+  font-family: 'Roboto-Bold';
+  text-align:left;
+  /*background-color:#f1f1f1;*/
+  background-color:#5f6268;
+  color:#f1f1f1;
+  border: 0px none;
+  font-size:12px;
+  height:20px;
+  padding:0 2px;
+  white-space:nowrap;
+}
+TH.data a {
+  color:#f1f1f1;
+}
+TABLE.commandPanel TH.comment {
+  color:#5f6268;
+}
+
+TR.command > TD {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+a {
+  color:#5f6268;
+  text-decoration:none;
+}
+
+a:hover {
+  text-decoration:underline;
+}
+
+body {
+  background:#f1f1f1 url(../images/bg.png) repeat-x;
+  /*background-size: cover;*/
+  background-attachment: scroll;
+  color:#5f6268;
+  font-family: 'Roboto-Regular';
+  font-size:11px;
+  line-height:18px;
+  margin-top:25px;
+  margin-right:5px;
+}
+
+body.config TD.dataUserVar {
+  padding:5px;
+  font-size:14px;
+}
+
+body.config TH.data {
+  padding:5px;
+}
+
+/*body.navbar {
+  background-color:#d9d9d9;
+}*/
+
+div.navbar {
+  background:#d9d9d9 url(../images/bg.png) repeat-x;
+  /*background-color:#f1f1f1;*/
+  border:0 none;
+  text-align: center;
+  margin: 0px;
+  line-height: 18px;
+  /*top: -6px*/
+}
+div.navbar img {
+  position: relative;
+  top: 6px
+}
+div.navbar li {
+  color: #5f6268;
+}
+div.navsectiontitle {
+  color:#5f6268;
+}
+
+div.navsection {
+  margin:0 0 0;
+}
+
+element.style {
+  visibility:visible;
+}
+
+table.overDivTable {
+  font-family: 'Roboto-Regular';
+  font-size: 11px;
+  border: 0px none;
+  box-shadow: 3px 6px 15px 3px rgba(0, 0, 0, 0.46);
+  border-spacing: 0px;
+
+}
+
+table.overDivTable > tbody > tr > td {
+  background-color:#ffffff;
+  border:0px none;
+  margin:0;
+}
+
+table.overDivTable a {
+  font-size:12px;
+  font-family: 'Roboto-Bold';
+  color:#f1f1f1;
+}
+
+td.filter {
+  padding-left:5px;
+  padding-right:3px;
+}
+
+td.statusEven,td.statusOdd,TD.statusHOSTPENDING,TD.statusHOSTDOWN,TD.statusHOSTUP,TD.statusHOSTUNREACHABLE,TD.statusSERVICEOK,TD.statusSERVICEWARNING,TD.statusSERVICECRITICAL,TD.statusSERVICEUNKNOWN,TD.statusSERVICEPENDING,TABLE.status tbody tr td.tableRowHover {
+  height:22px;
+}
+TABLE.status tbody tr TABLE#multi_table td.tableRowHover {
+  height:auto;
+}
+
+ul.navsectionlinks {
+	background-color:#d9d9d9;
+	list-style:none;
+	margin:0;
+	padding:0;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #b3b3b3;
+}
+
+ul.navsectionlinks li a {
+  font-family: 'Roboto-Bold';
+  padding:0 0 0 15px;
+}
+
+ul.navsectionlinks li ul {
+  list-style:none;
+  margin:0;
+  padding:0 0 0 30px;
+}
+
+ul.navsectionlinks li ul li a {
+  font-weight:normal;
+  padding:0;
+}
+
+ul.navsectionlinks li ul li ul {
+  list-style:none;
+  margin:0;
+  padding:0 0 0 15px;
+}
+
+ul.navsectionlinks li.navbarsearch:hover,ul.navsectionlinks li ul li:hover,li.navbarlinks:active{
+  background:none;
+}
+
+ul.navsectionlinks li:hover {
+  background-color:#f1f1f1;
+}
+
+ul.navsectionlinks li:active {
+  background:#ffffff;
+}
+
+TD.checkstatus {
+  border: 0px none;
+}
+
+TABLE.checkstatus, TABLE.extCommandPanel {
+  border: 0px none;
+  width: auto;
+}
+TABLE.extCommandPanel {
+  margin-top: 4px;
+}
+TABLE.extdetails, TABLE.extdetails2 {
+  border: 0px none;
+}
+TABLE.extdetails2 {
+  border: 0px none;
+  width: 100%;
+}
+TD.stateInfoPanel > TABLE {
+  width: 100%;
+}
+TD.extdetails > TABLE {
+  width: 100%;
+}
+
+/*TH.conftoolheader {
+  border-bottom: 5px solid #eaeff6;
+}*/
+
+TABLE.blockHeadBorder, DIV.blockHeadBorder {
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  /*border-top: 1px #5778A6 outset;
+  border-left: 1px #5778A6 outset;
+  border-right: 1px #5778A6 outset;*/
+  line-height: 18px;
+  height: 20px;
+  font-size: 16px;
+  font-family: 'Roboto-Bold';
+  white-space: nowrap;
+  /*color: #06507f;*/
+  background-color:#ffffff;
+}
+
+TABLE.cmdOptBox,TABLE.commandDescription {
+  background-color:#ffffff;
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  /*border:1px #5778A6 outset;*/
+  border-spacing:0;
+  margin:0;
+  padding:0;
+  padding-left:5px;
+  padding-right:5px;
+  width: 100%;
+}
+
+TABLE.cmdOuterTable {
+  width: auto;
+  border-spacing:20px;
+}
+DIV.cmdType {
+  text-align: center;
+  color: #e12d56;
+  font-family: 'Roboto-Bold';
+  font-size: 12px;
+}
+TABLE.optBoxInnerTable {
+  width: 100%;
+  margin: 5px;
+}
+
+table.filter > tbody > tr > td {
+  padding-right: 3px !important;
+}
+TABLE.statusgroups {
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  margin-bottom: 15px;
+}
+
+TABLE.status {
+  border-spacing: 0px;
+}
+TABLE.status TD {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+TABLE.status > TBODY > TR > TH {
+  border-right: 1px solid #d9d9d9;
+}
+
+TABLE.status {
+  border-spacing: 0px;
+  border: 0px none;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+}
+TABLE.servicestatus > TBODY > TR > TH {
+
+}
+
+TABLE.status > TBODY > TR > TD {
+  border-right: 1px solid #f5f8fc;
+  border-top: 1px solid #f5f8fc;
+}
+TABLE.status > TBODY > tr#hst_r0 > td, TABLE.status > TBODY > tr#svc_r0 > td, TABLE.status > TBODY > tr#dfl_r0 > td, TABLE.status > TBODY > tr.firstrow > td {
+  border-top: 0px none;
+}
+TABLE.status > TBODY > tr > td:last-child, TABLE.queue > TBODY > tr > td:last-child {
+  border-right: 0px none;
+}
+
+TABLE.hostTotals A I, TABLE.serviceTotals A I {
+  font-style: normal;
+}
+
+TABLE.tac TD.hostHeader, TABLE.tac TD.serviceHeader, TABLE.tac TD.featureHeader {
+  width: 150px;
+}
+
+TABLE.extdetails TD.dataVar {
+  white-space: nowrap;
+  width: 170px;
+}
+
+TABLE.extdetails DIV.hostUP,
+TABLE.extdetails DIV.hostDOWN,
+TABLE.extdetails DIV.hostUNREACHABLE,
+TABLE.extdetails DIV.hostPENDING,
+TABLE.extdetails DIV.serviceOK,
+TABLE.extdetails DIV.serviceWARNING,
+TABLE.extdetails DIV.serviceUNKNOWN,
+TABLE.extdetails DIV.serviceCRITICAL,
+TABLE.extdetails DIV.servicePENDING,
+TABLE.extdetails DIV.notflapping,
+TABLE.extdetails DIV.flapping,
+TABLE.extdetails DIV.downtimeINACTIVE,
+TABLE.extdetails DIV.downtimeACTIVE
+{
+  min-width: 80px;
+  float: left;
+  text-align: center;
+}
+TABLE.extdetails DIV.hostDOWN {
+  color:#ffffff;
+}
+
+TABLE.extdetails DIV.notificationsDISABLED,
+TABLE.extdetails DIV.notificationsENABLED,
+TABLE.extdetails DIV.checksDISABLED,
+TABLE.extdetails DIV.checksENABLED,
+TABLE.extdetails DIV.eventhandlersDISABLED,
+TABLE.extdetails DIV.eventhandlersENABLED,
+TABLE.extdetails DIV.flapdetectionDISABLED,
+TABLE.extdetails DIV.flapdetectionENABLED
+{
+  width: 120px;
+  text-align: center;
+}
+
+TABLE.extdetails TD.extdetails {
+/*  border-bottom: 1px solid #5778A6;*/
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.commandNote {
+  color: #e12d56;
+}
+
+TABLE.hostcomments TD, TABLE.hostdowntimes TD,TABLE.servicecomments TD, TABLE.servicedowntimes TD {
+  border-right: 1px solid #eaeff6;
+  text-align: center;
+}
+TABLE.hostcomments TD:last-child, TABLE.hostdowntimes TD:last-child, TABLE.servicecomments TD:last-child, TABLE.servicedowntimes TD:last-child {
+  border-right: 0px none;
+}
+
+TABLE.hostcomments TH, TABLE.hostdowntimes TH,TABLE.servicecomments TH, TABLE.servicedowntimes TH {
+  border-right: 1px solid #eaeff6;
+  border-bottom: 1px solid #eaeff6;
+}
+TABLE.hostcomments TH:last-child, TABLE.hostdowntimes TH:last-child, TABLE.servicecomments TH:last-child, TABLE.servicedowntimes TH:last-child {
+  border-right: 0px none;
+}
+
+
+TH.pnpSelected {
+  background-color: #eaeff6;
+  border: 1px #5778A6 inset;
+  font-size: 12px;
+}
+
+TABLE.bookmarkTable {
+  border: 1px outset #5778A6;
+}
+
+TABLE.procInfoTable TD.dataVal {
+  text-align: center;
+}
+
+TD.notesCell {
+  padding-right: 5px;
+}
+
+IMG.crit_icon {
+  vertical-align: text-bottom;
+}
+
+DIV.extinfo4 TD {
+ /*  white-space: nowrap; */
+}
+
+DIV.reportRange {
+    font-family: 'Roboto-Bold';
+}
+
+option.disable {
+    height: 8px !important;
+    line-height: 8px;
+    vertical-align: top;
+}
+
+TABLE.minemap th.status a:hover {
+  color:#000000;
+  text-decoration: underline;
+}
+
+TH.confSelected {
+  background-color: #acacac;
+  border: 1px #5778A6 inset;
+  font-size: 12px;
+}
+
+TABLE.confdetails {
+  width:90%;
+  max-width: 1000px;
+}
+
+td.attrValue:hover {
+  background-color:#FFEB66;
+}
+
+/* nice result tables in availability */
+body.avail TD.hostUP, body.avail TD.hostDOWN, body.avail TD.hostUNREACHABLE, body.avail TD.serviceOK, body.avail TD.serviceWARNING, body.avail TD.serviceUNKNOWN, body.avail TD.serviceCRITICAL {
+    min-width: 150px;
+}
+body.avail TD.dataOdd, body.avail TD.dataEven {
+    min-width: 160px;
+}
+
+.mainlogo {
+  width:  246px;
+  height: 246px;
+}
+
+.nav_small_logo {
+  margin: 10px;
+  padding: 0px;
+  width:  128px;
+  height: 30px;
+}
+
+DIV.health_bar_bg {
+    width:100px;
+    height: 20px;
+    background: #DDDDDD;
+}
+
+input.top_nav_pref_button, button.top_nav_pref_button {
+    background-color: #ffcd00;
+    border: none;
+	height: 16px;
+}
+
+.homepageURL, .checkforupdates, .disclaimer, DIV#mainfooter DIV.logos, SPAN.infoboxlinks {
+  display:none;
+}
+
+BODY.splashpage DIV.infoBoxTitle {
+    line-height: normal;
+}
+
+td.top_nav_pref input, td.top_nav_pref button {
+  width: 90px;
+}
+
+TABLE.pref_pane {
+  border: 0px none;
+  box-shadow: 3px 6px 15px 3px rgba(0, 0, 0, 0.46);
+  background-color:#ffffff;
+  color:#5f6268;
+  padding-left:5px;
+}
+
+TABLE.pref_pane tbody > tr > td {
+  background-color:#ffffff;
+  border: 0px none;
+}
+
+TABLE.pref_pane TH {
+  white-space: nowrap;
+}
+
+.btn-round{
+  background-color: #ffcd00;
+}
+.filter_button{
+  background-color: #ffffff;
+}
+.top_bug_button{
+  background-color: #f0666c;
+}
+.btn-round,.filter_button,.top_bug_button{
+  top:auto;
+  bottom:auto;
+  left:auto;
+  right:auto;
+  margin-top:0px;
+  margin-right:4px;
+  border-radius: 999em;
+  width: 20px !important;
+  height: 20px !important;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  line-height: 1;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  padding:10px;
+}
+
+.has_long_plugin_output {
+  color:#5f6268;
+  text-decoration:underline;
+  font-weight: 700;
+}
+
+SPAN.deleteicon SPAN {
+    border: 0px none;
+    position: absolute;
+    display: block;
+    top: 4px;
+    right: 5px;
+    width: 14px;
+    height: 14px;
+    background: url('../images/btn_close_small.png');
+    cursor: pointer;
+}
+div.logEntries,TABLE.conftoolobj,TABLE.conftool,TABLE.conftoolusers{
+    background-color:#ffffff;
+    border:0px none;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+}
+.logEntries img{
+    margin:2px;
+}
+td.dateTimeBreak{
+  font-size:13px;
+  font-family: 'Roboto-Bold';
+}
+TABLE.optBox{
+    top:100px !important;
+}
+DIV.bp_zoom_container{
+    background-color:#ffffff;
+}
