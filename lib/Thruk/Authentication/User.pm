@@ -66,6 +66,18 @@ sub new {
         return;
     }
 
+    my $user_auth_login_hook = $c->config->{'user_auth_login_hook'};
+    if ($user_auth_login_hook) {
+        # Expose the user_auth_login_hook to the web server %ENV that provides useful information.
+        local %ENV = %{$env};
+        # Was "IGNORE". We can't just fire and forget since we rely on the result from the hook.
+        local $SIG{CHLD} = 'DEFAULT';
+        system($user_auth_login_hook);
+        if ($? != 0) {
+            return;
+        }
+    }
+
     # change case?
     $username = lc($username) if $c->config->{'make_auth_user_lowercase'};
     $username = uc($username) if $c->config->{'make_auth_user_uppercase'};
