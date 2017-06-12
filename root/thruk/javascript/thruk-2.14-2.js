@@ -1470,9 +1470,10 @@ function verify_time_do(id, duration_id) {
         url: url_prefix + 'cgi-bin/status.cgi',
         type: 'POST',
         data: {
-            verify:   'time',
-            time:     obj.value,
-            duration: duration
+            verify:     'time',
+            time:        obj.value,
+            duration:    duration,
+            duration_id: duration_id
         },
         success: function(data) {
             var next = jQuery(obj).next();

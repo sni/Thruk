@@ -1461,10 +1461,22 @@ sub _process_verify_time {
         }
     }
 
-    if($start && $end && $c->config->{downtime_max_duration}) {
-        if($start > $end) {
-            ($start, $end) = ($end, $start);
-        }
+    # check for mixed up start/end
+    my $id = $c->req->parameters->{'duration_id'};
+    if($start && $end && $id && $id eq 'start_time') {
+        ($start, $end) = ($end, $start);
+    }
+
+    my $now = time();
+    if($start && $end && $start > $end) {
+        $error = 'End date must be after start date';
+        undef $verified;
+    }
+    elsif($start && $end && $end < $now) {
+        $error = 'End date must be in the future';
+        undef $verified;
+    }
+    elsif($start && $end && $c->config->{downtime_max_duration}) {
         my $max_duration = Thruk::Utils::Status::convert_time_amount($c->config->{downtime_max_duration});
         my $duration = $end - $start;
         if($duration > $max_duration) {
