@@ -175,6 +175,7 @@ our %config = ('name'                   => 'Thruk',
                                                 'update.x'      => undef,
                                                 '_'             => undef,
                                           },
+                                          'physical_logo_path' => [],
                                           'all_in_one_javascript' => [
                                               'jquery-1.12.4.min.js',
                                               'thruk-'.$VERSION.'-'.$filebranch.'.js',

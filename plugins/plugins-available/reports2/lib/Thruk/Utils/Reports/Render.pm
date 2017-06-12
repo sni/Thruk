@@ -930,6 +930,15 @@ sub _read_static_content_file {
     my $logo_url         = $url;
     $logo_url            =~ s/^$logo_path_prefix//gmx;
 
+    my $icon_dirs  = Thruk::Utils::list($c->config->{'physical_logo_path'});
+    my $physical_logo;
+    for my $dir (@{$icon_dirs}) {
+        $dir =~ s/\/$//gmx;
+        if($dir && -e $dir.'/'.$logo_url) {
+            $physical_logo = $dir.'/'.$logo_url;
+        }
+    }
+
     # image from theme
     my $default = $c->config->{'default_theme'};
     if($url =~ m|^themes/|mx) {
@@ -955,8 +964,8 @@ sub _read_static_content_file {
     }
 
     # icon image?
-    elsif(defined $c->config->{'physical_logo_path'} and -e $c->config->{'physical_logo_path'}.'/'.$logo_url) {
-        $file = $c->config->{'physical_logo_path'}.'/'.$logo_url;
+    elsif($physical_logo) {
+        $file = $physical_logo;
     }
 
     else {

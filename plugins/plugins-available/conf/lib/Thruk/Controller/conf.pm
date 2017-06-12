@@ -173,18 +173,15 @@ sub _process_json_page {
     if($type eq 'icon') {
         my $objects = [];
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'home'}."/themes";
-        my $dir        = $c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos";
-        $dir =~ s/\/$//gmx;
-        if(!-d $dir.'/.') {
-            # try to create that folder, it might not exist yet
-            eval {
-                Thruk::Utils::IO::mkdir_r($dir);
-            };
-        }
-        my $files = _find_files($c, $dir, '\.(png|gif|jpg)$');
-        for my $file (@{$files}) {
-            $file =~ s/$dir\///gmx;
-            push @{$objects}, $file." - ".$c->stash->{'logo_path_prefix'}.$file;
+        my $icon_dirs  = Thruk::Utils::list($c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos");
+        for my $dir (@{$icon_dirs}) {
+            $dir =~ s/\/$//gmx;
+            next unless -d $dir.'/.';
+            my $files = _find_files($c, $dir, '\.(png|gif|jpg)$');
+            for my $file (@{$files}) {
+                $file =~ s/$dir\///gmx;
+                push @{$objects}, $file." - ".$c->stash->{'logo_path_prefix'}.$file;
+            }
         }
         my $json = [ { 'name' => $type.'s', 'data' => $objects } ];
         return $c->render(json => $json);
