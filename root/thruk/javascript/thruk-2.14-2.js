@@ -5052,18 +5052,43 @@ function show_cal(id) {
 
   last_cal_id   = id;
   var dateObj   = new Date();
-  var date_val  = document.getElementById(id).value;
-  var date_time = date_val.split(" ");
-  if(date_time.length == 2) {
-    var dates     = date_time[0].split('-');
-    var times     = date_time[1].split(':');
-    if(times[2] == undefined) {
-        times[2] = 0;
+  var times     = new Array(0,0,0);
+
+  var parseDate = function(id) {
+    var date_val  = document.getElementById(id).value;
+    var date_time = date_val.split(" ");
+    if(date_time.length == 2) {
+      var dates     = date_time[0].split('-');
+      var times     = date_time[1].split(':');
+      if(times[2] == undefined) {
+          times = new Array(0,0,0);
+      }
+      var dateObj = new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]);
     }
-    dateObj   = new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]);
+    return([dateObj, times]);
   }
-  else {
-    times = new Array(0,0,0);
+
+  var tmp = parseDate(id);
+  dateObj = tmp[0];
+  times   = tmp[1];
+
+  var setDate = function() {
+    var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
+    document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+    document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+    // change end_date as well if new start date is past end date
+    if(id == "start_time") {
+        var end_date = document.getElementById("end_time");
+        if(end_date) {
+            var tmp = parseDate("end_time");
+            if(newDateObj.getTime() > tmp[0].getTime()) {
+                var endDate = new Date(newDateObj.getTime() + (downtime_duration * 1000));
+                end_date.value = Calendar.printDate(endDate, '%Y-%m-%d %H:%M:%S');
+            }
+        }
+    }
+    var now = new Date; last_cal_hidden = now.getTime();
+    jQuery('.DynarchCalendar-topCont').remove();
   }
 
   var cal = Calendar.setup({
@@ -5072,19 +5097,8 @@ function show_cal(id) {
       showTime: true,
       fdow: 1,
       weekNumbers: true,
-      onSelect: function() {
-        var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
-        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        var now = new Date; last_cal_hidden = now.getTime();
-        jQuery('.DynarchCalendar-topCont').remove();
-      },
-      onBlur: function() {
-        var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
-        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        var now = new Date; last_cal_hidden = now.getTime();
-        jQuery('.DynarchCalendar-topCont').remove();
-      },
+      onSelect: setDate,
+      onBlur:   setDate,
       onTimeChange: function(c, time) {
         time = time - time%5;
         c.setTime(time, true);
