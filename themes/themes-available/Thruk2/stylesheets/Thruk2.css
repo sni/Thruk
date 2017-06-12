@@ -1538,3 +1538,7 @@ table.listwizard input, table.listwizard select, div.ui-dialog-content  input, d
 TABLE.data.reports TABLE.filter {
     box-shadow: none;
 }
+
+select#quick_command {
+  font-size: 12px;
+}
