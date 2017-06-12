@@ -1848,7 +1848,7 @@ sub set_favicon_counter {
     }
 
     # get state from hosts and services (combined pages)
-    elsif(defined $c->stash->{'hosts'} and defined $c->stash->{'services'}) {
+    elsif(defined $c->stash->{'hosts'} and defined $c->stash->{'services'} and ref($c->stash->{'hosts'}) eq 'ARRAY') {
         for my $h (@{$c->stash->{'hosts'}}) {
             if($h->{'state'} != 0) { $total_red++ }
         }
