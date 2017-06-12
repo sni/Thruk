@@ -114,9 +114,9 @@
         [% SET hostclass = 'statusOdd'  IF loop.even %]
         [% SET hostclass = 'statusEven' IF loop.odd %]
         [% IF s.host_state == 1 %]
-          [% hostclass = 'statusHOSTDOWN' %]
+          [% hostclass = hostclass _ ' statusHOSTDOWN' %]
         [% ELSIF s.host_state == 2 %]
-          [% hostclass = 'statusHOSTUNREACHABLE' %]
+          [% hostclass = hostclass _ ' statusHOSTUNREACHABLE' %]
         [% END %]
         <td class='[% hostclass %] host_name'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">

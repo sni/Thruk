@@ -869,7 +869,7 @@ TR.command > TD {
   padding-right: 3px;
 }
 
-a {
+a, TD.tableRowSelected A {
   color:#5f6268;
   text-decoration:none;
 }
@@ -1542,3 +1542,4 @@ TABLE.data.reports TABLE.filter {
 select#quick_command {
   font-size: 12px;
 }
+

@@ -262,6 +262,13 @@ DIV.perfTypeTitle {
   font-weight:bold;
 }
 
+.statusEven {
+  background-color:#DEDBD2;
+}
+.statusOdd {
+  background-color:#E7E5DD;
+}
+
 DIV.statusTitle,DIV.dataTitle,DIV.reportSelectTitle,DIV.dateSelectTitle,DIV.navBoxTitle,DIV.commentTitle,DIV.downtimeTitle {
   font-size:16px;
   font-weight:bold;
@@ -318,7 +325,7 @@ TABLE.commandPanel {
   border:1px #E2DECD outset;
 }
 
-TABLE.commandPanel TD,TD.statusOdd {
+TABLE.commandPanel TD {
   background-color:#E7E5DD;
 }
 TABLE.commandPanel TD {
@@ -718,10 +725,6 @@ TD.statusBGUNKNOWN {
 TD.statusBGWARNING {
   background-color:#FFFF88;
   height:22px;
-}
-
-TD.statusEven {
-  background-color:#DEDBD2;
 }
 
 .statusOK,.statusRECOVERY,.statusHOSTUP,.serviceOK {
