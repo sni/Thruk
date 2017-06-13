@@ -39,6 +39,7 @@ If you are not using OMD, you will have to do some manual steps:
    https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg[github]
    or /usr/share/thruk/thruk_templates.cfg into your naemon conf.d
    folder, ex .:/etc/naemon/conf.d/thruk_bp_templates.cfg
+ - add default contacts or contactgroups to Thruk BP Host Template (thruk-bp-template)  
  - change the 'objects_templates_file' to that location.
  - create an empty file thruk_bp_generated.cfg, ex.:
    /etc/naemon/conf.d/thruk_bp_generated.cfg
