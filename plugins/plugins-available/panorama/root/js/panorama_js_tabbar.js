@@ -185,7 +185,9 @@ Ext.define('TP.TabBar', {
         tabhead.addListener('click', function(This, eOpts) {
             var tabpan = Ext.getCmp('tabpan');
             var tab    = tabpan.getActiveTab();
-            tab.disableMapControlsTemp();
+            if(tab) {
+                tab.disableMapControlsTemp();
+            }
             var menu = Ext.create('Ext.menu.Menu', {
                 margin: '0 0 10 0',
                 items: [{
@@ -225,7 +227,9 @@ Ext.define('TP.TabBar', {
                 }],
                 listeners: {
                     beforehide: function(menu, eOpts) {
-                        tab.enableMapControlsTemp();
+                        if(tab) {
+                            tab.enableMapControlsTemp();
+                        }
                         menu.destroy();
                     }
                 }
