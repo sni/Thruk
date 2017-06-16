@@ -406,6 +406,9 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
         options.filter = cfg.filter;
         options.task   = 'redirect_status';
         base           = 'panorama.cgi';
+        if(!cfg.incl_svc) {
+            options.style = 'hostdetail';
+        }
     }
     else if(cfg.dashboard) {
         options.map    = cfg.dashboard;
