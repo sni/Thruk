@@ -1543,3 +1543,6 @@ select#quick_command {
   font-size: 12px;
 }
 
+SPAN.ui-applist-button {
+  background-image: url("../images/application_view_list_btn.png") !important;
+}
