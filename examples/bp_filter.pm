@@ -97,3 +97,48 @@ sub unknown_filter {
     }
     return;
 }
+
+# Output: Add problem drill down information
+#
+# This filter adds recursive drill down information for all failed
+# nodes.
+sub add_recursive_output_filter {
+    my($c, $args) = @_;
+
+    # this is a input filter only
+    return unless $args->{'type'} eq 'output';
+
+    my $text    = '';
+    my $indent  = 0;
+    my $parents = {};
+    my $recurse;
+    $recurse = sub {
+        my($bp, $node, $indent) = @_;
+        $parents->{$bp->{id}.'-'.$node->{'id'}} = 1;
+        return if $indent > 20;
+        for my $n (@{$node->{'depends'}}) {
+            if($n->{'status'} != 0) {
+                if(defined $parents->{$bp->{id}.'-'.$n->{'id'}}) {
+                    $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}."] deep recursion...\n";
+                    next;
+                }
+                $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}.'] '.($n->{'status_text'} || $n->{'short_desc'})."\n";
+                &{$recurse}($bp, $n, $indent+1);
+            }
+        }
+        if($node->{'bp_ref'} && $node->{'status'} != 0) {
+            my $link_bp    = Thruk::BP::Utils::load_bp_data($c, $node->{'bp_ref'});
+            if($link_bp->[0]) {
+                my $first_node = $link_bp->[0]->{'nodes'}->[0];
+                $text .= (chr(8194) x ($indent*4)).'- ['.$first_node->{'label'}.'] '.($first_node->{'status_text'} || $first_node->{'short_desc'})."\n";
+                &{$recurse}($link_bp->[0], $first_node, $indent+1);
+            }
+        }
+        delete $parents->{$bp->{id}.'-'.$node->{'id'}};
+    };
+    &{$recurse}($args->{'bp'}, $args->{'node'}, $indent);
+
+    $args->{'extra'}->{'long_output'} = $text;
+
+    return;
+}

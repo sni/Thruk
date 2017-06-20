@@ -447,6 +447,8 @@ sub set_status {
             }
             $text = Thruk::BP::Utils::state2text($self->{'status'}).' - '.$text;
         }
+        $text  = $extra->{'output'} if $extra->{'output'};
+        $text .= "\n".$extra->{'long_output'} if $extra->{'long_output'};
         $bp->set_status($self->{'status'}, $text);
     }
     return;
