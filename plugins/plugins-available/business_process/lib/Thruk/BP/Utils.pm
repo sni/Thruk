@@ -339,15 +339,42 @@ sub get_custom_functions {
     my @files = glob(bp_base_folder($c).'/*.pm');
     for my $filename (@files) {
         next unless -s $filename;
-        my $f = _parse_custom_functions($filename);
+        my $f = _parse_custom_functions($filename, 'function$');
         push @{$functions}, @{$f};
     }
     return $functions;
 }
 
 ##########################################################
+
+=head2 get_custom_filter
+
+  get_custom_filter($c)
+
+returns list of custom filter
+
+=cut
+sub get_custom_filter {
+    my($c) = @_;
+
+    # get required files
+    my $functions = [];
+    my @files = glob(bp_base_folder($c).'/*.pm');
+    for my $filename (@files) {
+        next unless -s $filename;
+        my $f = _parse_custom_functions($filename, 'filter$');
+        push @{$functions}, @{$f};
+    }
+
+    # sort by name
+    @{$functions} = sort { $a->{'name'} cmp $b->{'name'} } @{$functions};
+
+    return $functions;
+}
+
+##########################################################
 sub _parse_custom_functions {
-    my($filename) = @_;
+    my($filename, $filter) = @_;
 
     my $functions = [];
     my $last_help = "";
@@ -357,10 +384,17 @@ sub _parse_custom_functions {
     while(my $line = <$fh>) {
         if($line =~ m/^\s*sub\s+([\w_]+)(\s|\{)/mx) {
             my $func = $1;
+            my $name = $func;
+            $last_help =~ s/^(Input|Output):\s(.*?):?$//mx;
+            if($2) {
+                $name = $1.": ". $2;
+            }
             $last_help =~ s/^Arguments:\s$//mx;
             $last_help =~ s/\A\s*//msx;
             $last_help =~ s/\s*\Z//msx;
-            push @{$functions}, { function => $func, help => $last_help, file => $filename, args => $last_args };
+            if(!$filter || $func =~ m/$filter/mx) {
+                push @{$functions}, { function => $func, help => $last_help, file => $filename, args => $last_args, name => $name };
+            }
             $last_help = "";
             $last_args = [];
         }

@@ -944,45 +944,7 @@ sub _process_summary_page {
     # set defaults for all groups
     my $all_groups;
     for my $group ( @{$groups} ) {
-        $group->{'hosts_pending'}                      = 0;
-        $group->{'hosts_up'}                           = 0;
-        $group->{'hosts_down'}                         = 0;
-        $group->{'hosts_down_unhandled'}               = 0;
-        $group->{'hosts_down_downtime'}                = 0;
-        $group->{'hosts_down_ack'}                     = 0;
-        $group->{'hosts_down_disabled_active'}         = 0;
-        $group->{'hosts_down_disabled_passive'}        = 0;
-        $group->{'hosts_unreachable'}                  = 0;
-        $group->{'hosts_unreachable_unhandled'}        = 0;
-        $group->{'hosts_unreachable_downtime'}         = 0;
-        $group->{'hosts_unreachable_ack'}              = 0;
-        $group->{'hosts_unreachable_disabled_active'}  = 0;
-        $group->{'hosts_unreachable_disabled_passive'} = 0;
-
-        $group->{'services_pending'}                   = 0;
-        $group->{'services_ok'}                        = 0;
-        $group->{'services_warning'}                   = 0;
-        $group->{'services_warning_unhandled'}         = 0;
-        $group->{'services_warning_downtime'}          = 0;
-        $group->{'services_warning_prob_host'}         = 0;
-        $group->{'services_warning_ack'}               = 0;
-        $group->{'services_warning_disabled_active'}   = 0;
-        $group->{'services_warning_disabled_passive'}  = 0;
-        $group->{'services_unknown'}                   = 0;
-        $group->{'services_unknown_unhandled'}         = 0;
-        $group->{'services_unknown_downtime'}          = 0;
-        $group->{'services_unknown_prob_host'}         = 0;
-        $group->{'services_unknown_ack'}               = 0;
-        $group->{'services_unknown_disabled_active'}   = 0;
-        $group->{'services_unknown_disabled_passive'}  = 0;
-        $group->{'services_critical'}                  = 0;
-        $group->{'services_critical_unhandled'}        = 0;
-        $group->{'services_critical_downtime'}         = 0;
-        $group->{'services_critical_prob_host'}        = 0;
-        $group->{'services_critical_ack'}              = 0;
-        $group->{'services_critical_disabled_active'}  = 0;
-        $group->{'services_critical_disabled_passive'} = 0;
-        $all_groups->{ $group->{'name'} }              = $group;
+        $all_groups->{ $group->{'name'} } = Thruk::Utils::Status::summary_set_group_defaults($group);
     }
 
     if( $c->stash->{substyle} eq 'host' ) {
@@ -1025,35 +987,7 @@ sub _process_summary_page {
                     $host_already_added{$group}->{ $service->{'host_name'} } = 1;
                 }
             }
-
-            $all_groups->{$group}->{'services_total'}++;
-
-            if( $service->{'has_been_checked'} == 0 ) { $all_groups->{$group}->{'services_pending'}++; }
-            elsif ( $service->{'state'} == 0 ) { $all_groups->{$group}->{'services_ok'}++; }
-            elsif ( $service->{'state'} == 1 ) { $all_groups->{$group}->{'services_warning'}++; }
-            elsif ( $service->{'state'} == 2 ) { $all_groups->{$group}->{'services_critical'}++; }
-            elsif ( $service->{'state'} == 3 ) { $all_groups->{$group}->{'services_unknown'}++; }
-
-            if( $service->{'state'} == 1 and $service->{'scheduled_downtime_depth'} > 0 ) { $all_groups->{$group}->{'services_warning_downtime'}++; }
-            if( $service->{'state'} == 1 and $service->{'acknowledged'} == 1 )            { $all_groups->{$group}->{'services_warning_ack'}++; }
-            if( $service->{'state'} == 1 and $service->{'checks_enabled'} == 0 and $service->{'check_type'} == 0 ) { $all_groups->{$group}->{'services_warning_disabled_active'}++; }
-            if( $service->{'state'} == 1 and $service->{'checks_enabled'} == 0 and $service->{'check_type'} == 1 ) { $all_groups->{$group}->{'services_warning_disabled_passive'}++; }
-            if( $service->{'state'} == 1 and $service->{'host_state'} > 0 )               { $all_groups->{$group}->{'services_warning_prob_host'}++; }
-            elsif ( $service->{'state'} == 1 and $service->{'checks_enabled'} == 1 and $service->{'host_state'} == 0 and $service->{'acknowledged'} == 0 and $service->{'scheduled_downtime_depth'} == 0 ) { $all_groups->{$group}->{'services_warning_unhandled'}++; }
-
-            if( $service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} > 0 ) { $all_groups->{$group}->{'services_critical_downtime'}++; }
-            if( $service->{'state'} == 2 and $service->{'acknowledged'} == 1 )            { $all_groups->{$group}->{'services_critical_ack'}++; }
-            if( $service->{'state'} == 2 and $service->{'checks_enabled'} == 0 and $service->{'check_type'} == 0 ) { $all_groups->{$group}->{'services_critical_disabled_active'}++; }
-            if( $service->{'state'} == 2 and $service->{'checks_enabled'} == 0 and $service->{'check_type'} == 1 ) { $all_groups->{$group}->{'services_critical_disabled_passive'}++; }
-            if( $service->{'state'} == 2 and $service->{'host_state'} > 0 )               { $all_groups->{$group}->{'services_critical_prob_host'}++; }
-            elsif ( $service->{'state'} == 2 and $service->{'checks_enabled'} == 1 and $service->{'host_state'} == 0 and $service->{'acknowledged'} == 0 and $service->{'scheduled_downtime_depth'} == 0 ) { $all_groups->{$group}->{'services_critical_unhandled'}++; }
-
-            if( $service->{'state'} == 3 and $service->{'scheduled_downtime_depth'} > 0 ) { $all_groups->{$group}->{'services_unknown_downtime'}++; }
-            if( $service->{'state'} == 3 and $service->{'acknowledged'} == 1 )            { $all_groups->{$group}->{'services_unknown_ack'}++; }
-            if( $service->{'state'} == 3 and $service->{'checks_enabled'} == 0 and $service->{'check_type'} == 0 ) { $all_groups->{$group}->{'services_unknown_disabled_active'}++; }
-            if( $service->{'state'} == 3 and $service->{'checks_enabled'} == 0 and $service->{'check_type'} == 1 ) { $all_groups->{$group}->{'services_unknown_disabled_passive'}++; }
-            if( $service->{'state'} == 3 and $service->{'host_state'} > 0 )               { $all_groups->{$group}->{'services_unknown_prob_host'}++; }
-            elsif ( $service->{'state'} == 3 and $service->{'checks_enabled'} == 1 and $service->{'host_state'} == 0 and $service->{'acknowledged'} == 0 and $service->{'scheduled_downtime_depth'} == 0 ) { $all_groups->{$group}->{'services_unknown_unhandled'}++; }
+            Thruk::Utils::Status::summary_add_service_stats($all_groups->{$group}, $service);
         }
     }
 

@@ -706,8 +706,9 @@ function bp_show_edit_node(id, refreshType) {
         }
     }
 
-    // initialize childrens tab
+    // initialize tabs
     bp_initialize_children_tab(node);
+    bp_initialize_filter_tab(node);
 
     // make dragable again
     if($edit_dialog) {
@@ -723,6 +724,22 @@ function bpRemoveAttribute(attr) {
 function bpAddAttribute(attr) {
     jQuery("INPUT[name=bp_"+attr+"]").parents("TR").show();
     jQuery("INPUT[name=bp_"+attr+"]").val('');
+}
+
+/* initialize filter tab */
+function bp_initialize_filter_tab(node) {
+    jQuery("INPUT.node_filter").prop("checked", false);
+    jQuery("INPUT.node_filter[value=off]").prop("checked", true);
+    if(node) {
+        jQuery(node.filter).each(function(nr, f) {
+            // enable and move to top
+            jQuery("TABLE.bp_filter tbody").prepend(jQuery("INPUT.node_filter[value=on][name=bp_filter_"+f+"]").prop("checked", true).closest('tr'));
+        });
+    }
+    jQuery(bp_filter).each(function(nr, f) {
+        // enable and move to top
+        jQuery("TABLE.bp_filter tbody").prepend(jQuery("INPUT.node_filter[value=global][name=bp_filter_"+f+"]").prop("checked", true).closest('tr'));
+    });
 }
 
 /* initialize childrens tab */
@@ -765,8 +782,8 @@ function bp_initialize_children_tab(node) {
     // button has to be initialized only once
     if(bp_list_wizard_initialized[bp_id] != undefined) {
         // reset filter
-        jQuery('INPUT.filter_available').val('');
-        jQuery('INPUT.filter_selected').val('');
+        jQuery('INPUT.node_filter_available').val('');
+        jQuery('INPUT.node_filter_selected').val('');
         data_filter_select('bp_'+bp_id+'_available_nodes', '');
         data_filter_select('bp_'+bp_id+'_selected_nodes', '');
     }

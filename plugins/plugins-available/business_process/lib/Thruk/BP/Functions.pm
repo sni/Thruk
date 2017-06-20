@@ -29,7 +29,7 @@ sub status {
     my($hostname, $description) = @{$args};
     my $data;
 
-    $livedata = $bp->bulk_fetch_live_data($c) unless defined $livedata;
+    confess("no status data supplied") unless defined $livedata;
 
     if($hostname and $description) {
         $data = $livedata->{'services'}->{$hostname}->{$description};
@@ -102,7 +102,8 @@ returns status based on real service or host
 sub groupstatus {
     my($c, $bp, $n, $args, $livedata) = @_;
     my($grouptype, $groupname, $hostwarn, $hostcrit, $servicewarn, $servicecrit) = @{$args};
-    $livedata = $bp->bulk_fetch_live_data($c) unless defined $livedata;
+
+    confess("no status data supplied") unless defined $livedata;
 
     my $data;
     if(lc($grouptype) eq 'hostgroup') {
@@ -392,6 +393,9 @@ sub custom {
     my $real_args = [@{$args}[1..$last]];
     eval {
         do($f->{'file'});
+        if($@) {
+            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+        }
         ## no critic
         eval('($status, $short_desc, $status_text, $extra) = '."$fname".'($c, $bp, $n, $real_args, $livedata);');
         ## use critic
@@ -399,14 +403,14 @@ sub custom {
             $status      = 3;
             $short_desc  = "UNKNOWN";
             $status_text = $@;
-            $c->log->info("internal error in custum function $fname: $@");
+            $c->log->info("internal error in custom function $fname: $@");
         }
     };
     if($@) {
         $status      = 3;
         $short_desc  = "UNKNOWN";
         $status_text = $@;
-        $c->log->info("internal error in custum function $fname: $@");
+        $c->log->info("internal error in custom function $fname: $@");
     }
     $short_desc  = '(no output)' unless $short_desc;
     $status_text = '(no output)' unless $status_text;
@@ -438,6 +442,57 @@ sub _count_good_bad {
         }
     }
     return($good, $bad);
+}
+
+##########################################################
+# runs filter function
+sub _filter {
+    my($c, $fname, $args) = @_;
+
+    $c->stash->{'bp_custom_filter'} = Thruk::BP::Utils::get_custom_filter($c) unless defined $c->stash->{'bp_custom_filter'};
+    my $f;
+    for my $tmp (@{$c->stash->{'bp_custom_filter'}}) {
+        if($tmp->{'function'} eq $fname) {
+            $f = $tmp;
+            last;
+        }
+    }
+    if(!$f) {
+        $c->log->info("custom filter $fname not found");
+        return;
+    }
+    eval {
+        do($f->{'file'});
+        if($@) {
+            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+        }
+        ## no critic
+        eval($fname.'($c, $args);');
+        ## use critic
+        if($@) {
+            $c->log->info("internal error in custom filter $fname: $@");
+        }
+    };
+    if($@) {
+        $c->log->info("internal error in custom filter $fname: $@");
+    }
+
+    return;
+}
+
+##########################################################
+# deep clones any object
+sub _dclone {
+    my($obj) = @_;
+    local $Data::Dumper::Purity = 1;
+    local $Data::Dumper::Terse = 1;
+    local $Data::Dumper::Useqq = 1;
+    local $Data::Dumper::Deparse = 1;
+    my $VAR1;
+    ## no critics
+    eval Data::Dumper->Dump([$obj]);
+    ## use critics
+    return($VAR1);
 }
 
 ##########################################################

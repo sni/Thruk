@@ -299,3 +299,16 @@ BODY.iframed DIV.bp_zoom_container {
 #cust_help PRE {
     margin: 0;
 }
+
+TABLE.bp_filter {
+  width: 100%;
+}
+
+TABLE.bp_filter TD {
+  text-align: center;
+}
+
+TABLE.bp_filter TD:first-child {
+  text-align: left;
+}
+

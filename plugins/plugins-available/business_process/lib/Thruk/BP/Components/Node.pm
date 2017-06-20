@@ -55,6 +55,7 @@ sub new {
         'acknowledged'              => 0,
         'testmode'                  => 0,
         'bp_ref'                    => undef,
+        'filter'                    => $data->{'filter'}        || [],
 
         'status'                    => $data->{'status'} // 4,
         'status_text'               => $data->{'status_text'} || '',
@@ -223,7 +224,7 @@ sub get_save_obj {
     };
 
     # save this keys
-    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts/) {
+    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts filter/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
     }
 
@@ -327,14 +328,51 @@ sub update_status {
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
+        # input filter
+        my $filter_args = {
+            type     => 'input',
+            bp       => $bp,
+            node     => $self,
+            livedata => $livedata,
+        };
+        if(scalar @{$bp->{'filter'}} > 0 || scalar @{$self->{'filter'}} > 0) {
+            delete $filter_args->{'bp'};
+            $filter_args = Thruk::BP::Functions::_dclone($filter_args);
+            $filter_args->{'bp'} = $bp;
+            for my $f (sort @{$bp->{'filter'}}) {
+                $filter_args->{'scope'} = 'global';
+                Thruk::BP::Functions::_filter($c, $f, $filter_args);
+            }
+            for my $f (sort @{$self->{'filter'}}) {
+                $filter_args->{'scope'} = 'node';
+                Thruk::BP::Functions::_filter($c, $f, $filter_args);
+            }
+            $filter_args->{'bp'}->recalculate_group_statistics($filter_args->{'livedata'}, 1);
+
+        }
+
         my($status, $short_desc, $status_text, $extra) = &{$function}($c,
-                                                                      $bp,
-                                                                      $self,
-                                                                      $self->{'function_args'},
-                                                                      $livedata,
+                                                                      $filter_args->{'bp'},
+                                                                      $filter_args->{'node'},
+                                                                      $filter_args->{'node'}->{'function_args'},
+                                                                      $filter_args->{'livedata'},
                                                                     );
-        $self->set_status($status, ($status_text || $short_desc), $bp, $extra);
-        $self->{'short_desc'} = $short_desc;
+        # output filter
+        $filter_args->{'type'}          = 'output';
+        $filter_args->{'status'}        = $status;
+        $filter_args->{'status_text'}   = $status_text;
+        $filter_args->{'short_desc'}    = $short_desc;
+        $filter_args->{'extra'}         = $extra;
+        for my $f (sort @{$bp->{'filter'}}) {
+            $filter_args->{'scope'} = 'global';
+            Thruk::BP::Functions::_filter($c, $f, $filter_args);
+        }
+        for my $f (sort @{$self->{'filter'}}) {
+            $filter_args->{'scope'} = 'node';
+            Thruk::BP::Functions::_filter($c, $f, $filter_args);
+        }
+        $self->set_status($filter_args->{'status'}, ($filter_args->{'status_text'} || $filter_args->{'short_desc'}), $filter_args->{'bp'}, $filter_args->{'extra'});
+        $self->{'short_desc'} = $filter_args->{'short_desc'};
     };
     if($@) {
         $self->set_status(3, 'Internal Error: '.$@, $bp);

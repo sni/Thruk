@@ -240,6 +240,19 @@ sub index {
             }
             $node->{'create_obj'} = $c->req->parameters->{'bp_create_link'} || 0;
 
+            # save node filter
+            $node->{'filter'} = [];
+            $bp->{'filter'}   = [];
+            for my $f (grep(/^bp_filter_/mx, keys %{$c->req->parameters})) {
+                my $val = $c->req->parameters->{$f};
+                $f =~ s/^bp_filter_//gmx;
+                if($val eq 'on') {
+                    push @{$node->{'filter'}}, $f;
+                }
+                if($val eq 'global') {
+                    push @{$bp->{'filter'}}, $f;
+                }
+            }
 
             my $label = Thruk::BP::Utils::clean_nasty($c->req->parameters->{'bp_label_'.$type} || 'none');
             # first node renames business process itself too
@@ -312,6 +325,7 @@ sub index {
         }
 
         $c->stash->{'bp_custom_functions'} = Thruk::BP::Utils::get_custom_functions($c);
+        $c->stash->{'bp_custom_filter'}    = Thruk::BP::Utils::get_custom_filter($c);
 
         if($action eq 'details') {
             if($c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'json') {

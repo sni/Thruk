@@ -125,9 +125,10 @@ link:configuration.html#component-thruk-plugin-bp[configuration sections].
 
 
 == Custom Functions
-Besides the normal functions you can write your own aggregation functions easily.
-Custom functions are written in Perl and are located in the <config dir>/bp/ with
-the .pm filename extension.
+Besides the normal functions you can write your own aggregation functions
+easily. Custom functions are written in Perl and are located in the <config
+dir>/bp/ with the .pm filename extension. The function name must end with
+`function` to distinguish them from custom filters.
 
 Example: /etc/thruk/bp/echo.pm
 ------
