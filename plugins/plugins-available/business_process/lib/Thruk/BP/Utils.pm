@@ -389,6 +389,7 @@ sub _parse_custom_functions {
             if($2) {
                 $name = $1.": ". $2;
             }
+            $name =~ s/:?\s*$//gmx;
             $last_help =~ s/^Arguments:\s$//mx;
             $last_help =~ s/\A\s*//msx;
             $last_help =~ s/\s*\Z//msx;

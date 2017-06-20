@@ -8,7 +8,7 @@
 # arg1: Text;      text;     text that should be echoed
 # arg2: Reverse;   checkbox; no ; yes
 # arg3: Uppercase; select;   no ; yes
-sub echofunction {
+sub echo_function {
     my($c, $bp, $n, $args, $livedata) = @_;
     my($text, $reverse, $upper) = @{$args};
     $text = 'no text supplied' unless $text;
