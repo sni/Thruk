@@ -52,17 +52,15 @@ SKIP: {
         'url'      => '/thruk/cgi-bin/cmd.cgi',
         'post'     => {
               'cmd_mod'      => '2',
-              'cmd_typ'      => '7',
+              'cmd_typ'      => '11',
               'start_time'   => POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime(time()+10)),
               'referer'      => 'status.cgi',
-              'host'         => 'host1',
-              'service'      => 'svc1',
               'backend'      => [$backends->[0]->{'key'}, $backends->[1]->{'key'}],
         },
         'like'     => 'This item has moved',
         'redirect' => 1,
     );
-    like($ENV{'THRUK_TEST_CMD_NO_LOG'}, '/\['.$backends->[0]->{'key'}.','.$backends->[1]->{'key'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got combined command');
+    like($ENV{'THRUK_TEST_CMD_NO_LOG'}, '/\['.$backends->[0]->{'key'}.','.$backends->[1]->{'key'}.'\] cmd: COMMAND \[\d+\] DISABLE_NOTIFICATIONS/', 'got combined command');
 };
 
 for my $file (sort glob("templates/cmd/*")) {
