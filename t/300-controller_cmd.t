@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2198;
+    plan tests => 2209;
 }
 
 BEGIN {
@@ -24,8 +24,8 @@ my $servicegroup   = TestUtils::get_test_servicegroup();
 my $post           = { test_only => 1, cmd_mod => 2, host => $host, 'service' => $service, 'servicegroup' => $servicegroup, 'hostgroup' => $hostgroup };
 
 # test quick commands
+my $backends = $c->{'db'}->get_peers();
 SKIP: {
-    my $backends = $c->{'db'}->get_peers();
     my $num = 21;
     skip "test is useless with only a single backend",                $num if (scalar @{$backends} <= 1);
     skip "test is requires authorized_for_all_service_commands role", $num if !$c->user->check_user_roles('authorized_for_all_service_commands');
@@ -62,6 +62,12 @@ SKIP: {
     );
     like($ENV{'THRUK_TEST_CMD_NO_LOG'}, '/\['.$backends->[0]->{'key'}.','.$backends->[1]->{'key'}.'\] cmd: COMMAND \[\d+\] DISABLE_NOTIFICATIONS/', 'got combined command');
 };
+
+TestUtils::test_page(
+    'url'      => '/thruk/cgi-bin/cmd.cgi?cmd_typ=96&host='.$host.'&backend='.$backends->[0]->{'key'}.'&backend='.$backends->[0]->{'key'},
+    'like'     => 'Command Options',
+);
+
 
 for my $file (sort glob("templates/cmd/*")) {
     next if($file eq '.' or $file eq '..');

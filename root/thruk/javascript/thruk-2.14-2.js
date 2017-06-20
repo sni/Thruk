@@ -729,8 +729,8 @@ function print_site_panel_header() {
         if(keys(sites.sections).length == 0) {
             return;
         }
-        if(backend_chooser == 'switch' && param_backend) {
-          dw("<div class='backend'><input type='button' class='button_peerUP' value='"+initial_backends[param_backend].name+"' onClick='toggleSitePanel()'>\</div>");
+        if(backend_chooser == 'switch' && param_backend[0]) {
+          dw("<div class='backend'><input type='button' class='button_peerUP' value='"+initial_backends[param_backend[0]].name+"' onClick='toggleSitePanel()'>\</div>");
           if(sites.disabled > 0) {
             dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+ sites.disabled+" more' onClick='toggleSitePanel()'></div>");
           }
