@@ -564,7 +564,7 @@ return all live data needed for this business process
 
 =cut
 sub bulk_fetch_live_data {
-    my($self, $c) = @_;
+    my($self, $c, $expand_groups) = @_;
 
     # check if have filters in place which requires fetching all hosts / services for group filters
     my $has_filters = 0;
@@ -578,6 +578,7 @@ sub bulk_fetch_live_data {
             }
         }
     }
+    $expand_groups = 1 if $has_filters;
 
     # bulk fetch live data
     my $hostfilter         = {};
@@ -608,7 +609,7 @@ sub bulk_fetch_live_data {
     }
 
 
-    if($has_filters) {
+    if($expand_groups) {
         # set empty group statistics for requested host/servicegroups
         for my $hostgroupname (keys %{$hostgroupfilter}) {
             $hostgroupdata->{$hostgroupname} = Thruk::Utils::Status::summary_set_group_defaults();
@@ -623,7 +624,7 @@ sub bulk_fetch_live_data {
         for my $hostname (keys %{$hostfilter}) {
             push @filter, { name => $hostname };
         }
-        if($has_filters && scalar keys %{$hostgroupfilter} > 0) {
+        if($expand_groups && scalar keys %{$hostgroupfilter} > 0) {
             for my $hostgroupname (keys %{$hostgroupfilter}) {
                 push @filter, { groups => { '>=' => $hostgroupname } };
             }
@@ -645,12 +646,12 @@ sub bulk_fetch_live_data {
                 }
             }
         }
-        if($has_filters && scalar keys %{$hostgroupfilter} > 0) {
+        if($expand_groups && scalar keys %{$hostgroupfilter} > 0) {
             for my $hostgroupname (keys %{$hostgroupfilter}) {
                 push @filter, { host_groups => { '>=' => $hostgroupname } };
             }
         }
-        if($has_filters && scalar keys %{$servicegroupfilter} > 0) {
+        if($expand_groups && scalar keys %{$servicegroupfilter} > 0) {
             for my $servicegroupname (keys %{$servicegroupfilter}) {
                 push @filter, { groups => { '>=' => $servicegroupname } };
             }
@@ -659,7 +660,7 @@ sub bulk_fetch_live_data {
         my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
         $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
     }
-    if(!$has_filters) {
+    if(!$expand_groups) {
         if(scalar keys %{$hostgroupfilter} > 0) {
             my @filter;
             for my $hostgroupname (keys %{$hostgroupfilter}) {
@@ -693,7 +694,7 @@ sub bulk_fetch_live_data {
     };
 
     # calculate group statistics from given hosts / services
-    if($has_filters) {
+    if($expand_groups) {
         $self->recalculate_group_statistics($livedata, 0);
     }
 

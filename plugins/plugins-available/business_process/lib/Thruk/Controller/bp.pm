@@ -358,48 +358,8 @@ sub index {
             my $params = {};
             my $hst = 0;
             my $svc = 0;
-            for my $n (@{$bp->{'nodes'}}) {
-                if(lc $n->{'function'} eq 'status') {
-                    if($n->{'host'} and $n->{'service'}) {
-                        my $service = $n->{'service'};
-                        my $svc_op  = '=';
-                        if(Thruk::BP::Utils::looks_like_regex($service)) {
-                            $service =~ s/^(b|w)://gmx;
-                            $service = Thruk::Utils::convert_wildcards_to_regex($service);
-                            $svc_op  = '~';
-                        }
-                        $params->{'svc_s'.$svc.'_type'}   = ['host', 'service'];
-                        $params->{'svc_s'.$svc.'_op'}     = ['=', $svc_op];
-                        $params->{'svc_s'.$svc.'_value'}  = [$n->{'host'}, $service];
-                        $svc++;
-                    }
-                    elsif($n->{'host'}) {
-                        $params->{'hst_s'.$hst.'_type'}   = 'host';
-                        $params->{'hst_s'.$hst.'_op'}     = '=';
-                        $params->{'hst_s'.$hst.'_value'}  = $n->{'host'};
-                        $hst++;
-                    }
-                }
-                elsif(lc $n->{'function'} eq 'groupstatus') {
-                    if($n->{'hostgroup'}) {
-                        $params->{'hst_s'.$hst.'_type'}   = 'hostgroup';
-                        $params->{'hst_s'.$hst.'_op'}     = '=';
-                        $params->{'hst_s'.$hst.'_value'}  = $n->{'hostgroup'};
-                        $hst++;
-
-                        $params->{'svc_s'.$svc.'_type'}   = 'hostgroup';
-                        $params->{'svc_s'.$svc.'_op'}     = '=';
-                        $params->{'svc_s'.$svc.'_value'}  = $n->{'hostgroup'};
-                        $svc++;
-                    }
-                    elsif($n->{'servicegroup'}) {
-                        $params->{'svc_s'.$svc.'_type'}   = 'servicegroup';
-                        $params->{'svc_s'.$svc.'_op'}     = '=';
-                        $params->{'svc_s'.$svc.'_value'}  = $n->{'servicegroup'};
-                        $svc++;
-                    }
-                }
-            }
+            my $bp_lookup = {};
+            ($params, $hst, $svc) = _bp_list_add_objects($c, $bp, $params, $hst, $svc, $bp_lookup);
             $params->{'title'} = $bp->{'name'};
             $params->{'style'} = 'combined';
             if($hst == 0) {
@@ -465,6 +425,86 @@ sub _bp_start_page {
     Thruk::Utils::ssi_include($c);
 
     return 1;
+}
+
+##########################################################
+sub _bp_list_add_objects {
+    my($c, $bp, $params, $hst, $svc, $bp_lookup) = @_;
+    $bp_lookup->{$bp->{'id'}} = 1;
+    for my $n (@{$bp->{'nodes'}}) {
+        if(lc $n->{'function'} eq 'status') {
+            if($n->{'host'} and $n->{'service'}) {
+                my $service = $n->{'service'};
+                my $svc_op  = '=';
+                if(Thruk::BP::Utils::looks_like_regex($service)) {
+                    $service =~ s/^(b|w)://gmx;
+                    $service = Thruk::Utils::convert_wildcards_to_regex($service);
+                    $svc_op  = '~';
+                }
+                $params->{'svc_s'.$svc.'_type'}   = ['host', 'service'];
+                $params->{'svc_s'.$svc.'_op'}     = ['=', $svc_op];
+                $params->{'svc_s'.$svc.'_value'}  = [$n->{'host'}, $service];
+                $svc++;
+            }
+            elsif($n->{'host'}) {
+                $params->{'hst_s'.$hst.'_type'}   = 'host';
+                $params->{'hst_s'.$hst.'_op'}     = '=';
+                $params->{'hst_s'.$hst.'_value'}  = $n->{'host'};
+                $hst++;
+            }
+        }
+        elsif(lc $n->{'function'} eq 'groupstatus') {
+            if($n->{'hostgroup'}) {
+                $params->{'hst_s'.$hst.'_type'}   = 'hostgroup';
+                $params->{'hst_s'.$hst.'_op'}     = '=';
+                $params->{'hst_s'.$hst.'_value'}  = $n->{'hostgroup'};
+                $hst++;
+
+                $params->{'svc_s'.$svc.'_type'}   = 'hostgroup';
+                $params->{'svc_s'.$svc.'_op'}     = '=';
+                $params->{'svc_s'.$svc.'_value'}  = $n->{'hostgroup'};
+                $svc++;
+            }
+            elsif($n->{'servicegroup'}) {
+                $params->{'svc_s'.$svc.'_type'}   = 'servicegroup';
+                $params->{'svc_s'.$svc.'_op'}     = '=';
+                $params->{'svc_s'.$svc.'_value'}  = $n->{'servicegroup'};
+                $svc++;
+            }
+        }
+    }
+
+    # check recursive for other linked business processes
+    my $recursive_bps = {};
+    my $livedata = $bp->bulk_fetch_live_data($c, 1);
+    if($livedata->{'hosts'}) {
+        for my $host (values %{$livedata->{'hosts'}}) {
+            my $vars = Thruk::Utils::get_custom_vars($c, $host);
+            if($vars->{'THRUK_BP_ID'} && !defined $bp_lookup->{$vars->{'THRUK_BP_ID'}}) {
+                $recursive_bps->{$vars->{'THRUK_BP_ID'}} = 1;
+            }
+        }
+    }
+    if($livedata->{'services'}) {
+        for my $name (keys %{$livedata->{'services'}}) {
+            for my $service (values %{$livedata->{'services'}->{$name}}) {
+                my $vars = Thruk::Utils::get_custom_vars($c, $service);
+                if($vars->{'THRUK_BP_ID'} && !defined $bp_lookup->{$vars->{'THRUK_BP_ID'}}) {
+                    $recursive_bps->{$vars->{'THRUK_BP_ID'}} = 1;
+                }
+            }
+        }
+    }
+    for my $bp_id (sort keys %{$recursive_bps}) {
+        my $link_bp = Thruk::BP::Utils::load_bp_data($c, $bp_id);
+        $bp_lookup->{$bp_id} = 1;
+        if(scalar @{$link_bp} == 1) {
+            ($params, $hst, $svc) = _bp_list_add_objects($c, $link_bp->[0], $params, $hst, $svc, $bp_lookup);
+        }
+    }
+
+
+    return($params, $hst, $svc);
 }
 
 ##########################################################
