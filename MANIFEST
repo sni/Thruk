@@ -23,6 +23,7 @@ docs/manpages/naglint.3
 docs/manpages/thruk.3
 docs/manpages/thruk.8
 docs/manpages/thruk8.txt
+examples/bp_filter.pm
 examples/bp_functions.pm
 examples/config_tool_git_checkin
 examples/contacts2csv

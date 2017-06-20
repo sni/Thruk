@@ -182,6 +182,7 @@ local_install: local_patches
 	############################################################################
 	# examples
 	cp -p examples/bp_functions.pm ${DESTDIR}${SYSCONFDIR}/bp/
+	cp -p examples/bp_filter.pm    ${DESTDIR}${SYSCONFDIR}/bp/
 
 quicktest:
 	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \

@@ -1,3 +1,8 @@
+use warnings;
+no warnings 'redefine';
+use strict;
+use utf8;
+
 # echofunction:
 #
 # This function just echoes the
@@ -8,7 +13,7 @@
 # arg1: Text;      text;     text that should be echoed
 # arg2: Reverse;   checkbox; yes; no
 # arg3: Uppercase; select;   yes; no
-sub echofunction {
+sub echo_function {
     my($c, $bp, $n, $args, $livedata) = @_;
     my($text, $reverse, $upper) = @{$args};
     $text = scalar reverse $text if $reverse eq 'yes';
