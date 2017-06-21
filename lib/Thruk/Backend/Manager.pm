@@ -2182,14 +2182,15 @@ sub _merge_hostgroup_answer {
             }
 
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
-            $groups->{ $row->{'name'} }->{'backends_hash'}->{$name} = 1;
+            $groups->{ $row->{'name'} }->{'backends_hash'}->{$key} = $name;
         }
     }
 
     # set backends used
     for my $group ( values %{$groups} ) {
         $group->{'backend'} = [];
-        @{ $group->{'backend'} } = sort keys %{ $group->{'backends_hash'} };
+        @{ $group->{'backend'} }  = sort values %{ $group->{'backends_hash'} };
+        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} };
         delete $group->{'backends_hash'};
     }
     my @return = values %{$groups};
@@ -2224,14 +2225,15 @@ sub _merge_servicegroup_answer {
                 $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
             }
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
-            $groups->{$row->{'name'}}->{'backends_hash'}->{$name} = 1;
+            $groups->{$row->{'name'}}->{'backends_hash'}->{$key} = $name;
         }
     }
 
     # set backends used
     for my $group ( values %{$groups} ) {
         $group->{'backend'} = [];
-        @{ $group->{'backend'} } = sort keys %{ $group->{'backends_hash'} };
+        @{ $group->{'backend'} } = sort values %{ $group->{'backends_hash'} };
+        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} };
         delete $group->{'backends_hash'};
     }
 

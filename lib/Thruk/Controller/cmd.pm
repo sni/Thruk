@@ -902,7 +902,9 @@ sub _get_affected_backends {
     # extract affected backends
     my $affected_backends = {};
     for my $row (@{$data}) {
-        $affected_backends->{$row->{'peer_key'}} = 1;
+        for my $peer_key (@{Thruk::Utils::list($row->{'peer_key'})}) {
+            $affected_backends->{$peer_key} = 1;
+        }
     }
     return([keys %{$affected_backends}]);
 }
