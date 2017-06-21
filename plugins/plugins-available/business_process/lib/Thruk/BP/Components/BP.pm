@@ -749,14 +749,14 @@ sub recalculate_group_statistics {
     }
     # map keys to the ones we expect
     for my $group (values %{$hostgroupdata}) {
-        $group->{num_hosts}         = $group->{'hosts_total'};
+        $group->{num_hosts}         = $group->{'hosts_total'} || 0;
         $group->{num_hosts_down}    = $group->{'hosts_down'};
         $group->{num_hosts_pending} = $group->{'hosts_pending'};
         $group->{num_hosts_unreach} = $group->{'hosts_unreachable'};
         $group->{num_hosts_up}      = $group->{'hosts_up'};
     }
     for my $group (values %{$servicegroupdata}, values %{$hostgroupdata}) {
-        $group->{num_services}         = $group->{'services_total'};
+        $group->{num_services}         = $group->{'services_total'} || 0;
         $group->{num_services_crit}    = $group->{'services_critical'};
         $group->{num_services_ok}      = $group->{'services_ok'};
         $group->{num_services_pending} = $group->{'services_pending'};
