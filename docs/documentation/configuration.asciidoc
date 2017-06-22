@@ -2099,9 +2099,9 @@ ex.:
             peer       = /tmp/livestatus.socket
         </options>
         <configtool>
-            core_conf  = /etc/naemon/naemon.cfg
-            obj_check  = /etc/init.d/naemon checkconfig
-            obj_reload = /etc/init.d/naemon reload
+            core_conf      = /etc/naemon/naemon.cfg
+            obj_check_cmd  = /etc/init.d/naemon checkconfig
+            obj_reload_cmd = /etc/init.d/naemon reload
         </configtool>
     </peer>
     <peer>
@@ -2143,7 +2143,7 @@ ex.:
     pre_obj_save_cmd          = .../hook.sh
     post_obj_save_cmd         = .../hook.sh
     git_base_dir              = /etc/naemon/conf.d/custom/
-    edit_files                = some/extra/files/to.edit
+    #edit_files               = some/extra/files/to.edit # deprecated
     extra_custom_var_host     = _WORKER
     extra_custom_var_service  = _SNMP_COMMUNITY, _OTHER_CUSTOM_VARIABLE
   </Component>
