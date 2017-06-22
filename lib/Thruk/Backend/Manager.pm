@@ -2190,7 +2190,7 @@ sub _merge_hostgroup_answer {
     for my $group ( values %{$groups} ) {
         $group->{'backend'} = [];
         @{ $group->{'backend'} }  = sort values %{ $group->{'backends_hash'} };
-        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} };
+        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
         delete $group->{'backends_hash'};
     }
     my @return = values %{$groups};
@@ -2233,7 +2233,7 @@ sub _merge_servicegroup_answer {
     for my $group ( values %{$groups} ) {
         $group->{'backend'} = [];
         @{ $group->{'backend'} } = sort values %{ $group->{'backends_hash'} };
-        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} };
+        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
         delete $group->{'backends_hash'};
     }
 
