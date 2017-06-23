@@ -1636,7 +1636,13 @@ sub _get_files_for_folder {
             $self->{'file_trans'}->{$d} = $display;
         }
 
-        push @files, $dir."/".$file;
+        # skip broken symlinks
+        my $path = $dir."/".$file;
+        if(-l $path && !-e $path) {
+            next;
+        }
+
+        push @files, $path;
     }
 
     return \@files;
