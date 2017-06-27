@@ -1229,7 +1229,17 @@ sub _do_on_peers {
             Thruk::Utils::LMD::check_proc($c->config, $c, 1);
             sleep(1);
             # then retry again
-            ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
+            eval {
+                ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
+            };
+            if($@) {
+                my $err = $@;
+                if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|mx) {
+                    $err = $1;
+                }
+                $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err unless $c->stash->{'lmd_ok'};
+                die("internal lmd error - ".$c->stash->{'lmd_error'});
+            }
         }
     } else {
         $skip_lmd = 1;
@@ -1517,6 +1527,9 @@ sub _get_result_lmd {
     my $t1 = [gettimeofday];
     $c->stats->profile( begin => "_get_result_lmd($function)");
 
+    delete $c->stash->{'lmd_ok'};
+    delete $c->stash->{'lmd_error'};
+
     if(scalar @{$peers} == 0) {
         return($result, $type, $totalsize);
     }
@@ -1531,6 +1544,9 @@ sub _get_result_lmd {
     $c->stash->{'total_backend_waited'} += $elapsed;
 
     my $meta = $peer->{'live'}->{'backend_obj'}->{'meta_data'};
+    if($meta) {
+        $c->stash->{'lmd_ok'} = 1;
+    }
     # update failed backends
     if($meta && $meta->{'failed'}) {
         for my $key (@{$peers}) {
