@@ -640,9 +640,9 @@ sub bulk_fetch_live_data {
                 if(Thruk::BP::Utils::looks_like_regex($description)) {
                     $description =~ s/^(b|w)://gmx;
                     $description = Thruk::Utils::convert_wildcards_to_regex($description);
-                    push @filter, { host_name => $hostname, description => { '~~' => $description }};
+                    push @filter, { '-and' => { host_name => $hostname, description => { '~~' => $description }}};
                 } else {
-                    push @filter, { host_name => $hostname, description => $description };
+                    push @filter, { '-and' => { host_name => $hostname, description => $description }};
                 }
             }
         }
