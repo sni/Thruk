@@ -5649,6 +5649,11 @@ var ajax_search = {
                                   result_obj.relevance += 1;
                               }
                           } else {
+                              if(sub_pattern == "*") {
+                                found++;
+                                result_obj.relevance += 1;
+                                return;
+                              }
                               var re;
                               try {
                                 re = new RegExp(sub_pattern, "gi");
@@ -5728,7 +5733,7 @@ var ajax_search = {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display;
                     jQuery.each(pattern, function(index, sub_pattern) {
-                        if(ajax_search.regex_matching) {
+                        if(ajax_search.regex_matching && sub_pattern != "*") {
                             var re = new RegExp('('+sub_pattern+')', "gi");
                             name = name.replace(re, "<b>$1<\/b>");
                         } else {
