@@ -26,7 +26,7 @@ returns status based on real service or host
 =cut
 sub status {
     my($c, $bp, $n, $args, $livedata) = @_;
-    my($hostname, $description) = @{$args};
+    my($hostname, $description, $op) = @{$args};
     my $data;
 
     confess("no status data supplied") unless defined $livedata;
@@ -34,8 +34,14 @@ sub status {
     if($hostname and $description) {
         $data = $livedata->{'services'}->{$hostname}->{$description};
 
+        # operator is new and optional
+        $op = "=" unless $op;
+
         # description may contain regular expressions, return worst/best function in that case
-        if(Thruk::BP::Utils::looks_like_regex($description)) {
+        if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
+            $op = "~";
+        }
+        if($op ne '=') {
             my $function = 'worst';
             if($description =~ m/^(b|w):(.*)$/mx) {
                 if($1 eq 'b') { $function = 'best' }
@@ -43,15 +49,20 @@ sub status {
             }
             $description = Thruk::Utils::convert_wildcards_to_regex($description);
 
+            if($op eq '!=') { $op = '!~'; }
+
             # create hash which can be used by internal calculation function
             my $depends = [];
             for my $sname (keys %{$livedata->{'services'}->{$hostname}}) {
-                if($sname =~ m/$description/mxi) {
+                if(   ($op eq '!~' && $sname !~ m/$description/mxi)
+                   || ($op eq  '~' && $sname =~ m/$description/mxi)
+                   || ($op eq '!=' && $sname ne $description)) {
                     my $s = $livedata->{'services'}->{$hostname}->{$sname};
                     next if($bp->{'state_type'} eq 'hard' and $s->{'state_type'} != 1);
                     push @{$depends}, { label => $sname, status => $s->{'state'} };
                 }
             }
+
             my @res;
             if(scalar @{$depends} == 0) {
                 return(3, 'no matching hosts/services found');
@@ -61,7 +72,11 @@ sub status {
             } else {
                 @res = best($c, $bp, { depends => $depends });
             }
-            $res[1] = $function.' of '.$hostname.':'.$description;
+            my $display_op = '';
+            if($op ne '=') {
+                $display_op = ' '.$op.' ';
+            }
+            $res[1] = $function.' of '.$hostname.':'.$display_op.$description;
             return(@res);
         }
     }

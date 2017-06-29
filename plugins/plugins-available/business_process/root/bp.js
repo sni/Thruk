@@ -371,12 +371,15 @@ function bp_select_type(type) {
 /* show node type select: status */
 function bp_select_status(node) {
     if(node && node.func.toLowerCase() == 'status') {
+        if(!node.func_args[2]) { node.func_args[2] = '='; }
         bp_fill_select_form({
-            text:  { 'bp_arg1_status': node.func_args[0], 'bp_arg2_status': node.func_args[1] }
+            text:   { 'bp_arg1_status': node.func_args[0], 'bp_arg2_status': node.func_args[1] },
+            select: { 'bp_arg3_status': node.func_args[2] }
         });
     } else {
         bp_fill_select_form({
-            text:  { 'bp_arg1_status': '', 'bp_arg2_status': '' }
+            text:   { 'bp_arg1_status': '', 'bp_arg2_status': '' },
+            select: { 'bp_arg3_status': '=' }
         });
     }
 }

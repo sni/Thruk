@@ -592,7 +592,7 @@ sub bulk_fetch_live_data {
     for my $n (@{$self->{'nodes'}}) {
         if(lc $n->{'function'} eq 'status') {
             if($n->{'host'} and $n->{'service'}) {
-                $servicefilter->{$n->{'host'}}->{$n->{'service'}} = 1;
+                $servicefilter->{$n->{'host'}}->{$n->{'service'}} = $n->{'function_args'}->[2] || '=';
             }
             elsif($n->{'host'}) {
                 $hostfilter->{$n->{'host'}} = 1;
@@ -637,10 +637,20 @@ sub bulk_fetch_live_data {
         my @filter;
         for my $hostname (keys %{$servicefilter}) {
             for my $description (keys %{$servicefilter->{$hostname}}) {
-                if(Thruk::BP::Utils::looks_like_regex($description)) {
+                my $op = $servicefilter->{$hostname}->{$description} || '=';
+                if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
+                    $op = '~';
+                }
+                if($op ne '=') {
                     $description =~ s/^(b|w)://gmx;
                     $description = Thruk::Utils::convert_wildcards_to_regex($description);
-                    push @filter, { '-and' => { host_name => $hostname, description => { '~~' => $description }}};
+                    my $full_op = {
+                            '=' =>  '=',
+                           '!=' => '!=',
+                            '~' => '~~',
+                           '!~' => '!~',
+                        }->{$op} || '~~';
+                    push @filter, { '-and' => { host_name => $hostname, description => { $full_op => $description }}};
                 } else {
                     push @filter, { '-and' => { host_name => $hostname, description => $description }};
                 }

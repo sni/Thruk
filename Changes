@@ -11,6 +11,7 @@ next:
             - add input/output filter
             - make references link recursive
             - performance improvements for service status nodes
+            - add optional operator for status aggregation
 
 2.14-2   Fri May  5 12:31:42 CEST 2017
           - autocomplete custom variables values if exposed by show_custom_vars

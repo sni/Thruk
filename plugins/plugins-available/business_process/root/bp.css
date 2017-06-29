@@ -59,6 +59,13 @@ DIV.ui-dialog INPUT[type=text] {
     width: 290px;
 }
 
+DIV.ui-dialog SELECT.filter_op_select {
+    width: 40px;
+}
+DIV.ui-dialog input#bp_arg2_status {
+    width: 245px;
+}
+
 .bp_type_desc {
     font-size: smaller;
 }
@@ -311,4 +318,3 @@ TABLE.bp_filter TD {
 TABLE.bp_filter TD:first-child {
   text-align: left;
 }
-
