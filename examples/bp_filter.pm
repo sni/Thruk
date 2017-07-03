@@ -59,8 +59,8 @@ sub acknowledged_filter {
         }
     }
 
-    # replace acknowledged problems in all nodes,
-    for my $d (@{$args->{'bp'}->{'nodes'}}) {
+    # replace acknowledged problems in all nodes
+    for my $d (@{$args->{'node'}->{'depends'}}) {
         $d->{'status'} = 0 if $d->{'acknowledged'} > 0;
     }
 
@@ -91,10 +91,11 @@ sub unknown_filter {
         }
     }
 
-    # replace unknowns in all nodes,
-    for my $d (@{$args->{'bp'}->{'nodes'}}) {
+    # replace unknowns in all nodes
+    for my $d (@{$args->{'node'}->{'depends'}}) {
         $d->{'status'} = 0 if $d->{'status'} && $d->{'status'} == 3;
     }
+
     return;
 }
 
