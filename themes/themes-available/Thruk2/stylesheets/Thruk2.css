@@ -444,6 +444,14 @@ TD.filterTitle {
   height: 28px;
 }
 
+TABLE.filter_container TABLE.filter {
+  width: 100%;
+}
+
+TABLE.filter_container TD.filter_table:not(:first-child) TABLE.filter {
+  border-left: 1px solid black;
+}
+
 TABLE.infoBox {
   background-color:#ffffff;
   border: 0px none;

@@ -9,7 +9,7 @@
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
 <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
 [% END %]
-<table id="[% paneprefix %]all_filter_table" style="display:none;" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
+<table id="[% paneprefix %]all_filter_table" class="filter_container" style="display:none;" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
 [% FOR search = searches.$paneprefix %]
 [% SET prefix = 's' _ loop.index %]
 [% IF loop.index > 0 && loop.index % 3 == 0 %]</tr><tr>[% END %]
