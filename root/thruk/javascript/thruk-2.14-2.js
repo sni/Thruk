@@ -4773,8 +4773,14 @@ function new_filter(cloneObj, parentObj, btnId) {
 
   var tblObj   = document.getElementById(parentObj);
   var tblBody  = tblObj.tBodies[0];
-  var nextCell = tblBody.rows[0].cells.length;
-  var newCell  = tblBody.rows[0].insertCell(nextCell);
+  var nextRow  = tblBody.rows.length - 1;
+  var nextCell = tblBody.rows[nextRow].cells.length;
+  if(nextCell > 2) {
+    nextCell = 0;
+    tblBody.insertRow(nextRow+1);
+    nextRow++;
+  }
+  var newCell  = tblBody.rows[nextRow].insertCell(nextCell);
   newCell.setAttribute('valign', 'top');
   newCell.appendChild(newObj);
 
@@ -4783,7 +4789,9 @@ function new_filter(cloneObj, parentObj, btnId) {
   hideBtn = document.getElementById(pane_prefix+new_prefix + 'filter_button_mini');
   if(hideBtn) { hideElement( hideBtn); }
   hideElement(pane_prefix + new_prefix + 'btn_accept_search');
-  hideElement(pane_prefix + new_prefix + 'btn_columns');
+  if(document.getElementById(pane_prefix + new_prefix + 'btn_columns')) {
+    hideElement(pane_prefix + new_prefix + 'btn_columns');
+  }
   showElement(pane_prefix + new_prefix + 'btn_del_search');
 
   hideBtn = document.getElementById(pane_prefix + new_prefix + 'filter_title');
@@ -4835,12 +4843,15 @@ function deleteSearchPane(id) {
   var index     = id.indexOf('_');
   search_prefix = id.substring(0,index+1);
 
-  var pane = document.getElementById(pane_prefix + search_prefix + 'filter_pane');
+  var pane  = document.getElementById(pane_prefix + search_prefix + 'filter_pane');
+  var table = jQuery(pane.parentNode).parents('TABLE').first()[0];
+
   var cell = pane.parentNode;
   while(cell.firstChild) {
       child = cell.firstChild;
       cell.removeChild(child);
   }
+  cell.parentNode.removeChild(cell);
 
   // show last "new search" button
   var last_nr = 0;
@@ -4849,6 +4860,28 @@ function deleteSearchPane(id) {
       if(tst && pane_prefix + 's'+x+'_' != search_prefix) { last_nr = x; }
   }
   showElement( pane_prefix + 's'+last_nr+'_' + 'new_filter');
+
+  // realign search panel to 3 per row.
+  // first collect all cells from all rows
+  var cells = [];
+  for(var rowNum = 0; rowNum < table.rows.length; rowNum++) {
+      while(table.rows[rowNum].firstChild) {
+        var node = table.rows[rowNum].removeChild(table.rows[rowNum].firstChild);
+        if(node.nodeType === document.ELEMENT_NODE) cells.push(node);
+      }
+  }
+  var rowNum = 0;
+  for(var i = 0; i < cells.length; i++) {
+    table.rows[rowNum].appendChild(cells[i]);
+    if(i > 0 && (i+1)%3 == 0) {
+        rowNum++;
+    }
+  }
+  // remove last row if its emtpy now
+  var rowNum = table.rows.length - 1;
+  if(table.rows[rowNum].cells.length == 0) {
+    table.deleteRow(table.rows[rowNum].rowIndex);
+  }
 
   return false;
 }
