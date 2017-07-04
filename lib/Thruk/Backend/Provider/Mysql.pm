@@ -1092,6 +1092,10 @@ sub _update_logcache {
     }
     return(-1) if $skip;
 
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
+    $dbh->commit or die $dbh->errstr;
+
     if($cache_version == 3) {
         $cache_version = 4;
         $dbh->do("ALTER TABLE `".$prefix."_log` CHANGE `state_type` `state_type` ENUM('HARD','SOFT') NULL DEFAULT NULL");
@@ -1123,10 +1127,6 @@ sub _update_logcache {
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
         $self->_create_tables($dbh, $prefix);
     }
-
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
-    $dbh->commit or die $dbh->errstr;
 
     my $log_count = 0;
     eval {
@@ -1750,6 +1750,7 @@ sub _import_peer_logfiles {
 ##########################################################
 sub _import_logcache_from_file {
     my($self,$mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup) = @_;
+    my $log_count = 0;
 
     # increase plugin output lookup performance for larger updates
     if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0) {
@@ -1760,12 +1761,18 @@ sub _import_logcache_from_file {
 
     require Monitoring::Availability::Logs;
 
+    # check pid / lock
+    #_set_write_locks($dbh, $prefix);
+    my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
+    if(scalar @pids != 1 || $pids[0] != $$) {
+        print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
+        return $log_count;
+    }
+
     # get current auto increment values
-    _set_write_locks($dbh, $prefix);
     my $auto_increments = _get_autoincrements($dbh, $prefix);
     my $foreign_key_stash = {};
 
-    my $log_count = 0;
     for my $f (@{$files}) {
         print $f if $verbose;
         my $duplicate_lookup  = {};
@@ -1863,8 +1870,15 @@ sub _insert_logs {
         $mode = MODE_IMPORT;
     }
 
+    # check pid / lock
+    #_set_write_locks($dbh, $prefix);
+    my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
+    if(scalar @pids != 1 || $pids[0] != $$) {
+        print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
+        return $log_count;
+    }
+
     # get current auto increment values
-    _set_write_locks($dbh, $prefix);
     my $auto_increments = _get_autoincrements($dbh, $prefix);
     my $foreign_key_stash = {};
 
