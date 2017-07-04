@@ -174,8 +174,8 @@ script has the following arguments
       - logcacheremoveunused        remove old tables from no longer used backends (mysql only)
 
     Livestatus Cache:
-      - livecachestart              start shadownaemons livecache
-      - livecachestop               stop all shadownaemons
+      - livecachestart              start lmd/shadownaemons livecache
+      - livecachestop               stop all lmd/shadownaemons
       - livecacherestart            restart livecaches for each site sequentially
       - livecachestatus             show livecache status
 

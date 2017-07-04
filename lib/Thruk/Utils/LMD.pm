@@ -64,6 +64,67 @@ sub check_proc {
 
 ########################################
 
+=head2 status
+
+  status($config)
+
+makes sure lmd process is running
+
+=cut
+
+sub status {
+    my($config) = @_;
+
+    my $status        = [];
+    my $total_started = 0;
+    my $started       = 0;
+    my $pid;
+
+    return($status, $total_started) unless $config->{'use_lmd_core'};
+
+    my $lmd_dir = $config->{'tmp_path'}.'/lmd';
+    if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
+        $total_started++;
+        $started = 1;
+        $pid     = read_file($lmd_dir.'/pid');
+        chomp($pid);
+    }
+    push @{$status}, { status => $started, pid => $pid };
+    return($status, $total_started);
+}
+
+########################################
+
+=head2 restart
+
+  restart($c, $config)
+
+restart lmd process
+
+=cut
+
+sub restart {
+    my($c, $config) = @_;
+
+    shutdown_procs($config);
+
+    # wait till its stopped
+    my($status, $started) = (1, 1);
+    for(my $x = 0; $x <= 20; $x++) {
+        eval {
+            ($status, $started) = status($config);
+        };
+        last if $started == 0;
+        sleep 1;
+    }
+
+    check_proc($config, $c, 0);
+
+    return;
+}
+
+########################################
+
 =head2 shutdown_procs
 
   shutdown_procs($config)

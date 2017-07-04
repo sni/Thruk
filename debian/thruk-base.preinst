@@ -18,4 +18,4 @@ if [ -d /etc/thruk/ssi/. ]; then
   cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
 fi
 
-exit
+exit 0

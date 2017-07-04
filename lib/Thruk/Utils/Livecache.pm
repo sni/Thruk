@@ -15,10 +15,83 @@ use warnings;
 use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep/;
 use Thruk::Utils::External;
+use Thruk::Utils::LMD;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 =head1 METHODS
+
+=head2 check_procs
+
+  check_procs($config, [$c], [$log_missing], [$force])
+
+makes sure all livecache processes are running
+
+=cut
+
+sub check_procs {
+    my($config, $c, $log_missing, $force) = @_;
+    if($config->{'use_lmd_core'}) {
+        return(Thruk::Utils::LMD::check_proc($config, $c, $log_missing));
+    }
+    return(check_shadow_naemon_procs($config, $c, $log_missing, $force));
+}
+
+##########################################################
+
+=head2 status
+
+  status($config)
+
+get status of livecache processes
+
+=cut
+
+sub status {
+    my($config) = @_;
+    if($config->{'use_lmd_core'}) {
+        return(Thruk::Utils::LMD::status($config));
+    }
+    return(status_shadow_naemon_procs($config));
+}
+
+##########################################################
+
+=head2 shutdown
+
+  shutdown($config)
+
+stop all livecache processes
+
+=cut
+
+sub shutdown {
+    my($config) = @_;
+    if($config->{'use_lmd_core'}) {
+        return(Thruk::Utils::LMD::shutdown_procs($config));
+    }
+    return(shutdown_shadow_naemon_procs($config));
+}
+
+##########################################################
+
+=head2 restart
+
+  restart($config)
+
+restart all livecache processes
+
+=cut
+
+sub restart {
+    my($c, $config) = @_;
+    if($config->{'use_lmd_core'}) {
+        return(Thruk::Utils::LMD::restart($c, $config));
+    }
+    return(restart_shadow_naemon_procs($c, $config));
+}
+
+##########################################################
 
 =head2 check_shadow_naemon_procs
 

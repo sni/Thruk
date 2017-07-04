@@ -143,6 +143,7 @@ if [ -d /etc/thruk/ssi/. ]; then
   mkdir -p /tmp/thruk_update/ssi
   cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
 fi
+
 exit 0
 
 %post base
@@ -250,6 +251,7 @@ case "$*" in
     ;;
   1)
     # POSTUPDATE
+    /usr/bin/thruk -a livecachestop --local >/dev/null 2>&1
     rm -rf %{_localstatedir}/cache/thruk/*
     mkdir -p /var/cache/thruk/reports
     chown -R %{apacheuser}:%{apachegroup} /var/cache/thruk
