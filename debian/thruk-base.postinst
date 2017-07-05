@@ -112,7 +112,7 @@ case "$1" in
         /usr/bin/crontab -l -u www-data 2>/dev/null | /usr/bin/crontab -u www-data -
 
         # cleanup tmp files
-        /usr/bin/thruk -a livecachestop --local >/dev/null 2>&1
+        /usr/bin/thruk -a livecachestop --local >/dev/null 2>&1 || :
         rm -rf /var/cache/thruk/*
 
         # update cron entries
