@@ -2111,6 +2111,7 @@ sub read_data_file {
     }
 
     # REMOVE AFTER: 01.01.2018
+    my $json_err = $@;
     my $cont = read_file($filename);
     $cont = Thruk::Utils::IO::untaint($cont);
 
@@ -2130,7 +2131,9 @@ sub read_data_file {
     eval("#line 1 $filename\n".'$VAR1 = '.$cont.';');
     ## use critic
 
-    warn($@) if $@;
+    if($@) {
+        warn("error loading $filename as json or perl format.\njson: ".$json_err."\nperl: ".$@);
+    }
 
     return $VAR1;
 }
