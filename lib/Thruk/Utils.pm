@@ -1668,6 +1668,7 @@ let the user choose a mobile page or not
 sub choose_mobile {
     my($c,$url) = @_;
 
+    return unless defined $c->config->{'use_feature_mobile'};
     return unless defined $c->req->header('user-agent');
     my $found = 0;
     for my $agent (split(/\s*,\s*/mx, $c->config->{'mobile_agent'})) {
