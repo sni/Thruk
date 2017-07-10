@@ -16,6 +16,7 @@
        Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
        Copyright (c) 1999-2009 Ethan Galstad.
   -->
+  [% PROCESS _header_broadcast.tt %]
   <br><br>
   <br><br>
   [% PROCESS _message.tt %]

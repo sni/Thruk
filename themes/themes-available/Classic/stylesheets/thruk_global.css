@@ -1334,6 +1334,10 @@ TABLE.broadcast_panel_container button.next {
   cursor: pointer;
 }
 
+TABLE.broadcast_panel_container span.preview {
+  opacity: 0.7;
+}
+
 BUTTON.thruk_btn {
   border: none;
   background-color: transparent;

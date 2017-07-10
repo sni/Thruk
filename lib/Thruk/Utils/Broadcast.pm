@@ -29,7 +29,10 @@ sub get_broadcasts {
     my $list = [];
 
     my $now    = time();
-    my $groups = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'};
+    my $groups = {};
+    if($c->stash->{'remote_user'}) {
+        $groups = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'};
+    }
     my @files  = glob($c->config->{'var_path'}.'/broadcast/*.json');
     return([]) unless scalar @files > 0;
 
@@ -54,6 +57,10 @@ sub get_broadcasts {
         $basename =~ s%.*?([^/]+\.json)$%$1%mx;
         $broadcast->{'basefile'} = $basename;
         next if $filefilter && $basename ne $filefilter;
+
+        if(!$c->stash->{'remote_user'} && !$broadcast->{'loginpage'}) {
+            next;
+        }
 
         $broadcast->{'contacts'}      = Thruk::Utils::list($broadcast->{'contacts'});
         $broadcast->{'contactgroups'} = Thruk::Utils::list($broadcast->{'contactgroups'});

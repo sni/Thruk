@@ -92,6 +92,12 @@
     </td>
   </tr>
   <tr>
+    <td class="dataEven" align="center"><b>Login Page</b></td>
+    <td class="dataOdd" align="left">
+        <input type="checkbox" value="1" name="loginpage"[% IF broadcast.defined('loginpage') && broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
+    </td>
+  </tr>
+  <tr>
     <td class="dataEven" align="center" colspan=2>
       <span class="required" style="float: left;">* - required</span>
       <button class="thruk_button_save" style="width: 160px;">
@@ -108,8 +114,14 @@
     jQuery('.broadcast_panel_container DIV.control').hide();
     jQuery('.broadcast_panel_container DIV.dismiss A').prop('onclick',null).off('click').on('click', function(e) { e.preventDefault(); alert("preview cannot be dismissed."); return false; })
     jQuery('TEXTAREA[name=text]').on('keyup', function() {
-      jQuery('.broadcast_panel_container DIV.broadcast').html(this.value);
+      if(this.value == "") {
+        jQuery('.broadcast_panel_container DIV.broadcast').html('<span class="preview">Broadcast preview...</span>');
+      } else {
+        jQuery('.broadcast_panel_container DIV.broadcast').html(this.value);
+      }
     });
+    // update preview once on page load
+    jQuery('TEXTAREA[name=text]').trigger('keyup');
   });
 -->
 </script>

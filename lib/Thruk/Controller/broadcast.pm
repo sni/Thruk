@@ -36,12 +36,12 @@ sub index {
         return $c->detach('/error/index/8');
     }
 
-    $c->stash->{'page'}            = 'broadcast';
+    $c->stash->{'page'}            = 'splashpage';
     $c->stash->{has_jquery_ui}     = 1;
     $c->stash->{disable_backspace} = 1;
     $c->stash->{'no_auto_reload'}  = 1;
 
-    Thruk::Utils::ssi_include($c);
+    Thruk::Utils::ssi_include($c, 'broadcast');
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
@@ -97,6 +97,7 @@ sub index {
             $broadcast->{'text'}          = $c->req->parameters->{'text'};
             $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
             $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
+            $broadcast->{'loginpage'}     = $c->req->parameters->{'loginpage'} || 0;
 
             Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
             Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);
