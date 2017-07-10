@@ -36,11 +36,12 @@ sub index {
         return $c->detach('/error/index/8');
     }
 
-    Thruk::Utils::ssi_include($c);
-
+    $c->stash->{'page'}            = 'broadcast';
     $c->stash->{has_jquery_ui}     = 1;
     $c->stash->{disable_backspace} = 1;
     $c->stash->{'no_auto_reload'}  = 1;
+
+    Thruk::Utils::ssi_include($c);
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
