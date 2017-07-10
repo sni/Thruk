@@ -47,7 +47,7 @@
     <td class="status [% rowclass %]" align="left">[% b.author %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>
-    <td class="status [% rowclass %]" align="left">[% IF b.defined('loginpage') && b.loginpage %]Yes[% END %]</td>
+    <td class="status [% rowclass %]" align="left">[% IF b.loginpage %]Yes[% END %]</td>
     <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contacts.join(', ') %]</td>
     <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contactgroups.join(', ') %]</td>
     <td class="status [% rowclass %]" nowrap align="left">

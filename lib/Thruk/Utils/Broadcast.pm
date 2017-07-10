@@ -142,6 +142,8 @@ sub get_broadcasts {
         $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
         $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';
         $broadcast->{'hide_before'} = $broadcast->{'hide_before'}   // '';
+        $broadcast->{'loginpage'}   = $broadcast->{'loginpage'}     // 0;
+        $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
 
         push @{$list}, $broadcast;
     }

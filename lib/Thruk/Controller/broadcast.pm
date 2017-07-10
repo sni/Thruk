@@ -98,6 +98,7 @@ sub index {
             $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
             $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
             $broadcast->{'loginpage'}     = $c->req->parameters->{'loginpage'} || 0;
+            $broadcast->{'annotation'}    = $c->req->parameters->{'annotation'} || '';
 
             Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
             Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);

@@ -65,6 +65,8 @@ A broadcast can have these attributes:
      ** `contactgroups`  A list of contactgroups which should receive the broadcast.
      ** `hide_before`    If set, the broadcast will not be shown before this date. Format is: YYYY-MM-DD HH:MM:SS.
      ** `expires`        If set, the broadcast will not be shown after this date. Format is: YYYY-MM-DD HH:MM:SS.
+     ** `loginpage`      If set, the broadcast will be displayed for unauthenticated users on the login page as well
+     ** `annotation`     Small annotation icon, choose between 'info' or 'warning'
 
 All attributes except the text itself are optional.
 

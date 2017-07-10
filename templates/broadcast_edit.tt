@@ -55,6 +55,14 @@
       </td>
   </tr>
   <tr>
+    <td class="dataEven" align="center"><b>Annotation</b></td>
+    <td class="dataOdd" align="left">
+        <input type="radio" name="annotation" value=""[% IF !broadcast.annotation %] checked[% END %]> None &nbsp; &nbsp; &nbsp;
+        <input type="radio" name="annotation" value="info"[% IF broadcast.annotation == "info" %] checked[% END %]> <img src='[% url_prefix %]themes/[% theme %]/images/info.png' border="0" alt='warning' title='warning' width="16" height="16" style="vertical-align: text-bottom;"> &nbsp; &nbsp; &nbsp;
+        <input type="radio" name="annotation" value="warning"[% IF broadcast.annotation == "warning" %] checked[% END %]> <img src='[% url_prefix %]themes/[% theme %]/images/warning.png' border="0" alt='warning' title='warning' width="16" height="16" style="vertical-align: text-bottom;">
+    </td>
+  </tr>
+  <tr>
     <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
     <td class="dataOdd" align="left">
       <textarea name="text" wrap="hard" cols=74 rows=10 style="width: 99%;">[% broadcast.text %]</textarea>
@@ -94,7 +102,7 @@
   <tr>
     <td class="dataEven" align="center"><b>Login Page</b></td>
     <td class="dataOdd" align="left">
-        <input type="checkbox" value="1" name="loginpage"[% IF broadcast.defined('loginpage') && broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
+        <input type="checkbox" value="1" name="loginpage"[% IF broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
     </td>
   </tr>
   <tr>
@@ -110,18 +118,25 @@
 
 <script type="text/javascript">
 <!--
+  function update_broadcast_preview() {
+    var val        = jQuery('TEXTAREA[name=text]').val();
+    var annotation = jQuery('INPUT[name=annotation]:checked').val();
+    if(annotation) {
+      val = "<img src='[% url_prefix %]themes/[% theme %]/images/"+annotation+".png' border='0' width='16' height='16' style='vertical-align: text-bottom; padding-right: 5px;'>" + val;
+    }
+    if(val == "") {
+      jQuery('.broadcast_panel_container DIV.broadcast').html('<span class="preview">Broadcast preview...</span>');
+    } else {
+      jQuery('.broadcast_panel_container DIV.broadcast').html(val);
+    }
+  }
+
   jQuery(document).ready(function() {
     jQuery('.broadcast_panel_container DIV.control').hide();
     jQuery('.broadcast_panel_container DIV.dismiss A').prop('onclick',null).off('click').on('click', function(e) { e.preventDefault(); alert("preview cannot be dismissed."); return false; })
-    jQuery('TEXTAREA[name=text]').on('keyup', function() {
-      if(this.value == "") {
-        jQuery('.broadcast_panel_container DIV.broadcast').html('<span class="preview">Broadcast preview...</span>');
-      } else {
-        jQuery('.broadcast_panel_container DIV.broadcast').html(this.value);
-      }
-    });
-    // update preview once on page load
-    jQuery('TEXTAREA[name=text]').trigger('keyup');
+    jQuery('TEXTAREA[name=text]').on('keyup', function() { update_broadcast_preview(); });
+    jQuery('INPUT[name=annotation]').on('change', function() { update_broadcast_preview(); });
+    update_broadcast_preview();
   });
 -->
 </script>
