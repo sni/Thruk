@@ -210,6 +210,8 @@ sub get_default_broadcast {
         hide_before     => '',
         contacts        => [],
         contactgroups   => [],
+        annotation      => '',
+        loginpage       => 0,
     };
     return($broadcast);
 }
