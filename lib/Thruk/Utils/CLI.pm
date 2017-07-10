@@ -975,8 +975,8 @@ sub _cmd_bpd {
 
     my $last_bp;
     my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
-    if($rate <  1) { $rate =  1; }
-    if($rate > 60) { $rate = 60; }
+    if($rate < 1) { $rate = 1; }
+    if($rate > 5) { $rate = 5; }
     my $timeout = ($rate*60) -5;
     local $SIG{ALRM} = sub { die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown')) };
     alarm($timeout);

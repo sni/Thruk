@@ -102,6 +102,7 @@ sub cmd {
             forward      => "forward on success"
             backends     => "list of selected backends (keys)"
             nofork       => "don't fork"
+            background   => "return $jobid if set, or redirect otherwise"
         }
     )
 

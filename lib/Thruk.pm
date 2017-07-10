@@ -474,10 +474,12 @@ sub _check_exit_reason {
        || $reason =~ m|Plack::Util::run_app|gmx) {
         local $| = 1;
         my $url = $Thruk::Request::c ? $Thruk::Request::c->req->url : 'unknown url';
-        print STDERR "ERROR: got signal $sig while handling request, possible timeout in $url\n$reason";
+        print STDERR "ERROR: got signal $sig while handling request, possible timeout in $url\n$reason\n";
         # send sigusr1 to lmd to create a backtrace
         if(defined $Thruk::Request::c && $Thruk::Request::c->config->{'use_lmd_core'}) {
-            Thruk::Utils::LMD::create_thread_dump($Thruk::Request::c, $Thruk::Request::c->config);
+            my $c = $Thruk::Request::c;
+            Thruk::Utils::LMD::create_thread_dump($c, $c->config);
+            Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);
         }
     }
     return;

@@ -35,7 +35,8 @@ sub check_proc {
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     my $logfile = $lmd_dir.'/lmd.log';
     my $size    = -s $logfile;
-    if($size && $size > 10*1024*1024) { # rotate logfile if its more than 10mb
+    if($size && $size > 20*1024*1024) { # rotate logfile if its more than 20mb
+        copy($logfile.'.1', $logfile.'.2') if -e $logfile.'.1';
         copy($logfile, $logfile.'.1');
         Thruk::Utils::IO::write($logfile, '');
     }
@@ -230,6 +231,61 @@ sub create_thread_dump {
         # send SIGUSR1
         kill(10, $pid);
     }
+    return;
+}
+
+########################################
+
+=head2 kill_if_not_responding
+
+  kill_if_not_responding()
+
+send test query and kill hard if it does not respond
+
+=cut
+sub kill_if_not_responding {
+    my($c, $config) = @_;
+
+    my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
+    my $pid_file = $lmd_dir.'/pid';
+    my $lmd_pid  = check_pid($pid_file);
+    return unless $lmd_pid;
+    my $data;
+    my $pid = fork();
+    if($pid == -1) { die("fork failed: $!"); }
+
+    if(!$pid) {
+        Thruk::Utils::External::_do_child_stuff($c, 0, 0);
+        alarm(2);
+        eval {
+            $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites");
+        };
+        alarm(0);
+        if($@) {
+            $c->log->warn("lmd not responding, killing with force");
+            kill(2, $lmd_pid);
+            sleep(1);
+            kill(9, $lmd_pid);
+        }
+        exit 0;
+    }
+
+    my $waited = 0;
+    while(POSIX::waitpid($pid, POSIX::WNOHANG) == 0) {
+        sleep(1);
+        $waited++;
+        last if $waited >= 2;
+    }
+    my $rc = $?;
+    if($rc != 0) {
+        $c->log->warn("lmd not responding, killing with force");
+        kill(2, $pid);
+        kill(2, $lmd_pid);
+        sleep(1);
+        kill(9, $lmd_pid);
+        kill(9, $pid);
+    }
+
     return;
 }
 

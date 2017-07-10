@@ -1240,6 +1240,8 @@ sub _do_on_peers {
                 if(!$c->stash->{'lmd_ok'}) {
                     Thruk::Utils::LMD::create_thread_dump($c, $c->config);
                     $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err;
+                    $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
+                    Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
                 }
                 die("internal lmd error - ".$c->stash->{'lmd_error'});
             }
