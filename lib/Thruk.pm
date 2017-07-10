@@ -212,18 +212,26 @@ sub _build_app {
             }
             $routes_already_loaded->{$route_file} = 1;
         }
-        elsif($plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx) {
-            my $plugin = $1;
-            $plugin =~ s|/|::|gmx;
+        elsif($plugin_dir =~ m|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm|gmx) {
+            my $plugin_class = $1;
+            $plugin_class =~ s|/|::|gmx;
             eval {
-                load $plugin;
-                $plugin->add_routes($self, $self->{'routes'});
+                load $plugin_class;
+                $plugin_class->add_routes($self, $self->{'routes'});
             };
             my $err = $@;
-            $self->log->error("disabled broken plugin $plugin: ".$err) if $err;
+            $self->log->error("disabled broken plugin $plugin_class: ".$err) if $err;
         } else {
             die("unknown plugin folder format: $plugin_dir");
         }
+
+        # enable cron files, this only works for OMD right now.
+        if($ENV{'OMD_ROOT'}) {
+            $self->_check_plugin_cron_file($plugin_dir);
+        }
+    }
+    if($ENV{'OMD_ROOT'}) {
+        $self->_cleanup_plugin_cron_files();
     }
     #&timing_breakpoint('startup() plugins loaded');
 
@@ -678,6 +686,47 @@ sub _setup_development_signals {
             print STDERR $@ if $@;
         };
         ## use critic
+    }
+    return;
+}
+
+###################################################
+sub _check_plugin_cron_file {
+    my($self, $plugin_dir) = @_;
+    my $cron_file = $plugin_dir;
+    $cron_file =~ s|/lib/Thruk/Controller/.*\.pm$|/cron|gmx;
+    if(-e $cron_file && $cron_file =~ m/\/plugins\-enabled\/([^\/]+)\/cron/mx) {
+        my $plugin_name = $1;
+        # check existing cron files, to see if its already enabled
+        my $found = 0;
+        my @existing_cron_files = glob($ENV{'OMD_ROOT'}.'/etc/cron.d/*');
+        for my $file (@existing_cron_files) {
+            if(-l $file) {
+                my $target = readlink($file);
+                if($target =~ m/\/\Q$plugin_name\E\/cron$/mx) {
+                    $found = 1;
+                    last;
+                }
+            }
+        }
+        if(!$found) {
+            symlink('../thruk/plugins-enabled/'.$plugin_name.'/cron', 'etc/cron.d/thruk-plugin-'.$plugin_name);
+            `omd status crontab >/dev/null 2>&1 && omd reload crontab > /dev/null`;
+            $self->log->info("enabled cronfile for plugin: ".$plugin_name);
+        }
+    }
+    return;
+}
+
+###################################################
+sub _cleanup_plugin_cron_files {
+    my($self) = @_;
+    my @existing_cron_files = glob($ENV{'OMD_ROOT'}.'/etc/cron.d/*');
+    for my $file (@existing_cron_files) {
+        if($file =~ m/\/thruk\-plugin\-/mx && -l $file && !-e $file) {
+            $self->log->info("removed old plugin cronfile: ".$file);
+            unlink($file);
+        }
     }
     return;
 }
