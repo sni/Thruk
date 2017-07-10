@@ -1237,7 +1237,10 @@ sub _do_on_peers {
                 if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|mx) {
                     $err = $1;
                 }
-                $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err unless $c->stash->{'lmd_ok'};
+                if(!$c->stash->{'lmd_ok'}) {
+                    Thruk::Utils::LMD::create_thread_dump($c, $c->config);
+                    $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err;
+                }
                 die("internal lmd error - ".$c->stash->{'lmd_error'});
             }
         }

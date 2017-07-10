@@ -475,6 +475,10 @@ sub _check_exit_reason {
         local $| = 1;
         my $url = $Thruk::Request::c ? $Thruk::Request::c->req->url : 'unknown url';
         print STDERR "ERROR: got signal $sig while handling request, possible timeout in $url\n$reason";
+        # send sigusr1 to lmd to create a backtrace
+        if(defined $Thruk::Request::c && $Thruk::Request::c->config->{'use_lmd_core'}) {
+            Thruk::Utils::LMD::create_thread_dump($Thruk::Request::c, $Thruk::Request::c->config);
+        }
     }
     return;
 }

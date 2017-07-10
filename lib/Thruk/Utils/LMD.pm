@@ -199,14 +199,38 @@ sub check_pid {
     return 0 unless -s $file;
     my $pid = read_file($file);
     if($pid =~ m/^(\d+)\s*$/mx) {
-        if(-d '/proc/'.$1) {
-            my $cmd = read_file('/proc/'.$1.'/cmdline');
+        $pid = $1;
+        if(-d '/proc/'.$pid) {
+            my $cmd = read_file('/proc/'.$pid.'/cmdline');
             if($cmd =~ m/lmd/mxi) {
-                return 1;
+                return $pid;
             }
         }
     }
     return 0;
+}
+
+########################################
+
+=head2 create_thread_dump
+
+  create_thread_dump()
+
+send sigusr1 to lmd to create a thread dump
+
+=cut
+sub create_thread_dump {
+    my($c, $config) = @_;
+    return if(!$config->{'use_lmd_core'});
+    return if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
+    my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
+    my $pid_file = $lmd_dir.'/pid';
+    my $pid = check_pid($pid_file);
+    if($pid) {
+        # send SIGUSR1
+        kill(10, $pid);
+    }
+    return;
 }
 
 ########################################
