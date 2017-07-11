@@ -1074,6 +1074,7 @@ sub _update_logcache {
         $mode = 'import';
     } else {
         eval {
+            $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
             my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
             if(scalar @pids > 0 and $pids[0]) {
                 if(kill(0, $pids[0])) {
@@ -1092,7 +1093,6 @@ sub _update_logcache {
     }
     return(-1) if $skip;
 
-    $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
     $dbh->commit or die $dbh->errstr;
