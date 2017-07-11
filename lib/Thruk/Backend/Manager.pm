@@ -1243,7 +1243,7 @@ sub _do_on_peers {
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
                     Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
                 }
-                die("internal lmd error - ".$c->stash->{'lmd_error'});
+                die("internal lmd error - ".($c->stash->{'lmd_error'} || $@));
             }
         }
     } else {

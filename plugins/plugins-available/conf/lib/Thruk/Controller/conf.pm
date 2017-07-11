@@ -1367,17 +1367,9 @@ sub _process_user_password_page {
 sub _get_tools {
     my ($c) = @_;
 
-    my $modules = {};
-    for my $folder (@INC) {
-        next unless -d $folder;
-        for my $file (glob($folder.'/Thruk/Utils/Conf/Tools/*.pm')) {
-            $file =~ s|^\Q$folder/\E||gmx;
-            $modules->{$file} = 1;
-        }
-    }
-
-    my $tools = {};
-    for my $file (keys %{$modules}) {
+    my $modules = Thruk::Utils::find_modules('/Thruk/Utils/Conf/Tools/*.pm');
+    my $tools   = {};
+    for my $file (@{$modules}) {
         require $file;
         my $class = $file;
         $class    =~ s|/|::|gmx;

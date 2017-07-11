@@ -975,7 +975,7 @@ imports logs into Mysql
 
 sub _import_logs {
     my($self, $c, $mode, $verbose, $backends, $blocksize, $options) = @_;
-    my $files = $options->{'url'} || [];
+    my $files = $options->{'files'} || [];
     $c->stats->profile(begin => "Mysql::_import_logs($mode)");
 
     #&timing_breakpoint('_import_logs');
