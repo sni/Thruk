@@ -1092,6 +1092,12 @@ sub _update_logcache {
     }
     return(-1) if $skip;
 
+    $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
+    if($mode eq 'import') {
+        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
+        $self->_create_tables($dbh, $prefix);
+    }
+
     $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
@@ -1122,12 +1128,6 @@ sub _update_logcache {
             $c->log->info($msg);
         }
         $mode = 'import';
-    }
-
-    $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
-    if($mode eq 'import') {
-        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
-        $self->_create_tables($dbh, $prefix);
     }
 
     my $log_count = 0;
