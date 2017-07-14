@@ -1722,7 +1722,7 @@ sub _import_peer_logfiles {
     $c->stats->profile(begin => "get livestatus timestamp");
     my($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
     if(!$start || !$end) {
-        die("something went wrong, cannot get start/end from logfiles ($start / $end)");
+        die("something went wrong, cannot get start/end from logfiles ($start / $end)\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
     }
     #&timing_breakpoint('_import_peer_logfiles: got livestatus timestamps');
 
