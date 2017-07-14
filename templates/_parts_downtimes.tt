@@ -10,7 +10,7 @@
     <td nowrap valign='top' align='right'>[% date_format(c, d.start_time) %]</td>
     <td nowrap valign='top' align='right'>[% date_format(c, d.end_time) %]</td>
     <td nowrap valign='top'>[% escape_quotes(d.author) %]</td>
-    <td>[% IF escape_html_tags %][% escape_html(escape_html(d.comment)) %][% ELSE %][% escape_quotes(d.comment) %][% END %]</td>
+    <td>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
   </tr>
   [% END %]
 </table>

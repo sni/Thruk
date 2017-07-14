@@ -69,8 +69,11 @@ case "$1" in
     configure)
         # restore themes, plugins and ssi
         if [ -d /tmp/thruk_update/themes/. ]; then
+          # do not remove the new default theme
+          test -h /tmp/thruk_update/themes/Thruk2 || mv /etc/thruk/themes/themes-enabled/Thruk2 /etc/thruk/themes/themes-enabled/.Thruk2
           rm -f /etc/thruk/themes/themes-enabled/*
           cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
+          test -h /etc/thruk/themes/themes-enabled/.Thruk2 && mv /etc/thruk/themes/themes-enabled/.Thruk2 /etc/thruk/themes/themes-enabled/Thruk2
         fi
         if [ -d /tmp/thruk_update/plugins/. ]; then
           rm -f /etc/thruk/plugins/plugins-enabled/*
@@ -84,13 +87,19 @@ case "$1" in
         rm -rf /tmp/thruk_update
 
         # set permissions
-        mkdir -p /var/lib/thruk /var/log/thruk /var/cache/thruk/reports /etc/thruk/bp /etc/thruk/thruk_local.d
+        mkdir -p /var/lib/thruk \
+                 /var/log/thruk \
+                 /var/cache/thruk/reports \
+                 /etc/thruk/bp \
+                 /etc/thruk/panorama \
+                 /etc/thruk/thruk_local.d
         chown -R www-data: /var/lib/thruk \
                            /var/cache/thruk \
                            /var/log/thruk \
                            /etc/thruk/plugins/plugins-enabled \
                            /etc/thruk/thruk_local.conf \
                            /etc/thruk/bp \
+                           /etc/thruk/panorama \
                            /etc/thruk/thruk_local.d
         chmod 755 /usr/share/thruk/fcgid_env.sh
         chmod 755 /usr/bin/thruk
@@ -101,6 +110,10 @@ case "$1" in
 
         # create empty crontab
         /usr/bin/crontab -l -u www-data 2>/dev/null | /usr/bin/crontab -u www-data -
+
+        # cleanup tmp files
+        /usr/bin/thruk -a livecachestop --local >/dev/null 2>&1
+        rm -rf /var/cache/thruk/*
 
         # update cron entries
         rm -f /var/cache/thruk/thruk.cache

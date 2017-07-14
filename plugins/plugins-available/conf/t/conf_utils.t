@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 701;
+    plan tests => 702;
 }
 
 BEGIN {
@@ -358,3 +358,17 @@ $objects->clone_refs($obj, $obj, $obj->{'conf'}->{'host_name'}, "cloned host");
 $tmp = $objects->get_objects_by_name('hostgroup', 'group3');
 isa_ok($tmp->[0], 'Monitoring::Config::Object::Hostgroup');
 is_deeply($tmp->[0]->{'conf'}->{'members'}, ['hostname1', 'cloned host'], "cloned host is now member of group");
+
+###########################################################
+# computed config for nested templates II
+$objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/11' });
+$objects->init();
+$parsedfile = $objects->{'files'}->[0];
+$obj = $parsedfile->{'objects'}->[0];
+$testhost = {
+    'host_name'           => 'sw_example',
+    'address'             => '192.168.50.3',
+    'hostgroups'          => [qw/g_location_central hg_location_central hg_netzwerk hg_netzwerk_switch hg_site_central/],
+};
+($computed_keys, $computed) = $obj->get_computed_config($objects);
+is_deeply($computed, $testhost, 'parsed nested templates II');

@@ -3,6 +3,7 @@
 SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
+DAILYTARBALL=$(shell ./get_version | tr ' ' '~')
 
 newversion: versionprecheck
 	test -e .git
@@ -15,21 +16,24 @@ dailydist: cleandist
 	$(MAKE) newversion
 	$(MAKE) dist
 	$(MAKE) resetdaily
-	mv Thruk-*.tar.gz Thruk-$$(echo "$(DAILYVERSION)" | tr ' ' '~').tar.gz
+	mv thruk-*.tar.gz thruk-$(DAILYTARBALL).tar.gz
 	rm -f plugins/plugins-available/panorama/root/all_in_one-$(DAILYVERSIONFILES)_panorama.js \
 		root/thruk/javascript/all_in_one-$(DAILYVERSIONFILES).js \
 		themes/themes-available/Thruk/stylesheets/all_in_one-$(DAILYVERSIONFILES).css \
-		themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$(DAILYVERSIONFILES).css
+		themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$(DAILYVERSIONFILES).css \
+		themes/themes-available/Thruk2/stylesheets/all_in_one-$(DAILYVERSIONFILES).css \
+		themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-$(DAILYVERSIONFILES).css
 	ls -la *.gz
 
 releasedist: cleandist dist
 	git describe --tag --exact-match
+	# required for servicepack releases, like 2.10-2
 	if [ "$(VERSION)" != "$(DAILYVERSION)" ]; then \
-	    tar zxf Thruk-$(VERSION).tar.gz; \
-	    mv Thruk-$(VERSION) Thruk-$(DAILYVERSION); \
-	    tar cfz Thruk-$(DAILYVERSION).tar.gz Thruk-$(DAILYVERSION); \
-	    rm -f Thruk-$(VERSION).tar.gz; \
-	    rm -rf Thruk-$(DAILYVERSION); \
+		tar zxf thruk-$(VERSION).tar.gz; \
+		mv thruk-$(VERSION) thruk-$(DAILYVERSION); \
+		tar cfz thruk-$(DAILYVERSION).tar.gz thruk-$(DAILYVERSION); \
+		rm -f thruk-$(VERSION).tar.gz; \
+		rm -rf thruk-$(DAILYVERSION); \
 	fi
 	ls -la *.gz
 
@@ -88,6 +92,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/ssi
+	mkdir -p ${DESTDIR}${SYSCONFDIR}/action_menus
 	cp -p thruk.conf ${DESTDIR}${SYSCONFDIR}/thruk.conf
 	echo "do '${DATADIR}/menu.conf';" > ${DESTDIR}${SYSCONFDIR}/menu_local.conf
 	cp -p support/thruk_local.conf.example ${DESTDIR}${SYSCONFDIR}/thruk_local.conf
@@ -135,6 +140,11 @@ local_install: local_patches
 	cp -p script/thruk   ${DESTDIR}${BINDIR}/
 	cp -p script/naglint ${DESTDIR}${BINDIR}/
 	cp -p script/nagexp  ${DESTDIR}${BINDIR}/
+	# rpmlint requires absolute perl path
+	${SED} -e 's+/usr/bin/env perl+/usr/bin/perl+g' \
+		-i ${DESTDIR}${BINDIR}/nagexp \
+		-i ${DESTDIR}${DATADIR}/script/thruk_fastcgi.pl \
+		-i ${DESTDIR}${DATADIR}/script/thruk.psgi
 	############################################################################
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3
@@ -172,6 +182,7 @@ local_install: local_patches
 	############################################################################
 	# examples
 	cp -p examples/bp_functions.pm ${DESTDIR}${SYSCONFDIR}/bp/
+	cp -p examples/bp_filter.pm    ${DESTDIR}${SYSCONFDIR}/bp/
 
 quicktest:
 	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \
@@ -209,6 +220,11 @@ dockerbuild:
 	rm -f t/docker/Dockerfile
 	$(MAKE) t/docker/Dockerfile
 
+dockerrebuild: dockerclean dockerbuild
+
+dockerclean:
+	-cd t/docker && docker rmi "local/thruk_panorama_test"
+
 dockertest: t/docker/Dockerfile dockertestfirefox dockertestchrome
 
 dockertestchrome:
@@ -224,3 +240,11 @@ dockertestfirefox:
 dockershell: t/docker/Dockerfile
 	mkdir -p $(DOCKERRESULTS)
 	$(DOCKERCMD) -it local/thruk_panorama_test /bin/bash
+
+rpm: $(NAME)-$(VERSION).tar.gz
+	rpmbuild -ta $(NAME)-$(VERSION).tar.gz
+
+deb: $(NAME)-$(VERSION).tar.gz
+	tar zxvf $(NAME)-$(VERSION).tar.gz
+	debuild -rfakeroot -i -us -uc -b
+	rm -rf $(NAME)-$(VERSION)

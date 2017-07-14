@@ -171,7 +171,7 @@ sub _process_comments_page {
                                                              );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_'], 'comment');
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="comments.xls"' );
         $c->stash->{'template'} = 'excel/comments.tt';
         return $c->render_excel();
@@ -220,7 +220,7 @@ sub _process_downtimes_page {
                                                                );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_'], 'downtime');
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="downtimes.xls"' );
         $c->stash->{'template'} = 'excel/downtimes.tt';
         return $c->render_excel();
@@ -267,7 +267,7 @@ sub _process_recurring_downtimes_page {
             'target'        => $target,
             'host'          => [split/\s*,\s*/mx,$host],
             'hostgroup'     => [split/\s*,\s*/mx,$hostgroup],
-            'service'       => $service,
+            'service'       => [split/\s*,\s*/mx,$service],
             'servicegroup'  => [split/\s*,\s*/mx,$servicegroup],
             'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->req->parameters),
             'duration'      => $c->req->parameters->{'duration'}        || 5,
@@ -399,7 +399,7 @@ sub _process_host_page {
     my $hostname = $c->req->parameters->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output/] );
 
     return $c->detach('/error/index/5') unless defined $hosts;
 
@@ -407,13 +407,16 @@ sub _process_host_page {
     $host = $hosts->[0];
 
     # we have more and backend param is used
-    if( scalar @{$hosts} == 1 and defined $backend ) {
+    if( scalar @{$hosts} == 1 and $backend ) {
         for my $h ( @{$hosts} ) {
             if( $h->{'peer_key'} eq $backend ) {
                 $host = $h;
                 last;
             }
         }
+    }
+    elsif( scalar @{$hosts} == 1) {
+        $c->stash->{'param_backend'} = $host->{'peer_key'};
     }
 
     return $c->detach('/error/index/5') unless defined $host;
@@ -534,7 +537,7 @@ sub _process_service_page {
 
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename } ], extra_columns => [qw/long_plugin_output/] );
 
     return $c->detach('/error/index/15') unless defined $services;
 
@@ -690,7 +693,15 @@ sub _process_process_info_page {
     return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     if($view_mode eq 'json') {
-        return $c->render(json => $c->stash->{'pi_detail'});
+        my $merged = {};
+        for my $name (qw/pi_detail backend_detail/) {
+            for my $key (keys %{$c->stash->{$name}}) {
+                for my $attr (keys %{$c->stash->{$name}->{$key}}) {
+                    $merged->{$key}->{$attr} = $c->stash->{$name}->{$key}->{$attr};
+                }
+            }
+        }
+        return $c->render(json => $merged);
     }
     return 1;
 }
@@ -750,8 +761,9 @@ sub _process_grafana_page {
     my $width   = $c->req->parameters->{'width'}  || 800;
     my $height  = $c->req->parameters->{'height'} || 300;
     my $format  = $c->req->parameters->{'format'} || 'png';
+    my $title   = $c->req->parameters->{'disablePanelTitel'};
 
-    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format));
+    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format, !$title));
     $c->{'rendered'} = 1;
     if($format eq 'png') {
         $c->res->headers->content_type('image/png');

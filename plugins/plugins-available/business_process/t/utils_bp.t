@@ -41,7 +41,8 @@ my $expected_functions = [{
                           'type' => 'select'
                        }],
             'file' => 't/xt/business_process/data/test_cust_function.pm',
-            'function' => 'echofunction',
+            'function' => 'echo_function',
+            'name' => 'echo_function',
             'help' => 'echofunction:
 
 This function just echoes the

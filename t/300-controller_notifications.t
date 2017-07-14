@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 244;
+    plan tests => 258;
 }
 
 BEGIN {
@@ -58,6 +58,8 @@ for my $url (@{$pages}) {
 $pages = [
 # Excel Export
     '/thruk/cgi-bin/notifications.cgi?view_mode=xls',
+    '/thruk/cgi-bin/notifications.cgi?contact=all&view_mode=xls&columns=1&columns=2&columns=3&columns=4&columns=5&columns=6&columns=7', # old xls mode
+    '/thruk/cgi-bin/notifications.cgi?contact=all&view_mode=xls&columns=Host&columns=Service&columns=Type&columns=Time&columns=Contact&columns=Command&columns=Information'
 ];
 
 for my $url (@{$pages}) {

@@ -136,7 +136,7 @@ sub index {
     elsif($subcat eq 'objects') {
         $c->stash->{'obj_model_changed'} = 0;
         _process_objects_page($c);
-        Thruk::Utils::Conf::store_model_retention($c) if $c->stash->{'obj_model_changed'};
+        Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'}) if $c->stash->{'obj_model_changed'};
         $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
     }
 
@@ -173,18 +173,15 @@ sub _process_json_page {
     if($type eq 'icon') {
         my $objects = [];
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'home'}."/themes";
-        my $dir        = $c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos";
-        $dir =~ s/\/$//gmx;
-        if(!-d $dir.'/.') {
-            # try to create that folder, it might not exist yet
-            eval {
-                Thruk::Utils::IO::mkdir_r($dir);
-            };
-        }
-        my $files = _find_files($c, $dir, '\.(png|gif|jpg)$');
-        for my $file (@{$files}) {
-            $file =~ s/$dir\///gmx;
-            push @{$objects}, $file." - ".$c->stash->{'logo_path_prefix'}.$file;
+        my $icon_dirs  = Thruk::Utils::list($c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos");
+        for my $dir (@{$icon_dirs}) {
+            $dir =~ s/\/$//gmx;
+            next unless -d $dir.'/.';
+            my $files = _find_files($c, $dir, '\.(png|gif|jpg)$');
+            for my $file (@{$files}) {
+                $file =~ s/$dir\///gmx;
+                push @{$objects}, $file." - ".$c->stash->{'logo_path_prefix'}.$file;
+            }
         }
         my $json = [ { 'name' => $type.'s', 'data' => $objects } ];
         return $c->render(json => $json);
@@ -299,7 +296,6 @@ sub _process_json_page {
     if($type eq 'attribute') {
         my $for  = $c->req->parameters->{'obj'};
         my $attr = $c->{'obj_db'}->get_default_keys($for, { no_alias => 1 });
-        push @{$attr}, 'customvariable';
         if($c->stash->{conf_config}->{'extra_custom_var_'.$for}) {
             for my $extra (@{Thruk::Utils::list($c->stash->{conf_config}->{'extra_custom_var_'.$for})}) {
                 my @extras = split/\s*,\s*/mx, $extra;
@@ -698,7 +694,10 @@ sub _process_plugins_page {
         if($pic !~ m/^[a-zA-Z0-9_\ \-]+$/gmx) {
             die("unknown pic: ".$pic);
         }
-        my $path = $plugin_available_dir.'/'.$pic.'/preview.png';
+        my $path = $plugin_enabled_dir.'/'.$pic.'/preview.png';
+        if(!-e $path) {
+            $path = $plugin_available_dir.'/'.$pic.'/preview.png';
+        }
         $c->res->headers->content_type('image/png');
         $c->stash->{'text'} = "";
         if(-e $path) {
@@ -745,11 +744,15 @@ sub _process_plugins_page {
     }
 
     my $plugins = {};
-    for my $addon (glob($plugin_available_dir.'/*/')) {
+    for my $addon (glob($plugin_available_dir.'/*/'), glob($plugin_enabled_dir.'/*/')) {
         my($addon_name, $dir) = _nice_addon_name($addon);
         $plugins->{$addon_name} = { enabled => 0, dir => $dir, description => '(no description available.)', url => '' };
-        if(-e $plugin_available_dir.'/'.$dir.'/description.txt') {
-            my $description = read_file($plugin_available_dir.'/'.$dir.'/description.txt');
+        my $desc_file = $plugin_available_dir.'/'.$dir.'/description.txt';
+        if(-e $plugin_enabled_dir.'/'.$dir.'/description.txt') {
+            $desc_file = $plugin_enabled_dir.'/'.$dir.'/description.txt';
+        }
+        if(-e $desc_file) {
+            my $description = read_file($desc_file);
             my $url         = "";
             if($description =~ s/^Url:\s*(.*)$//gmx) { $url = $1; }
             $plugins->{$addon_name}->{'description'} = $description;
@@ -818,16 +821,22 @@ sub _process_backends_page {
             next unless $backend->{'name'};
             delete $backend->{'id'} if $backend->{'id'} eq '';
 
-            if($backend->{'options'}->{'peer'} and $backend->{'type'} eq 'livestatus' and $backend->{'options'}->{'peer'} =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
-                $backend->{'options'}->{'peer'} .= ':6557';
+            $backend->{'options'}->{'peer'} = Thruk::Utils::list($backend->{'options'}->{'peer'});
+
+            for my $p (@{$backend->{'options'}->{'peer'}}) {
+                if($backend->{'type'} eq 'livestatus' and $p =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
+                    $p .= ':6557';
+                }
             }
 
             # add values from existing backend config
             if(defined $backend->{'id'}) {
                 my $peer = $c->{'db'}->get_peer_by_key($backend->{'id'});
                 $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
+                $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
+                $backend->{'state_host'} = $peer->{'state_host'} if defined $peer->{'state_host'};
             }
             $new = 1 if $x == 1;
             push @{$backends}, $backend;
@@ -893,7 +902,7 @@ sub _process_backends_page {
     # set ids
     for my $b (@{$backends}) {
         $b->{'type'}        = 'livestatus' unless defined $b->{'type'};
-        $b->{'key'}         = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
+        $b->{'id'}          = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'id'};
         $b->{'addr'}        = $b->{'options'}->{'peer'}  || '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
         $b->{'proxy'}       = $b->{'options'}->{'proxy'} || '';
@@ -1189,6 +1198,7 @@ sub _apply_config_changes {
             return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
         }
         if($c->{'obj_db'}->commit($c)) {
+            $c->stash->{'obj_model_changed'} = 1;
             Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
         }
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
@@ -1357,17 +1367,9 @@ sub _process_user_password_page {
 sub _get_tools {
     my ($c) = @_;
 
-    my $modules = {};
-    for my $folder (@INC) {
-        next unless -d $folder;
-        for my $file (glob($folder.'/Thruk/Utils/Conf/Tools/*.pm')) {
-            $file =~ s|^\Q$folder/\E||gmx;
-            $modules->{$file} = 1;
-        }
-    }
-
-    my $tools = {};
-    for my $file (keys %{$modules}) {
+    my $modules = Thruk::Utils::find_modules('/Thruk/Utils/Conf/Tools/*.pm');
+    my $tools   = {};
+    for my $file (@{$modules}) {
         require $file;
         my $class = $file;
         $class    =~ s|/|::|gmx;
@@ -1480,7 +1482,8 @@ sub _htpasswd_password {
 # returns htpasswd path
 sub _get_htpasswd {
     # htpasswd is usually somewhere in sbin
-    local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin';
+    # SLES11: htpasswd2 /usr/bin
+    local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin:/usr/bin';
     my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
     return($htpasswd);
 }
@@ -1817,6 +1820,7 @@ sub _object_disable {
     $obj->{'disabled'}               = 1;
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
+    $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
 
     # create log message
@@ -1838,6 +1842,7 @@ sub _object_enable {
     $obj->{'disabled'}               = 0;
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
+    $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
 
     # create log message
@@ -1855,14 +1860,39 @@ sub _object_enable {
 sub _object_delete {
     my($c, $obj) = @_;
 
+    my $refs = $c->{'obj_db'}->get_references($obj);
     if(!$c->req->parameters->{'force'}) {
-        my $refs = $c->{'obj_db'}->get_references($obj);
         if(scalar keys %{$refs}) {
-            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($obj->get_type()).' has remaining references' );
             return $c->redirect_to('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id().'&show_force=1');
         }
     }
+
+    if($c->req->parameters->{'ref'}) {
+        my $name        = $obj->get_name();
+        my $refs_delete = Thruk::Utils::list($c->req->parameters->{'ref'});
+        for my $id (@{$refs_delete}) {
+            for my $type (keys %{$refs}) {
+                if($refs->{$type}->{$id}) {
+                    my $ref_obj = $c->{'obj_db'}->get_object_by_id($id);
+                    for my $attr (keys %{$refs->{$type}->{$id}}) {
+                        if(ref $ref_obj->{'conf'}->{$attr} eq 'ARRAY') {
+                            $ref_obj->{'conf'}->{$attr} = [grep(!/^\Q$name\E$/mx, @{$ref_obj->{'conf'}->{$attr}})];
+                        } elsif(ref $ref_obj->{'conf'}->{$attr} eq '') {
+                            delete $ref_obj->{'conf'}->{$attr};
+                        }
+                        $c->{'obj_db'}->update_object($ref_obj, $ref_obj->{'conf'});
+                        $ref_obj->{'file'}->{'changed'}  = 1;
+                        $c->{'obj_db'}->{'needs_commit'} = 1;
+                        # remove if its unused now
+                        $c->{'obj_db'}->delete_object($ref_obj) if($ref_obj->can('is_unused') && $ref_obj->is_unused($c->{'obj_db'}));
+                    }
+                }
+            }
+        }
+    }
+
     $c->{'obj_db'}->delete_object($obj);
+    $c->stash->{'obj_model_changed'} = 1;
 
     # create log message
     $c->log->info(sprintf("[config][%s][%s] removed %s '%s'",
@@ -2176,7 +2206,7 @@ sub _file_history {
 
     my $logs = _get_git_logs($c, $dir);
 
-    Thruk::Backend::Manager::_page_data(undef, $c, $logs);
+    Thruk::Backend::Manager::page_data($c, $logs);
     $c->stash->{'logs'} = $logs;
     $c->stash->{'dir'}  = $dir;
     return;
@@ -2383,10 +2413,12 @@ sub _list_references {
 ##########################################################
 sub _config_check {
     my($c) = @_;
+    my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
+    $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
     if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
     }
-    elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
+    elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $obj_check_cmd)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );

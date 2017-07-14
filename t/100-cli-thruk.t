@@ -80,8 +80,8 @@ if($test->{'exit'} == 0) {
         # test commands with multiple backends
         local $ENV{'THRUK_NO_COMMANDS'} = 1;
         TestUtils::test_command({
-            cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0].' -b '.$backends[1],
-            errlike => ['/\['.$backends[0].','.$backends[1].'\]/', '/TESTMODE:/', '/'.$host.'/' ],
+            cmd  => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=11" -b '.$backends[0].' -b '.$backends[1],
+            errlike => ['/\['.$backends[0].','.$backends[1].'\]/', '/TESTMODE:/', '/DISABLE_NOTIFICATIONS/' ],
             like => ['/Command request successfully submitted to the Backend for processing/'],
         });
         TestUtils::test_command({
@@ -142,7 +142,7 @@ TestUtils::test_command({
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/file /tmp/services.xls',
-    like => ['/(Microsoft Office|CDF V2|Composite Document File V2) Document/' ],
+    like => ['/(Microsoft Office|CDF V2|CDFV2 Microsoft Excel|Composite Document File V2)/' ],
 });
 unlink('/tmp/allservices.xls');
 
@@ -165,7 +165,7 @@ TestUtils::test_command({
 # logcache
 TestUtils::test_command({
     cmd     => $BIN.' -a logcacheupdate',
-    like    => ['/(^$|OK - imported \d+ log items from \d+ site)/'],
+    like    => ['/(^$|OK - imported \d+ log items from \d+ site|FAILED - logcache is not enabled)/'],
     errlike => ['/(^$|FAILED - logcache is not enabled)/'],
     exit    => undef,
 });
@@ -173,7 +173,7 @@ TestUtils::test_command({
 # test command
 TestUtils::test_command({
     cmd     => $BIN.' -a command "'.$host.'"',
-    like    => ['/Expaned Command:/'],
+    like    => ['/Expanded Command:/'],
 });
 
 # self check

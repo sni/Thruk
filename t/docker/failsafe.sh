@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# use latest failsafe.sh from src folder
+if [ $0 != "/src/t/docker/failsafe.sh" ]; then
+    exec "/src/t/docker/failsafe.sh" $*;
+    exit 1;
+fi
+
 CASEDIR="/root/cases"
 
 # install latest thruk from source
@@ -15,12 +21,18 @@ rsync -a --delete /src/t/docker/cases/. $CASEDIR/.
 for case in $(cd $CASEDIR && ls -1 *.js); do
     if [ $case != '_include.js' -a $case != '_dashboard_exports.js' ]; then
         for retry in $(seq 3); do
-            ./test.sh $* $case | ./sakuli2unittest.pl -q
+            NO_APACHE_RELOAD=1 ./test.sh $* $case | /src/t/docker/sakuli2unittest.pl -q
             rc=$?
             [ $retry -gt 1 ] && echo "$case: retry:$retry - exited:$rc"
             [ $rc == 0 ]     && break
         done
-        [ $rc != 0 ] && exit $rc
+        if [ $rc != 0 ]; then
+            echo "thruk.log:"
+            tail -30 /var/log/thruk/thruk.log
+            echo "apache error.log:"
+            tail -30 /var/log/apache2/error.log
+            exit $rc
+        fi
     fi
 done
 

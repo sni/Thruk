@@ -3,7 +3,7 @@ Ext.define('TP_Sources', {
     fields: [
         {name: 'image_url', type: 'string'},
         {name: 'name',      type: 'string'},
-        {name: 'source',    type: 'number'},
+        {name: 'source',    type: 'number'}
     ]
 });
 
@@ -58,6 +58,7 @@ Ext.define('TP.PanletGrafana', {
         this.xdata.source     = grafana_default_panelId;
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
+        this.xdata.showtitle  = true;
         this.lastGraph        = '';
 
         /* update source selector */
@@ -81,7 +82,6 @@ Ext.define('TP.PanletGrafana', {
 
                 url = url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?');
                 Ext.Ajax.cors                = true;
-                Ext.Ajax.withCredentials     = true;
                 Ext.Ajax.useDefaultXhrHeader = false;
                 Ext.Ajax.request({
                     url:     url,
@@ -109,6 +109,7 @@ Ext.define('TP.PanletGrafana', {
                                 }
                             }
                         }
+                        if(!panel.gearitem || !panel.gearitem.down('form')) { return; }
                         var source_combo = TP.getFormField(panel.gearitem.down('form'), 'source');
                         source_combo.store.removeAll();
                         for(var nr=0; nr<sources.length; nr++) {
@@ -136,6 +137,9 @@ Ext.define('TP.PanletGrafana', {
             url = url + '&to='    + Math.round(now.getTime()/1000);
             url = url + '&width=' + size.width;
             url = url + '&height='+ (size.height+30);
+            if(this.xdata.showtitle != undefined && !this.xdata.showtitle) {
+                url = url + '&disablePanelTitel=1';
+            }
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
         };
@@ -228,6 +232,12 @@ Ext.define('TP.PanletGrafana', {
             fieldLabel: 'Show Border',
             xtype:      'checkbox',
             name:       'showborder'
+        });
+        this.addGearItems({
+            fieldLabel: 'Show Title',
+            xtype:      'checkbox',
+            name:       'showtitle',
+            boxLabel:   '(requires histou 0.3.10 or newer)'
         });
     },
     gearInitCallback: function(panel) {

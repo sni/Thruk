@@ -4,26 +4,32 @@
   <worksheet name='[% name %]' autofilter='A1:[% last_col %][% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
-        [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
-        [% IF columns.2  %]<cell width='20'>Entry Time</cell>[% END %]
-        [% IF columns.3  %]<cell width='16'>Author</cell>[% END %]
-        [% IF columns.4  %]<cell width='40'>Comment</cell>[% END %]
-        [% IF columns.5  %]<cell width='10'>Comment ID</cell>[% END %]
-        [% IF columns.6  %]<cell width='10'>Persistent</cell>[% END %]
-        [% IF columns.7  %]<cell width='14'>Type</cell>[% END %]
-        [% IF columns.8  %]<cell width='20'>Expires</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Hostname"   %]<cell width='30'>Hostname</cell>
+        [% ELSIF col == "Entry Time" %]<cell width='20'>Entry Time</cell>
+        [% ELSIF col == "Author"     %]<cell width='16'>Author</cell>
+        [% ELSIF col == "Comment"    %]<cell width='40'>Comment</cell>
+        [% ELSIF col == "Comment ID" %]<cell width='10'>Comment ID</cell>
+        [% ELSIF col == "Persistent" %]<cell width='10'>Persistent</cell>
+        [% ELSIF col == "Type"       %]<cell width='14'>Type</cell>
+        [% ELSIF col == "Expires"    %]<cell width='20'>Expires</cell>
+        [% END %]
+        [% END %]
       </format>
     </row>
     [% FOREACH d = data %]
       <row>
-        [% IF columns.1  %]<cell>[% escape_xml(d.host_name) %]</cell>[% END %]
-        [% IF columns.2  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
-        [% IF columns.3  %]<cell>[% escape_xml(d.author) %]</cell>[% END %]
-        [% IF columns.4  %]<cell>[% escape_xml(d.comment) %]</cell>[% END %]
-        [% IF columns.5  %]<cell>[% d.id %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% IF d.persistent %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.7  %]<cell>[% IF d.entry_type == 1 %]User[% ELSIF d.entry_type == 2 %]Scheduled Downtime[% ELSIF d.entry_type == 3 %]Flap Detection[% ELSIF d.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</cell>[% END %]
-        [% IF columns.8  %][% IF d.expires %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.expire_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% ELSE %]<cell>N/A</cell>[% END %][% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Hostname"   %]<cell>[% escape_xml(d.host_name) %]</cell>
+        [% ELSIF col == "Entry Time" %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
+        [% ELSIF col == "Author"     %]<cell>[% escape_xml(d.author) %]</cell>
+        [% ELSIF col == "Comment"    %]<cell>[% escape_xml(d.comment) %]</cell>
+        [% ELSIF col == "Comment ID" %]<cell>[% d.id %]</cell>
+        [% ELSIF col == "Persistent" %]<cell>[% IF d.persistent %]Yes[% ELSE %]No[% END %]</cell>
+        [% ELSIF col == "Type"       %]<cell>[% IF d.entry_type == 1 %]User[% ELSIF d.entry_type == 2 %]Scheduled Downtime[% ELSIF d.entry_type == 3 %]Flap Detection[% ELSIF d.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</cell>
+        [% ELSIF col == "Expires"    %][% IF d.expires %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.expire_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% ELSE %]<cell>N/A</cell>[% END %]
+        [% END %]
+        [% END %]
       </row>
     [% END %]
   </worksheet>

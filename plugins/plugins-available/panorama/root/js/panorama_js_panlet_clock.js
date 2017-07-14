@@ -29,7 +29,7 @@ Ext.define('TP.PanletClock', {
     width:  300,
     hideSettingsForm: ['backends'],
     bodyStyle: "background: transparent;",
-    style:     "background: transparent;",
+    style:    { position: 'absolute', zIndex: 50, background: 'transparent' },
     initComponent: function() {
         this.callParent();
         var panel             = this;
@@ -42,6 +42,10 @@ Ext.define('TP.PanletClock', {
             var panel = this;
             var d     = new Date();
             var el    = Ext.get(this.id+'-clock');
+            if(!el || !el.dom) {
+                /* not rendered yet */
+                return;
+            }
             var newText;
             if(panel.xdata.timezone == "Local Browser") {
                 newText = d.strftime(panel.xdata.timeformat);

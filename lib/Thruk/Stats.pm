@@ -42,6 +42,7 @@ sub report {
         my($time, $args, $caller) = @{$d};
         my($key,$val)             = @{$args};
         die("corrupt profile entry: ".Dumper($d)) unless $key;
+        die("corrupt profile entry: ".Dumper($d)) unless $val;
         if($key eq 'begin') {
             my $entry = {
                 'childs'     => [],
@@ -73,6 +74,7 @@ sub report {
                 }
             } else {
                 # found no start
+                print STDERR "no start found for: ".$entry->{'name'}."\n";
                 die("no start found for: ".Dumper($entry)) if Thruk->debug;
             }
         }

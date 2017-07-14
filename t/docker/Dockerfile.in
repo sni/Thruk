@@ -1,10 +1,10 @@
-FROM consol/sakuli-ubuntu-xfce:v1.0.0
+FROM consol/sakuli-ubuntu-xfce:v1.0.2
 MAINTAINER Sven Nierlein "sven@nierlein.de"
-ENV REFRESHED_AT 2015-10-27
+ENV REFRESHED_AT 2016-12-02
 
 RUN apt-get update
 RUN apt-get install -y apt-transport-https rsync lsof patch bash-completion chromium-browser firefox
-RUN sh -c "echo 'deb https://labs.consol.de/repo/testing/ubuntu $(lsb_release -sc) main' >> /etc/apt/sources.list"
+RUN sh -c "echo 'deb https://labs.consol.de/repo/stable/ubuntu $(lsb_release -sc) main' >> /etc/apt/sources.list"
 RUN gpg --keyserver keys.gnupg.net --recv-keys F8C1CA08A57B9ED7
 RUN gpg --armor --export F8C1CA08A57B9ED7 | sudo apt-key add -
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -12,7 +12,6 @@ RUN echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/so
 RUN apt-get update
 RUN apt-get install -y naemon
 RUN apt-get install -y google-chrome-stable
-RUN sed -e 's|#broker_module=/usr/lib/naemon/naemon-livestatus/livestatus.so|broker_module=/usr/lib/naemon/naemon-livestatus/livestatus.so|g' -i /etc/naemon/naemon.cfg
 RUN sed -e 's|incognito|incognito --no-sandbox --no-default-browser-check --no-first-run --disable-infobars|g' -i /root/sakuli/sahi/config/browser_types/linux.xml
 RUN rm -rf /etc/naemon/conf.d/*
 RUN mkdir -p /root/cases/

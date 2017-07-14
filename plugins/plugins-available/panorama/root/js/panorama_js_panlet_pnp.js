@@ -57,7 +57,6 @@ Ext.define('TP.PanletPNP', {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.cors                = true;
-                Ext.Ajax.withCredentials     = true;
                 Ext.Ajax.useDefaultXhrHeader = false;
                 Ext.Ajax.request({
                     url:     url,
@@ -75,6 +74,7 @@ Ext.define('TP.PanletPNP', {
                                 };
                             }
                         }
+                        if(!panel.gearitem || !panel.gearitem.down('form')) { return; }
                         var source_combo = TP.getFormField(panel.gearitem.down('form'), 'source');
                         source_combo.store.removeAll();
                         for(var nr=0; nr<data.length; nr++) {
@@ -245,13 +245,13 @@ Ext.define('TP.PanletPNP', {
             fieldLabel: 'Hide Legend',
             xtype:      'checkbox',
             name:       'hide_legend',
-            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)'
         });
         this.addGearItems({
             fieldLabel: 'Graph Only',
             xtype:      'checkbox',
             name:       'graph_only',
-            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)',
+            boxLabel:   '(requires pnp4nagios 0.6.26 or newer)'
         });
     },
     gearInitCallback: function(panel) {

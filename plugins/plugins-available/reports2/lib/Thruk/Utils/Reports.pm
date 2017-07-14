@@ -102,7 +102,12 @@ sub report_show {
             $name    =~ s/[^\wöäüÖÄÜß\-_\.]+//gmx;
             $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
             $c->res->headers->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
-            open(my $fh, '<', $report_file);
+            my $fh;
+            if($report->{'var'}->{'ctype'} eq 'text/html') {
+                open($fh, '<', $c->config->{'var_path'}.'/reports/'.$nr.'.html');
+            } else {
+                open($fh, '<', $report_file);
+            }
             binmode $fh;
             $c->res->body($fh);
             $c->{'rendered'} = 1;
@@ -493,7 +498,9 @@ sub generate_report {
 
     # convert to pdf
     if($Thruk::Utils::PDF::ctype eq 'text/html') {
-        $Thruk::Utils::PDF::ctype = "html2pdf";
+        if(!$options->{'params'}->{'pdf'} || $options->{'params'}->{'pdf'} eq 'yes') {
+            $Thruk::Utils::PDF::ctype = "html2pdf";
+        }
         my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
         move($attachment, $htmlfile);
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
@@ -1287,6 +1294,11 @@ sub _convert_to_pdf {
     }
 
     my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
+    my $autoscale = 0;
+    if($c->stash->{'param'}->{'pdf'}) {
+        $autoscale = 1;
+    }
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--autoscale=1' if $autoscale;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
     my $out = `$cmd 2>&1`;
 

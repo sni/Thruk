@@ -606,7 +606,7 @@ sub _do_send_command {
     return $c->detach('/error/index/10') unless $cmd ne '';
 
     # check for required fields
-    my($form, @errors);
+    my($form, @errors, $required_fields);
     eval {
         Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
             {   c                         => $c,
@@ -636,6 +636,9 @@ sub _do_send_command {
             my $req  = shift @matches;
             my $name = shift @matches;
             my $key  = shift @matches;
+            if( $req eq 'optBoxRequiredItem') {
+                $required_fields->{$key} = $c->req->parameters->{$key};
+            }
             if( $req eq 'optBoxRequiredItem' && ( !defined $c->req->parameters->{$key} || $c->req->parameters->{$key} =~ m/^\s*$/mx ) ) {
                 push @errors, { message => $name . ' is a required field' };
             }
@@ -646,10 +649,39 @@ sub _do_send_command {
             return;
         }
     }
+    if($c->config->{downtime_max_duration}) {
+        if($c->req->parameters->{'cmd_typ'} == 55 or $c->req->parameters->{'cmd_typ'} == 56 or $c->req->parameters->{'cmd_typ'} == 84 or $c->req->parameters->{'cmd_typ'} == 121) {
+            my $max_duration = Thruk::Utils::Status::convert_time_amount($c->config->{downtime_max_duration});
+            my $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} );
+            if(($end_time_unix - $start_time_unix) > $max_duration) {
+                $c->stash->{'form_errors'} = [{ message => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration) }];
+                delete $c->req->parameters->{'cmd_mod'};
+                return;
+            }
+            my $duration = $c->req->parameters->{'hours'} * 3600 + $c->req->parameters->{'minutes'} * 60;
+            if($duration > $max_duration) {
+                $c->stash->{'form_errors'} = [{ message => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration) }];
+                delete $c->req->parameters->{'cmd_mod'};
+                return;
+            }
+        }
+    }
 
     my($backends_list) = $c->{'db'}->select_backends('send_command');
     for my $cmd_line ( split /\n/mx, $cmd ) {
+        utf8::decode($cmd_line);
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
+
+        # if the backend list contains multiple entries,
+        # send the command only to those backends which actually have that object.
+        # this prevents ugly log entries when naemon core cannot find the corresponding object
+        if(scalar @{$backends_list} > 1) {
+            $backends_list = _get_affected_backends($c, $required_fields, $backends_list);
+            if(scalar @{$backends_list} == 0) {
+                return;
+            }
+        }
+
         my $joined_backends = join(',', @{$backends_list});
         push @{$c->stash->{'commands2send'}->{$joined_backends}}, $cmd_line;
 
@@ -839,6 +871,42 @@ sub _set_host_service_from_down_com_ids {
         $c->req->parameters->{'service'} = $data->[0]->{'service_description'};
     }
     return;
+}
+
+######################################
+# return list of backends which have the requested objects
+sub _get_affected_backends {
+    my($c, $required_fields, $backends) = @_;
+
+    my $data;
+    if(defined $required_fields->{'hostgroup'}) {
+        $data = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), name => $required_fields->{'hostgroup'}],
+                                           columns => [qw/name/] );
+    }
+    elsif(defined $required_fields->{'servicegroup'}) {
+        $data = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $required_fields->{'servicegroup'}],
+                                              columns => [qw/name/] );
+    }
+    elsif(defined $required_fields->{'service'}) {
+        $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), description => $required_fields->{'service'}, host_name => $required_fields->{'host'}],
+                                         columns => [qw/host_name description/] );
+    }
+    elsif(defined $required_fields->{'host'}) {
+        $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => $required_fields->{'host'}],
+                                      columns => [qw/name/] );
+    }
+
+    # return original list unless we have some data
+    return($backends) unless $data;
+
+    # extract affected backends
+    my $affected_backends = {};
+    for my $row (@{$data}) {
+        for my $peer_key (@{Thruk::Utils::list($row->{'peer_key'})}) {
+            $affected_backends->{$peer_key} = 1;
+        }
+    }
+    return([keys %{$affected_backends}]);
 }
 
 ######################################

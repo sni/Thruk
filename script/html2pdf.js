@@ -3,7 +3,7 @@ var page = require('webpage').create(),
     version = phantom.version.major,
     input, output;
 
-if (version == 2) {
+if (version >= 2) {
     // pdf sizing workarounds for phantomjs 2.0.0
     page.paperSize = { width: "21.8cm", height: "30.9cm", margin: '0px' }
 } else {
@@ -56,6 +56,13 @@ if (system.args.length < 3) {
     }
 
     page.open(input, function (status) {
+        if(options.autoscale) {
+            page.evaluate(function() {
+                // see https://github.com/ariya/phantomjs/issues/12685
+                // and http://stackoverflow.com/questions/24525561/phantomjs-fit-content-to-a4-page
+                document.querySelector('body').style.zoom = "0.55";
+            });
+        }
         if (status !== 'success') {
             console.log('Unable to load the input file!');
             phantom.exit(1);
@@ -80,6 +87,24 @@ if (system.args.length < 3) {
 }
 
 function checkGrafanaLoaded() {
+    var textErrorEl = page.evaluate(function() {
+        return [].map.call(document.querySelectorAll('p.panel-text-content'), function(el) {
+            console.log('p.panel-text-content found, export finished');
+            return el.className;
+        });
+    });
+    if(textErrorEl.length > 0) {
+        return(true);
+    }
+    var textErrorEl = page.evaluate(function() {
+        return [].map.call(document.querySelectorAll('div.alert-error'), function(el) {
+            return el.className;
+        });
+    });
+    if(textErrorEl.length > 0) {
+        console.log('div.alert-error found, export failed');
+        return(true);
+    }
     var chartEl = page.evaluate(function() {
         return [].map.call(document.querySelectorAll('DIV.flot-text'), function(el) {
             return el.className;

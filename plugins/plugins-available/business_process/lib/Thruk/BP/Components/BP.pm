@@ -27,7 +27,7 @@ Business Process
 
 my @extra_json_keys = qw/id/;
 my @stateful_keys   = qw/status status_text last_check last_state_change time/;
-my @saved_keys      = qw/name template rankDir state_type/;
+my @saved_keys      = qw/name template rankDir state_type filter/;
 
 ##########################################################
 
@@ -45,6 +45,7 @@ sub new {
         'editmode'          => $editmode,
         'name'              => undef,
         'template'          => $bpdata->{'template'} || '',
+        'filter'            => [],
         'nodes'             => [],
         'nodes_by_id'       => {},
         'nodes_by_name'     => {},
@@ -73,7 +74,7 @@ sub new {
     }
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
-    if(-e $file) {
+    if(-s $file) {
         $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
         return unless $bpdata;
         return unless $bpdata->{'name'};
@@ -121,7 +122,7 @@ sub load_runtime_data {
         $file = $self->{'datafile'}.'.edit';
     }
 
-    return unless -e $file;
+    return unless -s $file;
 
     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     for my $key (@stateful_keys) {
@@ -251,7 +252,7 @@ sub set_file {
     my($self, $c, $file) = @_;
     my $basename = $file;
     $basename    =~ s/^.*\///mx;
-    $self->{'file'}     = Thruk::BP::Utils::base_folder($c).'/'.$basename;
+    $self->{'file'}     = Thruk::BP::Utils::bp_base_folder($c).'/'.$basename;
     $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
     $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
     if($basename =~ m/(\d+).tbp/mx) {
@@ -302,6 +303,7 @@ sub get_json_nodes {
           duration                  => $n->{'last_state_change'} ? Thruk::Utils::Filter::duration(time() - $n->{'last_state_change'}) : '',
           acknowledged              => $n->{'acknowledged'}."",
           scheduled_downtime_depth  => $n->{'scheduled_downtime_depth'}."",
+          bp_ref                    => $n->{'bp_ref'},
           depends                   => $n->depends_list,
           func                      => $n->{'function'},
           func_args                 => $n->{'function_args'},
@@ -309,6 +311,7 @@ sub get_json_nodes {
           contactgroups             => $n->{'contactgroups'},
           notification_period       => $n->{'notification_period'},
           event_handler             => $n->{'event_handler'},
+          filter                    => $n->{'filter'},
         }
     }
     return(Thruk::Utils::Filter::json_encode($list));
@@ -433,11 +436,9 @@ sub commit {
 
     # run pre hook
     if($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
-        system($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}, 'pre', $self->{'file'});
-        if($? == -1) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$?.': '.$! );
+        my($rc, $out) = Thruk::Utils::IO::cmd($c, [$c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}, 'pre', $self->{'file'}]);
+        if($rc != 0) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$rc.': '.$out );
             return;
         }
     }
@@ -450,11 +451,9 @@ sub commit {
 
     # run post hook
     if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        local $SIG{CHLD}        = 'DEFAULT';
-        system($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}, 'post', $self->{'file'});
-        if($? == -1) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );
+        my($rc, $out) = Thruk::Utils::IO::cmd($c, [$c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}, 'post', $self->{'file'}]);
+        if($rc != 0) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$rc.': '.$out );
             return;
         }
     }
@@ -496,11 +495,13 @@ sub save {
 
 =head2 get_objects_conf
 
-return object config
+    get_objects_conf()
+
+return object config.
 
 =cut
 sub get_objects_conf {
-    my ( $self ) = @_;
+    my($self) = @_;
     my $obj = {
         'hosts'    => {},
         'services' => {},
@@ -563,7 +564,21 @@ return all live data needed for this business process
 
 =cut
 sub bulk_fetch_live_data {
-    my($self, $c) = @_;
+    my($self, $c, $expand_groups) = @_;
+
+    # check if have filters in place which requires fetching all hosts / services for group filters
+    my $has_filters = 0;
+    if($self->{'filter'} && scalar @{$self->{'filter'}} > 0) {
+        $has_filters = 1;
+    } else {
+        for my $n (@{$self->{'nodes'}}) {
+            if($n->{'filter'} && scalar @{$n->{'filter'}} > 0) {
+                $has_filters = 1;
+                last;
+            }
+        }
+    }
+    $expand_groups = 1 if $has_filters;
 
     # bulk fetch live data
     my $hostfilter         = {};
@@ -577,7 +592,7 @@ sub bulk_fetch_live_data {
     for my $n (@{$self->{'nodes'}}) {
         if(lc $n->{'function'} eq 'status') {
             if($n->{'host'} and $n->{'service'}) {
-                $servicefilter->{$n->{'host'}}->{$n->{'service'}} = 1;
+                $servicefilter->{$n->{'host'}}->{$n->{'service'}} = $n->{'function_args'}->[2] || '=';
             }
             elsif($n->{'host'}) {
                 $hostfilter->{$n->{'host'}} = 1;
@@ -592,10 +607,27 @@ sub bulk_fetch_live_data {
             }
         }
     }
+
+
+    if($expand_groups) {
+        # set empty group statistics for requested host/servicegroups
+        for my $hostgroupname (keys %{$hostgroupfilter}) {
+            $hostgroupdata->{$hostgroupname} = Thruk::Utils::Status::summary_set_group_defaults();
+        }
+        for my $servicegroupname (keys %{$servicegroupfilter}) {
+            $servicegroupdata->{$servicegroupname} = Thruk::Utils::Status::summary_set_group_defaults();
+        }
+    }
+
     if(scalar keys %{$hostfilter} > 0) {
         my @filter;
         for my $hostname (keys %{$hostfilter}) {
             push @filter, { name => $hostname };
+        }
+        if($expand_groups && scalar keys %{$hostgroupfilter} > 0) {
+            for my $hostgroupname (keys %{$hostgroupfilter}) {
+                push @filter, { groups => { '>=' => $hostgroupname } };
+            }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
         my $data   = $c->{'db'}->get_hosts(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
@@ -605,43 +637,143 @@ sub bulk_fetch_live_data {
         my @filter;
         for my $hostname (keys %{$servicefilter}) {
             for my $description (keys %{$servicefilter->{$hostname}}) {
-                push @filter, { host_name => $hostname, description => $description };
+                my $op = $servicefilter->{$hostname}->{$description} || '=';
+                if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
+                    $op = '~';
+                }
+                if($op ne '=') {
+                    $description =~ s/^(b|w)://gmx;
+                    $description = Thruk::Utils::convert_wildcards_to_regex($description);
+                    my $full_op = {
+                            '=' =>  '=',
+                           '!=' => '!=',
+                            '~' => '~~',
+                           '!~' => '!~',
+                        }->{$op} || '~~';
+                    push @filter, { '-and' => { host_name => $hostname, description => { $full_op => $description }}};
+                } else {
+                    push @filter, { '-and' => { host_name => $hostname, description => $description }};
+                }
+            }
+        }
+        if($expand_groups && scalar keys %{$hostgroupfilter} > 0) {
+            for my $hostgroupname (keys %{$hostgroupfilter}) {
+                push @filter, { host_groups => { '>=' => $hostgroupname } };
+            }
+        }
+        if($expand_groups && scalar keys %{$servicegroupfilter} > 0) {
+            for my $servicegroupname (keys %{$servicegroupfilter}) {
+                push @filter, { groups => { '>=' => $servicegroupname } };
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
         my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
         $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
     }
-    if(scalar keys %{$hostgroupfilter} > 0) {
-        my @filter;
-        for my $hostgroupname (keys %{$hostgroupfilter}) {
-            push @filter, { name => $hostgroupname };
+    if(!$expand_groups) {
+        if(scalar keys %{$hostgroupfilter} > 0) {
+            my @filter;
+            for my $hostgroupname (keys %{$hostgroupfilter}) {
+                push @filter, { name => $hostgroupname };
+            }
+            my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+            my $data   = $c->{'db'}->get_hostgroups(filter => [$filter], columns => [qw/name num_hosts num_hosts_down num_hosts_pending
+                                                                                     num_hosts_unreach num_hosts_up num_services num_services_crit
+                                                                                     num_services_ok num_services_pending num_services_unknown
+                                                                                     num_services_warn worst_service_state worst_host_state/]);
+            $hostgroupdata  = Thruk::Utils::array2hash($data, 'name');
         }
-        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_hostgroups(filter => [$filter], columns => [qw/name num_hosts num_hosts_down num_hosts_pending
-                                                                                 num_hosts_unreach num_hosts_up num_services num_services_crit
-                                                                                 num_services_ok num_services_pending num_services_unknown
-                                                                                 num_services_warn worst_service_state worst_host_state/]);
-        $hostgroupdata  = Thruk::Utils::array2hash($data, 'name');
-    }
-    if(scalar keys %{$servicegroupfilter} > 0) {
-        my @filter;
-        for my $servicegroupname (keys %{$servicegroupfilter}) {
-            push @filter, { name => $servicegroupname };
+        if(scalar keys %{$servicegroupfilter} > 0) {
+            my @filter;
+            for my $servicegroupname (keys %{$servicegroupfilter}) {
+                push @filter, { name => $servicegroupname };
+            }
+            my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+            my $data   = $c->{'db'}->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
+                                                                                           num_services_ok num_services_pending num_services_unknown
+                                                                                           num_services_warn worst_service_state/]);
+            $servicegroupdata  = Thruk::Utils::array2hash($data, 'name');
         }
-        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
-                                                                                       num_services_ok num_services_pending num_services_unknown
-                                                                                       num_services_warn worst_service_state/]);
-        $servicegroupdata  = Thruk::Utils::array2hash($data, 'name');
     }
 
-    return({
+    my $livedata = {
         'hosts'         => $hostdata,
         'services'      => $servicedata,
         'hostgroups'    => $hostgroupdata,
         'servicegroups' => $servicegroupdata,
-    });
+    };
+
+    # calculate group statistics from given hosts / services
+    if($expand_groups) {
+        $self->recalculate_group_statistics($livedata, 0);
+    }
+
+    return($livedata);
+}
+
+##########################################################
+
+=head2 recalculate_group_statistics
+
+recalculate group statistics for given hosts / services
+
+=cut
+sub recalculate_group_statistics {
+    my($self, $livedata, $reset) = @_;
+
+    my $hostdata         = $livedata->{'hosts'};
+    my $servicedata      = $livedata->{'services'};
+    my $hostgroupdata    = $livedata->{'hostgroups'};
+    my $servicegroupdata = $livedata->{'servicegroups'};
+
+    if($reset) {
+        # set empty group statistics for requested host/servicegroups
+        for my $hostgroupname (keys %{$hostgroupdata}) {
+            $hostgroupdata->{$hostgroupname} = Thruk::Utils::Status::summary_set_group_defaults();
+        }
+        for my $servicegroupname (keys %{$servicegroupdata}) {
+            $servicegroupdata->{$servicegroupname} = Thruk::Utils::Status::summary_set_group_defaults();
+        }
+    }
+
+    # calculate group statistics from given hosts / services
+    for my $hostname ( keys %{$hostdata} ) {
+        my $host = $hostdata->{$hostname};
+        for my $groupname ( @{ $host->{'groups'} } ) {
+            next unless $hostgroupdata->{$groupname};
+            Thruk::Utils::Status::summary_add_host_stats("", $hostgroupdata->{$groupname}, $host);
+        }
+    }
+    for my $hostname ( keys %{$servicedata} ) {
+        for my $description ( keys %{$servicedata->{$hostname}} ) {
+            my $service = $servicedata->{$hostname}->{$description};
+            for my $groupname ( @{ $service->{'groups'} } ) {
+                next unless $servicegroupdata->{$groupname};
+                Thruk::Utils::Status::summary_add_service_stats($servicegroupdata->{$groupname}, $service);
+            }
+            for my $groupname ( @{ $service->{'host_groups'} } ) {
+                next unless $hostgroupdata->{$groupname};
+                Thruk::Utils::Status::summary_add_service_stats($hostgroupdata->{$groupname}, $service);
+            }
+        }
+    }
+    # map keys to the ones we expect
+    for my $group (values %{$hostgroupdata}) {
+        $group->{num_hosts}         = $group->{'hosts_total'} || 0;
+        $group->{num_hosts_down}    = $group->{'hosts_down'};
+        $group->{num_hosts_pending} = $group->{'hosts_pending'};
+        $group->{num_hosts_unreach} = $group->{'hosts_unreachable'};
+        $group->{num_hosts_up}      = $group->{'hosts_up'};
+    }
+    for my $group (values %{$servicegroupdata}, values %{$hostgroupdata}) {
+        $group->{num_services}         = $group->{'services_total'} || 0;
+        $group->{num_services_crit}    = $group->{'services_critical'};
+        $group->{num_services_ok}      = $group->{'services_ok'};
+        $group->{num_services_pending} = $group->{'services_pending'};
+        $group->{num_services_unknown} = $group->{'services_unknown'};
+        $group->{num_services_warn}    = $group->{'services_warning'};
+    }
+    return;
 }
 
 ##########################################################

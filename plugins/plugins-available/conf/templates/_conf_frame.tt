@@ -5,7 +5,14 @@
 [% PROCESS _message.tt %]
 [% PROCESS _overdiv.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+[% IF thruk_debug && !c.config.demo_mode && c.config.exists('conf_retention_file') %]
+<div style="position: absolute; top: 3px; right: 200px; border: 1px dashed grey; background: #DDDDDD; padding: 0 5px;">
+   <span>file: [% c.config.conf_retention_file %]</span>
+   <span style="border-left: 1px solid grey; padding-left: 5px; margin-left: 5px;">mtime: [% date_format(c, c.config.conf_retention.9) %]</span>
+</div>
+[% END %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
       <tr>
         <td align="left" valign="top" width="50%">
         [% PROCESS _infobox.tt %]

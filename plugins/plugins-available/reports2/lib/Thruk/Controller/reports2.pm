@@ -182,7 +182,12 @@ sub report_edit {
         }
         $r->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
         if($c->req->parameters->{'params.url'}) {
-            $r->{'params'}->{'url'} = $c->req->parameters->{'params.url'};
+            my $uri = $c->req->parameters->{'params.url'};
+            if(!$r->{'params'}->{'url'}) {
+                $uri =~ s|(https?://[^/]+)/thruk/|/thruk/|gmx;
+                $uri =~ s|(https?://[^/]+)/([^/]+)/thruk/|/thruk/|gmx;
+            }
+            $r->{'params'}->{'url'} = $uri;
         }
     } else {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);

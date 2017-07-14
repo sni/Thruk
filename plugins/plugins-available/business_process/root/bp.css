@@ -59,8 +59,20 @@ DIV.ui-dialog INPUT[type=text] {
     width: 290px;
 }
 
+DIV.ui-dialog SELECT.filter_op_select {
+    width: 40px;
+}
+DIV.ui-dialog input#bp_arg2_status {
+    width: 245px;
+}
+
 .bp_type_desc {
     font-size: smaller;
+}
+
+.bp_help_cmd {
+    background: #CCCCCC;
+    color: #FE4071;
 }
 
 .bp_type_desc A {
@@ -72,6 +84,7 @@ DIV.ui-dialog INPUT[type=text] {
     text-align: left;
     padding-left: 2px;
     padding-right: 4px;
+    white-space: nowrap;
 }
 .bp_info TD {
     overflow: hidden;
@@ -96,9 +109,14 @@ DIV.ui-dialog INPUT[type=text] {
 .bp_status_extinfo_link {
     position: absolute;
     top: 2px;
-    right: 2px;
+    right: 10px;
 }
 
+.bp_ref_link {
+    position: absolute;
+    top: 0;
+    right: 2px;
+}
 
 .bp_settings INPUT, .bp_settings SELECT {
     width: 240px;
@@ -208,6 +226,16 @@ SPAN.bp_label {
     display: inherit;
 }
 
+.bp_node_bp_ref_icon {
+    position: absolute;
+    bottom: 2px;
+    right: 0px;
+    display: none;
+}
+.bp_node:hover .bp_node_bp_ref_icon {
+    display: inherit;
+}
+
 .bp_node_icons {
     position: absolute;
     top: 2px;
@@ -277,4 +305,16 @@ BODY.iframed DIV.bp_zoom_container {
 /* custom fields */
 #cust_help PRE {
     margin: 0;
+}
+
+TABLE.bp_filter {
+  width: 100%;
+}
+
+TABLE.bp_filter TD {
+  text-align: center;
+}
+
+TABLE.bp_filter TD:first-child {
+  text-align: left;
 }

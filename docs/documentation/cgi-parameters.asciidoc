@@ -4,7 +4,7 @@ title: CGI Parameters
 breadcrumb: [ "advanced.html", "Advanced" ]
 ---
 
-= CGI Parameters
+== CGI Parameters
 
 Most of the CGI Parameters can be changed with buttons, but there are
 some which are only accessible by adding them directly to the url.

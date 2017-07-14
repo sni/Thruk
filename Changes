@@ -1,9 +1,149 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next
+next:
+          - xls exports: add column reordering
+          - action menus: add close_timeout option
+          - downtimes: verify if end date is after start date
+          - broadcasts:
+            - show broadcasts optionally on the login page
+            - add optional annotation icon
+          - logcache:
+            - performance improvements for the import and update commands
+            - fix notifications filter by contact_name
+          - Business Process:
+            - add input/output filter
+            - make references link recursive
+            - performance improvements for service status nodes
+            - add optional operator for status aggregation
+          - fix issue when mobile plugin is disabled (#731)
+
+2.14-2   Fri May  5 12:31:42 CEST 2017
+          - autocomplete custom variables values if exposed by show_custom_vars
+          - make custom variables available in host/service excel export
+          - write details into apache log on timeouts
+          - make contacts email address available in enviroment for hooks and scripts
+          - action menus: support confirmation dialogs
+          - logcache:
+            - performance improvements for the logcacheclean command
+          - fix filtering for empty custom variables
+          - fix problems favicon counter
+
+2.14     Tue Mar 28 10:09:25 CEST 2017
+          - add new Thruk2 theme
+          - add broadcast system
+          - support opening server actions in new tabs
+          - support service lists for recurring downtimes
+          - fix livestatus "Operator !~~ for lists not implemented." issue when having an empty search filter
+          - set contactgroups as REMOTE_USER_GROUPS into the environment for hooks and scripts
+          - add basic filters to notifications page (#692)
+          - fix macro expansion with recursive args (#658)
+          - fix forcing logcache to myisam (#691)
+          - fix login hook not running in background
+          - Business Process:
+            - add support for simple wildcards, ex.: host:*
+            - add link to all input hosts/services
+            - add link to referenced business process if node links to another bp
+            - support regular expressions in service details link
+            - fix dropdown not being clickable
+            - fix selecting nodes for edit (#682)
+          - Panorama View:
+            - honor acknowledgement and downtime status shape color calculation
+            - add option for fixed positioned popups
+            - fix shape color for host problems in group/dashboard panels
+            - fix saving column width for grid panels
+          - Reports:
+            - hide program messages from reports by default, can be changed back by report_include_class2 = 2
+            - fix email report links from the preferences popup being cut off
+            - fix html being cut off (#545)
+          - Statusmap:
+            - allow grouping by custom variable exposed by show_custom_vars
+
+2.12-3   Tue Dec 20 20:43:54 CET 2016
+          - fix js error on status page
+          - Config Tool:
+            - fix http backends when using lmd
+
+2.12-2   Mon Nov 28 14:49:12 CET 2016
+          - add downtime_max_duration option
+          - fix glitch in column drag/drop
+          - fix missing jquery in mobile view (#653)
+          - fix redirect issue when omd site is named 'thruk'
+
+2.12     Fri Nov 18 10:14:00 CET 2016
+          - remove startup page, Thruk starts in less than a second now
+          - add adjustable status details columns / dynamic views
+          - add default_service_columns and default_host_columns config options
+          - Performance improvements on the host/service list page
+          - allow arbitrary html in the side navigation
+          - fix merging configuration from thruk_local.d
+          - fix session logout problem when there is a syntax error in menu_local.conf
+          - Panorama View:
+            - list already used colors in color picker
+            - add support for svg vector graphics as background/static/status images
+            - fix display error in speedometer with overlaping thresholds
+            - fix js error in shape dropdown
+            - fix error when using umlauts in dashboard title
+          - Business Process:
+            - add icinga2 support
+            - fix regular expression in service state nodes
+          - Reports:
+            - add outage report
+          - Logcache:
+            - add logcache_import_command option
+            - add logcache_delta_updates option
+
+2.10-2   Mon Oct  3 20:43:02 CEST 2016
+          - mark disabled eventhandler red on process info page
+          - add lmd support
+          - get uid/groups with POSIX:getgroups if possible (mickenordin #634)
+          - fix xss issue on login page
+          - Panorama View:
+            - increase popups delay to 1second
+            - fix popups showing when mouse moved over a icon
+            - fix start page not found when using OMD
+          - Mobile:
+            - fix sending reschedule command
+
+2.10     Wed Aug 24 14:59:03 CEST 2016
+          - add useragentcompat option for IE compatibility mode (ofosos #626)
+          - support reading action_menu_items from file/folder
+          - support thruk_local.d/file.$hostname files to separate host specific configs
+          - fix can_submit_commands setting not used from contact (#597)
+          - fix corrupting datafiles when trying to write to full filesystems
+          - support curl/wget scripts when cookie auth is enabled
+          - Logcache:
+            - add logcache_import_exclude option
+            - remove orphaned plugin output references on logcacheclean
+          - Reports:
+            - include any ok event always in availability calculation
+          - Panorama View:
+            - make popup completely customizable
+            - add dashboard status icon type
+            - add performance bar icon type
+            - add trend / forecast icon type
+            - icon label can be mouseover only now
+            - background color of dashboards can be changed now
+            - do not overlap icons which are placed close together
+            - host status beats service status for group/filter icons
+            - add scripted dashboard support
+            - dashboard files moved to /etc/thruk/panorama
+            - add dashboard overview as start page
+            - last dashboard can be closed now
+            - add text center option to labels
+            - add round corners option to labels
+          - Config Tool:
+            - support recursive object removal
+            - empty files will be deleted when the last object is removed
+            - fix showing custom variables attribute for some objects
+            - fix nested additive templates (#630)
+          - Business Process:
+            - translate host states to correct states
+
+2.08     Fri May  6 11:29:14 CEST 2016
           - add status column to performance map excel export
           - accept filter changes on body clicks too
           - support wildcards for ssi files
+          - use worst can_submit_commands value when having multiple backends
           - fix using negated comment/downtime filter
           - fix 'bad file descriptor' error when trying to log in subprocesses
           - fix using non-standard webserver ports with cookie authentication (#576)

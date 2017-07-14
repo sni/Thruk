@@ -83,6 +83,7 @@ sub add_link {
     $link{'links'}  = [] unless defined $link{'links'};
     $link{'target'} = _get_menu_target() unless defined $link{'target'};
     $link{'href'}   = _get_menu_link($link{'href'});
+    $link{'html'}   = $link{'html'};
     push(@{$last_section->{'links'}}, \%link);
     return;
 }
@@ -105,6 +106,7 @@ sub add_sub_link {
     $link{'links'}   = [] unless defined $link{'links'};
     $link{'href'}    = _get_menu_link($link{'href'});
     $link{'name'}    = "" unless defined $link{'name'};
+    $link{'html'}   = $link{'html'};
     push(@{$last_link->{'links'}}, \%link);
     return;
 }
@@ -312,8 +314,7 @@ sub _renew_navigation {
 
     $c->stash->{user_menu_items} = {};
     my $user_items;
-    my $userdata = Thruk::Utils::get_user_data($c);
-    $c->stash->{user_data} = $userdata;
+    my $userdata = $c->stash->{user_data};
     if(defined $userdata and defined $userdata->{'bookmarks'}) {
         for my $section (keys %{$userdata->{'bookmarks'}}) {
             for my $item (@{$userdata->{'bookmarks'}->{$section}}) {
@@ -327,8 +328,7 @@ sub _renew_navigation {
         }
     }
 
-    my $globaldata = Thruk::Utils::get_global_user_data($c);
-    $c->stash->{global_user_data} = $globaldata;
+    my $globaldata = $c->stash->{global_user_data};
     if(defined $globaldata and defined $globaldata->{'bookmarks'}) {
         for my $section (keys %{$globaldata->{'bookmarks'}}) {
             for my $item (@{$globaldata->{'bookmarks'}->{$section}}) {
@@ -357,10 +357,22 @@ sub _renew_navigation {
                 }
                 next unless $has_access;
             }
+            # visibility defined by callback?
+            if(defined $link->{'visible_cb'}) {
+                my $rc;
+                ## no critic
+                eval '$rc = '.$link->{'visible_cb'}.'($c);';
+                ## use critic
+                if($@) {
+                    $c->log->error("error while running callback ".$link->{'visible_cb'}.": ".$@);
+                }
+                next unless $rc;
+            }
 
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});
+            $link->{'html'}   = $link->{'html'};
             push(@{$section->{'links'}}, $link);
         }
     }
@@ -388,6 +400,7 @@ sub _renew_navigation {
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});
+            $link->{'html'}   = $link->{'html'};
 
             push(@{$sublink->{'links'}}, $link);
         }

@@ -40,9 +40,9 @@
       <ul>
         <li>
           select
-          <input type="checkbox" name="none" value="">
+          <input type="checkbox" name="none" value="" onclick="if(this.checked) { jQuery('input[name=clone_ref]').prop('checked', false); jQuery('input[name=all]').prop('checked', false); }">
           <a href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
-          <input type="checkbox" name="all" value="" checked>
+          <input type="checkbox" name="all" value="" checked onclick="if(this.checked) { jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); }">
           <a href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">all</a>
         </li>
       </ul>

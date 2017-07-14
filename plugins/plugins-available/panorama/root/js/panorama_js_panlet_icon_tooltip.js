@@ -6,24 +6,71 @@ Ext.onReady(function() {
         itemId:   'iconTip',
         target:    Ext.getBody(),
         delegate: 'A.tooltipTarget', // the cell class in which the tooltip has to be triggered
-        dismissDelay: 0,
-        width:     400,
+        dismissDelay:    0,
+        width:         400,
         manageHeight: false,
-        maxWidth:  400,
+        maxWidth:      400,
+        hideDelay:     300,
+        closable:     true,
+        showDelay:    1000,
         //closable:  true, hideDelay: 6000000, // enable for easier css debuging
         style:    'background: #E5E5E5',
         bodyStyle:'background: #E5E5E5',
         shadow:   'drop',
         html:      '',
         listeners: {
-            beforeshow: function(This, eOpts) {
-                if(TP.suppressIconTipForce) {
-                    return false;
+            move: function(This, x, y, eOpts) {
+                var position = "automatic";
+                if(TP.iconTipTarget && TP.iconTipTarget.xdata.popup && TP.iconTipTarget.xdata.popup.popup_position != "" && TP.iconTipTarget.xdata.popup.popup_position != "automatic") {
+                    position =  TP.iconTipTarget.xdata.popup.popup_position;
                 }
+                if(position == "relative position") {
+                    This.suspendEvents(false);
+                    TP.iconTip.setFixedOffsetPosition(TP.iconTipTarget, TP.iconTipTarget.xdata.popup.popup_x, TP.iconTipTarget.xdata.popup.popup_y);
+                    This.resumeEvents(false);
+                }
+                if(position == "absolute position") {
+                    This.suspendEvents(false);
+                    TP.iconTip.setFixedPosition(TP.iconTipTarget.xdata.popup.popup_x, TP.iconTipTarget.xdata.popup.popup_y);
+                    This.resumeEvents(false);
+                }
+                if(TP.iconSettingsWindow && TP.iconTip.isVisible()) {
+                    This.suspendEvents(false);
+                    TP.iconTip.alignToSettingsWindow();
+                    This.resumeEvents(false);
+                }
+            },
+            beforeshow: function(This, eOpts) {
+                if(!TP.iconTipTarget)       { return(false); }
+                if(TP.suppressIconTipForce) { return(false); }
                 TP.suppressIconTipForce = true;
                 if(TP.suppressIconTip) {
                     This.hide();
                     return false;
+                }
+                if(!TP.iconSettingsWindow && TP.iconTipTarget.xdata.popup && TP.iconTipTarget.xdata.popup.type == "off") {
+                    This.hide();
+                    return false;
+                }
+                var tabpan = Ext.getCmp('tabpan');
+                var tab = tabpan.getActiveTab();
+                if(!tab.locked && !TP.iconSettingsWindow) {
+                    return(false);
+                }
+                if(!TP.iconSettingsWindow) {
+                    // check if the mouse is still over the icon after the showDelay
+                    if(!TP.iconTipTarget || !TP.iconTipTarget.el) {
+                        return(false);
+                    }
+                    var pos = TP.iconTipTarget.getPosition();
+                    var size = TP.iconTipTarget.getSize();
+                    if(   cursorX < pos[0] || cursorX > pos[0]+size.width
+                       || cursorY < pos[1] || cursorY > pos[1]+size.height) {
+                        if(TP.iconTip) {
+                            TP.iconTip.last_id = "";
+                        }
+                        return(false);
+                    }
                 }
                 return true;
             },
@@ -31,47 +78,194 @@ Ext.onReady(function() {
                 if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.doLayout(); }
                 var size = This.getSize();
                 if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
-                var showAtPos = TP.getNextToPanelPos(TP.iconTip.panel, size.width, size.height);
-                var pos = This.getPosition();
-                if(pos[0] != showAtPos[0] || pos[1] != showAtPos[1]) {
-                    TP.suppressIconTipForce = false;
-                    This.showAt(showAtPos);
+
+                var position = "automatic";
+                if(TP.iconTipTarget && TP.iconTipTarget.xdata.popup && TP.iconTipTarget.xdata.popup.popup_position != "" && TP.iconTipTarget.xdata.popup.popup_position != "automatic") {
+                    position = TP.iconTipTarget.xdata.popup.popup_position;
                 }
-                TP.modalWindows.push(TP.iconTip);
+                if(position == "relative position") {
+                    TP.iconTip.setFixedOffsetPosition(TP.iconTipTarget, TP.iconTipTarget.xdata.popup.popup_x, TP.iconTipTarget.xdata.popup.popup_y);
+                }
+                else if(position == "absolute position") {
+                    TP.iconTip.setFixedPosition(TP.iconTipTarget.xdata.popup.popup_x, TP.iconTipTarget.xdata.popup.popup_y);
+                }
+                else if(!TP.iconSettingsWindow) {
+                    var showAtPos = TP.getNextToPanelPos(TP.iconTip.panel, size.width, size.height);
+                    var pos = This.getPosition();
+                    if(pos[0] != showAtPos[0] || pos[1] != showAtPos[1]) {
+                        TP.suppressIconTipForce = false;
+                        This.showAt(showAtPos);
+                    }
+                }
+
+                This.el.on('mouseover', function() {
+                    window.clearTimeout(This.hideTimer);
+                    delete This.hideTimer;
+                });
+                This.el.on('mouseout', function() {
+                    if(TP.iconSettingsWindow) { return; }
+                    This.delayHide();
+                });
+                if(TP.iconSettingsWindow && position == "automatic") {
+                    this.alignToSettingsWindow();
+                }
+                This.hidden = false;
             },
-            hide:    function(This) {
-                delete TP.iconTip.last_id;
-                TP.modalWindows = TP.removeFromList(TP.modalWindows, TP.iconTip);
+            beforehide: function(This) {
+                if(TP.iconSettingsWindow
+                   && TP.iconSettingsWindow.items.getAt(0)
+                   && TP.iconSettingsWindow.items.getAt(0).getActiveTab().title == "Popup"
+                ) { return(false); }
+                This.hidden = true;
             },
-            destroy: function(This) { delete TP.iconTip; }
+            destroy: function(This) { delete TP.iconTip; delete TP.iconTipTarget; }
+        },
+        alignToSettingsWindow: function() {
+            var position = "automatic";
+            var xdata = {};
+            if(TP.iconSettingsWindow) {
+                xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+            }
+            else if(TP.iconTipTarget) {
+                xdata = TP.iconTipTarget.xdata;
+            }
+            if(xdata.popup && xdata.popup.popup_position != "" && xdata.popup.popup_position != "automatic") {
+                position = xdata.popup.popup_position;
+            }
+            if(position == "relative position") {
+                TP.iconTip.setFixedOffsetPosition(TP.iconSettingsWindow.panel || TP.iconTipTarget, xdata.popup.popup_x, xdata.popup.popup_y);
+            }
+            else if(position == "absolute position") {
+                TP.iconTip.setFixedPosition(xdata.popup.popup_x, xdata.popup.popup_y);
+            }
+            else if(TP.iconSettingsWindow) {
+                var size = TP.iconSettingsWindow.getSize();
+                var pos  = TP.iconSettingsWindow.getPosition();
+                TP.suppressIconTipForce = false;
+                this.showAt([pos[0] + size.width + 10, pos[1]]);
+            }
+        },
+        setFixedOffsetPosition: function(panel, x, y) {
+            var pos  = panel.getPosition();
+            TP.suppressIconTipForce = false;
+            this.showAt([pos[0]+x, pos[1]+y]);
+        },
+        setFixedPosition: function(x, y) {
+            TP.suppressIconTipForce = false;
+            this.showAt([x, y]);
         }
     });
 
-    var tipRenderer = function (evt, el, eOpts) {
-        if(TP.suppressIconTip) { return; }
-        evt.stopEvent();
-        if(evt.target.tagName == "rect") { return; } /* skip canvas elements and only popup on actual paths */
+    TP.tipRenderer = function (evt, el, eOpts, force) {
+        if(evt.target.tagName == "rect") { delete TP.iconTipTarget; return; } /* skip canvas elements and only popup on actual paths */
         var img = Ext.getCmp(el.id);
-        if(!img || !img.el || !img.el.dom) { return; }
+        if(!img || !img.el || !img.el.dom) { delete TP.iconTipTarget; return; }
         try {
             if(img.panel) { img = img.panel; el = img.el.dom }
-        } catch(e) {return;} // errors with img.el not defined sometimes
-        if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
+        } catch(e) { delete TP.iconTipTarget; return;} // errors with img.el not defined sometimes
+
+        var xdata = img.xdata;
+        if(TP.iconSettingsWindow) {
+            xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+            img   = TP.iconSettingsWindow.panel;
+            TP.iconTipTarget = TP.iconSettingsWindow.panel;
+        }
+
+        /* activate label mouseover */
+        if(img.labelEl && xdata.label.display && xdata.label.display == 'mouseover') {
+            img.labelEl.mouseover = true;
+            img.labelEl.show();
+            delete img.labelEl.mouseover;
+            TP.mouseoverLabel = img.labelEl;
+        }
+
+        var tabpan = Ext.getCmp('tabpan');
+        var tab = tabpan.getActiveTab();
+        if(tab && !tab.locked && !TP.iconSettingsWindow) { delete TP.iconTipTarget; return; }
+
+        if(!force && TP.suppressIconTip) { delete TP.iconTipTarget; return; }
+        evt.stopEvent();
+        TP.iconTipTarget = img;
+
+        if(!force && ( TP.iconTip.last_id && TP.iconTip.last_id == el.id)) { return; }
         TP.iconTip.panel   = img;
         /* hide when in edit mode */
-        if(!img.locked) { return; }
+        if(!force && !img.locked) { return; }
         TP.iconTip.last_id = el.id;
-        if(!img.getName) { return; }
-        if(img.iconType == 'filtered') {
+        if(!img.getName) { delete TP.iconTipTarget; return; }
+        if(img.iconType == 'filter' || img.iconType == 'image') {
             TP.iconTip.setTitle(img.getName());
         } else {
             TP.iconTip.setTitle(ucfirst(img.iconType)+': '+img.getName());
         }
         var link;
         var d = img.getDetails();
-        var details = '<table class="iconDetails">';
+        /* custom popup details */
+        if(xdata.popup && xdata.popup.type == "custom") {
+            /* convert current details into hash */
+            var dHash = {};
+            for(var x=0; x<d.length; x++) {
+                dHash[d[x][0]] = d[x];
+            }
+            d = [];
+            var content = xdata.popup.content.split(/\n/);
+            var curBlock = [];
+            for(var x=0; x<content.length; x++) {
+                var line = content[x];
+                var m = line.match(/^\{\{\s*(.*)\s*\}\}\s*$/);
+                if(m && m[1]) {
+                    m[1] = m[1].replace(/^\s+/, '');
+                    m[1] = m[1].replace(/\s+$/, '');
+                    if(dHash[m[1]]) {
+                        if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
+                        d.push(dHash[m[1]]);
+                        continue;
+                    }
+                    if(dHash['*'+m[1]]) {
+                        if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
+                        /* make it possible to show a title for sections which use colspan usually */
+                        d.push([m[1], dHash['*'+m[1]][1]]);
+                        continue;
+                    }
+                    if(m[1].match(/^\*/)) {
+                        /* search for existing items without a leading asterix to hide sections which are not with a colspan by default */
+                        var key = m[1].replace(/^\*/, '');
+                        if(dHash[key]) {
+                            if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
+                            d.push([m[1], dHash[key][1]]);
+                            continue;
+                        }
+                    }
+                }
+                m = line.match(/^(.*):$/);
+                if(m && m[1]) {
+                    if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
+                    curBlock[0] = m[1];
+                    curBlock[1] = '';
+                    continue;
+                }
+                if(curBlock[0] != undefined) {
+                    curBlock[1] += img.setIconLabelDynamicText(line);
+                    curBlock[1] += '<br>';
+                    continue;
+                }
+                if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
+                curBlock[0] = '';
+                curBlock[1] = img.setIconLabelDynamicText(line)+'<br>';
+            }
+            if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
+        }
+
         TP.iconTip.panel = undefined;
+        if(d.length == 0) {
+            delete TP.iconTipTarget;
+            TP.iconTip.hide();
+            return;
+        }
+        var details = '<table class="iconDetails">';
         for(var x=0; x<d.length; x++) {
+            if(d[x].length == 2 && d[x][0] == '')        { d[x] = [d[x][1]]; }
+            if(d[x].length == 2 && d[x][0].match(/^\*/)) { d[x] = [d[x][1]]; }
             if(d[x].length == 1) {
                 details += '<tr>';
                 details += '<td colspan=2>'+d[x][0]+'<\/td>';
@@ -95,9 +289,22 @@ Ext.onReady(function() {
         var size;
         if(TP.iconTip.el) { size = TP.iconTip.getSize(); }
         if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
-        var showAtPos = TP.getNextToPanelPos(img, size.width, size.height);
         TP.suppressIconTipForce = false;
-        TP.iconTip.showAt(showAtPos);
+        if(xdata.popup && xdata.popup.popup_position == "relative position") {
+            TP.iconTip.setFixedOffsetPosition(img, xdata.popup.popup_x, xdata.popup.popup_y);
+        }
+        else if(xdata.popup && xdata.popup.popup_position == "absolute position") {
+            TP.iconTip.setFixedPosition(xdata.popup.popup_x, xdata.popup.popup_y);
+        }
+        else if(!TP.iconSettingsWindow) {
+            var showAtPos = TP.getNextToPanelPos(img, size.width, size.height);
+            TP.iconTip.showAt(showAtPos);
+        } else {
+            TP.iconTip.alignToSettingsWindow();
+        }
+        img.el.dom.onmouseout = function() {
+            TP.iconTip.delayHide();
+        };
         if(link && TP.iconTip.panel) {
             var style = 'detail';
             if(!(TP.iconTip.panel.iconType == 'servicegroup' || TP.iconTip.panel.xdata.general.incl_svc) || TP.iconTip.panel.iconType == 'host') {
@@ -145,7 +352,21 @@ Ext.onReady(function() {
     };
 
     Ext.getBody().on('mouseover', function(evt,t,a) {
-        tipRenderer(evt,t,a);
+        /* cancel previous hide timer */
+        window.clearTimeout(TP.iconTip.hideTimer);
+        delete TP.iconTip.hideTimer;
+
+        cursorX = evt.pageX;
+        cursorY = evt.pageY;
+
+        TP.tipRenderer(evt,t,a);
+    }, null, {delegate:'A.tooltipTarget'});
+
+    Ext.getBody().on('mouseout', function(evt,t,a) {
+        if(TP.mouseoverLabel && !TP.iconSettingsWindow) {
+            TP.mouseoverLabel.hide();
+            delete TP.mouseoverLabel;
+        }
     }, null, {delegate:'A.tooltipTarget'});
 });
 
@@ -241,11 +462,29 @@ TP.renderTipDetails = function(data) {
     TP.iconTip.detailsTarget.update(details);
     // make sure new size fits viewport
     TP.iconTip.detailsTarget.doLayout();
-    var size      = TP.iconTip.getSize();
-    if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
-    var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
     TP.suppressIconTipForce = false;
-    TP.iconTip.showAt(showAtPos);
+    if(panel.xdata.popup && panel.xdata.popup.popup_position == "relative position") {
+        TP.iconTip.setFixedOffsetPosition(img, panel.xdata.popup.popup_x, panel.xdata.popup.popup_y);
+    }
+    else if(panel.xdata.popup && panel.xdata.popup.popup_position == "absolute position") {
+        TP.iconTip.setFixedPosition(panel.xdata.popup.popup_x, panel.xdata.popup.popup_y);
+    }
+    else if(!TP.iconSettingsWindow) {
+        var size      = TP.iconTip.getSize();
+        if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
+        var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
+        TP.iconTip.showAt(showAtPos);
+    } else {
+        TP.iconTip.alignToSettingsWindow();
+    }
     TP.iconTip.syncShadow();
     return;
+}
+
+// save cursor position
+var cursorX;
+var cursorY;
+document.onmousemove = function(e){
+    cursorX = e.pageX;
+    cursorY = e.pageY;
 }

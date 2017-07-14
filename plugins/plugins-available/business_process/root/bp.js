@@ -138,8 +138,8 @@ function bp_context_menu_open(evt, node) {
     // clicking the wrench icon counts as right click too
     if(evt.target && jQuery(evt.target).hasClass('ui-icon-wrench')) { rightclick = true; }
     if(rightclick && node) {
-        bp_context_menu = true;
         bp_unset_active_node();
+        bp_context_menu = true;
         jQuery(node).addClass('bp_node_active');
         bp_active_node = node.id;
         bp_update_status(evt, node);
@@ -371,12 +371,15 @@ function bp_select_type(type) {
 /* show node type select: status */
 function bp_select_status(node) {
     if(node && node.func.toLowerCase() == 'status') {
+        if(!node.func_args[2]) { node.func_args[2] = '='; }
         bp_fill_select_form({
-            text:  { 'bp_arg1_status': node.func_args[0], 'bp_arg2_status': node.func_args[1] }
+            text:   { 'bp_arg1_status': node.func_args[0], 'bp_arg2_status': node.func_args[1] },
+            select: { 'bp_arg3_status': node.func_args[2] }
         });
     } else {
         bp_fill_select_form({
-            text:  { 'bp_arg1_status': '', 'bp_arg2_status': '' }
+            text:   { 'bp_arg1_status': '', 'bp_arg2_status': '' },
+            select: { 'bp_arg3_status': '=' }
         });
     }
 }
@@ -706,8 +709,9 @@ function bp_show_edit_node(id, refreshType) {
         }
     }
 
-    // initialize childrens tab
+    // initialize tabs
     bp_initialize_children_tab(node);
+    bp_initialize_filter_tab(node);
 
     // make dragable again
     if($edit_dialog) {
@@ -723,6 +727,22 @@ function bpRemoveAttribute(attr) {
 function bpAddAttribute(attr) {
     jQuery("INPUT[name=bp_"+attr+"]").parents("TR").show();
     jQuery("INPUT[name=bp_"+attr+"]").val('');
+}
+
+/* initialize filter tab */
+function bp_initialize_filter_tab(node) {
+    jQuery("INPUT.node_filter").prop("checked", false);
+    jQuery("INPUT.node_filter[value=off]").prop("checked", true);
+    if(node) {
+        jQuery(node.filter).each(function(nr, f) {
+            // enable and move to top
+            jQuery("TABLE.bp_filter tbody").prepend(jQuery("INPUT.node_filter[value=on][name=bp_filter_"+f+"]").prop("checked", true).closest('tr'));
+        });
+    }
+    jQuery(bp_filter).each(function(nr, f) {
+        // enable and move to top
+        jQuery("TABLE.bp_filter tbody").prepend(jQuery("INPUT.node_filter[value=global][name=bp_filter_"+f+"]").prop("checked", true).closest('tr'));
+    });
 }
 
 /* initialize childrens tab */
@@ -765,8 +785,8 @@ function bp_initialize_children_tab(node) {
     // button has to be initialized only once
     if(bp_list_wizard_initialized[bp_id] != undefined) {
         // reset filter
-        jQuery('INPUT.filter_available').val('');
-        jQuery('INPUT.filter_selected').val('');
+        jQuery('INPUT.node_filter_available').val('');
+        jQuery('INPUT.node_filter_selected').val('');
         data_filter_select('bp_'+bp_id+'_available_nodes', '');
         data_filter_select('bp_'+bp_id+'_selected_nodes', '');
     }
@@ -849,8 +869,6 @@ function bp_update_status(evt, node) {
         jQuery('#bp_status_icon_ack').css('display', 'none');
     }
 
-    jQuery('.bp_status_extinfo_link').css('display', 'none');
-
 
     var service, host;
     if(n.service) {
@@ -872,22 +890,40 @@ function bp_update_status(evt, node) {
     }
 
     // service specific things...
+    var link;
     if(service) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        if(looks_like_regex(service)) {
+            var filter = service.replace(/^(w|b):/, '');
+            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op=%7E&dfl_s0_value="+filter+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
+        } else {
+            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
+        }
     }
 
     // host specific things...
     else if(host) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>";
     }
     // hostgroup link
     else if(n.hostgroup) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>");
+        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>";
     }
 
     // servicegroup link
     else if(n.servicegroup) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>");
+        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>";
+    }
+
+    jQuery('.bp_status_extinfo_link').css('display', 'none');
+    if(link) {
+        jQuery('.bp_status_extinfo_link').css('display', '').html(link);
+    }
+
+    jQuery('.bp_ref_link').css('display', 'none');
+    jQuery("#"+n.id+" .bp_node_bp_ref_icon").css('visibility', 'hidden');
+    if(n.bp_ref) {
+        jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", "bp.cgi?action=details&bp="+n.bp_ref).css('visibility', '');
+        jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+n.bp_ref+"'><img src='"+url_prefix+"themes/"+theme+"/images/chart_organisation.png' border='0' alt='Show Business Process' title='Show Business Process' width='16' height='16'><\/a>");
     }
 
     return false;
@@ -1031,10 +1067,12 @@ function bp_zoom(zoom) {
 
     // center align inner container
     var zcontainer = document.getElementById('zoom'+bp_id);
-    var offset = ((graphW - maxX*zoom) / 2);
-    if(offset < 0) {offset = 0;}
-    zcontainer.style.left = offset+'px';
-    zcontainer.style.position = 'absolute';
+    if(zcontainer) {
+        var offset = ((graphW - maxX*zoom) / 2);
+        if(offset < 0) {offset = 0;}
+        zcontainer.style.left = offset+'px';
+        zcontainer.style.position = 'absolute';
+    }
 }
 
 /* draw connector between two nodes */
@@ -1214,4 +1252,11 @@ function bp_redraw(evt) {
     }
 
     return true;
+}
+
+function bp_remove_search_prefix(search) {
+    console.log(search);
+    search = search.replace(/^(w|b):/, "");
+    console.log(search);
+    return(search);
 }

@@ -4,7 +4,7 @@ title: Running Thruk with nginx on Ubuntu or Debian
 breadcrumb: [ "advanced.html", "Advanced" ]
 ---
 
-= Installation
+== Installation
 
 This document assumes Thruk is installed from official
 .deb packages from thruk.org.

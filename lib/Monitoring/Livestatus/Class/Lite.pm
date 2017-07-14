@@ -134,8 +134,9 @@ sub table {
     my($self, $name) = @_;
     confess('need table name') unless $name;
     my $table = {
-            '_class' => $self->{'backend_obj'},
-            '_table' => $name,
+            '_class'    => $self->{'backend_obj'},
+            '_table'    => $name,
+            '_backends' => $self->{'_default_backends'},
     };
     bless($table, 'Monitoring::Livestatus::Class::Lite');
     return $table;
@@ -153,6 +154,36 @@ list of columns to fetch
 sub columns {
     my($self, @columns) = @_;
     $self->{'_columns'} = \@columns;
+    return $self;
+}
+
+################################################################################
+
+=head2 backends
+
+    backends($backend_ids)
+
+sets ids for the Backend: header
+
+=cut
+sub backends {
+    my($self, @backend_ids) = @_;
+    $self->{'_backends'} = \@backend_ids;
+    return $self;
+}
+
+################################################################################
+
+=head2 default_backends
+
+    default_backends($backend_ids)
+
+sets default ids for the Backend: header
+
+=cut
+sub default_backends {
+    my($self, @backend_ids) = @_;
+    $self->{'_default_backends'} = \@backend_ids;
     return $self;
 }
 
@@ -306,6 +337,10 @@ sub statement {
     confess("no table??") unless $self->{'_table'};
 
     my @statements = ();
+    if( $self->{'_backends'} && ! $filter_only ) {
+        push @statements, sprintf('Backends: %s',join(' ',@{ $self->{'_backends'} }));
+    }
+
     if( $self->{'_columns'} ) {
         push @statements, sprintf('Columns: %s',join(' ',@{ $self->{'_columns'} }));
     }

@@ -351,7 +351,7 @@ sub get_url {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
         my $cmd = $c->config->{home}.'/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
-        local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
+        local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
         `$cmd`;
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
@@ -375,6 +375,7 @@ sub get_url {
     }
     if($url !~ m/\?/mx) { $url =~ s/\&/?/mx; }
 
+    local $ENV{THRUK_REPORT} = $url;
     my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $sessionid });
     my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
@@ -403,7 +404,10 @@ sub get_url {
             if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
                 $include_js = 0;
             }
-            #$result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
+            # only for url_reports
+            if($c->stash->{'param'}->{'pdf'}) {
+                $result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
+            }
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
@@ -609,8 +613,11 @@ sub html_all_inclusive {
     my($c, $url, $page, $include_js) = @_;
     $include_js = 0 unless defined $include_js;
     $c->stash->{'param'}->{'js'} = $include_js;
-    # remove html comments to not replace css and js from commented includes
+
+    # remove html comments to not replace css and js from commented includes, but make sure we don't wipe out js scripts
+    $page =~ s/(<script[^>]*>)\s*<\!\-\-(.*?)\-\->\s*(<\/script>)/$1\n$2\n$3/gsmxi;
     $page =~ s/<\!\-\-.*?\-\->//gsmxi;
+
     my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
     $page = _replace_css_and_images($page, $url, $report_base_url);
     $page = _replace_links($page, $url, $report_base_url);
@@ -689,7 +696,7 @@ sub _replace_css_and_images {
     my $c = $Thruk::Request::c or die("not initialized!");
     # replace images for already existing css
     while(
-    $text =~ s/(<style.*?)
+    $text =~ s/(<style[^>]*>)
               (url\()
               ([^:)]*)
               (\))
@@ -883,6 +890,27 @@ sub _replace_css_img {
 }
 
 ##############################################
+
+=head2 set_action_image_data_urls
+
+  set_action_image_data_urls($c, $urls)
+
+replaces hash of urls with data urls
+
+=cut
+sub set_action_image_data_urls {
+    my($c, $urls) = @_;
+    my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
+    my $baseurl         = $ENV{THRUK_REPORT};
+    my $default_theme   = $c->config->{'default_theme'};
+    for my $url (sort keys %{$urls}) {
+        $url =~ s|\{\{theme\}\}|$default_theme|gmx;
+        $urls->{$url} = _replace_img($baseurl, $report_base_url, "","",$url,"","");
+    }
+    return($urls);
+}
+
+##############################################
 sub _read_static_content_file {
     my($baseurl, $report_base_url, $url) = @_;
     my $c = $Thruk::Request::c or die("not initialized!");
@@ -901,6 +929,15 @@ sub _read_static_content_file {
     my $logo_path_prefix = $c->config->{'logo_path_prefix'};
     my $logo_url         = $url;
     $logo_url            =~ s/^$logo_path_prefix//gmx;
+
+    my $icon_dirs  = Thruk::Utils::list($c->config->{'physical_logo_path'});
+    my $physical_logo;
+    for my $dir (@{$icon_dirs}) {
+        $dir =~ s/\/$//gmx;
+        if($dir && -e $dir.'/'.$logo_url) {
+            $physical_logo = $dir.'/'.$logo_url;
+        }
+    }
 
     # image from theme
     my $default = $c->config->{'default_theme'};
@@ -927,8 +964,8 @@ sub _read_static_content_file {
     }
 
     # icon image?
-    elsif(defined $c->config->{'physical_logo_path'} and -e $c->config->{'physical_logo_path'}.'/'.$logo_url) {
-        $file = $c->config->{'physical_logo_path'}.'/'.$logo_url;
+    elsif($physical_logo) {
+        $file = $physical_logo;
     }
 
     else {

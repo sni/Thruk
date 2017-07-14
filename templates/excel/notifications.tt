@@ -5,25 +5,31 @@
   <worksheet name='Notifications' autofilter='A1:[% last_col %][% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
-        [% IF columns.1  %]<cell width='18'>Host</cell>[% END %]
-        [% IF columns.2  %]<cell width='23'>Service</cell>[% END %]
-        [% IF columns.2  %]<cell width='18'>Type</cell>[% END %]
-        [% IF columns.3  %]<cell width='18'>Time</cell>[% END %]
-        [% IF columns.4  %]<cell width='18'>Contact</cell>[% END %]
-        [% IF columns.5  %]<cell width='18'>Notification Command</cell>[% END %]
-        [% IF columns.6  %]<cell width='60'>Information</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Host"        %]<cell width='18'>Host</cell>
+        [% ELSIF col == "Service"     %]<cell width='23'>Service</cell>
+        [% ELSIF col == "Type"        %]<cell width='18'>Type</cell>
+        [% ELSIF col == "Time"        %]<cell width='18'>Time</cell>
+        [% ELSIF col == "Contact"     %]<cell width='18'>Contact</cell>
+        [% ELSIF col == "Command"     %]<cell width='18'>Notification Command</cell>
+        [% ELSIF col == "Information" %]<cell width='60'>Information</cell>
+        [% END %]
+        [% END %]
       </format>
     </row>
     [% FOREACH n = data %]
     [% PROCESS _notifications_log_line.tt %]
     <row>
-        [% IF columns.1  %]<cell>[% escape_xml(n.host_name) %]</cell>[% END %]
-        [% IF columns.2  %]<cell>[% escape_xml(n.service_description) %]</cell>[% END %]
-        [% IF columns.3  %]<format bg_color='[% state_color %]'><cell>[% level %]</cell></format>[% END %]
-        [% IF columns.4  %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(n.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>[% END %]
-        [% IF columns.5  %]<cell>[% escape_xml(n.contact_name) %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% escape_xml(n.command_name) %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% escape_xml(n.plugin_output) %]</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Host"        %]<cell>[% escape_xml(n.host_name) %]</cell>
+        [% ELSIF col == "Service"     %]<cell>[% escape_xml(n.service_description) %]</cell>
+        [% ELSIF col == "Type"        %]<format bg_color='[% state_color %]'><cell>[% level %]</cell></format>
+        [% ELSIF col == "Time"        %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(n.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>
+        [% ELSIF col == "Contact"     %]<cell>[% escape_xml(n.contact_name) %]</cell>
+        [% ELSIF col == "Command"     %]<cell>[% escape_xml(n.command_name) %]</cell>
+        [% ELSIF col == "Information" %]<cell>[% escape_xml(n.plugin_output) %]</cell>
+        [% END %]
+        [% END %]
     </row>
     [% END %]
   </worksheet>

@@ -13,6 +13,11 @@ Ext.define('TP.GridLoader', {
             }
             this.loading = true;
             return true;
+        },
+        'load': function(This, response, options, eOpts) {
+            if(This.target && This.target.body) {
+                This.target.unmask();
+            }
         }
     },
     callback: function(This, success, response, options) {
@@ -132,7 +137,7 @@ Ext.define('TP.GridLoader', {
                 try {
                     this.grid.applyState(this.initialState);
                 } catch(err) {
-                    TP.logError(panel.id, "gridApplyStateException", err);
+                    //TP.logError(panel.id, "gridApplyStateException", err);
                 }
             }
             if(this.xdata.gridstate != undefined) {
@@ -147,9 +152,12 @@ Ext.define('TP.GridLoader', {
             if(changed && columns) {
                 for(var x=0; x<columns.length; x++) {
                     if(columns[x].hidden != undefined) {
-                        // toggle header once to workaround a display clitch
+                        // toggle header once to workaround a display glitch
                         this.grid.columns[x].setVisible(columns[x].hidden);
                         this.grid.columns[x].setVisible(!columns[x].hidden);
+                    }
+                    if(columns[x].width != undefined) {
+                        this.grid.columns[x].setWidth(columns[x].width);
                     }
                 }
             }
@@ -213,6 +221,19 @@ Ext.define('TP.PanletGrid', {
                     } else {
                         panlet.xdata.groupField = undefined;
                     }
+
+                    // save columns width explitcitly
+                    for(var x=0; x<panlet.grid.columns.length; x++) {
+                        if(!panlet.grid.columns[x].isHidden()) {
+                            var width = panlet.grid.columns[x].getWidth();
+                            // width is 1 if not yet completly rendered and we don't want to store that
+                            // width is 0 if the settings window is open
+                            if(width > 1) {
+                                state.columns[x].width = width;
+                            }
+                        }
+                    }
+
                     panlet.saveState();
                     return false;
                 },

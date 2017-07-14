@@ -620,6 +620,8 @@ sub expand_command {
     my $rc;
     eval {
         ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args});
+        $expanded = $self->_obfuscate({string => $expanded, host => $host, service => $service, args => \@com_args});
+        $command_name = $self->_obfuscate({string => $command_name, host => $host, service => $service, args => \@com_args});
     };
 
     # does it still contain macros?
@@ -794,6 +796,7 @@ sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
     return unless defined $c->config->{'logcache'};
+    return if !$c->config->{'logcache_delta_updates'};
     eval {
         return $self->_renew_logcache($c, $noforks);
     };
@@ -851,7 +854,16 @@ sub _renew_logcache {
                                                       nofork    => $noforks,
                                                     });
         }
-        $self->_do_on_peers( 'renew_logcache', \@args, 1);
+        if($c->config->{'logcache_import_command'}) {
+            local $ENV{'THRUK_BACKENDS'} = join(',', @{$get_results_for});
+            local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
+            my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
+            if($rc != 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
+            }
+        } else {
+            $self->_do_on_peers( 'renew_logcache', \@args, 1);
+        }
     }
     return;
 }
@@ -1013,10 +1025,14 @@ sub _get_replaced_string {
             if(defined $macros->{$block} or $block =~ m/^\$ARG\d+\$/mx) {
                 my $replacement = $macros->{$block};
                 $replacement    = '' unless defined $replacement;
-                if(!$skip_args && $block =~ m/\$ARG\d+\$$/mx) {
-                    my $sub_rc;
-                    ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
-                    $rc = 0 unless $sub_rc;
+                if($block =~ m/\$ARG\d+\$$/mx) {
+                    if($skip_args) {
+                        $replacement = $block;
+                    } else {
+                        my $sub_rc;
+                        ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
+                        $rc = 0 unless $sub_rc;
+                    }
                 }
                 $block = $replacement;
             } else {
@@ -1025,21 +1041,52 @@ sub _get_replaced_string {
         }
         $res .= $block;
     }
-    ## no critic
+
+    $res = $self->_get_obfuscated_string($res, $macros);
+
+    return($res, $rc);
+}
+
+########################################
+sub _obfuscate {
+    my( $self, $args ) = @_;
+
+    my $string  = $args->{'string'};
+    my $macros  = $self->_get_macros($args);
+
+    return $self->_get_obfuscated_string($string, $macros);
+}
+
+########################################
+
+=head2 _get_obfuscated_string
+
+  _get_obfuscated_string
+
+replace sensitive data with ***
+
+=cut
+
+sub _get_obfuscated_string {
+    my( $self, $string, $macros ) = @_;
     if (defined $macros->{'$_SERVICEOBFUSCATE_ME$'}) {
         eval {
-            $res =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
+            ## no critic
+            $string =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
+            ## use critic
         };
     }
     if (defined $macros->{'$_HOSTOBFUSCATE_ME$'}) {
         eval {
-            $res =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
+            ## no critic
+            $string =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
+            ## use critic
         };
     }
-    ## use critic
 
-    return($res, $rc);
+    return $string;
 }
+
 ########################################
 
 =head2 _set_host_macros
@@ -1066,8 +1113,8 @@ sub _set_host_macros {
     $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
-    $macros->{'$HOSTDURATION$'}       = time() - $macros->{'$HOSTDURATION$'};
-    $macros->{'$HOSTSTATE$'}          = $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}};
+    $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
+    $macros->{'$HOSTSTATE$'}          = (defined $macros->{'$HOSTSTATEID$'})         ? $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}} : 0;
     $macros->{'$HOSTBACKENDID$'}      = $host->{'peer_key'};
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
@@ -1164,11 +1211,49 @@ sub _do_on_peers {
     $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for}));
 
     # send query to selected backends
-    my $selected_backends = scalar @{$get_results_for};
-    $c->stash->{'num_selected_backends'} = $selected_backends;
-    my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
+    my $num_selected_backends = scalar @{$get_results_for};
+    if($function ne 'send_command' && $function ne 'get_processinfo') {
+        $c->stash->{'num_selected_backends'} = $num_selected_backends;
+        $c->stash->{'selected_backends'}     = $get_results_for;
+    }
+
+    my($result, $type, $totalsize, $skip_lmd);
+    if($ENV{'THRUK_USE_LMD'}
+       && ($function =~ m/^get_/mx || $function eq 'send_command')
+       && ($function ne 'get_logs' || !$c->config->{'logcache'})
+       ) {
+        eval {
+            ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
+        };
+        if($@) {
+            Thruk::Utils::LMD::check_proc($c->config, $c, 1);
+            sleep(1);
+            # then retry again
+            eval {
+                ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
+            };
+            if($@) {
+                my $err = $@;
+                if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|mx) {
+                    $err = $1;
+                }
+                if(!$c->stash->{'lmd_ok'}) {
+                    Thruk::Utils::LMD::create_thread_dump($c, $c->config);
+                    $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err;
+                    $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
+                    Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
+                }
+                die("internal lmd error - ".($c->stash->{'lmd_error'} || $@));
+            }
+        }
+    } else {
+        $skip_lmd = 1;
+        ($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
+    }
+    local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
+
     #&timing_breakpoint('_get_result: '.$function);
-    if(!defined $result && $selected_backends != 0) {
+    if(!defined $result && $num_selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
@@ -1212,7 +1297,7 @@ sub _do_on_peers {
     $type = lc $type;
 
     # extract some extra data
-    if($function eq 'get_processinfo') {
+    if($function eq 'get_processinfo' && ref $result eq 'HASH') {
         # update configtool settings
         # and update last_program_starts
         # (set in Thruk::Utils::CLI::_cmd_raw)
@@ -1232,7 +1317,7 @@ sub _do_on_peers {
     }
 
     # howto merge the answers?
-    my $data;
+    my($data, $must_resort);
     if( $type eq 'file' ) {
         $data = $result;
     }
@@ -1249,10 +1334,14 @@ sub _do_on_peers {
         $data = $self->_sum_answer($result);
     }
     elsif ( $function eq 'get_hostgroups' ) {
+        $result = {} if $num_selected_backends == 0;
         $data = $self->_merge_hostgroup_answer($result);
+        $must_resort = 1;
     }
     elsif ( $function eq 'get_servicegroups' ) {
+        $result = {} if $num_selected_backends == 0;
         $data = $self->_merge_servicegroup_answer($result);
+        $must_resort = 1;
     }
     else {
         $data = $self->_merge_answer( $result, $type );
@@ -1263,16 +1352,19 @@ sub _do_on_peers {
         if( $arg{'remove_duplicates'} ) {
             $data = $self->_remove_duplicates($data);
             $totalsize = scalar @{$data};
+            $must_resort = 1;
         }
 
-        if( $arg{'sort'} ) {
-            if($type ne 'sorted' or scalar keys %{$result} > 1) {
-                $data = $self->_sort( $data, $arg{'sort'} );
+        if(!$ENV{'THRUK_USE_LMD'} || $must_resort) {
+            if( $arg{'sort'} ) {
+                if($type ne 'sorted' or scalar keys %{$result} > 1) {
+                    $data = $self->_sort( $data, $arg{'sort'} );
+                }
             }
-        }
 
-        if( $arg{'limit'} ) {
-            $data = $self->_limit( $data, $arg{'limit'} );
+            if( $arg{'limit'} ) {
+                $data = _limit( $data, $arg{'limit'} );
+            }
         }
 
         if( $arg{'pager'} ) {
@@ -1381,8 +1473,10 @@ sub select_backends {
     my $get_results_for = [];
     for my $peer ( @{ $self->get_peers() } ) {
         if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
-            $c->log->debug("skipped peer (down): ".$peer->{'name'}) if Thruk->trace;
-            next;
+            if(!$ENV{'THRUK_USE_LMD'}) {
+                $c->log->debug("skipped peer (down): ".$peer->{'name'}) if Thruk->trace;
+                next;
+            }
         }
         if(defined $backends) {
             unless(defined $backends->{$peer->{'key'}}) {
@@ -1419,6 +1513,81 @@ sub _get_result {
         return $self->_get_result_serial($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
     }
     return $self->_get_result_parallel($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
+}
+
+########################################
+
+=head2 _get_result_lmd
+
+  _get_result_lmd($peers, $function, $arguments)
+
+returns result for given function using lmd
+
+=cut
+
+sub _get_result_lmd {
+    my($self,$peers, $function, $arg) = @_;
+    my ($totalsize, $result, $type) = (0, []);
+    my $c  = $Thruk::Request::c;
+    my $t1 = [gettimeofday];
+    $c->stats->profile( begin => "_get_result_lmd($function)");
+
+    delete $c->stash->{'lmd_ok'};
+    delete $c->stash->{'lmd_error'};
+
+    if(scalar @{$peers} == 0) {
+        return($result, $type, $totalsize);
+    }
+
+    my $peer = $Thruk::Backend::Pool::lmd_peer;
+    $peer->{'live'}->default_backends(@{$peers});
+    my @res = $peer->$function(@{$arg});
+    $peer->{'live'}->default_backends();
+    ($result, $type, $totalsize) = @res;
+
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_backend_waited'} += $elapsed;
+
+    my $meta = $peer->{'live'}->{'backend_obj'}->{'meta_data'};
+    if($meta) {
+        $c->stash->{'lmd_ok'} = 1;
+    }
+    # update failed backends
+    if($meta && $meta->{'failed'}) {
+        for my $key (@{$peers}) {
+            delete $c->stash->{'failed_backends'}->{$key};
+            my $peer = $self->get_peer_by_key($key);
+            $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
+            $peer->{'runnning'}   = 1;
+            $peer->{'last_error'} = 'OK';
+
+        }
+        for my $key (keys %{$meta->{'failed'}}) {
+            $c->stash->{'failed_backends'}->{$key} = $meta->{'failed'}->{$key};
+            my $peer = $self->get_peer_by_key($key);
+            $peer->{'runnning'}   = 0;
+            $peer->{'last_error'} = $meta->{'failed'}->{$key};
+        }
+        if(scalar keys %{$meta->{'failed'}} == @{$peers}) {
+            die("did not get a valid response for at least any site");
+        }
+    }
+    if($meta && $meta->{'total'}) {
+        $totalsize = $meta->{'total'};
+    }
+
+    if($function eq 'get_hostgroups' || $function eq 'get_servicegroups' || ($type && (lc($type) eq 'file' || lc($type) eq 'stats'))) {
+        my $key = @{$self->get_peers()}[0]->{'key'};
+        $result = { $key => $result };
+    }
+
+    if($function eq 'send_command') {
+        $result = [];
+    }
+
+    $c->stats->profile( end => "_get_result_lmd($function)");
+    #&timing_breakpoint('_get_result_lmd end: '.$function);
+    return($result, $type, $totalsize);
 }
 
 ########################################
@@ -1614,7 +1783,8 @@ sub _get_results_xs_pool {
         # iterate over original peers to retain order
         # this keeps identical results in the order of our backends
         for my $peer ( @{ $self->get_peers() } ) {
-            my $key = $peer->{'key'};
+            my $key  = $peer->{'key'};
+            my $name = $peer->{'name'};
             my $sorted   = $sorted_results->{$key};
             next if !defined $sorted;
             if($sorted->{'failed'}) {
@@ -1641,10 +1811,10 @@ sub _get_results_xs_pool {
                             'opts'     => $sorted->{'opts'}->[$x],
                             'keys'     => $sorted->{'keys'}->[$x],
                         };
-                        push @{$sorted->{'keys'}->[$x]}, 'peer_key';
+                        push @{$sorted->{'keys'}->[$x]}, ('peer_key', 'peer_name');
                     }
                     # add peer key
-                    map { push(@{$_}, $key) } @{$sorted->{'res'}->[$x]->{'result'}};
+                    map { push(@{$_}, ($key, $name)) } @{$sorted->{'res'}->[$x]->{'result'}};
                     push @{$post_process->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
                     $optimized = 1;
                 } else {
@@ -1679,7 +1849,7 @@ sub _get_results_xs_pool {
                 $post_process->{'results'} = _sort_nr($post_process->{'results'}, $sortkeys);
             }
             # apply limit
-            $post_process->{'results'}  = $self->_limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
+            $post_process->{'results'}  = _limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
             # splice result, callbacks are missing...
             $post_process->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $post_process->{keys}, result => $post_process->{'results'}});
             $result->{'_all_'} = $post_process->{'results'};
@@ -1712,29 +1882,24 @@ sub _remove_duplicates {
     # calculate md5 sums
     my $uniq = {};
     for my $dat ( @{$data} ) {
-        my $peer_key = $dat->{'peer_key'};
-        delete $dat->{'peer_key'};
+        my $peer_key = delete $dat->{'peer_key'};
         my $peer_name = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_name'};
-        my $peer_addr = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_addr'};
-        my $str       = join( ';', grep(defined, values %{$dat}));
+        my $str       = join( ';', grep(defined, sort values %{$dat}));
         utf8::encode($str);
         my $md5       = md5_hex($str);
         if( !defined $uniq->{$md5} ) {
             $dat->{'peer_key'}  = $peer_key;
             $dat->{'peer_name'} = $peer_name;
-            $dat->{'peer_addr'} = $peer_addr;
 
             $uniq->{$md5} = {
                 'data'      => $dat,
                 'peer_key'  => [$peer_key],
                 'peer_name' => [$peer_name],
-                'peer_addr' => [$peer_addr],
             };
         }
         else {
             push @{ $uniq->{$md5}->{'peer_key'} },  $peer_key;
             push @{ $uniq->{$md5}->{'peer_name'} }, $peer_name;
-            push @{ $uniq->{$md5}->{'peer_addr'} }, $peer_addr;
         }
     }
 
@@ -1743,7 +1908,6 @@ sub _remove_duplicates {
         $data->{'data'}->{'backend'} = {
             'peer_key'  => $data->{'peer_key'},
             'peer_name' => $data->{'peer_name'},
-            'peer_addr' => $data->{'peer_addr'},
         };
         push @{$return}, $data->{'data'};
 
@@ -1751,6 +1915,23 @@ sub _remove_duplicates {
 
     $c->stats->profile( end => "Utils::remove_duplicates()" );
     return ($return);
+}
+
+########################################
+
+=head2 page_data
+
+  page_data($c, $data)
+
+adds paged data set to the template stash.
+Data will be available as 'data'
+The pager itself as 'pager'
+
+=cut
+
+sub page_data {
+    local $ENV{'THRUK_USE_LMD'} = undef;
+    return(_page_data(undef, @_));
 }
 
 ########################################
@@ -1870,10 +2051,12 @@ sub _page_data {
         $c->stash->{'data'} = $data;
     }
     else {
-        if($page == $pages) {
-            $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
-        } else {
-            $data = [splice(@{$data}, $entries*($page-1), $entries)];
+        if(!$ENV{'THRUK_USE_LMD'}) {
+            if($page == $pages) {
+                $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
+            } else {
+                $data = [splice(@{$data}, $entries*($page-1), $entries)];
+            }
         }
         $c->stash->{'data'} = $data;
     }
@@ -1942,6 +2125,9 @@ sub DESTROY {
 ##########################################################
 sub _merge_answer {
     my($self, $data, $type) = @_;
+    if($ENV{'THRUK_USE_LMD'}) {
+        return($data);
+    }
     my $c      = $Thruk::Request::c;
     my $return = [];
     if( defined $type and $type eq 'hash' ) {
@@ -1956,14 +2142,18 @@ sub _merge_answer {
 
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
-        my $key = $peer->{'key'};
+        my $key  = $peer->{'key'};
+        my $name = $peer->{'name'};
         next if !defined $data->{$key};
         confess("not a hash") unless ref $data eq 'HASH';
 
         if( ref $data->{$key} eq 'ARRAY' ) {
             $return = [] unless defined $return;
             if(defined $data->{$key}->[0] && ref $data->{$key}->[0] eq 'HASH') {
-                map { $_->{'peer_key'} = $key } @{$data->{$key}};
+                map {
+                    $_->{'peer_key'}  = $key;
+                    $_->{'peer_name'} = $name;
+                } @{$data->{$key}};
             }
             $return = [ @{$return}, @{$data->{$key}} ];
         }
@@ -1971,7 +2161,10 @@ sub _merge_answer {
             $return = {} unless defined $return;
             $return = {} unless ref $return eq 'HASH';
             my $tmp = $data->{$key};
-            map { $tmp->{$_}->{'peer_key'} = $key } keys %{$data->{$key}};
+            map {
+                $tmp->{$_}->{'peer_key'} = $key;
+                $tmp->{$_}->{'peer_name'} = $name;
+            } keys %{$data->{$key}};
             $return = { %{$return}, %{$data->{$key} } };
         }
         else {
@@ -2010,14 +2203,15 @@ sub _merge_hostgroup_answer {
             }
 
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
-            $groups->{ $row->{'name'} }->{'backends_hash'}->{$name} = 1;
+            $groups->{ $row->{'name'} }->{'backends_hash'}->{$key} = $name;
         }
     }
 
     # set backends used
     for my $group ( values %{$groups} ) {
         $group->{'backend'} = [];
-        @{ $group->{'backend'} } = sort keys %{ $group->{'backends_hash'} };
+        @{ $group->{'backend'} }  = sort values %{ $group->{'backends_hash'} };
+        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
         delete $group->{'backends_hash'};
     }
     my @return = values %{$groups};
@@ -2052,14 +2246,15 @@ sub _merge_servicegroup_answer {
                 $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
             }
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
-            $groups->{$row->{'name'}}->{'backends_hash'}->{$name} = 1;
+            $groups->{$row->{'name'}}->{'backends_hash'}->{$key} = $name;
         }
     }
 
     # set backends used
     for my $group ( values %{$groups} ) {
         $group->{'backend'} = [];
-        @{ $group->{'backend'} } = sort keys %{ $group->{'backends_hash'} };
+        @{ $group->{'backend'} } = sort values %{ $group->{'backends_hash'} };
+        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
         delete $group->{'backends_hash'};
     }
 
@@ -2148,6 +2343,9 @@ sub _merge_stats_answer {
 ##########################################################
 sub _sum_answer {
     my($self, $data) = @_;
+    if($ENV{'THRUK_USE_LMD'}) {
+        return($data);
+    }
     my $return;
 
     my @peers = keys %{$data};
@@ -2227,6 +2425,17 @@ sub _sort {
     }
     else {
         @keys = ($key);
+    }
+
+    for my $key (@keys) {
+        # add extra column for custom variables
+        if($key =~ m/^cust__(.*)$/mx) {
+            my $cust = $1;
+            for my $d (@{$data}) {
+                my $vars = Thruk::Utils::get_custom_vars($c, $d, '', 1);
+                $d->{$key} = $vars->{$cust} || $vars->{'HOST'.$cust} || '';
+            }
+        }
     }
 
     my @compares;
@@ -2341,7 +2550,7 @@ returns data limited by limit
 =cut
 
 sub _limit {
-    my($self, $data, $limit) = @_;
+    my($data, $limit) = @_;
 
     return $data unless defined $limit and $limit > 0;
 
@@ -2455,8 +2664,12 @@ set defaults for some results
 sub _set_result_defaults {
     my($self, $function, $data) = @_;
 
+    if(ref $data ne 'ARRAY') {
+        return($data);
+    }
+
     # set some defaults if no backends where selected
-    if($function eq "get_performance_stats" and ref $data eq 'ARRAY') {
+    if($function eq "get_performance_stats") {
         $data = {};
         for my $type (qw{hosts services}) {
             for my $key (qw{_active_sum _active_1_sum _active_5_sum _active_15_sum _active_60_sum _active_all_sum
@@ -2471,7 +2684,7 @@ sub _set_result_defaults {
             }
         }
     }
-    elsif($function eq "get_service_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_service_stats" || $function eq "get_service_totals_stats") {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
@@ -2486,7 +2699,7 @@ sub _set_result_defaults {
             $data->{$key} = 0;
         }
     }
-    elsif($function eq "get_host_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_host_stats" || $function eq "get_host_totals_stats") {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
@@ -2498,7 +2711,7 @@ sub _set_result_defaults {
             $data->{$key} = 0;
         }
     }
-    elsif($function eq "get_extra_perf_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_extra_perf_stats") {
         $data = {};
         for my $key (qw{
                         cached_log_messages connections connections_rate host_checks

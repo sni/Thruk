@@ -1,1 +1,1 @@
-﻿<a href='[% uri_with(c, 'view_mode' => 'json') %]' ><img src='[% url_prefix %]themes/[% theme %]/images/json.png' border="0" alt='Export to JSON' title='Export to JSON'></a>&nbsp;
+﻿<a href='[% uri_with(c, 'view_mode' => 'json') %]' ><button class="thruk_btn small secondary json_export" title="Export to JSON"></button></a>&nbsp;

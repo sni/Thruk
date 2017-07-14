@@ -9,8 +9,8 @@
 %endif
 
 Name:          thruk
-Version:       2.06
-Release: 1
+Version:       2.14
+Release: 2
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
@@ -143,11 +143,17 @@ if [ -d /etc/thruk/ssi/. ]; then
   mkdir -p /tmp/thruk_update/ssi
   cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
 fi
+
 exit 0
 
 %post base
 chkconfig --add thruk
-mkdir -p /var/cache/thruk/reports /var/log/thruk /etc/thruk/bp /var/lib/thruk /etc/thruk/thruk_local.d
+mkdir -p /var/cache/thruk/reports \
+         /var/log/thruk \
+         /etc/thruk/bp \
+         /etc/thruk/panorama \
+         /var/lib/thruk \
+         /etc/thruk/thruk_local.d
 touch /var/log/thruk/thruk.log
 chown -R %{apacheuser}:%{apachegroup} \
                 /var/lib/thruk \
@@ -156,6 +162,7 @@ chown -R %{apacheuser}:%{apachegroup} \
                 /etc/thruk/plugins/plugins-enabled \
                 /etc/thruk/thruk_local.conf \
                 /etc/thruk/bp \
+                /etc/thruk/panorama \
                 /etc/thruk/thruk_local.d
 /usr/bin/crontab -l -u %{apacheuser} 2>/dev/null | /usr/bin/crontab -u %{apacheuser} -
 %if %{defined suse_version}
@@ -187,8 +194,11 @@ exit 0
 %posttrans base
 # restore themes and plugins
 if [ -d /tmp/thruk_update/themes/. ]; then
+  # do not remove the new default theme
+  test -h /tmp/thruk_update/themes/Thruk2 || mv /etc/thruk/themes/themes-enabled/Thruk2 /etc/thruk/themes/themes-enabled/.Thruk2
   rm -f /etc/thruk/themes/themes-enabled/*
   cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
+  test -h /etc/thruk/themes/themes-enabled/.Thruk2 && mv /etc/thruk/themes/themes-enabled/.Thruk2 /etc/thruk/themes/themes-enabled/Thruk2
 fi
 if [ -d /tmp/thruk_update/plugins/. ]; then
   rm -f /etc/thruk/plugins/plugins-enabled/*
@@ -222,6 +232,7 @@ case "$*" in
     rmdir /etc/thruk/plugins/plugins-enabled 2>/dev/null
     rmdir /etc/thruk/plugins 2>/dev/null
     rmdir /etc/thruk/bp 2>/dev/null
+    rmdir /etc/thruk/panorama 2>/dev/null
     rmdir /etc/thruk/thruk_local.d 2>/dev/null
     rmdir /etc/thruk 2>/dev/null
     rmdir /usr/share/thruk/plugins/plugins-available 2>/dev/null
@@ -232,12 +243,15 @@ case "$*" in
           /usr/share/thruk \
           /usr/lib/thruk \
           /etc/thruk/ssi \
+          /etc/thruk/action_menus \
           /etc/thruk/bp \
+          /etc/thruk/panorama \
           /etc/thruk \
           2>/dev/null
     ;;
   1)
     # POSTUPDATE
+    /usr/bin/thruk -a livecachestop --local >/dev/null 2>&1
     rm -rf %{_localstatedir}/cache/thruk/*
     mkdir -p /var/cache/thruk/reports
     chown -R %{apacheuser}:%{apachegroup} /var/cache/thruk
@@ -290,6 +304,7 @@ exit 0
 %attr(0755,root,root) %{_bindir}/nagexp
 %attr(0755,root,root) %{_initrddir}/thruk
 %config %{_sysconfdir}/thruk/ssi
+%config %{_sysconfdir}/thruk/action_menus
 %config %{_sysconfdir}/thruk/thruk.conf
 %attr(0644,%{apacheuser},%{apachegroup}) %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %attr(0644,%{apacheuser},%{apachegroup}) %config(noreplace) %{_sysconfdir}/thruk/cgi.cfg
@@ -331,6 +346,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/usercontent/
 %config(noreplace) %{_sysconfdir}/thruk/bp/bp_functions.pm
+%config(noreplace) %{_sysconfdir}/thruk/bp/bp_filter.pm
 %attr(0755,root,root) %{_datadir}/thruk/thruk_auth
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk.psgi

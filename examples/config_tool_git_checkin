@@ -35,6 +35,9 @@ elif [ "$ACTION" == "post" ]; then
     msg="automatic commit of config tool changes ($REMOTE_USER)"
     export GIT_AUTHOR_NAME="$REMOTE_USER"
     export GIT_AUTHOR_EMAIL=$OMD_SITE@`hostname`
+    if [ "x$REMOTE_USER_EMAIL" != "x" ]; then
+      export GIT_AUTHOR_EMAIL=$REMOTE_USER_EMAIL
+    fi
   elif [ "$SSH_CLIENT" != "" ]; then
     msg="automatic commit of config tool changes ($SSH_CLIENT)"
   fi

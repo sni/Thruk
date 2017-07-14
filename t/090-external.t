@@ -21,7 +21,8 @@ my($out,$err,$time,$dir,$stash,$rc,$profile) = Thruk::Utils::External::get_resul
 is($out, `hostname`, "output ok");
 is($rc, 0, "exit code 0");
 
-$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd($c, "/bin/true"); print $out; return $rc;', background => 1 });
+my $true = -x '/usr/bin/true' ? '/usr/bin/true' : '/bin/true';
+$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd($c, "'.$true.'"); print $out; return $rc;', background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $job);
 is($out, "", "output empty");
@@ -33,20 +34,21 @@ TestUtils::wait_for_job($job);
 is($out, "test", "test output");
 is($rc, 3, "exit code 3");
 
-$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd($c, "/bin/false"); print $out; return $rc;', background => 1 });
+my $false = -x '/usr/bin/false' ? '/usr/bin/false' : '/bin/false';
+$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd($c, '.$false.'); print $out; return $rc;', background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $job);
 is($out, "", "output empty");
 ok($rc != 0, "exit code not 0");
 
 # cmd
-$job = Thruk::Utils::External::cmd($c, { cmd => '/bin/false', background => 1 });
+$job = Thruk::Utils::External::cmd($c, { cmd => $false, background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $job);
 is($out, "", "output empty");
 ok($rc != 0, "exit code not 0");
 
-$job = Thruk::Utils::External::cmd($c, { cmd => '/bin/true', background => 1 });
+$job = Thruk::Utils::External::cmd($c, { cmd => $true, background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $job);
 is($out, "", "output empty");

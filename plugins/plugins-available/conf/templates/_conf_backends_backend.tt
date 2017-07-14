@@ -1,7 +1,7 @@
 ﻿<tr class="backend_conf_[% x %]">
   <td class='dataVar' align="left">Name</td>
   <td class='dataVal'>
-    <input type="hidden" name="id[% x %]" value="[% b.key %]">
+    <input type="hidden" name="id[% x %]" value="[% b.id %]">
     <input type="text" name="name[% x %]" value="[% b.name %]" style="width: 200px;" placeholder="connection name">
   </td>
   <td class='dataVal' onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
@@ -21,14 +21,16 @@
     </select>
   </td>
 </tr>
+[% FOREACH addr IN b.addr.list %]
 <tr class="backend_conf_[% x %] backend_connection">
   <td class='dataVar' align="left">Connection</td>
   <td class='dataVal' colspan=2 nowrap>
-    <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;" placeholder="server:6557 or socket">
-    <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this)">
-    <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
+    <input type="text" name="peer[% x %]" value="[% addr %]" class="peer_[% x %]_[% loop.index %]" style="width: 200px;" placeholder="server:6557 or socket">
+    <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this, '[% x %]_[% loop.index %]')">
+    <img class="hidden testimg[% x %]_[% loop.index %]" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
   </td>
 </tr>
+[% END %]
 <tr class="backend_conf_[% x %] backend_auth">
   <td class='dataVar' align="left">Auth-Key</td>
   <td class='dataVal' colspan=2 nowrap>

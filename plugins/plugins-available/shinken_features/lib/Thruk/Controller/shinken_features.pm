@@ -202,7 +202,7 @@ sub _process_bothtypes_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     if( defined $view_mode and $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
         my $filename = 'status.xls';
         $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'servicedata'}  = $services;

@@ -6,6 +6,9 @@ function add_conf_attribute(table, key, rt) {
         value = key;
         key   = 'customvariable';
     }
+    if(fields[key] == undefined) {
+        return false;
+    }
 
     running_number--;
     if(key != 'customvariable' && key != 'exception') {
@@ -187,16 +190,6 @@ function init_conf_tool_buttons() {
                 jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
             }
         });
-        return false;
-    });
-
-    /* list wizard */
-    jQuery('button.members_wzd_button').button({
-        icons: {primary: 'ui-wzd-button'},
-        text: false,
-        label: 'open list wizard'
-    }).click(function() {
-        init_conf_tool_list_wizard(this.id, this.name);
         return false;
     });
 
@@ -533,112 +526,6 @@ function close_accordion() {
     }
 }
 
-/* handle list wizard dialog */
-var available_members = new Array();
-var selected_members  = new Array();
-var init_conf_tool_list_wizard_initialized = {};
-function init_conf_tool_list_wizard(id, type) {
-    id = id.substr(0, id.length -3);
-    var tmp       = type.split(/,/);
-    var input_id  = tmp[0];
-    type          = tmp[1];
-    var aggregate = Math.abs(tmp[2]);
-    var templates = tmp[3] ? true : false;
-
-    var $d = jQuery('#' + id + 'dialog')
-      .dialog({
-        dialogClass: 'dialogWithDropShadow',
-        autoOpen:    false,
-        width:       'auto',
-        maxWidth:    1024,
-        position:    'top',
-        close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
-    });
-
-    // initialize selected members
-    selected_members   = new Array();
-    selected_members_h = new Object();
-    var options = [];
-    var list = jQuery('#'+input_id).val().split(/\s*,\s*/);
-    for(var x=0; x<list.length;x+=aggregate) {
-        if(list[x] != '') {
-            var val = list[x];
-            for(var y=1; y<aggregate;y++) {
-                val = val+','+list[x+y]
-            }
-            selected_members.push(val);
-            selected_members_h[val] = 1;
-            options.push(new Option(val, val));
-        }
-    }
-    set_select_options(id+"selected_members", options, true);
-    sortlist(id+"selected_members");
-    reset_original_options(id+"selected_members");
-
-    // initialize available members
-    available_members = new Array();
-    jQuery("select#"+id+"available_members").html('<option disabled>loading...<\/option>');
-    jQuery.ajax({
-        url: 'conf.cgi?action=json&amp;type='+type,
-        type: 'POST',
-        success: function(data) {
-            var result = data[0]['data'];
-            if(templates) {
-                result = data[1]['data'];
-            }
-            var options = [];
-            var size = result.length;
-            for(var x=0; x<size;x++) {
-                if(!selected_members_h[result[x]]) {
-                    available_members.push(result[x]);
-                    options.push(new Option(result[x], result[x]));
-                }
-            }
-            set_select_options(id+"available_members", options, true);
-            sortlist(id+"available_members");
-            reset_original_options(id+"available_members");
-        },
-        error: function() {
-            jQuery("select#"+id+"available_members").html('<option disabled>error<\/option>');
-        }
-    });
-
-    // button has to be initialized only once
-    if(init_conf_tool_list_wizard_initialized[id] != undefined) {
-        // reset filter
-        jQuery('INPUT.filter_available').val('');
-        jQuery('INPUT.filter_selected').val('');
-        data_filter_select(id+'available_members', '');
-        data_filter_select(id+'selected_members', '');
-        $d.dialog('open');
-        return;
-    }
-    init_conf_tool_list_wizard_initialized[id] = true;
-
-    jQuery('#' + id + 'accept').button({
-        icons: {primary: 'ui-ok-button'}
-    }).click(function() {
-        data_filter_select(id+'available_members', '');
-        data_filter_select(id+'selected_members', '');
-
-        var newval = '';
-        var lb = document.getElementById(id+"selected_members");
-        for(i=0; i<lb.length; i++)  {
-            newval += lb.options[i].value;
-            if(i < lb.length-1) {
-                newval += ',';
-            }
-        }
-        jQuery('#'+input_id).val(newval);
-        ajax_search.hide_results(undefined, 1);
-        $d.dialog('close');
-        return false;
-    });
-
-    $d.dialog('open');
-    return;
-}
-
 /* filter already displayed attributes */
 function new_attr_filter(str) {
     if(jQuery('#new_'+str+'_btn').css('display') == 'none') {
@@ -650,8 +537,10 @@ function new_attr_filter(str) {
 /* new attribute onselect */
 function on_attr_select() {
     var key = jQuery('#newattr').val();
-    var newid = "#"+add_conf_attribute('attr_table', key,true).replace(/"/g, '');
+    var newid = add_conf_attribute('attr_table', key,true);
     ajax_search.reset();
+    if(!newid) { return false; }
+    newid = "#"+(newid.replace(/"/g, ''));
     if(key == "customvariable") {
         newid = newid+"_key";
     }
@@ -671,6 +560,7 @@ function on_empty_click(inp) {
     var v = input.value;
     input.value = 'customvariable';
     var newid = on_attr_select();
+    if(!newid) { return(false); }
     newid = newid.replace(/^#/, '');
     var newin = document.getElementById(newid);
     var tr = newin.parentNode.parentNode;
@@ -709,9 +599,32 @@ function save_reload_apply(formid) {
     return false;
 }
 
+var continue_cb;
 function conf_tool_cleanup(btn, link, hide) {
     if(jQuery(btn).hasClass('done')) {
         return(false);
+    }
+    if(link == "fix_all_serial") {
+        jQuery(btn).button({
+            icons: {primary: 'ui-waiting-button'},
+            disabled: true
+        })
+        var fix_buttons = jQuery('BUTTON.conf_cleanup_button_fix');
+        if(fix_buttons.length > 0) {
+            continue_cb = function() {
+                conf_tool_cleanup(btn, "fix_all_serial", hide);
+            }
+            fix_buttons[0].click();
+        }
+        if(fix_buttons.length == 0) {
+            continue_cb = undefined;
+            jQuery(btn).button({
+                icons: {primary: 'ui-ok-button'},
+                label:   'done',
+                disabled: false
+            }).addClass('done');
+        }
+        return false;
     }
     jQuery(btn).button({
         icons: {primary: 'ui-waiting-button'},
@@ -752,6 +665,8 @@ function conf_tool_cleanup(btn, link, hide) {
                 }
                 jQuery('#apply_config_changes_icon').show();
             }
+            jQuery(btn).removeClass('conf_cleanup_button_fix');
+            if(continue_cb) { continue_cb(); }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             jQuery(btn).button({
@@ -759,6 +674,7 @@ function conf_tool_cleanup(btn, link, hide) {
                 label:   'failed',
                 disabled: false
             })
+            jQuery(btn).removeClass('conf_cleanup_button_fix');
         }
     });
 

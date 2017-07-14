@@ -1,4 +1,4 @@
-﻿<a href="#" onclick="toggleElement('show_link', undefined, true); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/link.png' border="0" alt='Show link to this page' title='Show link to this page' width=16 height=16></a>&nbsp;
+﻿<a href="#" onclick="toggleElement('show_link', undefined, true); document.getElementById('url_input').focus(); return false;"><button class="thruk_btn small secondary show_link" title="Show link to this page"></button></a>&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:30px;z-index:100" id="show_link">
   <div class="shadow"><div class="shadowcontent">
     [% IF style != 'combined' %]

@@ -60,6 +60,41 @@ sub _debug {
 }
 
 ##############################################
+sub TIEHANDLE {
+    my($class, $fh) = @_;
+    my $self = {
+        fh      => $fh,
+        newline => 1,
+    };
+    bless $self, $class;
+    return($self);
+}
+
+##############################################
+sub BINMODE {
+    my($self, $mode) = @_;
+    return binmode $self->{'fh'}, $mode;
+}
+
+##############################################
+sub PRINT {
+    my($self, @data) = @_;
+    my $fh = $self->{'fh'};
+
+    if($self->{'newline'}) {
+        print $fh "[".(scalar localtime())."][INFO] ", @data;
+    } else {
+        print $fh @data;
+    }
+
+    $self->{'newline'} = 1;
+    if(join("", @data) !~ m/\n$/mx) {
+        $self->{'newline'} = 0;
+    }
+    return;
+}
+
+##############################################
 
 =head1 AUTHOR
 

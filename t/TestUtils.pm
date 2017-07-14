@@ -542,6 +542,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <input>/imxo;
         next if $err_str =~ m/Character\ ".*?"\ should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "manifest"\ for\ tag\ <html>/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "sizes"\ for\ tag\ <link>/imxo;
         diag($error->as_string."\n");
         push @return, $error;
     }

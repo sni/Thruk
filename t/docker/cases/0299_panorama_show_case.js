@@ -52,7 +52,7 @@ try {
     click(_button('/checkbox/', _rightOf(_label("Include Hosts:"))));
     click(_button('/Appearance/'));
     click(_div('/trigger/', _rightOf(_textbox('type'))));
-    click(_listItem("Pie Chart"));
+    click(_div("Pie Chart"));
     isVisible(_textbox('piewidth'));
     _setValue(_textbox("piewidth"), "120");
     isVisible(_textbox('piedonut'));

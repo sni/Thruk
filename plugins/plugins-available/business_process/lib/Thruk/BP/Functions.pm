@@ -26,49 +26,69 @@ returns status based on real service or host
 =cut
 sub status {
     my($c, $bp, $n, $args, $livedata) = @_;
-    my($hostname, $description) = @{$args};
+    my($hostname, $description, $op) = @{$args};
     my $data;
 
-    $livedata = $bp->bulk_fetch_live_data($c) unless defined $livedata;
+    confess("no status data supplied") unless defined $livedata;
 
     if($hostname and $description) {
         $data = $livedata->{'services'}->{$hostname}->{$description};
 
-        # description may contain wildcards, return worst function in that case
-        if($description =~ m/\*/mx) {
-            my $orig_description = $description;
+        # operator is new and optional
+        $op = "=" unless $op;
+
+        # description may contain regular expressions, return worst/best function in that case
+        if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
+            $op = "~";
+        }
+        if($op ne '=') {
             my $function = 'worst';
             if($description =~ m/^(b|w):(.*)$/mx) {
-                if($1 eq 'b') { $function = 'worst' }
+                if($1 eq 'b') { $function = 'best' }
                 $description = $2;
             }
-            $description =~ s/\*/.*/gmx;
+            $description = Thruk::Utils::convert_wildcards_to_regex($description);
+
+            if($op eq '!=') { $op = '!~'; }
 
             # create hash which can be used by internal calculation function
             my $depends = [];
             for my $sname (keys %{$livedata->{'services'}->{$hostname}}) {
-                if($sname =~ m/$description/mx) {
+                if(   ($op eq '!~' && $sname !~ m/$description/mxi)
+                   || ($op eq  '~' && $sname =~ m/$description/mxi)
+                   || ($op eq '!=' && $sname ne $description)) {
                     my $s = $livedata->{'services'}->{$hostname}->{$sname};
                     next if($bp->{'state_type'} eq 'hard' and $s->{'state_type'} != 1);
                     push @{$depends}, { label => $sname, status => $s->{'state'} };
                 }
             }
+
             my @res;
-            if($function eq 'worst') {
+            if(scalar @{$depends} == 0) {
+                return(3, 'no matching hosts/services found');
+            }
+            elsif($function eq 'worst') {
                 @res = worst($c, $bp, { depends => $depends });
             } else {
                 @res = best($c, $bp, { depends => $depends });
             }
-            $res[1] = $hostname.':'.$orig_description;
+            my $display_op = '';
+            if($op ne '=') {
+                $display_op = ' '.$op.' ';
+            }
+            $res[1] = $function.' of '.$hostname.':'.$display_op.$description;
             return(@res);
         }
     }
     elsif($hostname) {
         $data = $livedata->{'hosts'}->{$hostname};
+        # translate host downs to critical
+        $data->{'state'}           = 2 if (defined $data->{'state'}           && $data->{'state'} == 1);
+        $data->{'last_hard_state'} = 2 if (defined $data->{'last_hard_state'} && $data->{'last_hard_state'} == 1);
     }
 
     # only hard states?
-    if($data and $bp->{'state_type'} eq 'hard' and $data->{'state_type'} != 1) {
+    if($data && $bp->{'state_type'} eq 'hard' && defined $data->{'last_hard_state'} && (defined $data->{'state_type'} && $data->{'state_type'} != 1)) {
         return($data->{'last_hard_state'},
                ($n->{'status_text'} || 'no plugin output yet'), # return last status text
                undef,
@@ -76,7 +96,7 @@ sub status {
         );
     }
 
-    if($data) {
+    if($data && defined $data->{'state'}) {
         return($data->{'state'}, $data->{'plugin_output'}, undef, $data);
     }
     if($description) {
@@ -97,7 +117,8 @@ returns status based on real service or host
 sub groupstatus {
     my($c, $bp, $n, $args, $livedata) = @_;
     my($grouptype, $groupname, $hostwarn, $hostcrit, $servicewarn, $servicecrit) = @{$args};
-    $livedata = $bp->bulk_fetch_live_data($c) unless defined $livedata;
+
+    confess("no status data supplied") unless defined $livedata;
 
     my $data;
     if(lc($grouptype) eq 'hostgroup') {
@@ -264,6 +285,12 @@ sub at_least {
     $critical = $warning unless defined $critical;
     my($good, $bad) = _count_good_bad($n->{'depends'});
     my $state = 0;
+    if($warning !~ m/^\-?\d+$/mx) {
+        return(3, 'warning threshold must be numeric');
+    }
+    if($critical !~ m/^\-?\d+$/mx) {
+        return(3, 'critical threshold must be numeric');
+    }
     if($good <= $critical) {
         $state = 2;
     }
@@ -291,6 +318,12 @@ sub not_more {
     my($c, $bp, $n, $args) = @_;
     my($warning, $critical) = @{$args};
     my($good, $bad) = _count_good_bad($n->{'depends'});
+    if($warning !~ m/^\-?\d+$/mx) {
+        return(3, 'warning threshold must be numeric');
+    }
+    if($critical !~ m/^\-?\d+$/mx) {
+        return(3, 'critical threshold must be numeric');
+    }
     my $state = 0;
     if($good > $critical) {
         $state = 2;
@@ -319,6 +352,9 @@ sub equals {
     my($c, $bp, $n, $args) = @_;
     my($number) = @{$args};
     my($good, $bad) = _count_good_bad($n->{'depends'});
+    if($number !~ m/^\-?\d+$/mx) {
+        return(3, 'threshold must be numeric');
+    }
     if($good == 0 and $bad == 0) {
         return(3, 'no dependent nodes');
     }
@@ -372,6 +408,9 @@ sub custom {
     my $real_args = [@{$args}[1..$last]];
     eval {
         do($f->{'file'});
+        if($@) {
+            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+        }
         ## no critic
         eval('($status, $short_desc, $status_text, $extra) = '."$fname".'($c, $bp, $n, $real_args, $livedata);');
         ## use critic
@@ -379,14 +418,14 @@ sub custom {
             $status      = 3;
             $short_desc  = "UNKNOWN";
             $status_text = $@;
-            $c->log->info("internal error in custum function $fname: $@");
+            $c->log->info("internal error in custom function $fname: $@");
         }
     };
     if($@) {
         $status      = 3;
         $short_desc  = "UNKNOWN";
         $status_text = $@;
-        $c->log->info("internal error in custum function $fname: $@");
+        $c->log->info("internal error in custom function $fname: $@");
     }
     $short_desc  = '(no output)' unless $short_desc;
     $status_text = '(no output)' unless $status_text;
@@ -418,6 +457,57 @@ sub _count_good_bad {
         }
     }
     return($good, $bad);
+}
+
+##########################################################
+# runs filter function
+sub _filter {
+    my($c, $fname, $args) = @_;
+
+    $c->stash->{'bp_custom_filter'} = Thruk::BP::Utils::get_custom_filter($c) unless defined $c->stash->{'bp_custom_filter'};
+    my $f;
+    for my $tmp (@{$c->stash->{'bp_custom_filter'}}) {
+        if($tmp->{'function'} eq $fname) {
+            $f = $tmp;
+            last;
+        }
+    }
+    if(!$f) {
+        $c->log->info("custom filter $fname not found");
+        return;
+    }
+    eval {
+        do($f->{'file'});
+        if($@) {
+            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+        }
+        ## no critic
+        eval($fname.'($c, $args);');
+        ## use critic
+        if($@) {
+            $c->log->info("internal error in custom filter $fname: $@");
+        }
+    };
+    if($@) {
+        $c->log->info("internal error in custom filter $fname: $@");
+    }
+
+    return;
+}
+
+##########################################################
+# deep clones any object
+sub _dclone {
+    my($obj) = @_;
+    local $Data::Dumper::Purity = 1;
+    local $Data::Dumper::Terse = 1;
+    local $Data::Dumper::Useqq = 1;
+    local $Data::Dumper::Deparse = 1;
+    my $VAR1;
+    ## no critics
+    eval Data::Dumper->Dump([$obj]);
+    ## use critics
+    return($VAR1);
 }
 
 ##########################################################

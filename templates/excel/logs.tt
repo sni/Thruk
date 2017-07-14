@@ -7,13 +7,16 @@
   <worksheet name='Log Events' autofilter='A1:[% last_col %][% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
-        [% IF columns.1  %]<cell width='18'>Timestamp</cell>[% END %]
-        [% IF columns.2  %]<cell width='23'>Event</cell>[% END %]
-        [% IF columns.3  %]<cell width='23'>Event Detail</cell>[% END %]
-        [% IF columns.4  %]<cell width='25'>Host Name</cell>[% END %]
-        [% IF columns.5  %]<cell width='30'>Service</cell>[% END %]
-        [% IF columns.6  %]<cell width='10'>Info</cell>[% END %]
-        [% IF columns.7  %]<cell width='50'>Message</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Time"                %]<cell width='18'>Timestamp</cell>
+        [% ELSIF col == "Event"               %]<cell width='23'>Event</cell>
+        [% ELSIF col == "Event Detail"        %]<cell width='23'>Event Detail</cell>
+        [% ELSIF col == "Hostname"            %]<cell width='25'>Host Name</cell>
+        [% ELSIF col == "Service Description" %]<cell width='30'>Service</cell>
+        [% ELSIF col == "Info"                %]<cell width='10'>Info</cell>
+        [% ELSIF col == "Message"             %]<cell width='50'>Message</cell>
+        [% END %]
+        [% END %]
       </format>
     </row>
     [% FOREACH l = data %]
@@ -33,13 +36,16 @@
       [% message = message.remove(type _ ':\s*') %]
     [% END %]
     <row>
-        [% IF columns.1  %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(l.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>[% END %]
-        [% IF columns.2  %]<cell>[% IF has_type == 1 %][% l.type %][% ELSE %][% type %][% END %]</cell>[% END %]
-        [% IF columns.3  %]<cell>[% desc %]</cell>[% END %]
-        [% IF columns.4  %]<cell>[% escape_xml(l.host_name) %]</cell>[% END %]
-        [% IF columns.5  %]<cell>[% escape_xml(l.service_description) %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% escape_xml(info) %]</cell>[% END %]
-        [% IF columns.7  %]<cell>[% escape_xml(message) %]</cell>[% END %]
+        [% FOREACH col = columns %]
+        [% IF    col == "Time"          %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(l.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>
+        [% ELSIF col == "Event"         %]<cell>[% IF has_type == 1 %][% l.type %][% ELSE %][% type %][% END %]</cell>
+        [% ELSIF col == "Event Detail"        %]<cell>[% desc %]</cell>
+        [% ELSIF col == "Hostname"            %]<cell>[% escape_xml(l.host_name) %]</cell>
+        [% ELSIF col == "Service Description" %]<cell>[% escape_xml(l.service_description) %]</cell>
+        [% ELSIF col == "Info"                %]<cell>[% escape_xml(info) %]</cell>
+        [% ELSIF col == "Message"             %]<cell>[% escape_xml(message) %]</cell>
+        [% END %]
+        [% END %]
     </row>
     [% END %]
   </worksheet>

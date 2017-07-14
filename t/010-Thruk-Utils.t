@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 69;
+    plan tests => 77;
 
     use lib('t');
     require TestUtils;
@@ -171,12 +171,25 @@ is(Thruk::Utils::version_compare('1.0.1b1',     '1.0.1b2'), 0, 'version_compare:
 is(Thruk::Utils::version_compare('2.0-shinken', '1.1.3'),   1, 'version_compare: 2.0-shinken vs. 1.1.3');
 
 #########################
+{
 my $str      = '$USER1$/test -a $ARG1$ -b $ARG2$ -c $HOSTNAME$';
 my $macros   = {'$USER1$' => '/opt', '$ARG1$' => 'a', '$HOSTNAME$' => 'host' };
 my($replaced,$rc) = $b->_get_replaced_string($str, $macros);
 my $expected = '/opt/test -a a -b  -c host';
 is($rc, 1, 'macro replacement with empty args succeeds');
 is($replaced, $expected, 'macro replacement with empty args string');
+};
+
+#########################
+# test recursive macros which should not be replaced
+{
+my $str      = 'x$ARG1$x';
+my $macros   = {'$ARG1$' => '$HOST$ $ARG2$ $ARG3$', '$HOST$' => 'x'};
+my($replaced,$rc) = $b->_get_replaced_string($str, $macros);
+my $expected = 'xx $ARG2$ $ARG3$x';
+is($rc, 1, 'macro replacement with empty args succeeds');
+is($replaced, $expected, 'macro replacement with empty args string');
+};
 
 #########################
 # utf8 encoding
@@ -270,5 +283,13 @@ for my $l (@{$locations}) {
     is(Thruk::Utils::CookieAuth::get_netloc($l->[0]), $l->[1], "get_netloc for ".$l->[0]." is ".$l->[1]);
 }
 
+#########################
+# wildcard expansion
+is('',          Thruk::Utils::convert_wildcards_to_regex(''), 'empty wildcard');
+is('.*',        Thruk::Utils::convert_wildcards_to_regex('*'), 'simple wildcard');
+is('.*',        Thruk::Utils::convert_wildcards_to_regex('.*'), 'regex wildcard');
+is('a*',        Thruk::Utils::convert_wildcards_to_regex('a*'), 'letter wildcard');
+is('a+',        Thruk::Utils::convert_wildcards_to_regex('a+'), 'normal regex 1');
+is('^a(b|c)d*', Thruk::Utils::convert_wildcards_to_regex('^a(b|c)d*'), 'normal regex 2');
 
 #########################

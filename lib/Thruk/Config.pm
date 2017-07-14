@@ -8,6 +8,7 @@ use File::Slurp qw/read_file/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Thruk::Utils::Filter ();
+use Thruk::Utils::Broadcast ();
 
 =head1 NAME
 
@@ -27,10 +28,10 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.06';
+our $VERSION = '2.14';
 
 my $project_root = home('Thruk::Config');
-my $branch       = '';
+my $branch       = '2';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
 if($branch) {
@@ -45,7 +46,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'March 02, 2016',
+              'released'               => 'May 05, 2017',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -84,6 +85,7 @@ our %config = ('name'                   => 'Thruk',
                                           'throw'               => \&Thruk::Utils::Filter::throw,
                                           'contains'            => \&Thruk::Utils::Filter::contains,
                                           'date_format'         => \&Thruk::Utils::Filter::date_format,
+                                          'last_check'          => \&Thruk::Utils::Filter::last_check,
                                           'remove_html_comments' => \&Thruk::Utils::Filter::remove_html_comments,
                                           'format_date'         => \&Thruk::Utils::format_date,
                                           'format_cronentry'    => \&Thruk::Utils::format_cronentry,
@@ -110,6 +112,7 @@ our %config = ('name'                   => 'Thruk',
                                           'validate_json'       => \&Thruk::Utils::Filter::validate_json,
                                           'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
                                           'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
+                                          'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
@@ -172,8 +175,9 @@ our %config = ('name'                   => 'Thruk',
                                                 'update.x'      => undef,
                                                 '_'             => undef,
                                           },
+                                          'physical_logo_path' => [],
                                           'all_in_one_javascript' => [
-                                              'jquery-1.11.1.min.js',
+                                              'jquery-1.12.4.min.js',
                                               'thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'cal/jscal2.js',
                                               'overlib.js',
@@ -188,6 +192,15 @@ our %config = ('name'                   => 'Thruk',
                                               'thruk_global.css',
                                               'thruk_noframes.css',
                                               'Thruk.css',
+                                          ],
+                                          'all_in_one_css_frames2' => [
+                                               'thruk_global.css',
+                                               'Thruk2.css',
+                                          ],
+                                          'all_in_one_css_noframes2' => [
+                                              'thruk_global.css',
+                                              'thruk_noframes.css',
+                                              'Thruk2.css',
                                           ],
                                           'jquery_ui' => '1.10.3',
                                           'all_in_one_javascript_panorama' => [
@@ -252,40 +265,89 @@ make config available without loading complete dependencies
 
 sub get_config {
     my @files = @_;
+    my @local_files;
     if(scalar @files == 0) {
         for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
             push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
-                push @files, sort glob($path.'/thruk_local.d/*');
+                my @tmpfiles = sort glob($path.'/thruk_local.d/*');
+                for my $tmpfile (@tmpfiles) {
+                    my $ext;
+                    if($tmpfile =~ m/\.([^.]+)$/mx) { $ext = $1; }
+                    if(!$ext) {
+                        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                            print STDERR "skipped config file: ".$tmpfile.", file has no extension, please use either cfg, conf or the hostname\n";
+                        }
+                        next;
+                    }
+                    if($ext ne 'conf' && $ext ne 'cfg') {
+                        # only read if the extension matches the hostname
+                        our $hostname;
+                        if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
+                        if($tmpfile !~ m/\Q$hostname\E$/mx) {
+                            if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
+                                print STDERR "skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'\n";
+                            }
+                            next;
+                        }
+                    }
+                    push @local_files, $tmpfile;
+                }
             }
-            push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
+            push @local_files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
             last if scalar @files > 0;
         }
     }
 
-    my %configs = %{_load_any(\@files)};
+    my %configs = %{_load_any([@files, { 'thruk_local.conf' => \@local_files}])};
     my %config  = %Thruk::Config::config;
     my $first_backend_from_thruk_locals = 0;
-    for my $file (@files) {
-        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
-            print STDERR "reading config file: ".$file."\n";
-        }
+    for my $file (@files, 'thruk_local.conf') {
         for my $key (keys %{$configs{$file}}) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
-                if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
                 if($key eq 'Thruk::Backend') {
                     # merge all backends from thruk_locals
                     if(!$first_backend_from_thruk_locals && $file =~ m|thruk_local\.|mx) {
                         $config{$key}->{'peer'} = [];
                         $first_backend_from_thruk_locals = 1;
                     }
-                    $config{$key}->{'peer'} = [ @{list($config{$key}->{'peer'})}, @{list($configs{$file}->{$key}->{'peer'})} ];
+                    for my $peer (@{list($configs{$file}->{$key})}) {
+                        $config{$key}->{'peer'} = [ @{list($config{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
+                    }
                 } else {
+                    if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
                     $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
                 }
             } else {
                 $config{$key} = $configs{$file}->{$key};
+            }
+        }
+    }
+
+    # merge users and groups
+    for my $type (qw/Group User/) {
+        if($config{$type}) {
+            for my $name (keys %{$config{$type}}) {
+                # if its a list of hashes, merge into one hash
+                if(ref $config{$type}->{$name} eq 'ARRAY') {
+                    my $data = {};
+                    for my $d (@{$config{$type}->{$name}}) {
+                        for my $key (keys %{$d}) {
+                            if(!defined $data->{$key}) {
+                                $data->{$key} = $d->{$key};
+                            }
+                            else {
+                                if(ref $data->{$key} eq 'ARRAY') {
+                                    push @{$data->{$key}}, $d->{$key};
+                                } else {
+                                    $data->{$key} = [$data->{$key}, $d->{$key}];
+                                }
+                            }
+                        }
+                    }
+                    $config{$type}->{$name} = $data;
+                }
             }
         }
     }
@@ -348,7 +410,7 @@ sub set_default_config {
         group_paging_overview           => '*3, 10, 100, all',
         group_paging_grid               => '*5, 10, 50, all',
         group_paging_summary            => '*10, 50, 100, all',
-        default_theme                   => 'Thruk',
+        default_theme                   => 'Thruk2',
         datetime_format                 => '%Y-%m-%d  %H:%M:%S',
         datetime_format_long            => '%a %b %e %H:%M:%S %Z %Y',
         datetime_format_today           => '%H:%M:%S',
@@ -358,6 +420,7 @@ sub set_default_config {
         use_pager                       => 1,
         start_page                      => $config->{'url_prefix'}.'main.html',
         documentation_link              => $config->{'url_prefix'}.'docs/index.html',
+        useragentcompat                 => '',
         show_notification_number        => 1,
         strict_passive_mode             => 1,
         hide_passive_icon               => 0,
@@ -448,6 +511,7 @@ sub set_default_config {
         'cookie_auth_restricted_url'        => 'http://localhost/thruk/cgi-bin/restricted.cgi',
         'cookie_auth_session_timeout'       => 86400,
         'cookie_auth_session_cache_timeout' => 5,
+        'cookie_auth_domain'                => '',
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
         'ssl_verify_hostnames'              => 1,
@@ -463,6 +527,7 @@ sub set_default_config {
         'user_password_min_length'          => 5,
         'grafana_default_panelId'           => 1,
         'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
+        'logcache_delta_updates'            => 1,
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
@@ -475,10 +540,16 @@ sub set_default_config {
 
     for my $key (keys %{$defaults}) {
         $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};
+
+        # convert lists to scalars if the default is a scalar value
+        if(ref $defaults->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
+            my $l = scalar (@{$config->{$key}});
+            $config->{$key} = $config->{$key}->[$l-1];
+        }
     }
 
     # make a nice path
-    for my $key (qw/tmp_path var_path/) {
+    for my $key (qw/tmp_path var_path etc_path/) {
         $config->{$key} =~ s/\/$//mx if $config->{$key};
     }
 
@@ -765,6 +836,15 @@ sub _do_finalize_config {
     $config->{'var_path'} = $config->{'home'}.'/var' unless defined $config->{'var_path'};
     $config->{'var_path'} =~ s|/$||mx;
 
+    if(!defined $config->{'etc_path'}) {
+        if($ENV{'THRUK_CONFIG'}) {
+            $config->{'etc_path'} = $ENV{'THRUK_CONFIG'};
+        } else {
+            $config->{'etc_path'} = $config->{'home'};
+        }
+    }
+    $config->{'etc_path'} =~ s|/$||mx;
+
     ###################################################
     # switch user when running as root
     my $var_path = $config->{'var_path'} or die("no var path!");
@@ -867,11 +947,11 @@ sub _do_finalize_config {
     $config->{'tmp_path'} =~ s|/$||mx;
     $config->{'View::TT'}->{'COMPILE_DIR'} = $config->{'tmp_path'}.'/ttc_'.$>;
 
-    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{home}.'/ssi';
+    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
 
     ###################################################
     # when using shadow naemon, some settings don't make sense
-    if($config->{'use_shadow_naemon'}) {
+    if($config->{'use_shadow_naemon'} || $config->{'use_lmd_core'}) {
         $config->{'connection_pool_size'} = 1; # no pool required when using caching
         $config->{'check_local_states'}   = 0; # local state checking not required
     }
@@ -909,6 +989,18 @@ sub _do_finalize_config {
         $config->{'expand_user_macros'} = $new_expand_user_macros;
     }
 
+    # expand action_menu_items_folder
+    my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
+    for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
+        next unless -d $folder.'/.';
+        my @files = glob($folder.'/*.json');
+        for my $file (@files) {
+            if($file =~ m%([^/]+)\.json$%mx) {
+                my $basename = $1;
+                $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
+            }
+        }
+    }
 
     # set default config
     set_default_config($config);
@@ -925,15 +1017,34 @@ sub _do_finalize_config {
 return user and groups thruk runs with
 
 =cut
-
 sub get_user {
+    # Discover which user we want to be
     my($from_folder) = @_;
     confess($from_folder." ".$!) unless -d $from_folder;
+    # This is the user we want to be
     my $uid = (stat $from_folder)[4];
-    my($name,$gid) = (getpwuid($uid))[0, 3];
-    my @groups = ( $gid );
-    while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
-        $users =~ /\b$name\b/mx and push @groups, $gid;
+    # This is the current user
+    my $cuid = (getpwuid($<))[2];
+    # For now just initialize the array
+    my @groups = ( );
+
+    # If we are the user we want to be we use getgroups
+    # Which is fast and non intrusive against ldap/nis
+    if($cuid eq $uid) {
+        # Get the grous from getgroups
+        my @gids = POSIX::getgroups;
+        foreach my $egid (@gids) {
+            # Add zero to convert egid to an int like it is in the old function
+            push @groups, $egid  + 0;
+        }
+    }
+    # Otherwise we fall back on getgrent which will loop all groups in an intrusive way
+    else {
+        my($name,$gid) = (getpwuid($uid))[0, 3];
+        @groups = ( $gid );
+        while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
+            $users =~ /\b$name\b/mx and push @groups, $gid;
+        }
     }
     return($uid, \@groups);
 }
@@ -967,8 +1078,18 @@ return parsed config file
 
 sub read_config_file {
     my($file) = @_;
-    # this seems to be the fastest way to trim comments
-    my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file, binmode => ':utf8')));
+    $file = list($file);
+    my @config_lines;
+    for my $f (@{$file}) {
+        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
+            print STDERR "reading config file: ".$f."\n";
+        }
+        # since perl 5.23 sysread on utf-8 handles is deprecated, so we need to open the file manually
+        open my $fh, '<:encoding(UTF-8)', $f or die "Can't open '$f' for reading: $!";
+        my @rows = grep(!/^\s*\#/mxo, <$fh>);
+        push @config_lines, @rows;
+        CORE::close($fh);
+    }
     my $conf = {};
     _parse_rows($file, \@config_lines, $conf);
     return($conf);
@@ -998,6 +1119,7 @@ sub _parse_rows {
 
         # nested structures
         if(substr($line,0,1) eq '<') {
+            # named hashes: <item name>
             if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
                 my($k,$v) = ($1,$2);
                 my $next  = {};
@@ -1011,6 +1133,7 @@ sub _parse_rows {
                 }
                 next;
             }
+            # direct hashes: <name>
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
@@ -1020,7 +1143,12 @@ sub _parse_rows {
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
                     push @{$conf->{$k}}, $next;
                 } else {
-                    $conf->{$k} = [$conf->{$k}, $next];
+                    # merge top level hashes
+                    if(!$until && ref($conf->{$k}) eq 'HASH' && ref($next) eq 'HASH') {
+                        $conf->{$k} = { %{$conf->{$k}}, %{$next} };
+                    } else {
+                        $conf->{$k} = [$conf->{$k}, $next];
+                    }
                 }
                 next;
             }
@@ -1100,9 +1228,16 @@ sub load_any {
     my($options) = @_;
     my $result = {};
     for my $f (@{$options->{'files'}}) {
-        my $config = read_config_file($f);
+        my $name  = $f;
+        my $files = $f;
+        if(ref $f eq 'HASH') {
+            my @keys = keys %{$f};
+            $name = $keys[0];
+            $files = $f->{$name};
+        }
+        my $config = read_config_file($files);
         &{$options->{'filter'}}($config);
-        $result->{$f} = $config;
+        $result->{$name} = $config;
     }
     return($result);
 }

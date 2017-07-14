@@ -1,0 +1,74 @@
+﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
+  <tr>
+    <td align="left" valign="top" width="20%">
+      [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="top" width="60%">
+      <br><br>
+      <div align="center" class='dataTitle'>Broadcast</div>
+    </td>
+    <td align="right" valign="bottom" width="20%">
+      [% PROCESS _help.tt topic = "broadcast" %]
+    </td>
+  </tr>
+</table>
+
+<table border=0 cellpadding=0 cellspacing=0 style="width: 1000px; margin-bottom: 3px;">
+  <tr>
+    <td align="left" style="padding-top: 3px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</td>
+    <td align="center"></td>
+    <td align="right">
+      <a href="broadcast.cgi?action=edit&amp;id=new">
+        <button class="thruk_button_add">create new broadcast</button>
+      </a>
+    </td>
+  </tr>
+</table>
+<div id="reports_table">
+<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px; width: 1000px;">
+  <tr>
+    <th class="status" nowrap width="300">Content Preview</th>
+    <th class="status" nowrap width="80">Author</th>
+    <th class="status" nowrap width="100">Hide Before</th>
+    <th class="status" nowrap width="100">Expires After</th>
+    <th class="status" nowrap width="70">Public</th>
+    <th class="status" nowrap width="100">Contacts</th>
+    <th class="status" nowrap width="100">Contactgroups</th>
+    <th class="status" nowrap width="25">&nbsp;</th>
+  </tr>
+  [% FOREACH b = all_broadcasts %]
+  [% SET rowclass = 'statusOdd'  IF loop.even %]
+  [% SET rowclass = 'statusEven' IF loop.odd %]
+  <tr class="[%+ IF loop.first +%]firstrow[% END %]">
+    <td class="status [% rowclass %] text_ellipsis" align="left">[% b.text.split('<br>').0 %]</td>
+    <td class="status [% rowclass %]" align="left">[% b.author %]</td>
+    <td class="status [% rowclass %]" align="left">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
+    <td class="status [% rowclass %]" align="left">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>
+    <td class="status [% rowclass %]" align="left">[% IF b.loginpage %]Yes[% END %]</td>
+    <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contacts.join(', ') %]</td>
+    <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contactgroups.join(', ') %]</td>
+    <td class="status [% rowclass %]" nowrap align="left">
+      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=delete" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt='Remove Broadcast' title='Remove Broadcast' width=16 height=16></a>
+      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=clone" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_copy.png' border="0" alt='Clone Broadcast' title='Clone Broadcast' width=16 height=16></a>
+      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Broadcast' title='Edit Broadcast' width=16 height=16></a>
+    </td>
+  </tr>
+  [% END %]
+  [% IF all_broadcasts.size == 0 %]
+  <tr class="firstrow">
+    <td class="status statusOdd" align="center" colspan="10">no broadcasts defined yet</td>
+  </tr>
+  [% END %]
+</table>
+</div>
+
+<script type="text/javascript">
+<!--
+  jQuery(document).ready(function() {
+    table_search("table_search_input", ["statusTable"], 1);
+  });
+-->
+</script>

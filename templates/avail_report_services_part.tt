@@ -15,6 +15,7 @@
     [% ELSE %]
         <div align="center" class='dataTitle'>Service State Breakdowns:</div>
     [% END %]
+    [% SET class = 'dataEven' %]
 
     <div align="center">
       <table border="1" class='data'>

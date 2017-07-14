@@ -32,13 +32,14 @@
   var user_token          = '[% get_user_token(c) %]';
   var remote_user         = '[% remote_user %]';
   var omd_site            = '[% omd_site %]';
-  var referer             = '[% uri_with(c, '_' => 'undef' ) | uri %]';
-  var full_uri            = '[% escape_html(full_uri(c)) %]';
+  var referer             = '[% escape_js(uri_with(c, '_' => 'undef' )) %]';
+  var full_uri            = '[% escape_html(full_uri(c)).replace('&amp;', '&').replace('&amp;', '&') %]';
   var original_uri        = '[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% END %]';
   var show_sitepanel      = '[% show_sitepanel %]';
-  var param_backend       = '[% param_backend %]';
+  var param_backend       = [% json_encode(param_backend.list) %];
   var backend_chooser     = '[% backend_chooser %]';
   var info_popup_options  = [[% c.config.info_popup_options %]];
+  var downtime_duration   = [% downtime_duration %];
   [% PROCESS _common_js_bugs.tt %]
 
   [% IF disable_backspace %]
@@ -70,6 +71,28 @@
   });
   [% END %]
   init_page();
+
+  try {
+      if(window.parent.frames && top.frames['side']) {
+          top.frames['side'].is_reloading = undefined;
+          top.frames['side'].load_errors  = 0;
+      }
+  }
+  catch(e) { debug(e); }
+  /* favicon counter */
+  [%+ IF fav_counter +%]
+  [% totals = set_favicon_counter(c) %]
+    [%+ IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 +%]
+      updateFaviconCounter([% totals.red %], '#FF5B33');
+    [%+ ELSIF totals.red == 0 && totals.yellow > 0 && totals.orange == 0 +%]
+      updateFaviconCounter([% totals.yellow %], '#FFDE00');
+    [%+ ELSIF totals.red == 0 && totals.yellow == 0 && totals.orange > 0 +%]
+      updateFaviconCounter([% totals.orange %], '#FF9E00');
+    [%+ ELSE +%]
+      updateFaviconCounter([% totals.red + totals.yellow + totals.orange %], '#FF9E00');
+    [%+ END +%]
+  [%+ END +%]
+
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->

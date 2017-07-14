@@ -215,7 +215,11 @@ sub calculate_availability {
 
     my $softlogfilter;
     if(!$includesoftstates || $includesoftstates eq 'no') {
-        $softlogfilter = { state_type => { '=' => 'HARD' }};
+        # Somehow nagios can change from a Hard Critical into a Soft Critical which then results in a soft ok.
+        # Any ok state always resets the current problem, so no matter if a ok is soft or hard, we have
+        # to count it in. Otherwise we could end up with a critical last entry in the logfile, even if
+        # the current state is ok.
+        $softlogfilter = { -or => [ state_type => 'HARD', state => 0 ]};
     }
 
     my $logs;
@@ -555,8 +559,13 @@ sub calculate_availability {
             push @typefilter, { -or => [ @logservicefilter ] };
         }
     }
-    if ($c->config->{'report_include_class2'} == 1) {
-        push @typefilter, { class => 2 }; # programm messages
+    if($c->config->{'report_include_class2'} != 0) { # 0 means force - off
+        if($c->config->{'report_include_class2'} == 2 # 2 means force on
+           || ($c->config->{'report_include_class2'} == 1 # 1 means default auto
+               && ($full_log_entries || $assumestatesduringnotrunning eq 'no'))
+        ) {
+            push @typefilter, { class => 2 }; # programm messages
+        }
     }
     if($rpttimeperiod) {
         push @typefilter, { '-or' => [

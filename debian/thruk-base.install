@@ -7,6 +7,7 @@
 /etc/thruk/naglint.conf
 /etc/thruk/usercontent
 /etc/thruk/bp/bp_functions.pm
+/etc/thruk/bp/bp_filter.pm
 /usr/share/thruk/plugins/plugins-available/business_process
 /etc/thruk/plugins/plugins-available/business_process
 /etc/thruk/plugins/plugins-enabled/business_process
@@ -34,6 +35,7 @@
 /usr/share/thruk/plugins/plugins-available/core_scheduling
 /etc/thruk/plugins/plugins-available/core_scheduling
 /etc/thruk/ssi
+/etc/thruk/action_menus
 /etc/thruk/themes
 /etc/thruk/thruk.conf
 /etc/thruk/thruk_local.conf

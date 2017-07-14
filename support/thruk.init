@@ -31,8 +31,8 @@ if [ ! -z $OMD_SITE ]; then
     if [ -e $OMD_ROOT/.thruk ]; then
         . $OMD_ROOT/.thruk
     fi
-    if [ "$CONFIG_APACHE_MODE" != "own" ]; then
-        echo "only available for apaches 'own' mode!"
+    if [ "$CONFIG_APACHE_MODE" != "own" -a "$CONFIG_APACHE_MODE" != "ssl" ]; then
+        echo "only available for apaches 'own' or 'ssl' mode!"
         exit 1
     fi
     # make sure apache is running
@@ -117,15 +117,15 @@ case "$1" in
             if [ "$OMD_SITE" != "" ]; then
                 pkill -u $OMD_SITE -f thruk_fastcgi.pl
             fi
-            for x in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
-                echo -n "."
+            for x in $(seq 150); do
+                [ $((x%5)) -eq 0 ] && echo -n "."
                 newpids=""
                 for pid in $pids; do
                     ps -p $pid > /dev/null 2>&1 && newpids=" $pid"
                 done
                 pids="$newpids"
                 [ "$pids" = "" ] && break
-                sleep 1
+                sleep 0.1
             done
             if [ "$pids" = "" ]; then
                 echo "OK"

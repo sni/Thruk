@@ -165,6 +165,9 @@ The RewriteLock must be outside any virtualhost. After that, restart the apache.
 
 
 === How can I disable cookie authentication
+
+TIP: In OMD you just need to run `omd config set THRUK_COOKIE_AUTH off`
+
 Starting with v2.0 cookie (form based) authentication is enabled by default. In
 case you want to disable it again and switch back to standard basic
 authentication, you just need to comment the includes in your apache

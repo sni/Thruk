@@ -47,7 +47,21 @@
     <td class="status [% statusClass %]" align="center">[% statusText %]</td>
     <td class="status [% rowclass %]" align="center" nowrap>[% IF bp.draft %][% ELSE %][% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %][% END %]</td>
     <td class="status [% rowclass %]" align="left" nowrap>[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
-    <td class="status [% rowclass %]" align="left">[% IF bp.draft %][% ELSE %][% bp.status_text %][% END %]</td>
+    [% output = bp.status_text.split("\n") %]
+    <td class="status [% rowclass %]" align="left"[% IF output.size > 1 %]
+      [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% bp.name %]',WIDTH,600,[% c.config.info_popup_options %]))" abbr='[% escape_html(nl2br(bp.status_text)) %]'
+      [% END %]>
+      [% IF bp.draft %]
+      [% ELSE %]
+        [% IF output.size > 1 %]
+        <span class="has_long_plugin_output">
+        [% END %]
+        [% output.0 %]
+        [% IF output.size > 1 %]
+        </span>
+        [% END %]
+      [% END %]
+    </td>
     [% IF allowed_for_edit %]
     <td class="status [% rowclass %]" align="right" nowrap>
       <a href="bp.cgi?action=details&amp;bp=[% bp.id %]&amp;edit=1"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Graph' title='Edit Graph' width="16" height="16"></a>

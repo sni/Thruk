@@ -240,7 +240,7 @@ sub _process_dashboard_page {
     my $sortedgroups = Thruk::Backend::Manager::_sort($c, \@dashboard, { 'ASC' => 'name'});
 
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_overview'});
-    Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups, 16, scalar(@dashboard));
+    Thruk::Backend::Manager::page_data($c, $sortedgroups, 16, scalar(@dashboard));
 
     $c->stash->{'dashboard'} = $sortedgroups;
 

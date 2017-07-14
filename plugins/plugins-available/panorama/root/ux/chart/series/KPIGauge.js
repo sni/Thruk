@@ -66,8 +66,14 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
         }
 
         for (r = 0, rl = ranges.length; r < rl; r++) {
-            splitFromAngle = -180 * (1 - (ranges[r].from - minimum) / (maximum - minimum));
-            splitToAngle = -180 * (1 - (ranges[r].to - minimum) / (maximum - minimum));
+            var from = ranges[r].from;
+            if(from < minimum) { from = minimum; }
+            if(from > maximum) { continue; }
+            var to   = ranges[r].to;
+            if(to < minimum) { continue; }
+            if(to > maximum) { to = maximum; }
+            splitFromAngle = -180 * (1 - (from - minimum) / (maximum - minimum));
+            splitToAngle = -180 * (1 - (to - minimum) / (maximum - minimum));
             if(splitToAngle == splitFromAngle) { splitToAngle = splitToAngle- 2;}
             slices.push ({
                 startAngle: splitFromAngle,

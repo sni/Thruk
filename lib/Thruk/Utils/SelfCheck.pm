@@ -256,10 +256,12 @@ sub check_recurring_downtime {
     }
     elsif($downtime->{'target'} eq 'service') {
         for my $hst (@{$downtime->{'host'}}) {
-            my $data = $c->{'db'}->get_services(filter => [{ 'host_name' => $hst, description => $downtime->{'service'} } ], columns => [qw/host_name/], backend => $backends );
-            if(!$data || scalar @{$data} == 0) {
-                $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." - ".$downtime->{'service'}." not found in recurring downtime ".$file."\n";
-                $errors++;
+            for my $svc (@{$downtime->{'service'}}) {
+                my $data = $c->{'db'}->get_services(filter => [{ 'host_name' => $hst, description => $svc } ], columns => [qw/host_name/], backend => $backends );
+                if(!$data || scalar @{$data} == 0) {
+                    $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." - ".$svc." not found in recurring downtime ".$file."\n";
+                    $errors++;
+                }
             }
         }
     }

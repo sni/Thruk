@@ -43,6 +43,7 @@ Ext.onReady(function() {
             layout:   'border',
             renderTo: Ext.getBody(),
             margins:  '0 0 0 0',
+            border:   false,
             items:    [],
             xdata:    {},
             getActiveTab: function() {
@@ -95,4 +96,21 @@ Ext.onReady(function() {
             }
         }
     });
+
+    /* disable scrolling if body is masked */
+    var bodyDom  = Ext.getBody().dom;
+    var bodyMask = false;
+    TP.timeouts['body_scroll_interval'] = window.setInterval(function() {
+        if(bodyDom.className.match(/mask/)) {
+            if(!bodyMask) {
+                document.documentElement.style.overflow = "inherit";
+                bodyMask = true;
+            }
+        } else {
+            if(bodyMask) {
+                document.documentElement.style.overflow = "";
+                bodyMask = false;
+            }
+        }
+    }, 500);
 });

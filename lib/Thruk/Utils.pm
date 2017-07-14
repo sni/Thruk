@@ -480,7 +480,7 @@ sub get_dynamic_roles {
     $user = $c->user unless defined $user;
 
     # is the contact allowed to send commands?
-    my($can_submit_commands,$alias,$data);
+    my($can_submit_commands,$alias,$data,$email);
     my $cached_data = defined $username ? $c->cache->get->{'users'}->{$username} : {};
     if(defined $cached_data->{'can_submit_commands'}) {
         # got cached data
@@ -494,8 +494,11 @@ sub get_dynamic_roles {
 
     if(defined $data) {
         for my $dat (@{$data}) {
-            $alias               = $dat->{'alias'}               if defined $dat->{'alias'};
-            $can_submit_commands = $dat->{'can_submit_commands'} if defined $dat->{'can_submit_commands'};
+            $alias = $dat->{'alias'} if defined $dat->{'alias'};
+            $email = $dat->{'email'} if defined $dat->{'email'};
+            if(defined $dat->{'can_submit_commands'} && (!defined $can_submit_commands || $dat->{'can_submit_commands'} == 0)) {
+                $can_submit_commands = $dat->{'can_submit_commands'};
+            }
         }
     }
 
@@ -556,7 +559,7 @@ sub get_dynamic_roles {
     # roles could be duplicated
     $roles = array_uniq($roles);
 
-    return($roles, $can_submit_commands, $alias, $roles_by_group);
+    return($roles, $can_submit_commands, $alias, $roles_by_group, $email);
 }
 
 ########################################
@@ -577,11 +580,13 @@ sub set_dynamic_roles {
 
     $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
 
-    #my($roles, $can_submit_commands, $alias)...
-    my($roles, undef, $alias) = get_dynamic_roles($c, $username, $c->user);
+    my($roles, undef, $alias, undef, $email) = get_dynamic_roles($c, $username, $c->user);
 
     if(defined $alias) {
         $c->user->{'alias'} = $alias;
+    }
+    if(defined $email) {
+        $c->user->{'email'} = $email;
     }
 
     for my $role (@{$roles}) {
@@ -929,7 +934,7 @@ sub get_custom_vars {
     # add action menu from apply rules
     if($c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
         APPLY:
-        for my $menu (keys %{$c->config->{'action_menu_apply'}}) {
+        for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
             for my $pattern (ref $c->config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$c->config->{'action_menu_apply'}->{$menu}} : ($c->config->{'action_menu_apply'}->{$menu})) {
                 if(!$prefix && $data->{'description'}) {
                     my $test = $data->{'host_name'}.';'.$data->{'description'};
@@ -999,8 +1004,6 @@ sub set_custom_vars {
     my $already_added = {};
     for my $test (@{$vars}) {
         for my $cust_name (sort keys %{$custom_vars}) {
-            next if defined $already_added->{$cust_name};
-            my $cust_value = $custom_vars->{$cust_name};
             my $found      = 0;
             if($test eq $cust_name or $test eq '_'.$cust_name) {
                 $found = 1;
@@ -1015,6 +1018,7 @@ sub set_custom_vars {
             next unless $found;
 
             # expand macros in custom vars
+            my $cust_value = $custom_vars->{$cust_name};
             if(defined $host and defined $service) {
                     #($cust_value, $rc)...
                     ($cust_value, undef) = $c->{'db'}->_replace_macros({
@@ -1031,20 +1035,50 @@ sub set_custom_vars {
             }
 
             # add to dest
-            $already_added->{$cust_name} = 1;
             my $is_host = defined $service ? 0 : 1;
             if($add_host) {
                 if($cust_name =~ s/^HOST//gmx) {
-                    $already_added->{$cust_name} = 1;
                     $is_host = 1;
                 }
             }
+            next if $already_added->{$cust_name};
+            $already_added->{$cust_name} = 1;
             push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
         }
     }
     return;
 }
 
+########################################
+
+=head2 check_custom_var_list
+
+  check_custom_var_list($varname, $allowed)
+
+returns true if custom variable name is in the list of allowed variable names
+
+=cut
+
+sub check_custom_var_list {
+    my($varname, $allowed) = @_;
+
+    $varname =~ s/^_//gmx;
+
+    for my $cust_name (@{$allowed}) {
+        $cust_name =~ s/^_//gmx;
+        if($varname eq $cust_name) {
+            return(1);
+        } else {
+            my $v = "".$varname;
+            next if CORE::index($v, '*') == -1;
+            $v =~ s/\*/.*/gmx;
+            if($cust_name =~ m/^$v$/mx) {
+                return(1);
+            }
+        }
+    }
+    return;
+}
 
 ########################################
 
@@ -1253,8 +1287,8 @@ save excel file by background job
 =cut
 
 sub logs2xls {
-    my($c) = @_;
-    Thruk::Utils::Status::set_selected_columns($c);
+    my($c, $type) = @_;
+    Thruk::Utils::Status::set_selected_columns($c, [''], ($type || 'log'));
     $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
     savexls($c);
     return;
@@ -1385,18 +1419,19 @@ sub get_graph_url {
 
 =head2 get_perf_image
 
-  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format)
+  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format, $showtitle)
 
 return raw pnp/grafana image if possible.
 An empty string will be returned if no graph can be exported.
 
 =cut
 sub get_perf_image {
-    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format) = @_;
+    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format, $showtitle) = @_;
     my $pnpurl     = "";
     my $grafanaurl = "";
     $format        = 'png' unless $format;
     $svc           = ''    unless defined $svc;
+    $showtitle     = 1     unless defined $showtitle;
 
     my $custvars;
     if($svc) {
@@ -1420,11 +1455,16 @@ sub get_perf_image {
         $custvars   = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
     }
 
+    if(!$showtitle) {
+        $grafanaurl .= '&disablePanelTitel';
+    }
+
     $c->stash->{'last_graph_type'} = 'pnp';
     if($grafanaurl) {
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
+        undef $source if(defined $source && $source eq 'null');
         $source = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $source;
         $grafanaurl .= '&panelId='.$source;
         if($resize_grafana_images) {
@@ -1451,7 +1491,13 @@ sub get_perf_image {
 
     # create fake session
     my $sessionid = get_fake_session($c);
-    local $ENV{PHANTOMJSOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
+
+    # call login hook, because it might transfer our sessions to remote graphers
+    if($c->config->{'cookie_auth_login_hook'}) {
+        Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'});
+    }
+
     my($fh, $filename) = tempfile();
     CORE::close($fh);
     my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$source.'"';
@@ -1459,6 +1505,7 @@ sub get_perf_image {
         $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
     Thruk::Utils::IO::cmd($c, $cmd);
+    unlink($c->stash->{'fake_session_file'});
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
@@ -1467,7 +1514,6 @@ sub get_perf_image {
         }
         return $imgdata;
     }
-    unlink($c->stash->{'fake_session_file'});
     return "";
 }
 
@@ -1541,7 +1587,6 @@ sub get_action_url {
                     eval('$new_host =~ '.$regex);
                     ## use critic
                 }
-                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
                 if ($svc) {
                     my $new_svc = $svc;
@@ -1552,6 +1597,7 @@ sub get_action_url {
                     }
                     $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
                 }
+                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
                 last;
             }
@@ -1622,6 +1668,7 @@ let the user choose a mobile page or not
 sub choose_mobile {
     my($c,$url) = @_;
 
+    return unless defined $c->config->{'use_feature_mobile'};
     return unless defined $c->req->header('user-agent');
     my $found = 0;
     for my $agent (split(/\s*,\s*/mx, $c->config->{'mobile_agent'})) {
@@ -1946,13 +1993,13 @@ wait up to 60 seconds till the core responds
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
     $pkey = $c->stash->{'param_backend'} unless $pkey;
+    my $start = time();
     if(!$pkey && !$time) { sleep 5; }
 
     # wait until core responds again
-    my $start    = time();
     my $procinfo = {};
     my $done     = 0;
-    while($start > time() - 60) {
+    while($start > time() - 30) {
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
@@ -2064,6 +2111,7 @@ sub read_data_file {
     }
 
     # REMOVE AFTER: 01.01.2018
+    my $json_err = $@;
     my $cont = read_file($filename);
     $cont = Thruk::Utils::IO::untaint($cont);
 
@@ -2080,10 +2128,12 @@ sub read_data_file {
 
     my $VAR1;
     ## no critic
-    eval('$VAR1 = '.$cont.';');
+    eval("#line 1 $filename\n".'$VAR1 = '.$cont.';');
     ## use critic
 
-    warn($@) if $@;
+    if($@) {
+        warn("error loading $filename as json or perl format.\njson: ".$json_err."\nperl: ".$@);
+    }
 
     return $VAR1;
 }
@@ -2109,16 +2159,16 @@ sub write_data_file {
 
 =head2 backup_data_file
 
-  backup_data_file($filename, $mode, $max_backups, [$save_interval], [$force])
+  backup_data_file($filename, $targetfile, $mode, $max_backups, [$save_interval], [$force])
 
 write data to datafile
 
 =cut
 
 sub backup_data_file {
-    my($filename, $mode, $max_backups, $save_interval, $force) = @_;
+    my($filename, $targetfile, $mode, $max_backups, $save_interval, $force) = @_;
 
-    my @backups     = sort glob($filename.'.*.'.$mode);
+    my @backups     = sort glob($targetfile.'.*.'.$mode);
     @backups        = grep(!/\.runtime$/mx, @backups);
     my $num         = scalar @backups;
     my $last_backup = $backups[$num-1];
@@ -2134,7 +2184,7 @@ sub backup_data_file {
     my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
     my $new_md5 = md5_hex(read_file($filename));
     if($force || $new_md5 ne $old_md5) {
-        copy($filename, $filename.'.'.$now.'.'.$mode);
+        copy($filename, $targetfile.'.'.$now.'.'.$mode);
 
         # cleanup old backups
         while($num > $max_backups) {
@@ -2428,10 +2478,7 @@ return base etc folder
 =cut
 sub base_folder {
     my($c) = @_;
-    if($ENV{'THRUK_CONFIG'}) {
-        return($ENV{'THRUK_CONFIG'});
-    }
-    return($c->config->{'home'});
+    return($c->config->{'etc_path'});
 }
 
 ########################################
@@ -2543,10 +2590,14 @@ sub backends_hash_to_list {
     my $backends = [];
     for my $b (@{list($hashlist)}) {
         if(ref $b eq '') {
-            push @{$backends}, $b;
+            my $backend = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
+            push @{$backends}, ($backend ? $backend->peer_key() : $b);
         } else {
             for my $key (keys %{$b}) {
-                my $backend = $c->{'db'}->get_peer_by_key($key) || $c->{'db'}->get_peer_by_key($b->{$key});
+                my $backend = $c->{'db'}->get_peer_by_key($key);
+                if(!defined $backend && defined $b->{$key}) {
+                    $backend = $c->{'db'}->get_peer_by_key($b->{$key});
+                }
                 if($backend) {
                     push @{$backends}, $backend->peer_key();
                 } else {
@@ -2609,6 +2660,42 @@ sub _parse_date {
         }
     }
     return $timestamp;
+}
+
+########################################
+
+=head2 convert_wildcards_to_regex
+
+    convert_wildcards_to_regex($string)
+
+returns regular expression with wildcards replaced
+
+=cut
+sub convert_wildcards_to_regex {
+    my($str) = @_;
+    $str =~ s/^\*/.*/gmx;
+    return($str);
+}
+##############################################
+
+=head2 find_modules
+
+    find_modules($pattern)
+
+returns list of found modules
+
+=cut
+sub find_modules {
+    my($pattern) = @_;
+    my $modules = {};
+    for my $folder (@INC) {
+        next unless -d $folder;
+        for my $file (glob($folder.$pattern)) {
+            $file =~ s|^\Q$folder/\E||gmx;
+            $modules->{$file} = 1;
+        }
+    }
+    return([sort keys %{$modules}]);
 }
 
 ##############################################

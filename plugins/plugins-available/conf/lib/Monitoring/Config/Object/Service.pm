@@ -119,6 +119,7 @@ sub BUILD {
         'primary_key' => [ 'service_description', [ 'host_name', 'hostgroup_name' ] ],
         'default'     => $Monitoring::Config::Object::Service::Defaults,
         'standard'    => [ 'service_description', 'use', 'host_name', 'check_command', 'contact_groups' ],
+        'has_custom'  => 1,
     };
     bless $self, $class;
     return $self;
@@ -151,6 +152,21 @@ sub get_macros {
     }
 
     return $macros;
+}
+
+##########################################################
+
+=head2 is_unused
+
+returns true if service has no references to hosts or hostgroups
+
+=cut
+sub is_unused {
+    my($self, $objects) = @_;
+    my($svc_conf_keys, $svc_config) = $self->get_computed_config($objects);
+    return(0) if($svc_config->{'host_name'} && scalar @{$svc_config->{'host_name'}} > 0);
+    return(0) if($svc_config->{'hostgroup_name'} && scalar @{$svc_config->{'hostgroup_name'}} > 0);
+    return(1);
 }
 
 ##########################################################

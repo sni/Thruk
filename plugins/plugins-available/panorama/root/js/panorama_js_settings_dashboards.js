@@ -86,11 +86,11 @@ Ext.define('TP.DashboardManagementWindow', {
         });
         win.items.get(0).add(win.grid_my);
 
-        /* Public Dasboards */
+        /* Shared Dasboards */
         win.grid_public = Ext.create('Ext.grid.Panel', {
             tabConfig: {
-                title:   'Public',
-                tooltip: 'Public Dashboards'
+                title:   'Shared',
+                tooltip: 'Shared Dashboards'
             },
             columns:     [],
             listeners:   listeners,
@@ -157,6 +157,10 @@ Ext.define('TP.DashboardManagementWindow', {
         /* import / export */
         var tabpan = Ext.getCmp('tabpan');
         var tab    = tabpan.getActiveTab();
+        if(!tab) {
+            debug("forced setting activeTab");
+            tab = tabpan.setActiveTab(0);
+        }
         win.exportTab = TP.getExportTab({listeners: listeners, tab: tab});
         win.items.get(0).add(win.exportTab);
 
@@ -233,7 +237,6 @@ Ext.define('TP.DashboardManagementWindow', {
 TP.dashboardsWindow = function() {
     var win = Ext.create('TP.DashboardManagementWindow', {});
     TP.dashboardsSettingWindow = win;
-    TP.modalWindows.push(win);
 
     // somehow new tabbar elements occur when opening window again, so we just remove them
     var toDelete = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getCount() - 7;

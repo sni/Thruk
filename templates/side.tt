@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     [% PROCESS _common_css.tt %]
     [% PROCESS _common_js_files.tt %]
+    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
     <style type="text/css">
     <!--
     HTML {
@@ -33,27 +34,30 @@
       [%+ FOREACH link = section.links %]
         <ul class="navsectionlinks">
           [%+ IF link.href %]
-          <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>
+          <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>[% IF link.defined("html") %][% link.html %][% END %]
             [% IF link.links.size > 0 %]
             <ul>
             [% FOREACH sublink = link.links %]
-              <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>
-              [% FOREACH addlink = sublink.links %]
-                (<a href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
+              [% IF sublink.defined("href") && sublink.href %]
+                <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>[% IF sublink.defined("html") %][% sublink.html %][% END %]
+                [% FOREACH addlink = sublink.links %]
+                  (<a href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
+                [% END %]
+                </li>
+              [%+ ELSIF sublink.defined("html") %]
+                <li>[% sublink.html %]</li>
               [% END %]
-              </li>
             [%+ END %]
             </ul>
             [%+ END %]
           </li>
-          [%+ ELSIF link.search %]
+          [%+ ELSIF link.defined("search") && link.search %]
           <li class="navbarsearch">
           <div class="navbarsearch">
             <form method="get" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]">
               <fieldset>
                 <legend>[% link.name %]</legend>
                 [% IF use_new_search%]
-                <input type='hidden' name='hidesearch' value='2' />
                 <input type='hidden' name='s0_op' value='~' id="s0_to" />
                 <input type='hidden' name='s0_type' value='search' />
                 <input type='hidden' name='add_default_service_filter' value='1' />
@@ -66,6 +70,8 @@
             </form>
           </div>
           </li>
+          [%+ ELSIF link.defined("html") %]
+            <li>[% link.html %]</li>
           [%+ END %]
         </ul>
       [%+ END %]
@@ -73,9 +79,6 @@
       <div class="navsectionfooter"></div>
     </div>
     [% END %]
-
-    <img src="[% url_prefix %]themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
-    <img src="[% url_prefix %]themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
 
 [% PROCESS _ajax_search.tt %]
 

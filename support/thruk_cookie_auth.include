@@ -5,13 +5,13 @@
 RewriteRule ^@HTMLURL@$              @HTMLURL@/ [R=302,L]
 
 # redirect to a startup page when there is no pidfile yet
-RewriteCond %{REQUEST_METHOD}        GET
-RewriteCond %{REQUEST_URI}           !^@HTMLURL@/startup.html
-RewriteCond %{REQUEST_URI}           !^@HTMLURL@/side.html
-RewriteCond %{REQUEST_URI}           !^@HTMLURL@/.*\.(css|png|js)
-RewriteCond %{REQUEST_URI}           ^@HTMLURL@
-RewriteCond @TMPDIR@/thruk.pid       !-f
-RewriteRule ^(.*)$                   @HTMLURL@/startup.html?$1 [R=302,L,NE,QSA]
+#RewriteCond %{REQUEST_METHOD}        GET
+#RewriteCond %{REQUEST_URI}           !^@HTMLURL@/startup.html
+#RewriteCond %{REQUEST_URI}           !^@HTMLURL@/side.html
+#RewriteCond %{REQUEST_URI}           !^@HTMLURL@/.*\.(css|png|js)
+#RewriteCond %{REQUEST_URI}           ^@HTMLURL@
+#RewriteCond @TMPDIR@/thruk.pid       !-f
+#RewriteRule ^(.*)$                   @HTMLURL@/startup.html?$1 [R=302,L,NE,QSA]
 
 # cookie based authentication
 RewriteEngine On
@@ -19,7 +19,7 @@ RewriteMap  thruk_users              prg:@DATADIR@/thruk_auth
 RewriteCond %{REQUEST_URI}           !^@HTMLURL@/cgi-bin/restricted.cgi
 RewriteCond %{REQUEST_URI}           ^@HTMLURL@
 RewriteCond %{HTTP_COOKIE}           (thruk_auth=[^;]+|$)  [NC]
-RewriteRule ^/(.*)$                  /%1/%{REMOTE_ADDR}/____/$1/____/%{QUERY_STRING} [C,NS]
+RewriteRule ^/(.*)$                  /%1/%{REMOTE_ADDR}~~%{HTTP:Authorization}~~%{HTTP_USER_AGENT}/____/$1/____/%{QUERY_STRING} [C,NS]
 RewriteRule ^(.*)$                   ${thruk_users:$1|/loginbad/} [C,NS]
 RewriteRule ^/pass/(.*)$             /$1 [NS,PT,L,E=!REMOTE_USER]
 RewriteRule ^/redirect/(.*)$         /$1 [NS,L,R=302]

@@ -50,6 +50,19 @@ while(<$fh>) {
 close($fh);
 ok(scalar keys %{$manifest} >  0, 'read entrys from MANIFEST: '.(scalar keys %{$manifest}));
 
+# read our manifest.skip file
+my $manifest_skip = {};
+open($fh, '<', 'MANIFEST.SKIP') or die('open MANIFEST.SKIP failed: '.$!);
+while(<$fh>) {
+    my $line = $_;
+    chomp($line);
+    next if $line =~ m/^#/;
+    $manifest_skip->{$line} = 1;
+}
+close($fh);
+ok(scalar keys %{$manifest_skip} >  0, 'read entrys from MANIFEST.SKIP: '.(scalar keys %{$manifest_skip}));
+
+
 # verify that all symlinks are in our manifest file
 open(my $ph, '-|', 'bash -c "find {templates/,root/,plugins/,themes/} -type l" 2>&1') or die('find failed: '.$!);
 while(<$ph>) {
@@ -58,13 +71,13 @@ while(<$ph>) {
     $line =~ s|//|/|gmx;
     my $dst = readlink($line);
     if($dst =~ m|/root$|) {
-        if(defined $manifest->{$line}) {
+        if(defined $manifest->{$line} || defined $manifest_skip->{$line}) {
             fail("$line is in the MANIFEST but should not: $dst");
         } else {
             pass("$line is NOT in the MANIFEST");
         }
     } else {
-        if(defined $manifest->{$line}) {
+        if(defined $manifest->{$line} || defined $manifest_skip->{$line}) {
             pass("$line is in the MANIFEST");
         } else {
             fail("$line is NOT in the MANIFEST");

@@ -603,6 +603,22 @@ sub get_host_stats {
 
 ##########################################################
 
+=head2 get_host_totals_stats
+
+  get_host_totals_stats
+
+returns the host statistics used on the service/host details page
+
+=cut
+sub get_host_totals_stats {
+    my($self, @options) = @_;
+    my $res = $self->_req('get_host_totals_stats', \@options);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -613,6 +629,22 @@ returns the services statistics for the tac page
 sub get_service_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_service_stats', \@options);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
+}
+
+##########################################################
+
+=head2 get_service_totals_stats
+
+  get_service_totals_stats
+
+returns the services statistics used on the service/host details page
+
+=cut
+sub get_service_totals_stats {
+    my($self, @options) = @_;
+    my $res = $self->_req('get_service_totals_stats', \@options);
     #my($typ, $size, $data) = @{$res};
     return($res->[2], 'SUM');
 }
@@ -719,12 +751,13 @@ sub _req {
             my $remote_version = $data->{'version'};
             $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
             if($data->{'output'} =~ m/no\ such\ command/mx) {
-                die('backend too old, version returned: '.$remote_version);
+                die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
-            if($data->{'version'} < $self->{'min_backend_version'}) {
-                die('backend too old, version returned: '.$remote_version);
+            if(defined $data->{'version'} && ($data->{'version'} < $self->{'min_backend_version'})) {
+                die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
-            die('protocol error: '.$data->{'output'});
+            die('internal error: '.$data->{'output'}) if $data->{'output'};
+            die('protocol error: '.Dumper($data));
         }
         if(ref $data->{'output'} eq 'ARRAY') {
             # type, size, data
@@ -855,6 +888,9 @@ sub _clean_code_refs {
 sub _format_response_error {
     my($response) = @_;
     my $message = "";
+    if($response->decoded_content && $response->decoded_content =~ m|<h1>(OMD:.*?)</h1>|sxm) {
+        return($1);
+    }
     if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)\-\->|sxm) {
         $message = "\n".$1;
     }

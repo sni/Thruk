@@ -29,7 +29,7 @@ Note: some options are not accessible here for security reasons.
       </a>
     </td>
   </tr>
-  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', key => '', hidden => 0, type => 'livestatus', section => '' } x = 0 %]
+  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '' } x = 0 %]
   <tr>
     <td colspan=3 style="text-align:center; padding-bottom: 7px;">
       <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"[% IF readonly %] disabled[% END %]>
@@ -71,14 +71,14 @@ Note: some options are not accessible here for security reasons.
   }
 
   var orig_src;
-  function conf_test_connection(btn) {
+  function conf_test_connection(btn, loopid) {
     var nr          = btn.name.substr(4);
-    var peer        = jQuery('INPUT[name=peer'+nr+']').val();
+    var peer        = jQuery('INPUT.peer_'+loopid).val();
     var typ         = jQuery('SELECT[name=type'+nr+']').val();
     var auth        = jQuery('INPUT[name=auth'+nr+']').val();
     var proxy       = jQuery('INPUT[name=proxy'+nr+']').val();
     var remote_name = jQuery('INPUT[name=remote_name'+nr+']').val();
-    var img         = jQuery('#testimg'+nr)[0];
+    var img         = jQuery('.testimg'+loopid)[0];
     if(orig_src == undefined) {
       orig_src = img.src;
     } else {

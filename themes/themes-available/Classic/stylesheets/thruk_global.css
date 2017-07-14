@@ -119,17 +119,15 @@ table.top_nav {
   padding: 0px;
   font-size:8px;
 }
-.top_nav td {
+td.top_nav_pref {
   border: 0px none;
   padding: 0px;
   margin: 0px;
-}
-
-td.top_nav_pref {
   vertical-align: top;
 }
-td.top_nav_pref input, td.top_nav_pref button {
+td.top_nav_pref button {
   width: 85px;
+  height: 20px;
 }
 
 .top_nav div.backend {
@@ -169,7 +167,17 @@ TABLE.site_panel .notfirst {
   padding-left: 5px;
 }
 
-input.top_nav_pref_button, button.top_nav_pref_button {
+button.thruk_btn.top_refresh_button {
+  background-image: url(../images/arrow_refresh.png);
+  background-repeat: no-repeat;
+  width: 20px;
+  height: 16px;
+  display: block;
+  position: relative;
+  top: 2px;
+}
+
+button.thruk_btn.top_nav_pref_button, button.thruk_btn.top_nav_logout_button {
   color:#444444;
   background-color:#EEEEEE;
   border-style:double;
@@ -267,22 +275,23 @@ input.button_peerDOWNDIS {
   cursor: pointer;
 }
 
+input.button_peerUP:hover,
+input.button_peerDOWN:hover,
+input.button_peerDIS:hover,
+input.button_peerHID:hover,
+input.button_peerWARN:hover,
+input.button_peerUPDIS:hover,
+input.button_peerDOWNDIS:hover,
+button.thruk_btn.top_nav_pref_button:hover,
+button.thruk_btn.top_nav_logout_button:hover {
+  border-color: #555555;
+}
+
 input.section_active {
   font-weight: bold;
   border-color: #555555;
   border-width: 3px;
   border-style: solid;
-}
-
-/* class to preload images */
-.hidepics {
-  width:0px;
-  height:0px;
-  visibility:hidden;
-  position:absolute;
-  top: 0px;
-  left: 0px;
-  z-index: 100;
 }
 
 div.navbarsearch form fieldset {
@@ -625,6 +634,7 @@ table.filter > tbody > tr > td {
   position: absolute;
   top: 21px;
   right: 0px;
+  z-index: 1;
 }
 
 .hidenav {
@@ -933,14 +943,14 @@ TD.action_menu {
   padding-left: 20px;
 }
 
-input.top_refresh_button, img.top_bug_button {
-  margin-top: 2px;
-  margin-right: 4px;
-  width: 16px;
-  height: 16px;
-}
-body.splashpage input.top_refresh_button {
+body.splashpage button.top_refresh_button {
   display: none;
+}
+button.refreshing, button.thruk_btn.top_refresh_button.refreshing {
+  background-image: url('../images/waiting.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 td.filterValueInput input.filter_pre_value {
@@ -1023,6 +1033,7 @@ DIV.perf_bar_bg {
     -webkit-border-radius: 3px;
             border-radius: 3px;
     text-align: left;
+    position: relative; /* text is above background otherwise */
 }
 
 IMG.perf_bar {
@@ -1220,4 +1231,159 @@ DIV.pnpSelector {
 .black_white {
     filter: grayscale(100%);
     -webkit-filter: grayscale(100%);
+}
+
+TR.column-sortable-placeholder {
+  display: block;
+  border: 1px dashed grey;
+  background-color: #CCCCCC;
+  color: red;
+  height: 10px;
+}
+
+.drag_hint {
+    font-weight: normal;
+    font-style: italic;
+    font-size: smaller;
+}
+
+DIV.overlay {
+  width: 100%;
+  height: 100%;
+  background-color: #CCCCCC;
+  opacity: 0.6;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+DIV.overlay-text {
+  position: absolute;
+  margin-left: 20%;
+  margin-right: 20%;
+  margin-top: 120px;
+  top: 0;
+  left: 0;
+  background: #eaeaea;
+  color: black;
+  border: 1px solid black;
+  width: 90px;
+  height: 45px;
+  text-align: center;
+}
+
+/* workaround to make jquery ui sortable work with absolute position */
+/* http://stackoverflow.com/questions/5791886/jquery-draggable-shows-helper-in-wrong-place-after-page-scrolled */
+TABLE.filter {
+  overflow: auto;
+}
+
+.header_inline_edit {
+  line-height: 11px;
+  height: 10px;
+  background: transparent;
+}
+
+TABLE.broadcast_panel_container {
+  background-color: white;
+  position: absolute;
+  right: 150px;
+  top: -2px;
+  border: 1px solid black;
+  width: 500px;
+  height: 30px;
+  font-size: 14px;
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
+  text-align: left;
+  z-index: 5;
+}
+
+TABLE.broadcast_panel_container TD {
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+}
+
+TABLE.broadcast_panel_container div.dismiss {
+  position: absolute;
+  font-size: 10px;
+  top: 6px;
+  right: 5px;
+}
+
+TABLE.broadcast_panel_container div.controls {
+  position: absolute;
+  top: 3px;
+  right: 45px;
+}
+
+TABLE.broadcast_panel_container button.previous {
+  border: 0;
+  background: url('../images/resultset_previous.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+TABLE.broadcast_panel_container button.next {
+  border: 0;
+  background: url('../images/resultset_next.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+TABLE.broadcast_panel_container span.preview {
+  opacity: 0.7;
+}
+
+BUTTON.thruk_btn {
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  line-height: 1px;
+}
+
+BUTTON.filter_button {
+  border: 0;
+  background: url('../images/icon_maximize.gif') no-repeat;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: -2px;
+}
+
+BUTTON.wrench {
+  background-image: url('../images/config.png');
+}
+BUTTON.bugs {
+  background-image: url('../images/bug_error.png');
+}
+BUTTON.excel_export {
+  background-image: url('../images/page_white_excel.png');
+}
+BUTTON.json_export {
+  background-image: url('../images/json.png');
+}
+BUTTON.show_link {
+  background-image: url('../images/link.png');
+}
+BUTTON.add_bookmark {
+  background-image: url('../images/book_add.png');
+}
+
+BUTTON.small {
+  padding: 0;
+  width: 16px;
+  height: 16px;
+}
+
+
+.text_ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

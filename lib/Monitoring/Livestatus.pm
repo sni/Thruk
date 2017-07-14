@@ -12,7 +12,7 @@ use Storable qw/dclone/;
 use Monitoring::Livestatus::INET qw//;
 use Monitoring::Livestatus::UNIX qw//;
 
-our $VERSION = '0.76';
+our $VERSION = '0.78';
 
 
 # list of allowed options
@@ -84,21 +84,21 @@ address
 
 verbose mode
 
-=item line_seperator
+=item line_separator
 
-ascii code of the line seperator, defaults to 10, (newline)
+ascii code of the line separator, defaults to 10, (newline)
 
-=item column_seperator
+=item column_separator
 
-ascii code of the column seperator, defaults to 0 (null byte)
+ascii code of the column separator, defaults to 0 (null byte)
 
-=item list_seperator
+=item list_separator
 
-ascii code of the list seperator, defaults to 44 (comma)
+ascii code of the list separator, defaults to 44 (comma)
 
-=item host_service_seperator
+=item host_service_separator
 
-ascii code of the host/service seperator, defaults to 124 (pipe)
+ascii code of the host/service separator, defaults to 124 (pipe)
 
 =item keepalive
 
@@ -143,10 +143,10 @@ sub new {
       'server'                      => undef,   # use tcp connections
       'peer'                        => undef,   # use for socket / server connections
       'name'                        => undef,   # human readable name
-      'line_seperator'              => 10,      # defaults to newline
-      'column_seperator'            => 0,       # defaults to null byte
-      'list_seperator'              => 44,      # defaults to comma
-      'host_service_seperator'      => 124,     # defaults to pipe
+      'line_separator'              => 10,      # defaults to newline
+      'column_separator'            => 0,       # defaults to null byte
+      'list_separator'              => 44,      # defaults to comma
+      'host_service_separator'      => 124,     # defaults to pipe
       'keepalive'                   => 0,       # enable keepalive?
       'errors_are_fatal'            => 1,       # die on errors
       'backend'                     => undef,   # should be keept undef, used internally
@@ -159,6 +159,22 @@ sub new {
       'retries_on_connection_error' => 3,       # retry x times to connect
       'retry_interval'              => 1,       # retry after x seconds
     };
+
+    my %old_key = (
+                    line_seperator         => 'line_separator',
+                    column_seperator       => 'column_separator',
+                    list_seperator         => 'list_separator',
+                    host_service_seperator => 'host_service_separator',
+                  );
+
+    # previous versions had spelling errors in the key name
+    for my $opt_key (keys %old_key) {
+        if(exists $options{$opt_key}) {
+            my $value = $options{$opt_key};
+            $options{ $old_key{$opt_key} } = $value;
+            delete $options{$opt_key};
+        }
+    }
 
     for my $opt_key (keys %options) {
         if(exists $self->{$opt_key}) {
@@ -223,8 +239,8 @@ Always returns true.
 =cut
 
 sub do {
-    my($self, $statement) = @_;
-    $self->_send($statement);
+    my($self, $statement, $opt) = @_;
+    $self->_send($statement, $opt);
     return(1);
 }
 
@@ -899,10 +915,10 @@ Useful when using select based io.
 sub post_processing {
     my($self, $result, $opt, $keys) = @_;
 
-    my $total_count;
+    my $orig_result;
     if($opt->{'wrapped_json'}) {
-        $total_count = $result->{'total_count'};
-        $result      = $result->{'data'};
+        $orig_result = $result;
+        $result = $result->{'data'};
     }
 
     # add peer information?
@@ -929,9 +945,14 @@ sub post_processing {
 
     # set some metadata
     $self->{'meta_data'} = {
-        'total_count'  => $total_count,
         'result_count' => scalar @{$result},
     };
+    if($opt->{'wrapped_json'}) {
+        for my $key (keys %{$orig_result}) {
+            next if $key eq 'data';
+            $self->{'meta_data'}->{$key} = $orig_result->{$key};
+        }
+    }
 
     return({ keys => $keys, result => $result });
 }
@@ -1008,7 +1029,7 @@ useful when using multiple backends.
     deep copy/clone the result set.
 
     Only effective when using multiple backends and threads.
-    This can be safely turned off if you dont change the
+    This can be safely turned off if you don't change the
     result set.
     If you get an error like "Invalid value for shared scalar" error" this
     should be turned on.
@@ -1377,7 +1398,7 @@ sub _get_error {
         '452' => 'internal livestatus error',
         '490' => 'no query',
         '491' => 'failed to connect',
-        '492' => 'Separators not allowed in statement. Please use the seperator options in new()',
+        '492' => 'Separators not allowed in statement. Please use the separator options in new()',
         '493' => 'OuputFormat not allowed in statement. Header will be set automatically',
         '494' => 'ColumnHeaders not allowed in statement. Header will be set automatically',
         '495' => 'ResponseHeader not allowed in statement. Header will be set automatically',

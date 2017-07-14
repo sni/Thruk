@@ -2,13 +2,15 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html[% IF minimal %] class='minimal'[% END %]>
   <head>
-    <title>[% title_prefix %][% title %]</title>
+    <title>[% title_prefix %][% escape_html(title) %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel="icon" type="image/png" href="[% url_prefix %]themes/[% theme %]/images/favicon-32x32.png" sizes="32x32">
     [% SET page = 'status' IF page == '' %]
     [% PROCESS _common_css.tt %]
     [% PROCESS _common_js_files.tt %]
     [% PROCESS extra_headers.tt %]
     [% IF extra_header %][% extra_header %][% END %]
+    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
 
   <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %][% IF iframed %] iframed[% END %]' id='[% page %]'>
@@ -45,38 +47,38 @@
      Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
      Copyright (c) 1999-2009 Ethan Galstad.
 -->
+[% IF minimal == 2 %]
+<div class="top_nav">
+[% PROCESS _header_sites.tt %]
+</div>
+[% END %]
 [% UNLESS minimal %]
-<table border="0" cellpadding=0 cellspacing=0 class="top_nav">
+<table border="0" cellpadding=0 cellspacing=0 class="top_nav" style="position: relative;">
   <tr>
-    <td width="100%" valign="top">[% PROCESS _header_sites.tt %]</td>
-    <td class="hidden noprint" id="bug_report">
+    <td width="100%" valign="top">[% PROCESS _header_sites.tt %][% PROCESS _header_broadcast.tt %]</td>
+    <td class="hidden noprint top_nav_pref" id="bug_report">
       [% IF show_error_reports%]
-      <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report" width="16" height="16"></a>
+      <a href="#" id="bug_report-btnEl">
+      <button class="thruk_btn big primary bugs"></button>
+      </a>
       [% END %]
     </td>
-    [% IF 0 %]
-    <!--
     <td class="top_nav_pref">
-      <input type="button" class="top_nav_pref_button noprint" value="test error" title="test error" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="alert(nonexistant); return false;" style="margin-right: 30px;">
-    </td>
-    -->
-    [% END %]
-    <td>
-      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
+      <button class="noprint top_refresh_button thruk_btn big primary refresh" onClick="refresh_button(this)"></button>
     </td>
     <td class="top_nav_pref">
-      <input type="button" class="top_nav_pref_button noprint" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;">
+      <button class="noprint top_nav_pref_button thruk_btn big primary settings" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;">preferences</button>
     </td>
     [% IF cookie_auth && show_logout_button %]
     <td class="top_nav_pref">
       <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top'>
-      <button class="top_nav_pref_button noprint" title="logout" onMouseOver="button_over(this)" onMouseOut="button_out(this)">logout</button>
+      <button class="noprint top_nav_logout_button thruk_btn big primary logout" title="logout">logout</button>
       </form>
     </td>
     [% END %]
   </tr>
 </table>
 [% IF show_top_pane %]
-<a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
+<img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane clickable" id="btn_toggle_top_pane" alt="toggle header" onClick="toggleTopPane(); return false;">
 [% END %]
 [% END %]

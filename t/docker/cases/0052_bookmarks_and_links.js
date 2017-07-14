@@ -5,7 +5,7 @@ try {
     thruk_login();
     click(_link("Services"));
 
-    click(_image("book_add.png"));
+    click(_submit("/add_bookmark/"));
     isVisible(_textbox("newname"));
     _setValue(_textbox("newname"), "Test Bookmark");
     click(_select("section"));
@@ -13,7 +13,7 @@ try {
     click(_submit("add bookmark"));
 
     isVisible(_link("Test Bookmark"));
-    click(_image("book_add.png"));
+    click(_submit("/add_bookmark/"));
     click(_link("Remove Bookmarks"));
     click(_imageSubmitButton("delete"));
     click(_submit("save changes"));
@@ -21,7 +21,7 @@ try {
     isNotVisible(_link("Test Bookmark"));
 
     click(_link("Problems"));
-    click(_image("Show link to this page"));
+    click(_submit("/show_link/"));
     isVisible(_textbox("url_input"));
     _assertEqual("/^http:/", _getValue(_textbox("url_input")));
     _assertNotEqual("/&amp;/", _getValue(_textbox("url_input")));

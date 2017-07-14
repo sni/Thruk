@@ -57,8 +57,8 @@ sub cmd {
        or $conf->{'nofork'}
        or exists $c->req->parameters->{'noexternalforks'}
     ) {
-        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        my $out = `$cmd`;
+        # $rc, $out
+        my(undef, $out) = Thruk::Utils::IO::cmd($c, $cmd);
         return _finished_job_page($c, $c->stash, undef, $out);
     }
 
@@ -102,6 +102,7 @@ sub cmd {
             forward      => "forward on success"
             backends     => "list of selected backends (keys)"
             nofork       => "don't fork"
+            background   => "return $jobid if set, or redirect otherwise"
         }
     )
 
@@ -552,7 +553,13 @@ sub _do_child_stuff {
     # make remote user available
     if($c) {
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
-        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
+        my $groups = [];
+        my $cache = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
+        $groups = [sort keys %{$cache->{'contactgroups'}}] if($cache && $cache->{'contactgroups'});
+        local $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
+
+        $ENV{REMOTE_USER_GROUPS} = join(';', sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}});
     }
 
     $|=1; # autoflush
@@ -566,9 +573,9 @@ sub _do_child_stuff {
     }
 
     # logging must be reset after closing the filehandles
-    $c->app->reset_logging();
+    $c && $c->app->reset_logging();
 
-    $c->stats->enable(1) if $c;
+    $c && $c->stats->enable(1);
 
     return;
 }
@@ -676,6 +683,7 @@ return true if process is still running
 =cut
 sub _is_running {
     my $dir = shift;
+    $dir = Thruk::Utils::IO::untaint($dir);
 
     return 0 unless -s $dir."/pid";
 

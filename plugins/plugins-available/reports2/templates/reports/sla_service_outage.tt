@@ -1,0 +1,79 @@
+﻿
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'language'                     => [ 'Language',                   'language',        'en'                  ,'', 1    ] },
+        { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                         ] },
+        { 'host'                         => [ 'Host',                       'hosts',           ''                              ] },
+        { 'service'                      => [ 'Service',                    'services',        ''                              ] },
+        { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'lastweek'                      ] },
+        { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'days'                          ] },
+        { 'rpttimeperiod'                => [ 'Report Timeperiod',          'rpttimeperiod',   ''                              ] },
+        { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
+        { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
+        { 'details_max_level'            => [ 'Details SLA %',              'int',             '99.9' ,'hide details if sla is above threshold', 1 ] },
+        { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
+        { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
+        { 'initialassumedservicestate'   => [ 'Initial Assumed State',      'svc_initialassumedstate',          '0'            ] },
+        { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                            ] },
+        { 'unavailable'                  => [ 'Unavailable States',         'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '5'          ,'max. # pages per service', 1 ] },
+    ];
+  %]
+[% END %]
+
+[%# MAIL LAYOUT #%]
+[% PROCESS 'reports/comp/mail.tt' %]
+
+[%# PREPARE REPORT #%]
+[% PROCESS 'reports/comp/sla_prepare.tt' %]
+
+[%# REPORT LAYOUT #%]
+[% IF block == 'render' %]
+  [%# report settings #%]
+  [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
+  [%
+    title        = loc('SLA Outage Report')
+    subtitle     = r.name
+    coverdetails = [ loc('Report Timeperiod:'), get_report_timeperiod(start, end, reportDateFormat) ];
+    IF param.host;    coverdetails.push(loc('Host:'),    param.host);    END;
+    IF param.service; coverdetails.push(loc('Service:'), param.service); END;
+  %]
+
+  [% WRAPPER 'reports/comp/report.tt' %]
+    [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+    [% PROCESS 'reports/comp/backend_error_page.tt' %]
+
+    [% IF total_services > 1 %]
+      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("SLA Overview Graph") %]
+        [% PROCESS 'reports/comp/sla_total_graph_outage.tt' type='service' %]
+      [% END %]
+    [% END %]
+
+    [% FOREACH hst = avail_data.services.keys.sort %]
+      [% FOREACH svc = avail_data.services.$hst.keys.sort %]
+        [% c.req.parameters.host    = hst %]
+        [% c.req.parameters.service = svc %]
+        [% available = get_availability_percents() %]
+        [% p = available.total.percent; IF p == -1; p = 100; END; IF param.details_max_level != -1 && p >= param.details_max_level; NEXT; END %]
+        [% IF p < param.sla %]
+          [% pagetitle                    = loc("Service: %s on %s", svc, hst) %]
+          [% out = outages(logs, start, end) %]
+          [% page_data = page_splice(out, 12, param.max_outages_pages)  %]
+          [% FOREACH datablock = page_data %]
+            [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = pagetitle %]
+              [% FOREACH o = datablock %]
+                <div class="outages">
+                    [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
+                    <span class="duration">([% duration(o.duration) %])</span>
+                </div>
+                <div class="output">[% o.plugin_output %]</div>
+              [% END %]
+            [% END %]
+          [% END %]
+        [% END %]
+      [% END %]
+    [% END %]
+
+  [% END %][%# report wrapper #%]
+[% END %][%# render block #%]

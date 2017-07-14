@@ -302,7 +302,7 @@ TP.Msg = function() {
         return '<div class="msg '+cls+'"><a class="x-tab-close-btn" title="" href="#"><\/a><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
     }
     return {
-        msg : function(s) {
+        msg : function(s, close_timeout) {
             if(TP.unloading) { return; }
             if(!msgCt){
                 msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div'}, true);
@@ -337,7 +337,13 @@ TP.Msg = function() {
                 debug(title + ': ' + p[1]);
                 delay = 30000;
             } else {
-                delay = 3000;
+                delay = 5000;
+            }
+            if(close_timeout != undefined) {
+                if(close_timeout == 0) {
+                    return;
+                }
+                delay = close_timeout * 1000;
             }
             TP.timeouts['timeout_global_msg_ghost'] = window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
         }
@@ -436,6 +442,19 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                         start = start.getDarker(0.10);
                         stop  = stop.getDarker(0.10);
                     }
+                }
+                // add two rows of additional colors
+                var additionalColors = TP.getAllUsedColors();
+                if(additionalColors) {
+                    for(var x=0; x<16; x++) {
+                        if(additionalColors[x]) {
+                            this.colors.push(additionalColors[x].replace('#'));
+                        } else {
+                            this.colors.push("DDDDDD");
+                        }
+                    }
+                    this.height = 127;
+                    this.maxHeight = 127;
                 }
                 this.callParent();
             },
@@ -590,7 +609,6 @@ Ext.define('TP.dragEl', {
     floating:   true,
     width:      24,
     height:     24,
-    renderTo:  "bodyview",
     cls:       "clickable",
     x:          0,
     y:          0,
@@ -620,6 +638,9 @@ Ext.define('TP.dragEl', {
             if(This.noMoreMoves) { return; }
             if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
             if(y == undefined) { y = This.xdata.appearance[This.keyY]; }
+
+            /* breaks connectors: items are moved to 0/0 when unlocking in single window mode */
+            if(x == 0 && y == 0) { return; }
 
             /* snap to roaster when shift key is hold */
             if(TP.isShift) {
@@ -688,10 +709,10 @@ Ext.define('TP.dragEl', {
             TP.isShift = is_shift_pressed(evt);
             if(!panel.ddShadow) {
                 var size = panel.getSize();
-                panel.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
+                panel.ddShadow = Ext.DomHelper.append(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 10000; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
             }
             if(!panel.dragHint) {
-                panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
+                panel.dragHint = Ext.DomHelper.append(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 10000; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
             }
             tab.disableMapControlsTemp();
         });

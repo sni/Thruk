@@ -20,7 +20,7 @@ Business Process Node
 =cut
 
 my @stateful_keys   = qw/status status_text last_check last_state_change short_desc
-                       scheduled_downtime_depth acknowledged/;
+                       scheduled_downtime_depth acknowledged bp_ref/;
 
 ##########################################################
 
@@ -54,8 +54,10 @@ sub new {
         'scheduled_downtime_depth'  => 0,
         'acknowledged'              => 0,
         'testmode'                  => 0,
+        'bp_ref'                    => undef,
+        'filter'                    => $data->{'filter'}        || [],
 
-        'status'                    => defined $data->{'status'} ? $data->{'status'} : 4,
+        'status'                    => $data->{'status'} // 4,
         'status_text'               => $data->{'status_text'} || '',
         'short_desc'                => $data->{'short_desc'}  || '',
         'last_check'                => 0,
@@ -222,7 +224,7 @@ sub get_save_obj {
     };
 
     # save this keys
-    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts/) {
+    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts filter/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
     }
 
@@ -243,11 +245,13 @@ sub get_save_obj {
 
 =head2 get_objects_conf
 
+    get_objects_conf($bp)
+
 return objects config
 
 =cut
 sub get_objects_conf {
-    my ( $self, $bp ) = @_;
+    my($self, $bp) = @_;
 
     return unless $self->{'create_obj'};
 
@@ -324,14 +328,51 @@ sub update_status {
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
+        # input filter
+        my $filter_args = {
+            type     => 'input',
+            bp       => $bp,
+            node     => $self,
+            livedata => $livedata,
+        };
+        if(scalar @{$bp->{'filter'}} > 0 || scalar @{$self->{'filter'}} > 0) {
+            delete $filter_args->{'bp'};
+            $filter_args = Thruk::BP::Functions::_dclone($filter_args);
+            $filter_args->{'bp'} = $bp;
+            for my $f (sort @{$bp->{'filter'}}) {
+                $filter_args->{'scope'} = 'global';
+                Thruk::BP::Functions::_filter($c, $f, $filter_args);
+            }
+            for my $f (sort @{$self->{'filter'}}) {
+                $filter_args->{'scope'} = 'node';
+                Thruk::BP::Functions::_filter($c, $f, $filter_args);
+            }
+            $filter_args->{'bp'}->recalculate_group_statistics($filter_args->{'livedata'}, 1);
+
+        }
+
         my($status, $short_desc, $status_text, $extra) = &{$function}($c,
-                                                                      $bp,
-                                                                      $self,
-                                                                      $self->{'function_args'},
-                                                                      $livedata,
+                                                                      $filter_args->{'bp'},
+                                                                      $filter_args->{'node'},
+                                                                      $filter_args->{'node'}->{'function_args'},
+                                                                      $filter_args->{'livedata'},
                                                                     );
-        $self->set_status($status, ($status_text || $short_desc), $bp, $extra);
-        $self->{'short_desc'} = $short_desc;
+        # output filter
+        $filter_args->{'type'}          = 'output';
+        $filter_args->{'status'}        = $status;
+        $filter_args->{'status_text'}   = $status_text;
+        $filter_args->{'short_desc'}    = $short_desc;
+        $filter_args->{'extra'}         = $extra;
+        for my $f (sort @{$bp->{'filter'}}) {
+            $filter_args->{'scope'} = 'global';
+            Thruk::BP::Functions::_filter($c, $f, $filter_args);
+        }
+        for my $f (sort @{$self->{'filter'}}) {
+            $filter_args->{'scope'} = 'node';
+            Thruk::BP::Functions::_filter($c, $f, $filter_args);
+        }
+        $self->set_status($filter_args->{'status'}, ($filter_args->{'status_text'} || $filter_args->{'short_desc'}), $filter_args->{'bp'}, $filter_args->{'extra'});
+        $self->{'short_desc'} = $filter_args->{'short_desc'};
     };
     if($@) {
         $self->set_status(3, 'Internal Error: '.$@, $bp);
@@ -357,7 +398,7 @@ set status of node
 sub set_status {
     my($self, $state, $text, $bp, $extra) = @_;
 
-    my $last_state = $self->{'status'};
+    my $last_state = $self->{'status'} // 4;
 
     # update last check time
     my $now = time();
@@ -377,6 +418,12 @@ sub set_status {
     }
 
     # update some extra attributes
+    my %custom_vars;
+    $self->{'bp_ref'} = undef;
+    if($extra && $extra->{'host_custom_variable_names'} && $extra->{'host_custom_variable_values'}) {
+        @custom_vars{@{$extra->{'host_custom_variable_names'}}} = @{$extra->{'host_custom_variable_values'}};
+        $self->{'bp_ref'} = $custom_vars{'THRUK_BP_ID'};
+    }
     for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged testmode/) {
         $self->{$key} = $extra->{$key} if defined $extra->{$key};
     }
@@ -386,20 +433,22 @@ sub set_status {
         my $text = $self->{'status_text'};
         if(scalar @{$self->{'depends'}} > 0 and $self->{'function'} ne 'custom') {
             my $sum = Thruk::BP::Functions::_get_nodes_grouped_by_state($self, $bp);
-            if($sum->{'3'}) {
+            if($sum->{'3'} && $self->{'status'} == 3) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'3'}).' unknown';
             }
-            elsif($sum->{'2'}) {
+            elsif($sum->{'2'} && $self->{'status'} == 2) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'2'}).' failed';
             }
-            elsif($sum->{'1'}) {
+            elsif($sum->{'1'} && $self->{'status'} == 1) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'1'}).' warning';
             }
-            else {
+            elsif($sum->{'0'} && $self->{'status'} == 0) {
                 $text = 'everything is fine';
             }
             $text = Thruk::BP::Utils::state2text($self->{'status'}).' - '.$text;
         }
+        $text  = $extra->{'output'} if $extra->{'output'};
+        $text .= "\n".$extra->{'long_output'} if $extra->{'long_output'};
         $bp->set_status($self->{'status'}, $text);
     }
     return;

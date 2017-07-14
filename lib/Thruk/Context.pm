@@ -54,7 +54,7 @@ sub new {
         env    => $env,
         config => $app->{'config'},
         stash  => {
-            time_begin   => $time_begin,
+            time_begin   => $time_begin || time(),
             memory_begin => $memory_begin,
         },
         req    => $req,
@@ -300,6 +300,9 @@ sub translate_request_path {
     }
     if($product_prefix ne 'thruk') {
         $path_info =~ s|^/\Q$product_prefix\E|/thruk|mx;
+    }
+    if($ENV{'OMD_SITE'} and $ENV{'OMD_SITE'} eq 'thruk') {
+        $path_info =~ s|^\Q/cgi-bin/\E|/thruk/cgi-bin/|mx;
     }
     return($path_info);
 }

@@ -63,7 +63,7 @@
 
 
 <div id="edit_dialog_[% bp.id %]" style="display: none;">
-  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;" style="height: 100%;">
+  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;" style="height: 99%;">
   <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
   <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
 
@@ -71,9 +71,10 @@
   <ul>
     <li><a href="#tabs-1_[% bp.id %]">Type</a></li>
     <li><a href="#tabs-2_[% bp.id %]">Details</a></li>
-    <li><a href="#tabs-3_[% bp.id %]">Children</a></li>
-    <li><a href="#tabs-4_[% bp.id %]">Link</a></li>
-    <li><a href="#tabs-5_[% bp.id %]">General</a></li>
+    <li><a href="#tabs-3_[% bp.id %]">Filter</a></li>
+    <li><a href="#tabs-4_[% bp.id %]">Children</a></li>
+    <li><a href="#tabs-5_[% bp.id %]">Link</a></li>
+    <li><a href="#tabs-6_[% bp.id %]">General</a></li>
   </ul>
 
 
@@ -114,8 +115,9 @@
     function='status'
     div_help='Uses status from the selected host or service.<br>'
            _ 'The hoststatus will be used if the service is left empty.<br>'
-           _ 'Wildcards in service descriptions are possible:<br>'
-           _ 'check_* (worst), w:check_* (worst), b:check_* (best)'
+           _ 'Regular expressions in service descriptions are possible, ex.:<br>'
+           _ 'Service: <span class="bp_help_cmd">w:^db_.*</span> (worst state of all db_* services),<br>'
+           _ 'Service: <span class="bp_help_cmd">b:^(db_|web_).*</span> (best state from all db_*  and web_* services)'
 %]
 <tr>
   <th align="right">Host</th>
@@ -123,7 +125,15 @@
 </tr>
 <tr>
   <th align="right">Service</th>
-  <td align="left"><input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'bp_arg1_status' })"[% END %]></td>
+  <td align="left">
+    <select name="bp_arg3_status" id="bp_arg3_status" class="filter_op_select">
+      <option value="~">~</option>
+      <option value="!~">!~</option>
+      <option value="=">=</option>
+      <option value="!=">!=</option>
+    </select>
+    <input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })"[% END %]>
+  </td>
 </tr>
 [% END %]
 
@@ -273,8 +283,45 @@
   </div>
 
 
-  <!-- TAB 3: CHILDREN -->
+  <!-- TAB 3: FILTER -->
   <div id="tabs-3_[% bp.id %]" style="height: 85%;">
+  <div style="height: 85%; overflow-y: scroll; border: 1px solid #aaa;">
+  <table width="100%" style="height: 100%;">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Add input/output filter for this node only or globaly for all nodes.</td>
+    </tr>
+    <tr>
+      <td colspan=2 align="center" style="height: 100%; vertical-align: top;">
+        <table class="bp_filter">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Off</th>
+              <th>On</th>
+              <th>Global</th>
+            </tr>
+          </thead>
+          <tbody>
+          [% FOREACH f = bp_custom_filter %]
+          <tr>
+            <td title="[% f.help %]" onmouseover="jQuery('#filter_help').html(this.title)" onmouseout="jQuery('#filter_help').html('')">[% f.name %]</td>
+            <td><input type="radio" name="bp_filter_[% f.function %]" class="node_filter" value="off" checked></td>
+            <td><input type="radio" name="bp_filter_[% f.function %]" class="node_filter" value="on"></td>
+            <td><input type="radio" name="bp_filter_[% f.function %]" class="node_filter" value="global"></td>
+          </tr>
+          [% END %]
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </table>
+  </div>
+  <div id="filter_help"></div>
+  </div>
+
+
+  <!-- TAB 4: CHILDREN -->
+  <div id="tabs-4_[% bp.id %]" style="height: 85%;">
   <table width="100%" style="height: 100%;">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Change relationships for this node.</td>
@@ -290,7 +337,7 @@
             </tr>
             <tr>
               <td class="attrName">
-                <input type="text" class="filter_available" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
+                <input type="text" class="node_filter_available" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
                 <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:100%; height:90%; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
                     <option disabled>loading...</option>
                 </select>
@@ -300,7 +347,7 @@
                 <button class="bp_button bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
               </td>
               <td class="attrName" style="height: 100%;">
-                <input type="text" class="filter_selected" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
+                <input type="text" class="node_filter_selected" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
                 <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:100%; height:90%; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
                     <option disabled>loading...</option>
                 </select>
@@ -313,8 +360,8 @@
   </table>
   </div>
 
-  <!-- TAB 4: LINKS -->
-  <div id="tabs-4_[% bp.id %]">
+  <!-- TAB 5: LINKS -->
+  <div id="tabs-5_[% bp.id %]">
     <table width="100%">
     <tr>
       <td align="center" class="bp_type_desc" colspan=2>
@@ -352,9 +399,12 @@
       <th align="right" valign="top">Service Template</th>
       <td align="left">
         <input type="text" value="" id="bp_template" name="bp_template" placeholder="service template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+        [% IF objects_save_format == "nagios" %]
         [% IF use_feature_configtool %]<br><div style="padding-top: 2px;"><a href="conf.cgi?sub=objects&amp;action=editor&amp;file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a></div>[% END %]
+        [% END %]
       </td>
     </tr>
+    [% IF objects_save_format == "nagios" %]
     <tr class="supports_link">
       <th align="right" valign="top">Contact Groups</th>
       <td align="left">
@@ -387,16 +437,17 @@
       <th align="right" valign="top" nowrap>Add Extra Options</th>
       <td align="left">
         <form>
-          <select>
-            <option disabled>--- add extra option ---</option>
-            <option onclick="bpAddAttribute('contactgroups');" value="contactgroups">Contact Groups</option>
-            <option onclick="bpAddAttribute('contacts');" value="contacts">Contacts</option>
-            <option onclick="bpAddAttribute('event_handler');" value="eventhander">Eventhandler</option>
-            <option onclick="bpAddAttribute('notification_period');" value="notification_period">Notification Period</option>
+          <select onchange="bpAddAttribute(this.value)">
+            <option>--- add extra option ---</option>
+            <option value="contactgroups">Contact Groups</option>
+            <option value="contacts">Contacts</option>
+            <option value="event_handler">Eventhandler</option>
+            <option value="notification_period">Notification Period</option>
           </select>
         </form>
       </td>
     </tr>
+    [% END %]
     [% ELSE %]
     <tr>
       <td width="50"></td>
@@ -418,8 +469,8 @@
 
 
 
-  <!-- TAB 5: GLOBAL OPTIONS -->
-  <div id="tabs-5_[% bp.id %]">
+  <!-- TAB 6: GLOBAL OPTIONS -->
+  <div id="tabs-6_[% bp.id %]">
     <table width="100%">
     <tr>
       <td align="center" class="bp_type_desc" colspan=2>

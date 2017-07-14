@@ -137,15 +137,13 @@ TD.status {
 padding: 0px;
 }
 
-TD.statusOdd {
+.statusOdd {
 background-color: #E7E5DD;
-/*height: 22px;*/
 white-space: nowrap;
 }
 
-TD.statusEven {
+.statusEven {
 background-color: #DEDBD2;
-/*height: 22px;*/
 white-space: nowrap;
 }
 

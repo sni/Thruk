@@ -1,0 +1,110 @@
+---
+layout: docs
+title: Broadcast Announcements
+breadcrumb: [ "advanced.html", "Advanced" ]
+lightbox: true
+---
+
+== Broadcast Announcements
+{% include new_since.ad version="2.14" %}
+Broadcasts are a way to communicate news or any other relevant information to
+Thruk users. They will be displayed on all pages except the panorama dashboard.
+Broadcasts will be displayed on each page every time until they expire or the
+user clicks the dismiss link.
+
+++++
+<div align="center">
+<a title="thruk broadcast" rel="lightbox[broadcast]" href="advanced/broadcast.png"><img src="advanced/broadcast.png" alt="thruk broadcast" width="50%" height="50%" /></a>
+</div>
+<br style="clear: both;">
+++++
+
+=== Create new Broadcast
+
+There is a broadcast editor available if you are admin (having the configuration_information and systems_command role). The editor
+can be found on the top right in the preferences menu.
+
+++++
+<div align="center">
+<a title="thruk broadcast editor" rel="lightbox[broadcast]" href="advanced/broadcast_editor.png"><img src="advanced/broadcast_editor.png" alt="thruk broadcast editor" width="50%" height="50%" /></a>
+</div>
+<br style="clear: both;">
+++++
+
+
+=== Create new Broadcast manually
+
+Broadcasts can be created manually under the `var/broadcasts` folder. Each
+news goes into one file with the `.json` extension. The var folder is usually
+`/var/lib/thruk/broadcast` or `~/var/thruk/broadcast` when using OMD. You might
+have to create the folder first.
+
+A full example might look like this:
+
+./var/lib/thruk/broadcast/2017-02-09-example.json
+------
+{
+  "text":         "<b>Announcement:</b> The last update introduced broadcasts, read more at <a href='https://thruk.org' target='_blank'>thruk.org</a>.",
+  "contacts":      [],
+  "contactgroups": [],
+  "hide_before":  "2017-02-01 00:00:00",
+  "expires":      "2018-01-01 00:00:00"
+}
+------
+
+[TIP]
+.filenames
+=======
+Broadcasts are sorted by the filename, so use filenames of the pattern YYYY-MM-DD-title like: 2017-02-08-release-announcement.json
+=======
+
+A broadcast can have these attributes:
+
+     ** `text`           This is the raw text of your news. It may contain html and css to customize look and feel.
+     ** `contacts`       A list of contacts which should receive the broadcast.
+     ** `contactgroups`  A list of contactgroups which should receive the broadcast.
+     ** `hide_before`    If set, the broadcast will not be shown before this date. Format is: YYYY-MM-DD HH:MM:SS.
+     ** `expires`        If set, the broadcast will not be shown after this date. Format is: YYYY-MM-DD HH:MM:SS.
+     ** `loginpage`      If set, the broadcast will be displayed for unauthenticated users on the login page as well
+     ** `annotation`     Small annotation icon, choose between 'info' or 'warning'
+
+All attributes except the text itself are optional.
+
+
+=== Authorization
+
+Broadcasts are public for all contacts and users except if `contacts` and/or
+`contactgroups` are specified. Groups and Contacts can be negated by a leading
+`!`.
+
+
+=== Examples
+
+The most simple example contains nothing but a text message. It will be display
+for all users.
+
+------
+{
+  "text": "<b>Announcement:</b> this is a simple broadcased news."
+}
+------
+
+
+The next broadcast is limited to two contactgroups.
+
+------
+{
+  "text":          "<b>Announcement:</b> this is a broadcased for admins and operators only.",
+  "contactgroups": ["Admins", "Operators"]
+}
+------
+
+
+This broadcast is for everyone except a Dashboard group.
+
+------
+{
+  "text":          "<b>Announcement:</b> this is a broadcased for everyone except dashboards.",
+  "contactgroups": ["!Dashboard"]
+}
+------

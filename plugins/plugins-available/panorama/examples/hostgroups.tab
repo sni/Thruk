@@ -1,0 +1,56 @@
+# title:  Scripted Hostgroups
+# user:   thrukadmin
+# groups: [{"*" : "read-only"}]
+
+$dashboard = load_data();
+
+# fetch all hostgroups sorted by name
+my $groups = $c->db->get_hostgroups(sort => {'ASC' => 'name'});
+my $nr = 0;
+my $x  = 20;
+my $y  = 30;
+for my $group (@{$groups}) {
+    $dashboard->{'panlet_'.$nr} = {
+        "xdata" => {
+            "appearance" => {
+                "iconset" => "default_64",
+                "type" => "icon"
+            },
+            "cls" => "TP.HostgroupStatusIcon",
+            "general" => {
+                "hostgroup" => $group->{'name'},
+            },
+            "label" => {
+                "bgcolor" => "#cccccc",
+                "bordercolor" => "#aaaaaa",
+                "bordersize" => 1,
+                "fontbold" => "",
+                "fontcolor" => "#000000",
+                "fontfamily" => "inherit",
+                "fontitalic" => "",
+                "fontsize" => 10,
+                "height" => "",
+                "labeltext" => "<center>".$group->{'name'}."</center>",
+                "offsetx" => 0,
+                "offsety" => 42,
+                "orientation" => "horizontal",
+                "position" => "center",
+                "width" => "60"
+            },
+            "layout" => {
+                "x" => $x,
+                "y" => $y,
+            }
+        }
+    };
+    $x = $x + 70;
+    if($x > 500) {
+        $x = 20;
+        $y = $y + 90;
+    }
+    $nr++;
+}
+
+# update every 10 seconds
+$dashboard->{'ts'}                          = time()-time()%10;
+$dashboard->{'tab'}->{'xdata'}->{'refresh'} = 10;

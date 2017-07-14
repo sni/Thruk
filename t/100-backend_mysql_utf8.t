@@ -56,7 +56,7 @@ is($logcount, 10, 'imported all items from '.$files->[0]);
 is($logcount, 0, 'don\'t import duplicates '.$files->[0]);
 
 #####################################################################
-my($tempfile) = $m->get_logs(file => 1, collection => $prefix);
+my($tempfile) = $m->get_logs(file => 1, collection => $prefix, sort => { 'ASC' => 'time'});
 is(-f $tempfile, 1, $tempfile.' exists');
 TestUtils::test_command({
     cmd   => '/usr/bin/diff -u '.$tempfile.' '.$files->[0],

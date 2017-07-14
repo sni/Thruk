@@ -6,18 +6,15 @@
     <row>
       <format bold='1' bg_color='silver' align='center'>
         [% FOREACH col = columns %]
-        [% x = loop.index + 1 %]
-        [% IF col_sel.$x %]<cell width='30'>[% IF col_tr.exists(col) %][% col_tr.$col %][% ELSE %][% col %][% END %]</cell>[% END %]
+        <cell width='30'>[% col %]</cell>
         [% END %]
       </format>
     </row>
     [% FOREACH d = data %]
     <row>
       [% FOREACH col = columns %]
-      [% x = loop.index + 1 %]
-      [% IF col_sel.$x %]
         [%# status column #%]
-        [% IF col == 'state' %]
+        [% IF col == 'Status' %]
           [% IF d.has_been_checked == 0 %]
             [% state       = 'PENDING' %]
             [% state_color = 'grey' %]
@@ -38,9 +35,14 @@
               <cell>[% state %]</cell>
             </format>
         [% ELSE %]
-          <cell>[% IF d.exists(col) %][% d.$col %][% END %]</cell>
+          <cell>
+            [% IF col_tr.exists(col); %]
+              [% tr = col_tr.$col; d.$tr %]
+            [% ELSIF d.exists(col) %]
+              [% d.$col %]
+            [% END %]
+          </cell>
         [% END %]
-      [% END %]
       [% END %]
     </row>
     [% END %]

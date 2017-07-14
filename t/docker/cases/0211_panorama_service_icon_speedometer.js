@@ -20,7 +20,7 @@ try {
     click(_emphasis('Appearance'));
     isVisible(_textbox('type'));
     click(_div('/trigger/', _rightOf(_textbox('type'))));
-    click(_listItem('/Speedometer/'));
+    click(_div('/Speedometer/'));
     isVisible(_textbox('speedosource'));
     click(_div('/trigger/', _rightOf(_textbox('speedosource'))));
     click(_listItem('/Perf/'));

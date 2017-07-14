@@ -9,7 +9,7 @@
 <tr>
   <td nowrap valign='top' align='right'>[% date_format(c, com.entry_time) %]</td>
   <td nowrap valign='top'>[% escape_quotes(com.author) %]</td>
-  <td>[% IF escape_html_tags %][% escape_html(escape_html(nl2br(com.comment))) %][% ELSE %][% nl2br(escape_quotes(com.comment)) %][% END %]</td>
+  <td>[% IF escape_html_tags %][% escape_html(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
   <td nowrap valign='top'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
 </tr>
 [% END %]

@@ -4,7 +4,7 @@
 [% PROCESS _sounds.tt %]
 [% PROCESS _blocks.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %] class="infoboxrow">
       <tr>
         <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]
@@ -19,7 +19,7 @@
     <br>
     <table border="0" width="100%" cellpadding=0 cellspacing=0>
       <tr>
-        <td valign="top" align="left" width="33%" nowrap>
+        <td valign="top" align="left" width="33%" nowrap class="filter_button_cell">
           [% PROCESS _status_filter.tt %]
           <br>
         </td>
@@ -124,10 +124,23 @@
   [% IF s.has_been_checked == 0 %]service has not been checked yet[% END %]
   [% IF escape_html_tags %]
       [% escape_html(s.plugin_output) %]<br>
-      [% escape_html(nl2br(s.long_plugin_output)) %]
   [% ELSE %]
     [% s.plugin_output %]<br>
-    [% nl2br(s.long_plugin_output) %]
+  [% END %]
+  [% on_demand_long_plugin_output = 0 %]
+  [% IF s.defined("has_long_plugin_output") %]
+    [% on_demand_long_plugin_output = 1 %]
+  [% END %]
+  [% IF on_demand_long_plugin_output %]
+      [% IF s.has_long_plugin_output %]
+      <span class='long_plugin_output'></span>
+      [% END %]
+  [% ELSE %]
+    [% IF escape_html_tags %]
+        [% escape_html(nl2br(s.long_plugin_output)) %]
+    [% ELSE %]
+      [% nl2br(s.long_plugin_output) %]
+    [% END %]
   [% END %]
   </td></tr>
   </table>
@@ -144,7 +157,7 @@
   <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
   [% END %]
 [% END %]
-        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(info.replace("\n", "")) %]'>[% content %]</td>
+        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(info.replace("\n", "")) %]'>[% content %]</td>
     [% ELSE %]
     <td class='[% svcbg %]' align="center">-</td>
     [% END %]

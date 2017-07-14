@@ -80,6 +80,29 @@ sub peer_name {
 
 ##########################################################
 
+=head2 peer_list
+
+return peer address list
+
+=cut
+
+sub peer_list {
+    my($self) = @_;
+    if($self->{'peer_list'}) {
+        my $list = [@{$self->{'peer_list'}}];
+        if($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
+            push @{$list}, $self->{'class'}->{'config'}->{'options'}->{'fallback_peer'};
+        }
+        return($list);
+    }
+    elsif($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
+        return([$self->{'config'}->{'options'}->{'fallback_peer'}, $self->{'addr'}]);
+    }
+    return([$self->{'addr'}]);
+}
+
+##########################################################
+
 =head2 create_backend
 
   create_backend()
@@ -137,6 +160,11 @@ sub _initialise_peer {
     confess "missing name in peer configuration" unless defined $config->{'name'};
     confess "missing type in peer configuration" unless defined $config->{'type'};
 
+    # parse list of peers for LMD
+    if($self->{'config'}->{'options'}->{'peer'} && ref $self->{'config'}->{'options'}->{'peer'} eq 'ARRAY') {
+        $self->{'peer_list'} = $self->{'config'}->{'options'}->{'peer'};
+        $self->{'config'}->{'options'}->{'peer'} = $self->{'config'}->{'options'}->{'peer'}->[0];
+    }
     $self->{'name'}          = $config->{'name'};
     $self->{'type'}          = $config->{'type'};
     $self->{'hidden'}        = defined $config->{'hidden'} ? $config->{'hidden'} : 0;

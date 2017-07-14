@@ -1,21 +1,68 @@
 ﻿[% PROCESS _blocks.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
 
-    <table border="0" width="100%" class='status servicestatus' id="statusTable" onmouseout='reset_all_hosts_and_services();'>
+    [% IF show_form %]<form action="#" method="POST">[% END %]
+    <button class="thruk_btn primary small wrench" style="display: none; position: absolute;" name="columns" id="[% paneprefix %]_btn_columns_hover" onclick="initStatusTableColumnSorting('[% paneprefix %]', 'statusTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()"  onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()"></button>
+    <div class="filter_pane" style="visibility:hidden; left: 50px;" id="[% paneprefix %]_columns_select">
+    <div class="shadow"><div class="shadowcontent">
+    <table border="1" class='filter' cellspacing="0" cellpadding="0">
       <tr>
-        <th class='status' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
+        <td class='filter' style="width: 140px;">
+          <table border="0" cellspacing="2" cellpadding="0">
+            <tr>
+              <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Edit Columns:</td>
+              <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %]_accept_columns" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" alt="accept"></td>
+            </tr>
+          </table>
+          <table border=0 cellspacing=2 cellpadding=0 width="100%" id="[% paneprefix %]_columns_table">
+            <thead>
+              <tr>
+                <th colspan=2 class="drag_hint">reorder columns with drag/drop<br>rename with double click</th>
+              </tr>
+              <tr>
+                <th colspan=2 class="drag_hint"><input type="button" value="use as my default service columns" onclick='setDefaultColumns("svc", "[% paneprefix %]")'></th>
+              </tr>
+              <tr>
+                <th colspan=2 class="drag_hint"><input type="button" class="[% paneprefix %]_reset_columns_btn" value="reset my default service columns" onclick='setDefaultColumns("svc", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]></th>
+              </tr>
+            </thead>
+            <tbody>
+            [% FOREACH col = table_columns.$paneprefix %]
+            <tr>
+              <td valign="top" align="right" class='filterName clickable col_[% col.field %]' id="[% paneprefix %]_col_[% col.field %]n" width="90%">[% col.title %]</td>
+              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field %]" title="[% IF col.defined('orig'); col.orig; ELSE; col.title; END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
+            </tr>
+            [% END %]
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </table>
+    </div></div>
+    </div>
+    [% IF show_form %]</form>[% END %]
+
+    [% start_with = 7 %]
+    <table border="0" width="100%" class='status servicestatus [% paneprefix %]_table' id="statusTable" onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="visibility: hidden;"[% END %]>
+      <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'statusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
+        <th class='status col_host_name' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
         [% IF show_backends_in_table == 2 %]
-        <th class='status' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>
+        <th class='status col_peer_name' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>[% start_with = start_with + 1 %]
         [% END %]
-        <th class='status' nowrap>Service&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
-        <th class='status' nowrap>Status&nbsp;<a href='[%     short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service status (ascending)' title='Sort by service status (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service status (descending)' title='Sort by service status (descending)'></a></th>
-        <th class='status' nowrap>Last Check&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
-        <th class='status' nowrap>Duration&nbsp;<a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by state duration (ascending)' title='Sort by state duration (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by state duration time (descending)' title='Sort by state duration time (descending)'></a></th>
-        <th class='status' nowrap>Attempt&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by current attempt (ascending)' title='Sort by current attempt (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by current attempt (descending)' title='Sort by current attempt (descending)'></a></th>
+        <th class='status col_description' nowrap>Service&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
+        <th class='status col_state' nowrap>Status&nbsp;<a href='[%     short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service status (ascending)' title='Sort by service status (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service status (descending)' title='Sort by service status (descending)'></a></th>
+        <th class='status col_last_check' nowrap>Last Check&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
+        <th class='status col_duration' nowrap>Duration&nbsp;<a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by state duration (ascending)' title='Sort by state duration (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by state duration time (descending)' title='Sort by state duration time (descending)'></a></th>
+        <th class='status col_current_attempt' nowrap>Attempt&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by current attempt (ascending)' title='Sort by current attempt (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by current attempt (descending)' title='Sort by current attempt (descending)'></a></th>
         [% IF show_backends_in_table == 1 %]
-        <th class='status' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>
+        <th class='status col_peer_name' nowrap>Site&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>[% start_with = start_with + 1 %]
         [% END %]
-        <th class='status' nowrap>Status Information&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by status information (ascending)' title='Sort by status information (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by status information (descending)' title='Sort by status information (descending)'></a></th>
+        <th class='status col_plugin_output' nowrap>Status Information&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by status information (ascending)' title='Sort by status information (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by status information (descending)' title='Sort by status information (descending)'></a></th>
+        [% FOREACH col = default_columns.$paneprefix %]
+          [% IF loop.index >= start_with %]
+          <th class='status col_[% col.field %]' style="display: none;" nowrap>[% col.title %]&nbsp;<a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 1, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% col.title %] (ascending)' title='Sort by [% col.title %] (ascending)'></a><a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 2, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% col.title %] (descending)' title='Sort by [% col.title %] (descending)'></a></th>
+          [% END %]
+        [% END %]
       </tr>
 
       [% SET lasthost = '' %]
@@ -54,25 +101,24 @@
       [% END%]
 
       [% IF lasthost != '' && lasthost != s.host_name %]
-      <tr><td colspan="6"></td></tr>
-      <tr><td colspan="6"></td></tr>
+      <tr class="spacerrow"><td colspan="6"></td></tr>
+      <tr class="spacerrow"><td colspan="6"></td></tr>
       [% END %]
 
       <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">
         [% IF lasthost == s.host_name %]
-        <td></td>
+        <td class='host_name'></td>
         [% ELSE %]
-        [% SET lasthost = s.host_name %]
         [% SET host_comment_count = 0 %]
         [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
         [% SET hostclass = 'statusOdd'  IF loop.even %]
         [% SET hostclass = 'statusEven' IF loop.odd %]
         [% IF s.host_state == 1 %]
-          [% hostclass = 'statusHOSTDOWN' %]
+          [% hostclass = hostclass _ ' statusHOSTDOWN' %]
         [% ELSIF s.host_state == 2 %]
-          [% hostclass = 'statusHOSTUNREACHABLE' %]
+          [% hostclass = hostclass _ ' statusHOSTUNREACHABLE' %]
         [% END %]
-        <td class='[% hostclass %]'>
+        <td class='[% hostclass %] host_name'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
               <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
@@ -84,9 +130,9 @@
         </td>
         [% END %]
         [% IF show_backends_in_table == 2 %]
-        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
-        <td class='[% serviceclass %]'>
+        <td class='[% serviceclass %] description'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
             <tr>
               <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a></td>
@@ -96,15 +142,15 @@
             </tr>
           </table>
         </td>
-        <td class='status[% state %]'>[% state %]</td>
-        <td class='[% serviceclass %] last_check' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
+        <td class='status[% state %] state'>[% state %]</td>
+        <td class='[% serviceclass %] last_check' nowrap align="center">[% last_check(c, s.last_check) %]</td>
         <td class='[% serviceclass %] duration' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
-        <td class='[% serviceclass %] attempt' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
+        <td class='[% serviceclass %] current_attempt' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% IF show_backends_in_table == 1 %]
-        <td class='[% serviceclass %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] peer_name' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
           [% IF s.has_been_checked == 0 %]
-            <td class='[% serviceclass %] output' align="left">
+            <td class='[% serviceclass %] plugin_output mightOverflow' align="left">
               [% IF s.active_checks_enabled == 0 %]
               Service is not scheduled to be checked...
               [% ELSE %]
@@ -113,37 +159,97 @@
             </td>
           [% ELSE %]
             [% plugin_output      = remove_html_comments(s.plugin_output) %]
-            [% long_plugin_output = remove_html_comments(s.long_plugin_output) %]
-            <td align="left" class='[% serviceclass %] output'
+            [% on_demand_long_plugin_output = 0 %]
+            [% IF s.defined("has_long_plugin_output") %]
+              [% IF s.has_long_plugin_output %]
+                [% on_demand_long_plugin_output = 1 %]
+                [% long_plugin_output = "..." %]
+              [% ELSE %]
+                [% long_plugin_output = "" %]
+              [% END %]
+            [% ELSE %]
+              [% long_plugin_output = remove_html_comments(s.long_plugin_output) %]
+            [% END %]
+            [% IF escape_html_tags %]
+              [% long_plugin_output = escape_html(long_plugin_output) %]
+              [% plugin_output      = escape_html(plugin_output) %]
+            [% END %]
+            <td align="left" class='[% serviceclass %] plugin_output mightOverflow'
             [% IF long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
-                [% IF escape_html_tags %]
-                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(plugin_output)) %]<br>[% escape_html(nl2br(escape_html(long_plugin_output))) %]'
-                [% ELSE %]
-                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(plugin_output) %]<br>[% nl2br(escape_html(long_plugin_output)) %]'
-                [% END %]
+                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(plugin_output) %]<br>[% IF on_demand_long_plugin_output %][% escape_html("<span class='long_plugin_output'></span>") %][% ELSE %][% escape_html(nl2br(long_plugin_output)) %][% END %]'
               [% END %]
             [% END %]
             >
             [% pnp_url = get_pnp_url(c, s, 1) %]
             [% PROCESS _perfdata_table write="true" state=s.state plugin_output=plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description %]
-
             [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
-              [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% plugin_output %]</span>[% END %]
+              <span class="has_long_plugin_output">[% plugin_output %]</span>
             [% ELSE %]
-              [% IF escape_html_tags %][% escape_html(plugin_output) %][% ELSE %][% plugin_output %][% END %]
+              [% plugin_output %]
             [% END %]
-
             [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
-              [% IF escape_html_tags %]
-                <br>[% nl2br(escape_html(long_plugin_output)) %]
-              [% ELSE %]
-                <br>[% nl2br(long_plugin_output) %]
-              [% END %]
+            <br>[% nl2br(long_plugin_output) %]
             [% END %]
             </td>
           [% END %]
+        [% IF has_columns %]
+        [% IF !show_backends_in_table %]
+        <td class='[% serviceclass %] backend_[% peer_key %] peer_name' style="display: none;" align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        [% END %]
+        <td class='[% serviceclass %] host_address' style="display: none;" nowrap align="left">[% s.host_address %]</td>
+        <td class='[% serviceclass %] host_groups' style="display: none;" nowrap align="left">[% s.host_groups.join(', ') %]</td>
+        <td class='[% serviceclass %] check_command' style="display: none;" nowrap align="left">[% s.check_command.replace("\!.*$", "") %]</td>
+        <td class='[% serviceclass %] check_interval' style="display: none;" nowrap align="left">[% s.check_interval %]</td>
+        <td class='[% serviceclass %] check_period' style="display: none;" nowrap align="left">[% s.check_period %]</td>
+        <td class='[% serviceclass %] contacts mightOverflow' style="display: none;" nowrap align="left">[% s.contacts.join(', ') %]</td>
+        <td class='[% serviceclass %] comments' style="display: none;" nowrap align="left">
+        [% host_name = s.host_name %]
+        [% IF lasthost != s.host_name %]
+        [% IF comments_by_host.defined(host_name) %]
+            [% FOREACH com = comments_by_host.$host_name %]
+            [% IF com.defined("start_time") %]
+            Host Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
+            [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
+            [% IF com.entry_type == 1 %]Host Comment[% ELSIF com.entry_type == 4 %]Host Acknowledgement[% END %]: [% com.author %]: [% com.comment %]<br>
+            [% END %]
+            [% END %]
+        [% END %]
+        [% END %]
+        [% service_description = s.description; IF comments_by_host_service.defined(host_name) && comments_by_host_service.$host_name.defined(service_description) %]
+            [% FOREACH com = comments_by_host_service.$host_name.$service_description %]
+            [% IF com.defined("start_time") %]
+            Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
+            [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
+            [% IF com.entry_type == 1 %]Comment[% ELSIF com.entry_type == 4 %]Acknowledgement[% END %]: [% com.author %]: [% com.comment %]<br>
+            [% END %]
+            [% END %]
+        [% END %]
+        </td>
+        <td class='[% serviceclass %] event_handler' style="display: none;" nowrap align="left">[% s.event_handler.replace("\!.*$", "") %]</td>
+        <td class='[% serviceclass %] execution_time' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.execution_time) %]s</td>
+        <td class='[% serviceclass %] groups' style="display: none;" nowrap align="left">[% s.groups.join(', ') %]</td>
+        <td class='[% serviceclass %] latency' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.latency) %]s</td>
+        <td class='[% serviceclass %] next_check' style="display: none;" nowrap align="left">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]not scheduled[% END %]</td>
+        <td class='[% serviceclass %] notification_period' style="display: none;" nowrap align="left">[% s.notification_period %]</td>
+        <td class='[% serviceclass %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', s.percent_state_change) %]%</td>
+        <td class='[% serviceclass %] in_notification_period' style="display: none;" nowrap>[% IF s.in_notification_period %]Yes[% ELSE %]No[% END %]</td>
+        <td class='[% serviceclass %] in_check_period' style="display: none;" nowrap>[% IF s.in_check_period %]Yes[% ELSE %]No[% END %]</td>
+        [% FOREACH col = default_columns.$paneprefix %]
+          [% IF col.field.match('^cust_') %]
+          [% val = "";
+             field = col.field.replace('^cust_+', '');
+             cust_vars = get_custom_vars(c, s, '', 1);
+             IF cust_vars.exists(field); val = cust_vars.$field;
+             ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
+             END;
+          %]
+          <td class='[% serviceclass %] [% col.field %]' style="display: none;" nowrap align="left">[% val %]</td>
+          [% END %]
+        [% END %]
+        [% END %]
       </tr>
+      [% SET lasthost = s.host_name %]
       [% END %]
 
     </table>
@@ -162,3 +268,19 @@
       </div>
       <br>
     [% END %]
+
+<script type="text/javascript">
+<!--
+  if(!window.default_columns) { default_columns = {}; }
+  default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
+  jQuery(document).ready(function() {
+    [% IF has_columns %]
+    updateStatusColumns("[% paneprefix %]", false);
+    [% END %]
+    [% IF c.req.parameters.defined("autoShow") %]
+    initStatusTableColumnSorting('[% paneprefix %]', 'statusTable');
+    toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
+    [% END %]
+  });
+-->
+</script>

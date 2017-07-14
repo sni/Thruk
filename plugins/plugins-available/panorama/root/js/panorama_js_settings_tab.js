@@ -71,7 +71,7 @@ TP.getExportTab = function(options) {
             iconCls:'text-btn',
             width:   150,
             handler: function() {
-                TP.modalWindows.push(Ext.MessageBox.prompt({
+                Ext.MessageBox.prompt({
                     title:      'Import Tab(s)',
                     id:         'importdialog',
                     multiline:  true,
@@ -90,7 +90,7 @@ TP.getExportTab = function(options) {
                             }
                         }
                     }
-                }));
+                });
             }
         }, {
             xtype: 'button',
@@ -100,7 +100,7 @@ TP.getExportTab = function(options) {
             margin: '0 0 0 10',
             handler: function() {
                 var exportText = '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(Ext.JSON.encode(TP.cp.lastdata[options.tab.id])).match(/.{1,65}/g).join("\n")+"\n# End Export";
-                TP.modalWindows.push(Ext.MessageBox.show({
+                Ext.MessageBox.show({
                     cls:        'monospaced',
                     title:      'Current Tab Export',
                     multiline:  true,
@@ -118,7 +118,7 @@ TP.getExportTab = function(options) {
                             params: {text: exportText, task: 'textsave', file: options.tab.title+'.panorama'}
                         });
                     }
-                }));
+                });
             }
         }, {
             xtype:  'form',
@@ -135,13 +135,13 @@ TP.getExportTab = function(options) {
             width:  150,
             text: 'Reset to Default View',
             handler: function() {
-                TP.modalWindows.push(Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
+                Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
                     if (button === 'yes') {
                         if(options.close_handler) { options.close_handler(); }
-                        TP.modalWindows.push(Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...'));
+                        Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...');
                         window.location = 'panorama.cgi?clean=1';
                     }
-                }));
+                });
             }
         }]
     }];
@@ -420,15 +420,23 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             if(values.map) {
                 values.map_choose = 'geomap';
             }
+            if(values.background_color) {
+                values.map_choose = 'color';
+            }
         }
+
+        Ext.getCmp('background_color').hide();
+        Ext.getCmp('background_choose').hide();
+        Ext.getCmp('background_offset_choose').hide();
+        Ext.getCmp('wms_choose').hide();
+        Ext.getCmp('mapcenter').hide();
         if(values.map_choose == 'geomap') {
+            delete values.background_color;
             if(tab.xdata.map) {
                 values.map = tab.xdata.map;
             } else {
                 values.map = {};
             }
-            Ext.getCmp('background_choose').hide();
-            Ext.getCmp('background_offset_choose').hide();
             Ext.getCmp('wms_choose').show();
             Ext.getCmp('mapcenter').show();
             if(values.wms_provider == undefined || values.wms_provider == "") {
@@ -445,14 +453,27 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 Ext.getCmp('maplat').setRawValue(values.maplat);
                 Ext.getCmp('mapzoom').setRawValue(values.mapzoom);
             }
+            delete values['background_color'];
+        }
+        else if(values.map_choose == 'color') {
+            Ext.getCmp('background_color').show();
+            delete values['map'];
+            values['background'] = 'none';
         } else {
             Ext.getCmp('background_choose').show();
             Ext.getCmp('background_offset_choose').show();
-            Ext.getCmp('wms_choose').hide();
-            Ext.getCmp('mapcenter').hide();
             delete values['map'];
+            delete values['background_color'];
         }
         tab.setBackground(values);
+    }
+
+    var map_choose = "static";
+    if(tab.xdata.background_color != undefined && tab.xdata.background_color != "") {
+        map_choose = "color";
+    }
+    if(tab.xdata.map != undefined) {
+        map_choose = "map";
     }
 
     /* Dashboard Settings Tab */
@@ -487,15 +508,34 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             },
             layout:      'hbox',
             items: [{
+                    boxLabel:   'Color',
+                    name:       'map_choose',
+                    inputValue: 'color',
+                    checked:     map_choose == 'color' ? true : false
+                }, {
                     boxLabel:   'Static Image',
                     name:       'map_choose',
                     inputValue: 'static',
-                    checked:     tab.xdata.map == undefined ? true : false
+                    checked:     map_choose == 'static' ? true : false
                 }, {
                     boxLabel:   'Geo Map',
                     name:       'map_choose',
                     inputValue: 'geomap',
-                    checked:     tab.xdata.map != undefined ? true : false
+                    checked:     map_choose == 'map' ? true : false
+            }]
+        }, {
+            fieldLabel: ' ',
+            labelSeparator: '',
+            id:         'background_color',
+            hidden:      map_choose != 'color' ? true : false,
+            xtype:      'fieldcontainer',
+            layout:     'hbox',
+            items: [{
+                xtype:          'colorcbo',
+                name:           'background_color',
+                flex:            1,
+                value:           tab.xdata.background_color || '',
+                listeners:     { change: function() { applyBackground() } }
             }]
         }, {
             fieldLabel:     'WMS Provider',
@@ -509,7 +549,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             valueField:     'name',
             editable:        false,
             forceSelection:  true,
-            hidden:          tab.xdata.map == undefined ? true : false,
+            hidden:          map_choose != 'map' ? true : false,
             listeners:     { change: function(This) { applyBackground() } }
         }, {
             fieldLabel:  'Map Center',
@@ -546,7 +586,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             fieldLabel: ' ',
             labelSeparator: '',
             id:         'background_choose',
-            hidden:      tab.xdata.map != undefined ? true : false,
+            hidden:      map_choose != 'static' ? true : false,
             xtype:      'fieldcontainer',
             layout:     'hbox',
             defaults: {
@@ -564,6 +604,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 displayField:   'image',
                 flex:            1,
                 valueField:     'path',
+                value:           tab.xdata.background || 'none',
                 listConfig : {
                     getInnerTpl: function(displayField) {
                         return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
@@ -591,14 +632,14 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 maxValue:        10000,
                 step:            1,
                 width:           70,
-                value:           100,
+                value:           tab.xdata.backgroundscale || 100,
                 fieldStyle:     'text-align: right;'
             }]
         }, {
             fieldLabel:     ' ',
             labelSeparator: '',
             id:             'background_offset_choose',
-            hidden:          tab.xdata.map != undefined ? true : false,
+            hidden:          map_choose != 'static' ? true : false,
             xtype:          'fieldcontainer',
             layout:         'hbox',
             defaults: {
@@ -615,7 +656,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 maxValue:        10000,
                 step:            1,
                 width:           70,
-                value:           0,
+                value:           tab.xdata.backgroundoffset_x || 0,
                 fieldStyle:     'text-align: right;'
             },
             { xtype: 'label', text: 'Y:', style: 'margin-left: 10px; margin-right: 2px;', cls: 'x-form-item-label' },
@@ -628,7 +669,29 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 maxValue:        10000,
                 step:            1,
                 width:           70,
-                value:           0,
+                value:           tab.xdata.backgroundoffset_y || 0,
+                fieldStyle:     'text-align: right;'
+            },
+            { xtype: 'label', text: 'Fixed Size', style: 'margin-left: 20px; margin-right: 2px;', cls: 'x-form-item-label' },
+            {
+                xtype:          'numberunit',
+                unit:           'px',
+                allowDecimals:   true,
+                name:           'backgroundsize_x',
+                step:            10,
+                width:           70,
+                value:           tab.xdata.backgroundsize_x || "0",
+                fieldStyle:     'text-align: right;'
+            },
+            { xtype: 'label', text: '/', style: 'margin-left: 2px; margin-right: 2px;', cls: 'x-form-item-label' },
+            {
+                xtype:          'numberunit',
+                unit:           'px',
+                allowDecimals:   true,
+                name:           'backgroundsize_y',
+                step:            10,
+                width:           70,
+                value:           tab.xdata.backgroundsize_y || "0",
                 fieldStyle:     'text-align: right;'
             }]
 
@@ -666,7 +729,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     name:       'state_type',
                     inputValue: 'hard',
                     checked:    tab.xdata.state_type == 'hard' ? true : false,
-                    padding:    '0 0 0 30',
+                    padding:    '0 0 0 30'
             }]
         }, {
             xtype:      'panel',
@@ -795,7 +858,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     /* the actual settings window containing the panel */
     var tab_win_settings = new Ext.window.Window({
         modal:       true,
-        width:       550,
+        width:       600,
         height:      350,
         title:       'Settings',
         layout :     'fit',
@@ -850,6 +913,13 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                                 delete p.xdata.map;
                                 p.forceSaveState();
                             }
+                        }
+
+                        if(values['map_choose'] == 'static') {
+                            values['background_color'] = '';
+                        }
+                        if(values['map_choose'] == 'color') {
+                            values['background'] = 'none';
                         }
                         delete values['refresh_txt'];
                         delete values['map_choose'];
@@ -939,7 +1009,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
     tab_win_settings.show();
     mask.destroy();
-    TP.modalWindows.push(tab_win_settings);
 };
 
 TP.tabSettingsWindowLocked = function(tab, val) {
@@ -995,7 +1064,7 @@ TP.tabSettingsWindowLocked = function(tab, val) {
 };
 
 TP.uploadUserContent = function(type, location, onSuccess) {
-    TP.modalWindows.push(Ext.create('Ext.window.Window', {
+    Ext.create('Ext.window.Window', {
         title: 'Usercontent Upload',
         height: 100,
         width:  300,
@@ -1047,11 +1116,11 @@ TP.uploadUserContent = function(type, location, onSuccess) {
                 }
             }
         }]
-    }).show());
+    }).show();
 };
 
 TP.loadDashboardWindow = function() {
-    TP.modalWindows.push(Ext.create('Ext.window.Window', {
+    Ext.create('Ext.window.Window', {
         title: 'Load Dashboard From File',
         height: 100,
         width:  300,
@@ -1086,8 +1155,11 @@ TP.loadDashboardWindow = function() {
                         params: { task: 'load_dashboard' },
                         waitMsg: 'Loading Dashboard...',
                         success: function(form, action) {
-                            TP.add_pantab(action.result.newid);
-                            TP.Msg.msg("success_message~~dashboard loaded successfully.");
+                            /* refresh icon sets, there might be new ones now */
+                            TP.iconsetsStore.load({callback: function() {
+                                TP.add_pantab(action.result.newid);
+                                TP.Msg.msg("success_message~~dashboard loaded successfully.");
+                            }});
                             win.destroy();
                         },
                         failure: function(form, action) {
@@ -1098,5 +1170,5 @@ TP.loadDashboardWindow = function() {
                 }
             }
         }]
-    }).show());
+    }).show();
 }

@@ -77,16 +77,15 @@ sub index {
         $host = 'all';
     }
 
-    if($service ne '') {
-        $c->stash->{infoBoxTitle}   = 'Service Notifications';
-        push @{$filter}, { host_name => $host } if $host ne 'all';
-        push @{$filter}, { service_description => $service };
-    }
-    elsif($host ne '') {
+    if($host ne '') {
         $c->stash->{infoBoxTitle}   = 'Host Notifications';
         push @{$filter}, { host_name => $host } if $host ne 'all';
     }
-    elsif($contact ne '') {
+    if($service ne '') {
+        $c->stash->{infoBoxTitle}   = 'Service Notifications';
+        push @{$filter}, { service_description => $service };
+    }
+    if($contact ne '') {
         $c->stash->{infoBoxTitle}   = 'Contact Notifications';
         push @{$filter}, { contact_name => $contact } if $contact ne 'all';
     }
@@ -107,7 +106,7 @@ sub index {
         $c->stash->{'log_filter'} = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
                                       sort   => {$order => 'time'},
                                     };
-        return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
+        return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c, "notification")', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "notifications::updatecache");
         return if $c->{'db'}->renew_logcache($c);
