@@ -96,6 +96,7 @@ lib/Thruk/Utils/Broadcast.pm
 lib/Thruk/Utils/Cache.pm
 lib/Thruk/Utils/CLI.pm
 lib/Thruk/Utils/CLI/Backend.pm
+lib/Thruk/Utils/CLI/Cache.pm
 lib/Thruk/Utils/CLI/Command.pm
 lib/Thruk/Utils/CLI/Cron.pm
 lib/Thruk/Utils/CLI/Downtimetask.pm
@@ -374,6 +375,7 @@ plugins/plugins-available/panorama/DEV.txt
 plugins/plugins-available/panorama/examples/hostgroups.tab
 plugins/plugins-available/panorama/examples/iss.tab
 plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm
+plugins/plugins-available/panorama/lib/Thruk/Utils/CLI/Panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama/Scripted.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/PanoramaCpuStats.pm

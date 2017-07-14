@@ -627,6 +627,15 @@ sub _run_command_action {
         $action = $2;
         unshift @{$opt->{'commandoptions'}}, $1;
     }
+    elsif($action =~ /^(cache)
+                       (dump|clear|clean|drop)$/mx) {
+        $action = $1;
+        unshift @{$opt->{'commandoptions'}}, $2;
+    }
+    elsif($action eq 'clean_dashboards') {
+        $action = 'panorama';
+        unshift @{$opt->{'commandoptions'}}, 'clean';
+    }
 
     # raw query
     if($action eq 'raw') {
@@ -637,22 +646,6 @@ sub _run_command_action {
     # precompile templates
     elsif($action eq 'compile') {
         $data->{'output'} = _cmd_precompile($c);
-    }
-
-    # dashboard cleanup
-    elsif($action eq 'clean_dashboards') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_panorama($c, $action);
-    }
-
-    # cache actions
-    elsif($action eq 'dumpcache') {
-        $data->{'rc'} = 0;
-        $data->{'output'} = Dumper($c->cache->dump);
-    }
-    elsif($action eq 'clearcache') {
-        $data->{'rc'} = 0;
-        unlink($c->config->{'tmp_path'}.'/thruk.cache');
-        $data->{'output'} = "cache cleared";
     }
 
     # core reschedule?
@@ -766,34 +759,6 @@ sub _cmd_precompile {
     my $msg = Thruk::Utils::precompile_templates($c);
     $c->stats->profile(end => "_cmd_precompile()");
     return $msg;
-}
-
-##############################################
-sub _cmd_panorama {
-    my($c, $action) = @_;
-    $c->stats->profile(begin => "_cmd_panorama($action)");
-
-    if(!$c->config->{'use_feature_panorama'}) {
-        return("ERROR - panorama dashboard addon is disabled\n", 1);
-    }
-
-    eval {
-        require Thruk::Utils::Panorama;
-    };
-    if($@) {
-        _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
-        return("panorama plugin is disabled.\n", 1);
-    }
-
-    if($action eq 'clean_dashboards') {
-        $c->stash->{'is_admin'} = 1;
-        $c->{'panorama_var'}    = $c->config->{'var_path'}.'/panorama';
-        my $num = Thruk::Utils::Panorama::clean_old_dashboards($c);
-        return("OK - cleaned up $num old dashboards\n", 0);
-    }
-
-    $c->stats->profile(end => "_cmd_panorama($action)");
-    return("unknown panorma command", 1);
 }
 
 ##############################################
