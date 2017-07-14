@@ -33,6 +33,7 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
         - optimize              run table optimize
         - clean[=duration]      clean cache and keep everything within given duration
         - removeunused          remove unused tables for no longer existing backends
+        - drop                  remove all tables and data
 
 =back
 
@@ -57,7 +58,7 @@ sub cmd {
     my($c, $action, $commandoptions, undef, $src, $global_options) = @_;
     $c->stats->profile(begin => "_cmd_import_logs($action)");
 
-    my $mode      = shift @{$commandoptions};
+    my $mode = shift @{$commandoptions};
 
     if(!defined $c->config->{'logcache'}) {
         return("FAILED - logcache is not enabled\n", 1);
@@ -92,6 +93,15 @@ sub cmd {
         local $|=1;
         print "import removes current cache and imports new logfile data.\n";
         print "use logcacheupdate to update cache. Continue? [n]: ";
+        my $buf;
+        sysread STDIN, $buf, 1;
+        if($buf !~ m/^(y|j)/mxi) {
+            return("canceled\n", 1);
+        }
+    }
+    if($mode eq 'drop' && !$global_options->{'yes'}) {
+        local $|=1;
+        print "Do you really want to drop all data and remove the logcache? Continue? [n]: ";
         my $buf;
         sysread STDIN, $buf, 1;
         if($buf !~ m/^(y|j)/mxi) {
@@ -170,6 +180,15 @@ sub cmd {
             # already printed if verbose
             $details = join("\n", @{$errors})."\n";
         }
+        if($mode eq 'drop') {
+            return(sprintf("%s - droped logcache for %i site%s in %.2fs\n%s",
+                           $msg,
+                           $backend_count,
+                           ($backend_count == 1 ? '' : 's'),
+                           ($elapsed),
+                           $details,
+                           ), $rc);
+        }
         return(sprintf("%s - %s %i log items %sfrom %i site%s %s in %.2fs (%i/s)\n%s",
                        $msg,
                        $action,
@@ -208,6 +227,10 @@ Run update from given files
 Prune logcache data older than 3 years
 
   %> thruk logcache clean 3y
+
+Remove logcache data completly
+
+  %> thruk logcache drop
 
 =head1 AUTHOR
 

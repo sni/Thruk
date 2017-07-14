@@ -1028,6 +1028,9 @@ sub _import_logs {
                 $log_count->[0] += $tmp->[0];
                 $log_count->[1] += $tmp->[1];
             }
+            elsif($mode eq 'drop') {
+                $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+            }
             elsif($mode eq 'authupdate') {
                 $log_count += $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
             }
@@ -1058,6 +1061,11 @@ sub _update_logcache {
     unless(defined $blocksize) {
         $blocksize = 86400;
         $blocksize = 365 if $mode eq 'clean';
+    }
+
+    if($mode eq 'drop') {
+        _drop_tables($dbh, $prefix);
+        return;
     }
 
     # check tables and lock
