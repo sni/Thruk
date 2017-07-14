@@ -1060,75 +1060,25 @@ sub _update_logcache {
         $blocksize = 365 if $mode eq 'clean';
     }
 
+    # check tables and lock
+    _drop_tables($dbh, $prefix) if $mode eq 'import';
+    my $fresh_created = 0;
+    $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
+    if(_create_tables_if_not_exist($dbh, $prefix, $verbose)) {
+        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
+        $fresh_created = 1;
+    }
+    return(-1) unless _check_lock($dbh, $prefix, $verbose);
+    my $rc = _update_logcache_version($c, $dbh, $prefix, $verbose);
+    if(!$rc && $mode eq 'update') {
+        $mode = 'import';
+    }
+
     if($mode eq 'clean') {
         return(_update_logcache_clean($dbh, $prefix, $verbose, $blocksize));
     }
 
-    # check if our tables exist
-    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'%"')};
-
-    # check if there is already a update / import running
-    my $skip          = 0;
-    my $cache_version = 1;
-    if(scalar @tables == 0) {
-        $mode = 'import';
-    } else {
-        eval {
-            my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
-            if(scalar @pids > 0 and $pids[0]) {
-                if(kill(0, $pids[0])) {
-                    print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
-                    $skip = 1;
-                }
-            }
-            my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
-            if(scalar @versions > 0 and $versions[0]) {
-                $cache_version = $versions[0];
-            }
-        };
-        if($@) {
-            return(-1);
-        }
-    }
-    return(-1) if $skip;
-
-    $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
-    if($mode eq 'import') {
-        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
-        $self->_create_tables($dbh, $prefix);
-    }
-
-    $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
-    $dbh->commit or die $dbh->errstr;
-    $dbh->do('UNLOCK TABLES');
-
-    if($cache_version == 3) {
-        $cache_version = 4;
-        $dbh->do("ALTER TABLE `".$prefix."_log` CHANGE `state_type` `state_type` ENUM('HARD','SOFT') NULL DEFAULT NULL");
-        $dbh->do("UPDATE `".$prefix."_status` SET value = 4 WHERE status_id = 4");
-        print "WARNING: updated logcache to version 4\n" if $verbose;
-        $c->log->info("updated logcache to version 4");
-    }
-
-    if($cache_version == 4) {
-        $cache_version = 5;
-        $dbh->do("CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3))");
-        $dbh->do("UPDATE `".$prefix."_status` SET value = 5 WHERE status_id = 4");
-        print "WARNING: updated logcache to version 5\n" if $verbose;
-        $c->log->info("updated logcache to version 5");
-    }
-
-    if($cache_version < $Thruk::Backend::Provider::Mysql::cache_version) {
-        # only log message if not importing already
-        if($mode ne 'import') {
-            my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$Thruk::Backend::Provider::Mysql::cache_version.'...';
-            print "WARNING: ".$msg."\n" if $verbose;
-            $c->log->info($msg);
-        }
-        $mode = 'import';
-    }
+    $mode = 'import' if $fresh_created;
 
     my $log_count = 0;
     eval {
@@ -1151,9 +1101,9 @@ sub _update_logcache {
     };
     my $error = $@ || '';
 
-    _release_write_locks($dbh);
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
+    _release_write_locks($dbh);
     $dbh->commit or $error .= $dbh->errstr;
 
     if($error) {
@@ -1162,6 +1112,94 @@ sub _update_logcache {
     }
 
     return $log_count;
+}
+
+##########################################################
+# returns 1 if tables have been newly created or 0 if already exists
+sub _create_tables_if_not_exist {
+    my($dbh, $prefix, $verbose) = @_;
+
+    # check if our tables exist
+    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'%"')};
+    if(scalar @tables == 0) {
+        print "creating logcache tables\n" if $verbose;
+        _create_tables($dbh, $prefix);
+        return 1;
+    }
+
+    return;
+}
+
+##########################################################
+sub _check_lock {
+    my($dbh, $prefix, $verbose) = @_;
+
+    # check if there is already a update / import running
+    my $skip          = 0;
+    my $cache_version = 1;
+    eval {
+        $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
+        my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
+        if(scalar @pids > 0 and $pids[0]) {
+            if(kill(0, $pids[0])) {
+                print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
+                $skip = 1;
+            }
+        }
+        my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
+        if(scalar @versions > 0 and $versions[0]) {
+            $cache_version = $versions[0];
+        }
+    };
+    if($@) {
+        print "$@\n" if $verbose;
+        return;
+    }
+    return if $skip;
+
+    $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
+    $dbh->commit or die $dbh->errstr;
+    $dbh->do('UNLOCK TABLES');
+    return(1);
+}
+
+##########################################################
+sub _update_logcache_version {
+    my($c, $dbh, $prefix, $verbose) = @_;
+
+    my $cache_version = 1;
+    my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
+    if(scalar @versions > 0 and $versions[0]) {
+        $cache_version = $versions[0];
+    }
+
+    if($cache_version == 3) {
+        $cache_version = 4;
+        $dbh->do("ALTER TABLE `".$prefix."_log` CHANGE `state_type` `state_type` ENUM('HARD','SOFT') NULL DEFAULT NULL");
+        $dbh->do("UPDATE `".$prefix."_status` SET value = 4 WHERE status_id = 4");
+        print "WARNING: updated logcache to version 4\n" if $verbose;
+        $c->log->info("updated logcache to version 4");
+    }
+
+    if($cache_version == 4) {
+        $cache_version = 5;
+        $dbh->do("CREATE INDEX index_output_text ON `".$prefix."_plugin_output` (output(3))");
+        $dbh->do("UPDATE `".$prefix."_status` SET value = 5 WHERE status_id = 4");
+        print "WARNING: updated logcache to version 5\n" if $verbose;
+        $c->log->info("updated logcache to version 5");
+    }
+
+    if($cache_version < $Thruk::Backend::Provider::Mysql::cache_version) {
+        # only log message if not importing already
+        my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$Thruk::Backend::Provider::Mysql::cache_version.'...';
+        print "WARNING: ".$msg."\n" if $verbose;
+        $c->log->info($msg);
+        return;
+    }
+
+    return(1);
 }
 
 ##########################################################
@@ -1763,14 +1801,6 @@ sub _import_logcache_from_file {
 
     require Monitoring::Availability::Logs;
 
-    # check pid / lock
-    #_set_write_locks($dbh, $prefix);
-    my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
-    if(scalar @pids != 1 || $pids[0] != $$) {
-        print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
-        return $log_count;
-    }
-
     # get current auto increment values
     my $auto_increments = _get_autoincrements($dbh, $prefix);
     my $foreign_key_stash = {};
@@ -1873,7 +1903,6 @@ sub _insert_logs {
     }
 
     # check pid / lock
-    #_set_write_locks($dbh, $prefix);
     my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
     if(scalar @pids != 1 || $pids[0] != $$) {
         print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
@@ -1947,7 +1976,7 @@ sub _insert_logs {
 
 ##########################################################
 sub _create_tables {
-    my($self, $dbh, $prefix) = @_;
+    my($dbh, $prefix) = @_;
     for my $stm (@{_get_create_statements($prefix)}) {
         $dbh->do($stm);
     }
@@ -1957,7 +1986,7 @@ sub _create_tables {
 
 ##########################################################
 sub _drop_tables {
-    my($self, $dbh, $prefix) = @_;
+    my($dbh, $prefix) = @_;
     for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
         $dbh->do("DROP TABLE IF EXISTS `".$prefix."_".$table.'`');
     }
@@ -2031,26 +2060,6 @@ sub _get_autoincrements {
             AND TABLE_NAME LIKE "%'.$prefix.'_%"
         ', 'TABLE_NAME');
     return($auto_increments);
-}
-
-##########################################################
-sub _set_write_locks {
-    my($dbh, $prefix) = @_;
-    $dbh->do(
-        'LOCK TABLES
-            `'.$prefix.'_log` l WRITE,
-            `'.$prefix.'_log` WRITE,
-            `'.$prefix.'_plugin_output` WRITE,
-            `'.$prefix.'_plugin_output` p1 WRITE,
-            `'.$prefix.'_plugin_output` p2 WRITE,
-            `'.$prefix.'_host` WRITE,
-            `'.$prefix.'_host` h WRITE,
-            `'.$prefix.'_service` WRITE,
-            `'.$prefix.'_service` s WRITE,
-            `'.$prefix.'_contact` c WRITE,
-            `'.$prefix.'_contact` WRITE
-    ');
-    return;
 }
 
 ##########################################################
