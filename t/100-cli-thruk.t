@@ -183,10 +183,24 @@ TestUtils::test_command({
     exit => undef,
 });
 
+# self check with args
+TestUtils::test_command({
+    cmd    => $BIN.' selfcheck logfiles',
+    like   => ['/Logfiles:/'],
+    unlike => ['/Filesystem:/', '/is writable/', '/no errors/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    exit   => undef,
+});
+
 # panorama cleanup
 TestUtils::test_command({
     cmd  => $BIN.' -a clean_dashboards',
     like => ['/OK - cleaned up 0 old dashboards/'],
+});
+
+# plugin list
+TestUtils::test_command({
+    cmd  => $BIN.' plugin list',
+    like => ['/Description/', '/The Statusmap plugin creates maps/'],
 });
 
 done_testing();

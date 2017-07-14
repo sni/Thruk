@@ -54,12 +54,12 @@ Getopt::Long::GetOptions (
 
    "l|list-backends"    => \$options->{'listbackends'},
    "a|action=s"         => \$options->{'action'},
-   "<>"                 => sub { push @{$options->{'commandoptions'}}, "".shift },
 ) or do {
     print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
     _print_modules();
     exit 3;
 };
+@{$options->{'commandoptions'}} = @ARGV;
 if($options->{'help'}) {
     require Pod::Usage;
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
