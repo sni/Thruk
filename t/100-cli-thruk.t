@@ -107,7 +107,7 @@ TestUtils::test_command({
 # 2 commands
 TestUtils::test_command({
     cmd  => $BIN.' -a clearcache,dumpcache',
-    like => ['/^cache cleared\$VAR1/'],
+    like => ['/^cache cleared\n\$VAR1/'],
 });
 
 # create recurring downtime

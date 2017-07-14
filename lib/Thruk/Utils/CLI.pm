@@ -622,8 +622,8 @@ sub _run_command_action {
         $action = 'url';
         unshift @{$opt->{'commandoptions'}}, $1;
     }
-    elsif($action =~ /^(list|install|uninstall)
-                       (cron|backend|host|service|hostgroup|servicegroup)s?$/mx) {
+    elsif($action =~ /^(list|install|uninstall|clear|clean|dump)
+                       (cron|backend|host|service|hostgroup|servicegroup|cache)s?$/mx) {
         $action = $2;
         unshift @{$opt->{'commandoptions'}}, $1;
     }
