@@ -20,6 +20,7 @@ requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'HTTP::Response'                         => 0;     # required by Thruk::UserAgent
 requires 'HTTP::Request'                          => 0;     # required by Thruk::Utils::CLI
+requires 'Pod::Usage'                             => 0;     # required by Thruk::Utils::CL
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::UserAgent
 requires 'Net::HTTP'                              => 6.02;  # required for HTTP connections. Version required due to timeout bug
 requires 'URI::Escape'                            => 0;     # required by Thruk::Controller::Root
