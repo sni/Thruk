@@ -79,7 +79,7 @@ sub cmd {
         if($@) {
             return("enabling plugin failed: ".$@, 1);
         }
-        return("enabled plugin ".$name."\nYou need to restart the webserver to make the changes active.", 0);
+        return("enabled plugin ".$name."\nYou need to restart the webserver to make the changes active.\n", 0);
     }
     elsif($command eq 'disable') {
         my $name = shift @{$commandoptions};
@@ -89,7 +89,7 @@ sub cmd {
         if($@) {
             return("disabling plugin failed: ".$@, 1);
         }
-        return("disabled plugin ".$name."\nYou need to restart the webserver to make the changes active.", 0);
+        return("disabled plugin ".$name."\nYou need to restart the webserver to make the changes active.\n", 0);
     }
     elsif($command eq 'install') {
         return("not implemented yet", 1);

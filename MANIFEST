@@ -305,6 +305,7 @@ plugins/plugins-available/conf/templates/conf_plugins.tt
 plugins/plugins-available/conf/templates/conf_user_password.tt
 plugins/plugins-available/core_scheduling/description.txt
 plugins/plugins-available/core_scheduling/lib/Thruk/Controller/core_scheduling.pm
+plugins/plugins-available/core_scheduling/lib/Thruk/Utils/CLI/Core_scheduling.pm
 plugins/plugins-available/core_scheduling/preview.png
 plugins/plugins-available/core_scheduling/root/core_scheduling.css
 plugins/plugins-available/core_scheduling/routes

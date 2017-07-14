@@ -112,7 +112,7 @@ sub enable_plugin {
         elsif($ENV{'OMD_ROOT'}) {
             $plugin_src_dir = '../../../share/thruk/plugins/plugins-available/'.$dir;
         }
-        die($plugin_src_dir." does not exist") unless -e $plugin_src_dir;
+        die($plugin_src_dir." does not exist") unless -e $plugin_enabled_dir.'/'.$plugin_src_dir;
         symlink($plugin_src_dir,
                 $plugin_enabled_dir.'/'.$dir)
             or die("cannot create ".$plugin_enabled_dir.'/'.$dir." : ".$!);
