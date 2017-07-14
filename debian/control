@@ -23,8 +23,8 @@ Package: thruk-base
 Architecture: any
 Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
          libthruk (>=2.00),
-         apache2 | nginx-full,
-         libapache2-mod-fcgid | nginx-full,
+         apache2 | nginx-full | nginx-extras,
+         libapache2-mod-fcgid | nginx-full | nginx-extras,
          cron, logrotate
 Provides: thruk
 Replaces: thruk (<< 2.00)
