@@ -2713,8 +2713,9 @@ sub get_cli_modules {
     @{$modules} = sort map {
             my $mod = $_;
             if($mod =~ s/.*\/([^\/]+)\.pm/$1/gmx) {
-                return(lc($1));
+                $mod = lc($1);
             }
+            $mod;
         } @{$modules};
     return($modules);
 }
