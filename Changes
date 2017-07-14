@@ -10,6 +10,9 @@ next:
           - logcache:
             - performance improvements for the import and update commands
             - fix notifications filter by contact_name
+          - cli:
+            - cleanup cli module system
+            - add plugin cli command
           - Business Process:
             - add input/output filter
             - make references link recursive
