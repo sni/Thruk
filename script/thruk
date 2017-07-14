@@ -56,7 +56,7 @@ Getopt::Long::GetOptions (
    "a|action=s"         => \$options->{'action'},
    "<>"                 => sub { push @{$options->{'commandoptions'}}, "".shift },
 ) or do {
-    print "usage: $0 [<globaloptions>] <module> [<options>]\nsee --help for detailed help.\n";
+    print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
     _print_modules();
     exit 3;
 };
@@ -72,7 +72,7 @@ if($options->{'version'}) {
 }
 $options->{'verbose'} = 0 if $options->{'quiet'};
 if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'}) {
-    print "usage: $0 [<globaloptions>] <module> [<options>]\nsee --help for detailed help.\n";
+    print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
     _print_modules();
     exit 3;
 }
@@ -84,9 +84,7 @@ exit $cli->_run();
 ##############################################
 sub _print_modules {
     require Thruk::Utils;
-    my $modules = Thruk::Utils::find_modules('/Thruk/Utils/CLI/*.pm');
-    @{$modules} = map { $_ =~ s/.*\/([^\/]+)\.pm/$1/gmx; $_ = lc($1); } @{$modules};
-    print "Available modules: ".join(", ", sort @{$modules})."\n";
+    print "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
     return;
 }
 

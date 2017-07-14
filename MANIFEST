@@ -105,6 +105,7 @@ lib/Thruk/Utils/CLI/Host.pm
 lib/Thruk/Utils/CLI/Hostgroup.pm
 lib/Thruk/Utils/CLI/Livecache.pm
 lib/Thruk/Utils/CLI/Logcache.pm
+lib/Thruk/Utils/CLI/Plugin.pm
 lib/Thruk/Utils/CLI/Selfcheck.pm
 lib/Thruk/Utils/CLI/Service.pm
 lib/Thruk/Utils/CLI/Servicegroup.pm
@@ -117,6 +118,7 @@ lib/Thruk/Utils/Livecache.pm
 lib/Thruk/Utils/LMD.pm
 lib/Thruk/Utils/Log.pm
 lib/Thruk/Utils/Menu.pm
+lib/Thruk/Utils/Plugin.pm
 lib/Thruk/Utils/RecurringDowntimes.pm
 lib/Thruk/Utils/Scripts.pm
 lib/Thruk/Utils/SelfCheck.pm

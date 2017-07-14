@@ -2676,6 +2676,7 @@ sub convert_wildcards_to_regex {
     $str =~ s/^\*/.*/gmx;
     return($str);
 }
+
 ##############################################
 
 =head2 find_modules
@@ -2696,6 +2697,26 @@ sub find_modules {
         }
     }
     return([sort keys %{$modules}]);
+}
+
+##############################################
+
+=head2 get_cli_modules
+
+    get_cli_modules()
+
+returns list of cli modules
+
+=cut
+sub get_cli_modules {
+    my $modules = find_modules('/Thruk/Utils/CLI/*.pm');
+    @{$modules} = sort map {
+            my $mod = $_;
+            if($mod =~ s/.*\/([^\/]+)\.pm/$1/gmx) {
+                return(lc($1));
+            }
+        } @{$modules};
+    return($modules);
 }
 
 ##############################################

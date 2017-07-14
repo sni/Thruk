@@ -40,6 +40,7 @@ sub index {
         load File::Slurp, qw/read_file/;
         load Encode, qw(decode_utf8 encode_utf8);
         load Digest::MD5, qw(md5_hex);
+        load Thruk::Utils::Plugin;
         $c->config->{'conf_modules_loaded'} = 1;
     }
 
@@ -689,6 +690,8 @@ sub _process_plugins_page {
         $c->stash->{'readonly'}  = 1;
     }
 
+    my $plugins = Thruk::Utils::Plugin::get_plugins($c);
+
     if($c->stash->{action} eq 'preview') {
         my $pic = $c->req->parameters->{'pic'} || die("missing pic");
         if($pic !~ m/^[a-zA-Z0-9_\ \-]+$/gmx) {
@@ -718,50 +721,17 @@ sub _process_plugins_page {
         }
         else {
             for my $addon (glob($plugin_available_dir.'/*/')) {
-                my($addon_name, $dir) = _nice_addon_name($addon);
+                my($addon_name, $dir) = Thruk::Utils::Plugin::nice_addon_name($addon);
                 if(!defined $c->req->parameters->{'plugin.'.$dir} || $c->req->parameters->{'plugin.'.$dir} == 0) {
-                    unlink($plugin_enabled_dir.'/'.$dir);
+                    Thruk::Utils::Plugin::disable_plugin($c, $dir) if $plugins->{$dir}->{'enabled'};
                 }
                 if(defined $c->req->parameters->{'plugin.'.$dir} and $c->req->parameters->{'plugin.'.$dir} == 1) {
-                    if(!-e $plugin_enabled_dir.'/'.$dir) {
-                        my $plugin_src_dir = $plugin_available_dir.'/'.$dir;
-                        # make nicer and maintainable symlinks by not using absolute paths if possible
-                        if(-d $plugin_enabled_dir.'/../plugins-available/'.$dir) {
-                            $plugin_src_dir = '../plugins-available/'.$dir;
-                        }
-                        elsif($ENV{'OMD_ROOT'}) {
-                            $plugin_src_dir = '../../../share/thruk/plugins/plugins-available/'.$dir;
-                        }
-                        symlink($plugin_src_dir,
-                                $plugin_enabled_dir.'/'.$dir)
-                            or die("cannot create ".$plugin_enabled_dir.'/'.$dir." : ".$!);
-                    }
+                    Thruk::Utils::Plugin::enable_plugin($c, $dir) unless $plugins->{$dir}->{'enabled'};
                 }
             }
             Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully.' );
             return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=plugins&reload_nav=1');
         }
-    }
-
-    my $plugins = {};
-    for my $addon (glob($plugin_available_dir.'/*/'), glob($plugin_enabled_dir.'/*/')) {
-        my($addon_name, $dir) = _nice_addon_name($addon);
-        $plugins->{$addon_name} = { enabled => 0, dir => $dir, description => '(no description available.)', url => '' };
-        my $desc_file = $plugin_available_dir.'/'.$dir.'/description.txt';
-        if(-e $plugin_enabled_dir.'/'.$dir.'/description.txt') {
-            $desc_file = $plugin_enabled_dir.'/'.$dir.'/description.txt';
-        }
-        if(-e $desc_file) {
-            my $description = read_file($desc_file);
-            my $url         = "";
-            if($description =~ s/^Url:\s*(.*)$//gmx) { $url = $1; }
-            $plugins->{$addon_name}->{'description'} = $description;
-            $plugins->{$addon_name}->{'url'}         = $url;
-        }
-    }
-    for my $addon (glob($plugin_enabled_dir.'/*/')) {
-        my($addon_name, $dir) = _nice_addon_name($addon);
-        $plugins->{$addon_name}->{'enabled'} = 1;
     }
 
     $c->stash->{'plugins'}  = $plugins;
@@ -2511,17 +2481,6 @@ sub _check_external_reload {
         }
     }
     return;
-}
-
-##########################################################
-# return nicer addon name
-sub _nice_addon_name {
-    my($name) = @_;
-    my $dir = $name;
-    $dir =~ s/\/+$//gmx;
-    $dir =~ s/^.*\///gmx;
-    my $nicename = join(' ', map(ucfirst, split(/_/mx, $dir)));
-    return($nicename, $dir);
 }
 
 ##########################################################
