@@ -1037,7 +1037,7 @@ sub _import_logs {
             elsif($mode eq 'optimize') {
                 $log_count += $peer->logcache->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
             } else {
-                print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
+                die("unknown mode: ".$mode."\n");
             }
         };
         if($@) {

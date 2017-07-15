@@ -658,9 +658,10 @@ sub _run_command_action {
         # compatibility mode for old style commands
         if($action =~ m/^(selfcheck|report|livecache|downtimetask|bp|logcache|url)(\w*)
                          =?(.*)$/gmx) {
-            $action = $1;
-            unshift @{$opt->{'commandoptions'}}, $3 if $3;
-            unshift @{$opt->{'commandoptions'}}, $2 if $2;
+            my @m = ($1, $2, $3);
+            $action = $m[0];
+            unshift @{$opt->{'commandoptions'}}, $m[2] if $m[2];
+            unshift @{$opt->{'commandoptions'}}, $m[1] if $m[1];
         }
 
         # load sub command module
