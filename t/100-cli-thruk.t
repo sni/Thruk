@@ -123,7 +123,7 @@ TestUtils::test_command({
 # update crontab
 TestUtils::test_command({
     cmd  => $BIN.' "reports2.cgi?action=updatecron"',
-    like => ['/^OK - updated crontab$/'],
+    like => ['/OK - updated crontab$/'],
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/crontab -l '.$cronuser.' | grep "THIS PART IS WRITTEN BY THRUK" | wc -l',
@@ -201,6 +201,12 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => $BIN.' plugin list',
     like => ['/Description/', '/The Statusmap plugin creates maps/'],
+});
+
+# plugin list enabled
+TestUtils::test_command({
+    cmd  => $BIN.' plugin list enabled',
+    like => ['/^E/'],
 });
 
 done_testing();

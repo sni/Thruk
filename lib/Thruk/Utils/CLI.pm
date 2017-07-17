@@ -330,7 +330,7 @@ sub _run {
     my $terminal_attached = -t 0 ? 1 : 0;
     ## use critic
     my $log_timestamps = 0;
-    my $action = $self->{'opt'}->{'action'} || $self->{'opt'}->{'commandoptions'}->[0];
+    my $action = $self->{'opt'}->{'action'} || $self->{'opt'}->{'commandoptions'}->[0] || '';
     if($action =~ m/^(logcache|bp|report|downtimetask)/mx) {
         $log_timestamps = 1;
     }
