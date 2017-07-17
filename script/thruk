@@ -88,12 +88,14 @@ sub _print_modules {
     # read the config which puts our loaded addons into @INC and those cli modules will be found as well
     Thruk::Config::get_config();
     print "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
+    print "get help for a specific plugin with: $0 <plugin> help\n";
     return;
 }
 
+##############################################
+
 1;
 __END__
-##############################################
 
 =head1 NAME
 
