@@ -23,7 +23,7 @@
  
  ######################################
  # mode used when creating or saving files
-@@ -220,24 +220,24 @@
+@@ -220,28 +220,28 @@
  
  ######################################
  # files owners for new / changed files
@@ -43,6 +43,10 @@
  # you change the plugin path
 -#plugin_path = plugins/
 +plugin_path = @SYSCONFDIR@/plugins/
+ 
+ ######################################
+ # url to fetch new plugins from
+ #plugin_registry_url = https://api.thruk.org/v1/plugin/list.json
  
  ######################################
  # path to your themes

@@ -465,6 +465,18 @@ ex.:
   plugin_path = ./plugins
 
 
+
+=== plugin_registry_url
+
+Url to Thruks plugin registry. The url must supply a json data structure with a
+list thruk plugins. Can be specified multiple times.
+
+ex.:
+
+  plugin_registry_url = https://api.thruk.org/v1/plugin/list
+
+
+
 === themes_path
 
 Path to your themes directory. Can be used to specify different

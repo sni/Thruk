@@ -385,6 +385,7 @@ sub set_default_config {
         'cgi.cfg'                       => 'cgi.cfg',
         bug_email_rcpt                  => 'bugs@thruk.org',
         home_link                       => 'http://www.thruk.org',
+        plugin_registry_url             => ['https://api.thruk.org/v1/plugin/list'],
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,
@@ -625,6 +626,25 @@ sub _load_any {
     );
 
     return $cfg;
+}
+
+##############################################
+
+=head2 get_thruk_version
+
+  get_thruk_version($c, [$config])
+
+return thruk version string
+
+=cut
+
+sub get_thruk_version {
+    my($c, $config) = @_;
+    $config = $c->config unless $config;
+    if($config->{'branch'}) {
+        return($config->{'version'}.'-'.$config->{'branch'});
+    }
+    return($config->{'version'});
 }
 
 ##############################################
