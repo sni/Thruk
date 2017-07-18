@@ -1719,6 +1719,7 @@ sub update_cron_file {
     open(my $fh, '>>', $errorlog);
 
     if($c->config->{'cron_pre_edit_cmd'}) {
+        local $< = $> if $< == 0; # set real and effective uid to user, crontab will still be run as root on some systems otherwise
         my($fh2, $tmperror) = tempfile();
         Thruk::Utils::IO::close($fh2, $tmperror);
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$tmperror;
@@ -1811,6 +1812,7 @@ sub update_cron_file {
     Thruk::Utils::IO::close($fh, $c->config->{'cron_file'});
 
     if($c->config->{'cron_post_edit_cmd'}) {
+        local $< = $> if $< == 0; # set real and effective uid to user, crontab will still be run as root on some systems otherwise
         my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
         my $output = `$cmd`;
         if ($? == -1) {
