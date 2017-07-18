@@ -13,6 +13,7 @@ next:
           - cli:
             - cleanup cli module system
             - add plugin cli command
+            - add bash completion
           - Business Process:
             - add input/output filter
             - make references link recursive

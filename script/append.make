@@ -160,6 +160,10 @@ local_install: local_patches
 	# logrotation
 	[ -z "${LOGROTATEDIR}" ] || { mkdir -p ${DESTDIR}${LOGROTATEDIR} && cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk-base && cd ${DESTDIR}${LOGROTATEDIR} && patch -p1 < $(shell pwd)/blib/replace/0006-logrotate.patch; }
 	############################################################################
+	# bash completion
+	[ -z "${BASHCOMPLDIR}" ] || { mkdir -p ${DESTDIR}${BASHCOMPLDIR} && cp -p support/thruk_bash_completion ${DESTDIR}${BASHCOMPLDIR}/thruk-base; }
+	############################################################################
+	############################################################################
 	# rc script
 	[ -z "${INITDIR}" ] || { mkdir -p ${DESTDIR}${INITDIR} && cp -p support/thruk.init ${DESTDIR}${INITDIR}/thruk; }
 	############################################################################

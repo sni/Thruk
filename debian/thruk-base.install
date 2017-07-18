@@ -1,5 +1,6 @@
 /etc/init.d/thruk
 /etc/logrotate.d/thruk-base
+/etc/bash_completion.d/thruk-base
 /etc/thruk/cgi.cfg
 /etc/thruk/htpasswd
 /etc/thruk/log4perl.conf

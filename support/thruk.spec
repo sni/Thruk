@@ -104,6 +104,7 @@ and event reporting.
     --with-initdir="%{_initrddir}" \
     --with-logdir="%{_localstatedir}/log/thruk" \
     --with-logrotatedir="%{_sysconfdir}/logrotate.d" \
+    --with-bashcompletedir="%{_sysconfdir}/bash_completion.d" \
     --with-thruk-user="%{apacheuser}" \
     --with-thruk-group="%{apachegroup}" \
     --with-thruk-libs="%{_libdir}/thruk/perl5" \
@@ -313,6 +314,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/naglint.conf
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/thruk-base
+%config(noreplace) %{_sysconfdir}/bash_completion.d/thruk-base
 %config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk.conf
 %config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk_cookie_auth_vhost.conf
 %{_datadir}/%{name}/plugins/plugins-available/business_process

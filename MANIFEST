@@ -1372,6 +1372,7 @@ support/panorama2img.js
 support/thruk.init
 support/thruk.logrotate
 support/thruk.spec
+support/thruk_bash_completion
 support/thruk_cookie_auth.example
 support/thruk_cookie_auth.include
 support/thruk_cookie_auth_vhost.conf
