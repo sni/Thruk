@@ -12,6 +12,7 @@ Plugins Utilities Collection for Thruk
 
 use strict;
 use warnings;
+use Data::Dumper;
 use File::Slurp qw/read_file/;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 #use Thruk::Timer qw/timing_breakpoint/;
