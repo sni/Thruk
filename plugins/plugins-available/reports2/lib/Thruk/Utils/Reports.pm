@@ -743,8 +743,10 @@ sub update_cron_file {
             $st->{'nr'} = $r->{'nr'};
             my $cmd = _get_report_cmd($c, $r->{'nr'}, $mail);
             my $time = Thruk::Utils::get_cron_time_entry($st);
-            $cron_entries->{$time} = [] unless defined $cron_entries->{$time};
-            push @{$cron_entries->{$time}}, $cmd;
+            if($time) {
+                $cron_entries->{$time} = [] unless defined $cron_entries->{$time};
+                push @{$cron_entries->{$time}}, $cmd;
+            }
         }
     }
     my $max_concurrent_reports = $c->config->{'Thruk::Plugin::Reports2'}->{'max_concurrent_reports'} || 2;
