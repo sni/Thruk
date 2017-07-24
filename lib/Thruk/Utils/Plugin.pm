@@ -261,6 +261,23 @@ sub disable_plugin {
 
 ##############################################
 
+=head2 verify_plugin_name
+
+  verify_plugin_name($name)
+
+returns true if this is a valid name for a plugin
+
+=cut
+sub verify_plugin_name {
+    my($name) = @_;
+    if($name =~ m/^[a-zA-Z0-9\-\_]+$/mx) {
+        return 1;
+    }
+    return;
+}
+
+##############################################
+
 1;
 
 __END__

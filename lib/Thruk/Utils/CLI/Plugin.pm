@@ -169,6 +169,8 @@ sub _plugin_install {
         return("usage: $0 plugin install <name|tarball>\n", 1);
     }
 
+    return("ERROR: bogus plugin name\n", 1) unless Thruk::Utils::Plugin::verify_plugin_name($name);
+
     my($output, $rc, $plugin) = _do_plugin_install($c, $name, $globaloptions);
     if($rc != 0) {
         return($output, $rc);
@@ -254,6 +256,8 @@ sub _do_plugin_install {
     _debug("unpacking");
     Thruk::Utils::IO::cmd($c, ["tar", "xfz", $tarball, "-C", $tmpdir]);
     $root = $tmpdir.'/'.(keys %{$root})[0];
+    move($root, $tmpdir.'/'.$name);
+    $root = $tmpdir.'/'.$name;
     my $plugin = Thruk::Utils::Plugin::read_plugin_details($root);
 
     # do we overwrite an existing plugin?
@@ -287,6 +291,7 @@ sub _plugin_remove {
     if(!$name) {
         return("usage: $0 plugin install <name|tarball>\n", 1);
     }
+    return("ERROR: bogus plugin name\n", 1) unless Thruk::Utils::Plugin::verify_plugin_name($name);
 
     my($plugin_enabled_dir, $plugin_available_dir) = Thruk::Utils::Plugin::get_plugin_paths($c);
     if(-d $plugin_enabled_dir.'/'.$name) {
