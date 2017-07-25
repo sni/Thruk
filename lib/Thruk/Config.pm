@@ -556,6 +556,7 @@ sub set_default_config {
 
     # merge hashes
     for my $key (qw/cmd_quick_status cmd_defaults/) {
+        die(sprintf("%s should be a hash, got %s: %s", $key, ref $config->{$key}, Dumper($config->{$key}))) unless ref $config->{$key} eq 'HASH';
         $config->{$key} = { %{$defaults->{$key}}, %{ $config->{$key}} };
     }
     # command disabled should be a hash
