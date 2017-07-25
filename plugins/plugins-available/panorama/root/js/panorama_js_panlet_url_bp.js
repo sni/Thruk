@@ -57,12 +57,7 @@ Ext.define('TP.PanletBP', {
 
         panel.refreshHandler = function() {
             if(panel.xdata.graph) {
-                var refresh = panel.xdata.refresh;
-                if(refresh == -1 || refresh == undefined) {
-                    var tab = Ext.getCmp('tabpan');
-                    refresh = tab.xdata.refresh;
-                }
-                var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&readonly=1&iframed=1&minimal=1&nav=0&refresh='+refresh;
+                var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&_='+Ext.Date.now();
                 if(!panel.xdata.graph) {
                     newUrl = 'about:blank';
                 }

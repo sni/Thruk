@@ -20,6 +20,8 @@ next:
             - make references link recursive
             - performance improvements for service status nodes
             - add optional operator for status aggregation
+          - Panorama:
+            - fix business process widget refresh (#702)
           - fix issue when mobile plugin is disabled (#731)
 
 2.14-2   Fri May  5 12:31:42 CEST 2017
