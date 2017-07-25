@@ -457,8 +457,8 @@ sub job_page {
         return;
     }
 
-    # try to directly serve the request if it takes less than 10seconds
-    while($is_running and $time < 10) {
+    # try to directly serve the request if it takes less than 3 seconds
+    while($is_running and $time < 3) {
         sleep(1);
         ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
     }

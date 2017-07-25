@@ -2403,6 +2403,7 @@ sub _config_check {
 ##########################################################
 sub _config_reload {
     my($c) = @_;
+    $c->stats->profile(begin => "conf::_config_reload");
 
     my $time = time();
     my $name = $c->stash->{'param_backend'};
@@ -2447,6 +2448,7 @@ sub _config_reload {
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;
 
+    $c->stats->profile(end => "conf::_config_reload");
     return;
 }
 
