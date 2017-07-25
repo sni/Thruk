@@ -103,6 +103,19 @@ sub peer_name {
 
 ##########################################################
 
+=head2 _raw_query
+
+send a raw query to the backend
+
+=cut
+sub _raw_query {
+    my($self, $query) = @_;
+    my $res = $self->_req('_raw_query', [$query]);
+    return $res->[2];
+}
+
+##########################################################
+
 =head2 reconnect
 
 recreate lwp object

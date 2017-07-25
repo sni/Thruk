@@ -915,6 +915,14 @@ sub _cmd_raw {
         my $peer = $c->{'db'}->get_peer_by_name($opt->{'remote_name'});
         die('no such backend: '.$opt->{'remote_name'}) unless defined $peer;
         $key = $peer->peer_key();
+    }
+    elsif($opt->{'backends'}) {
+        if(ref $opt->{'backends'} ne 'ARRAY' || scalar @{$opt->{'backends'}} != 1) {
+            die('backends must be an array with a single value');
+        }
+        my $peer = $c->{'db'}->get_peer_by_name($opt->{'backends'}->[0]);
+        die('no such backend: '.$opt->{'backends'}->[0]) unless defined $peer;
+        $key = $peer->peer_key();
     } else {
         $key = $keys[0];
     }
