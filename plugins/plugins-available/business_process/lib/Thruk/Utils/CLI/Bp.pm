@@ -103,6 +103,7 @@ sub cmd {
     # enable all backends for now till configuration is possible for each BP
     $c->{'db'}->enable_backends();
 
+    undef $id if $id eq 'all';
     my $t0 = [gettimeofday];
     my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
     for my $bp (@{$bps}) {
