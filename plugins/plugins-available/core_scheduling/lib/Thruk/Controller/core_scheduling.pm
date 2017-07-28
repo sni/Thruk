@@ -188,6 +188,7 @@ sub _reschedule_backend {
     for my $d (@{$data}) {
         next unless $d->{'check_interval'};
         next unless $d->{'has_been_checked'};
+        next unless $d->{'in_check_period'};
         push @{$intervals->{$d->{'check_interval'}}}, $d;
     }
     for my $interval (keys %{$intervals}) {
