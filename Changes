@@ -22,6 +22,8 @@ next:
             - add optional operator for status aggregation
           - Panorama:
             - fix business process widget refresh (#702)
+          - Config Tool:
+            - fix removing too many backends (#743)
           - fix issue when mobile plugin is disabled (#731)
 
 2.14-2   Fri May  5 12:31:42 CEST 2017

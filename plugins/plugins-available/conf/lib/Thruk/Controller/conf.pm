@@ -770,10 +770,15 @@ sub _process_backends_page {
             return $c->redirect_to('conf.cgi?sub=backends');
         }
 
-        my $x=0;
+        my $numbers = [];
+        for my $key (sort keys %{$c->req->parameters}) {
+            if($key =~ m/^name(\d+)/mx) {
+                push @{$numbers}, $1;
+            }
+        }
         my $backends = [];
         my $new = 0;
-        while(defined $c->req->parameters->{'name'.$x}) {
+        for my $x (sort { $a <=> $b } @{$numbers}) {
             my $backend = {
                 'name'    => $c->req->parameters->{'name'.$x},
                 'type'    => $c->req->parameters->{'type'.$x},
