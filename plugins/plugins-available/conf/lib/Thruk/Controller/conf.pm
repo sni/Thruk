@@ -811,7 +811,7 @@ sub _process_backends_page {
                 $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
-                $backend->{'state_host'} = $peer->{'state_host'} if defined $peer->{'state_host'};
+                $backend->{'state_host'} = $peer->{'config'}->{'state_host'} if defined $peer->{'config'}->{'state_host'};
             }
             $new = 1 if $x == 1;
             push @{$backends}, $backend;
