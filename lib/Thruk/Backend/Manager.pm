@@ -890,6 +890,37 @@ sub close_logcache_connections {
 
 ########################################
 
+=head2 lmd_stats
+
+  lmd_stats($c)
+
+return lmd statistics
+
+=cut
+
+sub lmd_stats {
+    my($self, $c) = @_;
+    return unless defined $c->config->{'use_lmd_core'};
+    my $stats = $c->{'db'}->get_processinfo(
+                                extra_columns => [qw/peer_name peer_status peer_bytes_send peer_bytes_received
+                                                     peer_queries peer_last_error peer_last_update peer_last_online
+                                                     peer_response_time
+                                                    /],
+                                backend       => $c->{'db'}->peer_key(),
+                            );
+    my($status, undef) = Thruk::Utils::LMD::status($c->config);
+    my $start_time = $status->[0]->{'start_time'};
+    my $now = time();
+    for my $key (sort keys %{$stats}) {
+        my $stat = $stats->{$key};
+        $stat->{'peer_bytes_send_rate'}     = $stat->{'peer_bytes_send'} / ($now - $start_time);
+        $stat->{'peer_bytes_received_rate'} = $stat->{'peer_bytes_received'} / ($now - $start_time);
+    }
+    return($stats);
+}
+
+########################################
+
 =head2 _get_macros
 
   _get_macros

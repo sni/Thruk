@@ -5,6 +5,7 @@ next:
           - action menus: add close_timeout option
           - downtimes: verify if end date is after start date
           - support cascaded http backends with lmd
+          - show lmd statistics to performance page
           - broadcasts:
             - show broadcasts optionally on the login page
             - add optional annotation icon

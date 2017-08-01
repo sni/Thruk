@@ -505,6 +505,43 @@
         </tr>
         [% END %]
 
+        [% IF has_lmd %]
+        <tr>
+          <td valign="middle"><div class='perfTypeTitle'>LMD Statistics:</div></td>
+          <td valign="top" colspan=2>
+            <table border="1" cellspacing="0" cellpadding="0" class="data lmd_stats">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Backend</th>
+                      <th class='data'>Send</th>
+                      <th class='data'>Received</th>
+                      <th class='data'>Send Rate</th>
+                      <th class='data'>Received Rate</th>
+                      <th class='data'>Last Update</th>
+                      <th class='data'>Latency</th>
+                    </tr>
+                    [% FOREACH peer_key = lmd_stats.keys.sort %]
+                    [% s = lmd_stats.$peer_key %]
+                    <tr>
+                      <td class='dataVal'>[% s.peer_name %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_send, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_received, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_send_rate, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]/s</td>
+                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_received_rate, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]/s</td>
+                      <td class='dataVal'>[% date_format(c, s.peer_last_update) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f', s.peer_response_time) %]s</td>
+                    </tr>
+                    [% END %]
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        [% END %]
+
       </table>
     </div>
 

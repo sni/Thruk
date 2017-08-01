@@ -79,9 +79,10 @@ sub status {
     my $status        = [];
     my $total_started = 0;
     my $started       = 0;
+    my $start_time    = 0;
     my $pid;
 
-    return($status, $total_started) unless $config->{'use_lmd_core'};
+    return($status, $total_started, $start_time) unless $config->{'use_lmd_core'};
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
@@ -89,8 +90,9 @@ sub status {
         $started = 1;
         $pid     = read_file($lmd_dir.'/pid');
         chomp($pid);
+        $start_time = (stat($lmd_dir.'/pid'))[10];
     }
-    push @{$status}, { status => $started, pid => $pid };
+    push @{$status}, { status => $started, pid => $pid, start_time => $start_time };
     return($status, $total_started);
 }
 
