@@ -1188,6 +1188,9 @@ sub _read_socket_do {
     }
 
     $self->_close($sock) unless $self->{'keepalive'};
+    if($status >= 400 && $recv) {
+        $msg .= ' - '.$recv;
+    }
     return($status, $msg, $recv);
 }
 

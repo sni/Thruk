@@ -119,6 +119,7 @@ sub init_backend_thread_pool {
         $lmd_peer = Thruk::Backend::Provider::Livestatus->new({
                                                 peer      => $config->{'tmp_path'}.'/lmd/live.sock',
                                                 peer_key  => 'lmdpeer',
+                                                retries_on_connection_error => 0,
                                             });
         $lmd_peer->peer_key('lmdpeer');
         $lmd_peer->{'lmd_optimizations'} = 1;

@@ -115,6 +115,7 @@ sub new {
         peer      => $self->{'peer'},
         verbose   => $self->{'verbose'},
         keepalive => $self->{'keepalive'},
+        retries_on_connection_error => $self->{'retries_on_connection_error'},
     );
     bless($self, $class);
 

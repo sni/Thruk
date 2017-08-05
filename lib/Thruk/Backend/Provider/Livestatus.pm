@@ -721,7 +721,7 @@ sub get_logs {
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
     # optimized naemon with wrapped_json output
-    if($self->{'lmd_optimizations'}) {
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "logs");
         #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
     }
