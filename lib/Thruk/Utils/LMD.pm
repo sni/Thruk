@@ -201,7 +201,13 @@ sub check_pid {
     my $pid = read_file($file);
     if($pid =~ m/^(\d+)\s*$/mx) {
         $pid = $1;
-        if(-d '/proc/'.$pid) {
+        if(! -d '/proc') {
+            # check pid with kill when no proc filesystem exists
+            if(kill(0, $pid)) {
+                return($pid);
+            }
+        }
+        elsif(-d '/proc/'.$pid) {
             my $cmd = read_file('/proc/'.$pid.'/cmdline');
             if($cmd =~ m/lmd/mxi) {
                 return $pid;
@@ -228,8 +234,7 @@ sub create_thread_dump {
     my $pid_file = $lmd_dir.'/pid';
     my $pid = check_pid($pid_file);
     if($pid) {
-        # send SIGUSR1
-        kill(10, $pid);
+        kill('USR1', $pid);
     }
     return;
 }
@@ -256,13 +261,13 @@ sub kill_if_not_responding {
 
     if(!$pid) {
         Thruk::Utils::External::_do_child_stuff($c, 0, 0);
-        alarm(2);
+        alarm(3);
         eval {
-            $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites");
+            $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites\n");
         };
         alarm(0);
         if($@) {
-            $c->log->warn("lmd not responding, killing with force");
+            $c->log->warn("lmd not responding, killing with force: err - ".$@);
             kill(2, $lmd_pid);
             sleep(1);
             kill(9, $lmd_pid);
@@ -274,11 +279,11 @@ sub kill_if_not_responding {
     while(POSIX::waitpid($pid, POSIX::WNOHANG) == 0) {
         sleep(1);
         $waited++;
-        last if $waited >= 2;
+        last if $waited > 2;
     }
     my $rc = $?;
     if($rc != 0) {
-        $c->log->warn("lmd not responding, killing with force");
+        $c->log->warn("lmd not responding, killing with force: rc - ".$rc);
         kill(2, $pid);
         kill(2, $lmd_pid);
         sleep(1);
