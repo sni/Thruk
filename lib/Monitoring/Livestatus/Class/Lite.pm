@@ -110,13 +110,14 @@ sub new {
         $self = \%args;
     }
 
-    $self->{backend_obj} = Monitoring::Livestatus->new(
+    my $backend_args = {
         name      => $self->{'name'},
         peer      => $self->{'peer'},
         verbose   => $self->{'verbose'},
         keepalive => $self->{'keepalive'},
-        retries_on_connection_error => $self->{'retries_on_connection_error'},
-    );
+    };
+    $backend_args->{'retries_on_connection_error'} = $self->{'retries_on_connection_error'} if defined $self->{'retries_on_connection_error'};
+    $self->{backend_obj} = Monitoring::Livestatus->new(%{$backend_args});
     bless($self, $class);
 
     return $self;
