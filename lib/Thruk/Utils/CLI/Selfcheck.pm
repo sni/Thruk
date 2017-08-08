@@ -27,6 +27,7 @@ The selfcheck command runs a couple of selfchecks to identify typical issues whe
     - all                       runs all checks below
     - filesystem                runs filesystem checks
     - logfiles                  runs logfile checks
+    - lmd                       runs lmd related checks
     - recurring_downtimes       runs recurring downtimes checks
     - reports                   runs reporting checks
 

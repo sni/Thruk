@@ -63,6 +63,9 @@ sub self_check {
     if($type eq 'all' or $type eq 'recurring_downtimes') {
         push @{$results}, _reccuring_downtime_checks($c);
     }
+    if($type eq 'all' or $type eq 'lmd') {
+        push @{$results}, _lmd_checks($c);
+    }
 
     # aggregate results
     if(scalar @{$results} == 0) {
@@ -286,6 +289,63 @@ sub check_recurring_downtime {
     return($errors, $details);
 }
 
+##############################################
+
+=head2 _lmd_checks
+
+    _lmd_checks($c)
+
+verify errors in lmd
+
+=cut
+sub _lmd_checks  {
+    my($c) = @_;
+    return unless $c->config->{'use_lmd_core'};
+
+    my $details = "LMD:\n";
+    if($c->config->{'lmd_core_bin'}) {
+        if(! -x $c->config->{'lmd_core_bin'}) {
+            chomp(my $err = $!);
+            $details .= sprintf("  - lmd binary %s not executable: %s\n", $c->config->{'lmd_core_bin'}, $err);
+            return({sub => 'lmd', rc => 2, msg => "LMD CRITICAL", details => $details });
+        }
+    }
+
+    # try to run
+    my $cmd = ($c->config->{'lmd_core_bin'} || 'lmd').' --help 2>&1';
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    if($rc != 2 || $output !~ m/\QUsage of\E/mx) {
+        $details .= sprintf("  - cannot execute lmd: %s\n", $output);
+        return({sub => 'lmd', rc => 2, msg => "LMD WARNING", details => $details });
+    }
+
+    my($status, undef) = Thruk::Utils::LMD::status($c->config);
+    my $pid = $status->[0]->{'pid'};
+    if(!$pid) {
+        $details .= "  - lmd not running\n";
+        return({sub => 'lmd', rc => 1, msg => "LMD WARNING", details => $details });
+    }
+
+    my $start_time = $status->[0]->{'start_time'};
+    $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
+
+    my $total = scalar @{$c->{'db'}->peer_key()};
+    my $stats = $c->{'db'}->lmd_stats($c);
+    my $online = 0;
+    for my $key (sort keys %{$stats}) {
+        my $stat = $stats->{$key};
+        $online++ if $stat->{'status'} == 0;
+    }
+    $details .= sprintf("  - %i/%i backends online\n", $online, $total);
+    for my $peer ( @{ $c->{'db'}->get_peers() } ) {
+        my $key  = $peer->{'key'};
+        my $name = $peer->{'name'};
+        next unless $c->stash->{'failed_backends'}->{$key};
+        $details .= sprintf("    - %s: %s\n", $name, $c->stash->{'failed_backends'}->{$key});
+    }
+
+    return({sub => 'lmd', rc => 0, msg => "LMD OK", details => $details });
+}
 
 ##############################################
 
