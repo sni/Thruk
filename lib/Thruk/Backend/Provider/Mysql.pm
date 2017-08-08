@@ -222,6 +222,16 @@ sub get_processinfo {
 
 ##########################################################
 
+=head2 get_sites
+
+=cut
+
+sub get_sites {
+    confess("unimplemented");
+}
+
+##########################################################
+
 =head2 get_can_submit_commands
 
 =cut
