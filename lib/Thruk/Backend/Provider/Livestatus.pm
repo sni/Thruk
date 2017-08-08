@@ -194,6 +194,46 @@ sub get_processinfo {
 
 ##########################################################
 
+=head2 get_sites
+
+return the sites list from lmd
+
+=cut
+sub get_sites {
+    my($self, %options) = @_;
+    my $key = $self->peer_key();
+    my $data;
+    if(defined $options{'data'}) {
+        $data = { $key => $options{'data'}->[0] };
+    } else {
+        unless(defined $options{'columns'}) {
+            $options{'columns'} = [qw/
+                        peer_key peer_name key name addr status bytes_send bytes_received queries
+                        last_error last_update last_online response_time idling last_query
+            /];
+            if(defined $options{'extra_columns'}) {
+                push @{$options{'columns'}}, @{$options{'extra_columns'}};
+            }
+        }
+
+        $options{'options'}->{AddPeer} = 1;
+        $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
+
+        $data = $self->_optimize(
+                $self->{'live'}
+                     ->table('sites')
+                     ->columns(@{$options{'columns'}})
+                     ->options($options{'options'}))
+                     ->hashref_pk('peer_key');
+        return $data if $ENV{'THRUK_SELECT'};
+        return $data if $self->{'lmd_optimizations'};
+    }
+
+    return($data, 'HASH');
+}
+
+##########################################################
+
 =head2 get_can_submit_commands
 
 returns if this user is allowed to submit commands

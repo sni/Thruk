@@ -525,13 +525,13 @@
                     [% FOREACH peer_key = lmd_stats.keys.sort %]
                     [% s = lmd_stats.$peer_key %]
                     <tr>
-                      <td class='dataVal'>[% s.peer_name %]</td>
-                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_send, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_received, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_send_rate, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]/s</td>
-                      <td class='dataVal'>[% n = reduce_number(s.peer_bytes_received_rate, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]/s</td>
-                      <td class='dataVal'>[% date_format(c, s.peer_last_update) %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f', s.peer_response_time) %]s</td>
+                      <td class='dataVal'>[% s.name %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.bytes_send, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.bytes_received, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.bytes_send_rate, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]/s</td>
+                      <td class='dataVal'>[% n = reduce_number(s.bytes_received_rate, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]/s</td>
+                      <td class='dataVal'>[% date_format(c, s.last_update) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f', s.response_time) %]s</td>
                     </tr>
                     [% END %]
                   </table>
