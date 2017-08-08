@@ -25,7 +25,7 @@
               <th>Sounds:</th>
               <td>
                 [% IF has_cgi_sounds %]
-                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound_mute.png[% ELSE %]sound.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
                 [% ELSE %]
                 <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
