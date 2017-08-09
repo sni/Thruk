@@ -57,6 +57,7 @@ debian/thruk.*/.*
 debian/thruk.*.substvars
 debian/files
 debian/thruk.*.debhelper.log
+debian/.debhelper
 build-stamp
 configure-stamp
 my_templates/

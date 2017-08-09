@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.16     Tue Aug  8 21:18:40 CEST 2017
           - xls exports: add column reordering
           - action menus: add close_timeout option
           - downtimes: verify if end date is after start date

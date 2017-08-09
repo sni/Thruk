@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2017-07-05" "perl v5.20.2" "User Contributed Perl Documentation"
+.TH thruk 3 "2017-08-08" "perl v5.20.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -143,28 +143,30 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 .Vb 1
-\&  Usage: thruk [options] [url|files...]
+\&  Usage: thruk [globaloptions] <command> [commandoptions]
 \&
-\&  Options:
-\&  \-h, \-\-help                    Show this help message and exit
-\&  \-v, \-\-verbose                 Print verbose output
-\&  \-V, \-\-version                 Print version
+\&  Globaloptions:
+\&    \-h, \-\-help                    Show this help message and exit
+\&    \-v, \-\-verbose                 Print verbose output
+\&    \-q, \-\-quiet                   Print less output
+\&    \-V, \-\-version                 Print version
 \&
-\&  \-b, \-\-backend=<backend>       Comma seperated list of backends/sites
-\&                                which should be used for querys.
-\&  \-l, \-\-list\-backends           List available backends/sites.
-\&  \-a, \-\-action=<action>         Perform given action. see below for a list.
+\&    \-b, \-\-backend=<backend>       Comma seperated list of backends/sites
+\&                                  which should be used for querys.
+\&    \-A, \-\-auth=<auth>             Set username for querys
 \&
-\&  \-A, \-\-auth=<auth>             Set username for querys
+\&    \-c, \-\-credential=<pw>         Credential when connecting to remote
+\&                                  Thruk installations specified by the
+\&                                  remote\-url.
+\&    \-r, \-\-remote\-url=<url>        URL to remote installation.
+\&        \-\-local                   Don\*(Aqt try to connect fastcgi daemon first.
 \&
-\&  \-c, \-\-credential=<pw>         Credential when connecting to remote
-\&                                Thruk installations specified by the
-\&                                remote\-url.
-\&  \-r, \-\-remote\-url=<url>        URL to remote installation.
-\&      \-\-local                   Don\*(Aqt try to connect fastcgi daemon first.
+\&    \-y, \-\-yes                     answer yes to all given questions.
+\&    \-f, \-\-force                   some actions need to be forced
 \&
-\&  \-y, \-\-yes                     answer yes to all given questions.
-\&  \-f, \-\-force                   some actions need to be forced
+\&  Compatibility options:
+\&    \-l, \-\-list\-backends           List available backends/sites. Alias for \*(Aqbackend list\*(Aq.
+\&    \-a, \-\-action=<command>        Perform given action. see below for a list.
 .Ve
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
@@ -208,50 +210,10 @@ script has the following arguments
 .Ve
 .IP "\fB\-a\fR \fIaction\fR, \fB\-\-action\fR=\fIaction\fR" 4
 .IX Item "-a action, --action=action"
-.Vb 5
+.Vb 1
+\&    This is deprecated, use the new form \*(Aqthruk <cmd> ...\*(Aq instead.
+\&
 \&    perform selected action:
-\&      \- url=<url>                   output url result
-\&        \-i / \-\-all\-inclusive        includes all css, javascript and images in the resulting html page
-\&      \- report=<nr>                 generate report
-\&      \- reportmail=<nr>             send report by mail
-\&
-\&    Logcache: ( MySQL / MongoDB )
-\&      \- logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day. (hint: use \-\-start=3w to import last 3weeks only)
-\&      \- logcacheupdate              update logcache
-\&      \- logcacheauthupdate          update logcache authorization information
-\&      \- logcachestats               print logcache statistics
-\&      \- logcacheclean(=days)        clean everything older than specified number of days. Default is one year.
-\&      \- logcacheoptimize            optimize and repair logcache (mysql only)
-\&      \- logcacheremoveunused        remove old tables from no longer used backends (mysql only)
-\&
-\&    Livestatus Cache:
-\&      \- livecachestart              start lmd/shadownaemons livecache
-\&      \- livecachestop               stop all lmd/shadownaemons
-\&      \- livecacherestart            restart livecaches for each site sequentially
-\&      \- livecachestatus             show livecache status
-\&
-\&    Data Commands
-\&      \- listbackends                list all backends
-\&      \- listhosts                   list hostnames
-\&      \- listservices                list servicesnames
-\&      \- listhostgroups              list hostgroupnames
-\&      \- command <host> <service>    print used command line for this host/service
-\&
-\&    Graph Commands
-\&      \- graph                       print graph to stdout. Options are
-\&                                    \-\-host, \-\-service, \-\-width, \-\-height, \-\-source, \-\-format
-\&                                    \-\-start and \-\-end.
-\&                                    \-\-format can bei either \*(Aqpng\*(Aq or \*(Aqbase64\*(Aq.
-\&                                    this export will export the exact same graph as used in the
-\&                                    reports or on the details page.
-\&
-\&    Selfcheck Commands
-\&      \- selfcheck(=subtype)         run self check(s)
-\&                                    availabel subtypes:
-\&                                     \- filesystem
-\&                                     \- logfiles
-\&                                     \- reports
-\&                                     \- recurring_downtimes
 \&
 \&    Scheduling Commands
 \&      \- fix_scheduling(=filter)     balance scheduling or all hosts and services
@@ -260,13 +222,7 @@ script has the following arguments
 \&                                    fix_scheduling=sg:<servicegroup>
 \&
 \&    Internal Commands
-\&      \- installcron                 update cronjobs for downtimes and reports
-\&                                    (only needed during package installation)
-\&      \- uninstallcron               remove all thruk cronjobs
-\&                                    (only needed during package deinstallation)
 \&      \- compile                     compile templates for faster access
-\&      \- bp/bpd(=nr)                 calculate all/specified business process(es)
-\&      \- bpcommit                    write objects for business processes and reloads core
 \&      \- clean_dashboards            remove empty dashboards which are older than 1 day
 .Ve
 .IP "\fB\-A\fR \fIauthname\fR, \fB\-\-auth\fR=\fIauthname\fR" 4
@@ -307,43 +263,6 @@ List available backends:
 .PP
 .Vb 1
 \&  %> thruk \-l
-.Ve
-.PP
-Export the event log as excel file:
-.PP
-.Vb 1
-\&  %> thruk \-A thrukadmin \-a \*(Aqurl=/thruk/cgi\-bin/showlog.cgi?view_mode=xls\*(Aq > eventlog.xls
-.Ve
-.PP
-Urls can be shortened.
-Export all services into an excel file:
-.PP
-.Vb 1
-\&  %> thruk \*(Aqstatus.cgi?view_mode=xls&host=all\*(Aq > allservices.xls
-.Ve
-.PP
-Export service availability data into a csv file:
-.PP
-.Vb 1
-\&  %> thruk \-A thrukadmin \-a \*(Aqurl=avail.cgi?host=all&timeperiod=last7days&csvoutput=1\*(Aq > all_host_availability.csv
-.Ve
-.PP
-Generate pdf report
-.PP
-.Vb 1
-\&  %> thruk \-a \*(Aqreport=1\*(Aq > report.pdf
-.Ve
-.PP
-Generate pdf report and send it by mail:
-.PP
-.Vb 1
-\&  %> thruk \-a \*(Aqreportmail=1\*(Aq
-.Ve
-.PP
-Reschedule next check for host localhost now:
-.PP
-.Vb 1
-\&  %> thruk \*(Aqcmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now\*(Aq
 .Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"
