@@ -6,38 +6,20 @@
 <script type="text/javascript">
 <!--
 
-  function MyHash()
-  {
-      this.length = 0;
-      for (var i = 0; i < arguments.length; i += 2) {
-          if (typeof(arguments[i + 1]) != 'undefined') {
-              this[arguments[i]] = arguments[i + 1];
-              this.length++;
-          }
-      }
-  }
-
   function html_entity_decode(str) {
     var ta=document.createElement("textarea");
     ta.innerHTML=str.replace('<',"&lt;").replace('>',"&gt;");
     return ta.value;
   }
 
-
-  var details = new Array(
-  [% FOR a = image_map %]
-  new MyHash('start', "[% a.start_human %]", 'end', "[% a.end_human %]", 'state', "[% a.state %]", 'duration',  "[% a.duration %]", 'plugin_output', "[% HTML.escape(a.plugin_output) | replace("'", "\\'") %]", 'real_plugin_output', "[% HTML.escape(a.real_plugin_output) | replace("'", "\\'") %]")[% UNLESS loop.last %],[% END %]
-
-  [% END %]
-  );
-
+  var details = [% json_encode(image_map) %];
   var tmp;
   function showDetail(nr) {
     tmp = details[nr];
     document.getElementById('popup').style.visibility='visible';
     document.getElementById('detail_state').innerHTML         = details[nr].state;
-    document.getElementById('detail_start').innerHTML         = details[nr].start;
-    document.getElementById('detail_end').innerHTML           = details[nr].end;
+    document.getElementById('detail_start').innerHTML         = details[nr].start_human;
+    document.getElementById('detail_end').innerHTML           = details[nr].end_human;
     document.getElementById('detail_duration').innerHTML      = details[nr].duration;
     if(details[nr].plugin_output != details[nr].real_plugin_output) {
       [% IF escape_html_tags %]
