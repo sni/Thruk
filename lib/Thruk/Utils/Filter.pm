@@ -347,6 +347,7 @@ sub clean_referer {
         $uri =~ s/&amp;$key=[^&]+//gmx;
         $uri =~ s/\?$key=[^&]+/?/gmx;
     }
+    $uri =~ s/\.cgi\?\&amp;/.cgi?/gmx;
     return $uri;
 }
 
