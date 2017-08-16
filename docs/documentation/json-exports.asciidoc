@@ -47,6 +47,15 @@ See http://search.cpan.org/perldoc?Monitoring%3A%3AAvailability#CONSTRUCTOR[Moni
 for a detailed description of all parameters.
 
 
+==== Statistics Data / Tactical Overview Data
+
+Example: /thruk/cgi-bin/tac.cgi?view_mode=json
+
+Parameters: none
+
+Example: /thruk/cgi-bin/tac.cgi?view_mode=json
+
+
 ==== Backends / Sites Data
 {% include new_since.ad version="2.04" %}
 Export all site/backend specific data:

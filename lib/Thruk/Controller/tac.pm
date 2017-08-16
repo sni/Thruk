@@ -32,6 +32,17 @@ sub index {
     $c->stash->{'page'}          = 'tac';
     $c->stash->{'template'}      = 'tac.tt';
 
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
+    if($view_mode eq 'json') {
+        my $data = {
+            stats       => $c->stash->{'stats'},
+            hosts       => $c->stash->{'host_stats'},
+            services    => $c->stash->{'service_stats'},
+        };
+        return $c->render(json => $data);
+    }
+
+
     # set audio file to play
     Thruk::Utils::Status::set_audio_file($c);
 
