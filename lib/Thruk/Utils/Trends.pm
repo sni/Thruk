@@ -145,7 +145,7 @@ sub _do_report {
         $c->stash->{nomap}     = $c->req->parameters->{'nomap'};
     }
     $c->stash->{nomap}     = '' unless defined $c->stash->{nomap};
-    $c->stash->{image_map} = '' unless defined $c->stash->{image_map};
+    $c->stash->{image_map} = [] unless defined $c->stash->{image_map};
 
     # finished
     $c->stash->{time_token} = time() - $start_time;
