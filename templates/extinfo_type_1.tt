@@ -201,6 +201,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Current Attempt:</td>
+                            [% current_attempt = host.current_attempt %]
                             [% IF host.state_type == 1 && host.current_attempt == 1 && host.state != 0 %][% current_attempt = host.max_check_attempts %][% END %]
                             <td class='dataVal'>[% current_attempt %]/[% host.max_check_attempts %]&nbsp;&nbsp;([% IF host.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td>
                           </tr>
