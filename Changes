@@ -3,6 +3,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - add json export to tac page
           - add workaround for displaying wrong host current_check_attempt
+          - Business Process:
+            - change pre/post hooks arguments
 
 2.16     Tue Aug  8 21:18:40 CEST 2017
           - xls exports: add column reordering
