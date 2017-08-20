@@ -712,46 +712,58 @@ sub bulk_send {
     my($c, $commands) = @_;
 
     for my $backends (keys %{$commands}) {
-        my $options = {};
         # remove duplicate commands
         my $commands2send     = Thruk::Utils::array_uniq($commands->{$backends});
-        $options->{'command'} = join("\n\n", @{$commands2send});
-        $options->{'backend'} = [ split(/,/mx, $backends) ];
-        return 1 if $options->{'command'} eq '';
 
-        my @names;
-        for my $b (ref $backends eq 'ARRAY' ? @{$backends} : ($backends)) {
-            my $peer = $c->{'db'}->get_peer_by_key($b);
-            push @names, (defined $peer ? $peer->peer_name() : $b);
+        # bulk send only 100 at a time
+        while(@{$commands2send}) {
+            my $bucket = [ splice @{$commands2send}, 0, 100 ];
+            _bulk_send_backend($c, $backends, $bucket);
         }
-        my $backends_string = join(',', @names);
+    }
+    return 1;
+}
 
-        my $testmode = 0;
-        $testmode    = 1 if (defined $ENV{'THRUK_NO_COMMANDS'} or $c->req->parameters->{'test_only'});
+sub _bulk_send_backend {
+    my($c, $backends, $commands2send) = @_;
 
-        for my $cmd (@{$commands2send}) {
-            utf8::decode($cmd);
-            my $logstr = sprintf('%s[%s][%s] cmd: %s%s',
-                                    ($testmode ? 'TESTMODE: ' : ''),
-                                    $c->user->get('username'),
-                                    $backends_string,
-                                    $cmd,
-                                    ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
-                                );
-            if($ENV{'THRUK_TEST_CMD_NO_LOG'}) {
-                $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
-            } else {
-                $c->log->info($logstr);
-            }
+    my $options = {};
+    $options->{'command'} = join("\n\n", @{$commands2send});
+    $options->{'backend'} = [ split(/,/mx, $backends) ];
+    return 1 if $options->{'command'} eq '';
+
+    my @names;
+    for my $b (ref $backends eq 'ARRAY' ? @{$backends} : ($backends)) {
+        my $peer = $c->{'db'}->get_peer_by_key($b);
+        push @names, (defined $peer ? $peer->peer_name() : $b);
+    }
+    my $backends_string = join(',', @names);
+
+    my $testmode = 0;
+    $testmode    = 1 if (defined $ENV{'THRUK_NO_COMMANDS'} or $c->req->parameters->{'test_only'});
+
+    for my $cmd (@{$commands2send}) {
+        utf8::decode($cmd);
+        my $logstr = sprintf('%s[%s][%s] cmd: %s%s',
+                                ($testmode ? 'TESTMODE: ' : ''),
+                                $c->user->get('username'),
+                                $backends_string,
+                                $cmd,
+                                ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
+                            );
+        if($ENV{'THRUK_TEST_CMD_NO_LOG'}) {
+            $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
+        } else {
+            $c->log->info($logstr);
         }
-        if(!$testmode) {
-            $c->{'db'}->send_command( %{$options} );
-            my $cached_proc = $c->cache->get->{'global'} || {};
-            for my $key (split(/,/mx, $backends)) {
-                delete $cached_proc->{'processinfo'}->{$key};
-            }
-            $c->cache->set('global', $cached_proc);
+    }
+    if(!$testmode) {
+        $c->{'db'}->send_command( %{$options} );
+        my $cached_proc = $c->cache->get->{'global'} || {};
+        for my $key (split(/,/mx, $backends)) {
+            delete $cached_proc->{'processinfo'}->{$key};
         }
+        $c->cache->set('global', $cached_proc);
     }
 
     return 1;
