@@ -1007,12 +1007,15 @@ sub get_host_totals_stats {
         return(\%{$rows->[0]}, 'SUM');
     }
 
+    # unhandled are required for playing sounds on details page
     my $stats = [
         'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
         'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
         'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
         'down'                              => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
+        'down_and_unhandled'                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
         'unreachable'                       => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
+        'unreachable_and_unhandled'         => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
     ];
     $class->reset_filter()->stats($stats)->save_filter('hoststatstotals');
     return($self->get_host_totals_stats(%options));
@@ -1119,13 +1122,17 @@ sub get_service_totals_stats {
         return(\%{$rows->[0]}, 'SUM');
     }
 
+    # unhandled are required for playing sounds on details page
     my $stats = [
         'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
         'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
         'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
         'warning'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
+        'warning_and_unhandled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
         'critical'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
+        'critical_and_unhandled'            => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
         'unknown'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3 ]}},
+        'unknown_and_unhandled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
     ];
     $class->reset_filter()->stats($stats)->save_filter('servicestatstotals');
     return($self->get_service_totals_stats(%options));
