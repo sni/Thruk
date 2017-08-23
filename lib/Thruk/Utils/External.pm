@@ -557,9 +557,7 @@ sub _do_child_stuff {
         my $groups = [];
         my $cache = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
         $groups = [sort keys %{$cache->{'contactgroups'}}] if($cache && $cache->{'contactgroups'});
-        local $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
-
-        $ENV{REMOTE_USER_GROUPS} = join(';', sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}});
+        $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
     }
 
     $|=1; # autoflush
