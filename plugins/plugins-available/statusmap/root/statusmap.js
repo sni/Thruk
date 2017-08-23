@@ -137,7 +137,7 @@ function show_tree_map(id_to_show) {
                 tip = document.getElementById('tooltip');
                 tip.style.display = 'none';
 
-                var tree = eval('(' + json + ')');
+                var tree = json;
                 var parent = $jit.json.getParent(tree, id_to_show);
                 if(parent) {
                   additionalParams['host'] = parent.id;
@@ -229,7 +229,7 @@ function show_tree_map(id_to_show) {
           }
     });
 
-    var tree    = eval('(' + json + ')');
+    var tree    = json;
     tm.loadJSON(tree);
     if(id_to_show != 'rootid') {
       var node = tm.graph.getNode(id_to_show);
@@ -323,7 +323,7 @@ function show_circle_map(id_to_show, w, h) {
     });
 
     //load JSON data
-    var tree = eval('(' + json + ')');
+    var tree = json;
     rgraph.loadJSON(tree);
     rgraph.refresh();
     if(id_to_show != 'rootid') {
@@ -430,7 +430,7 @@ function show_hypertree_map(id_to_show, w, h) {
     }
   });
 
-    var tree = eval('(' + json + ')');
+    var tree = json;
     ht.loadJSON(tree);
     ht.root = id_to_show;
     ht.compute();

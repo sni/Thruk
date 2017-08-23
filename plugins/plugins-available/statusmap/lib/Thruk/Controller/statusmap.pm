@@ -129,10 +129,7 @@ sub index {
         $c->stash->{host} = 'rootid';
     }
 
-    #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger and not valid js code)
-    my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
-    $c->stash->{json}          = decode_utf8($coder->encode($json));
-
+    $c->stash->{json}          = $json;
     $c->stash->{title}         = 'Network Map';
     $c->stash->{page}          = 'statusmap';
     $c->stash->{style}         = 'statusmap';

@@ -91,7 +91,7 @@
 <!--
 
 var nodename = '[% nodename %]';
-var json     = '[% json %]';
+var json     = [% json_encode(json) %];
 var groupby  = '[% groupby %]';
 var detail   = [% detail %];
 
