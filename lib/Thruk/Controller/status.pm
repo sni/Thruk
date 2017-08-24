@@ -1033,8 +1033,8 @@ sub _process_combined_page {
     $c->stash->{'comments_by_host_service'}  = {};
     if($selected_hst_columns || $selected_svc_columns) {
         $has_columns = 1;
-        if($selected_hst_columns =~ m/comments/mx
-           || $selected_svc_columns =~ m/comments/mx
+        if(   ($selected_hst_columns && $selected_hst_columns =~ m/comments/mx)
+           || ($selected_svc_columns && $selected_svc_columns =~ m/comments/mx)
            || $c->req->parameters->{'autoShow'}) {
             Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
