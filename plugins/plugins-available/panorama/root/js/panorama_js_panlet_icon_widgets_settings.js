@@ -185,8 +185,8 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel: 'Position',
                     xtype:      'fieldcontainer',
                     layout:     'table',
-                    items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'x', width: 70, value: panel.xdata.layout.x, listeners: {
+                    items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;', hidden: !!tab.map },
+                            { xtype: 'numberfield', name:  'x', width: 70, value: panel.xdata.layout.x, hidden: !!tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
@@ -196,8 +196,8 @@ TP.iconShowEditDialog = function(panel) {
                                     }
                                 }
                             }},
-                            { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'y', width: 70, value: panel.xdata.layout.y, listeners: {
+                            { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px;', hidden: !!tab.map },
+                            { xtype: 'numberfield', name:  'y', width: 70, value: panel.xdata.layout.y, hidden: !!tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
@@ -207,7 +207,31 @@ TP.iconShowEditDialog = function(panel) {
                                     }
                                 }
                             }},
-                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint' }
+
+                            { xtype: 'label', text:  'lon:', style: 'margin-left: 0; margin-right: 2px;', hidden: !tab.map },
+                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: panel.xdata.map.lon, hidden: !tab.map, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    if(!panel.noMoreMoves) {
+                                        panel.noMoreMoves = true;
+                                        var lat = Number(This.up('panel').getValues().lat);
+                                        panel.moveToMapLonLat(undefined, false, {map:{lon: newValue, lat: lat}, layout:{}, appearance:{}});
+                                        panel.noMoreMoves = false;
+                                    }
+                                }
+                            }},
+                            { xtype: 'label', text:  'lat:', style: 'margin-left: 10px; margin-right: 2px;', hidden: !tab.map },
+                            { xtype: 'numberfield', name:  'lat', width: 140, decimalPrecision: 14, value: panel.xdata.map.lat, hidden: !tab.map, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    if(!panel.noMoreMoves) {
+                                        panel.noMoreMoves = true;
+                                        var lon = Number(This.up('panel').getValues().lon);
+                                        panel.moveToMapLonLat(undefined, false, {map:{lon: lon, lat: newValue}, layout:{}, appearance:{}});
+                                        panel.noMoreMoves = false;
+                                    }
+                                }
+                            }},
+
+                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint', hidden: !!tab.map }
                     ]
                 }, {
                     fieldLabel:   'Rotation',

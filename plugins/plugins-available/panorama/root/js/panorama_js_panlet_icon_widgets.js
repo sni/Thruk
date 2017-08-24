@@ -605,6 +605,12 @@ Ext.define('TP.SmallWidget', {
             }
             panel.xdata.map.lon = lonLat.lon;
             panel.xdata.map.lat = lonLat.lat;
+            if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) {
+                /* layout tab */
+                panel.noMoreMoves = true;
+                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({lon:lonLat.lon, lat:lonLat.lat});
+                panel.noMoreMoves = false;
+            }
         }
         panel.saveState();
     },
