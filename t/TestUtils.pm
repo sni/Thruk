@@ -537,6 +537,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Unknown\ attribute\ "data\-\w+"\ for\ tag/imxo;
         next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <input>/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <textarea>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "class"\ for\ tag\ <html>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <form>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <input>/imxo;
