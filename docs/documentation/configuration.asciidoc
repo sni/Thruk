@@ -1474,7 +1474,7 @@ Default: (curl|wget)
 
 ex.:
 
-  cookie_auth_direct_agents = (curl|wget)
+  cookie_auth_direct_agents = (wget|curl|python|Go-http-client)
 
 
 

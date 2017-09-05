@@ -50,7 +50,7 @@ $loginurl               =~ s|//|/|gmx;
 my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
 my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
 my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|images|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
-my $direct_auth_agents  = $config->{'cookie_auth_direct_agents'} || '(curl|wget)';
+my $direct_auth_agents  = $config->{'cookie_auth_direct_agents'} || '(wget|curl|python|Go-http-client)';
 my $direct_auth_regex   = qr#$direct_auth_agents#mxi;
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $session_split       = qr/~~~/mx;
