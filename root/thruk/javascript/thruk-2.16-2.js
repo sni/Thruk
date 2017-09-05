@@ -5038,6 +5038,36 @@ function check_filter_style_changes(form, pageStyle, columnFieldId) {
   return true;
 }
 
+/* remove empty values from form to reduce request size */
+function remove_empty_form_params(form) {
+  var s_data = jQuery(form).serializeArray();
+  for(var i=0; i<s_data.length; i++){
+    var f = s_data[i];
+    if(f["name"].match(/^(hst|svc|dfl)_/) && f["value"] === "") {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+    if(f["name"].match(/_hoststatustypes$/) && f["value"] == "15") {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+    if(f["name"].match(/_servicestatustypes/) && f["value"] == "31") {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+    if(f["name"].match(/_(host|service)props/) && f["value"] == "0") {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+    if(f["name"].match(/_columns_select$/)) {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+    if(f["name"].match(/^(host|service)_columns$/)) {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+    if(f["name"].match(/^(referer|bookmarks?|section)$/)) {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+  }
+  return(true);
+}
+
 /* select option from a select by value*/
 function selectByValue(select, val) {
   for(var x = 0; x< select.options.length; x++) {

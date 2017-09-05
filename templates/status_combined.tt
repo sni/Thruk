@@ -20,7 +20,7 @@
   <tr><td colspan=4><br></td></tr>
 </table>
 
-<form action="" method="GET" id="[% paneprefix %]filterForm">
+<form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(remove_empty_form_params(this))">
 <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:none;" alt="show">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% nav %]">

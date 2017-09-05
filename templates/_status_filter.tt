@@ -1,6 +1,6 @@
 ﻿<button class="filter_button thruk_btn big filter [% IF show_filter_table %]primary[% ELSE %]secondary[% END %]" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
 [% IF show_form %]
-<form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns'));">
+<form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') && remove_empty_form_params(this));">
 [%# make sure IE can submit form by pressing enter #%]
 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="nav" value="[% nav %]">
@@ -410,11 +410,13 @@
             #%]<input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, undefined, {striped: true})"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
             <a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="#" onclick="show_cal('[% paneprefix %][% prefix %]_[% loop.index %]_value')">
             <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+            [% IF enable_shinken_features %]
             <select name="[% paneprefix %][% prefix %]_value_sel" id="[% paneprefix %][% prefix %]_[% loop.index %]_value_sel" style="[% IF s.type == 'priority' %]visibility: visible;[% ELSE %]display: none; visibility: hidden;[% END %]">
               [% FOREACH prio IN priorities.keys.sort.reverse %]
               <option value="[% prio %]"[% IF s.value == prio %] selected[% END %]>[% priorities.$prio %]</option>
               [% END %]
             </select>
+            [% END %]
           </td>
 
 
