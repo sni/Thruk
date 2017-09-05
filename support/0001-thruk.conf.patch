@@ -127,8 +127,8 @@
 +    cgi.cfg  = @SYSCONFDIR@/cgi.cfg
 +    htpasswd = @SYSCONFDIR@/htpasswd
  
-     #pre_obj_save_cmd   =
-     #post_obj_save_cmd  =
+     #pre_obj_save_cmd    =
+     #post_obj_save_cmd   =
 @@ -759,7 +773,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  

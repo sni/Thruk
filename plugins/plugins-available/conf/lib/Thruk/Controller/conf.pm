@@ -80,6 +80,8 @@ sub index {
     $c->stash->{'has_refs'}            = 0;
     $c->stash->{'link_obj'}            = \&Thruk::Utils::Conf::_link_obj;
     $c->stash->{no_tt_trim}            = 1;
+    $c->stash->{post_obj_save_cmd}     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}   // '';
+    $c->stash->{show_summary_prompt}   = $c->config->{'Thruk::Plugin::ConfigTool'}->{'show_summary_prompt'} // 1;
 
     Thruk::Utils::ssi_include($c);
 
@@ -1099,6 +1101,9 @@ sub _apply_config_changes {
     $c->stash->{'template'}      = 'conf_objects_apply.tt';
     $c->stash->{'output'}        = '';
     $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
+
+    local $ENV{'THRUK_SUMMMARY_MESSAGE'} = $c->req->parameters->{'summary'} if $c->req->parameters->{'summary'};
+    local $ENV{'THRUK_SUMMMARY_DETAILS'} = $c->req->parameters->{'summary'} if $c->req->parameters->{'summarydesc'};
 
     if(defined $c->req->parameters->{'save_and_reload'}) {
         return unless Thruk::Utils::check_csrf($c);

@@ -361,3 +361,12 @@ LI.file_node I.jstree-icon {
 TR.tools_category TD {
     border-top: 1px solid #444444;
 }
+
+#summary-dialog-form input {
+  width: 400px;
+}
+
+#summary-dialog-form textarea {
+  width: 400px;
+  height: 80px;
+}

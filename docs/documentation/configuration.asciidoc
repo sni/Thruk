@@ -2155,6 +2155,7 @@ ex.:
     pre_obj_save_cmd          = .../hook.sh
     post_obj_save_cmd         = .../hook.sh
     git_base_dir              = /etc/naemon/conf.d/custom/
+    show_summary_prompt       = 1
     #edit_files               = some/extra/files/to.edit # deprecated
     extra_custom_var_host     = _WORKER
     extra_custom_var_service  = _SNMP_COMMUNITY, _OTHER_CUSTOM_VARIABLE
@@ -2182,20 +2183,26 @@ if the command returns non-zero exit code. Command will be run with
 
 The following environment variables will be set:
 
-     ** `standard macros`      as listed in link:cli.html#_environment-variables[CLI Environment]
-     ** `THRUK_BACKEND_ID`     internal id of the current edited backend
-     ** `THRUK_BACKEND_NAME`   name of the current edited backend
+     ** `standard macros`           as listed in link:cli.html#_environment-variables[CLI Environment]
+     ** `THRUK_BACKEND_ID`          internal id of the current edited backend
+     ** `THRUK_BACKEND_NAME`        name of the current edited backend
+     ** `THRUK_SUMMMARY_MESSAGE`    user supplied change summary title
+     ** `THRUK_SUMMMARY_DETAILS`    user supplied change details
 
 === post_obj_save_cmd
 Run a command after saving object config files. Command will be run with
 'post' as first argument and the root config folder as second
 argument.
 
+An example can be found in 'examples/config_tool_git_checkin'.
+
 The following environment variables will be set:
 
-     ** `standard macros`      as listed in link:cli.html#_environment-variables[CLI Environment]
-     ** `THRUK_BACKEND_ID`     internal id of the current edited backend
-     ** `THRUK_BACKEND_NAME`   name of the current edited backend
+     ** `standard macros`           as listed in link:cli.html#_environment-variables[CLI Environment]
+     ** `THRUK_BACKEND_ID`          internal id of the current edited backend
+     ** `THRUK_BACKEND_NAME`        name of the current edited backend
+     ** `THRUK_SUMMMARY_MESSAGE`    user supplied change summary title
+     ** `THRUK_SUMMMARY_DETAILS`    user supplied change details
 
 
 === git_base_dir
@@ -2204,6 +2211,11 @@ directory which is used to display the history. Should point to a
 directory which is part of a git repository. This config setting is
 only used for the history support in the configuration tool. The
 'git_base_dir' may be overriden by an per backend value.
+
+=== show_summary_prompt
+Thruk will show a prompt to input a change summary if a 'post_obj_save_cmd' is
+set. You can use this option to suppress that prompt.
+
 
 === edit_files
 

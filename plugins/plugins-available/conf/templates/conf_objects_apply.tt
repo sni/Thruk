@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
 <div align="center">
-<form action="conf.cgi" method="POST">
+<form action="conf.cgi" method="POST" id="save_form">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="apply" value="commit">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
@@ -71,7 +71,7 @@
         [% END %]
         </div></div>
         <br style="clear: both"><br>
-        <input type="submit" name="save" value="save your changes to disk" style="width:250px" class="conf_button">
+        <input type="submit" name="save" value="save your changes to disk" style="width:250px" class="conf_button" onclick="save_apply(this, 'save_form'); return false;">
         [% ELSE %]
           There are no pending changes to commit.
         [% END %]

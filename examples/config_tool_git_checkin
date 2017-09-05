@@ -41,6 +41,10 @@ elif [ "$ACTION" == "post" ]; then
   elif [ "$SSH_CLIENT" != "" ]; then
     msg="automatic commit of config tool changes ($SSH_CLIENT)"
   fi
+
+  if [ "$THRUK_SUMMMARY_MESSAGE" != "" ]; then
+    msg="$THRUK_SUMMMARY_MESSAGE\n\n$THRUK_SUMMMARY_DETAILS\n\n($msg)"
+  fi
 fi
 
 git commit -q -a -m "$msg" >/dev/null

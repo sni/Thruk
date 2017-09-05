@@ -585,18 +585,24 @@ function conf_validate_object_form(f) {
 }
 
 /* if form id is set, append own form value to remote form and submit merged */
-function save_reload_apply(formid) {
+function save_reload_apply(btn, formid, name) {
+    if(!name) { name = "save_and_reload"; }
     if(!formid) { return true; }
     var remoteform = document.getElementById(formid);
-    if(!remoteform) { return true; }
-    var input = jQuery("<input>", { type: "hidden", name: "save_and_reload", value: "1" });
-    jQuery(remoteform).append(jQuery(input));
-    if(remoteform.onsubmit()) {
-        // does not work in firefox (only after removing an attribute)
-        //debug(remoteform.submit());
-        jQuery('button.conf_apply_button')[0].click();
+    if(!remoteform) {
+        remoteform = jQuery(btn).closest('FORM');
     }
+    conf_prompt_change_summary(remoteform, function() {
+        var input = jQuery("<input>", { type: "submit", name: name, value: "1", style: "visibility: hidden;" });
+        jQuery(remoteform).append(jQuery(input));
+        input.click();
+        return false;
+    });
     return false;
+}
+
+function save_apply(btn, formid) {
+    return(save_reload_apply(btn, formid, "save"));
 }
 
 var continue_cb;
@@ -679,4 +685,32 @@ function conf_tool_cleanup(btn, link, hide) {
     });
 
     return(false);
+}
+
+function conf_prompt_change_summary(remoteform, callback) {
+    if(!show_commit_summary_prompt) {
+        return(callback());
+    }
+    jQuery("#summary-dialog-form").dialog({
+        autoOpen: true,
+        modal: true,
+        title: 'Enter Change Summary',
+        width: 500,
+        buttons: {
+            "Ok": function() {
+                var input = jQuery("<input>", { type: "hidden", name: "summary", value: jQuery("#summary-text").val() });
+                jQuery(remoteform).append(jQuery(input));
+
+                var input = jQuery("<input>", { type: "hidden", name: "summarydesc", value: jQuery("#summary-desc").val() });
+                jQuery(remoteform).append(jQuery(input));
+
+                jQuery(this).dialog("close");
+                return(callback());
+            },
+            "Cancel": function() {
+                jQuery(this).dialog("close");
+            }
+        }
+    });
+    return(true);
 }
