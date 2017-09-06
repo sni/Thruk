@@ -1062,8 +1062,9 @@ sub _avail_update {
                         }
                     }
                     my $cached = $cache->get(@cache_prefix, 'filter', $filtername, $key);
+                    $cache->set(@cache_prefix, 'filter', $filtername, $key, {val => -1, time => $now}) if(!$cached && !$cached_only);
                     $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $opts, undef, undef, 1);
-                    $cache->set(@cache_prefix, 'filter', $filtername, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                    $cache->set(@cache_prefix, 'filter', $filtername, $key, {val => $data->{$panel}->{$key}, time => $now}) if !$cached_only;
                 }
             }
         }
@@ -1077,11 +1078,12 @@ sub _avail_update {
                 for my $key (keys %{$in->{$panel}}) {
                     my $opts   = $in->{$panel}->{$key}->{opts};
                     my $cached = $cache->get(@cache_prefix, 'hostgroups', $group, $key);
+                    $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => -1, time => $now}) if(!$cached && !$cached_only);
                     if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
                         $c->req->parameters->{include_host_services} = 1;
                     }
                     $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $opts);
-                    $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                    $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if !$cached_only;
                 }
             }
         }
@@ -1093,8 +1095,9 @@ sub _avail_update {
             for my $panel (@{$types->{'servicegroups'}->{$group}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'servicegroups', $group, $key);
+                    $cache->set(@cache_prefix, 'servicegroups', $group, $key, {val => -1, time => $now}) if(!$cached && !$cached_only);
                     $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts});
-                    $cache->set(@cache_prefix, 'servicegroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                    $cache->set(@cache_prefix, 'servicegroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if !$cached_only;
                 }
             }
         }
@@ -1107,8 +1110,9 @@ sub _avail_update {
             for my $panel (@{$types->{'hosts'}->{$host}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'hosts', $host, $key);
+                    $cache->set(@cache_prefix, 'hosts', $host, $key, {val => -1, time => $now}) if(!$cached && !$cached_only);
                     $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host);
-                    $cache->set(@cache_prefix, 'hosts', $host, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                    $cache->set(@cache_prefix, 'hosts', $host, $key, {val => $data->{$panel}->{$key}, time => $now}) if !$cached_only;
                 }
             }
         }
@@ -1122,8 +1126,9 @@ sub _avail_update {
                 for my $panel (@{$types->{'services'}->{$host}->{$service}}) {
                     for my $key (keys %{$in->{$panel}}) {
                         my $cached = $cache->get(@cache_prefix, 'services', $host, $service, $key);
+                        $cache->set(@cache_prefix, 'services', $host, $service, $key, {val => -1, time => $now}) if(!$cached && !$cached_only);
                         $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host, $service);
-                        $cache->set(@cache_prefix, 'services', $host, $service, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                        $cache->set(@cache_prefix, 'services', $host, $service, $key, {val => $data->{$panel}->{$key}, time => $now}) if !$cached_only;
                     }
                 }
             }
@@ -1139,7 +1144,7 @@ sub _avail_update {
 
     my $json = { data => $data };
 
-    $c->stats->profile(end => "_avail_clean_cache");
+    $c->stats->profile(end => "_avail_update");
     return $c->render(json => $json);
 }
 
