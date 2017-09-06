@@ -227,7 +227,12 @@ sub save_bp_objects {
             ($rc, $msg) = (0, 'business process saved and core restarted');
             $reloaded = 1;
         }
-        Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if ($rc == 0 && $reloaded);
+        if($rc == 0 && $reloaded) {
+            my $core_reloaded = Thruk::Utils::wait_after_reload($c, $pkey, $time-1);
+            if(!$core_reloaded) {
+                ($rc, $msg) = (1, 'business process saved but core failed to restart');
+            }
+        }
     } else {
         # discard file
         unlink($filename);
