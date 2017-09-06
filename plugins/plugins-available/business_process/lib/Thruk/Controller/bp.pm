@@ -31,8 +31,9 @@ sub index {
         $c->config->{'bp_modules_loaded'} = 1;
     }
 
-    my $style = $c->req->parameters->{'style'};
-    if($style) {
+    my $action = $c->req->parameters->{'action'} || 'show';
+    my $style  = $c->req->parameters->{'style'};
+    if($style && $action ne 'list_objects') {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
@@ -66,8 +67,6 @@ sub index {
     $c->stash->{allowed_for_edit} = $allowed_for_edit;
     $c->stash->{allowed_for_edit} = 0 if $c->req->parameters->{'readonly'};
     $c->stash->{no_menu}          = $c->req->parameters->{'no_menu'} ? 1 : 0;
-
-    my $action = $c->req->parameters->{'action'} || 'show';
 
     # json actions
     if($allowed_for_edit) {
@@ -377,7 +376,9 @@ sub index {
             }
 
             for my $key (keys %{$c->req->parameters}) {
-                delete $c->req->parameters->{$key};
+                if($key !~ m/^(hoststatustypes|servicestatustypes)/mx) {
+                    delete $c->req->parameters->{$key};
+                }
             }
             for my $key (keys %{$params}) {
                 $c->req->parameters->{$key} = $params->{$key};
