@@ -12,6 +12,7 @@ Ext.define('TP.PanletUrl', {
         panel.xdata.selector = '';
         panel.xdata.keepcss  = true;
         panel.reloadOnSiteChanges = true;
+        panel.xdata.showborder = true;
 
         panel.loader = {
             autoLoad: false,
@@ -217,6 +218,10 @@ Ext.define('TP.PanletUrl', {
             fieldLabel: 'Keep CSS',
             xtype:      'checkbox',
             name:       'keepcss'
+        }, {
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
         }]);
     }
 });
