@@ -6,6 +6,8 @@ next:
             - show summary prompt if a post_obj_save_cmd is set
           - Business Process:
             - add weighted state example custom function
+          - Reports:
+            - add option to only send mails for specific thresholds
 
 2.16-2   Sun Aug 20 13:47:31 CEST 2017
           - add json export to tac page

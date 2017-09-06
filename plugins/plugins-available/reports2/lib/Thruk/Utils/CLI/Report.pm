@@ -65,11 +65,15 @@ sub cmd {
     if($mail) {
         if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, 1)) {
             $output = "report queued successfully\n";
-        }
-        elsif(Thruk::Utils::Reports::report_send($c, $nr)) {
-            $output = "mail send successfully\n";
         } else {
-            return("cannot send mail\n", 1)
+            my $sent = Thruk::Utils::Reports::report_send($c, $nr);
+            if($sent eq "2") {
+                $output = "mail not sent, threshold not reached\n";
+            } elsif($sent) {
+                $output = "mail sent successfully\n";
+            } else {
+                return("cannot send mail\n", 1)
+            }
         }
     } else {
         if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr)) {

@@ -11,6 +11,7 @@
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
         { 'details_max_level'            => [ 'Details SLA %',              'int',             '-1' ,'hide details if sla is above threshold', 1 ] },
+        { 'mail_max_level'               => [ 'Mail SLA %',                 'int',             '-1', 'cancel mail if no object breaks this sla'] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
         { 'initialassumedhoststate'      => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'            ] },
@@ -55,7 +56,11 @@
     [% c.req.parameters.host    = hst %]
     [% c.req.parameters.service = "" %]
     [% available = get_availability_percents() %]
-    [% p = available.total.percent; IF p == -1; p = 100; END; IF param.details_max_level != -1 && p >= param.details_max_level; NEXT; END %]
+    [% p = available.total.percent;
+       IF p == -1; p = 100; END;
+       IF param.mail_max_level != -1 && p <= param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
+       IF param.details_max_level != -1 && p >= param.details_max_level; NEXT;
+      END %]
     [% pagetitle = loc("Host: %s", hst) %]
     [% WRAPPER 'reports/comp/page_standard.tt' %]
       [% PROCESS 'reports/comp/sla_graph_page.tt' %]
