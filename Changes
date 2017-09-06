@@ -4,6 +4,8 @@ next:
           - add python and go client to default cookie_auth_direct_agents
           - Config Tool:
             - show summary prompt if a post_obj_save_cmd is set
+          - Business Process:
+            - add weighted state example custom function
 
 2.16-2   Sun Aug 20 13:47:31 CEST 2017
           - add json export to tac page
