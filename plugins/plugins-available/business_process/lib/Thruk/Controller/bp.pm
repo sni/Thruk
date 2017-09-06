@@ -360,6 +360,10 @@ sub index {
             my $svc = 0;
             my $bp_lookup = {};
             ($params, $hst, $svc) = _bp_list_add_objects($c, $bp, $params, $hst, $svc, $bp_lookup);
+            if($hst == 0 && $svc == 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'this business process has no references' });
+                return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
+            }
             $params->{'title'} = $bp->{'name'};
             $params->{'style'} = 'combined';
             if($hst == 0) {
