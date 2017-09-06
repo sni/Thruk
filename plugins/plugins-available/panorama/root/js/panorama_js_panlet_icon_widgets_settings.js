@@ -209,7 +209,7 @@ TP.iconShowEditDialog = function(panel) {
                             }},
 
                             { xtype: 'label', text:  'lon:', style: 'margin-left: 0; margin-right: 2px;', hidden: !tab.map },
-                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: panel.xdata.map.lon, hidden: !tab.map, listeners: {
+                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: (panel.xdata.map ? panel.xdata.map.lon : 0), hidden: !tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
@@ -220,7 +220,7 @@ TP.iconShowEditDialog = function(panel) {
                                 }
                             }},
                             { xtype: 'label', text:  'lat:', style: 'margin-left: 10px; margin-right: 2px;', hidden: !tab.map },
-                            { xtype: 'numberfield', name:  'lat', width: 140, decimalPrecision: 14, value: panel.xdata.map.lat, hidden: !tab.map, listeners: {
+                            { xtype: 'numberfield', name:  'lat', width: 140, decimalPrecision: 14, value: (panel.xdata.map ? panel.xdata.map.lat : 0), hidden: !tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
