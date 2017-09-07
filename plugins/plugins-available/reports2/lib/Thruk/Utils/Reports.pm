@@ -562,16 +562,18 @@ sub generate_report {
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
 
-    $options->{'var'}->{'send_mail_threshold_reached'} = 1;
+    my $send_mail_threshold_reached = 1;
     if(defined $c->stash->{'param'}->{'mail_max_level'} && $c->stash->{'param'}->{'mail_max_level'} != -1) {
-        $options->{'var'}->{'send_mail_threshold_reached'} = 0;
+        $send_mail_threshold_reached = 0;
         if($c->stash->{'param'}->{'mail_max_level_count'} > 0) {
-            $options->{'var'}->{'send_mail_threshold_reached'} = 1;
+            $send_mail_threshold_reached = 1;
         }
+        my $options = _read_report_file($c, $nr);
+        $options->{'var'}->{'send_mail_threshold_reached'} = $send_mail_threshold_reached;
+        _report_save($c, $nr, $options);
     }
-    _report_save($c, $nr, $options);
 
-    if($options->{'var'}->{'send_mails_next_time'} && $options->{'var'}->{'send_mail_threshold_reached'}) {
+    if($options->{'var'}->{'send_mails_next_time'} && $send_mail_threshold_reached) {
         Thruk::Utils::Reports::report_send($c, $nr);
     }
 

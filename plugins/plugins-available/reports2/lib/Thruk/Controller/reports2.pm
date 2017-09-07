@@ -375,8 +375,10 @@ sub report_download_debug{
             $c->{'rendered'} = 1;
             return 1;
         }
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no debug data for this report', code => 404 });
+    } else {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
