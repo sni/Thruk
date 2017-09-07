@@ -1177,7 +1177,6 @@ sub _read_report_file {
         $needs_save = 1;
     }
 
-
     # preset values from data
     if(defined $rdata) {
         for my $key (keys %{$rdata}) {

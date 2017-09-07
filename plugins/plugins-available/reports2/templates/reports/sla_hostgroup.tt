@@ -58,7 +58,7 @@
       [% available = get_availability_percents() %]
       [% p = available.total.percent;
          IF p == -1; p = 100; END;
-         IF param.mail_max_level != -1 && p <= param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
+         IF param.exists('mail_max_level') && param.mail_max_level != -1 && p <= param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
          IF param.details_max_level != -1 && p >= param.details_max_level; NEXT;
         END %]
       [% pagetitle                    = loc("Host: %s", hst) %]
