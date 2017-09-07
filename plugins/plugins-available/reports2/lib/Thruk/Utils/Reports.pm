@@ -520,9 +520,6 @@ sub generate_report {
         _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
     }
 
-    # update report runtime data
-    set_running($c, $nr, 0, undef, time());
-
     # set error if not already set
     if(!-f $attachment && !$Thruk::Utils::Reports::error) {
         $Thruk::Utils::Reports::error = read_file($logfile);
@@ -544,7 +541,7 @@ sub generate_report {
         }
     }
 
-    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 100, 'finished') if $ENV{'THRUK_JOB_DIR'};
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 95, 'clean up') if $ENV{'THRUK_JOB_DIR'};
 
     # clean up tmp files
     for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
@@ -575,9 +572,12 @@ sub generate_report {
     _report_save($c, $nr, $options);
 
     if($options->{'var'}->{'send_mails_next_time'} && $options->{'var'}->{'send_mail_threshold_reached'}) {
-        set_waiting($c, $nr, 0, 0);
         Thruk::Utils::Reports::report_send($c, $nr);
     }
+
+    # update report runtime data
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 100, 'finished') if $ENV{'THRUK_JOB_DIR'};
+    set_running($c, $nr, 0, undef, time());
 
     _check_for_waiting_reports($c);
     return $attachment;
