@@ -722,7 +722,8 @@ returns first and last logfile entry
 sub _get_logs_start_end {
     my($self, @options) = @_;
     my $res = $self->_req('_get_logs_start_end', \@options);
-    return($res->[0]);
+    my($start, $end) = @{$res->[2]};
+    return([$start, $end]);
 }
 
 ##########################################################
