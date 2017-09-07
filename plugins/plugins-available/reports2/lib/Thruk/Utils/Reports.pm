@@ -551,8 +551,10 @@ sub generate_report {
     if($c->stash->{'debug_info'}) {
         my $debug_file = Thruk::Action::AddDefaults::save_debug_information_to_tmp_file($c);
         if($debug_file) {
+            my $rpt_debug_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
+            move($debug_file, $rpt_debug_file);
             my $options = _read_report_file($c, $nr);
-            $options->{'var'}->{'debug_file'} = $debug_file;
+            $options->{'var'}->{'debug_file'} = $rpt_debug_file;
             _report_save($c, $nr, $options);
         }
     }
@@ -871,6 +873,7 @@ sub clean_report_tmp_files {
     unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dat'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
     unlink $c->config->{'var_path'}.'/reports/'.$nr.'.log'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.log';
     unlink $c->config->{'var_path'}.'/reports/'.$nr.'.html' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.html';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dbg'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
     return;
 }
 
