@@ -33,7 +33,7 @@ sub new {
     my $self = {
         'fast_query_timeout'   => 10,
         'timeout'              => 100,
-        'logs_timeout'         => 100,
+        'logs_timeout'         => 300,
         'config'               => $config,
         'peerconfig'           => $peerconfig,
         'product_prefix'       => $product_prefix,
