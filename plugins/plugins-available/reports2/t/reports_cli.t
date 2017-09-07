@@ -149,7 +149,7 @@ for my $report (@{$test_pdf_reports}) {
         unlink($mailtestfile);
         TestUtils::test_command({
             cmd  => $BIN.' -a reportmail=9999',
-            like => ['/mail send successfully$/'],
+            like => ['/mail sent successfully$/'],
             env  => { 'THRUK_MAIL_TEST' => $mailtestfile },
         });
         ok(-s $mailtestfile, 'mail testfile '.$mailtestfile.' does exist');
