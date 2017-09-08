@@ -593,9 +593,7 @@ sub _set_ssi {
     my($self) = @_;
     my $ssi_dir = $self->config->{'ssi_path'};
     my (%ssi, $dh);
-    if(!-e $ssi_dir) {
-        warn("cannot access ssi_path $ssi_dir: $!");
-    } else {
+    if(-e $ssi_dir) {
         opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
         for my $entry (readdir($dh)) {
             next if $entry eq '.' or $entry eq '..';
