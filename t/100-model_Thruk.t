@@ -212,8 +212,8 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "**
 
 ################################################################################
 # test obfuscation (from global config)
-$b->{'config'}->{'expand_user_macros'}       = ["ALL"];
-$b->{'config'}->{'command_line_obfuscation'} = ['/(\-\-password=")[^"]*(")/$1"***"$2/'];
+$b->{'config'}->{'expand_user_macros'}            = ["ALL"];
+$b->{'config'}->{'commandline_obfuscate_pattern'} = ['/(\-\-password=")[^"]*(")/$1***$2/'];
 Thruk::Config::_do_finalize_config($b->{'config'});
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
