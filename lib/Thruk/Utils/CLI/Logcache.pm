@@ -84,7 +84,7 @@ sub cmd {
 
     $opt->{'force'} = $global_options->{'force'};
     $opt->{'yes'}   = $global_options->{'yes'};
-    $opt->{'files'} = @{$commandoptions};
+    $opt->{'files'} = \@{$commandoptions};
 
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
