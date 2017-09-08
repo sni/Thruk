@@ -6,7 +6,7 @@ use Log::Log4perl qw(:easy);
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 38;
+    plan tests => 40;
 }
 
 BEGIN {
@@ -196,6 +196,33 @@ $cmd = $b->expand_command(
     },
 );
 is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p test3', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# test obfuscation (from host macro)
+$b->{'config'}->{'expand_user_macros'} = ["ALL"];
+Thruk::Config::_do_finalize_config($b->{'config'});
+$cmd = $b->expand_command(
+    'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_ME'], 'custom_variable_values' => ['password']))},
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ -p "password"',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "***"', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# test obfuscation (from global config)
+$b->{'config'}->{'expand_user_macros'}       = ["ALL"];
+$b->{'config'}->{'command_line_obfuscation'} = ['/(\-\-password=")[^"]*(")/$1"***"$2/'];
+Thruk::Config::_do_finalize_config($b->{'config'});
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ --password="test"',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' --password="***"', 'expanded command: '.$cmd->{'line_expanded'});
 
 ################################################################################
 my $res1 = Thruk::Utils::read_resource_file('t/data/resource.cfg');

@@ -1110,6 +1110,15 @@ sub _get_obfuscated_string {
         };
     }
 
+    my $c = $Thruk::Request::c;
+    if($c->config->{'commandline_obfuscate_pattern'}) {
+        for my $pattern (@{$c->config->{'commandline_obfuscate_pattern'}}) {
+            ## no critic
+            eval('$string =~ s'.$pattern.'g');
+            ## use critic
+        }
+    }
+
     return $string;
 }
 

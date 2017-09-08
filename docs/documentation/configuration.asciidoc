@@ -939,6 +939,18 @@ ex.:
   show_full_commandline = 0
 
 
+=== commandline_obfuscate_pattern
+{% include new_since.ad version="2.18" %}
+Replace pattern for expanded command lines. Could be used to replace
+sensitive information from beeing displayed in the gui.
+The pattern is a simple perl regular substitute expression in the form of
+'/pattern/replacement/'
+
+ex.:
+
+  commandline_obfuscate_pattern = /(\-\-password=")[^"]*(")/$1"***"$2/
+
+
 
 === show_full_commandline_source
 Usually the source of your expanded check_command should

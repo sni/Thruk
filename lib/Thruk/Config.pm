@@ -430,6 +430,7 @@ sub set_default_config {
         show_config_edit_buttons        => 0,
         show_backends_in_table          => 0,
         show_logout_button              => 0,
+        commandline_obfuscate_pattern   => [],
         backends_with_obj_config        => {},
         use_feature_statusmap           => 0,
         use_feature_statuswrl           => 0,
@@ -607,7 +608,9 @@ sub set_default_config {
     $config->{'show_custom_vars'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))];
 
     # make graph_replace a list
-    $config->{'graph_replace'} = [@{list($config->{'graph_replace'})}];
+    for my $key (qw/graph_replace commandline_obfuscate_pattern/) {
+        $config->{$key} = [@{list($config->{$key})}];
+    }
 
     ## no critic
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
