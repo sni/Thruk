@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+#
+# usage: action_wrapper [-u user] [-g group] command options...
+#
+# wrapper for action menu scripts which checks user and groups
+# permissions from REMOTE_USER and REMOTE_GROUPS environment.
+#
+
+use warnings;
+use strict;
+
+my($users, $groups) = ({},{});
+while(scalar @ARGV > 1) {
+    if($ARGV[0] eq '-u') {
+        $users->{$ARGV[1]} = 1;
+        shift @ARGV; shift @ARGV;
+    }
+    elsif($ARGV[0] eq '-g') {
+        $groups->{$ARGV[1]} = 1;
+        shift @ARGV; shift @ARGV;
+    } else {
+        last;
+    }
+}
+
+my $allowed = 0;
+if($users->{$ENV{'REMOTE_USER'}}) {
+    $allowed = 1;
+}
+else {
+    for my $grp (split/\s*,\s*/mx, $ENV{'REMOTE_USER'}) {
+        if($groups->{$grp}) {
+            $allowed = 1;
+            last;
+        }
+    }
+}
+
+if(!$allowed) {
+    print "you are not allowed to run this action!";
+    exit 1;
+}
+
+exec(@ARGV);
