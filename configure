@@ -44,7 +44,7 @@ Getopt::Long::GetOptions (
    "with-logdir=s"          => \$options->{'logdir'},
    "with-htmlurl=s"         => \$options->{'htmlurl'},
    "with-httpd-conf=s"      => \$options->{'httpd-conf'},
-   "with-checkresultdir=s"  => \$options->{'with-checkresultdir'},
+   "with-checkresultdir=s"  => \$options->{'checkresultdir'},
    "with-bashcompletedir=s" => \$options->{'bashcompldir'},
    "with-thruk-user=s"      => \$options->{'thruk-user'},
    "with-thruk-group=s"     => \$options->{'thruk-group'},
