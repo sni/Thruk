@@ -3,7 +3,7 @@
 # usage: action_wrapper [-u user] [-g group] command options...
 #
 # wrapper for action menu scripts which checks user and groups
-# permissions from REMOTE_USER and REMOTE_GROUPS environment.
+# permissions from REMOTE_USER and REMOTE_USER_GROUPS environment.
 #
 
 use warnings;
@@ -24,11 +24,11 @@ while(scalar @ARGV > 1) {
 }
 
 my $allowed = 0;
-if($users->{$ENV{'REMOTE_USER'}}) {
+if($ENV{'REMOTE_USER'} && $users->{$ENV{'REMOTE_USER'}}) {
     $allowed = 1;
 }
-else {
-    for my $grp (split/\s*,\s*/mx, $ENV{'REMOTE_USER'}) {
+elsif($ENV{'REMOTE_USER_GROUPS'}) {
+    for my $grp (split/\s*,\s*/mx, $ENV{'REMOTE_USER_GROUPS'}) {
         if($groups->{$grp}) {
             $allowed = 1;
             last;
