@@ -1,0 +1,26 @@
+SHELL=bash
+export THRUK_CONFIG=$(shell pwd)
+THRUK=../../../script/thruk
+
+test:
+	$(MAKE) prepare
+	for x in $$(seq 50); do \
+	   if [ $$($(THRUK) -l | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
+	done
+	$(THRUK) -l
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
+	$(MAKE) cleanup
+
+server:
+	$(MAKE) prepare
+	cd ../../.. && ./script/thruk_server.pl -r
+	$(MAKE) cleanup
+
+prepare:
+	docker-compose create
+	docker-compose build
+	docker-compose start
+
+cleanup:
+	docker-compose stop
+	docker-compose rm -f

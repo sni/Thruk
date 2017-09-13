@@ -245,6 +245,12 @@ dockershell: t/docker/Dockerfile
 	mkdir -p $(DOCKERRESULTS)
 	$(DOCKERCMD) -it local/thruk_panorama_test /bin/bash
 
+scenariotest:
+	$(MAKE) test_scenarios
+
+test_scenarios:
+	cd t/scenarios && $(MAKE) test
+
 rpm: $(NAME)-$(VERSION).tar.gz
 	rpmbuild -ta $(NAME)-$(VERSION).tar.gz
 

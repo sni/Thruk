@@ -41,6 +41,15 @@ Thruk::Config::get_config(); # adds plugins to INC which is required for many te
 our $placktest;
 
 #########################
+sub has_util {
+    my($util) = @_;
+    for my $path (split/:/mx, $ENV{'PATH'}) {
+        return(1) if -x $path.'/'.$util;
+    }
+    return(0);
+}
+
+#########################
 sub request {
     my($url) = @_;
     if(!defined $Thruk::Backend::Pool::peers) {
