@@ -83,6 +83,8 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
     sed -r "s/${VERSION}/$newversion/" -i dist.ini
     git mv plugins/plugins-available/mobile/root/mobile-${VERSION}-${BRANCH}.css plugins/plugins-available/mobile/root/mobile-$fileversion.css
     git mv plugins/plugins-available/mobile/root/mobile-${VERSION}-${BRANCH}.js plugins/plugins-available/mobile/root/mobile-$fileversion.js
+    git mv plugins/plugins-available/business_process/root/bp-${VERSION}-${BRANCH}.css plugins/plugins-available/business_process/root/bp-$fileversion.css
+    git mv plugins/plugins-available/business_process/root/bp-${VERSION}-${BRANCH}.js plugins/plugins-available/business_process/root/bp-$fileversion.js
     git mv plugins/plugins-available/panorama/root/panorama-${VERSION}-${BRANCH}.css plugins/plugins-available/panorama/root/panorama-$fileversion.css
     git mv root/thruk/javascript/thruk-${VERSION}-${BRANCH}.js root/thruk/javascript/thruk-$fileversion.js
     if [ -e root/thruk/javascript/all_in_one-${VERSION}-${BRANCH}.js ]; then
