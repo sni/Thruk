@@ -3,6 +3,7 @@
   tasks:
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE icinga
+  - shell: omd config demo set LIVESTATUS_TCP on
   - copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg

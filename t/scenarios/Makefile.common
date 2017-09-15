@@ -8,6 +8,15 @@ test:
 	   if [ $$($(THRUK) -l | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
 	$(THRUK) -l
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t
+	$(MAKE) cleanup
+
+test_verbose:
+	$(MAKE) prepare
+	for x in $$(seq 50); do \
+	   if [ $$($(THRUK) -l | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
+	done
+	$(THRUK) -l
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
 	$(MAKE) cleanup
 
