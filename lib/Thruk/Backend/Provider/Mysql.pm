@@ -1171,9 +1171,13 @@ sub _check_lock {
     };
     if($@) {
         print "$@\n" if $verbose;
+        $dbh->do('UNLOCK TABLES');
         return;
     }
-    return if $skip;
+    if($skip) {
+        $dbh->do('UNLOCK TABLES');
+        return;
+    }
 
     $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");

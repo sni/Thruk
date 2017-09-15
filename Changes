@@ -12,6 +12,7 @@ next:
             - add button to quickly create excel export reports
           - Logcache:
             - fix importing logs from file (#751)
+            - fix issue with locking
 
 2.16-2   Sun Aug 20 13:47:31 CEST 2017
           - add json export to tac page
