@@ -5106,7 +5106,7 @@ Y8,            d8""""""""8b   88
 
 var last_cal_hidden = undefined;
 var last_cal_id     = undefined;
-function show_cal(id) {
+function show_cal(id, defaultDate) {
   // make calendar toggle
   var now = new Date;
   if(last_cal_hidden != undefined && (now.getTime() - last_cal_hidden) < 150 && (last_cal_id == undefined || last_cal_id == id )) {
@@ -5132,6 +5132,10 @@ function show_cal(id) {
   }
 
   var tmp = parseDate(id);
+  if(!tmp[0] && defaultDate != undefined) {
+    document.getElementById(id).value = defaultDate;
+    tmp = parseDate(id);
+  }
   dateObj = tmp[0];
   times   = tmp[1];
 

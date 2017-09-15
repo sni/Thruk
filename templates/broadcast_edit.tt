@@ -37,7 +37,7 @@
              id="hide_before"
              name="hide_before"
              onkeyup="if(this.value != '') { verify_time(this.id) }"
-             onclick="show_cal('hide_before'); return false;"
+             onclick="show_cal('hide_before', '[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]'); return false;"
       >
       </td>
   </tr>
@@ -50,7 +50,7 @@
              id="expires"
              name="expires"
              onkeyup="if(this.value != '') { verify_time(this.id) }"
-             onclick="show_cal('expires'); return false;"
+             onclick="show_cal('expires', '[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]'); return false;"
       >
       </td>
   </tr>
