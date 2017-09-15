@@ -1586,6 +1586,7 @@ t/scenarios/backend_icinga/Makefile
 t/scenarios/backend_icinga/omd/Dockerfile
 t/scenarios/backend_icinga/omd/playbook.yml
 t/scenarios/backend_icinga/omd/test.cfg
+t/scenarios/backend_icinga/t/100-backend_icinga.t
 t/scenarios/backend_icinga/t/300-controller_extinfo.t
 t/scenarios/backend_icinga/thruk.conf
 t/scenarios/backend_icinga/thruk_local.conf
@@ -1594,17 +1595,10 @@ t/scenarios/backend_icinga2/Makefile
 t/scenarios/backend_icinga2/omd/Dockerfile
 t/scenarios/backend_icinga2/omd/playbook.yml
 t/scenarios/backend_icinga2/omd/test.cfg
+t/scenarios/backend_icinga2/t/100-backend_icinga.t
 t/scenarios/backend_icinga2/t/300-controller_extinfo.t
 t/scenarios/backend_icinga2/thruk.conf
 t/scenarios/backend_icinga2/thruk_local.conf
-t/scenarios/http_backend/docker-compose.yml
-t/scenarios/http_backend/Makefile
-t/scenarios/http_backend/omd/Dockerfile
-t/scenarios/http_backend/omd/playbook.yml
-t/scenarios/http_backend/omd/test.cfg
-t/scenarios/http_backend/t/300-controller_extinfo.t
-t/scenarios/http_backend/thruk.conf
-t/scenarios/http_backend/thruk_local.conf
 t/scenarios/Makefile
 t/scenarios/Makefile.common
 t/test_request
