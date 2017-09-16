@@ -17,15 +17,16 @@ test_verbose:
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
 
 server:
+	$(MAKE) clean
 	$(MAKE) prepare
 	cd ../../.. && ./script/thruk_server.pl -r
-	$(MAKE) cleanup
 
 prepare:
 	docker-compose create
 	docker-compose build
 	docker-compose start
 
-cleanup:
+clean:
 	docker-compose stop
 	docker-compose rm -f
+	rm -f ../../tmp/thruk.cache
