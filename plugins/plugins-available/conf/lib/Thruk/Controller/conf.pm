@@ -1102,8 +1102,8 @@ sub _apply_config_changes {
     $c->stash->{'output'}        = '';
     $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
 
-    local $ENV{'THRUK_SUMMMARY_MESSAGE'} = $c->req->parameters->{'summary'} if $c->req->parameters->{'summary'};
-    local $ENV{'THRUK_SUMMMARY_DETAILS'} = $c->req->parameters->{'summary'} if $c->req->parameters->{'summarydesc'};
+    local $ENV{'THRUK_SUMMARY_MESSAGE'} = $c->req->parameters->{'summary'}     if $c->req->parameters->{'summary'};
+    local $ENV{'THRUK_SUMMARY_DETAILS'} = $c->req->parameters->{'summarydesc'} if $c->req->parameters->{'summarydesc'};
 
     if(defined $c->req->parameters->{'save_and_reload'}) {
         return unless Thruk::Utils::check_csrf($c);

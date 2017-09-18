@@ -2198,8 +2198,8 @@ The following environment variables will be set:
      ** `standard macros`           as listed in link:cli.html#_environment-variables[CLI Environment]
      ** `THRUK_BACKEND_ID`          internal id of the current edited backend
      ** `THRUK_BACKEND_NAME`        name of the current edited backend
-     ** `THRUK_SUMMMARY_MESSAGE`    user supplied change summary title
-     ** `THRUK_SUMMMARY_DETAILS`    user supplied change details
+     ** `THRUK_SUMMARY_MESSAGE`     user supplied change summary title
+     ** `THRUK_SUMMARY_DETAILS`     user supplied change details
 
 === post_obj_save_cmd
 Run a command after saving object config files. Command will be run with
@@ -2213,8 +2213,8 @@ The following environment variables will be set:
      ** `standard macros`           as listed in link:cli.html#_environment-variables[CLI Environment]
      ** `THRUK_BACKEND_ID`          internal id of the current edited backend
      ** `THRUK_BACKEND_NAME`        name of the current edited backend
-     ** `THRUK_SUMMMARY_MESSAGE`    user supplied change summary title
-     ** `THRUK_SUMMMARY_DETAILS`    user supplied change details
+     ** `THRUK_SUMMARY_MESSAGE`     user supplied change summary title
+     ** `THRUK_SUMMARY_DETAILS`     user supplied change details
 
 
 === git_base_dir
