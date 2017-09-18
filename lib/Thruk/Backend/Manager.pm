@@ -797,8 +797,9 @@ sub renew_logcache {
     $noforks = 0 unless defined $noforks;
     return unless defined $c->config->{'logcache'};
     return if !$c->config->{'logcache_delta_updates'};
+    my $rc;
     eval {
-        return $self->_renew_logcache($c, $noforks);
+        $rc = $self->_renew_logcache($c, $noforks);
     };
     if($@) {
         $c->log->error($@);
@@ -807,7 +808,7 @@ sub renew_logcache {
         $c->stash->{errorDescription} =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
         return $c->detach('/error/index/99');
     }
-    return;
+    return $rc;
 }
 
 ########################################
