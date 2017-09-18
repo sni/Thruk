@@ -1,5 +1,6 @@
 SHELL=bash
 export THRUK_CONFIG=$(shell pwd)
+export TEST_AUTHOR=1
 THRUK=../../../script/thruk
 
 test:
@@ -21,13 +22,12 @@ test_verbose:
 server:
 	$(MAKE) clean
 	$(MAKE) prepare
-	cd ../../.. && ./script/thruk_server.pl -r
+	cd ../../.. && THRUK_PERFORMANCE_DEBUG=1 ./script/thruk_server.pl -r
 
 prepare:
-	docker-compose create
-	docker-compose build
-	docker-compose start
+	docker-compose up --build --remove-orphans -d
 
 clean:
 	docker-compose stop
 	docker-compose rm -f
+	docker network prune -f
