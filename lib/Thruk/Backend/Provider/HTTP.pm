@@ -722,7 +722,8 @@ returns first and last logfile entry
 sub _get_logs_start_end {
     my($self, @options) = @_;
     my $res = $self->_req('_get_logs_start_end', \@options);
-    my($start, $end) = @{$res->[2]};
+    # old thruk versions return the data in index 0 accidently
+    my($start, $end) = @{$res->[2] || $res->[0]};
     return([$start, $end]);
 }
 
