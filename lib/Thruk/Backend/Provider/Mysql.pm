@@ -1869,7 +1869,6 @@ sub _import_logcache_from_file {
             my $state_type        = $l->{'state_type'};
             &_set_class($l);
             if($state eq '')      { $state      = 'NULL'; }
-            if($state_type eq '') { $state_type = 'NULL'; }
 
             my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
             if($l->{'service_description'}) {
@@ -1890,7 +1889,7 @@ sub _import_logcache_from_file {
             my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
             my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
 
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
+            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.($state_type ? $dbh->quote($state_type) : 'NULL').','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
             # commit every 1000th to avoid to large blocks
             if($log_count%1000 == 0) {
