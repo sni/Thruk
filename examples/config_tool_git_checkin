@@ -47,7 +47,7 @@ elif [ "$ACTION" == "post" ]; then
   fi
 fi
 
-git commit -q -a -m "$msg" >/dev/null
+git commit -q -a -m "$(echo -e $msg)" >/dev/null
 
 echo "[$(date)] $0 $1 done"
 
