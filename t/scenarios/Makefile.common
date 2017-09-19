@@ -30,4 +30,4 @@ prepare:
 clean:
 	docker-compose stop
 	docker-compose rm -f
-	yes | docker network prune
+	-docker network prune
