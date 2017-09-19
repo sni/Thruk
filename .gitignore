@@ -72,3 +72,4 @@ thruk_local.d/
 !t/data/*
 !t/scenarios/*
 !t/scenarios/*/*
+!t/scenarios/*/*/*
