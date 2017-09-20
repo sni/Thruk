@@ -549,17 +549,15 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     /* update settings window */
     if(TP.iconSettingsWindow) {
         /* layout tab */
-        TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
+        Ext.getCmp('layoutForm').getForm().setValues({x:x, y:y});
         /* appearance tab */
         TP.skipRender = true;
-        TP.iconSettingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().setValues({
+        Ext.getCmp('appearanceForm').getForm().setValues({
             connectorfromx: icon.xdata.appearance.connectorfromx + deltaX,
             connectorfromy: icon.xdata.appearance.connectorfromy + deltaY,
             connectortox:   icon.xdata.appearance.connectortox   + deltaX,
             connectortoy:   icon.xdata.appearance.connectortoy   + deltaY
         });
-        if(icon.dragEl1) { icon.dragEl1.suspendEvents(); icon.dragEl1.setPosition(icon.xdata.appearance.connectorfromx + deltaX, icon.xdata.appearance.connectorfromy + deltaY); icon.dragEl1.resumeEvents(); }
-        if(icon.dragEl2) { icon.dragEl2.suspendEvents(); icon.dragEl2.setPosition(icon.xdata.appearance.connectortox   + deltaX, icon.xdata.appearance.connectortoy   + deltaY); icon.dragEl2.resumeEvents(); }
         TP.skipRender = false;
     }
     /* update label */
@@ -586,6 +584,10 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
         /* move aligned items too */
         TP.moveAlignedIcons(deltaX, deltaY, icon.id);
     }
+
+    // update drag elements
+    if(icon.dragEl1) { icon.dragEl1.resetDragEl(); }
+    if(icon.dragEl2) { icon.dragEl2.resetDragEl(); }
 
     if(!noUpdateLonLat) {
         icon.updateMapLonLat();
