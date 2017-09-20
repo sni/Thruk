@@ -718,10 +718,10 @@ Ext.define('TP.dragEl', {
         });
         panel.dd.addListener('drag', function(This, evt) {
             TP.isShift = is_shift_pressed(evt);
-            if(TP.iconSettingsWindow) { TP.iconSettingsWindow.renderUpdate(); }
+            if(TP.iconSettingsWindow && TP.iconSettingsGlobals.renderUpdate) { TP.iconSettingsGlobals.renderUpdate(); }
         });
         panel.dd.addListener('dragend', function(This, evt) {
-            if(TP.iconSettingsWindow) { TP.iconSettingsWindow.renderUpdate(); }
+            if(TP.iconSettingsWindow && TP.iconSettingsGlobals.renderUpdate) { TP.iconSettingsGlobals.renderUpdate(); }
             tab.enableMapControlsTemp();
             panel.dragHint.destroy();
             panel.dragHint = undefined;
