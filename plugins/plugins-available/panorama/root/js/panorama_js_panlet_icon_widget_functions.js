@@ -594,10 +594,11 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
 
 TP.moveAlignedIcons = function(deltaX, deltaY, skip_id) {
     if(!TP.moveIcons) { return; }
+    deltaX = Number(deltaX);
+    deltaY = Number(deltaY);
+    if(deltaX == 0 && deltaY == 0) { return; }
     Ext.Array.each(TP.moveIcons, function(item) {
         if(item.id != skip_id) {
-            deltaX = Number(deltaX);
-            deltaY = Number(deltaY);
             if(item.setIconLabel) {
                 item.suspendEvents();
                 item.xdata.layout.x = Number(item.xdata.layout.x) + deltaX;
