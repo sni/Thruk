@@ -764,6 +764,51 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         }
     };
 
+    /* Styles Settings Tab */
+    var stylesItems = [{
+        xtype:      'panel',
+        html:       'Define css classes here which can then be used in icon labels, etc.',
+        style:      'text-align: center;',
+        padding:    '0 0 10 0',
+        border:      0
+    }, {
+        xtype:          'textarea',
+        fieldLabel:     '',
+        name:           'user_styles',
+        value:          '',
+        height:          180,
+        emptyText:      'A.iconlabel { color: red !important; }',
+        submitEmptyText: false,
+        listeners: {
+            change: function(This, newValue, oldValue, eOpts) {
+                tab.setUserStyles(newValue);
+            }
+        }
+    }];
+    var stylesTab = {
+        title : 'Styles',
+        type  : 'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                    xtype:          'form',
+                    id:             'stylesForm',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:      'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults:      { anchor: '-12', labelWidth: 70 },
+                    items:           stylesItems
+            }],
+            listeners: {
+                afterrender: function() {
+                    Ext.getCmp('stylesForm').getForm().setValues(tab.xdata);
+                }
+            }
+        }]
+    };
 
     /* Sound Settings Tab */
     var soundItems = [{
@@ -848,6 +893,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         items             : [
             dashboardTab,
             backendsTab,
+            stylesTab,
             soundsTab,
             permissionsTab,
             exportTab,
@@ -930,6 +976,11 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         var values = s_form.getFieldValues();
                         Ext.apply(tab.xdata, values);
 
+                        s_form  = Ext.getCmp('stylesForm').getForm();
+                        if(!s_form.isValid()) { return false; }
+                        values = s_form.getFieldValues();
+                        Ext.apply(tab.xdata, values);
+
                         if(Ext.getCmp('backendsForm')) {
                             var b_form  = Ext.getCmp('backendsForm').getForm();
                             if(!b_form.isValid()) { return false; }
@@ -1004,6 +1055,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         tab.xdata['mapzoom'] = tab.xdata.map.zoom;
     }
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
+    Ext.getCmp('stylesForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
@@ -1028,6 +1080,16 @@ TP.tabSettingsWindowLocked = function(tab, val) {
     var soundForm = Ext.getCmp('soundForm');
     if(soundForm) {
         soundForm.items.each(function(item, idx, len) {
+            item.setDisabled(val);
+            if(tab.readonly == 1) {
+                item.setDisabled(true);
+            }
+        });
+    }
+    /* apply to styles tab */
+    var stylesForm = Ext.getCmp('stylesForm');
+    if(stylesForm) {
+        stylesForm.items.each(function(item, idx, len) {
             item.setDisabled(val);
             if(tab.readonly == 1) {
                 item.setDisabled(true);

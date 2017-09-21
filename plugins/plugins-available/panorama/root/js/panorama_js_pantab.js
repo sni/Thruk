@@ -88,6 +88,7 @@ Ext.define('TP.Pantab', {
             } catch(e) {
                 TP.Msg.msg("fail_message~~scroll failed: "+e);
             }
+            This.setUserStyles();
             return(true);
         },
         activate: function(This, eOpts) {
@@ -439,6 +440,7 @@ Ext.define('TP.Pantab', {
             if(This.map)   { This.map.destroy();   This.map   = undefined; }
         }
         if(This.hidden) { return; }
+        This.setUserStyles();
         if(xdata.hide_tab_header && This.tab) {
             This.tab.hide();
         }
@@ -1050,6 +1052,23 @@ Ext.define('TP.Pantab', {
                 panlet.setIconLabel();
             }
         }
+    },
+    setUserStyles: function(value) {
+        var tab = this;
+        if(value == undefined) {
+            value = tab.xdata.user_styles;
+        }
+        if(value == undefined) {
+            value = '';
+        }
+        var style = document.getElementById('user_styles');
+        if(!style) {
+            style      = document.createElement('style');
+            style.type = 'text/css';
+            style.id   = 'user_styles';
+            document.getElementsByTagName('head')[0].appendChild(style);
+        }
+        style.innerHTML = value;
     }
 });
 

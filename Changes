@@ -14,6 +14,7 @@ next:
             - fix importing logs from file (#751)
             - fix issue with locking
           - Panorama:
+            - add user styles option to add generic styles usable in labels etc.
             - fix moving watermark elements
 
 2.16-2   Sun Aug 20 13:47:31 CEST 2017
