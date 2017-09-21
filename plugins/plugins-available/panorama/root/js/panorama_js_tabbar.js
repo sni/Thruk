@@ -138,6 +138,17 @@ Ext.define('TP.TabBar', {
                         icon:    url_prefix+'plugins/panorama/images/folder_picture.png',
                         handler: function() { TP.loadDashboardWindow() }
                     },
+                    '-',
+                    , {
+                        xtype:  'menucheckitem',
+                        text:   'Show Grid',
+                        id:     'show_helper_grid',
+                        handler: function(item, e) {
+                            var tabpan = Ext.getCmp('tabpan');
+                            var tab    = tabpan.getActiveTab();
+                            tab.setBackground(tab.xdata);
+                        }
+                    },
                     /* Exit */
                     '-',
                     {

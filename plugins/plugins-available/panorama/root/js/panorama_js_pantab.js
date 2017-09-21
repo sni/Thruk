@@ -186,6 +186,10 @@ Ext.define('TP.Pantab', {
             if(This.bgImgEl)  { This.bgImgEl.hide();  }
             if(This.mapEl)    { This.mapEl.hide();    }
             if(This.map)      { This.map.controlsDiv.dom.style.display = "none"; }
+            if(This.bgDragEl) {
+                This.bgDragEl.dom.style.backgroundImage  = "";
+                This.bgDragEl.dom.style.backgroundRepeat = "";
+            }
         },
         afterrender: function(This, eOpts) {
             var tab = This;
@@ -760,6 +764,15 @@ Ext.define('TP.Pantab', {
             tab.el.dom.style.background = bg_color;
         } else {
             tab.el.dom.style.background = '';
+        }
+
+        var grid = Ext.getCmp('show_helper_grid');
+        if(grid && grid.checked) {
+            tab.bgDragEl.dom.style.backgroundImage  = "url("+url_prefix+'plugins/panorama/images/grid_helper.png'+")";
+            tab.bgDragEl.dom.style.backgroundRepeat = "repeat";
+        } else {
+            tab.bgDragEl.dom.style.backgroundImage  = "";
+            tab.bgDragEl.dom.style.backgroundRepeat = "";
         }
     },
     applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y) {
