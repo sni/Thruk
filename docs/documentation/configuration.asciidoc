@@ -2325,7 +2325,8 @@ ex.:
     max_concurrent_reports = 2
     report_base_url        = http://host.local/thruk/cgi-bin/
     phantomjs              = /usr/bin/phantomjs
-    pnp_export             = plugins/plugins-enabled/reports2/script/pnp_export.sh
+    pnp_export             = script/pnp_export.sh
+    grafana_export         = script/grafana_export.sh
     report_from_email      = User Name <example@mail.com>
     default_template       = host_sla.tt
   </Component>
@@ -2371,6 +2372,11 @@ ex.:
 
   export PNP_WGET="wget -q --user=admin --password=secret"
   export PNP_URL_PREFIX="http://demo.thruk.org"
+
+
+=== grafana_export
+
+Override default script for exporting grafana graphs to png with `grafana_export`.
 
 
 === report_from_email

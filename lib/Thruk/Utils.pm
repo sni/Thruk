@@ -1365,7 +1365,7 @@ sub get_histou_url {
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
-        if($obj->{$type} =~ m|histou\.js\?|mx) {
+        if($obj->{$type} =~ m%histou\.js\?|/grafana/%mx) {
             return($obj->{$type});
         }
     }
@@ -1484,7 +1484,10 @@ sub get_perf_image {
 
     my $exporter = $c->config->{home}.'/script/pnp_export.sh';
     $exporter    = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'};
-    $exporter    = $c->config->{home}.'/script/grafana_export.sh' if $grafanaurl;
+    if($grafanaurl) {
+        $exporter = $c->config->{home}.'/script/grafana_export.sh';
+        $exporter = $c->config->{'Thruk::Plugin::Reports2'}->{'grafana_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'grafana_export'};
+    }
 
     if(!defined $end)   { $end   = time();       }
     if(!defined $start) { $start = $end - 86400; }
