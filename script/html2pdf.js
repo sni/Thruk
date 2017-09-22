@@ -14,6 +14,14 @@ if (version >= 2) {
 
 if (system.args.length < 3) {
     console.log('Usage: html2pdf.js INPUT.html OUTPUT.pdf [<options>]');
+    console.log('');
+    console.log('Options:');
+    console.log('  --width=<width>       (in px)');
+    console.log('  --height=<height>     (in px)');
+    console.log('  --format=<pdf|png>');
+    console.log('  --autoscale');
+    console.log('  --cookie=<name>,<value>');
+    console.log('  --header=<name>:<value>');
     phantom.exit(1);
 } else {
     var args    = [];
@@ -21,7 +29,14 @@ if (system.args.length < 3) {
     system.args.forEach(function(arg, i) {
         var matches = arg.match(/^--([^=]+)=(.*)$/);
         if(matches) {
-            options[matches[1]] = matches[2];
+            if(matches[1] == "cookie" || matches[1] == "header") {
+                if(!options[matches[1]]) {
+                    options[matches[1]] = [];
+                }
+                options[matches[1]].push(matches[2]);
+            } else {
+                options[matches[1]] = matches[2];
+            }
         } else {
             args.push(arg);
         }
@@ -44,14 +59,28 @@ if (system.args.length < 3) {
         }
     }
 
+    // add custom cookies
     if(options.cookie) {
-        var c = options.cookie.match(/^([^,]+),(.*)$/);
         var domain = input.match(/https?:\/\/([^/:]+)/);
-        phantom.addCookie({
-          'domain'   : domain[1],
-          'name'     : c[1],
-          'value'    : c[2],
-          'path'     : '/'
+        options.cookie.forEach(function(cookie, i) {
+            var c = cookie.match(/^([^,]+),(.*)$/);
+            phantom.addCookie({
+              'domain'   : domain[1],
+              'name'     : c[1],
+              'value'    : c[2],
+              'path'     : '/'
+            });
+        });
+    }
+
+    // add custom http header
+    if(options.header) {
+        if(!page.customHeaders) {
+            page.customHeaders = {};
+        }
+        options.header.forEach(function(header, i) {
+            var c = header.match(/^([^:]+):\ *(.*)$/);
+            page.customHeaders[c[1]] = c[2];
         });
     }
 
