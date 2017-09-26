@@ -17,6 +17,8 @@ next:
             - add user styles option to add generic styles usable in labels etc.
             - add optional helper grid
             - fix moving watermark elements
+          - Mobile:
+            - add config option to add additonal links on the home page
 
 2.16-2   Sun Aug 20 13:47:31 CEST 2017
           - add json export to tac page

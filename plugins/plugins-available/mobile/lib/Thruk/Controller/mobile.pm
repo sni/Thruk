@@ -134,6 +134,15 @@ sub index {
         }
     }
 
+    # add additonal links on the home page
+    $c->stash->{links} = [];
+    if($c->config->{'Thruk::Plugin::Mobile'}->{'links'}) {
+        for my $link (@{Thruk::Utils::list($c->config->{'Thruk::Plugin::Mobile'}->{'links'})}) {
+            my($name,$url) = split(/\s*;\s*/mx, $link, 2);
+            push @{$c->stash->{links}}, { name => $name, url => $url };
+        }
+    }
+
     $c->stash->{template} = 'mobile.tt';
 
     return 1;

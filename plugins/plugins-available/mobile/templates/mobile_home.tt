@@ -53,6 +53,9 @@
 
       <h4>Links</h4>
       <ul data-role="listview" data-inset="true">
+        [% FOREACH l = links %]
+        <li><a href="[% l.url %]" rel="external">[% l.name %]</a></li>
+        [% END %]
         <li><a href="[% url_prefix %]index.html" rel="external" id="full_client_link">Access as Full Client</a></li>
       </ul>
     </div>

@@ -2490,6 +2490,21 @@ Refresh interval defines how often business processes
 will be recalculated and refreshed. (in minutes)
 
 
+== Component Thruk::Plugin::Mobile
+
+The Mobile plugin adds a mobile view component.
+
+Configuration Example:
+
+  <Component Thruk::Plugin::Mobile>
+    links             = Dashboard ABC ; panorama.cgi?map=ABC
+  </Component>
+
+
+=== links
+Additonal links on the start page in the form `<name> ; <url>`.
+The url is relative to the mobile.cgi
+
 
 
 == User & Group Specific Overrides
