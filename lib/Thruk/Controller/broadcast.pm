@@ -85,6 +85,7 @@ sub index {
                 my $x  = 1;
                 while(-e $c->config->{'var_path'}.'/broadcast/'.$id) {
                     $id = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'_'.$x.'.json', localtime);
+                    $x++;
                 }
             }
             if($id =~ m/^[\.\/]+/mx) {
