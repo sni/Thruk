@@ -186,6 +186,7 @@ sub _process_raw_request {
                             push @{$data}, $contact->{'name'} . ' - '.$contact->{'alias'};
                         }
                     }
+                    $data = Thruk::Utils::array_uniq($data);
                 }
             }
             elsif($type eq 'host' or $type eq 'hosts') {
@@ -223,6 +224,7 @@ sub _process_raw_request {
                     for my $d (@{$commands}) {
                         push @{$data}, $d->{'name'};
                     }
+                    $data = Thruk::Utils::array_uniq($data);
                 }
             }
             elsif($type eq 'custom variable' || $type eq 'custom value') {
