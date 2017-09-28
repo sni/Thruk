@@ -79,7 +79,7 @@ if($compare) {
         $opt->{'end'} = $1;
     }
 }
-chomp($last_line);
+chomp($last_line) if $last_line;
 
 my $options = {};
 $options->{backends} = [$opt->{'backend'}] if $opt->{'backend'};
