@@ -81,7 +81,9 @@ if($compare) {
 }
 chomp($last_line);
 
-my $cli     = Thruk::Utils::CLI->new({backends => [$opt->{'backend'}] });
+my $options = {};
+$options->{backends} = [$opt->{'backend'}] if $opt->{'backend'};
+my $cli     = Thruk::Utils::CLI->new($options);
 my $c       = $cli->get_c();
 Thruk::Action::AddDefaults::add_defaults($c);
 my $start   = Thruk::Utils::parse_date($c, $opt->{'start'});
