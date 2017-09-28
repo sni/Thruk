@@ -144,6 +144,14 @@ get_logs - Command line utility to retrieve or compare logs
 
 This script collects logs
 
+=head1 OPTIONS
+
+    -s|--start              set start date, can be timestamp or date definition
+    -e|--end                set end date, can be timestamp or date definition
+    -b|--backend            specify backend if there are multiple connected
+    -n|--nocache            bypass logcache (if enabled)
+    -v|--vimdiff            use vimdiff as diff program
+
 =head1 EXAMPLE
 
     fetch logfiles from livesystem
