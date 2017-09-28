@@ -48,6 +48,8 @@ GetOptions (
    "s|start=s"      => \$opt->{'start'},
    "e|end=s"        => \$opt->{'end'},
    "b|backend=s"    => \$opt->{'backend'},
+   "n|nocache"      => \$opt->{'nocache'},
+   "v|vimdiff"      => \$opt->{'vimdiff'},
    "<>"             => sub { push @{$opt->{'files'}}, scalar $_[0] },
 ) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
 pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
@@ -90,7 +92,9 @@ my $start   = Thruk::Utils::parse_date($c, $opt->{'start'});
 my $end     = Thruk::Utils::parse_date($c, $opt->{'end'});
 
 my $db      = $cli->get_db();
-my $logs    = $db->get_logs(filter => [{ time => { '>=' => $start }}, { time => { '<=' => $end }}]);
+$options = { filter => [{ time => { '>=' => $start }}, { time => { '<=' => $end }}], sort => {'ASC' => 'time'} };
+$options->{'nocache'} = 1 if $opt->{'nocache'};
+my $logs    = $db->get_logs(%{$options});
 
 if($compare) {
     my $fileA = $opt->{'files'}->[0];
@@ -111,7 +115,11 @@ if($compare) {
         }
     }
     close($fh);
-    print `diff $fileA $fileB`;
+    if($opt->{'vimdiff'}) {
+        exec("vimdiff $fileA $fileB; rm $fileB");
+    } else {
+        print `diff $fileA $fileB`;
+    }
     unlink($fileB);
 } else {
     for my $l (@{$logs}) {
