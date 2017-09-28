@@ -1483,8 +1483,8 @@ sub _plugin_lookup {
     }
 
     if($auto_increments) {
-        push @{$foreign_key_stash->{'plugin_output'}}, '('.$dbh->quote($look).')';
         $id = $auto_increments->{$prefix.'_plugin_output'}->{'AUTO_INCREMENT'}++;
+        push @{$foreign_key_stash->{'plugin_output'}}, '('.$id.', '.$dbh->quote($look).')';
         $hash->{$look} = $id;
         return $id;
     }
@@ -1504,8 +1504,8 @@ sub _host_lookup {
     return $id if $id;
 
     if($auto_increments) {
-        push @{$foreign_key_stash->{'host'}}, '('.$dbh->quote($host_name).')';
         $id = $auto_increments->{$prefix.'_host'}->{'AUTO_INCREMENT'}++;
+        push @{$foreign_key_stash->{'host'}}, '('.$id.', '.$dbh->quote($host_name).')';
         $host_lookup->{$host_name} = $id;
         return $id;
     }
@@ -1580,8 +1580,8 @@ sub _service_lookup {
     $host_id = &_host_lookup($host_lookup, $host_name, $dbh, $prefix, $auto_increments, $foreign_key_stash) unless $host_id;
 
     if($auto_increments) {
-        push @{$foreign_key_stash->{'service'}}, '('.$host_id.','.$dbh->quote($service_description).')';
         $id = $auto_increments->{$prefix.'_service'}->{'AUTO_INCREMENT'}++;
+        push @{$foreign_key_stash->{'service'}}, '('.$id.', '.$host_id.','.$dbh->quote($service_description).')';
         $service_lookup->{$host_name}->{$service_description} = $id;
         return $id;
     }
@@ -1602,8 +1602,8 @@ sub _contact_lookup {
     return $id if $id;
 
     if($auto_increments) {
-        push @{$foreign_key_stash->{'contact'}}, '('.$dbh->quote($contact_name).')';
         $id = $auto_increments->{$prefix.'_contact'}->{'AUTO_INCREMENT'}++;
+        push @{$foreign_key_stash->{'contact'}}, '('.$id.', '.$dbh->quote($contact_name).')';
         $contact_lookup->{$contact_name} = $id;
         return $id;
     }
@@ -2045,22 +2045,22 @@ sub _safe_insert_stash {
     my($self, $dbh, $prefix, $verbose, $foreign_key_stash) = @_;
 
     if($foreign_key_stash->{'plugin_output'}) {
-        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_plugin_output` (output) VALUES", \@{$foreign_key_stash->{'plugin_output'}}, $verbose);
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_plugin_output` (output_id, output) VALUES", \@{$foreign_key_stash->{'plugin_output'}}, $verbose);
         delete $foreign_key_stash->{'plugin_output'};
     }
 
     if($foreign_key_stash->{'host'}) {
-        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_host` (host_name) VALUES", \@{$foreign_key_stash->{'host'}}, $verbose);
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_host` (host_id, host_name) VALUES", \@{$foreign_key_stash->{'host'}}, $verbose);
         delete $foreign_key_stash->{'host'};
     }
 
     if($foreign_key_stash->{'service'}) {
-        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES", \@{$foreign_key_stash->{'service'}}, $verbose);
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_service` (service_id, host_id, service_description) VALUES", \@{$foreign_key_stash->{'service'}}, $verbose);
         delete $foreign_key_stash->{'service'};
     }
 
     if($foreign_key_stash->{'contact'}) {
-        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_contact` (name) VALUES", \@{$foreign_key_stash->{'contact'}}, $verbose);
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_contact` (contact_id, name) VALUES", \@{$foreign_key_stash->{'contact'}}, $verbose);
         delete $foreign_key_stash->{'contact'};
     }
 
