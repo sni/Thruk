@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - add new option 'commandline_obfuscate_pattern'
           - add python and go client to default cookie_auth_direct_agents
+          - combine recurring downtimes for the same time into a single cron entry
           - Config Tool:
             - show summary prompt if a post_obj_save_cmd is set
           - Business Process:

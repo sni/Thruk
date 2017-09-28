@@ -43,7 +43,7 @@ sub cmd {
     require URI::Escape;
     require Thruk::Utils::RecurringDowntimes;
 
-    my $file = shift @{$commandoptions};
+    my $files = [split(/\|/mx, shift @{$commandoptions})];
 
     my $total_retries = 5;
     my $retries;
@@ -56,6 +56,25 @@ sub cmd {
         };
         last unless $@;
     }
+
+    my($output, $overall_rc) = ("", 0);
+    for my $file (@{$files}) {
+        my($out, $rc) = _handle_file($c, $file);
+        $output .= $out;
+        $overall_rc = $rc if $rc > $overall_rc;
+    }
+
+    $c->stats->profile(end => "_cmd_downtimetask($action)");
+    return($output, $overall_rc);
+}
+
+##############################################
+# handle downtimetask for a given file
+sub _handle_file {
+    my($c, $file) = @_;
+
+    my $retries;
+    my $total_retries = 5;
 
     $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
     my $downtime   = Thruk::Utils::read_data_file($file);
@@ -174,7 +193,6 @@ sub cmd {
     $output .= " (after $retries retries)\n" if $retries;
     $output .= "\n";
 
-    $c->stats->profile(end => "_cmd_downtimetask($action)");
     return($output, 0);
 }
 

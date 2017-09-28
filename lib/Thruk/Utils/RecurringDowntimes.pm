@@ -34,15 +34,22 @@ update downtimes cron
 sub update_cron_file {
     my($c) = @_;
 
-    # gather reporting send types from all reports
-    my $cron_entries = [];
+    # gather cron entries for all recurring downtimes
+    my $combined_entries = {};
     my $downtimes = get_downtimes_list($c, 0, 1);
     for my $d (@{$downtimes}) {
         next unless defined $d->{'schedule'};
         next unless scalar @{$d->{'schedule'}} > 0;
         for my $cr (@{$d->{'schedule'}}) {
-            push @{$cron_entries}, [_get_cron_entry($c, $d, $cr)];
+            my $time = Thruk::Utils::get_cron_time_entry($cr);
+            $combined_entries->{$time} = [] unless $combined_entries->{$time};
+            push @{$combined_entries->{$time}}, $d->{'file'};
         }
+    }
+    my $cron_entries = [];
+    for my $time (sort keys %{$combined_entries}) {
+        my $cmd = _get_downtime_cmd($c, $combined_entries->{$time});
+        push @{$cron_entries}, [$time, $cmd];
     }
 
     Thruk::Utils::update_cron_file($c, 'downtimes', $cron_entries);
@@ -465,29 +472,19 @@ sub get_data_file_name {
 }
 
 ##########################################################
-# return cmd line for downtime
-sub _get_cron_entry {
-    my($c, $downtime, $rd) = @_;
-
-    my $cmd = _get_downtime_cmd($c, $downtime);
-    my $time = Thruk::Utils::get_cron_time_entry($rd);
-    return($time, $cmd);
-}
-
-##########################################################
 sub _get_downtime_cmd {
-    my($c, $downtime) = @_;
+    my($c, $files, $verbose) = @_;
     # ensure proper cron.log permission
     open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
     Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
     my $log = sprintf(">/dev/null 2>>%s/cron.log", $c->config->{'var_path'});
-    $log = sprintf(">>%s/cron.log 2>&1", $c->config->{'var_path'}) if $downtime->{'verbose'};
+    $log = sprintf(">>%s/cron.log 2>&1", $c->config->{'var_path'}) if $verbose;
     my $cmd = sprintf("cd %s && %s '%s -a downtimetask=\"%s\"%s' %s",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
                             $c->config->{'thruk_bin'},
-                            $downtime->{'file'},
-                            $downtime->{'verbose'} ? ' -vv ' : '',
+                            join('|', @{$files}),
+                            $verbose ? ' -vv ' : '',
                             $log,
                     );
     return $cmd;
