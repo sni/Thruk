@@ -29,6 +29,7 @@ examples/bp_functions.pm
 examples/config_tool_git_checkin
 examples/contacts2csv
 examples/dump_services
+examples/get_logs
 examples/list_hosts
 examples/objectcache2csv
 examples/remove_duplicates

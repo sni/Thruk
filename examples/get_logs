@@ -1,0 +1,151 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm -a $(cd `dirname $0` && pwd) != '/usr/share/thruk/examples' ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 24
+
+##############################################
+use strict;
+use warnings;
+use Pod::Usage;
+use Getopt::Long;
+use Thruk::Utils::CLI;
+use File::Temp qw/tempfile/;
+use Encode qw/encode_utf8/;
+
+binmode(STDOUT, ":encoding(UTF-8)");
+binmode(STDERR, ":encoding(UTF-8)");
+
+my $opt ={
+    'help'      => 0,
+    'start'     => 0,
+    'end'       => 0,
+    'backend'   => undef,
+    'files'     => [],
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+GetOptions (
+   "h|help"         => \$opt->{'help'},
+   "s|start=s"      => \$opt->{'start'},
+   "e|end=s"        => \$opt->{'end'},
+   "b|backend=s"    => \$opt->{'backend'},
+   "<>"             => sub { push @{$opt->{'files'}}, scalar $_[0] },
+) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
+pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
+
+my $compare = 0;
+if(scalar @{$opt->{'files'}} > 0) {
+    $compare = 1;
+}
+
+if(scalar @{$opt->{'files'}} == 0 && (!$opt->{'start'} || !$opt->{'end'})) {
+    pod2usage( { -verbose => 2,  -exit => 3 } );
+}
+
+my($first_line, $last_line);
+if($compare) {
+    # use start / end from file
+    open(my $fh, '<', $opt->{'files'}->[0]) or die("cannot open file: ".$!);
+    while(my $line = <$fh>) {
+        if($. == 1) {
+            chomp($first_line = $line);
+            if($line =~ m/^\[(\d+)\]/mx) {
+                $opt->{'start'} = $1;
+            }
+        }
+        $last_line = $line;
+    }
+    close($fh);
+    if($last_line =~ m/^\[(\d+)\]/mx) {
+        $opt->{'end'} = $1;
+    }
+}
+chomp($last_line);
+
+my $cli     = Thruk::Utils::CLI->new({backends => [$opt->{'backend'}] });
+my $c       = $cli->get_c();
+Thruk::Action::AddDefaults::add_defaults($c);
+my $start   = Thruk::Utils::parse_date($c, $opt->{'start'});
+my $end     = Thruk::Utils::parse_date($c, $opt->{'end'});
+
+my $db      = $cli->get_db();
+my $logs    = $db->get_logs(filter => [{ time => { '>=' => $start }}, { time => { '<=' => $end }}]);
+
+if($compare) {
+    my $fileA = $opt->{'files'}->[0];
+    # write out compare logfile
+    my($fh, $fileB) = tempfile();
+    my $start_found = 0;
+    for my $l (@{$logs}) {
+        if(!$start_found) {
+            if($l->{'message'} eq $first_line) {
+                $start_found = 1;
+            }
+        }
+        if($start_found) {
+            print $fh encode_utf8($l->{'message'}),"\n";
+            if($l->{'message'} eq $last_line) {
+                last;
+            }
+        }
+    }
+    close($fh);
+    print `diff $fileA $fileB`;
+    unlink($fileB);
+} else {
+    for my $l (@{$logs}) {
+        print $l->{'message'},"\n";
+    }
+}
+
+exit 0;
+
+##############################################
+
+=head1 NAME
+
+get_logs - Command line utility to retrieve or compare logs
+
+=head1 SYNOPSIS
+
+  Usage: get_logs [-b backend] --start=<date> --end=<date> > /tmp/logfile.log
+         get_logs [-b backend] existing_logfile
+
+=head1 DESCRIPTION
+
+This script collects logs
+
+=head1 EXAMPLE
+
+    fetch logfiles from livesystem
+
+get_logs --start=yesterday --end=now > /tmp/logfile.log
+
+    compare logfiles from livestatus with actual logfile
+
+get_logs var/naemon/archive/naemon-09-27-2017-00.log
+
+=head1 AUTHOR
+
+2017, Sven Nierlein, <sven@consol.de>
+
+=cut
