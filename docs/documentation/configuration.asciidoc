@@ -2502,6 +2502,7 @@ Configuration Example:
 
 
 === links
+{% include new_since.ad version="2.18" %}
 Additonal links on the start page in the form `<name> ; <url>`.
 The url is relative to the mobile.cgi
 
