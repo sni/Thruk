@@ -693,8 +693,7 @@ sets a uniq id
 
 =cut
 sub set_uniq_id {
-    my $self    = shift;
-    my $objects = shift;
+    my($self, $objects) = @_;
 
     if(!defined $self->{'id'} || $self->{'id'} eq 'new') {
         $self->{'id'} = $self->_make_id();
@@ -704,6 +703,12 @@ sub set_uniq_id {
     my $nr = 5;
     while(defined $objects->{'byid'}->{$self->{'id'}} and $objects->{'byid'}->{$self->{'id'}} != $self) {
         $self->{'id'} = $self->_make_id(++$nr);
+        if(length($self->{'id'}) < $nr) {
+            $self->{'id'} = $self->{'id'} . int(rand(10000));
+        }
+        if($nr > 100) {
+            die(sprintf("cannot assign uniq id to %s in %s:%i", $self->get_name(), $self->{'file'}->{'path'}, $self->{'line'}));
+        }
     }
     return $self->{'id'};
 }
