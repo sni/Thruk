@@ -249,13 +249,7 @@ Ext.define('TP.Panlet', {
             TP.log('['+this.id+'] rendered');
             this.startTimeouts();
             this.syncShadowTimeout();
-        },
-        afterlayout: function(This) {
-            /* make all border and background work */
-            if(this.xdata.showborder != true) {
-                // results in endless loop otherwise
-                this.applyBorderAndBackground();
-            }
+            this.applyBorderAndBackground();
         },
         beforestatesave: function( This, state, eOpts ) {
             if(This.locked) {

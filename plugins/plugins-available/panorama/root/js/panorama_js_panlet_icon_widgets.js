@@ -452,6 +452,7 @@ Ext.define('TP.SmallWidget', {
                         text:   'Remove',
                         icon:   url_prefix+'plugins/panorama/images/delete.png',
                         disabled: This.locked,
+                        clickHideDelay: 500,
                         handler: function(me, eOpts) {
                             var menu = me.parentMenu;
                             var i = menu.items.findIndexBy(function(el) { if(el.text == 'Remove') {return true;} });
@@ -477,6 +478,7 @@ Ext.define('TP.SmallWidget', {
                                 }]
                             });
                             menu.move(menu.items.length, i);
+                            return false;
                         }
                     }, {
                         xtype:  'menuseparator',
@@ -754,7 +756,7 @@ Ext.define('TP.IconWidget', {
         if(newStatus != undefined) {
             panel.xdata.state = newStatus;
         }
-        this.updateRender();
+        panel.updateRender();
         if(panel.xdata.state != undefined && oldState.state != panel.xdata.state) {
             if(panel.locked && panel.el && (oldState.state != 4 && oldState.state != undefined)) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);

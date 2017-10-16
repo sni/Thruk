@@ -108,7 +108,7 @@ Ext.define('TP.GridLoader', {
             var changed = false;
             /* may fail if grid is already closed */
             try {
-                if(!panel.grid.headerCt.up('[store]') || !panel.grid.headerCt.up('[store]').store) {
+                if(!panel.grid.headerCt || !panel.grid.headerCt.up('[store]') || !panel.grid.headerCt.up('[store]').store) {
                     /* make sure store still exists, may have been closed meanwhile */
                     return;
                 }

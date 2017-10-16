@@ -968,7 +968,7 @@ TP.iconShowEditDialog = function(panel) {
 
     var settingsWindow = new Ext.Window({
         height:  350,
-        width:   450,
+        width:   470,
         layout: 'fit',
         hidden:  true,
         items:   tabPanel,

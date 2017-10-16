@@ -43,10 +43,10 @@ HTML, BODY {
 }
 
 /* make tab close only show on mouseover */
-A.x-tab-close-btn {
+SPAN.x-tab-close-btn {
   display: none;
 }
-DIV.x-tab-default-over A.x-tab-close-btn {
+A.x-tab-default-over SPAN.x-tab-close-btn {
   display: inherit;
 }
 
@@ -130,7 +130,7 @@ TD.icon_column DIV.x-grid-cell-inner {
 }
 
 TD.icon_column IMG {
-  padding-right: 3px;
+  margin-right: 3px;
 }
 
 .clickable:hover {
@@ -146,7 +146,7 @@ TD.slider_txt {
 }
 
 .x-boundlist-item img.chkCombo {
-  background: url("extjs-4.1.1/resources/themes/images/gray/form/checkbox.gif") no-repeat scroll 0 0 transparent;
+  background: url("extjs-4.2.2/resources/themes/images/gray/form/checkbox.gif") no-repeat scroll 0 0 transparent;
   border: 0 none;
   height: 13px;
   overflow: hidden;
@@ -466,7 +466,7 @@ DIV.autohideheader DIV.x-window-header {
   z-index: 20;
 }
 
-DIV.hideRightArrow IMG.x-menu-item-arrow {
+DIV.hideRightArrow DIV.x-menu-item-arrow {
     display: none;
 }
 

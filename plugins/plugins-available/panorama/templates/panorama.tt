@@ -16,12 +16,7 @@
     [% IF thruk_debug %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all-debug.js"></script>
     [% ELSE %]
-      <!--[IF IE]>
-        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all-debug.js"></script>
-      <![ENDIF]-->
-      <!--[IF !IE]> -->
-        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all.js"></script>
-      <!-- <![ENDIF]-->
+      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all.js"></script>
     [% END %]
     [% IF thruk_debug && !c.config.demo_mode %]
       [% FOREACH js = all_in_one_javascript_panorama %]

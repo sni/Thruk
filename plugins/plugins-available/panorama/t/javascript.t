@@ -33,6 +33,7 @@ var window = {
     getElementById:function(){},
     getElementsByTagName:function(t){
         if(t == 'html') {return([{}])};
+        if(t == 'script') {return([{src:'ext-all.js'}])};
         return([]);
     },
     documentElement:{
@@ -43,6 +44,12 @@ var window = {
     addEventListener: function(){},
     removeEventListener: function(){}
   },
+  DOMParser: function(){ return({
+    parseFromString: function(){ return({
+            getElementsByTagName:function(){ return([])},
+        })
+    }
+  })},
   location: {},
   addEventListener:    function(){},
   removeEventListener: function(){},
@@ -53,6 +60,7 @@ var window = {
 };
 var navigator  = window.navigator;
 var document   = window.document;
+DOMParser      = window.DOMParser;
 setTimeout     = function(){};
 clearTimeout   = function(){};
 setInterval    = function(){};

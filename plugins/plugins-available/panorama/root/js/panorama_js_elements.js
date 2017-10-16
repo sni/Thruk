@@ -299,7 +299,7 @@ TP.Msg = function() {
     var msgCt;
 
     function createBox(cls, title, s){
-        return '<div class="msg '+cls+'"><a class="x-tab-close-btn" title="" href="#"><\/a><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
+        return '<div class="msg x-tab-default '+cls+'"><a class="x-tab-close-btn" title="" href="#"><\/a><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
     }
     return {
         msg : function(s, close_timeout) {
