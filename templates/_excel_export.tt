@@ -84,7 +84,7 @@
           [% END %]
         <tr>
           <td colspan=2 align="center">
-            <input type="submit" name="export" id="excel_form_btn" value="export" onclick="toggleElement('excel_export_columns'); jQuery('#view_mode').val('xls'); jQuery(this).parents('FORM').submit(); return false;">
+            <input type="submit" name="export" id="excel_form_btn" value="export" onclick="jQuery('#view_mode').val('xls'); jQuery(this).parents('FORM').submit(); toggleElement('excel_export_columns');">
           </td>
         </tr>
         <tr>

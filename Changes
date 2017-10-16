@@ -5,6 +5,7 @@ next:
           - add python and go client to default cookie_auth_direct_agents
           - combine recurring downtimes for the same time into a single cron entry
           - fix listing service recurring downtimes (#766)
+          - fix excel export button (#765)
           - Config Tool:
             - show summary prompt if a post_obj_save_cmd is set
           - Business Process:
