@@ -28,6 +28,7 @@ for my $cmd (@{$cmds}) {
        or $line =~ m|jquery\.flot\.|mx
        or $line =~ m|root/./tests/|mx
        or $line =~ m|/geoext2|mx
+       or $line =~ m|/panorama_js_box_reorder.js|mx
     ) {
       next;
     }

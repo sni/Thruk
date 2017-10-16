@@ -1178,6 +1178,7 @@ plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/images/world.png
 plugins/plugins-available/panorama/root/images/wrench.png
+plugins/plugins-available/panorama/root/js/panorama_js_box_reorder.js
 plugins/plugins-available/panorama/root/js/panorama_js_elements.js
 plugins/plugins-available/panorama/root/js/panorama_js_form_filter.js
 plugins/plugins-available/panorama/root/js/panorama_js_functions.js
