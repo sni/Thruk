@@ -232,7 +232,9 @@ sub read_downtime {
         }
         elsif($d->{'target'} eq 'service') {
             for my $hst (@{$d->{'host'}}) {
-                return unless defined $authservices->{$hst}->{$d->{'service'}};
+                for my $svc (@{$d->{'service'}}) {
+                    return unless defined $authservices->{$hst}->{$svc};
+                }
             }
         }
         elsif($d->{'target'} eq 'servicegroup') {
