@@ -930,20 +930,22 @@ sub _do_finalize_config {
 
         # static content included?
         # only needed for development server, handled by apache aliasmatch otherwise
-        if( -d $addon.'root' and -w $config->{home}.'/root/thruk/plugins/' ) {
-            print STDERR " -> root\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-            my $target_symlink = $config->{home}.'/root/thruk/plugins/'.$addon_name;
-            if(-e $target_symlink) {
-                my @s1 = stat($target_symlink."/.");
-                my @s2 = stat($addon.'root/.');
-                if($s1[1] != $s2[1]) {
-                    print STDERR " -> inodes mismatch, trying to delete\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-                    unlink($target_symlink) or die("failed to unlink: ".$target_symlink." : ".$!);
+        if($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'DebugServer') {
+            if( -d $addon.'root' and -w $config->{home}.'/root/thruk/plugins/.' ) {
+                print STDERR " -> root\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+                my $target_symlink = $config->{home}.'/root/thruk/plugins/'.$addon_name;
+                if(-e $target_symlink) {
+                    my @s1 = stat($target_symlink."/.");
+                    my @s2 = stat($addon.'root/.');
+                    if($s1[1] != $s2[1]) {
+                        print STDERR " -> inodes mismatch, trying to delete\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+                        unlink($target_symlink) or die("failed to unlink: ".$target_symlink." : ".$!);
+                    }
                 }
-            }
-            if(!-e $target_symlink) {
-                unlink($target_symlink);
-                symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
+                if(!-e $target_symlink) {
+                    unlink($target_symlink);
+                    symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
+                }
             }
         }
     }
