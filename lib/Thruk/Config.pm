@@ -930,7 +930,7 @@ sub _do_finalize_config {
 
         # static content included?
         # only needed for development server, handled by apache aliasmatch otherwise
-        if($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'DebugServer') {
+        if($ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST')) {
             if( -d $addon.'root' and -w $config->{home}.'/root/thruk/plugins/.' ) {
                 print STDERR " -> root\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
                 my $target_symlink = $config->{home}.'/root/thruk/plugins/'.$addon_name;
