@@ -14,8 +14,12 @@ BEGIN {
 my $pwd  = cwd();
 my $make = $ENV{'MAKE'} || 'make';
 for my $dir (split/\n/mx, `ls -1d t/scenarios/*/.`) {
-    chdir($dir);
     $dir =~ s/\/\.$//gmx;
+    if($dir =~ /e2e/mx && !$ENV{'THRUK_TEST_E2E'}) {
+        skip 'E2E tests skiped, set THRUK_TEST_E2E env to run them', 0;
+        next;
+    }
+    chdir($dir);
     for my $step (qw/clean prepare test clean/) {
         ok(1, "$dir: running make $step");
         my $out = `$make $step 2>&1`;

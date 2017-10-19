@@ -31,3 +31,6 @@ clean:
 	docker-compose stop
 	docker-compose rm -f
 	-docker network prune -f
+
+update:
+	docker-compose pull

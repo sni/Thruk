@@ -213,8 +213,8 @@ DOCKERCMD=cd t/docker && \
                 $(shell [ -t 0 ] && echo '-ti') \
                 --rm \
                 -v $(shell pwd)/.:/src \
-                -v $(shell pwd)/t/docker/cases:/root/cases \
-                -v $(DOCKERRESULTS):/root/cases/_logs \
+                -v $(shell pwd)/t/docker/cases:/headless/sakuli/cases \
+                -v $(DOCKERRESULTS):/headless/sakuli/cases/_logs \
                 -v /etc/localtime:/etc/localtime
 t/docker/Dockerfile:
 	cp -p t/docker/Dockerfile.in t/docker/Dockerfile
