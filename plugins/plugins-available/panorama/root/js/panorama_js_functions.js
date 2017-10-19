@@ -1136,6 +1136,14 @@ var TP = {
         if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
         if(TP.iconUpdateRunning[tab.id]) { return; }
 
+        /* Delay update if not all icons are rendered yet.
+         * Those icons would be missing from getStatusReq()
+         */
+        if(tab.window_ids.length > 0 && TP.getAllPanel(tab).length < tab.window_ids.length) {
+            TP.updateAllIcons(tab, id, xdata, reschedule, callback);
+            return;
+        }
+
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) {
             if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
