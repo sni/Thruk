@@ -569,5 +569,6 @@
       </table>
     </div>
 
+    [% PROCESS user_ext_host_info.tt %]
 
 [% PROCESS _footer.tt %]

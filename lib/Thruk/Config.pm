@@ -221,6 +221,7 @@ our %config = ('name'                   => 'Thruk',
                   STAT_TTL           => 604800, # templates do not change in production
                   STRICT             => 0,
                   render_die         => 1,
+                  EVAL_PERL          => 1,
               },
               nagios => {
                   service_state_by_number => {

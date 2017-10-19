@@ -561,7 +561,9 @@
           </td>
         </tr>
         [% END %]
-
       </table>
     </div>
+
+    [% PROCESS user_ext_service_info.tt %]
+
 [% PROCESS _footer.tt %]

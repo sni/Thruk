@@ -1867,6 +1867,8 @@ templates/trends_report.tt
 templates/trends_step_1.tt
 templates/trends_step_2.tt
 templates/trends_step_3.tt
+templates/user_ext_host_info.tt
+templates/user_ext_service_info.tt
 templates/waiting_for_job.tt
 THANKS
 themes/themes-available/Classic/images/accept.png
