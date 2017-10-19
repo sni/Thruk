@@ -855,7 +855,8 @@ sub _task_load_dashboard {
         }
         delete $data->{'usercontent'};
     }
-    $data->{'id'} = 'new';
+    $data->{'id'}   = 'new';
+    $data->{'user'} = $c->stash->{'remote_user'};
     $data = _save_dashboard($c, $data);
     my $newid = $data->{'id'};
 
