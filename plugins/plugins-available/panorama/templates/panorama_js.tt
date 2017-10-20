@@ -55,7 +55,8 @@ Ext.onReady(function() {
             setActiveTab: function() {}
         });
         TP.add_pantab(one_tab_only, undefined, undefined, function(id) {
-            TP.initComplete();
+            // delay initComplete a bit, otherwise panlet cannot be added in readonly / single tab mode
+            TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initComplete();", 30000);
             if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
         });
     } else {
