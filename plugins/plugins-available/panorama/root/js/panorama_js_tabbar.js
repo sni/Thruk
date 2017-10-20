@@ -432,18 +432,20 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                 }
             } else {
                 var data = TP.getResponse(undefined, response);
-                data = data.data;
                 menu.removeAll();
                 var found = 0;
-                for(var x=0; x<data.length; x++) {
-                    if(all || (!Ext.getCmp(data[x].id)) || !Ext.getCmp(data[x].id).rendered) {
-                        found++;
-                        menu.add({text:    data[x].name,
-                                  val:     data[x].id,
-                                  icon:   url_prefix+'plugins/panorama/images/table_go.png',
-                                  handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
-                                }
-                        );
+                if(data && data.data) {
+                    data = data.data;
+                    for(var x=0; x<data.length; x++) {
+                        if(all || (!Ext.getCmp(data[x].id)) || !Ext.getCmp(data[x].id).rendered) {
+                            found++;
+                            menu.add({text:    data[x].name,
+                                      val:     data[x].id,
+                                      icon:   url_prefix+'plugins/panorama/images/table_go.png',
+                                      handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
+                                    }
+                            );
+                        }
                     }
                 }
                 if(found == 0) {
