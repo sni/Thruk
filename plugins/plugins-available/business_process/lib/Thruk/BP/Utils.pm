@@ -191,8 +191,8 @@ sub save_bp_objects {
 
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $new_hex = md5_hex(read_file($filename));
-    my $old_hex = -f $file ? md5_hex(read_file($file)) : '';
+    my $new_hex = md5_hex(scalar read_file($filename));
+    my $old_hex = -f $file ? md5_hex(scalar read_file($file)) : '';
 
     # check if something changed
     if($new_hex ne $old_hex) {
@@ -660,8 +660,12 @@ sub _get_sorted_keys {
         require Monitoring::Config;
         Monitoring::Config::set_save_config();
         my @keys = @{Monitoring::Config::Object::Parent::get_sorted_keys(undef, $keys)};
-        return \@keys;
+        $keys = \@keys;
     };
+    if($@) {
+        # do a normal alphanumeric sort otherwise
+        $keys = [sort @{$keys}];
+    }
     return $keys;
 }
 
