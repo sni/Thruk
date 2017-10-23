@@ -272,8 +272,8 @@ Ext.define('TP.PagingToolbar', {
         me.fireEvent('change', me, pageData);
     },
     updateData: function(data) {
-        this.panel.xdata.totalCount  = data.totalCount;
-        this.panel.xdata.currentPage = data.currentPage;
+        this.panel.xdata.totalCount  = parseInt(data.totalCount);
+        this.panel.xdata.currentPage = parseInt(data.currentPage);
     },
     moveNext: function() {
         this.panel.xdata.currentPage++;

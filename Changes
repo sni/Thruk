@@ -22,6 +22,7 @@ next:
             - add optional helper grid
             - update extjs 4.2.2
             - fix moving watermark elements
+            - fix widgets display issue in IE11
           - Mobile:
             - add config option to add additonal links on the home page
 

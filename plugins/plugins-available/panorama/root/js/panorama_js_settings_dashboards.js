@@ -60,10 +60,6 @@ Ext.define('TP.DashboardManagementWindow', {
             },
             afterrender: function(This) {
                 win.startLoading = true;
-                if(This.loader) {
-                    /* prevent tab switching directly after open which leads to js errors targetParent undef */
-                    win.mask("Loading");
-                }
             },
             reconfigure: function(This) {
                 win.unmask();
@@ -80,7 +76,7 @@ Ext.define('TP.DashboardManagementWindow', {
             loader:      Ext.create('TP.GridLoader', {
                 url:        'panorama.cgi?task=dashboard_list&list=my',
                 loadMask:    true,
-                target:      win
+                reconfigure: true
             }),
             plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
         });
@@ -97,7 +93,7 @@ Ext.define('TP.DashboardManagementWindow', {
             loader:      Ext.create('TP.GridLoader', {
                 url:        'panorama.cgi?task=dashboard_list&list=public',
                 loadMask:    true,
-                target:      win
+                reconfigure: true
             }),
             plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
         });
@@ -115,7 +111,7 @@ Ext.define('TP.DashboardManagementWindow', {
                 loader:      Ext.create('TP.GridLoader', {
                     url:        'panorama.cgi?task=dashboard_list&list=all',
                     loadMask:    true,
-                    target:      win
+                    reconfigure: true
                 }),
                 plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })],
                 bbar:[{
