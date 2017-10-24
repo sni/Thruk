@@ -472,6 +472,17 @@ TP.filterWindow = function(ftype, base_el, panel) {
                 /* autoScroll overwrites this otherwise */
                 this.body.dom.style.overflowY = 'hidden';
             }
+        },
+        checkServiceFormVisibility: function() {
+            if(ftype == 'host') {
+                win.items.each(function(item, idx, length) {
+                    if(item.getForm) {
+                        var fields = item.getForm().getFields();
+                        fields.getAt(2).hide();
+                        fields.getAt(3).hide();
+                    }
+                });
+            }
         }
     });
 
@@ -525,21 +536,12 @@ TP.filterWindow = function(ftype, base_el, panel) {
     }
 
     /* hide service specific fields for hosts */
-    if(ftype == 'host') {
-        win.items.each(function(item, idx, length) {
-            if(item.getForm) {
-                var fields = item.getForm().getFields();
-                fields.getAt(2).hide();
-                fields.getAt(3).hide();
-            }
-        });
-    }
+    win.checkServiceFormVisibility();
 
     /* add or button */
     win.add({
         xtype:      'panel',
         border:     false,
-        height:     '100%',
         html:       '<div align="center" class="clickable" style="width: 25px; margin-top: 60px;"><img src="'+url_prefix+'plugins/panorama/images/right.png" alt="add new or filter" style="vertical-align: middle"><br>or<\/div>',
         listeners:  {
             afterrender: function(This, eOpts) {
@@ -547,6 +549,8 @@ TP.filterWindow = function(ftype, base_el, panel) {
                     var newform = Ext.create("TP.formFilterPanel", {panel: panel});
                     newform.insert(newform.items.length-1, {xtype: 'tp_filter_select', panel: panel});
                     win.insert(win.items.length-1, newform);
+
+                    win.checkServiceFormVisibility();
 
                     // scroll right to view the new filter
                     win.body.dom.scrollLeft=10000000000;
