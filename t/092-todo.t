@@ -29,6 +29,7 @@ for my $cmd (@{$cmds}) {
        or $line =~ m|root/./tests/|mx
        or $line =~ m|/geoext2|mx
        or $line =~ m|/panorama_js_box_reorder.js|mx
+       or $line =~ m|/all_in_one|mx
     ) {
       next;
     }
