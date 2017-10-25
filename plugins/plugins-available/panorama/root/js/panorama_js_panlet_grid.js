@@ -75,7 +75,12 @@ Ext.define('TP.GridLoader', {
                 /* make sure store still exists, may have been closed meanwhile */
                 return;
             }
-            panel.reconfigure(gridStore, data.columns);
+            /* panel.reconfigure throws internal error sometimes */
+            try {
+                panel.reconfigure(gridStore, data.columns);
+            } catch(err) {
+                //TP.logError(panel.id, "panelReconfigureException", err);
+            }
             return;
         }
 
@@ -160,7 +165,12 @@ Ext.define('TP.GridLoader', {
         TP.setPagingToolbarVisibility(panel, pagingToolbar, data);
 
         if(panel.xdata.gridstate != undefined) {
-            grid.applyState(panel.xdata.gridstate);
+            /* applyState throws internal error but state gets applied anyway */
+            try {
+                grid.applyState(panel.xdata.gridstate);
+            } catch(err) {
+                //TP.logError(panel.id, "gridApplyStateException", err);
+            }
         }
         else if(panel.initialState != undefined) {
             /* applyState throws internal error but state gets applied anyway */
