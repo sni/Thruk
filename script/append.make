@@ -206,50 +206,14 @@ timedtest:
 		fi; \
 	done
 
-DOCKERRESULTS=$(shell pwd)/t/docker/results/$(shell date +'%Y-%m-%d_%H.%M')
-DOCKERCMD=cd t/docker && \
-            docker run \
-                -p 5901:5901 \
-                $(shell [ -t 0 ] && echo '-ti') \
-                --rm \
-                -v $(shell pwd)/.:/src \
-                -v $(shell pwd)/t/docker/cases:/headless/sakuli/cases \
-                -v $(DOCKERRESULTS):/headless/sakuli/cases/_logs \
-                -v /etc/localtime:/etc/localtime
-t/docker/Dockerfile:
-	cp -p t/docker/Dockerfile.in t/docker/Dockerfile
-	cd t/docker && docker build -t="local/thruk_panorama_test" .
-
-dockerbuild:
-	rm -f t/docker/Dockerfile
-	$(MAKE) t/docker/Dockerfile
-
-dockerrebuild: dockerclean dockerbuild
-
-dockerclean:
-	-cd t/docker && docker rmi "local/thruk_panorama_test"
-
-dockertest: t/docker/Dockerfile dockertestfirefox dockertestchrome
-
-dockertestchrome:
-	mkdir -p $(DOCKERRESULTS)
-	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -browser chrome
-	rm -rf $(DOCKERRESULTS)
-
-dockertestfirefox:
-	mkdir -p $(DOCKERRESULTS)
-	$(DOCKERCMD) local/thruk_panorama_test /root/failsafe.sh -browser firefox
-	rm -rf $(DOCKERRESULTS)
-
-dockershell: t/docker/Dockerfile
-	mkdir -p $(DOCKERRESULTS)
-	$(DOCKERCMD) -it local/thruk_panorama_test /bin/bash
-
 scenariotest:
 	$(MAKE) test_scenarios
 
 test_scenarios:
 	cd t/scenarios && $(MAKE) test
+
+e2etest:
+	cd t/scenarios/e2e && $(MAKE) test
 
 rpm: $(NAME)-$(VERSION).tar.gz
 	rpmbuild -ta $(NAME)-$(VERSION).tar.gz

@@ -1834,6 +1834,7 @@ t/scenarios/backend_icinga2/t/100-backend_icinga.t
 t/scenarios/backend_icinga2/t/300-controller_extinfo.t
 t/scenarios/backend_icinga2/thruk.conf
 t/scenarios/backend_icinga2/thruk_local.conf
+t/scenarios/e2e/.dropbox_uploader.enc
 t/scenarios/e2e/0001-sahi_add_color_to_highlight.js.patch
 t/scenarios/e2e/all_in_one.tab
 t/scenarios/e2e/cases/0010_reschedule_all_services.js
@@ -1894,6 +1895,7 @@ t/scenarios/e2e/cases/test.sh/test.sh
 t/scenarios/e2e/cases/testsuite.properties
 t/scenarios/e2e/cases/testsuite.suite
 t/scenarios/e2e/docker-compose.yml
+t/scenarios/e2e/dropbox_uploader.sh
 t/scenarios/e2e/failsafe.sh
 t/scenarios/e2e/Makefile
 t/scenarios/e2e/omd/Dockerfile
