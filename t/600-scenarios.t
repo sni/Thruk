@@ -20,7 +20,7 @@ for my $dir (split/\n/mx, `ls -1d t/scenarios/*/.`) {
         next;
     }
     chdir($dir);
-    for my $step (qw/clean prepare test clean/) {
+    for my $step (qw/clean update prepare test clean/) {
         ok(1, "$dir: running make $step");
         my $out = `$make $step 2>&1`;
         my $rc = $?;
