@@ -16,7 +16,7 @@ my $make = $ENV{'MAKE'} || 'make';
 for my $dir (split/\n/mx, `ls -1d t/scenarios/*/.`) {
     $dir =~ s/\/\.$//gmx;
     if($dir =~ /e2e/mx && !$ENV{'THRUK_TEST_E2E'}) {
-        skip 'E2E tests skiped, set THRUK_TEST_E2E env to run them', 0;
+        diag('E2E tests skiped, set THRUK_TEST_E2E env to run them');
         next;
     }
     chdir($dir);
