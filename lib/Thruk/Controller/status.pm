@@ -237,6 +237,7 @@ sub _process_raw_request {
                     my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
                     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
                     for my $obj (@{$hosts}, @{$services}) {
+                        next unless ref $obj->{custom_variable_names} eq 'ARRAY';
                         for my $key (@{$obj->{custom_variable_names}}) {
                             $vars->{$key} = 1;
                         }
