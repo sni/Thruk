@@ -304,7 +304,7 @@ sub _get_connection_details {
 
     for my $pd (keys %{$c->stash->{'backend_detail'}}) {
         next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
-        $detail .= $c->stash->{'backend_detail'}->{$pd}->{'name'}.': '.Thruk::Utils::Filter::escape_html($c->stash->{'failed_backends'}->{$pd} || $c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '').' ('.($c->stash->{'backend_detail'}->{$pd}->{'addr'} || '').")\n";
+        $detail .= $c->stash->{'backend_detail'}->{$pd}->{'name'}.': '.($c->stash->{'failed_backends'}->{$pd} || $c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '').' ('.($c->stash->{'backend_detail'}->{$pd}->{'addr'} || '').")\n";
     }
     return $detail;
 }
