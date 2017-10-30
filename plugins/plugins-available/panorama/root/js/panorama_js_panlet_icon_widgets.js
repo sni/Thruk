@@ -650,8 +650,8 @@ Ext.define('TP.SmallWidget', {
             }
             var x     = (pixel.x-s.width/2);
             var y     = (pixel.y-s.height/2)+TP.offset_y;
-            xdata.layout.x = x;
-            xdata.layout.y = y;
+            xdata.layout.x = Math.floor(x);
+            xdata.layout.y = Math.floor(y);
             panel.setRawPosition(x, y);
             if(panel.el && TP.isThisTheActiveTab(panel)) {
                 if(xdata.appearance.type == "connector") {

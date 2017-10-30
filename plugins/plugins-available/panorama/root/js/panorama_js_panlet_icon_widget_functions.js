@@ -589,7 +589,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     if(icon.dragEl1) { icon.dragEl1.resetDragEl(); }
     if(icon.dragEl2) { icon.dragEl2.resetDragEl(); }
 
-    if(!noUpdateLonLat) {
+    if(!noUpdateLonLat && (deltaX != 0 || deltaY != 0)) {
         icon.updateMapLonLat();
     }
 }
