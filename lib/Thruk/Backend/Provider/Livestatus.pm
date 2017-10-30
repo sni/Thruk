@@ -1211,7 +1211,7 @@ sub get_performance_stats {
         if($ENV{'THRUK_SELECT'}) {
             push @{$selects}, $rows;
         } else {
-            $data = { %{$data}, %{$rows->[0]} };
+            $data = { %{$data}, %{$rows->[0]} } if $rows->[0];
         }
 
         # add stats for passive checks
@@ -1226,7 +1226,7 @@ sub get_performance_stats {
         if($ENV{'THRUK_SELECT'}) {
             push @{$selects}, $rows;
         } else {
-            $data  = { %{$data}, %{$rows->[0]} };
+            $data  = { %{$data}, %{$rows->[0]} } if $rows->[0];
         }
     }
 
