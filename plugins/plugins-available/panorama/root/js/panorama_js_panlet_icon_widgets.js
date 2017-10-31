@@ -607,12 +607,16 @@ Ext.define('TP.SmallWidget', {
             }
             panel.xdata.map.lon = lonLat.lon;
             panel.xdata.map.lat = lonLat.lat;
-            if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) {
-                /* layout tab */
-                panel.noMoreMoves = true;
-                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({lon:lonLat.lon, lat:lonLat.lat});
-                panel.noMoreMoves = false;
+        }
+        if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) {
+            /* layout tab */
+            panel.noMoreMoves = true;
+            Ext.getCmp('layoutForm').getForm().setValues({lon:lonLat.lon, lat:lonLat.lat});
+            if(panel.xdata.appearance.type == "connector") {
+                Ext.getCmp('appearanceForm').getForm().setValues({connectorfromx:panel.xdata.appearance.connectorfromx, connectorfromy:panel.xdata.appearance.connectorfromy,
+                                                                  connectortox:  panel.xdata.appearance.connectortox,   connectortoy:  panel.xdata.appearance.connectortoy });
             }
+            panel.noMoreMoves = false;
         }
         panel.saveState();
     },
@@ -635,7 +639,7 @@ Ext.define('TP.SmallWidget', {
             xdata.appearance.connectortox   = pixel2.x;
             xdata.appearance.connectortoy   = pixel2.y+TP.offset_y;
             if(panel.el) {
-                panel.updateRender();
+                panel.updateRender(xdata);
             }
         } else {
             var pixel = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon), lat: Number(xdata.map.lat)});

@@ -37,7 +37,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         if(isNaN(fromX)) {
             // may happen if from and to is not yet calculated
             if(panel.xdata.map) {
-                panel.moveToMapLonLat(undefined, false);
+                panel.moveToMapLonLat(undefined, false, xdata);
             }
             return;
         }
@@ -211,6 +211,15 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
             values['connectorcolor_unknown']     = '#CC740F';
             values['connectorgradient']          =  0;
             values['connectorsource']            = 'fixed';
+            if(panel.xdata.map) {
+                var tab    = Ext.getCmp(panel.panel_id);
+                var lonLat1 = tab.map.map.getLonLatFromPixel({x: values['connectorfromx'], y: values['connectorfromy']});
+                panel.xdata.map.lon1 = lonLat1.lon;
+                panel.xdata.map.lat1 = lonLat1.lat;
+                var lonLat2 = tab.map.map.getLonLatFromPixel({x: values['connectortox'], y: values['connectortoy']});
+                panel.xdata.map.lon2 = lonLat2.lon;
+                panel.xdata.map.lat2 = lonLat2.lat;
+            }
             Ext.getCmp('appearanceForm').getForm().setValues(values);
         }
     },
