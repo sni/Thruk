@@ -1042,7 +1042,7 @@ TP.iconShowEditDialog = function(panel) {
                     if(panel.firstRun) {
                         panel.destroy();
                     } else {
-                        if(panel.classChanged) {
+                        if(panel.classChanged || panel.xdata.appearance.type == "connector") {
                             var key = panel.id;
                             panel.redrawOnly = true;
                             panel.destroy();
