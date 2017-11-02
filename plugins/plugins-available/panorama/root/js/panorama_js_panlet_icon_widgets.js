@@ -66,7 +66,7 @@ Ext.define('TP.SmallWidget', {
         };
 
         if(!this.locked) {
-            this.stateEvents = ['reconfigure', 'afterlayout', 'move'];
+            this.stateEvents = []; // not required to set events here, stateSave will be called manually everywhere
             this.draggable   = true;
         }
 
@@ -207,6 +207,9 @@ Ext.define('TP.SmallWidget', {
         },
         beforestatesave: function( This, state, eOpts ) {
             if(This.locked) {
+                return(false);
+            }
+            if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel && TP.iconSettingsWindow.panel.id == This.id) {
                 return(false);
             }
             return(true);
@@ -599,7 +602,7 @@ Ext.define('TP.SmallWidget', {
                 lat1: lonLat1.lat,
                 lon2: lonLat2.lon,
                 lat2: lonLat2.lat
-            }
+            };
         } else {
             /* do not completly overwrite map{}, it might be a connector which looses its endpoints then */
             if(panel.xdata.appearance.type != "connector" || panel.xdata.map == undefined) {

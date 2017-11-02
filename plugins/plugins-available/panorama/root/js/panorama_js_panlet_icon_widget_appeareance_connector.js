@@ -225,13 +225,25 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
     },
 
     getAppearanceTabItems: function(panel) {
+        var endpointsChanged = function() {
+            if(panel.noMoreMoves) { return; }
+            if(panel.xdata.map) {
+                var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
+                panel.xdata.appearance.connectorfromx = xdata.appearance.connectorfromx;
+                panel.xdata.appearance.connectorfromy = xdata.appearance.connectorfromy;
+                panel.xdata.appearance.connectortox   = xdata.appearance.connectortox;
+                panel.xdata.appearance.connectortoy   = xdata.appearance.connectortoy;
+                panel.updateMapLonLat();
+            }
+            TP.iconSettingsGlobals.renderUpdate();
+        };
         return([{
             fieldLabel: 'From',
             xtype:      'fieldcontainer',
             name:       'connectorfrom',
             cls:        'connector',
             layout:     { type: 'hbox', align: 'stretch' },
-            defaults:   { listeners: { change: function() { TP.iconSettingsGlobals.renderUpdate(); } } },
+            defaults:   { listeners: { change: endpointsChanged } },
             items:        [{
                 xtype:        'label',
                 text:         'x',
@@ -278,7 +290,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
             name:       'connectorto',
             cls:        'connector',
             layout:     { type: 'hbox', align: 'stretch' },
-            defaults:   { listeners: { change: function() { TP.iconSettingsGlobals.renderUpdate(); } } },
+            defaults:   { listeners: { change: endpointsChanged } },
             items:        [{
                 xtype:        'label',
                 text:         'x',
