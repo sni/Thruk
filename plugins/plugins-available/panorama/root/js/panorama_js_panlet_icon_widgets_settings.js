@@ -185,6 +185,8 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel: 'Position',
                     xtype:      'fieldcontainer',
                     layout:     'table',
+                    id:         'layoutFormPosition',
+                    disabled:   (panel.xdata.appearance.type == 'connector'),
                     items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;', hidden: !!tab.map },
                             { xtype: 'numberfield', name:  'x', width: 70, value: panel.xdata.layout.x, hidden: !!tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
@@ -378,6 +380,11 @@ TP.iconShowEditDialog = function(panel) {
                 } else {
                     Ext.getCmp('layoutscale').setDisabled(true);
                     Ext.getCmp('layoutsize').setDisabled(true);
+                }
+                if(newValue == 'connector') {
+                    Ext.getCmp('layoutFormPosition').setDisabled(true);
+                } else {
+                    Ext.getCmp('layoutFormPosition').setDisabled(false);
                 }
 
                 panel.appearance = Ext.create('tp.icon.appearance.'+newValue, { panel: panel });

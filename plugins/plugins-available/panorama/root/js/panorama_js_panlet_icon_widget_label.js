@@ -300,6 +300,7 @@ Ext.define('TP.IconLabel', {
                                 panel.xdata.appearance.connectortox   += diffX;
                                 panel.xdata.appearance.connectortoy   += diffY;
                             }
+                            panel.updateMapLonLat();
                             panel.saveState();
                         }
                     }
