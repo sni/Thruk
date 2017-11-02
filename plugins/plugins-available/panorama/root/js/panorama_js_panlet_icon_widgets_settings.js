@@ -314,6 +314,7 @@ TP.iconShowEditDialog = function(panel) {
     var renderUpdateDo = function(forceColor, forceRenderItem) {
         if(TP.skipRender) { return; }
         var xdata = TP.get_icon_form_xdata(settingsWindow);
+        if(panel.lastState != undefined) { xdata.state = panel.lastState; }
         if(panel.iconType == 'image') { panel.setRenderItem(xdata); }
         if(xdata.appearance      == undefined) { return; }
         if(xdata.appearance.type == undefined) { return; }
@@ -1078,10 +1079,13 @@ TP.iconShowEditDialog = function(panel) {
     };
     TP.iconSettingsGlobals.stateUpdate = function() {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
-        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
-        labelUpdate();
-        // update performance data stores
-        TP.iconSettingsGlobals.perfDataUpdate();
+        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata, undefined, function() {
+            panel.refreshHandler(panel.lastState); // recalculate state
+            TP.iconSettingsGlobals.renderUpdate();
+            labelUpdate();
+            // update performance data stores
+            TP.iconSettingsGlobals.perfDataUpdate();
+        });
     }
 
     TP.iconSettingsGlobals.popupPreviewUpdate = function() {

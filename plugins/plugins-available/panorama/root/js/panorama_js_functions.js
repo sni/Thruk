@@ -1221,6 +1221,7 @@ var TP = {
 
                                     delete ref.hosts[name][y]['no_data'];
                                     ref.hosts[name][y].host = data.hosts[x];
+                                    ref.hosts[name][y].lastState = state;
                                     ref.hosts[name][y].refreshHandler(state);
                                 }
                                 delete ref.hosts[name];
@@ -1275,6 +1276,7 @@ var TP = {
 
                                     delete ref.services[hst][svc][y]['no_data'];
                                     ref.services[hst][svc][y].service = data.services[x];
+                                    ref.services[hst][svc][y].lastState = state;
                                     ref.services[hst][svc][y].refreshHandler(state);
                                 }
                                 delete ref.services[hst][svc];
