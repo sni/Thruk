@@ -416,7 +416,6 @@ Ext.define('Ext.ux.ColorPickerCombo', {
             ownerCt:     this,
             renderTo:    document.body,
             floating:    true,
-            hidden:      true,
             focusOnShow: true,
             style:     { backgroundColor: "#fff" } ,
             initComponent: function() {
