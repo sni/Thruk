@@ -1080,6 +1080,7 @@ TP.iconShowEditDialog = function(panel) {
     TP.iconSettingsGlobals.stateUpdate = function() {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata, undefined, function() {
+            if(!TP.iconSettingsWindow) { return; } // closed meanwhile
             panel.refreshHandler(panel.lastState); // recalculate state
             TP.iconSettingsGlobals.renderUpdate();
             labelUpdate();
