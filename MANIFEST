@@ -1856,6 +1856,7 @@ t/scenarios/e2e/cases/0212_panorama_text_label_widget.js
 t/scenarios/e2e/cases/0213_panorama_arrow_element.js
 t/scenarios/e2e/cases/0214_panorama_service_icon_perfbar.js
 t/scenarios/e2e/cases/0215_panorama_service_icon_trend.js
+t/scenarios/e2e/cases/0216_panorama_host_icon.js
 t/scenarios/e2e/cases/0220_panorama_geo_map.js
 t/scenarios/e2e/cases/0221_panorama_geo_switch.js
 t/scenarios/e2e/cases/0222_panorama_geo_map_cancel.js
