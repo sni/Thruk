@@ -1043,13 +1043,7 @@ TP.iconShowEditDialog = function(panel) {
                         panel.destroy();
                     } else {
                         if(panel.classChanged || panel.xdata.appearance.type == "connector") {
-                            var key = panel.id;
-                            panel.redrawOnly = true;
-                            panel.destroy();
-                            TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
-                                panel = TP.add_panlet({id:key, skip_state:true, tb:tab, autoshow:true}, false);
-                                TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
-                            }, 50);
+                            panel.redraw();
                             return;
                         } else {
                             // restore position and layout

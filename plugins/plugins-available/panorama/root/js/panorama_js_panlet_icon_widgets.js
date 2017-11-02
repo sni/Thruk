@@ -861,6 +861,18 @@ Ext.define('TP.IconWidget', {
         if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
     },
 
+    redraw: function() {
+        var panel = this;
+        var key = panel.id;
+        var tab = Ext.getCmp(panel.panel_id);
+        panel.redrawOnly = true;
+        panel.destroy();
+        TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
+            panel = TP.add_panlet({id:key, skip_state:true, tb:tab, autoshow:true}, false);
+            TP.updateAllIcons(tab, panel.id);
+        }, 50);
+    },
+
     /* set main render item*/
     setRenderItem: function(xdata, forceRecreate, forceColor) {
         var panel = this;
