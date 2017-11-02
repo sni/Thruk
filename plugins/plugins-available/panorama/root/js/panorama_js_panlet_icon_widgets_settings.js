@@ -1006,8 +1006,8 @@ TP.iconShowEditDialog = function(panel) {
                     if(panel.classChanged) {
                         panel.xdata.cls = panel.classChanged;
                     }
-                    panel.forceSaveState();
                     delete TP.iconSettingsWindow;
+                    panel.forceSaveState();
                     settingsWindow.destroy();
                     panel.firstRun = false;
                     panel.applyXdata();

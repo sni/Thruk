@@ -275,23 +275,12 @@ Ext.define('TP.IconLabel', {
                         var newX = pos[0]+diffX;
                         var newY = pos[1]+diffY;
                         panel.setRawPosition(newX, newY);
+                        panel.updateMapLonLat(true);
                         // update settings window
                         if(TP.iconSettingsWindow) {
                             Ext.getCmp('layoutForm').getForm().setValues({x:newX, y:newY});
-                            if(panel.xdata.appearance.type == "connector" && panel.xdata.appearance.connectorfromx != undefined) {
-                                TP.skipRender = true;
-                                var currentPos = Ext.getCmp('appearanceForm').getForm().getValues();
-                                Ext.getCmp('appearanceForm').getForm().setValues({
-                                    connectorfromx: currentPos.connectorfromx + diffX,
-                                    connectorfromy: currentPos.connectorfromy + diffY,
-                                    connectortox:   currentPos.connectortox   + diffX,
-                                    connectortoy:   currentPos.connectortoy   + diffY
-                                });
-                                TP.skipRender = false;
-                                if(panel.dragEl1) { panel.dragEl1.resetDragEl(); }
-                                if(panel.dragEl2) { panel.dragEl2.resetDragEl(); }
-                            }
-                        } else if(!panel.readonly) {
+                        }
+                        if(!panel.readonly) {
                             panel.xdata.layout.x = newX;
                             panel.xdata.layout.y = newY;
                             if(panel.xdata.appearance.type == "connector" && panel.xdata.appearance.connectorfromx != undefined) {
@@ -300,9 +289,10 @@ Ext.define('TP.IconLabel', {
                                 panel.xdata.appearance.connectortox   += diffX;
                                 panel.xdata.appearance.connectortoy   += diffY;
                             }
-                            panel.updateMapLonLat();
                             panel.saveState();
                         }
+                        if(panel.dragEl1) { panel.dragEl1.resetDragEl(); }
+                        if(panel.dragEl2) { panel.dragEl2.resetDragEl(); }
                     }
                 },
                 boxready: function( This, width, height, eOpts ) {
