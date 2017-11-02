@@ -167,6 +167,9 @@ Ext.define('TP.SmallWidget', {
                 /* clear state information */
                 TP.cp.clear(this.id);
                 if(This.labelEl) { This.labelEl.destroy(); }
+                if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel && TP.iconSettingsWindow.panel.id == this.id) {
+                    TP.iconSettingsWindow.destroy();
+                }
             }
             if(This.dragEl1) { This.dragEl1.destroy(); }
             if(This.dragEl2) { This.dragEl2.destroy(); }
