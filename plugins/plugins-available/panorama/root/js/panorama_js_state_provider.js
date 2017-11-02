@@ -170,13 +170,13 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         for(var key in data) {
             var encoded1 = Ext.JSON.encode(this.lastdata[key]);
             var encoded2 = Ext.JSON.encode(data[key]);
-            if(!TP.JSONequals(encoded1, encoded2)) {
+            if(this.lastdata[key] != null && !TP.JSONequals(encoded1, encoded2)) {
                 params[key] = encoded2;
                 changed++;
             }
         }
-        if(changed == 0) { return; }
         this.lastdata = data;
+        if(changed == 0) { return; }
         params.task   = 'update2';
         if(extraParams) {
             Ext.apply(params, extraParams);
@@ -184,13 +184,33 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(Ext.getCmp('tabpan').getActiveTab()) {
             params.current_tab = Ext.getCmp('tabpan').getActiveTab().id;
         }
+
+        if(!TP.stateSaveImage) {
+            TP.stateSaveImage = Ext.create('Ext.Img', {
+                src:      url_prefix+'plugins/panorama/images/disk.png',
+                autoEl:  'div',
+                floating: true,
+                shadow:   false,
+                title:   'saving...',
+                renderTo: Ext.getBody()
+            });
+        }
+        TP.stateSaveImage.showAt(Ext.getBody().getSize().width - 30, 35);
+        TP.timeouts['timeout_stateprovider_saveimagedetroy'] = window.setTimeout(function() {
+            TP.stateSaveImage.hide();
+        }, 1500);
+
         var conn      = new Ext.data.Connection();
-        TP.log('[global] state provider saved to server');
         conn.request({
             url:    this.url,
             params: params,
             async:  async,
             success: function(response, opts) {
+                TP.log('[global] state provider saved to server');
+                TP.timeouts['timeout_stateprovider_saveimagedetroy'] = window.setTimeout(function() {
+                    TP.stateSaveImage.hide();
+                }, 500);
+
                 /* allow response to contain cookie messages */
                 TP.getResponse(undefined, response, false, true);
 
@@ -198,6 +218,10 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
                 if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
                     TP.dashboardsSettingGrid.loader.load();
                 }
+            },
+            failure: function(response, opts) {
+                TP.log('[global] state provider failed to save changes to server');
+                TP.Msg.msg("fail_message~~saving changes failed: "+response.status+' - '+response.statusText+'<br>please have a look at the server logfile.');
             }
         });
     }
