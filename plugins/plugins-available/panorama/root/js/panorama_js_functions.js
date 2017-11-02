@@ -1177,8 +1177,8 @@ var TP = {
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
                     TP.refresh_errors++;
-                    /* ignore first error, maybe caused by a reload */
-                    if(TP.refresh_errors > 1) {
+                    /* ignore first errors, maybe caused by a reload */
+                    if(TP.refresh_errors > 2) {
                         if(response.status == 0) {
                             TP.Msg.msg("fail_message~~refreshing status failed");
                         } else {
