@@ -721,9 +721,6 @@ Ext.define('TP.IconWidget', {
     initComponent: function() {
         var panel = this;
         this.callParent();
-        this.addListener('afterrender', function(This, eOpts) {
-            this.setRenderItem();
-        });
     },
     items: [],
     applyXdata: function(xdata) {
@@ -859,6 +856,7 @@ Ext.define('TP.IconWidget', {
         /* no need for changes if we are not the active tab */
         if(!TP.isThisTheActiveTab(panel)) { return; }
         if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
+        panel.size = panel.getSize();
     },
 
     redraw: function() {

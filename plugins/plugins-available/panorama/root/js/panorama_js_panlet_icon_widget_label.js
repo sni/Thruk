@@ -148,6 +148,7 @@ Ext.define('TP.IconLabel', {
     setIconLabelPosition: function(cfg) {
         var panel = this;
         if(!panel.labelEl || !panel.labelEl.el) { return; }
+        if(!panel.size)                         { return; }
         if(cfg == undefined) { cfg = panel.xdata.label; }
         var left          = TP.extract_number_with_unit({ value: panel.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
         var top           = TP.extract_number_with_unit({ value: panel.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
@@ -248,13 +249,13 @@ Ext.define('TP.IconLabel', {
             panel:       panel,
             draggable:  !panel.locked,
             renderTo:  "iconContainer",
-            style:     { position: 'absolute' },
             shadow:     false,
             hidden:     (!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == 'mouseover'),
             hideMode:  'visibility',
             cls:        ((panel.xdata.link && panel.xdata.link.link) ? '' : 'not') +'clickable iconlabel tooltipTarget', // defaults to text cursor otherwise
             style:      {
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                left:       '-1000px'    // hide initally before setIconLabelPosition moves it to the correct position
             },
             autoEl: {
                 tag:     'a',
