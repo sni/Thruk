@@ -6,7 +6,7 @@ THRUK=../../../script/thruk
 test:
 	$(THRUK) cache clean
 	for x in $$(seq 50); do \
-	   if [ $$($(THRUK) -l | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
+	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
 	$(THRUK) -l
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t
@@ -14,7 +14,7 @@ test:
 test_verbose:
 	$(THRUK) cache clean
 	for x in $$(seq 50); do \
-	   if [ $$($(THRUK) -l | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
+	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
 	$(THRUK) -l
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
