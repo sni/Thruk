@@ -272,17 +272,19 @@ sub save_logs_to_tempfile {
 
 =head2 cmd
 
-  cmd($c, $command [, $stdin])
+  cmd($c, $command [, $stdin] [, $print_prefix])
 
 run command and return exit code and output
 
 $command can be either a string like '/bin/prog arg1 arg2' or an
 array like ['/bin/prog', 'arg1', 'arg2']
 
+optional print_prefix will print the result on the fly with given prefix.
+
 =cut
 
 sub cmd {
-    my($c, $cmd, $stdin) = @_;
+    my($c, $cmd, $stdin, $print_prefix) = @_;
 
     local $SIG{CHLD} = '';
     local $SIG{PIPE} = 'DEFAULT';
@@ -309,10 +311,17 @@ sub cmd {
             CORE::close($wtr);
         }
         while(POSIX::waitpid($pid, WNOHANG) == 0) {
-            push @lines, <$rdr>;
+            my $line = <$rdr>;
+            next unless defined $line;
+            push @lines, $line;
+            print $print_prefix,$line if defined $print_prefix;
         }
         $rc = $?;
-        push @lines, <$rdr>;
+        my $line = <$rdr>;
+        if(defined $line) {
+            push @lines, $line;
+            print $print_prefix,$line if defined $print_prefix;
+        }
         chomp($output = join('', @lines) || '');
         # restore original array
         unshift @{$cmd}, $prog;
