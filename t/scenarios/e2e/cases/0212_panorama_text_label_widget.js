@@ -12,8 +12,6 @@ var $case = function() {
 
     mouseClickXY(100,100);
 
-    mouseRightClickXY(100,100);
-    click(_span("Settings"));
     isVisible(_textbox("labeltext"));
     _setValue(_textbox("labeltext"), "Test Label Text");
 
