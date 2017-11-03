@@ -525,10 +525,11 @@ Ext.define('TP.StaticIcon', {
                     return(true);
                 },
                 change: function() {
-                if(TP.iconSettingsWindow.renderUpdate) {
-                    TP.iconSettingsWindow.renderUpdate();
+                    if(TP.iconSettingsGlobals.renderUpdate) {
+                        TP.iconSettingsGlobals.renderUpdate();
+                    }
                 }
-            }}
+            }
         }, {
             xtype:      'panel',
             html:       'Place images in: '+usercontent_folder+'/images/ <a href="#" onclick="TP.uploadUserContent(\'image\', \'images/\')">(upload)</a>',
