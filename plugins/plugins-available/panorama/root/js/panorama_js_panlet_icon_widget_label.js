@@ -159,6 +159,9 @@ Ext.define('TP.IconLabel', {
         var elHeight      = TP.extract_number_with_unit({ value: panel.height,            unit:'',    floor: true, defaultValue:   0 });
         var bordersize    = TP.extract_number_with_unit({ value: cfg.bordersize,          unit:' px', floor: true, defaultValue:   0 });
 
+        // avoid flickering when not yet positioned correctly
+        if(elWidth == 0 && elHeight == 0 && left == 0 && top == 0) { return; }
+
         var el    = panel.labelEl.el.dom;
         var style = el.style;
 
