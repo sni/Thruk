@@ -1276,6 +1276,8 @@ plugins/plugins-available/panorama/root/ux/chart/series/KPIGauge.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
 plugins/plugins-available/panorama/root/ux/form/MultiSelect.js
 plugins/plugins-available/panorama/routes
+plugins/plugins-available/panorama/scripts/disable_debug.sh
+plugins/plugins-available/panorama/scripts/enable_debug.sh
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/t/javascript_pattern.t
