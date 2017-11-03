@@ -1828,6 +1828,10 @@ var TP = {
 
     /* renew dashboards on the fly */
     renewDashboardDo: function(tab) {
+        // reschedule if state provider is saving right now, this might result in race conditions
+        if(TP.cp.isSaving) {
+            return TP.renewDashboard(tab);
+        }
         TP.log('['+tab.id+'] renewDashboardDo');
         var duration = 1000;
         tab.renewInProgress = true;

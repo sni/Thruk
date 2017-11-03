@@ -1011,9 +1011,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabpan.xdata, values);
                         var newstate = Ext.JSON.encode(tabpan.getState());
-                        TP.log('['+tab.id+'] settings changed: '+newstate);
                         /* avoid useless updates */
                         if(oldstate != newstate) {
+                            TP.log('['+tab.id+'] settings changed: '+newstate);
                             tabpan.saveState();
                             tabpan.startTimeouts();
                         }

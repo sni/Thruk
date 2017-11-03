@@ -72,6 +72,8 @@ Ext.state.HttpProvider = function(config){
     Ext.state.HttpProvider.superclass.constructor.call(this);
     this.url       = '';
     this.saveDelay = 500;
+    this.isSaving = false;
+    this.isSavingCounter = 0;
     Ext.apply(this, config);
     this.state = this.readValues();
 };
@@ -154,28 +156,29 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 
     /* send changes back to server */
     saveChanges: function(async, extraParams) {
+        var cp = this;
         if(readonly || dashboard_ignore_changes) { return; }
-        if(!TP.initialized) { this.queueChanges(); return; }
+        if(!TP.initialized) { cp.queueChanges(); return; }
         if(async == undefined) { async = true; }
 
         /* seperate state by dashboards */
         var data = setStateByTab(ExtState);
-        if(!this.lastdata) {
+        if(!cp.lastdata) {
             /* set initial data which we can later check against to reduce number of update querys */
-            this.lastdata = data;
+            cp.lastdata = data;
             return;
         }
         var params  = {};
         var changed = 0;
         for(var key in data) {
-            var encoded1 = Ext.JSON.encode(this.lastdata[key]);
+            var encoded1 = Ext.JSON.encode(cp.lastdata[key]);
             var encoded2 = Ext.JSON.encode(data[key]);
-            if(this.lastdata[key] != null && !TP.JSONequals(encoded1, encoded2)) {
+            if(cp.lastdata[key] != null && !TP.JSONequals(encoded1, encoded2)) {
                 params[key] = encoded2;
                 changed++;
             }
         }
-        this.lastdata = data;
+        cp.lastdata = data;
         if(changed == 0) { return; }
         params.task   = 'update2';
         if(extraParams) {
@@ -200,12 +203,16 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             TP.stateSaveImage.hide();
         }, 1500);
 
-        var conn      = new Ext.data.Connection();
+        cp.isSavingCounter++;
+        cp.isSaving = true;
+        var conn    = new Ext.data.Connection();
         conn.request({
-            url:    this.url,
+            url:    cp.url,
             params: params,
             async:  async,
             success: function(response, opts) {
+                cp.isSavingCounter--;
+                cp.isSaving = (cp.isSavingCounter == 0);
                 TP.log('[global] state provider saved to server');
                 TP.timeouts['timeout_stateprovider_saveimagedetroy'] = window.setTimeout(function() {
                     TP.stateSaveImage.hide();
@@ -220,6 +227,8 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
                 }
             },
             failure: function(response, opts) {
+                cp.isSavingCounter--;
+                cp.isSaving = (cp.isSavingCounter == 0);
                 TP.log('[global] state provider failed to save changes to server');
                 TP.Msg.msg("fail_message~~saving changes failed: "+response.status+' - '+response.statusText+'<br>please have a look at the server logfile.');
             }
