@@ -236,7 +236,7 @@ returns formated last check date
 sub last_check {
     my($c, $timestamp) = @_;
     confess("no c") unless defined $c;
-    if(!$timestamp || $timestamp eq 'err:-1') {
+    if(!$timestamp || $timestamp eq '-1') {
         return('never');
     }
     return(date_format($c, $timestamp));
