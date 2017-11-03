@@ -399,7 +399,6 @@ Ext.define('TP.SiteStatusIcon', {
     iconType: 'site',
     iconName: 'Sitename',
     initComponent: function() {
-        var panel = this;
         this.callParent();
     },
     getGeneralItems: function() {

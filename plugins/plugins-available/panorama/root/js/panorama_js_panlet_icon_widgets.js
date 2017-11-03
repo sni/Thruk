@@ -102,7 +102,10 @@ Ext.define('TP.SmallWidget', {
             This.addClickEventhandler(This.el);
 
             if(!readonly && !This.locked) {
-                if((This.xdata.general[This.iconType] == '' && This.firstRun != false && This.iconType != "text") || This.firstRun == true) {
+                if(This.iconType == "text" && This.firstRun == undefined && This.xdata.label.labeltext == "Label") {
+                    This.firstRun = true;
+                }
+                if((This.xdata.general[This.iconType] == '' && This.firstRun == undefined && This.iconType != "text") || This.firstRun == true) {
                     This.firstRun = true;
                     TP.timeouts['timeout_' + This.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
@@ -110,9 +113,7 @@ Ext.define('TP.SmallWidget', {
                             var pos = This.getPosition();
                             This.xdata.layout.x = pos[0];
                             This.xdata.layout.y = pos[1];
-                            if(This.iconType != 'text') {
-                                TP.iconShowEditDialog(This);
-                            }
+                            TP.iconShowEditDialog(This);
                         }
                     }, 250);
                 }
@@ -719,7 +720,6 @@ Ext.define('TP.IconWidget', {
         this.noUpdateLonLat--;
     },
     initComponent: function() {
-        var panel = this;
         this.callParent();
     },
     items: [],
