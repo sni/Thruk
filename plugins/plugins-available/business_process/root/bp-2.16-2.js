@@ -336,7 +336,7 @@ function bp_input_keys(evt, input) {
 }
 
 /* generic node type selection */
-function bp_select_type(type) {
+function bp_select_type(type, defaults) {
     bp_show_edit_node(undefined, false);
     jQuery('.bp_type_box').prop('checked', false).button("refresh");
     jQuery('#bp_check_'+type).prop('checked', true).button("refresh");
@@ -365,6 +365,11 @@ function bp_select_type(type) {
     else if(type == 'equals')      { bp_select_equals(node)      }
     else if(type == 'custom')      { bp_select_custom(node)      }
     jQuery('#bp_function').val(type);
+    if(defaults) {
+        for(var key in defaults) {
+            jQuery('#'+key).val(defaults[key]);
+        }
+    }
     bp_update_status_function();
 }
 

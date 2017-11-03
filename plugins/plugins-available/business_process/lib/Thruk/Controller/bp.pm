@@ -68,6 +68,8 @@ sub index {
     $c->stash->{allowed_for_edit} = 0 if $c->req->parameters->{'readonly'};
     $c->stash->{no_menu}          = $c->req->parameters->{'no_menu'} ? 1 : 0;
 
+    $c->stash->{fav_custom_fun} = $c->config->{'Thruk::Plugin::BP'}->{'favorite_custom_function'} ? [split(/\s*;\s*/mx, $c->config->{'Thruk::Plugin::BP'}->{'favorite_custom_function'})] : [];
+
     # json actions
     if($allowed_for_edit) {
         if($action eq 'templates') {

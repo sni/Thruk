@@ -10,6 +10,7 @@ next:
             - show summary prompt if a post_obj_save_cmd is set
           - Business Process:
             - add weighted state example custom function
+            - add new configuration option 'favorite_custom_function'
             - skip reloading core if objects have not changed
           - Reports:
             - add option to only send mails for specific thresholds

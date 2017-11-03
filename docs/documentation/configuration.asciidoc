@@ -2449,6 +2449,7 @@ Configuration Example:
     #pre_save_cmd          =
     #post_save_cmd         =
     refresh_interval       = 1
+    #favorite_custom_function = echo ; echo_function
   </Component>
 
 
@@ -2488,6 +2489,11 @@ stage is set to 'post'.
 === refresh_interval
 Refresh interval defines how often business processes
 will be recalculated and refreshed. (in minutes)
+
+
+=== favorite_custom_function
+Favorite custom function will be displayed on the 'Type' tab
+so you don't have to select custom first. Syntax is <name>;<function>
 
 
 == Component Thruk::Plugin::Mobile
