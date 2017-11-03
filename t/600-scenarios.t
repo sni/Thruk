@@ -11,6 +11,9 @@ BEGIN {
     plan skip_all => 'docker-compose required' unless TestUtils::has_util('docker-compose');
 }
 
+use_ok("Thruk::Utils::IO");
+
+my $verbose = $ENV{'HARNESS_IS_VERBOSE'} ? 1 : undef;
 my $pwd  = cwd();
 my $make = $ENV{'MAKE'} || 'make';
 for my $dir (split/\n/mx, `ls -1d t/scenarios/*/.`) {
@@ -22,9 +25,12 @@ for my $dir (split/\n/mx, `ls -1d t/scenarios/*/.`) {
     chdir($dir);
     for my $step (qw/clean update prepare test clean/) {
         ok(1, "$dir: running make $step");
-        my $out = `$make $step 2>&1`;
-        my $rc = $?;
-        is($rc, 0, "rc was $rc") or diag($out);
+        my($rc, $out) = Thruk::Utils::IO::cmd(undef, [$make, $step], undef, ($verbose ? '## ' : undef));
+        is($rc, 0, "rc was $rc");
+        if(!$verbose && $rc != 0) { diag($out) }; # already printed in verbose mode
+        if($step eq "prepare" && $rc != 0) {
+            BAIL_OUT("$step failed");
+        }
     }
     chdir($pwd);
 }
