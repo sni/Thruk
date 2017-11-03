@@ -204,9 +204,9 @@
         [% END %]
         </td>
         <td class='[% class %] event_handler' style="display: none;" nowrap align="left">[% h.event_handler.replace("\!.*$", "") %]</td>
-        <td class='[% class %] execution_time' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.execution_time) %]s</td>
+        <td class='[% class %] execution_time' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.execution_time || 0) %]s</td>
         <td class='[% class %] groups' style="display: none;" nowrap align="left">[% h.groups.join(', ') %]</td>
-        <td class='[% class %] latency' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.latency) %]s</td>
+        <td class='[% class %] latency' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.latency || 0) %]s</td>
         <td class='[% class %] next_check' style="display: none;" nowrap align="left">[% IF h.next_check %][% date_format(c, h.next_check) %][% ELSE %]not scheduled[% END %]</td>
         <td class='[% class %] notification_period' style="display: none;" nowrap align="left">[% h.notification_period %]</td>
         <td class='[% class %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.percent_state_change) %]%</td>
