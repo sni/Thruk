@@ -113,6 +113,10 @@ TP.addPanletsMenu = function(options) {
                 text:   'Mine Map',
                 icon:   url_prefix+'plugins/panorama/images/minemap.png',
                 handler: function() { TP.add_panlet({type:'TP.PanletGridServiceMineMap'}) }
+            }, {
+                text:   'Squares',
+                icon:   url_prefix+'plugins/panorama/images/minemap.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletSquares'}) }
             },
             /* Misc */
             '-', {

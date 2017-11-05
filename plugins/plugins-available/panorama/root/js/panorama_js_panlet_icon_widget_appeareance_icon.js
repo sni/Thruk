@@ -62,43 +62,9 @@ Ext.define('TP.IconWidgetAppearanceIcon', {
             }
         }
         else if(panel.iconType == 'host' || panel.hostProblem) {
-            if(panel.acknowledged) {
-                     if(xdata.state == 1) { newSrc = 'acknowledged_down';        }
-                else if(xdata.state == 2) { newSrc = 'acknowledged_unreachable'; }
-                else                      { newSrc = 'acknowledged_unknown';     }
-            }
-            else if(panel.downtime) {
-                if(     xdata.state == 0) { newSrc = 'downtime_up';          }
-                else if(xdata.state == 1) { newSrc = 'downtime_down';        }
-                else if(xdata.state == 2) { newSrc = 'downtime_unreachable'; }
-                else if(xdata.state == 4) { newSrc = 'downtime_pending';     }
-                else                      { newSrc = 'downtime_unknown';     }
-            } else {
-                if(     xdata.state == 0) { newSrc = 'up';          }
-                else if(xdata.state == 1) { newSrc = 'down';        }
-                else if(xdata.state == 2) { newSrc = 'unreachable'; }
-                else if(xdata.state == 4) { newSrc = 'pending';     }
-                else                      { newSrc = 'unknown';     }
-            }
+            newSrc = TP.hostState2Src(xdata.state, panel.acknowledged, panel.downtime);
         } else {
-            if(panel.acknowledged) {
-                     if(xdata.state == 1) { newSrc = 'acknowledged_warning';  }
-                else if(xdata.state == 2) { newSrc = 'acknowledged_critical'; }
-                else                      { newSrc = 'acknowledged_unknown';  }
-            }
-            else if(panel.downtime) {
-                if(     xdata.state == 0) { newSrc = 'downtime_ok';       }
-                else if(xdata.state == 1) { newSrc = 'downtime_warning';  }
-                else if(xdata.state == 2) { newSrc = 'downtime_critical'; }
-                else if(xdata.state == 4) { newSrc = 'downtime_pending';  }
-                else                      { newSrc = 'downtime_unknown';  }
-            } else {
-                if(     xdata.state == 0) { newSrc = 'ok';       }
-                else if(xdata.state == 1) { newSrc = 'warning';  }
-                else if(xdata.state == 2) { newSrc = 'critical'; }
-                else if(xdata.state == 4) { newSrc = 'pending';  }
-                else                      { newSrc = 'unknown';  }
-            }
+            newSrc = TP.serviceState2Src(xdata.state, panel.acknowledged, panel.downtime);
         }
         if(rec != null && rec.data.fileset[newSrc]) {
             newSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset[newSrc];
@@ -143,3 +109,49 @@ Ext.define('TP.IconWidgetAppearanceIcon', {
         }]);
     }
 });
+
+TP.hostState2Src = function(state, acknowledged, downtime) {
+    var newSrc;
+    if(acknowledged) {
+             if(state == 1) { newSrc = 'acknowledged_down';        }
+        else if(state == 2) { newSrc = 'acknowledged_unreachable'; }
+        else                { newSrc = 'acknowledged_unknown';     }
+    }
+    else if(downtime) {
+        if(     state == 0) { newSrc = 'downtime_up';          }
+        else if(state == 1) { newSrc = 'downtime_down';        }
+        else if(state == 2) { newSrc = 'downtime_unreachable'; }
+        else if(state == 4) { newSrc = 'downtime_pending';     }
+        else                { newSrc = 'downtime_unknown';     }
+    } else {
+        if(     state == 0) { newSrc = 'up';          }
+        else if(state == 1) { newSrc = 'down';        }
+        else if(state == 2) { newSrc = 'unreachable'; }
+        else if(state == 4) { newSrc = 'pending';     }
+        else                { newSrc = 'unknown';     }
+    }
+    return(newSrc);
+}
+
+TP.serviceState2Src = function(state, acknowledged, downtime) {
+    var newSrc;
+    if(acknowledged) {
+             if(state == 1) { newSrc = 'acknowledged_warning';  }
+        else if(state == 2) { newSrc = 'acknowledged_critical'; }
+        else                { newSrc = 'acknowledged_unknown';  }
+    }
+    else if(downtime) {
+        if(     state == 0) { newSrc = 'downtime_ok';       }
+        else if(state == 1) { newSrc = 'downtime_warning';  }
+        else if(state == 2) { newSrc = 'downtime_critical'; }
+        else if(state == 4) { newSrc = 'downtime_pending';  }
+        else                { newSrc = 'downtime_unknown';  }
+    } else {
+        if(     state == 0) { newSrc = 'ok';       }
+        else if(state == 1) { newSrc = 'warning';  }
+        else if(state == 2) { newSrc = 'critical'; }
+        else if(state == 4) { newSrc = 'pending';  }
+        else                { newSrc = 'unknown';  }
+    }
+    return(newSrc);
+}

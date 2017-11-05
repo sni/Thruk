@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 522;
+    plan tests => 531;
 }
 
 BEGIN {
@@ -86,6 +86,7 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=servicesminemap',
     '/thruk/cgi-bin/panorama.cgi?task=services_pie',
     '/thruk/cgi-bin/panorama.cgi?task=servicetotals',
+    '/thruk/cgi-bin/panorama.cgi?task=squares_data',
     '/thruk/cgi-bin/panorama.cgi?task=show_logs',
     '/thruk/cgi-bin/panorama.cgi?task=site_status',
     '/thruk/cgi-bin/panorama.cgi?task=stats_check_metrics',

@@ -148,6 +148,9 @@ sub index {
         elsif($task eq 'services') {
             return(_task_services($c));
         }
+        elsif($task eq 'squares_data') {
+            return(_task_squares_data($c));
+        }
         elsif($task eq 'servicesminemap') {
             return(_task_servicesminemap($c));
         }
@@ -1746,6 +1749,69 @@ sub _task_services {
             _long_plugin($s) if $c->stash->{'show_long_plugin_output'} eq 'inline';
         }
     }
+
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
+}
+
+##########################################################
+sub _task_squares_data {
+    my($c) = @_;
+
+    my $source = $c->req->parameters->{'source'} || 'hosts';
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $data = [];
+    my $uniq_hosts = {};
+    if($source eq 'services' || $source eq 'both') {
+        my $services = $c->{'db'}->get_services(
+                                    filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
+                                    columns => [qw/host_name host_state host_has_been_checked host_scheduled_downtime_depth host_acknowledged
+                                                   description state acknowledged scheduled_downtime_depth has_been_checked/],
+                                    sort    => { ASC => [ 'host_name',   'description' ] },
+                                );
+        for my $svc (@{$services}) {
+            if(!$uniq_hosts->{$svc->{'host_name'}}) {
+                push @{$data}, { uniq         => $svc->{'host_name'},
+                                 name         => $svc->{'host_name'},
+                                 state        => $svc->{'host_has_been_checked'} == 0 ? 4 : $svc->{'host_state'},
+                                 downtime     => $svc->{'host_scheduled_downtime_depth'},
+                                 acknowledged => $svc->{'host_acknowledged'},
+                                 link         => 'extinfo.cgi?type=1&host='.$svc->{'host_name'},
+                                 isHost       => 1,
+                                };
+                $uniq_hosts->{$svc->{'host_name'}} = 1;
+            }
+            push @{$data}, { uniq         => $svc->{'host_name'}.';'.$svc->{'description'},
+                             name         => $svc->{'host_name'}.' - '.$svc->{'description'},
+                             state        => $svc->{'has_been_checked'} == 0 ? 4 : $svc->{'state'},
+                             downtime     => $svc->{'scheduled_downtime_depth'},
+                             acknowledged => $svc->{'acknowledged'},
+                             link         => 'extinfo.cgi?type=1&host='.$svc->{'host_name'}."&service=".$svc->{'description'},
+                           };
+        }
+    }
+    elsif($source eq 'hosts') {
+        my $hosts = $c->{'db'}->get_hosts(
+                                    filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
+                                    columns => [qw/name state acknowledged scheduled_downtime_depth has_been_checked/],
+                                    sort    => { ASC => [ 'name' ] },
+                                );
+        for my $hst (@{$hosts}) {
+            push @{$data}, { uniq         => $hst->{'name'},
+                             name         => $hst->{'name'},
+                             state        => $hst->{'state'},
+                             downtime     => $hst->{'scheduled_downtime_depth'},
+                             acknowledged => $hst->{'acknowledged'},
+                             link         => 'extinfo.cgi?type=1&host='.$hst->{'name'},
+                             isHost       => 1,
+                            };
+        }
+    }
+    my $json = {
+        data => $data,
+    };
 
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json);

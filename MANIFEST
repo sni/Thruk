@@ -1214,6 +1214,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_panlet_piechart.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_piechart_stats.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_pnp.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_service.js
+plugins/plugins-available/panorama/root/js/panorama_js_panlet_squares.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url_bp.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url_nagvis.js

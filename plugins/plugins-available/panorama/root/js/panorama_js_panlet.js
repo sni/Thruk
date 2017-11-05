@@ -5,6 +5,8 @@ Ext.define('TP.Panlet', {
     y:         25,
     height:    200,
     width:     400,
+    minSettingsWidth:  450,
+    minSettingsHeight: 200,
     layout:    'fit',
     constrain: false,
     hideMode:  'visibility',
@@ -557,9 +559,9 @@ TP.panletGearHandler = function(panel) {
             panel.gearInitCallback(panel);
         }
         panel.origSize = panel.getSize();
-        if(panel.origSize.width < 450 || panel.origSize.height < 250) {
-            panel.setSize(Ext.Array.max([450, panel.origSize.width]),
-                         Ext.Array.max([250, panel.origSize.height])
+        if(panel.origSize.width < panel.minSettingsWidth || panel.origSize.height < panel.minSettingsHeight) {
+            panel.setSize(Ext.Array.max([panel.minSettingsWidth, panel.origSize.width]),
+                         Ext.Array.max([panel.minSettingsHeight, panel.origSize.height])
                         );
         }
         panel.applyBorderAndBackground();
