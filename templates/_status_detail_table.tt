@@ -121,7 +121,7 @@
         <td class='[% hostclass %] host_name'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
-              <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
+              <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %] - [% s.host_alias %]'>[% s.host_display_name %]</a></td>
               <td align="right">
                 [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
               </td>
