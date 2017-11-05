@@ -311,6 +311,10 @@ Ext.define('TP.Panlet', {
                     this.getEl().shadow.el.removeCls('hidden');
                 }
             }
+            if(this.autohideHeaderOffset != undefined && !this.gearitem) {
+                this.getEl().setStyle('overflow', 'visible');
+                this.getHeader().getEl().dom.style.top = this.autohideHeaderOffset+'px';
+            }
         }
     },
     hideHeader: function(global) {
@@ -329,7 +333,7 @@ Ext.define('TP.Panlet', {
     },
     applyBorderAndBackground: function() {
         this.overCls = 'autohideheaderover';
-        if((this.xdata.showborder == false) && this.gearitem == undefined) {
+        if(this.xdata.showborder == false && this.gearitem == undefined) {
             this.cls     = 'autohideheader';
             this.bodyCls = 'autohideheader';
             this.shadow  = false;

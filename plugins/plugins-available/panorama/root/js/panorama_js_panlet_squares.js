@@ -8,6 +8,7 @@ Ext.define('TP.PanletSquares', {
     minSettingsHeight: 400,
     bodyStyle: "background: transparent;",
     style:    { position: 'absolute', zIndex: 50, background: 'transparent' },
+    autohideHeaderOffset: -17,
     has_search_button: 'service',
     hideSettingsForm: ['url'],
     reloadOnSiteChanges: true,
