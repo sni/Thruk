@@ -607,6 +607,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     if(!noUpdateLonLat && (deltaX != 0 || deltaY != 0)) {
         icon.updateMapLonLat();
     }
+    icon.saveState();
 }
 
 TP.moveAlignedIcons = function(deltaX, deltaY, skip_id) {

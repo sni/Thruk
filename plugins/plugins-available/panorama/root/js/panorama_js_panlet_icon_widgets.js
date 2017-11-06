@@ -81,6 +81,9 @@ Ext.define('TP.SmallWidget', {
                 delete state.xdata.appearance.connectorfromy;
                 delete state.xdata.appearance.connectortox;
                 delete state.xdata.appearance.connectortoy;
+            } else {
+                delete state.xdata.layout.lon;
+                delete state.xdata.layout.lat;
             }
             return state;
         };
