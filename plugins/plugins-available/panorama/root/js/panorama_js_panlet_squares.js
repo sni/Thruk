@@ -369,7 +369,9 @@ Ext.define('TP.PanletSquares', {
                     var item = panel.dataStore[panel.tip.itemUniq].item;
                     panel.tip.item = item;
                     tip.setTitle(item.name);
-                    tip.update("");
+                    var state = TP.text_status(item.state, item.isHost);
+                    tip.update("Status: <span class='"+state.toUpperCase()+"'>"+state+"<\/span><br>"
+                              +"Duration: "+TP.duration(item.duration));
                     var detailsBtn = Ext.getCmp(panel.id+'-detailsBtn')
                     if(detailsBtn) { detailsBtn.setHref(item.link); }
                     return(true);
