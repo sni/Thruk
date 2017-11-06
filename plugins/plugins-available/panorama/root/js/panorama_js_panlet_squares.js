@@ -19,6 +19,8 @@ Ext.define('TP.PanletSquares', {
         panel.xdata.source       = 'hosts';
         //panel.xdata.groupby     = ['host_name', 'description'];
         panel.xdata.iconPadding  = 2;
+        panel.xdata.iconSet      = 'default_64';
+        panel.xdata.iconSize     = 'expand';
         panel.xdata.iconWidth    = 0;
         panel.xdata.iconHeight   = 0;
         panel.xdata.popup_button = ['details'];
@@ -135,6 +137,28 @@ Ext.define('TP.PanletSquares', {
                 name:         'background',
                 value:        '',
                 flex:          1
+            }]
+        });
+
+        panel.addGearItems({
+            xtype:        'fieldcontainer',
+            fieldLabel:   'Iconset',
+            layout:      { type: 'hbox', align: 'stretch' },
+            items:        [{
+                xtype:        'combobox',
+                name:         'iconSet',
+                cls:          'icon',
+                store:         TP.iconsetsStore,
+                value:        panel.xdata.iconSet,
+                emptyText:    'use dashboards default icon set',
+                displayField: 'name',
+                valueField:   'value',
+                width:        200,
+                listConfig : {
+                    getInnerTpl: function(displayField) {
+                        return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
+                    }
+                }
             }, {
                 xtype:        'label',
                 text:         'Padding: ',
@@ -151,24 +175,24 @@ Ext.define('TP.PanletSquares', {
                 fieldStyle:   'text-align: right;'
             }]
         });
-
         panel.addGearItems({
             xtype:        'fieldcontainer',
-            fieldLabel:   'Iconset',
+            fieldLabel:   'Icon Size',
             layout:      { type: 'hbox', align: 'stretch' },
             items:        [{
                 xtype:        'combobox',
-                name:         'iconset',
-                cls:          'icon',
-                store:         TP.iconsetsStore,
-                value:        '',
-                emptyText:    'use dashboards default icon set',
-                displayField: 'name',
-                valueField:   'value',
-                width:        200,
-                listConfig : {
-                    getInnerTpl: function(displayField) {
-                        return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
+                name:         'iconSize',
+                store:        [['auto','Automatic'],['fixed','Fixed Size'],['expand','Adjust to Panel Size']],
+                value:        panel.xdata.iconSize,
+                listeners: {
+                    change: function(This, val) {
+                        if(val == "fixed") {
+                            Ext.getCmp('iconWidth').setDisabled(false);
+                            Ext.getCmp('iconHeight').setDisabled(false);
+                        } else {
+                            Ext.getCmp('iconWidth').setDisabled(true);
+                            Ext.getCmp('iconHeight').setDisabled(true);
+                        }
                     }
                 }
             }, {
@@ -179,11 +203,13 @@ Ext.define('TP.PanletSquares', {
                 xtype:        'numberunit',
                 unit:         'px',
                 name:         'iconWidth',
+                id:           'iconWidth',
                 minValue:      0,
                 maxValue:      1000,
                 step:          1,
                 width:         60,
                 value:         panel.xdata.iconWidth,
+                disabled:      panel.xdata.iconSize == "fixed" ? false : true,
                 fieldStyle:   'text-align: right;'
             }, {
                 xtype:        'label',
@@ -193,19 +219,14 @@ Ext.define('TP.PanletSquares', {
                 xtype:        'numberunit',
                 unit:         'px',
                 name:         'iconHeight',
+                id:           'iconHeight',
                 minValue:      0,
                 maxValue:      1000,
                 step:          1,
                 width:         60,
                 value:         panel.xdata.iconHeight,
+                disabled:      panel.xdata.iconSize == "fixed" ? false : true,
                 fieldStyle:   'text-align: right;'
-            }, {
-                xtype:      'panel',
-                html:       '0 px means automatic!',
-                style:      'text-align: center;',
-                bodyCls:    'form-hint',
-                padding:    '10 0 0 0',
-                border:      0
             }]
         });
 
@@ -349,7 +370,7 @@ TP.square_update_callback = function(panel, data, retries) {
     if(!panel.el || !panel.el.dom) { return; }
     if(!panel.containerItem || !panel.containerItem.body.el || !panel.containerItem.body.el.dom) { return; }
     var tab   = Ext.getCmp(panel.panel_id);
-    var iconsetName = panel.xdata.iconset;
+    var iconsetName = panel.xdata.iconSet;
     if(iconsetName == '' || iconsetName == undefined) {
         if(!tab) { return; }
         iconsetName = tab.xdata.defaulticonset || 'default';
@@ -357,10 +378,35 @@ TP.square_update_callback = function(panel, data, retries) {
     var rec    = TP.iconsetsStore.findRecord('value', iconsetName);
     var imgSrc = Ext.BLANK_IMAGE_URL;
     var leftStart  = 3;
-    var topStart   = 5;
+    var topStart   = 3;
     var padding    = panel.xdata.iconPadding;
-    var iconWidth  = panel.xdata.iconWidth;
-    var iconHeight = panel.xdata.iconHeight;
+    var iconWidth  = 0;
+    var iconHeight = 0;
+    if(panel.xdata.iconSize == 'fixed') {
+        iconWidth  = panel.xdata.iconWidth;
+        iconHeight = panel.xdata.iconHeight;
+    }
+    if(panel.xdata.iconSize == 'expand') {
+        // see how big the icons can be to fill the complete panel
+        if(data.length == 0) { return; }
+        var size = panel.getSize();
+        size.width  += -14; // 8px border + 2*3px padding
+        size.height += -14; // same
+
+        // calculate ideal average edge length
+        var avgWidth  = Math.floor(Math.sqrt((size.width * size.height) / data.length));
+        var minWidth  = avgWidth;
+        var minHeight = avgWidth;
+        // adjust so there is no space on the x - axe
+        minWidth   = size.width / (Math.ceil(size.width / minWidth));
+        // adjust so there is no space on the y - axe
+        minHeight  = size.height / (Math.ceil(size.height / minHeight));
+        // choose whatever is bigger
+        minWidth   = Ext.Array.max([minWidth, minHeight]);
+
+        iconWidth  = minWidth - padding;
+        iconHeight = minWidth - padding;
+    }
 
     // reset all update flags
     for(var key in panel.dataStore) {
