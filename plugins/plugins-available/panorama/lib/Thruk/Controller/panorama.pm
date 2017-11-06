@@ -1775,6 +1775,8 @@ sub _task_squares_data {
             if(!$uniq_hosts->{$svc->{'host_name'}}) {
                 push @{$data}, { uniq         => $svc->{'host_name'},
                                  name         => $svc->{'host_name'},
+                                 host_name    => $svc->{'host_name'},
+                                 description  => '',
                                  state        => $svc->{'host_has_been_checked'} == 0 ? 4 : $svc->{'host_state'},
                                  downtime     => $svc->{'host_scheduled_downtime_depth'},
                                  acknowledged => $svc->{'host_acknowledged'},
@@ -1785,6 +1787,8 @@ sub _task_squares_data {
             }
             push @{$data}, { uniq         => $svc->{'host_name'}.';'.$svc->{'description'},
                              name         => $svc->{'host_name'}.' - '.$svc->{'description'},
+                             host_name    => $svc->{'host_name'},
+                             description  => $svc->{'description'},
                              state        => $svc->{'has_been_checked'} == 0 ? 4 : $svc->{'state'},
                              downtime     => $svc->{'scheduled_downtime_depth'},
                              acknowledged => $svc->{'acknowledged'},
@@ -1801,6 +1805,8 @@ sub _task_squares_data {
         for my $hst (@{$hosts}) {
             push @{$data}, { uniq         => $hst->{'name'},
                              name         => $hst->{'name'},
+                             host_name    => $hst->{'name'},
+                             description  => '',
                              state        => $hst->{'state'},
                              downtime     => $hst->{'scheduled_downtime_depth'},
                              acknowledged => $hst->{'acknowledged'},

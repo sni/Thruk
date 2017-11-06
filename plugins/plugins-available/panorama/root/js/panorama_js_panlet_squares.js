@@ -14,13 +14,14 @@ Ext.define('TP.PanletSquares', {
     reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
-        var panel               = this;
-        panel.xdata.showborder  = false;
-        panel.xdata.source      = 'hosts';
+        var panel                = this;
+        panel.xdata.showborder   = false;
+        panel.xdata.source       = 'hosts';
         //panel.xdata.groupby     = ['host_name', 'description'];
-        panel.xdata.iconPadding = 2;
-        panel.xdata.iconWidth   = 0;
-        panel.xdata.iconHeight  = 0;
+        panel.xdata.iconPadding  = 2;
+        panel.xdata.iconWidth    = 0;
+        panel.xdata.iconHeight   = 0;
+        panel.xdata.popup_button = ['details'];
 
         panel.dataStore        = {};
 
@@ -61,36 +62,17 @@ Ext.define('TP.PanletSquares', {
             html:      '<span id="'+panel.id+'-container"></span>'
         });
 
-        /* tool tip */
-        panel.tip = Ext.create('Ext.tip.ToolTip', {
-            target: panel.containerItem.el,
-            renderTo: Ext.getBody(),
-            minWidth: 200,
-            fbar: [
-              { type: 'button',
-                text: 'Details',
-                href: 'panorama.cgi',
-                id:   panel.id+'-detailsBtn',
-                icon: url_prefix+'plugins/panorama/images/information.png',
-              }
-            ],
-            listeners: {
-                beforeshow: function updateTipBody(tip, eOpts) {
-                    var item = panel.dataStore[panel.tip.itemUniq].item;
-                    tip.setTitle(item.name);
-                    tip.update("");
-                    Ext.getCmp(panel.id+'-detailsBtn').setHref(item.link);
-                }
-            }
-        });
-
         /* sets inital value */
         panel.addListener('afterrender', function() {
+            panel.createToolTip();
             panel.refreshHandler();
         });
         panel.addListener('resize', function() {
             panel.refreshHandler();
         });
+        panel.formUpdatedCallback = function(panel) {
+            panel.createToolTip();
+        }
     },
     adjustBodyStyle: function() {
         var panel = this;
@@ -113,11 +95,11 @@ Ext.define('TP.PanletSquares', {
                 name:         'source',
                 store:        [['hosts','Hosts'],['services','Services'],['both','Hosts & Services']],
                 value:        panel.xdata.source
-            }, {
+            }/*, {
                 xtype:        'label',
                 text:         'Group By: ',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
-            }/*, {
+            }, {
                 xtype:        'combobox',
                 multiSelect:   true,
                 name:         'groupby',
@@ -225,6 +207,140 @@ Ext.define('TP.PanletSquares', {
                 padding:    '10 0 0 0',
                 border:      0
             }]
+        });
+
+        var available_buttons = [["details", "details"]];
+        Ext.Array.each(action_menu_actions, function(name, i) {
+            available_buttons.push(["s:"+name, name]);
+        });
+        Ext.Array.each(action_menu_items, function(val, i) {
+            var name = val[0];
+            available_buttons.push(["m:"+name, name]);
+        });
+        panel.addGearItems({
+            xtype:        'fieldcontainer',
+            fieldLabel:   'Popup Button',
+            layout:      { type: 'hbox', align: 'stretch' },
+            items:        [{
+                xtype:        'combobox',
+                name:         'popup_button',
+                multiSelect:   true,
+                width:         300,
+                store:         available_buttons,
+                value:         panel.xdata.popup_button,
+                emptyText:    'add buttons to popup',
+                listConfig : {
+                    getInnerTpl: function(displayField) {
+                        return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
+                    }
+                }
+            }]
+        });
+    },
+    createToolTip: function() {
+        var panel = this;
+        /* add tool tip */
+        var popup_fbar_btn = [];
+        Ext.Array.each(panel.xdata.popup_button, function(val, i) {
+            if(val == "details") {
+                popup_fbar_btn.push({
+                    type: 'button',
+                    text: 'Details',
+                    href: 'panorama.cgi',
+                    id:   panel.id+'-detailsBtn',
+                    icon: url_prefix+'plugins/panorama/images/information.png'
+                });
+            } else {
+                var icon = url_prefix+'plugins/panorama/images/cog.png';
+                var name = 'Action';
+                var matches = val.match(/s:(.+)$/);
+                if(matches) {
+                    val  = 'server://'+matches[1];
+                    name = matches[1];
+                }
+                matches = val.match(/m:(.+)$/);
+                if(matches) {
+                    val  = 'menu://'+matches[1];
+                    icon = url_prefix+'plugins/panorama/images/menu-down.gif';
+                    name = matches[1];
+                }
+                popup_fbar_btn.push({
+                    type: 'button',
+                    text:  name,
+                    icon:  icon,
+                    handler: function(This) {
+                        var btn = This;
+                        // create fake panel context to execute the click command from the menu
+                        panel.fakePanel = Ext.create('Ext.panel.Panel', {
+                            autoShow: false,
+                            floating: true,
+                            x: 100,
+                            y: 100,
+                            autoEl:  'a',
+                            href:    '#',
+                            text:    ' ',
+                            renderTo: Ext.getBody(),
+                            panel_id: panel.panel_id,
+                            xdata: {
+                                link: {
+                                    link: val
+                                },
+                                general: {
+                                    host: panel.tip.item.host_name,
+                                    service: panel.tip.item.description
+                                }
+                            },
+                            listeners: {
+                                afterrender: function(This) {
+                                    var options = {
+                                        alignTo:  btn,
+                                        callback: function() {
+                                            window.setTimeout(function() {
+                                                panel.tip.hide();
+                                            }, 500);
+                                        }
+                                    };
+                                    TP.iconClickHandlerExec(This.id, val, This, undefined, undefined, options);
+                                }
+                            }
+                        });
+                        panel.fakePanel.show();
+                    }
+                });
+            }
+        });
+        if(panel.tip) {
+            panel.tip.destroy();
+            delete panel.tip;
+        }
+        panel.tip = Ext.create('Ext.tip.ToolTip', {
+            renderTo: Ext.getBody(),
+            minWidth: Ext.Array.max([200, (popup_fbar_btn.length * 110)]),
+            buttonAlign: 'left',
+            fbar: popup_fbar_btn,
+            listeners: {
+                beforeshow: function updateTipBody(tip, eOpts) {
+                    if(!panel.tip.itemUniq || !panel.dataStore[panel.tip.itemUniq]) { return false; }
+                    var item = panel.dataStore[panel.tip.itemUniq].item;
+                    panel.tip.item = item;
+                    tip.setTitle(item.name);
+                    tip.update("");
+                    var detailsBtn = Ext.getCmp(panel.id+'-detailsBtn')
+                    if(detailsBtn) { detailsBtn.setHref(item.link); }
+                    return(true);
+                },
+                beforehide: function(tip, eOpts) {
+                    // don't hide if there is still a menu open
+                    if(Ext.getCmp('iconActionMenu')) {
+                        return(false);
+                    }
+                    if(panel.fakePanel) {
+                        panel.fakePanel.destroy();
+                        delete panel.fakePanel;
+                    }
+                    return(true);
+                }
+            }
         });
     }
 });
