@@ -531,6 +531,7 @@ TP.panletGearHandler = function(panel) {
     if(panel.locked) { return; }
     var tab = Ext.getCmp(panel.panel_id);
     if(panel.gearitem == undefined) {
+        // show settings
         panel.add(Ext.create('TP.PanletGearItem', {}));
         panel.gearitem = panel.items.getAt(panel.items.length-1);
         if(!panel.gearItemsExtra) {
@@ -571,7 +572,10 @@ TP.panletGearHandler = function(panel) {
         panel.applyBorderAndBackground();
         panel.addCls('gearopen');
         panel.showHeader(tab);
+        // move to front
+        panel.el.dom.style.zIndex = 1000;
     } else {
+        // hide settings
         panel.remove(panel.gearitem);
         panel.gearitem.destroy();
         delete panel.gearItemsExtra;
@@ -587,5 +591,7 @@ TP.panletGearHandler = function(panel) {
         panel.items.getAt(0).show();
         panel.hideHeader(tab);
         panel.syncShadowTimeout();
+        // move back
+        panel.el.dom.style.zIndex = panel.style.zIndex || 50;
     }
 }
