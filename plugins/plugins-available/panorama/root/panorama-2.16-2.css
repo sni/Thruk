@@ -67,18 +67,18 @@ DIV.x-tab-top button {
 }
 .bug-tab {
     background-image: url("images/bug_error.png") !important;
-    left: 4px;
-    top: 3px;
+    left: 0px;
+    top: -1px;
 }
 .debug-tab {
     background-image: url("images/information.png") !important;
     left: -4px;
-    top: 0px;
+    top: -1px;
 }
 .user-tab {
     background-image: url("images/user_suit.png") !important;
     left: -2px;
-    top: 0px;
+    top: -1px;
 }
 .refresh-btn {
     background-image: url("images/arrow_refresh.png") !important;
