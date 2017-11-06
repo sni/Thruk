@@ -2520,6 +2520,9 @@ single users or groups. In theory it's possible to override each and every
 config setting from the thruk.conf but you will get funny results if you
 override fundamental settings like backends, paths and such things.
 
+'Groups' are contact groups from your monitoring core and 'Users' are the
+contact names as they show up in the Thruk interface.
+
 === Groups
 The groups directive overrides specific config settings for one group only.
 Group overrides are applied in alphabetical order. For example, if you have
