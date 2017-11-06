@@ -1743,15 +1743,17 @@ function do_table_search() {
 function showBugReport(id, text) {
     var link = document.getElementById('bug_report-btnEl');
     var raw  = text;
+    var href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
     if(link) {
         text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n" + text;
-        link.href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
+        link.href=href;
     }
 
     var obj = document.getElementById(id);
     try {
         /* for extjs */
         Ext.getCmp(id).show();
+        Ext.getCmp(id).setHref(href);
         Ext.getCmp(id).el.dom.ondblclick    = function() { return showErrorTextPopup(raw) };
         Ext.getCmp(id).el.dom.oncontextmenu = function() { return showErrorTextPopup(raw) };
     }
