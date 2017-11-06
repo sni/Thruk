@@ -142,7 +142,7 @@ Ext.define('TP.PanletSquares', {
 
         panel.addGearItems({
             xtype:        'fieldcontainer',
-            fieldLabel:   'Iconset',
+            fieldLabel:   'Icon Set',
             layout:      { type: 'hbox', align: 'stretch' },
             items:        [{
                 xtype:        'combobox',
@@ -227,6 +227,30 @@ Ext.define('TP.PanletSquares', {
                 value:         panel.xdata.iconHeight,
                 disabled:      panel.xdata.iconSize == "fixed" ? false : true,
                 fieldStyle:   'text-align: right;'
+            }]
+        });
+        panel.addGearItems({
+            xtype:        'fieldcontainer',
+            fieldLabel:   'Icon Color',
+            layout:      { type: 'hbox', align: 'stretch' },
+            items:        [{
+                xtype:        'label',
+                text:         'Fade to black/white after',
+                margins:      {top: 3, right: 2, bottom: 0, left: 7}
+            }, {
+                xtype:        'numberunit',
+                unit:         'px',
+                name:         'durationHours',
+                minValue:      0,
+                maxValue:      100000,
+                step:          1,
+                width:         60,
+                value:         panel.xdata.durationHours,
+                fieldStyle:   'text-align: right;'
+            }, {
+                xtype:        'label',
+                text:         'hours',
+                margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }]
         });
 
@@ -465,6 +489,17 @@ TP.square_update_callback = function(panel, data, retries) {
         panel.dataStore[item.uniq].el.dom.style.height = iconHeight+"px";
         panel.dataStore[item.uniq].el.dom.style.top    = top+"px";
         panel.dataStore[item.uniq].el.dom.dataName     = item.uniq;
+
+        // apply black/white filter based on state duration
+        if(panel.xdata.durationHours > 0) {
+            var durationHours  = 24;
+            if(item.duration < 3600*durationHours) {
+                var durationFilter = Ext.Array.min([100, Math.round(item.duration / (3600*durationHours/100))]);
+                panel.dataStore[item.uniq].el.dom.style.filter = "grayscale("+durationFilter+"%)";
+            } else {
+                panel.dataStore[item.uniq].el.dom.style.filter = "grayscale(100%)";
+            }
+        }
 
         if(panel.dataStore[item.uniq].el.dom.src != oldSrc) {
             TP.flickerImg(panel.dataStore[item.uniq].el.id);

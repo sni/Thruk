@@ -1762,13 +1762,14 @@ sub _task_squares_data {
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $data = [];
+    my $now        = time();
+    my $data       = [];
     my $uniq_hosts = {};
     if($source eq 'services' || $source eq 'both') {
         my $services = $c->{'db'}->get_services(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
-                                    columns => [qw/host_name host_state host_has_been_checked host_scheduled_downtime_depth host_acknowledged
-                                                   description state acknowledged scheduled_downtime_depth has_been_checked/],
+                                    columns => [qw/host_name host_state host_has_been_checked host_scheduled_downtime_depth host_acknowledged host_last_state_change
+                                                   description state acknowledged scheduled_downtime_depth has_been_checked last_state_change/],
                                     sort    => { ASC => [ 'host_name',   'description' ] },
                                 );
         for my $svc (@{$services}) {
@@ -1781,6 +1782,7 @@ sub _task_squares_data {
                                  downtime     => $svc->{'host_scheduled_downtime_depth'},
                                  acknowledged => $svc->{'host_acknowledged'},
                                  link         => 'extinfo.cgi?type=1&host='.$svc->{'host_name'},
+                                 duration     => $now - $svc->{'host_last_state_change'},
                                  isHost       => 1,
                                 };
                 $uniq_hosts->{$svc->{'host_name'}} = 1;
@@ -1792,14 +1794,15 @@ sub _task_squares_data {
                              state        => $svc->{'has_been_checked'} == 0 ? 4 : $svc->{'state'},
                              downtime     => $svc->{'scheduled_downtime_depth'},
                              acknowledged => $svc->{'acknowledged'},
-                             link         => 'extinfo.cgi?type=1&host='.$svc->{'host_name'}."&service=".$svc->{'description'},
+                             link         => 'extinfo.cgi?type=2&host='.$svc->{'host_name'}."&service=".$svc->{'description'},
+                             duration     => $now - $svc->{'last_state_change'},
                            };
         }
     }
     elsif($source eq 'hosts') {
         my $hosts = $c->{'db'}->get_hosts(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
-                                    columns => [qw/name state acknowledged scheduled_downtime_depth has_been_checked/],
+                                    columns => [qw/name state acknowledged scheduled_downtime_depth has_been_checked last_state_change/],
                                     sort    => { ASC => [ 'name' ] },
                                 );
         for my $hst (@{$hosts}) {
@@ -1811,6 +1814,7 @@ sub _task_squares_data {
                              downtime     => $hst->{'scheduled_downtime_depth'},
                              acknowledged => $hst->{'acknowledged'},
                              link         => 'extinfo.cgi?type=1&host='.$hst->{'name'},
+                             duration     => $now - $hst->{'last_state_change'},
                              isHost       => 1,
                             };
         }
