@@ -19,6 +19,7 @@ next:
             - fix importing logs from file (#751)
             - fix issue with locking
           - Panorama:
+            - add squares widget
             - add user styles option to add generic styles usable in labels etc.
             - add optional helper grid
             - update extjs 4.2.2
