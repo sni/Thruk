@@ -393,19 +393,10 @@ TP.square_update_callback = function(panel, data, retries) {
         size.width  += -14; // 8px border + 2*3px padding
         size.height += -14; // same
 
-        // calculate ideal average edge length
-        var avgWidth  = Math.floor(Math.sqrt((size.width * size.height) / data.length));
-        var minWidth  = avgWidth;
-        var minHeight = avgWidth;
-        // adjust so there is no space on the x - axe
-        minWidth   = size.width / (Math.ceil(size.width / minWidth));
-        // adjust so there is no space on the y - axe
-        minHeight  = size.height / (Math.ceil(size.height / minHeight));
-        // choose whatever is bigger
-        minWidth   = Ext.Array.max([minWidth, minHeight]);
+        var edgeLength = TP.getMaxSquareEdgeLength(size.width, size.height, data.length);
 
-        iconWidth  = minWidth - padding;
-        iconHeight = minWidth - padding;
+        iconWidth  = edgeLength - padding;
+        iconHeight = edgeLength - padding;
     }
 
     // reset all update flags
@@ -496,4 +487,23 @@ TP.square_update_callback = function(panel, data, retries) {
             delete panel.dataStore[key];
         }
     }
+}
+
+/* calculate maximum square edge length for given rectangle */
+TP.getMaxSquareEdgeLength = function(x, y, nr) {
+    var sx, sy;
+    var px = Math.ceil(Math.sqrt(nr * x / y));
+    if(Math.floor(px * y / x) * px < nr) { //does not fit, y / ( x / px ) = px * y / x
+        sx = y / Math.ceil(px * y / x);
+    } else {
+        sx = x / px;
+    }
+
+    var py = Math.ceil(Math.sqrt(nr * y / x));
+    if(Math.floor(py * x / y) * py < nr) { //does not fit
+        sy = x / Math.ceil(x * py /y);
+    } else {
+        sy = y / py;
+    }
+    return(Math.floor(Ext.Array.max([sx, sy])));
 }
