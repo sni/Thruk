@@ -311,17 +311,14 @@ sub cmd {
             CORE::close($wtr);
         }
         while(POSIX::waitpid($pid, WNOHANG) == 0) {
-            my $line = <$rdr>;
-            next unless defined $line;
-            push @lines, $line;
-            print $print_prefix,$line if defined $print_prefix;
+            my @line = <$rdr>;
+            push @lines, @line;
+            print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
         }
         $rc = $?;
-        my $line = <$rdr>;
-        if(defined $line) {
-            push @lines, $line;
-            print $print_prefix,$line if defined $print_prefix;
-        }
+        my @line = <$rdr>;
+        push @lines, @line;
+        print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
         chomp($output = join('', @lines) || '');
         # restore original array
         unshift @{$cmd}, $prog;
