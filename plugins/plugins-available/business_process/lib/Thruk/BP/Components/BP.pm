@@ -7,7 +7,6 @@ use Carp;
 use File::Temp;
 use File::Copy qw/move/;
 use Fcntl qw/:DEFAULT/;
-use Scalar::Util qw/weaken isweak/;
 use Thruk::Utils;
 use Thruk::Utils::IO;
 use Thruk::BP::Components::Node;
@@ -93,15 +92,12 @@ sub new {
         $self->add_node($node, 1);
     }
 
-    $self->_resolve_nodes();
     $self->load_runtime_data();
 
     $self->save() if $self->{'need_save'};
 
-    # avoid circular refs
     for my $n (@{$self->{'nodes'}}) {
-        weaken($self->{'nodes_by_id'}->{$n->{'id'}})      unless isweak($self->{'nodes_by_id'}->{$n->{'id'}});
-        weaken($self->{'nodes_by_name'}->{$n->{'label'}}) unless isweak($self->{'nodes_by_name'}->{$n->{'label'}});
+        $n->update_parents($self);
     }
 
     return $self;
@@ -152,6 +148,7 @@ sub update_status {
     my ( $self, $c, $type ) = @_;
     die("no context") unless $c;
 
+    $c->stats->profile(begin => "update_status");
     my $t0 = [gettimeofday];
 
     $type = 0 unless defined $type;
@@ -192,7 +189,9 @@ sub update_status {
     }
 
     # submit back to core
+    $c->stats->profile(begin => "_submit_results_to_core");
     $self->_submit_results_to_core($c, $results);
+    $c->stats->profile(end => "_submit_results_to_core");
 
     # save runtime
     $self->{'time'} = tv_interval($t0);
@@ -200,6 +199,7 @@ sub update_status {
     # store runtime data
     $self->save_runtime();
 
+    $c->stats->profile(end => "update_status");
     return;
 }
 
@@ -304,7 +304,7 @@ sub get_json_nodes {
           acknowledged              => $n->{'acknowledged'}."",
           scheduled_downtime_depth  => $n->{'scheduled_downtime_depth'}."",
           bp_ref                    => $n->{'bp_ref'},
-          depends                   => $n->depends_list,
+          depends                   => $n->{'depends'},
           func                      => $n->{'function'},
           func_args                 => $n->{'function_args'},
           contacts                  => $n->{'contacts'},
@@ -334,6 +334,11 @@ sub add_node {
             $node->set_id($self->make_new_node_id());
         }
         $node->set_id($id);
+    } else {
+        if(!$node->{'id'}) {
+            my $id = $self->make_new_node_id();
+            $node->set_id($id);
+        }
     }
     $self->{'nodes_by_id'}->{$node->{'id'}}      = $node if $node->{'id'};
     $self->{'nodes_by_name'}->{$node->{'label'}} = $node;
@@ -362,18 +367,18 @@ sub remove_node {
     delete $self->{'nodes_by_name'}->{$node->{'label'}};
 
     # remove connections
-    for my $p (@{$node->{'parents'}}) {
+    for my $p (@{$node->parents($self)}) {
         my @depends;
-        for my $d (@{$p->{'depends'}}) {
-            push @depends, $d unless $d->{'id'} eq $node_id;
+        for my $d (@{$p->depends($self)}) {
+            push @depends, $d->{'id'} unless $d->{'id'} eq $node_id;
         }
         $p->{'depends'} = \@depends;
     }
 
-    for my $d (@{$node->{'depends'}}) {
+    for my $d (@{$node->depends($self)}) {
         my @parents;
-        for my $p (@{$d->{'parents'}}) {
-            push @parents, $p unless $p->{'id'} eq $node_id;
+        for my $p (@{$d->parents($self)}) {
+            push @parents, $p->{'id'} unless $p->{'id'} eq $node_id;
         }
         $d->{'parents'} = \@parents;
     }

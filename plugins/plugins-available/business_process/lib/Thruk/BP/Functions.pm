@@ -238,7 +238,7 @@ returns worst state of all dependent nodes
 =cut
 sub worst {
     my($c, $bp, $n) = @_;
-    my $states = _get_nodes_grouped_by_state($n);
+    my $states = _get_nodes_grouped_by_state($n, $bp);
     if(scalar keys %{$states} == 0) {
         return(3, 'no dependent nodes');
     }
@@ -259,7 +259,7 @@ returns best state of all dependent nodes
 =cut
 sub best {
     my($c, $bp, $n) = @_;
-    my $states = _get_nodes_grouped_by_state($n);
+    my $states = _get_nodes_grouped_by_state($n, $bp);
     if(scalar keys %{$states} == 0) {
         return(3, 'no dependent nodes');
     }
@@ -283,7 +283,7 @@ sub at_least {
     my($c, $bp, $n, $args) = @_;
     my($warning, $critical) = @{$args};
     $critical = $warning unless defined $critical;
-    my($good, $bad) = _count_good_bad($n->{'depends'});
+    my($good, $bad) = _count_good_bad($n->depends($bp));
     my $state = 0;
     if($warning !~ m/^\-?\d+$/mx) {
         return(3, 'warning threshold must be numeric');
@@ -317,7 +317,7 @@ returns state if thresholds are reached
 sub not_more {
     my($c, $bp, $n, $args) = @_;
     my($warning, $critical) = @{$args};
-    my($good, $bad) = _count_good_bad($n->{'depends'});
+    my($good, $bad) = _count_good_bad($n->depends($bp));
     if($warning !~ m/^\-?\d+$/mx) {
         return(3, 'warning threshold must be numeric');
     }
@@ -351,7 +351,7 @@ returns number of good nodes matches the number
 sub equals {
     my($c, $bp, $n, $args) = @_;
     my($number) = @{$args};
-    my($good, $bad) = _count_good_bad($n->{'depends'});
+    my($good, $bad) = _count_good_bad($n->depends($bp));
     if($number !~ m/^\-?\d+$/mx) {
         return(3, 'threshold must be numeric');
     }
@@ -434,9 +434,10 @@ sub custom {
 
 ##########################################################
 sub _get_nodes_grouped_by_state {
-    my($n) = @_;
-    my $states = {};
-    for my $d (@{$n->{'depends'}}) {
+    my($n, $bp) = @_;
+    my $states  = {};
+    my $depends = ref $n eq 'HASH' ? $n->{'depends'} : $n->depends($bp);
+    for my $d (@{$depends}) {
         my $state = defined $d->{'status'} ? $d->{'status'} : 4;
         $state = -1 if $state == 4; # make sorting easier
         $states->{$state} = [] unless defined $states->{$state};
@@ -499,15 +500,12 @@ sub _filter {
 # deep clones any object
 sub _dclone {
     my($obj) = @_;
-    local $Data::Dumper::Purity = 1;
-    local $Data::Dumper::Terse = 1;
-    local $Data::Dumper::Useqq = 1;
-    local $Data::Dumper::Deparse = 1;
-    my $VAR1;
-    ## no critics
-    eval Data::Dumper->Dump([$obj]);
-    ## use critics
-    return($VAR1);
+
+    # use faster Clone module if available
+    return(Clone::clone($obj)) if $INC{'Clone.pm'};
+
+    # else use Storable
+    return(Storable::dclone($obj));
 }
 
 ##########################################################

@@ -2,7 +2,6 @@ package Thruk::BP::Components::Node;
 
 use strict;
 use warnings;
-use Scalar::Util qw/weaken isweak/;
 use Thruk::Utils;
 use Thruk::BP::Functions;
 use Thruk::BP::Utils;
@@ -36,7 +35,6 @@ sub new {
         'id'                        => $data->{'id'},
         'label'                     => $data->{'label'},
         'function'                  => '',
-        'function_ref'              => undef,
         'function_args'             => [],
         'depends'                   => Thruk::Utils::list($data->{'depends'} || []),
         'parents'                   => $data->{'parents'}       || [],
@@ -114,82 +112,26 @@ append new child noew
 =cut
 sub append_child {
     my($self, $append) = @_;
-    push @{$self->{'depends'}}, $append;
+    push @{$self->{'depends'}}, $append->{'id'};
     return;
 }
 
 ##########################################################
 
-=head2 resolve_depends
+=head2 update_parents
 
-resolve dependend nodes into objects
+update parents list for all childs
 
 =cut
-sub resolve_depends {
-    my($self, $bp, $depends) = @_;
-
-    # set or update?
-    if(!$depends) {
-        $depends = $self->{'depends'};
-    } else {
-        # remove node from the parent list of its children first
-        for my $d (@{$self->{'depends'}}) {
-            my @new_parents;
-            for my $p (@{$d->{'parents'}}) {
-                push @new_parents, $p unless $p->{'id'} eq $self->{'id'};
-            }
-            $d->{'parents'} = \@new_parents;
+sub update_parents {
+    my($self, $bp) = @_;
+    my $id = $self->{'id'};
+    for my $d (@{$self->depends($bp)}) {
+        if(! grep($id, @{$d->{'parents'}}) ) {
+            push @{$d->{'parents'}}, $id;
         }
     }
-
-    my $new_depends = [];
-    for my $d (@{$depends}) {
-        # not a reference yet?
-        if(ref $d eq '') {
-            my $dn = $bp->{'nodes_by_id'}->{$d} || $bp->{'nodes_by_name'}->{$d};
-            if(!$dn) {
-                # fake node required
-                $dn = Thruk::BP::Components::Node->new({
-                                    'id'       => $bp->make_new_node_id(),
-                                    'label'    => $d,
-                                    'function' => 'Fixed("Unknown")',
-                });
-                $bp->add_node($dn);
-            }
-            $d = $dn;
-        }
-        push @{$new_depends}, $d;
-
-        # add parent connection
-        push @{$d->{'parents'}}, $self;
-    }
-    $self->{'depends'} = $new_depends;
-
-    # avoid circular refs
-    for(my $x = 0; $x < @{$self->{'depends'}}; $x++) {
-        weaken($self->{'depends'}->[$x]) unless isweak($self->{'depends'}->[$x]);
-    }
-    for(my $x = 0; $x < @{$self->{'parents'}}; $x++) {
-        weaken($self->{'parents'}->[$x]) unless isweak($self->{'parents'}->[$x]);
-    }
-
     return;
-}
-
-##########################################################
-
-=head2 depends_list
-
-return data which needs to be statefully stored
-
-=cut
-sub depends_list {
-    my($self) = @_;
-    my $list = [];
-    for my $d (@{$self->{'depends'}}) {
-        push @{$list}, [$d->{'id'}, $d->{'label'}];
-    }
-    return($list);
 }
 
 ##########################################################
@@ -224,7 +166,7 @@ sub get_save_obj {
     };
 
     # save this keys
-    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts filter/) {
+    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts filter depends/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
     }
 
@@ -233,11 +175,6 @@ sub get_save_obj {
         $obj->{'function'} = sprintf("%s(%s)", $self->{'function'}, Thruk::BP::Utils::join_args($self->{'function_args'}));
     }
 
-    # depends
-    $obj->{'depends'} = [] if scalar @{$self->{'depends'}} > 0;
-    for my $d (@{$self->{'depends'}}) {
-        push @{$obj->{'depends'}}, $d->{'id'};
-    }
     return $obj;
 }
 
@@ -324,9 +261,11 @@ sub update_status {
     delete $bp->{'need_update'}->{$self->{'id'}};
 
     return if $type == 1 and $self->{'function'} eq 'status';
+    $c->stats->profile(begin => "update_status bp-".$bp->{id}."-".$self->{'id'});
 
-    return unless $self->{'function_ref'};
-    my $function = $self->{'function_ref'};
+    return unless $self->{'function'};
+    my $function = \&{'Thruk::BP::Functions::'.$self->{'function'}};
+
     eval {
         # input filter
         my $filter_args = {
@@ -378,6 +317,8 @@ sub update_status {
         $self->set_status(3, 'Internal Error: '.$@, $bp);
     }
 
+    $c->stats->profile(end => "update_status bp-".$bp->{id}."-".$self->{'id'});
+
     # indicate a new result if we are linked to an object
     return 1 if $self->{'create_obj'};
 
@@ -411,7 +352,7 @@ sub set_status {
         $self->{'last_state_change'} = $now;
         # put parents on update list
         if($bp) {
-            for my $p (@{$self->{'parents'}}) {
+            for my $p (@{$self->parents($bp)}) {
                 $bp->{'need_update'}->{$p->{'id'}} = $p;
             }
         }
@@ -465,7 +406,6 @@ sub _set_function {
             $self->set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
         } else {
             $self->{'function_args'} = Thruk::BP::Utils::clean_function_args($fargs);
-            $self->{'function_ref'}  = $function;
             $self->{'function'}      = $fname;
         }
     }
@@ -614,6 +554,43 @@ sub _get_status {
     $output =~ s/\n/\\n/gmxo;
 
     return($output, $status, $string);
+}
+
+##########################################################
+
+=head2 depends
+
+    depends()
+
+returns list of depending nodes
+
+=cut
+sub depends {
+    my($self, $bp) = @_;
+    my $depends = [];
+    for my $d (@{$self->{'depends'}}) {
+        push @{$depends}, $bp->{'nodes_by_id'}->{$d} if $bp->{'nodes_by_id'}->{$d};
+    }
+    return($depends);
+}
+
+##########################################################
+
+=head2 parents
+
+    parents()
+
+returns list of parent nodes
+
+=cut
+
+sub parents {
+    my($self, $bp) = @_;
+    my $parents = [];
+    for my $p (@{$self->{'parents'}}) {
+        push @{$parents}, $bp->{'nodes_by_id'}->{$p} if $bp->{'nodes_by_id'}->{$p};
+    }
+    return($parents);
 }
 
 ##########################################################

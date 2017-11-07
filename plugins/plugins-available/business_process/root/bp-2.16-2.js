@@ -757,11 +757,11 @@ function bp_initialize_children_tab(node) {
     selected_nodes_h = new Object();
     var options = [];
     if(node) {
-        node.depends.forEach(function(d) {
-            var val = d[0];
-            selected_nodes.push(val);
-            selected_nodes_h[val] = 1;
-            options.push(new Option(d[1], val));
+        node.depends.forEach(function(id) {
+            var d = bp_get_node(id);
+            selected_nodes.push(id);
+            selected_nodes_h[id] = 1;
+            options.push(new Option(d.label, id));
         });
     }
     set_select_options('bp_'+bp_id+"_selected_nodes", options, false);

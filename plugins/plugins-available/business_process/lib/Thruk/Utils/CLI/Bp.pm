@@ -67,6 +67,11 @@ sub cmd {
         return("business process plugin is disabled.\n", 1);
     }
 
+    # loading Clone makes BPs with filters lot faster
+    eval {
+        require Clone;
+    };
+
     my $mode = shift @{$commandoptions} || '';
 
     if($mode eq 'commit') {

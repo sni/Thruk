@@ -60,7 +60,7 @@ sub acknowledged_filter {
     }
 
     # replace acknowledged problems in all nodes
-    for my $d (@{$args->{'node'}->{'depends'}}) {
+    for my $d (@{$args->{'node'}->depends($args->{'bp'})}) {
         $d->{'status'} = 0 if $d->{'acknowledged'} > 0;
     }
 
@@ -92,7 +92,7 @@ sub unknown_filter {
     }
 
     # replace unknowns in all nodes
-    for my $d (@{$args->{'node'}->{'depends'}}) {
+    for my $d (@{$args->{'node'}->depends($args->{'bp'})}) {
         $d->{'status'} = 0 if $d->{'status'} && $d->{'status'} == 3;
     }
 
@@ -117,7 +117,7 @@ sub add_recursive_output_filter {
         my($bp, $node, $indent) = @_;
         $parents->{$bp->{id}.'-'.$node->{'id'}} = 1;
         return if $indent > 20;
-        for my $n (@{$node->{'depends'}}) {
+        for my $n (@{$node->depends($bp)}) {
             if($n->{'status'} != 0) {
                 if(defined $parents->{$bp->{id}.'-'.$n->{'id'}}) {
                     $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}."] deep recursion...\n";

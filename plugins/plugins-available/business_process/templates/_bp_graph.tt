@@ -58,7 +58,7 @@
     var nodes = [% bp.get_json_nodes(c) %];
     [% edges = [];
       FOREACH n IN bp.nodes;
-        FOREACH d IN n.depends;
+        FOREACH d IN n.depends(bp);
           edges.push([n.id, d.id]);
         END;
     END %]

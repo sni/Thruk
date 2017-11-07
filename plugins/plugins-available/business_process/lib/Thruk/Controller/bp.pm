@@ -28,6 +28,10 @@ sub index {
     if(!$c->config->{'bp_modules_loaded'}) {
         require Data::Dumper;
         require Thruk::BP::Utils;
+        # loading Clone makes BPs with filters lot faster
+        eval {
+            require Clone;
+        };
         $c->config->{'bp_modules_loaded'} = 1;
     }
 
@@ -228,8 +232,7 @@ sub index {
             }
 
             # update children
-            my $depends = Thruk::Utils::list($c->req->parameters->{'bp_'.$id.'_selected_nodes'} || []);
-            $node->resolve_depends($bp, $depends);
+            $node->{'depends'} = Thruk::Utils::list($c->req->parameters->{'bp_'.$id.'_selected_nodes'} || []);
 
             # save object creating attributes
             for my $key (qw/host service template notification_period event_handler/) {
@@ -289,15 +292,18 @@ sub index {
         my $bp = Thruk::BP::Components::BP->new($c, $file, {
             'name'  => $label,
             'nodes' => [{
+                'id'       => 'node1',
                 'label'    => $label,
                 'function' => 'Worst()',
-                'depends'  => ['Example Node'],
+                'depends'  => ['node2'],
             }, {
+                'id'       => 'node2',
                 'label'    => 'Example Node',
                 'function' => 'Fixed("OK")',
             }],
         });
         $bp->set_label($c, $label);
+        $bp->save();
         die("internal error") unless $bp;
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);

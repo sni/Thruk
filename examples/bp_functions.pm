@@ -37,7 +37,7 @@ sub weighted_state_function {
     my($status, $output) = (0, "");
     my $total     = 0;
     my $available = 0;
-    for my $child (@{$n->{'depends'}}) {
+    for my $child (@{$n->depends($bp)}) {
         my $weight = 1;
         if($child->{'label'} =~ m/(\d+)$/mx) {
             $weight = $1;
