@@ -799,6 +799,12 @@ sub _submit_results_to_core {
             return $self->_submit_results_to_core_backend($c, $results);
         }
     }
+    # log a warning that there is nothing to send result too
+    if(!$c->{'no_result_warned'}) {
+        $c->log->warn("no result_backend set, cannot send results to core. Either set result_backend or spool_dir when having multiple backends.");
+        $c->{'no_result_warned'} = 1;
+    }
+    return;
 }
 
 ##########################################################
