@@ -7,7 +7,7 @@ use JSON::XS;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 280;
+    plan tests => 333;
 }
 
 BEGIN {
@@ -92,6 +92,38 @@ for my $url (@{$pages}) {
     my $test = TestUtils::make_test_hash($url, {'like' => 'Business Process'});
     TestUtils::test_page(%{$test});
 }
+ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
+
+###########################################################
+# test custom filter functions
+copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp')  or die("copy failed: ".$!);
+copy('examples/bp_filter.pm', './bp/test_cust_filter.pm')               or die("copy failed: ".$!);
+ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
+$pages = [
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=node2&node=node2'
+                    .'&bp_function=fixed&bp_arg1_fixed=WARNING&bp_label_fixed=testwarn',
+      skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node2'
+                    .'&bp_function=fixed&bp_arg1_fixed=WARNING&bp_label_fixed=testwarnsub',
+      skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=node1&node=node1'
+                    .'&bp_function=worst&bp_label_worst=testnode'
+                    .'&bp_filter_acknowledged_filter=global'
+                    .'&bp_filter_downtime_filter=global'
+                    .'&bp_filter_unknown_filter=global'
+                    .'&bp_filter_add_recursive_output_filter=on'
+                    .'&bp_9999_selected_nodes=node2'
+                    .'&bp_9999_selected_nodes=node3',
+      skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'testwarnsub', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid,             like => 'WARNING - Worst state is WARNING', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1 },
+];
+for my $url (@{$pages}) {
+    my $test = TestUtils::make_test_hash($url, {'like' => 'Business Process'});
+    TestUtils::test_page(%{$test});
+}
+unlink('./bp/test_cust_filter.pm');
 ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
 
 ###########################################################
