@@ -982,10 +982,14 @@ sub _task_availability {
     }
 
     $c->stats->profile(begin => "_task_avail");
-    my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_avail_update($c)',
-                                                   message    => 'availability is being calculated',
-                                                   background => 1,
-                                            });
+    if($c->req->parameters->{'force'}) {
+        Thruk::Controller::panorama::_avail_update($c);
+    } else {
+        Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_avail_update($c)',
+                                           message    => 'availability is being calculated',
+                                           background => 1,
+                                        });
+    }
     my $res = _avail_update($c, 1);
     $c->stats->profile(end => "_task_avail");
     return($res);
@@ -1211,6 +1215,30 @@ sub _avail_calc {
     $c->req->parameters->{t2}            = time();
     $c->req->parameters->{t1}            = $c->req->parameters->{t2} - $duration;
     $c->req->parameters->{rpttimeperiod} = $opts->{'tm'};
+    if($opts->{'h'}) {
+        $unavailable_states->{'down'}        = 0;
+        $unavailable_states->{'unreachable'} = 0;
+        for my $chr (split//mx, lc $opts->{'h'}) {
+            if($chr eq 'd') { $unavailable_states->{'down'}        = 1; }
+            if($chr eq 'u') { $unavailable_states->{'unreachable'} = 1; }
+        }
+    }
+    if($opts->{'s'}) {
+        $unavailable_states->{'warning'}  = 0;
+        $unavailable_states->{'critical'} = 0;
+        $unavailable_states->{'unknown'}  = 0;
+        for my $chr (split//mx, lc $opts->{'s'}) {
+            if($chr eq 'w') { $unavailable_states->{'warning'}  = 1; }
+            if($chr eq 'c') { $unavailable_states->{'critical'} = 1; }
+            if($chr eq 'u') { $unavailable_states->{'unknown'}  = 1; }
+        }
+    }
+    # set downtimes as unavailable too
+    if(defined $opts->{'downtime'} && !$opts->{'downtime'}) {
+        for my $key (keys %{$unavailable_states}) {
+            $unavailable_states->{$key."_downtime"} = 1;
+        }
+    }
     if(!$filter) {
         eval {
             Thruk::Utils::Avail::calculate_availability($c)
@@ -1773,7 +1801,7 @@ sub _task_squares_data {
                                     sort    => { ASC => [ 'host_name',   'description' ] },
                                 );
         for my $svc (@{$services}) {
-            if(!$uniq_hosts->{$svc->{'host_name'}}) {
+            if($source eq 'both' && !$uniq_hosts->{$svc->{'host_name'}}) {
                 push @{$data}, { uniq         => $svc->{'host_name'},
                                  name         => $svc->{'host_name'},
                                  host_name    => $svc->{'host_name'},

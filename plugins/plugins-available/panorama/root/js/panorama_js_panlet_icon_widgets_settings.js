@@ -1343,6 +1343,13 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                     +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
                     +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", s: "cu"})) }}%<\/i><\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2>service availablility with only critical and unknown assumed as unavailable<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2>avail. options are: d: &lt;duration&gt;, tm: &lt;timeperiod&gt;, s: &lt;servicesstates&gt;, h: &lt;hoststates&gt;, downtime: false<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2>host states are d (down), u (unreachable)<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2>service states are w (warning), c (critical) and u (unknown)<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2>downtimes are assumed to be available unless downtime: false is set<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8", s: "cu", downtime: false})) }}%<\/i><\/td><\/tr>'
                     +extra_items
 
                     +'<\/table>',

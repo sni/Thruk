@@ -370,7 +370,7 @@ Ext.define('TP.PanletSquares', {
                     panel.tip.item = item;
                     tip.setTitle(item.name);
                     var state = TP.text_status(item.state, item.isHost);
-                    tip.update("Status: <span class='"+state.toUpperCase()+"'>"+state+"<\/span><br>"
+                    tip.update("Status: <div class='extinfostate "+state.toUpperCase()+"'>"+state+"<\/div><br>"
                               +"Duration: "+TP.duration(item.duration));
                     var detailsBtn = Ext.getCmp(panel.id+'-detailsBtn')
                     if(detailsBtn) { detailsBtn.setHref(item.link); }
