@@ -26,6 +26,7 @@ server:
 
 prepare:
 	docker-compose up --build --remove-orphans -d
+	docker-compose ps
 
 clean:
 	docker-compose stop
@@ -34,3 +35,4 @@ clean:
 
 update:
 	docker-compose pull
+
