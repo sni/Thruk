@@ -674,6 +674,7 @@ sub _get_filter {
     # message filter have to go into a having clause
     $filter =~ s/WHERE\ \(\((.*)\)\ AND\ \)/WHERE ($1)/gmx;
     if($filter and $filter =~ m/message\ (NOT\ LIKE|NOT\ RLIKE|RLIKE|=|LIKE|!=)\ /mx) {
+        my $operator = $1;
         if($filter =~ s/^\ WHERE\ \((time\ >=\ \d+\ AND\ time\ <=\ \d+)//mx) {
             my $timef = $1;
             my $having = $filter;
@@ -687,7 +688,7 @@ sub _get_filter {
                 $filter = $filter.' HAVING ('.$having.')';
             }
         } else {
-            $filter =~ s/message\ RLIKE\ '/p1.output\ RLIKE\ '/gmx;
+            $filter =~ s/(.*) AND\ message\ RLIKE\ '([^']+)'(.*)/\1\3 HAVING (message $operator '\2')/gmx;
         }
     }
     $filter =~ s/\ AND\ \)/)/gmx;
