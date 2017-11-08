@@ -76,6 +76,7 @@
     var testmodes   = [% json_encode(testmodes) %];
     var cust_func   = [% json_encode(bp_custom_functions) %];
     var bp_filter   = [% json_encode(bp.filter) %];
+    var bp_status   = [% json_encode([bp.status_text]) %][0];
 
     var bp_graph_options = {
         'bp_rankDir': '[% bp.rankDir %]',

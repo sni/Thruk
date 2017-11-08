@@ -85,6 +85,7 @@ DIV.ui-dialog input#bp_arg2_status {
     padding-left: 2px;
     padding-right: 4px;
     white-space: nowrap;
+    width: 80px;
 }
 .bp_info TD {
     overflow: hidden;
@@ -92,9 +93,34 @@ DIV.ui-dialog input#bp_arg2_status {
 }
 #bp_status_plugin_output {
     overflow: hidden;
-    width: 205px;
     height: 35px;
+    width: 205px;
+    white-space: pre;
 }
+
+TR.expanded #bp_status_plugin_output_expand {
+    display: none;
+}
+TR.expanded TD {
+    overflow: visible;
+    width: 215px;
+    height: 36px;
+    position: relative;
+}
+TR.expanded #bp_status_plugin_output {
+    overflow: visible;
+    height: auto;
+    width: auto;
+    background-color: #fff;
+    position: absolute;
+    top: 3px;
+    right: 0;
+    padding: 3px;
+    border: 1px solid grey;
+    -webkit-box-shadow:  3px 3px 3px 3px rgba(140, 140, 140, 0.6);
+    box-shadow:  3px 3px 3px 3px rgba(140, 140, 140, 0.6);
+}
+
 #bp_status_status DIV.statusField {
     float: left;
     min-width: 80px;

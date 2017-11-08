@@ -817,6 +817,9 @@ function bp_menu_save() {
     }
 }
 
+/* returns true if element overflows */
+jQuery.fn.overflown=function(){var e=this[0];return e.scrollHeight>e.clientHeight||e.scrollWidth>e.clientWidth;}
+
 /* set status data */
 function bp_update_status(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
@@ -846,8 +849,20 @@ function bp_update_status(evt, node) {
     jQuery('#bp_status_label').html(n.label);
 
     var status_text = n.status_text.replace(/\|.*$/, '');
-    jQuery('#bp_status_plugin_output').html("<span id='bp_status_plugin_output_title'>"+status_text+"<\/span>");
-    jQuery('#bp_status_plugin_output_title').attr('title', status_text);
+    if(n.id == "node1") {
+        status_text = bp_status.replace(/\|.*$/, '');
+    }
+    status_text = status_text.replace(/\n/, '<br>');
+    jQuery('#bp_status_plugin_output').html(status_text);
+
+    if(jQuery('#bp_status_plugin_output').overflown()) {
+        jQuery('#bp_status_plugin_output_expand').css({visibility: 'inherit'});
+        jQuery('#bp_status_plugin_output').parents("TR").first().addClass("clickable");
+    } else {
+        jQuery('#bp_status_plugin_output_expand').css({visibility: 'hidden'});
+        jQuery('#bp_status_plugin_output').parents("TR").first().removeClass("clickable");
+    }
+    jQuery('#bp_status_plugin_output').parents("TR").first().removeClass("expanded");
 
     jQuery('#bp_status_last_check').html(n.last_check);
     jQuery('#bp_status_duration').html(n.duration);
@@ -932,6 +947,25 @@ function bp_update_status(evt, node) {
     }
 
     return false;
+}
+
+/* toggle display of long plugin output */
+function bp_toggle_plugin_output() {
+    if(!jQuery('#bp_status_plugin_output').overflown()) {
+        return;
+    }
+    var tr = jQuery('#bp_status_plugin_output').parents("TR").first();
+    if(!tr.hasClass("expanded")) {
+        showElement('bp_status_plugin_output', undefined, true, undefined, function() {
+            // restore on body close
+            tr.removeClass("expanded");
+            window.setTimeout(function() {
+                // restore visibility
+                showElement('bp_status_plugin_output');
+            }, 100);
+        });
+        tr.addClass("expanded");
+    }
 }
 
 /* toggle object creation */

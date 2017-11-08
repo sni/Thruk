@@ -51,8 +51,8 @@
                   </div>
                 </td>
               </tr>
-              <tr class='data'>
-                <th>Plugin Output</th>
+              <tr class='data clickable' onclick="bp_toggle_plugin_output();">
+                <th>Plugin Output<div id="bp_status_plugin_output_expand" style="text-align: center; font-weight: bold;">...</div></th>
                 <td><div id="bp_status_plugin_output"></div></td>
               </tr>
               <tr class='data'>
