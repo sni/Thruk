@@ -238,8 +238,7 @@ Ext.define('TP.PanletSquares', {
                 text:         'Fade to black/white after',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
-                xtype:        'numberunit',
-                unit:         'px',
+                xtype:        'numberfield',
                 name:         'durationHours',
                 minValue:      0,
                 maxValue:      100000,
