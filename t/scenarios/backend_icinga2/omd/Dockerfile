@@ -7,4 +7,3 @@ FROM  consol/omd-labs-centos:latest
 #RUN omd -f update demo
 
 COPY playbook.yml /root/ansible_dropin/
-COPY test.cfg /root/

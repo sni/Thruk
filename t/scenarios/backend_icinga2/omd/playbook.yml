@@ -4,20 +4,9 @@
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE icinga2
   - shell: omd config demo set LIVESTATUS_TCP on
-  - copy:
-      src: /omd/sites/demo/share/doc/naemon/example.cfg
-      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
-      owner: demo
-      group: demo
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:
       path: /omd/sites/demo/var/thruk/secret.key
       mode: 0600
       owner: demo
       group: demo
-  - copy:
-      src: /root/test.cfg
-      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
-      owner: demo
-      group: demo
- 

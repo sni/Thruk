@@ -1833,7 +1833,6 @@ t/scenarios/backend_icinga2/docker-compose.yml
 t/scenarios/backend_icinga2/Makefile
 t/scenarios/backend_icinga2/omd/Dockerfile
 t/scenarios/backend_icinga2/omd/playbook.yml
-t/scenarios/backend_icinga2/omd/test.cfg
 t/scenarios/backend_icinga2/t/100-backend_icinga.t
 t/scenarios/backend_icinga2/t/300-controller_extinfo.t
 t/scenarios/backend_icinga2/t/300-controller_status.t
