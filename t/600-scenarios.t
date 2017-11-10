@@ -25,6 +25,7 @@ for my $dir (@{$scenarios}) {
 }
 
 for my $dir (@{$scenarios}) {
+    next if $dir =~ /nagios4/mx;
     if($dir =~ /e2e$/mx && !$ENV{'THRUK_TEST_E2E'}) {
         diag('E2E tests skiped, set THRUK_TEST_E2E env to run them');
         next;

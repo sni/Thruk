@@ -1839,6 +1839,13 @@ t/scenarios/backend_icinga2/t/300-controller_status.t
 t/scenarios/backend_icinga2/t/300-controller_tac.t
 t/scenarios/backend_icinga2/thruk.conf
 t/scenarios/backend_icinga2/thruk_local.conf
+t/scenarios/backend_nagios4/docker-compose.yml
+t/scenarios/backend_nagios4/Makefile
+t/scenarios/backend_nagios4/omd/Dockerfile
+t/scenarios/backend_nagios4/omd/playbook.yml
+t/scenarios/backend_nagios4/omd/test.cfg
+t/scenarios/backend_nagios4/thruk.conf
+t/scenarios/backend_nagios4/thruk_local.conf
 t/scenarios/e2e/.dropbox_uploader.enc
 t/scenarios/e2e/0001-sahi_add_color_to_highlight.js.patch
 t/scenarios/e2e/all_in_one.tab

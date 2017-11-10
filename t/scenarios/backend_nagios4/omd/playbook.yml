@@ -1,0 +1,63 @@
+---
+- hosts: all
+  tasks:
+  - shell: omd config demo set APACHE_MODE own
+  - shell: omd config demo set CORE nagios
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/nagios/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/nagios/conf.d/test.cfg
+      owner: demo
+      group: demo
+
+- hosts: all
+  become: true
+  become_user: demo
+  tasks:
+  - shell: wget "https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.1.1.tar.gz"
+    args:
+      chdir: tmp/
+  - shell: tar zxf nagios-4.1.1.tar.gz
+    args:
+      chdir: tmp/
+  - shell: "cd tmp/nagioscore-nagios-4.1.1 && ./configure && make nagios"
+  - shell: "cp tmp/nagioscore-nagios-4.1.1/base/nagios local/bin"
+  - lineinfile:
+     path: /omd/sites/demo/etc/init.d/nagios
+     state: present
+     regexp: '^BIN='
+     line: 'BIN=$OMD_ROOT/local/bin/nagios'
+  - shell: wget "https://mathias-kettner.de/download/check_mk-1.2.6p12.tar.gz"
+    args:
+      chdir: tmp/
+  - shell: tar zxf check_mk-1.2.6p12.tar.gz
+    args:
+      chdir: tmp/
+  - shell: "mkdir tmp/livestatus"
+  - shell: tar zxf ../check_mk-1.2.6p12/livestatus.tar.gz
+    args:
+      chdir: tmp/livestatus
+  - shell: "cd tmp/livestatus && ./configure --with-nagios4 && make"
+  - shell: "cp tmp/livestatus/src/livestatus.o local/lib"
+  - lineinfile:
+     path: /omd/sites/demo/etc/nagios/nagios.d/mk-livestatus.cfg
+     state: present
+     regexp: '^broker_module='
+     line: 'broker_module=/omd/sites/demo/local/lib/livestatus.o num_client_threads=20 pnp_path=/omd/sites/demo/var/pnp4nagios/perfdata /omd/sites/demo/tmp/run/live'
+  - lineinfile:
+     path: /omd/sites/demo/etc/nagios/nagios.d/omd.cfg
+     state: present
+     regexp: '^query_socket'
+     line: 'query_socket=/omd/sites/demo/tmp/nagios/nagios.qh'
+  - shell: "rm -f etc/nagios/nagios.d/pnp4nagios.cfg"
