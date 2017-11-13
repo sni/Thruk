@@ -1958,7 +1958,7 @@ sub _insert_logs {
         if(($state_type eq '') || (($state_type ne 'HARD') && ($state_type ne 'SOFT'))) { undef $state_type; } # if set to NULL then $dbh->quote($state_type) returns 'NULL' instead of NULL. Only accept HARD or SOFT state
 
         my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
-        if($l->{'service_description'}) {
+        if($l->{'host_name'} && $l->{'service_description'}) {
             $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
             $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host, $auto_increments, $foreign_key_stash);
         }
