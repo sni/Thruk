@@ -674,7 +674,7 @@ sub _get_filter {
     # message filter have to go into a having clause
     $filter =~ s/WHERE\ \(\((.*)\)\ AND\ \)/WHERE ($1)/gmx;
     if($filter and $filter =~ m/message\ (NOT\ LIKE|NOT\ RLIKE|RLIKE|=|LIKE|!=)\ /mx) {
-        if($filter =~ s/^\ WHERE\ \((time\ >=\ \d+\ AND\ time\ <=\ \d+)//mx) {
+        if($filter =~ s/^\ WHERE\ \(((\(host_name\ =\ '.+'(\ AND\ service_description\ =\ '.+')?\)\ AND\ )?time\ >=\ \d+\ AND\ time\ <=\ \d+)//mx) {
             my $timef = $1;
             my $having = $filter;
             $filter = 'WHERE ('.$timef.')';
