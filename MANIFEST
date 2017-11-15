@@ -1946,6 +1946,15 @@ t/scenarios/logfile_cache_http/thruk.conf
 t/scenarios/logfile_cache_http/thruk_local.conf
 t/scenarios/Makefile
 t/scenarios/Makefile.common
+t/scenarios/report_mails_e2e/docker-compose.yml
+t/scenarios/report_mails_e2e/Makefile
+t/scenarios/report_mails_e2e/omd/1.rpt
+t/scenarios/report_mails_e2e/omd/Dockerfile
+t/scenarios/report_mails_e2e/omd/playbook.yml
+t/scenarios/report_mails_e2e/omd/test.cfg
+t/scenarios/report_mails_e2e/omd/test.sh
+t/scenarios/report_mails_e2e/thruk.conf
+t/scenarios/report_mails_e2e/thruk_local.conf
 t/test_request
 t/TestUtils.pm
 t/timed_test.sh
