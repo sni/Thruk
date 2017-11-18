@@ -42,7 +42,7 @@ my $_add_panlet = sub {
                 "newtab" => "on"
             },
             "nsize" => [ 64, 64 ],
-            "size" => 64
+            "size" => 91
         }
     });
 };
@@ -141,7 +141,7 @@ __DATA__
             "link" : "javascript:TP.add_pantab('new')"
          },
         "nsize" : [ 64, 64 ],
-        "size" : 64
+        "size" : 91
       }
    },
    "panlet_1" : {
@@ -171,7 +171,7 @@ __DATA__
             "link" : "javascript:TP.add_pantab('new_geo')"
          },
         "nsize" : [ 64, 64 ],
-        "size" : 64
+        "size" : 91
       }
    },
    "panlet_2" : {
@@ -201,7 +201,7 @@ __DATA__
             "link" : "javascript:TP.loadDashboardWindow()"
          },
         "nsize" : [ 64, 64 ],
-        "size" : 64
+        "size" : 91
       }
    }
 }
