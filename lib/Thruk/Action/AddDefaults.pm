@@ -251,7 +251,11 @@ sub begin {
     ## use critic
 
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
-    $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent'    if $ENV{'THRUK_CONFIG'};
+    # make usercontent folder based on env var if set. But only if it exists. Fallback to standard folder
+    # otherwise except it doesn't exist either. Then better take the later if both do not exist.
+    if($ENV{'THRUK_CONFIG'} && (-d $ENV{'THRUK_CONFIG'}.'/usercontent/.' || !-d $c->stash->{'usercontent_folder'}.'/.')) {
+        $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent';
+    }
 
     # initialize our backends
     if(!$c->{'db'} ) {
