@@ -210,7 +210,12 @@ sub index {
                 }
                 else {
                     $errors++;
-                    Thruk::Utils::set_message( $c, 'fail_message', "command for host $host failed" );
+                    if($c->stash->{'thruk_message'}) {
+                        Thruk::Utils::append_message( $c, "\ncommand for host $host failed" );
+                    } else {
+                        Thruk::Utils::set_message( $c, 'fail_message', "command for host $host failed" );
+                    }
+                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for host $host failed");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
@@ -247,7 +252,12 @@ sub index {
                 }
                 else {
                     $errors++;
-                    Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
+                    if($c->stash->{'thruk_message'}) {
+                        Thruk::Utils::append_message( $c, "\ncommand for $service on host $host failed" );
+                    } else {
+                        Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
+                    }
+                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for $service on host $host failed");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
@@ -598,7 +608,13 @@ sub _do_send_command {
         $cmd =~ s/^\s+//gmx;
         $cmd =~ s/\s+$//gmx;
     };
-    $c->log->error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@) if $@;
+    if($@) {
+        if($@ =~ m/error\ \-\ (.*?)\ at\ /gmx) {
+            push @{$c->stash->{'form_errors'}}, $1;
+        } else {
+            $c->log->error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
+        }
+    }
 
     # unknown command given?
     return $c->detach('/error/index/7') unless defined $cmd;
