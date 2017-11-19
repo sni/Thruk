@@ -573,6 +573,7 @@ sub _do_send_command {
         return $c->detach('/error/index/12');
     }
 
+    local $c->{'errored'} = 0;
     my $cmd;
     eval {
         Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',

@@ -105,6 +105,8 @@ detach to other controller
 
 =cut
 sub detach {
+    # errored flag is set in error controller to avoid recursion if error controller
+    # itself throws an error, just bail out in that case
     if(!$_[0]->{'errored'} && $_[1] =~ m|/error/index/(\d+)$|mx) {
         Thruk::Controller::error::index($_[0], $1);
         return;
