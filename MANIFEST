@@ -1832,6 +1832,7 @@ t/scenarios/backend_icinga/thruk_local.conf
 t/scenarios/backend_icinga2/docker-compose.yml
 t/scenarios/backend_icinga2/Makefile
 t/scenarios/backend_icinga2/omd/Dockerfile
+t/scenarios/backend_icinga2/omd/more_hosts.conf
 t/scenarios/backend_icinga2/omd/playbook.yml
 t/scenarios/backend_icinga2/t/100-backend_icinga.t
 t/scenarios/backend_icinga2/t/300-controller_extinfo.t

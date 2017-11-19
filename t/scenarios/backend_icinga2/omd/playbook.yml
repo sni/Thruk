@@ -10,3 +10,8 @@
       mode: 0600
       owner: demo
       group: demo
+  - copy:
+      src: /root/more_hosts.conf
+      dest: /omd/sites/demo/etc/icinga2/conf.d/more_hosts.conf
+      owner: demo
+      group: demo

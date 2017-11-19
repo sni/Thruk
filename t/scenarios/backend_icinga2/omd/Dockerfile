@@ -6,4 +6,5 @@ FROM  consol/omd-labs-centos:latest
 #RUN yum -y install omd-labs-edition-daily
 #RUN omd -f update demo
 
+COPY more_hosts.conf /root/
 COPY playbook.yml /root/ansible_dropin/

@@ -90,3 +90,4 @@ plugins/plugins-available/editor
 plugins/plugins-enabled/editor
 ^thruk_local.d/.*.conf
 t/scenarios/e2e/_run/
+t/scenarios/*/panorama/
