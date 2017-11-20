@@ -154,6 +154,7 @@ sub index {
     if($c->config->{'cookie_auth_domain'} && $cookie_domain ne $c->config->{'cookie_auth_domain'}) {
         Thruk::Utils::set_message( $c, 'warn_message', 'using '.$cookie_domain.' instead of the configured cookie_auth_domain '.$c->config->{'cookie_auth_domain'});
     }
+    $c->stash->{'cookie_domain'} = $cookie_domain;
 
     $c->stats->profile(end => "login::index");
 

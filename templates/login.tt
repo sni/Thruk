@@ -23,7 +23,7 @@
   <div align="center">
     <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     <div class="loginmask">
-      <form method="POST" action="login.cgi" onsubmit="jQuery('body').addClass('submitting'); return true;">
+      <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
           <input type="hidden" name="referer" value="" id="referer">
           <table class="infoBox">
             <tr><td class="infoBox">
@@ -60,17 +60,24 @@
         ref = ref.replace(/\/\w+\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         ref = ref.replace(/\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         if(keepflag == undefined || keepflag == false) {
-            ref = ref.replace(/^\?(expired|invalid|problem)\&/, '?');
-            ref = ref.replace(/^\?(expired|invalid|problem)$/,  '');
+            ref = ref.replace(/^\?(expired|invalid|problem|nocookie)\&/, '?');
+            ref = ref.replace(/^\?(expired|invalid|problem|nocookie)$/,  '');
         }
         ref = ref.replace(/^\?/, '/');
         ref = ref.replace(/^\/+/, '/');
         ref = ref.replace(/^\?/, '/');
-        ref = ref.replace(/^\/(expired|invalid|problem)\&/,  '$1&/');
+        ref = ref.replace(/^\/(expired|invalid|problem|nocookie)\&/,  '$1&/');
         ref = ref.replace(/_=\d+/, '');
         ref = ref.replace(/\?$/, '');
         ref = ref.replace(/\#side.html$/, '');
         return(ref);
+    }
+
+    function onLogin() {
+        // set test cookie again, it may be removed already when logged into in another tab
+        cookieSave('thruk_test', '****', 0, '[% cookie_domain %]');
+        jQuery('body').addClass('submitting');
+        return(true);
     }
 
     if ( top.location != location ) {

@@ -436,7 +436,7 @@ function prefSubmitSound(url, value) {
 }
 
 /* save something in a cookie */
-function cookieSave(name, value, expires) {
+function cookieSave(name, value, expires, domain) {
   var now       = new Date();
   var expirestr = '';
 
@@ -448,7 +448,13 @@ function cookieSave(name, value, expires) {
     expirestr = " expires=" + expires.toGMTString() + ";";
   }
 
-  document.cookie = name+"="+value+"; path="+cookie_path+";"+expirestr;
+  var cookieStr = name+"="+value+"; path="+cookie_path+";"+expirestr;
+
+  if(domain) {
+    cookieStr += ";domain="+domain;
+  }
+
+  document.cookie = cookieStr;
 }
 
 /* remove existing cookie */
