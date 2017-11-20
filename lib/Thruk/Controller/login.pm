@@ -58,7 +58,11 @@ sub index {
         }
 
         if($keywords eq 'nocookie') {
-            Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies' );
+            my $hint = '';
+            if($cookie_domain) {
+                $hint = ' (cookie domain is set to: '.$cookie_domain.')';
+            }
+            Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies'.$hint );
         }
         if($keywords =~ /^expired\&(.*)$/mx or $keywords eq 'expired') {
             _invalidate_current_session($c, $cookie_path, $sdir);
