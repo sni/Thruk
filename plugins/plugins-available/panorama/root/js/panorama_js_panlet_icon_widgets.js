@@ -724,6 +724,9 @@ Ext.define('TP.IconWidget', {
     },
     initComponent: function() {
         this.callParent();
+        this.addListener('afterrender', function(This, eOpts) {
+            this.setRenderItem();
+        });
     },
     items: [],
     applyXdata: function(xdata) {
