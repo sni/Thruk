@@ -275,9 +275,7 @@ sub update_status {
             livedata => $livedata,
         };
         if(scalar @{$bp->{'filter'}} > 0 || scalar @{$self->{'filter'}} > 0) {
-            delete $filter_args->{'bp'};
             $filter_args = Thruk::BP::Functions::_dclone($filter_args);
-            $filter_args->{'bp'} = $bp;
             for my $f (sort @{$bp->{'filter'}}) {
                 $filter_args->{'scope'} = 'global';
                 Thruk::BP::Functions::_filter($c, $f, $filter_args);
@@ -287,7 +285,6 @@ sub update_status {
                 Thruk::BP::Functions::_filter($c, $f, $filter_args);
             }
             $filter_args->{'bp'}->recalculate_group_statistics($filter_args->{'livedata'}, 1);
-
         }
 
         my($status, $short_desc, $status_text, $extra) = &{$function}($c,
