@@ -38,7 +38,7 @@ var $case = function() {
     // remove dashboard
     thruk_remove_panorama_dashboard("Arrow Element");
 
-    testCase.endOfStep("panorama arrow widget", 60);
+    testCase.endOfStep("panorama arrow widget", 120);
 };
 
 runTest($case);

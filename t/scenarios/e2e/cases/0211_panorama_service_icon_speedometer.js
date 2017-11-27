@@ -35,7 +35,7 @@ var $case = function() {
     click(_span("Remove"));
     click(_link("Yes"));
 
-    testCase.endOfStep("panorama service speedometer", 40);
+    testCase.endOfStep("panorama service speedometer", 60);
 };
 
 runTest($case);

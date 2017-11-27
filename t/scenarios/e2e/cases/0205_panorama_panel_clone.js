@@ -18,7 +18,7 @@ var $case = function() {
     env.sleep(1);
     click(_image("/x-tool-close/"));
 
-    testCase.endOfStep("panorama panel clone", 20);
+    testCase.endOfStep("panorama panel clone", 30);
 };
 
 runTest($case);

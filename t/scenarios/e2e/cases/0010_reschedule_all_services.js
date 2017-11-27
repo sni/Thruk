@@ -39,7 +39,7 @@ var $case = function() {
     isVisible(_div("3 of 3 Matching Service Entries Displayed"));
     isVisible(_div("0 of 0 Matching Host Entries Displayed"));
 
-    testCase.endOfStep("reschedule all services", 60);
+    testCase.endOfStep("reschedule all services", 90);
 
     thruk_logout();
 };

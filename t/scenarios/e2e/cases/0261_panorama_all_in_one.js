@@ -25,7 +25,7 @@ var $case = function() {
 
     thruk_remove_panorama_dashboard("All In One");
 
-    testCase.endOfStep("panorama all in one", 60);
+    testCase.endOfStep("panorama all in one", 90);
 };
 
 runTest($case);

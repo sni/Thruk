@@ -113,7 +113,6 @@ while(my $line = <STDIN>) {
             } else {
                 print "\n";
             }
-            chomp($line);
             print $line;
             $errored = 1;
         } else{

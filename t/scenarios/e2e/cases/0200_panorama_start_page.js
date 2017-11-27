@@ -8,7 +8,7 @@ var $case = function() {
     isVisible(_link($testUser));
     _assertEqual($testUser, _getText(_link($testUser)));
     _assertContainsText($testUser, _link($testUser));
-    testCase.endOfStep("panorama start page", 20);
+    testCase.endOfStep("panorama start page", 30);
 
     thruk_panorama_logout();
 };
