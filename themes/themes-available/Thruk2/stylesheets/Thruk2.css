@@ -144,6 +144,8 @@ DIV.infoMessage {
 .navbarsearch input {
   font-size:12px;
   width:120px;
+  height: 17px;
+  border-width: 1px;
 }
 
 .navsection {

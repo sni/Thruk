@@ -1387,3 +1387,10 @@ BUTTON.small {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+#table_search_input {
+  width: 100px;
+  height: 19px;
+  margin-right: 3px;
+  border-width: 1px;
+}
