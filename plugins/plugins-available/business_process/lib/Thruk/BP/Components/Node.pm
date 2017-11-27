@@ -310,7 +310,7 @@ sub update_status {
             $filter_args->{'scope'} = 'node';
             Thruk::BP::Functions::_filter($c, $f, $filter_args);
         }
-        $self->set_status($filter_args->{'status'}, ($filter_args->{'status_text'} || $filter_args->{'short_desc'}), $filter_args->{'bp'}, $filter_args->{'extra'});
+        $self->set_status($filter_args->{'status'}, ($filter_args->{'status_text'} || $filter_args->{'short_desc'}), $bp, $filter_args->{'extra'});
         $self->{'short_desc'} = $filter_args->{'short_desc'};
     };
     if($@) {
