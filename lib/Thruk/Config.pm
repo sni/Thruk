@@ -316,6 +316,17 @@ sub get_config {
                     for my $peer (@{list($configs{$file}->{$key})}) {
                         $config{$key}->{'peer'} = [ @{list($config{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
                     }
+                }
+                elsif($key =~ '^Thruk::Plugin::') {
+                    if(ref $configs{$file}->{$key} eq 'ARRAY') {
+                        my $hash = {};
+                        while(my $add = shift @{$configs{$file}->{$key}}) {
+                            $hash = { %{$hash}, %{$add} };
+                        }
+                        $configs{$file}->{$key} = $hash;
+                    }
+                    if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
+                    $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
                 } else {
                     if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
                     $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };

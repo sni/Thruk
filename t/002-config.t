@@ -37,8 +37,19 @@ if(!$@) {
                     { 'name' => 'local3' },
                     { 'name' => 'local4' }
     ]};
+    my $expected_bp_config = {
+        'objects_reload_cmd' => '/bin/true',
+        'refresh_interval' => 1,
+    };
+    my $expected_menu_states = {
+        'General' => '0',
+        'System' => '1',
+        'Test' => '1'
+    };
     is_deeply($config->{'Thruk::Backend'}, $expected_backends, "parsing backends from thruk_local.d");
     is_deeply($config->{'backend_debug'}, 1, "parsing scalars from thruk_local.d");
+    is_deeply($config->{'Thruk::Plugin::BP'}, $expected_bp_config, "parsing component config from thruk_local.d");
+    is_deeply($config->{'initial_menu_state'}, $expected_menu_states, "parsing menu states config from thruk_local.d");
 };
 
 ####################################################
