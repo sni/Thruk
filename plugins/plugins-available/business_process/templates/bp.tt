@@ -2,12 +2,12 @@
 [% USE date %]
 
 <div style="margin-left: 10px; display: table;">
-  <div style="text-align: left; float: left; line-height: 29px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</div>
+  <div style="text-align: left; float: left;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</div>
   [% IF allowed_for_edit %]
   <div style="text-align: right; margin-bottom: 3px;"><a href="bp.cgi?action=new" class="bp_button bp_edit_button" style="width: 230px;">create new business process</a></div>
 [% END %]
 <div id="bp_table">
-<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px;">
+<table border="1" class='status hoverable' id="statusTable" width="100%">
   <tr>
     <th class="status" nowrap width="200">Name</th>
     <th class="status" nowrap width="0">&nbsp;</th>
@@ -33,9 +33,9 @@
   [% END %]
   <tr class="[%+ IF loop.first +%] firstrow[% END %]">
     [% IF bp.draft %]
-    <td class="status [% rowclass %]" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.id %]&amp;edit=1"><b>[% bp.name %] <span style="color: #eb6900; padding-left: 10px;">(DRAFT)</span></b></a></td>
+    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.id %]&amp;edit=1"><b>[% bp.name %] <span style="color: #eb6900; padding-left: 10px;">(DRAFT)</span></b></a></td>
     [% ELSE %]
-    <td class="status [% rowclass %]" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.id %]"><b>[% bp.name %]</b></a></td>
+    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.id %]"><b>[% bp.name %]</b></a></td>
     [% END %]
     <td class="status [% rowclass %]" align="right" nowrap>
     [% IF !bp.draft %]
@@ -48,7 +48,7 @@
     <td class="status [% rowclass %]" align="center" nowrap>[% IF bp.draft %][% ELSE %][% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %][% END %]</td>
     <td class="status [% rowclass %]" align="left" nowrap>[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
     [% output = bp.status_text.split("\n") %]
-    <td class="status [% rowclass %]" align="left"[% IF output.size > 1 %]
+    <td class="status [% rowclass %] mightOverflow plugin_output" align="left"[% IF output.size > 1 %]
       [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% bp.name %]',WIDTH,600,[% c.config.info_popup_options %]))" abbr='[% escape_html(nl2br(bp.status_text)) %]'
       [% END %]>
       [% IF bp.draft %]
