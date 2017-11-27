@@ -275,7 +275,10 @@ sub update_status {
             livedata => $livedata,
         };
         if(scalar @{$bp->{'filter'}} > 0 || scalar @{$self->{'filter'}} > 0) {
+            my $need_update = delete $bp->{'need_update'};
             $filter_args = Thruk::BP::Functions::_dclone($filter_args);
+            $bp->{'need_update'} = $need_update;
+            $filter_args->{'bp'}->{'need_update'} = $need_update;
             for my $f (sort @{$bp->{'filter'}}) {
                 $filter_args->{'scope'} = 'global';
                 Thruk::BP::Functions::_filter($c, $f, $filter_args);
@@ -350,7 +353,7 @@ sub set_status {
         # put parents on update list
         if($bp) {
             for my $p (@{$self->parents($bp)}) {
-                $bp->{'need_update'}->{$p->{'id'}} = $p;
+                $bp->{'need_update'}->{$p->{'id'}} = 1;
             }
         }
     }
