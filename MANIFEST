@@ -1916,7 +1916,6 @@ t/scenarios/e2e/cases/_images/select_dashboard_file.png
 t/scenarios/e2e/cases/_images/speedometer.png
 t/scenarios/e2e/cases/_images/very_good.png
 t/scenarios/e2e/cases/_include.js
-t/scenarios/e2e/cases/test.sh/test.sh
 t/scenarios/e2e/cases/testsuite.properties
 t/scenarios/e2e/cases/testsuite.suite
 t/scenarios/e2e/docker-compose.yml
