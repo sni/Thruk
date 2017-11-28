@@ -130,6 +130,7 @@ TR.expanded #bp_status_plugin_output {
     -webkit-box-shadow:  3px 3px 3px 3px rgba(140, 140, 140, 0.6);
     box-shadow:  3px 3px 3px 3px rgba(140, 140, 140, 0.6);
     cursor: default;
+    z-index: 200;
 }
 
 #bp_status_status DIV.statusField {
