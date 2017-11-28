@@ -137,12 +137,13 @@ Using arbitrary attributes, you can easily add a confirmation dialog to your
 server actions.
 
 .action_menus/confirm_restart.json
------
+++++++++++++++++++++++++
+{% raw %}
 {
-  "icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",
+  "icon":"../themes/{{theme}}/images/arrow_refresh.png",
   "label":"service restart",
   "action":"server://restart_service",
   "onclick": "return(confirm('Really restart service?'));"
 }
------
-
+{% endraw %}
+++++++++++++++++++++++++

@@ -1744,22 +1744,22 @@ Sample menu with two items and a seperator:
 .....
 {% raw %}
   {
-    "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+    "icon":"../themes/{{theme}}/images/dropdown.png",
     "title": "sample menu",
     "menu": [
       {
-        "icon":   "/thruk/themes/{{theme}}/images/arrow_refresh.png",
+        "icon":   "../themes/{{theme}}/images/arrow_refresh.png",
         "label":  "refresh",
         "action": "server://refresh/$HOSTNAME$"
       },
       {
-        "icon":   "/thruk/themes/{{theme}}/images/page_white_key.png",
+        "icon":   "../themes/{{theme}}/images/page_white_key.png",
         "label":  "example",
         "action": "server://example/$HOSTNAME$/$SERVICEDESC$"
       },
       "-",
       {
-        "icon":   "/thruk/themes/{{theme}}/images/page_white_text.png",
+        "icon":   "../themes/{{theme}}/images/page_white_text.png",
         "label":  "wiki",
         "action": "http://company-wiki/pages/$HOSTNAME$"
       }
@@ -1810,12 +1810,12 @@ Sample icons with two action icons:
 {% raw %}
   [
     {
-      "icon":"/thruk/themes/{{theme}}/images/criticity_1.png",
+      "icon":"../themes/{{theme}}/images/criticity_1.png",
       "action":"http://splunk/abc/hostid=$_HOSTHOSTID$",
       "target":"_blank"
     },
     {
-      "icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",
+      "icon":"../themes/{{theme}}/images/arrow_refresh.png",
       "action":"server://refresh/$HOSTNAME$",
     }
   ]
