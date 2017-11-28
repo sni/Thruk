@@ -2,7 +2,7 @@
 
   <tr style="display: none" id="el_0">
     <td class='dataVar dataOdd conf_attr_unused conf_row' align="left" width="170" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"></td>
-    <td class='dataVar dataOdd conf_row clickable' align="left" width="16" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none" tabindex='13' alt="remove"></td>
+    <td class='dataVar dataOdd conf_row clickable' align="left" width="16" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none; height:16px; width: 16px;" tabindex='13' alt="remove"></td>
     <td class='dataVal dataOdd conf_row' colspan=2></td>
     <td class='dataVal dataOdd clickable conf_row' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr=''><img src='[% url_prefix %]themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
   </tr>
