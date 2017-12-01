@@ -8,7 +8,7 @@
   <table border="0" class="optBox" style="position: absolute; right: 30px; top: 55px;">
     <tr>
       <td>
-        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;token=' _ get_user_token(c); button(link, 'save changes', 'bp_save_button') %]
+        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;token=' _ get_user_token(c); button(link, 'save changes', 'bp_save_button', 'return(bp_on_save_click(this))') %]
       </td>
     </tr>
   </table>

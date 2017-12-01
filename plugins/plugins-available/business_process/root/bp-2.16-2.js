@@ -1299,3 +1299,15 @@ function bp_remove_search_prefix(search) {
     console.log(search);
     return(search);
 }
+
+function bp_on_save_click(btn) {
+    jQuery(btn).button({
+        icons: {primary: 'ui-waiting-button'}
+    });
+    window.setTimeout(function() {
+        jQuery(btn).button({
+            icons: {primary: 'ui-error-button'}
+        });
+    }, 30000);
+    return true;
+}
