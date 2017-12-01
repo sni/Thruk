@@ -321,15 +321,16 @@ function close_and_remove_event(evt) {
                 inside = true;
             }
 
-            // make sure our event target is not a subelement of the panel to close
-            if(!inside && evt) {
-                inside = is_el_subelement(evt.target, obj);
-            }
-
             // hilight checked area
             //var color = inside ? 'green' : 'red';
             //hilight_area(x1, y1, x2, y2, 1000, color);
         }
+
+        // make sure our event target is not a subelement of the panel to close
+        if(!inside && evt) {
+            inside = is_el_subelement(evt.target, obj);
+        }
+
         if(evt && inside) {
             new_elems.push(value);
         } else {
