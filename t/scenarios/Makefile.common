@@ -5,6 +5,7 @@ THRUK=../../../script/thruk
 
 test:
 	$(THRUK) cache clean
+	$(MAKE) wait_start_extra
 	for x in $$(seq 50); do \
 	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
@@ -13,6 +14,7 @@ test:
 
 test_verbose:
 	$(THRUK) cache clean
+	$(MAKE) wait_start_extra
 	for x in $$(seq 50); do \
 	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
@@ -36,3 +38,4 @@ clean:
 update:
 	docker-compose pull
 
+wait_start_extra:
