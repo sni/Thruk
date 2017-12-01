@@ -8,3 +8,5 @@ test:
 	$(THRUK) -l
 	$(THRUK) cache clean
 	docker-compose exec --user root omd bash -ci /root/test.sh
+
+test_verbose: test
