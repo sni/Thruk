@@ -21,7 +21,7 @@ PIDFILE=/var/cache/thruk/thruk.pid
 STARTURL="http://localhost/thruk/cgi-bin/remote.cgi?startup"
 STARTTIMEOUT=15
 STARTLOG="/tmp/thrukstart.log"
-WGET="/usr/bin/wget"
+CMD="/usr/bin/wget"
 
 if [ ! -z $OMD_SITE ]; then
     STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi?startup"
@@ -32,13 +32,13 @@ if [ ! -z $OMD_SITE ]; then
         . $OMD_ROOT/.thruk
     fi
     if [ "$CONFIG_APACHE_MODE" != "own" -a "$CONFIG_APACHE_MODE" != "ssl" ]; then
-        echo "only available for apaches 'own' or 'ssl' mode!"
+        echo "only available for apache mode 'own' or 'ssl'!"
         exit 1
     fi
     # make sure apache is running
     omd status apache > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "apaches is not running, cannot start!"
+        echo "apache is not running, cannot start!"
         exit 1
     fi
 else
@@ -53,7 +53,13 @@ fi
 
 # make it possible to override startcmd by sysconfig
 if [ -z "$STARTCMD" ]; then
-  STARTCMD="$WGET --no-proxy --no-check-certificate --post-data='' -t 1 --debug --timeout=$STARTTIMEOUT -O - $STARTURL"
+  if ! test -x $CMD; then
+    # use curl as fallback
+    CMD="/usr/bin/curl"
+    STARTCMD="$CMD --noproxy '*' --location --insecure --data '' --verbose --max-time $STARTTIMEOUT $STARTURL"
+  else
+    STARTCMD="$CMD --no-proxy --no-check-certificate --post-data='' -t 1 --debug --timeout=$STARTTIMEOUT -O - $STARTURL"
+  fi
 fi
 
 get_pids() {
@@ -72,8 +78,8 @@ case "$1" in
     start)
         if [ "$STARTCMD" = "" ]; then
             echo "$NAME starts up on the first request"
-        elif [ ! -f $WGET ]; then
-            echo "wget not found, cannot send initial request"
+        elif [ ! -x $CMD ]; then
+            echo "$CMD not found, cannot send initial request"
         else
             if [ ! -z $OMD_SITE ]; then
               if [ -d "/var/lock/subsys" ]; then
