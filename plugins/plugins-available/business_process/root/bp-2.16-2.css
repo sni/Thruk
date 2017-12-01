@@ -20,9 +20,6 @@ TD.action_menu {
     padding-right: 5px;
 }
 
-#statusTable {
-    white-space: nowrap;
-}
 #statusTable TD.plugin_output, #statusTable TD.name {
   max-width: 50%;
   width: 50%;
