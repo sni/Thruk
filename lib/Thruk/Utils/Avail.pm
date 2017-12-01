@@ -882,6 +882,103 @@ sub get_availability_percents {
     return $json;
 }
 
+##########################################################
+
+=head2 outages
+
+  outages($c, $logs, $unavailable_states, $start, $end, $host, $service, $only_host_services)
+
+return combined outages from log entries
+
+=cut
+sub outages {
+    my($logs, $unavailable_states, $start, $end, $host, $service, $only_host_services) = @_;
+    my $u = $unavailable_states;
+
+    # combine outages
+    my @reduced_logs;
+    my($current, $last, $current_state);
+    my $in_timeperiod  = 1;
+
+    for my $l (@{$logs}) {
+        if($only_host_services) {
+            next if  $l->{'host'} ne $host;
+            next if !$l->{'service'};
+        } else {
+            if($service) {
+                next if(defined $l->{'service'} and $l->{'service'} ne $service);
+                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+            } else {
+                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+            }
+        }
+
+        $in_timeperiod = 1 if $l->{'type'} eq 'TIMEPERIOD START';
+        $in_timeperiod = 0 if $l->{'type'} eq 'TIMEPERIOD STOP';
+
+        $l->{'class'} = lc $l->{'class'};
+        if($current_state && $l->{'class'} eq 'indeterminate') {
+            if($current_state->{'class'} ne 'indeterminate') {
+                for my $key (qw/class host service plugin_output type/) {
+                    $l->{$key} = $current_state->{$key};
+                }
+            }
+        } else {
+            $current_state = $l;
+        }
+
+        my $in_outage = 0;
+        if($in_timeperiod) {
+            if($l->{'in_downtime'}) {
+                if($u->{$l->{'class'}.'_downtime'}) {
+                    $in_outage = 1;
+                }
+            } else {
+                if($u->{$l->{'class'}}) {
+                    $in_outage = 1;
+                }
+            }
+        }
+
+        # end of current outage
+        if($current && !$in_outage) {
+            $current->{'real_end'} = $l->{'start'};
+            push @reduced_logs, $current if $in_timeperiod;
+            undef $current;
+            next;
+        }
+
+        # start of new outage
+        if(!$current && $in_outage) {
+            $current = $l;
+            next;
+        }
+
+        if($current && $l->{'class'} ne 'indeterminate') {
+            $current->{'class'} = $l->{'class'};
+        }
+        $last = $l;
+    }
+    if($current && $last) {
+        $current->{'real_end'} = $last->{'end'};
+        push @reduced_logs, $current if $in_timeperiod;
+    }
+
+    my $outages = [];
+    for my $l (reverse @reduced_logs) {
+        next if $end   < $l->{'start'};
+        next if $start > $l->{'real_end'};
+        $l->{'start'}    = $start if $start > $l->{'start'};
+        $l->{'real_end'} = $end   if $end   < $l->{'real_end'};
+        $l->{'duration'} = $l->{'real_end'} - $l->{'start'};
+        if($l->{'duration'} > 0) {
+            push @{$outages}, $l;
+        }
+    }
+
+    return $outages;
+}
+
 ##############################################
 sub _sum_availability {
     my($t, $u) = @_;

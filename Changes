@@ -15,6 +15,7 @@ next:
           - Reports:
             - add option to only send mails for specific thresholds
             - add button to quickly create excel export reports
+            - fix listing outages during downtimes
           - Logcache:
             - fix importing logs from file (#751)
             - fix issue with locking

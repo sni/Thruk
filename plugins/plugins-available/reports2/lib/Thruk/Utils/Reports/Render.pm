@@ -98,7 +98,7 @@ sub calculate_availability {
 
 =head2 outages
 
-  outages($logs, $start, $end, $x, $y, $step1, $step2, $max)
+  outages($logs, $start, $end)
 
 print outages from log entries
 
@@ -112,68 +112,7 @@ sub outages {
     my $service            = $c->req->parameters->{'service'};
     my $only_host_services = $c->req->parameters->{'only_host_services'};
 
-    # combine outages
-    my @reduced_logs;
-    my($combined, $last);
-    my $downtime = 0;
-    my $in_time  = 1;
-    for my $l (@{$logs}) {
-        next if $l->{'type'} eq 'TIMEPERIOD START' and $in_time == 1; # skip repeating timeperiod starts
-        next if $l->{'type'} eq 'TIMEPERIOD STOP'  and $in_time == 0; # skip repeating timeperiod stops
-        if($only_host_services) {
-            next if  $l->{'host'} ne $host;
-            next if !$l->{'service'};
-        } else {
-            if($service) {
-                next if(defined $l->{'service'} and $l->{'service'} ne $service);
-                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
-            } else {
-                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
-            }
-        }
-
-        $l->{'class'} = lc $l->{'class'};
-        $downtime = $l->{'in_downtime'} if defined $l->{'in_downtime'};
-        if(!defined $combined) {
-            $combined = $l;
-        }
-        # combine classes if report should contain downtimes too
-        if($downtime) {
-            if(   (defined $u->{$l->{'class'}}  && !defined $u->{$l->{'class'}.'_downtime'})
-               or (!defined $u->{$l->{'class'}} && defined $u->{$l->{'class'}.'_downtime'})
-            ) {
-                $combined->{'class'} = $combined->{'class'}.'_downtime';
-            }
-        }
-        if($combined->{'class'} ne $l->{'class'}) {
-            $combined->{'real_end'} = $l->{'start'};
-            push @reduced_logs, $combined if $in_time and $combined->{'class'} ne 'indeterminate';
-            undef $combined;
-            $combined = $l;
-        }
-        $in_time = 1 if $l->{'type'} eq 'TIMEPERIOD START';
-        $in_time = 0 if $l->{'type'} eq 'TIMEPERIOD STOP';
-        $last = $l;
-    }
-    if(defined $last) {
-        $combined->{'real_end'} = $last->{'end'};
-        $in_time = 1 if $last->{'type'} eq 'TIMEPERIOD STOP'; # if the last log entry is a stop, it must have been _in_ before
-        push @reduced_logs, $combined if $in_time and $combined->{'class'} ne 'indeterminate';
-    }
-
-    my $outages = [];
-    for my $l (reverse @reduced_logs) {
-        next if $end   < $l->{'start'};
-        next if $start > $l->{'real_end'};
-        $l->{'start'}    = $start if $start > $l->{'start'};
-        $l->{'real_end'} = $end   if $end   < $l->{'real_end'};
-        $l->{'duration'} = $l->{'real_end'} - $l->{'start'};
-        if(defined $u->{$l->{'class'}} and $l->{'duration'} > 0) {
-            push @{$outages}, $l;
-        }
-    }
-
-    return $outages;
+    return(Thruk::Utils::Avail::outages($logs, $start, $end, $host, $service, $only_host_services));
 }
 
 ##########################################################
