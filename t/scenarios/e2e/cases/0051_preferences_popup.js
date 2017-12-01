@@ -15,6 +15,9 @@ var $case = function() {
     click(_submit("preferences"));
     isVisible(_span("/Update in \\d+ seconds/"));
 
+    click(_select("theme"));
+    isVisible(_button("change"));
+
     testCase.endOfStep("preferences popup", 20);
 };
 
