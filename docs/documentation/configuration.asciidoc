@@ -2081,6 +2081,9 @@ for details.
      ** `options`
         *** `peer`            address of this connection.
         *** `resource_file`   resource_file for this peer (used for macro replacement)
+        *** `auth`            secret key for http connections.
+        *** `remote_name`     remote site name for http connections (required if remote instance is connected to multiple backends)
+        *** `fallback_peer`   fallback connection address
      ** `configtool`
         *** `core_type`       Give the config parser a hint about
                               your config. Can be 'naemon', 'nagios', 'icinga'
@@ -2137,9 +2140,19 @@ ex.:
     </peer>
     <peer>
         name   = External Shinken
-        type = livestatus
+        type   = livestatus
         <options>
-            peer   = 172.16.0.3:50000
+            peer          = 172.16.0.3:50000
+            fallback_peer = 172.16.0.4:50000  # will be used as fallback
+       </options>
+    </peer>
+    <peer>
+        name   = Another Thruk
+        type   = http
+        <options>
+            peer        = http://172.16.0.4/thruk/
+            auth        = secret_key_from_remote_instance
+            remote_name = id1   # required if remote site has multiple backends connected itself
        </options>
     </peer>
   </Component>
