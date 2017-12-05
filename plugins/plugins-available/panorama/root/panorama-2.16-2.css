@@ -684,3 +684,24 @@ SPAN.avail_result_error {
 .displayTable {
   display: table;
 }
+
+.squares_popup TABLE {
+  padding: 3px;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.squares_popup TABLE TD {
+  border: 1px solid #AAAAAA;
+  padding: 0 2px;
+}
+
+.squares_popup DIV.extinfostate {
+ position: relative;
+}
+
+.squares_popup DIV.extinfostate IMG {
+ vertical-align: text-bottom;
+ position: absolute;
+ right: 1px;
+}

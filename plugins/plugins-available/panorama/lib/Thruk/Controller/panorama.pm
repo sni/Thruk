@@ -1824,6 +1824,7 @@ sub _task_squares_data {
                              acknowledged => $svc->{'acknowledged'},
                              link         => 'extinfo.cgi?type=2&host='.$svc->{'host_name'}."&service=".$svc->{'description'},
                              duration     => $now - $svc->{'last_state_change'},
+                             isHost       => 0,
                            };
         }
     }
@@ -1847,6 +1848,76 @@ sub _task_squares_data {
                             };
         }
     }
+
+    # apply group by
+    if($c->req->parameters->{'groupby'}) {
+        my $groupby = Thruk::Utils::list($c->req->parameters->{'groupby'});
+        if(scalar @{$groupby} == 2 && $groupby->[0] eq 'host_name' && $groupby->[1] eq 'description') {
+            # nothing todo
+        }
+        elsif(scalar @{$groupby} == 1 && $groupby->[0] eq 'host_name' && $source eq 'hosts') {
+            # nothing todo
+        } else {
+            my $grouped_data = {};
+            for my $d (@{$data}) {
+                my $uniq = [];
+                for my $key (@{$groupby}) {
+                    push @{$uniq}, $d->{$key};
+                }
+                $uniq = join(" - ", @{$uniq});
+                my $details = {
+                    'host_name'    => $d->{'host_name'},
+                    'description'  => $d->{'description'},
+                    'state'        => $d->{'state'},
+                    'duration'     => $d->{'duration'},
+                    'acknowledged' => $d->{'acknowledged'},
+                    'downtime'     => $d->{'downtime'},
+                    'isHost'       => $d->{'isHost'},
+                };
+                if(!$grouped_data->{$uniq}) {
+                    $grouped_data->{$uniq} = $d;
+                    $grouped_data->{$uniq}->{'uniq'}    = $uniq;
+                    $grouped_data->{$uniq}->{'name'}    = $uniq;
+                    $grouped_data->{$uniq}->{'details'} = [$details];
+                } else {
+                    my $comb = $grouped_data->{$uniq};
+                    if($d->{'state'} > 0 && $d->{'state'} != 4) {
+                        my $worse = 0;
+                        if(!$d->{'acknowledged'} && $comb->{'acknowledged'}) {
+                            $worse = 1;
+                        }
+                        elsif(!$d->{'downtime'} && $comb->{'downtime'}) {
+                            $worse = 1;
+                        }
+                        elsif($d->{'isHost'} && !$comb->{'isHost'}) {
+                            $worse = 1;
+                        }
+                        elsif($comb->{'isHost'} && $comb->{'state'} != 0) {
+                            # host state beats every service
+                        }
+                        elsif($d->{'state'} > $comb->{'state'}) {
+                            $worse = 1;
+                        }
+                        if($worse) {
+                            $comb->{'state'}        = $d->{'state'};
+                            $comb->{'isHost'}       = $d->{'isHost'};
+                            $comb->{'downtime'}     = $d->{'downtime'};
+                            $comb->{'acknowledged'} = $d->{'acknowledged'};
+                        }
+                    }
+                    if($comb->{'duration'} > $d->{'duration'} && $comb->{'state'} == $d->{'state'} && $comb->{'isHost'} == $d->{'isHost'}) {
+                        $comb->{'duration'} = $d->{'duration'};
+                    }
+                    push @{$grouped_data->{$uniq}->{'details'}}, $details;
+                }
+            }
+            $data = [];
+            for my $key (sort keys %{$grouped_data}) {
+                push @{$data}, $grouped_data->{$key};
+            }
+        }
+    }
+
     my $json = {
         data => $data,
     };

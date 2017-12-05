@@ -17,7 +17,7 @@ Ext.define('TP.PanletSquares', {
         var panel                = this;
         panel.xdata.showborder   = false;
         panel.xdata.source       = 'hosts';
-        //panel.xdata.groupby     = ['host_name', 'description'];
+        panel.xdata.groupby     = ['host_name', 'description'];
         panel.xdata.iconPadding  = 2;
         panel.xdata.iconSet      = 'default_64';
         panel.xdata.iconSize     = 'expand';
@@ -97,7 +97,7 @@ Ext.define('TP.PanletSquares', {
                 name:         'source',
                 store:        [['hosts','Hosts'],['services','Services'],['both','Hosts & Services']],
                 value:        panel.xdata.source
-            }/*, {
+            }, {
                 xtype:        'label',
                 text:         'Group By: ',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
@@ -106,14 +106,14 @@ Ext.define('TP.PanletSquares', {
                 multiSelect:   true,
                 name:         'groupby',
                 width:        250,
-                store:        [['host_name','Hostname'],['description','Servicename'],['host_groups','Hostgroup']],
+                store:        [['host_name','Hostname'],['description','Servicename']],
                 value:        panel.xdata.groupby,
                 listConfig : {
                     getInnerTpl: function(displayField) {
                         return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
                     }
                 }
-            }*/]
+            }]
         });
         TP.addFormFilter(panel, panel.has_search_button);
 
@@ -359,6 +359,8 @@ Ext.define('TP.PanletSquares', {
         }
         panel.tip = Ext.create('Ext.tip.ToolTip', {
             renderTo: Ext.getBody(),
+            dismissDelay: 120000, // close automatically after 2 minutes
+            cls: 'squares_popup',
             minWidth: Ext.Array.max([200, (popup_fbar_btn.length * 110)]),
             buttonAlign: 'left',
             fbar: popup_fbar_btn,
@@ -368,9 +370,48 @@ Ext.define('TP.PanletSquares', {
                     var item = panel.dataStore[panel.tip.itemUniq].item;
                     panel.tip.item = item;
                     tip.setTitle(item.name);
+                    var details = '';
+                    var detailCount = 0;
+                    console.log(item)
+                    if(item.details) {
+                        details = '<br>Details:<br><table>';
+                        for(var nr=0; nr<item.details.length; nr++) {
+                            var d = item.details[nr];
+                            if(item.state != 0 && (d.state == 0 || d.state == 4)) { continue; }
+                            detailCount++;
+                            if(detailCount == 11) {
+                                details += '<tr><td colspan=4>...<\/td><\/tr>'
+                                break;
+                            }
+                            var dState = TP.text_status(d.state, d.isHost);
+                            var downtime = '';
+                            if(d.downtime) {
+                                downtime = '<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png">';
+                            }
+                            var acknowledged = '';
+                            if(d.acknowledged) {
+                                acknowledged = '<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png">';
+                            }
+                            details += '<tr><td>'+d.host_name+'<\/td>'
+                                      +'<td>'+d.description+'<\/td>'
+                                      +'<td><div class="extinfostate '+dState.toUpperCase()+'">'+dState+acknowledged+downtime+'<\/div><\/td>'
+                                      +'<td>'+TP.duration(d.duration)+'<\/td>'
+                                      +'<\/tr>';
+                        }
+                        details += '<\/table>';
+                    }
+                    var downtime = '';
+                    if(item.downtime) {
+                        downtime = '<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png">';
+                    }
+                    var acknowledged = '';
+                    if(item.acknowledged) {
+                        acknowledged = '<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png">';
+                    }
                     var state = TP.text_status(item.state, item.isHost);
-                    tip.update("Status: <div class='extinfostate "+state.toUpperCase()+"'>"+state+"<\/div><br>"
-                              +"Duration: "+TP.duration(item.duration));
+                    tip.update("Status: <div class='extinfostate "+state.toUpperCase()+"'>"+state+acknowledged+downtime+"<\/div><br>"
+                              +"Duration: "+TP.duration(item.duration)
+                              +details);
                     var detailsBtn = Ext.getCmp(panel.id+'-detailsBtn')
                     if(detailsBtn) { detailsBtn.setHref(item.link); }
                     return(true);
