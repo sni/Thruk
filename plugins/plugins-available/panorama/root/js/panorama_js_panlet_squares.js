@@ -14,16 +14,17 @@ Ext.define('TP.PanletSquares', {
     reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
-        var panel                = this;
-        panel.xdata.showborder   = false;
-        panel.xdata.source       = 'hosts';
-        panel.xdata.groupby     = ['host_name', 'description'];
-        panel.xdata.iconPadding  = 2;
-        panel.xdata.iconSet      = 'default_64';
-        panel.xdata.iconSize     = 'expand';
-        panel.xdata.iconWidth    = 0;
-        panel.xdata.iconHeight   = 0;
-        panel.xdata.popup_button = ['details'];
+        var panel                 = this;
+        panel.xdata.showborder    = false;
+        panel.xdata.source        = 'hosts';
+        panel.xdata.groupby       = ['host_name', 'description'];
+        panel.xdata.iconPadding   = 2;
+        panel.xdata.iconSet       = 'default_64';
+        panel.xdata.iconSize      = 'expand';
+        panel.xdata.iconWidth     = 0;
+        panel.xdata.iconHeight    = 0;
+        panel.xdata.popup_button  = ['details'];
+        panel.xdata.durationHours = 24;
 
         panel.dataStore        = {};
 
@@ -235,7 +236,7 @@ Ext.define('TP.PanletSquares', {
             layout:      { type: 'hbox', align: 'stretch' },
             items:        [{
                 xtype:        'label',
-                text:         'Fade to black/white after',
+                text:         'Fade to black/white for',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
                 xtype:        'numberfield',
