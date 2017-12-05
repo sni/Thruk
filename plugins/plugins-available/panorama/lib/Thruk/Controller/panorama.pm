@@ -1792,29 +1792,13 @@ sub _task_squares_data {
 
     my $now        = time();
     my $data       = [];
-    my $uniq_hosts = {};
     if($source eq 'services' || $source eq 'both') {
         my $services = $c->{'db'}->get_services(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
-                                    columns => [qw/host_name host_state host_has_been_checked host_scheduled_downtime_depth host_acknowledged host_last_state_change
-                                                   description state acknowledged scheduled_downtime_depth has_been_checked last_state_change/],
+                                    columns => [qw/host_name description state acknowledged scheduled_downtime_depth has_been_checked last_state_change/],
                                     sort    => { ASC => [ 'host_name',   'description' ] },
                                 );
         for my $svc (@{$services}) {
-            if($source eq 'both' && !$uniq_hosts->{$svc->{'host_name'}}) {
-                push @{$data}, { uniq         => $svc->{'host_name'},
-                                 name         => $svc->{'host_name'},
-                                 host_name    => $svc->{'host_name'},
-                                 description  => '',
-                                 state        => $svc->{'host_has_been_checked'} == 0 ? 4 : $svc->{'host_state'},
-                                 downtime     => $svc->{'host_scheduled_downtime_depth'},
-                                 acknowledged => $svc->{'host_acknowledged'},
-                                 link         => 'extinfo.cgi?type=1&host='.$svc->{'host_name'},
-                                 duration     => $now - $svc->{'host_last_state_change'},
-                                 isHost       => 1,
-                                };
-                $uniq_hosts->{$svc->{'host_name'}} = 1;
-            }
             push @{$data}, { uniq         => $svc->{'host_name'}.';'.$svc->{'description'},
                              name         => $svc->{'host_name'}.' - '.$svc->{'description'},
                              host_name    => $svc->{'host_name'},
@@ -1828,7 +1812,8 @@ sub _task_squares_data {
                            };
         }
     }
-    elsif($source eq 'hosts') {
+
+    if($source eq 'hosts' || $source eq 'both') {
         my $hosts = $c->{'db'}->get_hosts(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
                                     columns => [qw/name state acknowledged scheduled_downtime_depth has_been_checked last_state_change/],
@@ -1847,6 +1832,11 @@ sub _task_squares_data {
                              isHost       => 1,
                             };
         }
+    }
+
+    # need to sort by host/service again
+    if($source eq 'both') {
+        $data = Thruk::Backend::Manager::_sort({}, $data, 'uniq');
     }
 
     # apply group by
