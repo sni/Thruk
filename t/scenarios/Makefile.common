@@ -6,7 +6,7 @@ THRUK=../../../script/thruk
 test:
 	$(THRUK) cache clean
 	$(MAKE) wait_start_extra
-	for x in $$(seq 50); do \
+	for x in $$(seq 120); do \
 	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
 	$(THRUK) -l
@@ -15,7 +15,7 @@ test:
 test_verbose:
 	$(THRUK) cache clean
 	$(MAKE) wait_start_extra
-	for x in $$(seq 50); do \
+	for x in $$(seq 120); do \
 	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
 	$(THRUK) -l
