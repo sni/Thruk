@@ -1893,6 +1893,7 @@ sub _task_squares_data {
                             $comb->{'isHost'}       = $d->{'isHost'};
                             $comb->{'downtime'}     = $d->{'downtime'};
                             $comb->{'acknowledged'} = $d->{'acknowledged'};
+                            $comb->{'duration'}     = $d->{'duration'};
                         }
                     }
                     if($comb->{'duration'} > $d->{'duration'} && $comb->{'state'} == $d->{'state'} && $comb->{'isHost'} == $d->{'isHost'}) {

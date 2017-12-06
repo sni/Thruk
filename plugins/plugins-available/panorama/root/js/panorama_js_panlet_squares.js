@@ -24,7 +24,7 @@ Ext.define('TP.PanletSquares', {
         panel.xdata.iconWidth     = 0;
         panel.xdata.iconHeight    = 0;
         panel.xdata.popup_button  = ['details'];
-        panel.xdata.durationHours = 24;
+        panel.xdata.fadeduration  = "24h";
 
         panel.dataStore        = {};
 
@@ -239,17 +239,14 @@ Ext.define('TP.PanletSquares', {
                 text:         'Fade to black/white for',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
-                xtype:        'numberfield',
-                name:         'durationHours',
-                minValue:      0,
-                maxValue:      100000,
-                step:          1,
+                xtype:        'textfield',
+                name:         'fadeduration',
                 width:         60,
-                value:         panel.xdata.durationHours,
+                value:         panel.xdata.fadeduration,
                 fieldStyle:   'text-align: right;'
             }, {
                 xtype:        'label',
-                text:         'hours',
+                text:         'ex.: 3d = 3 days, 24h = 24 hours, 60m = 60 minutes',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }]
         });
@@ -534,10 +531,10 @@ TP.square_update_callback = function(panel, data, retries) {
         panel.dataStore[item.uniq].el.dom.dataName     = item.uniq;
 
         // apply black/white filter based on state duration
-        if(panel.xdata.durationHours > 0) {
-            var durationHours  = 24;
-            if(item.duration < 3600*durationHours) {
-                var durationFilter = Ext.Array.min([100, Math.round(item.duration / (3600*durationHours/100))]);
+        if(panel.xdata.fadeduration != "") {
+            var durationHours  = TP.timeframe2seconds(panel.xdata.fadeduration);
+            if(item.duration < durationHours) {
+                var durationFilter = Ext.Array.min([100, Math.round(item.duration / (durationHours/100))]);
                 panel.dataStore[item.uniq].el.dom.style.filter = "grayscale("+durationFilter+"%)";
             } else {
                 panel.dataStore[item.uniq].el.dom.style.filter = "grayscale(100%)";
