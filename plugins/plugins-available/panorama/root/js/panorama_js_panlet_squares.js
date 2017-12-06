@@ -368,37 +368,8 @@ Ext.define('TP.PanletSquares', {
                     var item = panel.dataStore[panel.tip.itemUniq].item;
                     panel.tip.item = item;
                     tip.setTitle(item.name);
-                    var details = '';
-                    var detailCount = 0;
-                    console.log(item)
-                    if(item.details) {
-                        details = '<br>Details:<br><table>';
-                        for(var nr=0; nr<item.details.length; nr++) {
-                            var d = item.details[nr];
-                            if(item.state != 0 && (d.state == 0 || d.state == 4)) { continue; }
-                            detailCount++;
-                            if(detailCount == 11) {
-                                details += '<tr><td colspan=4>...<\/td><\/tr>'
-                                break;
-                            }
-                            var dState = TP.text_status(d.state, d.isHost);
-                            var downtime = '';
-                            if(d.downtime) {
-                                downtime = '<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png">';
-                            }
-                            var acknowledged = '';
-                            if(d.acknowledged) {
-                                acknowledged = '<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png">';
-                            }
-                            details += '<tr><td>'+d.host_name+'<\/td>'
-                                      +'<td>'+d.description+'<\/td>'
-                                      +'<td><div class="extinfostate '+dState.toUpperCase()+'">'+dState+acknowledged+downtime+'<\/div><\/td>'
-                                      +'<td>'+TP.duration(d.duration)+'<\/td>'
-                                      +'<\/tr>';
-                        }
-                        details += '<\/table>';
-                    }
                     var downtime = '';
+                    var details  = TP.square_item_details(item);
                     if(item.downtime) {
                         downtime = '<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png">';
                     }
@@ -411,7 +382,13 @@ Ext.define('TP.PanletSquares', {
                               +"Duration: "+TP.duration(item.duration)
                               +details);
                     var detailsBtn = Ext.getCmp(panel.id+'-detailsBtn')
-                    if(detailsBtn) { detailsBtn.setHref(item.link); }
+                    if(detailsBtn) {
+                        if(!item.link) {
+                            detailsBtn.setHref(TP.square_item_details_link(panel, item));
+                        } else {
+                            detailsBtn.setHref(item.link);
+                        }
+                    }
                     return(true);
                 },
                 beforehide: function(tip, eOpts) {
@@ -429,6 +406,60 @@ Ext.define('TP.PanletSquares', {
         });
     }
 });
+
+TP.square_item_details_link = function(panel, item) {
+    if(!item.details) {
+        return("#");
+    }
+    var options = {
+        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id)),
+        filter:   panel.xdata.filter,
+        task:    'redirect_status'
+    };
+    var uniqs = item.uniq.split(" - ");
+    for(var nr=0; nr<panel.xdata.groupby.length; nr++) {
+        if(panel.xdata.groupby[nr] == "host_name") {
+            options.host = uniqs[nr];
+        }
+        if(panel.xdata.groupby[nr] == "description") {
+            options.service = uniqs[nr];
+        }
+    }
+    return("panorama.cgi?"+Ext.Object.toQueryString(options));
+}
+
+TP.square_item_details = function(item) {
+    var details = '';
+    var detailCount = 0;
+    if(item.details) {
+        details = '<br>Details:<br><table>';
+        for(var nr=0; nr<item.details.length; nr++) {
+            var d = item.details[nr];
+            if(item.state != 0 && (d.state == 0 || d.state == 4)) { continue; }
+            detailCount++;
+            if(detailCount == 11) {
+                details += '<tr><td colspan=4>...<\/td><\/tr>'
+                break;
+            }
+            var dState = TP.text_status(d.state, d.isHost);
+            var downtime = '';
+            if(d.downtime) {
+                downtime = '<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png">';
+            }
+            var acknowledged = '';
+            if(d.acknowledged) {
+                acknowledged = '<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png">';
+            }
+            details += '<tr><td>'+d.host_name+'<\/td>'
+                      +'<td>'+d.description+'<\/td>'
+                      +'<td><div class="extinfostate '+dState.toUpperCase()+'">'+dState+acknowledged+downtime+'<\/div><\/td>'
+                      +'<td>'+TP.duration(d.duration)+'<\/td>'
+                      +'<\/tr>';
+        }
+        details += '<\/table>';
+    }
+    return(details);
+}
 
 TP.square_update_callback = function(panel, data, retries) {
     if(!panel.el || !panel.el.dom) { return; }
