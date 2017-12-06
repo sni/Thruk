@@ -112,7 +112,7 @@ sub outages {
     my $service            = $c->req->parameters->{'service'};
     my $only_host_services = $c->req->parameters->{'only_host_services'};
 
-    return(Thruk::Utils::Avail::outages($logs, $start, $end, $host, $service, $only_host_services));
+    return(Thruk::Utils::Avail::outages($logs, $u, $start, $end, $host, $service, $only_host_services));
 }
 
 ##########################################################
