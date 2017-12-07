@@ -548,6 +548,16 @@ TP.square_update_callback = function(panel, data, retries) {
                 panel.tip.itemUniq = This.target.dataName;
                 panel.tip.showBy(This.target);
             });
+            el.on("mouseover", function(This) {
+                var dataName = This.target.dataName;
+                var el = panel.dataStore[dataName];
+                if(el.label) { return; }
+                TP.square_set_icon_label(panel, el, dataName, el.item.name);
+                el.label.on("mouseout", function() {
+                    el.label.destroy();
+                    delete el.label;
+                });
+            });
             panel.dataStore[item.uniq] = el;
         }
         // update position and source
@@ -562,13 +572,25 @@ TP.square_update_callback = function(panel, data, retries) {
         panel.dataStore[item.uniq].el.dom.dataName     = item.uniq;
 
         // apply black/white filter based on state duration
+        panel.dataStore[item.uniq].keepLabel = true;
         if(panel.xdata.fadeduration != "") {
-            var durationHours  = TP.timeframe2seconds(panel.xdata.fadeduration);
+            var durationHours = TP.timeframe2seconds(panel.xdata.fadeduration);
+            var el = panel.dataStore[item.uniq].el;
             if(item.duration < durationHours) {
                 var durationFilter = Ext.Array.min([100, Math.round(item.duration / (durationHours/100))]);
-                panel.dataStore[item.uniq].el.dom.style.filter = "grayscale("+durationFilter+"%)";
+                el.dom.style.filter = "grayscale("+durationFilter+"%)";
+                TP.square_set_icon_label(panel, el, item.uniq, item.name);
+                el.label.dom.style.opacity = 1-durationFilter/100;
+                el.label.on("mouseover", function(This) {
+                    This.target.opacityOrig = This.target.style.opacity;
+                    This.target.style.opacity = 1;
+                });
+                el.label.on("mouseout", function(This) {
+                    This.target.style.opacity = This.target.opacityOrig;
+                });
             } else {
-                panel.dataStore[item.uniq].el.dom.style.filter = "grayscale(100%)";
+                el.dom.style.filter = "grayscale(100%)";
+                panel.dataStore[item.uniq].keepLabel = false;
             }
         }
 
@@ -588,7 +610,14 @@ TP.square_update_callback = function(panel, data, retries) {
     }
     // remove all old icons
     for(var key in panel.dataStore) {
+        if(!panel.dataStore[key].keepLabel && panel.dataStore[key].el.label) {
+            panel.dataStore[key].el.label.destroy();
+            delete panel.dataStore[key].el.label;
+        }
         if(!panel.dataStore[key].updated) {
+            if(panel.dataStore[key].el.label) {
+                panel.dataStore[key].el.label.destroy();
+            }
             panel.dataStore[key].destroy();
             delete panel.dataStore[key];
         }
@@ -612,4 +641,49 @@ TP.getMaxSquareEdgeLength = function(x, y, nr) {
         sy = y / py;
     }
     return(Math.floor(Ext.Array.max([sx, sy])));
+}
+
+TP.square_set_icon_label = function(panel, icon, uniq, text) {
+    var top    = icon.dom.style.top.replace("px", "");
+    var left   = icon.dom.style.left.replace("px", "");;
+    var width  = icon.dom.style.width.replace("px", "");
+    var height = icon.dom.style.width.replace("px", "");;
+    var fontsize = 8;
+    var el;
+    if(icon.label) {
+        el = icon.label;
+    } else {
+        el = panel.containerItem.body.appendChild({
+                                               tag:    'div',
+                                              'class': 'clickable',
+                                               style: {
+                                                    fontSize:   fontsize+'px',
+                                                    wordWrap:  'break-word',
+                                                    textAlign: 'center',
+                                                    overflow:  'hidden',
+                                                    position: 'absolute'
+                                                }
+        });
+        icon.label = el;
+
+        el.on("click", function(l) {
+            panel.tip.itemUniq = uniq;
+            panel.tip.showBy(l.target);
+        });
+    }
+    el.dom.style.width  = width+"px";
+    el.dom.style.height = height+"px";
+    el.dom.style.top    = top+"px";
+    el.dom.style.left   = left+"px";
+    el.dom.innerText    = text;
+
+    // set maximum font-size
+    while(el.dom.scrollHeight <= height && el.dom.scrollWidth <= width && fontsize < 100) {
+        fontsize++;
+        el.dom.style.fontSize = fontsize+"px";
+    }
+    fontsize = fontsize - 1;
+    el.dom.style.fontSize = fontsize+"px";
+
+    return;
 }
