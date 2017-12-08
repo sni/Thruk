@@ -27,6 +27,7 @@ next:
             - add label availability options
             - fix moving watermark elements
             - fix widgets display issue in IE11
+            - fix row height in status lists (#779)
           - Mobile:
             - add config option to add additonal links on the home page
 

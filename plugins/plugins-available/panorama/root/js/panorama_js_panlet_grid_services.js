@@ -10,6 +10,7 @@ Ext.define('TP.PanletGridServices', {
     hideSettingsForm: ['url'],
     reloadOnSiteChanges: true,
     autohideHeaderOffset: -17,
+    cls: 'statusdata',
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=services';

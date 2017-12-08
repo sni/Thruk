@@ -42,6 +42,17 @@ HTML, BODY {
   border: 1px dashed black;
 }
 
+.statusdata TD.PENDING,
+.statusdata TD.UP,
+.statusdata TD.UNREACHABLE,
+.statusdata TD.DOWN,
+.statusdata TD.OK,
+.statusdata TD.WARNING,
+.statusdata TD.CRITICAL,
+.statusdata TD.UNKNOWN {
+  height: 22px;
+}
+
 /* make tab close only show on mouseover */
 SPAN.x-tab-close-btn {
   display: none;
