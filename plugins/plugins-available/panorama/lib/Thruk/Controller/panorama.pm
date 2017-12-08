@@ -2789,10 +2789,6 @@ sub _do_filter {
 
     my $nr = 0;
     for my $f (@{$filter}) {
-        # skip empty searches
-        if($f->{'type'} eq 'Search' && $f->{'op'} eq '~' && $f->{'value'} eq '') {
-            next;
-        }
         my $pre = 'dfl_s'.$nr.'_';
         for my $key (qw/hostprops hoststatustypes serviceprops servicestatustypes/) {
             $c->req->parameters->{$pre.$key} = $f->{$key};
