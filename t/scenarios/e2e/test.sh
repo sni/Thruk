@@ -81,7 +81,7 @@ find $CASEDIR -type f -exec chmod 666 {} \;
 docker-compose exec --user root omd bash -ci ">/omd/sites/demo/var/log/thruk.log"
 docker-compose exec --user root omd bash -ci "rm -rf /omd/sites/demo/var/thruk/users/* /omd/sites/demo/var/thruk/panorama/* /omd/sites/demo/etc/thruk/panorama/*"
 
-docker-compose exec sakuli bash -ci "sakuli run $SAKULI_TEST_DIR"
+docker-compose exec sakuli bash -ci "sakuli run $SAKULI_TEST_DIR $*"
 res=$?
 echo "SAKULI_RETURN_VAL: $res"
 
