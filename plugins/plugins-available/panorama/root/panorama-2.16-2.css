@@ -287,7 +287,7 @@ DIV.mine_map_state4 {
   background-image: radial-gradient(circle closest-corner at center, #CFCFCF 0%, #525252 100%);
 }
 TD.mine_map_cell DIV.x-grid-cell-inner {
-  padding-top:    0px;
+  padding-top:    2px;
   padding-bottom: 0px;
   padding-left:   1px;
   padding-right:  1px;
