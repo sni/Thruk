@@ -976,7 +976,7 @@ var TP = {
         });
         el.on("contextmenu", function(evt, el, o) {
             var tab = Ext.getCmp(tabId);
-            tab.contextmenu(evt, true);
+            tab.contextmenu(evt, true, true);
         });
     },
     /* sum list elements */

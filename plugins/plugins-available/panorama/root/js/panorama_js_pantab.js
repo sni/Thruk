@@ -889,7 +889,7 @@ Ext.define('TP.Pantab', {
             TP.updateAllIcons(tab);
         }
     },
-    contextmenu: function(evt, hidePasteAndNew) {
+    contextmenu: function(evt, hidePasteAndNew, showClose) {
         var tab = this;
         /* right click context menu on tab body */
         evt.preventDefault();
@@ -949,7 +949,10 @@ Ext.define('TP.Pantab', {
             }];
         if(!readonly && !tab.readonly) {
             menu_items = menu_items.concat([
-                 '-', {
+                 ,{
+                    xtype: 'menuseparator',
+                    hidden:  hidePasteAndNew
+                }, {
                     text:   'New',
                     icon:   url_prefix+'plugins/panorama/images/cog_add.png',
                     hideOnClick: false,
@@ -1022,6 +1025,11 @@ Ext.define('TP.Pantab', {
                         id:      'restorepointsloading'
                     }],
                     hidden:  tab.xdata.locked       // only show when not locked
+                }, {
+                    text:   'Close Dashboard',
+                    icon:   url_prefix+'plugins/panorama/images/door_in.png',
+                    handler: function() { tab.close(); },
+                    hidden:  !showClose
                 }, {
                     text:   'Unlock Dashboard',
                     icon:   url_prefix+'plugins/panorama/images/lock_open.png',
