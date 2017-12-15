@@ -40,6 +40,9 @@ var $case = function() {
 
     isVisible(_link("GeoMap Test"));
 
+    rightClick(_span("GeoMap Test"));
+    click(_span("Close Dashboard"));
+
     thruk_remove_panorama_dashboard("GeoMap Test");
 
     testCase.endOfStep("panorama geo map", 60);

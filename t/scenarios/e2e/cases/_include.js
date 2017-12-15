@@ -7,7 +7,13 @@ var $testPassword = "omd"
 _set($testUser,     $testUser);
 _set($testPassword, $testPassword);
 _set($waitTimeout,  $waitTimeout);
-testCase.addImagePaths("../_images/");
+if(_eval("_sahi._isChrome();")) {
+    testCase.addImagePaths("../_images_chrome/");
+} else if(_eval("_sahi._isIE();")) {
+    testCase.addImagePaths("../_images_ie/");
+} else {
+    testCase.addImagePaths("../_images_firefox/");
+}
 
 _setSpeed(50);              // default is 100ms
 env.setSimilarity(0.90);    // default is 0.7
@@ -26,6 +32,7 @@ function runTest($case) {
 }
 
 function openDebugConsole() {
+    env.type(Key.F11);
     _eval("_sahi.openController();");
     env.sleep(99999);
 }
@@ -42,7 +49,9 @@ function mouseRightClickXY($x, $y) {
 
 function thruk_login() {
     // workaround problem where login fails on first try
-    _navigateTo("http://omd/demo/thruk");
+    var $lastUrl = testCase.getLastURL();
+    _set($lastUrl, $lastUrl);
+    _navigateTo($lastUrl+"cgi-bin/login.cgi");
 
     testCase.endOfStep("login page", 20);
 
@@ -121,9 +130,11 @@ function thruk_remove_panorama_dashboard($name) {
 /* wrap click in a highlight */
 function click($el, $combo) {
     _wait($waitTimeout, _assertExists($el));
-    try {
-        _mouseOver($el, $combo);
-    } catch(e) {};
+    if(!_isVisible($el, true)) {
+        try {
+            _mouseOver($el, $combo);
+        } catch(e) {};
+    }
     isVisible($el, "red");
     _click($el, $combo);
 }
@@ -131,9 +142,11 @@ function click($el, $combo) {
 /* wrap rightclick in a highlight */
 function rightClick($el, $combo) {
     _wait($waitTimeout, _assertExists($el));
-    try {
-        _mouseOver($el, $combo);
-    } catch(e) {};
+    if(!_isVisible($el, true)) {
+        try {
+            _mouseOver($el, $combo);
+        } catch(e) {};
+    }
     isVisible($el, "red");
     _rightClick($el, $combo);
 }
@@ -152,7 +165,10 @@ function isVisible($el, $color) {
             _call(_eval("document.body.appendChild(document.createElement('div'))").innerHTML = "<div style='position:absolute; width: 30px; height: 30px; left; "+$position[0]+"px; top: "+$position[1]+"px; border: 2px solid green;'></div>");
         }
     }
-    _highlight($el, $color);
+    if(!_eval("_sahi._isChrome();")) {
+        // breaks chrome
+        _highlight($el, $color);
+    }
 }
 
 /* wrap !isVisible with a small wait */

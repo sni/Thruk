@@ -30,6 +30,10 @@ while(my $line = <STDIN>) {
         $exitcode = $1;
         print $line unless $quiet;
     }
+    elsif($line =~ m|SKIP:|mx && $line !~ m/\Q - _log(\E/mx) {
+        $line =~ s/^.*SKIP:/SKIP:/gmx;
+        print $line;
+    }
     # number of cases
     # number of cases
     elsif($line =~ m|\Qread test suite information of file\E|mx) {

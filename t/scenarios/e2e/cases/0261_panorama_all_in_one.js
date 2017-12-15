@@ -2,6 +2,11 @@ _dynamicInclude($includeFolder);
 _include('../_include.js');
 
 var $case = function() {
+    if(_eval("_sahi._isChrome();")) {
+        _log("SKIP: test does not work in chrome right now");
+        return;
+    }
+
     thruk_login();
     thruk_open_panorama();
 

@@ -2,6 +2,11 @@ _dynamicInclude($includeFolder);
 _include('../_include.js');
 
 var $case = function() {
+    if(_eval("_sahi._isChrome();")) {
+        _log("SKIP: test is broken in chrome");
+        return;
+    }
+
     thruk_login();
     thruk_open_panorama();
 
@@ -56,7 +61,9 @@ var $case = function() {
     mouseRightClickXY(200,100);
     click(_span("Dashboard Settings"));
     isVisible(_textbox("title"));
+
     _click(_label("Static Image"));
+
     isVisible(_textbox('background'));
     click(_div('/trigger/', _rightOf(_textbox('background'))));
     click(_div("europa.png"));

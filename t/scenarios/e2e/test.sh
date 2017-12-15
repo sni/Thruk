@@ -2,7 +2,7 @@
 
 BASEURL=http://omd/demo/thruk/
 CASESRC="$(pwd)/cases"
-DATE=$(date +%F_%H.%M.%S)
+DATE=$(date +%F_%H.%M)
 CASEDIR="$(pwd)/_run/$DATE"
 SAKULI_TEST_DIR="/cases/$DATE/"
 
@@ -12,6 +12,11 @@ patch -p4 < ./0001-sahi_add_color_to_highlight.js.patch >/dev/null 2>&1
 docker cp concat.js $(docker-compose ps -q sakuli):headless/sakuli/sahi/htdocs/spr/concat.js
 rm -f concat.js*
 
+# clean _run folder and only keep last 20 results
+for dir in $(ls -1tr _run/ | head -n -20); do
+    rm -rf $dir
+done
+
 function finish {
     # clean up
     rm -f $CASEDIR/testsuite.*
@@ -19,7 +24,7 @@ function finish {
     rm -rf $CASEDIR/*/*.js
     rm -rf $CASEDIR/*.js
     rm -rf $CASEDIR/*.sh
-    rm -rf $CASEDIR/_images
+    rm -rf $CASEDIR/_images*
     rmdir $CASEDIR/* 2>/dev/null
 }
 trap finish EXIT
@@ -28,6 +33,11 @@ trap finish EXIT
 # and adjust suites file if there where case options
 rm -rf $CASEDIR
 cp -rp $CASESRC $CASEDIR
+
+# replace symlinked images with copies, sakuli cannot find them otherwise
+for img in $(find $CASEDIR/_images_chrome -type l); do src=$(readlink $img); rm $img; cp $CASEDIR/_images_chrome/$src $img; done
+for img in $(find $CASEDIR/_images_ie     -type l); do src=$(readlink $img); rm $img; cp $CASEDIR/_images_ie/$src $img; done
+
 >$CASEDIR/testsuite.suite
 find $CASEDIR/ -type d -exec chmod 777 {} \;
 find $CASEDIR/ -type f -exec chmod 666 {} \;

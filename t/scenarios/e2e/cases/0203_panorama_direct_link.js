@@ -3,6 +3,11 @@ _include('../_include.js');
 _include('../_dashboard_exports.js');
 
 var $case = function() {
+    if(_eval("_sahi._isChrome();")) {
+        _log("SKIP: test is broken in chrome");
+        return;
+    }
+
     thruk_login();
     thruk_open_panorama();
 
@@ -29,7 +34,7 @@ var $case = function() {
 
     thruk_remove_panorama_dashboard("Test Background");
 
-    testCase.endOfStep("panorama direct link", 60);
+    testCase.endOfStep("panorama direct link", 90);
     thruk_panorama_logout();
 };
 
