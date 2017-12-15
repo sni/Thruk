@@ -412,7 +412,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     function applyBackground(values) {
         if(values == undefined) {
             var d_form  = Ext.getCmp('dashboardForm').getForm();
-            if(!d_form.isValid()) { return false; }
+            if(!d_form.isValid()) { return; }
             values = d_form.getFieldValues();
             if(values.locked) { return; }
         }
@@ -466,6 +466,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             delete values['background_color'];
         }
         tab.setBackground(values);
+        return;
     }
 
     var map_choose = "static";
