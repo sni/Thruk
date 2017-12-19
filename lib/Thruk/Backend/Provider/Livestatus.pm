@@ -59,7 +59,7 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
     host_active_checks_enabled host_address host_alias host_checks_enabled host_check_type
     host_latency host_plugin_output host_perf_data host_current_attempt host_check_command
     host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
-    host_is_executing host_is_flapping host_name host_notes_url_expanded
+    host_is_executing host_is_flapping host_notes host_name host_notes_url_expanded
     host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
     host_last_state_change
     icon_image icon_image_alt icon_image_expanded is_executing is_flapping

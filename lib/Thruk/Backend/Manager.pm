@@ -1350,6 +1350,7 @@ sub _set_host_macros {
     $macros->{'$MAXHOSTATTEMPTS$'}    = (defined $host->{'host_max_check_attempts'}) ? $host->{'host_max_check_attempts'} : $host->{'max_check_attempts'};
     $macros->{'$HOSTDOWNTIME$'}       = (defined $host->{'host_scheduled_downtime_depth'}) ? $host->{'host_scheduled_downtime_depth'} : $host->{'scheduled_downtime_depth'};
     $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
+    $macros->{'$HOSTNOTES$'}          = (defined $host->{'host_notes'})              ? $host->{'host_notes'}              : $host->{'notes'};
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
     $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
