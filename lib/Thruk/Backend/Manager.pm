@@ -1147,6 +1147,7 @@ sub _set_host_macros {
     $macros->{'$HOSTPERFDATA$'}       = (defined $host->{'host_perf_data'})          ? $host->{'host_perf_data'}          : $host->{'perf_data'};
     $macros->{'$HOSTATTEMPT$'}        = (defined $host->{'host_current_attempt'})    ? $host->{'host_current_attempt'}    : $host->{'current_attempt'};
     $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
+    $macros->{'$HOSTNOTES$'}          = (defined $host->{'host_notes'})              ? $host->{'host_notes'}              : $host->{'notes_url'};
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
     $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
