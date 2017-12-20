@@ -7,9 +7,11 @@ var $testPassword = "omd"
 _set($testUser,     $testUser);
 _set($testPassword, $testPassword);
 _set($waitTimeout,  $waitTimeout);
-if(_eval("_sahi._isChrome();")) {
+_set($isChrome, _eval("_sahi._isChrome();"));
+_set($isIE, _eval("_sahi._isIE();"));
+if(isChrome()) {
     testCase.addImagePaths("../_images_chrome/");
-} else if(_eval("_sahi._isIE();")) {
+} else if(isIE()) {
     testCase.addImagePaths("../_images_ie/");
 } else {
     testCase.addImagePaths("../_images_firefox/");
@@ -165,7 +167,7 @@ function isVisible($el, $color) {
             _call(_eval("document.body.appendChild(document.createElement('div'))").innerHTML = "<div style='position:absolute; width: 30px; height: 30px; left; "+$position[0]+"px; top: "+$position[1]+"px; border: 2px solid green;'></div>");
         }
     }
-    if(!_eval("_sahi._isChrome();")) {
+    if(!isChrome()) {
         // breaks chrome
         _highlight($el, $color);
     }
@@ -189,4 +191,12 @@ function tryMultiple($test, $action, $retries, $atLeastOnce) {
             break;
         }
     }
+}
+
+function isChrome() {
+    return($isChrome == true);
+}
+
+function isIE() {
+    return($isIE == true);
 }

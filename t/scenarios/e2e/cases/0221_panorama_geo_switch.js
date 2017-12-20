@@ -2,7 +2,7 @@ _dynamicInclude($includeFolder);
 _include('../_include.js');
 
 var $case = function() {
-    if(_eval("_sahi._isChrome();")) {
+    if(isChrome()) {
         _log("SKIP: test is broken in chrome");
         return;
     }

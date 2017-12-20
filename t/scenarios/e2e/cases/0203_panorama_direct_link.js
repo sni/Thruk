@@ -3,7 +3,7 @@ _include('../_include.js');
 _include('../_dashboard_exports.js');
 
 var $case = function() {
-    if(_eval("_sahi._isChrome();")) {
+    if(isChrome()) {
         _log("SKIP: test is broken in chrome");
         return;
     }

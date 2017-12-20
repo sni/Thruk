@@ -11,8 +11,8 @@ services:
         - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
   sakuli:
-    #image: consol/sakuli-ubuntu-xfce:dev
-    build: sakuli/
+    image: consol/sakuli-ubuntu-xfce:dev
+    #build: sakuli/
     environment:
         - JVM_HEAP_XMX=512
         - TZ=Europe/Berlin
