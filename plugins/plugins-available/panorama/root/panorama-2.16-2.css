@@ -716,3 +716,12 @@ SPAN.avail_result_error {
  position: absolute;
  right: 1px;
 }
+
+DIV.TP_PanletGridServiceMineMap DIV.x-column-header-inner {
+  overflow: visible;
+}
+
+BODY.x-chrome DIV.TP_PanletGridServiceMineMap DIV.x-column-header-first DIV.x-column-header-inner {
+  position: absolute;
+  bottom: 0px;
+}

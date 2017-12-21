@@ -2071,7 +2071,13 @@ sub _task_servicesminemap {
     my $service2index = {};
     my $json = {
         columns => [
-            { 'header' => '<div class="minemap_first_col" style="top: '.($height/2-10).'px;">Hostname</div>', width => 120, height => $height, dataIndex => 'host_display_name' },
+            { 'header'       => '<div class="minemap_first_col" style="top: '.($height/2-10).'px;">Hostname</div>',
+              'headerIE'     => '<div class="minemap_first_col" style="top: '.($height-25).'px;">Hostname</div>',
+              'headerChrome' => '<div class="minemap_first_col" style="bottom: 0px;">Hostname</div>',
+              'width'        => 120,
+              'height'       => $height,
+              'dataIndex'    => 'host_display_name',
+            },
         ],
         data        => [],
     };
@@ -2081,13 +2087,14 @@ sub _task_servicesminemap {
         my $index = 'col'.$x;
         $service2index->{$svc} = $index;
         push @{$json->{'columns'}}, {
-                    'header'    => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$svc.'</div>',
-                    'headerIE'  => '<div class="vertical" style="top: 8px; width: '.($height-25).'px; right: '.($height/2-16).'px;">'.$svc.'</div>',
-                    'width'     => 20,
-                    'height'    => $height,
-                    'dataIndex' => $index,
-                    'align'     => 'center',
-                    'tdCls'     => 'mine_map_cell',
+                    'header'       => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$svc.'</div>',
+                    'headerIE'     => '<div class="vertical" style="top: 8px; width: '.($height-25).'px; right: '.($height/2-16).'px;">'.$svc.'</div>',
+                    'headerChrome' => '<div class="vertical" style="top: '.($height-20).'px;">'.$svc.'</div>',
+                    'width'        => 20,
+                    'height'       => $height,
+                    'dataIndex'    => $index,
+                    'align'        => 'center',
+                    'tdCls'        => 'mine_map_cell',
         };
         $x++;
     }

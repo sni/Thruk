@@ -248,6 +248,9 @@ TP.extractDataFields = function(panel, data) {
             if(Ext.isIE && key2 == 'headerIE') {
                 data.columns[key]['header'] = data.columns[key]['headerIE'];
             }
+            if(Ext.isChrome && key2 == 'headerChrome') {
+                data.columns[key]['header'] = data.columns[key]['headerChrome'];
+            }
             if(key2 == 'items') {
                 for(var x=0; x<data.columns[key][key2].length; x++) {
                     if(data.columns[key][key2][x].handler) {

@@ -1911,6 +1911,7 @@ t/scenarios/e2e/cases/_images_chrome/green.png
 t/scenarios/e2e/cases/_images_chrome/island_green.png
 t/scenarios/e2e/cases/_images_chrome/island_map_green.png
 t/scenarios/e2e/cases/_images_chrome/island_map_green_offset.png
+t/scenarios/e2e/cases/_images_chrome/minemap.png
 t/scenarios/e2e/cases/_images_chrome/neutral_trend.png
 t/scenarios/e2e/cases/_images_chrome/perfbar.png
 t/scenarios/e2e/cases/_images_chrome/select_dashboard_file.png
@@ -1929,6 +1930,7 @@ t/scenarios/e2e/cases/_images_firefox/green.png
 t/scenarios/e2e/cases/_images_firefox/island_green.png
 t/scenarios/e2e/cases/_images_firefox/island_map_green.png
 t/scenarios/e2e/cases/_images_firefox/island_map_green_offset.png
+t/scenarios/e2e/cases/_images_firefox/minemap.png
 t/scenarios/e2e/cases/_images_firefox/neutral_trend.png
 t/scenarios/e2e/cases/_images_firefox/perfbar.png
 t/scenarios/e2e/cases/_images_firefox/select_dashboard_file.png
@@ -1947,6 +1949,7 @@ t/scenarios/e2e/cases/_images_ie/green.png
 t/scenarios/e2e/cases/_images_ie/island_green.png
 t/scenarios/e2e/cases/_images_ie/island_map_green.png
 t/scenarios/e2e/cases/_images_ie/island_map_green_offset.png
+t/scenarios/e2e/cases/_images_ie/minemap.png
 t/scenarios/e2e/cases/_images_ie/neutral_trend.png
 t/scenarios/e2e/cases/_images_ie/perfbar.png
 t/scenarios/e2e/cases/_images_ie/select_dashboard_file.png

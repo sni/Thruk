@@ -28,6 +28,7 @@ next:
             - fix moving watermark elements
             - fix widgets display issue in IE11
             - fix row height in status lists (#779)
+            - fix minemap header in chrome and IE (#782)
           - Mobile:
             - add config option to add additonal links on the home page
 
