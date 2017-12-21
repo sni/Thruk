@@ -14,9 +14,12 @@ var $case = function() {
     isVisible(_span("HTTP"));
 
     click(_image("/x-tool-refresh/"));
-    click(_image("/x-tool-gear/"));
 
+    click(_image("/x-tool-gear/"));
     click(_link("cancel"));
+
+    screenRegion.waitForImage("minemap.png", 3).mouseMove();
+
     click(_image("/x-tool-close/"));
 
     testCase.endOfStep("panorama mine map panel", 20);
