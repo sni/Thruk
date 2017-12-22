@@ -6,6 +6,10 @@ var $case = function() {
         _log("SKIP: test does not work in chrome right now");
         return;
     }
+    if(isIE()) {
+        _log("SKIP: test does not work in IE right now");
+        return;
+    }
 
     thruk_login();
     thruk_open_panorama();
