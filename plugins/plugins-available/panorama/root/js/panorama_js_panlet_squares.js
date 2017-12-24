@@ -554,7 +554,14 @@ TP.square_update_callback = function(panel, data, retries) {
                 var dataName = This.target.dataName;
                 var el = panel.dataStore[dataName];
                 if(el.label) { return; }
+                for(var key in panel.dataStore) {
+                    if(panel.dataStore[key].label && panel.dataStore[key].label.overOnly) {
+                        panel.dataStore[key].label.destroy();
+                        delete panel.dataStore[key].label;
+                    }
+                }
                 TP.square_set_icon_label(panel, el, dataName, el.item.name);
+                el.label.overOnly = true;
                 el.label.on("mouseout", function() {
                     el.label.destroy();
                     delete el.label;
