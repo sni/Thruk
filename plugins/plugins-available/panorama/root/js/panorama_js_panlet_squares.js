@@ -31,7 +31,9 @@ Ext.define('TP.PanletSquares', {
         /* data loader */
         panel.loader = {
             autoLoad: false,
-            renderer: 'data',
+            renderer: function(loader, response, active) {
+                // using default renderer breaks ie11
+            },
             scope:    panel,
             url:      'panorama.cgi?task=squares_data',
             ajaxOptions: { method: 'POST' },
@@ -246,7 +248,7 @@ Ext.define('TP.PanletSquares', {
                 fieldStyle:   'text-align: right;'
             }, {
                 xtype:        'label',
-                text:         'ex.: 3d = 3 days, 24h = 24 hours, 60m = 60 minutes',
+                text:         Ext.isIE ? '(not supported in IE)' : 'ex.: 3d = 3 days, 24h = 24 hours, 60m = 60 minutes',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }]
         });
@@ -537,7 +539,7 @@ TP.square_update_callback = function(panel, data, retries) {
             imgSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset[newSrc];
         }
         if(!panel.dataStore[item.uniq]) {
-            var el = panel.containerItem.body.appendChild({tag:   'img',
+            var el = panel.containerItem.body.createChild({tag:   'img',
                                                   src:    imgSrc,
                                                   'class': 'clickable',
                                                   style: {top:       top+'px',
@@ -653,7 +655,7 @@ TP.square_set_icon_label = function(panel, icon, uniq, text) {
     if(icon.label) {
         el = icon.label;
     } else {
-        el = panel.containerItem.body.appendChild({
+        el = panel.containerItem.body.createChild({
                                                tag:    'div',
                                               'class': 'clickable',
                                                style: {
