@@ -1895,7 +1895,8 @@ t/scenarios/e2e/cases/0257_panorama_services_panel.js
 t/scenarios/e2e/cases/0258_panorama_services_totals_panel.js
 t/scenarios/e2e/cases/0259_panorama_services_graph_panel.js
 t/scenarios/e2e/cases/0260_panorama_mine_map_panel.js
-t/scenarios/e2e/cases/0261_panorama_all_in_one.js
+t/scenarios/e2e/cases/0261_panorama_squares_panel.js
+t/scenarios/e2e/cases/0298_panorama_all_in_one.js
 t/scenarios/e2e/cases/0299_panorama_show_case.js
 t/scenarios/e2e/cases/_dashboard_exports.js
 t/scenarios/e2e/cases/_images_chrome/applications.png
@@ -1916,6 +1917,7 @@ t/scenarios/e2e/cases/_images_chrome/neutral_trend.png
 t/scenarios/e2e/cases/_images_chrome/perfbar.png
 t/scenarios/e2e/cases/_images_chrome/select_dashboard_file.png
 t/scenarios/e2e/cases/_images_chrome/speedometer.png
+t/scenarios/e2e/cases/_images_chrome/squares.png
 t/scenarios/e2e/cases/_images_chrome/very_good.png
 t/scenarios/e2e/cases/_images_firefox/applications.png
 t/scenarios/e2e/cases/_images_firefox/arrow_map.png
@@ -1935,6 +1937,7 @@ t/scenarios/e2e/cases/_images_firefox/neutral_trend.png
 t/scenarios/e2e/cases/_images_firefox/perfbar.png
 t/scenarios/e2e/cases/_images_firefox/select_dashboard_file.png
 t/scenarios/e2e/cases/_images_firefox/speedometer.png
+t/scenarios/e2e/cases/_images_firefox/squares.png
 t/scenarios/e2e/cases/_images_firefox/very_good.png
 t/scenarios/e2e/cases/_images_ie/applications.png
 t/scenarios/e2e/cases/_images_ie/arrow_map.png
@@ -1954,6 +1957,7 @@ t/scenarios/e2e/cases/_images_ie/neutral_trend.png
 t/scenarios/e2e/cases/_images_ie/perfbar.png
 t/scenarios/e2e/cases/_images_ie/select_dashboard_file.png
 t/scenarios/e2e/cases/_images_ie/speedometer.png
+t/scenarios/e2e/cases/_images_ie/squares.png
 t/scenarios/e2e/cases/_images_ie/very_good.png
 t/scenarios/e2e/cases/_include.js
 t/scenarios/e2e/cases/testsuite.properties
