@@ -14,7 +14,7 @@ rm -f concat.js*
 
 # clean _run folder and only keep last 20 results
 for dir in $(ls -1tr _run/ | head -n -20); do
-    rm -rf $dir
+    rm -rf _run/$dir
 done
 
 function finish {
