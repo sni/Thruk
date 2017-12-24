@@ -77,6 +77,13 @@ Ext.define('TP.PanletSquares', {
         });
         panel.formUpdatedCallback = function(panel) {
             panel.createToolTip();
+            // clean all label
+            for(var key in panel.dataStore) {
+                if(panel.dataStore[key].label) {
+                    panel.dataStore[key].label.destroy();
+                    delete panel.dataStore[key].label;
+                }
+            }
         }
     },
     adjustBodyStyle: function() {
