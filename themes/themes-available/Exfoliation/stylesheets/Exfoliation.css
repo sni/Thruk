@@ -56,3 +56,8 @@ div.pnpSelector { display: inline; position: absolute; right: 2px; top: -6px; }
 td.dataVal.eventHandler {
   width: auto;
 }
+
+DIV.loginmask table.infoBox {
+  width: inherit;
+  border: 1px solid #BBBBBB;
+}
