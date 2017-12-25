@@ -144,8 +144,8 @@ plugins/plugins-available/business_process/lib/Thruk/BP/Utils.pm
 plugins/plugins-available/business_process/lib/Thruk/Controller/bp.pm
 plugins/plugins-available/business_process/lib/Thruk/Utils/CLI/Bp.pm
 plugins/plugins-available/business_process/preview.png
-plugins/plugins-available/business_process/root/bp-2.16-2.css
-plugins/plugins-available/business_process/root/bp-2.16-2.js
+plugins/plugins-available/business_process/root/bp-2.18-1.css
+plugins/plugins-available/business_process/root/bp-2.18-1.js
 plugins/plugins-available/business_process/root/bp-ie-fixes.js
 plugins/plugins-available/business_process/root/dagre-0.4.6/dagre.min.js
 plugins/plugins-available/business_process/root/images/lock.png
@@ -356,8 +356,8 @@ plugins/plugins-available/mobile/root/jqm/images/ajax-loader.gif
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.4.5.min.css
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.4.5.min.js
 plugins/plugins-available/mobile/root/jquery.mobile.router.min.js
-plugins/plugins-available/mobile/root/mobile-2.16-2.css
-plugins/plugins-available/mobile/root/mobile-2.16-2.js
+plugins/plugins-available/mobile/root/mobile-2.18-1.css
+plugins/plugins-available/mobile/root/mobile-2.18-1.js
 plugins/plugins-available/mobile/routes
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
@@ -386,7 +386,7 @@ plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama/Scripted.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/PanoramaCpuStats.pm
 plugins/plugins-available/panorama/preview.png
 plugins/plugins-available/panorama/README
-plugins/plugins-available/panorama/root/all_in_one-2.16-2_panorama.js
+plugins/plugins-available/panorama/root/all_in_one-2.18-1_panorama.js
 plugins/plugins-available/panorama/root/bigscreen.js
 plugins/plugins-available/panorama/root/cleanextjs.sh
 plugins/plugins-available/panorama/root/extjs-4.2.2/ext-all-debug.js
@@ -1272,7 +1272,7 @@ plugins/plugins-available/panorama/root/openlayer/theme/default/img/zoom-panel.p
 plugins/plugins-available/panorama/root/openlayer/theme/default/style.css
 plugins/plugins-available/panorama/root/openlayer/theme/default/style.mobile.css
 plugins/plugins-available/panorama/root/OpenLayers-2.13.1.js
-plugins/plugins-available/panorama/root/panorama-2.16-2.css
+plugins/plugins-available/panorama/root/panorama-2.18-1.css
 plugins/plugins-available/panorama/root/sprintf.js
 plugins/plugins-available/panorama/root/ux/chart/series/KPIGauge.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
@@ -1398,7 +1398,7 @@ root/robots.txt
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/all_in_one-2.16-2.js
+root/thruk/javascript/all_in_one-2.18-1.js
 root/thruk/javascript/cal/img/cool-bg-hard-inv.png
 root/thruk/javascript/cal/img/cool-bg-hard.png
 root/thruk/javascript/cal/img/cool-bg-inv.png
@@ -1447,7 +1447,7 @@ root/thruk/javascript/jstree-3.0.9/themes/default/style.min.css
 root/thruk/javascript/jstree-3.0.9/themes/default/throbber.gif
 root/thruk/javascript/overlib.js
 root/thruk/javascript/strftime-min.js
-root/thruk/javascript/thruk-2.16-2.js
+root/thruk/javascript/thruk-2.18-1.js
 root/thruk/media/critical.wav
 root/thruk/media/ok.wav
 root/thruk/media/unknown.wav
@@ -2976,8 +2976,8 @@ themes/themes-available/Thruk/images/waiting.gif
 themes/themes-available/Thruk/images/wand.png
 themes/themes-available/Thruk/images/warning.png
 themes/themes-available/Thruk/images/yellow.gif
-themes/themes-available/Thruk/stylesheets/all_in_one-2.16-2.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.16-2.css
+themes/themes-available/Thruk/stylesheets/all_in_one-2.18-1.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.18-1.css
 themes/themes-available/Thruk/stylesheets/Thruk.css
 themes/themes-available/Thruk/stylesheets/thruk_global.css
 themes/themes-available/Thruk/stylesheets/thruk_noframes.css
@@ -3145,8 +3145,8 @@ themes/themes-available/Thruk2/images/waiting.gif
 themes/themes-available/Thruk2/images/wand.png
 themes/themes-available/Thruk2/images/warning.png
 themes/themes-available/Thruk2/images/yellow.gif
-themes/themes-available/Thruk2/stylesheets/all_in_one-2.16-2.css
-themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-2.16-2.css
+themes/themes-available/Thruk2/stylesheets/all_in_one-2.18-1.css
+themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-2.18-1.css
 themes/themes-available/Thruk2/stylesheets/Thruk2.css
 themes/themes-available/Thruk2/stylesheets/thruk_global.css
 themes/themes-available/Thruk2/stylesheets/thruk_noframes.css
