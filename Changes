@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - add support for ipv6 livestatus backends (#753)
+
 2.18     Mon Dec 25 15:27:06 CET 2017
           - add new option 'commandline_obfuscate_pattern'
           - add python and go client to default cookie_auth_direct_agents

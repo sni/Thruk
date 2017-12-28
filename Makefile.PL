@@ -26,6 +26,7 @@ requires 'Net::HTTP'                              => 6.02;  # required for HTTP 
 requires 'URI::Escape'                            => 0;     # required by Thruk::Controller::Root
 requires 'HTML::Entities'                         => 0;     # required by Thruk::Utils::Filter
 requires 'Socket'                                 => 0;     # required by Monitoring::Livestatus
+requires 'IO::Socket::IP'                         => 0;     # required by Monitoring::Livestatus
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
 requires 'Date::Calc'                             => 6.3;   # required by Thruk::Utils

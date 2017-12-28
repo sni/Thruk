@@ -3,7 +3,7 @@ use parent 'Monitoring::Livestatus';
 
 use strict;
 use warnings;
-use IO::Socket::INET ();
+use IO::Socket::IP ();
 use Socket qw(IPPROTO_TCP TCP_NODELAY);
 use Carp qw/confess croak/;
 
@@ -56,9 +56,9 @@ sub _open {
     my $remaining = alarm($self->{'connect_timeout'});
     eval {
         local $SIG{'ALRM'} = sub { die("connection timeout"); };
-        $sock = IO::Socket::INET->new(
+        $sock = IO::Socket::IP->new(
                                          PeerAddr => $self->{'peer'},
-                                         Type     => IO::Socket::INET::SOCK_STREAM,
+                                         Type     => IO::Socket::IP::SOCK_STREAM,
                                          Timeout  => $self->{'connect_timeout'},
                                          );
         if(!defined $sock || !$sock->connected()) {
