@@ -95,7 +95,7 @@
   </tr>
 </table>
 <br>
-<a href="reports2.cgi?action=edit&amp;report=new" id="reschedule_btn" class="button wzd_button">balance all hosts and services</a>
+<a href="#" id="reschedule_btn" class="button wzd_button">balance all hosts and services</a>
 
 </td></tr></table>
 
