@@ -1309,5 +1309,13 @@ function bp_on_save_click(btn) {
             icons: {primary: 'ui-error-button'}
         });
     }, 30000);
-    return true;
+
+    /* returning true does no longer work in recent chrome versions(tested in v63.0.3239)
+     * so remove the onclick handler and click again
+     */
+    jQuery(btn).prop('onclick',null).off('click');
+    window.setTimeout(function() {
+        btn.click();
+    }, 100);
+    return false;
 }
