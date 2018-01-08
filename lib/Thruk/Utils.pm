@@ -2115,7 +2115,7 @@ sub read_data_file {
         return($res);
     }
 
-    # REMOVE AFTER: 01.01.2018
+    # REMOVE AFTER: 01.01.2019
     my $json_err = $@;
     my $cont = read_file($filename);
     $cont = Thruk::Utils::IO::untaint($cont);
