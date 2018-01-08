@@ -47,7 +47,6 @@ sub check_proc {
     _write_lmd_config($config);
 
     $c->log->error("lmd not running, starting up...") if $log_missing;
-    local $SIG{CHLD} = 'DEFAULT';
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -pidfile '.$lmd_dir.'/pid'
               .' -config '.$lmd_dir.'/lmd.ini';
@@ -69,7 +68,7 @@ sub check_proc {
 
   status($config)
 
-makes sure lmd process is running
+return lmd process status
 
 =cut
 
@@ -229,7 +228,7 @@ send sigusr1 to lmd to create a thread dump
 
 =cut
 sub create_thread_dump {
-    my($c, $config) = @_;
+    my($config) = @_;
     return if(!$config->{'use_lmd_core'});
     return if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
     my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
@@ -258,6 +257,8 @@ sub kill_if_not_responding {
     my $lmd_pid  = check_pid($pid_file);
     return unless $lmd_pid;
     my $data;
+    local $SIG{CHLD} = 'DEFAULT';
+    local $SIG{PIPE} = 'DEFAULT';
     my $pid = fork();
     if($pid == -1) { die("fork failed: $!"); }
 
@@ -270,6 +271,7 @@ sub kill_if_not_responding {
         alarm(0);
         if($@) {
             $c->log->warn("lmd not responding, killing with force: err - ".$@);
+            create_thread_dump($config);
             kill(2, $lmd_pid);
             sleep(1);
             kill(9, $lmd_pid);
@@ -278,14 +280,15 @@ sub kill_if_not_responding {
     }
 
     my $waited = 0;
-    while(POSIX::waitpid($pid, POSIX::WNOHANG) == 0) {
+    my $rc = -1;
+    while($waited++ < 2 && $rc != 0) {
+        POSIX::waitpid($pid, POSIX::WNOHANG);
+        $rc = $?;
         sleep(1);
-        $waited++;
-        last if $waited > 2;
     }
-    my $rc = $?;
     if($rc != 0) {
         $c->log->warn("lmd not responding, killing with force: rc - ".$rc);
+        create_thread_dump($config);
         kill(2, $pid);
         kill(2, $lmd_pid);
         sleep(1);

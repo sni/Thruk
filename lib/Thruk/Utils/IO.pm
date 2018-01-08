@@ -327,9 +327,17 @@ sub cmd {
         #&timing_breakpoint('IO::cmd: '.$cmd);
         $c->log->debug( "running cmd: ". $cmd ) if $c;
         local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx;
-        if($cmd =~ m/&\s*$/mx && $cmd !~ m|2>&1|mx) {
-            $c->log->warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
+
+        # background process?
+        if($cmd =~ m/&\s*$/mx) {
+            if($cmd !~ m|2>&1|mx) {
+                $c->log->warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
+            }
+            require Thruk::Utils::External;
+            Thruk::Utils::External::perl($c, { expr => '`'.$cmd.'`', background => 1 });
+            return(0, "");
         }
+
         $output = `$cmd`;
         $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD

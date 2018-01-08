@@ -6,6 +6,14 @@ use File::Slurp qw/read_file/;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
+my $c = TestUtils::get_c();
+
 use_ok("Thruk::Utils::IO");
 
 my $cmds = [
@@ -86,7 +94,7 @@ if(-e '/dev/full') {
 #########################
 # background commands
 my $start = time();
-($rc, $output) = Thruk::Utils::IO::cmd(undef, "sleep 1 >/dev/null 2>&1 &");
+($rc, $output) = Thruk::Utils::IO::cmd($c, "sleep 1 >/dev/null 2>&1 &");
 my $time = time()- $start;
 ok($time < 5, "runtime < 5 (".$time."s)");
 is($rc, 0, "exit code is: ".$rc);

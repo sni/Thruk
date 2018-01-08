@@ -479,7 +479,6 @@ sub _check_exit_reason {
         # send sigusr1 to lmd to create a backtrace
         if(defined $Thruk::Request::c && $Thruk::Request::c->config->{'use_lmd_core'}) {
             my $c = $Thruk::Request::c;
-            Thruk::Utils::LMD::create_thread_dump($c, $c->config);
             Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);
         }
     }
