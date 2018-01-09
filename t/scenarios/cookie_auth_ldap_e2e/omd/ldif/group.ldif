@@ -1,0 +1,6 @@
+dn: cn=test,ou=Group,dc=test,dc=local
+objectClass: posixGroup
+objectClass: top
+cn: test
+userPassword: {crypt}x
+gidNumber: 1000

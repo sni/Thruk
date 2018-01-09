@@ -1,0 +1,4 @@
+dn: cn=config
+changetype: modify
+add: olcIdleTimeout
+olcIdleTimeout: 15

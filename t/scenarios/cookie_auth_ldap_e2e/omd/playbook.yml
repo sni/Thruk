@@ -1,0 +1,54 @@
+---
+- hosts: all
+  tasks:
+  - yum:
+      name:
+        - mod_ldap
+        - openldap-servers
+        - openldap-clients
+      state: present
+  - shell: systemctl enable slapd.service
+  - lineinfile:
+     path: /etc/openldap/ldap.conf
+     state: present
+     regexp: 'BASE'
+     line: 'BASE dc=test,dc=local'
+  - lineinfile:
+     path: /etc/openldap/ldap.conf
+     state: present
+     regexp: 'URI'
+     line: 'URI ldap://localhost'
+  - shell: cp -a /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+  - shell: chown ldap:ldap /var/lib/ldap/DB_CONFIG
+  - shell: mkdir -p /etc/openldap/ldif
+  - shell: rsync -a /root/ldif/. /etc/openldap/ldif/.
+  - shell: '/usr/sbin/slapd -4 -u ldap -h "ldap://127.0.0.1:9000/ ldapi:///"'
+  - shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f "/etc/openldap/ldif/cn=config_olcRootPW.ldif"  # pw: root
+  - shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f "/etc/openldap/ldif/cn=config_BASE.ldif"
+  - shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f "/etc/openldap/ldif/cn=config_Manager_olcRootPW.ldif" # pw: manager
+  - shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f "/etc/openldap/ldif/cn=config_GLOBAL_olcIdleTimeout.ldif"
+  - shell: ldapadd -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+  - shell: ldapadd -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+  - shell: ldapadd -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+  - shell: ldapadd -H ldap://127.0.0.1:9000/ -w manager -x -D cn=Manager,dc=test,dc=local -f "/etc/openldap/ldif/cn=config_DIT.ldif"
+  - shell: ldapadd -H ldap://127.0.0.1:9000/ -w manager -x -D cn=Manager,dc=test,dc=local -f "/etc/openldap/ldif/user.ldif"
+  - shell: ldapadd -H ldap://127.0.0.1:9000/ -w manager -x -D cn=Manager,dc=test,dc=local -f "/etc/openldap/ldif/group.ldif"
+  - shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f "/etc/openldap/ldif/cn=config_anonymous_bind.ldif"
+
+  - shell: omd config demo set APACHE_MODE own
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
+  - shell: ln -s /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
+  - copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/auth_ldap.conf
+      dest: /omd/sites/demo/etc/apache/conf.d/auth.conf
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

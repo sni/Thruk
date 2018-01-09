@@ -1,0 +1,17 @@
+dn: uid=ldap,ou=People,dc=test,dc=local
+uid: ldap
+cn: Ldap User
+objectClass: account
+objectClass: posixAccount
+objectClass: top
+objectClass: shadowAccount
+userPassword: {SSHA}5xQvMA+ppe+Vum/hoJcxRdo5UUl9a+Iw
+shadowLastChange: 16383
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+loginShell: /bin/bash
+uidNumber: 1000
+gidNumber: 1000
+homeDirectory: /home/ldap
+gecos: Ldap User

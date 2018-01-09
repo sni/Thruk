@@ -1,0 +1,19 @@
+# test.local
+dn: dc=test,dc=local
+dc: test
+ou: test Dot local
+objectClass: top
+objectClass: dcObject
+objectClass: organizationalUnit
+
+# People, test.local
+dn: ou=People,dc=test,dc=local
+ou: People
+objectClass: top
+objectClass: organizationalUnit
+
+# Group, test.local
+dn: ou=Group,dc=test,dc=local
+ou: Group
+objectClass: top
+objectClass: organizationalUnit
