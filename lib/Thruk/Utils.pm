@@ -2106,7 +2106,6 @@ return data for datafile
 sub read_data_file {
     my($filename) = @_;
 
-    # just wrap the json writer and keep the rest to read old data files
     my $res;
     eval {
         $res = Thruk::Utils::IO::json_lock_retrieve($filename);
@@ -2114,33 +2113,8 @@ sub read_data_file {
     if(!$@ && $res) {
         return($res);
     }
-
-    # REMOVE AFTER: 01.01.2019
-    my $json_err = $@;
-    my $cont = read_file($filename);
-    $cont = Thruk::Utils::IO::untaint($cont);
-
-    # ensure right encoding
-    decode_any($cont);
-
-    $cont =~ s/^\$VAR1\ =\ //mx;
-
-    # replace broken escape sequences
-    $cont =~ s/\\x\{[\w]{5,}\}/\x{fffd}/gmxi;
-
-    # replace broken JSON::PP::Boolean
-    $cont =~ s/JSON::PP::/JSON::XS::/gmx;
-
-    my $VAR1;
-    ## no critic
-    eval("#line 1 $filename\n".'$VAR1 = '.$cont.';');
-    ## use critic
-
-    if($@) {
-        warn("error loading $filename as json or perl format.\njson: ".$json_err."\nperl: ".$@);
-    }
-
-    return $VAR1;
+    warn("error loading $filename - ".$@);
+    return;
 }
 
 ##############################################

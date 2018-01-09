@@ -1720,7 +1720,6 @@ t/100-model_Thruk.t
 t/100-scripts.t
 t/100-themes.t
 t/101-cli-thruk.t
-t/102-thruk_utils.t
 t/103-thruk_utils_io.t
 t/104-thruk_utils_cache.t
 t/105-thruk-utils-ssi.t
@@ -1809,9 +1808,6 @@ t/data/separated_hashes/thruk_local.d/b.conf
 t/data/test_c_style.conf
 t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
-t/data/userfiles/encoding_broken
-t/data/userfiles/encoding_iso
-t/data/userfiles/encoding_ok
 t/perlcriticrc
 t/scenarios/backend_http/docker-compose.yml
 t/scenarios/backend_http/Makefile
