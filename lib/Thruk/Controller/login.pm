@@ -118,6 +118,7 @@ sub index {
                 return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
             }
             elsif($success) {
+                $c->stash->{'remote_user'} = $login;
                 $c->cookie('thruk_auth' => $success, {
                     path    => $cookie_path,
                     domain  => $cookie_domain,
