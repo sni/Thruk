@@ -55,7 +55,7 @@ sub check_proc {
     }
     $cmd .= ' >/dev/null 2>&1 &';
 
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
     $c->log->error(sprintf('starting lmd failed with rc %d: %s', $rc, $output)) if $rc != 0;
 
     #&timing_breakpoint('check_proc');

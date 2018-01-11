@@ -272,7 +272,7 @@ sub save_logs_to_tempfile {
 
 =head2 cmd
 
-  cmd($c, $command [, $stdin] [, $print_prefix])
+  cmd($c, $command [, $stdin] [, $print_prefix] [, $detached])
 
 run command and return exit code and output
 
@@ -281,10 +281,12 @@ array like ['/bin/prog', 'arg1', 'arg2']
 
 optional print_prefix will print the result on the fly with given prefix.
 
+optional detached will run the command detached in the background
+
 =cut
 
 sub cmd {
-    my($c, $cmd, $stdin, $print_prefix) = @_;
+    my($c, $cmd, $stdin, $print_prefix, $detached) = @_;
 
     local $SIG{CHLD} = '';
     local $SIG{PIPE} = 'DEFAULT';
@@ -299,6 +301,15 @@ sub cmd {
     local $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
     local $ENV{REMOTE_USER_EMAIL} = $c->user->{'email'} if $c && $c->user;
     local $ENV{REMOTE_USER_ALIAS} = $c->user->{'alias'} if $c && $c->user;
+
+    if($detached) {
+        confess("stdin not supported for detached commands") if $stdin;
+        confess("array cmd not supported for detached commands") if ref $cmd eq 'ARRAY';
+        require Thruk::Utils::External;
+        Thruk::Utils::External::perl($c, { expr => '`'.$cmd.'`', background => 1 });
+        return(0, "cmd started in background");
+    }
+
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
@@ -333,9 +344,6 @@ sub cmd {
             if($cmd !~ m|2>&1|mx) {
                 $c->log->warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
             }
-            require Thruk::Utils::External;
-            Thruk::Utils::External::perl($c, { expr => '`'.$cmd.'`', background => 1 });
-            return(0, "");
         }
 
         $output = `$cmd`;
