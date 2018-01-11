@@ -30,5 +30,7 @@
       <tr><th colspan=2>Output</th></tr>
       <tr><td colspan=2 id="[% type %]_plugin_output"></td></tr>
     </table>
+    <a href="#alerts" class="[% type %]_alerts"><button>Alerts</button></a>
+    <a href="#notifications" class="[% type %]_notifications"><button>Notifications</button></a>
   </div>
 </div>
