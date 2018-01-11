@@ -68,11 +68,27 @@ jQuery(document).ready(function(e){
     refresh_host_status();
     refresh_service_status();
 
+    jQuery("#hosts_list_data").on("filterablebeforefilter",    function(e, data) { filterablebeforefilter(e, data, ThrukMobile.page_hosts_list) });
+    jQuery("#services_list_data").on("filterablebeforefilter", function(e, data) { filterablebeforefilter(e, data, ThrukMobile.page_services_list) });
+
     /* hide notice about fullscreen mode */
     if(window.navigator.standalone == true) {
         jQuery('#fullscreenteaser').hide();
     }
 });
+
+function filterablebeforefilter(e, data, pageref) {
+    var val = data.input.val();
+    var hash = document.location.hash.replace(/[\?&]filter=.*/, "");
+    if(val != "") {
+        hash = hash+"&filter="+encoder(val);
+    }
+    window.parent.history.replaceState({}, "", hash);
+    if(jQuery('.more').length == 0 && val == "") {
+        return;
+    }
+    pageref(null, null, null, null, null, 1);
+}
 
 /* return host status text */
 function get_host_status(host) {

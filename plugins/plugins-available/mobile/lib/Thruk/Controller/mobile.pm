@@ -80,13 +80,18 @@ sub index {
             $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         }
         elsif($type eq 'hosts') {
-            if(defined $c->req->parameters->{'host'}) {
+            if(defined $c->req->parameters->{'host'} || defined $c->req->parameters->{'filter'}) {
                 $hostfilter = { 'name' => $c->req->parameters->{'host'} };
+                my $commentfilter = { 'host_name' => $c->req->parameters->{'host'} };
+                if(defined $c->req->parameters->{'filter'}) {
+                    $hostfilter    = { 'name' => { '~~' => $c->req->parameters->{'filter'} } };
+                    $commentfilter = { 'host_name' => { '~~' => $c->req->parameters->{'filter'} } };
+                }
                 $comments   = $c->{'db'}->get_comments(
-                                filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $c->req->parameters->{'host'} }, { 'service_description' => undef } ],
+                                filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), $commentfilter, { 'service_description' => undef } ],
                                 sort => { 'DESC' => 'id' } );
                 $downtimes  = $c->{'db'}->get_downtimes(
-                                filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $c->req->parameters->{'host'} }, { 'service_description' => undef } ],
+                                filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), $commentfilter, { 'service_description' => undef } ],
                                 sort => { 'DESC' => 'id' } );
             }
             $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1);
@@ -95,9 +100,18 @@ sub index {
             }
         }
         elsif($type eq 'services') {
-            if(defined $c->req->parameters->{'host'}) {
+            if(defined $c->req->parameters->{'host'} || defined $c->req->parameters->{'filter'}) {
                 $servicefilter = { 'description' => $c->req->parameters->{'service'},
                                    'host_name'   => $c->req->parameters->{'host'} };
+                my $commentfilter = { 'host_name' => $c->req->parameters->{'host'}, 'service_description' => $c->req->parameters->{'service'}, };
+                if(defined $c->req->parameters->{'filter'}) {
+                    $servicefilter = { -or => [ {'description' => { '~~' => $c->req->parameters->{'filter'} } },
+                                                { 'host_name'  => { '~~' => $c->req->parameters->{'filter'} } },
+                                              ]};
+                    $commentfilter = { -or => [ {'service_description' => { '~~' => $c->req->parameters->{'filter'} } },
+                                                { 'host_name'          => { '~~' => $c->req->parameters->{'filter'} } },
+                                              ]};
+                }
                 $comments      = $c->{'db'}->get_comments(
                                     filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $c->req->parameters->{'host'} }, { 'service_description' => $c->req->parameters->{'service'} } ],
                                     sort => { 'DESC' => 'id' } );
