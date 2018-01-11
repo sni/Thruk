@@ -74,14 +74,6 @@ jQuery(document).ready(function(e){
     }
 });
 
-
-/* send debug output to firebug console */
-function debug(str) {
-    if (window.console != undefined) {
-        console.debug(str);
-    }
-}
-
 /* return host status text */
 function get_host_status(host) {
     if(host.has_been_checked == 0) { return("PENDING"); }
@@ -209,22 +201,29 @@ function set_theme(theme) {
 
 /* set hosts status */
 var last_host_refresh = 0;
+var last_host_refresh_params;
 var unhandled_host_problems = 0;
 function refresh_host_status(force, update_backends) {
     if(force           == undefined) { force           = false; }
     if(update_backends == undefined) { update_backends = false; }
     var date = new Date;
     var now  = parseInt(date.getTime() / 1000);
-    if(force == false && now < last_host_refresh + 15) {
+    var params = get_params({
+        data: 'host_stats',
+        _:     unixtime()
+    });
+    var current_host_refresh_params = jQuery.param(params).replace(/_=\d+/, '');
+    if(force == false && now < last_host_refresh + 15 && current_host_refresh_params == last_host_refresh_params) {
         return false;
     }
-    last_host_refresh = now;
+    last_host_refresh        = now;
+    last_host_refresh_params = current_host_refresh_params;
 
     ['up', 'down', 'unreachable', 'pending', 'down_and_unhandled', 'unreachable_and_unhandled', 'unhandled' ].forEach(function(el){
         jQuery('.hosts_'+el+'_panel').hide();
     });
 
-    jQuery.get('mobile.cgi', { data: 'host_stats', _:unixtime() },
+    jQuery.get('mobile.cgi', params,
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
             data = data.data;
@@ -232,6 +231,7 @@ function refresh_host_status(force, update_backends) {
                 var val = eval("data."+el);
                 jQuery('.hosts_'+el).text(val)
                 if(val > 0) { jQuery('.hosts_'+el+'_panel').show(); }
+                update_href_filter('.hosts_'+el+'_panel A', params);
             });
             unhandled_host_problems = data.down_and_unhandled + data.unreachable_and_unhandled;
             jQuery('.hosts_unhandled').text('Host:' + unhandled_host_problems);
@@ -258,15 +258,21 @@ function refresh_service_status(force) {
     if(force == undefined) { force = false; }
     var date = new Date;
     var now  = parseInt(date.getTime() / 1000);
-    if(force == false && now < last_service_refresh + 15) {
+    var params = get_params({
+        data: 'service_stats',
+        _:     unixtime()
+    });
+    var current_service_refresh_params = jQuery.param(params).replace(/_=\d+/, '');
+    if(force == false && now < last_service_refresh + 15 && current_service_refresh_params == last_service_refresh_params) {
         return false;
     }
-    last_service_refresh = now;
+    last_service_refresh        = now;
+    last_service_refresh_params = current_service_refresh_params;
 
     ['ok', 'warning', 'critical', 'unknown', 'pending', 'unhandled', 'warning_and_unhandled', 'critical_and_unhandled', 'unknown_and_unhandled'].forEach(function(el){
         jQuery('.services_'+el+'_panel').hide();
     });
-    jQuery.get('mobile.cgi', { data: 'service_stats', _:unixtime() },
+    jQuery.get('mobile.cgi', params,
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
             data = data.data;
@@ -274,6 +280,7 @@ function refresh_service_status(force) {
                 var val = eval("data."+el);
                 jQuery('.services_'+el).text(val)
                 if(val > 0) { jQuery('.services_'+el+'_panel').show(); }
+                update_href_filter('.services_'+el+'_panel A', params);
             });
             unhandled_service_problems = data.warning_and_unhandled + data.critical_and_unhandled + data.unknown_and_unhandled;
             jQuery('.services_unhandled').text('Service:' + unhandled_service_problems);
@@ -343,6 +350,28 @@ function fail_all_backends() {
     }
 }
 
+/* update href for given parameter */
+function update_href_filter(selector, params) {
+    var obj  = jQuery(selector);
+    var orig = obj.attr('href');
+    if(obj.attr('origHref')) {
+        orig = obj.attr('origHref');
+    } else {
+        obj.attr('origHref', orig);
+    }
+    var new_link = orig;
+    for(var key in params) {
+        if(key == '_' || key == 'data') {
+            continue;
+        }
+        if(params[key] == undefined) {
+            continue;
+        }
+        new_link += '&'+key+"="+params[key];
+    }
+    obj.attr('href', new_link);
+}
+
 ThrukMobile = {
     /* Options Page */
     page_options: function(eventType, matchObj, ui, page, evt) {
@@ -358,10 +387,12 @@ ThrukMobile = {
     /* Alert List Page */
     page_alerts: function(eventType, matchObj, ui, page, evt, pagenr) {
         pagenr = list_pager_init(pagenr, 'alerts_list');
-        jQuery.get('mobile.cgi', {
-                data: 'alerts',
-                page: pagenr
-            },
+        var params = get_params({
+            data: 'alerts',
+            page:  pagenr,
+            _:     unixtime()
+        });
+        jQuery.get('mobile.cgi', params,
             function(data, textStatus, XMLHttpRequest) {
                 list_pager_data(pagenr, data, 'alerts_list', function() { ThrukMobile.page_alerts(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
                     var listitem = '';
@@ -388,10 +419,12 @@ ThrukMobile = {
     /* Notifications Page */
     page_notifications: function(eventType, matchObj, ui, page, evt, pagenr) {
         pagenr = list_pager_init(pagenr, 'notification_list');
-        jQuery.get('mobile.cgi', {
-                data: 'notifications',
-                page: pagenr
-            },
+        var params = get_params({
+            data: 'notifications',
+            page:  pagenr,
+            _:     unixtime()
+        });
+        jQuery.get('mobile.cgi', params,
             function(data, textStatus, XMLHttpRequest) {
                 list_pager_data(pagenr, data, 'notification_list', function() { ThrukMobile.page_notifications(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
                     if(entry.service_description) {
@@ -408,15 +441,12 @@ ThrukMobile = {
     /* Services List Page */
     page_services_list: function(eventType, matchObj, ui, page, evt, pagenr) {
         pagenr     = list_pager_init(pagenr, 'services_list_data');
-        var params = get_params();
-        jQuery.get('mobile.cgi', {
-                data:               'services',
-                servicestatustypes: params['servicestatustypes'],
-                serviceprops:       params['serviceprops'],
-                hoststatustypes:    params['hoststatustypes'],
-                page:               pagenr,
-                _:                  unixtime()
-            },
+        var params = get_params({
+            data: 'services',
+            page:  pagenr,
+            _:     unixtime()
+        });
+        jQuery.get('mobile.cgi', params,
             function(data, textStatus, XMLHttpRequest) {
                 list_pager_data(pagenr, data, 'services_list_data', function() { ThrukMobile.page_services_list(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
                     var icons = get_list_icons(entry);
@@ -430,14 +460,12 @@ ThrukMobile = {
     /* Hosts List Page */
     page_hosts_list: function(eventType, matchObj, ui, page, evt, pagenr) {
         pagenr     = list_pager_init(pagenr, 'hosts_list_data');
-        var params = get_params();
-        jQuery.get('mobile.cgi', {
-                data:           'hosts',
-                hoststatustypes: params['hoststatustypes'],
-                hostprops:       params['hostprops'],
-                page:            pagenr,
-                _:               unixtime()
-            },
+        var params = get_params({
+            data: 'hosts',
+            page:  pagenr,
+            _:     unixtime()
+        });
+        jQuery.get('mobile.cgi', params,
             function(data, textStatus, XMLHttpRequest) {
                 list_pager_data(pagenr, data, 'hosts_list_data', function() { ThrukMobile.page_hosts_list(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
                     var icons = get_list_icons(entry);
@@ -450,14 +478,12 @@ ThrukMobile = {
 
     /* Host Page */
     page_host: function(eventType, matchObj, ui, page, evt) {
-        var params = get_params();
+        var params = get_params({
+            data: 'hosts',
+            _:     unixtime()
+        });
         hide_common_extinfo('host');
-        jQuery.get('mobile.cgi', {
-                data:    'hosts',
-                host:    params['host'],
-                backend: params['backend'],
-                _:       unixtime()
-            },
+        jQuery.get('mobile.cgi', params,
             function(data, textStatus, XMLHttpRequest) {
                 var host = show_common_extinfo('host', data);
                 if(host != undefined) {
@@ -465,6 +491,8 @@ ThrukMobile = {
                     jQuery('#host_state').removeClass().text(get_host_status(host)).addClass(get_host_class(host));
                     jQuery('.host_referer').val('mobile.cgi#host?host='+encoder(params['host']));
                     jQuery('.selected_hosts').val(params['host']+";"+params['backend']);
+                    jQuery('.host_alerts').attr('href', '#alerts?host='+encoder(params['host']));
+                    jQuery('.host_notifications').attr('href', '#notifications?host='+encoder(params['host']));
                     show_common_acks_n_downtimes('host', host, data.comments, data.downtimes);
                 }
             },
@@ -475,14 +503,11 @@ ThrukMobile = {
     /* Service Page */
     page_service: function(eventType, matchObj, ui, page, evt) {
         hide_common_extinfo('service');
-        var params = get_params();
-        jQuery.get('mobile.cgi', {
-                data:    'services',
-                host:    params['host'],
-                service: params['service'],
-                backend: params['backend'],
-                _:       unixtime()
-            },
+        var params = get_params({
+            data: 'services',
+            _:     unixtime()
+        });
+        jQuery.get('mobile.cgi', params,
             function(data, textStatus, XMLHttpRequest) {
                 var service = show_common_extinfo('service', data);
                 if(service != undefined) {
@@ -490,6 +515,8 @@ ThrukMobile = {
                     jQuery('#service_state').removeClass().text(get_service_status(service)).addClass(get_service_class(service));
                     jQuery('.service_referer').val('mobile.cgi#service?host='+encoder(params['host'])+'&service='+encoder(params['service']));
                     jQuery('.selected_services').val(params['host']+';'+params['service']+";"+params['backend']);
+                    jQuery('.service_alerts').attr('href', '#alerts?host='+encoder(params['host'])+'&service='+encoder(params['service']));
+                    jQuery('.service_notifications').attr('href', '#notifications?host='+encoder(params['host'])+'&service='+encoder(params['service']));
                     show_common_acks_n_downtimes('service', service, data.comments, data.downtimes);
                 }
             },
@@ -561,13 +588,15 @@ function decoder(str) {
 }
 
 /* return parameter from url */
-function get_params() {
+function get_params(params) {
+    if(!params) { params = {}; }
     var str    = document.location.hash;
     str        = str.replace(/#+.*\?/, '');
-    var params = {};
     jQuery(str.split('&')).each(function(x, s) {
-        p = s.split('=');
-        params[p[0]] = decoder(p[1]);
+        if(s != "") {
+            p = s.split('=');
+            params[p[0]] = decoder(p[1]);
+        }
     });
     return(params);
 }

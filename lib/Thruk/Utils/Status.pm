@@ -391,6 +391,7 @@ sub classic_filter {
     my $host         = $c->req->parameters->{'host'}         || '';
     my $hostgroup    = $c->req->parameters->{'hostgroup'}    || '';
     my $servicegroup = $c->req->parameters->{'servicegroup'} || '';
+    my $contact      = $c->req->parameters->{'contact'}      || '';
 
     $c->stash->{'host'}         = $host         if defined $c->stash;
     $c->stash->{'hostgroup'}    = $hostgroup    if defined $c->stash;
@@ -423,6 +424,10 @@ sub classic_filter {
         push @servicefilter,       [ { 'groups' => { '>=' => $servicegroup } } ];
         push @servicegroupfilter,  [ { 'name' => $servicegroup } ];
         $c->stash->{'has_service_filter'} = 1;
+    }
+    if ( $contact ne 'all' and $contact ne '' ) {
+        push @hostfilter,        [ { contacts => { '>=' => $contact } } ];
+        push @servicefilter,     [ { contacts => { '>=' => $contact } } ];
     }
 
     # apply default filter

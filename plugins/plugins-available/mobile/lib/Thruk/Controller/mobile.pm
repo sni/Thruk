@@ -43,8 +43,10 @@ sub index {
                                         };
         }
 
+        my ($hostfilter, $servicefilter) = _extract_filter_from_param($c);
         my($data,$comments,$downtimes,$pnp_url);
         if($type eq 'notifications') {
+            my($logfilter) = _extract_logfilter_from_param($c);
             my $filter = {
                     '-and' => [
                                 { 'time' => { '>=' => time() - 86400*3 } },
@@ -53,9 +55,10 @@ sub index {
                             ],
             };
 
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => 1, sort => {'DESC' => 'time'});
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter, $logfilter], pager => 1, sort => {'DESC' => 'time'});
         }
         elsif($type eq 'alerts') {
+            my($logfilter) = _extract_logfilter_from_param($c);
             my $filter = {
                     '-and' => [
                                 { 'time' => { '>=' => time() - 86400*3 } },
@@ -68,16 +71,15 @@ sub index {
                                 ],
                             }],
             };
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => 1, sort => {'DESC' => 'time'});
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter, $logfilter], pager => 1, sort => {'DESC' => 'time'});
         }
         elsif($type eq 'host_stats') {
-            $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+            $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         }
         elsif($type eq 'service_stats') {
-            $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+            $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         }
         elsif($type eq 'hosts') {
-            my ($hostfilter, $servicefilter) = _extract_filter_from_param($c);
             if(defined $c->req->parameters->{'host'}) {
                 $hostfilter = { 'name' => $c->req->parameters->{'host'} };
                 $comments   = $c->{'db'}->get_comments(
@@ -93,7 +95,6 @@ sub index {
             }
         }
         elsif($type eq 'services') {
-            my ($hostfilter, $servicefilter) = _extract_filter_from_param($c);
             if(defined $c->req->parameters->{'host'}) {
                 $servicefilter = { 'description' => $c->req->parameters->{'service'},
                                    'host_name'   => $c->req->parameters->{'host'} };
@@ -137,7 +138,9 @@ sub index {
     # add additonal links on the home page
     $c->stash->{links} = [];
     if($c->config->{'Thruk::Plugin::Mobile'}->{'links'}) {
+        my $remote_user = $c->stash->{'remote_user'};
         for my $link (@{Thruk::Utils::list($c->config->{'Thruk::Plugin::Mobile'}->{'links'})}) {
+            $link =~ s/\$CONTACTNAME\$/$remote_user/gmx;
             my($name,$url) = split(/\s*;\s*/mx, $link, 2);
             push @{$c->stash->{links}}, { name => $name, url => $url };
         }
@@ -153,6 +156,23 @@ sub _extract_filter_from_param {
     my($c) = @_;
     my( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($c);
     return($hostfilter, $servicefilter);
+}
+
+##########################################################
+sub _extract_logfilter_from_param {
+    my($c) = @_;
+    my $filter = [];
+    if(defined $c->req->parameters->{'host'}) {
+        push @{$filter}, { host_name => $c->req->parameters->{'host'} };
+    }
+    if(defined $c->req->parameters->{'service'}) {
+        push @{$filter}, { service_description => $c->req->parameters->{'service'} };
+    }
+    if($c->req->parameters->{'contact'}) {
+        push @{$filter}, { contact_name => $c->req->parameters->{'contact'} };
+    }
+
+    return($filter);
 }
 
 =head1 AUTHOR
