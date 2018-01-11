@@ -1139,7 +1139,7 @@ var TP = {
         /* Delay update if not all icons are rendered yet.
          * Those icons would be missing from getStatusReq()
          */
-        if(tab.window_ids.length > 0 && TP.getAllPanel(tab).length < tab.window_ids.length) {
+        if(id == undefined && tab.window_ids.length > 0 && TP.getAllPanel(tab).length < tab.window_ids.length) {
             TP.updateAllIcons(tab, id, xdata, reschedule, callback);
             return;
         }
