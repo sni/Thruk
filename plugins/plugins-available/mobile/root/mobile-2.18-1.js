@@ -452,6 +452,7 @@ ThrukMobile = {
                     var icons = get_list_icons(entry);
                     jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+encoder(entry.host_name)+'&service='+encoder(entry.description)+'&backend=' + entry.peer_key + '">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
                 });
+                jQuery('#services_list_data').listview('refresh');
             },
             'json'
         );
@@ -471,6 +472,7 @@ ThrukMobile = {
                     var icons = get_list_icons(entry);
                     jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+encoder(entry.name)+'&backend=' + entry.peer_key + '">' + entry.name +icons+'</a></li>');
                 });
+                jQuery('#hosts_list_data').listview('refresh');
             },
             'json'
         );
@@ -595,7 +597,9 @@ function get_params(params) {
     jQuery(str.split('&')).each(function(x, s) {
         if(s != "") {
             p = s.split('=');
-            params[p[0]] = decoder(p[1]);
+            if(p.length > 1) {
+                params[p[0]] = decoder(p[1]);
+            }
         }
     });
     return(params);
