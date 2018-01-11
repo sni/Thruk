@@ -6,6 +6,8 @@ next:
             - fix save button in chrome (#786)
           - LMD:
             - only restart lmd on timeouts when neccessary
+          - Mobile:
+            - add alerts and notifications button to extinfo page
 
 2.18     Mon Dec 25 15:27:06 CET 2017
           - add new option 'commandline_obfuscate_pattern'

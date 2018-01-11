@@ -2516,7 +2516,8 @@ The Mobile plugin adds a mobile view component.
 Configuration Example:
 
   <Component Thruk::Plugin::Mobile>
-    links             = Dashboard ABC ; panorama.cgi?map=ABC
+    links   = Dashboard ABC ; panorama.cgi?map=ABC
+    links   = My Problems   ; \#problems?contact=$CONTACTNAME$
   </Component>
 
 
