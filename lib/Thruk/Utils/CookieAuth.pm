@@ -195,7 +195,7 @@ sub clean_session_files {
         my $file = $sdir.'/'.$entry;
         my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
-        if($mtime < $timeout) {
+        if($mtime && $mtime < $timeout) {
             unlink($file);
         }
     }
