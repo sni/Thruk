@@ -69,3 +69,10 @@ TH {
 div.theme_buttons .ui-btn-inner {
   padding: 0.6em 21px;
 }
+
+UL.ui-listview SPAN.ui-li-count {
+  position: inherit;
+  float: right;
+  right: -3.2em !important;
+  top: 0.9em !important;
+}
