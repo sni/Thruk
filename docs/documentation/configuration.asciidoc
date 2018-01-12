@@ -1449,6 +1449,15 @@ ex.:
   cookie_auth_session_cache_timeout = 5
 
 
+=== cookie_auth_login_timeout
+Timeout for internal sub request on authentication url. Defaults to 10 seconds
+and can be disabled by setting it to zero.
+
+ex.:
+
+  cookie_auth_login_timeout = 10
+
+
 === cookie_auth_domain
 
 Cookie domain is usually set automatically. Use this option

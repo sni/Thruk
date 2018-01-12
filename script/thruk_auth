@@ -45,6 +45,7 @@ my $loginurl            = $config->{'cookie_auth_login_url'}       || $urlprefix
 my $sessiontimeout      = $config->{'cookie_auth_session_timeout'} || 86400;
 my $sessioncachetimeout = defined $config->{'cookie_auth_session_cache_timeout'} ? $config->{'cookie_auth_session_cache_timeout'} : 5;
 my $sessioncache        = {};
+my $login_timeout       = defined $config->{'cookie_auth_login_timeout'} ? $config->{'cookie_auth_login_timeout'} : 10;
 $loginurl               = "/redirect/".$loginurl;
 $loginurl               =~ s|//|/|gmx;
 my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
@@ -151,8 +152,10 @@ sub process {
             # validate session data
             my $rc;
             eval {
+                alarm($login_timeout);
                 $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user);
             };
+            alarm(0);
             if($rc == -1 or $@) {
                 print STDERR "thruk_auth: technical problem during login for ".$user if $verbose;
                 print STDERR "thruk_auth: ".$@ if $@;
