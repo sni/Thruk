@@ -1545,7 +1545,7 @@ table.listwizard input, table.listwizard select, div.ui-dialog-content  input, d
   background-color: #ffffff;
 }
 
-TABLE.data.reports TABLE.filter {
+TABLE.data.reports TABLE.filter, TABLE.data.recurring_downtimes TABLE.filter {
     box-shadow: none;
 }
 
