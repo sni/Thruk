@@ -96,7 +96,7 @@ function init_page() {
     }
 
     var newUrl = window.location.href;
-    var scroll = newUrl.match(/(\?|\&)scrollTo=(\d+)/);
+    var scroll = newUrl.match(/(\?|\&)scrollTo=([\d\.]+)/);
     if(scroll) {
         scrollToPos = scroll[2];
     }
@@ -171,8 +171,8 @@ function cleanUnderscoreUrl() {
 function cleanUnderscore(str) {
     str = str.replace(/\?_=\d+/g, '?');
     str = str.replace(/\&_=\d+/g, '');
-    str = str.replace(/\?scrollTo=\d+/g, '?');
-    str = str.replace(/\&scrollTo=\d+/g, '');
+    str = str.replace(/\?scrollTo=[\d\.]+/g, '?');
+    str = str.replace(/\&scrollTo=[\d\.]+/g, '');
     str = str.replace(/\?autoShow=\w+/g, '?');
     str = str.replace(/\&autoShow=\w+/g, '');
     str = str.replace(/\?$/g, '');
@@ -4133,7 +4133,7 @@ function getPageScroll() {
     } else if (document.body) {
         yScroll = document.body.scrollTop;
     }
-    return yScroll;
+    return Number(yScroll).toFixed(0);
 }
 
 /* submit a form by id */
