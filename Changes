@@ -2,8 +2,9 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add support for ipv6 livestatus backends (#753)
-          - fix occasional wrong redirects on page reloads (#776)
           - add timeout for cookie authentication http sub request
+          - add filter to notifications and history page
+          - fix occasional wrong redirects on page reloads (#776)
           - Business Process:
             - fix save button in chrome (#786)
           - LMD:

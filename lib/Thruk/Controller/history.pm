@@ -131,7 +131,23 @@ sub index {
     # join type filter together
     push @{$filter}, { -or => \@prop_filter };
 
-    my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
+    # additional filters set?
+    my $pattern         = $c->req->parameters->{'pattern'};
+    my $exclude_pattern = $c->req->parameters->{'exclude_pattern'};
+    my $errors = 0;
+    if(defined $pattern and $pattern !~ m/^\s*$/mx) {
+        $errors++ unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
+        push @{$filter}, { message => { '~~' => $pattern }};
+    }
+    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+        $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $exclude_pattern);
+        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+    }
+
+    my $total_filter;
+    if($errors == 0) {
+        $total_filter = Thruk::Utils::combine_filter('-and', $filter);
+    }
 
     my $order = "DESC";
     if($oldestfirst) {
@@ -155,6 +171,8 @@ sub index {
         $c->stats->profile(end => "history::fetch");
     }
 
+    $c->stash->{pattern}          = $pattern         || '';
+    $c->stash->{exclude_pattern}  = $exclude_pattern || '';
     $c->stash->{archive}          = $archive;
     $c->stash->{type}             = $type;
     $c->stash->{statetype}        = $statetype;

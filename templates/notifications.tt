@@ -7,6 +7,26 @@
       <tr>
         <td align="left" valign="top" width="33%">
         [% PROCESS _infobox.tt %]
+          <table border="1" class='filter' cellspacing="0" cellpadding="0">
+            <tr>
+              <td class='filter'>
+                <table border="0" cellspacing="2" cellpadding="0">
+                  <tr>
+                    <td align="left" class='filterTitle'>Display Filters:</td>
+                    <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" alt="update"></td>
+                  </tr>
+                  <tr>
+                    <td align="left" class='filterName'>Search Pattern:</td>
+                    <td align="left" class='filterValue'><input type="text" name="pattern" value="[% pattern%]" size=30></td>
+                  </tr>
+                  <tr>
+                    <td align="left" class='filterName'>Exclude Pattern:</td>
+                    <td align="left" class='filterValue'><input type="text" name="exclude_pattern" value="[% exclude_pattern%]" size=30></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
         </td>
         <td align="center" valign="top" width="33%">
           <div align="center" class='dataTitle'>
