@@ -1261,6 +1261,7 @@ sub _update_logcache_clean {
     $sth->bind_columns(\$db_id);
     while($sth->fetch) {
         my $file_id = <$fh>;
+        last unless $file_id;
 
         # this means the id is not used anymore
         while($db_id < $file_id) {
@@ -1277,6 +1278,7 @@ sub _update_logcache_clean {
             }
         }
     }
+    CORE::close($fh);
     if($to_delete > 100) {
         $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id IN (".join(",", @bulk_delete).")");
         @bulk_delete = ();
