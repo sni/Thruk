@@ -89,7 +89,7 @@ sub process {
         }
 
         # direct access
-        if($extra->[1] && $extra->[2] =~ $direct_auth_regex) { # TODO: make configurable
+        if($extra->[1] && $extra->[2] =~ $direct_auth_regex) {
             print STDERR "thruk_auth: script bypass cookie auth for $path" if $verbose;
             my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
             if($session && $session ne '-1') {
@@ -144,6 +144,8 @@ sub process {
         if($sessioncachetimeout == 0 || ($basicauth && $basicauth eq 'none')) {
             # no validation enabled
             print STDERR "thruk_auth: session ok (not revalidated)" if $verbose;
+            # uptime mtime of sessionfile
+            utime($now, $now, $sessionfile);
         }
         else {
             # validate session data
@@ -164,6 +166,7 @@ sub process {
                 delete $sessioncache->{$auth};
                 return $loginurl."?invalid&".$path."\n";
             }
+            # uptime mtime of sessionfile
             utime($now, $now, $sessionfile);
         }
 
