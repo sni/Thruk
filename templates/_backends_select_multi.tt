@@ -1,7 +1,7 @@
 ﻿[% backends_selected=0 %]
 [% IF selected_backends.size < backends.size && selected_backends.size > 0 %][% backends_selected=1 %][% END %]
-  <input type="checkbox" id="backends_toggle" name="backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('[% param_name %]'); toggleDisabled('available_backends'); toggleDisabled('filter_available'); toggleDisabled('filter_selected');" style="vertical-align: top;"><span onclick="toggleCheckBox('backends_toggle'); toggleDisabled('[% param_name %]'); toggleDisabled('available_backends'); toggleDisabled('filter_available'); toggleDisabled('filter_selected');" class="clickable"[% IF !can_edit %] disabled[% END %]> Select Backends</span><br>
-  <table style="height: 100%;" class="filter">
+  <input type="checkbox" id="backends_toggle" name="backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('backends_toggle_table');" class="clickable"[% IF !can_edit %] disabled[% END %]><span> Select Backends</span><br>
+  <table style="height: 150px;[% IF !backends_selected %] display: none;[% END %]" class="filter" id="backends_toggle_table">
     <tr>
       <td class="attrName"><b>Available</b></td>
       <td>&nbsp;</td>

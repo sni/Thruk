@@ -46,7 +46,7 @@
   [% IF backends.size > 10 %]
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
-    <td class="dataOdd" align="left" colspan=2 style="height:150px;">
+    <td class="dataOdd" align="left" colspan=2>
     [% PROCESS _backends_select_multi.tt param_name='report_backends' selected_backends=r.backends can_edit=1 onchange="reports_update_affected_sla_objects(this)" %]
     </td>
   </tr>
@@ -56,8 +56,8 @@
     <td class="dataOdd" align="left" colspan=2>
       [% backends_selected=0 %]
       [% IF r.backends.size > 0 %][% backends_selected=1 %][% END %]
-      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends'); reports_update_affected_sla_objects(this);" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span><br>
-      <select id="report_backends" name="report_backends" multiple style="min-width: 180px;"[% IF !backends_selected %] disabled[% END %] onchange="reports_update_affected_sla_objects(this)">
+      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('report_backends'); reports_update_affected_sla_objects(this);" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleElement('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span><br>
+      <select id="report_backends" name="report_backends" multiple style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]" onchange="reports_update_affected_sla_objects(this)">
         [% FOREACH b = backends %]
         <option value="[% b %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
