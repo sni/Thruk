@@ -1454,15 +1454,34 @@ sub _get_contact_lookup {
 ##########################################################
 sub _get_plugin_lookup {
     my($dbh,$prefix) = @_;
-    my $max_initial_cache = 5000;
+    #&timing_breakpoint('_get_plugin_lookup');
 
-    my $sth = $dbh->prepare("SELECT output_id, output FROM `".$prefix."_plugin_output` LIMIT $max_initial_cache");
-    $sth->execute;
     my $plugin_lookup = {};
-    for my $o (@{$sth->fetchall_arrayref()}) { $plugin_lookup->{$o->[1]} = $o->[0]; }
-    if(scalar keys %{$plugin_lookup} >= $max_initial_cache) {
-        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
+
+    # fetch todays logentries for deduplication
+    my $yesterday = time() - 86400;
+    my $sql = '
+        SELECT
+            l.message,
+            p1.output,
+            l.plugin_output,
+            p2.output
+        FROM
+            `'.$prefix.'_log` l
+            LEFT JOIN `'.$prefix.'_plugin_output` p1 ON l.message = p1.output_id
+            LEFT JOIN `'.$prefix.'_plugin_output` p2 ON l.plugin_output = p2.output_id
+        WHERE l.time > '.$yesterday;
+
+    my $sth = $dbh->prepare($sql);
+    $sth->execute;
+    for my $o (@{$sth->fetchall_arrayref()}) {
+        $plugin_lookup->{$o->[1]} = $o->[0];
+        $plugin_lookup->{$o->[3]} = $o->[2];
     }
+
+    $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
+
+    #&timing_breakpoint('_get_plugin_lookup done');
     return $plugin_lookup;
 }
 
@@ -1494,6 +1513,8 @@ sub _plugin_lookup {
     $dbh->do("INSERT INTO `".$prefix."_plugin_output` (output) VALUES(".$dbh->quote($look).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $hash->{$look} = $id;
+
+    #&timing_breakpoint('_plugin_lookup done');
     return $id;
 }
 
@@ -1749,10 +1770,7 @@ sub _import_peer_logfiles {
     my $time = $start;
 
     # increase plugin output lookup performance for larger updates
-    if($end - $start > 86400) {
-        $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
-        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
-    }
+    $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
 
     # add import filter?
     my $import_filter = [];
@@ -1793,12 +1811,6 @@ sub _import_peer_logfiles {
 
         $time = $time + $blocksize;
 
-        # increase plugin output lookup performance for larger updates
-        if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0 and scalar @{$logs} > 500) {
-            $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
-            $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
-        }
-
         $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup);
 
         $c->stats->profile(end => $stime);
@@ -1816,12 +1828,7 @@ sub _import_logcache_from_file {
     my($self,$mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup) = @_;
     my $log_count = 0;
 
-    # increase plugin output lookup performance for larger updates
-    if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0) {
-        $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
-        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
-        #print "plugin output lookup filled with ".(scalar keys %{$plugin_lookup})." entries\n" if $verbose;
-    }
+    $plugin_lookup = _get_plugin_lookup($dbh,$prefix) unless scalar keys %{$plugin_lookup} > 0;
 
     require Monitoring::Availability::Logs;
 

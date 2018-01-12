@@ -12,6 +12,8 @@ next:
           - Mobile:
             - implement remote filtering
             - add alerts and notifications button to extinfo page
+          - Logcache:
+            - speed up updates
 
 2.18     Mon Dec 25 15:27:06 CET 2017
           - add new option 'commandline_obfuscate_pattern'
