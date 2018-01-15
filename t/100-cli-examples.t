@@ -16,7 +16,7 @@ BEGIN {
 ###########################################################
 my @files;
 if(scalar @ARGV == 0) {
-    plan(tests => 20);
+    plan(tests => 24);
     @files = glob('examples/*');
 } else {
     @files = @ARGV;
