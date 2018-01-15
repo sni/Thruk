@@ -590,10 +590,14 @@ sub expand_command {
 
     # different source?
     if(defined $source and $source ne 'check_command') {
-        $source  = uc($source);
-        $source  =~ s/^_//mx;
-        my $vars = Thruk::Utils::get_custom_vars(undef, $obj);
-        $command_name = $vars->{$source} || '';
+        if($obj->{$source}) {
+            $command_name = $obj->{$source};
+        } else {
+            $source  = uc($source);
+            $source  =~ s/^_//mx;
+            my $vars = Thruk::Utils::get_custom_vars(undef, $obj);
+            $command_name = $vars->{$source} || '';
+        }
     }
 
     my($name, @com_args) = split(/(?<!\\)!/mx, $command_name, 255);
@@ -1142,16 +1146,19 @@ sub _set_host_macros {
     $macros->{'$HOSTNAME$'}           = (defined $host->{'host_name'})               ? $host->{'host_name'}               : $host->{'name'};
     $macros->{'$HOSTALIAS$'}          = (defined $host->{'host_alias'})              ? $host->{'host_alias'}              : $host->{'alias'};
     $macros->{'$HOSTSTATEID$'}        = (defined $host->{'host_state'})              ? $host->{'host_state'}              : $host->{'state'};
+    $macros->{'$HOSTSTATETYPE'}       = (defined $host->{'host_state_type'})         ? $host->{'host_state_type'}         : $host->{'state_type'};
     $macros->{'$HOSTLATENCY$'}        = (defined $host->{'host_latency'})            ? $host->{'host_latency'}            : $host->{'latency'};
     $macros->{'$HOSTOUTPUT$'}         = (defined $host->{'host_plugin_output'})      ? $host->{'host_plugin_output'}      : $host->{'plugin_output'};
     $macros->{'$HOSTPERFDATA$'}       = (defined $host->{'host_perf_data'})          ? $host->{'host_perf_data'}          : $host->{'perf_data'};
     $macros->{'$HOSTATTEMPT$'}        = (defined $host->{'host_current_attempt'})    ? $host->{'host_current_attempt'}    : $host->{'current_attempt'};
+    $macros->{'$HOSTDOWNTIME$'}       = (defined $host->{'host_scheduled_downtime_depth'}) ? $host->{'host_scheduled_downtime_depth'} : $host->{'scheduled_downtime_depth'};
     $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
     $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
     $macros->{'$HOSTSTATE$'}          = (defined $macros->{'$HOSTSTATEID$'})         ? $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}} : 0;
-    $macros->{'$HOSTBACKENDID$'}      = $host->{'peer_key'};
+    $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
+    $macros->{'$HOSTSTATETYPE'}       = (defined $macros->{'$HOSTSTATETYPE'})        ? $macros->{'$HOSTSTATETYPE'} == 1 ? 'HARD' : 'SOFT' : '';
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
     my $peer = defined $host->{'peer_key'} ? $self->get_peer_by_key($host->{'peer_key'}) : undef;
@@ -1192,6 +1199,7 @@ sub _set_service_macros {
     $macros->{'$SERVICEDESC$'}           = $service->{'description'};
     $macros->{'$SERVICESTATEID$'}        = $service->{'state'};
     $macros->{'$SERVICESTATE$'}          = $c->config->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
+    $macros->{'$SERVICESTATETYPE$'}      = $service->{'state_type'} ? 'HARD' : 'SOFT';
     $macros->{'$SERVICELATENCY$'}        = $service->{'latency'};
     $macros->{'$SERVICEOUTPUT$'}         = $service->{'plugin_output'};
     $macros->{'$SERVICEPERFDATA$'}       = $service->{'perf_data'};
@@ -1200,6 +1208,7 @@ sub _set_service_macros {
     $macros->{'$SERVICEBACKENDID$'}      = $service->{'peer_key'};
     $macros->{'$SERVICENOTESURL$'}       = $service->{'notes_url_expanded'};
     $macros->{'$SERVICEDURATION$'}       = time() - $service->{'last_state_change'};
+    $macros->{'$SERVICEDOWNTIME$'}       = $service->{'scheduled_downtime_depth'};
     my $peer = defined $service->{'peer_key'} ? $self->get_peer_by_key($service->{'peer_key'}) : undef;
     if($peer) {
         $macros->{'$SERVICEBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
