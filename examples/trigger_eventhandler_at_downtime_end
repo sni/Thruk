@@ -1,0 +1,151 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm -a $(cd `dirname $0` && pwd) != '/usr/share/thruk/examples' ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 24
+
+##############################################
+use strict;
+use warnings;
+use Pod::Usage;
+use Getopt::Long;
+use Thruk::Utils::CLI;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Encode qw/encode_utf8/;
+
+binmode(STDOUT, ":encoding(UTF-8)");
+binmode(STDERR, ":encoding(UTF-8)");
+
+my $opt ={
+    'help'      => 0,
+    'lookback'  => 60,
+    'backend'   => undef,
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+GetOptions (
+    "h|help"         => \$opt->{'help'},
+    "l|lookback=i"   => \$opt->{'lookback'},
+    "b|backend=s"    => \$opt->{'backend'},
+    "n|nocache"      => \$opt->{'nocache'},
+    "f|foreground"   => \$opt->{'foreground'},
+    "t|testmode"     => \$opt->{'testmode'},
+) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
+pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
+
+my $options = {};
+$options->{backends} = [$opt->{'backend'}] if $opt->{'backend'};
+my $cli     = Thruk::Utils::CLI->new($options);
+my $c       = $cli->get_c();
+Thruk::Action::AddDefaults::add_defaults($c);
+my $start   = time() - $opt->{'lookback'};
+my $db      = $cli->get_db();
+
+my $logoptions = {
+    filter => [
+        time    => { '>=' => $start },
+        time    => { '<=' => time() },
+        type    => 'SERVICE DOWNTIME ALERT',
+        message => { '~~' => ';STOPPED;' },
+    ],
+    sort => {'ASC' => 'time'},
+};
+$logoptions->{'nocache'} = 1 if $opt->{'nocache'};
+my $logs = $db->get_logs(%{$logoptions});
+
+for my $l (@{$logs}) {
+    _info(sprintf("scheduling eventhandler for %s - %s", $l->{'host_name'}, $l->{'service_description'}));
+
+    # expand eventhandler command
+    my $service = $db->get_services(
+                        filter  => [{ host_name => $l->{'host_name'}, description => $l->{'service_description'} }],
+                        backend => [$l->{'peer_key'}],
+    );
+    if(!$service->[0]) {
+        _error("cannot find matching service");
+        next;
+    }
+    $service = $service->[0];
+
+    my $host = $db->get_hosts(
+                        filter  => [{ name => $l->{'host_name'} }],
+                        backend => [$l->{'peer_key'}],
+    );
+    if(!$host->[0]) {
+        _error("cannot find matching host");
+        next;
+    }
+    $host = $host->[0];
+
+    my $cmd = $db->expand_command(host => $host, service => $service, source => 'event_handler');
+    if($cmd->{'note'}) {
+        _error($cmd->{'note'});
+        next;
+    }
+
+    my $cmd_line = $cmd->{'line_expanded'};
+    if($opt->{'testmode'}) {
+        _info(sprintf("(testmode) would run: %s\n", $cmd_line));
+    }
+
+    _info(sprintf("cmd: %s\n", $cmd_line));
+    if($opt->{'foreground'}) {
+        `$cmd_line`;
+    } else {
+        `$cmd_line >/dev/null 2>&1 &`;
+    }
+}
+
+exit 0;
+
+##############################################
+
+=head1 NAME
+
+trigger_eventhandler_at_downtime_end - Command line utility to trigger eventhandler when a downtime is over
+
+=head1 SYNOPSIS
+
+  Usage: trigger_eventhandler_at_downtime_end [-b backend] --lookback=<seconds>
+
+=head1 DESCRIPTION
+
+This script collects logs
+
+=head1 OPTIONS
+
+    -l|--lookback           amount of seconds to lookback into the logfile
+    -b|--backend            specify backend if there are multiple connected
+    -n|--nocache            bypass logcache (if enabled)
+    -f|--foreground         do not run eventhandler in background
+    -t|--testmode           do not actially run eventhandler command, just print it
+
+=head1 EXAMPLE
+
+    run eventhandler for all services which downtimes stopped in the last 60 seconds
+
+trigger_eventhandler_at_downtime_end --lockback=60
+
+=head1 AUTHOR
+
+2019, Sven Nierlein, <sven@consol.de>
+
+=cut

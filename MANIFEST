@@ -33,6 +33,7 @@ examples/get_logs
 examples/list_hosts
 examples/objectcache2csv
 examples/remove_duplicates
+examples/trigger_eventhandler_at_downtime_end
 get_version
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
