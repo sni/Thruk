@@ -71,8 +71,15 @@ my $logoptions = {
 $logoptions->{'nocache'} = 1 if $opt->{'nocache'};
 my $logs = $db->get_logs(%{$logoptions});
 
+# fetch global eventhandler status
+my $status = $db->get_processinfo();
+
 for my $l (@{$logs}) {
     _info(sprintf("scheduling eventhandler for %s - %s", $l->{'host_name'}, $l->{'service_description'}));
+    if(!$status->{$l->{'peer_key'}}->{'enable_event_handlers'}) {
+        _info("event_handler are globally disabled");
+        next;
+    }
 
     # expand eventhandler command
     my $service = $db->get_services(
@@ -84,6 +91,14 @@ for my $l (@{$logs}) {
         next;
     }
     $service = $service->[0];
+    if(!$service->{'event_handler'}) {
+        _info("service has no event_handler");
+        next;
+    }
+    if(!$service->{'event_handler_enabled'}) {
+        _info("service has event_handler disabled");
+        next;
+    }
 
     my $host = $db->get_hosts(
                         filter  => [{ name => $l->{'host_name'} }],
