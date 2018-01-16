@@ -1151,6 +1151,7 @@ sub _set_host_macros {
     $macros->{'$HOSTOUTPUT$'}         = (defined $host->{'host_plugin_output'})      ? $host->{'host_plugin_output'}      : $host->{'plugin_output'};
     $macros->{'$HOSTPERFDATA$'}       = (defined $host->{'host_perf_data'})          ? $host->{'host_perf_data'}          : $host->{'perf_data'};
     $macros->{'$HOSTATTEMPT$'}        = (defined $host->{'host_current_attempt'})    ? $host->{'host_current_attempt'}    : $host->{'current_attempt'};
+    $macros->{'$MAXHOSTATTEMPTS$'}    = (defined $host->{'host_max_check_attempts'}) ? $host->{'host_max_check_attempts'} : $host->{'max_check_attempts'};
     $macros->{'$HOSTDOWNTIME$'}       = (defined $host->{'host_scheduled_downtime_depth'}) ? $host->{'host_scheduled_downtime_depth'} : $host->{'scheduled_downtime_depth'};
     $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
@@ -1204,6 +1205,7 @@ sub _set_service_macros {
     $macros->{'$SERVICEOUTPUT$'}         = $service->{'plugin_output'};
     $macros->{'$SERVICEPERFDATA$'}       = $service->{'perf_data'};
     $macros->{'$SERVICEATTEMPT$'}        = $service->{'current_attempt'};
+    $macros->{'$MAXSERVICEATTEMPTS$'}    = $service->{'max_check_attempts'};
     $macros->{'$SERVICECHECKCOMMAND$'}   = $service->{'check_command'};
     $macros->{'$SERVICEBACKENDID$'}      = $service->{'peer_key'};
     $macros->{'$SERVICENOTESURL$'}       = $service->{'notes_url_expanded'};
