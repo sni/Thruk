@@ -408,6 +408,7 @@ sub test_page {
             my $content = $return->{'content'};
             utf8::decode($content);
             $lint->parse($content);
+            $lint->eof();
             my @errors = $lint->errors;
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
             is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
