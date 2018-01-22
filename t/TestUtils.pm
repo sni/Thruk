@@ -554,6 +554,10 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Character\ ".*?"\ should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "manifest"\ for\ tag\ <html>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "sizes"\ for\ tag\ <link>/imxo;
+        next if $err_str =~ m/<html>\ tag\ is\ required/imxo;
+        next if $err_str =~ m/<head>\ tag\ is\ required/imxo;
+        next if $err_str =~ m/<title>\ tag\ is\ required/imxo;
+        next if $err_str =~ m/<body>\ tag\ is\ required/imxo;
         diag($error->as_string."\n");
         push @return, $error;
     }
