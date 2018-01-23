@@ -9,6 +9,7 @@ next:
             - fix save button in chrome (#786)
           - LMD:
             - only restart lmd on timeouts when neccessary
+            - support lmd federation mode
           - Mobile:
             - implement remote filtering
             - add alerts and notifications button to extinfo page

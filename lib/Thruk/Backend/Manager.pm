@@ -75,6 +75,7 @@ sub init {
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;
 
+    $self->{'sections'} = {};
     for my $peer (@{$self->get_peers(1)}) {
         $self->{'by_key'}->{$peer->{'key'}}   = $peer;
         $self->{'by_name'}->{$peer->{'name'}} = $peer;
@@ -1536,6 +1537,9 @@ sub select_backends {
         }
         push @{$get_results_for}, $peer->{'key'};
     }
+    if(defined $backends && $backends->{'ALL'}) {
+        push @{$get_results_for}, 'ALL';
+    }
     return($get_results_for, $arg, \%arg);
 }
 
@@ -1601,6 +1605,7 @@ sub _get_result_lmd {
     # update failed backends
     if($meta && $meta->{'failed'}) {
         for my $key (@{$peers}) {
+            next if $key eq 'ALL';
             delete $c->stash->{'failed_backends'}->{$key};
             my $peer = $self->get_peer_by_key($key);
             $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones

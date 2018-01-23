@@ -34,8 +34,11 @@ clean:
 	docker-compose stop
 	docker-compose rm -f
 	-docker network prune -f
+	$(MAKE) extra_clean
 
 update:
 	docker-compose pull
 
 wait_start_extra:
+
+extra_clean:
