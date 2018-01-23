@@ -1,6 +1,11 @@
-# put the RewriteLock outside your virtual hosts (only required for apache < 2.4)
+# put the RewriteLock outside your virtual hosts
+# apache 2.2 lock
 <IfModule !mod_authz_core.c>
   RewriteLock "/var/cache/thruk/apache_rewrite.lock"
+</IfModule>
+# apache 2.4 lock
+<IfModule mod_authz_core.c>
+  Mutex file:/var/cache/thruk/ rewrite-map
 </IfModule>
 
 # put everything else inside your vhost
