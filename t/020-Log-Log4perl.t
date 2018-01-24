@@ -45,7 +45,7 @@ for my $url (@{$pages}) {
 }
 
 # do they exist all all?
-is(-e '/tmp/thruk_test_error.log', 1, 'thruk_test_error.log exists');
+is(-e '/tmp/thruk_test_error.log', 1, 'thruk_test_error.log exists') or BAIL_OUT("logfile does not exist at all");
 is(-e '/tmp/thruk_test_debug.log', 1, 'thruk_test_debug.log exists');
 is(-s '/tmp/thruk_test_error.log', 0, 'thruk_test_error.log is empty') or diag(qx|cat /tmp/thruk_test_error.log|);
 

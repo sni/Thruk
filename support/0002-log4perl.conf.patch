@@ -3,7 +3,7 @@
 @@ -14,7 +14,7 @@
  
  # normal log messages
- log4perl.appender.ThrukLog=Log::Dispatch::File
+ log4perl.appender.ThrukLog=Log::Log4perl::Appender::File
 -log4perl.appender.ThrukLog.filename=logs/error.log
 +log4perl.appender.ThrukLog.filename=@LOGDIR@/thruk.log
  log4perl.appender.ThrukLog.mode=append

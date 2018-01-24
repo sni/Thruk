@@ -37,7 +37,6 @@ requires 'DateTime'                               => 0;     # required by Panora
 requires 'Excel::Template'                        => 0;     # required by Thruk::Views::ExcelRenderer
 requires 'IO::String'                             => 0;     # required by Thruk::Views::ExcelRenderer
 requires 'Log::Log4perl'                          => 1.34;  # required by Thruk
-requires 'Log::Dispatch::File'                    => 0;     # required by Thruk / Log4perl example config
 requires 'Storable'                               => 0;     # required by Thruk::Utils::External
 requires 'threads'                                => 0;     # required by Thruk::Pool::Simple
 requires 'Thread::Queue'                          => 0;     # required by Thruk::Pool::Simple
