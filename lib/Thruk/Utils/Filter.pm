@@ -15,7 +15,7 @@ use warnings;
 use Carp qw/confess cluck carp/;
 use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
-use JSON::XS ();
+use Cpanel::JSON::XS ();
 use Encode qw/decode_utf8/;
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw/read_file/;
@@ -474,7 +474,7 @@ returns error if json is invalid
 sub validate_json {
     my($str) = @_;
     eval {
-        JSON::XS->new->decode($str);
+        Cpanel::JSON::XS->new->decode($str);
     };
     if($@) {
         my $err = $@;
@@ -539,7 +539,7 @@ sub get_action_menu {
     if($ENV{THRUK_REPORT} && !$err) {
         # workaround for images beeing placed by js document.write later
         my $image_data = {};
-        my $items = JSON::XS->new->decode($menu);
+        my $items = Cpanel::JSON::XS->new->decode($menu);
         for my $item (@{Thruk::Utils::list($items)}) {
             $image_data->{$item->{'icon'}} = '' if $item->{'icon'};
         }
@@ -561,9 +561,9 @@ sub json_encode {
     # do not use utf8 here, results in double encoding because object should be utf8 already
     # for example business processes having utf8 characters in the plugin output
     if(scalar @_ > 1) {
-        return JSON::XS->new->encode([@_]);
+        return Cpanel::JSON::XS->new->encode([@_]);
     }
-    return JSON::XS->new->encode($_[0]);
+    return Cpanel::JSON::XS->new->encode($_[0]);
 }
 
 ########################################
@@ -576,8 +576,8 @@ returns json encoded object
 
 =cut
 sub encode_json_obj {
-    return decode_utf8(JSON::XS::encode_json($_[0])) if $_[1];
-    return JSON::XS::encode_json($_[0]);
+    return decode_utf8(Cpanel::JSON::XS::encode_json($_[0])) if $_[1];
+    return Cpanel::JSON::XS::encode_json($_[0]);
 }
 
 ########################################
@@ -1100,7 +1100,7 @@ sub get_cmd_submit_hash {
     else {
         confess("no such type: $type");
     }
-    return(JSON::XS::encode_json($hash));
+    return(Cpanel::JSON::XS::encode_json($hash));
 }
 
 ########################################

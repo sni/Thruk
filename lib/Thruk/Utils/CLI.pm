@@ -16,7 +16,7 @@ use strict;
 use Carp;
 use Data::Dumper qw/Dumper/;
 use Thruk::UserAgent qw//;
-use JSON::XS qw/encode_json decode_json/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
 use Time::HiRes qw/gettimeofday tv_interval/;

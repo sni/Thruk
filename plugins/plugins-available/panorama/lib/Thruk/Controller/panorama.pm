@@ -3,7 +3,7 @@ package Thruk::Controller::panorama;
 use strict;
 use warnings;
 use Data::Dumper qw/Dumper/;
-use JSON::XS qw/decode_json encode_json/;
+use Cpanel::JSON::XS qw/decode_json encode_json/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
 use Encode qw(decode_utf8 encode_utf8);
@@ -643,14 +643,14 @@ sub _task_upload {
     my $location = $c->req->parameters->{'location'};
     if(!$type || !$location || !$c->req->uploads->{$type}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'missing properties in fileupload.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'missing properties in fileupload.', success => Cpanel::JSON::XS::false });
         return;
     }
     $location =~ s|/$||gmx;
 
     if($c->config->{'demo_mode'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'fileupload is disabled in demo mode.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'fileupload is disabled in demo mode.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -659,13 +659,13 @@ sub _task_upload {
 
     if(!-w $folder.'/.') {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload must use existing and writable folder.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload must use existing and writable folder.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -673,14 +673,14 @@ sub _task_upload {
     $filename =~ s|^/||gmx;
     if($filename !~ m/^[a-z0-9_\- ]+\.(jpeg|jpg|gif|png|svg)$/mxi) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload contains invalid characters (a-z0-9_- ) in filename.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload contains invalid characters (a-z0-9_- ) in filename.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     my $newlocation = $folder.'/'.$filename;
     if(-s $newlocation && !$c->stash->{'is_admin'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Only administrator may overwrite existing files.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'Only administrator may overwrite existing files.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -689,12 +689,12 @@ sub _task_upload {
     };
     if($@) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => $@, success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => $@, success => Cpanel::JSON::XS::false });
         return;
     }
 
     # must be text/html result, otherwise extjs form result handler dies
-    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, filename => $filename });
+    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => Cpanel::JSON::XS::true, filename => $filename });
     return;
 }
 
@@ -706,14 +706,14 @@ sub _task_uploadecho {
 
     if(!$c->req->uploads->{'file'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     my $upload = $c->req->uploads->{'file'};
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -721,7 +721,7 @@ sub _task_uploadecho {
     unlink($upload->{'tempname'});
 
     # must be text/html result, otherwise extjs form result handler dies
-    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => JSON::XS::true, content => $content });
+    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => Cpanel::JSON::XS::true, content => $content });
     return;
 }
 
@@ -810,14 +810,14 @@ sub _task_load_dashboard {
 
     if(!$c->req->uploads->{'file'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     my $upload = $c->req->uploads->{'file'};
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'File exceeds the allowed filesize of 50MB.', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'File exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -831,7 +831,7 @@ sub _task_load_dashboard {
     };
     if($@) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'This is not a valid dashboard', success => JSON::XS::false });
+        $c->stash->{text} = encode_json({ 'msg' => 'This is not a valid dashboard', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -852,7 +852,7 @@ sub _task_load_dashboard {
             };
             if($@) {
                 $c->log->error('Usercontent upload for '.$file.' failed: '.$@);
-                $c->stash->{text} = encode_json({ 'msg' => 'Usercontent upload for '.$file.' failed.', success => JSON::XS::false });
+                $c->stash->{text} = encode_json({ 'msg' => 'Usercontent upload for '.$file.' failed.', success => Cpanel::JSON::XS::false });
                 return;
             }
         }
@@ -864,7 +864,7 @@ sub _task_load_dashboard {
     my $newid = $data->{'id'};
 
     # must be text/html result, otherwise extjs form result handler dies
-    $c->stash->{text} = encode_json({ 'msg' => 'Import successfull', success => JSON::XS::true, newid => $newid });
+    $c->stash->{text} = encode_json({ 'msg' => 'Import successfull', success => Cpanel::JSON::XS::true, newid => $newid });
     return;
 }
 
@@ -895,7 +895,7 @@ sub _get_wms_provider {
         $data =~ s/\s*$//gmx;
         next unless $data;
         eval {
-            my $test = JSON::XS::decode_json($data);
+            my $test = Cpanel::JSON::XS::decode_json($data);
         };
         if($@) {
             print STDERR "error in wms provider: ".$@;
@@ -959,7 +959,7 @@ sub _get_timezone_data {
             text   => $name,
             abbr   => $dt->time_zone()->short_name_for_datetime($dt),
             offset => $dt->offset(),
-            isdst  => $dt->is_dst() ? JSON::XS::true : JSON::XS::false,
+            isdst  => $dt->is_dst() ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
         };
     }
     $cache->set('timezones', {
@@ -1391,13 +1391,13 @@ sub _task_server_stats {
 
     my $json = {
         columns => [
-            { 'header' => 'Cat',    dataIndex => 'cat',   hidden => JSON::XS::true },
+            { 'header' => 'Cat',    dataIndex => 'cat',   hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Type',   dataIndex => 'type',  width => 60, align => 'right' },
             { 'header' => 'Value',  dataIndex => 'value', width => 65, align => 'right', renderer => 'TP.render_systat_value' },
             { 'header' => 'Graph',  dataIndex => 'graph', flex  => 1,                    renderer => 'TP.render_systat_graph' },
-            { 'header' => 'Warn',   dataIndex => 'warn',  hidden => JSON::XS::true },
-            { 'header' => 'Crit',   dataIndex => 'crit',  hidden => JSON::XS::true },
-            { 'header' => 'Max',    dataIndex => 'max',   hidden => JSON::XS::true },
+            { 'header' => 'Warn',   dataIndex => 'warn',  hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Crit',   dataIndex => 'crit',  hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Max',    dataIndex => 'max',   hidden => Cpanel::JSON::XS::true },
         ],
         data  => [],
         group => 'cat',
@@ -1554,18 +1554,18 @@ sub _task_site_status {
 
     my $json = {
         columns => [
-            { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => JSON::XS::true },
+            { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => Cpanel::JSON::XS::true },
             { 'header' => '',                 dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_site' },
-            { 'header' => 'Category',         dataIndex => 'category',                width => 60, hidden => JSON::XS::true },
-            { 'header' => 'Section',          dataIndex => 'section',                 width => 60, hidden => JSON::XS::true },
+            { 'header' => 'Category',         dataIndex => 'category',                width => 60, hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Section',          dataIndex => 'section',                 width => 60, hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Site',             dataIndex => 'site',                    width => 60, flex => 1 },
             { 'header' => 'Version',          dataIndex => 'version',                 width => 50, renderer => 'TP.add_title' },
             { 'header' => 'Runtime',          dataIndex => 'runtime',                 width => 85 },
-            { 'header' => 'Notifications',    dataIndex => 'enable_notifications',    width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
-            { 'header' => 'Svc Checks',       dataIndex => 'execute_service_checks',  width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
-            { 'header' => 'Hst Checks',       dataIndex => 'execute_host_checks',     width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
-            { 'header' => 'Eventhandlers',    dataIndex => 'enable_event_handlers',   width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
-            { 'header' => 'Performance Data', dataIndex => 'process_performance_data',width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Notifications',    dataIndex => 'enable_notifications',    width => 65, hidden => Cpanel::JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Svc Checks',       dataIndex => 'execute_service_checks',  width => 65, hidden => Cpanel::JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Hst Checks',       dataIndex => 'execute_host_checks',     width => 65, hidden => Cpanel::JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Eventhandlers',    dataIndex => 'enable_event_handlers',   width => 65, hidden => Cpanel::JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Performance Data', dataIndex => 'process_performance_data',width => 65, hidden => Cpanel::JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
         ],
         data    => [],
     };
@@ -1641,39 +1641,39 @@ sub _task_hosts {
             { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                        renderer => 'TP.render_plugin_output' },
             { 'header' => 'Performance',            width => 80,  dataIndex => 'perf_data',                            renderer => 'TP.render_perfbar' },
 
-            { 'header' => 'Parents',                  dataIndex => 'parents',                     hidden => JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
-            { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => JSON::XS::true },
-            { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => JSON::XS::true },
-            { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Check Type',               dataIndex => 'check_type',                  hidden => JSON::XS::true, renderer => 'TP.render_check_type' },
-            { 'header' => 'Site ID',                  dataIndex => 'peer_key',                    hidden => JSON::XS::true },
-            { 'header' => 'Has Been Checked',         dataIndex => 'has_been_checked',            hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Active Checks Enabled',    dataIndex => 'active_checks_enabled',       hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Accept Passive Checks',    dataIndex => 'accept_passive_checks',       hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Next Check',               dataIndex => 'next_check',                  hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Notification Number',      dataIndex => 'current_notification_number', hidden => JSON::XS::true },
-            { 'header' => 'First Notification Delay', dataIndex => 'first_notification_delay',    hidden => JSON::XS::true },
-            { 'header' => 'Notifications Enabled',    dataIndex => 'notifications_enabled',       hidden => JSON::XS::true, renderer => 'TP.render_enabled_switch' },
-            { 'header' => 'Is Flapping',              dataIndex => 'is_flapping',                 hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Acknowledged',             dataIndex => 'acknowledged',                hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Comments',                 dataIndex => 'comments',                    hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Scheduled Downtime Depth', dataIndex => 'scheduled_downtime_depth',    hidden => JSON::XS::true },
-            { 'header' => 'Action Url',               dataIndex => 'action_url_expanded',         hidden => JSON::XS::true, renderer => 'TP.render_action_url' },
-            { 'header' => 'Notes url',                dataIndex => 'notes_url_expanded',          hidden => JSON::XS::true, renderer => 'TP.render_notes_url' },
-            { 'header' => 'Icon Image',               dataIndex => 'icon_image_expanded',         hidden => JSON::XS::true, renderer => 'TP.render_icon_url' },
-            { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
+            { 'header' => 'Parents',                  dataIndex => 'parents',                     hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
+            { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Check Type',               dataIndex => 'check_type',                  hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_check_type' },
+            { 'header' => 'Site ID',                  dataIndex => 'peer_key',                    hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Has Been Checked',         dataIndex => 'has_been_checked',            hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Active Checks Enabled',    dataIndex => 'active_checks_enabled',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Accept Passive Checks',    dataIndex => 'accept_passive_checks',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Next Check',               dataIndex => 'next_check',                  hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Notification Number',      dataIndex => 'current_notification_number', hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'First Notification Delay', dataIndex => 'first_notification_delay',    hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Notifications Enabled',    dataIndex => 'notifications_enabled',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Is Flapping',              dataIndex => 'is_flapping',                 hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Acknowledged',             dataIndex => 'acknowledged',                hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Comments',                 dataIndex => 'comments',                    hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Scheduled Downtime Depth', dataIndex => 'scheduled_downtime_depth',    hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Action Url',               dataIndex => 'action_url_expanded',         hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_action_url' },
+            { 'header' => 'Notes url',                dataIndex => 'notes_url_expanded',          hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_notes_url' },
+            { 'header' => 'Icon Image',               dataIndex => 'icon_image_expanded',         hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_icon_url' },
+            { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
 
-            { 'header' => 'Last Time Up',          dataIndex => 'last_time_up',          hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Last Time Unreachable', dataIndex => 'last_time_unreachable', hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Last Time Down',        dataIndex => 'last_time_down',        hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Up',          dataIndex => 'last_time_up',          hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Unreachable', dataIndex => 'last_time_unreachable', hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Down',        dataIndex => 'last_time_down',        hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
         ],
         data        => $c->stash->{'data'},
         totalCount  => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
-        paging      => JSON::XS::true,
+        paging      => Cpanel::JSON::XS::true,
     };
 
     if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
@@ -1706,10 +1706,10 @@ sub _task_services {
     my $json = {
         columns => [
             { 'header' => 'Hostname',               width => 120, dataIndex => 'host_display_name',                    renderer => 'TP.render_service_host' },
-            { 'header' => 'Host',                                 dataIndex => 'host_name',         hidden => JSON::XS::true },
+            { 'header' => 'Host',                                 dataIndex => 'host_name',         hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Host Icons',             width => 75,  dataIndex => 'icons',             align => 'right',  renderer => 'TP.render_host_service_icons' },
             { 'header' => 'Service',                width => 120, dataIndex => 'display_name',                         renderer => 'TP.render_clickable_service' },
-            { 'header' => 'Description',                          dataIndex => 'description',       hidden => JSON::XS::true },
+            { 'header' => 'Description',                          dataIndex => 'description',       hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Icons',                  width => 75,  dataIndex => 'icons',             align => 'right',  renderer => 'TP.render_service_icons' },
             { 'header' => 'Status',                 width => 70,  dataIndex => 'state',             align => 'center', renderer => 'TP.render_service_status' },
             { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',        align => 'center', renderer => 'TP.render_last_check' },
@@ -1719,56 +1719,56 @@ sub _task_services {
             { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                        renderer => 'TP.render_plugin_output' },
             { 'header' => 'Performance',            width => 80,  dataIndex => 'perf_data',                            renderer => 'TP.render_perfbar' },
 
-            { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => JSON::XS::true },
-            { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => JSON::XS::true },
-            { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Check Type',               dataIndex => 'check_type',                  hidden => JSON::XS::true, renderer => 'TP.render_check_type' },
-            { 'header' => 'Site ID',                  dataIndex => 'peer_key',                    hidden => JSON::XS::true },
-            { 'header' => 'Has Been Checked',         dataIndex => 'has_been_checked',            hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Active Checks Enabled',    dataIndex => 'active_checks_enabled',       hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Accept Passive Checks',    dataIndex => 'accept_passive_checks',       hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Next Check',               dataIndex => 'next_check',                  hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Notification Number',      dataIndex => 'current_notification_number', hidden => JSON::XS::true },
-            { 'header' => 'First Notification Delay', dataIndex => 'first_notification_delay',    hidden => JSON::XS::true },
-            { 'header' => 'Notifications Enabled',    dataIndex => 'notifications_enabled',       hidden => JSON::XS::true, renderer => 'TP.render_enabled_switch' },
-            { 'header' => 'Is Flapping',              dataIndex => 'is_flapping',                 hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Acknowledged',             dataIndex => 'acknowledged',                hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Comments',                 dataIndex => 'comments',                    hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Scheduled Downtime Depth', dataIndex => 'scheduled_downtime_depth',    hidden => JSON::XS::true },
-            { 'header' => 'Action Url',               dataIndex => 'action_url_expanded',         hidden => JSON::XS::true, renderer => 'TP.render_action_url' },
-            { 'header' => 'Notes url',                dataIndex => 'notes_url_expanded',          hidden => JSON::XS::true, renderer => 'TP.render_notes_url' },
-            { 'header' => 'Icon Image',               dataIndex => 'icon_image_expanded',         hidden => JSON::XS::true, renderer => 'TP.render_icon_url' },
-            { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
+            { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Check Type',               dataIndex => 'check_type',                  hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_check_type' },
+            { 'header' => 'Site ID',                  dataIndex => 'peer_key',                    hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Has Been Checked',         dataIndex => 'has_been_checked',            hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Active Checks Enabled',    dataIndex => 'active_checks_enabled',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Accept Passive Checks',    dataIndex => 'accept_passive_checks',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Next Check',               dataIndex => 'next_check',                  hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Notification Number',      dataIndex => 'current_notification_number', hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'First Notification Delay', dataIndex => 'first_notification_delay',    hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Notifications Enabled',    dataIndex => 'notifications_enabled',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Is Flapping',              dataIndex => 'is_flapping',                 hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Acknowledged',             dataIndex => 'acknowledged',                hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Comments',                 dataIndex => 'comments',                    hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Scheduled Downtime Depth', dataIndex => 'scheduled_downtime_depth',    hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Action Url',               dataIndex => 'action_url_expanded',         hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_action_url' },
+            { 'header' => 'Notes url',                dataIndex => 'notes_url_expanded',          hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_notes_url' },
+            { 'header' => 'Icon Image',               dataIndex => 'icon_image_expanded',         hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_icon_url' },
+            { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
 
-            { 'header' => 'Host Parents',                   dataIndex => 'host_parents',                  hidden => JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
-            { 'header' => 'Host Status',                    dataIndex => 'host_state',                    hidden => JSON::XS::true, renderer => 'TP.render_host_status' },
-            { 'header' => 'Host Notifications Enabled',     dataIndex => 'host_notifications_enabled',    hidden => JSON::XS::true, renderer => 'TP.render_enabled_switch' },
-            { 'header' => 'Host Check Type',                dataIndex => 'host_check_type',               hidden => JSON::XS::true, renderer => 'TP.render_check_type' },
-            { 'header' => 'Host Active Checks Enabled',     dataIndex => 'host_active_checks_enabled',    hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Host Accept Passive Checks',     dataIndex => 'host_accept_passive_checks',    hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Host Is Flapping',               dataIndex => 'host_is_flapping',              hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Host Acknowledged',              dataIndex => 'host_acknowledged',             hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
-            { 'header' => 'Host Comments',                  dataIndex => 'host_comments',                 hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Host Scheduled Downtime Depth',  dataIndex => 'host_scheduled_downtime_depth', hidden => JSON::XS::true },
-            { 'header' => 'Host Action Url',                dataIndex => 'host_action_url_expanded',      hidden => JSON::XS::true, renderer => 'TP.render_action_url' },
-            { 'header' => 'Host Notes Url',                 dataIndex => 'host_notes_url_expanded',       hidden => JSON::XS::true, renderer => 'TP.render_notes_url' },
-            { 'header' => 'Host Icon Image',                dataIndex => 'host_icon_image_expanded',      hidden => JSON::XS::true, renderer => 'TP.render_icon_url' },
-            { 'header' => 'Host Icon Image Alt',            dataIndex => 'host_icon_image_alt',           hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Host Custom Variable Names',     dataIndex => 'host_custom_variable_names',    hidden => JSON::XS::true, hideable => JSON::XS::false },
-            { 'header' => 'Host Custom Variable Values',    dataIndex => 'host_custom_variable_values',   hidden => JSON::XS::true, hideable => JSON::XS::false },
+            { 'header' => 'Host Parents',                   dataIndex => 'host_parents',                  hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
+            { 'header' => 'Host Status',                    dataIndex => 'host_state',                    hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_host_status' },
+            { 'header' => 'Host Notifications Enabled',     dataIndex => 'host_notifications_enabled',    hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Host Check Type',                dataIndex => 'host_check_type',               hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_check_type' },
+            { 'header' => 'Host Active Checks Enabled',     dataIndex => 'host_active_checks_enabled',    hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Host Accept Passive Checks',     dataIndex => 'host_accept_passive_checks',    hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Host Is Flapping',               dataIndex => 'host_is_flapping',              hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Host Acknowledged',              dataIndex => 'host_acknowledged',             hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Host Comments',                  dataIndex => 'host_comments',                 hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Host Scheduled Downtime Depth',  dataIndex => 'host_scheduled_downtime_depth', hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Host Action Url',                dataIndex => 'host_action_url_expanded',      hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_action_url' },
+            { 'header' => 'Host Notes Url',                 dataIndex => 'host_notes_url_expanded',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_notes_url' },
+            { 'header' => 'Host Icon Image',                dataIndex => 'host_icon_image_expanded',      hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_icon_url' },
+            { 'header' => 'Host Icon Image Alt',            dataIndex => 'host_icon_image_alt',           hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Host Custom Variable Names',     dataIndex => 'host_custom_variable_names',    hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
+            { 'header' => 'Host Custom Variable Values',    dataIndex => 'host_custom_variable_values',   hidden => Cpanel::JSON::XS::true, hideable => Cpanel::JSON::XS::false },
 
-            { 'header' => 'Last Time Ok',       dataIndex => 'last_time_ok',       hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Last Time Warning',  dataIndex => 'last_time_warning',  hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Last Time Unknown',  dataIndex => 'last_time_unknown',  hidden => JSON::XS::true, renderer => 'TP.render_date' },
-            { 'header' => 'Last Time Critical', dataIndex => 'last_time_critical', hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Ok',       dataIndex => 'last_time_ok',       hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Warning',  dataIndex => 'last_time_warning',  hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Unknown',  dataIndex => 'last_time_unknown',  hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Critical', dataIndex => 'last_time_critical', hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
         ],
         data        => $c->stash->{'data'},
         totalCount  => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
-        paging      => JSON::XS::true,
+        paging      => Cpanel::JSON::XS::true,
     };
 
     if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
@@ -2164,7 +2164,7 @@ sub _task_pnp_graphs {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
-        paging      => JSON::XS::true,
+        paging      => Cpanel::JSON::XS::true,
     };
 
     return $c->render(json => $json);
@@ -2212,7 +2212,7 @@ sub _task_grafana_graphs {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
-        paging      => JSON::XS::true,
+        paging      => Cpanel::JSON::XS::true,
     };
 
     return $c->render(json => $json);
@@ -2248,7 +2248,7 @@ sub _task_userdata_backgroundimages {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
-        paging      => JSON::XS::true,
+        paging      => Cpanel::JSON::XS::true,
     };
     return $c->render(json => $json);
 }
@@ -2282,7 +2282,7 @@ sub _task_userdata_images {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
-        paging      => JSON::XS::true,
+        paging      => Cpanel::JSON::XS::true,
     };
     return $c->render(json => $json);
 }
@@ -2567,14 +2567,14 @@ sub _task_dashboard_list {
 
     my $json = {
         columns => [
-            { 'header' => 'Id',                        dataIndex => 'id',                              hidden => JSON::XS::true },
-            { 'header' => 'Nr',                        dataIndex => 'nr',                              hidden => JSON::XS::true },
+            { 'header' => 'Id',                        dataIndex => 'id',                              hidden => Cpanel::JSON::XS::true },
+            { 'header' => 'Nr',                        dataIndex => 'nr',                              hidden => Cpanel::JSON::XS::true },
             { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
             { 'header' => 'Name',        width => 120, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
             { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
             { 'header' => 'Owner',        width => 120, dataIndex => 'user',        align => 'center',
                                          editor => $c->stash->{'is_admin'} ? {} : undef,
-                                         hidden => $type eq 'my' ? JSON::XS::true : JSON::XS::false,
+                                         hidden => $type eq 'my' ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
                                          tdCls => $c->stash->{'is_admin'} ? 'editable' : '',
             },
             { 'header' => 'Read-Write Groups',  width => 120, dataIndex => 'groups_rw',    align => 'left' },

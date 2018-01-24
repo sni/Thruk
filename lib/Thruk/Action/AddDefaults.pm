@@ -19,7 +19,7 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use JSON::XS qw/encode_json/;
+use Cpanel::JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
 use POSIX ();
 use Thruk::Utils::Filter ();

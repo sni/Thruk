@@ -28,7 +28,6 @@ sub index {
 
     if(!$c->config->{'statusmap_modules_loaded'}) {
         load Carp, qw/confess carp/;
-        load JSON::XS;
         load Data::Dumper, qw/Dumper/;
         load Encode, qw/decode_utf8/;
         $c->config->{'statusmap_modules_loaded'} = 1;

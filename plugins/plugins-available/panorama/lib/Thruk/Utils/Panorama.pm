@@ -3,7 +3,7 @@ package Thruk::Utils::Panorama;
 use strict;
 use warnings;
 use Thruk::Utils::Panorama::Scripted;
-use JSON::XS;
+use Cpanel::JSON::XS;
 
 =head1 NAME
 
@@ -136,7 +136,7 @@ sub get_dashboard_list {
                     user        => $d->{'user'},
                     groups_rw   => join(', ', @{$groups_rw}),
                     groups_ro   => join(', ', @{$groups_ro}),
-                    readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
+                    readonly    => $d->{'readonly'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
                     description => $d->{'description'} || '',
                     objects     => $d->{'objects'},
                     ts          => $d->{'ts'},

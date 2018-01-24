@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use threads qw/yield/;
 use Thread::Queue qw//;
-use JSON::XS qw/decode_json encode_json/;
+use Cpanel::JSON::XS qw/decode_json encode_json/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {

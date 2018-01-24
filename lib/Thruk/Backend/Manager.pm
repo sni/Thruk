@@ -1820,7 +1820,7 @@ sub _get_results_xs_pool {
         if($thread_num > 100) { $thread_num = 100; } # limit thread size, tests showed that higher number do not increase performance
         my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
         #&timing_breakpoint('_get_results_xs_pool socket_pool_do done');
-        my $decoder = JSON::XS->new->utf8->relaxed;
+        my $decoder = Cpanel::JSON::XS->new->utf8->relaxed;
         for my $row (@{$raw}) {
             if($row->{'success'}) {
                 $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $decoder->decode(delete $row->{'result'});

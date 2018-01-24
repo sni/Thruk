@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use Carp qw/confess longmess/;
 use Fcntl qw/:mode :flock/;
-use JSON::XS ();
+use Cpanel::JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 use File::Slurp qw/read_file/;
@@ -186,7 +186,7 @@ stores data json encoded
 sub json_lock_store {
     my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
 
-    my $json = JSON::XS->new->utf8;
+    my $json = Cpanel::JSON::XS->new->utf8;
     $json = $json->pretty if $pretty;
     $json = $json->canonical; # keys will be randomly ordered otherwise
 
@@ -223,7 +223,7 @@ retrieve json data
 sub json_lock_retrieve {
     my($file) = @_;
 
-    my $json = JSON::XS->new->utf8;
+    my $json = Cpanel::JSON::XS->new->utf8;
     $json->relaxed();
     local $/=undef;
 

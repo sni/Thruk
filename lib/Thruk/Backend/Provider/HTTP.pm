@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Module::Load qw/load/;
-use JSON::XS qw/decode_json encode_json/;
+use Cpanel::JSON::XS qw/decode_json encode_json/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
