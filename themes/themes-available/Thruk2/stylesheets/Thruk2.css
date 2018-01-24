@@ -781,14 +781,22 @@ TD.stateInfoTable1 > TABLE,TD.stateInfoTable2 > TABLE {
 }
 
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
+  background-color:#f0666c;
+  color: #ffffff;
   height:22px;
 }
 
+TD.statusBGCRITICAL a,TD.statusBGCRITICALACK a,TD.statusBGCRITICALSCHED a,TD.statusBGDOWN a,TD.statusBGDOWNACK a,TD.statusBGDOWNSCHED a,TD.statusBGUNREACHABLE a,TD.statusBGUNREACHABLEACK a,TD.statusBGUNREACHABLESCHED a{
+  color: #ffffff;
+}
+
 TD.statusBGUNKNOWN {
+  background-color:#ffcd00
   height:22px;
 }
 
 TD.statusBGWARNING {
+  background-color:#ffe57b
   height:22px;
 }
 
