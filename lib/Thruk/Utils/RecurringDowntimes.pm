@@ -88,9 +88,9 @@ sub get_downtimes_list {
     }
 
     # host and service filter
-    push @servicefilter, {  host_name => $host } if $host;
-    push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] } if $service;
-    push @hostfilter, { name => $host }                                                     if $host;
+    push @servicefilter, {  host_name => $host }     if $host;
+    push @servicefilter, { description => $service } if $service;
+    push @hostfilter, { name => $host }              if $host;
 
     my($hosts, $services, $hostgroups, $servicegroups) = ({},{},{},{});
     if($host || $service) {
