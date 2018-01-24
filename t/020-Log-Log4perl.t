@@ -16,6 +16,7 @@ BEGIN {
     }
     $ENV{'THRUK_SRC'}     = 'TEST';
     $ENV{'THRUK_VERBOSE'} = 1;
+    $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'} = 1; # prevent errors logged from old LMD versions which would break the test
 }
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
@@ -58,7 +59,7 @@ ok(unlink('/tmp/thruk_test_debug.log'), 'unlink test debug file');
 done_testing();
 
 END {
-    if($log4perl_created) {
+    if($log4perl_created && !$ENV{'THRUK_JOB_ID'}) {
         unlink("log4perl.conf");
         unlink('/tmp/thruk_test_error.log');
         unlink('/tmp/thruk_test_debug.log');
