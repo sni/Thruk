@@ -48,9 +48,7 @@ RewriteCond %{REQUEST_URI}           ^/(thruk|pnp4nagios)
 
 Make sure to include the updated file instead of the default. Either by editing 'thruk_cookie_auth_vhost.conf' or your custom virtual host configuration.
 
-Then add the path used for cookies to your local thruk configuration. This should be the default anyway but just to make sure.
-
-ex.:
+Then add the path used for cookies to your local thruk configuration. You can add the following line to '/etc/thruk/thruk.conf'.
 
 ------
 cookie_path = /
