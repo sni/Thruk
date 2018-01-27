@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
-use JSON::XS;
+use Cpanel::JSON::XS qw/decode_json/;
 use Thruk::Config;
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8);

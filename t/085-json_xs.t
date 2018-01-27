@@ -4,7 +4,7 @@ use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
-open(my $ph, '-|', 'bash -c "find ./lib ./plugins/plugins-available/*/lib -type f" 2>&1') or die('find failed: '.$!);
+open(my $ph, '-|', 'bash -c "find ./lib ./t ./plugins/plugins-available/*/{lib,t} -type f" 2>&1') or die('find failed: '.$!);
 while(<$ph>) {
     my $line = $_;
     chomp($line);
