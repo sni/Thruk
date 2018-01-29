@@ -147,14 +147,14 @@ sub perl {
         local $SIG{CHLD} = 'DEFAULT';
 
         do {
+            # some db drivers need reconnect after forking
+            _reconnect($c);
+
             ## no critic
             local *STDOUT;
             local *STDERR;
             open STDERR, '>', $dir."/stderr";
             open STDOUT, '>', $dir."/stdout";
-
-            # some db drivers need reconnect after forking
-            _reconnect($c);
 
             my $rc = eval($conf->{'expr'});
             ## use critic
