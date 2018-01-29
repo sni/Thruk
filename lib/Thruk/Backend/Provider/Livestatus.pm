@@ -767,11 +767,11 @@ sub get_logs {
     }
 
     my @logs = reverse @{$self->_get_table('log', \%options)};
-    return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
-
     unless(wantarray) {
         confess("get_logs() should not be called in scalar context when not used with file option");
     }
+
+    return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
     return(\@logs, undef, $size);
 }
 
