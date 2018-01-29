@@ -169,7 +169,7 @@ sub get_processinfo {
             }
         }
 
-        $options{'options'}->{AddPeer} = 1;
+        $options{'options'}->{AddPeer} = 1 unless defined $options{'options'}->{AddPeer};
         $options{'options'}->{rename}  = { 'livestatus_version' => 'data_source_version' };
         $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
 
@@ -201,35 +201,18 @@ return the sites list from lmd
 =cut
 sub get_sites {
     my($self, %options) = @_;
-    my $key = $self->peer_key();
-    my $data;
-    if(defined $options{'data'}) {
-        $data = { $key => $options{'data'}->[0] };
-    } else {
-        unless(defined $options{'columns'}) {
-            $options{'columns'} = [qw/
-                        peer_key peer_name key name addr status bytes_send bytes_received queries
-                        last_error last_update last_online response_time idling last_query
-            /];
-            if(defined $options{'extra_columns'}) {
-                push @{$options{'columns'}}, @{$options{'extra_columns'}};
-            }
+    return($options{'data'}) if($options{'data'});
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            peer_key peer_name key name addr status bytes_send bytes_received queries
+            last_error last_update last_online response_time idling last_query
+            parent section
+        /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
-
-        $options{'options'}->{AddPeer} = 1;
-        $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
-
-        $data = $self->_optimize(
-                $self->{'live'}
-                     ->table('sites')
-                     ->columns(@{$options{'columns'}})
-                     ->options($options{'options'}))
-                     ->hashref_pk('peer_key');
-        return $data if $ENV{'THRUK_SELECT'};
-        return $data if $self->{'lmd_optimizations'};
     }
-
-    return($data, 'HASH');
+    return $self->_get_table('sites', \%options);
 }
 
 ##########################################################
@@ -761,9 +744,9 @@ sub get_logs {
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
     # optimized naemon with wrapped_json output
-    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+    if($self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "logs");
-        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+        #&timing_breakpoint('optimized get_logs') if $self->{'optimized'};
     }
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/

@@ -34,7 +34,7 @@ sub index {
         load Monitoring::Config;
         load Socket, qw/inet_ntoa/;
         load File::Copy;
-        load JSON::XS;
+        load Cpanel::JSON::XS;
         load Storable, qw/dclone/;
         load Data::Dumper, qw/Dumper/;
         load File::Slurp, qw/read_file/;
@@ -1756,8 +1756,8 @@ sub _set_files_stash {
     }
 
     # no encoding here, filenames are encoded already
-    $c->stash->{'filenames_json'} = JSON::XS->new->encode([{ name => 'files', data => [ sort @filenames ]}]);
-    $c->stash->{'files_json'}     = JSON::XS->new->encode($files_tree);
+    $c->stash->{'filenames_json'} = Cpanel::JSON::XS->new->encode([{ name => 'files', data => [ sort @filenames ]}]);
+    $c->stash->{'files_json'}     = Cpanel::JSON::XS->new->encode($files_tree);
     $c->stash->{'files_tree'}     = $files_tree;
 
     return $files_root;

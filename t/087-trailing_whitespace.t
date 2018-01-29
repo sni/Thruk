@@ -4,8 +4,6 @@ use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
-my @dirs = glob("./lib ./plugins/plugins-available/*/lib ./templates ./plugins/plugins-available/*/templates");
-
 open(my $ph, '-|', 'bash -c "find ./lib ./plugins/plugins-available/*/lib ./templates ./plugins/plugins-available/*/templates -type f" 2>&1') or die('find failed: '.$!);
 while(<$ph>) {
     my $line = $_;

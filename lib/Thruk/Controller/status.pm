@@ -1192,7 +1192,7 @@ sub _process_perfmap_page {
             $val =~ s/;.*$//gmxo;
             $val =~ s/,/./gmxo;
             $val =~ m/^([\d\.\-]+)(.*?)$/mx;
-            if(defined $1) {
+            if($val && defined $1) { # $val && required, triggers unused var in t/086-Test-Vars.t otherwise
                 $svc->{'perf'}->{$key} = 1;
                 $keys->{$key} = 1;
                 $svc->{$key} = $1.$2;

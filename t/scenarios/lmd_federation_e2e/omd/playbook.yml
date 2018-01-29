@@ -1,0 +1,56 @@
+---
+- hosts: all
+  tasks:
+# demo site, directly connected
+  - shell: "omd config demo set LIVESTATUS_TCP on"
+
+# create additional sites
+  - shell: "omd create {{item}}"
+    with_items: ['demo2', 'demo3', 'demo4']
+    args:
+      creates: "/omd/sites/{{item}}"
+  - shell: "omd stop {{item}}"
+    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+  - copy:
+      src: "/omd/sites/{{item}}/share/doc/naemon/example.cfg"
+      dest: "/omd/sites/{{item}}/etc/naemon/conf.d/example.cfg"
+      owner: "{{item}}"
+      group: "{{item}}"
+    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+  - replace:
+      path: "/omd/sites/{{item}}/etc/naemon/conf.d/example.cfg"
+      regexp: 'localhost'
+      replace: "{{item}}"
+    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+
+
+# demo 2 site, connects by lmd to demo 3 / 4
+  - copy:
+      src: "/scenario/omd/thruk_local.demo2"
+      dest: "/omd/sites/demo2/etc/thruk/thruk_local.conf"
+      owner: "demo2"
+      group: "demo2"
+  - lineinfile:
+     path: "/omd/sites/demo2/etc/thruk/lmd.ini"
+     state: present
+     regexp: 'Listen'
+     line: "Listen = ['0.0.0.0:7000']"
+
+# demo 3 site
+  - shell: "omd config demo3 set LIVESTATUS_TCP on"
+  - shell: "omd config demo3 set LIVESTATUS_TCP_PORT 7001"
+
+# demo 4 site
+  - shell: "omd config demo4 set LIVESTATUS_TCP on"
+  - shell: "omd config demo4 set LIVESTATUS_TCP_PORT 7002"
+  - shell: echo "testkey" > /omd/sites/demo4/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo4/var/thruk/secret.key
+      mode: 0600
+      owner: demo4
+      group: demo4
+
+
+# start all sites
+  - shell: "omd start {{item}}"
+    with_items: ['demo', 'demo2', 'demo3', 'demo4']

@@ -135,69 +135,69 @@ sub perl {
 
     if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
-    } else {
-        if(defined $conf->{'backends'}) {
-            $c->{'db'}->disable_backends();
-            $c->{'db'}->enable_backends($conf->{'backends'});
-        }
-        eval {
-            $c->stats->profile(begin => 'External::perl');
-            _do_child_stuff($c, $dir, $id);
-            local $SIG{CHLD} = 'DEFAULT';
+    }
 
-            do {
-                ## no critic
-                local *STDOUT;
-                local *STDERR;
-                open STDERR, '>', $dir."/stderr";
-                open STDOUT, '>', $dir."/stdout";
+    if(defined $conf->{'backends'}) {
+        $c->{'db'}->disable_backends();
+        $c->{'db'}->enable_backends($conf->{'backends'});
+    }
+    eval {
+        $c->stats->profile(begin => 'External::perl');
+        _do_child_stuff($c, $dir, $id);
+        local $SIG{CHLD} = 'DEFAULT';
 
-                # some db drivers need reconnect after forking
-                _reconnect($c);
+        do {
+            # some db drivers need reconnect after forking
+            _reconnect($c);
 
-                my $rc = eval($conf->{'expr'});
-                ## use critic
+            ## no critic
+            local *STDOUT;
+            local *STDERR;
+            open STDERR, '>', $dir."/stderr";
+            open STDOUT, '>', $dir."/stdout";
 
-                if($@) {
-                    print STDERR $@;
-                    exit(1);
-                }
+            my $rc = eval($conf->{'expr'});
+            ## use critic
 
-                $rc = -1 unless defined $rc;
-                open(my $fh, '>>', $dir."/rc");
-                print $fh $rc;
-                Thruk::Utils::IO::close($fh, $dir."/rc");
-
-                close(STDOUT);
-                close(STDERR);
-            };
-
-            # save stash
-            _clean_unstorable_refs($c->stash);
-            store(\%{$c->stash}, $dir."/stash");
-
-            if($c->config->{'thruk_debug'}) {
-                open(my $fh, '>', $dir."/stash.dump");
-                print $fh Dumper($c->stash);
-                CORE::close($fh);
+            if($@) {
+                print STDERR $@;
+                exit(1);
             }
 
-            $c->stats->profile(end => 'External::perl');
-            save_profile($c, $dir);
+            $rc = -1 unless defined $rc;
+            open(my $fh, '>>', $dir."/rc");
+            print $fh $rc;
+            Thruk::Utils::IO::close($fh, $dir."/rc");
+
+            close(STDOUT);
+            close(STDERR);
         };
-        if($@) {
-            my $err = $@;
-            eval {
-                open(my $fh, '>>', $dir."/stderr");
-                print $fh $err;
-                Thruk::Utils::IO::close($fh, $dir."/stderr");
-            };
-            save_profile($c, $dir);
-            exit(1);
+
+        # save stash
+        _clean_unstorable_refs($c->stash);
+        store(\%{$c->stash}, $dir."/stash");
+
+        if($c->config->{'thruk_debug'}) {
+            open(my $fh, '>', $dir."/stash.dump");
+            print $fh Dumper($c->stash);
+            CORE::close($fh);
         }
+
+        $c->stats->profile(end => 'External::perl');
         save_profile($c, $dir);
+    };
+    if($@) {
+        my $err = $@;
+        eval {
+            open(my $fh, '>>', $dir."/stderr");
+            print $fh $err;
+            Thruk::Utils::IO::close($fh, $dir."/stderr");
+        };
+        save_profile($c, $dir);
+        # calling _exit skips running END blocks
         exit(0);
     }
+    save_profile($c, $dir);
     exit(1);
 }
 

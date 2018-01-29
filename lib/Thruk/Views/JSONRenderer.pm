@@ -13,7 +13,7 @@ JSON data renderer
 use strict;
 use warnings;
 use Carp qw/confess/;
-use JSON::XS ();
+use Cpanel::JSON::XS ();
 
 =head1 METHODS
 
@@ -46,7 +46,7 @@ sub render_json {
 sub _get_encoder {
     my($c) = @_;
     $c->app->{'jsonencoder'} =
-        JSON::XS->new
+        Cpanel::JSON::XS->new
                 ->ascii
                 ->pretty
                 ->canonical             # sort hash keys, breaks panorama if not set
@@ -64,10 +64,10 @@ __END__
 
 =head1 DESCRIPTION
 
-This module renders L<JSON::XS> data.
+This module renders L<Cpanel::JSON::XS> data.
 
 =head1 SEE ALSO
 
-L<JSON::XS>.
+L<Cpanel::JSON::XS>.
 
 =cut

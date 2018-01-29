@@ -3,7 +3,7 @@ package Thruk::Utils::Panorama;
 use strict;
 use warnings;
 use Thruk::Utils::Panorama::Scripted;
-use JSON::XS;
+use Cpanel::JSON::XS;
 
 =head1 NAME
 
@@ -136,7 +136,7 @@ sub get_dashboard_list {
                     user        => $d->{'user'},
                     groups_rw   => join(', ', @{$groups_rw}),
                     groups_ro   => join(', ', @{$groups_ro}),
-                    readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
+                    readonly    => $d->{'readonly'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
                     description => $d->{'description'} || '',
                     objects     => $d->{'objects'},
                     ts          => $d->{'ts'},
@@ -170,7 +170,10 @@ sub load_dashboard {
     $nr       =~ s/^tabpan-tab_//gmx;
     my $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
-    # startpage can be overridden, only load original file if there is nonen in etc/
+    # only numbers allowed
+    return if $nr !~ m/^\d+$/gmx;
+
+    # startpage can be overridden, only load original file if there is none in etc/
     if($nr == 0 && !-s $file) {
         $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }

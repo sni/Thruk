@@ -340,7 +340,9 @@ sub statement {
 
     my @statements = ();
     if( $self->{'_backends'} && ! $filter_only ) {
-        push @statements, sprintf('Backends: %s',join(' ',@{ $self->{'_backends'} }));
+        if(scalar @{$self->{'_backends'}} != 1 || $self->{'_backends'}->[0] ne 'ALL') {
+            push @statements, sprintf('Backends: %s',join(' ',@{ $self->{'_backends'} }));
+        }
     }
 
     if( $self->{'_columns'} ) {

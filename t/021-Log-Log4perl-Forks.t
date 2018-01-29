@@ -16,6 +16,7 @@ BEGIN {
     }
     $ENV{'THRUK_SRC'}     = 'TEST';
     $ENV{'THRUK_VERBOSE'} = 1;
+    $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'} = 1; # prevent errors logged from old LMD versions which would break the test
 }
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};

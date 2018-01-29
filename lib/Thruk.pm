@@ -396,6 +396,9 @@ sub reset_logging {
             $appender->{'appender'}->{'close'} = 1;
             $appender->{'appender'}->{'close_after_write'} = 1;
 
+            # makes Log::Log4perl::Appender::File reopen its filehandle
+            $appender->{'appender'}->{'recreate'} = 1;
+
             # result in write on close fh otherwise
             CORE::close($appender->{'appender'}->{'fh'});
             undef $appender->{'appender'}->{'fh'};
