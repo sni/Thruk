@@ -170,7 +170,10 @@ sub load_dashboard {
     $nr       =~ s/^tabpan-tab_//gmx;
     my $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
-    # startpage can be overridden, only load original file if there is nonen in etc/
+    # only numbers allowed
+    return if $nr !~ m/^\d+$/gmx;
+
+    # startpage can be overridden, only load original file if there is none in etc/
     if($nr == 0 && !-s $file) {
         $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }
