@@ -658,6 +658,7 @@ function bp_show_edit_node(id, refreshType) {
         jQuery("INPUT[name=bp_contactgroups]").val(node.contactgroups.join(", "));
         jQuery("INPUT[name=bp_contacts]").val(node.contacts.join(", "));
         jQuery("INPUT[name=bp_notification_period]").val(node.notification_period);
+        jQuery("INPUT[name=bp_event_handler]").val(node.event_handler);
 
         if(node.contactgroups.length == 0) {
             jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();

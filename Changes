@@ -7,6 +7,7 @@ next:
           - fix occasional wrong redirects on page reloads (#776)
           - Business Process:
             - fix save button in chrome (#786)
+            - fix displaying configured eventhandler
           - LMD:
             - only restart lmd on timeouts when neccessary
             - support lmd federation mode
