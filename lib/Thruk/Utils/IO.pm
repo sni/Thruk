@@ -223,6 +223,8 @@ retrieve json data
 sub json_lock_retrieve {
     my($file) = @_;
 
+    return unless -s $file;
+
     my $json = Cpanel::JSON::XS->new->utf8;
     $json->relaxed();
     local $/=undef;
