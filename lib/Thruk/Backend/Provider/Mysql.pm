@@ -1458,8 +1458,8 @@ sub _get_plugin_lookup {
 
     my $plugin_lookup = {};
 
-    # fetch todays logentries for deduplication
-    my $yesterday = time() - 86400;
+    # fetch last 25hours of logentries for deduplication
+    my $yesterday = time() - (25 * 3600);
     my $sql = '
         SELECT
             l.message,
