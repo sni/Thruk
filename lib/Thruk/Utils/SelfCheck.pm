@@ -332,8 +332,7 @@ sub _lmd_checks  {
     my $total = scalar @{$c->{'db'}->peer_key()};
     my $stats = $c->{'db'}->lmd_stats($c);
     my $online = 0;
-    for my $key (sort keys %{$stats}) {
-        my $stat = $stats->{$key};
+    for my $stat (@{$stats}) {
         $online++ if $stat->{'status'} == 0;
     }
     $details .= sprintf("  - %i/%i backends online\n", $online, $total);

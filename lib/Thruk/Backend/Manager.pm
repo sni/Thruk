@@ -912,8 +912,7 @@ sub lmd_stats {
     my($status, undef) = Thruk::Utils::LMD::status($c->config);
     my $start_time = $status->[0]->{'start_time'};
     my $now = time();
-    for my $key (sort keys %{$stats}) {
-        my $stat = $stats->{$key};
+    for my $stat (@{$stats}) {
         $stat->{'bytes_send_rate'}     = $stat->{'bytes_send'} / ($now - $start_time);
         $stat->{'bytes_received_rate'} = $stat->{'bytes_received'} / ($now - $start_time);
     }
