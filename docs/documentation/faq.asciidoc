@@ -85,9 +85,16 @@ of the file.
     ...
     Include /usr/share/thruk/thruk_cookie_auth.include
   </VirtualHost>
+
 ---
 
-Finally reload the apache:
+You may also wish to modify your `/etc/thruk/thruk_local.conf` to use an updated `cookie_auth_restricted_url`:
+---
+  cookie_auth_restricted_url = https://localhost/thruk/cgi-bin/restricted.cgi
+  
+---
+
+Finally reload Apache:
 
   #> systemctl reload httpd
 
