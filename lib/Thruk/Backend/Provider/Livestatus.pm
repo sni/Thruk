@@ -169,7 +169,7 @@ sub get_processinfo {
             }
         }
 
-        $options{'options'}->{AddPeer} = 1;
+        $options{'options'}->{AddPeer} = 1 unless defined $options{'options'}->{AddPeer};
         $options{'options'}->{rename}  = { 'livestatus_version' => 'data_source_version' };
         $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
 
@@ -201,35 +201,18 @@ return the sites list from lmd
 =cut
 sub get_sites {
     my($self, %options) = @_;
-    my $key = $self->peer_key();
-    my $data;
-    if(defined $options{'data'}) {
-        $data = { $key => $options{'data'}->[0] };
-    } else {
-        unless(defined $options{'columns'}) {
-            $options{'columns'} = [qw/
-                        peer_key peer_name key name addr status bytes_send bytes_received queries
-                        last_error last_update last_online response_time idling last_query
-            /];
-            if(defined $options{'extra_columns'}) {
-                push @{$options{'columns'}}, @{$options{'extra_columns'}};
-            }
+    return($options{'data'}) if($options{'data'});
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            peer_key peer_name key name addr status bytes_send bytes_received queries
+            last_error last_update last_online response_time idling last_query
+            parent section
+        /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
-
-        $options{'options'}->{AddPeer} = 1;
-        $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
-
-        $data = $self->_optimize(
-                $self->{'live'}
-                     ->table('sites')
-                     ->columns(@{$options{'columns'}})
-                     ->options($options{'options'}))
-                     ->hashref_pk('peer_key');
-        return $data if $ENV{'THRUK_SELECT'};
-        return $data if $self->{'lmd_optimizations'};
     }
-
-    return($data, 'HASH');
+    return $self->_get_table('sites', \%options);
 }
 
 ##########################################################
@@ -761,9 +744,18 @@ sub get_logs {
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
     # optimized naemon with wrapped_json output
-    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
-        $self->_optimized_for_wrapped_json(\%options, "logs");
-        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+    if($self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options, "log");
+        #&timing_breakpoint('optimized get_logs') if $self->{'optimized'};
+    }
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'}) {
+        ($size, $limit) = $self->_get_query_size('log', \%options, 'time', 'DESC', 'time');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
     }
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
@@ -775,8 +767,12 @@ sub get_logs {
     }
 
     my @logs = reverse @{$self->_get_table('log', \%options)};
+    unless(wantarray) {
+        confess("get_logs() should not be called in scalar context when not used with file option");
+    }
+
     return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
-    return \@logs;
+    return(\@logs, undef, $size);
 }
 
 
@@ -1397,12 +1393,16 @@ sub _get_query_size {
     return unless defined $options->{'pager'};
     if(defined $options->{'sort'}) {
         return unless ref $options->{'sort'} eq 'HASH';
-        return unless defined $options->{'sort'}->{'ASC'};
-        if(ref $options->{'sort'}->{'ASC'} eq 'ARRAY') {
-            return if defined $sortby1 and $options->{'sort'}->{'ASC'}->[0] ne $sortby1;
-            return if defined $sortby2 and $options->{'sort'}->{'ASC'}->[1] ne $sortby2;
+        if($options->{'sort'}->{'DESC'} && $sortby1 && $sortby1 eq 'DESC') {
+            return if(!$sortby2 || $sortby2 ne $options->{'sort'}->{'DESC'});
         } else {
-            return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
+            return unless defined $options->{'sort'}->{'ASC'};
+            if(ref $options->{'sort'}->{'ASC'} eq 'ARRAY') {
+                return if defined $sortby1 and $options->{'sort'}->{'ASC'}->[0] ne $sortby1;
+                return if defined $sortby2 and $options->{'sort'}->{'ASC'}->[1] ne $sortby2;
+            } else {
+                return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
+            }
         }
     }
 

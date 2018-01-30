@@ -1458,8 +1458,8 @@ sub _get_plugin_lookup {
 
     my $plugin_lookup = {};
 
-    # fetch todays logentries for deduplication
-    my $yesterday = time() - 86400;
+    # fetch last 25hours of logentries for deduplication
+    my $yesterday = time() - (25 * 3600);
     my $sql = '
         SELECT
             l.message,
@@ -1769,9 +1769,6 @@ sub _import_peer_logfiles {
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
 
-    # increase plugin output lookup performance for larger updates
-    $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
-
     # add import filter?
     my $import_filter = [];
     for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_exclude'})}) {
@@ -1788,6 +1785,10 @@ sub _import_peer_logfiles {
         $c->stats->profile(begin => $stime);
         my $duplicate_lookup = {};
         print scalar localtime $time if $verbose;
+
+        # do not let lookup grow to much, recreate from latet logfiles, otherwise import would consume lots of memory
+        $plugin_lookup = _get_plugin_lookup($dbh,$prefix) if scalar keys %{$plugin_lookup} > 100000;
+
         my $logs = [];
         eval {
             # get logs from peer
@@ -1841,6 +1842,10 @@ sub _import_logcache_from_file {
         my $duplicate_lookup  = {};
         my $last_duplicate_ts = 0;
         my @values;
+
+        # do not let lookup grow to much, recreate from latet logfiles, otherwise import would consume lots of memory
+        $plugin_lookup = _get_plugin_lookup($dbh,$prefix) if scalar keys %{$plugin_lookup} > 100000;
+
         open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
         while(my $line = <$fh>) {
             chomp($line);

@@ -1,0 +1,42 @@
+use_lmd_core=1
+lmd_core_bin=~/bin/lmd
+lmd_core_config=~/etc/thruk/lmd.ini
+ssl_verify_hostnames=0
+
+<Component Thruk::Backend>
+    <peer>
+        name  = demo2
+        id    = demo2id
+        type  = livestatus
+        <options>
+            peer = /omd/sites/demo2/tmp/run/live
+       </options>
+       <configtool>
+            core_conf      = /omd/sites/demo2/tmp/core/core.cfg
+            obj_check_cmd  = /omd/sites/demo2/etc/init.d/core check
+            obj_reload_cmd = /omd/sites/demo2/etc/init.d/core reload
+       </configtool>
+    </peer>
+    <peer>
+        name    = demo3
+        id      = demo3id
+        type    = livestatus
+        section = section
+        <options>
+            peer = localhost:7001
+        </options>
+    </peer>
+    <peer>
+        name    = demo4
+        id      = demo4id
+        type    = http
+        section = section/subsection
+        <options>
+            peer = https://localhost/demo4/
+            auth = testkey
+        </options>
+    </peer>
+</Component>
+
+
+

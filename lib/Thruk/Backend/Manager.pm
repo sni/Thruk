@@ -75,6 +75,7 @@ sub init {
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;
 
+    $self->{'sections'} = {};
     for my $peer (@{$self->get_peers(1)}) {
         $self->{'by_key'}->{$peer->{'key'}}   = $peer;
         $self->{'by_name'}->{$peer->{'name'}} = $peer;
@@ -911,8 +912,7 @@ sub lmd_stats {
     my($status, undef) = Thruk::Utils::LMD::status($c->config);
     my $start_time = $status->[0]->{'start_time'};
     my $now = time();
-    for my $key (sort keys %{$stats}) {
-        my $stat = $stats->{$key};
+    for my $stat (@{$stats}) {
         $stat->{'bytes_send_rate'}     = $stat->{'bytes_send'} / ($now - $start_time);
         $stat->{'bytes_received_rate'} = $stat->{'bytes_received'} / ($now - $start_time);
     }
@@ -1536,6 +1536,9 @@ sub select_backends {
         }
         push @{$get_results_for}, $peer->{'key'};
     }
+    if(defined $backends && $backends->{'ALL'}) {
+        push @{$get_results_for}, 'ALL';
+    }
     return($get_results_for, $arg, \%arg);
 }
 
@@ -1601,6 +1604,7 @@ sub _get_result_lmd {
     # update failed backends
     if($meta && $meta->{'failed'}) {
         for my $key (@{$peers}) {
+            next if $key eq 'ALL';
             delete $c->stash->{'failed_backends'}->{$key};
             my $peer = $self->get_peer_by_key($key);
             $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
@@ -1815,7 +1819,7 @@ sub _get_results_xs_pool {
         if($thread_num > 100) { $thread_num = 100; } # limit thread size, tests showed that higher number do not increase performance
         my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
         #&timing_breakpoint('_get_results_xs_pool socket_pool_do done');
-        my $decoder = JSON::XS->new->utf8->relaxed;
+        my $decoder = Cpanel::JSON::XS->new->utf8->relaxed;
         for my $row (@{$raw}) {
             if($row->{'success'}) {
                 $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $decoder->decode(delete $row->{'result'});

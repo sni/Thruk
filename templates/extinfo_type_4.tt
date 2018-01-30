@@ -522,8 +522,7 @@
                       <th class='data'>Last Update</th>
                       <th class='data'>Latency</th>
                     </tr>
-                    [% FOREACH peer_key = lmd_stats.keys.sort %]
-                    [% s = lmd_stats.$peer_key %]
+                    [% FOREACH s = lmd_stats %]
                     <tr>
                       <td class='dataVal'>[% s.name %]</td>
                       <td class='dataVal'>[% n = reduce_number(s.bytes_send, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>

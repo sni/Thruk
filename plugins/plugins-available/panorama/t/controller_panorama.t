@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
-use JSON::XS;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Encode qw/encode_utf8/;
 
 BEGIN {

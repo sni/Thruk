@@ -1,7 +1,7 @@
 ################################
 ## Logging Configuration
 #
-# see http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html
+# see http://search.cpan.org/perldoc?Log%3A%3ALog4perl%3A%3AConfig
 # for other configuration options
 #
 # normal logging, error messages and sent commands
@@ -13,7 +13,7 @@ log4perl.logger=ALL, ThrukLog
 # you have to uncomment the logger definitions below too
 
 # normal log messages
-log4perl.appender.ThrukLog=Log::Dispatch::File
+log4perl.appender.ThrukLog=Log::Log4perl::Appender::File
 log4perl.appender.ThrukLog.filename=logs/error.log
 log4perl.appender.ThrukLog.mode=append
 log4perl.appender.ThrukLog.Threshold=INFO
@@ -21,7 +21,7 @@ log4perl.appender.ThrukLog.layout=Log::Log4perl::Layout::PatternLayout
 log4perl.appender.ThrukLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n
 
 ## debug too
-#log4perl.appender.DebugLog=Log::Dispatch::File
+#log4perl.appender.DebugLog=Log::Log4perl::Appender::File
 #log4perl.appender.DebugLog.filename=logs/debug.log
 #log4perl.appender.DebugLog.mode=append
 #log4perl.appender.DebugLog.Threshold=DEBUG

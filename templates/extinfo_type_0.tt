@@ -51,6 +51,14 @@
                     </td>
                     [% END %]
                   </tr>
+                  [% IF backends.size > 5 %]
+                  <tr>
+                    <td class='dataVar' nowrap>Section:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>[% backend_detail.$pd.section %]</td>
+                    [% END %]
+                  </tr>
+                  [% END %]
                   <tr>
                     <td class='dataVar' nowrap>Program Version:</td>
                     [% FOREACH pd IN tmpbackends %]
@@ -242,7 +250,7 @@
                     <td class='dataVar' nowrap>Data Source:</td>
                     [% FOREACH pd IN tmpbackends %]
                     <td class='dataVal dataSource'>
-                      [% IF backend_detail.$pd.type == 'livestatus' %]live:[% ELSIF backend_detail.$pd.type == 'http' %][% ELSE %][% backend_detail.$pd.type %]:[% END %][% backend_detail.$pd.addr.replace('/thruk/cgi-bin/remote.cgi', '') %]
+                      [% backend_detail.$pd.addr.replace('/thruk/cgi-bin/remote.cgi', '') %]
                     </td>
                     [% END %]
                   </tr>

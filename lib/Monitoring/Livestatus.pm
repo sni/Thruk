@@ -6,13 +6,13 @@ use warnings;
 use Data::Dumper qw/Dumper/;
 use Carp qw/carp croak confess/;
 use Digest::MD5 qw(md5_hex);
-use JSON::XS ();
+use Cpanel::JSON::XS ();
 use Storable qw/dclone/;
 
 use Monitoring::Livestatus::INET qw//;
 use Monitoring::Livestatus::UNIX qw//;
 
-our $VERSION = '0.78';
+our $VERSION = '0.80';
 
 
 # list of allowed options
@@ -856,7 +856,7 @@ sub _send {
     if($status == 200) {
         $result = $body;
     } else {
-        my $json_decoder = JSON::XS->new->utf8->relaxed;
+        my $json_decoder = Cpanel::JSON::XS->new->utf8->relaxed;
         # fix json output
         eval {
             $result = $json_decoder->decode($body);
@@ -1166,7 +1166,7 @@ sub _read_socket_do {
     if($json_decoder) {
         $json_decoder->incr_reset;
     } else {
-        $json_decoder = JSON::XS->new->utf8->relaxed;
+        $json_decoder = Cpanel::JSON::XS->new->utf8->relaxed;
     }
     if($content_length > 0) {
         if($status == 200) {

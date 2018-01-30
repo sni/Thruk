@@ -16,6 +16,7 @@ BEGIN {
     }
     $ENV{'THRUK_SRC'}     = 'TEST';
     $ENV{'THRUK_VERBOSE'} = 1;
+    $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'} = 1; # prevent errors logged from old LMD versions which would break the test
 }
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
@@ -45,7 +46,7 @@ for my $url (@{$pages}) {
 }
 
 # do they exist all all?
-is(-e '/tmp/thruk_test_error.log', 1, 'thruk_test_error.log exists');
+is(-e '/tmp/thruk_test_error.log', 1, 'thruk_test_error.log exists') or BAIL_OUT("logfile does not exist at all");
 is(-e '/tmp/thruk_test_debug.log', 1, 'thruk_test_debug.log exists');
 is(-s '/tmp/thruk_test_error.log', 0, 'thruk_test_error.log is empty') or diag(qx|cat /tmp/thruk_test_error.log|);
 
@@ -58,7 +59,7 @@ ok(unlink('/tmp/thruk_test_debug.log'), 'unlink test debug file');
 done_testing();
 
 END {
-    if($log4perl_created) {
+    if($log4perl_created && !$ENV{'THRUK_JOB_ID'}) {
         unlink("log4perl.conf");
         unlink('/tmp/thruk_test_error.log');
         unlink('/tmp/thruk_test_debug.log');

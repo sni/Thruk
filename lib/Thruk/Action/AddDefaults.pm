@@ -19,7 +19,7 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use JSON::XS qw/encode_json/;
+use Cpanel::JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
 use POSIX ();
 use Thruk::Utils::Filter ();
@@ -49,6 +49,8 @@ use constant {
     DISABLED_CONF    => 5,
     HIDDEN_CONF      => 6,
     UP_CONF          => 7,
+
+    HIDDEN_LMD_PARENT => 8,
 };
 
 ######################################
@@ -744,6 +746,9 @@ sub set_configs_stash {
     6 = hidden   (overide by config tool)   HIDDEN_CONF
     7 = up       (overide by config tool)   UP_CONF
 
+   override by LMD clients
+    8 = disabled (overide by lmd)           HIDDEN_LMD_PARENT
+
 =cut
 sub _set_possible_backends {
     my ($c,$disabled_backends) = @_;
@@ -762,6 +767,10 @@ sub _set_possible_backends {
             next;
         }
         my $peer = $c->{'db'}->get_peer_by_key($back);
+        if($peer->{disabled} && $peer->{disabled} == HIDDEN_LMD_PARENT) {
+            $c->{'db'}->disable_backend($back);
+            next;
+        }
         $backend_detail{$back} = {
             'name'       => $peer->{'name'},
             'addr'       => $peer->{'addr'},
@@ -769,6 +778,7 @@ sub _set_possible_backends {
             'disabled'   => $disabled_backends->{$back} || REACHABLE,
             'running'    => 0,
             'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
+            'section'    => $peer->{'section'} || 'Default',
         };
         if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
             $backend_detail{$back}->{'running'} = 1;
@@ -1007,6 +1017,17 @@ sub set_processinfo {
                     }
                 }
                 $c->stats->profile(end => "AddDefaults::set_processinfo fetch shadowed info");
+            }
+
+            my $missing = 0;
+            for my $key (keys %{$processinfo}) {
+                if(!$Thruk::Backend::Pool::peers->{$key}) {
+                    $missing++;
+                }
+            }
+
+            if($ENV{'THRUK_USE_LMD'}) {
+                ($processinfo, $cached_data) = check_federation_peers($c, $processinfo, $cached_data);
             }
         }
         $cached_data->{'processinfo_time'} = time();
@@ -1264,6 +1285,86 @@ sub save_debug_information_to_tmp_file {
     Thruk::Utils::set_message( $c, 'success_message fixed', 'Debug Information written to: '.$tmpfile );
     $c->stats->profile(end => "save_debug_information_to_tmp_file");
     return($tmpfile);
+}
+
+########################################
+
+=head2 check_federation_peers
+
+    expand peers if a single backend returns more than one site,
+    for example with lmd federation
+
+=cut
+sub check_federation_peers {
+    my($c, $processinfo, $cached_data) = @_;
+    return($processinfo, $cached_data) if $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
+    my $all_sites_info;
+    eval {
+        $all_sites_info = $c->{'db'}->get_sites(backend => ["ALL"]);
+    };
+    if($@) {
+        # may fail for older lmd releases which don't have parent or section information
+        if($@ =~ m/\Qbad request: table sites has no column\E/mx) {
+            $c->log->info("cannot check lmd federation mode, please update LMD.");
+            ## no critic
+            $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'} = 1;
+            ## use critic
+        }
+    }
+    return($processinfo, $cached_data) unless $all_sites_info;
+
+    # add sub federated backends
+    my $existing =  {};
+    my $changed  = 0;
+    for my $row (@{$all_sites_info}) {
+        my $key = $row->{'key'};
+        $existing->{$key} = 1;
+        if(!$Thruk::Backend::Pool::peers->{$key}) {
+            my $parent = $Thruk::Backend::Pool::peers->{$row->{'parent'}};
+            next unless $parent;
+            my $peer = Thruk::Backend::Peer->new({
+                name => $row->{'name'},
+                id   => $key,
+                type => "livestatus",
+                section => $row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name(),
+                options => {
+                    peer => $row->{'addr'},
+                },
+            }, $c->config, {});
+            $peer->{'lmd_fake_backend'} = 1;
+            $Thruk::Backend::Pool::peers->{$peer->{'key'}} = $peer;
+            push @{$Thruk::Backend::Pool::peer_order}, $peer->{'key'};
+            $parent->{'disabled'} = HIDDEN_LMD_PARENT;
+            $changed++;
+        }
+    }
+    # remove exceeding backends
+    my $new_order = [];
+    for my $key (@{$Thruk::Backend::Pool::peer_order}) {
+        my $peer = $Thruk::Backend::Pool::peers->{$key};
+        if(!$peer->{'lmd_fake_backend'}) {
+            push @{$new_order}, $key;
+            next;
+        }
+        if(!$existing->{$key}) {
+            delete $cached_data->{'processinfo'}->{$key};
+            delete $Thruk::Backend::Pool::peers->{$key};
+            $changed++;
+            next;
+        }
+        push @{$new_order}, $key;
+    }
+    if($changed) {
+        $Thruk::Backend::Pool::peer_order = $new_order;
+        $c->db->{'initialized'} = 0;
+        $c->db->init();
+        # fetch missing processinfo
+        $processinfo = $c->{'db'}->get_processinfo();
+        for my $key (keys %{$processinfo}) {
+            $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
+        }
+    }
+    return($processinfo, $cached_data);
 }
 
 ########################################

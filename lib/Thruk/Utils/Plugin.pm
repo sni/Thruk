@@ -77,7 +77,7 @@ sub get_online_plugins {
             _error("Url ".$url." returned code: ".$res[0]);
             _debug(Dumper(\@res));
         } else {
-            my $json = JSON::XS->new->utf8;
+            my $json = Cpanel::JSON::XS->new->utf8;
             $json->relaxed();
             my $data;
             eval {

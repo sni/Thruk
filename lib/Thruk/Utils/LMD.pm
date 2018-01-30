@@ -143,6 +143,7 @@ sub shutdown_procs {
         my $pid = read_file($pidfile);
         kill(15, $pid);
     }
+    delete $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
     return;
 }
 
@@ -345,12 +346,23 @@ sub _write_lmd_config {
         $site_config .= "SkipSSLCheck = 1\n\n";
     }
 
+    my $lmd_version = get_lmd_version($config);
+    my $supports_section = 0;
+    if($lmd_version && Thruk::Utils::version_compare($lmd_version, '1.1.6')) {
+        $supports_section = 1;
+    }
+
     for my $key (@{$Thruk::Backend::Pool::peer_order}) {
         my $peer = $Thruk::Backend::Pool::peers->{$key};
+        next if $peer->{'lmd_fake_backend'};
         $site_config .= "[[Connections]]\n";
-        $site_config .= "name   = '".$peer->peer_name()."'\n";
-        $site_config .= "id     = '".$key."'\n";
-        $site_config .= "source = ['".join("', '", @{$peer->peer_list()})."']\n";
+        $site_config .= "name    = '".$peer->peer_name()."'\n";
+        $site_config .= "id      = '".$key."'\n";
+        $site_config .= "source  = ['".join("', '", @{$peer->peer_list()})."']\n";
+        # section is supported starting with lmd 1.1.6
+        if($supports_section && $peer->{'section'} && $peer->{'section'} ne 'Default') {
+            $site_config .= "section = '".$peer->{'section'}."'\n";
+        }
         if($peer->{'type'} eq 'http') {
             $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
             $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};
@@ -372,6 +384,29 @@ sub _write_lmd_config {
 
     Thruk::Utils::IO::write($lmd_dir.'/lmd.ini',$site_config);
     return(1);
+}
+
+##########################################################
+
+=head2 get_lmd_version
+
+  get_lmd_version($config)
+
+returns lmd version
+
+=cut
+sub get_lmd_version {
+    my($config) = @_;
+
+    my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
+              .' -version';
+
+    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    if($output && $output =~ m/version\s+([\S]+)\s+/mx) {
+        return $1;
+    }
+
+    return;
 }
 
 1;

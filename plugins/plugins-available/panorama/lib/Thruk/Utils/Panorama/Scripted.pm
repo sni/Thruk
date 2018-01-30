@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use File::Slurp qw/read_file/;
-use JSON::XS qw/decode_json encode_json/;
+use Cpanel::JSON::XS qw/decode_json encode_json/;
 
 ##############################################
 =head1 METHODS
@@ -112,7 +112,7 @@ read data part
 
 =cut
 sub load_data {
-    my $json = JSON::XS->new->utf8;
+    my $json = Cpanel::JSON::XS->new->utf8;
     $json->relaxed();
     my $dashboard = $json->decode($Thruk::Utils::Panorama::Scripted::data);
     _merge_meta($dashboard, $Thruk::Utils::Panorama::Scripted::meta);
