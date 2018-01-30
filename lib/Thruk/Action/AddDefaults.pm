@@ -778,6 +778,7 @@ sub _set_possible_backends {
             'disabled'   => $disabled_backends->{$back} || REACHABLE,
             'running'    => 0,
             'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
+            'section'    => $peer->{'section'} || 'Default',
         };
         if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
             $backend_detail{$back}->{'running'} = 1;

@@ -51,6 +51,14 @@
                     </td>
                     [% END %]
                   </tr>
+                  [% IF backends.size > 5 %]
+                  <tr>
+                    <td class='dataVar' nowrap>Section:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>[% backend_detail.$pd.section %]</td>
+                    [% END %]
+                  </tr>
+                  [% END %]
                   <tr>
                     <td class='dataVar' nowrap>Program Version:</td>
                     [% FOREACH pd IN tmpbackends %]

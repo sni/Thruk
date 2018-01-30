@@ -350,9 +350,10 @@ sub _write_lmd_config {
         my $peer = $Thruk::Backend::Pool::peers->{$key};
         next if $peer->{'lmd_fake_backend'};
         $site_config .= "[[Connections]]\n";
-        $site_config .= "name   = '".$peer->peer_name()."'\n";
-        $site_config .= "id     = '".$key."'\n";
-        $site_config .= "source = ['".join("', '", @{$peer->peer_list()})."']\n";
+        $site_config .= "name    = '".$peer->peer_name()."'\n";
+        $site_config .= "id      = '".$key."'\n";
+        $site_config .= "source  = ['".join("', '", @{$peer->peer_list()})."']\n";
+        $site_config .= "section = '".$peer->{'section'}."'\n" if($peer->{'section'} && $peer->{'section'} ne 'Default');
         if($peer->{'type'} eq 'http') {
             $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
             $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};
