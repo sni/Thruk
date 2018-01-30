@@ -11,6 +11,8 @@
       creates: "/omd/sites/{{item}}"
   - shell: "omd stop {{item}}"
     with_items: ['demo', 'demo2', 'demo3', 'demo4']
+  - shell: "omd config {{item}} set TMPFS off"
+    with_items: ['demo', 'demo2', 'demo3', 'demo4']
   - copy:
       src: "/omd/sites/{{item}}/share/doc/naemon/example.cfg"
       dest: "/omd/sites/{{item}}/etc/naemon/conf.d/example.cfg"
@@ -30,6 +32,7 @@
       dest: "/omd/sites/demo2/etc/thruk/thruk_local.conf"
       owner: "demo2"
       group: "demo2"
+  - shell: sed -e "s/id\ *=\s*/id    = {{ lookup('env','PREFIX') }}/g" -i /omd/sites/demo2/etc/thruk/thruk_local.conf
   - lineinfile:
      path: "/omd/sites/demo2/etc/thruk/lmd.ini"
      state: present
