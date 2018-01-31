@@ -957,6 +957,7 @@ Ext.define('TP.IconWidget', {
                 // chrome gets position totally wrong when going back to start dashboard otherwise
                 if(panel.el && panel.el.dom && panel.getPosition()[0] != Number(newX).toFixed()) {
                     window.setTimeout(Ext.bind(function(x, y) {
+                        if(!panel.el) { return; }
                         panel.el.dom.style.left = x+"px";
                         panel.el.dom.style.top = y+"px";
                     }, panel, [newX, newY]), 200);

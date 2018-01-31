@@ -228,6 +228,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         var endpointsChanged = function() {
             if(panel.noMoreMoves) { return; }
             if(panel.xdata.map) {
+                if(!TP.iconSettingsWindow) { return; }
                 var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
                 panel.xdata.appearance.connectorfromx = xdata.appearance.connectorfromx;
                 panel.xdata.appearance.connectorfromy = xdata.appearance.connectorfromy;
