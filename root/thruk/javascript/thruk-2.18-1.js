@@ -1705,7 +1705,7 @@ function do_table_search() {
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
         var matches = table.className.match(/searchSubTable_([^\ ]*)/);
-        if(matches[1]) {
+        if(matches && matches[1]) {
             jQuery(table).find("TABLE."+matches[1]).each(function(x, t) {
                 do_table_search_table(id, t, value);
             });
