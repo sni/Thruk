@@ -1927,6 +1927,7 @@ t/scenarios/sakuli_e2e/cases/0210_panorama_hostgroup_icon.js
 t/scenarios/sakuli_e2e/cases/0211_panorama_service_icon_speedometer.js
 t/scenarios/sakuli_e2e/cases/0212_panorama_text_label_widget.js
 t/scenarios/sakuli_e2e/cases/0213_panorama_arrow_element.js
+t/scenarios/sakuli_e2e/cases/0213_panorama_arrow_element_geo.js
 t/scenarios/sakuli_e2e/cases/0214_panorama_service_icon_perfbar.js
 t/scenarios/sakuli_e2e/cases/0215_panorama_service_icon_trend.js
 t/scenarios/sakuli_e2e/cases/0216_panorama_host_icon.js
@@ -1952,6 +1953,7 @@ t/scenarios/sakuli_e2e/cases/0299_panorama_show_case.js
 t/scenarios/sakuli_e2e/cases/_dashboard_exports.js
 t/scenarios/sakuli_e2e/cases/_images_chrome/applications.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/arrow_map.png
+t/scenarios/sakuli_e2e/cases/_images_chrome/arrow_map_geo.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/bad.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/controls_unlock.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/dropdown.png
@@ -1972,6 +1974,7 @@ t/scenarios/sakuli_e2e/cases/_images_chrome/squares.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/very_good.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/applications.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/arrow_map.png
+t/scenarios/sakuli_e2e/cases/_images_firefox/arrow_map_geo.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/bad.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/controls_unlock.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/dropdown.png
@@ -1992,6 +1995,7 @@ t/scenarios/sakuli_e2e/cases/_images_firefox/squares.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/very_good.png
 t/scenarios/sakuli_e2e/cases/_images_ie/applications.png
 t/scenarios/sakuli_e2e/cases/_images_ie/arrow_map.png
+t/scenarios/sakuli_e2e/cases/_images_ie/arrow_map_geo.png
 t/scenarios/sakuli_e2e/cases/_images_ie/bad.png
 t/scenarios/sakuli_e2e/cases/_images_ie/controls_unlock.png
 t/scenarios/sakuli_e2e/cases/_images_ie/dropdown.png
