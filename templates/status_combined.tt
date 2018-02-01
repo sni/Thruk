@@ -74,7 +74,7 @@
 
 [% PROCESS _status_hostdetail_table.tt data=hosts paneprefix='hst_' sortprefix='_hst' %]
 [% IF hosts_limit_hit %]
-<div class='itemTotalsTitle'><a href="[% uri_with(c, 'show_all_hosts' => '1' ) %]">Limit of [% hosts.size %] matching hosts reached, click to show all.</a></div>
+<div class='itemTotalsTitle'><a href="[% uri_with(c, 'show_all_hosts' => '1' ) %]"><span class="alerttext">Limit of [% hosts.size %] matching hosts reached, click to show all.</span></a></div>
 [% ELSE %]
 <div class='itemTotalsTitle'>[% hosts.size %] of [% hosts.size %] Matching Host Entries Displayed</div>
 [% END %]
@@ -109,7 +109,7 @@
 [% END %]
 [% PROCESS _status_detail_table.tt  data=services paneprefix='svc_' sortprefix='_svc' %]
 [% IF services_limit_hit %]
-<div class='itemTotalsTitle'><a href="[% uri_with(c, 'show_all_services' => '1' ) %]">Limit of [% services.size %] matching services reached, click to show all.</a></div>
+<div class='itemTotalsTitle'><a href="[% uri_with(c, 'show_all_services' => '1' ) %]"><span class="alerttext">Limit of [% services.size %] matching services reached, click to show all.</span></a></div>
 [% ELSE %]
 <div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
 [% END %]
