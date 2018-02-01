@@ -5099,8 +5099,15 @@ function check_filter_style_changes(form, pageStyle, columnFieldId) {
   return true;
 }
 
+
+var status_form_clean = true;
+function setNoFormClean() {
+    status_form_clean = false;
+}
+
 /* remove empty values from form to reduce request size */
 function remove_empty_form_params(form) {
+  if(!status_form_clean) { return true; }
   var s_data = jQuery(form).serializeArray();
   for(var i=0; i<s_data.length; i++){
     var f = s_data[i];
