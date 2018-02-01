@@ -734,6 +734,13 @@ ex.:
   group_paging_grid = *5,  10, 50,  all
 
 
+=== problems_limit
+Cut off objects on problems page, set 0 to disable limit completly.
+Defaults to 500.
+
+ex.:
+
+  problems_limit = 500
 
 
 

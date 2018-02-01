@@ -5,6 +5,7 @@ next:
           - add timeout for cookie authentication http sub request
           - add filter to notifications and history page
           - add filter to processinfo page
+          - add new 'problems_limit' config option
           - fix occasional wrong redirects on page reloads (#776)
           - Business Process:
             - fix save button in chrome (#786)
