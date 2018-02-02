@@ -1,4 +1,4 @@
-﻿<input type="text" placeholder="filter" id="table_search_input" class="deletable" onchange='table_search(this.id, [% encode_json_obj(ids) %])' onkeyup='table_search(this.id, [% encode_json_obj(ids) %])' onfocus='table_search(this.id, [% encode_json_obj(ids) %])'>
+﻿<input type="text" placeholder="filter" id="table_search_input" class="deletable" onchange='table_search(this.id, [% encode_json_obj(ids) %])' onkeyup='table_search(this.id, [% encode_json_obj(ids) %])' onfocus='table_search(this.id, [% encode_json_obj(ids) %], true)'>
 <script type="text/javascript">
 <!--
 [%+ FOREACH id = ids +%]
