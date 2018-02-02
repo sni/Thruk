@@ -24,7 +24,7 @@ Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Group:         Applications/Monitoring
 BuildRequires: autoconf, automake, perl
-Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
+Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
 BuildRequires: libthruk >= 2.20
 Requires:      thruk-base = %{version}-%{release}
