@@ -183,12 +183,14 @@ sub get_processinfo {
         return $data if $self->{'lmd_optimizations'};
     }
 
-    $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
+    $data->{$key}->{'data_source_version'} = "Livestatus ".($data->{$key}->{'data_source_version'} || 'unknown');
     $self->{'naemon_optimizations'} = 0 unless defined $self->{'naemon_optimizations'};
     $self->{'naemon_optimizations'} = 1 if $data->{$key}->{'data_source_version'} =~ m/\-naemon$/mx;
 
     # naemon checks external commands on arrival
-    $data->{$key}->{'last_command_check'} = time() if $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'};
+    if(defined $data->{$key}->{'program_start'} && $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'}) {
+        $data->{$key}->{'last_command_check'} = time();
+    }
     return($data, 'HASH');
 }
 
