@@ -6,7 +6,7 @@ extra_wait_start:
 	done
 
 extra_prepare:
-	sudo ./docker_tc.sh lmdfederatione2e_slow_1
+	sudo ./docker_tc.sh lmdfederatione2e_slow_1 slow
 
 extra_clean:
 	-killall lmd
