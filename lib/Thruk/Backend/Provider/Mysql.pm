@@ -1104,7 +1104,7 @@ sub _update_logcache {
         my $host_lookup    = _get_host_lookup(   $dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
         my $service_lookup = _get_service_lookup($dbh,$peer,$prefix, $host_lookup, $mode eq 'import' ? 0 : 1);
         my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
-        my $plugin_lookup  = {};
+        my $plugin_lookup  = _get_plugin_lookup($dbh,$prefix);
 
         if(defined $files and scalar @{$files} > 0) {
             $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup);
