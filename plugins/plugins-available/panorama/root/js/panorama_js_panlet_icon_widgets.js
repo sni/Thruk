@@ -867,7 +867,7 @@ Ext.define('TP.IconWidget', {
         /* no need for changes if we are not the active tab */
         if(!TP.isThisTheActiveTab(panel)) { return; }
         if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
-        panel.size = panel.getSize();
+        if(panel.el) { panel.size = panel.getSize(); }
     },
 
     redraw: function() {
