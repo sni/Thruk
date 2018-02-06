@@ -152,6 +152,7 @@ sub process {
             # validate session data
             my $rc;
             eval {
+                local $SIG{'ALRM'} = sub { die("timeout during auth check"); };
                 alarm($login_timeout);
                 $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user);
             };

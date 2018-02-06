@@ -150,6 +150,9 @@ sub verify_basic_auth {
             return 1;
         }
     }
+    if($res->code == 500 and $res->decoded_content =~ m/\Qtimeout during auth check\E/mx) {
+        return -1;
+    }
     return 0;
 }
 

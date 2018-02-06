@@ -543,7 +543,7 @@ sub _remove_pid {
 ## no critic
 $SIG{INT}  = sub { _check_exit_reason("INT");  _remove_pid(); exit; };
 $SIG{TERM} = sub { _check_exit_reason("TERM"); _remove_pid(); exit; };
-$SIG{PIPE} = sub { _check_exit_reason("TERM"); _remove_pid(); exit; };
+$SIG{PIPE} = sub { _check_exit_reason("PIPE"); _remove_pid(); exit; };
 ## use critic
 END {
     _remove_pid();
