@@ -1456,7 +1456,7 @@ sub get_perf_image {
     }
 
     if(!$showtitle) {
-        $grafanaurl .= '&disablePanelTitel';
+        $grafanaurl .= '&disablePanelTitle';
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
