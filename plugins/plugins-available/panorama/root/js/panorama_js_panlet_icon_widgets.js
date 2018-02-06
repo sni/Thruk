@@ -187,8 +187,8 @@ Ext.define('TP.SmallWidget', {
             if(x != undefined && !isNaN(x)) { x = Math.floor(x); } else { x = pos[0]; }
             if(y != undefined && !isNaN(y)) { y = Math.floor(y); } else { y = pos[1]; }
 
-            // not moved at all, would break initial connector placement
-            if(x == pos[0] && y == pos[1]) {
+            // not moved at all, would break initial connector placement on geo maps
+            if(x == pos[0] && y == pos[1] && This.xdata.appearance.type == "connector") {
                 return;
             }
 
