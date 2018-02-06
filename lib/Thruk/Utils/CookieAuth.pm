@@ -15,6 +15,7 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Thruk::UserAgent;
+use Thruk::Authentication::User;
 use Digest::MD5 qw(md5_hex);
 use Thruk::Utils;
 use Thruk::Utils::IO;
@@ -93,7 +94,7 @@ sub external_authentication {
             $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
                 if(ref $login eq 'HASH') { $login = $1; }
-                if($1 eq $login) {
+                if($1 eq Thruk::Authentication::User::transform_username($config, $login)) {
                     my $sessionid = md5_hex(rand(1000).time());
                     chomp($sessionid);
                     my $hash = $res->request->header('authorization');
@@ -145,7 +146,7 @@ sub verify_basic_auth {
         }
     }
     if($res->code == 200 and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
-        if($1 eq $login) {
+        if($1 eq Thruk::Authentication::User::transform_username($config, $login)) {
             return 1;
         }
     }

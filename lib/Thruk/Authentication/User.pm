@@ -66,19 +66,8 @@ sub new {
         return;
     }
 
-    # change case?
-    $username = lc($username) if $c->config->{'make_auth_user_lowercase'};
-    $username = uc($username) if $c->config->{'make_auth_user_uppercase'};
-
-    # regex replace?
-    if($c->config->{'make_auth_replace_regex'}) {
-        $c->log->debug("authentication regex replace before: ".$username);
-        ## no critic
-        eval('$username =~ '.$c->config->{'make_auth_replace_regex'});
-        ## use critic
-        $c->log->error("authentication regex replace error: ".$@) if $@;
-        $c->log->debug("authentication regex replace after : ".$username);
-    }
+    # transform username upper/lower case?
+    $username = transform_username($c->config, $username, $c);
 
     $self->{'username'}      = $username;
     $self->{'roles'}         = [];
@@ -250,6 +239,33 @@ sub check_cmd_permissions {
         return 0;
     }
     return 0;
+}
+
+=head2 transform_username
+
+run transformation rules for username
+
+ transform_username($config, $username, [$c])
+
+=cut
+
+sub transform_username {
+    my($config, $username, $c) = @_;
+
+    # change case?
+    $username = lc($username) if $config->{'make_auth_user_lowercase'};
+    $username = uc($username) if $config->{'make_auth_user_uppercase'};
+
+    # regex replace?
+    if($config->{'make_auth_replace_regex'}) {
+        $c->log->debug("authentication regex replace before: ".$username) if $c;
+        ## no critic
+        eval('$username =~ '.$config->{'make_auth_replace_regex'});
+        ## use critic
+        $c->log->error("authentication regex replace error: ".$@) if ($c && $@);
+        $c->log->debug("authentication regex replace after : ".$username) if $c;
+    }
+    return($username);
 }
 
 1;
