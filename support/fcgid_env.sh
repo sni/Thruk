@@ -15,4 +15,5 @@ else
   [ -e ~/.thruk ]             && . ~/.thruk
 fi
 
+THRUK_FCGI_BIN="/opt/projects/git/Thruk/script/thruk_fastcgi.pl"
 exec $THRUK_FCGI_BIN

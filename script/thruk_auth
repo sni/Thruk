@@ -164,10 +164,10 @@ sub process {
             utime($now, $now, $sessionfile);
         }
         else {
-            # validate session data
+            # revalidate session data
             my $rc;
+            $SIG{'ALRM'} = sub { die("timeout during auth check"); };
             eval {
-                local $SIG{'ALRM'} = sub { die("timeout during auth check"); };
                 alarm($login_timeout);
                 $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user, $login_timeout-1);
             };

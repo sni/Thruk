@@ -366,7 +366,7 @@ exit 0
 %{_datadir}/thruk/dist.ini
 %{_datadir}/thruk/thruk_cookie_auth.include
 %attr(0755,root,root) %{_datadir}/thruk/fcgid_env.sh
-%attr(0755,root,root) %{_datadir}/thruk/thruk_authd.sh
+%attr(0755,root,root) %{_datadir}/thruk/thruk_authd.pl
 %doc %{_mandir}/man3/nagexp.3
 %doc %{_mandir}/man3/naglint.3
 %doc %{_mandir}/man3/thruk.3
