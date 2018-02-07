@@ -11,3 +11,17 @@
    [ -e /etc/sysconfig/thruk ] && . /etc/sysconfig/thruk
    [ -e /etc/default/thruk ]   && . /etc/default/thruk
    [ -e ~/.thruk ]             && . ~/.thruk
+
+--- a/thruk_authd.sh	2015-07-14 13:37:54.576056301 +0200
++++ b/thruk_authd.sh	2015-07-14 13:51:32.933883093 +0200
+@@ -10,8 +10,8 @@
+   [ -e $OMD_ROOT/.profile ] && . $OMD_ROOT/.profile
+   [ -e $OMD_ROOT/.thruk   ] && . $OMD_ROOT/.thruk
+ else
+-  export THRUK_CONFIG="/etc/thruk"
+-  THRUK_FCGI_BIN="/usr/share/thruk/script/thruk_fastcgi.pl"
++  export THRUK_CONFIG="@SYSCONFDIR@"
++  THRUK_FCGI_BIN="@DATADIR@/script/thruk_fastcgi.pl"
+   [ -e /etc/sysconfig/thruk ] && . /etc/sysconfig/thruk
+   [ -e /etc/default/thruk ]   && . /etc/default/thruk
+   [ -e ~/.thruk ]             && . ~/.thruk

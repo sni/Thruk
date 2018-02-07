@@ -102,6 +102,7 @@ case "$1" in
                            /etc/thruk/panorama \
                            /etc/thruk/thruk_local.d
         chmod 755 /usr/share/thruk/fcgid_env.sh
+        chmod 755 /usr/share/thruk/thruk_authd.sh
         chmod 755 /usr/bin/thruk
 
         # Depending on which webserver is installed, set up the basics
