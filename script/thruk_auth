@@ -61,11 +61,17 @@ my $last_cache_clean    = 0;
 while (<STDIN>) {
     chomp(my $in = $_);
 
+    # do not accidentally print to stdout
+    # copy STDOUT to another filehandle
+    open(my $STDOUT_APACHE, '>&', STDOUT);
+    open (STDOUT, '>&', STDERR);
+    select STDERR;
+
     my $t0 = [gettimeofday];
     print STDERR "thruk_auth: url '$in' " if $verbose > 1;
     my $res = process($in);
     print STDERR "\nthruk_auth:  -> $res" if $verbose > 1;
-    print $res;
+    print $STDOUT_APACHE $res;
     my $elapsed = tv_interval ( $t0 );
     printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
 }
@@ -163,7 +169,7 @@ sub process {
             eval {
                 local $SIG{'ALRM'} = sub { die("timeout during auth check"); };
                 alarm($login_timeout);
-                $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user);
+                $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user, $login_timeout-1);
             };
             alarm(0);
             if($rc == -1 or $@) {

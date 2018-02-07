@@ -130,10 +130,11 @@ verify authentication by sending request with basic auth header
 
 =cut
 sub verify_basic_auth {
-    my($config, $basic_auth, $login) = @_;
+    my($config, $basic_auth, $login, $timeout) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
 
     my $ua = get_user_agent($config);
+    $ua->timeout($timeout) if $timeout;
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
