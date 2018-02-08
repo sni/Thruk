@@ -112,6 +112,15 @@ and event reporting.
     --with-htmlurl="/thruk"
 %{__make} %{?_smp_mflags} all
 
+# replace /usr/bin/env according to https://fedoraproject.org/wiki/Packaging:Guidelines#Shebang_lines
+sed -e 's%/usr/bin/env perl%/usr/bin/perl%' -i \
+    script/thruk_server.pl \
+    support/thruk_authd.pl \
+
+# this plugin is shipped separatly
+rm plugins/plugins-enabled/reports2
+
+
 %install
 %{__rm} -rf %{buildroot}
 %{__make} install \
@@ -120,7 +129,7 @@ and event reporting.
     COMMAND_OPTS="" \
     INIT_OPTS=""
 mkdir -p %{buildroot}%{_localstatedir}/lib/thruk
-rm %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled/reports2
+
 # enable su logrotate directive if required
 %if 0%{?fedora} >= 16 || 0%{?rhel} >= 7 || 0%{?sles_version} >= 12
     sed -i -e 's/^.*#su/    su/' %{buildroot}/%{_sysconfdir}/logrotate.d/thruk-base
