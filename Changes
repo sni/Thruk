@@ -6,6 +6,7 @@ next:
           - add filter to notifications and history page
           - add filter to processinfo page
           - add new 'problems_limit' config option
+          - support tls livestatus connections
           - fix occasional wrong redirects on page reloads (#776)
           - Business Process:
             - fix save button in chrome (#786)
@@ -13,6 +14,7 @@ next:
           - LMD:
             - only restart lmd on timeouts when neccessary
             - support lmd federation mode
+            - support lmd tls livestatus connections
           - Mobile:
             - implement remote filtering
             - add alerts and notifications button to extinfo page

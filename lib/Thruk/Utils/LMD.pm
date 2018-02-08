@@ -367,6 +367,10 @@ sub _write_lmd_config {
             $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
             $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};
         }
+        $site_config .= "tlsCertificate = '".$peer->{'config'}->{'options'}->{'cert'}."'\n"    if $peer->{'config'}->{'options'}->{'cert'};
+        $site_config .= "tlsKey         = '".$peer->{'config'}->{'options'}->{'key'}."'\n"     if $peer->{'config'}->{'options'}->{'key'};
+        $site_config .= "tlsCA          = '".$peer->{'config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'config'}->{'options'}->{'ca_file'};
+        $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'config'}->{'options'}->{'verify'} && $peer->{'config'}->{'options'}->{'verify'} == 0);
         $site_config .= "\n";
     }
 

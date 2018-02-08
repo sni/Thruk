@@ -2100,6 +2100,10 @@ for details.
         *** `auth`            secret key for http connections.
         *** `remote_name`     remote site name for http connections (required if remote instance is connected to multiple backends)
         *** `fallback_peer`   fallback connection address
+        *** `cert`            optional client certificate for tls connections
+        *** `key`             optional client key for tls connections
+        *** `ca_file`         ca file to verify tls server
+        *** `verify`          set to 0 to disable any tls verification
      ** `configtool`
         *** `core_type`       Give the config parser a hint about
                               your config. Can be 'naemon', 'nagios', 'icinga'
@@ -2169,6 +2173,17 @@ ex.:
             peer        = http://172.16.0.4/thruk/
             auth        = secret_key_from_remote_instance
             remote_name = id1   # required if remote site has multiple backends connected itself
+       </options>
+    </peer>
+    <peer>
+        name   = TLS Livestatus
+        type   = livestatus
+        <options>
+            peer    = tls://172.16.0.2:9999
+            cert    = client.pem
+            key     = client.key
+            ca_file = server.crt
+            verify  = 1
        </options>
     </peer>
   </Component>

@@ -115,6 +115,10 @@ sub new {
         peer      => $self->{'peer'},
         verbose   => $self->{'verbose'},
         keepalive => $self->{'keepalive'},
+        cert      => $self->{'cert'},
+        key       => $self->{'key'},
+        ca_file   => $self->{'ca_file'},
+        verify    => $self->{'verify'},
     };
     $backend_args->{'retries_on_connection_error'} = $self->{'retries_on_connection_error'} if defined $self->{'retries_on_connection_error'};
     $self->{backend_obj} = Monitoring::Livestatus->new(%{$backend_args});
