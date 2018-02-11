@@ -546,6 +546,7 @@ function on_attr_select() {
     }
     window.setTimeout(function() {
         ajax_search.hide_results(null, 1);
+        if(!document.getElementById(newid)) { return; }
         jQuery(newid).focus();
         /* move cursor to end of input */
         setCaretToPos(jQuery(newid)[0], jQuery(newid).val().length);
