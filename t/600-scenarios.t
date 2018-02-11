@@ -47,6 +47,7 @@ sub _run {
     is($rc, 0, "rc was $rc");
     if(!$verbose && $rc != 0) { diag($out) }; # already printed in verbose mode
     if($step eq "prepare" && $rc != 0) {
+        diag(`docker ps`);
         BAIL_OUT("$step failed");
     }
 }
