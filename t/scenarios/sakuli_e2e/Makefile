@@ -12,6 +12,8 @@ test_wait:
 
 test: test_firefox test_chrome
 
+test_verbose: test
+
 test_firefox: test_wait
 	./failsafe.sh -browser firefox
 

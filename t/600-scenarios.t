@@ -31,7 +31,7 @@ for my $dir (@{$scenarios}) {
         next;
     }
     chdir($dir);
-    for my $step (qw/update prepare test clean/) {
+    for my $step (qw/update prepare test_verbose clean/) {
         _run($dir, $step);
     }
     chdir($pwd);
@@ -44,7 +44,7 @@ sub _run {
 
     ok(1, "$dir: running make $step");
     my($rc, $out) = Thruk::Utils::IO::cmd(undef, [$make, $step], undef, ($verbose ? '## ' : undef));
-    is($rc, 0, "rc was $rc");
+    is($rc, 0, "step $step rc was $rc");
     if(!$verbose && $rc != 0) { diag($out) }; # already printed in verbose mode
     if($step eq "prepare" && $rc != 0) {
         diag(`docker ps`);

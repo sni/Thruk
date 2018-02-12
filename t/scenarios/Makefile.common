@@ -1,15 +1,16 @@
 SHELL=bash
 export THRUK_CONFIG=$(shell pwd)
 export TEST_AUTHOR=1
-THRUK=../../../script/thruk
+THRUK=cd ../../.. && ./script/thruk
 STARTUPWAIT=300
+EXPECTED_BACKENDS=1
 
 test:
 	$(THRUK) cache clean
 	$(MAKE) extra_wait_start
 	for x in $$(seq $(STARTUPWAIT)); do \
-	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 1; fi; \
-	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "startup failed"; docker ps; $(THRUK) -l; exit 1; fi; \
+	   if [ $$($(THRUK) -l 2>&1 | grep -v ^Def | grep -v ^- | grep -v ERROR | wc -l) -eq $(EXPECTED_BACKENDS) ]; then break; else sleep 1; fi; \
+	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "ERROR: startup failed"; docker ps; $(THRUK) -l; exit 1; fi; \
 	done
 	$(THRUK) -l
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t
@@ -19,7 +20,7 @@ test_verbose:
 	$(MAKE) extra_wait_start
 	for x in $$(seq $(STARTUPWAIT)); do \
 	   if [ $$($(THRUK) -l 2>&1 | grep -c ERROR) -eq 0 ]; then break; else sleep 1; fi; \
-	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "startup failed"; docker ps; $(THRUK) -l; exit 1; fi; \
+	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "ERROR: startup failed"; docker ps; $(THRUK) -l; exit 1; fi; \
 	done
 	$(THRUK) -l
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
