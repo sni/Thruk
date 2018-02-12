@@ -64,7 +64,7 @@ sub cmd {
                 $c->stash->{'backend_detail'}->{$key}->{'name'},
                 $addr,
         );
-        my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
+        my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : 'OK';
         chomp($error);
         $output .= " (".$error.")" if $error;
         $output .= "\n";
