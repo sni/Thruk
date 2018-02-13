@@ -299,7 +299,7 @@ sub _get_connection_details {
     my $detail = '';
 
     if($c->stash->{'lmd_error'}) {
-        return $c->stash->{'lmd_error'};
+        return "lmd error - ".$c->stash->{'lmd_error'};
     }
 
     for my $pd (keys %{$c->stash->{'backend_detail'}}) {

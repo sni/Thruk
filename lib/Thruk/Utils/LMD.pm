@@ -406,6 +406,7 @@ sub get_lmd_version {
               .' -version';
 
     my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    $config->{'lmd_version'} = $output;
     if($output && $output =~ m/version\s+([\S]+)\s+/mx) {
         return $1;
     }

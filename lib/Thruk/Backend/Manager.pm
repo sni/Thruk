@@ -1284,6 +1284,9 @@ sub _do_on_peers {
                 if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|mx) {
                     $err = $1;
                 }
+                elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
+                    $err = $1;
+                }
                 if(!$c->stash->{'lmd_ok'}) {
                     $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err;
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
