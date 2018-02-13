@@ -38,6 +38,7 @@ my $opt ={
     'help'      => 0,
     'lookback'  => 60,
     'backend'   => undef,
+    'verbose'   => 0,
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
@@ -48,6 +49,7 @@ GetOptions (
     "n|nocache"      => \$opt->{'nocache'},
     "f|foreground"   => \$opt->{'foreground'},
     "t|testmode"     => \$opt->{'testmode'},
+    "v|verbose"      => sub { $opt->{'verbose'}++ },
 ) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
 pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
 
@@ -70,6 +72,7 @@ my $logoptions = {
 };
 $logoptions->{'nocache'} = 1 if $opt->{'nocache'};
 my $logs = $db->get_logs(%{$logoptions});
+_info(sprintf("fetched %i log entries", scalar @{$logs})) if $opt->{'verbose'};
 
 # fetch global eventhandler status
 my $status = $db->get_processinfo();

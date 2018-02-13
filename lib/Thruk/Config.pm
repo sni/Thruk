@@ -1040,6 +1040,20 @@ sub _do_finalize_config {
         }
     }
 
+    # enable OMD tweaks
+    if($ENV{'OMD_ROOT'}) {
+        my $site = $ENV{'OMD_SITE'};
+        my $root = $ENV{'OMD_ROOT'};
+        my($siteport) = (`grep CONFIG_APACHE_TCP_PORT $root/etc/omd/site.conf` =~ m/(\d+)/mx);
+        my($ssl)      = (`grep CONFIG_APACHE_MODE     $root/etc/omd/site.conf` =~ m/'(\w+)'/mx);
+        my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
+        $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
+        # bypass system reverse proxy for restricted cgi for permormance and locking reasons
+        if($config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi-bin/restricted.cgi$|mx) {
+            $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
+        }
+    }
+
     # set default config
     set_default_config($config);
 

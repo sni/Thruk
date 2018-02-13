@@ -722,8 +722,10 @@ Ext.define('TP.dragEl', {
         panel.dd.addListener('dragend', function(This, evt) {
             if(TP.iconSettingsWindow && TP.iconSettingsGlobals.renderUpdate) { TP.iconSettingsGlobals.renderUpdate(); }
             tab.enableMapControlsTemp();
-            panel.dragHint.destroy();
-            panel.dragHint = undefined;
+            if(panel.dragHint) {
+                panel.dragHint.destroy();
+                panel.dragHint = undefined;
+            }
             TP.isShift = is_shift_pressed(evt);
             if(TP.isShift) {
                 var pos = panel.getPosition();

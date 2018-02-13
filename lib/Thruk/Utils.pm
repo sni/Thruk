@@ -1456,7 +1456,7 @@ sub get_perf_image {
     }
 
     if(!$showtitle) {
-        $grafanaurl .= '&disablePanelTitel';
+        $grafanaurl .= '&disablePanelTitle';
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
@@ -1505,6 +1505,12 @@ sub get_perf_image {
     CORE::close($fh);
     my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$source.'"';
     if($grafanaurl) {
+        if($ENV{'OMD_ROOT'}) {
+            my $site = $ENV{'OMD_SITE'};
+            if($grafanaurl =~ m|^https?://localhost/$site(/grafana/.*)$|mx) {
+                $grafanaurl = $c->config->{'omd_local_site_url'}.$1;
+            }
+        }
         $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
     Thruk::Utils::IO::cmd($c, $cmd);

@@ -717,6 +717,18 @@ sub _process_perf_info_page {
        and $c->check_user_roles("authorized_for_system_information")) {
         my $apache = $c->req->parameters->{'apache'};
 
+        # autodetect omd apaches
+        if(scalar keys %{$c->config->{'apache_status'}} == 0 && $ENV{'OMD_ROOT'}) {
+            my $root      = $ENV{'OMD_ROOT'};
+            my($siteport) = (`grep CONFIG_APACHE_TCP_PORT $root/etc/omd/site.conf` =~ m/(\d+)/mx);
+            my($ssl)      = (`grep CONFIG_APACHE_MODE     $root/etc/omd/site.conf` =~ m/'(\w+)'/mx);
+            my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
+            $c->config->{'apache_status'} = {
+                'Site'   => $proto.'://127.0.0.1:'.$siteport.'/server-status',
+                'System' => $proto.'://127.0.0.1/server-status',
+            };
+        }
+
         for my $name (keys %{$c->config->{'apache_status'}}) {
             push @{$c->stash->{'apache_status'}}, $name;
         }

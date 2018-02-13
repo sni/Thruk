@@ -1704,46 +1704,97 @@ function do_table_search() {
     set_hash(value, 2);
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
-        /* make tables fixed width to avoid flickering */
-        table.width = table.offsetWidth;
-        var startWith = 1;
-        if(jQuery(table).hasClass('header2')) {
-            startWith = 2;
-        }
-        jQuery.each(table.rows, function(nr, row) {
-            if(nr >= startWith) {
-                var found = 0;
-                jQuery.each(row.cells, function(nr, cell) {
-                    /* if regex matching fails, use normal matching */
-                    try {
-                        if(cell.innerHTML.toLowerCase().match(value)) {
-                            found = 1;
-                        }
-                    } catch(err) {
-                        if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
-                            found = 1;
-                        }
-                    }
-                });
-                if(found == 0) {
-                    if(!jQuery(row).hasClass('table_search_skip')) {
-                        jQuery(row).addClass('filter_hidden');
-                    }
-                } else {
-                    if(!jQuery(row).hasClass('table_search_skip')) {
-                        jQuery(row).removeClass('filter_hidden');
-                    }
-                }
-            }
-        });
-        if(table_search_cb[id] != undefined) {
-            try {
-                table_search_cb[id]();
-            } catch(err) {
-                debug(err);
-            }
+        var matches = table.className.match(/searchSubTable_([^\ ]*)/);
+        if(matches && matches[1]) {
+            jQuery(table).find("TABLE."+matches[1]).each(function(x, t) {
+                do_table_search_table(id, t, value);
+            });
+        } else {
+            do_table_search_table(id, table, value);
         }
     });
+}
+
+function do_table_search_table(id, table, value) {
+    /* make tables fixed width to avoid flickering */
+    table.width = table.offsetWidth;
+    var startWith = 1;
+    if(jQuery(table).hasClass('header2')) {
+        startWith = 2;
+    }
+    if(jQuery(table).hasClass('search_vertical')) {
+        var totalFound = 0;
+        jQuery.each(table.rows[0].cells, function(col_nr, ref_cell) {
+            if(col_nr < startWith) {
+                return;
+            }
+            var found = 0;
+            jQuery.each(table.rows, function(nr, row) {
+                var cell = row.cells[col_nr];
+                try {
+                    if(cell.innerHTML.toLowerCase().match(value)) {
+                        found = 1;
+                    }
+                } catch(err) {
+                    if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
+                        found = 1;
+                    }
+                }
+            });
+            jQuery.each(table.rows, function(nr, row) {
+                var cell = row.cells[col_nr];
+                if(found == 0) {
+                    jQuery(cell).addClass('filter_hidden');
+                } else {
+                    jQuery(cell).removeClass('filter_hidden');
+                }
+            });
+            if(found > 0) {
+                totalFound++;
+            }
+        });
+        if(jQuery(table).hasClass('search_hide_empty')) {
+            if(totalFound == 0) {
+                jQuery(table).addClass('filter_hidden');
+            } else {
+                jQuery(table).removeClass('filter_hidden');
+            }
+        }
+    } else {
+        jQuery.each(table.rows, function(nr, row) {
+            if(nr < startWith) {
+                return;
+            }
+            if(jQuery(row).hasClass('table_search_skip')) {
+                return;
+            }
+            var found = 0;
+            jQuery.each(row.cells, function(nr, cell) {
+                /* if regex matching fails, use normal matching */
+                try {
+                    if(cell.innerHTML.toLowerCase().match(value)) {
+                        found = 1;
+                    }
+                } catch(err) {
+                    if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
+                        found = 1;
+                    }
+                }
+            });
+            if(found == 0) {
+                jQuery(row).addClass('filter_hidden');
+            } else {
+                jQuery(row).removeClass('filter_hidden');
+            }
+        });
+    }
+    if(table_search_cb[id] != undefined) {
+        try {
+            table_search_cb[id]();
+        } catch(err) {
+            debug(err);
+        }
+    }
 }
 
 /* show bug report icon */
@@ -2128,10 +2179,11 @@ function set_hash(value, nr) {
     value = value.replace(/\|$/, '');
 
     // replace history otherwise we have to press back twice
+    if(value != "") { value = '#'+value; }
     if (history.replaceState) {
-        history.replaceState({}, "", '#'+value);
+        history.replaceState({}, "", value);
     } else {
-        window.location.replace('#'+value);
+        window.location.replace(value);
     }
     if(window.parent) {
         try {
@@ -5047,8 +5099,15 @@ function check_filter_style_changes(form, pageStyle, columnFieldId) {
   return true;
 }
 
+
+var status_form_clean = true;
+function setNoFormClean() {
+    status_form_clean = false;
+}
+
 /* remove empty values from form to reduce request size */
 function remove_empty_form_params(form) {
+  if(!status_form_clean) { return true; }
   var s_data = jQuery(form).serializeArray();
   for(var i=0; i<s_data.length; i++){
     var f = s_data[i];

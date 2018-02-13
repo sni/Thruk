@@ -371,11 +371,10 @@ Ext.define('TP.Panlet', {
                 }
             }
         }
+        if(!this.header) { return; }
         var global = Ext.getCmp(this.panel_id);
         if(global.xdata.autohideheader || this.xdata.showborder == false) {
-            if(this.header) {
-                this.header.hide();
-            }
+            this.header.hide();
         }
         if(this.xdata.showborder == true && global.xdata.autohideheader == false) {
             this.header.show();

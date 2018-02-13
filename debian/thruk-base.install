@@ -48,6 +48,7 @@
 /usr/share/thruk/dist.ini
 /usr/share/thruk/thruk_cookie_auth.include
 /usr/share/thruk/fcgid_env.sh
+/usr/share/thruk/thruk_authd.pl
 /usr/share/thruk/lib
 /usr/share/thruk/menu.conf
 /usr/share/thruk/root

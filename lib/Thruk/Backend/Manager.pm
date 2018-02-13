@@ -1392,6 +1392,9 @@ sub _do_on_peers {
     else {
         $data = $self->_merge_answer( $result, $type );
     }
+    if($function eq 'get_logs' && !$c->config->{'logcache'}) {
+        $must_resort = 1;
+    }
 
     # additional data processing, paging, sorting and limiting
     if(scalar keys %arg > 0) {
@@ -1414,6 +1417,7 @@ sub _do_on_peers {
         }
 
         if( $arg{'pager'} ) {
+            local $ENV{'THRUK_USE_LMD'} = undef if $must_resort;
             $data = $self->_page_data(undef, $data, undef, $totalsize);
         }
     }

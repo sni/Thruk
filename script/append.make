@@ -121,6 +121,8 @@ local_install: local_patches
 	cp -rp root/thruk/usercontent/* ${DESTDIR}${SYSCONFDIR}/usercontent/
 	cp -rp support/fcgid_env.sh ${DESTDIR}${DATADIR}/
 	chmod 755 ${DESTDIR}${DATADIR}/fcgid_env.sh
+	cp -rp support/thruk_authd.pl ${DESTDIR}${DATADIR}/
+	chmod 755 ${DESTDIR}${DATADIR}/thruk_authd.pl
 	cp -rp menu.conf ${DESTDIR}${DATADIR}/
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/

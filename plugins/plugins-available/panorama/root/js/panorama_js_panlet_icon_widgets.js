@@ -184,8 +184,13 @@ Ext.define('TP.SmallWidget', {
         },
         move: function(This, x, y, eOpts) {
             var pos = This.getPosition();
-            if(x != undefined) { x = Math.floor(x); } else { x = pos[0]; }
-            if(y != undefined) { y = Math.floor(y); } else { y = pos[1]; }
+            if(x != undefined && !isNaN(x)) { x = Math.floor(x); } else { x = pos[0]; }
+            if(y != undefined && !isNaN(y)) { y = Math.floor(y); } else { y = pos[1]; }
+
+            // not moved at all, would break initial connector placement on geo maps
+            if(x == pos[0] && y == pos[1] && This.xdata.appearance.type == "connector") {
+                return;
+            }
 
             /* snap to roaster when shift key is hold */
             if(TP.isShift) {
@@ -862,7 +867,7 @@ Ext.define('TP.IconWidget', {
         /* no need for changes if we are not the active tab */
         if(!TP.isThisTheActiveTab(panel)) { return; }
         if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
-        panel.size = panel.getSize();
+        if(panel.el) { panel.size = panel.getSize(); }
     },
 
     redraw: function() {
@@ -957,6 +962,7 @@ Ext.define('TP.IconWidget', {
                 // chrome gets position totally wrong when going back to start dashboard otherwise
                 if(panel.el && panel.el.dom && panel.getPosition()[0] != Number(newX).toFixed()) {
                     window.setTimeout(Ext.bind(function(x, y) {
+                        if(!panel.el) { return; }
                         panel.el.dom.style.left = x+"px";
                         panel.el.dom.style.top = y+"px";
                     }, panel, [newX, newY]), 200);
