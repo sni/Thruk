@@ -159,6 +159,78 @@ image:source/livestatus.png[Livestatus Architecture]
 
 
 
+=== TLS Livestatus
+{% include new_since.ad version="2.20" %}
+
+TLS Livestatus is just like livestatus but encrypted with TLS/SSL. Therefor
+you need to create certificates and configure your backend(s) for example like:
+
+-------
+  <Component Thruk::Backend>
+      <peer>
+          name    = remote_site
+          type    = livestatus
+          <options>
+              peer    = tls://remote_host:6557
+              cert    = /etc/thruk/client.pem
+              key     = /etc/thruk/client.key
+              ca_file = /etc/thruk/server.crt
+              verify  = 1
+          </options>
+      </peer>
+  </Component>
+-------
+
+Adding `cert` and `key` is optional and enables client certificate authorization.
+The `ca_file` is used to verify the certificate of the server. Hostname and
+certificate verification can be disabled by setting `verify` to 0. But it's
+not recommended and makes your connection as secure as without tls.
+
+A full configuration example is here assuming an omd installation with a site named `demo`:
+
+Fetch makecert.sh from https://github.com/sni/Thruk/blob/master/support/makecert.sh
+-------
+  %> ./makecert.sh remote_host your@email.com
+-------
+
+xinetd.conf:
+-------
+  service tls_livestatus
+  {
+          type            = UNLISTED
+          socket_type     = stream
+          protocol        = tcp
+          port            = 6557
+          wait            = no
+          cps             = 100 3
+          instances       = 500
+          per_source      = 250
+          flags           = NODELAY
+          disable         = no
+          user            = demo
+          server          = /usr/bin/stunnel
+          server_args     = /omd/sites/demo/etc/stunnel/stunnel.conf
+  }
+-------
+
+stunnel.conf:
+-------
+  service                = tls_livestatus
+  exec                   = /usr/bin/timeout
+  execargs               = timeout 600 /omd/versions/default/bin/unixcat /omd/sites/demo/tmp/run/live
+  cert                   = /omd/sites/demo/etc/stunnel/server.pem
+  key                    = /omd/sites/demo/etc/stunnel/server.key
+  compression            = zlib
+  ciphers                = AES128-SHA
+  verify                 = 2
+  CAfile                 = /omd/sites/demo/etc/stunnel/client.pem
+  TIMEOUTidle            = 600
+  debug                  = debug
+  output                 = /omd/sites/demo/var/log/stunnel.log
+  syslog                 = no
+-------
+
+
 === HTTP
 
 A HTTP connection is possible between multiple Thruk installations. A

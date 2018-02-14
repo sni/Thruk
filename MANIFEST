@@ -1670,6 +1670,7 @@ support/0007-fcgish.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd
+support/makecert.sh
 support/menu_local.conf
 support/naglint.conf.example
 support/panorama2img
