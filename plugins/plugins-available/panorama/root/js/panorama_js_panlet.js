@@ -587,7 +587,9 @@ TP.panletGearHandler = function(panel) {
         }
         panel.stateful = true;
         panel.applyBorderAndBackground();
-        panel.items.getAt(0).show();
+        if(panel.items.getAt(0)) {
+            panel.items.getAt(0).show();
+        }
         panel.hideHeader(tab);
         panel.syncShadowTimeout();
         // move back
