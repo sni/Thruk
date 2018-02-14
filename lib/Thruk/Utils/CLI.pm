@@ -914,7 +914,7 @@ sub _cmd_raw {
     my $function  = $opt->{'sub'};
 
     unless(defined $c->stash->{'defaults_added'}) {
-        Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
+        Thruk::Action::AddDefaults::add_defaults($c, 1);
     }
     my @keys = @{$Thruk::Backend::Pool::peer_order};
     my $key = $keys[0];
