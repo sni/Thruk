@@ -272,7 +272,7 @@ sub kill_if_not_responding {
         alarm(0);
         if($@) {
             $c->log->warn("lmd not responding, killing with force: err - ".$@);
-            create_thread_dump($config);
+            kill('USR1', $lmd_pid);
             kill(2, $lmd_pid);
             sleep(1);
             kill(9, $lmd_pid);
@@ -288,8 +288,8 @@ sub kill_if_not_responding {
         sleep(1);
     }
     if($rc != 0) {
-        $c->log->warn("lmd not responding, killing with force: rc - ".$rc);
-        create_thread_dump($config);
+        $c->log->warn("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
+        kill('USR1', $lmd_pid);
         kill(2, $pid);
         kill(2, $lmd_pid);
         sleep(1);

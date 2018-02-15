@@ -2036,6 +2036,19 @@ var TP = {
             }, delay);
         }
     },
+    /* calls function delayed and removes duplicate calls till then */
+    delayEvents: function(scope, callback, delay, timeoutName) {
+        if(!scope) {
+            /* out of scope already, nothing to do */
+            return;
+        }
+        window.clearTimeout(TP.timeouts[timeoutName]);
+        TP.timeouts[timeoutName] = window.setTimeout(function() {
+            if(scope) {
+                callback();
+            }
+        }, delay);
+    },
     isThisTheActiveTab: function(panel) {
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();

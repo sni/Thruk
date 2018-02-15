@@ -86,6 +86,11 @@ DIV.x-tab-top button {
     left: -4px;
     top: -1px;
 }
+.reload-tab {
+    background-image: url("images/arrow_refresh.png") !important;
+    left: -2px;
+    top: -1px;
+}
 .user-tab {
     background-image: url("images/user_suit.png") !important;
     left: -2px;

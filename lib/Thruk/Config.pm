@@ -151,6 +151,7 @@ our %config = ('name'                   => 'Thruk',
                                           'show_top_pane'  => 0,        # used in _header.tt on status pages
                                           'body_class'     => '',       # used in _conf_bare.tt on config pages
                                           'thruk_debug'    => 0,
+                                          'panorama_debug' => 0,
                                           'all_in_one_css' => 0,
                                           'hide_backends_chooser' => 0,
                                           'show_sitepanel' => 'off',

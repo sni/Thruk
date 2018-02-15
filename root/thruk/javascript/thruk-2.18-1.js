@@ -1814,6 +1814,8 @@ function showBugReport(id, text) {
         Ext.getCmp(id).setHref(href);
         Ext.getCmp(id).el.dom.ondblclick    = function() { return showErrorTextPopup(raw) };
         Ext.getCmp(id).el.dom.oncontextmenu = function() { return showErrorTextPopup(raw) };
+        Ext.getCmp(id).el.dom.style.zIndex = 1000;
+        Ext.getCmp(id).el.dom.style.left   = "10px";
     }
     catch(err) {
         /* for all other pages */
@@ -1824,6 +1826,12 @@ function showBugReport(id, text) {
             obj.oncontextmenu    = function() { return showErrorTextPopup(raw) };
         }
     }
+    try {
+        Ext.getCmp('debug_mode').show();
+        Ext.getCmp('debug_mode').el.dom.style.zIndex = 1000;
+        Ext.getCmp('debug_mode').el.dom.style.left   = "90px";
+    }
+    catch(err) {}
 }
 
 /* show popup with the current error text */
@@ -1916,6 +1924,8 @@ function getErrorText(details, error) {
     } catch(err) {}
 
     /* this only works in panorama view */
+    /*
+     *removed... doesn't help much and just fills the logfile
     try {
         if(TP.logHistory) {
             text += "\n";
@@ -1929,6 +1939,7 @@ function getErrorText(details, error) {
             }
         }
     } catch(err) {}
+    */
     text += "\n";
     return(text);
 }
