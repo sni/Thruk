@@ -57,6 +57,8 @@ sub index {
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
+    $c->stash->{'panorama_debug'} = $c->config->{'panorama_debug'};
+    $c->stash->{'panorama_debug'} = 1 if $c->req->parameters->{'debug'};
 
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
     $c->stash->{'readonly'} = 1 if defined $c->req->parameters->{'readonly'};
