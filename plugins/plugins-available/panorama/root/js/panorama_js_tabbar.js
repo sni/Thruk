@@ -430,30 +430,90 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                 } else {
                     TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
                 }
-            } else {
-                var data = TP.getResponse(undefined, response);
-                menu.removeAll();
-                var found = 0;
-                if(data && data.data) {
-                    data = data.data;
-                    for(var x=0; x<data.length; x++) {
-                        if(all || (!Ext.getCmp(data[x].id)) || !Ext.getCmp(data[x].id).rendered) {
-                            found++;
-                            menu.add({text:    data[x].name,
-                                      val:     data[x].id,
-                                      icon:   url_prefix+'plugins/panorama/images/table_go.png',
-                                      handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
-                                    }
-                            );
-                        }
+                return;
+            }
+            var data = TP.getResponse(undefined, response);
+            menu.removeAll();
+            var found = 0;
+            if(data && data.data) {
+                data = data.data;
+                // add search bar
+                if(data.length > 10) {
+                    TP.addMenuSearchField(menu);
+                }
+                for(var x=0; x<data.length; x++) {
+                    if(all || (!Ext.getCmp(data[x].id)) || !Ext.getCmp(data[x].id).rendered) {
+                        found++;
+                        menu.add({text:    data[x].name,
+                                  val:     data[x].id,
+                                  icon:   url_prefix+'plugins/panorama/images/table_go.png',
+                                  handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
+                                }
+                        );
                     }
                 }
-                if(found == 0) {
-                    menu.add({text: 'none', disabled: true});
-                }
+            }
+            if(found == 0) {
+                menu.add({text: 'none', disabled: true});
             }
         }
     });
+}
+
+TP.addMenuSearchField = function(menu) {
+    var doFilter = function(This, newValue, oldValue, eOpts) {
+        TP.delayEvents(This, function() {
+            // create list of pattern
+            var searches = newValue.split(" ");
+            var cleaned  = [];
+            var pattern  = [];
+            for(var i=0; i < searches.length; i++) {
+                if(searches[i] != "") {
+                    cleaned.push(searches[i]);
+                    pattern.push(new RegExp(searches[i], 'gi'));
+                }
+            }
+            // reset if no search is done at all
+            if(cleaned.length == 0) {
+                menu.items.each(function(item, index, len) {
+                    if(item.origText) {
+                        item.setText(item.origText);
+                    }
+                    item.show();
+                });
+                return;
+            }
+            var replacePattern = new RegExp('('+cleaned.join('|')+')', 'gi');
+            menu.items.each(function(item, index, len) {
+                if(index == 0) { return; } // don't hide the search itself
+                if(!item.origText) {
+                    item.origText = item.text;
+                }
+                var found = true;
+                for(var i=0; i < pattern.length; i++) {
+                    if(!item.origText.match(pattern[i])) {
+                        found = false;
+                        break;
+                    }
+                }
+                if(found) {
+                    item.setText(item.origText.replace(replacePattern, '<b>$1</b>'));
+                    item.show();
+                } else {
+                    item.hide();
+                }
+            });
+        }, 300, 'menu_search_delay');
+    };
+    var searchField = {
+        xtype: 'textfield',
+        name: 'filter',
+        emptyText: 'filter dashboard list...',
+        listeners: {
+            change: doFilter
+        }
+    };
+    menu.add(searchField);
 }
 
 TP.getLogTab = function() {
