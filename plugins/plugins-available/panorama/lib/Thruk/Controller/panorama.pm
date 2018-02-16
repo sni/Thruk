@@ -51,7 +51,7 @@ sub index {
 
     # add current dashboard to error details, so if something goes wrong, we can log which dashboard is responsible
     $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
-    $c->stash->{errorDetails} .= sprintf("Dashboard: %s\n", $c->req->parameters->{'current_tab'});
+    $c->stash->{errorDetails} .= sprintf("Dashboard: %s\n", $c->req->parameters->{'current_tab'}) if $c->req->parameters->{'current_tab'};
 
     # add some functions
     $c->stash->{'get_static_panorama_files'} = \&Thruk::Utils::Panorama::get_static_panorama_files;
