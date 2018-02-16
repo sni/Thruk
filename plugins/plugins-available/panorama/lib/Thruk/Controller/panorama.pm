@@ -1511,10 +1511,10 @@ sub _task_show_logs {
     my $pattern         = $c->req->parameters->{'pattern'};
     my $exclude_pattern = $c->req->parameters->{'exclude'};
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
-        push @{$filter}, { message => { '~~' => $pattern }};
+        push @{$filter}, { message => { '~~' => Thruk::Utils::clean_regex($pattern) }};
     }
     if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
-        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+        push @{$filter}, { message => { '!~~' => Thruk::Utils::clean_regex($exclude_pattern) }};
     }
     my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
     return if $c->{'db'}->renew_logcache($c);

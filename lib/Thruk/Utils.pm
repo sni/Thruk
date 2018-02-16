@@ -2711,6 +2711,29 @@ sub get_cli_modules {
 
 ##############################################
 
+=head2 clean_regex
+
+    clean_regex()
+
+returns cleaned regular expression, ex.: removes trailing .*
+
+=cut
+sub clean_regex {
+    my($regex) = @_;
+
+    # trim leading and trailing whitespace
+    $regex =~ s/^\s+//mx;
+    $regex =~ s/\s+$//mx;
+
+    # trim leading and trailing .*
+    $regex =~ s/^\.\*//mx;
+    $regex =~ s/\.\*$//mx;
+
+    return($regex);
+}
+
+##############################################
+
 1;
 
 __END__
