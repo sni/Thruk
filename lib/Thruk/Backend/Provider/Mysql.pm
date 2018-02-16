@@ -3,10 +3,11 @@ package Thruk::Backend::Provider::Mysql;
 use strict;
 use warnings;
 #use Thruk::Timer qw/timing_breakpoint/;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Digest::MD5 qw/md5_hex/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
+use Thruk::Utils qw//;
 
 =head1 NAME
 
@@ -770,9 +771,9 @@ sub _get_subfilter {
             my $v = [values %{$inp}]->[0];
             if($k eq '=')                           { return '= '._quote($v); }
             if($k eq '!=')                          { return '!= '._quote($v); }
-            if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote($v)); }
-            if($k eq '~~')                          { return 'RLIKE '._quote_backslash(_quote($v)); }
-            if($k eq '!~~')                         { return 'NOT RLIKE '._quote_backslash(_quote($v)); }
+            if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
+            if($k eq '~~')                          { return 'RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
+            if($k eq '!~~')                         { return 'NOT RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
             if($k eq '>='  and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '= '.join(' OR '.$f.' = ', @{_quote($v)}); }
             if($k eq '!>=' and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '!= '.join(' OR '.$f.' != ', @{_quote($v)}); }
             if($k eq '!>=')                         { return '!= '._quote($v); }

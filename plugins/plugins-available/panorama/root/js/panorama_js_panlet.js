@@ -546,7 +546,10 @@ TP.panletGearHandler = function(panel) {
         /* set initial form values */
         panel.setFormDefaults();
         panel.stateful = false;
-        panel.items.getAt(0).hide();
+        // hide main content if already rendered
+        if(panel.items.getAt(0) != panel.gearitem) {
+            panel.items.getAt(0).hide();
+        }
 
         // add current available backends
         var backendItem = TP.getFormField(panel.gearitem.down('form'), 'backends');

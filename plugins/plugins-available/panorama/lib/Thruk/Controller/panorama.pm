@@ -49,6 +49,10 @@ sub index {
         $c->config->{'panorama_modules_loaded'} = 1;
     }
 
+    # add current dashboard to error details, so if something goes wrong, we can log which dashboard is responsible
+    $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
+    $c->stash->{errorDetails} .= sprintf("Dashboard: %s\n", $c->req->parameters->{'current_tab'}) if $c->req->parameters->{'current_tab'};
+
     # add some functions
     $c->stash->{'get_static_panorama_files'} = \&Thruk::Utils::Panorama::get_static_panorama_files;
 
@@ -1507,13 +1511,12 @@ sub _task_show_logs {
     my $pattern         = $c->req->parameters->{'pattern'};
     my $exclude_pattern = $c->req->parameters->{'exclude'};
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
-        push @{$filter}, { message => { '~~' => $pattern }};
+        push @{$filter}, { message => { '~~' => Thruk::Utils::clean_regex($pattern) }};
     }
     if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
-        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+        push @{$filter}, { message => { '!~~' => Thruk::Utils::clean_regex($exclude_pattern) }};
     }
     my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
-
     return if $c->{'db'}->renew_logcache($c);
     my $data = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
 

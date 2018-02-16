@@ -187,7 +187,7 @@ sub load_dashboard {
         $scripted = 1;
     } else {
         # static dashboard
-        $dashboard = Thruk::Utils::read_data_file($file);
+        $dashboard = Thruk::Utils::read_data_file($file, $c);
         if(!defined $dashboard) {
             my $content = Thruk::Utils::IO::read($file);
             if($content =~ m/^\#\s*title:/mx) {
@@ -241,7 +241,7 @@ sub load_dashboard {
     my $runtime      = {};
     my $runtimefile  = Thruk::Utils::Panorama::_get_runtime_file($c, $nr);
     if(-e $runtimefile) {
-       $runtime = Thruk::Utils::read_data_file($runtimefile);
+       $runtime = Thruk::Utils::read_data_file($runtimefile, $c);
     }
     for my $tab (keys %{$runtime}) {
         next if !defined $dashboard->{$tab};

@@ -477,11 +477,18 @@ sub _check_exit_reason {
     if((defined $Thruk::Request::c && $now - $Thruk::Request::c->stash->{'time_begin'} > 10)
        || $reason =~ m|Plack::Util::run_app|gmx) {
         local $| = 1;
-        my $url = $Thruk::Request::c ? $Thruk::Request::c->req->url : 'unknown url';
-        print STDERR "ERROR: got signal $sig while handling request, possible timeout in $url\n$reason\n";
+        my $c = $Thruk::Request::c;
+        my $url = $c->req->url;
+        printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
+        printf(STDERR "ERROR: User: %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
+        if($c->stash->{errorDetails}) {
+            for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
+                printf(STDERR "ERROR: %s\n", $row);
+            }
+        }
+        printf(STDERR "ERROR: Stacktrace: \n%s\n", $reason);
         # send sigusr1 to lmd to create a backtrace
-        if(defined $Thruk::Request::c && $Thruk::Request::c->config->{'use_lmd_core'}) {
-            my $c = $Thruk::Request::c;
+        if($c->config->{'use_lmd_core'}) {
             Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);
         }
     }

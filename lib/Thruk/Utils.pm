@@ -2103,14 +2103,14 @@ sub get_cron_entries_from_param {
 
 =head2 read_data_file
 
-  read_data_file($filename)
+  read_data_file($filename, [$c])
 
 return data for datafile
 
 =cut
 
 sub read_data_file {
-    my($filename) = @_;
+    my($filename, $c) = @_;
 
     my $res;
     eval {
@@ -2119,7 +2119,11 @@ sub read_data_file {
     if(!$@ && $res) {
         return($res);
     }
-    warn("error loading $filename - ".$@);
+    if($c) {
+        $c->log->warn("error loading $filename - ".$@);
+    } else {
+        warn("error loading $filename - ".$@);
+    }
     return;
 }
 
@@ -2703,6 +2707,29 @@ sub get_cli_modules {
             $mod;
         } @{$modules};
     return($modules);
+}
+
+##############################################
+
+=head2 clean_regex
+
+    clean_regex()
+
+returns cleaned regular expression, ex.: removes trailing .*
+
+=cut
+sub clean_regex {
+    my($regex) = @_;
+
+    # trim leading and trailing whitespace
+    $regex =~ s/^\s+//mx;
+    $regex =~ s/\s+$//mx;
+
+    # trim leading and trailing .*
+    $regex =~ s/^\.\*//mx;
+    $regex =~ s/\.\*$//mx;
+
+    return($regex);
 }
 
 ##############################################
