@@ -3,10 +3,11 @@ package Thruk::Backend::Provider::Mysql;
 use strict;
 use warnings;
 #use Thruk::Timer qw/timing_breakpoint/;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Digest::MD5 qw/md5_hex/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
+use Thruk::Utils qw//;
 
 =head1 NAME
 
