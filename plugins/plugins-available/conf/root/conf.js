@@ -570,7 +570,11 @@ function on_empty_click(inp) {
     if(td.value.substr(0,1) != '_') {
         td.value = '_' + td.value;
     }
-    newin.name = 'obj.'+td.value;
+    var value_input_id = newid.replace(/_key$/, '');
+    var value_input    = document.getElementById(value_input_id);
+    if(value_input) {
+        value_input.name = 'obj.'+td.value;
+    }
     return false;
 }
 
