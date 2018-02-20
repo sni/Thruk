@@ -1,3 +1,4 @@
 ﻿var initial_backends = [% json_encode(initial_backends) %];
 var backend_keys     = [% json_encode(backends) %];
+var sites            = [% json_encode(sites) %];
 var current_backend_states;

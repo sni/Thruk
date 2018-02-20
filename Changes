@@ -8,6 +8,7 @@ next:
           - add new 'problems_limit' config option
           - support tls livestatus connections
           - fix occasional wrong redirects on page reloads (#776)
+          - support unlimited backend section depth
           - Business Process:
             - fix save button in chrome (#786)
             - fix displaying configured eventhandler

@@ -814,7 +814,7 @@ sub update_site_panel_hashes {
     return unless $backends;
     return if scalar @{$backends} == 0;
 
-    # create hashes used in javascript
+    # create flat list of backend hashes used in javascript
     for my $back (@{$backends}) {
         my $peer = $c->{'db'}->get_peer_by_key($back);
         $initial_backends->{$back} = {
@@ -833,58 +833,7 @@ sub update_site_panel_hashes {
     }
 
     # create sections and subsection for site panel
-    my $sites = {
-        up       => 0,
-        disabled => 0,
-        down     => 0,
-        sections => {},
-        total    => 0,
-    };
-    for my $section (sort keys %{$c->{'db'}->{'sections'}}) {
-        if(!defined $sites->{'sections'}->{$section}) {
-            $sites->{'sections'}->{$section} = { 'up' => 0, 'disabled' => 0, 'down' => 0, 'total' => 0, subsections => {} };
-        }
-        for my $subsection (sort keys %{$c->{'db'}->{'sections'}->{$section}}) {
-            if(!defined $sites->{'sections'}->{$section}->{'subsections'}->{$subsection}) {
-                $sites->{'sections'}->{$section}->{'subsections'}->{$subsection} = { 'up' => 0, 'disabled' => 0, 'down' => 0, 'total' => 0, sites => [] };
-            }
-            for my $bname (sort keys %{$c->{'db'}->{'sections'}->{$section}->{$subsection}}) {
-                for my $p (@{$c->{'db'}->{'sections'}->{$section}->{$subsection}->{$bname}}) {
-                    my $pd = $p->{'key'};
-                    next if(!$backend_detail->{$pd} || $backend_detail->{$pd}->{'disabled'} == DISABLED_CONF);
-                    my $class = 'DOWN';
-                    $class = 'UP'   if $backend_detail->{$pd}->{'running'};
-                    $class = 'DOWN' if $c->stash->{'failed_backends'}->{$pd};
-                    $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_USER;
-                    $class = 'HID'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_PARAM;
-                    $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Utils::list($c->stash->{'param_backend'})});
-                    $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_CONF;
-                    $class = 'UP'   if($backend_detail->{$pd}->{'disabled'} == UP_CONF && $class ne 'DOWN');
-                    $backend_detail->{$pd}->{'class'} = $class;
-                    my $total_key = lc $class;
-                    if($class eq 'DIS' || $class eq 'HID') {
-                        $total_key = 'disabled';
-                    }
-                    $sites->{'sections'}->{$section}->{'subsections'}->{$subsection}->{$total_key}++;
-                    $sites->{'sections'}->{$section}->{'subsections'}->{$subsection}->{'total'}++;
-                    $sites->{'sections'}->{$section}->{'total'}++;
-                    $sites->{'sections'}->{$section}->{$total_key}++;
-                    $sites->{$total_key}++;
-                    $sites->{'total'}++;
-                    push @{$sites->{'sections'}->{$section}->{'subsections'}->{$subsection}->{'sites'}}, $pd;
-                    $initial_backends->{$pd}->{'cls'} = $class;
-                    my $last_error = ($initial_backends->{$pd}->{'name'} || '').': OK';
-                    if($c->stash->{'failed_backends'}->{$pd}) {
-                        $last_error = $c->stash->{'failed_backends'}->{$pd};
-                    }
-                    if($backend_detail->{$pd}->{'last_error'}) {
-                        $last_error = $backend_detail->{$pd}->{'last_error'};
-                    }
-                    $initial_backends->{$pd}->{'last_error'} = $last_error;
-                }
-            }
-        }
-    }
+    _calculate_section_totals($c, $c->{'db'}->{'sections'}, $backend_detail, $initial_backends);
 
     my $show_sitepanel = 'list';
        if($c->stash->{'sitepanel'} eq 'list')      { $show_sitepanel = 'list'; }
@@ -892,16 +841,72 @@ sub update_site_panel_hashes {
     elsif($c->stash->{'sitepanel'} eq 'collapsed') { $show_sitepanel = 'collapsed'; }
     elsif($c->stash->{'sitepanel'} eq 'off')       { $show_sitepanel = 'off'; }
     elsif($c->stash->{'sitepanel'} eq 'auto') {
-        if(scalar keys %{$sites->{'sections'}} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
-        elsif(($sites->{sections}->{'Default'}->{'subsections'} && scalar keys %{$sites->{sections}->{'Default'}->{'subsections'}} > 1) || scalar @{$backends} >= 10) { $show_sitepanel = 'panel'; }
+        if($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
+        elsif($c->{'db'}->{'sections'}->{'sub'} || scalar @{$backends} >= 10) { $show_sitepanel = 'panel'; }
         elsif(scalar @{$backends} == 1) { $show_sitepanel = 'off'; }
         else { $show_sitepanel = 'list'; }
     }
 
     $c->stash->{'initial_backends'} = $initial_backends;
     $c->stash->{'show_sitepanel'}   = $show_sitepanel;
-    $c->stash->{'sites'}            = $sites;
+    $c->stash->{'sites'}            = $c->{'db'}->{'sections'};
 
+    # merge all panel in a Default section
+    if($c->stash->{'show_sitepanel'} eq 'panel') {
+        my $sites = $c->stash->{'sites'};
+        if(!$sites->{'sub'} || !$sites->{'sub'}->{'Default'}) {
+            $sites->{'sub'}->{'Default'} = { peers => $sites->{'peers'} || [] };
+        }
+    }
+
+    return;
+}
+
+########################################
+sub _calculate_section_totals {
+    my($c, $section, $backend_detail, $initial_backends) = @_;
+    for my $key (qw/up disabled down total/) {
+        $section->{$key} = 0;
+    }
+
+    if($section->{'sub'}) {
+        for my $s (values %{$section->{'sub'}}) {
+            _calculate_section_totals($c, $s, $backend_detail, $initial_backends);
+            for my $key (qw/up disabled down total/) {
+                $section->{$key} += $s->{$key};
+            }
+        }
+    }
+
+    if($section->{'peers'}) {
+        for my $pd (@{$section->{'peers'}}) {
+            next if(!$backend_detail->{$pd} || $backend_detail->{$pd}->{'disabled'} == DISABLED_CONF);
+            my $class = 'DOWN';
+            $class = 'UP'   if $backend_detail->{$pd}->{'running'};
+            $class = 'DOWN' if $c->stash->{'failed_backends'}->{$pd};
+            $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_USER;
+            $class = 'HID'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_PARAM;
+            $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Utils::list($c->stash->{'param_backend'})});
+            $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_CONF;
+            $class = 'UP'   if($backend_detail->{$pd}->{'disabled'} == UP_CONF && $class ne 'DOWN');
+            $backend_detail->{$pd}->{'class'} = $class;
+            my $total_key = lc $class;
+            if($class eq 'DIS' || $class eq 'HID') {
+                $total_key = 'disabled';
+            }
+            $section->{$total_key}++;
+            $section->{'total'}++;
+            $initial_backends->{$pd}->{'cls'} = $class;
+            my $last_error = ($initial_backends->{$pd}->{'name'} || '').': OK';
+            if($c->stash->{'failed_backends'}->{$pd}) {
+                $last_error = $c->stash->{'failed_backends'}->{$pd};
+            }
+            if($backend_detail->{$pd}->{'last_error'}) {
+                $last_error = $backend_detail->{$pd}->{'last_error'};
+            }
+            $initial_backends->{$pd}->{'last_error'} = $last_error;
+        }
+    }
     return;
 }
 
