@@ -31,7 +31,7 @@ prepare:
 	$(MAKE) extra_prepare
 
 clean:
-	docker-compose stop
+	docker-compose kill
 	docker-compose rm -f
 	-docker network prune -f
 	$(MAKE) extra_clean
