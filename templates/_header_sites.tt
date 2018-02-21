@@ -1,10 +1,31 @@
-﻿<table border=0 cellpadding=0 cellspacing=0 class="site_panel_container"><tr><td>
+﻿[% BLOCK site_btn %]
+[% b = initial_backends.$id %]
+[% IF b.exists('cls') && b.cls != "" %]
+<div class="backend">
+  <input id="button_[% id %]" class="button_peer[% b.cls %] backend_[% id %]" value="[% b.name | html %]" title="[% b.last_error | html %]" onclick="toggleBackend('[% id %]')" type="button">
+</div>
+[% END %]
+[% END %]
+
+<table border=0 cellpadding=0 cellspacing=0 class="site_panel_container"><tr><td>
 [% IF !hide_backends_chooser && sites != "" %]
-<script type="text/javascript">
-<!--
-var sites = [% json_encode(sites) %];
-print_site_panel_header();
--->
-</script>
+  [% IF show_sitepanel == 'list' %]
+      [% FOREACH b = backends %]
+        [% PROCESS site_btn id=b %]
+      [% END %]
+  [% ELSIF show_sitepanel == 'panel' || show_sitepanel == 'collapsed' %]
+    [% IF backend_chooser == "switch" && param_backend.list.size > 0 && param_backend.list.0 != "" %]
+      [% b = param_backend.list.0 %]
+      <div class='backend'><input type='button' class='button_peerUP' value='[% initial_backends.$b.name | html %]' onClick='toggleSitePanel()'></div>
+      [% IF sites.disabled > 0 %]
+        <div class='backend'><input type='button' class='button_peerDIS' value='[% sites.disabled %] more' onClick='toggleSitePanel()'></div>
+      [% END %]
+    [% ELSE %]
+      <div class='backend'><input type='button' class='[% IF sites.up > 0 %]button_peerUP[% ELSE %]button_peerDIS[% END %]' value='[% sites.up %] up' onClick='toggleSitePanel()'></div>
+      <div class='backend'><input type='button' class='button_peerDIS' value='[% sites.disabled %] disabled' onClick='toggleSitePanel()'></div>
+      <div class='backend'><input type='button' class='[% IF sites.down > 0 %]button_peerDOWN[% ELSE %]button_peerDIS[% END %]' value='[% sites.down %] down' onClick='toggleSitePanel()'></div>
+    [% END %]
+    <div id="site_panel" class="site_panel_[% show_sitepanel %]" style="display: none;"></div>
+  [% END %]
 [% END %]
 </td></tr></table>

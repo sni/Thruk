@@ -1575,18 +1575,6 @@ sub _task_site_status {
         data    => [],
     };
 
-    # get sections
-    for my $category (keys %{$c->{'db'}->{'sections'}}) {
-        for my $section (keys %{$c->{'db'}->{'sections'}->{$category}}) {
-            for my $name (keys %{$c->{'db'}->{'sections'}->{$category}->{$section}}) {
-                my $backends = $c->{'db'}->{'sections'}->{$category}->{$section}->{$name};
-                for my $b (@{$backends}) {
-                    $c->stash->{'pi_detail'}->{$b->{'key'}}->{'category'} = $category;
-                    $c->stash->{'pi_detail'}->{$b->{'key'}}->{'section'}  = $section;
-                }
-            }
-        }
-    }
     for my $key (@{$c->stash->{'backends'}}) {
         next if($backend_filter && !defined $backend_filter->{$key});
         my $b    = $c->stash->{'backend_detail'}->{$key};
@@ -1606,9 +1594,11 @@ sub _task_site_status {
             site     => $b->{'name'},
             version  => $program_version,
             runtime  => $runtime,
+            section  => $b->{'section'},
+            category => $b->{'section'}, # keep for backwards compatibility
         };
         for my $attr (qw/enable_notifications execute_host_checks execute_service_checks
-                      enable_event_handlers process_performance_data category section/) {
+                      enable_event_handlers process_performance_data/) {
             $row->{$attr} = $d->{$attr};
         }
         push @{$json->{'data'}}, $row;

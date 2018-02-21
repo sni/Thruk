@@ -12,13 +12,12 @@ wait_start:
 	   if [ $$($(THRUK) -l 2>&1 | grep -v ^Def | grep -v ^- | grep -v ERROR | grep OK | wc -l) -eq $(EXPECTED_BACKENDS) ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "ERROR: startup failed"; docker ps; $(THRUK) -l; exit 1; fi; \
 	done
+	$(THRUK) -l
 
 test: wait_start
-	$(THRUK) -l
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t
 
 test_verbose: wait_start
-	$(THRUK) -l
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
 
 server:
@@ -32,7 +31,7 @@ prepare:
 	$(MAKE) extra_prepare
 
 clean:
-	docker-compose stop
+	docker-compose kill
 	docker-compose rm -f
 	-docker network prune -f
 	$(MAKE) extra_clean

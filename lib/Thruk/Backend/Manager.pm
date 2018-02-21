@@ -76,6 +76,7 @@ sub init {
     return if scalar @{ $self->{'backends'} } == 0;
 
     $self->{'sections'} = {};
+    $self->{'sections_depth'} = 0;
     for my $peer (@{$self->get_peers(1)}) {
         $self->{'by_key'}->{$peer->{'key'}}   = $peer;
         $self->{'by_name'}->{$peer->{'name'}} = $peer;
@@ -85,15 +86,28 @@ sub init {
         } else {
             $self->{'local_hosts'}->{$peer->{'key'}} = 1;
         }
-        my($subsection,$section) = split(/\//mx, $peer->{'section'}, 2);
-        if(!$section) {
-            $section    = $subsection;
-            $subsection = 'Default';
+        my @sections = split(/\/+/mx, $peer->{'section'});
+        if(scalar @sections == 0) {
+            @sections = ();
+        } elsif($sections[0] eq 'Default') {
+            shift @sections;
         }
-        if(!defined $self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}}) {
-            $self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}} = [];
+        my $depth = scalar @sections;
+        $self->{'sections_depth'} = $depth if $self->{'sections_depth'} < $depth;
+        my $cur_section = $self->{'sections'};
+        for my $section (@sections) {
+            if(!$cur_section->{'sub'}) {
+                $cur_section->{'sub'} = {};
+            }
+            if(!$cur_section->{'sub'}->{$section}) {
+                $cur_section->{'sub'}->{$section} = {};
+            }
+            $cur_section = $cur_section->{'sub'}->{$section};
         }
-        push @{$self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}}}, $peer;
+        if(!$cur_section->{'peers'}) {
+            $cur_section->{'peers'} = [];
+        }
+        push @{$cur_section->{'peers'}}, $peer->{'key'};
     }
 
     $self->{'initialized'} = 1;

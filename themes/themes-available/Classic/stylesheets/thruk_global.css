@@ -146,6 +146,10 @@ DIV#site_panel {
  font-size:11px;
 }
 
+DIV.site_panel_collapsed {
+ min-width: 800px;
+}
+
 TABLE.site_panel {
   background: #F0F1EE;
   border: none;
@@ -283,7 +287,8 @@ input.button_peerWARN:hover,
 input.button_peerUPDIS:hover,
 input.button_peerDOWNDIS:hover,
 button.thruk_btn.top_nav_pref_button:hover,
-button.thruk_btn.top_nav_logout_button:hover {
+button.thruk_btn.top_nav_logout_button:hover,
+input.button_peer_selected {
   border-color: #555555;
 }
 

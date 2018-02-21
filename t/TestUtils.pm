@@ -297,7 +297,7 @@ sub test_page {
         return $return;
     }
 
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(.*)$/mxo) {
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         # is it a background job page?
         wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
@@ -321,7 +321,7 @@ sub test_page {
             }
         }
     }
-    elsif(defined $return->{'content'} and $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(.*)$/mxo) {
+    elsif(defined $return->{'content'} and $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         # is it a background job page?
         wait_for_job($1);
         my $location = "/".$product."/cgi-bin/job.cgi?job=".$1;
@@ -591,7 +591,7 @@ sub get_user {
 
 #########################
 sub wait_for_job {
-    my $job = shift;
+    my $job   = shift;
     my $start  = time();
     my $config = Thruk::Config::get_config();
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
