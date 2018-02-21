@@ -67,6 +67,23 @@ sub add_section {
     return;
 }
 
+##############################################
+
+=head2 insert_section
+
+  insert_section()
+
+insert a new section at the given index
+
+=cut
+sub insert_section {
+    my ($idx, %section) = @_;
+    $section{'links'} = [];
+    $section{'icon'}  = '' unless defined $section{'icon'};
+    splice(@{$Thruk::Utils::Menu::navigation}, $idx, 0, \%section);
+    return;
+}
+
 
 ##############################################
 
