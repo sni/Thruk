@@ -61,6 +61,12 @@ You can add new sections with:
 add_section('name' => 'General');
 -----
 
+You can insert sections at a given position with:
+
+-----
+insert_section(2, 'name' => 'Projects');
+-----
+
 
 === Adding a new Link
 
