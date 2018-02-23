@@ -1668,6 +1668,7 @@ support/0005-thruk_auth.patch
 support/0006-logrotate.patch
 support/0007-fcgish.patch
 support/apache_fcgid.conf
+support/convert_old_datafile.pl
 support/fcgid_env.sh
 support/htpasswd
 support/makecert.sh
