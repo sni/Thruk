@@ -210,24 +210,25 @@ TP.iconShowEditDialog = function(panel) {
                                 }
                             }},
 
-                            { xtype: 'label', text:  'lon:', style: 'margin-left: 0; margin-right: 2px;', hidden: !tab.map },
-                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: (panel.xdata.map ? panel.xdata.map.lon : 0), hidden: !tab.map, listeners: {
-                                change: function(This, newValue, oldValue, eOpts) {
-                                    if(!panel.noMoreMoves) {
-                                        panel.noMoreMoves = true;
-                                        var lat = Number(This.up('panel').getValues().lat);
-                                        panel.moveToMapLonLat(undefined, false, {map:{lon: newValue, lat: lat}, layout:{}, appearance:{}});
-                                        panel.noMoreMoves = false;
-                                    }
-                                }
-                            }},
-                            { xtype: 'label', text:  'lat:', style: 'margin-left: 10px; margin-right: 2px;', hidden: !tab.map },
+                            { xtype: 'label', text:  'lat:', style: 'margin-left: 0px; margin-right: 2px;', hidden: !tab.map },
                             { xtype: 'numberfield', name:  'lat', width: 140, decimalPrecision: 14, value: (panel.xdata.map ? panel.xdata.map.lat : 0), hidden: !tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
                                         var lon = Number(This.up('panel').getValues().lon);
                                         panel.moveToMapLonLat(undefined, false, {map:{lon: lon, lat: newValue}, layout:{}, appearance:{}});
+                                        panel.noMoreMoves = false;
+                                    }
+                                }
+                            }},
+
+                            { xtype: 'label', text:  'lon:', style: 'margin-left: 10px; margin-right: 2px;', hidden: !tab.map },
+                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: (panel.xdata.map ? panel.xdata.map.lon : 0), hidden: !tab.map, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    if(!panel.noMoreMoves) {
+                                        panel.noMoreMoves = true;
+                                        var lat = Number(This.up('panel').getValues().lat);
+                                        panel.moveToMapLonLat(undefined, false, {map:{lon: newValue, lat: lat}, layout:{}, appearance:{}});
                                         panel.noMoreMoves = false;
                                     }
                                 }
