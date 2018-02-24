@@ -898,45 +898,63 @@ Ext.define('TP.Pantab', {
         var pos = [evt.getX(), evt.getY()];
         var nr = tab.id.replace(/^tabpan-tab_/, '');
 
-        var menu_items = [{
+        var menu_items = [];
+        if(!readonly && !tab.readonly) {
+            menu_items = menu_items.concat([{
+                    text:   'New',
+                    icon:   url_prefix+'plugins/panorama/images/cog_add.png',
+                    hideOnClick: false,
+                    menu:    TP.addPanletsMenu({open: 'right'}),
+                    disabled: tab.xdata.locked,
+                    hidden:  hidePasteAndNew
+                }]);
+        }
+
+
+        menu_items = menu_items.concat([{
                 text:   'Refresh',
                 icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                 handler: function() { TP.refreshAllSitePanel(tab) }
-            }, '-', {
-                text:   'Fullscreen',
+            }, {
+                text:   'Display',
                 icon:   url_prefix+'plugins/panorama/images/picture_empty.png',
-                handler: function() {
-                    var element = Ext.getBody().dom;
-                    try {
-                        BigScreen.request(element);
-                    } catch(err) {
-                        TP.logError(tab.id, "bigscreenException", err);
-                    }
-                },
-                hidden:  !!BigScreen.element
-            }, {
-                text:   'Exit Fullscreen',
-                icon:   url_prefix+'plugins/panorama/images/pictures.png',
-                handler: function() { BigScreen.exit(); },
-                hidden:  !BigScreen.element
-            }, {
-                text:       'Open Tab Mode',
-                icon:       url_prefix+'plugins/panorama/images/application_put.png',
-                href:       'panorama.cgi#'+nr,
-                tooltip:    'open this dashboard in tab mode',
-                hidden:     !one_tab_only
-            }, {
-                text:       'Direct Link',
-                icon:       url_prefix+'plugins/panorama/images/application_put.png',
-                href:       'panorama.cgi?'+Ext.Object.toQueryString({map: tab.xdata.title}),
-                hrefTarget: '_blank',
-                tooltip:    'open this dashboard only (new window)',
-                hidden:    !!one_tab_only
-            }, {
-                text:   'Debug Information',
-                icon:   url_prefix+'plugins/panorama/images/information.png',
-                handler: function() { thruk_debug_window_handler() },
-                hidden:  (!thruk_debug_js || thruk_demo_mode)
+                hideOnClick: false,
+                menu: [{
+                    text:   'Fullscreen',
+                    icon:   url_prefix+'plugins/panorama/images/picture_empty.png',
+                    handler: function() {
+                        var element = Ext.getBody().dom;
+                        try {
+                            BigScreen.request(element);
+                        } catch(err) {
+                            TP.logError(tab.id, "bigscreenException", err);
+                        }
+                    },
+                    hidden:  !!BigScreen.element
+                }, {
+                    text:   'Exit Fullscreen',
+                    icon:   url_prefix+'plugins/panorama/images/pictures.png',
+                    handler: function() { BigScreen.exit(); },
+                    hidden:  !BigScreen.element
+                }, {
+                    text:       'Open Tab Mode',
+                    icon:       url_prefix+'plugins/panorama/images/application_put.png',
+                    href:       'panorama.cgi#'+nr,
+                    tooltip:    'open this dashboard in tab mode',
+                    hidden:     !one_tab_only
+                }, {
+                    text:       'Direct Link',
+                    icon:       url_prefix+'plugins/panorama/images/application_put.png',
+                    href:       'panorama.cgi?'+Ext.Object.toQueryString({map: tab.xdata.title}),
+                    hrefTarget: '_blank',
+                    tooltip:    'open this dashboard only (new window)',
+                    hidden:    !!one_tab_only
+                }, {
+                    text:   'Debug Information',
+                    icon:   url_prefix+'plugins/panorama/images/information.png',
+                    handler: function() { thruk_debug_window_handler() },
+                    hidden:  (!thruk_debug_js || thruk_demo_mode)
+                }]
             }, '-', {
                 text:   'Save Dashboard',
                 icon:    url_prefix+'plugins/panorama/images/disk.png',
@@ -946,18 +964,11 @@ Ext.define('TP.Pantab', {
                 icon:    url_prefix+'plugins/panorama/images/folder_picture.png',
                 handler: function() { TP.loadDashboardWindow() },
                 hidden:  !!one_tab_only
-            }];
+        }]);
         if(!readonly && !tab.readonly) {
             menu_items = menu_items.concat([
-                 ,{
+                {
                     xtype: 'menuseparator',
-                    hidden:  hidePasteAndNew
-                }, {
-                    text:   'New',
-                    icon:   url_prefix+'plugins/panorama/images/cog_add.png',
-                    hideOnClick: false,
-                    menu:    TP.addPanletsMenu({open: 'right'}),
-                    disabled: tab.xdata.locked,
                     hidden:  hidePasteAndNew
                 }, {
                     text:   'Paste',
