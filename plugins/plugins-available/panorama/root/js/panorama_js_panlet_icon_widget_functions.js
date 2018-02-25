@@ -554,12 +554,11 @@ function availability(panel, opts) {
 }
 
 
-TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
-    window.clearTimeout(TP.timeouts['timeout_icon_move']);
-
+TP.iconMoveHandler = function(icon, x, y) {
     var deltaX = x - icon.xdata.layout.x;
     var deltaY = y - icon.xdata.layout.y;
     if(isNaN(deltaX) || isNaN(deltaY)) { return; }
+    if(deltaX == 0 && deltaY == 0) { return; }
 
     /* update settings window */
     if(TP.iconSettingsWindow) {
@@ -577,7 +576,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     }
     /* update label */
     if(icon.setIconLabel) {
-        icon.setIconLabel();
+        icon.setIconLabelPosition();
     }
 
     /* moving with closed settings window */
@@ -604,9 +603,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     if(icon.dragEl1) { icon.dragEl1.resetDragEl(); }
     if(icon.dragEl2) { icon.dragEl2.resetDragEl(); }
 
-    if(!noUpdateLonLat && (deltaX != 0 || deltaY != 0)) {
-        icon.updateMapLonLat();
-    }
+    icon.updateMapLonLat();
     icon.saveState();
 }
 

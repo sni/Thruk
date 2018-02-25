@@ -260,9 +260,6 @@ Ext.define('TP.Pantab', {
         delete state.xdata.locked;
         delete state.xdata.refresh_txt;
         delete state.xdata.map_choose;
-        if(this.map) {
-            this.fixMapIcons();
-        }
         return state;
     },
     saveIconsStates: function() {
@@ -323,17 +320,6 @@ Ext.define('TP.Pantab', {
             });
         }
     },
-    fixMapIcons: function() {
-        if(!this.map) { return; }
-        var This = this;
-        var panels = TP.getAllPanel(This);
-        for(var nr=0; nr<panels.length; nr++) {
-            var panel = panels[nr];
-            if(panel.el && panel.xdata.map == undefined && panel.xdata.layout != undefined) {
-                panel.updateMapLonLat();
-            }
-        }
-    },
     moveMapIcons: function(movedOnly) {
         if(!this.map) { return; }
         var This = this;
@@ -342,7 +328,7 @@ Ext.define('TP.Pantab', {
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
-            if(panel.xdata.map != undefined) {
+            if(panel.xdata.layout.lon != undefined) {
                 panel.moveToMapLonLat(size, movedOnly);
             }
         }
@@ -676,13 +662,9 @@ Ext.define('TP.Pantab', {
             }
             tab.mapEl.lastCenter = [mapData.center[0], mapData.center[1], mapData.zoom];
             tab.map = Ext.create('GeoExt.panel.Map', mapData);
-            map.events.register("movestart", map, function() {
-                tab.fixMapIcons();
-            });
             map.events.register("move", map, function() {
                 tab.moveMapIcons(true);
             });
-            tab.fixMapIcons();
             controlsDiv.dom.style.display = "";
             tab.lockButton = controlsDiv.createChild('<div class="lockButton unlocked">', controlsDiv.dom.childNodes[0]);
             tab.lockButton.on("click", function(evt) {
