@@ -25,7 +25,7 @@ var $case = function() {
     click(_span("Icons & Widgets"));
     click(_span("Line / Arrow / Watermark"));
 
-    mouseClickXY(200,100);
+    mouseClickXY(200,130);
 
     isVisible(_textbox('host'));
     click(_div('/trigger/', _rightOf(_textbox('host'))));
@@ -34,19 +34,44 @@ var $case = function() {
     click(_div('/trigger/', _rightOf(_textbox('service'))));
     _setValue(_textbox("service"), "Example Check");
 
+    click(_span("Appearance"));
+    _assertEqual("62.7553515625", _getValue(_textbox("lat1")));
+    _assertEqual("-6.0793359375", _getValue(_textbox("lon1")));
+    _assertEqual("62.7553515625", _getValue(_textbox("lat2")));
+    _assertEqual("2.7097265625", _getValue(_textbox("lon2")));
+
+    mouseMoveXY(300,300);
     screenRegion.waitForImage("arrow_map_geo.png", 3).mouseMove();
 
     click(_span("save"));
 
-    mouseClickXY(300,300);
-
-    //openDebugConsole();
     screenRegion.waitForImage("arrow_map_geo.png", 3).mouseMove();
+    mouseMoveXY(300,300);
+
+    mouseRightClickXY(200,130);
+    click(_span("Settings"));
+    click(_span("Appearance"));
+    _setValue(_textbox("lat1"), "48.858222");
+    _setValue(_textbox("lon1"), "2.2945");
+    _setValue(_textbox("lat2"), "51.50064");
+    _setValue(_textbox("lon2"), "-0.12445");
+    click(_span("save"));
+
+    screenRegion.waitForImage("geo_paris_london.png", 3).mouseMove();
+
+    mouseRightClickXY(200,130);
+    click(_span("Settings"));
+    click(_span("Appearance"));
+
+    _assertEqual("48.858222", _getValue(_textbox("lat1")));
+    _assertEqual("2.2945", _getValue(_textbox("lon1")));
+    _assertEqual("51.50064", _getValue(_textbox("lat2")));
+    _assertEqual("-0.12445", _getValue(_textbox("lon2")));
 
     // remove dashboard
     thruk_remove_panorama_dashboard("Arrow Element");
 
-    testCase.endOfStep("panorama arrow widget geo", 120);
+    testCase.endOfStep("panorama arrow widget geo", 180);
 };
 
 runTest($case);

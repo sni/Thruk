@@ -30,6 +30,13 @@ var $case = function() {
     isVisible(_textbox('service'));
     click(_div('/trigger/', _rightOf(_textbox('service'))));
     _setValue(_textbox("service"), "Example Check");
+
+    click(_span("Appearance"));
+    _assertEqual("62.7553515625", _getValue(_textbox("connectorfromx")));
+    _assertEqual("-6.0793359375", _getValue(_textbox("connectorfromy")));
+    _assertEqual("62.7553515625", _getValue(_textbox("connectortox")));
+    _assertEqual("2.7097265625", _getValue(_textbox("connectortox")));
+
     click(_span("save"));
 
     mouseClickXY(300,300);

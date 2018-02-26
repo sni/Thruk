@@ -39,6 +39,11 @@ function openDebugConsole() {
     env.sleep(99999);
 }
 
+function mouseMoveXY($x, $y) {
+    var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
+    region.mouseMove();
+}
+
 function mouseClickXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
     region.click();
