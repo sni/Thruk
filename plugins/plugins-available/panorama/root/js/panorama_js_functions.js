@@ -283,8 +283,6 @@ var TP = {
             config.type = state[config.conf.id].xdata.cls;
         }
         if(config.type == undefined) {
-            debug(config);
-            var err  = new Error("no type!");
             var text = "";
             try {
                 delete config['tb'];
@@ -292,8 +290,8 @@ var TP = {
             } catch(err) {
                 text = ""+err;
             }
+            var err  = new Error("no type in "+text);
             TP.logError("global", "noTypeException", err);
-            TP.log("[global] "+text);
             throw err;
         }
         // fake state (probably cloned)
