@@ -2,11 +2,6 @@ _dynamicInclude($includeFolder);
 _include('../_include.js');
 
 var $case = function() {
-    if(isChrome()) {
-        _log("SKIP: test is broken in chrome");
-        return;
-    }
-
     thruk_login();
     thruk_open_panorama();
 
@@ -50,7 +45,7 @@ var $case = function() {
 
     screenRegion.waitForImage("island_map_green.png", 3).mouseMove();
 
-    testCase.endOfStep("panorama geo map switch I", 60);
+    testCase.endOfStep("panorama geo map switch I", 90);
 
     thruk_panorama_exit();
     thruk_open_panorama();
@@ -78,7 +73,7 @@ var $case = function() {
     // remove dashboard
     thruk_remove_panorama_dashboard("GeoMap Test");
 
-    testCase.endOfStep("panorama geo map switch II", 60);
+    testCase.endOfStep("panorama geo map switch II", 90);
 };
 
 runTest($case);
