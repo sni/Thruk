@@ -590,8 +590,10 @@ Ext.define('TP.SmallWidget', {
                 }
             });
             el.dd.addListener('dragend', function(This, evt) {
-                panel.dragHint.destroy();
-                panel.dragHint = undefined;
+                if(panel.dragHint) {
+                    panel.dragHint.destroy();
+                    panel.dragHint = undefined;
+                }
                 tab.enableMapControlsTemp();
                 TP.isShift = is_shift_pressed(evt);
                 /* prevents opening link after draging */
