@@ -771,7 +771,7 @@ Ext.define('TP.Pantab', {
         var panels = TP.getAllPanel(tab);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
-            if(panel.el && panel.xdata.layout != undefined && (panel.xdata.layout.lon == undefined || panel.xdata.layout.lon == "")) {
+            if(panel.el && panel.xdata.layout != undefined && (panel.xdata.layout.lon == undefined || panel.xdata.layout.lon == "")) {
                 panel.updateMapLonLat();
             }
         }
