@@ -54,6 +54,12 @@ function mouseRightClickXY($x, $y) {
     region.rightClick();
 }
 
+function mouseDrag($x1, $y1, $x2, $y2) {
+    var region1 = new RegionRectangle($x1-10,$y1-10,$x1+10,$y1+10);
+    var region2 = new RegionRectangle($x2-10,$y2-10,$x2+10,$y2+10);
+    region1.dragAndDropTo(region2);
+}
+
 function thruk_login() {
     // workaround problem where login fails on first try
     var $lastUrl = testCase.getLastURL();
