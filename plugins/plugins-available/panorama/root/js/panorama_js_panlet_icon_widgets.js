@@ -897,6 +897,9 @@ Ext.define('TP.IconWidget', {
         panel.redrawOnly = true;
         panel.destroy();
         TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
+            // meanwhile removed?
+            if(!TP.cp.state[key]) { return; }
+            // else redraw
             panel = TP.add_panlet({id:key, skip_state:true, tb:tab, autoshow:true}, false);
             TP.updateAllIcons(tab, panel.id);
         }, 50);
