@@ -203,8 +203,6 @@ Ext.define('TP.Pantab', {
             TP.log('['+tab.id+'] added tab - refresh: '+tab.xdata.refresh);
             if(!tab.title) {
                 tab.applyXdata();
-            } else {
-                tab.setBackground(tab.xdata);
             }
             var header = tab.getDockedItems()[0];
             if(header) { header.hide() }
@@ -603,13 +601,6 @@ Ext.define('TP.Pantab', {
                 }
                 return;
             }
-            Ext.Loader.setConfig({
-                enabled: true,
-                disableCaching: false,
-                paths: {
-                    GeoExt: url_prefix+"plugins/panorama/geoext2-2.0.2/src/GeoExt"
-                }
-            });
             var attribution = wmsData[2];
             if(attribution == undefined) {
                 var url = xdata.wms_provider.replace(/\ .*$/, '');
@@ -649,6 +640,10 @@ Ext.define('TP.Pantab', {
                         if(This.map.lastZoomLevel != undefined && zoom != This.map.lastZoomLevel) {
                             movedOnly = false; /* recalculation required */
                         }
+
+                        // if we recently switched from image to geo map or vice versa, we need to update coordinates
+                        tab.fixIconsMapPosition(xdata);
+
                         This.map.lastZoomLevel = zoom;
                         tab.moveMapIcons(movedOnly);
                         tab.saveState();
@@ -764,16 +759,22 @@ Ext.define('TP.Pantab', {
         }
 
         // if we recently switched from image to geo map or vice versa, we need to update coordinates
+        tab.fixIconsMapPosition(xdata);
+
+        return;
+    },
+    // set current position to each panel which does not have a lon/lat yet
+    fixIconsMapPosition: function(xdata) {
+        var tab = this;
+        if(xdata == undefined) { xdata = tab.xdata; }
+        if(!xdata.map) { return; }
         var panels = TP.getAllPanel(tab);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
-            if(xdata.map) {
-                if(panel.el && panel.xdata.layout != undefined && (panel.xdata.layout.lon == undefined || panel.xdata.layout.lon == "")) {
-                    panel.updateMapLonLat();
-                }
+            if(panel.el && panel.xdata.layout != undefined && (panel.xdata.layout.lon == undefined || panel.xdata.layout.lon == "")) {
+                panel.updateMapLonLat();
             }
         }
-        return;
     },
     applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y) {
         var tab = this;

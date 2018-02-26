@@ -2011,7 +2011,7 @@ var TP = {
         nr = "tabpan-tab_"+nr;
         return(nr);
     },
-    reduceDelayEvents: function(scope, callback, delay, timeoutName) {
+    reduceDelayEvents: function(scope, callback, delay, timeoutName, skipInitialRun) {
         var now = (new Date()).getTime();
         if(!scope) {
             /* probably out of scope already, run it a last time */
@@ -2023,7 +2023,9 @@ var TP = {
         window.clearTimeout(TP.timeouts[timeoutName]);
         if(now > scope.lastEventRun[timeoutName] + delay) {
             scope.lastEventRun[timeoutName] = now;
-            callback();
+            if(!skipInitialRun) {
+                callback();
+            }
         } else {
             TP.timeouts[timeoutName] = window.setTimeout(function() {
                 if(scope) {

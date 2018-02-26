@@ -469,6 +469,12 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         return;
     }
 
+    var changedListener = function(This, newValue, oldValue, eOpts) {
+        TP.reduceDelayEvents(tab, function() {
+            applyBackground();
+        }, 100, 'timeout_tab_background_change', true);
+    }
+
     var map_choose = "static";
     if(tab.xdata.background_color != undefined && tab.xdata.background_color != "") {
         map_choose = "color";
@@ -505,7 +511,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             defaultType: 'radiofield',
             defaults:   {
                 flex: 1,
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: changedListener }
             },
             layout:      'hbox',
             items: [{
@@ -536,7 +542,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 name:           'background_color',
                 flex:            1,
                 value:           tab.xdata.background_color || '',
-                listeners:     { change: function() { applyBackground() } }
+                listeners:     { change: changedListener }
             }]
         }, {
             fieldLabel:     'WMS Provider',
@@ -551,14 +557,14 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             editable:        false,
             forceSelection:  true,
             hidden:          map_choose != 'map' ? true : false,
-            listeners:     { change: function(This) { applyBackground() } }
+            listeners:     { change: changedListener }
         }, {
             fieldLabel:  'Map Center',
             xtype:       'fieldcontainer',
             id:          'mapcenter',
             layout:      'hbox',
             defaults:   {
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: changedListener }
             },
             items: [
             { xtype: 'label', text:  'Lon/Lat:', style: 'margin-left: 0px; margin-right: 2px;', cls: 'x-form-item-label' },
@@ -591,7 +597,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             xtype:      'fieldcontainer',
             layout:     'hbox',
             defaults: {
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: changedListener }
             },
             items: [{
                 xtype:          'combobox',
@@ -620,7 +626,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         return(true);
                     },
-                    change: function(This) { applyBackground() }
+                    change: changedListener
                 }
             },
             { xtype: 'label', text:  'Scale:', style: 'margin-left: 10px; margin-right: 2px;', cls: 'x-form-item-label' },
@@ -644,7 +650,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             xtype:          'fieldcontainer',
             layout:         'hbox',
             defaults: {
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: changedListener }
             },
             items: [
             { xtype: 'label', text: 'Offset X:', style: 'margin-right: 2px;', cls: 'x-form-item-label' },
@@ -757,12 +763,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     defaults:      { anchor: '-12', labelWidth: 130 },
                     items:           dashboardItems
             }]
-        }],
-        listeners: {
-            afterrender: function() {
-                applyBackground(tab.xdata);
-            }
-        }
+        }]
     };
 
     /* Styles Settings Tab */
@@ -1060,6 +1061,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
+    changedListener();
     tab_win_settings.show();
     mask.destroy();
 };

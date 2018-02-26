@@ -678,6 +678,7 @@ Ext.define('TP.SmallWidget', {
         var tab   = Ext.getCmp(panel.panel_id);
         if(xdata == undefined) { xdata = panel.xdata; }
         if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
+console.log("moveToMapLonLat")
         if(xdata.layout == undefined) { xdata.layout = {}; }
         if(xdata.appearance.type == "connector" && !movedOnly) {
             var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(xdata.layout.lon),  lat: Number(xdata.layout.lat)});
