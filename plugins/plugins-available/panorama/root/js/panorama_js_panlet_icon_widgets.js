@@ -735,7 +735,7 @@ Ext.define('TP.SmallWidget', {
             panel.setPagePosition(x, y);
         }
         panel.resumeEvents();
-        panel.setIconLabel();
+        panel.setIconLabelPosition();
         return(panel);
     }
 });

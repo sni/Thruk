@@ -98,6 +98,13 @@ Ext.define('TP.Pantab', {
             if(startPage && startPage.id != This.id) {
                 startPage.destroy();
             }
+            // close map controls from previous tab
+            if(TP.initial_active_tab && TP.initial_active_tab != This.id) {
+                var prevTab = Ext.getCmp(TP.initial_active_tab);
+                if(prevTab && prevTab.disableMapControls) {
+                    prevTab.disableMapControls();
+                }
+            }
 
             /* close tooltip */
             if(TP.iconTip) { TP.iconTip.hide() }
@@ -589,7 +596,6 @@ Ext.define('TP.Pantab', {
             if(!tab.mapEl) {
                 tab.mapEl = body.createChild('<div id="'+tab.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
             }
-            var changed = false;
             if(tab.mapEl.lastWMSProvider != undefined && tab.mapEl.lastWMSProvider == xdata.wms_provider) {
                 if(!tab.mapEl.lastCenter || tab.mapEl.lastCenter[0] != xdata.map.lon || tab.mapEl.lastCenter[1] != xdata.map.lat || tab.mapEl.lastCenter[2] != xdata.map.zoom) {
                     tab.map.map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom);
@@ -756,6 +762,18 @@ Ext.define('TP.Pantab', {
             tab.bgDragEl.dom.style.backgroundImage  = "";
             tab.bgDragEl.dom.style.backgroundRepeat = "";
         }
+
+        // if we recently switched from image to geo map or vice versa, we need to update coordinates
+        var panels = TP.getAllPanel(tab);
+        for(var nr=0; nr<panels.length; nr++) {
+            var panel = panels[nr];
+            if(xdata.map) {
+                if(panel.el && panel.xdata.layout != undefined && (panel.xdata.layout.lon == undefined || panel.xdata.layout.lon == "")) {
+                    panel.updateMapLonLat();
+                }
+            }
+        }
+        return;
     },
     applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y) {
         var tab = this;
