@@ -279,7 +279,7 @@ Ext.define('TP.IconLabel', {
                         var newX = pos[0]+diffX;
                         var newY = pos[1]+diffY;
                         panel.setRawPosition(newX, newY);
-                        panel.updateMapLonLat(true);
+                        panel.updateMapLonLat(undefined, "center");
                         // update settings window
                         if(TP.iconSettingsWindow) {
                             Ext.getCmp('layoutForm').getForm().setValues({x:newX, y:newY});

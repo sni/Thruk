@@ -153,7 +153,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         panel.setRawPosition(xdata.layout.x, xdata.layout.y);
         // update saved coordinates on first rendering
         if(xdata.layout.lon1 == "") {
-            panel.updateMapLonLat(true, xdata);
+            panel.updateMapLonLat(xdata);
         }
 
         /* adjust drag elements position */

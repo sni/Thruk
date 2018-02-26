@@ -619,8 +619,8 @@ Ext.define('TP.SmallWidget', {
         }
     },
     // sets xdata lon/lat based on current position
-    // * forceCenter: can be set if a connector is moved based on center instead of its endpoints
-    updateMapLonLat: function(forceCenter, xdata) {
+    // * key: can be set if a connector is moved and only one of (center, from, to) should be updated
+    updateMapLonLat: function(xdata, key) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         var tab   = Ext.getCmp(panel.panel_id);
@@ -633,17 +633,21 @@ Ext.define('TP.SmallWidget', {
         }
         var p = panel.getPosition();
         var lonLat = tab.map.map.getLonLatFromPixel({x: (p[0]+s.width/2), y: (p[1]+s.height/2)-TP.offset_y});
-        xdata.layout.lon  = lonLat.lon;
-        xdata.layout.lat  = lonLat.lat;
+        if(key == undefined || key == "center") {
+            xdata.layout.lon  = lonLat.lon;
+            xdata.layout.lat  = lonLat.lat;
+        }
 
         // is it a endpoint from a connector being dragged?
         var lonLat1, lonLat2;
         if(xdata.appearance.type == "connector") {
             lonLat1 = tab.map.map.getLonLatFromPixel({x: xdata.appearance.connectorfromx, y: xdata.appearance.connectorfromy-TP.offset_y});
             lonLat2 = tab.map.map.getLonLatFromPixel({x: xdata.appearance.connectortox,   y: xdata.appearance.connectortoy-TP.offset_y});
-            if(!forceCenter) {
+            if(key == undefined || key == "connectorfromx") {
                 xdata.layout.lon1 = lonLat1.lon;
                 xdata.layout.lat1 = lonLat1.lat;
+            }
+            if(key == undefined || key == "connectortox") {
                 xdata.layout.lon2 = lonLat2.lon;
                 xdata.layout.lat2 = lonLat2.lat;
             }
@@ -653,10 +657,16 @@ Ext.define('TP.SmallWidget', {
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) {
             // layout tab
             panel.noMoreMoves = true;
-            Ext.getCmp('layoutForm').getForm().setValues({lon:lonLat.lon, lat:lonLat.lat});
+            if(key == undefined || key == "center") {
+                Ext.getCmp('layoutForm').getForm().setValues({lon:lonLat.lon, lat:lonLat.lat});
+            }
             if(xdata.appearance.type == "connector") {
-                Ext.getCmp('appearanceForm').getForm().setValues({lon1: lonLat1.lon, lat1: lonLat1.lat,
-                                                                  lon2: lonLat2.lon, lat2: lonLat2.lat });
+                if(key == undefined || key == "connectorfromx") {
+                    Ext.getCmp('appearanceForm').getForm().setValues({ lon1: lonLat1.lon, lat1: lonLat1.lat });
+                }
+                if(key == undefined || key == "connectortox") {
+                    Ext.getCmp('appearanceForm').getForm().setValues({ lon2: lonLat2.lon, lat2: lonLat2.lat });
+                }
             }
             panel.noMoreMoves = false;
         }
