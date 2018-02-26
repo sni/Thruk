@@ -151,7 +151,10 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         xdata.layout.x = Math.ceil(fromX-box.path[0][1]+box.x);
         xdata.layout.y = Math.ceil(fromY-box.path[0][2]+box.y);
         panel.setRawPosition(xdata.layout.x, xdata.layout.y);
-        panel.updateMapLonLat(true, xdata);
+        // update saved coordinates on first rendering
+        if(xdata.layout.lon1 == "") {
+            panel.updateMapLonLat(true, xdata);
+        }
 
         /* adjust drag elements position */
         Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {

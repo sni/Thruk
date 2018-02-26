@@ -74,7 +74,8 @@ Ext.define('TP.SmallWidget', {
             var state      = {
                 xdata: TP.clone(this.xdata)
             };
-            if(state.xdata.map || state.xdata.layout.lon != undefined) {
+            var tab = Ext.getCmp(this.panel_id);
+            if(state.xdata.map || tab.map) {
                 delete state.xdata.layout.x;
                 delete state.xdata.layout.y;
                 delete state.xdata.appearance.connectorfromx;
@@ -229,6 +230,12 @@ Ext.define('TP.SmallWidget', {
                 }
             }
 
+            // save coordinates when created first time
+            var tab = Ext.getCmp(This.panel_id);
+            if(tab.map && (This.xdata.layout.lon == undefined || This.xdata.layout.lon == "")) {
+                This.updateMapLonLat();
+            }
+
             TP.iconMoveHandler(This, x, y);
         },
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
@@ -262,7 +269,7 @@ Ext.define('TP.SmallWidget', {
         if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon' };
 
         /* restore position */
-        if(panel.xdata.layout.lon != undefined) {
+        if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
             panel.moveToMapLonLat(undefined, false, xdata);
         } else {
             xdata.layout.x = Number(xdata.layout.x);
@@ -316,7 +323,7 @@ Ext.define('TP.SmallWidget', {
         var y = Number(layout.y);
         layout.x = x;
         layout.y = y;
-        if(panel.xdata.layout.lon != undefined) {
+        if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
             panel.moveToMapLonLat(undefined, false);
             return;
         }

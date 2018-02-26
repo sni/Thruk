@@ -560,11 +560,11 @@ TP.iconMoveHandler = function(icon, x, y) {
     if(isNaN(deltaX) || isNaN(deltaY)) { return; }
     if(deltaX == 0 && deltaY == 0) { return; }
 
-    /* update settings window */
+    // update settings window
     if(TP.iconSettingsWindow) {
-        /* layout tab */
+        // layout tab
         Ext.getCmp('layoutForm').getForm().setValues({x:x, y:y});
-        /* appearance tab */
+        // appearance tab
         TP.skipRender = true;
         Ext.getCmp('appearanceForm').getForm().setValues({
             connectorfromx: icon.xdata.appearance.connectorfromx + deltaX,
@@ -574,12 +574,12 @@ TP.iconMoveHandler = function(icon, x, y) {
         });
         TP.skipRender = false;
     }
-    /* update label */
+    // update label
     if(icon.setIconLabel) {
         icon.setIconLabelPosition();
     }
 
-    /* moving with closed settings window */
+    // moving with closed settings window
     if(icon.stateful) {
         if(icon.setIconLabel) {
             if(!icon.locked) {
@@ -595,7 +595,7 @@ TP.iconMoveHandler = function(icon, x, y) {
             }
         }
 
-        /* move aligned items too */
+        // move aligned items too
         TP.moveAlignedIcons(deltaX, deltaY, icon.id);
     }
 

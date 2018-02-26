@@ -1174,16 +1174,17 @@ TP.get_icon_form_xdata = function(settingsWindow) {
             }
         }
     });
-    if(xdata.appearance.lon1 != undefined) {
+    if(xdata.appearance.type == "connector") {
         xdata.layout.lon1 = xdata.appearance.lon1;
         xdata.layout.lat1 = xdata.appearance.lat1;
         xdata.layout.lon2 = xdata.appearance.lon2;
         xdata.layout.lat2 = xdata.appearance.lat2;
-        delete xdata.appearance.lon1;
-        delete xdata.appearance.lat1;
-        delete xdata.appearance.lon2;
-        delete xdata.appearance.lat2;
     }
+    delete xdata.appearance.lon1;
+    delete xdata.appearance.lat1;
+    delete xdata.appearance.lon2;
+    delete xdata.appearance.lat2;
+
     if(settingsWindow.panel.hideAppearanceTab)  { delete xdata.appearance; }
     if(settingsWindow.panel.iconType == 'text') { delete xdata.general;    }
     if(xdata.appearance) {
