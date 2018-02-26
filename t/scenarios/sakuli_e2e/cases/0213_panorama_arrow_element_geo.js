@@ -59,7 +59,7 @@ var $case = function() {
 
     screenRegion.waitForImage("geo_paris_london.png", 3).mouseMove();
 
-    mouseRightClickXY(200,130);
+    mouseRightClickXY(240,310);
     click(_span("Settings"));
     click(_span("Appearance"));
 
@@ -67,6 +67,15 @@ var $case = function() {
     _assertEqual("2.2945", _getValue(_textbox("lon1")));
     _assertEqual("51.50064", _getValue(_textbox("lat2")));
     _assertEqual("-0.12445", _getValue(_textbox("lon2")));
+
+    // test drag / drop
+    mouseMoveXY(220,290);
+    mouseDrag(220,290, 220, 200);
+
+    _assertEqual("48.858222", _getValue(_textbox("lat1")));
+    _assertEqual("2.2945", _getValue(_textbox("lon1")));
+    _assertEqual("57.43796875", _getValue(_textbox("lat2")));
+    _assertEqual("-0.10277343749999", _getValue(_textbox("lon2")));
 
     // remove dashboard
     thruk_remove_panorama_dashboard("Arrow Element");
