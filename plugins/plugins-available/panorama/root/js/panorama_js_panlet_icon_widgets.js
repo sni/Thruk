@@ -1046,6 +1046,7 @@ Ext.define('TP.IconWidget', {
                     offsetX:    -12,
                     offsetY:    -12
                 });
+                panel.addClickEventhandler(panel.dragEl1.el);
                 panel.dragEl2 = Ext.create('TP.dragEl', {
                     renderTo:  'iconContainer',
                     panel:      panel,
@@ -1055,6 +1056,7 @@ Ext.define('TP.IconWidget', {
                     offsetX:    -12,
                     offsetY:    -12
                 });
+                panel.addClickEventhandler(panel.dragEl2.el);
             }
         }
         else if(panel.appearance.setRenderItem) {
