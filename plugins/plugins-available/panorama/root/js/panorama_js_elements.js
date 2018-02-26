@@ -99,7 +99,6 @@ Ext.define('Ext.ux.form.field.DateTime', {
         me.initField();
     },
 
-    //@private
     buildField: function() {
         var l;
         var d = {};
