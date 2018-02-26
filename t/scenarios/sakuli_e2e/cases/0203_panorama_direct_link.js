@@ -21,6 +21,7 @@ var $case = function() {
     isVisible(_span("World Clock"));
 
     mouseRightClickXY(200,100);
+    click(_span("Display"));
     click(_span("Direct Link"));
 
     _wait(3000, _assert(_popup("Test Background")));
