@@ -1977,6 +1977,7 @@ t/scenarios/sakuli_e2e/cases/_images_chrome/dropdown.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/file_dialog_button_open.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/file_dialog_text_button.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/file_dialog_text_field.png
+t/scenarios/sakuli_e2e/cases/_images_chrome/geo_paris_london.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/good.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/green.png
 t/scenarios/sakuli_e2e/cases/_images_chrome/island_green.png
@@ -1998,6 +1999,7 @@ t/scenarios/sakuli_e2e/cases/_images_firefox/dropdown.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/file_dialog_button_open.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/file_dialog_text_button.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/file_dialog_text_field.png
+t/scenarios/sakuli_e2e/cases/_images_firefox/geo_paris_london.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/good.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/green.png
 t/scenarios/sakuli_e2e/cases/_images_firefox/island_green.png
@@ -2019,6 +2021,7 @@ t/scenarios/sakuli_e2e/cases/_images_ie/dropdown.png
 t/scenarios/sakuli_e2e/cases/_images_ie/file_dialog_button_open.png
 t/scenarios/sakuli_e2e/cases/_images_ie/file_dialog_text_button.png
 t/scenarios/sakuli_e2e/cases/_images_ie/file_dialog_text_field.png
+t/scenarios/sakuli_e2e/cases/_images_ie/geo_paris_london.png
 t/scenarios/sakuli_e2e/cases/_images_ie/good.png
 t/scenarios/sakuli_e2e/cases/_images_ie/green.png
 t/scenarios/sakuli_e2e/cases/_images_ie/island_green.png

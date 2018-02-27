@@ -554,18 +554,17 @@ function availability(panel, opts) {
 }
 
 
-TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
-    window.clearTimeout(TP.timeouts['timeout_icon_move']);
-
+TP.iconMoveHandler = function(icon, x, y) {
     var deltaX = x - icon.xdata.layout.x;
     var deltaY = y - icon.xdata.layout.y;
     if(isNaN(deltaX) || isNaN(deltaY)) { return; }
+    if(deltaX == 0 && deltaY == 0) { return; }
 
-    /* update settings window */
+    // update settings window
     if(TP.iconSettingsWindow) {
-        /* layout tab */
+        // layout tab
         Ext.getCmp('layoutForm').getForm().setValues({x:x, y:y});
-        /* appearance tab */
+        // appearance tab
         TP.skipRender = true;
         Ext.getCmp('appearanceForm').getForm().setValues({
             connectorfromx: icon.xdata.appearance.connectorfromx + deltaX,
@@ -575,12 +574,12 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
         });
         TP.skipRender = false;
     }
-    /* update label */
+    // update label
     if(icon.setIconLabel) {
-        icon.setIconLabel();
+        icon.setIconLabelPosition();
     }
 
-    /* moving with closed settings window */
+    // moving with closed settings window
     if(icon.stateful) {
         if(icon.setIconLabel) {
             if(!icon.locked) {
@@ -596,7 +595,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
             }
         }
 
-        /* move aligned items too */
+        // move aligned items too
         TP.moveAlignedIcons(deltaX, deltaY, icon.id);
     }
 
@@ -604,9 +603,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     if(icon.dragEl1) { icon.dragEl1.resetDragEl(); }
     if(icon.dragEl2) { icon.dragEl2.resetDragEl(); }
 
-    if(!noUpdateLonLat && (deltaX != 0 || deltaY != 0)) {
-        icon.updateMapLonLat();
-    }
+    icon.updateMapLonLat();
     icon.saveState();
 }
 

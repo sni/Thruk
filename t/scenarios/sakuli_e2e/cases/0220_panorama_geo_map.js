@@ -45,7 +45,7 @@ var $case = function() {
 
     thruk_remove_panorama_dashboard("GeoMap Test");
 
-    testCase.endOfStep("panorama geo map", 60);
+    testCase.endOfStep("panorama geo map", 90);
 };
 
 runTest($case);

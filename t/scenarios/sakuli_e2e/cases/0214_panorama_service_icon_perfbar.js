@@ -37,7 +37,7 @@ var $case = function() {
     click(_span("Remove"));
     click(_link("Yes"));
 
-    testCase.endOfStep("panorama service performance bar", 40);
+    testCase.endOfStep("panorama service performance bar", 60);
 };
 
 runTest($case);

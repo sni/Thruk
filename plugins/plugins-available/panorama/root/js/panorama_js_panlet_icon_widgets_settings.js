@@ -211,24 +211,24 @@ TP.iconShowEditDialog = function(panel) {
                             }},
 
                             { xtype: 'label', text:  'lat:', style: 'margin-left: 0px; margin-right: 2px;', hidden: !tab.map },
-                            { xtype: 'numberfield', name:  'lat', width: 140, decimalPrecision: 14, value: (panel.xdata.map ? panel.xdata.map.lat : 0), hidden: !tab.map, listeners: {
+                            { xtype: 'numberfield', name:  'lat', width: 140, decimalPrecision: 14, value: panel.xdata.layout.lat, hidden: !tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
                                         var lon = Number(This.up('panel').getValues().lon);
-                                        panel.moveToMapLonLat(undefined, false, {map:{lon: lon, lat: newValue}, layout:{}, appearance:{}});
+                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: lon, lat: newValue}, appearance:{}});
                                         panel.noMoreMoves = false;
                                     }
                                 }
                             }},
 
                             { xtype: 'label', text:  'lon:', style: 'margin-left: 10px; margin-right: 2px;', hidden: !tab.map },
-                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: (panel.xdata.map ? panel.xdata.map.lon : 0), hidden: !tab.map, listeners: {
+                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: panel.xdata.label.lon, hidden: !tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
                                         var lat = Number(This.up('panel').getValues().lat);
-                                        panel.moveToMapLonLat(undefined, false, {map:{lon: newValue, lat: lat}, layout:{}, appearance:{}});
+                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: newValue, lat: lat}, appearance:{}});
                                         panel.noMoreMoves = false;
                                     }
                                 }
@@ -1020,7 +1020,7 @@ TP.iconShowEditDialog = function(panel) {
         ],
         listeners: {
             afterRender: function (This) {
-                var form = This.items.getAt(0).items.getAt(1).down('form').getForm();
+                var form = Ext.getCmp('layoutForm').getForm();
                 this.nav = Ext.create('Ext.util.KeyNav', this.el, {
                     'left':  function(evt){ form.setValues({x: Number(form.getValues().x)-1}); },
                     'right': function(evt){ form.setValues({x: Number(form.getValues().x)+1}); },
@@ -1174,6 +1174,17 @@ TP.get_icon_form_xdata = function(settingsWindow) {
             }
         }
     });
+    if(xdata.appearance.type == "connector") {
+        xdata.layout.lon1 = xdata.appearance.lon1;
+        xdata.layout.lat1 = xdata.appearance.lat1;
+        xdata.layout.lon2 = xdata.appearance.lon2;
+        xdata.layout.lat2 = xdata.appearance.lat2;
+    }
+    delete xdata.appearance.lon1;
+    delete xdata.appearance.lat1;
+    delete xdata.appearance.lon2;
+    delete xdata.appearance.lat2;
+
     if(settingsWindow.panel.hideAppearanceTab)  { delete xdata.appearance; }
     if(settingsWindow.panel.iconType == 'text') { delete xdata.general;    }
     if(xdata.appearance) {

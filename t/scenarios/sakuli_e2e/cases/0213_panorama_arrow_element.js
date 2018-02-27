@@ -30,15 +30,41 @@ var $case = function() {
     isVisible(_textbox('service'));
     click(_div('/trigger/', _rightOf(_textbox('service'))));
     _setValue(_textbox("service"), "Example Check");
+
+    click(_span("Appearance"));
+    _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
+    _assertEqual("136 px", _getValue(_textbox("connectorfromy")));
+    _assertEqual("387 px", _getValue(_textbox("connectortox")));
+    _assertEqual("136 px", _getValue(_textbox("connectortoy")));
+
     click(_span("save"));
 
     mouseClickXY(300,300);
     screenRegion.waitForImage("arrow_map.png", 3).mouseMove();
 
+    mouseMoveXY(130,100);
+    mouseDrag(130,100, 130, 150);
+
+    mouseRightClickXY(130, 150);
+
+    click(_span("Settings"));
+    click(_span("Appearance"));
+
+    _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
+    _assertEqual("211 px", _getValue(_textbox("connectorfromy")));
+    _assertEqual("387 px", _getValue(_textbox("connectortox")));
+    _assertEqual("136 px", _getValue(_textbox("connectortoy")));
+
+    _setValue(_textbox("connectorfromx"), "187");
+    _setValue(_textbox("connectorfromy"), "136");
+    click(_span("save"));
+
+    screenRegion.waitForImage("arrow_map.png", 3).mouseMove();
+
     // remove dashboard
     thruk_remove_panorama_dashboard("Arrow Element");
 
-    testCase.endOfStep("panorama arrow widget", 120);
+    testCase.endOfStep("panorama arrow widget", 180);
 };
 
 runTest($case);

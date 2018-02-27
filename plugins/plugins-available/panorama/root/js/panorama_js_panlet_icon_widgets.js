@@ -41,7 +41,7 @@ Ext.define('TP.SmallWidget', {
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
         this.xdata.general    = {};
-        this.xdata.layout     = { rotation:   0 };
+        this.xdata.layout     = { rotation: 0 };
         if(this.xdata.appearance == undefined) {
             this.xdata.appearance = { type: 'icon' };
         }
@@ -74,7 +74,8 @@ Ext.define('TP.SmallWidget', {
             var state      = {
                 xdata: TP.clone(this.xdata)
             };
-            if(state.xdata.map) {
+            var tab = Ext.getCmp(this.panel_id);
+            if(state.xdata.map || tab.map) {
                 delete state.xdata.layout.x;
                 delete state.xdata.layout.y;
                 delete state.xdata.appearance.connectorfromx;
@@ -84,12 +85,33 @@ Ext.define('TP.SmallWidget', {
             } else {
                 delete state.xdata.layout.lon;
                 delete state.xdata.layout.lat;
+                delete state.xdata.layout.lon1;
+                delete state.xdata.layout.lon1;
+                delete state.xdata.layout.lat2;
+                delete state.xdata.layout.lat3;
             }
+            delete state.xdata.map;
             return state;
         };
         this.origApplyState = this.applyState;
         this.applyState = function(state) {
             Ext.apply(this.xdata, state.xdata);
+
+            // convert old location of map data
+            if(this.xdata.map) {
+                this.xdata.layout.lon = this.xdata.map.lon;
+                this.xdata.layout.lat = this.xdata.map.lat;
+                if(this.xdata.map.lat1) {
+                    this.xdata.layout.lon1 = this.xdata.map.lon1;
+                    this.xdata.layout.lat1 = this.xdata.map.lat1;
+                }
+                if(this.xdata.map.lat2) {
+                    this.xdata.layout.lon2 = this.xdata.map.lon2;
+                    this.xdata.layout.lat2 = this.xdata.map.lat2;
+                }
+                delete this.xdata.map;
+            }
+
             TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             this.origApplyState(state);
             this.moveToMapLonLat(); /* recalculate x/y from coordinates */
@@ -192,7 +214,7 @@ Ext.define('TP.SmallWidget', {
                 return;
             }
 
-            /* snap to roaster when shift key is hold */
+            // snap to roaster when shift key is hold
             if(TP.isShift) {
                 pos = TP.get_snap(x, y);
                 if(This.ddShadow) {
@@ -208,10 +230,13 @@ Ext.define('TP.SmallWidget', {
                 }
             }
 
-            var noUpdateLonLat = This.noUpdateLonLat;
-            TP.reduceDelayEvents(This, function() {
-                TP.iconMoveHandler(This, x, y, noUpdateLonLat);
-            }, 50, 'timeout_icon_move');
+            // save coordinates when created first time
+            var tab = Ext.getCmp(This.panel_id);
+            if(tab.map && (This.xdata.layout.lon == undefined || This.xdata.layout.lon == "")) {
+                This.updateMapLonLat();
+            }
+
+            TP.iconMoveHandler(This, x, y);
         },
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
             /* update label */
@@ -244,7 +269,7 @@ Ext.define('TP.SmallWidget', {
         if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon' };
 
         /* restore position */
-        if(panel.xdata.map) {
+        if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
             panel.moveToMapLonLat(undefined, false, xdata);
         } else {
             xdata.layout.x = Number(xdata.layout.x);
@@ -279,16 +304,16 @@ Ext.define('TP.SmallWidget', {
     },
     /* change size and position animated */
     applyAnimated: function(animated) {
-        var win = this;
-        win.animations++;
-        win.stateful = false;
+        var panel = this;
+        panel.animations++;
+        panel.stateful = false;
         var delay = (animated.duration ? animated.duration : 250) + 250;
         window.setTimeout(Ext.bind(function() {
-            win.animations--;
-            if(win.animations == 0) { win.stateful = true; }
-        }, win, []), delay);
+            panel.animations--;
+            if(panel.animations == 0) { panel.stateful = true; }
+        }, panel, []), delay);
 
-        layout = this.xdata.layout;
+        layout = panel.xdata.layout;
         if(layout.rotation) {
             // animations with rotated elements results in wrong position,
             // ex.: rotated shapes return wrong position on getPosition()
@@ -298,18 +323,18 @@ Ext.define('TP.SmallWidget', {
         var y = Number(layout.y);
         layout.x = x;
         layout.y = y;
-        if(win.xdata.map) {
-            win.moveToMapLonLat(undefined, false);
+        if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
+            panel.moveToMapLonLat(undefined, false);
             return;
         }
-        if(win.shrinked) {
-            win.shrinked.x = x;
-            win.shrinked.y = y;
-            animated.to = {x:x+win.shrinked.offsetX, y:y+win.shrinked.offsetY};
+        if(panel.shrinked) {
+            panel.shrinked.x = x;
+            panel.shrinked.y = y;
+            animated.to = {x:x+panel.shrinked.offsetX, y:y+panel.shrinked.offsetY};
         } else {
             animated.to = {x:x, y:y};
         }
-        this.animate(animated);
+        panel.animate(animated);
     },
     /* apply z-index */
     applyZindex: function(value) {
@@ -565,8 +590,10 @@ Ext.define('TP.SmallWidget', {
                 }
             });
             el.dd.addListener('dragend', function(This, evt) {
-                panel.dragHint.destroy();
-                panel.dragHint = undefined;
+                if(panel.dragHint) {
+                    panel.dragHint.destroy();
+                    panel.dragHint = undefined;
+                }
                 tab.enableMapControlsTemp();
                 TP.isShift = is_shift_pressed(evt);
                 /* prevents opening link after draging */
@@ -591,62 +618,72 @@ Ext.define('TP.SmallWidget', {
             el.dd_listener_added = true;
         }
     },
-    updateMapLonLat: function(forceCenter) {
+    // sets xdata lon/lat based on current position
+    // * key: can be set if a connector is moved and only one of (center, from, to) should be updated
+    updateMapLonLat: function(xdata, key) {
         var panel = this;
-        if(forceCenter && panel.noUpdateLonLat > 0) { return; }
+        if(xdata == undefined) { xdata = panel.xdata; }
         var tab   = Ext.getCmp(panel.panel_id);
         if(tab == undefined || tab.map == undefined || tab.map.map == undefined) { return; }
         var s;
-        if(!panel.el) {
-            s     = {width: panel.xdata.size, height: panel.xdata.size};
+        if(xdata.size || !panel.el) {
+            s     = {width: xdata.size, height: xdata.size};
         } else {
             s     = panel.getSize();
         }
         var p = panel.getPosition();
         var lonLat = tab.map.map.getLonLatFromPixel({x: (p[0]+s.width/2), y: (p[1]+s.height/2)-TP.offset_y});
-        if(!forceCenter && panel.xdata.appearance.type == "connector") {
-            var lonLat1 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectorfromx, y: panel.xdata.appearance.connectorfromy-TP.offset_y});
-            var lonLat2 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectortox,   y: panel.xdata.appearance.connectortoy-TP.offset_y});
-            panel.xdata.map = {
-                lon:  lonLat.lon,
-                lat:  lonLat.lat,
-                lon1: lonLat1.lon,
-                lat1: lonLat1.lat,
-                lon2: lonLat2.lon,
-                lat2: lonLat2.lat
-            };
-        } else {
-            /* do not completly overwrite map{}, it might be a connector which looses its endpoints then */
-            if(panel.xdata.appearance.type != "connector" || panel.xdata.map == undefined) {
-                panel.xdata.map = {};
-            }
-            panel.xdata.map.lon = lonLat.lon;
-            panel.xdata.map.lat = lonLat.lat;
+        if(key == undefined || key == "center") {
+            xdata.layout.lon  = lonLat.lon;
+            xdata.layout.lat  = lonLat.lat;
         }
+
+        // is it a endpoint from a connector being dragged?
+        var lonLat1, lonLat2;
+        if(xdata.appearance.type == "connector") {
+            lonLat1 = tab.map.map.getLonLatFromPixel({x: xdata.appearance.connectorfromx, y: xdata.appearance.connectorfromy-TP.offset_y});
+            lonLat2 = tab.map.map.getLonLatFromPixel({x: xdata.appearance.connectortox,   y: xdata.appearance.connectortoy-TP.offset_y});
+            if(key == undefined || key == "connectorfromx") {
+                xdata.layout.lon1 = lonLat1.lon;
+                xdata.layout.lat1 = lonLat1.lat;
+            }
+            if(key == undefined || key == "connectortox") {
+                xdata.layout.lon2 = lonLat2.lon;
+                xdata.layout.lat2 = lonLat2.lat;
+            }
+        }
+
+        // update settings window
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) {
-            /* layout tab */
+            // layout tab
             panel.noMoreMoves = true;
-            Ext.getCmp('layoutForm').getForm().setValues({lon:lonLat.lon, lat:lonLat.lat});
-            if(panel.xdata.appearance.type == "connector") {
-                Ext.getCmp('appearanceForm').getForm().setValues({connectorfromx:panel.xdata.appearance.connectorfromx, connectorfromy:panel.xdata.appearance.connectorfromy,
-                                                                  connectortox:  panel.xdata.appearance.connectortox,   connectortoy:  panel.xdata.appearance.connectortoy });
+            if(key == undefined || key == "center") {
+                Ext.getCmp('layoutForm').getForm().setValues({lon:lonLat.lon, lat:lonLat.lat});
+            }
+            if(xdata.appearance.type == "connector") {
+                if(key == undefined || key == "connectorfromx") {
+                    Ext.getCmp('appearanceForm').getForm().setValues({ lon1: lonLat1.lon, lat1: lonLat1.lat });
+                }
+                if(key == undefined || key == "connectortox") {
+                    Ext.getCmp('appearanceForm').getForm().setValues({ lon2: lonLat2.lon, lat2: lonLat2.lat });
+                }
             }
             panel.noMoreMoves = false;
         }
         panel.saveState();
     },
+    // moves panel to position accoring to lat/lon
     moveToMapLonLat: function(maxSize, movedOnly, xdata) {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
         if(xdata == undefined) { xdata = panel.xdata; }
         if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
-        if(xdata.map == undefined)                     { return; }
-        panel.noUpdateLonLat++;
+console.log("moveToMapLonLat")
         if(xdata.layout == undefined) { xdata.layout = {}; }
         if(xdata.appearance.type == "connector" && !movedOnly) {
-            var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon),  lat: Number(xdata.map.lat)});
-            var pixel1 = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon1), lat: Number(xdata.map.lat1)});
-            var pixel2 = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon2), lat: Number(xdata.map.lat2)});
+            var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(xdata.layout.lon),  lat: Number(xdata.layout.lat)});
+            var pixel1 = tab.map.map.getPixelFromLonLat({lon: Number(xdata.layout.lon1), lat: Number(xdata.layout.lat1)});
+            var pixel2 = tab.map.map.getPixelFromLonLat({lon: Number(xdata.layout.lon2), lat: Number(xdata.layout.lat2)});
             xdata.layout.x                  = pixel.x;
             xdata.layout.y                  = pixel.y+TP.offset_y;
             xdata.appearance.connectorfromx = pixel1.x;
@@ -657,9 +694,9 @@ Ext.define('TP.SmallWidget', {
                 panel.updateRender(xdata);
             }
         } else {
-            var pixel = tab.map.map.getPixelFromLonLat({lon: Number(xdata.map.lon), lat: Number(xdata.map.lat)});
+            var pixel = tab.map.map.getPixelFromLonLat({lon: Number(xdata.layout.lon), lat: Number(xdata.layout.lat)});
             var s;
-            if(!panel.el) {
+            if(xdata.size || !panel.el) {
                 s     = {width: xdata.size, height: xdata.size};
             } else {
                 s     = panel.getSize();
@@ -671,7 +708,7 @@ Ext.define('TP.SmallWidget', {
             var y     = (pixel.y-s.height/2)+TP.offset_y;
             xdata.layout.x = Math.floor(x);
             xdata.layout.y = Math.floor(y);
-            panel.setRawPosition(x, y);
+            panel.setRawPosition(xdata.layout.x, xdata.layout.y);
             if(panel.el && TP.isThisTheActiveTab(panel)) {
                 if(xdata.appearance.type == "connector") {
                     if(panel.isHidden()) { panel.show(); }
@@ -689,20 +726,17 @@ Ext.define('TP.SmallWidget', {
         if(!panel.isHidden() && panel.el) {
             panel.setIconLabel();
         }
-        panel.noUpdateLonLat--;
     },
     setRawPosition: function(x, y) {
         var panel = this;
-        panel.noUpdateLonLat++
         panel.suspendEvents();
         panel.setPosition(x, y);
-        if(panel.xdata.map && panel.el && panel.el.dom) {
+        if(panel.xdata.layout.lon != undefined && panel.el && panel.el.dom) {
             // connectors on maps in single tab mode are rendered wrong otherwise
             panel.setPagePosition(x, y);
         }
         panel.resumeEvents();
-        panel.noUpdateLonLat--;
-        panel.setIconLabel();
+        panel.setIconLabelPosition();
         return(panel);
     }
 });
@@ -720,12 +754,9 @@ Ext.define('TP.IconWidget', {
     width:     22,
     height:    22,
 
-    noUpdateLonLat: 0,
     constructor: function (config) {
-        this.noUpdateLonLat++;
         this.mixins.smallWidget.constructor.call(this, config);
         this.callParent();
-        this.noUpdateLonLat--;
     },
     initComponent: function() {
         this.callParent();
@@ -780,7 +811,7 @@ Ext.define('TP.IconWidget', {
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
             }
         }
-        if(panel.xdata.map) {
+        if(tab.map) {
             panel.moveToMapLonLat(undefined, false);
         }
         panel.setIconLabel();
@@ -877,6 +908,9 @@ Ext.define('TP.IconWidget', {
         panel.redrawOnly = true;
         panel.destroy();
         TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
+            // meanwhile removed?
+            if(!TP.cp.state[key]) { return; }
+            // else redraw
             panel = TP.add_panlet({id:key, skip_state:true, tb:tab, autoshow:true}, false);
             TP.updateAllIcons(tab, panel.id);
         }, 50);
@@ -885,15 +919,22 @@ Ext.define('TP.IconWidget', {
     /* set main render item*/
     setRenderItem: function(xdata, forceRecreate, forceColor) {
         var panel = this;
+        var tab = Ext.getCmp(panel.panel_id);
         if(xdata == undefined) { xdata = panel.xdata; }
         if(panel.itemRendering && !forceRecreate) { return; }
+
+        panel.appearance = Ext.create('tp.icon.appearance.'+xdata.appearance['type'], { panel: panel });
+
+        if(panel.xdata.layout.x == undefined || panel.xdata.layout.y == undefined) {
+            // may happen if on a geomap and map not yet rendered
+            return;
+        }
+
         panel.itemRendering = true;
         panel.removeAll();
         panel.surface  = undefined;
         panel.icon     = undefined;
         panel.chart    = undefined;
-
-        panel.appearance = Ext.create('tp.icon.appearance.'+xdata.appearance['type'], { panel: panel });
 
         if(panel.dragEl1) { panel.dragEl1.destroy(); }
         if(panel.dragEl2) { panel.dragEl2.destroy(); }
@@ -946,7 +987,7 @@ Ext.define('TP.IconWidget', {
             }
             /* shrink panel size to icon size if possible (non-edit mode and not rotated) */
             delete panel.shrinked;
-            if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && scale == 1 && panel.locked && !panel.xdata.map) {
+            if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && scale == 1 && panel.locked && !tab.map) {
                 var offsetX = (size-width)/2;
                 var offsetY = (size-height)/2;
                 panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y, offsetX: offsetX, offsetY: offsetY };
@@ -1019,6 +1060,7 @@ Ext.define('TP.IconWidget', {
                     offsetX:    -12,
                     offsetY:    -12
                 });
+                panel.addClickEventhandler(panel.dragEl1.el);
                 panel.dragEl2 = Ext.create('TP.dragEl', {
                     renderTo:  'iconContainer',
                     panel:      panel,
@@ -1028,6 +1070,7 @@ Ext.define('TP.IconWidget', {
                     offsetX:    -12,
                     offsetY:    -12
                 });
+                panel.addClickEventhandler(panel.dragEl2.el);
             }
         }
         else if(panel.appearance.setRenderItem) {

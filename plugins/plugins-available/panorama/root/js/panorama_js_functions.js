@@ -283,8 +283,6 @@ var TP = {
             config.type = state[config.conf.id].xdata.cls;
         }
         if(config.type == undefined) {
-            debug(config);
-            var err  = new Error("no type!");
             var text = "";
             try {
                 delete config['tb'];
@@ -292,8 +290,8 @@ var TP = {
             } catch(err) {
                 text = ""+err;
             }
+            var err  = new Error("no type in "+text);
             TP.logError("global", "noTypeException", err);
-            TP.log("[global] "+text);
             throw err;
         }
         // fake state (probably cloned)
@@ -2013,7 +2011,7 @@ var TP = {
         nr = "tabpan-tab_"+nr;
         return(nr);
     },
-    reduceDelayEvents: function(scope, callback, delay, timeoutName) {
+    reduceDelayEvents: function(scope, callback, delay, timeoutName, skipInitialRun) {
         var now = (new Date()).getTime();
         if(!scope) {
             /* probably out of scope already, run it a last time */
@@ -2025,7 +2023,9 @@ var TP = {
         window.clearTimeout(TP.timeouts[timeoutName]);
         if(now > scope.lastEventRun[timeoutName] + delay) {
             scope.lastEventRun[timeoutName] = now;
-            callback();
+            if(!skipInitialRun) {
+                callback();
+            }
         } else {
             TP.timeouts[timeoutName] = window.setTimeout(function() {
                 if(scope) {

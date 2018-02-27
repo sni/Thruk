@@ -98,6 +98,13 @@ Ext.define('TP.Pantab', {
             if(startPage && startPage.id != This.id) {
                 startPage.destroy();
             }
+            // close map controls from previous tab
+            if(TP.initial_active_tab && TP.initial_active_tab != This.id) {
+                var prevTab = Ext.getCmp(TP.initial_active_tab);
+                if(prevTab && prevTab.disableMapControls) {
+                    prevTab.disableMapControls();
+                }
+            }
 
             /* close tooltip */
             if(TP.iconTip) { TP.iconTip.hide() }
@@ -196,8 +203,6 @@ Ext.define('TP.Pantab', {
             TP.log('['+tab.id+'] added tab - refresh: '+tab.xdata.refresh);
             if(!tab.title) {
                 tab.applyXdata();
-            } else {
-                tab.setBackground(tab.xdata);
             }
             var header = tab.getDockedItems()[0];
             if(header) { header.hide() }
@@ -260,9 +265,6 @@ Ext.define('TP.Pantab', {
         delete state.xdata.locked;
         delete state.xdata.refresh_txt;
         delete state.xdata.map_choose;
-        if(this.map) {
-            this.fixMapIcons();
-        }
         return state;
     },
     saveIconsStates: function() {
@@ -323,17 +325,6 @@ Ext.define('TP.Pantab', {
             });
         }
     },
-    fixMapIcons: function() {
-        if(!this.map) { return; }
-        var This = this;
-        var panels = TP.getAllPanel(This);
-        for(var nr=0; nr<panels.length; nr++) {
-            var panel = panels[nr];
-            if(panel.el && panel.xdata.map == undefined && panel.xdata.layout != undefined) {
-                panel.updateMapLonLat();
-            }
-        }
-    },
     moveMapIcons: function(movedOnly) {
         if(!this.map) { return; }
         var This = this;
@@ -342,7 +333,7 @@ Ext.define('TP.Pantab', {
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
-            if(panel.xdata.map != undefined) {
+            if(panel.xdata.layout.lon != undefined) {
                 panel.moveToMapLonLat(size, movedOnly);
             }
         }
@@ -603,7 +594,6 @@ Ext.define('TP.Pantab', {
             if(!tab.mapEl) {
                 tab.mapEl = body.createChild('<div id="'+tab.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
             }
-            var changed = false;
             if(tab.mapEl.lastWMSProvider != undefined && tab.mapEl.lastWMSProvider == xdata.wms_provider) {
                 if(!tab.mapEl.lastCenter || tab.mapEl.lastCenter[0] != xdata.map.lon || tab.mapEl.lastCenter[1] != xdata.map.lat || tab.mapEl.lastCenter[2] != xdata.map.zoom) {
                     tab.map.map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom);
@@ -611,13 +601,6 @@ Ext.define('TP.Pantab', {
                 }
                 return;
             }
-            Ext.Loader.setConfig({
-                enabled: true,
-                disableCaching: false,
-                paths: {
-                    GeoExt: url_prefix+"plugins/panorama/geoext2-2.0.2/src/GeoExt"
-                }
-            });
             var attribution = wmsData[2];
             if(attribution == undefined) {
                 var url = xdata.wms_provider.replace(/\ .*$/, '');
@@ -657,6 +640,10 @@ Ext.define('TP.Pantab', {
                         if(This.map.lastZoomLevel != undefined && zoom != This.map.lastZoomLevel) {
                             movedOnly = false; /* recalculation required */
                         }
+
+                        // if we recently switched from image to geo map or vice versa, we need to update coordinates
+                        tab.fixIconsMapPosition(xdata);
+
                         This.map.lastZoomLevel = zoom;
                         tab.moveMapIcons(movedOnly);
                         tab.saveState();
@@ -676,13 +663,9 @@ Ext.define('TP.Pantab', {
             }
             tab.mapEl.lastCenter = [mapData.center[0], mapData.center[1], mapData.zoom];
             tab.map = Ext.create('GeoExt.panel.Map', mapData);
-            map.events.register("movestart", map, function() {
-                tab.fixMapIcons();
-            });
             map.events.register("move", map, function() {
                 tab.moveMapIcons(true);
             });
-            tab.fixMapIcons();
             controlsDiv.dom.style.display = "";
             tab.lockButton = controlsDiv.createChild('<div class="lockButton unlocked">', controlsDiv.dom.childNodes[0]);
             tab.lockButton.on("click", function(evt) {
@@ -773,6 +756,24 @@ Ext.define('TP.Pantab', {
         } else {
             tab.bgDragEl.dom.style.backgroundImage  = "";
             tab.bgDragEl.dom.style.backgroundRepeat = "";
+        }
+
+        // if we recently switched from image to geo map or vice versa, we need to update coordinates
+        tab.fixIconsMapPosition(xdata);
+
+        return;
+    },
+    // set current position to each panel which does not have a lon/lat yet
+    fixIconsMapPosition: function(xdata) {
+        var tab = this;
+        if(xdata == undefined) { xdata = tab.xdata; }
+        if(!xdata.map) { return; }
+        var panels = TP.getAllPanel(tab);
+        for(var nr=0; nr<panels.length; nr++) {
+            var panel = panels[nr];
+            if(panel.el && panel.xdata.layout != undefined && (panel.xdata.layout.lon == undefined || panel.xdata.layout.lon == "")) {
+                panel.updateMapLonLat();
+            }
         }
     },
     applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y) {
@@ -898,45 +899,63 @@ Ext.define('TP.Pantab', {
         var pos = [evt.getX(), evt.getY()];
         var nr = tab.id.replace(/^tabpan-tab_/, '');
 
-        var menu_items = [{
+        var menu_items = [];
+        if(!readonly && !tab.readonly) {
+            menu_items = menu_items.concat([{
+                    text:   'New',
+                    icon:   url_prefix+'plugins/panorama/images/cog_add.png',
+                    hideOnClick: false,
+                    menu:    TP.addPanletsMenu({open: 'right'}),
+                    disabled: tab.xdata.locked,
+                    hidden:  hidePasteAndNew
+                }]);
+        }
+
+
+        menu_items = menu_items.concat([{
                 text:   'Refresh',
                 icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                 handler: function() { TP.refreshAllSitePanel(tab) }
-            }, '-', {
-                text:   'Fullscreen',
+            }, {
+                text:   'Display',
                 icon:   url_prefix+'plugins/panorama/images/picture_empty.png',
-                handler: function() {
-                    var element = Ext.getBody().dom;
-                    try {
-                        BigScreen.request(element);
-                    } catch(err) {
-                        TP.logError(tab.id, "bigscreenException", err);
-                    }
-                },
-                hidden:  !!BigScreen.element
-            }, {
-                text:   'Exit Fullscreen',
-                icon:   url_prefix+'plugins/panorama/images/pictures.png',
-                handler: function() { BigScreen.exit(); },
-                hidden:  !BigScreen.element
-            }, {
-                text:       'Open Tab Mode',
-                icon:       url_prefix+'plugins/panorama/images/application_put.png',
-                href:       'panorama.cgi#'+nr,
-                tooltip:    'open this dashboard in tab mode',
-                hidden:     !one_tab_only
-            }, {
-                text:       'Direct Link',
-                icon:       url_prefix+'plugins/panorama/images/application_put.png',
-                href:       'panorama.cgi?'+Ext.Object.toQueryString({map: tab.xdata.title}),
-                hrefTarget: '_blank',
-                tooltip:    'open this dashboard only (new window)',
-                hidden:    !!one_tab_only
-            }, {
-                text:   'Debug Information',
-                icon:   url_prefix+'plugins/panorama/images/information.png',
-                handler: function() { thruk_debug_window_handler() },
-                hidden:  (!thruk_debug_js || thruk_demo_mode)
+                hideOnClick: false,
+                menu: [{
+                    text:   'Fullscreen',
+                    icon:   url_prefix+'plugins/panorama/images/picture_empty.png',
+                    handler: function() {
+                        var element = Ext.getBody().dom;
+                        try {
+                            BigScreen.request(element);
+                        } catch(err) {
+                            TP.logError(tab.id, "bigscreenException", err);
+                        }
+                    },
+                    hidden:  !!BigScreen.element
+                }, {
+                    text:   'Exit Fullscreen',
+                    icon:   url_prefix+'plugins/panorama/images/pictures.png',
+                    handler: function() { BigScreen.exit(); },
+                    hidden:  !BigScreen.element
+                }, {
+                    text:       'Open Tab Mode',
+                    icon:       url_prefix+'plugins/panorama/images/application_put.png',
+                    href:       'panorama.cgi#'+nr,
+                    tooltip:    'open this dashboard in tab mode',
+                    hidden:     !one_tab_only
+                }, {
+                    text:       'Direct Link',
+                    icon:       url_prefix+'plugins/panorama/images/application_put.png',
+                    href:       'panorama.cgi?'+Ext.Object.toQueryString({map: tab.xdata.title}),
+                    hrefTarget: '_blank',
+                    tooltip:    'open this dashboard only (new window)',
+                    hidden:    !!one_tab_only
+                }, {
+                    text:   'Debug Information',
+                    icon:   url_prefix+'plugins/panorama/images/information.png',
+                    handler: function() { thruk_debug_window_handler() },
+                    hidden:  (!thruk_debug_js || thruk_demo_mode)
+                }]
             }, '-', {
                 text:   'Save Dashboard',
                 icon:    url_prefix+'plugins/panorama/images/disk.png',
@@ -946,18 +965,11 @@ Ext.define('TP.Pantab', {
                 icon:    url_prefix+'plugins/panorama/images/folder_picture.png',
                 handler: function() { TP.loadDashboardWindow() },
                 hidden:  !!one_tab_only
-            }];
+        }]);
         if(!readonly && !tab.readonly) {
             menu_items = menu_items.concat([
-                 ,{
+                {
                     xtype: 'menuseparator',
-                    hidden:  hidePasteAndNew
-                }, {
-                    text:   'New',
-                    icon:   url_prefix+'plugins/panorama/images/cog_add.png',
-                    hideOnClick: false,
-                    menu:    TP.addPanletsMenu({open: 'right'}),
-                    disabled: tab.xdata.locked,
                     hidden:  hidePasteAndNew
                 }, {
                     text:   'Paste',

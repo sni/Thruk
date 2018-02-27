@@ -89,18 +89,6 @@
     }
     var callOnEnter = function(actualElement) {
         return;
-        var lastElement = elements[elements.length - 1];
-        if ((actualElement === lastElement.element || actualElement === lastVideoElement) && lastElement.hasEntered) {
-            return;
-        }
-        if (actualElement.tagName === "VIDEO") {
-            lastVideoElement = actualElement;
-        }
-        if (elements.length === 1) {
-            bigscreen.onenter(bigscreen.element);
-        }
-        lastElement.enter.call(lastElement.element, actualElement || lastElement.element);
-        lastElement.hasEntered = true;
     };
     var callOnExit = function() {
         if (lastVideoElement && !hasControls && !iOS7) {

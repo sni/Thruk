@@ -99,7 +99,6 @@ Ext.define('Ext.ux.form.field.DateTime', {
         me.initField();
     },
 
-    //@private
     buildField: function() {
         var l;
         var d = {};
@@ -662,7 +661,7 @@ Ext.define('TP.dragEl', {
                 var origY = This.xdata.appearance[This.keyY];
                 This.xdata.appearance[This.keyX] = x-This.offsetX;
                 This.xdata.appearance[This.keyY] = y-This.offsetY;
-                This.panel.updateMapLonLat();
+                This.panel.updateMapLonLat(undefined, This.keyX);
                 if(TP.iconSettingsWindow) {
                     var values = {};
                     values[This.keyX] = This.xdata.appearance[This.keyX];
