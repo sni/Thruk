@@ -57,9 +57,9 @@ sub parse {
 
             if($field->{'type'} eq 'LIST' or $field->{'type'} eq 'ENUM') {
                 if(defined $value) {
-                    my @list = split/\s*,\s*/mx, $value;
+                    my @list = split/\s*,\s*/mxo, $value;
                     # remove empty elements
-                    @list = grep {!/^\s*$/mx} @list;
+                    @list = grep {!/^\s*$/mxo} @list;
                     $self->{'conf'}->{$attr} = \@list;
                 } else {
                     $self->{'conf'}->{$attr} = [];

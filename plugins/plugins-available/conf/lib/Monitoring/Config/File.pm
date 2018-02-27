@@ -23,6 +23,8 @@ Defaults for host objects
 
 =cut
 
+my $semicolonreplacement = chr(0).chr(0);
+
 ##########################################################
 
 =head2 new
@@ -113,29 +115,36 @@ sub update_objects {
     $self->{'parse_errors'} = [];
     $self->{'comments'}     = [];
 
-    open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
-    while(my $line = <$fh>) {
-        Thruk::Utils::decode_any($line);
-        chomp($line);
-        if($. < 10) {
+    my $linenr = 1;
+    my $buffer = '';
+    for my $line (split(/\n/mxo, Thruk::Utils::decode_any(scalar read_file($self->{'path'})))) {
+        $line =~ s/\s+$//mxo;
+        if(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
+            $line =~ s/^\s+//mx;
+            $line    = substr($line, 0, -1);
+            $buffer .= $line;
+            $linenr++;
+            next;
+        }
+        if($buffer ne '') {
+            $line =~ s/^\s+//mx;
+            $line   = $buffer.$line;
+            $buffer = '';
+        }
+        if($linenr < 10) {
             if($line =~ m/^\#\s*thruk:\s*readonly/mxo) {
                 $self->{'readonly'} = 1;
             }
         }
-        # connect multiple lines
-        while(substr($line, -1) eq '\\' and (substr($line, 0, 1) ne '#' or $in_disabled_object)) {
-            my $newline = <$fh>;
-            chomp($newline);
-            StripLSpace($newline);
-            if($in_disabled_object) {
-                $newline = substr($newline, 1);
-            }
-            $line = substr($line, 0, -1).$newline;
-        }
+        $line =~ s/^\s+//mxo;
+        next if $line eq '';
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
-            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
+            = &_parse_line($self, $line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
+        $linenr++;
     }
-    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
+
+    $self->{'lines'} = ($linenr-1); # set line counter
+
 
     if(defined $current_object or $in_unknown_object) {
         push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
@@ -184,21 +193,23 @@ sub update_objects_from_text {
     my $linenr = 1;
     my $buffer = '';
     for my $line (split/\n/mx, $text) {
-        StripTSpace($line);
+        $line =~ s/\s+$//mxo;
         if(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
-            StripLSpace($line);
+            $line =~ s/^\s+//mx;
             $line    = substr($line, 0, -1);
             $buffer .= $line;
             $linenr++;
             next;
         }
         if($buffer ne '') {
-            StripLSpace($line);
+            $line =~ s/^\s+//mx;
             $line   = $buffer.$line;
             $buffer = '';
         }
+        $line =~ s/^\s+//mxo;
+        next if $line eq '';
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
-            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
+            = &_parse_line($self, $line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
         if(defined $lastline && $lastline ne '' && !defined $object_at_line) {
             if($linenr >= $lastline) {
                 $object_at_line = $current_object;
@@ -206,6 +217,8 @@ sub update_objects_from_text {
         }
         $linenr++;
     }
+
+    $self->{'lines'} = ($linenr-1); # set line counter
 
     if(defined $current_object or $in_unknown_object) {
         push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
@@ -269,15 +282,7 @@ parse a single config line
 
 =cut
 sub _parse_line {
-    my ( $self, $line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr) = @_;
-
-    chomp($line);
-
-    # strip whitespaces
-    StripLTSpace($line);
-
-    # skip empty lines;
-    return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object) if $line eq '';
+    my($self, $line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr) = @_;
 
     # full line comments
     if(!$in_disabled_object
@@ -290,26 +295,24 @@ sub _parse_line {
         return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
     }
 
-    # escaped semicolons are allowed
-    my $semicolonreplacement = chr(0).chr(0);
-    $line =~ s/\\;/$semicolonreplacement/gmxo;
+    if(index($line, ';') != -1) {
+        # escaped semicolons are allowed
+        $line =~ s/\\;/$semicolonreplacement/gmxo;
 
-    # inline comments only with ; not with #
-    if($line =~ s/^(.+?)\s*([\;].*)$//gmxo) {
-        $line = $1;
-        my $comment = $2;
-        # save inline comments if possible
-        my($key, $value) = split(/\s+/mxo, $line, 2);
-        $inl_comments->{$key} = $comment if defined $key;
+        # inline comments only with ; not with #
+        if($line =~ s/^(.+?)\s*([\;].*)$//gmxo) {
+            $line = $1;
+            my $comment = $2;
+            # save inline comments if possible
+            my($key, $value) = split(/\s+/mxo, $line, 2);
+            $inl_comments->{$key} = $comment if defined $key;
+        }
+
+        $line =~ s/$semicolonreplacement/\\;/gmxo;
     }
 
-    $line =~ s/$semicolonreplacement/\\;/gmxo;
-
-    $linenr = $. unless defined $linenr;
-    $self->{'lines'} = $linenr; # increase line counter
-
     # new object starts
-    if($line =~ m/^(;|\#|)\s*define\s+(\w+)(\s|{|$)/mxo) {
+    if(index($line, 'define') != -1 && $line =~ m/^(;|\#|)\s*define\s+(\w+)(\s|{|$)/mxo) {
         $in_disabled_object = $1 ? 1 : 0;
         $current_object = Monitoring::Config::Object->new(type => $2, file => $self, line => $linenr, 'coretype' => $self->{'coretype'}, disabled => $in_disabled_object);
         unless(defined $current_object) {

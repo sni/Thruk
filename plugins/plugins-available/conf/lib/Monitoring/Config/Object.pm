@@ -3,7 +3,6 @@ package Monitoring::Config::Object;
 use strict;
 use warnings;
 use Carp;
-use Storable qw(dclone);
 use Monitoring::Config::Object::Host;
 use Monitoring::Config::Object::Hostgroup;
 use Monitoring::Config::Object::Hostextinfo;
@@ -117,7 +116,7 @@ sub new {
 
     return unless defined $current_object;
 
-    $current_object->{'conf'}     = dclone( $conf{'conf'} || {} );
+    $current_object->{'conf'}     = $conf{'conf'} || {};
     $current_object->{'line'}     = $conf{'line'} || 0;
     $current_object->set_file($conf{'file'}) if defined $conf{'file'};
     $current_object->{'comments'} = [];

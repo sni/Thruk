@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 702;
+    plan tests => 703;
 }
 
 BEGIN {
@@ -372,3 +372,14 @@ $testhost = {
 };
 ($computed_keys, $computed) = $obj->get_computed_config($objects);
 is_deeply($computed, $testhost, 'parsed nested templates II');
+
+###########################################################
+# remove empty list elements
+my $file = Monitoring::Config::File->new("test.cfg", undef, 'nagios');
+$file->update_objects_from_text('
+define host {
+  host_name   test
+  host_groups a, ,,b, c
+}
+');
+is_deeply($file->{'objects'}->[0]->{'conf'}->{'hostgroups'}, ['a', 'b', 'c'], 'parsed empty lists');
