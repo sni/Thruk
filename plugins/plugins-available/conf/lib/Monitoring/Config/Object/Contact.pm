@@ -67,15 +67,20 @@ return new object
 sub BUILD {
     my $class = shift || __PACKAGE__;
     my $coretype = shift;
-    if($coretype eq 'any' or $coretype eq 'shinken') {
-        for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
-            $Monitoring::Config::Object::Contact::Defaults->{$key} = $Monitoring::Config::Object::Contact::ShinkenSpecific->{$key};
+
+    if(!$Monitoring::Config::Object::Contact::defaults_cleaned || $Monitoring::Config::Object::Contact::defaults_cleaned ne $coretype) {
+        if($coretype eq 'any' or $coretype eq 'shinken') {
+            for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
+                $Monitoring::Config::Object::Contact::Defaults->{$key} = $Monitoring::Config::Object::Contact::ShinkenSpecific->{$key};
+            }
+        } else {
+            for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
+                delete $Monitoring::Config::Object::Contact::Defaults->{$key};
+            }
         }
-    } else {
-        for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
-            delete $Monitoring::Config::Object::Contact::Defaults->{$key};
-        }
+        $Monitoring::Config::Object::Contact::defaults_cleaned = $coretype;
     }
+
     my $self = {
         'type'        => 'contact',
         'primary_key' => 'contact_name',
