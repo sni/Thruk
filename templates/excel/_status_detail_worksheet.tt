@@ -77,9 +77,14 @@
         [% ELSIF col == "Status Information"       %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% format_date(s.next_check, datetime_format_long) %][% ELSE %][% escape_xml(s.plugin_output) %][% END %]</cell>
         [% ELSIF col == "Extra Status Information" %]<cell>[% IF s.has_been_checked == 1 %][% escape_xml(s.long_plugin_output) %][% END %]</cell>
         [% ELSE %]
-          [% cust_vars = get_custom_vars(c, s) %]
-          [% col = col.replace('^_', '') %]
-          <cell>[% IF cust_vars.exists(col); escape_xml(cust_vars.$col); END %]</cell>
+          [% val = "";
+             field = col.replace('^_+', '');
+             cust_vars = get_custom_vars(c, s,'',1); %]
+             [% IF cust_vars.exists(field); val = cust_vars.$field;
+             ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
+             END;
+          %]          
+          <cell>[% escape_xml(val) %]</cell>
         [% END %]
         [% END %]
       </row>
