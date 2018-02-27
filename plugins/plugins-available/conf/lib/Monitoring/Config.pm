@@ -303,6 +303,30 @@ sub commit {
     return $rc;
 }
 
+##########################################################
+
+=head2 print_errors
+
+    print_errors([$fh])
+
+Print all errors to stdout or supplied filehandle
+
+=cut
+sub print_errors {
+    my($self, $fh) = @_;
+    $fh = *STDOUT unless $fh;
+
+    $self->_collect_errors();
+    for my $err (@{$self->{'parse_errors'}}) {
+        print $fh $err, "\n";
+    }
+    for my $err (@{$self->{'errors'}}) {
+        print $fh $err, "\n";
+    }
+
+    return;
+}
+
 
 ##########################################################
 
