@@ -1928,11 +1928,7 @@ sub _rebuild_index {
 
 ##########################################################
 sub _update_obj_in_index {
-    my $self    = shift;
-    my $objects = shift;
-    my $obj     = shift;
-    my $primary = shift;
-    my $tmpconf = shift;
+    my($self, $objects, $obj, $primary, $tmpconf) = @_;
 
     my $pname  = $obj->get_primary_name(1, $tmpconf);
     my $tname  = $obj->get_template_name();
@@ -2046,12 +2042,14 @@ sub _check_references {
     my($self, %options) = @_;
 
     $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
+    my $templates_by_name = $self->{'objects'}->{'byname'}->{'templates'};
+    my $objects_by_name   = $self->{'objects'}->{'byname'};
     my @parse_errors;
     $self->_all_object_links_callback(sub {
         my($file, $obj, $attr, $link, $val) = @_;
         return if $obj->{'disabled'};
         if($attr eq 'use') {
-            if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
+            if(!defined $templates_by_name->{$link}->{$val}) {
                 if($options{'hash'}) {
                     push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
                                           id        => $obj->get_id(),
@@ -2066,14 +2064,14 @@ sub _check_references {
                 }
             }
         }
-        elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
+        elsif(!defined $objects_by_name->{$link}->{$val}) {
             # 'null' is a special value used to cancel inheritance
             return if $val eq 'null';
 
             # hostgroups are allowed to have a register 0
-            return if ($link eq 'hostgroup' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+            return if ($link eq 'hostgroup' and defined $templates_by_name->{$link}->{$val});
             # host are allowed to have a register 0
-            return if ($link eq 'host' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+            return if ($link eq 'host' and defined $templates_by_name->{$link}->{$val});
 
 
 
