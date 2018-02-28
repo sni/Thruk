@@ -133,11 +133,12 @@ sub update_objects_from_text {
 
     my $linenr = 0;
     my $buffer = '';
+    $text =~ s/\s+$//gmxo;
+    $text =~ s/^\s+//gmxo;
     my @lines = split(/\n/mx, $text);
     while(@lines) {
         my $line = shift @lines;
         $linenr++;
-        $line =~ s/\s+$//mxo;
         if(substr($line, -1) eq '\\') {
             $line =~ s/^\s+//mx;
             $line    = substr($line, 0, -1);
@@ -145,10 +146,9 @@ sub update_objects_from_text {
                 $line = substr($line, 1);
             }
             $buffer .= $line;
-            $linenr++;
             next;
         }
-        if($buffer ne '') {
+        if($buffer) {
             if(substr($line, 0, 1) eq '#') {
                 $line = substr($line, 1);
             }
@@ -156,15 +156,9 @@ sub update_objects_from_text {
             $line   = $buffer.$line;
             $buffer = '';
         }
-        $line =~ s/^\s+//mxo;
-        next if $line eq '';
+        next unless $line;
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
             = &_parse_line($self, $line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
-        if(defined $lastline && $lastline ne '' && !defined $object_at_line) {
-            if($linenr >= $lastline) {
-                $object_at_line = $current_object;
-            }
-        }
     }
 
     $self->{'lines'} = $linenr; # set line counter
@@ -186,7 +180,14 @@ sub update_objects_from_text {
     $self->{'parsed'}  = 1;
     $self->{'changed'} = 1;
 
-    return $object_at_line if defined $lastline;
+    # return object for given line
+    if(defined $lastline) {
+        for my $obj ($self->{'objects'}) {
+            if($obj->{'line'} >= $lastline) {
+                return($obj);
+            }
+        }
+    }
     return;
 }
 
