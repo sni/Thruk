@@ -131,53 +131,48 @@ sub as_text {
 
     for my $key (@{$self->get_sorted_keys()}) {
         my $value;
-        if(defined $self->{'default'}->{$key}
-            and ($self->{'default'}->{$key}->{'type'} eq 'LIST'
-              or $self->{'default'}->{$key}->{'type'} eq 'ENUM'
-            )
-        ) {
+        my $type = defined $self->{'default'}->{$key} ? $self->{'default'}->{$key}->{'type'} : '';
+        if($type eq 'LIST' || $type eq 'ENUM') {
             $value = join($cfg->{'list_join_string'}, @{$self->{'conf'}->{$key}});
         } else {
-            $value = $self->{'conf'}->{$key};
+            $value = $self->{'conf'}->{$key} // '';
+
+            # break very long lines
+            if($key eq 'command_line' and $cfg->{'break_long_arguments'} and length($key) + length($value) > 120) {
+                my $long_command = $self->_break_long_command($key, $value, $disabled);
+                $text .= $disabled.join(" \\\n".$disabled, @{$long_command})."\n";
+                $nr_object_lines += scalar @{$long_command};
+                if($self->{'inl_comments'}->{$key}) {
+                    chomp($text);
+                    my $ind      = rindex($text, "\n");
+                    my $lastline = substr($text, $ind+1);
+                    $text        = substr($text, 0, $ind);
+                    $text       .= "\n";
+                    my $format   = "%-".$cfg->{'indent_object_comments'}."s %s\n";
+                    $text       .= sprintf $format, $lastline, $self->{'inl_comments'}->{$key};
+                }
+                next;
+            }
         }
 
-        # empty values are valid syntax
-        $value = '' unless defined $value;
-
-        # break very long lines
-        if($key eq 'command_line' and $cfg->{'break_long_arguments'} and length($key) + length($value) > 120) {
-            my $long_command = $self->_break_long_command($key, $value, $disabled);
-            $text .= $disabled.join(" \\\n".$disabled, @{$long_command})."\n";
-            $nr_object_lines += scalar @{$long_command};
-            if($self->{'inl_comments'}->{$key}) {
-                chomp($text);
-                my $ind      = rindex($text, "\n");
-                my $lastline = substr($text, $ind+1);
-                $text        = substr($text, 0, $ind);
-                $text       .= "\n";
-                my $format   = "%-".$cfg->{'indent_object_comments'}."s %s\n";
-                $text       .= sprintf $format, $lastline, $self->{'inl_comments'}->{$key};
-            }
+        $text .= $disabled;
+        my $line;
+        if($value ne '') {
+            my $format = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
+            $line = sprintf $format, "", $key, $value;
         } else {
-            $text .= $disabled;
-            my $line;
-            if($value ne '') {
-                my $format = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
-                $line = sprintf $format, "", $key, $value;
-            } else {
-                # empty values are allowed
-                my $format = "%-".$cfg->{'indent_object_key'}."s%s";
-                $line = sprintf $format, "", $key;
-            }
-            if($self->{'inl_comments'}->{$key}) {
-                my $format = "%-".$cfg->{'indent_object_comments'}."s %s";
-                $text .= sprintf $format, $line, $self->{'inl_comments'}->{$key};
-            } else {
-                $text .= $line;
-            }
-            $text .= "\n";
-            $nr_object_lines++;
+            # empty values are allowed
+            my $format = "%-".$cfg->{'indent_object_key'}."s%s";
+            $line = sprintf $format, "", $key;
         }
+        if($self->{'inl_comments'}->{$key}) {
+            my $format = "%-".$cfg->{'indent_object_comments'}."s %s";
+            $text .= sprintf $format, $line, $self->{'inl_comments'}->{$key};
+        } else {
+            $text .= $line;
+        }
+        $text .= "\n";
+        $nr_object_lines++;
     }
     $text .= $disabled;
     $text .= "}\n\n";
@@ -358,17 +353,20 @@ return the sorted config keys for this object
 
 =cut
 sub get_sorted_keys {
-    my $self = shift;
-    my $conf = shift || $self->{'conf'};
-    my @keys;
-    if(ref $conf eq 'HASH') {
-        @keys = keys %{$conf};
-    } else {
-        @keys = @{$conf};
-    }
+    my($self, $conf) = @_;
     defined $Monitoring::Config::key_sort or confess('uninitialized');
-    @keys = sort $Monitoring::Config::key_sort @keys;
-    return \@keys;
+
+    my @keys;
+    if(!defined $conf) {
+        @keys = keys %{$self->{'conf'}};
+    } else {
+        if(ref $conf eq 'HASH') {
+            @keys = keys %{$conf};
+        } else {
+            @keys = @{$conf};
+        }
+    }
+    return([sort $Monitoring::Config::key_sort @keys]);
 }
 
 

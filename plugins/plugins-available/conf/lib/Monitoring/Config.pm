@@ -2549,35 +2549,45 @@ sort function for object keys
 sub _sort_by_object_keys {
     my($attr_keys, $cust_var_keys) = @_;
 
+    my $order_cache = {};
+    my $max        = scalar @{$attr_keys} + 5;
+
+    my $num = $max;
+    for my $ord (@{$attr_keys}) {
+        $order_cache->{$ord} = $num;
+        $num--;
+    }
+
     return sub {
         ## no critic
         $a = $Monitoring::Config::Object::Parent::a;
         $b = $Monitoring::Config::Object::Parent::b;
         ## use critic
-        my $order = $attr_keys;
-        my $num   = scalar @{$attr_keys} + 5;
 
-        for my $ord (@{$order}) {
-            if($a eq $ord) { return -$num; }
-            if($b eq $ord) { return  $num; }
-            $num--;
-        }
+        my $num_a = $order_cache->{$a} || 0;
+        my $num_b = $order_cache->{$b} || 0;
+        if($num_a > $num_b) { return -$num_a; }
+        if($num_b > $num_a) { return  $num_b; }
 
         my $result = $a cmp $b;
 
-        if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
-            # prefer some custom variables
-            my $cust_order = $cust_var_keys;
-            my $cust_num   = scalar @{$cust_var_keys} + 3;
-            for my $ord (@{$cust_order}) {
-                if($a eq $ord) { return -$cust_num; }
-                if($b eq $ord) { return  $cust_num; }
-                $cust_num--;
+        if(substr($a, 0, 1) eq '_') {
+            if(substr($b, 0, 1) eq '_') {
+                # prefer some custom variables
+                my $cust_order = $cust_var_keys;
+                my $cust_num   = scalar @{$cust_var_keys} + 3;
+                for my $ord (@{$cust_order}) {
+                    if($a eq $ord) { return -$cust_num; }
+                    if($b eq $ord) { return  $cust_num; }
+                    $cust_num--;
+                }
+                return $result;
             }
-            return $result;
+            return -$result;
         }
-        if(substr($a, 0, 1) eq '_') { return -$result; }
-        if(substr($b, 0, 1) eq '_') { return -$result; }
+        elsif(substr($b, 0, 1) eq '_') {
+            return -$result;
+        }
 
         return $result;
     };
