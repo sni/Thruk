@@ -110,6 +110,7 @@ in list context, returns [$text, $nr_comment_lines, $nr_object_lines]
 sub as_text {
     my($self) = @_;
 
+    confess("uninitialized") unless $Monitoring::Config::format_values;
     my $disabled = $self->{'disabled'} ? '#' : '';
 
     my $cfg = $Monitoring::Config::save_options;
@@ -148,8 +149,8 @@ sub as_text {
                     my $lastline = substr($text, $ind+1);
                     $text        = substr($text, 0, $ind);
                     $text       .= "\n";
-                    my $format   = "%-".$cfg->{'indent_object_comments'}."s %s\n";
-                    $text       .= sprintf $format, $lastline, $self->{'inl_comments'}->{$key};
+                    $text       .= sprintf $Monitoring::Config::format_comments, $lastline, $self->{'inl_comments'}->{$key};
+                    $text       .= "\n";
                 }
                 next;
             }
@@ -158,16 +159,13 @@ sub as_text {
         $text .= $disabled;
         my $line;
         if($value ne '') {
-            my $format = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
-            $line = sprintf $format, "", $key, $value;
+            $line = sprintf $Monitoring::Config::format_values, "", $key, $value;
         } else {
             # empty values are allowed
-            my $format = "%-".$cfg->{'indent_object_key'}."s%s";
-            $line = sprintf $format, "", $key;
+            $line = sprintf $Monitoring::Config::format_keys, "", $key;
         }
         if($self->{'inl_comments'}->{$key}) {
-            my $format = "%-".$cfg->{'indent_object_comments'}."s %s";
-            $text .= sprintf $format, $line, $self->{'inl_comments'}->{$key};
+            $text .= sprintf $Monitoring::Config::format_comments, $line, $self->{'inl_comments'}->{$key};
         } else {
             $text .= $line;
         }
@@ -369,6 +367,54 @@ sub get_sorted_keys {
     return([sort $Monitoring::Config::key_sort @keys]);
 }
 
+##########################################################
+
+=head2 _sort_by_object_keys
+
+sort function for object keys
+
+=cut
+sub _sort_by_object_keys {
+    my($attr_keys, $cust_var_keys) = @_;
+
+    my $order_cache = {};
+    my $max         = scalar @{$attr_keys} + 5;
+
+    my $num = $max;
+    for my $ord (@{$attr_keys}) {
+        $order_cache->{$ord} = $num;
+        $num--;
+    }
+
+    return sub {
+        my $num_a = $order_cache->{$a} || 0;
+        my $num_b = $order_cache->{$b} || 0;
+        if($num_a > $num_b) { return -$num_a; }
+        if($num_b > $num_a) { return  $num_b; }
+
+        my $result = $a cmp $b;
+
+        if(substr($a, 0, 1) eq '_') {
+            if(substr($b, 0, 1) eq '_') {
+                # prefer some custom variables
+                my $cust_order = $cust_var_keys;
+                my $cust_num   = scalar @{$cust_var_keys} + 3;
+                for my $ord (@{$cust_order}) {
+                    if($a eq $ord) { return -$cust_num; }
+                    if($b eq $ord) { return  $cust_num; }
+                    $cust_num--;
+                }
+                return $result;
+            }
+            return -$result;
+        }
+        elsif(substr($b, 0, 1) eq '_') {
+            return -$result;
+        }
+
+        return $result;
+    };
+}
 
 ##########################################################
 
