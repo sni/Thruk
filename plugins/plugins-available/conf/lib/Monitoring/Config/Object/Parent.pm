@@ -283,10 +283,9 @@ return the primary objects name
 
 =cut
 sub get_primary_name {
-    my $self     = shift;
-    my $full     = shift || 0;
-    my $conf     = shift || $self->{'conf'};
-    my $fallback = shift;
+    my($self, $full, $conf, $fallback) = @_;
+    $full = 0 unless $full;
+    $conf = $self->{'conf'} unless $conf;
 
     return $fallback if defined $fallback;
 

@@ -102,67 +102,8 @@ sub update_objects {
     return unless $self->{'parsed'} == 0;
     return unless defined $self->{'md5'};
 
-    # reset macro index
-    $self->{'macros'} = { 'host' => {}, 'service' => {}};
-
-    my $current_object;
-    my $in_unknown_object;
-    my $in_disabled_object;
-    my $comments            = [];
-    my $inl_comments        = {};
-    $self->{'objects'}      = [];
-    $self->{'errors'}       = [];
-    $self->{'parse_errors'} = [];
-    $self->{'comments'}     = [];
-
-    my $linenr = 1;
-    my $buffer = '';
-    for my $line (split(/\n/mxo, Thruk::Utils::decode_any(scalar read_file($self->{'path'})))) {
-        $line =~ s/\s+$//mxo;
-        if(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
-            $line =~ s/^\s+//mx;
-            $line    = substr($line, 0, -1);
-            $buffer .= $line;
-            $linenr++;
-            next;
-        }
-        if($buffer ne '') {
-            $line =~ s/^\s+//mx;
-            $line   = $buffer.$line;
-            $buffer = '';
-        }
-        if($linenr < 10) {
-            if($line =~ m/^\#\s*thruk:\s*readonly/mxo) {
-                $self->{'readonly'} = 1;
-            }
-        }
-        $line =~ s/^\s+//mxo;
-        next if $line eq '';
-        ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
-            = &_parse_line($self, $line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
-        $linenr++;
-    }
-
-    $self->{'lines'} = ($linenr-1); # set line counter
-
-
-    if(defined $current_object or $in_unknown_object) {
-        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
-    }
-
-    # add trailing comments to last object
-    if(defined $comments and scalar @{$comments} > 0) {
-        # only if we have at least one object
-        if(scalar @{$self->{'objects'}} > 0) {
-            push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
-        } else {
-            $self->{'comments'} = $comments;
-        }
-    }
-
-    $self->{'parsed'}  = 1;
-    $self->{'changed'} = 0;
-    return;
+    my $text = Thruk::Utils::decode_any(scalar read_file($self->{'path'}));
+    return $self->update_objects_from_text($text);
 }
 
 
@@ -174,7 +115,7 @@ update all objects from this file by text
 
 =cut
 sub update_objects_from_text {
-    my ( $self, $text, $lastline ) = @_;
+    my ($self, $text, $lastline) = @_;
 
     # reset macro index
     $self->{'macros'} = { 'host' => {}, 'service' => {}};
@@ -190,18 +131,27 @@ sub update_objects_from_text {
     $self->{'parse_errors'} = [];
     $self->{'comments'}     = [];
 
-    my $linenr = 1;
+    my $linenr = 0;
     my $buffer = '';
-    for my $line (split/\n/mx, $text) {
+    my @lines = split(/\n/mx, $text);
+    while(@lines) {
+        my $line = shift @lines;
+        $linenr++;
         $line =~ s/\s+$//mxo;
-        if(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
+        if(substr($line, -1) eq '\\') {
             $line =~ s/^\s+//mx;
             $line    = substr($line, 0, -1);
+            if($buffer ne '' && substr($line, 0, 1) eq '#') {
+                $line = substr($line, 1);
+            }
             $buffer .= $line;
             $linenr++;
             next;
         }
         if($buffer ne '') {
+            if(substr($line, 0, 1) eq '#') {
+                $line = substr($line, 1);
+            }
             $line =~ s/^\s+//mx;
             $line   = $buffer.$line;
             $buffer = '';
@@ -215,13 +165,12 @@ sub update_objects_from_text {
                 $object_at_line = $current_object;
             }
         }
-        $linenr++;
     }
 
-    $self->{'lines'} = ($linenr-1); # set line counter
+    $self->{'lines'} = $linenr; # set line counter
 
     if(defined $current_object or $in_unknown_object) {
-        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
+        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$linenr;
     }
 
     # add trailing comments to last object
