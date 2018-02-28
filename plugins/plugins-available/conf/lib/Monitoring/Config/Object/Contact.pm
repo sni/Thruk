@@ -55,6 +55,8 @@ $Monitoring::Config::Object::Contact::ShinkenSpecific = {
     'expert'              => { type => 'BOOL', cat => 'Extended' },
 };
 
+$Monitoring::Config::Object::Contact::standard_keys = [ 'contact_name', 'use', 'alias', 'email', 'can_submit_commands' ];
+
 ##########################################################
 
 =head1 METHODS
@@ -85,7 +87,7 @@ sub BUILD {
         'type'        => 'contact',
         'primary_key' => 'contact_name',
         'default'     => $Monitoring::Config::Object::Contact::Defaults,
-        'standard'    => [ 'contact_name', 'use', 'alias', 'email', 'can_submit_commands' ],
+        'standard'    => $Monitoring::Config::Object::Contact::standard_keys,
         'has_custom'  => 1,
     };
     bless $self, $class;

@@ -95,6 +95,8 @@ $Monitoring::Config::Object::Host::ShinkenSpecific = {
     'service_includes'            => { type => 'STRING', cat => 'Extended' },
 };
 
+$Monitoring::Config::Object::Host::Defaults::standard_keys = [ 'host_name', 'use', 'alias', 'address', 'contact_groups' ];
+
 ##########################################################
 
 =head1 METHODS
@@ -131,7 +133,7 @@ sub BUILD {
         'type'        => 'host',
         'primary_key' => 'host_name',
         'default'     => $Monitoring::Config::Object::Host::Defaults,
-        'standard'    => [ 'host_name', 'use', 'alias', 'address', 'contact_groups' ],
+        'standard'    => $Monitoring::Config::Object::Host::Defaults::standard_keys,
         'has_custom'  => 1,
     };
     bless $self, $class;
