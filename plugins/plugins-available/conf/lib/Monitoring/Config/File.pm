@@ -103,7 +103,9 @@ sub update_objects {
     return unless defined $self->{'md5'};
 
     my $text = Thruk::Utils::decode_any(scalar read_file($self->{'path'}));
-    return $self->update_objects_from_text($text);
+    $self->update_objects_from_text($text);
+    $self->{'changed'} = 0;
+    return;
 }
 
 
