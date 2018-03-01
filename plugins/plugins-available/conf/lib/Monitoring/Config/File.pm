@@ -29,7 +29,7 @@ my $semicolonreplacement = chr(0).chr(0);
 
 =head2 new
 
-return new host
+return new file object
 
 =cut
 sub new {
@@ -312,6 +312,24 @@ sub update_objects_from_text {
             }
         }
     }
+    return;
+}
+
+##########################################################
+
+=head2 add_object
+
+add object to file
+
+=cut
+sub add_object {
+    my($self, $conf) = @_;
+
+    $conf->{'file'}     = $self;
+    $conf->{'coretype'} = $self->{'coretype'};
+    push @{$self->{'objects'}}, Monitoring::Config::Object->new(%{$conf});
+    $self->{'changed'} = 1;
+
     return;
 }
 
