@@ -2690,9 +2690,10 @@ sub get_plugin_preview {
 ##########################################################
 sub _set_output_format {
     my($cfg) = @_;
-    $Monitoring::Config::format_comments = "%-".$cfg->{'indent_object_comments'}."s %s";
-    $Monitoring::Config::format_values   = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
-    $Monitoring::Config::format_keys     = "%-".$cfg->{'indent_object_key'}."s%s";
+    $Monitoring::Config::format_comments  = "%-".$cfg->{'indent_object_comments'}."s %s";
+    $Monitoring::Config::format_values    = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
+    $Monitoring::Config::format_values_nl = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s\n";
+    $Monitoring::Config::format_keys      = "%-".$cfg->{'indent_object_key'}."s%s\n";
     return;
 }
 

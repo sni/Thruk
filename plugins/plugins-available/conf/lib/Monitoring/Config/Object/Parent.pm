@@ -157,19 +157,17 @@ sub as_text {
         }
 
         $text .= $disabled;
-        my $line;
-        if($value ne '') {
-            $line = sprintf $Monitoring::Config::format_values, "", $key, $value;
+        if($self->{'inl_comments'}->{$key}) {
+            my $line = sprintf $Monitoring::Config::format_values, "", $key, $value;
+            $text   .= sprintf $Monitoring::Config::format_comments, $line, $self->{'inl_comments'}->{$key};
+            $text .= "\n";
+        }
+        elsif($value ne '') {
+            $text .= sprintf $Monitoring::Config::format_values_nl, "", $key, $value;
         } else {
             # empty values are allowed
-            $line = sprintf $Monitoring::Config::format_keys, "", $key;
+            $text .= sprintf $Monitoring::Config::format_keys, "", $key;
         }
-        if($self->{'inl_comments'}->{$key}) {
-            $text .= sprintf $Monitoring::Config::format_comments, $line, $self->{'inl_comments'}->{$key};
-        } else {
-            $text .= $line;
-        }
-        $text .= "\n";
         $nr_object_lines++;
     }
     $text .= $disabled;
