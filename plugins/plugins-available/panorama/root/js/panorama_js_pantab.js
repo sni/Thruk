@@ -47,7 +47,7 @@ Ext.define('TP.Pantab', {
         beforeclose: function( This, eOpts ) {
             var tabpan = Ext.getCmp('tabpan');
             var tabState = tabpan.getState(); // recalculate open_tabs
-            if(tabState.open_tabs.length <= 1) {
+            if(tabpan.open_tabs.length <= 1) {
                 TP.add_pantab("tabpan-tab_0");
             }
             TP.log('['+This.id+'] closing tab');
@@ -145,11 +145,7 @@ Ext.define('TP.Pantab', {
                 tabpan.saveState();
             }
             var curNr = this.id.replace(/^tabpan-tab_/, '');
-            if(curNr != 0) {
-                set_hash(curNr, 1);
-            } else {
-                set_hash("");
-            }
+            cookieSave('thruk_panorama_active', curNr);
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {

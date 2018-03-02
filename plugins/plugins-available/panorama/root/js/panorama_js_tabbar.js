@@ -307,17 +307,25 @@ Ext.define('TP.TabBar', {
         if(open_tabs.length == ordered_items.length) {
             open_tabs = ordered_items;
         }
-        var activeTab = this.getActiveTab();
-        if(!activeTab) {
-            debug("forced setting activeTab");
-            activeTab = this.setActiveTab(open_tabs.length > 0 ? open_tabs[0] : 0);
-        }
-        this.open_tabs = open_tabs;
 
+        // save open tabs and active tab as cookie
+        if(TP.initialized) {
+            var activeTab = this.getActiveTab();
+            if(!activeTab) {
+                debug("forced setting activeTab");
+                activeTab = this.setActiveTab(open_tabs.length > 0 ? open_tabs[0] : 0);
+            }
+            cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^tabpan-tab_/, '') : 0);
+            var numbers = [];
+            for(var nr=0; nr<open_tabs.length; nr++) {
+                numbers.push(open_tabs[nr].replace(/^tabpan-tab_/, ''));
+            }
+            cookieSave('thruk_panorama_tabs', numbers.join(':'));
+        }
+
+        this.open_tabs = open_tabs;
         return {
-            open_tabs:  open_tabs,
-            xdata:      this.xdata,
-            activeTab:  activeTab ? activeTab.getStateId() : null
+            xdata: this.xdata
         }
     },
     applyState: function(state) {

@@ -793,6 +793,7 @@ Ext.define('TP.IconWidget', {
     },
     refreshHandler: function(newStatus) {
         var tab   = Ext.getCmp(this.panel_id);
+        if(!tab) { return; } // maybe just closed
         var panel = this;
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) { return; }
         var oldState = {

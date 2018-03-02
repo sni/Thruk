@@ -224,9 +224,6 @@ var TP = {
         /* set initial timestamp */
         Ext.getCmp(id).ts = TP.cp.state[id].ts;
 
-        /* save tabs state */
-        Ext.getCmp('tabpan').saveState();
-
         /* any callbacks? */
         if(callback) { callback(id); }
 
@@ -860,7 +857,7 @@ var TP = {
 
             if(data && data.dashboard_ts != undefined) {
                 for(var key in data.dashboard_ts) {
-                    var tab_id = key;
+                    var tab_id = TP.nr2TabId(key);
                     var tab = Ext.getCmp(tab_id);
                     if(!tab) {
                         // dashboard has been closed already

@@ -22,6 +22,7 @@ next:
           - Logcache:
             - speed up updates
           - Panorama:
+            - save open tabs in cookies instead of the user profile
             - add quick filter for dashboard dropdown
           - Config Tool:
             - fix adding custom variables
