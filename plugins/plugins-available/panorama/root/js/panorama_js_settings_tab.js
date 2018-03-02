@@ -911,7 +911,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     /* the actual settings window containing the panel */
     var tab_win_settings = new Ext.window.Window({
         modal:       true,
-        width:       600,
+        width:       610,
         height:      350,
         title:       'Settings',
         layout :     'fit',

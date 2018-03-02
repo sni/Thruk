@@ -727,15 +727,15 @@ Ext.define('TP.Pantab', {
             if(!tab.bgImgEl) {
                 var iconContainer = Ext.fly('iconContainer');
                 tab.bgImgEl  = iconContainer.createChild('<img>', iconContainer.dom.childNodes[0]);
+                tab.bgImgEl.on('load',
+                                function (evt, ele, opts) {
+                                    tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
+                                },
+                                undefined, {
+                                    single: true    // remove event handler after first occurence
+                                }
+                );
             }
-            tab.bgImgEl.on('load',
-                            function (evt, ele, opts) {
-                                tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
-                            },
-                            undefined, {
-                                single: true    // remove event handler after first occurence
-                            }
-            );
             tab.bgImgEl.dom.src            = background;
             tab.bgImgEl.dom.style.position = "absolute";
             tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
@@ -782,6 +782,7 @@ Ext.define('TP.Pantab', {
         }
     },
     applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y) {
+        if(background.match(/s\.gif$/)) { return; }
         var tab = this;
         if(size_x != undefined && size_x > 0 && size_y != undefined && size_y > 0) {
             tab.bgImgEl.dom.style.width  = size_x+"px";
