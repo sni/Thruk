@@ -213,6 +213,9 @@ Ext.define('TP.Pantab', {
             if(This.xdata.hide_tab_header) {
                 This.tab.hide();
             }
+            if(one_tab_only) {
+                document.title = This.xdata.title;
+            }
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {

@@ -129,6 +129,9 @@ var TP = {
                         tabpan.saveState();
                     }
 
+                    if(!hidden) {
+                        TP.initial_active_tab = id; // set inital tab, so panlets will be shown
+                    }
                     TP.add_pantab(id, replace_id, hidden, callback, extraConf, skipAutoShow);
 
                     /* disable lock for new dashboard */
@@ -145,7 +148,7 @@ var TP = {
         if(hidden) {
             Ext.create("TP.Pantab", {id: id, hidden: true});
         } else {
-            if(TP.initial_active_tab == undefined) {
+            if(TP.initial_active_tab == undefined || one_tab_only) {
                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
             }
 
