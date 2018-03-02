@@ -21,9 +21,11 @@ unless($INC{'Test/More.pm'}) {
 }
 
 sub timing_breakpoint {
-    my($msg)     = @_;
-    my @caller   = caller;
-    my $tmp      = [gettimeofday];
+    my($msg, $reset, $lvl) = @_;
+    my @caller  = caller($lvl || 0);
+    my $tmp     = [gettimeofday];
+
+    if($reset) { $lasttime = $tmp; }
     my $total    = tv_interval($starttime);
     my $elapsed  = tv_interval($lasttime);
     my $memory   = '';

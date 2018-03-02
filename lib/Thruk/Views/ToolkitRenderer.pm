@@ -15,9 +15,6 @@ use warnings;
 use Carp qw/confess/;
 use Template ();
 
-BEGIN {
-    #use Thruk::Timer qw/timing_breakpoint/;
-}
 =head1 METHODS
 
 =head2 register
@@ -67,7 +64,6 @@ sub render {
             ];
     }
 
-    #&timing_breakpoint('render_tt render()');
     $tt->process(
         $template,
         ($stash || $c->stash),
@@ -75,7 +71,6 @@ sub render {
     ) || do {
         die($tt->error.' on '.$template);
     };
-    #&timing_breakpoint('render_tt processed');
     $c->stats->profile(end => "render: ".$template);
     if($output) {
         ${$output} =~ s/^\s+//sgmxo unless $c->stash->{no_tt_trim};
