@@ -559,9 +559,12 @@ Ext.define('TP.Pantab', {
             size_y     = xdata.backgroundsize_y,
             bg_color   = xdata.background_color;
         if(retries == undefined) { retries = 0; }
-        if(retries >= 5)         { return;      }
+        if(retries >= 10)        { return;      }
         var body = tab.body;
-        if(body == undefined)    { return; }
+        if(body == undefined)    {
+            window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
+            return;
+        }
 
         if(xdata.map) {
             if(tab.bgImgEl) { tab.bgImgEl.destroy(); tab.bgImgEl = undefined; }
