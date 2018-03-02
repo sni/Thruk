@@ -2021,11 +2021,9 @@ var TP = {
         if(!scope.lastEventRun)              { scope.lastEventRun = {}; }
         if(!scope.lastEventRun[timeoutName]) { scope.lastEventRun[timeoutName] = 0; }
         window.clearTimeout(TP.timeouts[timeoutName]);
-        if(now > scope.lastEventRun[timeoutName] + delay) {
+        if(now > scope.lastEventRun[timeoutName] + delay && !skipInitialRun) {
             scope.lastEventRun[timeoutName] = now;
-            if(!skipInitialRun) {
-                callback();
-            }
+            callback();
         } else {
             TP.timeouts[timeoutName] = window.setTimeout(function() {
                 if(scope) {

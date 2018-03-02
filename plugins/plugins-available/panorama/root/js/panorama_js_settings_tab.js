@@ -414,7 +414,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             var d_form  = Ext.getCmp('dashboardForm').getForm();
             if(!d_form.isValid()) { return; }
             values = d_form.getFieldValues();
-            if(values.locked) { return; }
         }
         if(values.map_choose == undefined) {
             if(values.map) {
@@ -465,11 +464,15 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             delete values['map'];
             delete values['background_color'];
         }
+
+        if(values.locked) { return; }
         tab.setBackground(values);
         return;
     }
 
+    var listenToChanges = false;
     var changedListener = function(This, newValue, oldValue, eOpts) {
+        if(!listenToChanges) { return; }
         TP.reduceDelayEvents(tab, function() {
             applyBackground();
         }, 100, 'timeout_tab_background_change', true);
@@ -563,6 +566,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             xtype:       'fieldcontainer',
             id:          'mapcenter',
             layout:      'hbox',
+            hidden:       map_choose != 'map' ? true : false,
             defaults:   {
                 listeners: { change: changedListener }
             },
@@ -1061,8 +1065,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
-    changedListener();
     tab_win_settings.show();
+    listenToChanges = true;
+    applyBackground(tab.xdata);
     mask.destroy();
 };
 

@@ -333,7 +333,7 @@ Ext.define('TP.Pantab', {
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
-            if(panel.xdata.layout.lon != undefined) {
+            if(panel.xdata.layout && panel.xdata.layout.lon != undefined) {
                 panel.moveToMapLonLat(size, movedOnly);
             }
         }
