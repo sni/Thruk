@@ -42,6 +42,8 @@ $Monitoring::Config::Object::Hostdependency::Defaults = {
     'execution_failure_options'     => { type => 'ALIAS', 'name' => 'execution_failure_criteria' },
 };
 
+$Monitoring::Config::Object::Hostdependency::primary_keys = [ 'host_name', [ 'hostgroup_name' ] ];
+
 ##########################################################
 
 =head1 METHODS
@@ -55,7 +57,7 @@ sub BUILD {
     my $class = shift || __PACKAGE__;
     my $self = {
         'type'        => 'hostdependency',
-        'primary_key' => [ 'host_name', [ 'hostgroup_name' ] ],
+        'primary_key' => $Monitoring::Config::Object::Hostdependency::primary_keys,
         'default'     => $Monitoring::Config::Object::Hostdependency::Defaults,
     };
     bless $self, $class;

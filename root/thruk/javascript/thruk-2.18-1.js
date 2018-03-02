@@ -1143,7 +1143,7 @@ function count_site_section_totals(section, prefix) {
             else if(jQuery(btn).hasClass('button_peerDOWN')) {
                 section.down++;
             } else {
-                if(thruk_debug_js) { alert("ERROR: no known class found for btn: " + pd + " - " + btn.title ); }
+                if(thruk_debug_js) { alert("ERROR: no known class found for btn: " + pd ); }
             }
         });
     }

@@ -95,6 +95,8 @@ $Monitoring::Config::Object::Host::ShinkenSpecific = {
     'service_includes'            => { type => 'STRING', cat => 'Extended' },
 };
 
+$Monitoring::Config::Object::Host::Defaults::standard_keys = [ 'host_name', 'use', 'alias', 'address', 'contact_groups' ];
+
 ##########################################################
 
 =head1 METHODS
@@ -108,27 +110,30 @@ sub BUILD {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
 
-    if($coretype eq 'any' or $coretype eq 'shinken') {
-        for my $key (keys %{$Monitoring::Config::Object::Host::ShinkenSpecific}) {
-            $Monitoring::Config::Object::Host::Defaults->{$key} = $Monitoring::Config::Object::Host::ShinkenSpecific->{$key};
+    if(!$Monitoring::Config::Object::Host::defaults_cleaned || $Monitoring::Config::Object::Host::defaults_cleaned ne $coretype) {
+        if($coretype eq 'any' or $coretype eq 'shinken') {
+            for my $key (keys %{$Monitoring::Config::Object::Host::ShinkenSpecific}) {
+                $Monitoring::Config::Object::Host::Defaults->{$key} = $Monitoring::Config::Object::Host::ShinkenSpecific->{$key};
+            }
+        } else {
+            for my $key (keys %{$Monitoring::Config::Object::Host::ShinkenSpecific}) {
+                delete $Monitoring::Config::Object::Host::Defaults->{$key};
+            }
         }
-    } else {
-        for my $key (keys %{$Monitoring::Config::Object::Host::ShinkenSpecific}) {
-            delete $Monitoring::Config::Object::Host::Defaults->{$key};
-        }
-    }
 
-    if($coretype eq 'any' or $coretype eq 'icinga') {
-        $Monitoring::Config::Object::Host::Defaults->{'address6'} = { type => 'STRING', cat => 'Basic' };
-    } else {
-        delete $Monitoring::Config::Object::Host::Defaults->{'address6'};
+        if($coretype eq 'any' or $coretype eq 'icinga') {
+            $Monitoring::Config::Object::Host::Defaults->{'address6'} = { type => 'STRING', cat => 'Basic' };
+        } else {
+            delete $Monitoring::Config::Object::Host::Defaults->{'address6'};
+        }
+        $Monitoring::Config::Object::Host::defaults_cleaned = $coretype;
     }
 
     my $self = {
         'type'        => 'host',
         'primary_key' => 'host_name',
         'default'     => $Monitoring::Config::Object::Host::Defaults,
-        'standard'    => [ 'host_name', 'use', 'alias', 'address', 'contact_groups' ],
+        'standard'    => $Monitoring::Config::Object::Host::Defaults::standard_keys,
         'has_custom'  => 1,
     };
     bless $self, $class;

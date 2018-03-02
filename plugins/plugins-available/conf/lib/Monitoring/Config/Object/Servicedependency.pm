@@ -49,6 +49,8 @@ $Monitoring::Config::Object::Servicedependency::Defaults = {
     'notification_failure_options'  => { type => 'ALIAS', 'name' => 'notification_failure_criteria' },
 };
 
+$Monitoring::Config::Object::Servicedependency::primary_keys = [ 'service_description', [ 'host_name', 'hostgroup_name' ] ];
+
 ##########################################################
 
 =head1 METHODS
@@ -62,7 +64,7 @@ sub BUILD {
     my $class = shift || __PACKAGE__;
     my $self = {
         'type'        => 'servicedependency',
-        'primary_key' => [ 'service_description', [ 'host_name', 'hostgroup_name' ] ],
+        'primary_key' => $Monitoring::Config::Object::Servicedependency::primary_keys,
         'default'     => $Monitoring::Config::Object::Servicedependency::Defaults,
     };
     bless $self, $class;

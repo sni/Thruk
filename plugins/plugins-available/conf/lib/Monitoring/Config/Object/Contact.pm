@@ -55,6 +55,8 @@ $Monitoring::Config::Object::Contact::ShinkenSpecific = {
     'expert'              => { type => 'BOOL', cat => 'Extended' },
 };
 
+$Monitoring::Config::Object::Contact::standard_keys = [ 'contact_name', 'use', 'alias', 'email', 'can_submit_commands' ];
+
 ##########################################################
 
 =head1 METHODS
@@ -67,20 +69,25 @@ return new object
 sub BUILD {
     my $class = shift || __PACKAGE__;
     my $coretype = shift;
-    if($coretype eq 'any' or $coretype eq 'shinken') {
-        for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
-            $Monitoring::Config::Object::Contact::Defaults->{$key} = $Monitoring::Config::Object::Contact::ShinkenSpecific->{$key};
+
+    if(!$Monitoring::Config::Object::Contact::defaults_cleaned || $Monitoring::Config::Object::Contact::defaults_cleaned ne $coretype) {
+        if($coretype eq 'any' or $coretype eq 'shinken') {
+            for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
+                $Monitoring::Config::Object::Contact::Defaults->{$key} = $Monitoring::Config::Object::Contact::ShinkenSpecific->{$key};
+            }
+        } else {
+            for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
+                delete $Monitoring::Config::Object::Contact::Defaults->{$key};
+            }
         }
-    } else {
-        for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
-            delete $Monitoring::Config::Object::Contact::Defaults->{$key};
-        }
+        $Monitoring::Config::Object::Contact::defaults_cleaned = $coretype;
     }
+
     my $self = {
         'type'        => 'contact',
         'primary_key' => 'contact_name',
         'default'     => $Monitoring::Config::Object::Contact::Defaults,
-        'standard'    => [ 'contact_name', 'use', 'alias', 'email', 'can_submit_commands' ],
+        'standard'    => $Monitoring::Config::Object::Contact::standard_keys,
         'has_custom'  => 1,
     };
     bless $self, $class;

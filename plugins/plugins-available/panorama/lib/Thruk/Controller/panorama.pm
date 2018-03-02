@@ -273,6 +273,8 @@ sub _js {
         $open_tabs = [$dashboard->{'nr'}];
         $c->stash->{one_tab_only} = $dashboard->{'nr'};
         $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
+    } elsif($c->cookie('thruk_panorama_tabs')) {
+        $open_tabs = [split(/\s*:\s*/mx, $c->cookie('thruk_panorama_tabs')->value)];
     }
 
     $c->stash->{shapes} = {};
@@ -305,6 +307,11 @@ sub _js {
             }
         }
         $c->stash->{shapes} = $shapes;
+        # restore last open tab
+        if($c->cookie('thruk_panorama_active')) {
+            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $open_tabs;
+            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'activeTab'} = 'tabpan-tab_'.$c->cookie('thruk_panorama_active')->value;
+        }
         $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'}) if $data->{'panorama'}->{dashboards}->{'tabpan'};
     }
 
@@ -3154,11 +3161,8 @@ sub _get_default_tab_xdata {
 ##########################################################
 sub _add_json_dashboard_timestamps {
     my($c, $json, $tab) = @_;
-    if(!defined $tab) {
-        my $data = Thruk::Utils::get_user_data($c);
-        if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'}) {
-            $tab = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'};
-        }
+    if(!defined $tab && $c->cookie('thruk_panorama_active')) {
+        $tab = $c->cookie('thruk_panorama_active')->value;
     }
     if($tab) {
         my $nr = $tab;

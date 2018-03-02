@@ -730,3 +730,7 @@ BODY.x-chrome DIV.TP_PanletGridServiceMineMap DIV.x-column-header-first DIV.x-co
   position: absolute;
   bottom: 0px;
 }
+
+A.x-color-picker-item SPAN {
+  height: 12px;
+}

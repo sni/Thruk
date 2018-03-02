@@ -1463,8 +1463,6 @@ sub _do_on_peers {
 
     $data = $self->_set_result_defaults($function, $data);
 
-    #&timing_breakpoint('_get_result complete: '.$function);
-
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
     return $data;
@@ -1657,7 +1655,6 @@ sub _get_result_lmd {
     }
 
     $c->stats->profile( end => "_get_result_lmd($function)");
-    #&timing_breakpoint('_get_result_lmd end: '.$function);
     return($result, $type, $totalsize);
 }
 
@@ -1705,7 +1702,6 @@ sub _get_result_serial {
     $c->stash->{'total_backend_waited'} += $elapsed;
 
     $c->stats->profile( end => "_get_result_serial($function)");
-    #&timing_breakpoint('_get_result_serial end: '.$function);
     return($result, $type, $totalsize);
 }
 
@@ -1773,8 +1769,7 @@ sub _get_results_xs_pool {
     my($self, $peers, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
 
-    #&timing_breakpoint('_get_results_xs_pool begin: '.$function);
-    $c->stats->profile( begin => "_get_results_xs_pool()");
+    $c->stats->profile( begin => '_get_results_xs_pool('.$function.')');
 
     my $result;
     my $remaining_peers = [];
@@ -1927,8 +1922,7 @@ sub _get_results_xs_pool {
         }
     }
 
-    $c->stats->profile( end => "_get_results_xs_pool()");
-    #&timing_breakpoint('_get_results_xs_pool end: '.$function);
+    $c->stats->profile( end => '_get_results_xs_pool('.$function.')');
 
     return($remaining_peers, $result, $type, $totalsize);
 }

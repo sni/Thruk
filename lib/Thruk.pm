@@ -258,7 +258,7 @@ sub _dispatcher {
     my($env) = @_;
 
     $Thruk::COUNT++;
-    #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO});
+    #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
     # connection keep alive breaks IE in development server
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         delete $env->{'HTTP_CONNECTION'};
@@ -326,14 +326,11 @@ sub _dispatcher {
         Thruk::Views::ToolkitRenderer::render_tt($c);
     }
 
-    #&timing_breakpoint("_dispatcher finalize");
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
-    #&timing_breakpoint("_dispatcher finalize done");
 
     _after_dispatch($c, $res);
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
-    #&timing_breakpoint("_dispatcher done");
     return($res);
 }
 

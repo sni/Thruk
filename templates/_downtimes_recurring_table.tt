@@ -33,7 +33,8 @@
                 [% END %]
             [% ELSE %]
                 [% FOREACH svc = d.service %]
-                    [% svc %][% UNLESS loop.last %], [% END %]
+                    <a href='status.cgi?hidesearch=0&amp;hidetop=&amp;style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc %]</a>
+                    [% UNLESS loop.last %], [% END %]
                 [% END %]
             [% END %]
         [% ELSIF d.target == 'hostgroup' %]

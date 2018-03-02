@@ -54,7 +54,7 @@ Ext.onReady(function() {
                 }
                 var tabpan = Ext.getCmp('tabpan');
                 var tab = tabpan.getActiveTab();
-                if(!tab.locked && !TP.iconSettingsWindow) {
+                if(!tab || !tab.locked && !TP.iconSettingsWindow) {
                     return(false);
                 }
                 if(!TP.iconSettingsWindow) {

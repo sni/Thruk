@@ -93,6 +93,9 @@ $Monitoring::Config::Object::Service::ShinkenSpecific = {
     'host_dependency_enabled'      => { type => 'BOOL', cat => 'Extended' },
 };
 
+$Monitoring::Config::Object::Service::primary_keys  = [ 'service_description', [ 'host_name', 'hostgroup_name' ] ];
+$Monitoring::Config::Object::Service::standard_keys = [ 'service_description', 'use', 'host_name', 'check_command', 'contact_groups' ];
+
 ##########################################################
 
 =head1 METHODS
@@ -105,20 +108,25 @@ return new object
 sub BUILD {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
-    if($coretype eq 'any' or $coretype eq 'shinken') {
-        for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
-            $Monitoring::Config::Object::Service::Defaults->{$key} = $Monitoring::Config::Object::Service::ShinkenSpecific->{$key};
+
+    if(!$Monitoring::Config::Object::Service::defaults_cleaned || $Monitoring::Config::Object::Service::defaults_cleaned ne $coretype) {
+        if($coretype eq 'any' or $coretype eq 'shinken') {
+            for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
+                $Monitoring::Config::Object::Service::Defaults->{$key} = $Monitoring::Config::Object::Service::ShinkenSpecific->{$key};
+            }
+        } else {
+            for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
+                delete $Monitoring::Config::Object::Service::Defaults->{$key};
+            }
         }
-    } else {
-        for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
-            delete $Monitoring::Config::Object::Service::Defaults->{$key};
-        }
+        $Monitoring::Config::Object::Service::defaults_cleaned = $coretype;
     }
+
     my $self = {
         'type'        => 'service',
-        'primary_key' => [ 'service_description', [ 'host_name', 'hostgroup_name' ] ],
+        'primary_key' => $Monitoring::Config::Object::Service::primary_keys,
         'default'     => $Monitoring::Config::Object::Service::Defaults,
-        'standard'    => [ 'service_description', 'use', 'host_name', 'check_command', 'contact_groups' ],
+        'standard'    => $Monitoring::Config::Object::Service::standard_keys,
         'has_custom'  => 1,
     };
     bless $self, $class;

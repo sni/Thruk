@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 702;
+    plan tests => 703;
 }
 
 BEGIN {
@@ -128,12 +128,12 @@ $objects->init();
 isa_ok( $objects, 'Monitoring::Config' );
 is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files:\n".Dumper($objects));
 my $parsedfile = $objects->{'files'}->[0];
-is( $parsedfile->{'md5'}, 'bf6f91fcc7c569f4cc96bcdf8e926811', 'files md5 sum' );
+is( $parsedfile->{'md5'}, '789b8aee75f4e6f991e18af683384bdb', 'files md5 sum' );
 like( $parsedfile->{'parse_errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );
 my $obj = $parsedfile->{'objects'}->[0];
 my $host = {
-    '_CUST1'         => 'cust 1 val',
     '_CUST2'         => 'cust 2 val',
+    '_CUST1'         => 'cust 1 val',
     '_CUST3'         => 'cust 3 val multiline',
     'use'            => [ 'generic-host' ],
     'hostgroups'     => [ 'hostgroup1', 'hostgroup2' ],
@@ -144,6 +144,9 @@ my $host = {
     'alias'          => 'alias1         # one more',
     'contact_groups' => [ 'group1', 'group2' ],
     'parents'        => [ 'parent_host' ],
+    '_TYPE'          => 'linux',
+    '_TAGS'          => 'dmz',
+    '_APPS'          => 'app1=a, app2',
 };
 is_deeply($obj->{'conf'}, $host, 'parsed host');
 is( scalar @{ $obj->{'comments'} }, 3, 'number of comments' );
@@ -158,6 +161,9 @@ my $exp_keys = [
            'hostgroups',
            'icon_image',
            'icon_image_alt',
+           '_TYPE',
+           '_TAGS',
+           '_APPS',
            '_CUST1',
            '_CUST2',
            '_CUST3',
@@ -372,3 +378,14 @@ $testhost = {
 };
 ($computed_keys, $computed) = $obj->get_computed_config($objects);
 is_deeply($computed, $testhost, 'parsed nested templates II');
+
+###########################################################
+# remove empty list elements
+my $file = Monitoring::Config::File->new("test.cfg", undef, 'nagios');
+$file->update_objects_from_text('
+define host {
+  host_name   test
+  host_groups a, ,,b, c
+}
+');
+is_deeply($file->{'objects'}->[0]->{'conf'}->{'hostgroups'}, ['a', 'b', 'c'], 'parsed empty lists');
