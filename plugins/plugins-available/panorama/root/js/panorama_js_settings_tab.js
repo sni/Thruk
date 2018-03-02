@@ -497,7 +497,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             /* tab title */
             xtype:      'textfield',
             name:       'title',
-            fieldLabel: 'Title'
+            fieldLabel: 'Title',
+            listeners: { change: function(This, newValue, oldValue, eOpts) { document.title = newValue; } }
         }, {
             /* global refresh rate */
             xtype:      'tp_slider',
@@ -928,6 +929,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         tab.applyXdata(undefined, false);
                         tab_win_settings.destroy();
+                        document.title = tab.xdata.title;
                         if(closeAfterEdit) { tab.destroy(); }
                     }
                 }, {
@@ -1023,6 +1025,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             tabpan.saveState();
                             tabpan.startTimeouts();
                         }
+
+                        document.title = tab.xdata.title;
 
                         TP.refreshAllSitePanel(tab);
 
