@@ -46,6 +46,9 @@ var TP = {
 
     add_pantab: function(id, replace_id, hidden, callback, extraConf, skipAutoShow) {
         var tabpan = Ext.getCmp('tabpan');
+        if(id && Ext.isNumeric(String(id))) {
+            id = TP.nr2TabId(id);
+        }
 
         /* if previously added as hidden tab, destroy it and add it normal */
         if(id && Ext.getCmp(id)) {
@@ -91,9 +94,6 @@ var TP = {
                 method: 'POST',
                 params: { nr: id, hidden: hidden },
                 callback: function(options, success, response) {
-                    if(id != 'new') {
-                        id = TP.nr2TabId(id);
-                    }
                     if(!success) {
                         if(!hidden) {
                             if(response.status == 0) {
@@ -119,9 +119,6 @@ var TP = {
                         TP.cp.set(key, Ext.JSON.decode(data[key]));
                     }
                     if(TP.cp.state[id]) {
-                        if(!hidden) {
-                            TP.initial_active_tab = id; // set inital tab, so panlets will be shown
-                        }
                         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
                             TP.dashboardsSettingGrid.getView().refresh();
                         }
@@ -148,6 +145,10 @@ var TP = {
         if(hidden) {
             Ext.create("TP.Pantab", {id: id, hidden: true});
         } else {
+            if(TP.initial_active_tab == undefined) {
+                TP.initial_active_tab = id; // set inital tab, so panlets will be shown
+            }
+
             var tab = tabpan.add(new TP.Pantab({id: id}));
             if(!skipAutoShow) {
                 tab.show();
