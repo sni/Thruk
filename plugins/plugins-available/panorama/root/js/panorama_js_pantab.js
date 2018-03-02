@@ -900,14 +900,14 @@ Ext.define('TP.Pantab', {
         var nr = tab.id.replace(/^tabpan-tab_/, '');
 
         var menu_items = [];
-        if(!readonly && !tab.readonly) {
+        if(tab.xdata.locked) { hidePasteAndNew = true; }
+        if(!readonly && !tab.readonly && !hidePasteAndNew) {
             menu_items = menu_items.concat([{
                     text:   'New',
                     icon:   url_prefix+'plugins/panorama/images/cog_add.png',
                     hideOnClick: false,
                     menu:    TP.addPanletsMenu({open: 'right'}),
-                    disabled: tab.xdata.locked,
-                    hidden:  hidePasteAndNew
+                    disabled: tab.xdata.locked
                 }]);
         }
 
