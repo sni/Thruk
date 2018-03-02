@@ -93,6 +93,9 @@ $Monitoring::Config::Object::Service::ShinkenSpecific = {
     'host_dependency_enabled'      => { type => 'BOOL', cat => 'Extended' },
 };
 
+$Monitoring::Config::Object::Service::primary_keys  = [ 'service_description', [ 'host_name', 'hostgroup_name' ] ];
+$Monitoring::Config::Object::Service::standard_keys = [ 'service_description', 'use', 'host_name', 'check_command', 'contact_groups' ];
+
 ##########################################################
 
 =head1 METHODS
@@ -121,9 +124,9 @@ sub BUILD {
 
     my $self = {
         'type'        => 'service',
-        'primary_key' => [ 'service_description', [ 'host_name', 'hostgroup_name' ] ],
+        'primary_key' => $Monitoring::Config::Object::Service::primary_keys,
         'default'     => $Monitoring::Config::Object::Service::Defaults,
-        'standard'    => [ 'service_description', 'use', 'host_name', 'check_command', 'contact_groups' ],
+        'standard'    => $Monitoring::Config::Object::Service::standard_keys,
         'has_custom'  => 1,
     };
     bless $self, $class;

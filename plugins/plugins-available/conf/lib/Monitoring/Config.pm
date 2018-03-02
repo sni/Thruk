@@ -111,6 +111,8 @@ sub new {
 
     bless $self, $class;
 
+    _set_output_format($Monitoring::Config::save_options);
+
     # read rc file
     $self->read_rc_file();
 
@@ -2527,60 +2529,18 @@ sub set_save_config {
     my($self, $settings) = @_;
 
     my $cfg = $Monitoring::Config::save_options;
-    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    _set_output_format($cfg);
     return $cfg unless defined $settings;
 
     for my $key (keys %{$settings}) {
         $cfg->{$key} = $settings->{$key} if defined $cfg->{$key};
     }
 
-    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    _set_output_format($cfg);
 
     return $cfg;
-}
-
-##########################################################
-
-=head2 _sort_by_object_keys
-
-sort function for object keys
-
-=cut
-sub _sort_by_object_keys {
-    my($attr_keys, $cust_var_keys) = @_;
-
-    return sub {
-        ## no critic
-        $a = $Monitoring::Config::Object::Parent::a;
-        $b = $Monitoring::Config::Object::Parent::b;
-        ## use critic
-        my $order = $attr_keys;
-        my $num   = scalar @{$attr_keys} + 5;
-
-        for my $ord (@{$order}) {
-            if($a eq $ord) { return -$num; }
-            if($b eq $ord) { return  $num; }
-            $num--;
-        }
-
-        my $result = $a cmp $b;
-
-        if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
-            # prefer some custom variables
-            my $cust_order = $cust_var_keys;
-            my $cust_num   = scalar @{$cust_var_keys} + 3;
-            for my $ord (@{$cust_order}) {
-                if($a eq $ord) { return -$cust_num; }
-                if($b eq $ord) { return  $cust_num; }
-                $cust_num--;
-            }
-            return $result;
-        }
-        if(substr($a, 0, 1) eq '_') { return -$result; }
-        if(substr($b, 0, 1) eq '_') { return -$result; }
-
-        return $result;
-    };
 }
 
 ##########################################################
@@ -2687,7 +2647,7 @@ sub get_plugin_preview {
     return $output unless defined $args;
 
     my $cfg = $Monitoring::Config::save_options;
-    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
 
     my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
     $macros    = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'}, $macros);
@@ -2726,6 +2686,17 @@ sub get_plugin_preview {
     }
     return $output;
 }
+
+##########################################################
+sub _set_output_format {
+    my($cfg) = @_;
+    $Monitoring::Config::format_comments  = "%-".$cfg->{'indent_object_comments'}."s %s";
+    $Monitoring::Config::format_values    = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
+    $Monitoring::Config::format_values_nl = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s\n";
+    $Monitoring::Config::format_keys      = "%-".$cfg->{'indent_object_key'}."s%s\n";
+    return;
+}
+
 ##########################################################
 
 =head1 AUTHOR

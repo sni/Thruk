@@ -2725,9 +2725,9 @@ sub clean_regex {
     $regex =~ s/^\s+//mx;
     $regex =~ s/\s+$//mx;
 
-    # trim leading and trailing .*
-    $regex =~ s/^\.\*//mx;
-    $regex =~ s/\.\*$//mx;
+    # trim leading and trailing .*(?)
+    $regex =~ s/^\.\*\??//mx;
+    $regex =~ s/\.\*\??$//mx;
 
     return($regex);
 }
