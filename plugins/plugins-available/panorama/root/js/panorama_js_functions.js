@@ -203,9 +203,9 @@ var TP = {
                     }
                 } else {
                     var replace_nr;
-                    var tabState = tabpan.getState();
-                    for(var x=0; x<tabState.open_tabs.length; x++) {
-                        if(tabState.open_tabs[x] == replace_id) {
+                    tabpan.getState(); // recalculate open tabs
+                    for(var x=0; x<tabpan.open_tabs.length; x++) {
+                        if(tabpan.open_tabs[x] == replace_id) {
                             replace_nr = x+1;
                         }
                     }
