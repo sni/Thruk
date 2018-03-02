@@ -464,7 +464,7 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                     me.picker.destroy();
                     me.picker = undefined;
                 },
-                show: function(field,opts){
+                afterrender: function(field,opts){
                     field.getEl().monitorMouseLeave(2500, field.hide, field);
                     Ext.Array.each(field.el.dom.getElementsByTagName('A'), function(item, index) {
                         item.onmouseover=function() { if(me.mouseover) { me.mouseover(item.getElementsByTagName('SPAN')[0].style.backgroundColor); }},

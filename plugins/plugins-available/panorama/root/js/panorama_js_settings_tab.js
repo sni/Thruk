@@ -410,25 +410,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     };
 
     function applyBackground(values) {
-        if(values == undefined) {
-            var d_form  = Ext.getCmp('dashboardForm').getForm();
-            if(!d_form.isValid()) { return; }
-            values = d_form.getFieldValues();
-        }
-        if(values.map_choose == undefined) {
-            if(values.map) {
-                values.map_choose = 'geomap';
-            }
-            if(values.background_color) {
-                values.map_choose = 'color';
-            }
-        }
+        values = getValues(values);
 
-        Ext.getCmp('background_color').hide();
-        Ext.getCmp('background_choose').hide();
-        Ext.getCmp('background_offset_choose').hide();
-        Ext.getCmp('wms_choose').hide();
-        Ext.getCmp('mapcenter').hide();
         if(values.map_choose == 'geomap') {
             delete values.background_color;
             if(tab.xdata.map) {
@@ -436,8 +419,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             } else {
                 values.map = {};
             }
-            Ext.getCmp('wms_choose').show();
-            Ext.getCmp('mapcenter').show();
             if(values.wms_provider == undefined || values.wms_provider == "") {
                 if(wmsProvider.data.length > 0) {
                     values.wms_provider = wmsProvider.getAt(0).data.name;
@@ -455,12 +436,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             delete values['background_color'];
         }
         else if(values.map_choose == 'color') {
-            Ext.getCmp('background_color').show();
             delete values['map'];
             values['background'] = 'none';
         } else {
-            Ext.getCmp('background_choose').show();
-            Ext.getCmp('background_offset_choose').show();
             delete values['map'];
             delete values['background_color'];
         }
@@ -468,6 +446,43 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         if(values.locked) { return; }
         tab.setBackground(values);
         return;
+    }
+
+    function getValues(values) {
+        if(values != undefined) {
+            var d_form  = Ext.getCmp('dashboardForm').getForm();
+            if(!d_form.isValid()) { return(values); }
+            values = d_form.getFieldValues();
+        }
+        if(values.map_choose == undefined) {
+            if(values.map) {
+                values.map_choose = 'geomap';
+            }
+            if(values.background_color) {
+                values.map_choose = 'color';
+            }
+        }
+        return(values);
+    }
+
+    function setBackgroundOptionVisibility(values) {
+        values = getValues(values);
+
+        Ext.getCmp('background_color').hide();
+        Ext.getCmp('background_choose').hide();
+        Ext.getCmp('background_offset_choose').hide();
+        Ext.getCmp('wms_choose').hide();
+        Ext.getCmp('mapcenter').hide();
+        if(values.map_choose == 'geomap') {
+            Ext.getCmp('wms_choose').show();
+            Ext.getCmp('mapcenter').show();
+        }
+        else if(values.map_choose == 'color') {
+            Ext.getCmp('background_color').show();
+        } else {
+            Ext.getCmp('background_choose').show();
+            Ext.getCmp('background_offset_choose').show();
+        }
     }
 
     var listenToChanges = false;
@@ -515,7 +530,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             defaultType: 'radiofield',
             defaults:   {
                 flex: 1,
-                listeners: { change: changedListener }
+                listeners: { change: function() { setBackgroundOptionVisibility(); changedListener(); } }
             },
             layout:      'hbox',
             items: [{
@@ -546,7 +561,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 name:           'background_color',
                 flex:            1,
                 value:           tab.xdata.background_color || '',
-                listeners:     { change: changedListener }
+                listeners:     { change: changedListener },
+                mouseover:     function(color) {
+                    Ext.dom.Query.select('.x-mask')[0].style.display="none";
+                    tab.el.dom.style.backgroundOrig = tab.el.dom.style.background;
+                    tab.el.dom.style.background = color;
+                },
+                mouseout:      function(color) {
+                    Ext.dom.Query.select('.x-mask')[0].style.display="";
+                    tab.el.dom.style.background = tab.el.dom.style.backgroundOrig;
+                }
             }]
         }, {
             fieldLabel:     'WMS Provider',
@@ -1070,8 +1094,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
     tab_win_settings.show();
-    listenToChanges = true;
+    setBackgroundOptionVisibility(tab.xdata);
     applyBackground(tab.xdata);
+    listenToChanges = true;
     mask.destroy();
 };
 
