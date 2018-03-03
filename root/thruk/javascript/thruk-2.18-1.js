@@ -1923,7 +1923,7 @@ function getErrorText(details, error) {
         }
         if(window.XMLHttpRequest && file && !file.match("eval")) {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", file, false);
+            xhr.open("GET", file);
             xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
             xhr.send(null);
             var source = xhr.responseText.split(/\n/);
