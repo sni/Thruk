@@ -329,7 +329,7 @@ Ext.define('TP.TabBar', {
         }
     },
     applyState: function(state) {
-        TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
+        TP.log('['+this.id+'] applyState: '+(state ? Ext.JSON.encode(state) : 'none'));
         try {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
             TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
@@ -340,7 +340,7 @@ Ext.define('TP.TabBar', {
                 if(state.activeTab && TP.initial_active_tab == undefined) {
                     TP.initial_active_tab = state.activeTab;
                 }
-                this.xdata = state.xdata;
+                this.xdata = state.xdata || {};
 
                 if(state.open_tabs) {
                     for(var nr=0; nr<state.open_tabs.length; nr++) {
