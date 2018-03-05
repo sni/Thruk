@@ -263,6 +263,8 @@ sub index {
 sub _js {
     my($c, $only_data) = @_;
 
+    # merge open dashboards into state
+    my $data = Thruk::Utils::get_user_data($c);
     my $open_tabs;
     if(defined $c->req->parameters->{'map'}) {
         my $dashboard = _get_dashboard_by_name($c, $c->req->parameters->{'map'});
@@ -275,13 +277,16 @@ sub _js {
         $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
     } elsif($c->cookie('thruk_panorama_tabs')) {
         $open_tabs = [split(/\s*:\s*/mx, $c->cookie('thruk_panorama_tabs')->value)];
+        $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $open_tabs;
+        if($c->cookie('thruk_panorama_active')) {
+            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'activeTab'} = 'tabpan-tab_'.$c->cookie('thruk_panorama_active')->value;
+        }
     }
 
     $c->stash->{shapes} = {};
     $c->stash->{state}  = '';
 
-    # merge open dashboards into state
-    my $data = Thruk::Utils::get_user_data($c);
+    # restore last open tab
     if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
         my $shapes         = {};
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
@@ -307,11 +312,6 @@ sub _js {
             }
         }
         $c->stash->{shapes} = $shapes;
-        # restore last open tab
-        if($c->cookie('thruk_panorama_active')) {
-            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $open_tabs;
-            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'activeTab'} = 'tabpan-tab_'.$c->cookie('thruk_panorama_active')->value;
-        }
         $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'}) if $data->{'panorama'}->{dashboards}->{'tabpan'};
     }
 

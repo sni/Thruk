@@ -55,6 +55,10 @@ var TP = {
             var tab = Ext.getCmp(id);
             if(!tab.rendered) {
                 tab.destroy();
+            } else {
+                // dont add same dashboard twice
+                debug("attemted to add dashboard twice");
+                return;
             }
         }
 
@@ -88,6 +92,10 @@ var TP = {
             newDashboard = true;
         }
         if(id && TP.cp.state[id] == undefined) {
+            if(!TP.initialized) {
+                // all initial tabs should have a state, if not, do not open that tab
+                return;
+            }
             /* fetch state info and add new tab as callback */
             Ext.Ajax.request({
                 url: 'panorama.cgi?task=dashboard_data',
@@ -161,7 +169,7 @@ var TP = {
             if(tabpan.getTabBar) {
                 tabbar = tabpan.getTabBar();
                 for(var x=0; x<tabbar.items.items.length; x++) {
-                    if(tabbar.items.items[x].card.id == id) {
+                    if(tabbar.items.items[x].card && tabbar.items.items[x].card.id == id) {
                         tabPos = x;
                         break;
                     }

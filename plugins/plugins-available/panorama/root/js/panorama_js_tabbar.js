@@ -318,7 +318,10 @@ Ext.define('TP.TabBar', {
             cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^tabpan-tab_/, '') : 0);
             var numbers = [];
             for(var nr=0; nr<open_tabs.length; nr++) {
-                numbers.push(open_tabs[nr].replace(/^tabpan-tab_/, ''));
+                var num = open_tabs[nr].replace(/^tabpan-tab_/, '');
+                if(num > 0) {
+                    numbers.push(num);
+                }
             }
             cookieSave('thruk_panorama_tabs', numbers.join(':'));
         }
