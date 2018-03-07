@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.20     Wed Mar  7 10:59:57 CET 2018
           - add support for ipv6 livestatus backends (#753)
           - add timeout for cookie authentication http sub request
           - add filter to notifications and history page
