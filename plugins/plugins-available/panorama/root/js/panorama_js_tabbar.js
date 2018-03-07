@@ -92,15 +92,6 @@ Ext.define('TP.TabBar', {
             tooltip:  'Send Bug Report',
             listeners: { afterrender: function(This, eOpts) { This.hide(); } }
         }, {
-            id:        'debug_mode',
-            closable:   false,
-            iconCls:   'reload-tab',
-            href:      'panorama.cgi?debug=1',
-            hrefTarget: '',
-            html:      'Debug Mode',
-            tooltip:   'Reload Dashboad in Debug Mode',
-            listeners: { afterrender: function(This, eOpts) { This.hide(); } }
-        }, {
             iconCls:  'user-tab',
             closable:  false,
             tooltip:  'user menu',
