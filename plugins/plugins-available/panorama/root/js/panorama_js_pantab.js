@@ -140,10 +140,6 @@ Ext.define('TP.Pantab', {
                 }, delay + 100);
             }
 
-            // save current active tab unless we are in tab rotation mode
-            if(tabpan.xdata.rotate_tabs <= 0) {
-                tabpan.saveState();
-            }
             var curNr = this.id.replace(/^tabpan-tab_/, '');
             cookieSave('thruk_panorama_active', curNr);
 

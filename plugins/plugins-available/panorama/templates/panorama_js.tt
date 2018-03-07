@@ -4,10 +4,8 @@ Ext.BLANK_IMAGE_URL = url_prefix+'plugins/panorama/images/s.gif';
 Ext.namespace("TP");
 [%+ IF state +%]
 var ExtState      = [% state %];
-var ExtStateSplit = false;
 [%+ ELSE +%]
 var ExtState      = [% dashboards %];
-var ExtStateSplit = true;
 [%+ END +%]
 var default_dashboard = [% default_dashboard %];
 var initial_shapes = [% json_encode(shapes) %];

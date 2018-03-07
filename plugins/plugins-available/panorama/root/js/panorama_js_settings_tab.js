@@ -411,6 +411,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
 
     function applyBackground(values) {
         values = getValues(values);
+        if(values == undefined) { return; }
 
         if(values.map_choose == 'geomap') {
             delete values.background_color;
@@ -449,9 +450,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     }
 
     function getValues(values) {
-        if(values != undefined) {
+        if(values == undefined) {
             var d_form  = Ext.getCmp('dashboardForm').getForm();
-            if(!d_form.isValid()) { return(values); }
+            if(!d_form.isValid()) { return; }
             values = d_form.getFieldValues();
         }
         if(values.map_choose == undefined) {
@@ -467,6 +468,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
 
     function setBackgroundOptionVisibility(values) {
         values = getValues(values);
+        if(values == undefined) { return; }
 
         Ext.getCmp('background_color').hide();
         Ext.getCmp('background_choose').hide();
