@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 703;
+    plan tests => 705;
 }
 
 BEGIN {
@@ -378,6 +378,10 @@ $testhost = {
 };
 ($computed_keys, $computed) = $obj->get_computed_config($objects);
 is_deeply($computed, $testhost, 'parsed nested templates II');
+
+# check line numbers
+is($parsedfile->{'objects'}->[7]->{'line'}, 31, "start line number of last object");
+is($parsedfile->{'objects'}->[7]->{'line2'}, 35, "end line number of last object");
 
 ###########################################################
 # remove empty list elements
