@@ -14,7 +14,7 @@
 <input type="hidden" name="backlink" value="[% c.req.parameters.backlink %]">
 [% END %]
 <div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
-<table border="0" class='data conftoolobj'>
+<table border="0" class='data conftoolobj' style="width: 100%;">
   <tr>
     <th class='data' width="5%" align="left"><a href='[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
     <th class='data' width="90%"><span  style="font-size: larger;">[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>[% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]</th>
@@ -32,7 +32,7 @@
             // save original value decoded
             original_value = editor.value;
 
-            var w = editor.offsetWidth - 10, h = jQuery(window).height() - 200;
+            var w = editor.offsetWidth - 10, h = jQuery(window).height() - jQuery('#texteditor').offset().top - 30;
             editor.style.width  = w + 'px';
             editor.style.height = h + 'px';
 
