@@ -2095,6 +2095,7 @@ sub _file_save {
         $c->{'obj_db'}->_rebuild_index();
         my $files_root                   = _set_files_stash($c, 1);
         $c->{'obj_db'}->{'needs_commit'} = 1;
+        $c->stash->{'obj_model_changed'} = 1;
         $c->stash->{'file_name'}         = $file->{'display'};
         $c->stash->{'file_name'}         =~ s/^$files_root//gmx;
         if(scalar @{$file->{'errors'}} > 0) {
