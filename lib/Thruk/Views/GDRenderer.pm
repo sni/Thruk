@@ -13,6 +13,7 @@ GD file renderer
 use strict;
 use warnings;
 use Carp qw/confess/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 METHODS
 
@@ -32,6 +33,7 @@ sub register {
 =cut
 sub render_gd {
     my($c) = @_;
+    my $t1 = [gettimeofday];
     $c->stats->profile(begin => "render_gd");
     my $gd_image = $c->stash->{gd_image} or die('no gd_image found in stash');
     $c->res->content_type('image/png');
@@ -39,6 +41,8 @@ sub render_gd {
     $c->{'rendered'} = 1;
     $c->res->body($output);
     $c->stats->profile(end => "render_gd");
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_render_waited'} += $elapsed;
     return($output);
 }
 

@@ -786,7 +786,8 @@ sub _after_dispatch {
         }
     }
     $c->stats->profile(end => "_after_dispatch");
-    $c->stats->profile(comment => 'total time waited on backends: '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if defined $c->stash->{'total_backend_waited'};
+    $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if defined $c->stash->{'total_backend_waited'};
+    $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'})) if defined $c->stash->{'total_render_waited'};
 
     # restore user specific settings
     Thruk::Config::finalize($c);
@@ -803,13 +804,16 @@ sub _after_dispatch {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
+        my $waited = [];
+        push @{$waited}, defined $c->stash->{'total_backend_waited'} ? sprintf("%.3fs", $c->stash->{'total_backend_waited'}) : '-';
+        push @{$waited}, defined $c->stash->{'total_render_waited'} ? sprintf("%.3fs", $c->stash->{'total_render_waited'}) : '-';
         $c->log->info(sprintf("%5d Req: %03d   mem:%7s MB %6s MB   dur:%6ss %9s   size:% 12s   stat: %d   url: %s",
                                 $$,
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
                                 sprintf("%.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
                                 sprintf("%.3f", $elapsed),
-                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.3fs)', $c->stash->{'total_backend_waited'}) : '----',
+                                '('.join('/', @{$waited}).')',
                                 defined $content_length ? sprintf("%.3f kb", $content_length/1024) : '----',
                                 $res->[0],
                                 $url,
