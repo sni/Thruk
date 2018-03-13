@@ -455,10 +455,13 @@ sub job_page {
     }
 
     # try to directly serve the request if it takes less than 3 seconds
+    $c->stats->profile(begin => "job_page waiting for finish");
     while($is_running and $time < 3) {
-        sleep(1);
+        Time::HiRes::sleep(0.1) if $time <  1;
+        Time::HiRes::sleep(0.3) if $time >= 1;
         ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
     }
+    $c->stats->profile(end => "job_page waiting for finish");
 
     # job still running?
     if($is_running) {
