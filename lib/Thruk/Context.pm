@@ -58,6 +58,7 @@ sub new {
             memory_begin         => $memory_begin,
             total_backend_waited => 0,
             total_render_waited  => 0,
+            inject_stats         => 1,
         },
         req    => $req,
         res    => $req->new_response(200),

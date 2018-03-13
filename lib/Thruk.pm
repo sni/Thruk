@@ -800,7 +800,7 @@ sub _after_dispatch {
     $c->stash->{'time_total'} = $elapsed;
 
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $url =~ m/\.cgi/mx) {
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'}) {
         # inject stats into html page
         $c->stash->{'profile'} = $c->stats->report();
         my $stats = "";
