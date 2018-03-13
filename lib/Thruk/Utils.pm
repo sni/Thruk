@@ -2003,6 +2003,7 @@ wait up to 60 seconds till the core responds
 
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
+    $c->stats->profile(begin => "wait_after_reload");
     $pkey = $c->stash->{'param_backend'} unless $pkey;
     my $start = time();
     if(!$pkey && !$time) { sleep 5; }
@@ -2052,8 +2053,13 @@ sub wait_after_reload {
             $done = 1;
             last;
         }
-        sleep(1);
+        if(time() - $start <= 5) {
+            Time::HiRes::sleep(0.3);
+        } else {
+            sleep(1);
+        }
     }
+    $c->stats->profile(end => "wait_after_reload");
     if($done) {
         # clean up cached groups which may have changed
         $c->cache->clear();
