@@ -27,6 +27,7 @@ sub index {
 
     # Safe Defaults required for changing backends
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    #&timing_breakpoint('index start');
 
     if(!$c->config->{'conf_modules_loaded'}) {
         load Thruk::Utils::Conf;
@@ -43,6 +44,7 @@ sub index {
         load Thruk::Utils::Plugin;
         $c->config->{'conf_modules_loaded'} = 1;
     }
+    #&timing_breakpoint('index modules loaded');
 
     my $subcat = $c->req->parameters->{'sub'}    || '';
     my $action = $c->req->parameters->{'action'} || 'show';
@@ -105,6 +107,7 @@ sub index {
     $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
     $c->stash->{has_obj_conf} = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
 
+    #&timing_breakpoint('index starting subs');
     # set default
     $c->stash->{conf_config}->{'show_plugin_syntax_helper'} = 1 unless defined $c->stash->{conf_config}->{'show_plugin_syntax_helper'};
 
@@ -143,6 +146,7 @@ sub index {
         $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
     }
 
+    #&timing_breakpoint('index done');
     return 1;
 }
 

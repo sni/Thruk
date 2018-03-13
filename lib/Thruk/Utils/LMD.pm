@@ -164,6 +164,7 @@ sub check_initial_start {
     #&timing_breakpoint("lmd check_initial_start");
 
     if($background) {
+        $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
         ## no critic
         $SIG{CHLD} = 'IGNORE';
         ## use critic
@@ -347,6 +348,7 @@ sub _write_lmd_config {
     }
 
     my $lmd_version = get_lmd_version($config);
+    $ENV{'THRUK_LMD_VERSION'} = $lmd_version;
     my $supports_section = 0;
     if($lmd_version && Thruk::Utils::version_compare($lmd_version, '1.1.6')) {
         $supports_section = 1;
