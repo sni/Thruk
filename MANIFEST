@@ -2082,6 +2082,7 @@ templates/_host_command_box.tt
 templates/_host_command_box_full.tt
 templates/_host_status_details_box.tt
 templates/_infobox.tt
+templates/_internal_stats.tt
 templates/_json_export.tt
 templates/_log_date_select.tt
 templates/_logs.tt

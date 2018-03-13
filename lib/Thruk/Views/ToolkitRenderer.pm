@@ -57,7 +57,6 @@ sub render_tt {
 =cut
 sub render {
     my($c, $template, $stash, $output) = @_;
-    my $t1 = [gettimeofday];
     my $tt = $c->app->{'tt'};
     confess("no template") unless $template;
     $c->stats->profile(begin => "render: ".$template);
@@ -84,8 +83,6 @@ sub render {
             utf8::encode(${$output});
         }
     }
-    my $elapsed = tv_interval($t1);
-    $c->stash->{'total_render_waited'} += $elapsed;
     return;
 }
 
