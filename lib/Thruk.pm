@@ -802,7 +802,7 @@ sub _after_dispatch {
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'}) {
         # inject stats into html page
-        $c->stash->{'profile'} = $c->stats->report();
+        push @{$c->stash->{'profile'}}, $c->stats->report();
         my $stats = "";
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
         $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx;

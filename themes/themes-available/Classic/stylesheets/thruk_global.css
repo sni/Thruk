@@ -1415,6 +1415,11 @@ BUTTON.small {
   border-collapse: collapse;
 }
 
+.thruk_dev_panel PRE {
+  height: 600px;
+  overflow: scroll;
+}
+
 .thruk_dev_panel_bar {
     padding: 0;
     margin: 0;
@@ -1433,4 +1438,20 @@ BUTTON.small {
 
 .thruk_dev_panel TABLE TH {
   text-align: left;
+}
+
+.thruk_dev_panel button.previous {
+  border: 0;
+  background: url('../images/resultset_previous.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.thruk_dev_panel button.next {
+  border: 0;
+  background: url('../images/resultset_next.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }

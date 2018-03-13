@@ -12,17 +12,25 @@
 <div style="bottom: 8px; right: 8px; position: fixed; display: none;" class="thruk_dev_panel" id="stats_details">
   <table>
     <tr>
-      <td>
-        <pre>[% profile %]</pre>
+      <td style="padding-right: 15px;">
+        [% IF profile.size > 1 %]
+        <div class="controls">
+          <button class="previous" style="visibility: hidden;" onclick="show_list(-1, 'PRE.profiles');"></button>
+          <button class="next"[% IF profile.size == 1 %] style="visibility: hidden;"[% END %] onclick="show_list(1, 'PRE.profiles');"></button>
+        </div>
+        [% END %]
+        [% FOREACH p = profile %]
+        <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</pre>
+        [% END %]
       </td>
       <td valign="bottom">
-        <table width="200px" style="position: relative; bottom: 20px;">
+        <table width="200" style="position: relative; bottom: 20px;">
           <tr>
             <th width="20%">Backend</th>
             <td width="80%"><div class="thruk_dev_panel_square" style="background: #7FDBFF;"></div>[% sprintf("%.3f", total_backend_waited) %]s</td>
           </tr>
           <tr>
-            <th>Controler</th>
+            <th>Controller</th>
             <td><div class="thruk_dev_panel_square" style="background: #FFDC00;"></div>[% sprintf("%.3f", (time_total - total_backend_waited - total_render_waited)) %]s</td>
           </tr>
           <tr>

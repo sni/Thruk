@@ -182,10 +182,9 @@ sub perl {
             print $fh Dumper($c->stash);
             CORE::close($fh);
         }
-
-        $c->stats->profile(end => 'External::perl');
-        save_profile($c, $dir);
     };
+    $c->stats->profile(end => 'External::perl');
+    save_profile($c, $dir);
     if($@) {
         my $err = $@;
         eval {
@@ -193,11 +192,9 @@ sub perl {
             print $fh $err;
             Thruk::Utils::IO::close($fh, $dir."/stderr");
         };
-        save_profile($c, $dir);
         # calling _exit skips running END blocks
         exit(0);
     }
-    save_profile($c, $dir);
     exit(1);
 }
 
@@ -476,9 +473,12 @@ sub job_page {
         $c->stash->{template}             = 'waiting_for_job.tt';
     } else {
         # job finished, display result
-        #my($out,$err,$time,$dir,$stash)...
-        my($out,$err,undef,$dir,$stash) = get_result($c, $job);
+        #my($out,$err,$time,$dir,$stash,$rc,$profile)...
+        my($out,$err,undef,$dir,$stash,$rc,$profile) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
+        for my $p (split(/Profile:/mx, $profile)) {
+            push @{$c->stash->{'profile'}}, "Profile:".$p if $p;
+        }
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
         if(defined $err and $err ne '') {
             $c->error($err);
