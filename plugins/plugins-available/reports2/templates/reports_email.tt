@@ -65,3 +65,5 @@
   init_report_tool_buttons();
 -->
 </script>
+
+[% PROCESS _footer.tt %]
