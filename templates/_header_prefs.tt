@@ -67,6 +67,18 @@
                 <input type="button" name="submit" value="Create Broadcast" onClick="window.location='[% url_prefix %]cgi-bin/broadcast.cgi'; return false;">
               </td>
             </tr>
+            <tr>
+              <th>Debug Profiles:</th>
+              <td>
+                [% IF user_profiling %]
+                <img src="[% url_prefix %]themes/[% theme %]/images/detail.gif" alt="disable debug profiles" width=16 height=16 style="vertical-align:top;">
+                <input type="button" name="submit" value="Disable Debug Profiling for this User" onClick="cookieRemove('thruk_profiling'); return reloadPage();">
+                [% ELSE %]
+                <img src="[% url_prefix %]themes/[% theme %]/images/detail.gif" alt="enable debug profiles" width=16 height=16 style="vertical-align:top;">
+                <input type="button" name="submit" value="Enable Debug Profiling for this User" onClick="cookieSave('thruk_profiling', 1, 0); return reloadPage();">
+                [% END %]
+              </td>
+            </tr>
             [% END %]
             <tr>
               <th>Page Refresh:</th>

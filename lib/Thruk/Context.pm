@@ -59,6 +59,7 @@ sub new {
             total_backend_waited => 0,
             total_render_waited  => 0,
             inject_stats         => 1,
+            user_profiling       => 0,
         },
         req    => $req,
         res    => $req->new_response(200),

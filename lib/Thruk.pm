@@ -37,6 +37,7 @@ BEGIN {
 
 ###################################################
 # clean up env
+my $tt_profiling = 0;
 BEGIN {
     ## no critic
     if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 3) {
@@ -45,6 +46,7 @@ BEGIN {
     use Time::HiRes qw/gettimeofday tv_interval/;
     eval "use Thruk::Template::Context;" if $ENV{'THRUK_PERFORMANCE_DEBUG'};
     ## use critic
+    $tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
 use constant {
     # backend states
@@ -264,6 +266,12 @@ sub _dispatcher {
         delete $env->{'HTTP_CONNECTION'};
     }
     my $c = Thruk::Context->new($thruk, $env);
+    my $enable_profiles = 0;
+    if($c->req->cookies->{'thruk_profiling'}) {
+        $enable_profiles = 1;
+        $c->stash->{'user_profiling'} = 1;
+    }
+    local $ENV{'THRUK_PERFORMANCE_DEBUG'} = 1 if $enable_profiles;
     $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
 
     if(Thruk->verbose) {
@@ -803,11 +811,11 @@ sub _after_dispatch {
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'}) {
         # inject stats into html page
         push @{$c->stash->{'profile'}}, $c->stats->report();
-        push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()};
+        push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
         my $stats = "";
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
         $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx;
-        Thruk::Template::Context::reset_profiles();
+        Thruk::Template::Context::reset_profiles() if $tt_profiling;
     }
 
     my $content_length = _set_content_length($res);
