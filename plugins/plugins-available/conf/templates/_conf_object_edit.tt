@@ -1,4 +1,5 @@
-﻿<table width="644" cellspacing=0 cellpadding=0 id="attr_table">
+﻿[% PROCESS _conf_object_row.tt %]
+<table width="644" cellspacing=0 cellpadding=0 id="attr_table">
 
   <tr style="display: none" id="el_0">
     <td class='dataVar dataOdd conf_attr_unused conf_row' align="left" width="170" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"></td>
@@ -24,7 +25,7 @@
       <td class='dataVar [% loopclass +%] [%+ class %] conf_row' align="left" width="170" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src' ,'[% url_prefix %]images/spacer.png')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="jQuery('.obj_[% key %]').attr('name', 'obj.'+this.value)">[% ELSE %][% key %][% END %]</td>
       <td class='dataVar [% loopclass +%] [%+ class %] conf_row clickable' width="16" align="left" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]images/spacer.png')"><input type="image" src="[% url_prefix %]images/spacer.png" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="height:16px; width: 16px;" tabindex='13' alt="remove"></td>
       <td class='dataVal [% loopclass %] conf_row' colspan=2>
-        [% PROCESS _conf_object_row.tt nr = loop.count edit = 1 defaults = obj.default key = key obj_conf = obj.conf %]
+        [% PROCESS _conf_object_row nr = loop.count edit = 1 defaults = obj.default key = key obj_conf = obj.conf %]
       </td>
       [% SET helpkey = key %]
       [% IF !obj.default.exists(key) %]
@@ -73,7 +74,7 @@
       <!--
       var fields = new Object({
         [% FOREACH key_cat = obj.get_default_keys() %]
-          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row.tt nr=0 edit=1 defaults = obj.default key = key obj_conf = obj.conf | escape_html | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
+          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row nr=0 edit=1 defaults = obj.default key = key obj_conf = obj.conf | escape_html | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
             [% UNLESS loop.last %],[% END %]
           [% END %]
           [% UNLESS loop.last %],[% END %]
