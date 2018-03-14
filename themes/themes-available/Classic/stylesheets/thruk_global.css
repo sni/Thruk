@@ -1419,6 +1419,7 @@ BUTTON.small {
 .thruk_dev_panel PRE {
   height: 600px;
   overflow-y: auto;
+  min-width: 700px;
 }
 
 .thruk_dev_panel_bar {
