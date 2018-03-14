@@ -41,8 +41,17 @@
             <th style="border-top: 1px solid gray;">Total</th>
             <td style="border-top: 1px solid gray;"><b>[% sprintf("%.3fs", time_total) %]s</b></td>
           </tr>
-        </table
+        </table>
       </td>
     </tr>
   </table>
 </div>
+<script>
+  jQuery(document).ready(function() {
+    // pre requires absolute px height, but we just want 90% of the screen
+    var height = jQuery(window).height() * 0.8;
+    if(height <  600) { height =  600; }
+    if(height > 1000) { height = 1000; }
+    jQuery("PRE.profiles").css("height", height+"px");
+  });
+</script>
