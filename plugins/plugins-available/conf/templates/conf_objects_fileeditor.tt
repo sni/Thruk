@@ -42,6 +42,7 @@
             jQuery("#texteditor").linedtextarea(
                {selectedLine: [% line %]}
             );
+            set_current_line([% line %]);
         };
 
         /* intercept when there are unsaved changes */
@@ -54,6 +55,13 @@
 
         function get_current_line() {
             return(editor.value.substr(0, getCaret(editor)).split("\n").length);
+        }
+
+        function set_current_line(line) {
+            var pos = editor.value.split("\n").slice(0, line-1).join("\n").length + 1;
+            editor.focus();
+            editor.selectionStart = pos;
+            editor.selectionEnd   = pos;
         }
 
         function has_changed() {
