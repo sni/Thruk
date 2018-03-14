@@ -916,6 +916,8 @@ function bp_update_status(evt, node) {
         if(looks_like_regex(service)) {
             var filter = service.replace(/^(w|b):/, '');
             link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op=%7E&dfl_s0_value="+filter+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
+        } else if (host == service) {
+            link = "<a href='?action=details&bp=" + n.bp_ref + "#'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
         } else {
             link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
         }
