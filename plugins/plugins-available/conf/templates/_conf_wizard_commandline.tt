@@ -13,7 +13,7 @@
     <tr>
       <td class="attrName"><b>Plugin Arguments</b></td>
       <td>
-        <textarea type="text" id="[% id %]_inp_args" style="width:650px; height: 150px;"[% IF use_ajax_search %]onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})"[% END %]></textarea>
+        <textarea id="[% id %]_inp_args" style="width:650px; height: 150px;"[% IF use_ajax_search %]onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})"[% END %]></textarea>
       </td>
     </tr>
     [% IF conf_config.show_plugin_syntax_helper %]
