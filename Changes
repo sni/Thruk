@@ -1,6 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Config Tool:
+            - make command line a textarea
+
 2.20-2   Wed Mar 14 00:12:24 CET 2018
+          - add optional debug switch for admin users
           - Config Tool:
             - fix error when saving from raw edit
 
