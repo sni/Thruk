@@ -358,6 +358,8 @@ function init_conf_tool_plugin_wizard(id) {
     var index = cmd_line.indexOf(" ");
     if(index != -1) {
         var args = cmd_line.substr(index + 1);
+        // format args nicely
+        args = args.replace(/\s+(\-|>)/g, "\n    $1");
         document.getElementById(id + "inp_args").value = args;
         cmd_line = cmd_line.substr(0, index);
     };

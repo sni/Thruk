@@ -1400,6 +1400,8 @@ function select_all_options(select_id) {
 function get_trimmed_pattern(pattern) {
     var trimmed_pattern = new Array();
     jQuery.each(pattern.split(" "), function(index, sub_pattern) {
+        sub_pattern = sub_pattern.replace(/\s+$/g, "");
+        sub_pattern = sub_pattern.replace(/^\s+/g, "");
         if(sub_pattern != '') {
             trimmed_pattern.push(sub_pattern);
         }
