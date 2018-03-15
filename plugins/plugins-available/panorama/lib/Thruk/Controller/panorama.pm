@@ -58,6 +58,7 @@ sub index {
 
     $c->stash->{title}             = 'Thruk Panorama';
     $c->stash->{'skip_navigation'} = 1;
+    $c->stash->{'inject_stats'}    = 0;
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};

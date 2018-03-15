@@ -1286,7 +1286,7 @@ sub _do_on_peers {
         eval {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
         };
-        if($@) {
+        if($@ && !$c->stash->{'lmd_ok'}) {
             Thruk::Utils::LMD::check_proc($c->config, $c, 1);
             sleep(1);
             # then retry again
@@ -1365,7 +1365,11 @@ sub _do_on_peers {
         # and update last_program_starts
         # (set in Thruk::Utils::CLI::_cmd_raw)
         for my $key (keys %{$result}) {
-            my $res = $result->{$key}->{$key};
+            my $res;
+            $res = $result->{$key}->{$key};
+            if($result->{$key}->{'configtool'}) {
+                $res = $result->{$key};
+            }
             if($res && $res->{'configtool'}) {
                 my $peer = $self->get_peer_by_key($key);
                 # do not overwrite local configuration with remote configtool settings

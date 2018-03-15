@@ -140,3 +140,5 @@
   });
 -->
 </script>
+
+[% PROCESS _footer.tt %]

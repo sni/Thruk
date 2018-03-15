@@ -167,6 +167,9 @@ sub get_processinfo {
             if(defined $options{'extra_columns'}) {
                 push @{$options{'columns'}}, @{$options{'extra_columns'}};
             }
+            if($ENV{'THRUK_USE_LMD'} && $ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.0')) {
+                push @{$options{'columns'}}, 'configtool';
+            }
         }
 
         $options{'options'}->{AddPeer} = 1 unless defined $options{'options'}->{AddPeer};

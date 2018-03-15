@@ -165,6 +165,7 @@ sub check_initial_start {
 
     if($background) {
         ## no critic
+        $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
         $SIG{CHLD} = 'IGNORE';
         ## use critic
         my $pid = fork();
@@ -347,6 +348,9 @@ sub _write_lmd_config {
     }
 
     my $lmd_version = get_lmd_version($config);
+    ## no critic
+    $ENV{'THRUK_LMD_VERSION'} = $lmd_version;
+    ## use critic
     my $supports_section = 0;
     if($lmd_version && Thruk::Utils::version_compare($lmd_version, '1.1.6')) {
         $supports_section = 1;

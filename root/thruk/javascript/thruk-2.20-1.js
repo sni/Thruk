@@ -2804,6 +2804,28 @@ function looks_like_regex(str) {
     return(false);
 }
 
+function show_list(incr, selector) {
+    var elements = jQuery(selector);
+    var curIdx = 0;
+    jQuery(elements).each(function(i, n) {
+        if(jQuery(n).is(":visible")) {
+            jQuery(n).hide();
+            curIdx = i;
+            return(false);
+        }
+    });
+    var newIdx = curIdx+incr;
+    jQuery(elements[newIdx]).show();
+    jQuery("DIV.controls BUTTON.next").css('visibility', '');
+    jQuery("DIV.controls BUTTON.previous").css('visibility', '');
+    if(newIdx == elements.length -1) {
+        jQuery("DIV.controls BUTTON.next").css('visibility', 'hidden');
+    }
+    if(newIdx == 0) {
+        jQuery("DIV.controls BUTTON.previous").css('visibility', 'hidden');
+    }
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

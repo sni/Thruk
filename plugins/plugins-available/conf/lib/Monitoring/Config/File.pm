@@ -135,11 +135,11 @@ sub update_objects_from_text {
 
     my $linenr = 0;
     my $buffer = '';
-    $text =~ s/\s+$//gmxo;
-    $text =~ s/^\s+//gmxo;
     my @lines = split(/\n/mx, $text);
     while(@lines) {
         my $line = shift @lines;
+        $line =~ s/\s+$//gmxo;
+        $line =~ s/^\s+//gmxo;
         $linenr++;
         if(substr($line, -1) eq '\\') {
             $line = substr($line, 0, -1);
@@ -192,7 +192,7 @@ sub update_objects_from_text {
             }
             $current_object->{'comments'}     = $comments;
             $current_object->{'inl_comments'} = $inl_comments;
-            $current_object->{'line2'}    = $linenr;
+            $current_object->{'line2'}        = $linenr;
             my $parse_errors = $current_object->parse();
             if(scalar @{$parse_errors} > 0) { push @{$self->{'parse_errors'}}, @{$parse_errors} }
             $current_object->{'id'} = $current_object->_make_id();
@@ -306,7 +306,7 @@ sub update_objects_from_text {
 
     # return object for given line
     if(defined $lastline) {
-        for my $obj ($self->{'objects'}) {
+        for my $obj (@{$self->{'objects'}}) {
             if($obj->{'line'} >= $lastline) {
                 return($obj);
             }

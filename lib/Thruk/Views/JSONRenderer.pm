@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Cpanel::JSON::XS ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 METHODS
 
@@ -33,6 +34,7 @@ sub register {
 =cut
 sub render_json {
     my($c, $data) = @_;
+    my $t1 = [gettimeofday];
     $c->stats->profile(begin => "render_json");
     my $encoder = $c->app->{'jsonencoder'} || _get_encoder($c);
     my $output = $encoder->encode($data);
@@ -40,6 +42,8 @@ sub render_json {
     $c->res->content_type('application/json;charset=UTF-8');
     $c->res->body($output);
     $c->stats->profile(end => "render_json");
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_render_waited'} += $elapsed;
     return($output);
 }
 

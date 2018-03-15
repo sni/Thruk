@@ -9,6 +9,7 @@ use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
+#use Thruk::Timer qw/timing_breakpoint/;
 
 use constant {
     DISABLED_CONF    => 5,
@@ -827,43 +828,47 @@ sub get_backends_with_obj_config {
     my $firstpeer;
     $c->stash->{'param_backend'} = '';
 
-    my @peers = @{$c->{'db'}->get_peers(1)};
-    my @fetch;
-    for my $peer (@peers) {
-        for my $addr (@{$peer->peer_list()}) {
-            if($addr =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
-                if(!$c->stash->{'failed_backends'}->{$peer->{'key'}}) {
-                    $peer->{'configtool'} = { remote => 1 };
-                    push @fetch, $peer->{'key'};
-                    last;
-                }
-            }
-        }
-    }
-    if(scalar @fetch > 0) {
+    #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
+
+    my $fetch = _get_peer_keys_without_configtool($c);
+    if(scalar @{$fetch} > 0) {
+        #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config II');
         eval {
-            $c->{'db'}->get_processinfo(backend => \@fetch);
+            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo a');
+            $c->{'db'}->get_processinfo(backend => $fetch);
+            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo b');
         };
-        for my $key (@fetch) {
+
+        my $new_fetch = [];
+        $fetch = _get_peer_keys_without_configtool($c);
+        for my $key (@{$fetch}) {
             if($c->stash->{'failed_backends'}->{$key}) {
                 my $peer = $c->{'db'}->get_peer_by_key($key);
                 delete $peer->{'configtool'}->{remote};
+            } else {
+                push @{$new_fetch}, $key;
             }
         }
+        $fetch = $new_fetch;
+
         # when using lmd/shadownaemon, do fetch the real config data now
-        if($Thruk::Backend::Pool::xs && ($ENV{'THRUK_USE_LMD'} || !defined $ENV{'THRUK_USE_SHADOW'} || $ENV{'THRUK_USE_SHADOW'})) {
-            for my $key (@fetch) {
+        if(scalar @{$fetch} > 0 && $Thruk::Backend::Pool::xs && ($ENV{'THRUK_USE_LMD'} || !defined $ENV{'THRUK_USE_SHADOW'} || $ENV{'THRUK_USE_SHADOW'})) {
+            for my $key (@{$fetch}) {
                 my $peer = $c->{'db'}->get_peer_by_key($key);
                 delete $peer->{'configtool'}->{remote};
             }
             # make sure we have uptodate information about config section of http backends
             local $ENV{'THRUK_USE_SHADOW'} = 0;
             local $ENV{'THRUK_USE_LMD'}    = 0;
+            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config III a');
             get_backends_with_obj_config($c);
+            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config III b');
         }
     }
+    #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
 
     # first hide all of them
+    my @peers = @{$c->{'db'}->get_peers(1)};
     for my $peer (@peers) {
         my $min_key_size = 0;
         if(defined $peer->{'configtool'}->{remote} and $peer->{'configtool'}->{remote} == 1) { $min_key_size = 1; }
@@ -921,7 +926,29 @@ sub get_backends_with_obj_config {
 
     $c->stash->{'backend_chooser'} = 'switch';
 
+    #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config done');
     return $backends;
+}
+
+##########################################################
+sub _get_peer_keys_without_configtool {
+    my($c) = @_;
+    my @peers = @{$c->{'db'}->get_peers(1)};
+    my @fetch;
+    #&timing_breakpoint('_get_peer_keys_without_configtool');
+    for my $peer (@peers) {
+        for my $addr (@{$peer->peer_list()}) {
+            if($addr =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
+                if(!$c->stash->{'failed_backends'}->{$peer->{'key'}}) {
+                    $peer->{'configtool'} = { remote => 1 };
+                    push @fetch, $peer->{'key'};
+                    last;
+                }
+            }
+        }
+    }
+    #&timing_breakpoint('_get_peer_keys_without_configtool done');
+    return \@fetch;
 }
 
 ##########################################################

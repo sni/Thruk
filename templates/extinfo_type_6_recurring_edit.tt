@@ -159,3 +159,5 @@
   update_recurring_type_select('type_select');
 -->
 </script>
+
+[% PROCESS _footer.tt %]

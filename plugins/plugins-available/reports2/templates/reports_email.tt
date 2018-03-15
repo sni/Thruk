@@ -59,9 +59,12 @@
     </td>
   </tr>
 </table>
+</form>
 
 <script type="text/javascript">
 <!--
   init_report_tool_buttons();
 -->
 </script>
+
+[% PROCESS _footer.tt %]

@@ -54,6 +54,16 @@ var $case = function() {
 
     _assertEqual("127.0.0.5", _getValue(_textbox("obj.address")));
 
+    // raw edit
+    click(_submit("raw edit"));
+    isVisible(_div("79"));
+    _assertEqual("lineno lineselect", _div("79").className);
+    _assertNotEqual("/ARRAY/", _getValue(_textarea("texteditor")));
+    click(_link("save"));
+
+    isVisible(_textbox("obj.host_name"));
+    _assertEqual("localhost", _getValue(_textbox("obj.host_name")));
+
     // revert changes
     click(_link("Apply"));
     click(_submit("discard all unsaved changes"));

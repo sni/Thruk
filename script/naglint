@@ -27,7 +27,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use strict;
 use warnings;
 
-our $VERSION = '2.18';
+our $VERSION = '2.20';
 my $branch       = '';
 $branch      = Thruk::Config::get_git_name() unless $branch ne '';
 

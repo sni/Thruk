@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Template ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 METHODS
 
@@ -35,6 +36,7 @@ sub register {
 =cut
 sub render_tt {
     my($c) = @_;
+    my $t1 = [gettimeofday];
     my $template = $c->stash->{'template'};
     $c->stats->profile(begin => "render_tt: ".$template);
     my $output;
@@ -43,6 +45,8 @@ sub render_tt {
     $c->res->content_type('text/html; charset=utf-8') unless $c->res->content_type();
     $c->res->body($output);
     $c->stats->profile(end => "render_tt: ".$template);
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_render_waited'} += $elapsed;
     return;
 }
 
