@@ -576,8 +576,21 @@ sub store_model_retention {
     confess("no backend") unless $backend;
     $c->stats->profile(begin => "store_model_retention($backend)");
 
-    my $model = $c->app->obj_db_model;
-    my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+    my $model   = $c->app->obj_db_model;
+    my $user_id = md5_hex($c->stash->{'remote_user'});
+
+    # store changed/stashed changed to local user, unchanged config can be stored in a generic file
+    my $file      = $c->config->{'conf_retention_file'};
+    my $user_file = $c->config->{'tmp_path'}."/obj_retention.".$backend.".".$user_id.".dat";
+    if(!$file) {
+        $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+    }
+    if($model->{'configs'}->{$backend}->{'needs_commit'}) {
+        $file = $user_file;
+    } else {
+        unlink($user_file);
+        $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+    }
 
     confess("no such backend") unless defined $model->{'configs'}->{$backend};
 
@@ -618,9 +631,13 @@ sub get_model_retention {
     my($c, $backend) = @_;
     $c->stats->profile(begin => "get_model_retention($backend)");
 
-    my $model = $c->app->obj_db_model;
+    my $model   = $c->app->obj_db_model;
+    my $user_id = md5_hex($c->stash->{'remote_user'});
 
-    my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+    my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".".$user_id.".dat";
+    if(! -f $file) {
+        $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+    }
     if(! -f $file) {
         $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
     }
