@@ -577,7 +577,7 @@ sub store_model_retention {
     $c->stats->profile(begin => "store_model_retention($backend)");
 
     my $model   = $c->app->obj_db_model;
-    my $user_id = md5_hex($c->stash->{'remote_user'});
+    my $user_id = md5_hex($c->stash->{'remote_user'} || '');
 
     # store changed/stashed changed to local user, unchanged config can be stored in a generic file
     my $file      = $c->config->{'conf_retention_file'};
@@ -635,7 +635,7 @@ sub get_model_retention {
     $c->stats->profile(begin => "get_model_retention($backend)");
 
     my $model   = $c->app->obj_db_model;
-    my $user_id = md5_hex($c->stash->{'remote_user'});
+    my $user_id = md5_hex($c->stash->{'remote_user'} || '');
 
     my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".".$user_id.".dat";
     if(! -f $file) {
@@ -1006,6 +1006,7 @@ update shared cache of changed files
 =cut
 sub update_shared_changed_files {
     my($c, $pkey) = @_;
+    return unless $c->{'obj_db'};
     my $changed_files = $c->{'obj_db'}->get_changed_files();
 
     my $time         = time();
