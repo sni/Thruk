@@ -273,6 +273,7 @@ sub _dispatcher {
     }
     local $ENV{'THRUK_PERFORMANCE_DEBUG'} = 1 if $enable_profiles;
     $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
+    $c->stats->profile(comment => sprintf('local time: %s - pid: %s - req: %s', (scalar localtime), $$, $Thruk::COUNT));
 
     if(Thruk->verbose) {
         $c->log->debug($c->req->url);
