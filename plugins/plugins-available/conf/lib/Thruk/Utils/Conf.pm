@@ -95,7 +95,7 @@ sub set_object_model {
         return 0;
     }
 
-    $c->{'obj_db'}->{'stats'}      = $c->{'stats'};
+    $c->{'obj_db'}->{'stats'} = $c->{'stats'};
     if(lc($peer_conftool->{'type'}) eq 'http') {
         $c->{'obj_db'}->{'remotepeer'} = $peer_conftool;
         weaken($c->{'obj_db'}->{'remotepeer'}); # avoid circular refs
@@ -616,6 +616,9 @@ sub store_model_retention {
         return;
     }
 
+    # update shared changed files information
+    update_shared_changed_files($c, $backend);
+
     $c->stats->profile(end => "store_model_retention($backend)");
     return 1;
 }
@@ -990,6 +993,143 @@ sub clean_from_tool_ignores {
         }
     }
     return($hidden, $cleaned);
+}
+
+##########################################################
+
+=head2 update_shared_changed_files
+
+    update_shared_changed_files($c, $pkey);
+
+update shared cache of changed files
+
+=cut
+sub update_shared_changed_files {
+    my($c, $pkey) = @_;
+    my $changed_files = $c->{'obj_db'}->get_changed_files();
+
+    my $time         = time();
+    my $user         = $c->stash->{'remote_user'};
+    my $changed_file = $c->config->{'var_path'}.'/conf_changed_files';
+    my $cache        = -s $changed_file ? Thruk::Utils::IO::json_lock_retrieve($changed_file) : {};
+    my $changed      = 0;
+    $cache->{$pkey}  = {} unless $cache->{$pkey};
+
+    my $changed_lookup = {};
+    for my $file (@{$changed_files}) {
+        $changed_lookup->{$file->{'path'}} = 1;
+    }
+
+    # clear old locks after some time
+    my $write_timeout = time() - 3600;
+    for my $fname (keys %{$cache->{$pkey}}) {
+        if($cache->{$pkey}->{$fname}->{'time'} < $write_timeout) {
+            delete($cache->{$pkey}->{$fname});
+            $changed = 1;
+        }
+        elsif($cache->{$pkey}->{$fname}->{'user'} eq $user && !$changed_lookup->{$fname}) {
+            delete($cache->{$pkey}->{$fname});
+            $changed = 1;
+        }
+    }
+
+    # add new locks
+    for my $file (@{$changed_files}) {
+        next if($cache->{$pkey}->{$file->{'path'}} && $cache->{$pkey}->{$file->{'path'}}->{'user'} ne $user);
+        $cache->{$pkey}->{$file->{'path'}} = {
+            user    => $user,
+            time    => $time,
+        };
+        $changed = 1;
+    }
+    if($changed) {
+        Thruk::Utils::IO::json_lock_store($changed_file, $cache);
+    }
+
+    return($cache->{$pkey});
+}
+
+##########################################################
+
+=head2 get_file_lock
+
+    get_file_lock($c, $file);
+
+set lock for given file
+
+=cut
+sub get_file_lock {
+    my($c, $file) = @_;
+
+    my $pkey         = $c->stash->{'param_backend'};
+    update_shared_changed_files($c, $pkey);
+    my $user         = $c->stash->{'remote_user'};
+    my $changed_file = $c->config->{'var_path'}.'/conf_changed_files';
+    my $cache        = -s $changed_file ? Thruk::Utils::IO::json_lock_retrieve($changed_file) : {};
+    $cache->{$pkey}  = {} unless $cache->{$pkey};
+    my $path         = $file->{'path'};
+
+    if($cache->{$pkey}->{$path} && $cache->{$pkey}->{$path}->{'user'} ne $user) {
+        return($cache->{$pkey}->{$path});
+    }
+    return("");
+}
+
+##########################################################
+
+=head2 file_unlock
+
+    file_unlock($c, $path);
+
+unlock read lock for given file
+
+=cut
+sub file_unlock {
+    my($c, $path) = @_;
+
+    my $pkey         = $c->stash->{'param_backend'};
+    my $user         = $c->stash->{'remote_user'};
+    my $changed_file = $c->config->{'var_path'}.'/conf_changed_files';
+    my $cache        = -s $changed_file ? Thruk::Utils::IO::json_lock_retrieve($changed_file) : {};
+    $cache->{$pkey}  = {} unless $cache->{$pkey};
+
+    if($cache->{$pkey}->{$path} && $cache->{$pkey}->{$path}->{'user'} eq $user) {
+        delete($cache->{$pkey}->{$path});
+        Thruk::Utils::IO::json_lock_store($changed_file, $cache);
+    }
+
+    return;
+}
+
+##########################################################
+
+=head2 set_file_lock
+
+    set_file_lock($c, $path, [$overwrite]);
+
+set lock for given path
+
+=cut
+sub set_file_lock {
+    my($c, $path, $overwrite) = @_;
+
+    my $time         = time();
+    my $pkey         = $c->stash->{'param_backend'};
+    my $user         = $c->stash->{'remote_user'};
+    my $changed_file = $c->config->{'var_path'}.'/conf_changed_files';
+    my $cache        = -s $changed_file ? Thruk::Utils::IO::json_lock_retrieve($changed_file) : {};
+    $cache->{$pkey}  = {} unless $cache->{$pkey};
+
+    if(!$overwrite && $cache->{$pkey}->{$path} && $cache->{$pkey}->{$path}->{'user'} ne $user) {
+        return($cache->{$pkey}->{$path});
+    }
+    $cache->{$pkey}->{$path} = {
+        user    => $user,
+        time    => $time,
+    };
+    Thruk::Utils::IO::json_lock_store($changed_file, $cache);
+
+    return;
 }
 
 ##########################################################

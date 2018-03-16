@@ -10,6 +10,11 @@
 -->
 </script>
 [% END %]
+[% file_locked = ""; IF object.defined('file'); PROCESS _conf_ondemand_file_lock.tt file=object.file form="obj_edit_" _ object.get_id(); END %]
+[% readonly = 0;
+   IF object.defined('file') && object.file.readonly; readonly = 1; END;
+   IF file_locked; readonly = 1; END;
+%]
 
 [% duplicate_keys = {} %]
 <form action="conf.cgi" method="POST" onsubmit="return conf_validate_object_form(this);" id="obj_edit_[% object.get_id() %]">
@@ -51,7 +56,9 @@
               <span style="[% IF subcat != 'config' && subcat != 'comp' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1 sub_3">
                 <br>
                 [% IF object.defined('file') %]
-                  [% object.file.display %] [% IF object.line > 0 %] line [% object.line %][% END %][% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
+                  [% object.file.display %] [% IF object.line > 0 %] line [% object.line %][% END %]
+                  [% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
+                  [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span style="color: #EB6900"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
                 [% ELSE %]
                   <span style="[% IF subcat != 'config' %]display:none;[% END %]" class="sub_1">
                   save to: <input type="text" class="deletable" placeholder="enter filename" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', { striped:false, autosubmit:false, templates:false, data:data, emptymsg:'file will be created'})">
@@ -60,7 +67,7 @@
               </span>
             </td>
             <td style="width: 50px;" class="data dataSubmit sub_1">
-              [% IF ! object.defined('file') || ! object.file.readonly %]
+              [% IF ! readonly %]
               <button class="conf_apply_button conf_button">apply</button>
               [% END %]
             </td>
@@ -72,7 +79,7 @@
     <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
       <td class='dataVal' colspan=3 style="text-align: center;">
         <div align="center">
-        [% IF object.defined('file') && object.file.readonly %]
+        [% IF readonly %]
           [% PROCESS _conf_object_view.tt obj = object conf = "obj" %]
         [% ELSE %]
           [% show_save_reload = 'obj_edit_' _ object.get_id() %]
@@ -145,7 +152,7 @@
       </td>
     </tr>
 
-    [% IF ! object.defined('file') || ! object.file.readonly %]
+    [% IF ! readonly %]
     <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
       <td colspan=3 class="data dataSubmit">
         [% IF object.get_id() != 'new' && ! bare %]
@@ -176,13 +183,16 @@
   });
 
   [% IF show_object %]
-  [% IF ! object.defined('file') || ! object.file.readonly %]
+  [% IF ! readonly %]
   var form_id = "obj_edit_[% object.get_id() %]";
   var initial_form_values;
-  jQuery(window).on('beforeunload', function(){
+  jQuery(window).on('beforeunload', function(e){
+    var form = document.getElementById(form_id);
     var form_values = jQuery("#"+form_id).serialize();
-    if(form_values != initial_form_values) {
-      return("Not applied changes will be lost if you leave this page.");
+    if(form_values != initial_form_values && !form.needs_reload) {
+      var msg = "Not applied changes will be lost if you leave this page.";
+      e.returnValue = msg;
+      return(msg);
     }
     return;
   });

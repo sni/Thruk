@@ -81,6 +81,7 @@ sub index {
     $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{'has_refs'}            = 0;
     $c->stash->{'link_obj'}            = \&Thruk::Utils::Conf::_link_obj;
+    $c->stash->{'get_file_lock'}       = \&Thruk::Utils::Conf::get_file_lock;
     $c->stash->{no_tt_trim}            = 1;
     $c->stash->{post_obj_save_cmd}     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}   // '';
     $c->stash->{show_summary_prompt}   = $c->config->{'Thruk::Plugin::ConfigTool'}->{'show_summary_prompt'} // 1;
@@ -914,6 +915,19 @@ sub _process_objects_page {
     $c->stash->{'coretype'}         = $c->{'obj_db'}->{'coretype'};
     $c->stash->{'bare'}             = $c->req->parameters->{'bare'} || 0;
     $c->stash->{'has_history'}      = 0;
+
+    # lock/unlock files
+    if($c->cookie('thruk_conf_unlock')) {
+        Thruk::Utils::Conf::file_unlock($c, $c->cookie('thruk_conf_unlock')->value);
+        $c->cookie('thruk_conf_unlock' => '', { expires => 0, path => $c->stash->{'cookie_path'} });
+    }
+    if(defined $c->req->parameters->{'lock'}) {
+        my $lock = Thruk::Utils::Conf::set_file_lock($c, $c->req->parameters->{'lock'}, $c->req->parameters->{'overwrite'});
+        if($lock) {
+            return $c->render(json => {'failed' => $lock});
+        }
+        return $c->render(json => {'ok' => 1});
+    }
 
     $c->{'obj_db'}->read_rc_file();
 

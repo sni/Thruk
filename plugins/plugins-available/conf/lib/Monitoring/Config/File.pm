@@ -341,7 +341,10 @@ return true if file is readonly
 
 =cut
 sub readonly {
-    my($self) = @_;
+    my($self, $set) = @_;
+    if(defined $set) {
+        $self->{'readonly'} = $set;
+    }
     return $self->{'readonly'};
 }
 

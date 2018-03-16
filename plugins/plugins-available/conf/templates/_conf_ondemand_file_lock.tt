@@ -1,0 +1,53 @@
+﻿[%
+  file_locked = "";
+  IF ! file.readonly && ! c.req.parameters.defined("unlock");
+    file_locked = get_file_lock(c, file);
+  END;
+%]
+[% IF ! file.readonly && ! file_locked %]
+<script type="text/javascript">
+<!--
+    jQuery(document).ready(function() {
+        // set onchange for all inputs in this form
+        var form = document.getElementById('[% form %]');
+        jQuery('#[% form %] INPUT, #[% form %] TEXTAREA, #[% form %] SELECT').on('change keypress', function(el){
+            if(form.lock_set) { return; }
+            jQuery.ajax({
+                url: url_prefix + 'cgi-bin/conf.cgi',
+                type: 'POST',
+                data: {
+                    sub:  'objects',
+                    [% IF c.req.parameters.defined("unlock") %]
+                    overwrite:  true,
+                    [% END %]
+                    lock: '[% file.path %]'
+                },
+                success: function(data) {
+                    if(data && data.failed) {
+                        thruk_message(-1, "file has been locked meanwhile by "+data.failed.user);
+                        form.needs_reload = true;
+                        reloadPage();
+                    } else {
+                        form.lock_set = true;
+                    }
+                }
+            });
+        });
+
+        jQuery(window).on('beforeunload', function(){
+            if(!form.lock_set) { return; }
+            cookieSave('thruk_conf_unlock', '[% file.path %]', 0);
+            jQuery.ajax({
+                url: url_prefix + 'cgi-bin/conf.cgi',
+                type: 'POST',
+                async: false, /* must be async, otherwise it would not complete before unload is finished */
+                data: {
+                    sub:    'objects',
+                    unlock: '[% file.path %]'
+                }
+            });
+        });
+    });
+-->
+</script>
+[% END %]
