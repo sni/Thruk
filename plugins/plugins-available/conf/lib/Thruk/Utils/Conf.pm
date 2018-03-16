@@ -635,7 +635,7 @@ sub get_model_retention {
     $c->stats->profile(begin => "get_model_retention($backend)");
 
     my $model   = $c->app->obj_db_model;
-    my $user_id = md5_hex($c->stash->{'remote_user'} || '');
+    my $user_id = md5_hex($c->stash->{'remote_user'} || '');
 
     my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".".$user_id.".dat";
     if(! -f $file) {
