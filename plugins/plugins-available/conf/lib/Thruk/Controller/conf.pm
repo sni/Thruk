@@ -2426,6 +2426,12 @@ sub _config_reload {
     my $pkey = $peer->peer_key();
     my $wait = 1;
 
+    my $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
+    if(!$last_reload) {
+        my $processinfo = $c->{'db'}->get_processinfo(backends => $pkey);
+        $last_reload = $processinfo->{$pkey}->{'program_start'} || (time() - 1);
+    }
+
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
@@ -2446,7 +2452,7 @@ sub _config_reload {
         # restart by livestatus
         die("no backend found by name ".$name) unless $peer;
         my $options = {
-            'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
+            'command' => sprintf("COMMAND [%d] RESTART_PROCESS", $time),
             'backend' => [ $pkey ],
         };
         $c->{'db'}->send_command( %{$options} );
@@ -2455,7 +2461,7 @@ sub _config_reload {
 
     # wait until core responds again
     if($wait) {
-        if(!Thruk::Utils::wait_after_reload($c, $pkey, $time-1)) {
+        if(!Thruk::Utils::wait_after_reload($c, $pkey, $last_reload)) {
             $c->stash->{'output'} .= "\n<font color='red'>Warning: waiting for core reload failed.</font>";
         }
     }
