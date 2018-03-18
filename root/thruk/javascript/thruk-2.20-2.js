@@ -1133,6 +1133,7 @@ function count_site_section_totals(section, prefix) {
     if(section["peers"]) {
         jQuery(section["peers"]).each(function(i, pd) {
             var btn = document.getElementById("button_"+pd);
+            if(!btn) { return; }
             section.total++;
             if(jQuery(btn).hasClass('button_peerDIS') || jQuery(btn).hasClass('button_peerHID')) {
                 section.disabled++;
@@ -1142,8 +1143,6 @@ function count_site_section_totals(section, prefix) {
             }
             else if(jQuery(btn).hasClass('button_peerDOWN')) {
                 section.down++;
-            } else {
-                if(thruk_debug_js) { alert("ERROR: no known class found for btn: " + pd ); }
             }
         });
     }
