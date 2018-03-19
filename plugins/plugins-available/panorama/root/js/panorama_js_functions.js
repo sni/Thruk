@@ -850,6 +850,10 @@ var TP = {
                 }
             }
 
+            if(data && data.broadcasts) {
+                TP.showBroadcasts(data.broadcasts);
+            }
+
             if(data && !TP.already_reloading) {
                 if(data.server_version != undefined && thruk_version != data.server_version) {
                     TP.already_reloading = true;
@@ -2107,6 +2111,32 @@ var TP = {
             var color = val.replace(/^#/, '');
             colors[color] = 1;
         }
+    },
+    showBroadcasts: function(broadcasts) {
+        if(!broadcasts || broadcasts.length == 0) { return; }
+        if(!TP.broadcastCt) {
+            TP.broadcastCt = Ext.DomHelper.insertFirst(document.body, {id:'broadcast-div', 'class': "popup-msg"}, true);
+        }
+        var b   = broadcasts[0];
+        var id  = b.basefile.replace(/[^0-9a-z]/g, "");
+        if(document.getElementById(id)) {
+            return;
+        }
+        var text = b.text;
+        if(b.annotation) {
+            text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
+        }
+        var msg = TP.Msg.msg("info_message~~"+text, 0, TP.broadcastCt, "Announcement", function() {
+            Ext.Ajax.request({
+                url: 'broadcast.cgi',
+                method: 'POST',
+                params: {
+                    action:  'dismiss',
+                    panorama: 1,
+                    token:    user_token
+                }
+            });
+        });
     }
 }
 TP.log('[global] starting');

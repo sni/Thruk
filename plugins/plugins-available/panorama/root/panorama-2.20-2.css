@@ -338,14 +338,22 @@ TABLE.x-form-item-hidden {
 DIV.msg {
   position: relative;
 }
-#msg-div {
+DIV.popup-msg {
     position:absolute;
     left:35%;
     top:10px;
     width:400px;
     z-index: 100000;
 }
-#msg-div .msg {
+#broadcast-div {
+  position:absolute;
+  right: 10px;
+  left: inherit;
+  top:30px;
+  width:400px;
+  z-index: 100000;
+}
+DIV.popup-msg .msg {
     border-radius: 8px;
     -moz-border-radius: 8px;
     background: #F6F6F6;
@@ -354,12 +362,12 @@ DIV.msg {
     padding: 10px 15px;
     color: #555;
 }
-#msg-div .msg h3 {
+DIV.popup-msg .msg h3 {
     margin: 0 0 8px;
     font-weight: bold;
     font-size: 15px;
 }
-#msg-div .msg p {
+DIV.popup-msg .msg p {
     margin: 0;
 }
 DIV.success_message h3 {

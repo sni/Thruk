@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Panorama:
+            - optionally show broadcasts in panorama dashboards
           - Config Tool:
             - make command line a textarea
             - use separate edit sessions for each user
