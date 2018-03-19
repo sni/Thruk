@@ -90,6 +90,7 @@ lib/Thruk/Request.pm
 lib/Thruk/Request/Cookie.pm
 lib/Thruk/Stats.pm
 lib/Thruk/Template/Context.pm
+lib/Thruk/Template/Exception.pm
 lib/Thruk/Timer.pm
 lib/Thruk/UserAgent.pm
 lib/Thruk/Utils.pm

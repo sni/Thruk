@@ -45,6 +45,7 @@ BEGIN {
     }
     use Time::HiRes qw/gettimeofday tv_interval/;
     eval "use Thruk::Template::Context;" if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+    eval "use Thruk::Template::Exception;" if $ENV{'TEST_AUTHOR'};
     ## use critic
     $tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
