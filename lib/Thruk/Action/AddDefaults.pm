@@ -365,7 +365,7 @@ sub end {
         elsif($c->stash->{page} eq 'extinfo') {
             my $type = $c->req->parameters->{'type'} || 0;
 
-            $c->stash->{'title'} = $c->stash->{'infoBoxTitle'};
+            $c->stash->{'title'} = $c->stash->{'infoBoxTitle'} if $c->stash->{'infoBoxTitle'};
             if($type !~ m/^\d+$/mx) {}
             # host details
             elsif($type == 1) {
