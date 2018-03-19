@@ -273,6 +273,10 @@ plugins/plugins-available/conf/t/data/local/core.d.utf8/utf8.cfg
 plugins/plugins-available/conf/t/data/local/core.d/test.cfg
 plugins/plugins-available/conf/t/data/local/thruk_local.conf
 plugins/plugins-available/conf/t/data/local/var/secret.key
+plugins/plugins-available/conf/t/data/merges/1/a.cfg
+plugins/plugins-available/conf/t/data/merges/1/b.cfg
+plugins/plugins-available/conf/t/data/merges/1/c.cfg
+plugins/plugins-available/conf/t/data/merges/1/d.cfg
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
 plugins/plugins-available/conf/templates/_conf_backends_backend.tt
@@ -283,7 +287,7 @@ plugins/plugins-available/conf/templates/_conf_object_row.tt
 plugins/plugins-available/conf/templates/_conf_object_view.tt
 plugins/plugins-available/conf/templates/_conf_objects_frame.tt
 plugins/plugins-available/conf/templates/_conf_objects_menu.tt
-plugins/plugins-available/conf/templates/_conf_ondemand_file_lock.tt
+plugins/plugins-available/conf/templates/_conf_ondemand_file_edit.tt
 plugins/plugins-available/conf/templates/_conf_references_menu.tt
 plugins/plugins-available/conf/templates/_conf_tools_menu.tt
 plugins/plugins-available/conf/templates/_conf_wizard_command.tt

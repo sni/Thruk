@@ -10,7 +10,7 @@
 -->
 </script>
 [% END %]
-[% file_locked = ""; IF object.defined('file'); PROCESS _conf_ondemand_file_lock.tt file=object.file form="obj_edit_" _ object.get_id(); END %]
+[% file_locked = ""; IF object.defined('file'); PROCESS _conf_ondemand_file_edit.tt file=object.file form="obj_edit_" _ object.get_id(); END %]
 [% readonly = 0;
    IF object.defined('file') && object.file.readonly; readonly = 1; END;
    IF file_locked; readonly = 1; END;

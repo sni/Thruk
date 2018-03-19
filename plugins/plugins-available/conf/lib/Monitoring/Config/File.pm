@@ -39,6 +39,7 @@ sub new {
     my $self = {
         'path'         => $file,
         'display'      => $remotepath || $file,
+        'backup'       => '',
         'mtime'        => undef,
         'md5'          => undef,
         'inode'        => 0,
@@ -105,6 +106,7 @@ sub update_objects {
     my $text = Thruk::Utils::decode_any(scalar read_file($self->{'path'}));
     $self->update_objects_from_text($text);
     $self->{'changed'} = 0;
+    $self->{'backup'}  = "";
     return;
 }
 
@@ -457,6 +459,7 @@ sub save {
 
     $self->{'changed'}     = 0;
     $self->{'is_new_file'} = 0;
+    $self->{'backup'}      = '';
     $self->_update_meta_data();
 
     return 1;
@@ -549,41 +552,85 @@ sub get_new_file_content {
 
 ##########################################################
 
-=head2 StripTSpace
+=head2 set_backup
 
-strip trailing whitespace
-
-replacement for string::strip, which is broken on 64 bit
-https://rt.cpan.org/Ticket/Display.html?id=70028
+set backup file content in order to generate change diff later
 
 =cut
-sub StripTSpace {
-    $_[0] =~ s/\s+$//mx;
+sub set_backup {
+    my($self) = @_;
+    return if $self->{'backup'};
+    return if $self->{'is_new_file'};
+    # read file from disk
+    $self->{'backup'}  = scalar read_file($self->{'path'});
+    $self->{'changed'} = 1;
     return;
 }
 
 ##########################################################
 
-=head2 StripLSpace
+=head2 try_merge
 
-strip leading whitespace
+merge our changes into a changed file from disk.
 
-=cut
-sub StripLSpace {
-    $_[0] =~ s/^\s+//mx;
-    return;
-}
-
-##########################################################
-
-=head2 StripLTSpace
-
-strip leading and trailing whitespace
+returns true if file has been updated and false if merge fails.
 
 =cut
-sub StripLTSpace {
-    $_[0] =~ s/^\s+//mx;
-    $_[0] =~ s/\s+$//mx;
+sub try_merge {
+    my($self) = @_;
+    return 1 unless $self->{'changed'};
+    return if $self->{'is_new_file'};
+    return unless $self->{'backup'};
+
+    my $tmpdir = File::Temp::tempdir();
+
+    # save our backup as clean file
+    my $file1 = Monitoring::Config::File->new($tmpdir.'/file1.cfg', undef, $self->{'coretype'});
+    $file1->update_objects_from_text($self->{'backup'});
+    open(my $fh1, '>', $tmpdir.'/file1.cfg') or die("cannot write: ".$tmpdir."/file1.cfg: ".$!);
+    print $fh1 $file1->get_new_file_content();
+    Thruk::Utils::IO::close($fh1, $tmpdir.'/file1.cfg');
+
+    # save our current content as clean file
+    my $file2 = Monitoring::Config::File->new($tmpdir.'/file2.cfg', undef, $self->{'coretype'});
+    $file2->update_objects_from_text($self->get_new_file_content());
+    open(my $fh2, '>', $tmpdir.'/file2.cfg') or die("cannot write: ".$tmpdir."/file2.cfg: ".$!);
+    print $fh2 $file2->get_new_file_content();
+    Thruk::Utils::IO::close($fh2, $tmpdir.'/file2.cfg');
+
+    # get diff from new file from disk compared to our backup
+    my $cmd = 'cd '.$tmpdir.' && diff -u file1.cfg file2.cfg > patch 2>/dev/null';
+    my($rc) = Thruk::Utils::IO::cmd(undef, $cmd);
+
+    # save cleaned version of current file from disk
+    my $file3 = Monitoring::Config::File->new($self->{'path'}, undef, $self->{'coretype'});
+    $file3->update_objects();
+    $file3->{'changed'} = 1;
+    open(my $fh3, '>', $tmpdir.'/file1.cfg') or die("cannot write: ".$tmpdir."/file1.cfg: ".$!);
+    print $fh3 $file3->get_new_file_content();
+    Thruk::Utils::IO::close($fh3, $tmpdir.'/file1.cfg');
+
+    # try to apply patch to current file from disk
+    $cmd = 'cd '.$tmpdir.' && patch -F 10 -p0 < patch 2>&1';
+    my($rc2, $out) = Thruk::Utils::IO::cmd(undef, $cmd);
+
+    my $text = Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg'));
+
+    # cleanup
+    unlink(glob($tmpdir.'/*'));
+    rmdir($tmpdir);
+
+    # merge successful
+    if($rc2 == 0) {
+        # read merged file and replace our content with the merged one
+        $self->update_objects_from_text($text);
+        $self->{'backup'} = "";
+        $self->set_backup();
+        $self->_update_meta_data();
+        return 1;
+    }
+
+    push @{$self->{'errors'}}, "unable to merge local disk changes: ".$out;
     return;
 }
 

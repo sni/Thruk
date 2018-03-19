@@ -13,7 +13,7 @@
 [% IF c.req.parameters.exists('backlink') %]
 <input type="hidden" name="backlink" value="[% c.req.parameters.backlink %]">
 [% END %]
-[% file_locked = ""; PROCESS _conf_ondemand_file_lock.tt file=file form="saveform" %]
+[% file_locked = ""; PROCESS _conf_ondemand_file_edit.tt file=file form="saveform" %]
 [% readonly = 0;
    IF file.readonly; readonly = 1; END;
    IF file_locked; readonly = 1; END;
