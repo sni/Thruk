@@ -40,6 +40,7 @@ belonging to other clients?"
 The installation instructions for OMD are straight forward:
 
 [source,bash]
+```
 # OMD requires some dependencies found in EPEL
 yum -y install epel-release
 # Install the OMD repo
@@ -49,6 +50,7 @@ yum -y install omd
 # Thruk will not work with SELinux, so we will go ahead and disable it
 setenforce 0
 sed -i.bak 's/enforcing/disabled/' /etc/selinux.config
+```
 
 === Creating and starting sites
 
