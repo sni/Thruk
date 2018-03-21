@@ -855,7 +855,7 @@ sub update_site_panel_hashes {
     if($c->stash->{'show_sitepanel'} eq 'panel') {
         my $sites = $c->stash->{'sites'};
         if(!$sites->{'sub'} || !$sites->{'sub'}->{'Default'}) {
-            $sites->{'sub'}->{'Default'} = { peers => $sites->{'peers'} || [] };
+            $sites->{'sub'}->{'Default'} = { peers => delete $sites->{'peers'} || [] };
         }
     }
 

@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - fix wrong number of backends (#809)
           - Panorama:
             - optionally show broadcasts in panorama dashboards
           - Config Tool:
