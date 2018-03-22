@@ -372,7 +372,14 @@
         <tr>
           <td class='filterValueInput' nowrap style="vertical-align: inherit;" colspan=2>
             <select name="[% paneprefix %][% prefix %]_type" id="[% paneprefix %][% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
+              [%# when changed, update _status_filter.tt too! #%]
               <option value="search">Search</option>
+              <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
+              <option value="service"[% IF s.type == 'service' %] selected[% END %]>Service</option>
+              <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
+              <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
+              <option disabled>----------------</option>
+              <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
               [% IF enable_shinken_features %]
               <option value="priority"[% IF s.type == 'priority' %] selected[% END %]>Business Impact</option>
               [% END %]
@@ -385,8 +392,6 @@
               <option value="duration"[% IF s.type == 'duration' %] selected[% END %]>Duration</option>
               <option value="event handler"[% IF s.type == 'event handler' %] selected[% END %]>Event Handler</option>
               <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
-              <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
-              <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
               <option value="last check"[% IF s.type == 'last check' %] selected[% END %]>Last Check</option>
               <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
               <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
@@ -394,9 +399,6 @@
               <option value="number of services"[% IF s.type == 'number of services' %] selected[% END %]>Number of Services</option>
               <option value="parent"[% IF s.type == 'parent' %] selected[% END %]>Parent</option>
               <option value="plugin output"[% IF s.type == 'plugin output' %] selected[% END %]>Plugin Output</option>
-              <option value="service"[% IF s.type == 'service' %] selected[% END %]>Service</option>
-              <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
-              <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
             </select>[%# we don't want whitespaces here in final html but keep the nice source layout
             #%]<input type="text" name="[% paneprefix %][% prefix %]_val_pre" class="filter_pre_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_val_pre" value="[% s.val_pre %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'custom variable')"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">[%#
             #%]<select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to" class="filter_op_select">

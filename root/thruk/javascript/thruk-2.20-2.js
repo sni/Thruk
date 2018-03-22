@@ -4664,6 +4664,43 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
   target.innerHTML = filtername;
 }
 
+function getFilterTypeOptions() {
+    var important = new Array(/* when changed, update _status_filter.tt too! */
+        'Search',
+        'Host',
+        'Service',
+        'Hostgroup',
+        'Servicegroup',
+        '----------------'
+    );
+    var others = new Array(
+        'Check Period',
+        'Comment',
+        'Contact',
+        'Current Attempt',
+        'Custom Variable',
+        'Downtime Duration',
+        'Duration',
+        'Event Handler',
+        'Execution Time',
+        'Last Check',
+        'Latency',
+        'Next Check',
+        'Notification Period',
+        'Number of Services',
+        'Parent',
+        'Plugin Output',
+        '% State Change'
+       );
+    if(enable_shinken_features) {
+        others.unshift('Business Impact');
+    }
+    var options = Array();
+    options = options.concat(important);
+    options = options.concat(others.sort());
+    return(options);
+}
+
 /* add a new filter selector to this table */
 function add_new_filter(search_prefix, table) {
   pane_prefix   = search_prefix.substring(0,4);
@@ -4691,32 +4728,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect = document.createElement('select');
-  var options    = new Array('Check Period', /* when changed, update _panorama_js_form_filter.tt too! */
-                             'Comment',
-                             'Contact',
-                             'Current Attempt',
-                             'Custom Variable',
-                             'Downtime Duration',
-                             'Duration',
-                             'Event Handler',
-                             'Execution Time',
-                             'Host',
-                             'Hostgroup',
-                             'Last Check',
-                             'Latency',
-                             'Next Check',
-                             'Notification Period',
-                             'Number of Services',
-                             'Parent',
-                             'Plugin Output',
-                             'Service',
-                             'Servicegroup',
-                             '% State Change'
-                            );
-  if(enable_shinken_features) {
-    options.unshift('Business Impact');
-  }
-  options.unshift('Search');
+  var options    = getFilterTypeOptions();
 
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
@@ -4832,6 +4844,9 @@ function add_options(select, options, numbered) {
     jQuery.each(options, function(index, text) {
         var opt  = document.createElement('option');
         opt.text = text;
+        if(text.match(/^\-+$/)) {
+            opt.disabled = true;
+        }
         if(numbered) {
             opt.value = x;
         } else {
