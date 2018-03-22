@@ -269,7 +269,7 @@ $c->redirect_to(<url>)
 sub redirect_to {
     my($c, $url) = @_;
     $c->res->content_type('text/html; charset=utf-8');
-    $c->res->body('This item has moved');
+    $c->res->body('This item has moved to '.$url);
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
     return 1;
