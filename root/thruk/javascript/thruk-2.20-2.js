@@ -2183,8 +2183,8 @@ function save_url_in_parents_hash() {
 function set_hash(value, nr) {
     if(value == undefined)   { value = ""; }
     if(value == "undefined") { value = ""; }
+    var current = get_hash();
     if(nr != undefined) {
-        var current   = get_hash();
         if(current == undefined) {
             current = "";
         }
@@ -2196,7 +2196,12 @@ function set_hash(value, nr) {
     value = value.replace(/\|$/, '');
 
     // replace history otherwise we have to press back twice
-    if(value != "") { value = '#'+value; }
+    if(current == value) { return; }
+    if(value == "") {
+        value = getCurrentUrl(false).replace(/\#.*$/, "");
+    } else {
+        value = '#'+value;
+    }
     if (history.replaceState) {
         history.replaceState({}, "", value);
     } else {
