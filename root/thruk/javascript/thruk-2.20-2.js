@@ -1730,7 +1730,9 @@ function do_table_search() {
 
 function do_table_search_table(id, table, value) {
     /* make tables fixed width to avoid flickering */
-    table.width = table.offsetWidth;
+    if(table.offsetWidth) {
+        table.width = table.offsetWidth;
+    }
     var startWith = 1;
     if(jQuery(table).hasClass('header2')) {
         startWith = 2;
