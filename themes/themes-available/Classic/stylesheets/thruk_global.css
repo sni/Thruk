@@ -101,6 +101,12 @@ table.pref_pane > tbody > tr > td {
 TABLE.pref_pane TD {
     text-align: left;
 }
+TABLE.pref_pane .separator {
+  border-bottom: 1px dotted grey;
+  text-align: center;
+  padding-top: 10px;
+}
+
 img.pref_pane_button {
   position:absolute;
   top: 4px;
@@ -767,6 +773,17 @@ body.config TD.dataUserVar {
 body.config TD.dataSubmit {
     text-align:center;
     padding: 4px;
+}
+
+body.conf TABLE.conftooluserprofile TD {
+  text-align: left;
+}
+.conftoolheaderseperator {
+  padding-top: 15px;
+}
+
+body.conf TABLE.conftooluserprofile TD.dataVal IMG {
+  margin-right: 10px;
 }
 
 TABLE.cmd_pane tbody > tr > th > A > IMG {

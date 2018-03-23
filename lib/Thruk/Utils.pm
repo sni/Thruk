@@ -593,6 +593,8 @@ sub set_dynamic_roles {
         push @{$c->user->{'roles'}}, $role;
     }
 
+    $c->user->{'roles'} = array_uniq($c->user->{'roles'});
+
     $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
     return 1;
 }

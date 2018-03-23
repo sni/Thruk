@@ -85,6 +85,7 @@ lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/test.pm
 lib/Thruk/Controller/trends.pm
+lib/Thruk/Controller/user.pm
 lib/Thruk/Pool/Simple.pm
 lib/Thruk/Request.pm
 lib/Thruk/Request/Cookie.pm
@@ -1760,6 +1761,7 @@ t/300-controller_summary.t
 t/300-controller_tac.t
 t/300-controller_test.t
 t/300-controller_trends.t
+t/300-controller_user.t
 t/400-recurring_downtime.t
 t/600-scenarios.t
 t/700-naemon.t
@@ -2307,6 +2309,7 @@ templates/trends_step_2.tt
 templates/trends_step_3.tt
 templates/user_ext_host_info.tt
 templates/user_ext_service_info.tt
+templates/user_profile.tt
 templates/waiting_for_job.tt
 THANKS
 themes/themes-available/Classic/images/accept.png

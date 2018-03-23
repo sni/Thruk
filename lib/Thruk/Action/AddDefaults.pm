@@ -610,9 +610,10 @@ sub add_defaults {
 
     ###############################
     # user / group specific config?
+    $c->stash->{'contactgroups'} = [sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}];
     if(!$no_config_adjustments && $c->stash->{'remote_user'}) {
         $c->stash->{'config_adjustments'} = {};
-        for my $group (sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}) {
+        for my $group (@{$c->stash->{'contactgroups'}}) {
             if(defined $c->config->{'Group'}->{$group}) {
                 # move components one level up
                 if($c->config->{'Group'}->{$group}->{'Component'}) {
@@ -1072,6 +1073,7 @@ sub set_processinfo {
                 'prev_last_program_restart' => time(),
                 'contactgroups'             => $contactgroups,
             };
+            $c->stash->{'contactgroups'} = [sort keys %{$contactgroups}];
             $c->cache->set('users', $c->stash->{'remote_user'}, $cached_user_data);
             $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
         }

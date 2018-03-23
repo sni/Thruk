@@ -505,6 +505,7 @@ sub get_contactgroups_by_contact {
 
     $cached_data->{'contactgroups'} = $contactgroups;
     $c->cache->set('users', $username, $cached_data);
+    $c->stash->{'contactgroups'} = $data if($c->stash->{'remote_user'} && $username eq $c->stash->{'remote_user'});
     return $contactgroups;
 }
 

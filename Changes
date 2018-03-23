@@ -1,6 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - cleanup preferences popup
+          - add user profile page
+          - move broadcast into side navigation
           - move important filters up (#792)
           - fix wrong number of backends (#809)
           - Panorama:
