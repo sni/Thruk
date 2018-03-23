@@ -12,6 +12,7 @@ next:
           - Config Tool:
             - make command line a textarea
             - use separate edit sessions for each user
+            - fix adding custom variables from extra_custom_var
 
 2.20-2   Wed Mar 14 00:12:24 CET 2018
           - add optional debug switch for admin users
