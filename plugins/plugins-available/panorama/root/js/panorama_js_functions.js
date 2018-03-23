@@ -963,8 +963,7 @@ var TP = {
     /* rotate tabs once */
     rotateTabs: function() {
         var tabpan = Ext.getCmp('tabpan');
-        var state  = tabpan.getState();
-        var at     = state.activeTab;
+        var at     = tabpan.getActiveTab();
         // find next tab
         var found = false;
         var next  = undefined;
@@ -973,7 +972,7 @@ var TP = {
                 next = tab.id;
                 return false;
             }
-            if(tab.id == at) {
+            if(tab.id == at.id) {
                 found = true;
             }
         });

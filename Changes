@@ -8,6 +8,7 @@ next:
           - fix wrong number of backends (#809)
           - Panorama:
             - optionally show broadcasts in panorama dashboards
+            - fix tab rotation
           - Config Tool:
             - make command line a textarea
             - use separate edit sessions for each user
