@@ -610,7 +610,7 @@ sub add_defaults {
 
     ###############################
     # user / group specific config?
-    $c->stash->{'contactgroups'} = [sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}];
+    $c->stash->{'contactgroups'} = $c->stash->{'remote_user'} ? [sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}] : [];
     if(!$no_config_adjustments && $c->stash->{'remote_user'}) {
         $c->stash->{'config_adjustments'} = {};
         for my $group (@{$c->stash->{'contactgroups'}}) {
