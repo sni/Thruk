@@ -79,11 +79,11 @@
         [% ELSE %]
           [% val = "";
              field = col.replace('^_+', '');
-             cust_vars = get_custom_vars(c, s,'',1); %]
-             [% IF cust_vars.exists(field); val = cust_vars.$field;
+             cust_vars = get_custom_vars(c, s,'',1);
+             IF cust_vars.exists(field); val = cust_vars.$field;
              ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
              END;
-          %]          
+          %]
           <cell>[% escape_xml(val) %]</cell>
         [% END %]
         [% END %]
