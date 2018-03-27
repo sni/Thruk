@@ -47,7 +47,7 @@ Ext.define('TP.Pantab', {
         beforeclose: function( This, eOpts ) {
             var tabpan = Ext.getCmp('tabpan');
             var tabState = tabpan.getState(); // recalculate open_tabs
-            if(tabState.open_tabs.length <= 1) {
+            if(tabpan.open_tabs.length <= 1) {
                 TP.add_pantab("tabpan-tab_0");
             }
             TP.log('['+This.id+'] closing tab');
@@ -140,16 +140,8 @@ Ext.define('TP.Pantab', {
                 }, delay + 100);
             }
 
-            // save current active tab unless we are in tab rotation mode
-            if(tabpan.xdata.rotate_tabs <= 0) {
-                tabpan.saveState();
-            }
             var curNr = this.id.replace(/^tabpan-tab_/, '');
-            if(curNr != 0) {
-                set_hash(curNr, 1);
-            } else {
-                set_hash("");
-            }
+            cookieSave('thruk_panorama_active', curNr);
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
@@ -186,6 +178,9 @@ Ext.define('TP.Pantab', {
             }
             /* set id from active tab, otherwise adding new background tabs might become visible (they set autoshow if this id matches) */
             TP.initial_active_tab = This.id;
+
+            // set title
+            document.title = This.xdata.title;
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
@@ -212,6 +207,9 @@ Ext.define('TP.Pantab', {
             tab.el.on("click", tab.tabBodyClick);
             if(This.xdata.hide_tab_header) {
                 This.tab.hide();
+            }
+            if(one_tab_only) {
+                document.title = This.xdata.title;
             }
         },
         beforerender: function(This, eOpts) {
@@ -333,7 +331,7 @@ Ext.define('TP.Pantab', {
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
-            if(panel.xdata.layout.lon != undefined) {
+            if(panel.xdata.layout && panel.xdata.layout.lon != undefined) {
                 panel.moveToMapLonLat(size, movedOnly);
             }
         }
@@ -559,9 +557,12 @@ Ext.define('TP.Pantab', {
             size_y     = xdata.backgroundsize_y,
             bg_color   = xdata.background_color;
         if(retries == undefined) { retries = 0; }
-        if(retries >= 5)         { return;      }
+        if(retries >= 10)        { return;      }
         var body = tab.body;
-        if(body == undefined)    { return; }
+        if(body == undefined)    {
+            window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
+            return;
+        }
 
         if(xdata.map) {
             if(tab.bgImgEl) { tab.bgImgEl.destroy(); tab.bgImgEl = undefined; }
@@ -722,15 +723,15 @@ Ext.define('TP.Pantab', {
             if(!tab.bgImgEl) {
                 var iconContainer = Ext.fly('iconContainer');
                 tab.bgImgEl  = iconContainer.createChild('<img>', iconContainer.dom.childNodes[0]);
+                tab.bgImgEl.on('load',
+                                function (evt, ele, opts) {
+                                    tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
+                                },
+                                undefined, {
+                                    single: true    // remove event handler after first occurence
+                                }
+                );
             }
-            tab.bgImgEl.on('load',
-                            function (evt, ele, opts) {
-                                tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
-                            },
-                            undefined, {
-                                single: true    // remove event handler after first occurence
-                            }
-            );
             tab.bgImgEl.dom.src            = background;
             tab.bgImgEl.dom.style.position = "absolute";
             tab.applyBackgroundSizeAndOffset(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y);
@@ -777,6 +778,7 @@ Ext.define('TP.Pantab', {
         }
     },
     applyBackgroundSizeAndOffset: function(xdata, retries, background, scale, offset_x, offset_y, size_x, size_y) {
+        if(background.match(/s\.gif$/)) { return; }
         var tab = this;
         if(size_x != undefined && size_x > 0 && size_y != undefined && size_y > 0) {
             tab.bgImgEl.dom.style.width  = size_x+"px";
@@ -900,14 +902,14 @@ Ext.define('TP.Pantab', {
         var nr = tab.id.replace(/^tabpan-tab_/, '');
 
         var menu_items = [];
-        if(!readonly && !tab.readonly) {
+        if(tab.xdata.locked) { hidePasteAndNew = true; }
+        if(!readonly && !tab.readonly && !hidePasteAndNew) {
             menu_items = menu_items.concat([{
                     text:   'New',
                     icon:   url_prefix+'plugins/panorama/images/cog_add.png',
                     hideOnClick: false,
                     menu:    TP.addPanletsMenu({open: 'right'}),
-                    disabled: tab.xdata.locked,
-                    hidden:  hidePasteAndNew
+                    disabled: tab.xdata.locked
                 }]);
         }
 

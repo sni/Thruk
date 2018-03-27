@@ -216,7 +216,7 @@ test_scenarios:
 	cd t/scenarios && $(MAKE) test
 
 e2etest:
-	cd t/scenarios/sakuli_e2e && $(MAKE) prepare test
+	cd t/scenarios/sakuli_e2e && $(MAKE) clean update prepare test
 
 rpm: $(NAME)-$(VERSION).tar.gz
 	rpmbuild -ta $(NAME)-$(VERSION).tar.gz

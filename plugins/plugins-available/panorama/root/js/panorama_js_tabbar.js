@@ -92,15 +92,6 @@ Ext.define('TP.TabBar', {
             tooltip:  'Send Bug Report',
             listeners: { afterrender: function(This, eOpts) { This.hide(); } }
         }, {
-            id:        'debug_mode',
-            closable:   false,
-            iconCls:   'reload-tab',
-            href:      'panorama.cgi?debug=1',
-            hrefTarget: '',
-            html:      'Debug Mode',
-            tooltip:   'Reload Dashboad in Debug Mode',
-            listeners: { afterrender: function(This, eOpts) { This.hide(); } }
-        }, {
             iconCls:  'user-tab',
             closable:  false,
             tooltip:  'user menu',
@@ -307,21 +298,32 @@ Ext.define('TP.TabBar', {
         if(open_tabs.length == ordered_items.length) {
             open_tabs = ordered_items;
         }
-        var activeTab = this.getActiveTab();
-        if(!activeTab) {
-            debug("forced setting activeTab");
-            activeTab = this.setActiveTab(open_tabs.length > 0 ? open_tabs[0] : 0);
-        }
-        this.open_tabs = open_tabs;
 
+        // save open tabs and active tab as cookie
+        if(TP.initialized) {
+            var activeTab = this.getActiveTab();
+            if(!activeTab) {
+                debug("forced setting activeTab");
+                activeTab = this.setActiveTab(open_tabs.length > 0 ? open_tabs[0] : 0);
+            }
+            cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^tabpan-tab_/, '') : 0);
+            var numbers = [];
+            for(var nr=0; nr<open_tabs.length; nr++) {
+                var num = open_tabs[nr].replace(/^tabpan-tab_/, '');
+                if(num > 0) {
+                    numbers.push(num);
+                }
+            }
+            cookieSave('thruk_panorama_tabs', numbers.join(':'));
+        }
+
+        this.open_tabs = open_tabs;
         return {
-            open_tabs:  open_tabs,
-            xdata:      this.xdata,
-            activeTab:  activeTab ? activeTab.getStateId() : null
+            xdata: this.xdata
         }
     },
     applyState: function(state) {
-        TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
+        TP.log('['+this.id+'] applyState: '+(state ? Ext.JSON.encode(state) : 'none'));
         try {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
             TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
@@ -332,7 +334,7 @@ Ext.define('TP.TabBar', {
                 if(state.activeTab && TP.initial_active_tab == undefined) {
                     TP.initial_active_tab = state.activeTab;
                 }
-                this.xdata = state.xdata;
+                this.xdata = state.xdata || {};
 
                 if(state.open_tabs) {
                     for(var nr=0; nr<state.open_tabs.length; nr++) {

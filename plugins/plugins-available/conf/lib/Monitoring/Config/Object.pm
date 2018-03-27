@@ -108,6 +108,7 @@ return a new L<object|Monitoring::Config::Object::Parent> of given type. Type ca
 sub new {
     my($class, %conf) = @_;
     confess('no core type!') unless defined $conf{'coretype'};
+    confess('no type!')      unless defined $conf{'type'};
 
     my $objclass = 'Monitoring::Config::Object::'.ucfirst($conf{'type'});
     my $obj = \&{$objclass."::BUILD"};

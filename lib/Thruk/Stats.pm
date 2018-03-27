@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Time::HiRes qw/gettimeofday tv_interval/;
+#use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {
     my($class) = @_;
@@ -17,6 +18,7 @@ sub new {
 
 sub profile {
     my($self, @arg) = @_;
+    #&timing_breakpoint($arg[1], undef, 1) if $arg[0] eq 'end';
     return unless $self->{'enabled'};
     my $t0 = [gettimeofday];
     push @{$self->{'profile'}}, [$t0, \@arg, [caller]];

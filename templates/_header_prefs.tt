@@ -6,13 +6,23 @@
         <td>
           <table width="470">
             <tr>
-              <th colspan=2 align="center" style="border-bottom: 1px dotted grey">User Settings</th>
+              <th colspan=2 class="separator">Settings</th>
+            </tr>
+            <tr>
+              <th width="100">User Profile:</th>
+              <td>
+                <img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="change theme" width=16 height=16 style="vertical-align:sub;">
+                <input type="button" name="submit" value="Show user profile" onClick="window.location='[% url_prefix %]cgi-bin/user.cgi'; return false;" style="width: 160px;">
+              </td>
+            </tr>
+            <tr>
+              <th colspan=2 class="separator">Session Settings</th>
             </tr>
             <tr>
               <th width="100">Theme:</th>
               <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:top;">
-                <select name="theme" id="pref_theme">
+                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:sub;">
+                <select name="theme" id="pref_theme" style="width: 160px;">
                   [% FOR t = themes %]
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
                   [% END %]
@@ -25,11 +35,11 @@
               <th>Sounds:</th>
               <td>
                 [% IF has_cgi_sounds %]
-                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
+                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:sub;">
+                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')" style="width: 160px;">
                 [% ELSE %]
-                <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled>
+                <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:sub;">
+                <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled style="width: 160px;">
                 [% END %]
               </td>
             </tr>
@@ -37,41 +47,26 @@
             <tr>
               <th>Favicon:</th>
               <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')">
+                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:sub;">
+                <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')" style="width: 160px;">
               </td>
+            </tr>
+            <tr>
+              <th colspan=2 class="separator">Page Actions</th>
             </tr>
             [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
             <tr>
               <th>Report:</th>
               <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:sub;">
                 <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(original_uri ? original_uri : encodeURIComponent(full_uri)); return false;">
-              </td>
-            </tr>
-            [% END %]
-            [% IF c.config.exists('use_feature_configtool') && c.config.use_feature_configtool && !c.config.disable_user_password_change %]
-            <tr>
-              <th>Change Password:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_key.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Change User Password" onClick="window.location='[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer='+full_uri; return false;">
-              </td>
-            </tr>
-            [% END %]
-            [% IF c.check_user_roles('authorized_for_configuration_information') && c.check_user_roles('authorized_for_system_information') %]
-            <tr>
-              <th>Create Broadcast:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/page_world.png" alt="create new broadcast" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Create Broadcast" onClick="window.location='[% url_prefix %]cgi-bin/broadcast.cgi'; return false;">
               </td>
             </tr>
             [% END %]
             <tr>
               <th>Page Refresh:</th>
               <td nowrap>
-              <img src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:top;">
+              <img src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:sub;">
               <span id="refresh_rate"></span>
               </td>
             </tr>

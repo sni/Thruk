@@ -58,6 +58,7 @@ sub index {
 
     $c->stash->{title}             = 'Thruk Panorama';
     $c->stash->{'skip_navigation'} = 1;
+    $c->stash->{'inject_stats'}    = 0;
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
@@ -263,6 +264,8 @@ sub index {
 sub _js {
     my($c, $only_data) = @_;
 
+    # merge open dashboards into state
+    my $data = Thruk::Utils::get_user_data($c);
     my $open_tabs;
     if(defined $c->req->parameters->{'map'}) {
         my $dashboard = _get_dashboard_by_name($c, $c->req->parameters->{'map'});
@@ -273,13 +276,18 @@ sub _js {
         $open_tabs = [$dashboard->{'nr'}];
         $c->stash->{one_tab_only} = $dashboard->{'nr'};
         $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
+    } elsif($c->cookie('thruk_panorama_tabs')) {
+        $open_tabs = [split(/\s*:\s*/mx, $c->cookie('thruk_panorama_tabs')->value)];
+        $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $open_tabs;
+        if($c->cookie('thruk_panorama_active')) {
+            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'activeTab'} = 'tabpan-tab_'.$c->cookie('thruk_panorama_active')->value;
+        }
     }
 
     $c->stash->{shapes} = {};
     $c->stash->{state}  = '';
 
-    # merge open dashboards into state
-    my $data = Thruk::Utils::get_user_data($c);
+    # restore last open tab
     if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
         my $shapes         = {};
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
@@ -3154,11 +3162,8 @@ sub _get_default_tab_xdata {
 ##########################################################
 sub _add_json_dashboard_timestamps {
     my($c, $json, $tab) = @_;
-    if(!defined $tab) {
-        my $data = Thruk::Utils::get_user_data($c);
-        if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'}) {
-            $tab = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'};
-        }
+    if(!defined $tab && $c->cookie('thruk_panorama_active')) {
+        $tab = $c->cookie('thruk_panorama_active')->value;
     }
     if($tab) {
         my $nr = $tab;
@@ -3200,6 +3205,7 @@ sub _add_misc_details {
         $json->{'server_version'}       = $c->config->{'version'};
         $json->{'server_version'}      .= '~'.$c->config->{'branch'} if $c->config->{'branch'};
         $json->{'server_extra_version'} = $c->config->{'extra_version'};
+        $json->{'broadcasts'}           = Thruk::Utils::Broadcast::get_broadcasts($c, undef, undef, 1);
         $c->stats->profile(end => "_add_misc_details");
     }
     elsif($c->req->parameters->{'current_tab'}) {

@@ -9,6 +9,7 @@ my $replace = {
     'Monitoring::Availability::Logs'              => 'Monitoring::Availability',
     'Date::Calc::XS'                              => 'Date::Calc',
     'Template::Context'                           => 'Template',
+    'Template::Exception'                         => 'Template',
     'Hash::MultiValue'                            => 'Plack',
     'Plack::Response'                             => 'Plack',
     'Plack::Request'                              => 'Plack',

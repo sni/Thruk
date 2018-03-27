@@ -264,9 +264,11 @@ sub read_downtime {
         elsif($d->{'target'} eq 'service') {
             return if $host && !$service;
             for my $hst (@{$d->{'host'}}) {
-                if(defined $services->{$hst}->{$d->{'service'}}) {
-                    $found++;
-                    last;
+                for my $svc (@{$d->{'service'}}) {
+                    if(defined $services->{$hst}->{$svc}) {
+                        $found++;
+                        last;
+                    }
                 }
             }
         }

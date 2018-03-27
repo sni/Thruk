@@ -90,6 +90,7 @@ sub new {
             push @{$self->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
         }
     }
+    $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
 
     if($username eq '(cron)') {
         $self->{'roles'} = [qw/authorized_for_all_hosts

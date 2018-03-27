@@ -1,0 +1,57 @@
+﻿[% total = time_total; IF total < 1; total = 1; END %]
+<div style="bottom: 8px; right: 8px; width: 200px; position: fixed; border: 0; z-index: 101; padding: 0;" class="thruk_dev_panel clickable" onclick="stopRefresh(); toggleElement('stats_details', undefined, true);">
+  <div style="position: absolute; text-align: center; width: 200px; line-height: 20px;[% IF time_total > 1 %]font-weight: bold; color: red;[% END %]">Time: [% sprintf("%.3fs", time_total) %]</div>
+  <table>
+    <tr>
+      <td class="thruk_dev_panel_bar" style="background: #7FDBFF; width: [% sprintf("%d", total_backend_waited / total * 200) %]px"></td>
+      <td class="thruk_dev_panel_bar" style="background: #FFDC00; width: [% sprintf("%d", (time_total - total_backend_waited - total_render_waited) / total * 200) %]px"></td>
+      <td class="thruk_dev_panel_bar" style="background: #FF851B; width: [% sprintf("%d", total_render_waited / total * 200) %]px"></td>
+    </tr>
+  </table>
+</div>
+<div style="bottom: 8px; right: 8px; position: fixed; display: none;" class="thruk_dev_panel" id="stats_details">
+  <table>
+    <tr>
+      <td style="padding-right: 15px;">
+        [% IF profile.size > 1 %]
+        <div class="controls">
+          <button class="previous" style="visibility: hidden;" onclick="show_list(-1, 'PRE.profiles');"></button>
+          <button class="next"[% IF profile.size == 1 %] style="visibility: hidden;"[% END %] onclick="show_list(1, 'PRE.profiles');"></button>
+        </div>
+        [% END %]
+        [% FOREACH p = profile %]
+        <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</pre>
+        [% END %]
+      </td>
+      <td valign="bottom">
+        <table width="200" style="position: relative; bottom: 20px;">
+          <tr>
+            <th width="20%">Backend</th>
+            <td width="80%"><div class="thruk_dev_panel_square" style="background: #7FDBFF;"></div>[% sprintf("%.3f", total_backend_waited) %]s</td>
+          </tr>
+          <tr>
+            <th>Controller</th>
+            <td><div class="thruk_dev_panel_square" style="background: #FFDC00;"></div>[% sprintf("%.3f", (time_total - total_backend_waited - total_render_waited)) %]s</td>
+          </tr>
+          <tr>
+            <th>View</th>
+            <td><div class="thruk_dev_panel_square" style="background: #FF851B;"></div>[% sprintf("%.3f", total_render_waited) %]s</td>
+          </tr>
+          <tr>
+            <th style="border-top: 1px solid gray;">Total</th>
+            <td style="border-top: 1px solid gray;"><b>[% sprintf("%.3fs", time_total) %]s</b></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</div>
+<script>
+  jQuery(document).ready(function() {
+    // pre requires absolute px height, but we just want 90% of the screen
+    var height = jQuery(window).height() * 0.8;
+    if(height <  600) { height =  600; }
+    if(height > 1000) { height = 1000; }
+    jQuery("PRE.profiles").css("height", height+"px");
+  });
+</script>

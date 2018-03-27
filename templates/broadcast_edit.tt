@@ -100,11 +100,17 @@
     </td>
   </tr>
   <tr>
-    <td class="dataEven" align="center"><b>Login Page</b></td>
+    <td class="dataEven" align="center"><b>Panorama Dashboard</b></td>
     <td class="dataOdd" align="left">
-        <input type="checkbox" value="1" name="loginpage"[% IF broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
+        <input type="checkbox" value="1" name="panorama"[% IF broadcast.panorama %] checked[% END %]> Display on panorama dashboards.
     </td>
   </tr>
+  <tr>
+      <td class="dataEven" align="center"><b>Login Page</b></td>
+      <td class="dataOdd" align="left">
+          <input type="checkbox" value="1" name="loginpage"[% IF broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
+      </td>
+    </tr>
   <tr>
     <td class="dataEven" align="center" colspan=2>
       <span class="required" style="float: left;">* - required</span>
@@ -140,3 +146,5 @@
   });
 -->
 </script>
+
+[% PROCESS _footer.tt %]

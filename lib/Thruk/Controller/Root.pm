@@ -113,6 +113,7 @@ sub thruk_index_html {
     $c->stash->{'template'}        = 'index.tt';
     $c->stash->{'no_auto_reload'}  = 1;
     $c->stash->{'skip_navigation'} = 1;
+    $c->stash->{'inject_stats'}    = 0;
 
     return 1;
 }
@@ -135,6 +136,7 @@ sub thruk_side_html {
     $c->stash->{'title'}          = $c->config->{'name'};
     $c->stash->{'template'}       = 'side.tt';
     $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'inject_stats'}   = 0;
 
     return 1;
 }
@@ -183,6 +185,7 @@ sub thruk_frame_html {
 
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'navigation'}     = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
+    $c->stash->{'inject_stats'}   = 0;
 
     # no link or none matched, display the usual index.html
     return(thruk_index_html($c));
@@ -205,6 +208,7 @@ sub thruk_main_html {
     $c->stash->{'page'}                    = 'splashpage';
     $c->stash->{'template'}                = 'main.tt';
     $c->stash->{'no_auto_reload'}          = 1;
+    $c->stash->{'inject_stats'}            = 0;
 
     return 1;
 }
@@ -227,6 +231,7 @@ sub thruk_changes_html {
     $c->stash->{'template'}              = 'changes.tt';
     $c->stash->{page}                    = 'splashpage';
     $c->stash->{no_tt_trim}              = 1;
+    $c->stash->{'inject_stats'}          = 0;
 
     return 1;
 }
@@ -249,6 +254,7 @@ sub thruk_docs  {
     $c->stash->{'template'}              = 'docs.tt';
     $c->stash->{'extrabodyclass'}        = 'docs';
     $c->stash->{'page'}                  = 'splashpage';
+    $c->stash->{'inject_stats'}          = 0;
 
     return 1;
 }

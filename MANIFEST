@@ -85,11 +85,13 @@ lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/test.pm
 lib/Thruk/Controller/trends.pm
+lib/Thruk/Controller/user.pm
 lib/Thruk/Pool/Simple.pm
 lib/Thruk/Request.pm
 lib/Thruk/Request/Cookie.pm
 lib/Thruk/Stats.pm
 lib/Thruk/Template/Context.pm
+lib/Thruk/Template/Exception.pm
 lib/Thruk/Timer.pm
 lib/Thruk/UserAgent.pm
 lib/Thruk/Utils.pm
@@ -145,8 +147,8 @@ plugins/plugins-available/business_process/lib/Thruk/BP/Utils.pm
 plugins/plugins-available/business_process/lib/Thruk/Controller/bp.pm
 plugins/plugins-available/business_process/lib/Thruk/Utils/CLI/Bp.pm
 plugins/plugins-available/business_process/preview.png
-plugins/plugins-available/business_process/root/bp-2.18-1.css
-plugins/plugins-available/business_process/root/bp-2.18-1.js
+plugins/plugins-available/business_process/root/bp-2.20-2.css
+plugins/plugins-available/business_process/root/bp-2.20-2.js
 plugins/plugins-available/business_process/root/bp-ie-fixes.js
 plugins/plugins-available/business_process/root/dagre-0.4.6/dagre.min.js
 plugins/plugins-available/business_process/root/images/lock.png
@@ -273,6 +275,10 @@ plugins/plugins-available/conf/t/data/local/core.d.utf8/utf8.cfg
 plugins/plugins-available/conf/t/data/local/core.d/test.cfg
 plugins/plugins-available/conf/t/data/local/thruk_local.conf
 plugins/plugins-available/conf/t/data/local/var/secret.key
+plugins/plugins-available/conf/t/data/merges/1/a.cfg
+plugins/plugins-available/conf/t/data/merges/1/b.cfg
+plugins/plugins-available/conf/t/data/merges/1/c.cfg
+plugins/plugins-available/conf/t/data/merges/1/d.cfg
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
 plugins/plugins-available/conf/templates/_conf_backends_backend.tt
@@ -283,6 +289,7 @@ plugins/plugins-available/conf/templates/_conf_object_row.tt
 plugins/plugins-available/conf/templates/_conf_object_view.tt
 plugins/plugins-available/conf/templates/_conf_objects_frame.tt
 plugins/plugins-available/conf/templates/_conf_objects_menu.tt
+plugins/plugins-available/conf/templates/_conf_ondemand_file_edit.tt
 plugins/plugins-available/conf/templates/_conf_references_menu.tt
 plugins/plugins-available/conf/templates/_conf_tools_menu.tt
 plugins/plugins-available/conf/templates/_conf_wizard_command.tt
@@ -357,8 +364,8 @@ plugins/plugins-available/mobile/root/jqm/images/ajax-loader.gif
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.4.5.min.css
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.4.5.min.js
 plugins/plugins-available/mobile/root/jquery.mobile.router.min.js
-plugins/plugins-available/mobile/root/mobile-2.18-1.css
-plugins/plugins-available/mobile/root/mobile-2.18-1.js
+plugins/plugins-available/mobile/root/mobile-2.20-2.css
+plugins/plugins-available/mobile/root/mobile-2.20-2.js
 plugins/plugins-available/mobile/routes
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
@@ -387,7 +394,7 @@ plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama/Scripted.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/PanoramaCpuStats.pm
 plugins/plugins-available/panorama/preview.png
 plugins/plugins-available/panorama/README
-plugins/plugins-available/panorama/root/all_in_one-2.18-1_panorama.js
+plugins/plugins-available/panorama/root/all_in_one-2.20-2_panorama.js
 plugins/plugins-available/panorama/root/bigscreen.js
 plugins/plugins-available/panorama/root/cleanextjs.sh
 plugins/plugins-available/panorama/root/extjs-4.2.2/ext-all-debug.js
@@ -1273,7 +1280,7 @@ plugins/plugins-available/panorama/root/openlayer/theme/default/img/zoom-panel.p
 plugins/plugins-available/panorama/root/openlayer/theme/default/style.css
 plugins/plugins-available/panorama/root/openlayer/theme/default/style.mobile.css
 plugins/plugins-available/panorama/root/OpenLayers-2.13.1.js
-plugins/plugins-available/panorama/root/panorama-2.18-1.css
+plugins/plugins-available/panorama/root/panorama-2.20-2.css
 plugins/plugins-available/panorama/root/sprintf.js
 plugins/plugins-available/panorama/root/ux/chart/series/KPIGauge.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
@@ -1399,7 +1406,7 @@ root/robots.txt
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/all_in_one-2.18-1.js
+root/thruk/javascript/all_in_one-2.20-2.js
 root/thruk/javascript/cal/img/cool-bg-hard-inv.png
 root/thruk/javascript/cal/img/cool-bg-hard.png
 root/thruk/javascript/cal/img/cool-bg-inv.png
@@ -1448,7 +1455,7 @@ root/thruk/javascript/jstree-3.0.9/themes/default/style.min.css
 root/thruk/javascript/jstree-3.0.9/themes/default/throbber.gif
 root/thruk/javascript/overlib.js
 root/thruk/javascript/strftime-min.js
-root/thruk/javascript/thruk-2.18-1.js
+root/thruk/javascript/thruk-2.20-2.js
 root/thruk/media/critical.wav
 root/thruk/media/ok.wav
 root/thruk/media/unknown.wav
@@ -1754,6 +1761,7 @@ t/300-controller_summary.t
 t/300-controller_tac.t
 t/300-controller_test.t
 t/300-controller_trends.t
+t/300-controller_user.t
 t/400-recurring_downtime.t
 t/600-scenarios.t
 t/700-naemon.t
@@ -2082,6 +2090,7 @@ templates/_host_command_box.tt
 templates/_host_command_box_full.tt
 templates/_host_status_details_box.tt
 templates/_infobox.tt
+templates/_internal_stats.tt
 templates/_json_export.tt
 templates/_log_date_select.tt
 templates/_logs.tt
@@ -2300,6 +2309,7 @@ templates/trends_step_2.tt
 templates/trends_step_3.tt
 templates/user_ext_host_info.tt
 templates/user_ext_service_info.tt
+templates/user_profile.tt
 templates/waiting_for_job.tt
 THANKS
 themes/themes-available/Classic/images/accept.png
@@ -3025,8 +3035,8 @@ themes/themes-available/Thruk/images/waiting.gif
 themes/themes-available/Thruk/images/wand.png
 themes/themes-available/Thruk/images/warning.png
 themes/themes-available/Thruk/images/yellow.gif
-themes/themes-available/Thruk/stylesheets/all_in_one-2.18-1.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.18-1.css
+themes/themes-available/Thruk/stylesheets/all_in_one-2.20-2.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.20-2.css
 themes/themes-available/Thruk/stylesheets/Thruk.css
 themes/themes-available/Thruk/stylesheets/thruk_global.css
 themes/themes-available/Thruk/stylesheets/thruk_noframes.css
@@ -3194,8 +3204,8 @@ themes/themes-available/Thruk2/images/waiting.gif
 themes/themes-available/Thruk2/images/wand.png
 themes/themes-available/Thruk2/images/warning.png
 themes/themes-available/Thruk2/images/yellow.gif
-themes/themes-available/Thruk2/stylesheets/all_in_one-2.18-1.css
-themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-2.18-1.css
+themes/themes-available/Thruk2/stylesheets/all_in_one-2.20-2.css
+themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-2.20-2.css
 themes/themes-available/Thruk2/stylesheets/Thruk2.css
 themes/themes-available/Thruk2/stylesheets/thruk_global.css
 themes/themes-available/Thruk2/stylesheets/thruk_noframes.css

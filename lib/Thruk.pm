@@ -15,7 +15,7 @@ use warnings;
 
 use 5.008000;
 
-our $VERSION = '2.18';
+our $VERSION = '2.20';
 
 ###################################################
 # create connection pool
@@ -37,14 +37,17 @@ BEGIN {
 
 ###################################################
 # clean up env
+my $tt_profiling = 0;
 BEGIN {
     ## no critic
     if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 3) {
         $ENV{'THRUK_PERFORMANCE_DEBUG'} = 3;
     }
-    eval "use Time::HiRes qw/gettimeofday tv_interval/;" if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 0);
-    eval "use Thruk::Template::Context;"                 if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 3);
+    use Time::HiRes qw/gettimeofday tv_interval/;
+    eval "use Thruk::Template::Context;" if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+    eval "use Thruk::Template::Exception;" if $ENV{'TEST_AUTHOR'};
     ## use critic
+    $tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
 use constant {
     # backend states
@@ -179,6 +182,7 @@ sub _build_app {
         '/thruk/cgi-bin/history.cgi'       => 'Thruk::Controller::history::index',
         '/thruk/cgi-bin/login.cgi'         => 'Thruk::Controller::login::index',
         '/thruk/cgi-bin/broadcast.cgi'     => 'Thruk::Controller::broadcast::index',
+        '/thruk/cgi-bin/user.cgi'          => 'Thruk::Controller::user::index',
         '/thruk/cgi-bin/notifications.cgi' => 'Thruk::Controller::notifications::index',
         '/thruk/cgi-bin/outages.cgi'       => 'Thruk::Controller::outages::index',
         '/thruk/cgi-bin/remote.cgi'        => 'Thruk::Controller::remote::index',
@@ -258,13 +262,20 @@ sub _dispatcher {
     my($env) = @_;
 
     $Thruk::COUNT++;
-    #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO});
+    #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
     # connection keep alive breaks IE in development server
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         delete $env->{'HTTP_CONNECTION'};
     }
     my $c = Thruk::Context->new($thruk, $env);
+    my $enable_profiles = 0;
+    if($c->req->cookies->{'thruk_profiling'}) {
+        $enable_profiles = 1;
+        $c->stash->{'user_profiling'} = 1;
+    }
+    local $ENV{'THRUK_PERFORMANCE_DEBUG'} = 1 if $enable_profiles;
     $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
+    $c->stats->profile(comment => sprintf('local time: %s - pid: %s - req: %s', (scalar localtime), $$, $Thruk::COUNT));
 
     if(Thruk->verbose) {
         $c->log->debug($c->req->url);
@@ -326,14 +337,11 @@ sub _dispatcher {
         Thruk::Views::ToolkitRenderer::render_tt($c);
     }
 
-    #&timing_breakpoint("_dispatcher finalize");
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
-    #&timing_breakpoint("_dispatcher finalize done");
 
     _after_dispatch($c, $res);
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
-    #&timing_breakpoint("_dispatcher done");
     return($res);
 }
 
@@ -474,7 +482,7 @@ sub _check_exit_reason {
         return;
     }
     # if we are in run_app, this means we are currently processing a request
-    if((defined $Thruk::Request::c && $now - $Thruk::Request::c->stash->{'time_begin'} > 10)
+    if((defined $Thruk::Request::c && $now - $Thruk::Request::c->stash->{'time_begin'}->[0] > 10)
        || $reason =~ m|Plack::Util::run_app|gmx) {
         local $| = 1;
         my $c = $Thruk::Request::c;
@@ -747,11 +755,9 @@ sub _cleanup_plugin_cron_files {
 }
 
 ###################################################
-sub _after_dispatch {
-    my($c, $res) = @_;
-    $c->stats->profile(begin => "_after_dispatch");
+sub _set_content_length {
+    my($res) = @_;
 
-    # set content length
     my $content_length;
     my $h = Plack::Util::headers($res->[1]);
     if (!Plack::Util::status_with_no_entity_body($res->[0]) &&
@@ -761,6 +767,15 @@ sub _after_dispatch {
     {
         $h->push('Content-Length' => $content_length);
     }
+    $h->push('Cache-Control', 'no-store, must-revalidate');
+    $h->push('Expires', '0');
+    return($content_length);
+}
+
+###################################################
+sub _after_dispatch {
+    my($c, $res) = @_;
+    $c->stats->profile(begin => "_after_dispatch");
 
     # check if our shadows are still up and running
     if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
@@ -788,37 +803,55 @@ sub _after_dispatch {
             });
         }
     }
-    $c->stats->profile(end => "_after_dispatch");
-    $c->stats->profile(comment => 'total time waited on backends: '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if defined $c->stash->{'total_backend_waited'};
 
-    # restore user specific settings
-    Thruk::Config::finalize($c);
+    my $elapsed = tv_interval($c->stash->{'time_begin'});
+    $c->stats->profile(end => "_after_dispatch");
+    $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
+    $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
+    $c->stash->{'time_total'} = $elapsed;
+
+    my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'}) {
+        # inject stats into html page
+        push @{$c->stash->{'profile'}}, $c->stats->report();
+        push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
+        my $stats = "";
+        Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
+        $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx;
+        Thruk::Template::Context::reset_profiles() if $tt_profiling;
+    }
+
+    my $content_length = _set_content_length($res);
 
     # last possible time to report/save profile
     Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
 
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
-        my $elapsed = tv_interval($c->stash->{'time_begin'});
         $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
-        my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
         $url     = $c->req->url unless $url;
         $url     =~ s|^https?://[^/]+/|/|mxo;
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
-        $c->log->info(sprintf("%5d Req: %03d   mem:%7s MB %6s MB   dur:%6ss %9s   size:% 12s   stat: %d   url: %s",
+        my $waited = [];
+        push @{$waited}, $c->stash->{'total_backend_waited'} ? sprintf("%.3fs", $c->stash->{'total_backend_waited'}) : '-';
+        push @{$waited}, $c->stash->{'total_render_waited'} ? sprintf("%.3fs", $c->stash->{'total_render_waited'}) : '-';
+        $c->log->info(sprintf("%5d Req: %03d   mem:%7s MB %6s MB   dur:%6ss %16s   size:% 12s   stat: %d   url: %s",
                                 $$,
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
                                 sprintf("%.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
                                 sprintf("%.3f", $elapsed),
-                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.3fs)', $c->stash->{'total_backend_waited'}) : '----',
+                                '('.join('/', @{$waited}).')',
                                 defined $content_length ? sprintf("%.3f kb", $content_length/1024) : '----',
                                 $res->[0],
                                 $url,
                     ));
     }
     $c->log->debug($c->stats->report()) if Thruk->debug;
+
+    # restore user specific settings
+    Thruk::Config::finalize($c);
 
     # does this process need a restart?
     if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {

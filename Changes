@@ -1,6 +1,25 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - cleanup preferences popup
+          - add user profile page
+          - move broadcast into side navigation
+          - move important filters up (#792)
+          - fix wrong number of backends (#809)
+          - Panorama:
+            - optionally show broadcasts in panorama dashboards
+            - fix tab rotation
+          - Config Tool:
+            - make command line a textarea
+            - use separate edit sessions for each user
+            - fix adding custom variables from extra_custom_var
+
+2.20-2   Wed Mar 14 00:12:24 CET 2018
+          - add optional debug switch for admin users
+          - Config Tool:
+            - fix error when saving from raw edit
+
+2.20     Wed Mar  7 10:59:57 CET 2018
           - add support for ipv6 livestatus backends (#753)
           - add timeout for cookie authentication http sub request
           - add filter to notifications and history page
@@ -22,6 +41,7 @@ next:
           - Logcache:
             - speed up updates
           - Panorama:
+            - save open tabs in cookies instead of the user profile
             - add quick filter for dashboard dropdown
           - Config Tool:
             - fix adding custom variables

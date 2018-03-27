@@ -379,9 +379,7 @@ sub get_changed_files {
     for my $file (@{$self->{'files'}}) {
         push @files, $file if $file->{'changed'} == 1;
     }
-    if(scalar @files == 0) {
-        $self->{'needs_commit'} = 0;
-    }
+    $self->{'needs_commit'} = (scalar @files == 0) ? 0 : 1;
     return \@files;
 }
 
@@ -876,6 +874,9 @@ sub check_files_changed {
         # maybe core type has changed
         $self->_set_coretype();
     }
+
+    # since we reuse existing files, we need to remove changed files here
+    $self->_set_files(1) if $reload;
 
     $self->_check_files_changed($reload);
     my $errors2 = scalar @{$self->{'errors'}};
@@ -1677,22 +1678,29 @@ sub _get_files_for_folder {
 
 ##########################################################
 sub _set_files {
-    my ( $self ) = @_;
-    $self->{'files'} = $self->_get_files();
+    my($self, $discard_changes) = @_;
+    $self->{'files'} = $self->_get_files($discard_changes);
     return;
 }
 
 
 ##########################################################
 sub _get_files {
-    my ( $self ) = @_;
+    my ($self, $discard_changes) = @_;
 
     my @files;
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
-        my $force = 0;
-        $force    = 1 if $self->{'config'}->{'force'} or $self->{'config'}->{'relative'};
-        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $force, $self->{'file_trans'}->{$filename});
+        my $file = $self->get_file_by_path($filename);
+        if($discard_changes && $file->{'changed'}) {
+            undef $file;
+        }
+        # reuse existing file, otherwise merge would not work
+        if(!$file) {
+            my $force = 0;
+            $force    = 1 if $self->{'config'}->{'force'} or $self->{'config'}->{'relative'};
+            $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $force, $self->{'file_trans'}->{$filename});
+        }
         if(defined $file) {
             push @files, $file;
         } else {
@@ -1798,7 +1806,13 @@ sub _check_files_changed {
                 $file->_update_meta_data();
                 $self->{'needs_index_update'} = 1;
             } else {
-                push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
+                if($file->try_merge()) {
+                    $self->{'needs_commit'}       = 1;
+                    $self->{'obj_model_changed'}  = 1;
+                    $self->{'needs_index_update'} = 1;
+                } else {
+                    push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
+                }
             }
         }
 

@@ -224,6 +224,10 @@ then comment the line with:
 
 After that, restart the apache.
 
+
+=== How can I setup multiple sites with OMD
+There is a link:omd-multisite.html[guide] here.
+
 == Installation
 
 === Is it possible to operate Thruk in a cluster?

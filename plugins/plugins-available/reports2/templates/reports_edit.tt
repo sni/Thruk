@@ -158,3 +158,5 @@
   jQuery("FORM A").on('click', preserve_hash);
 -->
 </script>
+
+[% PROCESS _footer.tt %]

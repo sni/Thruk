@@ -301,10 +301,10 @@ TP.Msg = function() {
         return '<div class="msg x-tab-default '+cls+'"><a class="x-tab-close-btn" title="" href="#"><\/a><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
     }
     return {
-        msg : function(s, close_timeout) {
+        msg : function(s, close_timeout, container, title, onCloseCB) {
             if(TP.unloading) { return; }
             if(!msgCt){
-                msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div'}, true);
+                msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div', 'class': "popup-msg"}, true);
             }
             // show demo mode errors as warnings and only once
             if(s.match(/disabled in demo mode/)) {
@@ -316,17 +316,20 @@ TP.Msg = function() {
                 }
             }
             var p = s.split('~~', 2);
-            var title = 'Success';
-            if(p[0] == 'fail_message') {
-                title = 'Error';
-            }
-            if(p[0] == 'info_message') {
-                title = 'Information';
+            if(title == undefined) {
+                title = 'Success';
+                if(p[0] == 'fail_message') {
+                    title = 'Error';
+                }
+                if(p[0] == 'info_message') {
+                    title = 'Information';
+                }
             }
             TP.log('msg: '+title+' - '+p[1]);
-            var m = Ext.DomHelper.append(msgCt, createBox(p[0], title, p[1]), true);
+            var m = Ext.DomHelper.append((container || msgCt), createBox(p[0], title, p[1]), true);
             var btn = new Ext.Element(m.dom.firstChild);
             btn.on("click", function() {
+                if(onCloseCB) { onCloseCB(); }
                 m.ghost("t", { remove: true});
             });
             m.show();
@@ -340,11 +343,12 @@ TP.Msg = function() {
             }
             if(close_timeout != undefined) {
                 if(close_timeout == 0) {
-                    return;
+                    return(m);
                 }
                 delay = close_timeout * 1000;
             }
             TP.timeouts['timeout_global_msg_ghost'] = window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
+            return(m);
         }
     };
 }();
@@ -464,7 +468,7 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                     me.picker.destroy();
                     me.picker = undefined;
                 },
-                show: function(field,opts){
+                afterrender: function(field,opts){
                     field.getEl().monitorMouseLeave(2500, field.hide, field);
                     Ext.Array.each(field.el.dom.getElementsByTagName('A'), function(item, index) {
                         item.onmouseover=function() { if(me.mouseover) { me.mouseover(item.getElementsByTagName('SPAN')[0].style.backgroundColor); }},

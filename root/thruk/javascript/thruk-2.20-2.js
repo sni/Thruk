@@ -1133,6 +1133,7 @@ function count_site_section_totals(section, prefix) {
     if(section["peers"]) {
         jQuery(section["peers"]).each(function(i, pd) {
             var btn = document.getElementById("button_"+pd);
+            if(!btn) { return; }
             section.total++;
             if(jQuery(btn).hasClass('button_peerDIS') || jQuery(btn).hasClass('button_peerHID')) {
                 section.disabled++;
@@ -1142,8 +1143,6 @@ function count_site_section_totals(section, prefix) {
             }
             else if(jQuery(btn).hasClass('button_peerDOWN')) {
                 section.down++;
-            } else {
-                if(thruk_debug_js) { alert("ERROR: no known class found for btn: " + pd ); }
             }
         });
     }
@@ -1400,6 +1399,8 @@ function select_all_options(select_id) {
 function get_trimmed_pattern(pattern) {
     var trimmed_pattern = new Array();
     jQuery.each(pattern.split(" "), function(index, sub_pattern) {
+        sub_pattern = sub_pattern.replace(/\s+$/g, "");
+        sub_pattern = sub_pattern.replace(/^\s+/g, "");
         if(sub_pattern != '') {
             trimmed_pattern.push(sub_pattern);
         }
@@ -1729,7 +1730,9 @@ function do_table_search() {
 
 function do_table_search_table(id, table, value) {
     /* make tables fixed width to avoid flickering */
-    table.width = table.offsetWidth;
+    if(table.offsetWidth) {
+        table.width = table.offsetWidth;
+    }
     var startWith = 1;
     if(jQuery(table).hasClass('header2')) {
         startWith = 2;
@@ -1827,7 +1830,6 @@ function showBugReport(id, text) {
         Ext.getCmp(id).el.dom.ondblclick    = function() { return showErrorTextPopup(raw) };
         Ext.getCmp(id).el.dom.oncontextmenu = function() { return showErrorTextPopup(raw) };
         Ext.getCmp(id).el.dom.style.zIndex = 1000;
-        //Ext.getCmp(id).el.dom.style.left   = "10px";
     }
     catch(err) {
         /* for all other pages */
@@ -1838,12 +1840,6 @@ function showBugReport(id, text) {
             obj.oncontextmenu    = function() { return showErrorTextPopup(raw) };
         }
     }
-    try {
-        Ext.getCmp('debug_mode').show();
-        Ext.getCmp('debug_mode').el.dom.style.zIndex = 1000;
-        //Ext.getCmp('debug_mode').el.dom.style.left   = "90px";
-    }
-    catch(err) {}
 }
 
 /* show popup with the current error text */
@@ -1923,7 +1919,7 @@ function getErrorText(details, error) {
         }
         if(window.XMLHttpRequest && file && !file.match("eval")) {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", file, false);
+            xhr.open("GET", file);
             xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
             xhr.send(null);
             var source = xhr.responseText.split(/\n/);
@@ -2189,8 +2185,8 @@ function save_url_in_parents_hash() {
 function set_hash(value, nr) {
     if(value == undefined)   { value = ""; }
     if(value == "undefined") { value = ""; }
+    var current = get_hash();
     if(nr != undefined) {
-        var current   = get_hash();
         if(current == undefined) {
             current = "";
         }
@@ -2202,7 +2198,12 @@ function set_hash(value, nr) {
     value = value.replace(/\|$/, '');
 
     // replace history otherwise we have to press back twice
-    if(value != "") { value = '#'+value; }
+    if(current == value) { return; }
+    if(value == "") {
+        value = getCurrentUrl(false).replace(/\#.*$/, "");
+    } else {
+        value = '#'+value;
+    }
     if (history.replaceState) {
         history.replaceState({}, "", value);
     } else {
@@ -2809,6 +2810,28 @@ function looks_like_regex(str) {
         return(true);
     }
     return(false);
+}
+
+function show_list(incr, selector) {
+    var elements = jQuery(selector);
+    var curIdx = 0;
+    jQuery(elements).each(function(i, n) {
+        if(jQuery(n).is(":visible")) {
+            jQuery(n).hide();
+            curIdx = i;
+            return(false);
+        }
+    });
+    var newIdx = curIdx+incr;
+    jQuery(elements[newIdx]).show();
+    jQuery("DIV.controls BUTTON.next").css('visibility', '');
+    jQuery("DIV.controls BUTTON.previous").css('visibility', '');
+    if(newIdx == elements.length -1) {
+        jQuery("DIV.controls BUTTON.next").css('visibility', 'hidden');
+    }
+    if(newIdx == 0) {
+        jQuery("DIV.controls BUTTON.previous").css('visibility', 'hidden');
+    }
 }
 
 /*******************************************************************************
@@ -4648,6 +4671,43 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
   target.innerHTML = filtername;
 }
 
+function getFilterTypeOptions() {
+    var important = new Array(/* when changed, update _status_filter.tt too! */
+        'Search',
+        'Host',
+        'Service',
+        'Hostgroup',
+        'Servicegroup',
+        '----------------'
+    );
+    var others = new Array(
+        'Check Period',
+        'Comment',
+        'Contact',
+        'Current Attempt',
+        'Custom Variable',
+        'Downtime Duration',
+        'Duration',
+        'Event Handler',
+        'Execution Time',
+        'Last Check',
+        'Latency',
+        'Next Check',
+        'Notification Period',
+        'Number of Services',
+        'Parent',
+        'Plugin Output',
+        '% State Change'
+       );
+    if(enable_shinken_features) {
+        others.unshift('Business Impact');
+    }
+    var options = Array();
+    options = options.concat(important);
+    options = options.concat(others.sort());
+    return(options);
+}
+
 /* add a new filter selector to this table */
 function add_new_filter(search_prefix, table) {
   pane_prefix   = search_prefix.substring(0,4);
@@ -4675,32 +4735,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect = document.createElement('select');
-  var options    = new Array('Check Period', /* when changed, update _panorama_js_form_filter.tt too! */
-                             'Comment',
-                             'Contact',
-                             'Current Attempt',
-                             'Custom Variable',
-                             'Downtime Duration',
-                             'Duration',
-                             'Event Handler',
-                             'Execution Time',
-                             'Host',
-                             'Hostgroup',
-                             'Last Check',
-                             'Latency',
-                             'Next Check',
-                             'Notification Period',
-                             'Number of Services',
-                             'Parent',
-                             'Plugin Output',
-                             'Service',
-                             'Servicegroup',
-                             '% State Change'
-                            );
-  if(enable_shinken_features) {
-    options.unshift('Business Impact');
-  }
-  options.unshift('Search');
+  var options    = getFilterTypeOptions();
 
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
@@ -4816,6 +4851,9 @@ function add_options(select, options, numbered) {
     jQuery.each(options, function(index, text) {
         var opt  = document.createElement('option');
         opt.text = text;
+        if(text.match(/^\-+$/)) {
+            opt.disabled = true;
+        }
         if(numbered) {
             opt.value = x;
         } else {

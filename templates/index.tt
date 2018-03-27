@@ -5,7 +5,7 @@
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>[% title_prefix %][% escape_html(title) %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <link rel="icon" type="image/png" href="[% url_prefix %]themes/[% theme %]/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="[% url_prefix %]themes/[% theme %]/images/favicon-32x32.png" />
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
     <script type="text/javascript">
     <!--

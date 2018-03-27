@@ -13,16 +13,25 @@
 [% IF c.req.parameters.exists('backlink') %]
 <input type="hidden" name="backlink" value="[% c.req.parameters.backlink %]">
 [% END %]
+[% file_locked = ""; PROCESS _conf_ondemand_file_edit.tt file=file form="saveform" %]
+[% readonly = 0;
+   IF file.readonly; readonly = 1; END;
+   IF file_locked; readonly = 1; END;
+%]
 <div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
-<table border="0" class='data conftoolobj'>
+<table border="0" class='data conftoolobj' style="width: 100%;">
   <tr>
     <th class='data' width="5%" align="left"><a href='[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
-    <th class='data' width="90%"><span  style="font-size: larger;">[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>[% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]</th>
-    <th class='data' width="5%" align="right">[% UNLESS file.readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
+    <th class='data' width="90%">
+        <span  style="font-size: larger;">[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>
+        [% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]
+        [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span style="color: #EB6900"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
+    </th>
+    <th class='data' width="5%" align="right">[% UNLESS readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
   </tr>
   <tr>
     <td class="dataVar" colspan=3>
-        <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF file.readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
+        <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
         <script type="text/javascript">
         var editor;
         var original_value;
@@ -32,7 +41,7 @@
             // save original value decoded
             original_value = editor.value;
 
-            var w = editor.offsetWidth - 10, h = jQuery(window).height() - 200;
+            var w = editor.offsetWidth - 10, h = jQuery(window).height() - jQuery('#texteditor').offset().top - 30;
             editor.style.width  = w + 'px';
             editor.style.height = h + 'px';
 
@@ -42,11 +51,13 @@
             jQuery("#texteditor").linedtextarea(
                {selectedLine: [% line %]}
             );
+            set_current_line([% line %]);
         };
 
         /* intercept when there are unsaved changes */
         function confirm_discard_changes() {
-            if(has_changed()) {
+            form = document.getElementById('saveform');
+            if(has_changed() && !form.needs_reload) {
                 return confirm("File has been changed. Really discard changes?");
             }
             return true;
@@ -54,6 +65,13 @@
 
         function get_current_line() {
             return(editor.value.substr(0, getCaret(editor)).split("\n").length);
+        }
+
+        function set_current_line(line) {
+            var pos = editor.value.split("\n").slice(0, line-1).join("\n").length + 1;
+            editor.focus();
+            editor.selectionStart = pos;
+            editor.selectionEnd   = pos;
         }
 
         function has_changed() {

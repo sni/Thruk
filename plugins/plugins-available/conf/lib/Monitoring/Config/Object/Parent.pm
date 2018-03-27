@@ -866,7 +866,7 @@ sub _break_long_command {
     my @text;
     my @chunks = split(/(\s+[\-]{1,2}\w+|\s+[\|]{1}\s+|\s+>>\s*)/mx ,$value);
     my $first = shift @chunks;
-    Monitoring::Config::File::StripTSpace($first);
+    $first =~ s/\s+$//gmx;
     push @text, sprintf("  %-30s %s", $key, $first);
     my $size = scalar @chunks;
     my $arg  = 1;
@@ -875,7 +875,7 @@ sub _break_long_command {
     while($x < $size) {
         my $chunk = $chunks[$x];
         if($arg) {
-            Monitoring::Config::File::StripLSpace($chunk);
+            $chunk =~ s/^\s+//gmx;
             if(index($chunk, '-') == 0) { $chunk = '  '.$chunk; }
             if(index($chunk, '>') == 0) { $chunk = '  '.$chunk; }
             $line .= sprintf "%-33s %s", '', $chunk;

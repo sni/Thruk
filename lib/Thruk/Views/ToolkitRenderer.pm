@@ -14,10 +14,8 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Template ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 
-BEGIN {
-    #use Thruk::Timer qw/timing_breakpoint/;
-}
 =head1 METHODS
 
 =head2 register
@@ -38,6 +36,7 @@ sub register {
 =cut
 sub render_tt {
     my($c) = @_;
+    my $t1 = [gettimeofday];
     my $template = $c->stash->{'template'};
     $c->stats->profile(begin => "render_tt: ".$template);
     my $output;
@@ -46,6 +45,8 @@ sub render_tt {
     $c->res->content_type('text/html; charset=utf-8') unless $c->res->content_type();
     $c->res->body($output);
     $c->stats->profile(end => "render_tt: ".$template);
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_render_waited'} += $elapsed;
     return;
 }
 
@@ -67,7 +68,6 @@ sub render {
             ];
     }
 
-    #&timing_breakpoint('render_tt render()');
     $tt->process(
         $template,
         ($stash || $c->stash),
@@ -75,7 +75,6 @@ sub render {
     ) || do {
         die($tt->error.' on '.$template);
     };
-    #&timing_breakpoint('render_tt processed');
     $c->stats->profile(end => "render: ".$template);
     if($output) {
         ${$output} =~ s/^\s+//sgmxo unless $c->stash->{no_tt_trim};

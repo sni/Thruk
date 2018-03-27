@@ -505,6 +505,7 @@ sub get_contactgroups_by_contact {
 
     $cached_data->{'contactgroups'} = $contactgroups;
     $c->cache->set('users', $username, $cached_data);
+    $c->stash->{'contactgroups'} = $data if($c->stash->{'remote_user'} && $username eq $c->stash->{'remote_user'});
     return $contactgroups;
 }
 
@@ -1286,7 +1287,7 @@ sub _do_on_peers {
         eval {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
         };
-        if($@) {
+        if($@ && !$c->stash->{'lmd_ok'}) {
             Thruk::Utils::LMD::check_proc($c->config, $c, 1);
             sleep(1);
             # then retry again
@@ -1365,7 +1366,11 @@ sub _do_on_peers {
         # and update last_program_starts
         # (set in Thruk::Utils::CLI::_cmd_raw)
         for my $key (keys %{$result}) {
-            my $res = $result->{$key}->{$key};
+            my $res;
+            $res = $result->{$key}->{$key};
+            if($result->{$key}->{'configtool'}) {
+                $res = $result->{$key};
+            }
             if($res && $res->{'configtool'}) {
                 my $peer = $self->get_peer_by_key($key);
                 # do not overwrite local configuration with remote configtool settings
@@ -1462,8 +1467,6 @@ sub _do_on_peers {
     }
 
     $data = $self->_set_result_defaults($function, $data);
-
-    #&timing_breakpoint('_get_result complete: '.$function);
 
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
@@ -1657,7 +1660,6 @@ sub _get_result_lmd {
     }
 
     $c->stats->profile( end => "_get_result_lmd($function)");
-    #&timing_breakpoint('_get_result_lmd end: '.$function);
     return($result, $type, $totalsize);
 }
 
@@ -1705,7 +1707,6 @@ sub _get_result_serial {
     $c->stash->{'total_backend_waited'} += $elapsed;
 
     $c->stats->profile( end => "_get_result_serial($function)");
-    #&timing_breakpoint('_get_result_serial end: '.$function);
     return($result, $type, $totalsize);
 }
 
@@ -1773,8 +1774,7 @@ sub _get_results_xs_pool {
     my($self, $peers, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
 
-    #&timing_breakpoint('_get_results_xs_pool begin: '.$function);
-    $c->stats->profile( begin => "_get_results_xs_pool()");
+    $c->stats->profile( begin => '_get_results_xs_pool('.$function.')');
 
     my $result;
     my $remaining_peers = [];
@@ -1927,8 +1927,7 @@ sub _get_results_xs_pool {
         }
     }
 
-    $c->stats->profile( end => "_get_results_xs_pool()");
-    #&timing_breakpoint('_get_results_xs_pool end: '.$function);
+    $c->stats->profile( end => '_get_results_xs_pool('.$function.')');
 
     return($remaining_peers, $result, $type, $totalsize);
 }

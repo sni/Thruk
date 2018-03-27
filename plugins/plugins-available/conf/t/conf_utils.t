@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 703;
+    plan tests => 712;
 }
 
 BEGIN {
@@ -379,6 +379,10 @@ $testhost = {
 ($computed_keys, $computed) = $obj->get_computed_config($objects);
 is_deeply($computed, $testhost, 'parsed nested templates II');
 
+# check line numbers
+is($parsedfile->{'objects'}->[7]->{'line'}, 31, "start line number of last object");
+is($parsedfile->{'objects'}->[7]->{'line2'}, 35, "end line number of last object");
+
 ###########################################################
 # remove empty list elements
 my $file = Monitoring::Config::File->new("test.cfg", undef, 'nagios');
@@ -389,3 +393,26 @@ define host {
 }
 ');
 is_deeply($file->{'objects'}->[0]->{'conf'}->{'hostgroups'}, ['a', 'b', 'c'], 'parsed empty lists');
+
+###########################################################
+# merging changes
+for my $mergedir (qw/1/) {
+    my $file = Monitoring::Config::File->new("./t/xt/conf/data/merges/".$mergedir."/a.cfg", undef, 'nagios');
+    $file->update_objects();
+    $file->set_backup();
+    is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
+    is(scalar @{$file->{'objects'}}, 2, "number of objects");
+    $file->update_objects_from_text(Thruk::Utils::decode_any(scalar read_file("./t/xt/conf/data/merges/".$mergedir."/b.cfg")));
+    is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
+    is(scalar @{$file->{'objects'}}, 2, "number of objects");
+    $file->{'path'} = './t/xt/conf/data/merges/'.$mergedir.'/c.cfg';
+    my $rc1 = $file->try_merge();
+    is($rc1, 1, "merge successfull");
+    my($fh, $filename) = File::Temp::tempfile();
+    print $fh $file->get_new_file_content();
+    close($fh);
+    my($rc2, $out) = Thruk::Utils::IO::cmd(undef, 'diff -Nuh "./t/xt/conf/data/merges/'.$mergedir.'/d.cfg" "'.$filename.'" 2>&1');
+    is($rc2, 0, "diff successfull");
+    is($out, "", "diff successfull");
+    unlink($filename);
+}
