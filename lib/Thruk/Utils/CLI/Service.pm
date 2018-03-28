@@ -10,7 +10,7 @@ The service command lists services from livestatus queries.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] service <cmd>
+  Usage: thruk [globaloptions] service [<host>]
 
 =head1 OPTIONS
 
@@ -43,10 +43,23 @@ use strict;
 
 =cut
 sub cmd {
-    my($c) = @_;
+    my($c, undef, $options) = @_;
     my $output = '';
-    for my $svc (@{$c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], sort => {'ASC' => [ 'host_name', 'description' ] })}) {
-        $output .= $svc->{'host_name'}.";".$svc->{'description'}."\n";
+    my $hostfilter = [];
+    my $hostname = $options->[0] || '';
+    if(!$hostname || ($hostname ne 'list' && $hostname ne 'help')) {
+        $hostfilter = [{ host_name => $hostname }];
+    }
+    my $uniq = {};
+    for my $svc (@{$c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $hostfilter], sort => {'ASC' => [ 'host_name', 'description' ] })}) {
+        my $name;
+        if($hostname) {
+            $name = $svc->{'description'};
+        } else {
+            $name = $svc->{'host_name'}.";".$svc->{'description'};
+        }
+        $output .= $name."\n" unless $uniq->{$name};
+        $uniq->{$name} = 1;
     }
     return($output, 0);
 }
@@ -55,9 +68,9 @@ sub cmd {
 
 =head1 EXAMPLES
 
-Run all selfchecks
+List all services for host localhost
 
-  %> thruk service list
+  %> thruk service localhost
 
 =head1 AUTHOR
 
