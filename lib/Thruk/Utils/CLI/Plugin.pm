@@ -44,6 +44,10 @@ use File::Copy qw/move/;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 ##############################################
+# no backends required for this command
+our $skip_backends = 1;
+
+##############################################
 
 =head1 METHODS
 

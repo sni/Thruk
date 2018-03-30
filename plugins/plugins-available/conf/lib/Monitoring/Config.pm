@@ -111,6 +111,8 @@ sub new {
 
     bless $self, $class;
 
+    _set_output_format($Monitoring::Config::save_options);
+
     # read rc file
     $self->read_rc_file();
 
@@ -303,6 +305,30 @@ sub commit {
     return $rc;
 }
 
+##########################################################
+
+=head2 print_errors
+
+    print_errors([$fh])
+
+Print all errors to stdout or supplied filehandle
+
+=cut
+sub print_errors {
+    my($self, $fh) = @_;
+    $fh = *STDOUT unless $fh;
+
+    $self->_collect_errors();
+    for my $err (@{$self->{'parse_errors'}}) {
+        print $fh $err, "\n";
+    }
+    for my $err (@{$self->{'errors'}}) {
+        print $fh $err, "\n";
+    }
+
+    return;
+}
+
 
 ##########################################################
 
@@ -353,9 +379,7 @@ sub get_changed_files {
     for my $file (@{$self->{'files'}}) {
         push @files, $file if $file->{'changed'} == 1;
     }
-    if(scalar @files == 0) {
-        $self->{'needs_commit'} = 0;
-    }
+    $self->{'needs_commit'} = (scalar @files == 0) ? 0 : 1;
     return \@files;
 }
 
@@ -850,6 +874,9 @@ sub check_files_changed {
         # maybe core type has changed
         $self->_set_coretype();
     }
+
+    # since we reuse existing files, we need to remove changed files here
+    $self->_set_files(1) if $reload;
 
     $self->_check_files_changed($reload);
     my $errors2 = scalar @{$self->{'errors'}};
@@ -1651,22 +1678,29 @@ sub _get_files_for_folder {
 
 ##########################################################
 sub _set_files {
-    my ( $self ) = @_;
-    $self->{'files'} = $self->_get_files();
+    my($self, $discard_changes) = @_;
+    $self->{'files'} = $self->_get_files($discard_changes);
     return;
 }
 
 
 ##########################################################
 sub _get_files {
-    my ( $self ) = @_;
+    my ($self, $discard_changes) = @_;
 
     my @files;
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
-        my $force = 0;
-        $force    = 1 if $self->{'config'}->{'force'} or $self->{'config'}->{'relative'};
-        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $force, $self->{'file_trans'}->{$filename});
+        my $file = $self->get_file_by_path($filename);
+        if($discard_changes && $file->{'changed'}) {
+            undef $file;
+        }
+        # reuse existing file, otherwise merge would not work
+        if(!$file) {
+            my $force = 0;
+            $force    = 1 if $self->{'config'}->{'force'} or $self->{'config'}->{'relative'};
+            $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $force, $self->{'file_trans'}->{$filename});
+        }
         if(defined $file) {
             push @files, $file;
         } else {
@@ -1772,7 +1806,13 @@ sub _check_files_changed {
                 $file->_update_meta_data();
                 $self->{'needs_index_update'} = 1;
             } else {
-                push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
+                if($file->try_merge()) {
+                    $self->{'needs_commit'}       = 1;
+                    $self->{'obj_model_changed'}  = 1;
+                    $self->{'needs_index_update'} = 1;
+                } else {
+                    push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
+                }
             }
         }
 
@@ -1904,11 +1944,7 @@ sub _rebuild_index {
 
 ##########################################################
 sub _update_obj_in_index {
-    my $self    = shift;
-    my $objects = shift;
-    my $obj     = shift;
-    my $primary = shift;
-    my $tmpconf = shift;
+    my($self, $objects, $obj, $primary, $tmpconf) = @_;
 
     my $pname  = $obj->get_primary_name(1, $tmpconf);
     my $tname  = $obj->get_template_name();
@@ -2022,12 +2058,14 @@ sub _check_references {
     my($self, %options) = @_;
 
     $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
+    my $templates_by_name = $self->{'objects'}->{'byname'}->{'templates'};
+    my $objects_by_name   = $self->{'objects'}->{'byname'};
     my @parse_errors;
     $self->_all_object_links_callback(sub {
         my($file, $obj, $attr, $link, $val) = @_;
         return if $obj->{'disabled'};
         if($attr eq 'use') {
-            if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
+            if(!defined $templates_by_name->{$link}->{$val}) {
                 if($options{'hash'}) {
                     push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
                                           id        => $obj->get_id(),
@@ -2042,14 +2080,14 @@ sub _check_references {
                 }
             }
         }
-        elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
+        elsif(!defined $objects_by_name->{$link}->{$val}) {
             # 'null' is a special value used to cancel inheritance
             return if $val eq 'null';
 
             # hostgroups are allowed to have a register 0
-            return if ($link eq 'hostgroup' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+            return if ($link eq 'hostgroup' and defined $templates_by_name->{$link}->{$val});
             # host are allowed to have a register 0
-            return if ($link eq 'host' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+            return if ($link eq 'host' and defined $templates_by_name->{$link}->{$val});
 
 
 
@@ -2505,60 +2543,18 @@ sub set_save_config {
     my($self, $settings) = @_;
 
     my $cfg = $Monitoring::Config::save_options;
-    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    _set_output_format($cfg);
     return $cfg unless defined $settings;
 
     for my $key (keys %{$settings}) {
         $cfg->{$key} = $settings->{$key} if defined $cfg->{$key};
     }
 
-    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    _set_output_format($cfg);
 
     return $cfg;
-}
-
-##########################################################
-
-=head2 _sort_by_object_keys
-
-sort function for object keys
-
-=cut
-sub _sort_by_object_keys {
-    my($attr_keys, $cust_var_keys) = @_;
-
-    return sub {
-        ## no critic
-        $a = $Monitoring::Config::Object::Parent::a;
-        $b = $Monitoring::Config::Object::Parent::b;
-        ## use critic
-        my $order = $attr_keys;
-        my $num   = scalar @{$attr_keys} + 5;
-
-        for my $ord (@{$order}) {
-            if($a eq $ord) { return -$num; }
-            if($b eq $ord) { return  $num; }
-            $num--;
-        }
-
-        my $result = $a cmp $b;
-
-        if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
-            # prefer some custom variables
-            my $cust_order = $cust_var_keys;
-            my $cust_num   = scalar @{$cust_var_keys} + 3;
-            for my $ord (@{$cust_order}) {
-                if($a eq $ord) { return -$cust_num; }
-                if($b eq $ord) { return  $cust_num; }
-                $cust_num--;
-            }
-            return $result;
-        }
-        if(substr($a, 0, 1) eq '_') { return -$result; }
-        if(substr($b, 0, 1) eq '_') { return -$result; }
-
-        return $result;
-    };
 }
 
 ##########################################################
@@ -2665,7 +2661,7 @@ sub get_plugin_preview {
     return $output unless defined $args;
 
     my $cfg = $Monitoring::Config::save_options;
-    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
 
     my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
     $macros    = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'}, $macros);
@@ -2704,6 +2700,17 @@ sub get_plugin_preview {
     }
     return $output;
 }
+
+##########################################################
+sub _set_output_format {
+    my($cfg) = @_;
+    $Monitoring::Config::format_comments  = "%-".$cfg->{'indent_object_comments'}."s %s";
+    $Monitoring::Config::format_values    = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
+    $Monitoring::Config::format_values_nl = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s\n";
+    $Monitoring::Config::format_keys      = "%-".$cfg->{'indent_object_key'}."s%s\n";
+    return;
+}
+
 ##########################################################
 
 =head1 AUTHOR

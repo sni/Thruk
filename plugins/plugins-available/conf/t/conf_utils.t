@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 702;
+    plan tests => 712;
 }
 
 BEGIN {
@@ -128,12 +128,12 @@ $objects->init();
 isa_ok( $objects, 'Monitoring::Config' );
 is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files:\n".Dumper($objects));
 my $parsedfile = $objects->{'files'}->[0];
-is( $parsedfile->{'md5'}, 'bf6f91fcc7c569f4cc96bcdf8e926811', 'files md5 sum' );
+is( $parsedfile->{'md5'}, '789b8aee75f4e6f991e18af683384bdb', 'files md5 sum' );
 like( $parsedfile->{'parse_errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );
 my $obj = $parsedfile->{'objects'}->[0];
 my $host = {
-    '_CUST1'         => 'cust 1 val',
     '_CUST2'         => 'cust 2 val',
+    '_CUST1'         => 'cust 1 val',
     '_CUST3'         => 'cust 3 val multiline',
     'use'            => [ 'generic-host' ],
     'hostgroups'     => [ 'hostgroup1', 'hostgroup2' ],
@@ -144,6 +144,9 @@ my $host = {
     'alias'          => 'alias1         # one more',
     'contact_groups' => [ 'group1', 'group2' ],
     'parents'        => [ 'parent_host' ],
+    '_TYPE'          => 'linux',
+    '_TAGS'          => 'dmz',
+    '_APPS'          => 'app1=a, app2',
 };
 is_deeply($obj->{'conf'}, $host, 'parsed host');
 is( scalar @{ $obj->{'comments'} }, 3, 'number of comments' );
@@ -158,6 +161,9 @@ my $exp_keys = [
            'hostgroups',
            'icon_image',
            'icon_image_alt',
+           '_TYPE',
+           '_TAGS',
+           '_APPS',
            '_CUST1',
            '_CUST2',
            '_CUST3',
@@ -372,3 +378,41 @@ $testhost = {
 };
 ($computed_keys, $computed) = $obj->get_computed_config($objects);
 is_deeply($computed, $testhost, 'parsed nested templates II');
+
+# check line numbers
+is($parsedfile->{'objects'}->[7]->{'line'}, 31, "start line number of last object");
+is($parsedfile->{'objects'}->[7]->{'line2'}, 35, "end line number of last object");
+
+###########################################################
+# remove empty list elements
+my $file = Monitoring::Config::File->new("test.cfg", undef, 'nagios');
+$file->update_objects_from_text('
+define host {
+  host_name   test
+  host_groups a, ,,b, c
+}
+');
+is_deeply($file->{'objects'}->[0]->{'conf'}->{'hostgroups'}, ['a', 'b', 'c'], 'parsed empty lists');
+
+###########################################################
+# merging changes
+for my $mergedir (qw/1/) {
+    my $file = Monitoring::Config::File->new("./t/xt/conf/data/merges/".$mergedir."/a.cfg", undef, 'nagios');
+    $file->update_objects();
+    $file->set_backup();
+    is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
+    is(scalar @{$file->{'objects'}}, 2, "number of objects");
+    $file->update_objects_from_text(Thruk::Utils::decode_any(scalar read_file("./t/xt/conf/data/merges/".$mergedir."/b.cfg")));
+    is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
+    is(scalar @{$file->{'objects'}}, 2, "number of objects");
+    $file->{'path'} = './t/xt/conf/data/merges/'.$mergedir.'/c.cfg';
+    my $rc1 = $file->try_merge();
+    is($rc1, 1, "merge successfull");
+    my($fh, $filename) = File::Temp::tempfile();
+    print $fh $file->get_new_file_content();
+    close($fh);
+    my($rc2, $out) = Thruk::Utils::IO::cmd(undef, 'diff -Nuh "./t/xt/conf/data/merges/'.$mergedir.'/d.cfg" "'.$filename.'" 2>&1');
+    is($rc2, 0, "diff successfull");
+    is($out, "", "diff successfull");
+    unlink($filename);
+}

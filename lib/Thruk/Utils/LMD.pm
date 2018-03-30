@@ -165,6 +165,7 @@ sub check_initial_start {
 
     if($background) {
         ## no critic
+        $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
         $SIG{CHLD} = 'IGNORE';
         ## use critic
         my $pid = fork();
@@ -272,7 +273,7 @@ sub kill_if_not_responding {
         alarm(0);
         if($@) {
             $c->log->warn("lmd not responding, killing with force: err - ".$@);
-            create_thread_dump($config);
+            kill('USR1', $lmd_pid);
             kill(2, $lmd_pid);
             sleep(1);
             kill(9, $lmd_pid);
@@ -288,8 +289,8 @@ sub kill_if_not_responding {
         sleep(1);
     }
     if($rc != 0) {
-        $c->log->warn("lmd not responding, killing with force: rc - ".$rc);
-        create_thread_dump($config);
+        $c->log->warn("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
+        kill('USR1', $lmd_pid);
         kill(2, $pid);
         kill(2, $lmd_pid);
         sleep(1);
@@ -346,17 +347,34 @@ sub _write_lmd_config {
         $site_config .= "SkipSSLCheck = 1\n\n";
     }
 
+    my $lmd_version = get_lmd_version($config);
+    ## no critic
+    $ENV{'THRUK_LMD_VERSION'} = $lmd_version;
+    ## use critic
+    my $supports_section = 0;
+    if($lmd_version && Thruk::Utils::version_compare($lmd_version, '1.1.6')) {
+        $supports_section = 1;
+    }
+
     for my $key (@{$Thruk::Backend::Pool::peer_order}) {
         my $peer = $Thruk::Backend::Pool::peers->{$key};
         next if $peer->{'lmd_fake_backend'};
         $site_config .= "[[Connections]]\n";
-        $site_config .= "name   = '".$peer->peer_name()."'\n";
-        $site_config .= "id     = '".$key."'\n";
-        $site_config .= "source = ['".join("', '", @{$peer->peer_list()})."']\n";
+        $site_config .= "name    = '".$peer->peer_name()."'\n";
+        $site_config .= "id      = '".$key."'\n";
+        $site_config .= "source  = ['".join("', '", @{$peer->peer_list()})."']\n";
+        # section is supported starting with lmd 1.1.6
+        if($supports_section && $peer->{'section'} && $peer->{'section'} ne 'Default') {
+            $site_config .= "section = '".$peer->{'section'}."'\n";
+        }
         if($peer->{'type'} eq 'http') {
             $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
             $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};
         }
+        $site_config .= "tlsCertificate = '".$peer->{'config'}->{'options'}->{'cert'}."'\n"    if $peer->{'config'}->{'options'}->{'cert'};
+        $site_config .= "tlsKey         = '".$peer->{'config'}->{'options'}->{'key'}."'\n"     if $peer->{'config'}->{'options'}->{'key'};
+        $site_config .= "tlsCA          = '".$peer->{'config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'config'}->{'options'}->{'ca_file'};
+        $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'config'}->{'options'}->{'verify'} && $peer->{'config'}->{'options'}->{'verify'} == 0);
         $site_config .= "\n";
     }
 
@@ -374,6 +392,30 @@ sub _write_lmd_config {
 
     Thruk::Utils::IO::write($lmd_dir.'/lmd.ini',$site_config);
     return(1);
+}
+
+##########################################################
+
+=head2 get_lmd_version
+
+  get_lmd_version($config)
+
+returns lmd version
+
+=cut
+sub get_lmd_version {
+    my($config) = @_;
+
+    my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
+              .' -version';
+
+    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    $config->{'lmd_version'} = $output;
+    if($output && $output =~ m/version\s+([\S]+)\s+/mx) {
+        return $1;
+    }
+
+    return;
 }
 
 1;

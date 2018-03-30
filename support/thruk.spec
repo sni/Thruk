@@ -9,8 +9,8 @@
 %endif
 
 Name:          thruk
-Version:       2.18
-Release: 1
+Version:       2.20
+Release: 2
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
@@ -24,7 +24,7 @@ Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Group:         Applications/Monitoring
 BuildRequires: autoconf, automake, perl
-Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
+Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
 BuildRequires: libthruk >= 2.20
 Requires:      thruk-base = %{version}-%{release}
@@ -112,6 +112,15 @@ and event reporting.
     --with-htmlurl="/thruk"
 %{__make} %{?_smp_mflags} all
 
+# replace /usr/bin/env according to https://fedoraproject.org/wiki/Packaging:Guidelines#Shebang_lines
+sed -e 's%/usr/bin/env perl%/usr/bin/perl%' -i \
+    script/thruk_server.pl \
+    support/thruk_authd.pl \
+
+# this plugin is shipped separatly
+rm plugins/plugins-enabled/reports2
+
+
 %install
 %{__rm} -rf %{buildroot}
 %{__make} install \
@@ -120,7 +129,7 @@ and event reporting.
     COMMAND_OPTS="" \
     INIT_OPTS=""
 mkdir -p %{buildroot}%{_localstatedir}/lib/thruk
-rm %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled/reports2
+
 # enable su logrotate directive if required
 %if 0%{?fedora} >= 16 || 0%{?rhel} >= 7 || 0%{?sles_version} >= 12
     sed -i -e 's/^.*#su/    su/' %{buildroot}/%{_sysconfdir}/logrotate.d/thruk-base
@@ -356,6 +365,7 @@ exit 0
 %attr(0644,root,root) %{_datadir}/thruk/script/html2pdf.js
 %attr(0755,root,root) %{_datadir}/thruk/script/html2pdf.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/pnp_export.sh
+%attr(0755,root,root) %{_datadir}/thruk/script/convert_old_datafile
 %{_datadir}/thruk/root
 %{_datadir}/thruk/templates
 %{_datadir}/thruk/themes
@@ -366,6 +376,7 @@ exit 0
 %{_datadir}/thruk/dist.ini
 %{_datadir}/thruk/thruk_cookie_auth.include
 %attr(0755,root,root) %{_datadir}/thruk/fcgid_env.sh
+%attr(0755,root,root) %{_datadir}/thruk/thruk_authd.pl
 %doc %{_mandir}/man3/nagexp.3
 %doc %{_mandir}/man3/naglint.3
 %doc %{_mandir}/man3/thruk.3

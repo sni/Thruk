@@ -3,7 +3,6 @@ package Monitoring::Config::Object;
 use strict;
 use warnings;
 use Carp;
-use Storable qw(dclone);
 use Monitoring::Config::Object::Host;
 use Monitoring::Config::Object::Hostgroup;
 use Monitoring::Config::Object::Hostextinfo;
@@ -109,6 +108,7 @@ return a new L<object|Monitoring::Config::Object::Parent> of given type. Type ca
 sub new {
     my($class, %conf) = @_;
     confess('no core type!') unless defined $conf{'coretype'};
+    confess('no type!')      unless defined $conf{'type'};
 
     my $objclass = 'Monitoring::Config::Object::'.ucfirst($conf{'type'});
     my $obj = \&{$objclass."::BUILD"};
@@ -117,10 +117,10 @@ sub new {
 
     return unless defined $current_object;
 
-    $current_object->{'conf'}     = dclone( $conf{'conf'} || {} );
+    $current_object->{'conf'}     = $conf{'conf'} || {};
     $current_object->{'line'}     = $conf{'line'} || 0;
     $current_object->set_file($conf{'file'}) if defined $conf{'file'};
-    $current_object->{'comments'} = [];
+    $current_object->{'comments'} = $conf{'comments'} || [];
     $current_object->{'id'}       = 'new';
     $current_object->{'disabled'} = defined $conf{'disabled'} ? $conf{'disabled'} : 0;
 

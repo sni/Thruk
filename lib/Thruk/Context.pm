@@ -37,9 +37,9 @@ return new context object
 sub new {
     my($class, $app, $env) = @_;
 
-    my($time_begin, $memory_begin);
+    my $time_begin  = [gettimeofday()];
+    my $memory_begin;
     if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        $time_begin   = [gettimeofday()];
         $memory_begin = Thruk::Backend::Pool::get_memory_usage();
     }
 
@@ -54,8 +54,12 @@ sub new {
         env    => $env,
         config => $app->{'config'},
         stash  => {
-            time_begin   => $time_begin || time(),
-            memory_begin => $memory_begin,
+            time_begin           => $time_begin,
+            memory_begin         => $memory_begin,
+            total_backend_waited => 0,
+            total_render_waited  => 0,
+            inject_stats         => 1,
+            user_profiling       => 0,
         },
         req    => $req,
         res    => $req->new_response(200),
@@ -265,7 +269,7 @@ $c->redirect_to(<url>)
 sub redirect_to {
     my($c, $url) = @_;
     $c->res->content_type('text/html; charset=utf-8');
-    $c->res->body('This item has moved');
+    $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
     return 1;

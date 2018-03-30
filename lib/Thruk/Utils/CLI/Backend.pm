@@ -66,7 +66,7 @@ sub cmd {
         );
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
         chomp($error);
-        $output .= " (".$error.")" if $error;
+        $output .= " (".($error || 'OK').")";
         $output .= "\n";
     }
     $output .= sprintf("-------------------------------------------------\n");

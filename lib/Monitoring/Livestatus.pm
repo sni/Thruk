@@ -158,6 +158,11 @@ sub new {
       'deepcopy'                    => undef,   # copy result set to avoid errors with tied structures
       'retries_on_connection_error' => 3,       # retry x times to connect
       'retry_interval'              => 1,       # retry after x seconds
+    # tls options
+      'cert'                        => undef,
+      'key'                         => undef,
+      'ca_file'                     => undef,
+      'verify'                      => undef,
     };
 
     my %old_key = (
@@ -1140,10 +1145,10 @@ sub _send_socket {
 ########################################
 sub _send_socket_do {
     my($self, $statement) = @_;
-    my $sock = $self->_open() or return(491, $self->_get_error(491, $!), $!);
+    my $sock = $self->_open() or return(491, $self->_get_error(491, $@ || $!), $@ || $!);
     utf8::decode($statement);
     utf8::encode($statement);
-    print $sock $statement or return($self->_socket_error($statement, $sock, 'write to socket failed: '.$!));
+    print $sock $statement or return($self->_socket_error($statement, $sock, 'write to socket failed: '.($@ || $!)));
     print $sock "\n";
     return $sock;
 }

@@ -49,14 +49,21 @@ sub index {
         $c->config->{'panorama_modules_loaded'} = 1;
     }
 
+    # add current dashboard to error details, so if something goes wrong, we can log which dashboard is responsible
+    $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
+    $c->stash->{errorDetails} .= sprintf("Dashboard: %s\n", $c->req->parameters->{'current_tab'}) if $c->req->parameters->{'current_tab'};
+
     # add some functions
     $c->stash->{'get_static_panorama_files'} = \&Thruk::Utils::Panorama::get_static_panorama_files;
 
     $c->stash->{title}             = 'Thruk Panorama';
     $c->stash->{'skip_navigation'} = 1;
+    $c->stash->{'inject_stats'}    = 0;
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
+    $c->stash->{'panorama_debug'} = $c->config->{'panorama_debug'};
+    $c->stash->{'panorama_debug'} = 1 if $c->req->parameters->{'debug'};
 
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
     $c->stash->{'readonly'} = 1 if defined $c->req->parameters->{'readonly'};
@@ -257,6 +264,8 @@ sub index {
 sub _js {
     my($c, $only_data) = @_;
 
+    # merge open dashboards into state
+    my $data = Thruk::Utils::get_user_data($c);
     my $open_tabs;
     if(defined $c->req->parameters->{'map'}) {
         my $dashboard = _get_dashboard_by_name($c, $c->req->parameters->{'map'});
@@ -267,13 +276,18 @@ sub _js {
         $open_tabs = [$dashboard->{'nr'}];
         $c->stash->{one_tab_only} = $dashboard->{'nr'};
         $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
+    } elsif($c->cookie('thruk_panorama_tabs')) {
+        $open_tabs = [split(/\s*:\s*/mx, $c->cookie('thruk_panorama_tabs')->value)];
+        $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $open_tabs;
+        if($c->cookie('thruk_panorama_active')) {
+            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'activeTab'} = 'tabpan-tab_'.$c->cookie('thruk_panorama_active')->value;
+        }
     }
 
     $c->stash->{shapes} = {};
     $c->stash->{state}  = '';
 
-    # merge open dashboards into state
-    my $data = Thruk::Utils::get_user_data($c);
+    # restore last open tab
     if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
         my $shapes         = {};
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
@@ -1505,13 +1519,12 @@ sub _task_show_logs {
     my $pattern         = $c->req->parameters->{'pattern'};
     my $exclude_pattern = $c->req->parameters->{'exclude'};
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
-        push @{$filter}, { message => { '~~' => $pattern }};
+        push @{$filter}, { message => { '~~' => Thruk::Utils::clean_regex($pattern) }};
     }
     if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
-        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+        push @{$filter}, { message => { '!~~' => Thruk::Utils::clean_regex($exclude_pattern) }};
     }
     my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
-
     return if $c->{'db'}->renew_logcache($c);
     my $data = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
 
@@ -1570,18 +1583,6 @@ sub _task_site_status {
         data    => [],
     };
 
-    # get sections
-    for my $category (keys %{$c->{'db'}->{'sections'}}) {
-        for my $section (keys %{$c->{'db'}->{'sections'}->{$category}}) {
-            for my $name (keys %{$c->{'db'}->{'sections'}->{$category}->{$section}}) {
-                my $backends = $c->{'db'}->{'sections'}->{$category}->{$section}->{$name};
-                for my $b (@{$backends}) {
-                    $c->stash->{'pi_detail'}->{$b->{'key'}}->{'category'} = $category;
-                    $c->stash->{'pi_detail'}->{$b->{'key'}}->{'section'}  = $section;
-                }
-            }
-        }
-    }
     for my $key (@{$c->stash->{'backends'}}) {
         next if($backend_filter && !defined $backend_filter->{$key});
         my $b    = $c->stash->{'backend_detail'}->{$key};
@@ -1601,9 +1602,11 @@ sub _task_site_status {
             site     => $b->{'name'},
             version  => $program_version,
             runtime  => $runtime,
+            section  => $b->{'section'},
+            category => $b->{'section'}, # keep for backwards compatibility
         };
         for my $attr (qw/enable_notifications execute_host_checks execute_service_checks
-                      enable_event_handlers process_performance_data category section/) {
+                      enable_event_handlers process_performance_data/) {
             $row->{$attr} = $d->{$attr};
         }
         push @{$json->{'data'}}, $row;
@@ -3159,11 +3162,8 @@ sub _get_default_tab_xdata {
 ##########################################################
 sub _add_json_dashboard_timestamps {
     my($c, $json, $tab) = @_;
-    if(!defined $tab) {
-        my $data = Thruk::Utils::get_user_data($c);
-        if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'}) {
-            $tab = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'};
-        }
+    if(!defined $tab && $c->cookie('thruk_panorama_active')) {
+        $tab = $c->cookie('thruk_panorama_active')->value;
     }
     if($tab) {
         my $nr = $tab;
@@ -3205,6 +3205,7 @@ sub _add_misc_details {
         $json->{'server_version'}       = $c->config->{'version'};
         $json->{'server_version'}      .= '~'.$c->config->{'branch'} if $c->config->{'branch'};
         $json->{'server_extra_version'} = $c->config->{'extra_version'};
+        $json->{'broadcasts'}           = Thruk::Utils::Broadcast::get_broadcasts($c, undef, undef, 1);
         $c->stats->profile(end => "_add_misc_details");
     }
     elsif($c->req->parameters->{'current_tab'}) {

@@ -48,6 +48,7 @@
 /usr/share/thruk/dist.ini
 /usr/share/thruk/thruk_cookie_auth.include
 /usr/share/thruk/fcgid_env.sh
+/usr/share/thruk/thruk_authd.pl
 /usr/share/thruk/lib
 /usr/share/thruk/menu.conf
 /usr/share/thruk/root
@@ -58,6 +59,7 @@
 /usr/share/thruk/script/html2pdf.js
 /usr/share/thruk/script/html2pdf.sh
 /usr/share/thruk/script/pnp_export.sh
+/usr/share/thruk/script/convert_old_datafile
 /usr/share/thruk/templates
 /usr/share/thruk/themes
 /var/cache/thruk

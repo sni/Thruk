@@ -67,6 +67,8 @@ nytprof/
 nytprof.out
 .~ko-6.1.3-perllint~
 .~ko-8.5.3-perllint~
+.vstags
+.vscode
 sizeme.db
 test_hook.sh
 bp/\d+\.tbp
@@ -85,7 +87,7 @@ t/docker/cases/.*/.*.js
 .gem/
 .*\.json
 .idea/
-lmd.ini
+^lmd.ini$
 plugins/plugins-available/editor
 plugins/plugins-enabled/editor
 ^thruk_local.d/.*.conf

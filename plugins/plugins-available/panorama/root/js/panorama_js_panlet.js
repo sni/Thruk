@@ -371,11 +371,10 @@ Ext.define('TP.Panlet', {
                 }
             }
         }
+        if(!this.header) { return; }
         var global = Ext.getCmp(this.panel_id);
         if(global.xdata.autohideheader || this.xdata.showborder == false) {
-            if(this.header) {
-                this.header.hide();
-            }
+            this.header.hide();
         }
         if(this.xdata.showborder == true && global.xdata.autohideheader == false) {
             this.header.show();
@@ -547,7 +546,10 @@ TP.panletGearHandler = function(panel) {
         /* set initial form values */
         panel.setFormDefaults();
         panel.stateful = false;
-        panel.items.getAt(0).hide();
+        // hide main content if already rendered
+        if(panel.items.getAt(0) != panel.gearitem) {
+            panel.items.getAt(0).hide();
+        }
 
         // add current available backends
         var backendItem = TP.getFormField(panel.gearitem.down('form'), 'backends');
@@ -588,7 +590,9 @@ TP.panletGearHandler = function(panel) {
         }
         panel.stateful = true;
         panel.applyBorderAndBackground();
-        panel.items.getAt(0).show();
+        if(panel.items.getAt(0)) {
+            panel.items.getAt(0).show();
+        }
         panel.hideHeader(tab);
         panel.syncShadowTimeout();
         // move back

@@ -121,6 +121,8 @@ local_install: local_patches
 	cp -rp root/thruk/usercontent/* ${DESTDIR}${SYSCONFDIR}/usercontent/
 	cp -rp support/fcgid_env.sh ${DESTDIR}${DATADIR}/
 	chmod 755 ${DESTDIR}${DATADIR}/fcgid_env.sh
+	cp -rp support/thruk_authd.pl ${DESTDIR}${DATADIR}/
+	chmod 755 ${DESTDIR}${DATADIR}/thruk_authd.pl
 	cp -rp menu.conf ${DESTDIR}${DATADIR}/
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
@@ -131,6 +133,7 @@ local_install: local_patches
 	cp -p script/html2pdf.js       ${DESTDIR}${DATADIR}/script/
 	cp -p script/html2pdf.sh       ${DESTDIR}${DATADIR}/script/
 	cp -p script/pnp_export.sh     ${DESTDIR}${DATADIR}/script/
+	cp -p support/convert_old_datafile.pl ${DESTDIR}${DATADIR}/script/convert_old_datafile
 	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/
 	[ ! -f script/phantomjs ] || cp -p script/phantomjs ${DESTDIR}${DATADIR}/script/
 	echo " " > ${DESTDIR}${DATADIR}/dist.ini
@@ -213,7 +216,7 @@ test_scenarios:
 	cd t/scenarios && $(MAKE) test
 
 e2etest:
-	cd t/scenarios/e2e && $(MAKE) test
+	cd t/scenarios/sakuli_e2e && $(MAKE) clean update prepare test
 
 rpm: $(NAME)-$(VERSION).tar.gz
 	rpmbuild -ta $(NAME)-$(VERSION).tar.gz

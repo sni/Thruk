@@ -110,28 +110,15 @@ Ext.define('TP.formFilterSelect', {
         forceSelection: true,
         autoSelect:     true,
         width:          140,
-        store:          ['Search',
-                         'Check Period',
-                         'Comment',
-                         'Contact',
-                         'Current Attempt',
-                         'Custom Variable',
-                         'Downtime Duration',
-                         'Duration',
-                         'Event Handler',
-                         'Execution Time',
-                         'Host',
-                         'Hostgroup',
-                         'Last Check',
-                         'Latency',
-                         'Next Check',
-                         'Notification Period',
-                         'Number of Services',
-                         'Parent',
-                         'Plugin Output',
-                         'Service',
-                         'Servicegroup',
-                         '% State Change'],
+        store:          getFilterTypeOptions(),
+        tpl: '<ul class="' + Ext.plainListCls + '"><tpl for=".">'
+            +'<tpl if="field1 == \'----------------\'">'
+            +'<li class="item-disabled">'
+            +'<tpl else>'
+            +'<li class="x-boundlist-item" unselectable="on">'
+            +'</tpl>'
+            +'{field1}'
+            +'</li></tpl></ul>',
         listeners: {
             change: function(This, eOpts) {
                 This.up().check_changed(This.getValue());

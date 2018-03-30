@@ -1123,6 +1123,9 @@ sub _process_combined_page {
     $c->stash->{'hosts'} = $hosts;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
+    $c->stash->{'hosts_limit_hit'}    = 0;
+    $c->stash->{'services_limit_hit'} = 0;
+
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
@@ -1131,7 +1134,7 @@ sub _process_combined_page {
         $c->stash->{'template'}  = 'excel/status_combined.tt';
         return $c->render_excel();
     }
-    if ( $view_mode eq 'json' ) {
+    elsif ( $view_mode eq 'json' ) {
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             # remove custom macro colums which could contain confidential informations
             for my $h (@{$hosts}) {
@@ -1150,6 +1153,17 @@ sub _process_combined_page {
             'services' => $services,
         };
         return $c->render(json => $json);
+    } else {
+        if($c->config->{problems_limit}) {
+            if(scalar @{$c->stash->{'hosts'}} > $c->config->{problems_limit} && !$c->req->parameters->{'show_all_hosts'}) {
+                $c->stash->{'hosts_limit_hit'}    = 1;
+                $c->stash->{'hosts'}              = [splice(@{$c->stash->{'hosts'}}, 0, $c->config->{problems_limit})];
+            }
+            if(scalar @{$c->stash->{'services'}} > $c->config->{problems_limit} && !$c->req->parameters->{'show_all_services'}) {
+                $c->stash->{'services_limit_hit'} = 1;
+                $c->stash->{'services'}           = [splice(@{$c->stash->{'services'}}, 0, $c->config->{problems_limit})];
+            }
+        }
     }
 
     # set audio file to play

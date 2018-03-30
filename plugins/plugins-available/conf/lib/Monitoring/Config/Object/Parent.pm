@@ -57,9 +57,9 @@ sub parse {
 
             if($field->{'type'} eq 'LIST' or $field->{'type'} eq 'ENUM') {
                 if(defined $value) {
-                    my @list = split/\s*,\s*/mx, $value;
+                    my @list = split/\s*,\s*/mxo, $value;
                     # remove empty elements
-                    @list = grep {!/^\s*$/mx} @list;
+                    @list = grep {!/^\s*$/mxo} @list;
                     $self->{'conf'}->{$attr} = \@list;
                 } else {
                     $self->{'conf'}->{$attr} = [];
@@ -110,6 +110,7 @@ in list context, returns [$text, $nr_comment_lines, $nr_object_lines]
 sub as_text {
     my($self) = @_;
 
+    confess("uninitialized") unless $Monitoring::Config::format_values;
     my $disabled = $self->{'disabled'} ? '#' : '';
 
     my $cfg = $Monitoring::Config::save_options;
@@ -131,53 +132,43 @@ sub as_text {
 
     for my $key (@{$self->get_sorted_keys()}) {
         my $value;
-        if(defined $self->{'default'}->{$key}
-            and ($self->{'default'}->{$key}->{'type'} eq 'LIST'
-              or $self->{'default'}->{$key}->{'type'} eq 'ENUM'
-            )
-        ) {
+        my $type = defined $self->{'default'}->{$key} ? $self->{'default'}->{$key}->{'type'} : '';
+        if($type eq 'LIST' || $type eq 'ENUM') {
             $value = join($cfg->{'list_join_string'}, @{$self->{'conf'}->{$key}});
         } else {
-            $value = $self->{'conf'}->{$key};
+            $value = $self->{'conf'}->{$key} // '';
+
+            # break very long lines
+            if($key eq 'command_line' and $cfg->{'break_long_arguments'} and length($key) + length($value) > 120) {
+                my $long_command = $self->_break_long_command($key, $value, $disabled);
+                $text .= $disabled.join(" \\\n".$disabled, @{$long_command})."\n";
+                $nr_object_lines += scalar @{$long_command};
+                if($self->{'inl_comments'}->{$key}) {
+                    chomp($text);
+                    my $ind      = rindex($text, "\n");
+                    my $lastline = substr($text, $ind+1);
+                    $text        = substr($text, 0, $ind);
+                    $text       .= "\n";
+                    $text       .= sprintf $Monitoring::Config::format_comments, $lastline, $self->{'inl_comments'}->{$key};
+                    $text       .= "\n";
+                }
+                next;
+            }
         }
 
-        # empty values are valid syntax
-        $value = '' unless defined $value;
-
-        # break very long lines
-        if($key eq 'command_line' and $cfg->{'break_long_arguments'} and length($key) + length($value) > 120) {
-            my $long_command = $self->_break_long_command($key, $value, $disabled);
-            $text .= $disabled.join(" \\\n".$disabled, @{$long_command})."\n";
-            $nr_object_lines += scalar @{$long_command};
-            if($self->{'inl_comments'}->{$key}) {
-                chomp($text);
-                my $ind      = rindex($text, "\n");
-                my $lastline = substr($text, $ind+1);
-                $text        = substr($text, 0, $ind);
-                $text       .= "\n";
-                my $format   = "%-".$cfg->{'indent_object_comments'}."s %s\n";
-                $text       .= sprintf $format, $lastline, $self->{'inl_comments'}->{$key};
-            }
-        } else {
-            $text .= $disabled;
-            my $line;
-            if($value ne '') {
-                my $format = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
-                $line = sprintf $format, "", $key, $value;
-            } else {
-                # empty values are allowed
-                my $format = "%-".$cfg->{'indent_object_key'}."s%s";
-                $line = sprintf $format, "", $key;
-            }
-            if($self->{'inl_comments'}->{$key}) {
-                my $format = "%-".$cfg->{'indent_object_comments'}."s %s";
-                $text .= sprintf $format, $line, $self->{'inl_comments'}->{$key};
-            } else {
-                $text .= $line;
-            }
+        $text .= $disabled;
+        if($self->{'inl_comments'}->{$key}) {
+            my $line = sprintf $Monitoring::Config::format_values, "", $key, $value;
+            $text   .= sprintf $Monitoring::Config::format_comments, $line, $self->{'inl_comments'}->{$key};
             $text .= "\n";
-            $nr_object_lines++;
         }
+        elsif($value ne '') {
+            $text .= sprintf $Monitoring::Config::format_values_nl, "", $key, $value;
+        } else {
+            # empty values are allowed
+            $text .= sprintf $Monitoring::Config::format_keys, "", $key;
+        }
+        $nr_object_lines++;
     }
     $text .= $disabled;
     $text .= "}\n\n";
@@ -283,10 +274,9 @@ return the primary objects name
 
 =cut
 sub get_primary_name {
-    my $self     = shift;
-    my $full     = shift || 0;
-    my $conf     = shift || $self->{'conf'};
-    my $fallback = shift;
+    my($self, $full, $conf, $fallback) = @_;
+    $full = 0 unless $full;
+    $conf = $self->{'conf'} unless $conf;
 
     return $fallback if defined $fallback;
 
@@ -359,19 +349,70 @@ return the sorted config keys for this object
 
 =cut
 sub get_sorted_keys {
-    my $self = shift;
-    my $conf = shift || $self->{'conf'};
-    my @keys;
-    if(ref $conf eq 'HASH') {
-        @keys = keys %{$conf};
-    } else {
-        @keys = @{$conf};
-    }
+    my($self, $conf) = @_;
     defined $Monitoring::Config::key_sort or confess('uninitialized');
-    @keys = sort $Monitoring::Config::key_sort @keys;
-    return \@keys;
+
+    my @keys;
+    if(!defined $conf) {
+        @keys = keys %{$self->{'conf'}};
+    } else {
+        if(ref $conf eq 'HASH') {
+            @keys = keys %{$conf};
+        } else {
+            @keys = @{$conf};
+        }
+    }
+    return([sort $Monitoring::Config::key_sort @keys]);
 }
 
+##########################################################
+
+=head2 _sort_by_object_keys
+
+sort function for object keys
+
+=cut
+sub _sort_by_object_keys {
+    my($attr_keys, $cust_var_keys) = @_;
+
+    my $order_cache = {};
+    my $max         = scalar @{$attr_keys} + 5;
+
+    my $num = $max;
+    for my $ord (@{$attr_keys}) {
+        $order_cache->{$ord} = $num;
+        $num--;
+    }
+
+    return sub {
+        my $num_a = $order_cache->{$a} || 0;
+        my $num_b = $order_cache->{$b} || 0;
+        if($num_a > $num_b) { return -$num_a; }
+        if($num_b > $num_a) { return  $num_b; }
+
+        my $result = $a cmp $b;
+
+        if(substr($a, 0, 1) eq '_') {
+            if(substr($b, 0, 1) eq '_') {
+                # prefer some custom variables
+                my $cust_order = $cust_var_keys;
+                my $cust_num   = scalar @{$cust_var_keys} + 3;
+                for my $ord (@{$cust_order}) {
+                    if($a eq $ord) { return -$cust_num; }
+                    if($b eq $ord) { return  $cust_num; }
+                    $cust_num--;
+                }
+                return $result;
+            }
+            return -$result;
+        }
+        elsif(substr($b, 0, 1) eq '_') {
+            return -$result;
+        }
+
+        return $result;
+    };
+}
 
 ##########################################################
 
@@ -825,7 +866,7 @@ sub _break_long_command {
     my @text;
     my @chunks = split(/(\s+[\-]{1,2}\w+|\s+[\|]{1}\s+|\s+>>\s*)/mx ,$value);
     my $first = shift @chunks;
-    Monitoring::Config::File::StripTSpace($first);
+    $first =~ s/\s+$//gmx;
     push @text, sprintf("  %-30s %s", $key, $first);
     my $size = scalar @chunks;
     my $arg  = 1;
@@ -834,7 +875,7 @@ sub _break_long_command {
     while($x < $size) {
         my $chunk = $chunks[$x];
         if($arg) {
-            Monitoring::Config::File::StripLSpace($chunk);
+            $chunk =~ s/^\s+//gmx;
             if(index($chunk, '-') == 0) { $chunk = '  '.$chunk; }
             if(index($chunk, '>') == 0) { $chunk = '  '.$chunk; }
             $line .= sprintf "%-33s %s", '', $chunk;

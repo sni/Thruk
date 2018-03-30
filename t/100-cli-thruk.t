@@ -194,7 +194,7 @@ TestUtils::test_command({
 # panorama cleanup
 TestUtils::test_command({
     cmd  => $BIN.' -a clean_dashboards',
-    like => ['/OK - cleaned up 0 old dashboards/'],
+    like => ['/OK - cleaned up \d+ old dashboards/'],
 });
 
 # plugin list

@@ -410,26 +410,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     };
 
     function applyBackground(values) {
-        if(values == undefined) {
-            var d_form  = Ext.getCmp('dashboardForm').getForm();
-            if(!d_form.isValid()) { return; }
-            values = d_form.getFieldValues();
-            if(values.locked) { return; }
-        }
-        if(values.map_choose == undefined) {
-            if(values.map) {
-                values.map_choose = 'geomap';
-            }
-            if(values.background_color) {
-                values.map_choose = 'color';
-            }
-        }
+        values = getValues(values);
+        if(values == undefined) { return; }
 
-        Ext.getCmp('background_color').hide();
-        Ext.getCmp('background_choose').hide();
-        Ext.getCmp('background_offset_choose').hide();
-        Ext.getCmp('wms_choose').hide();
-        Ext.getCmp('mapcenter').hide();
         if(values.map_choose == 'geomap') {
             delete values.background_color;
             if(tab.xdata.map) {
@@ -437,8 +420,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             } else {
                 values.map = {};
             }
-            Ext.getCmp('wms_choose').show();
-            Ext.getCmp('mapcenter').show();
             if(values.wms_provider == undefined || values.wms_provider == "") {
                 if(wmsProvider.data.length > 0) {
                     values.wms_provider = wmsProvider.getAt(0).data.name;
@@ -456,17 +437,62 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             delete values['background_color'];
         }
         else if(values.map_choose == 'color') {
-            Ext.getCmp('background_color').show();
             delete values['map'];
             values['background'] = 'none';
         } else {
-            Ext.getCmp('background_choose').show();
-            Ext.getCmp('background_offset_choose').show();
             delete values['map'];
             delete values['background_color'];
         }
+
+        if(values.locked) { return; }
         tab.setBackground(values);
         return;
+    }
+
+    function getValues(values) {
+        if(values == undefined) {
+            var d_form  = Ext.getCmp('dashboardForm').getForm();
+            if(!d_form.isValid()) { return; }
+            values = d_form.getFieldValues();
+        }
+        if(values.map_choose == undefined) {
+            if(values.map) {
+                values.map_choose = 'geomap';
+            }
+            if(values.background_color) {
+                values.map_choose = 'color';
+            }
+        }
+        return(values);
+    }
+
+    function setBackgroundOptionVisibility(values) {
+        values = getValues(values);
+        if(values == undefined) { return; }
+
+        Ext.getCmp('background_color').hide();
+        Ext.getCmp('background_choose').hide();
+        Ext.getCmp('background_offset_choose').hide();
+        Ext.getCmp('wms_choose').hide();
+        Ext.getCmp('mapcenter').hide();
+        if(values.map_choose == 'geomap') {
+            Ext.getCmp('wms_choose').show();
+            Ext.getCmp('mapcenter').show();
+        }
+        else if(values.map_choose == 'color') {
+            Ext.getCmp('background_color').show();
+        } else {
+            Ext.getCmp('background_choose').show();
+            Ext.getCmp('background_offset_choose').show();
+        }
+    }
+
+    var listenToChanges = false;
+    var changedListener = function(This, newValue, oldValue, eOpts) {
+        if(!listenToChanges) { return; }
+        TP.reduceDelayEvents(tab, function() {
+            applyBackground();
+        }, 100, 'timeout_tab_background_change', true);
     }
 
     var map_choose = "static";
@@ -488,7 +514,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             /* tab title */
             xtype:      'textfield',
             name:       'title',
-            fieldLabel: 'Title'
+            fieldLabel: 'Title',
+            listeners: { change: function(This, newValue, oldValue, eOpts) { document.title = newValue; } }
         }, {
             /* global refresh rate */
             xtype:      'tp_slider',
@@ -505,7 +532,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             defaultType: 'radiofield',
             defaults:   {
                 flex: 1,
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: function() { setBackgroundOptionVisibility(); changedListener(); } }
             },
             layout:      'hbox',
             items: [{
@@ -536,7 +563,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 name:           'background_color',
                 flex:            1,
                 value:           tab.xdata.background_color || '',
-                listeners:     { change: function() { applyBackground() } }
+                listeners:     { change: changedListener },
+                mouseover:     function(color) {
+                    Ext.dom.Query.select('.x-mask')[0].style.display="none";
+                    tab.el.dom.style.backgroundOrig = tab.el.dom.style.background;
+                    tab.el.dom.style.background = color;
+                },
+                mouseout:      function(color) {
+                    Ext.dom.Query.select('.x-mask')[0].style.display="";
+                    tab.el.dom.style.background = tab.el.dom.style.backgroundOrig;
+                }
             }]
         }, {
             fieldLabel:     'WMS Provider',
@@ -551,14 +587,15 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             editable:        false,
             forceSelection:  true,
             hidden:          map_choose != 'map' ? true : false,
-            listeners:     { change: function(This) { applyBackground() } }
+            listeners:     { change: changedListener }
         }, {
             fieldLabel:  'Map Center',
             xtype:       'fieldcontainer',
             id:          'mapcenter',
             layout:      'hbox',
+            hidden:       map_choose != 'map' ? true : false,
             defaults:   {
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: changedListener }
             },
             items: [
             { xtype: 'label', text:  'Lon/Lat:', style: 'margin-left: 0px; margin-right: 2px;', cls: 'x-form-item-label' },
@@ -591,7 +628,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             xtype:      'fieldcontainer',
             layout:     'hbox',
             defaults: {
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: changedListener }
             },
             items: [{
                 xtype:          'combobox',
@@ -620,7 +657,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         return(true);
                     },
-                    change: function(This) { applyBackground() }
+                    change: changedListener
                 }
             },
             { xtype: 'label', text:  'Scale:', style: 'margin-left: 10px; margin-right: 2px;', cls: 'x-form-item-label' },
@@ -644,7 +681,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             xtype:          'fieldcontainer',
             layout:         'hbox',
             defaults: {
-                listeners: { change: function(This) { applyBackground() } }
+                listeners: { change: changedListener }
             },
             items: [
             { xtype: 'label', text: 'Offset X:', style: 'margin-right: 2px;', cls: 'x-form-item-label' },
@@ -757,12 +794,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     defaults:      { anchor: '-12', labelWidth: 130 },
                     items:           dashboardItems
             }]
-        }],
-        listeners: {
-            afterrender: function() {
-                applyBackground(tab.xdata);
-            }
-        }
+        }]
     };
 
     /* Styles Settings Tab */
@@ -905,7 +937,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     /* the actual settings window containing the panel */
     var tab_win_settings = new Ext.window.Window({
         modal:       true,
-        width:       600,
+        width:       610,
         height:      350,
         title:       'Settings',
         layout :     'fit',
@@ -923,6 +955,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         tab.applyXdata(undefined, false);
                         tab_win_settings.destroy();
+                        document.title = tab.xdata.title;
                         if(closeAfterEdit) { tab.destroy(); }
                     }
                 }, {
@@ -1019,6 +1052,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             tabpan.startTimeouts();
                         }
 
+                        document.title = tab.xdata.title;
+
                         TP.refreshAllSitePanel(tab);
 
                         /* border setting may have changed, so redraw all panlets with some small delay */
@@ -1061,6 +1096,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
     tab_win_settings.show();
+    setBackgroundOptionVisibility(tab.xdata);
+    applyBackground(tab.xdata);
+    listenToChanges = true;
     mask.destroy();
 };
 

@@ -210,6 +210,7 @@ sub _initialise_peer {
             $addr =~ s/\/.*$//mx;
         }
         if($self->{'type'} eq 'livestatus') {
+            $addr =~ s/^tls:\/\///mx;
             $addr =~ s/:.*$//mx;
         }
 

@@ -26,7 +26,7 @@ sub index {
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
         if($action eq 'dismiss') {
-            Thruk::Utils::Broadcast::update_dismiss($c);
+            Thruk::Utils::Broadcast::update_dismiss($c, $c->req->parameters->{'panorama'});
             return $c->render(json => {'status' => 'ok'});
         }
     }
@@ -36,10 +36,12 @@ sub index {
         return $c->detach('/error/index/8');
     }
 
-    $c->stash->{'page'}            = 'splashpage';
+    $c->stash->{'page'}            = 'extinfo';
     $c->stash->{has_jquery_ui}     = 1;
     $c->stash->{disable_backspace} = 1;
     $c->stash->{'no_auto_reload'}  = 1;
+    $c->stash->{'title'}           = 'Broadcasts';
+    $c->stash->{'infoBoxTitle'}    = 'Broadcasts';
 
     Thruk::Utils::ssi_include($c, 'broadcast');
 
@@ -100,6 +102,7 @@ sub index {
             $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
             $broadcast->{'loginpage'}     = $c->req->parameters->{'loginpage'} || 0;
             $broadcast->{'annotation'}    = $c->req->parameters->{'annotation'} || '';
+            $broadcast->{'panorama'}      = $c->req->parameters->{'panorama'} || 0;
 
             Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
             Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);

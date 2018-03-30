@@ -704,15 +704,11 @@ function window_location_replace(url) {
     window.location.replace(url);
 }
 
-function get_site_panel_backend_button(id, with_id, styles, onclick, section, subsection) {
+function get_site_panel_backend_button(id, styles, onclick, section) {
     if(!initial_backends[id]['cls']) { return(""); }
     var btn = '<input type="button"';
-    if(with_id) {
-        btn += " id='button_"+id+"'";
-    }
-    section    = section.replace(/[^\w]/, '_');
-    subsection = subsection.replace(/[^\w]/, '_');
-    btn += ' class="button_peer'+initial_backends[id]['cls']+' backend_'+id+' section_'+section+' subsection_'+section+'_'+subsection+'"';
+    btn += " id='button_"+id+"'";
+    btn += ' class="button_peer'+initial_backends[id]['cls']+' backend_'+id+' section_'+section+'"';
     btn += ' value="'+initial_backends[id]['name']+'"';
     btn += ' title="'+escapeHTML(initial_backends[id]['last_error']).replace(/"/, "'")+'"';
     if(initial_backends[id]['disabled'] == 5) {
@@ -726,29 +722,6 @@ function get_site_panel_backend_button(id, with_id, styles, onclick, section, su
 
 /* create sites header */
 function dw(txt) {document.write(txt);}
-function print_site_panel_header() {
-    if(show_sitepanel == 'list') {
-        for(var nr = 0; nr < backend_keys.length; nr++) {
-          dw(get_site_panel_backend_button(backend_keys[nr], true, "", "toggleBackend('"+backend_keys[nr]+"')", '', ''));
-        }
-    }
-    else if(show_sitepanel == 'panel' || show_sitepanel == 'collapsed') {
-        if(keys(sites.sections).length == 0) {
-            return;
-        }
-        if(backend_chooser == 'switch' && param_backend[0]) {
-          dw("<div class='backend'><input type='button' class='button_peerUP' value='"+initial_backends[param_backend[0]].name+"' onClick='toggleSitePanel()'>\</div>");
-          if(sites.disabled > 0) {
-            dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+ sites.disabled+" more' onClick='toggleSitePanel()'></div>");
-          }
-        } else {
-          dw("<div class='backend'><input type='button' class='"+(sites.up > 0 ? "button_peerUP" : "button_peerDIS")+"' value='"+sites.up+" up' onClick='toggleSitePanel()'></div>");
-          dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+sites.disabled+" disabled' onClick='toggleSitePanel()'></div>");
-          dw("<div class='backend'><input type='button' class='"+(sites.down > 0 ? "button_peerDOWN" : "button_peerDIS")+"' value='"+sites.down+" down' onClick='toggleSitePanel()'></div>");
-        }
-        dw('<div id="site_panel" style="display: none;"><\/div>');
-    }
-}
 
 /* create sites popup */
 function create_site_panel_popup() {
@@ -765,7 +738,7 @@ function create_site_panel_popup() {
     }
     panel += '          <td style="padding-right: 20px;">Choose your sites</td>';
     if(backend_chooser != 'switch') {
-        panel += '      <td align="right" width="70" class="clickable" onclick="toggleAllSections(true);">check all</td>';
+        panel += '      <td align="right" width="70" class="clickable" onclick="toggleAllSections(true);">enable all</td>';
         panel += '      <td align="left" width="20"><input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();"></td>';
     }
     panel += '        </tr>';
@@ -786,27 +759,27 @@ function create_site_panel_popup() {
 }
 
 function create_site_panel_popup_panel() {
-    var section = sites.sections.Default;
     panel  = '<div class="site_panel_sections" style="overflow: auto;">';
     panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
     panel += '  <tr>';
-    jQuery(keys(section.subsections).sort()).each(function(i, subsection) {
-        if(section.subsections[subsection].total == 0) { return; }
-        if(subsection == "Default" && keys(section.subsections).length == 1) { return; }
-        panel += '<th class="site_panel '+(i==0 ? '' : "notfirst")+'">';
-        panel += '  <a href="#" class="sites_subsection" onclick="toggleSection(\'Default/'+subsection+'\'); return false;" title="'+subsection+'">'+subsection+'</a>';
-        panel += '</th>';
-    });
+    if(sites["sub"] && keys(sites["sub"]).length > 1) {
+        jQuery(keys(sites["sub"]).sort()).each(function(i, subsection) {
+            if(sites["sub"][subsection].total == 0) { return; }
+            panel += '<th class="site_panel '+(i==0 ? '' : "notfirst")+'">';
+            panel += '  <a href="#" class="sites_subsection" onclick="toggleSection([\''+subsection+'\']); return false;" title="'+subsection+'">'+subsection+'</a>';
+            panel += '</th>';
+        });
+    }
     panel += '  </tr>';
     panel += '  <tr>';
-    jQuery(keys(section.subsections).sort()).each(function(i, subsection) {
-        if(section.subsections[subsection].total == 0) { return; }
+    jQuery(keys(sites["sub"]).sort()).each(function(i, subsection) {
+        if(sites["sub"][subsection].total == 0) { return; }
         panel += '<td valign="top" class="site_panel '+(i==0 ? "" : "notfirst")+'" align="center">';
-        panel += '<table cellpadding=0 cellspacing=0 border=0><tr>';
+        panel += '<table cellpadding=0 cellspacing=0 border=0><tr class="subpeers_'+subsection+'">';
         panel += '<td valign="top">';
         var count = 0;
-        jQuery(section.subsections[subsection].sites).each(function(i, pd) {
-            panel += get_site_panel_backend_button(pd, true, "clear: both;", "toggleBackend('"+pd+"')", 'Default', subsection);
+        jQuery(_site_panel_flat_peers(sites["sub"][subsection])).each(function(i, pd) {
+            panel += get_site_panel_backend_button(pd, "clear: both;", "toggleBackend('"+pd+"')", toClsName(subsection));
             count++;
             if(count > 15) { count = 0; panel += '</td><td valign="top">'; }
         });
@@ -820,87 +793,149 @@ function create_site_panel_popup_panel() {
     return(panel);
 }
 
+function _site_panel_flat_peers(section) {
+    var peers = [];
+    if(section["sub"]) {
+        jQuery(keys(section["sub"]).sort()).each(function(i, subsection) {
+            peers = peers.concat(_site_panel_flat_peers(section["sub"][subsection]));
+        });
+    }
+    if(section["peers"]) {
+        jQuery(section["peers"]).each(function(i, p) {
+            peers.push(p);
+        });
+    }
+    return(peers);
+}
+
+function toClsName(name) {
+    name = name.replace(/[^a-zA-Z0-9]+/g, '-');
+    return(name);
+}
+
+function toClsNameList(list, join_char) {
+    var out = [];
+    if(join_char == undefined) { join_char = '_'; }
+    for(var x = 0; x < list.length; x++) {
+        out.push(toClsName(list[x]));
+    }
+    return(out.join(join_char));
+}
+
 function create_site_panel_popup_collapsed() {
     panel  = '<div class="site_panel_sections" style="overflow: auto;">';
     panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
-    var sections_num = keys(sites.sections).length;
-    jQuery(keys(sites.sections).sort()).each(function(i, sectionname) {
-        var section = sites.sections[sectionname];
-        if(sections_num > 1) {
-            panel += '  <tr>';
-            panel += '    <th align="left">';
-            panel += '      <a href="#" onclick="toggleAllSubSection(\''+sectionname+'\'); return false;" title="'+sectionname+'" class="sites_subsection">'+sectionname+'</a>';
-            panel += '    </th>';
-            panel += '  </tr>';
-        }
-        panel += '  <tr>';
-        panel += '    <td>';
-        jQuery(keys(section.subsections).sort()).each(function(i, subsectionname) {
-            var subsection = section.subsections[subsectionname];
-            if(subsection.total == 0) { return; }
-            var cls = 'button_peerDIS';
-            if(section.total == subsection.up) { cls = 'button_peerUP'; }
-            if(section.total == subsection.down) { cls = 'button_peerDOWN'; }
-            if(section.total == subsection.disabled) { cls = 'button_peerDIS'; }
-            if(section.up  > 0 && subsection.down > 0) { cls = 'button_peerWARN'; }
-            if(section.up  > 0 && subsection.disabled > 0 && subsection.down == 0) { cls = 'button_peerUPDIS'; }
-            if(section.up == 0 && subsection.disabled > 0 && subsection.down > 0) { cls = 'button_peerDOWNDIS'; }
-            panel += '<div class="backend"><input id="btn_sites_'+sectionname+'_'+subsectionname+'" type="button" class="'+cls+' btn_sites btn_sites_'+sectionname+'" value="'+subsectionname+'" onClick="toggleSubSection(\'sites_'+sectionname+'_'+subsectionname+'\')"></div>';
-        });
-        panel += '    </td>';
-        panel += '  </tr>';
-        if(i < sections_num - 1) {
+    jQuery(keys(sites.sub).sort()).each(function(i, sectionname) {
+        if(i > 0) {
             panel += '  <tr>';
             panel += '    <td><hr class="sites_collapsed"></td>';
             panel += '  </tr>';
         }
+        panel += '<tr>';
+        panel += ' <th align="left">';
+        panel += '   <a href="#" onclick="toggleSection([\''+sectionname+'\']); return false;" title="'+sectionname+'" class="sites_subsection">'+sectionname+'</a>';
+        panel += '  </th>';
+        panel += '</tr>';
+        // show first two levels of sections
+        panel += add_site_panel_popup_collapsed_section(sites["sub"][sectionname], [sectionname]);
+        // including peers
+        if(sites["sub"][sectionname]["peers"]) {
+            panel += '  <tr class="subpeer subpeers_'+(toClsName(sectionname))+' sublvl_1">';
+            panel += '    <th align="left" style="padding-left: 10px;">';
+            jQuery(sites["sub"][sectionname]["peers"]).each(function(i, pd) {
+                panel += get_site_panel_backend_button(pd, "", "toggleBackend('"+pd+"')", toClsName(sectionname));
+            });
+            panel += '    </th>';
+            panel += '  </tr>';
+        }
     });
-    panel += create_site_panel_popup_panel_section_details();
+
+    // add top level peers
+    if(sites["peers"]) {
+        panel += '  <tr class="subpeer subpeers_top">';
+        panel += '    <th align="left">';
+        panel += '    <hr class="sites_collapsed">';
+        jQuery(sites["peers"]).each(function(i, pd) {
+            panel += get_site_panel_backend_button(pd, "", "toggleBackend('"+pd+"')", "top");
+        });
+        panel += '    </th>';
+        panel += '  </tr>';
+    }
+
+    // add all other peers
+    jQuery(keys(sites.sub).sort()).each(function(i, sectionname) {
+        panel += add_site_panel_popup_collapsed_peers(sites["sub"][sectionname], [sectionname]);
+    });
+
     panel += '</table>';
     panel += '<\/div>';
     return(panel);
 }
 
-function create_site_panel_popup_panel_section_details() {
-    panel = '';
-    var sections_num = keys(sites.sections).length;
-    jQuery(keys(sites.sections).sort()).each(function(i, sectionname) {
-        var section = sites.sections[sectionname];
-        jQuery(keys(section.subsections).sort()).each(function(j, subsectionname) {
-            var subsection = section.subsections[subsectionname];
-            if(subsection.total == 0) { return; }
-            panel += '<tr style="display:none;" id="sites_'+sectionname+'_'+subsectionname+'">';
-            panel += '  <td>';
-            panel += '    <br>';
-            panel += '    <hr class="sites_collapsed last">';
-            panel += '    <table><tr><td>';
-            panel += '      <input type="checkbox" id="all_section_'+sectionname+'_'+subsectionname+'" value="" name="all_section_'+sectionname+'_'+subsectionname+'" onclick="toggleSection(\''+sectionname+'/'+subsectionname+'\');" style="cursor: pointer;">';
-            panel += '    </td><td style="vertical-align: middle;">';
-            panel += '      <a href="#" onclick="toggleSection(\''+sectionname+'/'+subsectionname+'\'); return false;"><b>';
-            if(sections_num > 1) { panel += sectionname+' -&gt; '; }
-            panel += '      '+subsectionname+'</b></a>:';
-            panel += '    </td></tr></table>';
-            /* sort by name, not by id */
-            var site_names = {};
-            jQuery(subsection.sites.sort()).each(function(k, site_id) {
-                var site_name = initial_backends[site_id]['name'].toLowerCase();
-                if(site_names[site_name] == undefined) {
-                    site_names[site_name] = [];
-                }
-                site_names[site_name].push(site_id);
-            });
-            jQuery(keys(site_names).sort()).each(function(k, site_name) {
-                jQuery(site_names[site_name]).each(function(l, site_id) {
-                    panel += get_site_panel_backend_button(site_id, true, '', 'toggleBackend(\''+site_id+'\')', sectionname, subsectionname);
-                });
-            });
-            panel += '</td>';
-            panel += '</tr>';
+function add_site_panel_popup_collapsed_section(section, prefix) {
+    var lvl = prefix.length;
+    panel = "";
+    var prefixCls = toClsNameList(prefix);
+    if(section["sub"]) {
+        panel += '  <tr style="'+(lvl > 1 ? 'display: none;' : '')+'" class="subsection subsection_'+prefixCls+' sublvl_'+lvl+'">';
+        panel += '    <th align="left" style="padding-left: '+(lvl*10)+'px;">';
+        jQuery(keys(section["sub"]).sort()).each(function(i, sectionname) {
+            var subsection = section["sub"][sectionname];
+            var new_prefix = prefix.concat(sectionname);
+            var cls = 'button_peerDIS';
+            if(subsection.total == subsection.up) { cls = 'button_peerUP'; }
+            if(subsection.total == subsection.down) { cls = 'button_peerDOWN'; }
+            if(subsection.total == subsection.disabled) { cls = 'button_peerDIS'; }
+            if(subsection.up  > 0 && subsection.down > 0) { cls = 'button_peerWARN'; }
+            if(subsection.up  > 0 && subsection.disabled > 0 && subsection.down == 0) { cls = 'button_peerUPDIS'; }
+            if(subsection.up == 0 && subsection.disabled > 0 && subsection.down > 0) { cls = 'button_peerDOWNDIS'; }
+            panel += "<input type='button' class='"+cls+" btn_sites btn_sites_"+prefixCls+"_"+toClsName(sectionname)+"' value='"+sectionname+"' onClick='toggleSubSectionVisibility("+JSON.stringify(new_prefix)+")'>";
         });
-    });
+        panel += '    </th>';
+        panel += '  </tr>';
+
+        jQuery(keys(section["sub"]).sort()).each(function(i, sectionname) {
+            var subsection = section["sub"][sectionname];
+            var new_prefix = prefix.concat(sectionname);
+            panel += add_site_panel_popup_collapsed_section(subsection, new_prefix);
+        });
+    }
+
     return(panel);
 }
 
+function add_site_panel_popup_collapsed_peers(section, prefix) {
+    var lvl = prefix.length;
+    panel = "";
+    if(section["peers"]) {
+        var prefixCls = toClsNameList(prefix);
+        panel += '  <tr class="subpeer subpeers_'+prefixCls+'" style="display: none;">';
+        panel += '    <th align="left">';
+        panel += '    <hr class="sites_collapsed last">';
+
+        panel += '    <table><tr><td>';
+        panel += "      <input type='checkbox' onclick='toggleSection("+JSON.stringify(prefix)+");' class='clickable section_check_box_"+prefixCls+"'>";
+        panel += '    </td><td style="vertical-align: middle;">';
+        panel += "      <a href='#' onclick='toggleSection("+JSON.stringify(prefix)+"); return false;'><b>";
+        panel += prefix.join(' -&gt; ');
+        panel += '      </b></a>:';
+        panel += '    </td></tr></table>';
+
+        jQuery(section["peers"]).each(function(i, pd) {
+            panel += get_site_panel_backend_button(pd, "", "toggleBackend('"+pd+"')", prefixCls);
+        });
+        panel += '    </th>';
+        panel += '  </tr>';
+    }
+    if(section["sub"]) {
+        jQuery(keys(section["sub"]).sort()).each(function(i, sectionname) {
+            var subsection = section["sub"][sectionname];
+            var new_prefix = prefix.concat(sectionname);
+            panel += add_site_panel_popup_collapsed_peers(subsection, new_prefix);
+        });
+    }
+    return(panel);
+}
 
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
@@ -991,31 +1026,47 @@ function toggleBackend(backend, state, skip_update) {
 }
 
 /* toggle subsection */
-var last_subsection;
-function toggleSubSection(subsection) {
-    var enabled = toggleElement(subsection);
-    if(enabled) {
-        jQuery('#btn_'+subsection).addClass('section_active');
+function toggleSubSectionVisibility(subsection) {
+    // hide everything
+    jQuery('TR.subpeer, TR.subsection').css('display', 'none');
+    jQuery('TR.subsection INPUT').removeClass('button_peer_selected');
+
+    // show parents sections
+    var subsectionCls = toClsNameList(subsection);
+    var cls = '';
+    for(var x = 0; x < subsection.length; x++) {
+        if(cls != "") { cls = cls+'_'; }
+        cls = cls+toClsName(subsection[x]);
+        // show section itself
+        jQuery('TR.subsection_'+cls).css('display', '');
+        // but hide all subsections
+        jQuery('TR.subsection_'+cls+' INPUT').css('display', 'none');
+        // except the one we want to see
+        jQuery('INPUT.btn_sites_'+cls).css('display', '').addClass('button_peer_selected');
     }
-    if(last_subsection == subsection) {
-        jQuery('#btn_'+subsection).removeClass('section_active');
-        last_subsection = undefined;
-    } else {
-        if(last_subsection != undefined) {
-            jQuery('#btn_'+last_subsection).removeClass('section_active');
-            hideElement(last_subsection);
-        }
-        last_subsection = subsection;
-    }
-    updateSitePanelCheckBox();
+
+    // show section itself
+    jQuery('TR.subsection_'+subsectionCls).css('display', '');
+    jQuery('TR.subsection_'+subsectionCls+' INPUT').css('display', '');
+
+    // show peer for this subsection
+    jQuery('TR.subpeers_'+subsectionCls).css('display', '');
+    jQuery('TR.subpeers_'+subsectionCls+' INPUT').css('display', '');
+
+    // always show top sections
+    jQuery('TR.sublvl_1').css('display', '');
+    jQuery('TR.sublvl_1 INPUT').css('display', '');
 }
 
 /* toggle all backends for this section */
-function toggleSection(section) {
-    section = section.replace(/[^\w]+/g, '_');
+function toggleSection(sections) {
     var first_state = undefined;
-    jQuery('INPUT[type=button].subsection_'+section).each(function(i, b) {
+    var section = toClsNameList(sections);
+    var regex   = new RegExp('section_'+section+'(_|\\\s|$)');
+    jQuery('TABLE.site_panel INPUT[type=button]').each(function(i, b) {
         var id = b.id.replace(/^button_/, '');
+        if(!id) { return; }
+        if(!b.className.match(regex)) { return; }
         if(first_state == undefined) {
             if(jQuery(b).hasClass("button_peerUP") || jQuery(b).hasClass("button_peerDOWN")) {
                 first_state = 0;
@@ -1025,32 +1076,7 @@ function toggleSection(section) {
         }
         toggleBackend(id, first_state, true);
     });
-    updateSitePanelCheckBox();
-}
 
-/* toggle all backends for one subsection */
-function toggleAllSubSection(subsection) {
-    subsection = subsection.replace(/[^\w]+/g, '_');
-    var first_state = undefined;
-    jQuery('INPUT[type=button].section_'+subsection).each(function(i, b) {
-        var id = b.id.replace(/^button_/, '');
-        if(first_state == undefined) {
-            if(jQuery(b).hasClass("button_peerUP") || jQuery(b).hasClass("button_peerDOWN")) {
-                first_state = 0;
-            } else {
-                first_state = 1;
-            }
-        }
-        toggleBackend(id, first_state, true);
-    });
-    jQuery('INPUT.btn_sites_'+subsection).each(function(i, b) {
-        jQuery(b).removeClass("button_peerDIS button_peerDOWN button_peerUP button_peerWARN button_peerUPDIS button_peerDOWNDIS");
-        if(first_state == 0) {
-            jQuery(b).addClass("button_peerDIS");
-        } else {
-            jQuery(b).addClass("button_peerUP");
-        }
-    });
     updateSitePanelCheckBox();
 }
 
@@ -1069,43 +1095,17 @@ function toggleAllSections(reverse) {
             toggleBackend(id, state, true);
         }
     });
-    jQuery('INPUT.btn_sites').each(function(i, b) {
-        jQuery(b).removeClass("button_peerDIS button_peerDOWN button_peerUP button_peerWARN button_peerUPDIS button_peerDOWNDIS");
-        if(state == 1) {
-            jQuery(b).addClass("button_peerUP");
-        } else {
-            jQuery(b).addClass("button_peerDIS");
-        }
-    });
+
     updateSitePanelCheckBox();
 }
 
-/* update all site panel checkboxes */
+/* update all site panel checkboxes and section button */
 function updateSitePanelCheckBox() {
-    var sections = [];
-    jQuery('A.sites_subsection').each(function(i, b) {
-        sections.push(b.title);
-    });
-    if(sections.length == 0) {
-        sections = ['Default'];
-    }
-
     /* count totals */
-    var total = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
-    jQuery(sections).each(function(i, section) {
-        total['sections'][section] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
-        if(jQuery('INPUT.btn_sites_'+section).length == 0) {
-            total['sections']['Default'] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
-            total = count_site_section_totals(total, 'Default', section);
-        } else {
-            jQuery('INPUT.btn_sites_'+section).each(function(i, b) {
-                var subsection = b.value;
-                total = count_site_section_totals(total, section, subsection);
-            });
-        }
-    });
-    /* check all button */
-    if(total['disabled'] > 0) {
+    count_site_section_totals(sites, []);
+
+    /* enable all button */
+    if(sites['disabled'] > 0) {
         jQuery('#all_backends').prop('checked', false);
     } else {
         jQuery('#all_backends').prop('checked', true);
@@ -1113,70 +1113,81 @@ function updateSitePanelCheckBox() {
 }
 
 /* count totals for a section */
-function count_site_section_totals(total, section, subsection) {
-    var cls_subsection = subsection.replace(/[^\w]/g, '_');
-    var cls_section    = section.replace(/[^\w]/g, '_');
-    total['sections'][section]['subsections'][subsection] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0 };
-    jQuery('INPUT.subsection_'+cls_section+'_'+cls_subsection).each(function(i, b) {
-        if(jQuery(b).hasClass('button_peerDIS') || jQuery(b).hasClass('button_peerHID')) {
-            total['sections'][section]['subsections'][subsection]['disabled']++;
-            total['sections'][section]['disabled']++;
-            total['disabled']++;
-        }
-        else if(jQuery(b).hasClass('button_peerUP')) {
-            total['sections'][section]['subsections'][subsection]['up']++;
-            total['sections'][section]['up']++;
-            total['up']++;
-        }
-        else if(jQuery(b).hasClass('button_peerDOWN')) {
-            total['sections'][section]['subsections'][subsection]['down']++;
-            total['sections'][section]['down']++;
-            total['down']++;
-        } else {
-            if(thruk_debug_js) { alert("ERROR: no known class found in section: " + section + ', subsection: ' + subsection + ', site: ' + b.title ); }
-        }
-        total['sections'][section]['subsections'][subsection]['total']++;
-        total['sections'][section]['total']++;
-        total['total']++;
-    });
+function count_site_section_totals(section, prefix) {
+    section.total    = 0;
+    section.disabled = 0;
+    section.down     = 0;
+    section.up       = 0;
+    if(section["sub"]) {
+        jQuery(keys(section["sub"]).sort()).each(function(i, sectionname) {
+            var subsection = section["sub"][sectionname];
+            var new_prefix = prefix.concat(sectionname);
+            count_site_section_totals(subsection, new_prefix);
+            section.total    += subsection.total;
+            section.disabled += subsection.disabled;
+            section.down     += subsection.down;
+            section.up       += subsection.up;
+        });
+    }
+
+    if(section["peers"]) {
+        jQuery(section["peers"]).each(function(i, pd) {
+            var btn = document.getElementById("button_"+pd);
+            if(!btn) { return; }
+            section.total++;
+            if(jQuery(btn).hasClass('button_peerDIS') || jQuery(btn).hasClass('button_peerHID')) {
+                section.disabled++;
+            }
+            else if(jQuery(btn).hasClass('button_peerUP')) {
+                section.up++;
+            }
+            else if(jQuery(btn).hasClass('button_peerDOWN')) {
+                section.down++;
+            }
+        });
+    }
+
+    if(prefix.length == 0) { return; }
 
     /* set section button */
-    jQuery('#btn_sites_' + cls_section + '_' + cls_subsection)
+    var prefixCls = toClsNameList(prefix);
+    var newBtnClass = "";
+    if(section.disabled == section.total) {
+        newBtnClass = "button_peerDIS";
+    }
+    else if(section.up == section.total) {
+        newBtnClass = "button_peerUP";
+    }
+    else if(section.down == section.total) {
+        newBtnClass = "button_peerDOWN";
+    }
+    else if(section.down > 0 && section.up > 0) {
+        newBtnClass = "button_peerWARN";
+    }
+    else if(section.up > 0 && section.disabled > 0 && section.down == 0) {
+        newBtnClass = "button_peerUPDIS";
+    }
+    else if(section.disabled > 0 && section.down > 0 && section.up == 0) {
+        newBtnClass = "button_peerDOWNDIS";
+    }
+    jQuery('.btn_sites_' + prefixCls)
             .removeClass("button_peerDIS")
             .removeClass("button_peerDOWN")
             .removeClass("button_peerUP")
             .removeClass("button_peerWARN")
             .removeClass("button_peerUPDIS")
-            .removeClass("button_peerDOWNDIS");
-    if(total['sections'][section]['subsections'][subsection]['disabled'] == total['sections'][section]['subsections'][subsection]['total']) {
-        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerDIS');
-    }
-    else if(total['sections'][section]['subsections'][subsection]['up'] == total['sections'][section]['subsections'][subsection]['total']) {
-        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerUP');
-    }
-    else if(total['sections'][section]['subsections'][subsection]['down'] == total['sections'][section]['subsections'][subsection]['total']) {
-        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerDOWN');
-    }
-    else if(total['sections'][section]['subsections'][subsection]['down'] > 0 && total['sections'][section]['subsections'][subsection]['up'] > 0) {
-        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerWARN');
-    }
-    else if(total['sections'][section]['subsections'][subsection]['up'] > 0 && total['sections'][section]['subsections'][subsection]['disabled'] > 0 && total['sections'][section]['subsections'][subsection]['down'] == 0) {
-        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerUPDIS');
-    }
-    else if(total['sections'][section]['subsections'][subsection]['disabled'] > 0 && total['sections'][section]['subsections'][subsection]['down'] > 0 && total['sections'][section]['subsections'][subsection]['up'] == 0) {
-        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerDOWNDIS');
-    }
+            .removeClass("button_peerDOWNDIS")
+            .addClass(newBtnClass);
 
     /* set section checkbox */
-    if(total['sections'][section]['subsections'][subsection]['disabled'] > 0) {
-        jQuery('#all_section_' + cls_section + '_' + cls_subsection).prop('checked', false);
+    if(section.disabled > 0) {
+        jQuery('.section_check_box_'+prefixCls).prop('checked', false);
     } else {
-        jQuery('#all_section_' + cls_section + '_' + cls_subsection).prop('checked', true);
+        jQuery('.section_check_box_'+prefixCls).prop('checked', true);
     }
-    return total;
 }
 
-/* toogle checkbox by id */
+/* toggle checkbox by id */
 function toggleCheckBox(id) {
   var box = document.getElementById(id);
   if(box.checked) {
@@ -1186,7 +1197,7 @@ function toggleCheckBox(id) {
   }
 }
 
-/* toogle disabled status */
+/* toggle disabled status */
 function toggleDisabled(id) {
   var thing = document.getElementById(id);
   if(thruk_debug_js && thing == undefined) { alert("ERROR: no element in toggleDisabled() for: " + id ); }
@@ -1388,6 +1399,8 @@ function select_all_options(select_id) {
 function get_trimmed_pattern(pattern) {
     var trimmed_pattern = new Array();
     jQuery.each(pattern.split(" "), function(index, sub_pattern) {
+        sub_pattern = sub_pattern.replace(/\s+$/g, "");
+        sub_pattern = sub_pattern.replace(/^\s+/g, "");
         if(sub_pattern != '') {
             trimmed_pattern.push(sub_pattern);
         }
@@ -1704,46 +1717,99 @@ function do_table_search() {
     set_hash(value, 2);
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
-        /* make tables fixed width to avoid flickering */
-        table.width = table.offsetWidth;
-        var startWith = 1;
-        if(jQuery(table).hasClass('header2')) {
-            startWith = 2;
-        }
-        jQuery.each(table.rows, function(nr, row) {
-            if(nr >= startWith) {
-                var found = 0;
-                jQuery.each(row.cells, function(nr, cell) {
-                    /* if regex matching fails, use normal matching */
-                    try {
-                        if(cell.innerHTML.toLowerCase().match(value)) {
-                            found = 1;
-                        }
-                    } catch(err) {
-                        if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
-                            found = 1;
-                        }
-                    }
-                });
-                if(found == 0) {
-                    if(!jQuery(row).hasClass('table_search_skip')) {
-                        jQuery(row).addClass('filter_hidden');
-                    }
-                } else {
-                    if(!jQuery(row).hasClass('table_search_skip')) {
-                        jQuery(row).removeClass('filter_hidden');
-                    }
-                }
-            }
-        });
-        if(table_search_cb[id] != undefined) {
-            try {
-                table_search_cb[id]();
-            } catch(err) {
-                debug(err);
-            }
+        var matches = table.className.match(/searchSubTable_([^\ ]*)/);
+        if(matches && matches[1]) {
+            jQuery(table).find("TABLE."+matches[1]).each(function(x, t) {
+                do_table_search_table(id, t, value);
+            });
+        } else {
+            do_table_search_table(id, table, value);
         }
     });
+}
+
+function do_table_search_table(id, table, value) {
+    /* make tables fixed width to avoid flickering */
+    if(table.offsetWidth) {
+        table.width = table.offsetWidth;
+    }
+    var startWith = 1;
+    if(jQuery(table).hasClass('header2')) {
+        startWith = 2;
+    }
+    if(jQuery(table).hasClass('search_vertical')) {
+        var totalFound = 0;
+        jQuery.each(table.rows[0].cells, function(col_nr, ref_cell) {
+            if(col_nr < startWith) {
+                return;
+            }
+            var found = 0;
+            jQuery.each(table.rows, function(nr, row) {
+                var cell = row.cells[col_nr];
+                try {
+                    if(cell.innerHTML.toLowerCase().match(value)) {
+                        found = 1;
+                    }
+                } catch(err) {
+                    if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
+                        found = 1;
+                    }
+                }
+            });
+            jQuery.each(table.rows, function(nr, row) {
+                var cell = row.cells[col_nr];
+                if(found == 0) {
+                    jQuery(cell).addClass('filter_hidden');
+                } else {
+                    jQuery(cell).removeClass('filter_hidden');
+                }
+            });
+            if(found > 0) {
+                totalFound++;
+            }
+        });
+        if(jQuery(table).hasClass('search_hide_empty')) {
+            if(totalFound == 0) {
+                jQuery(table).addClass('filter_hidden');
+            } else {
+                jQuery(table).removeClass('filter_hidden');
+            }
+        }
+    } else {
+        jQuery.each(table.rows, function(nr, row) {
+            if(nr < startWith) {
+                return;
+            }
+            if(jQuery(row).hasClass('table_search_skip')) {
+                return;
+            }
+            var found = 0;
+            jQuery.each(row.cells, function(nr, cell) {
+                /* if regex matching fails, use normal matching */
+                try {
+                    if(cell.innerHTML.toLowerCase().match(value)) {
+                        found = 1;
+                    }
+                } catch(err) {
+                    if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
+                        found = 1;
+                    }
+                }
+            });
+            if(found == 0) {
+                jQuery(row).addClass('filter_hidden');
+            } else {
+                jQuery(row).removeClass('filter_hidden');
+            }
+        });
+    }
+    if(table_search_cb[id] != undefined) {
+        try {
+            table_search_cb[id]();
+        } catch(err) {
+            debug(err);
+        }
+    }
 }
 
 /* show bug report icon */
@@ -1763,6 +1829,7 @@ function showBugReport(id, text) {
         Ext.getCmp(id).setHref(href);
         Ext.getCmp(id).el.dom.ondblclick    = function() { return showErrorTextPopup(raw) };
         Ext.getCmp(id).el.dom.oncontextmenu = function() { return showErrorTextPopup(raw) };
+        Ext.getCmp(id).el.dom.style.zIndex = 1000;
     }
     catch(err) {
         /* for all other pages */
@@ -1852,7 +1919,7 @@ function getErrorText(details, error) {
         }
         if(window.XMLHttpRequest && file && !file.match("eval")) {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", file, false);
+            xhr.open("GET", file);
             xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
             xhr.send(null);
             var source = xhr.responseText.split(/\n/);
@@ -1865,6 +1932,8 @@ function getErrorText(details, error) {
     } catch(err) {}
 
     /* this only works in panorama view */
+    /*
+     *removed... doesn't help much and just fills the logfile
     try {
         if(TP.logHistory) {
             text += "\n";
@@ -1878,6 +1947,7 @@ function getErrorText(details, error) {
             }
         }
     } catch(err) {}
+    */
     text += "\n";
     return(text);
 }
@@ -2115,8 +2185,8 @@ function save_url_in_parents_hash() {
 function set_hash(value, nr) {
     if(value == undefined)   { value = ""; }
     if(value == "undefined") { value = ""; }
+    var current = get_hash();
     if(nr != undefined) {
-        var current   = get_hash();
         if(current == undefined) {
             current = "";
         }
@@ -2128,10 +2198,16 @@ function set_hash(value, nr) {
     value = value.replace(/\|$/, '');
 
     // replace history otherwise we have to press back twice
-    if (history.replaceState) {
-        history.replaceState({}, "", '#'+value);
+    if(current == value) { return; }
+    if(value == "") {
+        value = getCurrentUrl(false).replace(/\#.*$/, "");
     } else {
-        window.location.replace('#'+value);
+        value = '#'+value;
+    }
+    if (history.replaceState) {
+        history.replaceState({}, "", value);
+    } else {
+        window.location.replace(value);
     }
     if(window.parent) {
         try {
@@ -2734,6 +2810,28 @@ function looks_like_regex(str) {
         return(true);
     }
     return(false);
+}
+
+function show_list(incr, selector) {
+    var elements = jQuery(selector);
+    var curIdx = 0;
+    jQuery(elements).each(function(i, n) {
+        if(jQuery(n).is(":visible")) {
+            jQuery(n).hide();
+            curIdx = i;
+            return(false);
+        }
+    });
+    var newIdx = curIdx+incr;
+    jQuery(elements[newIdx]).show();
+    jQuery("DIV.controls BUTTON.next").css('visibility', '');
+    jQuery("DIV.controls BUTTON.previous").css('visibility', '');
+    if(newIdx == elements.length -1) {
+        jQuery("DIV.controls BUTTON.next").css('visibility', 'hidden');
+    }
+    if(newIdx == 0) {
+        jQuery("DIV.controls BUTTON.previous").css('visibility', 'hidden');
+    }
 }
 
 /*******************************************************************************
@@ -4573,6 +4671,43 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
   target.innerHTML = filtername;
 }
 
+function getFilterTypeOptions() {
+    var important = new Array(/* when changed, update _status_filter.tt too! */
+        'Search',
+        'Host',
+        'Service',
+        'Hostgroup',
+        'Servicegroup',
+        '----------------'
+    );
+    var others = new Array(
+        'Check Period',
+        'Comment',
+        'Contact',
+        'Current Attempt',
+        'Custom Variable',
+        'Downtime Duration',
+        'Duration',
+        'Event Handler',
+        'Execution Time',
+        'Last Check',
+        'Latency',
+        'Next Check',
+        'Notification Period',
+        'Number of Services',
+        'Parent',
+        'Plugin Output',
+        '% State Change'
+       );
+    if(enable_shinken_features) {
+        others.unshift('Business Impact');
+    }
+    var options = Array();
+    options = options.concat(important);
+    options = options.concat(others.sort());
+    return(options);
+}
+
 /* add a new filter selector to this table */
 function add_new_filter(search_prefix, table) {
   pane_prefix   = search_prefix.substring(0,4);
@@ -4600,32 +4735,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect = document.createElement('select');
-  var options    = new Array('Check Period', /* when changed, update _panorama_js_form_filter.tt too! */
-                             'Comment',
-                             'Contact',
-                             'Current Attempt',
-                             'Custom Variable',
-                             'Downtime Duration',
-                             'Duration',
-                             'Event Handler',
-                             'Execution Time',
-                             'Host',
-                             'Hostgroup',
-                             'Last Check',
-                             'Latency',
-                             'Next Check',
-                             'Notification Period',
-                             'Number of Services',
-                             'Parent',
-                             'Plugin Output',
-                             'Service',
-                             'Servicegroup',
-                             '% State Change'
-                            );
-  if(enable_shinken_features) {
-    options.unshift('Business Impact');
-  }
-  options.unshift('Search');
+  var options    = getFilterTypeOptions();
 
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
@@ -4741,6 +4851,9 @@ function add_options(select, options, numbered) {
     jQuery.each(options, function(index, text) {
         var opt  = document.createElement('option');
         opt.text = text;
+        if(text.match(/^\-+$/)) {
+            opt.disabled = true;
+        }
         if(numbered) {
             opt.value = x;
         } else {
@@ -4895,7 +5008,7 @@ function deleteSearchPane(id) {
   return false;
 }
 
-/* toogle checkbox for attribute filter */
+/* toggle checkbox for attribute filter */
 function toggleFilterCheckBox(id) {
   id  = id.substring(0, id.length -1);
   var box = document.getElementById(id);
@@ -4906,7 +5019,7 @@ function toggleFilterCheckBox(id) {
   }
 }
 
-/* toogle all checkbox for attribute filter */
+/* toggle all checkbox for attribute filter */
 function toggleAllFilterCheckBox(prefix) {
   var box = document.getElementById(prefix+"ht0");
   var state = false;
@@ -5047,8 +5160,15 @@ function check_filter_style_changes(form, pageStyle, columnFieldId) {
   return true;
 }
 
+
+var status_form_clean = true;
+function setNoFormClean() {
+    status_form_clean = false;
+}
+
 /* remove empty values from form to reduce request size */
 function remove_empty_form_params(form) {
+  if(!status_form_clean) { return true; }
   var s_data = jQuery(form).serializeArray();
   for(var i=0; i<s_data.length; i++){
     var f = s_data[i];

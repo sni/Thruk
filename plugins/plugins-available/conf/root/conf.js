@@ -47,6 +47,11 @@ function add_conf_attribute(table, key, rt) {
     // insert row at 3rd last position
     tblBody.insertBefore(newObj, tblBody.rows[tblBody.rows.length -3]);
 
+    // force set name of input field, not only onchange, otherwise preset customvariables from extra_custom_var might now work
+    if(key == 'customvariable') {
+        jQuery('.obj_' + running_number).attr('name', 'obj.'+value);
+    }
+
     reset_table_row_classes(table, 'dataEven', 'dataOdd');
 
     // otherwise button icons are missing
@@ -358,6 +363,8 @@ function init_conf_tool_plugin_wizard(id) {
     var index = cmd_line.indexOf(" ");
     if(index != -1) {
         var args = cmd_line.substr(index + 1);
+        // format args nicely
+        args = args.replace(/\s+(\-|>)/g, "\n    $1");
         document.getElementById(id + "inp_args").value = args;
         cmd_line = cmd_line.substr(0, index);
     };
@@ -546,6 +553,7 @@ function on_attr_select() {
     }
     window.setTimeout(function() {
         ajax_search.hide_results(null, 1);
+        if(!document.getElementById(newid)) { return; }
         jQuery(newid).focus();
         /* move cursor to end of input */
         setCaretToPos(jQuery(newid)[0], jQuery(newid).val().length);
@@ -569,7 +577,11 @@ function on_empty_click(inp) {
     if(td.value.substr(0,1) != '_') {
         td.value = '_' + td.value;
     }
-    newin.name = 'obj.'+td.value;
+    var value_input_id = newid.replace(/_key$/, '');
+    var value_input    = document.getElementById(value_input_id);
+    if(value_input) {
+        value_input.name = 'obj.'+td.value;
+    }
     return false;
 }
 

@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use Cwd qw/cwd/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 BEGIN {
     use lib('t');
@@ -31,22 +32,33 @@ for my $dir (@{$scenarios}) {
         next;
     }
     chdir($dir);
-    for my $step (qw/update prepare test clean/) {
+    for my $step (qw/update prepare wait_start test_verbose clean/) {
         _run($dir, $step);
     }
     chdir($pwd);
 }
+
+# make simple normal final request since the tests kill existing lmd childs and upcoming
+# tests will fail if there is a startup message on stderr
+TestUtils::test_page( url => '/thruk/cgi-bin/extinfo.cgi?type=0' );
 
 done_testing();
 
 sub _run {
     my($dir, $step) = @_;
 
+    my $t0 = [gettimeofday];
     ok(1, "$dir: running make $step");
     my($rc, $out) = Thruk::Utils::IO::cmd(undef, [$make, $step], undef, ($verbose ? '## ' : undef));
-    is($rc, 0, "rc was $rc");
-    if(!$verbose && $rc != 0) { diag($out) }; # already printed in verbose mode
+    is($rc, 0, sprintf("step %s complete, rc=%d duration=%.1fsec", $step, $rc, tv_interval ($t0)));
+    # already printed in verbose mode
+    if(!$verbose && $rc != 0) {
+        diag("*** make output ***************-");
+        diag($out);
+        diag("********************************");
+    };
     if($step eq "prepare" && $rc != 0) {
+        diag(`docker ps`);
         BAIL_OUT("$step failed");
     }
 }

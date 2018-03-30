@@ -36,7 +36,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         var arrowtype = xdata.appearance.connectorarrowtype;
         if(isNaN(fromX)) {
             // may happen if from and to is not yet calculated
-            if(panel.xdata.map) {
+            if(panel.xdata.layout.lon != undefined) {
                 panel.moveToMapLonLat(undefined, false, xdata);
             }
             return;
@@ -151,7 +151,10 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         xdata.layout.x = Math.ceil(fromX-box.path[0][1]+box.x);
         xdata.layout.y = Math.ceil(fromY-box.path[0][2]+box.y);
         panel.setRawPosition(xdata.layout.x, xdata.layout.y);
-        panel.updateMapLonLat(true);
+        // update saved coordinates on first rendering
+        if(xdata.layout.lon1 == "") {
+            panel.updateMapLonLat(xdata);
+        }
 
         /* adjust drag elements position */
         Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {
@@ -211,31 +214,21 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
             values['connectorcolor_unknown']     = '#CC740F';
             values['connectorgradient']          =  0;
             values['connectorsource']            = 'fixed';
-            if(panel.xdata.map) {
-                var tab    = Ext.getCmp(panel.panel_id);
-                var lonLat1 = tab.map.map.getLonLatFromPixel({x: values['connectorfromx'], y: values['connectorfromy']});
-                panel.xdata.map.lon1 = lonLat1.lon;
-                panel.xdata.map.lat1 = lonLat1.lat;
-                var lonLat2 = tab.map.map.getLonLatFromPixel({x: values['connectortox'], y: values['connectortoy']});
-                panel.xdata.map.lon2 = lonLat2.lon;
-                panel.xdata.map.lat2 = lonLat2.lat;
-            }
             Ext.getCmp('appearanceForm').getForm().setValues(values);
         }
     },
 
     getAppearanceTabItems: function(panel) {
+        var tab = Ext.getCmp(panel.panel_id);
         var endpointsChanged = function() {
             if(panel.noMoreMoves) { return; }
-            if(panel.xdata.map) {
+            if(!TP.iconSettingsWindow) { return; }
+            if(tab.map) {
                 var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
-                panel.xdata.appearance.connectorfromx = xdata.appearance.connectorfromx;
-                panel.xdata.appearance.connectorfromy = xdata.appearance.connectorfromy;
-                panel.xdata.appearance.connectortox   = xdata.appearance.connectortox;
-                panel.xdata.appearance.connectortoy   = xdata.appearance.connectortoy;
-                panel.updateMapLonLat();
+                panel.moveToMapLonLat(undefined, undefined, xdata);
+            } else {
+                TP.iconSettingsGlobals.renderUpdate();
             }
-            TP.iconSettingsGlobals.renderUpdate();
         };
         return([{
             fieldLabel: 'From',
@@ -246,7 +239,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
             defaults:   { listeners: { change: endpointsChanged } },
             items:        [{
                 xtype:        'label',
-                text:         'x',
+                text:         !tab.map ? 'x' : 'lat',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
                 xtype:        'numberunit',
@@ -254,10 +247,18 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
                 name:         'connectorfromx',
                 width:         70,
                 unit:         'px',
-                value:         panel.xdata.appearance.connectorfromx
+                value:         panel.xdata.appearance.connectorfromx,
+                hidden:      !!tab.map
+            }, {
+                xtype:        'numberfield',
+                name:         'lat1',
+                width:         95,
+                decimalPrecision: 14,
+                value:         panel.xdata.layout.lat1,
+                hidden:       !tab.map
             }, {
                 xtype:        'label',
-                text:         'y',
+                text:         !tab.map ? 'x' : 'lon',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
                 xtype:        'numberunit',
@@ -265,7 +266,15 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
                 name:         'connectorfromy',
                 width:         70,
                 unit:         'px',
-                value:         panel.xdata.appearance.connectorfromy
+                value:         panel.xdata.appearance.connectorfromy,
+                hidden:      !!tab.map
+            }, {
+                xtype:        'numberfield',
+                name:         'lon1',
+                width:         95,
+                decimalPrecision: 14,
+                value:         panel.xdata.layout.lon1,
+                hidden:       !tab.map
             },{
                 xtype:        'label',
                 text:         'Endpoints',
@@ -293,7 +302,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
             defaults:   { listeners: { change: endpointsChanged } },
             items:        [{
                 xtype:        'label',
-                text:         'x',
+                text:         !tab.map ? 'x' : 'lat',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
                 xtype:        'numberunit',
@@ -301,10 +310,18 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
                 name:         'connectortox',
                 width:         70,
                 unit:         'px',
-                value:         panel.xdata.appearance.connectortox
+                value:         panel.xdata.appearance.connectortox,
+                hidden:      !!tab.map
+            }, {
+                xtype:        'numberfield',
+                name:         'lat2',
+                width:         95,
+                decimalPrecision: 14,
+                value:         panel.xdata.layout.lat2,
+                hidden:       !tab.map
             }, {
                 xtype:        'label',
-                text:         'y',
+                text:         !tab.map ? 'x' : 'lon',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
                 xtype:        'numberunit',
@@ -312,7 +329,15 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
                 name:         'connectortoy',
                 width:         70,
                 unit:         'px',
-                value:         panel.xdata.appearance.connectortoy
+                value:         panel.xdata.appearance.connectortoy,
+                hidden:      !!tab.map
+            }, {
+                xtype:        'numberfield',
+                name:         'lon2',
+                width:         95,
+                decimalPrecision: 14,
+                value:         panel.xdata.layout.lon2,
+                hidden:       !tab.map
             }]
         },
         {

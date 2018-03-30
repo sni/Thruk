@@ -39,6 +39,11 @@ function openDebugConsole() {
     env.sleep(99999);
 }
 
+function mouseMoveXY($x, $y) {
+    var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
+    region.mouseMove();
+}
+
 function mouseClickXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
     region.click();
@@ -47,6 +52,12 @@ function mouseClickXY($x, $y) {
 function mouseRightClickXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
     region.rightClick();
+}
+
+function mouseDrag($x1, $y1, $x2, $y2) {
+    var region1 = new RegionRectangle($x1-10,$y1-10,$x1+10,$y1+10);
+    var region2 = new RegionRectangle($x2-10,$y2-10,$x2+10,$y2+10);
+    region1.dragAndDropTo(region2);
 }
 
 function thruk_login() {

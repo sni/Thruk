@@ -13,6 +13,7 @@ Excel file renderer
 use strict;
 use warnings;
 use Carp qw/confess/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 METHODS
 
@@ -32,6 +33,7 @@ sub register {
 =cut
 sub render_excel {
     my($c) = @_;
+    my $t1 = [gettimeofday];
     my $template = $c->stash->{'template'};
     $c->stats->profile(begin => "render_excel: ".$template);
     my $output = render($c, $template);
@@ -39,6 +41,8 @@ sub render_excel {
     $c->res->content_type('application/x-msexcel');
     $c->res->body($output);
     $c->stats->profile(end => "render_excel: ".$template);
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_render_waited'} += $elapsed;
     return($output);
 }
 
@@ -49,6 +53,7 @@ sub render_excel {
 =cut
 sub render {
     my($c, $template) = @_;
+    my $t1 = [gettimeofday];
     $c->stats->profile(begin => "render: ".$template);
     my $worksheets;
     Thruk::Views::ToolkitRenderer::render($c, $template, undef, \$worksheets);
@@ -64,6 +69,8 @@ sub render {
     }
     my $output = ''.$excel_template->output;
     $c->stats->profile(end => "render: ".$template);
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_render_waited'} += $elapsed;
     return($output);
 }
 

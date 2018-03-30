@@ -54,7 +54,7 @@ Ext.onReady(function() {
                 }
                 var tabpan = Ext.getCmp('tabpan');
                 var tab = tabpan.getActiveTab();
-                if(!tab.locked && !TP.iconSettingsWindow) {
+                if(!tab || !tab.locked && !TP.iconSettingsWindow) {
                     return(false);
                 }
                 if(!TP.iconSettingsWindow) {
@@ -311,6 +311,10 @@ Ext.onReady(function() {
                 style = 'hostdetail';
             }
             link = link+'&style='+style+'&view_mode=json';
+            if(!document.getElementById('tipdetails')) {
+                // will result in js error if renderTo target does not (yet) exist
+                return;
+            }
             if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.destroy(); }
             TP.iconTip.detailsTarget = Ext.create('Ext.panel.Panel', {
                 renderTo: 'tipdetails',

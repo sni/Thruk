@@ -560,14 +560,6 @@ sub _run_commands {
         Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'});
     }
 
-    unless(defined $c->stash->{'defaults_added'}) {
-        Thruk::Action::AddDefaults::add_defaults($c, 1);
-    }
-    # set backends from options
-    if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
-        Thruk::Action::AddDefaults::_set_enabled_backends($c, $opt->{'backends'});
-    }
-
     my $data = {
         'output'  => '',
         'rc'      => 0,
@@ -694,6 +686,22 @@ sub _run_command_action {
         # print help only?
         if(scalar @{$opt->{'commandoptions'}} > 0 && $opt->{'commandoptions'}->[0] =~ /^(help|\-h)$/mx) {
             return(get_submodule_help(ucfirst($action)));
+        }
+
+        my $skip_backends;
+        {
+            ## no critic
+            no strict 'refs';
+            ## use critic
+            $skip_backends = ${"Thruk::Utils::CLI::".ucfirst($action)."::skip_backends"};
+        }
+        if(!defined $c->stash->{'defaults_added'} && !$skip_backends) {
+            Thruk::Action::AddDefaults::add_defaults($c, 1);
+
+            # set backends from options
+            if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
+                Thruk::Action::AddDefaults::_set_enabled_backends($c, $opt->{'backends'});
+            }
         }
 
         # run command
@@ -906,7 +914,7 @@ sub _cmd_raw {
     my $function  = $opt->{'sub'};
 
     unless(defined $c->stash->{'defaults_added'}) {
-        Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
+        Thruk::Action::AddDefaults::add_defaults($c, 1);
     }
     my @keys = @{$Thruk::Backend::Pool::peer_order};
     my $key = $keys[0];

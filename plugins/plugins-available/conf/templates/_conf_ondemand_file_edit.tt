@@ -1,0 +1,30 @@
+﻿[% IF ! file.readonly && ! file.backup && ! file.is_new_file %]
+<script type="text/javascript">
+<!--
+    jQuery(document).ready(function() {
+        // set onchange for all inputs in this form
+        var form = document.getElementById('[% form %]');
+        jQuery('#[% form %] INPUT, #[% form %] TEXTAREA, #[% form %] SELECT').on('change keypress', function(el){
+            if(form.edit_started) { return; }
+            jQuery.ajax({
+                url: url_prefix + 'cgi-bin/conf.cgi',
+                type: 'POST',
+                data: {
+                    sub:        'objects',
+                    start_edit: '[% file.path %]'
+                },
+                success: function(data) {
+                    if(data && data.md5 && data.md5 != "[% file.md5 %]") {
+                        thruk_message(-1, "file has been changed on disk meanwhile, refreshing...");
+                        form.needs_reload = true;
+                        reloadPage();
+                    } else {
+                        form.edit_started = true;
+                    }
+                }
+            });
+        });
+    });
+-->
+</script>
+[% END %]

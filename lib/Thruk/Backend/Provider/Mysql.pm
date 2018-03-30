@@ -3,10 +3,11 @@ package Thruk::Backend::Provider::Mysql;
 use strict;
 use warnings;
 #use Thruk::Timer qw/timing_breakpoint/;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Digest::MD5 qw/md5_hex/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
+use Thruk::Utils qw//;
 
 =head1 NAME
 
@@ -770,9 +771,9 @@ sub _get_subfilter {
             my $v = [values %{$inp}]->[0];
             if($k eq '=')                           { return '= '._quote($v); }
             if($k eq '!=')                          { return '!= '._quote($v); }
-            if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote($v)); }
-            if($k eq '~~')                          { return 'RLIKE '._quote_backslash(_quote($v)); }
-            if($k eq '!~~')                         { return 'NOT RLIKE '._quote_backslash(_quote($v)); }
+            if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
+            if($k eq '~~')                          { return 'RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
+            if($k eq '!~~')                         { return 'NOT RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
             if($k eq '>='  and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '= '.join(' OR '.$f.' = ', @{_quote($v)}); }
             if($k eq '!>=' and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '!= '.join(' OR '.$f.' != ', @{_quote($v)}); }
             if($k eq '!>=')                         { return '!= '._quote($v); }
@@ -988,7 +989,6 @@ sub _import_logs {
     my $files = $options->{'files'} || [];
     $c->stats->profile(begin => "Mysql::_import_logs($mode)");
 
-    #&timing_breakpoint('_import_logs');
     my $forcestart;
     if($options->{'start'}) {
         $forcestart = time() - Thruk::Utils::Status::convert_time_amount($options->{'start'});
@@ -1019,7 +1019,6 @@ sub _import_logs {
         my $prefix = $key;
         my $peer   = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'enabled'};
-        #&timing_breakpoint('_import_logs '.$key);
         $c->stats->profile(begin => "$key");
         $backend_count++;
         $peer->logcache->reconnect();
@@ -1056,7 +1055,6 @@ sub _import_logs {
         }
 
         $c->stats->profile(end => "$key");
-        #&timing_breakpoint('_import_logs done '.$key);
     }
 
     $c->stats->profile(end => "Mysql::_import_logs($mode)");
@@ -1104,7 +1102,7 @@ sub _update_logcache {
         my $host_lookup    = _get_host_lookup(   $dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
         my $service_lookup = _get_service_lookup($dbh,$peer,$prefix, $host_lookup, $mode eq 'import' ? 0 : 1);
         my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
-        my $plugin_lookup  = {};
+        my $plugin_lookup  = _get_plugin_lookup($dbh,$prefix);
 
         if(defined $files and scalar @{$files} > 0) {
             $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup);
@@ -1738,7 +1736,6 @@ sub _fill_lookup_logs {
 sub _import_peer_logfiles {
     my($self,$c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$forcestart) = @_;
 
-    #&timing_breakpoint('_import_peer_logfiles');
     # get start / end timestamp
     my($mstart, $mend);
     my $filter = [];
@@ -1753,15 +1750,12 @@ sub _import_peer_logfiles {
         $c->stats->profile(end => "get last mysql timestamp");
     }
 
-    #&timing_breakpoint('_import_peer_logfiles: got mysql timestamps');
-
     my $log_count = 0;
     $c->stats->profile(begin => "get livestatus timestamp");
     my($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
     if(!$start || !$end) {
         die("something went wrong, cannot get start/end from logfiles ($start / $end)\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
     }
-    #&timing_breakpoint('_import_peer_logfiles: got livestatus timestamps');
 
     print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
     $c->stats->profile(end => "get livestatus timestamp");

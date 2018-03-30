@@ -219,3 +219,5 @@ function updateGraph(reschedule) {
 
 -->
 </script>
+
+[% PROCESS _footer.tt %]

@@ -1,4 +1,5 @@
-﻿[% SET value = "" %]
+﻿[% BLOCK _conf_object_row %]
+[% SET value = "" %]
 [% IF obj_conf.defined(key) %]
   [% SET value = obj_conf.$key %]
 [% END %]
@@ -123,4 +124,5 @@
         [% value.join(', ') %]
     [% END %]
   [% END %]
+[% END %]
 [% END %]

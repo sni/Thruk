@@ -15,10 +15,13 @@
     </table>
 
     <div align="left" style="padding-left: 5px;">
+    [% IF backends.size > 1 %]
+    [% PROCESS _table_search_field.tt ids=["procInfoTable"] %]
+    [% END %]
     [% PROCESS _json_export.tt %]
     </div>
 
-    <table border="0" cellpadding="0">
+    <table border="0" cellpadding="0" id="procInfoTable" class="searchSubTable_procInfo">
       <tr>
         <td valign="top" style="padding-right: 20px;">
           <div class='dataTitle blockHead blockHeadBorder'>Process Information</div>
@@ -38,7 +41,7 @@
           <table border="1" cellspacing="0" cellpadding="0" class='data procInfoTable'>
             <tr>
               <td class='stateInfoTable1'>
-                <table border="0">
+                <table border="0" class="search_vertical search_hide_empty procInfo">
                   <tr>
                     <td class='dataVar' nowrap>Backend Name:</td>
                     [% FOREACH pd IN tmpbackends %]
@@ -51,6 +54,14 @@
                     </td>
                     [% END %]
                   </tr>
+                  [% IF backends.size > 5 %]
+                  <tr>
+                    <td class='dataVar' nowrap>Section:</td>
+                    [% FOREACH pd IN tmpbackends %]
+                    <td class='dataVal'>[% backend_detail.$pd.section %]</td>
+                    [% END %]
+                  </tr>
+                  [% END %]
                   <tr>
                     <td class='dataVar' nowrap>Program Version:</td>
                     [% FOREACH pd IN tmpbackends %]

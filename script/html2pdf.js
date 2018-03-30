@@ -96,7 +96,7 @@ if (system.args.length < 3) {
             console.log('Unable to load the input file!');
             phantom.exit(1);
         } else {
-            if(input.match(/histou\.js\?/)) {
+            if(input.match(/histou\.js\?/) || input.match(/grafana\/dashboard/)) {
                 var retries = 0;
                 window.setInterval(function () {
                     retries++;

@@ -21,6 +21,7 @@ ssl_verify_hostnames=0
         name    = demo3
         id      = demo3id
         type    = livestatus
+        section = section
         <options>
             peer = localhost:7001
         </options>
@@ -29,6 +30,7 @@ ssl_verify_hostnames=0
         name    = demo4
         id      = demo4id
         type    = http
+        section = section/subsection
         <options>
             peer = https://localhost/demo4/
             auth = testkey

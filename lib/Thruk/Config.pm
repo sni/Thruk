@@ -28,10 +28,10 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.18';
+our $VERSION = '2.20';
 
 my $project_root = home('Thruk::Config');
-my $branch       = '';
+my $branch       = '2';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
 if($branch) {
@@ -46,7 +46,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'December 25, 2017',
+              'released'               => 'March 14, 2018',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -151,6 +151,7 @@ our %config = ('name'                   => 'Thruk',
                                           'show_top_pane'  => 0,        # used in _header.tt on status pages
                                           'body_class'     => '',       # used in _conf_bare.tt on config pages
                                           'thruk_debug'    => 0,
+                                          'panorama_debug' => 0,
                                           'all_in_one_css' => 0,
                                           'hide_backends_chooser' => 0,
                                           'show_sitepanel' => 'off',
@@ -212,6 +213,10 @@ our %config = ('name'                   => 'Thruk',
                                               'plugins/panorama/bigscreen.js',
                                               'javascript/strftime-min.js',
                                               'plugins/panorama/OpenLayers-2.13.1.js',
+                                              'plugins/panorama/geoext2-2.0.2/src/GeoExt/Version.js',
+                                              'plugins/panorama/geoext2-2.0.2/src/GeoExt/data/LayerModel.js',
+                                              'plugins/panorama/geoext2-2.0.2/src/GeoExt/data/LayerStore.js',
+                                              'plugins/panorama/geoext2-2.0.2/src/GeoExt/panel/Map.js',
                                           ],
                                       },
                   PRE_CHOMP          => 0,
@@ -1037,6 +1042,20 @@ sub _do_finalize_config {
                 my $basename = $1;
                 $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
             }
+        }
+    }
+
+    # enable OMD tweaks
+    if($ENV{'OMD_ROOT'}) {
+        my $site = $ENV{'OMD_SITE'};
+        my $root = $ENV{'OMD_ROOT'};
+        my($siteport) = (`grep CONFIG_APACHE_TCP_PORT $root/etc/omd/site.conf` =~ m/(\d+)/mx);
+        my($ssl)      = (`grep CONFIG_APACHE_MODE     $root/etc/omd/site.conf` =~ m/'(\w+)'/mx);
+        my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
+        $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
+        # bypass system reverse proxy for restricted cgi for permormance and locking reasons
+        if($config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi-bin/restricted.cgi$|mx) {
+            $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
         }
     }
 

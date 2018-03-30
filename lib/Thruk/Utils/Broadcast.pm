@@ -17,15 +17,15 @@ use warnings;
 
 =head1 METHODS
 
-=head2 get_broadcasts($c, [$unfiltered], [$file])
+=head2 get_broadcasts
 
-  get_broadcasts($c, [$unfiltered], [$file])
+  get_broadcasts($c, [$unfiltered], [$file], [$panorama_only])
 
 return list of broadcasts for this contact
 
 =cut
 sub get_broadcasts {
-    my($c, $unfiltered, $filefilter) = @_;
+    my($c, $unfiltered, $filefilter, $panorama_only) = @_;
     my $list = [];
 
     my $now    = time();
@@ -143,7 +143,10 @@ sub get_broadcasts {
         $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';
         $broadcast->{'hide_before'} = $broadcast->{'hide_before'}   // '';
         $broadcast->{'loginpage'}   = $broadcast->{'loginpage'}     // 0;
+        $broadcast->{'panorama'}    = $broadcast->{'panorama'}      // 0;
         $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
+
+        next if($panorama_only && !$broadcast->{'panorama'});
 
         push @{$list}, $broadcast;
     }
@@ -166,10 +169,10 @@ mark all broadcasts as read for the current user
 
 =cut
 sub update_dismiss {
-    my($c) = @_;
+    my($c, $panorama_only) = @_;
 
     my $now = time();
-    my $broadcasts = get_broadcasts($c);
+    my $broadcasts = get_broadcasts($c, undef, undef, $panorama_only);
     my $data = Thruk::Utils::get_user_data($c);
     $data->{'broadcast'}->{'read'} = {} unless $data->{'broadcast'}->{'read'};
 
@@ -212,6 +215,7 @@ sub get_default_broadcast {
         contactgroups   => [],
         annotation      => '',
         loginpage       => 0,
+        panorama        => 1,
     };
     return($broadcast);
 }

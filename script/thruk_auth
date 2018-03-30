@@ -61,11 +61,14 @@ my $last_cache_clean    = 0;
 while (<STDIN>) {
     chomp(my $in = $_);
 
+    # do not accidentally print to stdout
+    select STDERR;
+
     my $t0 = [gettimeofday];
     print STDERR "thruk_auth: url '$in' " if $verbose > 1;
     my $res = process($in);
     print STDERR "\nthruk_auth:  -> $res" if $verbose > 1;
-    print $res;
+    print STDOUT $res;
     my $elapsed = tv_interval ( $t0 );
     printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
 }
@@ -129,6 +132,18 @@ sub process {
             return $loginurl."?expired&".$path."\n";
         }
 
+        chomp(my $cont = read_file($sessionfile));
+        my($basicauth, $ip, $user) = split($session_split, $cont, 3);
+
+        # fill sessioncache from mtime initially, so we don't have to revalidate new sessions immediately
+        if(!$sessioncache->{$auth}) {
+            my @stat = stat($sessionfile);
+            $sessioncache->{$auth} = {
+                    'login' => $user,
+                    'time'  => $stat[9],
+            };
+        }
+
         # session timeout reached?
         if($sessioncachetimeout > 0 and defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
             print STDERR "thruk_auth: session timeout: ".$sessioncache->{$auth}->{'login'} if $verbose;
@@ -138,9 +153,6 @@ sub process {
             return $loginurl."?expired&".$path."\n";
         }
 
-        chomp(my $cont = read_file($sessionfile));
-        my($basicauth, $ip, $user) = split($session_split, $cont, 3);
-
         # revalidation disabled
         if($sessioncachetimeout == 0 || ($basicauth && $basicauth eq 'none')) {
             # no validation enabled
@@ -149,11 +161,12 @@ sub process {
             utime($now, $now, $sessionfile);
         }
         else {
-            # validate session data
+            # revalidate session data
             my $rc;
+            $SIG{'ALRM'} = sub { die("timeout during auth check"); };
             eval {
                 alarm($login_timeout);
-                $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user);
+                $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user, $login_timeout-1);
             };
             alarm(0);
             if($rc == -1 or $@) {
@@ -169,7 +182,7 @@ sub process {
                 delete $sessioncache->{$auth};
                 return $loginurl."?invalid&".$path."\n";
             }
-            # uptime mtime of sessionfile
+            # update mtime of sessionfile
             utime($now, $now, $sessionfile);
         }
 

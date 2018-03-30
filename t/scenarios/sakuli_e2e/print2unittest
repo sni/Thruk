@@ -26,6 +26,7 @@ while(my $line = <STDIN>) {
     elsif($line =~ m%^(USER_ID|nss_wrapper|JVM_HEAP_XMX|set|umask)%mx) {}
     elsif($line =~ m/^[\-\s]*$/mx) {}
     elsif($line =~ m/^\-+.*_JAVA_OPTIONS/mx) {}
+    elsif($line =~ m/(_sahi\.setServerVar|for\ sahi\ refresh|sahi\-proxy\-timer|loaded\ image)/mx) {}
     elsif($line =~ m|SAKULI_RETURN_VAL:\s+(\d+)|mx) {
         $exitcode = $1;
         print $line unless $quiet;

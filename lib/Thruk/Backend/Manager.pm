@@ -76,6 +76,7 @@ sub init {
     return if scalar @{ $self->{'backends'} } == 0;
 
     $self->{'sections'} = {};
+    $self->{'sections_depth'} = 0;
     for my $peer (@{$self->get_peers(1)}) {
         $self->{'by_key'}->{$peer->{'key'}}   = $peer;
         $self->{'by_name'}->{$peer->{'name'}} = $peer;
@@ -85,15 +86,28 @@ sub init {
         } else {
             $self->{'local_hosts'}->{$peer->{'key'}} = 1;
         }
-        my($subsection,$section) = split(/\//mx, $peer->{'section'}, 2);
-        if(!$section) {
-            $section    = $subsection;
-            $subsection = 'Default';
+        my @sections = split(/\/+/mx, $peer->{'section'});
+        if(scalar @sections == 0) {
+            @sections = ();
+        } elsif($sections[0] eq 'Default') {
+            shift @sections;
         }
-        if(!defined $self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}}) {
-            $self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}} = [];
+        my $depth = scalar @sections;
+        $self->{'sections_depth'} = $depth if $self->{'sections_depth'} < $depth;
+        my $cur_section = $self->{'sections'};
+        for my $section (@sections) {
+            if(!$cur_section->{'sub'}) {
+                $cur_section->{'sub'} = {};
+            }
+            if(!$cur_section->{'sub'}->{$section}) {
+                $cur_section->{'sub'}->{$section} = {};
+            }
+            $cur_section = $cur_section->{'sub'}->{$section};
         }
-        push @{$self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}}}, $peer;
+        if(!$cur_section->{'peers'}) {
+            $cur_section->{'peers'} = [];
+        }
+        push @{$cur_section->{'peers'}}, $peer->{'key'};
     }
 
     $self->{'initialized'} = 1;
@@ -491,6 +505,7 @@ sub get_contactgroups_by_contact {
 
     $cached_data->{'contactgroups'} = $contactgroups;
     $c->cache->set('users', $username, $cached_data);
+    $c->stash->{'contactgroups'} = $data if($c->stash->{'remote_user'} && $username eq $c->stash->{'remote_user'});
     return $contactgroups;
 }
 
@@ -912,8 +927,7 @@ sub lmd_stats {
     my($status, undef) = Thruk::Utils::LMD::status($c->config);
     my $start_time = $status->[0]->{'start_time'};
     my $now = time();
-    for my $key (sort keys %{$stats}) {
-        my $stat = $stats->{$key};
+    for my $stat (@{$stats}) {
         $stat->{'bytes_send_rate'}     = $stat->{'bytes_send'} / ($now - $start_time);
         $stat->{'bytes_received_rate'} = $stat->{'bytes_received'} / ($now - $start_time);
     }
@@ -1273,7 +1287,7 @@ sub _do_on_peers {
         eval {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
         };
-        if($@) {
+        if($@ && !$c->stash->{'lmd_ok'}) {
             Thruk::Utils::LMD::check_proc($c->config, $c, 1);
             sleep(1);
             # then retry again
@@ -1283,6 +1297,9 @@ sub _do_on_peers {
             if($@) {
                 my $err = $@;
                 if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|mx) {
+                    $err = $1;
+                }
+                elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
                     $err = $1;
                 }
                 if(!$c->stash->{'lmd_ok'}) {
@@ -1349,7 +1366,11 @@ sub _do_on_peers {
         # and update last_program_starts
         # (set in Thruk::Utils::CLI::_cmd_raw)
         for my $key (keys %{$result}) {
-            my $res = $result->{$key}->{$key};
+            my $res;
+            $res = $result->{$key}->{$key};
+            if($result->{$key}->{'configtool'}) {
+                $res = $result->{$key};
+            }
             if($res && $res->{'configtool'}) {
                 my $peer = $self->get_peer_by_key($key);
                 # do not overwrite local configuration with remote configtool settings
@@ -1393,6 +1414,9 @@ sub _do_on_peers {
     else {
         $data = $self->_merge_answer( $result, $type );
     }
+    if($function eq 'get_logs' && !$c->config->{'logcache'}) {
+        $must_resort = 1;
+    }
 
     # additional data processing, paging, sorting and limiting
     if(scalar keys %arg > 0) {
@@ -1415,6 +1439,7 @@ sub _do_on_peers {
         }
 
         if( $arg{'pager'} ) {
+            local $ENV{'THRUK_USE_LMD'} = undef if $must_resort;
             $data = $self->_page_data(undef, $data, undef, $totalsize);
         }
     }
@@ -1442,8 +1467,6 @@ sub _do_on_peers {
     }
 
     $data = $self->_set_result_defaults($function, $data);
-
-    #&timing_breakpoint('_get_result complete: '.$function);
 
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
@@ -1637,7 +1660,6 @@ sub _get_result_lmd {
     }
 
     $c->stats->profile( end => "_get_result_lmd($function)");
-    #&timing_breakpoint('_get_result_lmd end: '.$function);
     return($result, $type, $totalsize);
 }
 
@@ -1685,7 +1707,6 @@ sub _get_result_serial {
     $c->stash->{'total_backend_waited'} += $elapsed;
 
     $c->stats->profile( end => "_get_result_serial($function)");
-    #&timing_breakpoint('_get_result_serial end: '.$function);
     return($result, $type, $totalsize);
 }
 
@@ -1753,8 +1774,7 @@ sub _get_results_xs_pool {
     my($self, $peers, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
 
-    #&timing_breakpoint('_get_results_xs_pool begin: '.$function);
-    $c->stats->profile( begin => "_get_results_xs_pool()");
+    $c->stats->profile( begin => '_get_results_xs_pool('.$function.')');
 
     my $result;
     my $remaining_peers = [];
@@ -1907,8 +1927,7 @@ sub _get_results_xs_pool {
         }
     }
 
-    $c->stats->profile( end => "_get_results_xs_pool()");
-    #&timing_breakpoint('_get_results_xs_pool end: '.$function);
+    $c->stats->profile( end => '_get_results_xs_pool('.$function.')');
 
     return($remaining_peers, $result, $type, $totalsize);
 }

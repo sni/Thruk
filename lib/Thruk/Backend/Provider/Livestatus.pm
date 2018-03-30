@@ -167,6 +167,9 @@ sub get_processinfo {
             if(defined $options{'extra_columns'}) {
                 push @{$options{'columns'}}, @{$options{'extra_columns'}};
             }
+            if($ENV{'THRUK_USE_LMD'} && $ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.0')) {
+                push @{$options{'columns'}}, 'configtool';
+            }
         }
 
         $options{'options'}->{AddPeer} = 1 unless defined $options{'options'}->{AddPeer};
@@ -183,12 +186,14 @@ sub get_processinfo {
         return $data if $self->{'lmd_optimizations'};
     }
 
-    $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
+    $data->{$key}->{'data_source_version'} = "Livestatus ".($data->{$key}->{'data_source_version'} || 'unknown');
     $self->{'naemon_optimizations'} = 0 unless defined $self->{'naemon_optimizations'};
     $self->{'naemon_optimizations'} = 1 if $data->{$key}->{'data_source_version'} =~ m/\-naemon$/mx;
 
     # naemon checks external commands on arrival
-    $data->{$key}->{'last_command_check'} = time() if $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'};
+    if(defined $data->{$key}->{'program_start'} && $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'}) {
+        $data->{$key}->{'last_command_check'} = time();
+    }
     return($data, 'HASH');
 }
 
@@ -745,8 +750,17 @@ sub get_logs {
     }
     # optimized naemon with wrapped_json output
     if($self->{'naemon_optimizations'}) {
-        $self->_optimized_for_wrapped_json(\%options, "logs");
+        $self->_optimized_for_wrapped_json(\%options, "log");
         #&timing_breakpoint('optimized get_logs') if $self->{'optimized'};
+    }
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'}) {
+        ($size, $limit) = $self->_get_query_size('log', \%options, 'time', 'time');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
     }
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
@@ -758,8 +772,12 @@ sub get_logs {
     }
 
     my @logs = reverse @{$self->_get_table('log', \%options)};
+    unless(wantarray) {
+        confess("get_logs() should not be called in scalar context when not used with file option");
+    }
+
     return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
-    return \@logs;
+    return(\@logs, undef, $size);
 }
 
 
@@ -1380,12 +1398,16 @@ sub _get_query_size {
     return unless defined $options->{'pager'};
     if(defined $options->{'sort'}) {
         return unless ref $options->{'sort'} eq 'HASH';
-        return unless defined $options->{'sort'}->{'ASC'};
-        if(ref $options->{'sort'}->{'ASC'} eq 'ARRAY') {
-            return if defined $sortby1 and $options->{'sort'}->{'ASC'}->[0] ne $sortby1;
-            return if defined $sortby2 and $options->{'sort'}->{'ASC'}->[1] ne $sortby2;
+        if($options->{'sort'}->{'DESC'} && $sortby1 && $sortby1 eq 'DESC') {
+            return if(!$sortby2 || $sortby2 ne $options->{'sort'}->{'DESC'});
         } else {
-            return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
+            return unless defined $options->{'sort'}->{'ASC'};
+            if(ref $options->{'sort'}->{'ASC'} eq 'ARRAY') {
+                return if defined $sortby1 and $options->{'sort'}->{'ASC'}->[0] ne $sortby1;
+                return if defined $sortby2 and $options->{'sort'}->{'ASC'}->[1] ne $sortby2;
+            } else {
+                return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
+            }
         }
     }
 

@@ -48,7 +48,15 @@ sub index {
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
 
     $c->{'errored'}           = 1;
-    $c->stash->{errorDetails} = '';
+    $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
+
+    ###############################
+    if($c->user_exists) {
+        $c->stash->{'remote_user'}  = $c->user->get('username');
+    } else {
+        $c->stash->{'remote_user'}  = '?';
+    }
+    $c->stash->{errorDetails} .= sprintf("User: %s\n", $c->stash->{'remote_user'});
 
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
@@ -209,7 +217,7 @@ sub index {
     if($arg1 != 99) {
         $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};
         $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
-        $c->stash->{errorDetails}       = $errors->{$arg1}->{'details'} if defined $errors->{$arg1}->{'details'};
+        $c->stash->{errorDetails}      .= $errors->{$arg1}->{'details'} if defined $errors->{$arg1}->{'details'};
         $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
     }
 
@@ -221,8 +229,8 @@ sub index {
         if($code >= 500) {
             $c->log->error($errors->{$arg1}->{'mess'});
             $c->log->error("on page: ".$c->req->url) if defined $c->req->url;
-            if($errors->{$arg1}->{'details'}) {
-                for my $row (split(/\n/mx, $errors->{$arg1}->{'details'})) {
+            if($c->stash->{errorDetails}) {
+                for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
                 }
             }
@@ -241,13 +249,6 @@ sub index {
 
     # clear errors to avoid invinite loops
     $c->clear_errors();
-
-    ###############################
-    if($c->user_exists) {
-        $c->stash->{'remote_user'}  = $c->user->get('username');
-    } else {
-        $c->stash->{'remote_user'}  = '?';
-    }
 
     $c->stash->{'template'} = 'error.tt';
 
@@ -299,7 +300,7 @@ sub _get_connection_details {
     my $detail = '';
 
     if($c->stash->{'lmd_error'}) {
-        return $c->stash->{'lmd_error'};
+        return "lmd error - ".$c->stash->{'lmd_error'};
     }
 
     for my $pd (keys %{$c->stash->{'backend_detail'}}) {

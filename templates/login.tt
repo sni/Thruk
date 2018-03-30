@@ -80,17 +80,26 @@
         return(true);
     }
 
-    if ( top.location != location ) {
-      // when inside a frame, open login page in top frame
-      var ref = clean_ref(document.location.pathname + document.location.search + document.location.hash, true);
-      ref = ref.replace(/\/thruk\//, '/thruk/#');
-      top.location.href = '[% loginurl %]?'+ref;
-    } else {
-      var ref = clean_ref(window.location.search + window.location.hash);
-      var el  = document.getElementById('referer');
-      ref = decodeURIComponent(ref).replace(/\+/g, " ");
-      if(el) { el.value = ref; }
+    function breakFrame() {
+        // only redirect in real frames, we only want to hide the sidebar if logged out
+        // but not break iframes from ex. graphing popups
+        if ( window.frameElement && window.frameElement.tagName == "FRAME" && top.location != location) {
+            // when inside a frame, open login page in top frame
+            var ref = clean_ref(document.location.pathname + document.location.search + document.location.hash, true);
+            ref = ref.replace(/\/thruk\//, '/thruk/#');
+            top.location.href = '[% loginurl %]?'+ref;
+        } else {
+            var ref = clean_ref(window.location.search + window.location.hash);
+            var el  = document.getElementById('referer');
+            ref = decodeURIComponent(ref).replace(/\+/g, " ");
+            if(el) { el.value = ref; }
+        }
+        return;
     }
+
+    try {
+        breakFrame();
+    } catch(e) { console.log(e); }
   -->
   </script>
   [% ssi_footer %]

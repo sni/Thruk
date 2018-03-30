@@ -101,6 +101,12 @@ table.pref_pane > tbody > tr > td {
 TABLE.pref_pane TD {
     text-align: left;
 }
+TABLE.pref_pane .separator {
+  border-bottom: 1px dotted grey;
+  text-align: center;
+  padding-top: 10px;
+}
+
 img.pref_pane_button {
   position:absolute;
   top: 4px;
@@ -144,6 +150,10 @@ DIV#site_panel {
  z-index: 5000;
  left: 17px;
  font-size:11px;
+}
+
+DIV.site_panel_collapsed {
+ min-width: 800px;
 }
 
 TABLE.site_panel {
@@ -283,7 +293,8 @@ input.button_peerWARN:hover,
 input.button_peerUPDIS:hover,
 input.button_peerDOWNDIS:hover,
 button.thruk_btn.top_nav_pref_button:hover,
-button.thruk_btn.top_nav_logout_button:hover {
+button.thruk_btn.top_nav_logout_button:hover,
+input.button_peer_selected {
   border-color: #555555;
 }
 
@@ -762,6 +773,17 @@ body.config TD.dataUserVar {
 body.config TD.dataSubmit {
     text-align:center;
     padding: 4px;
+}
+
+body.conf TABLE.conftooluserprofile TD {
+  text-align: left;
+}
+.conftoolheaderseperator {
+  padding-top: 15px;
+}
+
+body.conf TABLE.conftooluserprofile TD.dataVal IMG {
+  margin-right: 10px;
 }
 
 TABLE.cmd_pane tbody > tr > th > A > IMG {
@@ -1393,4 +1415,62 @@ BUTTON.small {
   height: 19px;
   margin-right: 3px;
   border-width: 1px;
+}
+
+.thruk_dev_panel {
+  position: absolute;
+  border: 1px dashed grey;
+  background: #DDDDDD;
+  padding: 0 5px;
+  z-index: 100;
+  -webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+  box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+  border-radius: 3px;
+}
+
+.thruk_dev_panel TABLE {
+  border-collapse: collapse;
+}
+
+.thruk_dev_panel PRE {
+  height: 600px;
+  overflow-y: auto;
+  min-width: 700px;
+}
+
+.thruk_dev_panel_bar {
+    padding: 0;
+    margin: 0;
+    border: 1px solid black;
+    height: 20px;
+    min-width: 1px;
+}
+
+.thruk_dev_panel_square {
+  width: 8px;
+  height: 8px;
+  border: 1px solid gray;
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.thruk_dev_panel TABLE TH {
+  text-align: left;
+}
+
+.thruk_dev_panel button.previous {
+  border: 0;
+  background: url('../images/resultset_previous.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.thruk_dev_panel button.next {
+  border: 0;
+  background: url('../images/resultset_next.png') no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }

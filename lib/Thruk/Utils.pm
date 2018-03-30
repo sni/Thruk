@@ -593,6 +593,8 @@ sub set_dynamic_roles {
         push @{$c->user->{'roles'}}, $role;
     }
 
+    $c->user->{'roles'} = array_uniq($c->user->{'roles'});
+
     $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
     return 1;
 }
@@ -1456,7 +1458,7 @@ sub get_perf_image {
     }
 
     if(!$showtitle) {
-        $grafanaurl .= '&disablePanelTitel';
+        $grafanaurl .= '&disablePanelTitle';
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
@@ -1505,6 +1507,12 @@ sub get_perf_image {
     CORE::close($fh);
     my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$source.'"';
     if($grafanaurl) {
+        if($ENV{'OMD_ROOT'}) {
+            my $site = $ENV{'OMD_SITE'};
+            if($grafanaurl =~ m|^https?://localhost/$site(/grafana/.*)$|mx) {
+                $grafanaurl = $c->config->{'omd_local_site_url'}.$1;
+            }
+        }
         $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
     Thruk::Utils::IO::cmd($c, $cmd);
@@ -1997,9 +2005,10 @@ wait up to 60 seconds till the core responds
 
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
+    $c->stats->profile(begin => "wait_after_reload ($time)");
     $pkey = $c->stash->{'param_backend'} unless $pkey;
     my $start = time();
-    if(!$pkey && !$time) { sleep 5; }
+    if(!$pkey && !$time) { sleep 3; }
 
     # wait until core responds again
     my $procinfo = {};
@@ -2009,24 +2018,29 @@ sub wait_after_reload {
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
             local $SIG{'PIPE'} = sub { die "pipe error\n" };
-            alarm(10);
+            alarm(5);
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
         alarm(0);
         if($@) {
+            $c->stats->profile(comment => "get_processinfo: ".$@);
             $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
         }
         elsif($pkey && $c->stash->{'failed_backends'}->{$pkey}) {
+            $c->stats->profile(comment => "get_processinfo: ".$c->stash->{'failed_backends'}->{$pkey});
             $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey});
         }
         elsif($pkey and $time) {
             # not yet restarted
-            if($procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
-                $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
-            } else {
-                $done = 1;
-                last;
+            if($procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'}) {
+                $c->stats->profile(comment => "core program_start: ".$procinfo->{$pkey}->{'program_start'});
+                if($procinfo->{$pkey}->{'program_start'} > $time) {
+                    $done = 1;
+                    last;
+                } else {
+                    $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+                }
             }
         }
         elsif($time) {
@@ -2035,6 +2049,7 @@ sub wait_after_reload {
                 for my $key (keys %{$procinfo}) {
                     if($procinfo->{$key}->{'program_start'} > $newest_core) { $newest_core = $procinfo->{$key}->{'program_start'}; }
                 }
+                $c->stats->profile(comment => "core program_start: ".$newest_core);
                 if($newest_core > $time) {
                     $done = 1;
                     last;
@@ -2046,8 +2061,13 @@ sub wait_after_reload {
             $done = 1;
             last;
         }
-        sleep(1);
+        if(time() - $start <= 5) {
+            Time::HiRes::sleep(0.3);
+        } else {
+            sleep(1);
+        }
     }
+    $c->stats->profile(end => "wait_after_reload ($time)");
     if($done) {
         # clean up cached groups which may have changed
         $c->cache->clear();
@@ -2097,14 +2117,14 @@ sub get_cron_entries_from_param {
 
 =head2 read_data_file
 
-  read_data_file($filename)
+  read_data_file($filename, [$c])
 
 return data for datafile
 
 =cut
 
 sub read_data_file {
-    my($filename) = @_;
+    my($filename, $c) = @_;
 
     my $res;
     eval {
@@ -2113,7 +2133,11 @@ sub read_data_file {
     if(!$@ && $res) {
         return($res);
     }
-    warn("error loading $filename - ".$@);
+    if($c) {
+        $c->log->warn("error loading $filename - ".$@);
+    } else {
+        warn("error loading $filename - ".$@);
+    }
     return;
 }
 
@@ -2697,6 +2721,29 @@ sub get_cli_modules {
             $mod;
         } @{$modules};
     return($modules);
+}
+
+##############################################
+
+=head2 clean_regex
+
+    clean_regex()
+
+returns cleaned regular expression, ex.: removes trailing .*
+
+=cut
+sub clean_regex {
+    my($regex) = @_;
+
+    # trim leading and trailing whitespace
+    $regex =~ s/^\s+//mx;
+    $regex =~ s/\s+$//mx;
+
+    # trim leading and trailing .*(?)
+    $regex =~ s/^\.\*\??//mx;
+    $regex =~ s/\.\*\??$//mx;
+
+    return($regex);
 }
 
 ##############################################

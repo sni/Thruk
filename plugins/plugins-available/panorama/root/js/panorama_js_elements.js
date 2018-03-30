@@ -99,7 +99,6 @@ Ext.define('Ext.ux.form.field.DateTime', {
         me.initField();
     },
 
-    //@private
     buildField: function() {
         var l;
         var d = {};
@@ -302,10 +301,10 @@ TP.Msg = function() {
         return '<div class="msg x-tab-default '+cls+'"><a class="x-tab-close-btn" title="" href="#"><\/a><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
     }
     return {
-        msg : function(s, close_timeout) {
+        msg : function(s, close_timeout, container, title, onCloseCB) {
             if(TP.unloading) { return; }
             if(!msgCt){
-                msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div'}, true);
+                msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div', 'class': "popup-msg"}, true);
             }
             // show demo mode errors as warnings and only once
             if(s.match(/disabled in demo mode/)) {
@@ -317,17 +316,20 @@ TP.Msg = function() {
                 }
             }
             var p = s.split('~~', 2);
-            var title = 'Success';
-            if(p[0] == 'fail_message') {
-                title = 'Error';
-            }
-            if(p[0] == 'info_message') {
-                title = 'Information';
+            if(title == undefined) {
+                title = 'Success';
+                if(p[0] == 'fail_message') {
+                    title = 'Error';
+                }
+                if(p[0] == 'info_message') {
+                    title = 'Information';
+                }
             }
             TP.log('msg: '+title+' - '+p[1]);
-            var m = Ext.DomHelper.append(msgCt, createBox(p[0], title, p[1]), true);
+            var m = Ext.DomHelper.append((container || msgCt), createBox(p[0], title, p[1]), true);
             var btn = new Ext.Element(m.dom.firstChild);
             btn.on("click", function() {
+                if(onCloseCB) { onCloseCB(); }
                 m.ghost("t", { remove: true});
             });
             m.show();
@@ -341,11 +343,12 @@ TP.Msg = function() {
             }
             if(close_timeout != undefined) {
                 if(close_timeout == 0) {
-                    return;
+                    return(m);
                 }
                 delay = close_timeout * 1000;
             }
             TP.timeouts['timeout_global_msg_ghost'] = window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
+            return(m);
         }
     };
 }();
@@ -465,7 +468,7 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                     me.picker.destroy();
                     me.picker = undefined;
                 },
-                show: function(field,opts){
+                afterrender: function(field,opts){
                     field.getEl().monitorMouseLeave(2500, field.hide, field);
                     Ext.Array.each(field.el.dom.getElementsByTagName('A'), function(item, index) {
                         item.onmouseover=function() { if(me.mouseover) { me.mouseover(item.getElementsByTagName('SPAN')[0].style.backgroundColor); }},
@@ -662,7 +665,7 @@ Ext.define('TP.dragEl', {
                 var origY = This.xdata.appearance[This.keyY];
                 This.xdata.appearance[This.keyX] = x-This.offsetX;
                 This.xdata.appearance[This.keyY] = y-This.offsetY;
-                This.panel.updateMapLonLat();
+                This.panel.updateMapLonLat(undefined, This.keyX);
                 if(TP.iconSettingsWindow) {
                     var values = {};
                     values[This.keyX] = This.xdata.appearance[This.keyX];
@@ -722,8 +725,10 @@ Ext.define('TP.dragEl', {
         panel.dd.addListener('dragend', function(This, evt) {
             if(TP.iconSettingsWindow && TP.iconSettingsGlobals.renderUpdate) { TP.iconSettingsGlobals.renderUpdate(); }
             tab.enableMapControlsTemp();
-            panel.dragHint.destroy();
-            panel.dragHint = undefined;
+            if(panel.dragHint) {
+                panel.dragHint.destroy();
+                panel.dragHint = undefined;
+            }
             TP.isShift = is_shift_pressed(evt);
             if(TP.isShift) {
                 var pos = panel.getPosition();

@@ -6,7 +6,7 @@ Thruk::Utils::CLI::Command - Command CLI module
 
 =head1 DESCRIPTION
 
-The command command displayes the expanded command for a given host or service
+The command command displays the expanded command for a given host or service
 
 =head1 SYNOPSIS
 
@@ -42,6 +42,8 @@ sub cmd {
     $c->stats->profile(begin => "_cmd_command($action)");
     my $hostname    = shift @{$commandoptions};
     my $description = shift @{$commandoptions};
+
+    return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) unless $hostname;
 
     my $backend = $global_options->{'backends'}->[0] || '';
     my($host, $service);
