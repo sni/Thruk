@@ -10,6 +10,16 @@ _thruk_sub_commands() {
     return
 }
 
+_thruk_list_hosts() {
+    thruk host list
+    return
+}
+
+_thruk_list_services() {
+    thruk service $1
+    return
+}
+
 _thruk()
 {
     COMPREPLY=()
@@ -77,6 +87,26 @@ _thruk()
         # thruk plugin remove|update ...
         elif [[ ${subcmdargs[0]} =~ remove|update ]]; then
             opts=$(thruk plugin list | awk '{print $2}' | grep -v Name)
+        fi
+
+    # thruk command ...
+    elif [[ $subcmd =~ command ]]; then
+
+        # thruk command ...
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="$(_thruk_list_hosts)"
+
+        # thruk command <host> ...
+        elif [ ${#subcmdargs[@]} -eq 1 ]; then
+            opts="$(_thruk_list_services ${subcmdargs[0]})"
+        fi
+
+    # thruk service ...
+    elif [[ $subcmd =~ service ]]; then
+
+        # thruk service ...
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="$(_thruk_list_hosts)"
         fi
 
     else

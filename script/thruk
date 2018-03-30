@@ -52,6 +52,7 @@ Getopt::Long::GetOptions (
    "y|yes"              => \$options->{'yes'},
    "f|force"            => \$options->{'force'},
 
+     "list-commands"    => \$options->{'listcommands'},
    "l|list-backends"    => \$options->{'listbackends'},
    "a|action=s"         => \$options->{'action'},
 ) or do {
@@ -71,10 +72,14 @@ if($options->{'version'}) {
     print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
 }
 $options->{'verbose'} = 0 if $options->{'quiet'};
-if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'}) {
+if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
     print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
     _print_modules();
     exit 3;
+}
+if($options->{'listcommands'}) {
+    _print_modules();
+    exit 0;
 }
 
 require Thruk::Utils::CLI;
@@ -125,6 +130,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
     -f, --force                   some actions need to be forced
 
   Compatibility options:
+        --list-commands           List available commands.
     -l, --list-backends           List available backends/sites. Alias for 'backend list'.
     -a, --action=<command>        Perform given action. see below for a list.
 
@@ -135,7 +141,13 @@ This script gives access to various parts of the Thruk gui and allows to generat
 excel reports, csv exports or any other url by using command line and bypassing the
 webserver.
 
-=head1 OPTIONS
+=head1 COMMANDS
+
+Available commands will be listed when running thruk without any argument or by
+
+  %> thruk --list-commands
+
+=head1 GLOBALOPTIONS
 
 script has the following arguments
 
@@ -167,6 +179,10 @@ script has the following arguments
 =item B<-l> , B<--list-backends>
 
     get list of available backends
+
+=item B<--list-commands>
+
+    get list of available commands.
 
 =item B<-a> I<action>, B<--action>=I<action>
 
@@ -221,6 +237,10 @@ thruk returns 0 on success and >= 1 otherwise
 List available backends:
 
   %> thruk -l
+
+List available commands:
+
+  %> thruk
 
 =head1 AUTHOR
 
