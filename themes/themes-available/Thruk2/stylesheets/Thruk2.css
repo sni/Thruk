@@ -791,12 +791,12 @@ TD.statusBGCRITICAL a,TD.statusBGCRITICALACK a,TD.statusBGCRITICALSCHED a,TD.sta
 }
 
 TD.statusBGUNKNOWN {
-  background-color:#ffcd00
+  background-color:#ffcd00;
   height:22px;
 }
 
 TD.statusBGWARNING {
-  background-color:#ffe57b
+  background-color:#ffe57b;
   height:22px;
 }
 
