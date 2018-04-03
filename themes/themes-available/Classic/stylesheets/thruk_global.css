@@ -959,6 +959,14 @@ input.ui-button {
   padding-bottom: 2px !important;
 }
 
+INPUT.ui-button, BUTTON.ui-button {
+  min-width: 80px;
+  min-height: 28px;
+}
+
+.ui-button.ui-button-icon-only {
+  min-width: inherit;
+}
 
 TD.action_menu {
   width: 250px;
