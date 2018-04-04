@@ -2112,31 +2112,44 @@ var TP = {
         }
     },
     showBroadcasts: function(broadcasts) {
-        if(!broadcasts || broadcasts.length == 0) { return; }
+        if(!broadcasts) { return; }
+        if(!TP.broadcasts) { TP.broadcasts = {}; }
         if(!TP.broadcastCt) {
             TP.broadcastCt = Ext.DomHelper.insertFirst(document.body, {id:'broadcast-div', 'class': "popup-msg"}, true);
         }
-        var b   = broadcasts[0];
-        var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
-        if(document.getElementById(id)) {
-            return;
-        }
-        var text = b.text;
-        if(b.annotation) {
-            text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
-        }
-        var msg = TP.Msg.msg("info_message~~"+text, 0, TP.broadcastCt, "Announcement", function() {
-            Ext.Ajax.request({
-                url: 'broadcast.cgi',
-                method: 'POST',
-                params: {
-                    action:  'dismiss',
-                    panorama: 1,
-                    token:    user_token
-                }
+        var broadcast_list = {};
+        for(var x = 0; x < broadcasts.length; x++) {
+            var b   = broadcasts[x];
+            var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
+            if(TP.broadcasts[id]) {
+                broadcast_list[id] = TP.broadcasts[id];
+                continue;
+            }
+            var text = b.text;
+            if(b.annotation) {
+                text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
+            }
+            var msg = TP.Msg.msg("info_message~~"+text, 0, TP.broadcastCt, "Announcement", function() {
+                Ext.Ajax.request({
+                    url: 'broadcast.cgi',
+                    method: 'POST',
+                    params: {
+                        action:  'dismiss',
+                        panorama: 1,
+                        token:    user_token
+                    }
+                });
+                delete TP.broadcasts[id];
             });
-        });
-        msg.el.dom.id = id;
+            broadcast_list[id] = msg.id;
+        }
+        for(var key in TP.broadcasts) {
+            if(!broadcast_list[key]) {
+                Ext.get(TP.broadcasts[key]).destroy();
+            }
+        }
+
+        TP.broadcasts = broadcast_list;
     }
 }
 TP.log('[global] starting');
