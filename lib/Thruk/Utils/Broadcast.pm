@@ -133,12 +133,6 @@ sub get_broadcasts {
             }
         }
 
-        $broadcast->{'new'} = 0;
-        if(!$unfiltered && !defined $already_read->{$basename}) {
-            $broadcast->{'new'} = 1;
-            $new_count++;
-        }
-
         $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
         $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';
         $broadcast->{'hide_before'} = $broadcast->{'hide_before'}   // '';
@@ -147,6 +141,12 @@ sub get_broadcasts {
         $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
 
         next if($panorama_only && !$broadcast->{'panorama'});
+
+        $broadcast->{'new'} = 0;
+        if(!$unfiltered && !defined $already_read->{$basename}) {
+            $broadcast->{'new'} = 1;
+            $new_count++;
+        }
 
         push @{$list}, $broadcast;
     }
