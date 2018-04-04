@@ -1,5 +1,5 @@
 A.bp_button {
-    height: 25px;
+    height: 16px;
 }
 BUTTON.bp_button {
     height: 27px;
@@ -32,11 +32,18 @@ LI.bp_menu_seperator.ui-state-disabled {
 LI.bp_menu_seperator.ui-state-disabled A {
     line-height: 0px;
 }
+#bp_menu A {
+    width: 117px;
+    height: 16px;
+    display: block;
+}
 
 .bp_type_btn, .bp_type_box, .bp_type_box_label {
-    height: 80px;
-    width: 80px;
+    height: 60px;
+    width: 60px;
     white-space: normal;
+    display: inherit;
+    vertical-align: middle;
 }
 .bp_type_box_label SPAN {
     height: 65px;
@@ -49,6 +56,10 @@ LI.bp_menu_seperator.ui-state-disabled A {
     height: inherit;
     width: inherit;
     white-space: inherit;
+}
+
+#bp_edit_node_form .ui-dialog-titlebar-close {
+    top: 12px;
 }
 
 .bp_dialog_back_btn {

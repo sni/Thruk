@@ -964,6 +964,10 @@ INPUT.ui-button, BUTTON.ui-button {
   min-height: 28px;
 }
 
+A.ui-button {
+  height: 16px;
+}
+
 .ui-button.ui-button-icon-only {
   min-width: inherit;
 }
