@@ -19,7 +19,7 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
 }
 BODY.bare_tree {
   background-color: white;
-  margin-top: 34px;
+  margin-top: 40px;
   border: none;
 }
 
