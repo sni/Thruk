@@ -2117,7 +2117,7 @@ var TP = {
             TP.broadcastCt = Ext.DomHelper.insertFirst(document.body, {id:'broadcast-div', 'class': "popup-msg"}, true);
         }
         var b   = broadcasts[0];
-        var id  = b.basefile.replace(/[^0-9a-z]/g, "");
+        var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
         if(document.getElementById(id)) {
             return;
         }
@@ -2136,6 +2136,7 @@ var TP = {
                 }
             });
         });
+        msg.el.dom.id = id;
     }
 }
 TP.log('[global] starting');
