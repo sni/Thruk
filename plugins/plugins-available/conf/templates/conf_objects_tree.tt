@@ -29,8 +29,8 @@
     <td valign="top" style="text-align: left; width: 200px;">
       <div style="width: 200px; height: 34px; background: white; border-bottom: 1px solid grey;">
         <div id="tool_set">
-          <button name="expand" id="tool_collapse"><label for="tool_collapse">C</label>
-          <button name="expand" id="tool_expand"><label for="tool_expand">E</label>
+          <button name="expand" id="tool_collapse"><label for="tool_collapse">C</label></button>
+          <button name="expand" id="tool_expand"><label for="tool_expand">E</label></button>
         </div>
       </div>
       <div id="container">
