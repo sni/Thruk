@@ -19,7 +19,7 @@
     </tr>
     <tr>
       <td colspan=2 class="data dataSubmit">
-        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi'">
+        <input type="button" name="cancel" value="cancel" style="width:80px" onclick="window.location='conf.cgi'">
         <input type="submit" name="send" value="show" style="width:80px">
       </td>
     </tr>
@@ -57,7 +57,7 @@
     [% IF conf_config.exists('htpasswd') %]
     <tr>
       <td class='dataVar' align="left">Password Set</td>
-      <td class='dataVal'>[% IF has_htpasswd_entry %]Yes <input type="submit" name="send" value="remove password">[% ELSE %]No[% END %]</td>
+      <td class='dataVal'>[% IF has_htpasswd_entry %]Yes - <input type="submit" name="send" value="remove password">[% ELSE %]No[% END %]</td>
     </tr>
     <tr>
       <td class='dataVar' align="left">Password</td>
@@ -81,7 +81,7 @@
     [% END %]
     <tr>
       <td colspan=2 class="data dataSubmit">
-        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi?sub=users'">
+        <input type="button" name="cancel" value="cancel" style="width:80px" onclick="window.location='conf.cgi?sub=users'">
         <input type="submit" name="send" value="save" style="width:80px"[% IF readonly %] disabled[% END %]>
       </td>
     </tr>
