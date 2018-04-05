@@ -2881,27 +2881,12 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
             }
 
             /* apply other attributes */
-            for(var key in el) {
-                if(key != "icon" && key != "action" && key != "menu" && key != "label") {
-                    if(key.match(/^on/)) {
-                        var cmd = el[key];
-                        jQuery(item).bind(key.substring(2), {cmd: cmd}, function(evt) {
-                            var res = new Function(evt.data.cmd)();
-                            if(!res) {
-                                /* cancel default/other binds when callback returns false */
-                                evt.stopImmediatePropagation();
-                            }
-                            return(res);
-                        });
-                    } else {
-                        item[key] = el[key];
-                    }
+            set_action_menu_attr(item, el, backend, host, service, function() {
+                // must be added as callback, otherwise the order of the binds gets mixed up and "onclick confirms" would be called after the click itself
+                if(el.action) {
+                    check_server_action(undefined, item, backend, host, service, undefined, undefined, undefined, el);
                 }
-            }
-
-            if(el.action) {
-                check_server_action(undefined, item, backend, host, service, undefined, undefined, undefined, el);
-            }
+            });
 
             /* obtain reference to current script tag so we could insert the icons here */
             var scriptTag = document.scripts[document.scripts.length - 1];
@@ -2914,6 +2899,63 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
     }
     catch(err) {
         document.write('<img src="'+ url_prefix +'themes/'+ theme +'/images/error.png" title="'+err+'">');
+    }
+}
+
+/* set a single attribute for given item/link */
+function set_action_menu_attr(item, data, backend, host, service, callback) {
+    var toReplace = {};
+    for(var key in data) {
+        // those key are handled separately already
+        if(key == "icon" || key == "action" || key == "menu" || key == "label") {
+            continue;
+        }
+
+        var attr = data[key];
+        if(String(attr).match(/\$/)) {
+            toReplace[key] = attr;
+            continue;
+        }
+        if(key.match(/^on/)) {
+            var cmd = attr;
+            jQuery(item).bind(key.substring(2), {cmd: cmd}, function(evt) {
+                var cmd = evt.data.cmd;
+                var res = new Function(cmd)();
+                if(!res) {
+                    /* cancel default/other binds when callback returns false */
+                    evt.stopImmediatePropagation();
+                }
+                return(res);
+            });
+        } else {
+            item[key] = attr;
+        }
+    }
+    if(Object.keys(toReplace).length > 0) {
+        jQuery.ajax({
+            url: url_prefix + 'cgi-bin/status.cgi?replacemacros=1',
+            data: {
+                host:     host,
+                service:  service,
+                backend:  backend,
+                dataJson: JSON.stringify(toReplace),
+                token:    user_token
+            },
+            type: 'POST',
+            success: function(data) {
+                if(data.rc != 0) {
+                    thruk_message(1, 'could not replace macros: '+ data.data);
+                } else {
+                    set_action_menu_attr(item, data.data, backend, host, service, callback);
+                    callback();
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                thruk_message(1, 'could not replace macros: '+ textStatus);
+            }
+        });
+    } else {
+        callback();
     }
 }
 
@@ -2985,27 +3027,13 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
         link.appendChild(label);
         link.href       = replace_macros(el.action);
 
-        /* apply other attributes */
-        for(var key in el) {
-            if(key != "icon" && key != "action" && key != "menu" && key != "label") {
-                if(key.match(/^on/)) {
-                    var cmd = el[key];
-                    jQuery(link).bind(key.substring(2), {cmd: cmd}, function(evt) {
-                        var res = new Function(evt.data.cmd)();
-                        if(!res) {
-                            /* cancel default/other binds when callback returns false */
-                            evt.stopImmediatePropagation();
-                        }
-                        return(res);
-                    });
-                } else {
-                    link[key] = el[key];
-                }
-            }
-        }
-
         item.appendChild(link);
-        check_server_action(id, link, backend, host, service, undefined, undefined, undefined, el);
+
+        /* apply other attributes */
+        set_action_menu_attr(link, el, backend, host, service, function() {
+            // must be added as callback, otherwise the order of the binds gets mixed up and "onclick confirms" would be called after the click itself
+            check_server_action(id, link, backend, host, service, undefined, undefined, undefined, el);
+        });
         return(true);
     });
 

@@ -2,6 +2,7 @@ package Thruk::Controller::status;
 
 use strict;
 use warnings;
+use Cpanel::JSON::XS qw/decode_json/;
 
 =head1 NAME
 
@@ -1491,8 +1492,21 @@ sub _replacemacros {
     my $obj = $objs->[0];
     return(1, 'no such object') unless $obj;
 
+    if($c->req->parameters->{'dataJson'}) {
+        my $new       =  {};
+        my $overal_rc = 0;
+        my $data = decode_json($c->req->parameters->{'dataJson'});
+        for my $key (keys %{$data}) {
+            my($replaced, $rc) = $c->{'db'}->replace_macros($data->{$key}, {host => $obj, service => $service ? $obj : undef, skip_user => 1});
+            $new->{$key} = $replaced;
+            $overal_rc = $rc if $rc > $overal_rc;
+        }
+        return(!$overal_rc, $new);
+    }
+
     my($new, $rc) = $c->{'db'}->replace_macros($data, {host => $obj, service => $service ? $obj : undef, skip_user => 1});
     # replace_macros returns 1 on success, js expects 0 on success, so revert rc here
+
     return(!$rc, $new);
 }
 

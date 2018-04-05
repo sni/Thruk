@@ -5,6 +5,7 @@ next:
           - add user profile page
           - move broadcast into side navigation
           - move important filters up (#792)
+          - support macros in action menu onclicks
           - fix wrong number of backends (#809)
           - Panorama:
             - optionally show broadcasts in panorama dashboards
