@@ -10,9 +10,21 @@
 <table border=0 cellpadding=0 cellspacing=0 class="site_panel_container"><tr><td>
 [% IF !hide_backends_chooser && sites != "" %]
   [% IF show_sitepanel == 'list' %]
-      [% FOREACH b = backends %]
-        [% PROCESS site_btn id=b %]
-      [% END %]
+  	[% IF site_global_switch %]
+        	<div style='width:100%;height:20px' />
+        	<div class='backend'><input type='button'  class='button_peerUP' value='All On' more' onClick='switchBackends(1)'></div>
+        	<div class='backend'><input type='button'  class='button_peerDIS' value='All Off' more' onClick='switchBackends(0)'></div>
+        	</div>
+        	<div style='width:100%'/>
+      		[% FOREACH b = backends %]
+        		[% PROCESS site_btn id=b %]
+      		[% END %]
+        	</div>
+	[% ELSE %]
+      		[% FOREACH b = backends %]
+        		[% PROCESS site_btn id=b %]
+      		[% END %]
+	[% END %]
   [% ELSIF show_sitepanel == 'panel' || show_sitepanel == 'collapsed' %]
     [% IF backend_chooser == "switch" && param_backend.list.size > 0 && param_backend.list.0 != "" %]
       [% b = param_backend.list.0 %]

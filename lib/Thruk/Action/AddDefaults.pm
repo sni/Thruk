@@ -33,7 +33,7 @@ our @stash_config_keys = qw/
     priorities show_modified_attributes downtime_duration expire_ack_duration
     show_backends_in_table host_action_icon service_action_icon cookie_path
     use_feature_trends show_error_reports skip_js_errors perf_bar_mode
-    bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
+    bug_email_rcpt home_link first_day_of_week sitepanel site_global_switch perf_bar_pnp_popup
     status_color_background show_logout_button use_feature_recurring_downtime
     use_service_description force_sticky_ack force_send_notification force_persistent_ack
     force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
@@ -859,6 +859,7 @@ sub update_site_panel_hashes {
             $sites->{'sub'}->{'Default'} = { peers => delete $sites->{'peers'} || [] };
         }
     }
+
 
     return;
 }

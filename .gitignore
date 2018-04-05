@@ -78,3 +78,4 @@ thruk_local.d/
 !t/scenarios/*/*/*
 t/scenarios/*/panorama/
 tmp_*
+perl5/

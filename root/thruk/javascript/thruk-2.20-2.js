@@ -720,6 +720,12 @@ function get_site_panel_backend_button(id, styles, onclick, section) {
     return("<div class='backend' style='"+styles+"'>"+btn+"<\/div>");
 }
 
+function switchBackends(state){
+        for(var nr = 0; nr < backend_keys.length; nr++) {
+          toggleBackend(backend_keys[nr],state);
+        }
+}
+
 /* create sites header */
 function dw(txt) {document.write(txt);}
 
