@@ -653,9 +653,10 @@ sub get_model_retention {
 
     # don't read retention file when current data is newer
     my @stat = stat($file);
-    if( $model->cache_exists($backend) and
-        defined $c->config->{'conf_retention'}
+    if( $model->cache_exists($backend)
+        and defined $c->config->{'conf_retention'}
         and $stat[9] <= $c->config->{'conf_retention'}->[9]
+        and $c->config->{'conf_retention_file'} eq $file
     ) {
        return 1;
     }
