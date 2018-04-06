@@ -1274,6 +1274,8 @@ BUTTON.thruk_btn.ui-button {
   margin: 0;
   padding: 0;
   line-height: inherit;
+  min-width: inherit;
+  min-height: inherit;
 }
 BUTTON.thruk_btn.ui-button SPAN.ui-button-text {
     padding: 0;
