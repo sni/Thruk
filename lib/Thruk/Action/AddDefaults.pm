@@ -848,6 +848,10 @@ sub update_site_panel_hashes {
         else { $show_sitepanel = 'list'; }
     }
 
+    if ($c->stash->{'site_global_switch'} && (scalar @{$backends} >= $c->stash->{'site_global_switch'} )){
+       $c->stash->{'global_site_switch'}=1;
+   }
+
     $c->stash->{'initial_backends'} = $initial_backends;
     $c->stash->{'show_sitepanel'}   = $show_sitepanel;
     $c->stash->{'sites'}            = $c->{'db'}->{'sections'};

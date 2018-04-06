@@ -533,7 +533,7 @@ sub set_default_config {
         'cookie_auth_domain'                => '',
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
-        'site_global_switch'                => 1,
+        'site_global_switch'                => 0,
         'ssl_verify_hostnames'              => 1,
         'precompile_templates'              => 0,
         'report_use_temp_files'             => 14,
