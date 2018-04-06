@@ -1744,7 +1744,7 @@ var TP = {
             return;
         }
         var group = TP.getTabTotals(tab);
-        var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes});
+        var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes, order: tab.xdata.state_order});
         return(res);
     },
     getTabTotals: function(tab) {

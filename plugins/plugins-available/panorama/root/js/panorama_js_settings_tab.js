@@ -282,7 +282,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 fieldLabel: 'Backends / Sites',
                 xtype:      'itemselector',
                 name:       'backends',
-                height:     200,
+                height:     250,
                 disabled:   !tab.xdata.select_backends,
                 buttons:   ['add', 'remove'],
                 store:     backends,
@@ -375,7 +375,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     }
                 }
             })],
-            height: 230,
+            height: 280,
             width:  300,
             fbar: [{
                 type: 'button',
@@ -747,6 +747,13 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 }
             }
         }, {
+            xtype:      'panel',
+            html:       'Place background images in: '+usercontent_folder+'/backgrounds/ <a href="#" onclick="TP.uploadUserContent(\'image\', \'backgrounds/\')">(upload)</a>',
+            style:      'text-align: center;',
+            bodyCls:    'form-hint',
+            padding:    '2 0 8 0',
+            border:      0
+        }, {
             /* auto hide panlet header */
             xtype:      'checkbox',
             fieldLabel: 'Hide Panlet Header',
@@ -768,15 +775,37 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     inputValue: 'hard',
                     checked:    tab.xdata.state_type == 'hard' ? true : false,
                     padding:    '0 0 0 30'
+            }, {
+                    xtype:      'button',
+                    margin:     '0 0 0 50',
+                    text:       'Change State Order',
+                    icon:       '../plugins/panorama/images/table_gear.png',
+                    handler:    function() {
+                        TP.showStateOrderChangeWindow('state_order');
+                    }
+            }, {
+                xtype:      'hidden',
+                name:       'state_order',
+                id:         'state_order',
+                value:      ''
             }]
+        }/*,{
+            fieldLabel:  'Service State Order',
+            xtype:       'fieldcontainer',
+            defaultType: 'button',
+            layout:      'hbox',
+            plugins :     Ext.create('Ext.ux.BoxReorderer', {}),
+            defaults:   { reorderable: true, width: 80 },
+            id:          'svc_state_order',
+            items:        serviceStateOrderItems
         }, {
             xtype:      'panel',
-            html:       'Place background images in: '+usercontent_folder+'/backgrounds/ <a href="#" onclick="TP.uploadUserContent(\'image\', \'backgrounds/\')">(upload)</a>',
+            html:       '(drag items to desired order)',
             style:      'text-align: center;',
             bodyCls:    'form-hint',
-            padding:    '10 0 0 0',
+            padding:    '2 0 0 0',
             border:      0
-        }];
+        }*/];
     var dashboardTab = {
         title : 'Dashboard',
         type  : 'panel',
@@ -809,7 +838,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         fieldLabel:     '',
         name:           'user_styles',
         value:          '',
-        height:          180,
+        height:          280,
         emptyText:      'A.iconlabel { color: red !important; }',
         submitEmptyText: false,
         listeners: {
@@ -937,8 +966,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     /* the actual settings window containing the panel */
     var tab_win_settings = new Ext.window.Window({
         modal:       true,
-        width:       610,
-        height:      350,
+        width:       620,
+        height:      400,
         title:       'Settings',
         layout :     'fit',
         buttonAlign: 'center',
@@ -1003,6 +1032,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         delete values['refresh_txt'];
                         delete values['map_choose'];
+
+                        values['state_order'] = values['state_order'].split(',');
+
                         Ext.apply(tab.xdata, values);
 
                         var s_form  = Ext.getCmp('soundForm').getForm();
@@ -1272,4 +1304,86 @@ TP.loadDashboardWindow = function() {
             }
         }]
     }).show();
+}
+
+TP.showStateOrderChangeWindow = function(id) {
+    var win = Ext.create('Ext.window.Window', {
+        modal:       true,
+        width:       300,
+        height:      550,
+        title:       'Change State Order',
+        layout :     'fit',
+        buttonAlign: 'center',
+        items: [{
+                xtype:          'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:      'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 80 },
+                items:           [{
+                    fieldLabel:  'State Order',
+                    xtype:       'fieldcontainer',
+                    defaultType: 'button',
+                    layout:      'vbox',
+                    plugins :     Ext.create('Ext.ux.BoxReorderer', {}),
+                    defaults:   { reorderable: true, width: 80 },
+                    id:          'state_order_change_container',
+                    items:        []
+                }, {
+                    xtype:      'panel',
+                    html:       'drag items from worst (top) to best (bottom) state',
+                    style:      'text-align: center;',
+                    bodyCls:    'form-hint',
+                    padding:    '2 0 0 0',
+                    border:      0
+                }]
+        }],
+        fbar: [{
+            xtype:  'button',
+            text:   'reset',
+            handler: function(This) {
+                setItems(default_state_order);
+            }
+        },{
+            xtype:  'button',
+            text:   'cancel',
+            handler: function(This) {
+                win.destroy();
+            }
+        }, {
+        /* save button */
+            xtype : 'button',
+            text:   'save',
+            handler: function() {
+                var items = Ext.getCmp('state_order_change_container').items.items;
+                var values = [];
+                for(var x = 0; x < items.length; x++) {
+                    values.push(items[x].value);
+                }
+                Ext.getCmp(id).setValue(values.join(','));
+                win.destroy();
+            }
+        }]
+    });
+
+    function setItems(value) {
+        var items = [];
+        for(var x = 0; x < value.length; x++) {
+            items.push({
+                width:      170,
+                text:       value[x].replace(/_/, " "),
+                value:      value[x],
+                textAlign: 'left',
+                icon:      '../usercontent/images/status/default/'+value[x]+'.png'
+            });
+        }
+        var container = Ext.getCmp('state_order_change_container');
+        container.removeAll();
+        container.add(items);
+    }
+
+    var value = Ext.getCmp(id).getValue().split(',');
+    setItems(value);
+    win.show();
 }

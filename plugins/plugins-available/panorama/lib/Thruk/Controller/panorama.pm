@@ -363,6 +363,9 @@ sub _js {
     $c->stash->{default_map_lon} = $lon;
     $c->stash->{default_map_lat} = $lat;
 
+    my $default_state_order = $c->config->{'Thruk::Plugin::Panorama'}->{'default_state_order'};
+    $c->stash->{default_state_order} = [split(/\s*,\s*/mx, $default_state_order)];
+
     unless($only_data) {
         $c->res->headers->content_type('text/javascript; charset=UTF-8');
         $c->stash->{template} = 'panorama_js.tt';

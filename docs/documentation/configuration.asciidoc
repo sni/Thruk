@@ -2308,6 +2308,7 @@ ex.:
     geo_map_default_zoom   = 5
     extra_fonts            = CompanyFont1, CompanyFont2
     new_files_start_at     = 1
+    default_state_order    = down, unreachable, ...
   </Component>
 
 
@@ -2332,6 +2333,9 @@ leaks. Disabled when set to 0.
 Normally new files start at index 1 but this can be changed here. This helps in
 situations when more than one Thruk installation has to create dashboards in
 the same folder.
+
+=== default_state_order
+Defines the order to determine the worst state for filter and group icons.
 
 === geo_map_default_center
 Default coordinates (lon,lat) for new geo maps.
