@@ -9,6 +9,8 @@ next:
           - fix wrong number of backends (#809)
           - Panorama:
             - optionally show broadcasts in panorama dashboards
+            - make determing worst state for group/filter icons configurable
+            - add new configuration option 'default_state_order'
             - fix tab rotation
           - Config Tool:
             - make command line a textarea
