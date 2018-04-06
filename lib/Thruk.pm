@@ -817,7 +817,7 @@ sub _after_dispatch {
         push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
         my $stats = "";
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
-        $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx;
+        $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx if ref $res->[2] eq 'ARRAY';
         Thruk::Template::Context::reset_profiles() if $tt_profiling;
     }
 
