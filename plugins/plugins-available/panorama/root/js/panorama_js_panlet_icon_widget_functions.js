@@ -432,12 +432,6 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
     } else {
         return('#');
     }
-    if(panel.xdata.general.backends && panel.xdata.general.backends.length > 0) {
-        options.backends = panel.xdata.general.backends;
-    } else {
-        var tab = Ext.getCmp(panel.panel_id);
-        options.backends = tab.xdata.backends;
-    }
     if(relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));
     }

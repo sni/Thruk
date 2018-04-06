@@ -1628,6 +1628,9 @@ var TP = {
         if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0) {
             backends = panel.xdata.backends;
         }
+        else if(panel && panel.xdata.general.backends && panel.xdata.general.backends.length > 0) {
+            backends = panel.xdata.general.backends;
+        }
         else if(tab.xdata.select_backends) {
             backends = tab.xdata.backends;
         } else {
