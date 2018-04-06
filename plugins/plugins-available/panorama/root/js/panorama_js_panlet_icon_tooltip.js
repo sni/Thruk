@@ -7,12 +7,12 @@ Ext.onReady(function() {
         target:    Ext.getBody(),
         delegate: 'A.tooltipTarget', // the cell class in which the tooltip has to be triggered
         dismissDelay:    0,
-        width:         400,
+        width:         500,
         manageHeight: false,
-        maxWidth:      400,
+        maxWidth:      500,
         hideDelay:     300,
         closable:     true,
-        showDelay:    1000,
+        showDelay:     500,
         //closable:  true, hideDelay: 6000000, // enable for easier css debuging
         style:    'background: #E5E5E5',
         bodyStyle:'background: #E5E5E5',
@@ -77,7 +77,7 @@ Ext.onReady(function() {
             show: function(This) {
                 if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.doLayout(); }
                 var size = This.getSize();
-                if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
+                if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150} }
 
                 var position = "automatic";
                 if(TP.iconTipTarget && TP.iconTipTarget.xdata.popup && TP.iconTipTarget.xdata.popup.popup_position != "" && TP.iconTipTarget.xdata.popup.popup_position != "automatic") {
@@ -146,6 +146,7 @@ Ext.onReady(function() {
             }
         },
         setFixedOffsetPosition: function(panel, x, y) {
+            if(!panel || !panel.getPosition) { return; }
             var pos  = panel.getPosition();
             TP.suppressIconTipForce = false;
             this.showAt([pos[0]+x, pos[1]+y]);
@@ -187,7 +188,7 @@ Ext.onReady(function() {
         evt.stopEvent();
         TP.iconTipTarget = img;
 
-        if(!force && ( TP.iconTip.last_id && TP.iconTip.last_id == el.id)) { return; }
+        if(!force && ( TP.iconTip.last_id && TP.iconTip.last_id == el.id)) { TP.suppressIconTipForce = false; return; }
         TP.iconTip.panel   = img;
         /* hide when in edit mode */
         if(!force && !img.locked) { return; }
@@ -288,7 +289,7 @@ Ext.onReady(function() {
         TP.iconTip.update(details);
         var size;
         if(TP.iconTip.el) { size = TP.iconTip.getSize(); }
-        if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
+        if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150} }
         TP.suppressIconTipForce = false;
         if(xdata.popup && xdata.popup.popup_position == "relative position") {
             TP.iconTip.setFixedOffsetPosition(img, xdata.popup.popup_x, xdata.popup.popup_y);
@@ -321,7 +322,7 @@ Ext.onReady(function() {
                 html:     ' ',
                 border:     0,
                 minHeight: 40,
-                width:     380
+                width:     480
             });
             TP.iconTip.detailsTarget.body.mask("loading");
             if(link == TP.iconTip.lastUrl && TP.iconTip.lastData) {
@@ -475,7 +476,7 @@ TP.renderTipDetails = function(data) {
     }
     else if(!TP.iconSettingsWindow) {
         var size      = TP.iconTip.getSize();
-        if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
+        if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150} }
         var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
         TP.iconTip.showAt(showAtPos);
     } else {
