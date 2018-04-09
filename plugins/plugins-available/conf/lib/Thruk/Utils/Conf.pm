@@ -585,15 +585,15 @@ sub store_model_retention {
 
     # store changed/stashed changed to local user, unchanged config can be stored in a generic file
     my $file      = $c->config->{'conf_retention_file'};
-    my $user_file = $c->config->{'tmp_path'}."/obj_retention.".$backend.".".$user_id.".dat";
+    my $user_file = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";
     if(!$file) {
-        $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+        $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     }
     if($model->{'configs'}->{$backend}->{'needs_commit'} || $c->stash->{'use_user_model_retention_file'}) {
         $file = $user_file;
     } else {
         unlink($user_file);
-        $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+        $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     }
 
     confess("no such backend") unless defined $model->{'configs'}->{$backend};
@@ -638,12 +638,19 @@ sub get_model_retention {
     my $model   = $c->app->obj_db_model;
     my $user_id = md5_hex($c->stash->{'remote_user'} || '');
 
-    my $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".".$user_id.".dat";
+    # migrate files from tmp_path to var_path
+    my $tmp_path = $c->config->{'tmp_path'};
+    my $var_path = $c->config->{'var_path'};
+    # REMOVE AFTER: 01.01.2020
+    `mv $tmp_path/obj_retention* $var_path/ >/dev/null 2>&1`;
+    # </REMOVE AFTER>
+
+    my $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";
     if(! -f $file) {
-        $file  = $c->config->{'tmp_path'}."/obj_retention.".$backend.".dat";
+        $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     }
     if(! -f $file) {
-        $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
+        $file  = $c->config->{'var_path'}."/obj_retention.dat";
     }
 
     if(! -f $file) {
