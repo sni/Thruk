@@ -263,6 +263,9 @@ Ext.define('TP.Pantab', {
         delete state.xdata.locked;
         delete state.xdata.refresh_txt;
         delete state.xdata.map_choose;
+        if(state.xdata.state_order.join(',') == default_state_order.join(',')) {
+            delete state.xdata.state_order;
+        }
         return state;
     },
     saveIconsStates: function() {
@@ -424,6 +427,12 @@ Ext.define('TP.Pantab', {
         }
         if(This.readonly) {
             This.locked = true;
+        }
+        if(!This.xdata.state_order) {
+            This.xdata.state_order = default_state_order;
+        }
+        if(!Ext.isArray(This.xdata.state_order)) {
+            This.xdata.state_order = This.xdata.state_order.split(',');
         }
         xdata.locked = This.locked;
         This.setLock(xdata.locked);

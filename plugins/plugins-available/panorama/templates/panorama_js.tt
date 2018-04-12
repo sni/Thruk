@@ -9,6 +9,7 @@ var ExtState      = [% dashboards %];
 [%+ END +%]
 var default_dashboard = [% default_dashboard %];
 var initial_shapes = [% json_encode(shapes) %];
+var default_state_order = [% json_encode(default_state_order) %];
 
 Ext.onReady(function() {
     /* create state provider */

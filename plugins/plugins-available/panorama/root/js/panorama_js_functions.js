@@ -1628,6 +1628,9 @@ var TP = {
         if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0) {
             backends = panel.xdata.backends;
         }
+        else if(panel && panel.xdata.general && panel.xdata.general.backends && panel.xdata.general.backends.length > 0) {
+            backends = panel.xdata.general.backends;
+        }
         else if(tab.xdata.select_backends) {
             backends = tab.xdata.backends;
         } else {
@@ -1741,7 +1744,7 @@ var TP = {
             return;
         }
         var group = TP.getTabTotals(tab);
-        var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes});
+        var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes, order: tab.xdata.state_order});
         return(res);
     },
     getTabTotals: function(tab) {

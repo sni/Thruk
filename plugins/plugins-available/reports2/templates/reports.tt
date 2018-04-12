@@ -170,7 +170,9 @@
     else                     { jQuery('#view1').prop('checked', true) }
     init_report_tool_buttons();
     [% IF highlight %]
-    jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
+    jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000, function() {
+      reports_view(typ);
+    });
     if(typ == 'my') {
       // filter again, otherwise the owner cell would be displayed after hilighting
       reports_view(typ);
