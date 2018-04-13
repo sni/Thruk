@@ -1084,7 +1084,7 @@ sub _update_logcache {
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
         $fresh_created = 1;
     }
-    return(-1) unless _check_lock($dbh, $prefix, $verbose);
+    return(-1) unless _check_lock($dbh, $prefix, $verbose, $c);
     my $rc = _update_logcache_version($c, $dbh, $prefix, $verbose);
     if(!$rc && $mode eq 'update') {
         $mode = 'import';
@@ -1105,7 +1105,7 @@ sub _update_logcache {
         my $plugin_lookup  = _get_plugin_lookup($dbh,$prefix);
 
         if(defined $files and scalar @{$files} > 0) {
-            $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup);
+            $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$c);
         } else {
             $log_count += $self->_import_peer_logfiles($c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$forcestart);
         }
@@ -1119,7 +1119,7 @@ sub _update_logcache {
 
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
-    _release_write_locks($dbh);
+    _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->commit or $error .= $dbh->errstr;
 
     if($error) {
@@ -1148,13 +1148,13 @@ sub _create_tables_if_not_exist {
 
 ##########################################################
 sub _check_lock {
-    my($dbh, $prefix, $verbose) = @_;
+    my($dbh, $prefix, $verbose, $c) = @_;
 
     # check if there is already a update / import running
     my $skip          = 0;
     my $cache_version = 1;
     eval {
-        $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
+        $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE') unless $c->config->{'logcache_pxc_strict_mode'};
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
@@ -1169,19 +1169,19 @@ sub _check_lock {
     };
     if($@) {
         print "$@\n" if $verbose;
-        $dbh->do('UNLOCK TABLES');
+        $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
         return;
     }
     if($skip) {
-        $dbh->do('UNLOCK TABLES');
+        $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
         return;
     }
 
-    $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
+    $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE') unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
     $dbh->commit or die $dbh->errstr;
-    $dbh->do('UNLOCK TABLES');
+    $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
     return(1);
 }
 
@@ -1341,8 +1341,7 @@ sub _update_logcache_auth {
 
 ##########################################################
 sub _update_logcache_optimize {
-    #my($self, $c, $peer, $dbh, $prefix, $verbose, $options) = @_;
-    my($self, undef, undef, $dbh, $prefix, $verbose, $options) = @_;
+    my($self, $c, $peer, $dbh, $prefix, $verbose, $options) = @_;
 
     # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
@@ -1359,13 +1358,15 @@ sub _update_logcache_optimize {
     };
     print "$@\n" if($@ && $verbose);
 
-    # repair / optimize tables
-    print "optimizing / repairing tables\n" if $verbose;
-    for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
-        print $table.'...' if $verbose;
-        $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
-        $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
-        print "OK\n" if $verbose;
+    unless ($c->config->{'logcache_pxc_strict_mode'}) {
+        # repair / optimize tables
+        print "optimizing / repairing tables\n" if $verbose;
+        for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
+            print $table.'...' if $verbose;
+            $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
+            $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
+            print "OK\n" if $verbose;
+        }
     }
 
     $dbh->commit or die $dbh->errstr;
@@ -1806,7 +1807,7 @@ sub _import_peer_logfiles {
 
         $time = $time + $blocksize;
 
-        $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup);
+        $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c);
 
         $c->stats->profile(end => $stime);
     }
@@ -1820,7 +1821,7 @@ sub _import_peer_logfiles {
 
 ##########################################################
 sub _import_logcache_from_file {
-    my($self,$mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup) = @_;
+    my($self,$mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup, $c) = @_;
     my $log_count = 0;
 
     $plugin_lookup = _get_plugin_lookup($dbh,$prefix) unless scalar keys %{$plugin_lookup} > 0;
@@ -1913,7 +1914,7 @@ sub _import_logcache_from_file {
         print "\n" if $verbose;
     }
 
-    _release_write_locks($dbh);
+    _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     print "it is recommended to run logcacheoptimize after importing logfiles.\n" if $verbose;
 
@@ -1922,7 +1923,7 @@ sub _import_logcache_from_file {
 
 ##########################################################
 sub _insert_logs {
-    my($self,$dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup) = @_;
+    my($self,$dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c) = @_;
     my $log_count = 0;
 
     if($mode eq 'update') {
@@ -1997,7 +1998,7 @@ sub _insert_logs {
     }
     $self->_safe_insert($dbh, $stm, \@values, $verbose);
     $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
-    _release_write_locks($dbh);
+    _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     print '. '.$log_count . " entries added\n" if $verbose;
     return $log_count;
