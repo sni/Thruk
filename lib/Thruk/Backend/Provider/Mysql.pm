@@ -1914,9 +1914,10 @@ sub _import_logcache_from_file {
         print "\n" if $verbose;
     }
 
-    _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
-
-    print "it is recommended to run logcacheoptimize after importing logfiles.\n" if $verbose;
+    unless ($c->config->{'logcache_pxc_strict_mode'}) {
+        _release_write_locks($dbh);
+        print "it is recommended to run logcacheoptimize after importing logfiles.\n" if $verbose;
+    }
 
     return $log_count;
 }
