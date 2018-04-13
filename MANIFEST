@@ -1291,6 +1291,7 @@ plugins/plugins-available/panorama/scripts/enable_debug.sh
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/t/javascript_pattern.t
+plugins/plugins-available/panorama/t/javascript_tests.js
 plugins/plugins-available/panorama/templates/_panorama_js_globals.tt
 plugins/plugins-available/panorama/templates/panorama.tt
 plugins/plugins-available/panorama/templates/panorama_js.tt
