@@ -29,8 +29,8 @@
     <td valign="top" style="text-align: left; width: 200px;">
       <div style="width: 200px; height: 34px; background: white; border-bottom: 1px solid grey;">
         <div id="tool_set">
-          <input type="radio" name="expand" id="tool_collapse"><label for="tool_collapse">C</label>
-          <input type="radio" name="expand" id="tool_expand"><label for="tool_expand">E</label>
+          <button name="expand" id="tool_collapse"><label for="tool_collapse">C</label></button>
+          <button name="expand" id="tool_expand"><label for="tool_expand">E</label></button>
         </div>
       </div>
       <div id="container">
@@ -110,10 +110,9 @@ jQuery(function($) {
     container.style.width  = 200 + 'px';
     container.style.height = (h-55)  + 'px';
 
-    jQuery("#tool_set").buttonset();
     jQuery('#tool_collapse').button({
-        icons: {primary: 'ui-appsidelist-button'},
-        text: false,
+        icon: 'ui-appsidelist-button',
+        showLabel: false,
         label: 'collapse all folder'
     }).click(function() {
         jQuery('#container').jstree('close_all');
@@ -121,13 +120,14 @@ jQuery(function($) {
         return;
     });
     jQuery('#tool_expand').button({
-        icons: {primary: 'ui-appsidetree-button'},
-        text: false,
+        icon: 'ui-appsidetree-button',
+        showLabel: false,
         label: 'expand all folder'
     }).click(function() {
         jQuery('#container').jstree('open_all');
         return;
     });
+    jQuery("#tool_set").controlgroup();
 
   jQuery('#container')
   .on('changed.jstree', function (e, data) {

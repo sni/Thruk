@@ -1353,7 +1353,21 @@ ex.:
   logcache_import_command = .../importscript.sh
 
 
+=== logcache_pxc_strict_mode
+If you are using a mysql database with galera replication such as MariaDB Cluster,
+Percona XtraDB Cluster or Galera Cluster it is a good idea to avoid locks and
+optimize/repair table statements since they are not properly replicated.
 
+Especially in Percona XtraDB Cluster > 5.6 the default setting of pxc_strict_mode
+will disable locks all togheter.
+
+This setting will make the logcache work in that case. More information about
+pxc_strict_mode available here:
+  - link:https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html[Percona documentation]
+
+ex.:
+
+  logcache_pxc_strict_mode = 1
 
 === delay_pages_after_backend_reload
 
@@ -2308,6 +2322,7 @@ ex.:
     geo_map_default_zoom   = 5
     extra_fonts            = CompanyFont1, CompanyFont2
     new_files_start_at     = 1
+    default_state_order    = down, unreachable, ...
   </Component>
 
 
@@ -2332,6 +2347,9 @@ leaks. Disabled when set to 0.
 Normally new files start at index 1 but this can be changed here. This helps in
 situations when more than one Thruk installation has to create dashboards in
 the same folder.
+
+=== default_state_order
+Defines the order to determine the worst state for filter and group icons.
 
 === geo_map_default_center
 Default coordinates (lon,lat) for new geo maps.

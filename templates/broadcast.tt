@@ -28,12 +28,12 @@
   </tr>
 </table>
 <div id="reports_table">
-<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px; width: 1000px;">
+<table border="1" class='status hoverable' id="statusTable" style="max-width: 1200px; width: 1200px;">
   <tr>
     <th class="status" nowrap width="300">Content Preview</th>
     <th class="status" nowrap width="80">Author</th>
-    <th class="status" nowrap width="100">Hide Before</th>
-    <th class="status" nowrap width="100">Expires After</th>
+    <th class="status" nowrap width="110">Hide Before</th>
+    <th class="status" nowrap width="110">Expires After</th>
     <th class="status" nowrap width="70">Public</th>
     <th class="status" nowrap width="100">Contacts</th>
     <th class="status" nowrap width="100">Contactgroups</th>
@@ -43,7 +43,7 @@
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="[%+ IF loop.first +%]firstrow[% END %]">
-    <td class="status [% rowclass %] text_ellipsis" align="left">[% b.text.split('<br>').0 %]</td>
+    <td class="status [% rowclass %] text_ellipsis" align="left" style="white-space: inherit;"> [% b.text.split('<br>').0 %]</td>
     <td class="status [% rowclass %]" align="left">[% b.author %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>

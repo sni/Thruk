@@ -127,4 +127,12 @@ print $fh $tst->{'content'};
 close($fh);
 js_eval_ok($filename) && unlink($filename);
 
+#################################################
+# tests from javascript_tests file
+my @functions = read_file('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+js_eval_ok('t/xt/panorama/javascript_tests.js');
+for my $f (@functions) {
+    js_is("$f()", '1', "$f()");
+}
+
 done_testing();

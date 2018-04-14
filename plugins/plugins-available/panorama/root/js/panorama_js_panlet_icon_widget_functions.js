@@ -26,64 +26,130 @@ TP.get_summarized_servicestatus = function(item) {
 /* returns group status */
 TP.get_group_status = function(options) {
     var group          = options.group,
+        order          = options.order,
         incl_svc       = options.incl_svc,
-        incl_hst       = options.incl_hst;
-        incl_ack       = options.incl_ack;
-        incl_downtimes = options.incl_downtimes;
-    var s;
-    var acknowledged = false;
-    var downtime     = false;
-    var hostProblem  = false;
+        incl_hst       = options.incl_hst,
+        incl_ack       = options.incl_ack, // alert acks as well, basically means acks are threated as unacked
+        incl_downtimes = options.incl_downtimes; // assume no downtime
+    if(!order) { order = default_state_order }
     if(group.hosts    == undefined) { group.hosts    = {} }
     if(group.services == undefined) { group.services = {} }
 
     var totals = { services: {}, hosts: {} };
     if(incl_svc) {
+        // since ok, crit,... contain the downtimes and acks as well, override with the plain_ ones.
         totals.services.ok       = group.services.plain_ok;;
         totals.services.critical = group.services.plain_critical;
         totals.services.warning  = group.services.plain_warning;
         totals.services.unknown  = group.services.plain_unknown;
         totals.services.pending  = group.services.plain_pending;
+        if(incl_ack) {
+            totals.services.critical += group.services.ack_critical;
+            totals.services.warning  += group.services.ack_warning;
+            totals.services.unknown  += group.services.ack_unknown;
+        }
+        if(incl_downtimes) {
+            totals.services.critical += group.services.downtime_critical;
+            totals.services.warning  += group.services.downtime_warning;
+            totals.services.unknown  += group.services.downtime_unknown;
+        }
     }
     if(incl_hst) {
         totals.hosts.up          = group.hosts.plain_up;
         totals.hosts.down        = group.hosts.plain_down;
         totals.hosts.unreachable = group.hosts.plain_unreachable;
         totals.hosts.pending     = group.hosts.plain_pending;
+        if(incl_ack) {
+            totals.hosts.down        = group.hosts.ack_down;
+            totals.hosts.unreachable = group.hosts.ack_unreachable;
+        }
+        if(incl_downtimes) {
+            totals.hosts.down        = group.hosts.downtime_down;
+            totals.hosts.unreachable = group.hosts.downtime_unreachable;
+        }
     }
 
-         if(incl_hst && totals.hosts.down        > 0)                            { s = 1; hostProblem = true; }
-    else if(incl_hst && totals.hosts.unreachable > 0)                            { s = 2; hostProblem = true; }
-    else if(incl_svc && totals.services.unknown > 0)                             { s = 3; }
-    else if(incl_svc && incl_ack && group.services.ack_unknown > 0)              { s = 3; }
-    else if(incl_svc && incl_downtimes && group.services.downtimes_unknown > 0)  { s = 3; }
-    else if(incl_ack && group.hosts.ack_unreachable > 0)                         { s = 2; }
-    else if(incl_ack && group.hosts.ack_down        > 0)                         { s = 2; }
-    else if(incl_hst && incl_downtimes && group.hosts.downtime_down        > 0)  { s = 1; hostProblem = true; }
-    else if(incl_hst && incl_downtimes && group.hosts.downtime_unreachable > 0)  { s = 2; hostProblem = true; }
-    else if(incl_svc && totals.services.critical > 0)                            { s = 2; }
-    else if(incl_svc && incl_ack && group.services.ack_critical > 0)             { s = 2; }
-    else if(incl_svc && incl_downtimes && group.services.downtimes_critical > 0) { s = 2; }
-    else if(incl_svc && totals.services.warning > 0)                             { s = 1; }
-    else if(incl_svc && incl_ack && group.services.ack_warning > 0)              { s = 1; }
-    else if(incl_svc && incl_downtimes && group.services.downtimes_warning > 0)  { s = 1; }
-    else                                                                         { s = 0; }
-    if(s == 0) {
-        var a = 0;
-             if(incl_hst && group.hosts.ack_down             > 0) { a = 1; acknowledged = true; hostProblem = true; }
-        else if(incl_hst && group.hosts.ack_unreachable      > 0) { a = 2; acknowledged = true; hostProblem = true; }
-        else if(incl_svc && group.services.ack_unknown       > 0) { a = 3; acknowledged = true; }
-        else if(incl_svc && group.services.ack_critical      > 0) { a = 2; acknowledged = true; }
-        else if(incl_svc && group.services.ack_warning       > 0) { a = 1; acknowledged = true; }
-
-        var d = 0;
-             if(incl_hst && group.hosts.downtime_down        > 0) { d = 1; downtime     = true; hostProblem = true; }
-        else if(incl_hst && group.hosts.downtime_unreachable > 0) { d = 2; downtime     = true; hostProblem = true; }
-        else if(incl_svc && group.services.downtimes_unknown > 0) { d = 3; downtime     = true; }
-        else if(incl_svc && group.services.downtime_critical > 0) { d = 2; downtime     = true; }
-        else if(incl_svc && group.services.downtime_warning  > 0) { d = 1; downtime     = true; }
-        s = Ext.Array.max([a,s,d]);
+    var s;
+    var acknowledged = false;
+    var downtime     = false;
+    var hostProblem  = false;
+    for(var x = 0; x < order.length; x++) {
+        switch (order[x]) {
+            case "down":
+                if(incl_hst && totals.hosts.down > 0)                 { s = 1; hostProblem = true; }
+                break;
+            case "unreachable":
+                if(incl_hst && totals.hosts.unreachable > 0)          { s = 2; hostProblem = true; }
+                break;
+            case "unknown":
+                if(incl_svc && totals.services.unknown > 0)           { s = 3; }
+                break;
+            case "acknowledged_unknown":
+                if(incl_svc && group.services.ack_unknown > 0)        { s = 3; acknowledged = true; }
+                break;
+            case "downtime_unknown":
+                if(incl_svc && group.services.downtime_unknown > 0)   { s = 3; downtime = true; }
+                break;
+            case "acknowledged_unreachable":
+                if(incl_hst && group.hosts.ack_unreachable > 0)       { s = 2; hostProblem = true; acknowledged = true; }
+                break;
+            case "acknowledged_down":
+                if(incl_hst && group.hosts.ack_down > 0)              { s = 1; hostProblem = true; acknowledged = true; }
+                break;
+            case "downtime_down":
+                if(incl_hst && group.hosts.downtime_down > 0)         { s = 1; hostProblem = true; downtime = true; }
+                break;
+            case "downtime_unreachable":
+                if(incl_hst && group.hosts.downtime_unreachable > 0)  { s = 2; hostProblem = true; downtime = true; }
+                break;
+            case "critical":
+                if(incl_svc && totals.services.critical > 0)          { s = 2; }
+                break;
+            case "acknowledged_critical":
+                if(incl_svc && group.services.ack_critical > 0)       { s = 2; acknowledged = true; }
+                break;
+            case "downtime_critical":
+                if(incl_svc && group.services.downtime_critical > 0)  { s = 2; downtime = true; }
+                break;
+            case "warning":
+                if(incl_svc && totals.services.warning > 0)           { s = 1; }
+                break;
+            case "acknowledged_warning":
+                if(incl_svc && group.services.ack_warning > 0)        { s = 1; acknowledged = true; }
+                break;
+            case "downtime_warning":
+                if(incl_svc && group.services.downtime_warning > 0)   { s = 1; downtime = true; }
+                break;
+            case "ok":
+                if(incl_svc && totals.services.ok > 0)                { s = 0; }
+                break;
+            case "up":
+                if(incl_hst && totals.hosts.up > 0)                   { s = 0; }
+                break;
+            case "downtime_up":
+                if(incl_hst && group.hosts.downtime_up > 0)           { s = 0; downtime = true; }
+                break;
+            case "downtime_ok":
+                if(incl_svc && group.services.downtime_ok > 0)        { s = 0; downtime = true; }
+                break;
+            case "pending":
+                if(incl_svc && totals.services.pending > 0)           { s = 4; }
+                if(incl_hst && totals.hosts.pending > 0)              { s = 4; hostProblem = true; }
+                break;
+            case "downtime_pending":
+                if(incl_svc && group.services.downtime_pending > 0)   { s = 4; downtime = true; }
+                if(incl_hst && group.hosts.downtime_pending > 0)      { s = 4; hostProblem = true; downtime = true; }
+                break;
+            default:
+                throw new Error("unhandled state: '"+order[x]+"'");
+                break;
+        }
+        // first hit sets the current overall state
+        if(s != undefined) {
+            break;
+        }
     }
+
     return({state: s, downtime: downtime, acknowledged: acknowledged, hostProblem: hostProblem });
 }
 
@@ -431,12 +497,6 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
         relativeUrl    = true;
     } else {
         return('#');
-    }
-    if(panel.xdata.general.backends && panel.xdata.general.backends.length > 0) {
-        options.backends = panel.xdata.general.backends;
-    } else {
-        var tab = Ext.getCmp(panel.panel_id);
-        options.backends = tab.xdata.backends;
     }
     if(relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));

@@ -2210,6 +2210,7 @@ sub decode_any {
     eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
     if($@) { # input was not utf8
         return($_[0]) if $@ =~ m/\QCannot decode string with wide characters\E/mxo; # since Encode.pm 2.53 decode_utf8 no longer noops when utf8 is already on
+        return($_[0]) if $@ =~ m/\QWide character at\E/mxo;                         # since Encode.pm ~2.90 message changed
         $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
     }
     return $_[0];

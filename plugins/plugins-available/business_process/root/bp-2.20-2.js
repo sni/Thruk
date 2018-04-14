@@ -611,7 +611,7 @@ function bp_show_edit_node(id, refreshType) {
     // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
     jQuery("#edit_dialog_"+bp_id).tabs().dialog({
         autoOpen: false, modal: true,
-        width: 470, height: 350,
+        width: 480, height: 370,
         draggable: false, // disable the dialog's drag we're using the tabs titlebar instead
         modal: true,
         closeOnEscape: true,

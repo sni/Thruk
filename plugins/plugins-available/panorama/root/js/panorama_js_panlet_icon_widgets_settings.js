@@ -1193,6 +1193,9 @@ TP.get_icon_form_xdata = function(settingsWindow) {
     }
     if(xdata.general) {
         delete xdata.general.newcls;
+        if(xdata.general.backends && xdata.general.backends.length == 1 && xdata.general.backends[0] == '') {
+            delete xdata.general.backends;
+        }
     }
     return(xdata);
 }

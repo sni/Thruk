@@ -72,12 +72,13 @@ create folder recursive
 
 sub mkdir_r {
     for my $dirname (@_) {
-        next if -d $dirname;
+        $dirname =~ s|\/\.?$||gmx;
+        next if -d $dirname.'/.';
         my $path = '';
         for my $part (split/(\/)/mx, $dirname) {
             $path .= $part;
             next if $path eq '';
-            Thruk::Utils::IO::mkdir($path) unless -d $path;
+            Thruk::Utils::IO::mkdir($path) unless -d $path.'/.';
         }
     }
     return 1;

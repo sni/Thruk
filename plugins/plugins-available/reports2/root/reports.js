@@ -31,7 +31,8 @@ function init_report_tool_buttons() {
         text: false
     });
 
-    jQuery('.radioset').buttonset();
+    jQuery('.radioset INPUT[type=radio]').button({icon:false});
+    jQuery('.radioset').controlgroup({});
 
     jQuery('.report_remove_button').button({
         icons: {primary: 'ui-remove-button'}

@@ -1628,6 +1628,9 @@ var TP = {
         if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0) {
             backends = panel.xdata.backends;
         }
+        else if(panel && panel.xdata.general && panel.xdata.general.backends && panel.xdata.general.backends.length > 0 && (panel.xdata.general.backends.length != 1 || panel.xdata.general.backends[0] != "")) {
+            backends = panel.xdata.general.backends;
+        }
         else if(tab.xdata.select_backends) {
             backends = tab.xdata.backends;
         } else {
@@ -1741,7 +1744,7 @@ var TP = {
             return;
         }
         var group = TP.getTabTotals(tab);
-        var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes});
+        var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes, order: tab.xdata.state_order});
         return(res);
     },
     getTabTotals: function(tab) {
@@ -2112,30 +2115,44 @@ var TP = {
         }
     },
     showBroadcasts: function(broadcasts) {
-        if(!broadcasts || broadcasts.length == 0) { return; }
+        if(!broadcasts) { return; }
+        if(!TP.broadcasts) { TP.broadcasts = {}; }
         if(!TP.broadcastCt) {
             TP.broadcastCt = Ext.DomHelper.insertFirst(document.body, {id:'broadcast-div', 'class': "popup-msg"}, true);
         }
-        var b   = broadcasts[0];
-        var id  = b.basefile.replace(/[^0-9a-z]/g, "");
-        if(document.getElementById(id)) {
-            return;
-        }
-        var text = b.text;
-        if(b.annotation) {
-            text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
-        }
-        var msg = TP.Msg.msg("info_message~~"+text, 0, TP.broadcastCt, "Announcement", function() {
-            Ext.Ajax.request({
-                url: 'broadcast.cgi',
-                method: 'POST',
-                params: {
-                    action:  'dismiss',
-                    panorama: 1,
-                    token:    user_token
-                }
+        var broadcast_list = {};
+        for(var x = 0; x < broadcasts.length; x++) {
+            var b   = broadcasts[x];
+            var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
+            if(TP.broadcasts[id]) {
+                broadcast_list[id] = TP.broadcasts[id];
+                continue;
+            }
+            var text = b.text;
+            if(b.annotation) {
+                text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
+            }
+            var msg = TP.Msg.msg("info_message~~"+text, 0, TP.broadcastCt, "Announcement", function() {
+                Ext.Ajax.request({
+                    url: 'broadcast.cgi',
+                    method: 'POST',
+                    params: {
+                        action:  'dismiss',
+                        panorama: 1,
+                        token:    user_token
+                    }
+                });
+                delete TP.broadcasts[id];
             });
-        });
+            broadcast_list[id] = msg.id;
+        }
+        for(var key in TP.broadcasts) {
+            if(!broadcast_list[key]) {
+                Ext.get(TP.broadcasts[key]).destroy();
+            }
+        }
+
+        TP.broadcasts = broadcast_list;
     }
 }
 TP.log('[global] starting');

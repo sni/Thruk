@@ -203,7 +203,7 @@ our %config = ('name'                   => 'Thruk',
                                               'thruk_noframes.css',
                                               'Thruk2.css',
                                           ],
-                                          'jquery_ui' => '1.10.3',
+                                          'jquery_ui' => '1.12.1',
                                           'all_in_one_javascript_panorama' => [
                                               'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'plugins/panorama/ux/form/MultiSelect.js',
