@@ -1353,7 +1353,21 @@ ex.:
   logcache_import_command = .../importscript.sh
 
 
+=== logcache_pxc_strict_mode
+If you are using a mysql database with galera replication such as MariaDB Cluster,
+Percona XtraDB Cluster or Galera Cluster it is a good idea to avoid locks and
+optimize/repair table statements since they are not properly replicated.
 
+Especially in Percona XtraDB Cluster > 5.6 the default setting of pxc_strict_mode
+will disable locks all togheter.
+
+This setting will make the logcache work in that case. More information about
+pxc_strict_mode available here:
+  - link:https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html[Percona documentation]
+
+ex.:
+
+  logcache_pxc_strict_mode = 1
 
 === delay_pages_after_backend_reload
 
