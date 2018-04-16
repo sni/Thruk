@@ -489,6 +489,7 @@ sub _check_exit_reason {
         my $url = $c->req->url;
         printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
         printf(STDERR "ERROR: User: %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
+        printf(STDERR "ERROR: Address: %s\n", $c->req->address) if $c->req->address;
         if($c->stash->{errorDetails}) {
             for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                 printf(STDERR "ERROR: %s\n", $row);
