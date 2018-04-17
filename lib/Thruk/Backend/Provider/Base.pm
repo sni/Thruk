@@ -541,6 +541,20 @@ sub renew_logcache {
     confess("unimplemented");
 }
 
+##########################################################
+
+=head2 get_logs_start_end
+
+  get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub get_logs_start_end {
+    my $self = shift;
+    confess("unimplemented");
+}
+
 
 =head1 AUTHOR
 

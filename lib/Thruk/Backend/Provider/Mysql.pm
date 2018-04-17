@@ -855,6 +855,19 @@ sub _quote_backslash {
 
 ##########################################################
 
+=head2 get_logs_start_end
+
+  get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub get_logs_start_end {
+    return(_get_logs_start_end(@_));
+}
+
+##########################################################
+
 =head2 _get_logs_start_end
 
   _get_logs_start_end
@@ -1743,7 +1756,7 @@ sub _import_peer_logfiles {
     if($mode eq 'update') {
         $c->stats->profile(begin => "get last mysql timestamp");
         # get last timestamp from Mysql
-        ($mstart, $mend) = @{$peer->logcache->_get_logs_start_end(collection => $prefix)};
+        ($mstart, $mend) = @{$peer->logcache->get_logs_start_end(collection => $prefix)};
         if(defined $mend) {
             print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
             push @{$filter}, {time => { '>=' => $mend }};
@@ -1753,16 +1766,26 @@ sub _import_peer_logfiles {
 
     my $log_count = 0;
     $c->stats->profile(begin => "get livestatus timestamp");
-    my($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
-    if(!$start || !$end) {
-        die("something went wrong, cannot get start/end from logfiles ($start / $end)\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
+    my($start, $end);
+    if($forcestart) {
+        $start = $forcestart;
     }
-
-    print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
+    elsif(scalar @{$filter} == 0) {
+        # fetching logs without any filter is a terrible bad idea
+        ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'});
+    } else {
+        ($start, $end) = @{$peer->{'class'}->get_logs_start_end(filter => $filter)};
+    }
+    if(!$start) {
+        die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
+    }
     $c->stats->profile(end => "get livestatus timestamp");
+
     $start = $forcestart if $forcestart;
-    print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
+    print "importing ", scalar localtime $start, "\n" if $verbose;
+    print "until latest entry in logfile: ", scalar localtime $end, "\n" if($end && $verbose);
     my $time = $start;
+    $end = time() unless $end;
 
     # add import filter?
     my $import_filter = [];
@@ -1781,7 +1804,7 @@ sub _import_peer_logfiles {
         my $duplicate_lookup = {};
         print scalar localtime $time if $verbose;
 
-        # do not let lookup grow to much, recreate from latet logfiles, otherwise import would consume lots of memory
+        # do not let lookup grow to much, recreate from latest logfiles, otherwise import would consume lots of memory
         $plugin_lookup = _get_plugin_lookup($dbh,$prefix) if scalar keys %{$plugin_lookup} > 100000;
 
         my $logs = [];

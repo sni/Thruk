@@ -712,6 +712,19 @@ sub get_extra_perf_stats {
 
 ##########################################################
 
+=head2 get_logs_start_end
+
+  get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub get_logs_start_end {
+    return(_get_logs_start_end(@_));
+}
+
+##########################################################
+
 =head2 _get_logs_start_end
 
   _get_logs_start_end
@@ -776,7 +789,7 @@ sub _req {
         eval {
             $data = decode_json($response->decoded_content);
         };
-        #die($@."\nrequest:\n".Dumper($response)) if $@;
+        die($@."\nrequest:\n".Dumper($response)) if $@;
         die($@."\n") if $@;
         if($data->{'rc'} == 1) {
             my $remote_version = $data->{'version'};

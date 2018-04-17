@@ -511,6 +511,18 @@ sub renew_logcache {
     return;
 }
 
+##########################################################
+
+=head2 get_logs_start_end
+
+  get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub get_logs_start_end {
+    return;
+}
 
 =head1 AUTHOR
 

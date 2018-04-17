@@ -1444,6 +1444,19 @@ sub _get_query_size {
 
 ##########################################################
 
+=head2 get_logs_start_end
+
+  get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub get_logs_start_end {
+    return(_get_logs_start_end(@_));
+}
+
+##########################################################
+
 =head2 _get_logs_start_end
 
   _get_logs_start_end
@@ -1453,6 +1466,11 @@ returns the min/max timestamp for given logs
 =cut
 sub _get_logs_start_end {
     my($self, %options) = @_;
+    if(!$options{'filter'} || scalar @{$options{'filter'}} == 0) {
+        # not a good idea, try to assume earliest date without parsing all logfiles
+        my($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($self);
+        return([$start, $end]);
+    }
     my $class = $self->_get_class('log', \%options);
     my $rows  = $class->stats([ 'start' => { -isa => [ -min => 'time' ]},
                                 'end'   => { -isa => [ -max => 'time' ]},
