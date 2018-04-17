@@ -56,6 +56,7 @@ use constant {
     ADD_CACHED_DEFAULTS => 2,
 };
 use Carp qw/confess longmess/;
+$Carp::MaxArgLen = 500;
 use File::Slurp qw(read_file);
 use Module::Load qw/load/;
 use Data::Dumper qw/Dumper/;
