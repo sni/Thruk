@@ -16,9 +16,11 @@ wait_start:
 
 test: wait_start
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t
+	$(MAKE) extra_test
 
 test_verbose: wait_start
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
+	$(MAKE) extra_test
 
 server:
 	$(MAKE) clean
@@ -44,3 +46,5 @@ extra_wait_start:
 extra_clean:
 
 extra_prepare:
+
+extra_test:

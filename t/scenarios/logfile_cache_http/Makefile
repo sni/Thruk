@@ -7,3 +7,6 @@ extra_wait_start:
 	   if [ $$($(THRUK) logcache stats 2>&1 | grep -c failed:) -eq 0 ]; then break; else sleep 0.5; fi; \
 	done
 	$(THRUK) logcache stats
+
+extra_test:
+	$(THRUK) logcache stats | grep ^core
