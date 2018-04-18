@@ -1958,7 +1958,7 @@ sub _insert_logs {
 
     # check pid / lock
     my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
-    if(scalar @pids != 1 || $pids[0] != $$) {
+    if(scalar @pids == 1 && $pids[0] != $$) {
         print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
         return $log_count;
     }
