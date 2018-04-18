@@ -524,10 +524,8 @@ sub get_logs {
     }
     # increased timeout for logs
     $self->{'ua'} || $self->reconnect();
-    $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);
     #my($typ, $size, $data) = @{$res};
-    $self->{'ua'}->timeout($self->{'timeout'});
 
     return(Thruk::Utils::IO::save_logs_to_tempfile($res->[2]), 'file') if $use_file;
     return $res->[2];
@@ -767,6 +765,8 @@ sub _req {
     }
 
     $self->{'ua'} || $self->reconnect();
+    $self->{'ua'}->timeout($self->{'timeout'});
+    $self->{'ua'}->timeout($self->{'logs_timeout'}) if $sub =~ m/logs/gmx;
     my $response = _ua_post_with_timeout(
                         $self->{'ua'},
                         $self->{'addr'},
