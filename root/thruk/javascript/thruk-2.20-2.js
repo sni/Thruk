@@ -5200,9 +5200,6 @@ function remove_empty_form_params(form) {
   var s_data = jQuery(form).serializeArray();
   for(var i=0; i<s_data.length; i++){
     var f = s_data[i];
-    if(f["name"].match(/^(hst|svc|dfl)_/) && f["value"] === "") {
-        jQuery("INPUT[name='"+f["name"]+"']").remove();
-    }
     if(f["name"].match(/_hoststatustypes$/) && f["value"] == "15") {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
     }
@@ -5222,6 +5219,7 @@ function remove_empty_form_params(form) {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
     }
   }
+//return false;
   return(true);
 }
 
