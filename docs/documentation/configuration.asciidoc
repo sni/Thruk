@@ -2512,6 +2512,7 @@ Configuration Example:
     #post_save_cmd         =
     refresh_interval       = 1
     #favorite_custom_function = echo ; echo_function
+    #worker                = 5
   </Component>
 
 
@@ -2557,6 +2558,11 @@ will be recalculated and refreshed. (in minutes)
 Favorite custom function will be displayed on the 'Type' tab
 so you don't have to select custom first. Syntax is <name>;<function>
 
+
+=== worker
+Set the number of parallel business process calculations. Setting it
+to 1 disables parallelization. Setting it to 0 trys to autodetect a
+suitable value.
 
 == Component Thruk::Plugin::Mobile
 

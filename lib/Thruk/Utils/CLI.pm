@@ -336,7 +336,7 @@ sub _run {
     }
 
     # force some commands to be local
-    if($action =~ m/^(logcache|livecache|bpd|report|plugin)/mx) {
+    if($action =~ m/^(logcache|livecache|bpd|bp||report|plugin)/mx) {
         $self->{'opt'}->{'local'} = 1;
     }
 

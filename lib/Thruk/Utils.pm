@@ -1649,6 +1649,26 @@ sub list {
 
 ########################################
 
+=head2 array_chunk
+
+  array_chunk($list, $number)
+
+return list of <number> evenly chunked parts
+
+=cut
+
+sub array_chunk {
+    my($list, $number) = @_;
+    my $chunks = [];
+    my $size = POSIX::floor(scalar @{$list} / $number);
+    while(my @chunk = splice( @{$list}, 0, $size+1 ) ) {
+        push @{$chunks}, \@chunk;
+    }
+    return($chunks);
+}
+
+########################################
+
 =head2 translate_host_status
 
   translate_host_status($status)

@@ -39,7 +39,8 @@ The bp command provides all business process related cli commands.
 
 use warnings;
 use strict;
-use Time::HiRes qw/gettimeofday tv_interval/;
+use Time::HiRes qw/gettimeofday tv_interval sleep/;
+use Thruk::Utils;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 ##############################################
@@ -67,11 +68,6 @@ sub cmd {
         return("business process plugin is disabled.\n", 1);
     }
 
-    # loading Clone makes BPs with filters lot faster
-    eval {
-        require Clone;
-    };
-
     my $mode = shift @{$commandoptions} || '';
 
     if($mode eq 'commit') {
@@ -96,6 +92,11 @@ sub cmd {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 
+    # loading Clone makes BPs with filters lot faster
+    eval {
+        require Clone;
+    };
+
     # calculate bps
     my $last_bp;
     my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
@@ -109,18 +110,53 @@ sub cmd {
     $c->{'db'}->enable_backends();
 
     undef $id if $id eq 'all';
-    my $t0 = [gettimeofday];
-    my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
-    for my $bp (@{$bps}) {
-        $last_bp = $bp;
-        _debug("updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
-        $bp->update_status($c);
-        _debug("OK") if $Thruk::Utils::CLI::verbose >= 1;
+    my $t0     = [gettimeofday];
+    my $bps    = Thruk::BP::Utils::load_bp_data($c, $id);
+    my $num_bp = scalar @{$bps};
+
+    my $worker_num = int($c->config->{'Thruk::Plugin::BP'}->{'worker'} || 0);
+    if($worker_num == 0) {
+        # try to autmatically find a suitable number of workers
+        $worker_num = 1;
+        if($num_bp > 20) {
+            $worker_num = 3;
+        }
+        if($num_bp > 100) {
+            $worker_num = 5;
+        }
+    }
+    my $chunks = Thruk::Utils::array_chunk($bps, $worker_num);
+
+    my @pids;
+    for my $chunk (@{$chunks}) {
+        my $child_pid;
+        if($worker_num > 1) {
+            $child_pid = fork();
+            die("failed to fork: $!") if $child_pid == -1;
+        }
+        if(!$child_pid) {
+            if($worker_num > 1) {
+                Thruk::Utils::External::_do_child_stuff();
+            }
+            for my $bp (@{$chunk}) {
+                $last_bp = $bp;
+                _debug("[$$] updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
+                $bp->update_status($c);
+                _debug("[$$] OK") if $Thruk::Utils::CLI::verbose >= 1;
+            }
+            exit if $worker_num > 1;
+        } else {
+            push @pids, $child_pid;
+        }
+    }
+    if($worker_num > 1) {
+        while(wait() != -1) {
+            sleep(0.1);
+        }
     }
     alarm(0);
-    my $nr = scalar @{$bps};
     my $elapsed = tv_interval($t0);
-    my $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
+    my $output = sprintf("OK - %d business processes updated in %.2fs\n", $num_bp, $elapsed);
 
     $c->stats->profile(end => "_cmd_bp($action)");
     return($output, 0);
