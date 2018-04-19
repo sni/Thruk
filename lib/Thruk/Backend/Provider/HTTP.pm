@@ -510,11 +510,16 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, @options) = @_;
+
     my %options = @options;
     if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
+
+    # just because we don't cache, doesn't mean our remote site is not allowed to cache
+    delete $options{'nocache'};
+    @options = %options;
 
     my $use_file = 0;
     if($options{'file'}) {
@@ -732,6 +737,17 @@ returns first and last logfile entry
 =cut
 sub _get_logs_start_end {
     my($self, @options) = @_;
+
+    my %options = @options;
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
+        $options{'collection'} = 'logs_'.$self->peer_key();
+        return $self->{'_peer'}->logcache->_get_logs_start_end(%options);
+    }
+
+    # just because we don't cache, doesn't mean our remote site is not allowed to cache
+    delete $options{'nocache'};
+    @options = %options;
+
     my $res = $self->_req('_get_logs_start_end', \@options);
     # old thruk versions return the data in index 0 accidently
     my($start, $end) = @{$res->[2] || $res->[0]};

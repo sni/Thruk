@@ -8,6 +8,7 @@ use Digest::MD5 qw/md5_hex/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
 use Thruk::Utils qw//;
+use Carp qw/confess/;
 
 =head1 NAME
 
@@ -379,6 +380,7 @@ sub get_logs {
         $orderby = ' ORDER BY l.time ASC';
         $sorted  = 1;
     }
+
     my($where,$contact,$system,$strict) = $self->_get_filter($options{'filter'});
 
     my $prefix = $options{'collection'};
@@ -780,6 +782,8 @@ sub _get_subfilter {
             if($k eq '>=' and $v !~ m/^[\d\.]+$/mx) { return 'IN ('._quote($v).')'; }
             if($k eq '>=')                          { return '>= '._quote($v); }
             if($k eq '<=')                          { return '<= '._quote($v); }
+            if($k eq '>')                           { return '> '._quote($v); }
+            if($k eq '<')                           { return '< '._quote($v); }
             if($k eq '-or') {
                 my $list = $self->_get_subfilter($v);
                 if(ref $list) {
@@ -1774,7 +1778,7 @@ sub _import_peer_logfiles {
         # fetching logs without any filter is a terrible bad idea
         ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'});
     } else {
-        ($start, $end) = @{$peer->{'class'}->get_logs_start_end(filter => $filter)};
+        ($start, $end) = @{$peer->{'class'}->get_logs_start_end(filter => $filter, nocache => 1)};
     }
     if(!$start) {
         die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
@@ -1813,7 +1817,7 @@ sub _import_peer_logfiles {
             ($logs) = $peer->{'class'}->get_logs(nocache => 1,
                                                  filter  => [{ '-and' => [
                                                                     { time => { '>=' => $time } },
-                                                                    { time => { '<'  => $time + $blocksize } },
+                                                                    { time => { '<=' => ($time + $blocksize - 1) } },
                                                             ]}, @{$import_filter} ],
                                                  columns => \@columns,
                                                 );
@@ -1976,6 +1980,7 @@ sub _insert_logs {
         $log_count++;
         print '.' if $log_count%1000 == 0 and $verbose;
 
+        $l->{'type'} = '' unless defined $l->{'type'};
         $l->{'type'} = 'TIMEPERIOD TRANSITION' if $l->{'type'} =~ m/^TIMEPERIOD\ TRANSITION/mxo;
         if($l->{'type'} eq 'TIMEPERIOD TRANSITION') {
             $l->{'plugin_output'} = '';
@@ -1988,7 +1993,7 @@ sub _insert_logs {
         if($state eq '')      { $state   = 'NULL'; }
 
         my $state_type        = $l->{'state_type'};
-        if(($state_type eq '') || (($state_type ne 'HARD') && ($state_type ne 'SOFT'))) { undef $state_type; } # if set to NULL then $dbh->quote($state_type) returns 'NULL' instead of NULL. Only accept HARD or SOFT state
+        if((!$state_type) || (($state_type ne 'HARD') && ($state_type ne 'SOFT'))) { undef $state_type; } # if set to NULL then $dbh->quote($state_type) returns 'NULL' instead of NULL. Only accept HARD or SOFT state
 
         my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
         if($l->{'host_name'} && $l->{'service_description'}) {

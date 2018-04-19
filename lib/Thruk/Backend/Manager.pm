@@ -790,7 +790,7 @@ sub logcache_stats {
     if($with_dates) {
         for my $key (keys %{$stats}) {
             my $peer  = $self->get_peer_by_key($key);
-            my($start, $end) = @{$peer->logcache->_get_logs_start_end()};
+            my($start, $end) = @{$peer->logcache->get_logs_start_end()};
             $stats->{$key}->{'start'} = $start;
             $stats->{$key}->{'end'}   = $end;
         }
@@ -925,7 +925,8 @@ sub get_logs_start_end_no_filter {
 
     my $time = time();
     for my $step (reverse @steps) {
-        (undef, $end) = @{$peer->get_logs_start_end(filter => [{ time => {'>=' => time() - $step }}])};
+        (undef, $end) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => time() - $step }}])};
+        last if $end;
     }
 
     # fetching logs without any filter is a terrible bad idea
@@ -936,7 +937,7 @@ sub get_logs_start_end_no_filter {
     $time = time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
     for my $step (@steps) {
         while($time <= time()) {
-            my($data) = $peer->get_logs(nocache => 1, filter => [{ time => { '<= ' => $time }}], columns => [qw/time/], options => { limit => 1 });
+            my($data) = $peer->get_logs(nocache => 1, filter => [{ time => { '<=' => $time }}], columns => [qw/time/], options => { limit => 1 });
             if($data && $data->[0]) {
                 $time  = $time - $step;
                 last;
@@ -948,7 +949,7 @@ sub get_logs_start_end_no_filter {
         }
         $start = $time;
     }
-    ($start, undef) = @{$peer->get_logs_start_end(filter => [{ time => {'>=' => $start - 86400 }}, { time => {'<=' => $start + 86400 }}])};
+    ($start, undef) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => $start - 86400 }}, { time => {'<=' => $start + 86400 }}])};
 
     return($start, $end);
 }

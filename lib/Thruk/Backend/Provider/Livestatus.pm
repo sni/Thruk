@@ -1466,6 +1466,10 @@ returns the min/max timestamp for given logs
 =cut
 sub _get_logs_start_end {
     my($self, %options) = @_;
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
+        $options{'collection'} = 'logs_'.$self->peer_key();
+        return $self->{'_peer'}->logcache->_get_logs_start_end(%options);
+    }
     if(!$options{'filter'} || scalar @{$options{'filter'}} == 0) {
         # not a good idea, try to assume earliest date without parsing all logfiles
         my($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($self);
