@@ -272,13 +272,13 @@ SPAN.bp_label {
     display: inherit;
 }
 
-.bp_node_bp_ref_icon {
+.bp_node_bp_ref_icon, .bp_node_link_icon {
     position: absolute;
     bottom: 2px;
     right: 0px;
     display: none;
 }
-.bp_node:hover .bp_node_bp_ref_icon {
+.bp_node:hover .bp_node_bp_ref_icon, .bp_node:hover .bp_node_link_icon {
     display: inherit;
 }
 

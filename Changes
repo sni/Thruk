@@ -19,6 +19,7 @@ next:
             - fix adding custom variables from extra_custom_var
           - Business Process:
             - calculate results parallel if there are many bps
+            - add details link to each node
 
 2.20-2   Wed Mar 14 00:12:24 CET 2018
           - add optional debug switch for admin users
