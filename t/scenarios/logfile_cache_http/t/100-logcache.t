@@ -4,7 +4,6 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 25;
 }
 
 BEGIN {
@@ -25,3 +24,7 @@ TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/showlog.cgi',
     'like'   => ["Event Log", "LOG VERSION: 2.0", "Local time is"],
 );
+
+# cannot determine fixed number of tests, number depends on wether initial import redirects or not,
+# which depends on machine load and speed (initial import redirects after 10 seconds)
+done_testing();
