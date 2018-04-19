@@ -838,6 +838,7 @@ sub _process_backends_page {
         my $remote_name = $c->req->parameters->{'remote_name'};
         my @test;
         eval {
+            local $ENV{'THRUK_USE_LMD'} = "";
             my $con = Thruk::Backend::Peer->new({
                                                  type    => $type,
                                                  name    => 'test connection',
