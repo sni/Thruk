@@ -22,6 +22,7 @@ next:
           - Business Process:
             - calculate results parallel if there are many bps
             - add details link to each node
+            - add max_check_attempts to bp nodes
 
 2.20-2   Wed Mar 14 00:12:24 CET 2018
           - add optional debug switch for admin users

@@ -434,6 +434,13 @@
       </td>
     </tr>
     <tr class="supports_link">
+      <th align="right" valign="top" nowrap>Max Check Attempts</th>
+      <td align="left">
+        <input type="text" id="bp_max_check_attempts" name="bp_max_check_attempts" placeholder="max check attempts"  class="bp_create" value="">
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove max check attempts" onclick="bpRemoveAttribute('max_check_attempts'); return false;">
+      </td>
+    </tr>
+    <tr class="supports_link">
       <th align="right" valign="top" nowrap>Add Extra Options</th>
       <td align="left">
         <form>
@@ -443,6 +450,7 @@
             <option value="contacts">Contacts</option>
             <option value="event_handler">Eventhandler</option>
             <option value="notification_period">Notification Period</option>
+            <option value="max_check_attempts">Max Check Attempts</option>
           </select>
         </form>
       </td>

@@ -46,6 +46,7 @@ sub new {
         'contacts'                  => $data->{'contacts'}      || [],
         'contactgroups'             => $data->{'contactgroups'} || [],
         'notification_period'       => $data->{'notification_period'} || '',
+        'max_check_attempts'        => $data->{'max_check_attempts'} || '',
         'event_handler'             => $data->{'event_handler'} || '',
         'create_obj'                => $data->{'create_obj'}    || 0,
         'create_obj_ok'             => 1,
@@ -166,7 +167,7 @@ sub get_save_obj {
     };
 
     # save this keys
-    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts filter depends/) {
+    for my $key (qw/template create_obj notification_period max_check_attempts event_handler contactgroups contacts filter depends/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
     }
 
@@ -202,7 +203,7 @@ sub get_objects_conf {
             '_THRUK_BP_ID'   => $bp->{'id'},
             '_THRUK_NODE_ID' => $self->{'id'},
         };
-        for my $key (qw/notification_period event_handler/) {
+        for my $key (qw/notification_period max_check_attempts event_handler/) {
             next unless $bp->{$key};
             $obj->{'hosts'}->{$bp->{'name'}}->{$key} = $bp->{$key};
         }
@@ -224,7 +225,7 @@ sub get_objects_conf {
         '_THRUK_BP_ID'        => $bp->{'id'},
         '_THRUK_NODE_ID'      => $self->{'id'},
     };
-    for my $key (qw/notification_period event_handler/) {
+    for my $key (qw/notification_period max_check_attempts event_handler/) {
         next unless $self->{$key};
         $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = $self->{$key};
     }
@@ -416,6 +417,7 @@ sub _set_function {
         $self->{'contacts'}             = [];
         $self->{'contactgroups'}        = [];
         $self->{'notification_period'}  = '';
+        $self->{'max_check_attempts'}   = '';
         $self->{'event_handler'}        = '';
         $self->{'create_obj'} = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
     }

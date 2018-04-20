@@ -615,7 +615,7 @@ function bp_show_edit_node(id, refreshType) {
     // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
     jQuery("#edit_dialog_"+bp_id).tabs().dialog({
         autoOpen: false, modal: true,
-        width: 480, height: 370,
+        width: 550, height: 370,
         draggable: false, // disable the dialog's drag we're using the tabs titlebar instead
         modal: true,
         closeOnEscape: true,
@@ -663,6 +663,7 @@ function bp_show_edit_node(id, refreshType) {
         jQuery("INPUT[name=bp_contacts]").val(node.contacts.join(", "));
         jQuery("INPUT[name=bp_notification_period]").val(node.notification_period);
         jQuery("INPUT[name=bp_event_handler]").val(node.event_handler);
+        jQuery("INPUT[name=bp_max_check_attempts]").val(node.max_check_attempts);
 
         if(node.contactgroups.length == 0) {
             jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();
@@ -684,6 +685,11 @@ function bp_show_edit_node(id, refreshType) {
         } else {
             jQuery("INPUT[name=bp_notification_period]").parents("TR").show();
         }
+        if(!node.max_check_attempts) {
+            jQuery("INPUT[name=bp_max_check_attempts]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_max_check_attempts]").parents("TR").show();
+        }
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
@@ -692,6 +698,7 @@ function bp_show_edit_node(id, refreshType) {
         bpRemoveAttribute('contacts');
         bpRemoveAttribute('notification_period');
         bpRemoveAttribute('event_handler');
+        bpRemoveAttribute('max_check_attempts');
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {

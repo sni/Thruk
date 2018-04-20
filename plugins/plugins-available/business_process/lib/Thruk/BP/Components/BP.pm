@@ -310,6 +310,7 @@ sub get_json_nodes {
           contacts                  => $n->{'contacts'},
           contactgroups             => $n->{'contactgroups'},
           notification_period       => $n->{'notification_period'},
+          max_check_attempts        => $n->{'max_check_attempts'},
           event_handler             => $n->{'event_handler'},
           filter                    => $n->{'filter'},
         }
