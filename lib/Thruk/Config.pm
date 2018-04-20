@@ -993,8 +993,8 @@ sub _do_finalize_config {
     $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
 
     ###################################################
-    # when using shadow naemon, some settings don't make sense
-    if($config->{'use_shadow_naemon'} || $config->{'use_lmd_core'}) {
+    # when using lmd, some settings don't make sense
+    if($config->{'use_lmd_core'}) {
         $config->{'connection_pool_size'} = 1; # no pool required when using caching
         $config->{'check_local_states'}   = 0; # local state checking not required
     }

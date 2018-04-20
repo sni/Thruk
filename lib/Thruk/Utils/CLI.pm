@@ -356,7 +356,6 @@ sub _run {
         # initialize backend pool here to safe some memory
         require Thruk::Backend::Pool;
         if($action and $action =~ m/livecache/mx) {
-            local $ENV{'USE_SHADOW_NAEMON'}        = 1;
             local $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
             Thruk::Backend::Pool::init_backend_thread_pool();
         } else {

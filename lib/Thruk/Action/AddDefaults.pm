@@ -246,12 +246,6 @@ sub begin {
         }
     }
 
-    # bypass shadownaemon by url
-    ## no critic
-    $ENV{'THRUK_USE_SHADOW'} = 1;
-    $ENV{'THRUK_USE_SHADOW'} = 0 if $c->req->parameters->{'nocache'};
-    ## use critic
-
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
     # make usercontent folder based on env var if set. But only if it exists. Fallback to standard folder
     # otherwise except it doesn't exist either. Then better take the later if both do not exist.
@@ -487,10 +481,6 @@ sub add_defaults {
         $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
     }
     my $cached_data = $c->cache->get->{'global'} || {};
-
-    ###############################
-    # start shadow naemon process on first request
-    Thruk::Utils::Livecache::check_initial_start($c, $c->config);
 
     ###############################
     my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe, $cached_data);
@@ -992,46 +982,6 @@ sub set_processinfo {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
         $processinfo = $c->{'db'}->get_processinfo();
         if(ref $processinfo eq 'HASH') {
-            my $missing_keys = [];
-            for my $peer (@{$c->{'db'}->get_peers()}) {
-                my $key  = $peer->peer_key();
-                my $name = $peer->peer_name();
-                $processinfo->{$key}->{'peer_name'} = $name;
-                if(scalar keys %{$processinfo->{$key}} > 5) {
-                    $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
-                }
-
-                # check if we have original datasource and core version when using shadownaemon
-                # but only if the backend itself is available
-                if($peer->{'cacheproxy'} && !$cached_data->{'real_processinfo'}->{$key} && !$c->stash->{'failed_backends'}->{$key}) {
-                    push @{$missing_keys}, $key;
-                }
-            }
-            if(scalar @{$missing_keys} > 0) {
-                local $ENV{'THRUK_USE_SHADOW'} = 0;
-                $c->stats->profile(begin => "AddDefaults::set_processinfo fetch shadowed info");
-                my $real_processinfo;
-                eval {
-                    $real_processinfo = $c->{'db'}->get_processinfo(backend => $missing_keys);
-                };
-                $c->log->debug("get_processinfo: ".$@) if $@;
-                if(ref $real_processinfo eq 'HASH') {
-                    for my $k (keys %{$real_processinfo}) {
-                        if(scalar keys %{$real_processinfo->{$k}} > 5) {
-                            $cached_data->{'real_processinfo'}->{$k} = $real_processinfo->{$k};
-                        }
-                    }
-                }
-                $c->stats->profile(end => "AddDefaults::set_processinfo fetch shadowed info");
-            }
-
-            my $missing = 0;
-            for my $key (keys %{$processinfo}) {
-                if(!$Thruk::Backend::Pool::peers->{$key}) {
-                    $missing++;
-                }
-            }
-
             if($ENV{'THRUK_USE_LMD'}) {
                 ($processinfo, $cached_data) = check_federation_peers($c, $processinfo, $cached_data);
             }

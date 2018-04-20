@@ -85,7 +85,6 @@ sub startup {
     require Thruk::Utils::IO;
     require Thruk::Utils::Auth;
     require Thruk::Utils::External;
-    require Thruk::Utils::Livecache;
     require Thruk::Utils::LMD;
     require Thruk::Utils::Menu;
     require Thruk::Utils::Status;
@@ -244,8 +243,6 @@ sub _build_app {
     Thruk::Views::ToolkitRenderer::register($self, {config => $self->{'config'}->{'View::TT'}});
 
     ###################################################
-    # start shadownaemons in background
-    Thruk::Utils::Livecache::check_initial_start(undef, $config, 1);
     my $c = Thruk::Context->new($self, {'PATH_INFO' => '/'});
     Thruk::Utils::LMD::check_initial_start($c, $config, 1);
 
@@ -538,20 +535,11 @@ sub _remove_pid {
             }
             if(scalar @{$remaining} == 0) {
                 unlink($pidfile);
-                if(__PACKAGE__->config->{'use_shadow_naemon'} and __PACKAGE__->config->{'use_shadow_naemon'} ne 'start_only') {
-                    Thruk::Utils::Livecache::shutdown_shadow_naemon_procs(__PACKAGE__->config);
-                }
             } else {
                 open(my $fh, '>', $pidfile);
                 print $fh join("\n", @{$remaining}),"\n";
                 CORE::close($fh);
             }
-        }
-    }
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'DebugServer') {
-        # debug server has no pid file, so just kill our shadows
-        if(__PACKAGE__->config->{'use_shadow_naemon'} and __PACKAGE__->config->{'use_shadow_naemon'} ne 'start_only') {
-            Thruk::Utils::Livecache::shutdown_shadow_naemon_procs(__PACKAGE__->config);
         }
     }
     return;
@@ -779,11 +767,6 @@ sub _set_content_length {
 sub _after_dispatch {
     my($c, $res) = @_;
     $c->stats->profile(begin => "_after_dispatch");
-
-    # check if our shadows are still up and running
-    if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
-        Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 1);
-    }
 
     if($ENV{THRUK_LEAK_CHECK}) {
         eval {

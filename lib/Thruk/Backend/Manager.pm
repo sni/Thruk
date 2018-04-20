@@ -1628,9 +1628,9 @@ sub _get_result {
        or $force_serial
        or scalar @{$peers} <= 1)
     {
-        return $self->_get_result_serial($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
+        return $self->_get_result_serial($peers, $function, $arg);
     }
-    return $self->_get_result_parallel($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
+    return $self->_get_result_parallel($peers, $function, $arg);
 }
 
 ########################################
@@ -1719,22 +1719,18 @@ returns result for given function
 =cut
 
 sub _get_result_serial {
-    my($self,$peers, $function, $arg, $use_shadow) = @_;
+    my($self,$peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c  = $Thruk::Request::c;
     my $t1 = [gettimeofday];
     $c->stats->profile( begin => "_get_result_serial($function)");
-
-    if($Thruk::Backend::Pool::xs and $use_shadow and $function =~ m/^get_/mxo and $function ne 'get_logs' and $function ne 'send_command') {
-        ($peers, $result, $type, $totalsize) = $self->_get_results_xs_pool($peers, $function, $arg);
-    }
 
     for my $key (@{$peers}) {
         my $peer = $self->get_peer_by_key($key);
         # skip already failed peers for this request
         next if $c->stash->{'failed_backends'}->{$key};
 
-        my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg, $use_shadow);
+        my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg);
         my $res = shift @res;
         my($typ, $size, $data, $last_error) = @{$res};
         chomp($last_error) if $last_error;
@@ -1766,7 +1762,7 @@ returns result for given function and args using the worker pool
 =cut
 
 sub _get_result_parallel {
-    my($self, $peers, $function, $arg, $use_shadow) = @_;
+    my($self, $peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Request::c;
 
@@ -1776,7 +1772,7 @@ sub _get_result_parallel {
     for my $key (@{$peers}) {
         # skip already failed peers for this request
         if(!$c->stash->{'failed_backends'}->{$key}) {
-            push @jobs, [$key, $function, $arg, $use_shadow];
+            push @jobs, [$key, $function, $arg];
         }
     }
     $Thruk::Backend::Pool::pool->add_bulk(\@jobs);
@@ -1803,178 +1799,6 @@ sub _get_result_parallel {
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
     return($result, $type, $totalsize);
-}
-
-
-########################################
-
-=head2 _get_results_xs_pool
-
-  _get_results_xs_pool($peers, $function, $arg)
-
-get result from xs thread pool
-
-=cut
-sub _get_results_xs_pool {
-    my($self, $peers, $function, $arg) = @_;
-    my $c = $Thruk::Request::c;
-
-    $c->stats->profile( begin => '_get_results_xs_pool('.$function.')');
-
-    my $result;
-    my $remaining_peers = [];
-    my $totalsize       = 0;
-    my $type;
-
-    my @pool_do;
-    my @cache_args;
-    my $sorted_results = {};
-    for my $key (@{$peers}) {
-        my $peer = $self->get_peer_by_key($key);
-        if(!$peer->{'cacheproxy'}) {
-            push @{$remaining_peers}, $key;
-            next;
-        }
-
-        $sorted_results->{$key} = {
-            'keys'   => [],
-            'res'    => [],
-            'opts'   => [],
-            'failed' => 0,
-        };
-        local $ENV{'THRUK_SELECT'} = 1;
-        if(!@cache_args) {
-            @cache_args = @{$peer->{'cacheproxy'}->$function(@{$arg})};
-            my($statement, $keys, $opt) = @cache_args;
-            if(ref $statement ne 'ARRAY') {
-                @cache_args = ([$statement, $keys, $opt]);
-            }
-            for my $tmp (@cache_args) {
-                if($tmp->[0] =~ m/^Stats/mxo) {
-                    ($tmp->[0],$tmp->[1]) = Monitoring::Livestatus::extract_keys_from_stats_statement($tmp->[0]);
-                }
-                if($tmp->[2] && $tmp->[2]->{'header'}) {
-                    for my $key ( keys %{$tmp->[2]->{'header'}}) {
-                        $tmp->[0] .= $key.': '.$tmp->[2]->{'header'}->{$key}."\n";
-                    }
-                }
-                if($opt && ref $opt eq 'HASH' && $opt->{'limit'}) {
-                    chomp($tmp->[0]);
-                    $tmp->[0] .= "\nLimit: ".$opt->{'limit'}."\n";
-                }
-            }
-        }
-
-        my $x = 0;
-        for my $tmp (@cache_args) {
-            push @pool_do, $x;
-            push @pool_do, $peer->{'key'};
-            push @pool_do, $peer->{'cacheproxy'}->{'live'}->{'peer'};
-            my($statement, $keys, $opt) = @{$tmp};
-            push @pool_do, $statement;
-            $sorted_results->{$key}->{'keys'}->[$x] = $keys;
-            $sorted_results->{$key}->{'opts'}->[$x] = $opt;
-            $x++;
-        }
-    }
-
-    # collect pool results
-    if(@pool_do) {
-        #&timing_breakpoint('_get_results_xs_pool socket_pool_do');
-        my $thread_num = scalar @pool_do;
-        if($thread_num > 100) { $thread_num = 100; } # limit thread size, tests showed that higher number do not increase performance
-        my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
-        #&timing_breakpoint('_get_results_xs_pool socket_pool_do done');
-        my $decoder = Cpanel::JSON::XS->new->utf8->relaxed;
-        for my $row (@{$raw}) {
-            if($row->{'success'}) {
-                $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $decoder->decode(delete $row->{'result'});
-            } else {
-                $sorted_results->{$row->{'key'}}->{'failed'} = $row->{'result'};
-            }
-        }
-        $raw = undef;
-        #&timing_breakpoint('_get_results_xs_pool sorted and decoded');
-        my $post_process;
-        # iterate over original peers to retain order
-        # this keeps identical results in the order of our backends
-        for my $peer ( @{ $self->get_peers() } ) {
-            my $key  = $peer->{'key'};
-            my $name = $peer->{'name'};
-            my $sorted   = $sorted_results->{$key};
-            next if !defined $sorted;
-            if($sorted->{'failed'}) {
-                $c->stash->{'failed_backends'}->{$key} = $sorted->{'failed'};
-                $peer->{'last_error'} = $sorted->{'failed'};
-                next;
-            }
-            my $optimized = 0;
-            my $res_size = scalar @{$sorted->{'res'}};
-            for(my $x=0; $x<$res_size;$x++) {
-                $sorted->{'opts'}->[$x]->{wrapped_json} = 1;
-                $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
-                $totalsize += $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
-                if($res_size == 1
-                   && $sorted->{'keys'}->[$x]
-                   && $sorted->{'opts'}->[$x]->{limit}
-                   && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY'
-                   && $function ne 'get_processinfo'
-                ) {
-                    # optimized postprocessing
-                    if(!defined $post_process) {
-                        $post_process = {
-                            'results'  => [],
-                            'opts'     => $sorted->{'opts'}->[$x],
-                            'keys'     => $sorted->{'keys'}->[$x],
-                        };
-                        push @{$sorted->{'keys'}->[$x]}, ('peer_key', 'peer_name');
-                    }
-                    # add peer key
-                    map { push(@{$_}, ($key, $name)) } @{$sorted->{'res'}->[$x]->{'result'}};
-                    push @{$post_process->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
-                    $optimized = 1;
-                } else {
-                    $sorted->{'opts'}->[$x]->{slice} = 1 if $sorted->{'keys'}->[$x];
-                    $sorted->{'res'}->[$x] = Monitoring::Livestatus::selectall_arrayref(undef, "", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
-                }
-            }
-            if(!$optimized) {
-                my @res = $peer->{'cacheproxy'}->$function(data => ($res_size == 1 ? $sorted->{'res'}->[0] : $sorted->{'res'}));
-                my($data,$typ,$size) = @res;
-                $type                = $typ;
-                $result->{$key}      = $data;
-            }
-        }
-
-        if($post_process) {
-            # get sort keys
-            my $sortkeys = [];
-            for my $sortk (@{$post_process->{'opts'}->{sort}}) {
-                my($key, $dir) = split/\s+/mx, $sortk;
-                my $x = 0;
-                for my $k (@{$post_process->{'keys'}}) {
-                    if($k eq $key) {
-                        push(@{$sortkeys}, $x, $dir);
-                        last;
-                    }
-                    $x++;
-                }
-            }
-            # sort our arrays
-            if((!$type || $type ne 'sorted') && scalar @{$sortkeys} > 0) {
-                $post_process->{'results'} = _sort_nr($post_process->{'results'}, $sortkeys);
-            }
-            # apply limit
-            $post_process->{'results'}  = _limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
-            # splice result, callbacks are missing...
-            $post_process->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $post_process->{keys}, result => $post_process->{'results'}});
-            $result->{'_all_'} = $post_process->{'results'};
-        }
-    }
-
-    $c->stats->profile( end => '_get_results_xs_pool('.$function.')');
-
-    return($remaining_peers, $result, $type, $totalsize);
 }
 
 ########################################

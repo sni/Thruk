@@ -119,7 +119,6 @@ lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/IO.pm
-lib/Thruk/Utils/Livecache.pm
 lib/Thruk/Utils/LMD.pm
 lib/Thruk/Utils/Log.pm
 lib/Thruk/Utils/Menu.pm
