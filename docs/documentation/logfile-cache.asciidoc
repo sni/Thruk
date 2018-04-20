@@ -13,14 +13,8 @@ monitoring and increases the overall load on your monitoring host. Therefor
 Thruk may use a logfile cache to increase performance of logfile access and
 reports.
 
-[WARNING]
-The MongoDB logcache is deprecated and got removed from Thruk in 2016. Use the MySQL logcache instead.
-
 For maximum performance, the Logfile Cache Database should be installed on the
 same server as Thruk itself (or at least in the same network).
-
-.Logfile Cache Architecture
-image:source/livestatus_mongodb.png[Logfile Cache Architecture]
 
 
 === Configuration

@@ -1297,20 +1297,15 @@ ex.:
 
 === logcache
 Enables caching logfiles for faster access and less memory usage for
-the naemon process. Cache supports MongoDB and Mysql only. Prefered
-type is Mysql. Format is a Mysql/MongoDB connection string like
+the naemon process. Cache supports only Mysql. Prefered
+type is Mysql. Format is a Mysql connection string like
 'mysql://hostname:port/db'. Using a cache dramatically decreases cpu and
 memory usage of Thruk and Naemon when accessing logfiles, for example when
 creating reports.
 
-[WARNING]
-The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
-
 ex.:
 
   logcache = mysql://user:password@localhost:3306/thruk_log_cache
-
-  logcache = mongodb://localhost:27017/thruk_log_cache
 
 
 === logcache_import_exclude
