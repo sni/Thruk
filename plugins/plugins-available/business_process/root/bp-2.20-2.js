@@ -298,9 +298,13 @@ function bp_fill_select_form(data, form) {
     if(data.radio) {
         for(var key in data.radio) {
             var d = data.radio[key];
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+']').removeAttr("checked");
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').prop("checked","checked");
-            jQuery(d[1]).buttonset();
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+']')
+               .prop("checked", false)
+               .checkboxradio({
+                  icon: false
+            });
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').prop("checked",true).checkboxradio("refresh");
+            jQuery(d[1]).controlgroup();
         }
     }
     if(data.text) {
