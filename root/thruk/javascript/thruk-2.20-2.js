@@ -705,7 +705,7 @@ function window_location_replace(url) {
 }
 
 function get_site_panel_backend_button(id, styles, onclick, section) {
-    if(!initial_backends[id]['cls']) { return(""); }
+    if(!initial_backends[id] || !initial_backends[id]['cls']) { return(""); }
     var btn = '<input type="button"';
     btn += " id='button_"+id+"'";
     btn += ' class="button_peer'+initial_backends[id]['cls']+' backend_'+id+' section_'+section+'"';
