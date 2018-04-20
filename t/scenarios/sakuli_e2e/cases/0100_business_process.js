@@ -7,13 +7,13 @@ var $case = function() {
     click(_link("Business Process"));
 
     /* Create Business Process */
-    click(_span("create new business process"));
+    click(_link("create new business process"));
     isVisible(_span("business process sucessfully created"));
     rightClick(_span("Example Node"));
     click(_link("Edit Node"));
-    click(_span("Dummy"));
+    click(_label("Dummy"));
     _setValue(_textbox("bp_label_fixed"), "Test Node");
-    click(_span("Warning"));
+    click(_label("Warning"));
     click(_button("Save"));
     isVisible(_div("WARNING"));
     click(_link("Business Process"));
@@ -27,7 +27,7 @@ var $case = function() {
     isVisible(_span("(Business-Impact-Analysis-Mode)"));
     rightClick(_span("Test Node"));
     _mouseOver(_link("Test Mode"));
-    click(_link("Critical"));
+    _click(_link("Critical"));
     isVisible(_div("CRITICAL"));
     isVisible(_div("testmode"));
 
