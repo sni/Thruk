@@ -9,6 +9,7 @@ next:
           - fix wrong number of backends (#809)
           - fix custom variable filters (#816)
           - deprecate shadownaemon
+          - renamed cli livecache cmd to lmd
           - Panorama:
             - optionally show broadcasts in panorama dashboards
             - make determing worst state for group/filter icons configurable

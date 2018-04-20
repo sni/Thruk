@@ -109,6 +109,7 @@ lib/Thruk/Utils/CLI/Graph.pm
 lib/Thruk/Utils/CLI/Host.pm
 lib/Thruk/Utils/CLI/Hostgroup.pm
 lib/Thruk/Utils/CLI/Livecache.pm
+lib/Thruk/Utils/CLI/Lmd.pm
 lib/Thruk/Utils/CLI/Logcache.pm
 lib/Thruk/Utils/CLI/Plugin.pm
 lib/Thruk/Utils/CLI/Selfcheck.pm
