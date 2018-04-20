@@ -955,6 +955,7 @@ sub _cmd_raw {
         return _cmd_ext_job($c, $opt);
     }
 
+    local $ENV{'THRUK_USE_LMD'} = ""; # don't try to do LMD stuff since we directly access the real backend
     my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
