@@ -75,7 +75,6 @@ sub get_broadcasts {
                 my $contacts = Thruk::Utils::array2hash($contacts);
                 if($contacts->{$c->stash->{'remote_user'}}) {
                     $allowed = 1;
-                    last;
                 }
             }
             # allowed for specific contactgroups
