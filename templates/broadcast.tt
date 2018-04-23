@@ -43,7 +43,7 @@
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="[%+ IF loop.first +%]firstrow[% END %]">
-    <td class="status [% rowclass %] text_ellipsis" align="left" style="white-space: inherit;"> [% b.text.split('<br>').0 %]</td>
+    <td class="status [% rowclass %] text_ellipsis" align="left" style="white-space: inherit;"> [% b.text.split('<br>').0 %][% IF b.template %]<span style="color: #eb6900; padding-left: 10px; float: right;">(DRAFT)</span>[% END %]</td>
     <td class="status [% rowclass %]" align="left">[% b.author %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>

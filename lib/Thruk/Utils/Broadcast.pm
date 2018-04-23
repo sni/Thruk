@@ -138,8 +138,10 @@ sub get_broadcasts {
         $broadcast->{'loginpage'}   = $broadcast->{'loginpage'}     // 0;
         $broadcast->{'panorama'}    = $broadcast->{'panorama'}      // 0;
         $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
+        $broadcast->{'template'}    = $broadcast->{'template'}      // 0;
 
         next if($panorama_only && !$broadcast->{'panorama'});
+        next if(!$unfiltered && $broadcast->{'template'});
 
         $broadcast->{'new'} = 0;
         if(!$unfiltered && !defined $already_read->{$basename}) {
@@ -215,6 +217,7 @@ sub get_default_broadcast {
         annotation      => '',
         loginpage       => 0,
         panorama        => 1,
+        template        => 0,
     };
     return($broadcast);
 }

@@ -42,6 +42,7 @@ sub index {
     $c->stash->{'no_auto_reload'}  = 1;
     $c->stash->{'title'}           = 'Broadcasts';
     $c->stash->{'infoBoxTitle'}    = 'Broadcasts';
+    $c->stash->{no_tt_trim}        = 1;
 
     Thruk::Utils::ssi_include($c, 'broadcast');
 
@@ -61,7 +62,8 @@ sub index {
                 }
             }
             if($action eq 'clone') {
-                $broadcast->{'author'} = $c->stash->{'remote_user'};
+                $broadcast->{'author'}   = $c->stash->{'remote_user'};
+                $broadcast->{'template'} = 0;
                 delete $broadcast->{'basefile'};
             }
             $broadcast->{'id'} = $broadcast->{'basefile'} || 'new';
@@ -103,6 +105,7 @@ sub index {
             $broadcast->{'loginpage'}     = $c->req->parameters->{'loginpage'} || 0;
             $broadcast->{'annotation'}    = $c->req->parameters->{'annotation'} || '';
             $broadcast->{'panorama'}      = $c->req->parameters->{'panorama'} || 0;
+            $broadcast->{'template'}      = $c->req->parameters->{'template'} || 0;
 
             Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
             Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);

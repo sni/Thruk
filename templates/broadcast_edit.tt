@@ -23,10 +23,16 @@
 <input type="hidden" name="action" value="save">
 <input type="hidden" name="id" value="[% broadcast.id %]">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
-<table border="1" class='data'>
+<table border="1" class='data' width=1000>
   <tr>
     <th class='data' style="width:125px;"><a href='broadcast.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>[% IF broadcast.id != "new" %]Edit[% ELSE%]Create[% END %] Broadcast</th>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Template</b></td>
+    <td class="dataOdd" align="left">
+        <input type="checkbox" value="1" name="template"[% IF broadcast.template %] checked[% END %]> Templates will never be displayed but can be cloned.
+    </td>
   </tr>
   <tr>
     <td class="dataEven" align="center"><b>Hide Before</b></td>
@@ -65,7 +71,7 @@
   <tr>
     <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
     <td class="dataOdd" align="left">
-      <textarea name="text" wrap="hard" cols=74 rows=10 style="width: 99%;">[% broadcast.text %]</textarea>
+      <textarea name="text" wrap="hard" cols=74 rows=14 style="width: 99%;">[% broadcast.text %]</textarea>
     </td>
   </tr>
   <tr>
@@ -75,7 +81,7 @@
       <input type="text"
              name="contacts"
              id="contacts"
-             style="width: 99%;"
+             style="width: 97%;"
              value="[% broadcast.contacts.join(', ') %]"
              [% IF use_ajax_search %]
                onfocus="this.click()"
@@ -91,7 +97,7 @@
       <input type="text"
              name="contactgroups"
              id="contactgroups"
-             style="width: 99%;"
+             style="width: 97%;"
              value="[% broadcast.contactgroups.join(', ') %]"
              [% IF use_ajax_search %]
                onfocus="this.click()"

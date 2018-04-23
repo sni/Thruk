@@ -10,6 +10,8 @@ next:
           - fix custom variable filters (#816)
           - deprecate shadownaemon
           - renamed cli livecache cmd to lmd
+          - Broadcasts:
+            - add template checkbox
           - Panorama:
             - optionally show broadcasts in panorama dashboards
             - make determing worst state for group/filter icons configurable
