@@ -4,11 +4,11 @@
 
 <div id="[% id %]_dialog" title="Command Wizzard" style="display: none;">
 <table><tr><td class="filter">
-  <table style="width:610px;">
+  <table style="width:100%;">
     <tr>
       <td class="attrName" width="10%"><b>Choose Command</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_command" value="" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:true, autosubmit:false})"[% END %]>
+        <input style="width: 300px;" type="text" id="[% id %]_inp_command" value="" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:true, autosubmit:false})"[% END %]>
         <input type="hidden" id="[% id %]_inp_args" value="">
       </td>
     </tr>
