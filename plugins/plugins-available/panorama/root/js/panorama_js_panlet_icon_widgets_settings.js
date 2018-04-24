@@ -313,7 +313,9 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
-    TP.shapesStore.load();
+    if(panel.xdata.appearance.type == 'shape') {
+        TP.shapesStore.load();
+    }
     var renderUpdateDo = function(forceColor, forceRenderItem) {
         if(TP.skipRender) { return; }
         var xdata = TP.get_icon_form_xdata(settingsWindow);
@@ -324,6 +326,9 @@ TP.iconShowEditDialog = function(panel) {
         if(xdata.appearance.type == 'shape') { forceRenderItem = true; }
         if(xdata.appearance.type != lastType || forceRenderItem) {
             if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem, forceColor); }
+            if(xdata.appearance.type == 'shape') {
+                TP.shapesStore.load();
+            }
         }
         lastType = xdata.appearance.type;
 
