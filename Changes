@@ -16,6 +16,7 @@ next:
             - optionally show broadcasts in panorama dashboards
             - make determing worst state for group/filter icons configurable
             - add new configuration option 'default_state_order'
+            - add view permission option to icon widgets
             - fix tab rotation
           - Config Tool:
             - make command line a textarea

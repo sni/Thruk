@@ -286,6 +286,7 @@ sub _process_raw_request {
                 for my $g (@{$groups}) {
                     push @{$data}, $g->{'name'};
                 }
+                $data = Thruk::Utils::array_uniq($data);
             }
             elsif($type eq 'event handler') {
                 if(!$c->check_user_roles("authorized_for_configuration_information")) {

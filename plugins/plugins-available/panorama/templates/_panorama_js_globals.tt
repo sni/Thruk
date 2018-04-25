@@ -16,6 +16,7 @@ var cookie_path         = '[% cookie_path %]';
 var cookie_auth         = [% IF cookie_auth %]true[% ELSE %]false[% END %];
 var base                = url_prefix+'plugins/panorama';
 var user_token          = '[% get_user_token(c) %]';
+var contactgroups       = [% json_encode(contactgroups) %];
 var host_action_icon    = '[% host_action_icon %]';
 var service_action_icon = '[% service_action_icon %]';
 var downtime_duration   = [% downtime_duration %];

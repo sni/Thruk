@@ -789,23 +789,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 id:         'state_order',
                 value:      ''
             }]
-        }/*,{
-            fieldLabel:  'Service State Order',
-            xtype:       'fieldcontainer',
-            defaultType: 'button',
-            layout:      'hbox',
-            plugins :     Ext.create('Ext.ux.BoxReorderer', {}),
-            defaults:   { reorderable: true, width: 80 },
-            id:          'svc_state_order',
-            items:        serviceStateOrderItems
-        }, {
-            xtype:      'panel',
-            html:       '(drag items to desired order)',
-            style:      'text-align: center;',
-            bodyCls:    'form-hint',
-            padding:    '2 0 0 0',
-            border:      0
-        }*/];
+        }];
     var dashboardTab = {
         title : 'Dashboard',
         type  : 'panel',
