@@ -907,12 +907,11 @@ TP.iconShowEditDialog = function(panel) {
         fields: ['contactgroup', 'permission'],
         data: access
     });
-    var permissionsItems = [{
-        /* permissions */
-        xtype:      'fieldcontainer',
-        fieldLabel: 'Permissions',
-        layout:     'fit',
-        items: [{
+    var permissionsItems = [,{
+            xtype: 'label',
+            text:  'Hide/show this icon for specific contactgroups',
+            style: "margin-left: 26%;"
+        },{
             xtype:      'gridpanel',
             name:       'permissions',
             id:         'permissionsGrid',
@@ -926,7 +925,7 @@ TP.iconShowEditDialog = function(panel) {
                             allowBlank:        false
                         }
                     },
-                    { header: 'Permissions', width: 140,  dataIndex: 'permission', align: 'left', tdCls: 'editable', editor: {
+                    { header: 'Permission', width: 140,  dataIndex: 'permission', align: 'left', tdCls: 'editable', editor: {
                             xtype:         'combobox',
                             triggerAction: 'all',
                             selectOnTab:    true,
@@ -954,15 +953,9 @@ TP.iconShowEditDialog = function(panel) {
                 }
             },
             plugins:     [Ext.create('Ext.grid.plugin.RowEditing', {
-                clicksToEdit: 1,
-                listeners: {
-                    canceledit: function(grid, eOpts) {
-                        // remove new elements
-                        if(eOpts.record.phantom) { eOpts.store.remove(eOpts.record); }
-                    }
-                }
+                clicksToEdit: 1
             })],
-            height: 250,
+            height: 230,
             width:  300,
             fbar: [{
                 type: 'button',
@@ -974,8 +967,13 @@ TP.iconShowEditDialog = function(panel) {
                     btn.up('gridpanel').plugins[0].startEdit(store.last(), 0);
                 }
             }]
-        }]
-    }];
+        },{
+            xtype: 'label',
+            text:  'Hint: order from top to bottom, first match wins',
+            cls:   'form-hint',
+            style: "margin-left: 30%;"
+        }
+    ];
     var permissionsTab = {
         title : 'Permissions',
         type  : 'panel',

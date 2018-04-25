@@ -29,7 +29,6 @@ Ext.define('TP.IconLabel', {
             }, 100);
         }
         if(cfg == undefined) { return; }
-        if(panel.hideLabel) { return; }
 
         panel.setIconLabelText(cfg);
         panel.setIconLabelPosition(cfg);
@@ -330,7 +329,6 @@ Ext.define('TP.IconLabel', {
                     if(!TP.iconSettingsWindow && panel.xdata.label.display && panel.xdata.label.display == "mouseover" && !This.mouseover) {
                         return(false);
                     }
-                    if(panel.hideLabel) { return false; }
                     return(true);
                 },
                 show: function( This, eOpts ) {

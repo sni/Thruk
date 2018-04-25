@@ -52,3 +52,8 @@ var grafana_default_panelId  = [% c.config.grafana_default_panelId %];
 var enable_shinken_features  = [% enable_shinken_features %];
 
 [%+ PROCESS _header_initial_states.tt +%]
+var contactgroupsHash = {};
+for(var x = 0; x < contactgroups.length; x++) {
+    var g = contactgroups[x];
+    contactgroupsHash[g] = true;
+}

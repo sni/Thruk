@@ -167,31 +167,18 @@ Ext.define('TP.SmallWidget', {
             This.setIconLabel();
         },
         beforeshow: function( This, eOpts ) {
-            delete This.hideLabel;
             // check view permissions
-            if(!This.xdata.groups) { return; }
-            if(!This.locked)       { return; }
-            var groupsHash = {};
-            for(var x = 0; x < contactgroups.length; x++) {
-                var g = contactgroups[x];
-                groupsHash[g] = true;
-            }
-            // last hit wins
-            var perm = "show";
-            for(var x = 0; x < This.xdata.groups.length; x++) {
-                var group = This.xdata.groups[x];
-                var g = Ext.Object.getKeys(group)[0];
-                if(g == "*" || groupsHash[g]) {
-                    perm = group[g];
+            if(!This.locked) { return(true); }
+            if(!This.hasViewPermissions()) {
+                // make sure label is hidden as well
+                if(This.labelEl) { This.labelEl.hide(); }
+                if(TP.removeLabel && TP.removeLabel[This.id]) {
+                    TP.removeLabel[This.id].destroy();
+                    delete TP.removeLabel[This.id];
                 }
+                return(false);
             }
-            if(perm == "show") {
-                return(true);
-            }
-            // make sure label is hidden as well
-            if(This.labelEl) { This.labelEl.hide(); }
-            This.hideLabel = true;
-            return(false);
+            return(true);
         },
         show: function( This, eOpts ) {
             This.addDDListener(This);
@@ -764,6 +751,23 @@ Ext.define('TP.SmallWidget', {
         panel.resumeEvents();
         panel.setIconLabelPosition();
         return(panel);
+    },
+
+    hasViewPermissions: function() {
+        var panel = this;
+        if(!panel.xdata.groups || panel.xdata.groups.length == 0) {
+            return(true);
+        }
+        // first hit wins
+        var perm = "show";
+        for(var x = 0; x < panel.xdata.groups.length; x++) {
+            var group = panel.xdata.groups[x];
+            var g = Ext.Object.getKeys(group)[0];
+            if(g == "*" || contactgroupsHash[g]) {
+                return(group[g] == "show");
+            }
+        }
+        return(true);
     }
 });
 

@@ -367,13 +367,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             store: permissionsStore,
             selType:    'rowmodel',
             plugins:     [Ext.create('Ext.grid.plugin.RowEditing', {
-                clicksToEdit: 1,
-                listeners: {
-                    canceledit: function(grid, eOpts) {
-                        // remove new elements
-                        if(eOpts.record.phantom) { eOpts.store.remove(eOpts.record); }
-                    }
-                }
+                clicksToEdit: 1
             })],
             height: 280,
             width:  300,
