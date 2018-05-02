@@ -512,6 +512,7 @@ sub _process_thruk_page {
                         wait_timeout
                         use_frames
                         server_timezone
+                        default_user_timezone
                         use_strict_host_authorization
                         show_long_plugin_output
                         info_popup_event_type

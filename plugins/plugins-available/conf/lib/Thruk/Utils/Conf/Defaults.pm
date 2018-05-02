@@ -28,6 +28,8 @@ sub get_thruk_cfg {
     my $conf = {
                 title_prefix                            => ['STRING', ''],
                 use_timezone                            => ['STRING', 'CET'],
+                server_timezone                         => ['STRING', ''],
+                default_user_timezone                   => ['STRING', ''],
                 use_strict_host_authorization           => ['BOOL',   '0'],
                 use_frames                              => ['BOOL',   '0'],
                 strict_passive_mode                     => ['BOOL',   '1'],
@@ -80,6 +82,8 @@ sub get_thruk_cfg {
         } elsif(exists $c->config->{$key}) {
             $conf->{$key}->[1] = $c->config->{$key};
         } elsif(   $key eq 'use_timezone'
+                or $key eq 'server_timezone'
+                or $key eq 'default_user_timezone'
                 or $key eq 'allowed_frame_links'
                 or $key eq 'resource_file'
                 or $key eq 'plugin_path'
