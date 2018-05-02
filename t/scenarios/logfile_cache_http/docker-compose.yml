@@ -14,7 +14,7 @@ services:
     build: backend/
     ports: []
   db:
-     image: mysql:latest
+     image: mysql:5
      restart: always
      environment:
         MYSQL_ROOT_PASSWORD: thruk
