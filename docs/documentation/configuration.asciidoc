@@ -164,14 +164,32 @@ ex.:
 
 === use_timezone
 
+*deprecated* use `server_timezone` now.
+
+=== server_timezone
+
 Changes the timezone from the systems default to this timezone.
 Only set this if you have trouble with displaying the right timestamps.
-Use /usr/share/zoneinfo on most linux systems for reference, as some
+Use `/usr/share/zoneinfo` on most linux systems for reference, as some
 timezones are set using the Region/Country format.
 
 ex.:
 
-  use_timezone = CET
+  server_timezone = CET
+
+
+=== default_user_timezone
+
+Since users can change their timezone setting, this changes their default.
+Possible values are:
+
+  - "Server Setting"
+  - "Local Browser"
+  - all from `/usr/share/zoneinfo`
+
+ex.:
+
+  default_user_timezone = "Server Setting"
 
 
 === mobile_agent

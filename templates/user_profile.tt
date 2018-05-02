@@ -16,10 +16,12 @@
   </tr>
 </table>
 
-<form action="" method="GET">
+<form action="user.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+<input type="hidden" name="action" value="save">
   <div align="center">
   <div style="width: 600px; position: relative;">
-  <button class="thruk_button_save" style="position: absolute; right: 0; top: -25px; display: none;">Save changes</button>
+  <button class="thruk_button thruk_button_save" style="position: absolute; right: 0; top: -30px;">Save changes</button>
   <table border="0" class='data conftooluserprofile' style="width:600px;">
     <tr><th colspan=2 class='data conftoolheader' style="text-align:center">User Information</th></tr>
     <tr>
@@ -33,6 +35,22 @@
     <tr>
       <td class='dataVar'>Roles</td>
       <td class='dataVal' style="white-space: normal;">[% c.user.roles.sort.join('<br>') %]</td>
+    </tr>
+    <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
+    <tr><th colspan=2 class='data conftoolheader' style="text-align:center">Timezone</th></tr>
+    <tr>
+      <td class='dataVar'>Set Timezone</td>
+      <td class='dataVal'>
+        <select name="timezone" style="float: left; margin-right: 15px;">
+          [% FOR tz = timezones %]
+          <option value="[% tz.text %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text %]</option>
+          [% END %]
+        </select>
+        <div>
+          <span>Server: <span id="server_tz">[% c.config._server_timezone %]</span></span><br>
+          <span>Browser: <span id="browser_tz"></span></span>
+        </div>
+      </td>
     </tr>
     [% IF c.config.exists('use_feature_configtool') && c.config.use_feature_configtool && !c.config.disable_user_password_change %]
     <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
@@ -64,5 +82,14 @@
 </div>
 </div>
 </form>
+
+<script type="text/javascript">
+  <!--
+  jQuery(function() {
+    var timezone = getBrowserTimezone();
+    jQuery('#browser_tz').html(timezone);
+  });
+  -->
+</script>
 
 [% PROCESS _footer.tt %]

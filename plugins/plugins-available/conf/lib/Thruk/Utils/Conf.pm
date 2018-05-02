@@ -2,7 +2,6 @@ package Thruk::Utils::Conf;
 
 use strict;
 use warnings;
-use POSIX ();
 use Carp qw/confess/;
 use File::Slurp qw/read_file/;
 use Digest::MD5 qw(md5_hex);
@@ -203,15 +202,8 @@ sub update_conf {
     if($update_c) {
         for my $key (keys %{$data}) {
             $update_c->config->{$key} = $data->{$key};
-            if($key eq 'use_timezone') {
-                ## no critic
-                if($data->{$key} ne '') {
-                    $ENV{'TZ'} = $data->{$key};
-                } else {
-                    delete $ENV{'TZ'};
-                }
-                ## use critic
-                POSIX::tzset();
+            if($key eq 'server_timezone') {
+                $update_c->app->set_timezone($data->{$key});
             }
         }
     }

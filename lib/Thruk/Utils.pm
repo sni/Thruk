@@ -23,6 +23,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils::IO ();
 use Digest::MD5 qw(md5_hex);
 use POSIX ();
+use Module::Load qw/load/;
 
 ##############################################
 =head1 METHODS
@@ -2765,6 +2766,66 @@ sub clean_regex {
     $regex =~ s/\.\*\??$//mx;
 
     return($regex);
+}
+
+##############################################
+
+=head2 get_timezone_data
+
+    get_timezone_data()
+
+returns list of available timezones
+
+=cut
+sub get_timezone_data {
+    my($c, $add_server) = @_;
+
+    my $timezones = [];
+    my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
+    my $data  = $cache->get('timezones');
+    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H");
+    if(defined $data && $data->{'timestamp'} eq $timestamp) {
+        $timezones = $data->{'timezones'};
+    } else {
+        load "DateTime";
+        load "DateTime::TimeZone";
+        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+        for my $name (DateTime::TimeZone->all_names) {
+            my $dt = DateTime->new(
+                year      => $year+1900,
+                month     => $mon+1,
+                day       => $mday,
+                hour      => $hour,
+                minute    => $min,
+                second    => $sec,
+                time_zone => $name,
+            );
+            push @{$timezones}, {
+                text   => $name,
+                abbr   => $dt->time_zone()->short_name_for_datetime($dt),
+                offset => $dt->offset(),
+                isdst  => $dt->is_dst() ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
+            };
+        }
+        $cache->set('timezones', {
+            timestamp => $timestamp,
+            timezones => $timezones,
+        });
+    }
+
+    unshift @{$timezones}, {
+        text   => 'Local Browser',
+        abbr   => '',
+        offset => 0,
+    };
+    if($add_server) {
+        unshift @{$timezones}, {
+            text   => 'Server Setting',
+            abbr   => '',
+            offset => 0,
+        };
+    }
+    return($timezones);
 }
 
 ##############################################

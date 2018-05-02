@@ -931,7 +931,7 @@ sub _task_timezones {
 
     my $query = $c->req->parameters->{'query'} || '';
     my $data  = [];
-    for my $tz (@{_get_timezone_data($c)}) {
+    for my $tz (@{Thruk::Utils::get_timezone_data($c)}) {
         next if($query && $tz->{'text'} !~ m/$query/mxi);
         push @{$data}, $tz;
     }
@@ -939,51 +939,6 @@ sub _task_timezones {
     my $json = { 'rc' => 0, 'data' => $data };
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json);
-}
-
-##########################################################
-sub _get_timezone_data {
-    my($c) = @_;
-
-    my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
-    my $data  = $cache->get('timezones');
-    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H");
-    if(defined $data && $data->{'timestamp'} eq $timestamp) {
-        return($data->{'timezones'});
-    }
-
-    my $timezones = [];
-    my $localname = 'Local Browser';
-    push @{$timezones}, {
-        text   => $localname,
-        abbr   => '',
-        offset => 0,
-    };
-    load DateTime;
-    load DateTime::TimeZone;
-    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-    for my $name (DateTime::TimeZone->all_names) {
-        my $dt = DateTime->new(
-            year      => $year+1900,
-            month     => $mon+1,
-            day       => $mday,
-            hour      => $hour,
-            minute    => $min,
-            second    => $sec,
-            time_zone => $name,
-        );
-        push @{$timezones}, {
-            text   => $name,
-            abbr   => $dt->time_zone()->short_name_for_datetime($dt),
-            offset => $dt->offset(),
-            isdst  => $dt->is_dst() ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
-        };
-    }
-    $cache->set('timezones', {
-        timestamp => $timestamp,
-        timezones => $timezones,
-    });
-    return($timezones);
 }
 
 

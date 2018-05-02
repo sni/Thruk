@@ -142,7 +142,7 @@ sub _build_app {
     #&timing_breakpoint('startup() cgi.cfg parsed');
 
     $self->_create_secret_file();
-    $self->_set_timezone();
+    $self->set_timezone();
     $self->_set_ssi();
     $self->_setup_pidfile();
 
@@ -337,6 +337,11 @@ sub _dispatcher {
 
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
+
+    ## no critic
+    $ENV{'TZ'} = $c->config->{'_server_timezone'};
+    ## use critic
+    POSIX::tzset();
 
     _after_dispatch($c, $res);
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
@@ -583,13 +588,28 @@ sub _create_secret_file {
 }
 
 ###################################################
-# set timezone
-sub _set_timezone {
-    my($self) = @_;
-    my $timezone = $self->config->{'use_timezone'};
-    if(defined $timezone) {
+
+=head2 set_timezone
+
+    set servers timezone
+
+=cut
+sub set_timezone {
+    my($self, $timezone) = @_;
+    if(!defined $timezone) {
+        $timezone = $self->config->{'server_timezone'} || $self->config->{'use_timezone'};
+    }
+    my($std, $dst) = POSIX::tzname();
+    $self->config->{'_server_timezone'} = $dst unless $self->config->{'_server_timezone'};
+    if($timezone) {
         ## no critic
         $ENV{'TZ'} = $timezone;
+        ## use critic
+        require POSIX;
+        POSIX::tzset();
+    } elsif($ENV{'TZ'}) {
+        ## no critic
+        delete $ENV{'TZ'};
         ## use critic
         require POSIX;
         POSIX::tzset();

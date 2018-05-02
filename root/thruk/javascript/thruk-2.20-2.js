@@ -122,7 +122,31 @@ function init_page() {
       }
     });
 
+    // store browsers timezone in a cookie so we can use it in later requests
+    cookieSave("thruk_tz", getBrowserTimezone());
+
     cleanUnderscoreUrl();
+}
+
+function getBrowserTimezone() {
+    var timezone;
+    try {
+        if(Intl.DateTimeFormat().resolvedOptions().timeZone) {
+            timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        } else {
+            var offset = (new Date()).getTimezoneOffset()/60;
+            if(offset == 0) {
+                timezone = "UTC";
+            }
+            if(offset < 0) {
+                timezone = "UTC"+offset;
+            }
+            if(offset > 0) {
+                timezone = "UTC+"+offset;
+            }
+        }
+    } catch(e) {}
+    return(timezone);
 }
 
 function thruk_onerror(msg, url, line, col, error) {

@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - cleanup preferences popup
           - add user profile page
+          - add timezone setting to users profile page
           - move broadcast into side navigation
           - move important filters up (#792)
           - support macros in action menu onclicks

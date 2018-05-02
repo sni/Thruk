@@ -412,6 +412,38 @@ sub add_defaults {
     $c->stash->{'defaults_added'} = 1;
 
     ###############################
+    # timezone settings
+    my $user_tz = $c->stash->{user_data}->{'tz'} || $c->config->{'default_user_timezone'} || "Server Setting";
+    my $timezone;
+    if($user_tz ne 'Server Setting') {
+        if($user_tz eq 'Local Browser') {
+            $timezone = $c->req->cookies->{'thruk_tz'};
+        } else {
+            $timezone = $user_tz;
+        }
+        if($timezone =~ m/^UTC(.+)$/mx) {
+            my $offset = $1*3600;
+            for my $tz (@{Thruk::Utils::get_timezone_data($c)}) {
+                if($tz->{'offset'} == $offset) {
+                    $timezone = $tz->{'text'};
+                    last;
+                }
+            }
+        }
+    }
+    ## no critic
+    if($timezone) {
+        # set users timezone
+        $ENV{'TZ'} = $timezone;
+        POSIX::tzset();
+    } else {
+        # set back to server timezone
+        $c->app->set_timezone();
+    }
+    ## use critic
+    $c->stash->{'user_tz'} = $user_tz;
+
+    ###############################
     $c->stash->{'escape_html_tags'}      = exists $c->config->{'cgi_cfg'}->{'escape_html_tags'}  ? $c->config->{'cgi_cfg'}->{'escape_html_tags'}  : 1;
     $c->stash->{'show_context_help'}     = exists $c->config->{'cgi_cfg'}->{'show_context_help'} ? $c->config->{'cgi_cfg'}->{'show_context_help'} : 0;
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
