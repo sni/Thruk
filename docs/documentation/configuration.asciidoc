@@ -167,7 +167,7 @@ ex.:
 *deprecated* use `server_timezone` now.
 
 === server_timezone
-
+{% include new_since.ad version="2.22" %}
 Changes the timezone from the systems default to this timezone.
 Only set this if you have trouble with displaying the right timestamps.
 Use `/usr/share/zoneinfo` on most linux systems for reference, as some
@@ -179,7 +179,7 @@ ex.:
 
 
 === default_user_timezone
-
+{% include new_since.ad version="2.22" %}
 Since users can change their timezone setting, this changes their default.
 Possible values are:
 
