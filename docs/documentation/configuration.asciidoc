@@ -1669,14 +1669,6 @@ ex.:
   use_feature_recurring_downtime = 1
 
 
-=== use_feature_histogram
-Use histograms, shows histogram links.
-
-ex.:
-
-  use_feature_histogram = 1
-
-
 === use_service_description
 Use service's description instead of display name.
 
