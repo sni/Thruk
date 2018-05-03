@@ -28,7 +28,7 @@ if($ENV{'REMOTE_USER'} && $users->{$ENV{'REMOTE_USER'}}) {
     $allowed = 1;
 }
 elsif($ENV{'REMOTE_USER_GROUPS'}) {
-    for my $grp (split/\s*,\s*/mx, $ENV{'REMOTE_USER_GROUPS'}) {
+    for my $grp (split/\s*;\s*/mx, $ENV{'REMOTE_USER_GROUPS'}) {
         if($groups->{$grp}) {
             $allowed = 1;
             last;
