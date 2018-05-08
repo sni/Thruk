@@ -1686,6 +1686,33 @@ sub translate_host_status {
     return 'UNKNOWN';
 }
 
+##############################################
+
+=head2 expand_duration
+
+  expand_duration($value)
+
+returns expanded seconds from given abbreviation
+
+possible conversions are
+1w => 604800
+1d => 86400
+1h => 3600
+1m => 60
+
+=cut
+sub expand_duration {
+    my($value) = @_;
+    if($value =~ m/^(\d+)(y|w|d|h|m|s)/gmx) {
+        if($2 eq 'y') { return $1 * 86400*365; }# year
+        if($2 eq 'w') { return $1 * 86400*7; }  # weeks
+        if($2 eq 'd') { return $1 * 86400; }    # days
+        if($2 eq 'h') { return $1 * 3600; }     # hours
+        if($2 eq 'm') { return $1 * 60; }       # minutes
+        if($2 eq 's') { return $1 }             # seconds
+    }
+    return $value;
+}
 
 ##############################################
 

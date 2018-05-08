@@ -668,7 +668,7 @@ sub _do_send_command {
     }
     if($c->config->{downtime_max_duration}) {
         if($c->req->parameters->{'cmd_typ'} == 55 or $c->req->parameters->{'cmd_typ'} == 56 or $c->req->parameters->{'cmd_typ'} == 84 or $c->req->parameters->{'cmd_typ'} == 121) {
-            my $max_duration = Thruk::Utils::Status::convert_time_amount($c->config->{downtime_max_duration});
+            my $max_duration = Thruk::Utils::expand_duration($c->config->{downtime_max_duration});
             my $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} );
             if(($end_time_unix - $start_time_unix) > $max_duration) {
                 $c->stash->{'form_errors'} = [{ message => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration) }];

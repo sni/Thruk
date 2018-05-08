@@ -1151,7 +1151,7 @@ sub _avail_clean_cache {
 ##########################################################
 sub _avail_calc {
     my($c, $cached_only, $now, $cached, $opts, $host, $service, $filter) = @_;
-    my $duration = Thruk::Utils::Status::convert_time_amount($opts->{'d'});
+    my $duration = Thruk::Utils::expand_duration($opts->{'d'});
     my $unavailable_states = {'down' => 1, 'unreachable' => 1, 'critical' => 1, 'unknown' => 1};
     my $cache_retrieve_factor = $c->config->{'Thruk::Plugin::Panorama'}->{'cache_retrieve_factor'} || 0.0025; # ~ once a day for yearly values, every ~ 3.5 minutes for daily averages
 
@@ -1469,7 +1469,7 @@ sub _task_show_logs {
 
     my $filter;
     my $end   = time();
-    my $start = $end - Thruk::Utils::Status::convert_time_amount($c->req->parameters->{'time'} || '15m');
+    my $start = $end - Thruk::Utils::expand_duration($c->req->parameters->{'time'} || '15m');
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<=' => $end }};
 

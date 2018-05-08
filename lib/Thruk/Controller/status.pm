@@ -1431,7 +1431,7 @@ sub _process_verify_time {
         undef $verified;
     }
     elsif($start && $end && $c->config->{downtime_max_duration}) {
-        my $max_duration = Thruk::Utils::Status::convert_time_amount($c->config->{downtime_max_duration});
+        my $max_duration = Thruk::Utils::expand_duration($c->config->{downtime_max_duration});
         my $duration = $end - $start;
         if($duration > $max_duration) {
             $error = 'Duration exceeds maximum<br>allowed value: '.Thruk::Utils::Filter::duration($max_duration);

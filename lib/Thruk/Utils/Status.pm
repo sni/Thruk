@@ -931,7 +931,7 @@ sub single_search {
             push @servicefilter, { latency => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'execution time' ) {
-            $value = Thruk::Utils::Status::convert_time_amount($value);
+            $value = Thruk::Utils::expand_duration($value);
             push @hostfilter,    { execution_time => { $op => $value } };
             push @servicefilter, { execution_time => { $op => $value } };
         }
@@ -1006,14 +1006,14 @@ sub single_search {
         }
         # Filter on the downtime duration
         elsif ( $filter->{'type'} eq 'downtime duration' ) {
-            $value                 = Thruk::Utils::Status::convert_time_amount($value);
+            $value                 = Thruk::Utils::expand_duration($value);
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_downtimes_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
         }
         elsif ( $filter->{'type'} eq 'duration' ) {
             my $now = time();
-            $value = Thruk::Utils::Status::convert_time_amount($value);
+            $value = Thruk::Utils::expand_duration($value);
             if(    ($op eq '>=' and ($now - $c->stash->{'last_program_restart'}) >= $value)
                 or ($op eq '<=' and ($now - $c->stash->{'last_program_restart'}) <= $value)
                 or ($op eq '!=' and ($now - $c->stash->{'last_program_restart'}) != $value)
@@ -1823,34 +1823,6 @@ sub get_downtimes_filter {
     }
 
     return(\@hostfilter, \@servicefilter);
-}
-
-##############################################
-
-=head2 convert_time_amount
-
-  convert_time_amount($value)
-
-returns converted amount of time
-
-possible conversions are
-1w => 604800
-1d => 86400
-1h => 3600
-1m => 60
-
-=cut
-sub convert_time_amount {
-    my $value = shift;
-    if($value =~ m/^(\d+)(y|w|d|h|m|s)/gmx) {
-        if($2 eq 'y') { return $1 * 86400*365; }# year
-        if($2 eq 'w') { return $1 * 86400*7; }  # weeks
-        if($2 eq 'd') { return $1 * 86400; }    # days
-        if($2 eq 'h') { return $1 * 3600; }     # hours
-        if($2 eq 'm') { return $1 * 60; }       # minutes
-        if($2 eq 's') { return $1 }             # seconds
-    }
-    return $value;
 }
 
 ##############################################
