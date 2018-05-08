@@ -1250,64 +1250,72 @@ sub _update_logcache_clean {
 
     my $start = time() - ($blocksize * 86400);
     print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
+    my $plugin_ref_count = 0;
     my $log_count = $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
+    return([$log_count, $plugin_ref_count]) if $log_count == 0;
 
     # clean old plugin outputs
     print "cleaning old orphaned plugin outputs\n" if $verbose;
     my($db_id, $db_id2);
     my($fh, $tempfile) = tempfile();
-    # get all used message / plugin_output ids (DISTINCT is slower than using sort -u later)
-    my $sth = $dbh->prepare("SELECT plugin_output, message FROM `".$prefix."_log`");
-    $sth->execute;
-    $sth->bind_columns(\$db_id, \$db_id2);
-    while($sth->fetch) {
-        print $fh $db_id, "\n", $db_id2, "\n";
-    }
-    CORE::close($fh);
-    print "fetched ids\n" if $verbose;
+    eval {
+        # get all used message / plugin_output ids (DISTINCT is slower than using sort -u later)
+        my $sth = $dbh->prepare("SELECT plugin_output, message FROM `".$prefix."_log`");
+        $sth->execute;
+        $sth->bind_columns(\$db_id, \$db_id2);
+        while($sth->fetch) {
+            print $fh $db_id, "\n", $db_id2, "\n";
+        }
+        CORE::close($fh) or confess("writing ids failed: $!");
+        print "fetched ids\n" if $verbose;
 
-    # sort all used ids
-    my $sortcmd = 'sort -nu -o '.$tempfile.'2 '.$tempfile.' && mv '.$tempfile.'2 '.$tempfile;
-    `$sortcmd`;
-    print "sorted used ids\n" if $verbose;
+        # sort all used ids
+        my $sortcmd = 'sort -nu -o '.$tempfile.'2 '.$tempfile.' && mv '.$tempfile.'2 '.$tempfile;
+        `$sortcmd`;
+        confess("sorting ids failed") if $? != 0;
+        print "sorted used ids\n" if $verbose;
 
-    # iterate existing ids and bulk remove those not in use anymore
-    open($fh, '<', $tempfile) or die('cannot open '.$tempfile.' for reading: '.$!);
-    my $plugin_ref_count = 0;
-    my @bulk_delete;
-    $sth = $dbh->prepare("SELECT output_id FROM `".$prefix."_plugin_output` ORDER BY output_id");
-    $sth->execute;
-    my $to_delete = 0;
-    $sth->bind_columns(\$db_id);
-    while($sth->fetch) {
-        my $file_id = <$fh>;
-        last unless $file_id;
+        # iterate existing ids and bulk remove those not in use anymore
+        open($fh, '<', $tempfile) or confess('cannot open '.$tempfile.' for reading: '.$!);
+        my @bulk_delete;
+        $sth = $dbh->prepare("SELECT output_id FROM `".$prefix."_plugin_output` ORDER BY output_id");
+        $sth->execute;
+        my $to_delete = 0;
+        $sth->bind_columns(\$db_id);
+        while($sth->fetch) {
+            my $file_id = <$fh>;
+            last unless $file_id;
 
-        # this means the id is not used anymore
-        while($db_id < $file_id) {
-            push @bulk_delete, $db_id;
-            $sth->fetch;
-            $to_delete++;
-            last unless $db_id;
+            # this means the id is not used anymore
+            while($db_id < $file_id) {
+                push @bulk_delete, $db_id;
+                $sth->fetch;
+                $to_delete++;
+                last unless $db_id;
 
-            if($to_delete > 100) {
-                $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id IN (".join(",", @bulk_delete).")");
-                @bulk_delete = ();
-                $to_delete   = 0;
-                $dbh->commit or die $dbh->errstr;
+                if($to_delete > 100) {
+                    $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id IN (".join(",", @bulk_delete).")");
+                    @bulk_delete = ();
+                    $to_delete   = 0;
+                    $dbh->commit or confess($dbh->errstr);
+                }
             }
         }
-    }
-    CORE::close($fh);
-    if($to_delete > 100) {
-        $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id IN (".join(",", @bulk_delete).")");
-        @bulk_delete = ();
-        $to_delete   = 0;
-        $dbh->commit or die $dbh->errstr;
-    }
+        CORE::close($fh);
+        if($to_delete > 100) {
+            $plugin_ref_count += $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id IN (".join(",", @bulk_delete).")");
+            @bulk_delete = ();
+            $to_delete   = 0;
+            $dbh->commit or confess($dbh->errstr);
+        }
+    };
     unlink($tempfile);
+    unlink($tempfile.'2');
+    if($@) {
+        die("logcache clean failed: $!");
+    }
 
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit or confess($dbh->errstr);
     return([$log_count, $plugin_ref_count]);
 }
 
