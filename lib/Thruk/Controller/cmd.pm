@@ -215,7 +215,7 @@ sub index {
                     } else {
                         Thruk::Utils::set_message( $c, 'fail_message', "command for host $host failed" );
                     }
-                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]) if $c->stash->{'form_errors'}->[0];
+                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for host $host failed");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
@@ -257,7 +257,7 @@ sub index {
                     } else {
                         Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
                     }
-                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]) if $c->stash->{'form_errors'}->[0];
+                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for $service on host $host failed");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }

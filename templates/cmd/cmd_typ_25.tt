@@ -12,13 +12,23 @@
 [%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
+    [% IF c.config.require_comments_for_disable_cmds %]
+    [% comment_author       = c.stash.remote_user %]
+    [% comment_data         = c.request.parameters.com_data_disable_cmd %]
+    [% END %]
 
-    [% IF c.request.parameters.ptc %]DISABLE_HOST_AND_CHILD_NOTIFICATIONS[% ELSE %]DISABLE_HOST_NOTIFICATIONS[% END %];[% sprintf("%s",host_name) %]
+    [% IF c.request.parameters.ptc %][% cmd = "DISABLE_HOST_AND_CHILD_NOTIFICATIONS" %][% ELSE %][% cmd = "DISABLE_HOST_NOTIFICATIONS" %][% END %][% sprintf("%s;%s",cmd,host_name) %]
+    [% IF c.config.require_comments_for_disable_cmds %]
+    ADD_HOST_COMMENT;[% sprintf("%s;1;%s;%s: %s",host_name,comment_author,cmd,comment_data) %]
+    [% END %]
 [% END %]
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxItem'>Disable Notifications For Child Hosts Too:</td><td><b><input type='checkbox' name='ptc'[% IF c.config.cmd_defaults.ptc %] checked[% END %]></b></td></tr>
+[% IF c.config.require_comments_for_disable_cmds %]
+<tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data_disable_cmd'></b></td></tr>
+[% END %]
 
 [% END %]
 [% END %]

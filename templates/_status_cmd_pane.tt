@@ -83,6 +83,12 @@
       <td class="statusOdd" width=90>Comment:</td>
       <td class="statusOdd"><input type="text" value="" name="com_data" id="com_data" size="37"></td>
     </tr>
+    <tr id="row_comment_disable_cmd">
+      [% IF c.config.require_comments_for_disable_cmds %]
+      <td class="statusOdd" width=90>Comment:</td>
+      <td class="statusOdd"><input type="text" value="" name="com_data_disable_cmd" id="com_data_disable_cmd" size="37"></td>
+      [% END %]
+    </tr>
     <tr id="row_start">
       <td class="statusOdd" width=90>Start:</td>
       <td class="statusOdd"><a href="#" onclick="show_cal('start_time'); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id, 'end_time')"></td>
