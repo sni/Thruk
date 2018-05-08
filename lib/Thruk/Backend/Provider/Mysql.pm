@@ -1008,7 +1008,7 @@ sub _import_logs {
 
     my $forcestart;
     if($options->{'start'}) {
-        $forcestart = time() - Thruk::Utils::Status::convert_time_amount($options->{'start'});
+        $forcestart = time() - Thruk::Utils::expand_duration($options->{'start'});
     }
 
     my $backend_count = 0;
@@ -1242,6 +1242,11 @@ sub _update_logcache_version {
 ##########################################################
 sub _update_logcache_clean {
     my($dbh, $prefix, $verbose, $blocksize) = @_;
+
+    if($blocksize =~ m/^\d+[a-z]{1}/mx) {
+        # blocksize is in days
+        $blocksize = int(Thruk::Utils::expand_duration($blocksize) / 86400);
+    }
 
     my $start = time() - ($blocksize * 86400);
     print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
