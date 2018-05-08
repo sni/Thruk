@@ -469,6 +469,10 @@ sub get_logs {
     }
     if($fh) {
         Thruk::Utils::IO::close($fh, $filename);
+        if($? != 0) {
+            unlink($filename);
+            confess("writing logs to $filename failed: $!");
+        }
         return($filename, 'file');
     } else {
         return($data, ($sorted ? 'sorted' : ''));

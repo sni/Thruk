@@ -267,7 +267,11 @@ sub save_logs_to_tempfile {
     for my $r (@{$data}) {
         print $fh Encode::encode_utf8($r->{'message'}),"\n";
     }
-    &close($fh, $filename) or die("cannot close file ".$filename.": ".$!);
+    &close($fh, $filename);
+    if($? != 0) {
+        unlink($filename);
+        confess("cannot close file ".$filename.": ".$!);
+    }
     return($filename);
 }
 
