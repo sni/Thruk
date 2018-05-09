@@ -479,8 +479,10 @@ sub job_page {
         #my($out,$err,$time,$dir,$stash,$rc,$profile)...
         my($out,$err,undef,$dir,$stash,$rc,$profile) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
-        for my $p (split(/Profile:/mx, $profile)) {
-            push @{$c->stash->{'profile'}}, "Profile:".$p if $p;
+        if($profile) {
+            for my $p (split(/Profile:/mx, $profile)) {
+                push @{$c->stash->{'profile'}}, "Profile:".$p if $p;
+            }
         }
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
         if(defined $err and $err ne '') {
