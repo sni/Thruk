@@ -468,8 +468,8 @@ sub get_logs {
         }
     }
     if($fh) {
-        Thruk::Utils::IO::close($fh, $filename);
-        if($? != 0) {
+        my $rc = Thruk::Utils::IO::close($fh, $filename);
+        if(!$rc) {
             unlink($filename);
             confess("writing logs to $filename failed: $!");
         }

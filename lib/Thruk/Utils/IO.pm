@@ -35,7 +35,8 @@ close filehandle and ensure permissions and ownership
 =cut
 sub close {
     my($fh, $filename, $just_close) = @_;
-    my $rc = CORE::close($fh) or confess("cannot write to $filename: $!");
+    my $rc = CORE::close($fh);
+    confess("cannot write to $filename: $!") unless $rc;
     ensure_permissions('file', $filename) unless $just_close;
     return $rc;
 }
