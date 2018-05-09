@@ -1400,7 +1400,7 @@ plugins/plugins-enabled/panorama
 plugins/plugins-enabled/reports2
 plugins/plugins-enabled/shinken_features
 plugins/plugins-enabled/statusmap
-README
+README.md
 root/favicon.ico
 root/index.html
 root/robots.txt
