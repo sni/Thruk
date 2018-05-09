@@ -1508,8 +1508,8 @@ sub _get_plugin_lookup {
     my $sth = $dbh->prepare($sql);
     $sth->execute;
     for my $o (@{$sth->fetchall_arrayref()}) {
-        $plugin_lookup->{$o->[1]} = $o->[0];
-        $plugin_lookup->{$o->[3]} = $o->[2];
+        $plugin_lookup->{$o->[1]} = $o->[0] if $o->[1];
+        $plugin_lookup->{$o->[3]} = $o->[2] if $o->[3];
     }
 
     $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
