@@ -84,7 +84,7 @@
       <td class="statusOdd"><input type="text" value="" name="com_data" id="com_data" size="37"></td>
     </tr>
     <tr id="row_comment_disable_cmd">
-      [% IF c.config.require_comments_for_disable_cmds %]
+      [% IF c.stash.require_comments_for_disable_cmds %]
       <td class="statusOdd" width=90>Comment:</td>
       <td class="statusOdd"><input type="text" value="" name="com_data_disable_cmd" id="com_data_disable_cmd" size="37"></td>
       [% END %]

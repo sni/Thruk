@@ -631,6 +631,12 @@ sub add_defaults {
     }
 
     ###############################
+    $c->stash->{'require_comments_for_disable_cmds'} = 0;
+    if(exists $c->config->{'require_comments_for_disable_cmds'}) {
+        $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'};
+    }
+
+    ###############################
     # user / group specific config?
     $c->stash->{'contactgroups'} = $c->stash->{'remote_user'} ? [sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}] : [];
     if(!$no_config_adjustments && $c->stash->{'remote_user'}) {

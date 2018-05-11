@@ -1705,6 +1705,18 @@ ex.:
   wait_timeout = 10
 
 
+=== require_comments_for_disable_cmds
+If set to 1, the user has to enter a comment for all disable active checks /
+disable notifications / disable event handler commands. These comments are
+automatically prefixed with the command name and will be deleted when checks /
+notifications / handlers are enabled again. They are also used by the
+'reenable_actions' utility.
+
+ex.:
+
+  require_comments_for_disable_cmds = 1
+
+
 
 
 

@@ -13,13 +13,13 @@
 [% BLOCK action%]
     [% service_desc         = c.request.parameters.service %]
     [% host_name            = c.request.parameters.host %]
-    [% IF c.config.require_comments_for_disable_cmds %]
+    [% IF c.stash.require_comments_for_disable_cmds %]
     [% comment_author       = c.stash.remote_user %]
     [% comment_data         = c.request.parameters.com_data_disable_cmd %]
     [% END %]
 
     DISABLE_SVC_EVENT_HANDLER;[% sprintf("%s;%s",host_name,service_desc) %]
-    [% IF c.config.require_comments_for_disable_cmds %]
+    [% IF c.stash.require_comments_for_disable_cmds %]
     ADD_SVC_COMMENT;[% sprintf("%s;%s;1;%s;DISABLE_SVC_EVENT_HANDLER: %s",host_name,service_desc,comment_author,comment_data) %]
     [% END %]
 [% END %]
@@ -27,7 +27,7 @@
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value='[% c.request.parameters.service %]'></b></td></tr>
-[% IF c.config.require_comments_for_disable_cmds %]
+[% IF c.stash.require_comments_for_disable_cmds %]
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data_disable_cmd'></b></td></tr>
 [% END %]
 
