@@ -54,25 +54,22 @@ Requires(preun): libthruk
 Requires(post): libthruk
 Requires:    perl logrotate gd wget
 AutoReqProv: no
+
+#sles and opensuse
 %if %{defined suse_version}
 Requires:    apache2 apache2-mod_fcgid cron
-%else
-# rhel specific requirements
-# >=rhel7
-%if 0%{?el7}%{?fc20}%{?fc21}%{?fc22}
-BuildRequires: perl-ExtUtils-Install
+%endif
+
+# >=rhel7 and fedora
+%if 0%{?el7}%{?fedora}
+BuildRequires: perl(ExtUtils::Install)
 Requires: httpd mod_fcgid cronie
-%else
-# rhel6 specific requirements
+%endif
+
+# rhel6 requirements
 %if 0%{?el6}
-BuildRequires: perl-ExtUtils-MakeMaker
+BuildRequires: perl(ExtUtils::MakeMaker)
 Requires: httpd mod_fcgid cronie
-%else
-# rhel5 specific requirements (centos support no el5 tag)
-BuildRequires: perl-ExtUtils-MakeMaker
-Requires: httpd mod_fcgid
-%endif
-%endif
 %endif
 
 %description base
