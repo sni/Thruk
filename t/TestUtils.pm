@@ -778,6 +778,7 @@ sub _request {
 #########################
 sub _external_request {
     my($url, $start_to, $post, $agent, $retry) = @_;
+    confess("no url") unless $url;
     $retry = 1 unless defined $retry;
 
     # make tests with http://localhost/naemon possible
