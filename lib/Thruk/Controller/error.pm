@@ -291,6 +291,18 @@ sub index {
     $c->res->headers->last_modified(time);
     $c->res->headers->expires(time - 3600);
     $c->res->headers->header(cache_control => "public, max-age=0");
+
+    # return error as json
+    if($c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
+        return $c->render(json => {
+            failed      => Cpanel::JSON::XS::true,
+            error       => $c->stash->{errorMessage},
+            details     => $c->stash->{errorDetails},
+            description => $c->stash->{errorDescription},
+            code        => $code,
+        });
+    }
+
     $c->{'rendered'} = 0; # force rerendering
     return 1;
 }
