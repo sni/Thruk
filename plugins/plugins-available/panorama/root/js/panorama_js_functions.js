@@ -1628,7 +1628,7 @@ var TP = {
         if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0) {
             backends = panel.xdata.backends;
         }
-        else if(panel && panel.xdata.general && panel.xdata.general.backends && panel.xdata.general.backends.length > 0 && (panel.xdata.general.backends.length != 1 || panel.xdata.general.backends[0] != "")) {
+        else if(panel && panel.xdata && panel.xdata.general && panel.xdata.general.backends && panel.xdata.general.backends.length > 0 && (panel.xdata.general.backends.length != 1 || panel.xdata.general.backends[0] != "")) {
             backends = panel.xdata.general.backends;
         }
         else if(tab.xdata.select_backends) {
