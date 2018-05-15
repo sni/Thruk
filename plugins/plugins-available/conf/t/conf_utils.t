@@ -374,7 +374,7 @@ $obj = $parsedfile->{'objects'}->[0];
 $testhost = {
     'host_name'           => 'sw_example',
     'address'             => '192.168.50.3',
-    'hostgroups'          => [qw/g_location_central hg_location_central hg_netzwerk hg_netzwerk_switch hg_site_central/],
+    'hostgroups'          => [qw/hg_location_central hg_netzwerk hg_netzwerk_switch hg_site_central/],
 };
 ($computed_keys, $computed) = $obj->get_computed_config($objects);
 is_deeply($computed, $testhost, 'parsed nested templates II');
