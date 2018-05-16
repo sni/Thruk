@@ -3,6 +3,7 @@ package Thruk::Controller::cmd;
 use strict;
 use warnings;
 use Data::Dumper;
+use Thruk::Utils::CLI;
 
 =head1 NAME
 
@@ -667,7 +668,7 @@ sub _do_send_command {
         }
     }
     if($c->config->{downtime_max_duration}) {
-        if($c->req->parameters->{'cmd_typ'} == 55 or $c->req->parameters->{'cmd_typ'} == 56 or $c->req->parameters->{'cmd_typ'} == 84 or $c->req->parameters->{'cmd_typ'} == 121) {
+        if($cmd_typ == 55 or $cmd_typ == 56 or $cmd_typ == 84 or $cmd_typ == 121) {
             my $max_duration = Thruk::Utils::expand_duration($c->config->{downtime_max_duration});
             my $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} );
             if(($end_time_unix - $start_time_unix) > $max_duration) {
@@ -708,6 +709,39 @@ sub _do_send_command {
         }
         if($cmd_typ == 2 or $cmd_typ == 78) {
             $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
+        }
+    }
+
+    # delete associated comment(s) if we are about to re-enable active checks,
+    # notifications or handlers
+    my %cmds_for_type = (
+        47 => ['DISABLE_HOST_CHECK'],
+        15 => ['DISABLE_HOST_SVC_CHECKS', 'DISABLE_HOST_CHECK'],
+        24 => ['DISABLE_HOST_NOTIFICATIONS', 'DISABLE_HOST_AND_CHILD_NOTIFICATIONS'],
+        28 => ['DISABLE_HOST_SVC_NOTIFICATIONS', 'DISABLE_HOST_NOTIFICATIONS'],
+        43 => ['DISABLE_HOST_EVENT_HANDLER'],
+        5  => ['DISABLE_SVC_CHECK'],
+        22 => ['DISABLE_SVC_NOTIFICATIONS'],
+        45 => ['DISABLE_SVC_EVENT_HANDLER'],
+    );
+    if (exists $cmds_for_type{$cmd_typ}) {
+        my $cli = Thruk::Utils::CLI->new;
+        my $db  = $cli->get_db();
+        for my $cmd (@{$cmds_for_type{$cmd_typ}}) {
+            for my $comm (@{$db->get_comments_by_pattern($c,
+                                                         $c->req->parameters->{'host'},
+                                                         $c->req->parameters->{'service'},
+                                                         $cmd)}) {
+                $c->log->debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
+                if ($cmd =~ /HOST/) {
+                    push @{$c->stash->{'commands2send'}->{$comm->{'backend'}}},
+                        sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d\n", time(), $comm->{'id'});
+                }
+                else {
+                    push @{$c->stash->{'commands2send'}->{$comm->{'backend'}}},
+                        sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d\n", time(), $comm->{'id'});
+                }
+            }
         }
     }
 

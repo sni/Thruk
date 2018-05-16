@@ -833,6 +833,30 @@ sub renew_logcache {
 
 ########################################
 
+=head2 get_comments_by_pattern
+
+  get_comments_by_pattern($c, $host, $svc, $pattern)
+
+retrieve backend and ID of host or service comment(s) that match the given pattern
+
+=cut
+
+sub get_comments_by_pattern {
+    my ($self, $c, $host, $svc, $pattern) = @_;
+    $c->log->debug("get_comments_by_pattern() has been called: host = $host, service = $svc, pattern = $pattern");
+    my $options  = {'filter' => [{'host_name' => $host}, {'service_description' => $svc}, {'comment' => {'~' => $pattern}}]};
+    my $comments = $self->get_comments(%{$options});
+    my $ids      = [];
+    for my $comm (@{$comments}) {
+        my ($cmd) = $comm->{'comment'} =~ /^DISABLE_([A-Z_]+):/;
+        $c->log->debug("found comment for command DISABLE_$cmd with ID $comm->{'id'} on backend $comm->{'peer_key'}");
+        push @{$ids}, {'backend' => $comm->{'peer_key'}, 'id' => $comm->{'id'}};
+    }
+    return $ids;
+}
+
+########################################
+
 =head2 _renew_logcache
 
   _renew_logcache($c)
