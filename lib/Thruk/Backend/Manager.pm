@@ -848,7 +848,7 @@ sub get_comments_by_pattern {
     my $comments = $self->get_comments(%{$options});
     my $ids      = [];
     for my $comm (@{$comments}) {
-        my ($cmd) = $comm->{'comment'} =~ /^DISABLE_([A-Z_]+):/;
+        my ($cmd) = $comm->{'comment'} =~ m/^DISABLE_([A-Z_]+):/mx;
         $c->log->debug("found comment for command DISABLE_$cmd with ID $comm->{'id'} on backend $comm->{'peer_key'}");
         push @{$ids}, {'backend' => $comm->{'peer_key'}, 'id' => $comm->{'id'}};
     }

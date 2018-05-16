@@ -733,7 +733,7 @@ sub _do_send_command {
                                                          $c->req->parameters->{'service'},
                                                          $cmd)}) {
                 $c->log->debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
-                if ($cmd =~ /HOST/) {
+                if ($cmd =~ m/HOST/mx) {
                     push @{$c->stash->{'commands2send'}->{$comm->{'backend'}}},
                         sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d\n", time(), $comm->{'id'});
                 }
