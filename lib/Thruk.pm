@@ -604,8 +604,11 @@ sub set_timezone {
     if(!defined $timezone) {
         $timezone = $self->config->{'server_timezone'} || $self->config->{'use_timezone'};
     }
-    my($std, $dst) = POSIX::tzname();
-    $self->config->{'_server_timezone'} = $dst unless $self->config->{'_server_timezone'};
+    if(!$self->config->{'_server_timezone'}) {
+        POSIX::tzset();
+        my($std, $dst) = POSIX::tzname();
+        $self->config->{'_server_timezone'} = $dst;
+    }
     require POSIX;
     if($timezone) {
         ## no critic
