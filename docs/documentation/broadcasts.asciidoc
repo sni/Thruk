@@ -31,6 +31,46 @@ can be found on the top right in the preferences menu.
 <br style="clear: both;">
 ++++
 
+==== HTML
+Broadcasts may contain html, css and javascript code, see example below.
+
+==== Macros
+{% include new_since.ad version="2.22" %}
+There are a few text macros available which make using templates easier:
+
+ - {{contact}}: will be replaced with the author name
+ - {{contactemail}}: will be replaced with the authors email (if availabe)
+ - {{date}}: contains the date from saving the broadcast
+ - {{theme}}: contains the users selected theme. Can be used for images.
+
+
+==== Example
+Full example with html and macros:
+```
+<img src="../themes/{{theme}}/images/ack.gif" width=16 height=16>
+<b>Upcoming maintainance change</b>:<br>
+
+<pre style="font-family: inherit;">
+Thruk will be updated <font color="red">next wednesday</font>
+to the latest release. We are expecting
+no downtime but lots of new features.
+</pre>
+
+{{contact}} - <a href="mailto:{{contactmail}}">{{contactmail}}</a>
+<span style="float: right">(<i>Last Update: {{date}}</i>)</span>
+
+<style>
+/* set panorama background color */
+DIV.popup-msg .msg {
+  background: rgba(240,240,240,0.85);
+}
+/* background color on other pages */
+TABLE.broadcast_panel_container {
+  background-color: rgba(255,255,255,0.85);
+}
+</style>
+```
+
 
 === Create new Broadcast manually
 
