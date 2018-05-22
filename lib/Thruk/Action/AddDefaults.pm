@@ -791,13 +791,13 @@ sub _set_possible_backends {
             next;
         }
         $backend_detail{$back} = {
-            'name'       => $peer->{'name'},
-            'addr'       => $peer->{'addr'},
-            'type'       => $peer->{'type'},
-            'disabled'   => $disabled_backends->{$back} || REACHABLE,
-            'running'    => 0,
-            'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
-            'section'    => $peer->{'section'} || 'Default',
+            'name'        => $peer->{'name'},
+            'addr'        => $peer->{'addr'},
+            'type'        => $peer->{'type'},
+            'disabled'    => $disabled_backends->{$back} || REACHABLE,
+            'running'     => 0,
+            'last_error'  => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
+            'section'     => $peer->{'section'} || 'Default',
         };
         if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
             $backend_detail{$back}->{'running'} = 1;
@@ -844,6 +844,9 @@ sub update_site_panel_hashes {
             data_src_version => '',
             program_start    => '',
         };
+        if($peer->{'last_online'}) {
+            $initial_backends->{$back}->{'last_online'} = time() - $peer->{'last_online'};
+        }
         if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}) {
             $initial_backends->{$back}->{'version'}          = $c->stash->{'pi_detail'}->{$back}->{'program_version'};
             $initial_backends->{$back}->{'data_src_version'} = $c->stash->{'pi_detail'}->{$back}->{'data_source_version'};
@@ -916,7 +919,7 @@ sub _calculate_section_totals {
             $section->{$total_key}++;
             $section->{'total'}++;
             $initial_backends->{$pd}->{'cls'} = $class;
-            my $last_error = ($initial_backends->{$pd}->{'name'} || '').': OK';
+            my $last_error =  'OK';
             if($c->stash->{'failed_backends'}->{$pd}) {
                 $last_error = $c->stash->{'failed_backends'}->{$pd};
             }
@@ -1347,6 +1350,15 @@ sub check_federation_peers {
         $processinfo = $c->{'db'}->get_processinfo();
         for my $key (keys %{$processinfo}) {
             $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
+        }
+    }
+    # set a few extra infos
+    for my $d (@{$all_sites_info}) {
+        my $key = $d->{'key'};
+        my $peer = $Thruk::Backend::Pool::peers->{$key};
+        next unless $peer;
+        for my $col (qw/last_online last_update last_error/) {
+            $peer->{$col} = $d->{$col};
         }
     }
     return($processinfo, $cached_data);

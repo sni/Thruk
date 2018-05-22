@@ -1703,7 +1703,6 @@ sub _get_result_lmd {
             $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
             $peer->{'runnning'}   = 1;
             $peer->{'last_error'} = 'OK';
-
         }
         for my $key (keys %{$meta->{'failed'}}) {
             $c->stash->{'failed_backends'}->{$key} = $meta->{'failed'}->{$key};

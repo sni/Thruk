@@ -758,11 +758,21 @@ function window_location_replace(url) {
 
 function get_site_panel_backend_button(id, styles, onclick, section) {
     if(!initial_backends[id] || !initial_backends[id]['cls']) { return(""); }
+    var cls = initial_backends[id]['cls'];
+    var title = initial_backends[id]['last_error'];
+    if(cls != "DIS") {
+        if(initial_backends[id]['last_online'] && initial_backends[id]['last_online'] > 30) {
+            title += "\nLast Online: "+duration(initial_backends[id]['last_online'])+" ago";
+            if(cls == "UP" && initial_backends[id]['last_error'] != "OK") {
+                cls = "WARN";
+            }
+        }
+    }
     var btn = '<input type="button"';
     btn += " id='button_"+id+"'";
-    btn += ' class="button_peer'+initial_backends[id]['cls']+' backend_'+id+' section_'+section+'"';
+    btn += ' class="button_peer'+cls+' backend_'+id+' section_'+section+'"';
     btn += ' value="'+initial_backends[id]['name']+'"';
-    btn += ' title="'+escapeHTML(initial_backends[id]['last_error']).replace(/"/, "'")+'"';
+    btn += ' title="'+escapeHTML(title).replace(/"/, "'")+'"';
     if(initial_backends[id]['disabled'] == 5) {
         btn += ' disabled'
     } else {
@@ -1237,6 +1247,19 @@ function count_site_section_totals(section, prefix) {
     } else {
         jQuery('.section_check_box_'+prefixCls).prop('checked', true);
     }
+}
+
+function duration(seconds) {
+    if(seconds < 300) {
+        return(seconds+" seconds");
+    }
+    if(seconds < 7200) {
+        return(Math.floor(seconds/60)+" minutes");
+    }
+    if(seconds < 86400*2) {
+        return(Math.floor(seconds/3600)+" hours");
+    }
+    return(Math.floor(seconds/86400)+" days");
 }
 
 /* toggle checkbox by id */
