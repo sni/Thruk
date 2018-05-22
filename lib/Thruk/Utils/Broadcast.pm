@@ -230,7 +230,7 @@ sub get_default_broadcast {
             contact      => $c->stash->{'remote_user'},
             contactemail => $c->user ? $c->user->{'email'} : 'none',
             theme        => $c->stash->{'theme'},
-        }
+        },
     };
     return($broadcast);
 }
