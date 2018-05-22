@@ -13,6 +13,7 @@ BEGIN {
     eval "use Test::JavaScript";
     plan skip_all => 'Test::JavaScript required' if $@;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    $ENV{'THRUK_QUIET'} = 1;
 }
 
 #################################################

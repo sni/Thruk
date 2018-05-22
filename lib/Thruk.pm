@@ -668,6 +668,7 @@ sub _init_logging {
         log4perl.appender.Screen.layout    = Log::Log4perl::Layout::PatternLayout
         log4perl.appender.Screen.layout.ConversionPattern = [%d{ABSOLUTE}][%p][%c] %m%n
         );
+        $log_conf =~ s/Threshold\s*=\s*\w+$/Threshold = ERROR/gmx if $ENV{'THRUK_QUIET'};
         Log::Log4perl::init(\$log_conf);
         $logger = Log::Log4perl->get_logger();
         $self->{'_log'} = $logger;
