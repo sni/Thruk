@@ -40,6 +40,7 @@ sub index {
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
+    $c->stash->{has_debug_options}     = 1;
     $c->stash->{'phantomjs'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
 

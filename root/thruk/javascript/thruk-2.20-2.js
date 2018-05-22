@@ -385,9 +385,13 @@ function toggleElementRemote(id, part, bodyclose) {
         return;
     }
     /* add loading image and fetch content */
+    var append = "";
+    if(has_debug_options) {
+        append += "&debug=1";
+    }
     el.innerHTML = "<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'>";
     showElement(id, undefined, bodyclose);
-    jQuery('#'+id).load(url_prefix+'cgi-bin/parts.cgi?part='+part, {}, function(text, status, req) {
+    jQuery('#'+id).load(url_prefix+'cgi-bin/parts.cgi?part='+part+append, {}, function(text, status, req) {
         showElement(id, undefined, bodyclose);
         resetRefresh();
     })
@@ -675,6 +679,30 @@ function getCurrentUrl(addTimeAndScroll) {
     if(origHash != '#' && origHash != '') {
         newUrl = newUrl + origHash;
     }
+    return(newUrl);
+}
+
+function uriWith(uri, params, removeParams) {
+    uri  = uri || window.location.href;
+    var urlArgs  = toQueryParams(uri);
+
+    for(var key in params) {
+        urlArgs[key] = params[key];
+    }
+
+    if(removeParams) {
+        for(var key in removeParams) {
+            delete urlArgs[key];
+        }
+    }
+
+    var newParams = toQueryString(urlArgs);
+
+    var newUrl = uri.replace(/\?.*$/g, '');
+    if(newParams != '') {
+        newUrl = newUrl + '?' + newParams;
+    }
+
     return(newUrl);
 }
 

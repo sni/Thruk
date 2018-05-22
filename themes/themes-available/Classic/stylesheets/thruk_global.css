@@ -107,6 +107,13 @@ TABLE.pref_pane .separator {
   padding-top: 10px;
 }
 
+.pref_pane_long_inp {
+  width: 270px;
+}
+.pref_pane_short_inp {
+  width: 160px;
+}
+
 img.pref_pane_button {
   position:absolute;
   top: 4px;

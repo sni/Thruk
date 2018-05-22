@@ -100,6 +100,7 @@ sub begin {
     $c->stash->{'show_nav_button'}    = $show_nav_button;
     $c->stash->{'reload_nav'}         = $c->req->parameters->{'reload_nav'} || '';
     $c->stash->{'show_sounds'}        = 0;
+    $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} || 0;
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
