@@ -70,8 +70,16 @@
   </tr>
   <tr>
     <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
-    <td class="dataOdd" align="left">
+    <td class="dataOdd" align="left" style="position: relative;">
       <textarea name="text" wrap="hard" cols=74 rows=14 style="width: 99%;">[% broadcast.text %]</textarea>
+      <div style="position: absolute; right: -430px; top: 10px; background: #e6e6e6; border-radius: 5px; border: 1px solid gray; padding: 8px;">
+        Help:
+        <ul style="padding-left: 10px; margin: 0;">
+         <li>HTML is allowed, ex: <b>&lt;b&gt;bold text&lt;/b&gt;</b></li>
+         <li>Images: &lt;img src="../themes/{{theme}}/images/ack.gif" width=16 height=16&gt;</li>
+         <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</b></li>
+        </ul>
+      </div>
     </td>
   </tr>
   <tr>
