@@ -56,7 +56,7 @@ to the latest release. We are expecting
 no downtime but lots of new features.
 </pre>
 
-{{contact}} - <a href="mailto:{{contactmail}}">{{contactmail}}</a>
+{{contact}} - <a href="mailto:{{contactemail}}">{{contactemail}}</a>
 <span style="float: right">(<i>Last Update: {{date}}</i>)</span>
 
 <style>

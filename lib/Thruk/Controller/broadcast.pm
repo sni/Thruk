@@ -108,6 +108,7 @@ sub index {
             $broadcast->{'annotation'}    = $c->req->parameters->{'annotation'} || '';
             $broadcast->{'panorama'}      = $c->req->parameters->{'panorama'} || 0;
             $broadcast->{'template'}      = $c->req->parameters->{'template'} || 0;
+            delete $broadcast->{'macros'};
 
             Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
             Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);

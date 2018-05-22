@@ -141,10 +141,10 @@ sub get_broadcasts {
         $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
         $broadcast->{'template'}    = $broadcast->{'template'}      // 0;
         $broadcast->{'macros'}      = {
-            date        => Thruk::Utils::Filter::date_format($c, (stat($broadcast->{'file'}))[9]),
-            contact     => $broadcast->{'author'},
-            contactmail => $broadcast->{'authoremail'},
-            theme       => $c->stash->{'theme'},
+            date         => Thruk::Utils::Filter::date_format($c, (stat($broadcast->{'file'}))[9]),
+            contact      => $broadcast->{'author'},
+            contactemail => $broadcast->{'authoremail'},
+            theme        => $c->stash->{'theme'},
         };
 
         next if($panorama_only && !$broadcast->{'panorama'});
@@ -225,6 +225,12 @@ sub get_default_broadcast {
         loginpage       => 0,
         panorama        => 1,
         template        => 0,
+        macros          => {
+            date         => Thruk::Utils::Filter::date_format($c, time()),
+            contact      => $c->stash->{'remote_user'},
+            contactemail => $c->user ? $c->user->{'email'} : 'none',
+            theme        => $c->stash->{'theme'},
+        }
     };
     return($broadcast);
 }
