@@ -77,7 +77,7 @@
         <ul style="padding-left: 10px; margin: 0;">
          <li>HTML is allowed, ex: <b>&lt;b&gt;bold text&lt;/b&gt;</b></li>
          <li>Images: &lt;img src="../themes/{{theme}}/images/ack.gif" width=16 height=16&gt;</li>
-         <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</b></li>
+         <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</li>
         </ul>
       </div>
     </td>

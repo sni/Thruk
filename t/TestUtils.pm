@@ -423,8 +423,8 @@ sub test_page {
         verify_html_js($content) unless $opts->{'skip_js_check'};
         # remove script tags without a src
         $content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
-        my @matches1 = $content =~ m/\s+(src|href)='(.+?)'/gio;
-        my @matches2 = $content =~ m/\s+(src|href)="(.+?)"/gio;
+        my @matches1 = $content =~ m/<(?:[^>]+)\s+(src|href)='(.+?)'/gio;
+        my @matches2 = $content =~ m/<(?:[^>]+)\s+(src|href)="(.+?)"/gio;
         my $links_to_check;
         my $x=0;
         for my $match (@matches1, @matches2) {
