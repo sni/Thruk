@@ -133,12 +133,19 @@ sub get_broadcasts {
         }
 
         $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
+        $broadcast->{'authoremail'} = $broadcast->{'authoremail'}   // 'none';
         $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';
         $broadcast->{'hide_before'} = $broadcast->{'hide_before'}   // '';
         $broadcast->{'loginpage'}   = $broadcast->{'loginpage'}     // 0;
         $broadcast->{'panorama'}    = $broadcast->{'panorama'}      // 0;
         $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
         $broadcast->{'template'}    = $broadcast->{'template'}      // 0;
+        $broadcast->{'macros'}      = {
+            date        => Thruk::Utils::Filter::date_format($c, (stat($broadcast->{'file'}))[9]),
+            contact     => $broadcast->{'author'},
+            contactmail => $broadcast->{'authoremail'},
+            theme       => $c->stash->{'theme'},
+        };
 
         next if($panorama_only && !$broadcast->{'panorama'});
         next if(!$unfiltered && $broadcast->{'template'});

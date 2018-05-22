@@ -62,7 +62,8 @@ sub index {
                 }
             }
             if($action eq 'clone') {
-                $broadcast->{'author'}   = $c->stash->{'remote_user'};
+                $broadcast->{'author'}      = $c->stash->{'remote_user'};
+                $broadcast->{'authoremail'} = $c->user ? $c->user->{'email'} : 'none';
                 $broadcast->{'template'} = 0;
                 delete $broadcast->{'basefile'};
             }
@@ -97,6 +98,7 @@ sub index {
                 return $c->redirect_to('broadcast.cgi');
             }
             $broadcast->{'author'}        = $c->stash->{'remote_user'};
+            $broadcast->{'authoremail'}   = $c->user ? $c->user->{'email'} : 'none';
             $broadcast->{'contacts'}      = [split(/\s*,\s*/mx, $c->req->parameters->{'contacts'})];
             $broadcast->{'contactgroups'} = [split(/\s*,\s*/mx, $c->req->parameters->{'contactgroups'})];
             $broadcast->{'text'}          = $c->req->parameters->{'text'};

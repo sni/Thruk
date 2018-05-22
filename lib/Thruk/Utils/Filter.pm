@@ -1105,6 +1105,24 @@ sub get_cmd_submit_hash {
 
 ########################################
 
+=head2 replace_macros
+
+  replace_macros($text, $macros)
+
+return text with replaced macros
+
+=cut
+sub replace_macros {
+    my($text, $macros) = @_;
+    return($text) unless $macros;
+    for my $key (keys %{$macros}) {
+        $text =~ s/\{\{\s*$key\s*\}\}/$macros->{$key}/gmxi;
+    }
+    return($text);
+}
+
+########################################
+
 1;
 
 __END__

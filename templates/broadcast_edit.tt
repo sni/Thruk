@@ -133,6 +133,7 @@
   function update_broadcast_preview() {
     var val        = jQuery('TEXTAREA[name=text]').val();
     var annotation = jQuery('INPUT[name=annotation]:checked').val();
+    val            = replace_macros(val, [% json_encode(broadcast.macros) %]);
     if(annotation) {
       val = "<img src='[% url_prefix %]themes/[% theme %]/images/"+annotation+".png' border='0' width='16' height='16' style='vertical-align: text-bottom; padding-right: 5px;'>" + val;
     }
