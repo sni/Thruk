@@ -4334,10 +4334,12 @@ function check_selected_command() {
     if(value == 8) { /* enable active checks */
     }
     if(value == 9) { /* disable active checks */
+        enableFormElement('row_comment_disable_cmd');
     }
     if(value == 10) { /* enable notifications */
     }
     if(value == 11) { /* disable notifications */
+        enableFormElement('row_comment_disable_cmd');
     }
     if(value == 12) { /* submit passive check result */
         enableFormElement('row_submit_options');
@@ -4346,7 +4348,7 @@ function check_selected_command() {
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_downtime_options', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_comment_disable_cmd', 'row_downtime_options', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
     jQuery.each(elems, function(index, id) {
         obj = document.getElementById(id);
         obj.style.display = "none";

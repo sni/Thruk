@@ -1647,6 +1647,7 @@ script/nagexp
 script/nagimp
 script/naglint
 script/pnp_export.sh
+script/reenable_actions
 script/test_cpan_modules.pl
 script/test_page_rps
 script/thruk
