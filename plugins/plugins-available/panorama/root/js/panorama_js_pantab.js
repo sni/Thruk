@@ -141,6 +141,7 @@ Ext.define('TP.Pantab', {
 
             var curNr = this.nr();
             cookieSave('thruk_panorama_active', curNr);
+            tabpan.getState(); // saves open dashboards
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
