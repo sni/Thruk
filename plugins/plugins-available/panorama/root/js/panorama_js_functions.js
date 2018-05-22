@@ -2124,15 +2124,18 @@ var TP = {
         for(var x = 0; x < broadcasts.length; x++) {
             var b   = broadcasts[x];
             var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
-            if(TP.broadcasts[id]) {
-                broadcast_list[id] = TP.broadcasts[id];
-                continue;
-            }
-            var text = b.text;
+            var text = replace_macros(b.text, b.macros);
             if(b.annotation) {
                 text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
             }
-            var msg = TP.Msg.msg("info_message~~"+text, 0, TP.broadcastCt, "Announcement", function() {
+            if(TP.broadcasts[id]) {
+                broadcast_list[id] = TP.broadcasts[id];
+                // update text for existing broadcasts
+                Ext.get(id+"_content").update(text);
+                continue;
+            }
+            // create missing broadcasts
+            var msg = TP.Msg.msg("info_message~~<div id="+id+"_content>"+text+"</div>", 0, TP.broadcastCt, "Announcement", function() {
                 Ext.Ajax.request({
                     url: 'broadcast.cgi',
                     method: 'POST',
@@ -2146,6 +2149,7 @@ var TP = {
             });
             broadcast_list[id] = msg.id;
         }
+        // remove exceeding broadcasts
         for(var key in TP.broadcasts) {
             if(!broadcast_list[key]) {
                 Ext.get(TP.broadcasts[key]).destroy();
