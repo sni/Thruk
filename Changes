@@ -4,6 +4,7 @@ next:
           - cleanup preferences popup
           - add user profile page
           - add timezone setting to users profile page
+          - add require_comments_for_disable_cmds option
           - move broadcast into side navigation
           - move important filters up (#792)
           - support macros in action menu onclicks

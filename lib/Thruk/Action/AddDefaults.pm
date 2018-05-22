@@ -449,16 +449,8 @@ sub add_defaults {
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
-    $c->stash->{'enable_shinken_features'} = 0;
-    if(exists $c->config->{'enable_shinken_features'}) {
-        $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
-    }
-
-    ###############################
-    $c->stash->{'enable_icinga_features'} = 0;
-    if(exists $c->config->{'enable_icinga_features'}) {
-        $c->stash->{'enable_icinga_features'} = $c->config->{'enable_icinga_features'};
-    }
+    $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'} || 0;
+    $c->stash->{'enable_icinga_features'}  = $c->config->{'enable_icinga_features'}  || 0;
 
     ###############################
     # redirect to error page unless we have a connection
@@ -631,10 +623,7 @@ sub add_defaults {
     }
 
     ###############################
-    $c->stash->{'require_comments_for_disable_cmds'} = 0;
-    if(exists $c->config->{'require_comments_for_disable_cmds'}) {
-        $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'};
-    }
+    $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
 
     ###############################
     # user / group specific config?
