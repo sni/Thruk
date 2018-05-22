@@ -946,7 +946,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         modal:       true,
         width:       620,
         height:      400,
-        title:       'Settings',
+        title:       'Settings: '+(tab.xdata.title ? tab.xdata.title+' - ' : '')+'#'+tab.nr(),
         layout :     'fit',
         buttonAlign: 'center',
         items:       tabPanel,
