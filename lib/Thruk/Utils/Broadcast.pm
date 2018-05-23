@@ -146,6 +146,7 @@ sub get_broadcasts {
             contactemail => $broadcast->{'authoremail'},
             theme        => $c->stash->{'theme'},
         };
+        _extract_front_matter_macros($broadcast);
 
         next if($panorama_only && !$broadcast->{'panorama'});
         next if(!$unfiltered && $broadcast->{'template'});
@@ -217,6 +218,7 @@ sub get_default_broadcast {
         author          => $c->stash->{'remote_user'},
         id              => 'new',
         text            => '',
+        raw_text        => '',
         expires         => '',
         hide_before     => '',
         contacts        => [],
@@ -225,6 +227,7 @@ sub get_default_broadcast {
         loginpage       => 0,
         panorama        => 1,
         template        => 0,
+        frontmatter     => {},
         macros          => {
             date         => Thruk::Utils::Filter::date_format($c, time()),
             contact      => $c->stash->{'remote_user'},
@@ -233,6 +236,29 @@ sub get_default_broadcast {
         },
     };
     return($broadcast);
+}
+
+########################################
+sub _extract_front_matter_macros {
+    my($b) = @_;
+    $b->{'raw_text'}    = $b->{'text'};
+    $b->{'frontmatter'} = {};
+    my($tmp, $frontmatter, $text) = split(/^\s*\-\-\-\s*$/mx, $b->{'text'}, 3);
+    if($tmp || !$frontmatter) {
+        return;
+    }
+    $b->{'text'} = $text;
+    $b->{'text'} =~ s/^\s+//gmx;
+    for my $line (split(/\n+/mx, $frontmatter)) {
+        my($key, $val) = split(/:/mx, $line, 2);
+        next unless $key;
+        $key =~ s/^\s+//gmx;
+        $key =~ s/\s+$//gmx;
+        $val =~ s/^\s+//gmx;
+        $val =~ s/\s+$//gmx;
+        $b->{'frontmatter'}->{$key} = $val;
+    }
+    return;
 }
 
 ########################################

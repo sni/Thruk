@@ -43,6 +43,27 @@ There are a few text macros available which make using templates easier:
  - {% raw %}{{date}}{% endraw %}: contains the date from saving the broadcast
  - {% raw %}{{theme}}{% endraw %}: contains the users selected theme. Can be used for images.
 
+==== Frontmatter
+{% include new_since.ad version="2.22" %}
+Besides the predefined macros, you can create your own variables with a front
+matter like this:
+
+```
+{% raw %}
+---
+variable: text content
+another: more text
+---
+{% endraw %}
+```
+
+Then later use them in your broadcast message like normal macros:
+```
+{% raw %}
+here comes the {{variable}}
+{% endraw %}
+```
+
 
 ==== Example
 Full example with html and macros:

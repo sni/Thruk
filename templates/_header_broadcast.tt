@@ -7,7 +7,7 @@
   [% IF n.annotation %]
   <img src='[% url_prefix %]themes/[% theme %]/images/[% n.annotation %].png' border="0" alt='warning' title='[% n.annotation %]' width="16" height="16" style="vertical-align: text-bottom;">
   [% END %]
-  [% replace_macros(n.text, n.macros) %]
+  [% replace_macros(replace_macros(n.text, n.frontmatter), n.macros) %]
 </div>
 [% END %]
 [% IF c.user_exists %]<div class="dismiss"><a href="#" onclick="broadcast_dismiss(); return(false);">dismiss</a></div>[% END %]

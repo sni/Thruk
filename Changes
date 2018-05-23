@@ -15,6 +15,7 @@ next:
           - Broadcasts:
             - add template checkbox
             - add macro support
+            - add frontmatter support
           - Panorama:
             - optionally show broadcasts in panorama dashboards
             - make determing worst state for group/filter icons configurable

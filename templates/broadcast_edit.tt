@@ -71,13 +71,20 @@
   <tr>
     <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
     <td class="dataOdd" align="left" style="position: relative;">
-      <textarea name="text" wrap="hard" cols=74 rows=14 style="width: 99%;">[% broadcast.text %]</textarea>
+      <textarea name="text" wrap="hard" cols=74 rows=14 style="width: 99%;">[% broadcast.raw_text %]</textarea>
       <div style="position: absolute; right: -430px; top: 10px; background: #e6e6e6; border-radius: 5px; border: 1px solid gray; padding: 8px;">
         Help:
         <ul style="padding-left: 10px; margin: 0;">
          <li>HTML is allowed, ex: <b>&lt;b&gt;bold text&lt;/b&gt;</b></li>
          <li>Images: &lt;img src="../themes/{{theme}}/images/ack.gif" width=16 height=16&gt;</li>
          <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</li>
+         <li>Frontmatter variables:<br>
+<pre>---
+variable: create variables first
+another: test
+---
+then use later like: {{variable}} and {{another}}</pre>
+         </li>
         </ul>
       </div>
     </td>
@@ -141,6 +148,9 @@
   function update_broadcast_preview() {
     var val        = jQuery('TEXTAREA[name=text]').val();
     var annotation = jQuery('INPUT[name=annotation]:checked').val();
+    var tmp        = extract_frontmatter(val);
+    val = tmp[0];
+    val            = replace_macros(val, tmp[1]);
     val            = replace_macros(val, [% json_encode(broadcast.macros) %]);
     if(annotation) {
       val = "<img src='[% url_prefix %]themes/[% theme %]/images/"+annotation+".png' border='0' width='16' height='16' style='vertical-align: text-bottom; padding-right: 5px;'>" + val;
@@ -159,6 +169,21 @@
     jQuery('INPUT[name=annotation]').on('change', function() { update_broadcast_preview(); });
     update_broadcast_preview();
   });
+
+  function extract_frontmatter(text) {
+    var macros = {};
+    var matches = text.split(/(?:^|\n)\-\-\-\s*\n/, 3);
+    if(matches[0] || !matches[1]) {
+      return([text, macros]);
+    }
+    var frontmatter = matches[1].split(/\n/);
+    for(var x=0; x<frontmatter.length; x++) {
+      var tmp = frontmatter[x].split(":", 2);
+      macros[tmp[0]] = tmp[1];
+    }
+    text = matches[2];
+    return([text, macros]);
+  }
 -->
 </script>
 
