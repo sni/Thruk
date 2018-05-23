@@ -243,6 +243,7 @@ Ext.define('TP.Pantab', {
     updateHeaderTooltip: function(text) {
         var tab         = this;
         var tabpan      = Ext.getCmp('tabpan');
+        if(!tabpan || !tabpan.getTabBar) { return; }
         var tabbarItems = tabpan.getTabBar().items.items;
         var tabhead;
         for(var x = 0; x < tabbarItems.length; x++) {
