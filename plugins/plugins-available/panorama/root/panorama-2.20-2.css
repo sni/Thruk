@@ -350,7 +350,8 @@ DIV.popup-msg {
   right: 10px;
   left: inherit;
   top:30px;
-  width:400px;
+  width: inherit;
+  min-width: 400px;
   z-index: 100000;
 }
 DIV.popup-msg .msg {
