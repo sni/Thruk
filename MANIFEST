@@ -303,6 +303,7 @@ plugins/plugins-available/conf/templates/conf_objects.tt
 plugins/plugins-available/conf/templates/conf_objects_apply.tt
 plugins/plugins-available/conf/templates/conf_objects_filebrowser.tt
 plugins/plugins-available/conf/templates/conf_objects_fileeditor.tt
+plugins/plugins-available/conf/templates/conf_objects_fancyeditor.tt
 plugins/plugins-available/conf/templates/conf_objects_filehistory.tt
 plugins/plugins-available/conf/templates/conf_objects_filehistory_commit.tt
 plugins/plugins-available/conf/templates/conf_objects_host_list_services.tt

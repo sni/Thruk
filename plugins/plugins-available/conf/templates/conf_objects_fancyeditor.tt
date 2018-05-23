@@ -46,7 +46,7 @@
                 editor.session.setMode("ace/mode/nagios");
                 editor.setOptions({
                     enableLiveAutocompletion: true,
-                    highlightActiveLine: true,
+                    highlightActiveLine: true
                 });
                 editor.setValue(document.getElementById('filecontent').value);
                 original_value = document.getElementById('filecontent').value;
@@ -88,3 +88,5 @@
 </form>
 
 [% END %]
+
+[% PROCESS _footer.tt %]
