@@ -1,0 +1,92 @@
+﻿[% PROCESS _header.tt css=["plugins/editor/editor.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
+                      js=["plugins/editor/ace-builds/src-min-noconflict/ace.js",
+                          "plugins/editor/ace-builds/src-min-noconflict/ext-language_tools.js",
+                          "javascript/jstree-3.0.9/jstree.min.js"]
+%]
+[% WRAPPER _conf_frame.tt %]
+<!--<script src="[% url_prefix %]plugins/conf/linedtextarea/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>-->
+<form action="conf.cgi" method="POST" id="saveform">
+<input type="hidden" name="sub" value="objects">
+<input type="hidden" name="action" value="savefile">
+<input type="hidden" name="file" value="[% file_link %]">
+<input type="hidden" name="content" value="[% file_content %]" id='filecontent'>
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
+[% IF show_object && back == "edit" %]
+<input type="hidden" name="data.id" value="[% object.get_id() %]">
+[% END %]
+<input type="hidden" name="line" value="" id="fileline">
+[% IF c.req.parameters.exists('backlink') %]
+<input type="hidden" name="backlink" value="[% c.req.parameters.backlink %]">
+[% END %]
+[% file_locked = ""; PROCESS _conf_ondemand_file_edit.tt file=file form="saveform" %]
+[% readonly = 0;
+   IF file.readonly; readonly = 1; END;
+   IF file_locked; readonly = 1; END;
+%]
+<div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
+<table border="0" class='data conftoolobj' style="width: 100%;">
+  <tr>
+    <th class='data' width="5%" align="left"><a href='[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+    <th class='data' width="90%">
+        <span  style="font-size: larger;">[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>
+        [% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]
+        [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span style="color: #EB6900"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
+    </th>
+    <th class='data' width="5%" align="right">[% UNLESS readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
+  </tr>
+  <tr>
+    <td class="dataVar" colspan=3>
+        <div id="editor"></div>
+        <script type="text/javascript">
+            var editor = ace.edit("editor");
+            var original_value;
+            /* set up editor */
+            window.onload = function() {
+                editor.setTheme("ace/theme/clouds");
+                editor.session.setMode("ace/mode/nagios");
+                editor.setOptions({
+                    enableLiveAutocompletion: true,
+                    highlightActiveLine: true
+                });
+                editor.setValue(document.getElementById('filecontent').value);
+                original_value = document.getElementById('filecontent').value;
+                editor.gotoLine([% line %]);
+            };
+
+            /* intercept when there are unsaved changes */
+            function confirm_discard_changes() {
+                form = document.getElementById('saveform');
+                if(has_changed() && !form.needs_reload) {
+                    return confirm("File has been changed. Really discard changes?");
+                }
+                return true;
+            }
+
+            function has_changed() {
+                if(editor.session.getValue() != original_value) {
+                    return true;
+                }
+                return false;
+            }
+
+            function save_file() {
+                form = document.getElementById('saveform');
+                document.getElementById('filecontent').value = editor.session.getValue();
+                [%+ IF show_object && back == "edit" +%]
+                document.getElementById('fileline').value = editor.getCursorPosition().row;
+                [%+ END +%]
+
+                form.submit();
+            }
+        </script>
+        <!--[IF IE]>
+        <![ENDIF]-->
+    </td>
+  </tr>
+</table>
+</div>
+</form>
+
+[% END %]
+
+[% PROCESS _footer.tt %]
