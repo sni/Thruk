@@ -2125,6 +2125,7 @@ var TP = {
             var b   = broadcasts[x];
             var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
             var text = replace_macros(b.text, b.macros);
+            var text = replace_macros(replace_macros(b.text, b.frontmatter), b.macros)
             if(b.annotation) {
                 text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
             }
