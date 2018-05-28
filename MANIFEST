@@ -301,9 +301,9 @@ plugins/plugins-available/conf/templates/conf_data.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt
 plugins/plugins-available/conf/templates/conf_objects.tt
 plugins/plugins-available/conf/templates/conf_objects_apply.tt
+plugins/plugins-available/conf/templates/conf_objects_fancyeditor.tt
 plugins/plugins-available/conf/templates/conf_objects_filebrowser.tt
 plugins/plugins-available/conf/templates/conf_objects_fileeditor.tt
-plugins/plugins-available/conf/templates/conf_objects_fancyeditor.tt
 plugins/plugins-available/conf/templates/conf_objects_filehistory.tt
 plugins/plugins-available/conf/templates/conf_objects_filehistory_commit.tt
 plugins/plugins-available/conf/templates/conf_objects_host_list_services.tt
@@ -1661,6 +1661,7 @@ script/thruk_link_images.sh
 script/thruk_optimize_images.sh
 script/thruk_patch_makefile.pl
 script/thruk_server.pl
+script/thruk_set_standard_header
 script/thruk_update.sh
 script/thruk_update_help.pl
 script/thruk_version.sh
@@ -1683,6 +1684,7 @@ support/menu_local.conf
 support/naglint.conf.example
 support/panorama2img
 support/panorama2img.js
+support/standard_script_header
 support/thruk.init
 support/thruk.logrotate
 support/thruk.spec

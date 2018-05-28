@@ -1,0 +1,32 @@
+#!/bin/bash
+
+test -f support/standard_script_header
+
+CHECK_ONLY=0
+if [ "x$1" = "check" ]; then
+  CHECK_ONLY=1
+fi
+
+for file in $(grep -c "exec perl" examples/* script/* | grep -v :0 | grep -v thruk_set_standard_header | awk -F: {' print $1 '}); do
+  linenr=$(grep -n "^#line " $file | head -n 1 | awk -F: '{ print $1 }')
+  if [ "x" = "x$linenr" ]; then
+    echo "could not detect line in $file"
+    exit 1
+  fi
+  linenr=$((linenr + 1))
+  tail -n +$linenr $file > $file.tmp
+  cp support/standard_script_header $file.head
+  if [ $(echo $file | grep -c 'examples/') -eq 0 ]; then
+    sed -i $file.head -e 's/\-a.*examples'"'"' //g'
+  fi
+  if [ $(grep -c Monitoring::Config $file) -eq 0 -a $(grep -c get_object_db $file) -eq 0 ]; then
+    sed -i $file.head -e 's%:[^:]*conf/lib%%g'
+  fi
+  if [ $CHECK_ONLY -eq 1 ]; then
+    cat $file.head $file.tmp > $file.check
+    diff $file.check $file
+  else
+    cat $file.head $file.tmp > $file
+  fi
+  rm $file.tmp $file.head
+done

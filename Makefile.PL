@@ -154,5 +154,10 @@ print `./script/thruk_patch_makefile.pl`;
 print `./script/thruk_create_combined_static_content.pl`;
 print "created cached js/css files\n";
 
+print `./script/thruk_set_standard_header`;
+if($? != 0) {
+  die("failed to update standard headers");
+}
+
 print "finished\n";
 exit 0
