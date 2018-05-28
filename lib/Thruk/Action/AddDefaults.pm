@@ -481,6 +481,7 @@ sub add_defaults {
         # redirect to backends manager if admin user
         if( $c->config->{'use_feature_configtool'} ) {
             $c->req->parameters->{'sub'} = 'backends';
+            Thruk::Utils::set_message( $c, 'fail_message fixed', 'Please setup backend(s) connections first.');
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/conf.cgi?sub=backends");
         } else {
             return $c->detach("/error/index/14");
