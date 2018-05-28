@@ -1744,6 +1744,8 @@ sub _trim_log_entry {
     # strip plugin output from the end
     if($l->{'plugin_output'}) {
         $l->{'message'} = substr($l->{'message'}, 0, -length($l->{'plugin_output'}));
+    } else {
+        $l->{'plugin_output'} = '';
     }
     return;
 }
