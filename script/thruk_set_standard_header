@@ -24,7 +24,11 @@ for file in $(grep -c "exec perl" examples/* script/* | grep -v :0 | grep -v thr
   fi
   if [ $CHECK_ONLY -eq 1 ]; then
     cat $file.head $file.tmp > $file.check
-    diff $file.check $file
+    DIFF=$(diff -Nuhr $file.check $file)
+    if [ "x$DIFF" != "x" ]; then
+        echo "$file:"
+        echo "$DIFF"
+    fi
   else
     cat $file.head $file.tmp > $file
   fi
