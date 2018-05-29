@@ -56,7 +56,6 @@ sub index {
     } else {
         $c->stash->{'remote_user'}  = '?';
     }
-    $c->stash->{errorDetails} .= sprintf("User: %s\n", $c->stash->{'remote_user'});
 
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
@@ -226,9 +225,9 @@ sub index {
     }
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
+        $c->log->error("***************************");
         if($code >= 500) {
             $c->log->error($errors->{$arg1}->{'mess'});
-            $c->log->error("on page: ".$c->req->url) if defined $c->req->url;
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
@@ -236,8 +235,9 @@ sub index {
             }
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
-            $c->log->debug("on page: ".$c->req->url) if defined $c->req->url;
         }
+        $c->log->error(sprintf("on page: %s\n", $c->req->url)) if defined $c->req->url;
+        $c->log->error(sprintf("User: %s\n", $c->stash->{'remote_user'}));
     }
 
     if($arg1 == 13 and $c->config->{'show_error_reports'}) {
