@@ -579,8 +579,14 @@ returns true if file has been updated and false if merge fails.
 sub try_merge {
     my($self) = @_;
     return 1 unless $self->{'changed'};
-    return if $self->{'is_new_file'};
-    return unless $self->{'backup'};
+    if($self->{'is_new_file'}) {
+        push @{$self->{'errors'}}, "a file with the same name has been created on disk meanwhile.";
+        return;
+    }
+    if(!$self->{'backup'}) {
+        push @{$self->{'errors'}}, "cannot merge, got no backup";
+        return;
+    }
 
     my $tmpdir = File::Temp::tempdir();
 
@@ -616,6 +622,9 @@ sub try_merge {
 
     my $text = Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg'));
 
+    my $rej;
+    $rej = ":\n".Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
+
     # cleanup
     unlink(glob($tmpdir.'/*'));
     rmdir($tmpdir);
@@ -630,7 +639,9 @@ sub try_merge {
         return 1;
     }
 
-    push @{$self->{'errors'}}, "unable to merge local disk changes: ".$out;
+    my $error = "unable to merge local disk changes:\n".$out;
+    $error .= ":\n".$rej if $rej;
+    push @{$self->{'errors'}}, $error;
     return;
 }
 

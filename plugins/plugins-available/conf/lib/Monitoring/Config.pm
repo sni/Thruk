@@ -1812,6 +1812,7 @@ sub _check_files_changed {
                     $self->{'needs_index_update'} = 1;
                 } else {
                     push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
+                    push @{$self->{'errors'}}, @{$file->{'errors'}} if $file->{'errors'};
                 }
             }
         }

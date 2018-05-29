@@ -1090,6 +1090,9 @@ sub _process_objects_page {
         if(!defined $obj->{'file'} || !defined $obj->{'file'}->{'path'}) {
             delete $obj->{'file'};
         }
+        if($obj->{'file'} && $obj->{'file'}->{'path'} && !$obj->{'file'}->readonly()) {
+            Thruk::Utils::Conf::start_file_edit($c, $obj->{'file'}->{'path'});
+        }
         $c->stash->{'file_link'} = $obj->{'file'}->{'display'} if defined $obj->{'file'};
         _gather_references($c, $obj);
     }

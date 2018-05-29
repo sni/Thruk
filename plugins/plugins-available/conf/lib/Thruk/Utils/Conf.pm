@@ -575,7 +575,7 @@ sub store_model_retention {
     my $model   = $c->app->obj_db_model;
     my $user_id = md5_hex($c->stash->{'remote_user'} || '');
 
-    # store changed/stashed changed to local user, unchanged config can be stored in a generic file
+    # store changes/stashed changes to local user, unchanged config can be stored in a generic file
     my $file      = $c->config->{'conf_retention_file'};
     my $user_file = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";
     if(!$file) {
@@ -1010,9 +1010,9 @@ sub start_file_edit {
     my $file = $c->{'obj_db'}->get_file_by_path($path);
     if(defined $file && !$file->{'backup'} && !$file->{'is_new_file'}) {
         $file->set_backup();
-        $c->stash->{'obj_model_changed'}             = 1;
-        $c->stash->{'use_user_model_retention_file'} = 1;
+        $c->stash->{'obj_model_changed'} = 1;
     }
+    $c->stash->{'use_user_model_retention_file'} = 1;
     return $file;
 }
 
