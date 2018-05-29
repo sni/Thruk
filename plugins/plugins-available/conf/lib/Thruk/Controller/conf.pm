@@ -1907,7 +1907,7 @@ sub _object_save {
 
     my $data        = $obj->get_data_from_param($c->req->parameters);
     my $old_comment = join("\n", @{$obj->{'comments'}});
-    my $new_comment = $c->req->parameters->{'conf_comment'};
+    my $new_comment = $c->req->parameters->{'conf_comment'} || '';
     $new_comment    =~ s/\r//gmx;
     my $new         = $c->req->parameters->{'data.id'} eq 'new' ? 1 : 0;
 
