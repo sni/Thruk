@@ -1884,6 +1884,15 @@ t/scenarios/backend_tls_livestatus/omd/xinetd.conf
 t/scenarios/backend_tls_livestatus/t/300-controller_tac.t
 t/scenarios/backend_tls_livestatus/thruk.conf
 t/scenarios/backend_tls_livestatus/thruk_local.conf
+t/scenarios/config_tool/cgi.cfg
+t/scenarios/config_tool/docker-compose.yml
+t/scenarios/config_tool/Makefile
+t/scenarios/config_tool/omd/Dockerfile
+t/scenarios/config_tool/omd/playbook.yml
+t/scenarios/config_tool/omd/test.cfg
+t/scenarios/config_tool/t/concurrent_edits.t
+t/scenarios/config_tool/thruk.conf
+t/scenarios/config_tool/thruk_local.conf
 t/scenarios/cookie_auth_ldap_e2e/docker-compose.yml
 t/scenarios/cookie_auth_ldap_e2e/Makefile
 t/scenarios/cookie_auth_ldap_e2e/omd/auth_ldap.conf
