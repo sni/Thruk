@@ -160,6 +160,7 @@ sub perl {
             ## use critic
 
             if($@) {
+                print STDERR "ERROR: perl eval failed:";
                 print STDERR $@;
                 exit(1);
             }
@@ -189,13 +190,14 @@ sub perl {
         my $err = $@;
         eval {
             open(my $fh, '>>', $dir."/stderr");
+            print $fh "ERROR: perl eval failed:";
             print $fh $err;
             Thruk::Utils::IO::close($fh, $dir."/stderr");
         };
         # calling _exit skips running END blocks
-        exit(0);
+        exit(1);
     }
-    exit(1);
+    exit(0);
 }
 
 
@@ -379,9 +381,12 @@ sub get_result {
         return('', 'no such job: '.$id, 0, $dir, undef, 1, undef);
     }
 
-    my($out, $err) = ('', '');
+    my($out, @err) = ('', ());
     $out = read_file($dir."/stdout") if -f $dir."/stdout";
-    $err = read_file($dir."/stderr") if -f $dir."/stderr";
+    @err = read_file($dir."/stderr") if -f $dir."/stderr";
+
+    # remove known harmless errors
+    my $err = join("\n", grep(!/Bad\ file\ descriptor\ during\ global\ destruction/mx, @err));
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir.'/start');
