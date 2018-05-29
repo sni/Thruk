@@ -5,7 +5,7 @@ use Test::More;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $cmds = [
-  "grep -nr 'TODO' lib/. templates/. plugins/plugins-available/. root/.",
+  "grep -nr 'TODO' lib/. templates/. plugins/plugins-available/. root/. t/",
 ];
 
 # find all TODOs
@@ -30,6 +30,7 @@ for my $cmd (@{$cmds}) {
        or $line =~ m|/geoext2|mx
        or $line =~ m|/panorama_js_box_reorder.js|mx
        or $line =~ m|/all_in_one|mx
+       or $line =~ m|/092\-todo\.t|mx
     ) {
       next;
     }
