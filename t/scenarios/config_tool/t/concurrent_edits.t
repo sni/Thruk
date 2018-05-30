@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use Digest::MD5 qw(md5_hex);
 
-plan tests => 243;
+plan tests => 270;
 
 BEGIN {
     $ENV{'THRUK_TEST_CONF_NO_LOG'} = 1;
@@ -36,14 +36,24 @@ TestUtils::test_page(
 );
 
 ###########################################################
-# change host but dont' save
+# view host but dont' change anything
 my $r = TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type=host&data.name=localhost',
     'like'    => [ $default_user, 'Host:\s+localhost', '127\.0\.0', 'obj_retention.test.'.$default_user_id.'.dat' ],
 );
 my($id) = $r->{'content'} =~ m/name="data\.id"\s+value="([^"]+)"/;
 isnt($id, undef, 'got id for host');
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes',
+    'like'    => [ $default_user, 'There are no pending changes to commit', 'obj_retention.test.'.$default_user_id.'.dat' ],
+);
 
+###########################################################
+# change host but dont' save to disk
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type=host&data.name=localhost',
+    'like'    => [ $default_user, 'Host:\s+localhost', '127\.0\.0', 'obj_retention.test.'.$default_user_id.'.dat' ],
+);
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/conf.cgi',
     'post'    => {

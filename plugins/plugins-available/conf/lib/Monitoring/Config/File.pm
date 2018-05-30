@@ -563,7 +563,6 @@ sub set_backup {
     return if $self->{'is_new_file'};
     # read file from disk
     $self->{'backup'}  = scalar read_file($self->{'path'});
-    $self->{'changed'} = 1;
     return;
 }
 
