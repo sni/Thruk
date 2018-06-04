@@ -772,17 +772,18 @@ sub _process_perf_info_page {
 sub _process_grafana_page {
     my($c) = @_;
 
-    my $hst     = $c->req->parameters->{'host'};
-    my $svc     = $c->req->parameters->{'service'};
-    my $source  = $c->req->parameters->{'source'} || 1;
-    my $start   = $c->req->parameters->{'from'};
-    my $end     = $c->req->parameters->{'to'};
-    my $width   = $c->req->parameters->{'width'}  || 800;
-    my $height  = $c->req->parameters->{'height'} || 300;
-    my $format  = $c->req->parameters->{'format'} || 'png';
-    my $title   = $c->req->parameters->{'disablePanelTitel'};
-
-    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format, !$title));
+    my $format = $c->req->parameters->{'format'} || 'png';
+    $c->res->body(Thruk::Utils::get_perf_image($c, {
+        host        => $c->req->parameters->{'host'},
+        service     => $c->req->parameters->{'service'},
+        start       => $c->req->parameters->{'from'},
+        end         => $c->req->parameters->{'to'},
+        width       => $c->req->parameters->{'width'} || 800,
+        height      => $c->req->parameters->{'height'} || 300,
+        source      => $c->req->parameters->{'source'} || 1,
+        format      => $format,
+        show_title  => !$c->req->parameters->{'disablePanelTitle'},
+    }));
     $c->{'rendered'} = 1;
     if($format eq 'png') {
         $c->res->headers->content_type('image/png');

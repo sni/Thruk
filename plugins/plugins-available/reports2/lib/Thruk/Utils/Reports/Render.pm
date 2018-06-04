@@ -514,12 +514,22 @@ sub get_graph_source {
   get_pnp_image(hst, svc, start, end, width, height, source)
 
 return base64 encoded pnp image if possible.
-A string will be returned if no PNP graph can be exported.
+An empty string will be returned if no PNP graph can be exported.
 
 =cut
 sub get_pnp_image {
+    my($hst, $svc, $start, $end, $width, $height, $source) = @_;
     my $c = $Thruk::Request::c or die("not initialized!");
-    my $imgdata = Thruk::Utils::get_perf_image($c, @_, 1);
+    my $imgdata = Thruk::Utils::get_perf_image($c, {
+        host           => $hst,
+        service        => $svc,
+        start          => $start,
+        end            => $end,
+        width          => $width,
+        height         => $height,
+        source         => $source,
+        resize_grafana => 1,
+    });
     return "" unless $imgdata;
     return 'data:image/png;base64,'.encode_base64($imgdata, '');
 }

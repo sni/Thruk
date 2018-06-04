@@ -138,7 +138,7 @@ Ext.define('TP.PanletGrafana', {
             url = url + '&width=' + size.width;
             url = url + '&height='+ (size.height+30);
             if(this.xdata.showtitle != undefined && !this.xdata.showtitle) {
-                url = url + '&disablePanelTitel=1';
+                url = url + '&disablePanelTitle=1';
             }
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);

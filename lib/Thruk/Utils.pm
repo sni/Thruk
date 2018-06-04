@@ -1422,43 +1422,56 @@ sub get_graph_url {
 
 =head2 get_perf_image
 
-  get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format, $showtitle)
+  get_perf_image($c, {
+    host           => $hst,
+    service        => $svc,
+    start          => $start,
+    end            => $end,
+    width          => $width,
+    height         => $height,
+    source         => $source,
+    resize_grafana => $resize_grafana_images,
+    format         => $format,
+    show_title     => $showtitle,
+  })
 
 return raw pnp/grafana image if possible.
 An empty string will be returned if no graph can be exported.
 
 =cut
 sub get_perf_image {
-    my($c, $hst, $svc, $start, $end, $width, $height, $source, $resize_grafana_images, $format, $showtitle) = @_;
+    my($c, $options) = @_;
     my $pnpurl     = "";
     my $grafanaurl = "";
-    $format        = 'png' unless $format;
-    $svc           = ''    unless defined $svc;
-    $showtitle     = 1     unless defined $showtitle;
+    $options->{'format'}     = 'png'  unless $options->{'format'};
+    $options->{'service'}    = ''     unless defined $options->{'service'};
+    $options->{'show_title'} = 1      unless defined $options->{'show_title'};
+    $options->{'end'}        = time() unless defined $options->{'end'};
+    $options->{'start'}      = $options->{'end'} - 86400 unless defined $options->{'start'};
 
     my $custvars;
-    if($svc) {
-        my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
+    if($options->{'service'}) {
+        my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $options->{'host'}, description => $options->{'service'} }]);
         if(scalar @{$svcdata} == 0) {
-            $c->log->error("no such service $svc on host $hst");
+            $c->log->error("no such service ".$options->{'service'}." on host ".$options->{'host'});
             return("");
         }
         $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
         $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
         $custvars   = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
     } else {
-        my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
+        my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $options->{'host'}}]);
         if(scalar @{$hstdata} == 0) {
-            $c->log->error("no such host $hst");
+            $c->log->error("no such host ".$options->{'host'});
             return("");
         }
-        $pnpurl     = get_pnp_url($c, $hstdata->[0], 1);
-        $grafanaurl = get_histou_url($c, $hstdata->[0], 1);
-        $svc        = '_HOST_' if $pnpurl;
-        $custvars   = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
+        $pnpurl                = get_pnp_url($c, $hstdata->[0], 1);
+        $grafanaurl            = get_histou_url($c, $hstdata->[0], 1);
+        $options->{'service'}  = '_HOST_' if $pnpurl;
+        $custvars              = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
     }
 
-    if(!$showtitle) {
+    if(!$options->{'show_title'}) {
         $grafanaurl .= '&disablePanelTitle';
     }
 
@@ -1467,14 +1480,14 @@ sub get_perf_image {
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
-        undef $source if(defined $source && $source eq 'null');
-        $source = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $source;
-        $grafanaurl .= '&panelId='.$source;
-        if($resize_grafana_images) {
-            $width  = $width * 1.3;
-            $height = $height * 2;
+        delete $options->{'source'} if(defined $options->{'source'} && $options->{'source'} eq 'null');
+        $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $options->{'source'};
+        $grafanaurl .= '&panelId='.$options->{'source'};
+        if($options->{'resize_grafana'}) {
+            $options->{'width'}  = $options->{'width'} * 1.3;
+            $options->{'height'} = $options->{'height'} * 2;
         }
-        $grafanaurl .= '&legend=false' if $height < 200;
+        $grafanaurl .= '&legend=false' if $options->{'height'} < 200;
         if($grafanaurl !~ m|^https?:|mx) {
             my $uri = Thruk::Utils::Filter::full_uri($c, 1);
             $uri    =~ s|(https?://[^/]+?)/.*$|$1|gmx;
@@ -1482,7 +1495,7 @@ sub get_perf_image {
             $grafanaurl = $uri.$grafanaurl;
         }
     } else {
-        $source = ($custvars->{'GRAPH_SOURCE'} || '0') unless defined $source;
+        $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} || '0') unless defined $options->{'source'};
     }
 
     my $exporter = $c->config->{home}.'/script/pnp_export.sh';
@@ -1492,12 +1505,9 @@ sub get_perf_image {
         $exporter = $c->config->{'Thruk::Plugin::Reports2'}->{'grafana_export'} if $c->config->{'Thruk::Plugin::Reports2'}->{'grafana_export'};
     }
 
-    if(!defined $end)   { $end   = time();       }
-    if(!defined $start) { $start = $end - 86400; }
-
     # create fake session
     my $sessionid = get_fake_session($c);
-    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$format;
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$options->{'format'};
 
     # call login hook, because it might transfer our sessions to remote graphers
     if($c->config->{'cookie_auth_login_hook'}) {
@@ -1506,7 +1516,7 @@ sub get_perf_image {
 
     my($fh, $filename) = tempfile();
     CORE::close($fh);
-    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$source.'"';
+    my $cmd = $exporter.' "'.$options->{'host'}.'" "'.$options->{'service'}.'" "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$options->{'source'}.'"';
     if($grafanaurl) {
         if($ENV{'OMD_ROOT'}) {
             my $site = $ENV{'OMD_SITE'};
@@ -1514,14 +1524,14 @@ sub get_perf_image {
                 $grafanaurl = $c->config->{'omd_local_site_url'}.$1;
             }
         }
-        $cmd = $exporter.' "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$grafanaurl.'" "'.$filename.'"';
+        $cmd = $exporter.' "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
     Thruk::Utils::IO::cmd($c, $cmd);
     unlink($c->stash->{'fake_session_file'});
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
-        if($format eq 'png') {
+        if($options->{'format'} eq 'png') {
             return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
         }
         return $imgdata;
