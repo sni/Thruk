@@ -172,16 +172,18 @@ then use later like: {{variable}} and {{another}}</pre>
 
   function extract_frontmatter(text) {
     var macros = {};
-    var matches = text.split(/(?:^|\n)\-\-\-\s*\n/, 3);
+    var matches = text.split(/(?:^|\n)\-\-\-\s*\n/);
     if(matches[0] || !matches[1]) {
       return([text, macros]);
     }
-    var frontmatter = matches[1].split(/\n/);
+    matches.shift();
+    var frontmatter = matches.shift().split(/\n/);
     for(var x=0; x<frontmatter.length; x++) {
-      var tmp = frontmatter[x].split(":", 2);
+      var tmp = splitN(frontmatter[x], ":", 2);
+      tmp[1] = tmp[1].replace(/^\s+/, '');
       macros[tmp[0]] = tmp[1];
     }
-    text = matches[2];
+    text = matches.join("---\n")
     return([text, macros]);
   }
 -->

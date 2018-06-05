@@ -2909,6 +2909,20 @@ function show_list(incr, selector) {
     }
 }
 
+/* split that works more like the perl split and appends the remaining str to the last element, doesn't work with regex */
+function splitN(str, separator, limit) {
+    str = str.split(separator);
+
+    if(str.length > limit) {
+        var ret = str.splice(0, limit);
+        ret.push(ret.pop()+separator+str.join(separator));
+
+        return ret;
+    }
+
+    return str;
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88
