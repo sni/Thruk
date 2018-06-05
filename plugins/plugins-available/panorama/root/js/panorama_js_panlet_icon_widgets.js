@@ -1116,9 +1116,11 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
-            panel.addCls('clickable');
-            panel.removeCls('notclickable');
-            if(panel.el) { panel.el.dom.href=xdata.link.link; }
+            if(panel.el) {
+                panel.addCls('clickable');
+                panel.removeCls('notclickable');
+                panel.el.dom.href=xdata.link.link;
+            }
             panel.autoEl.href=xdata.link.link;
             if(panel.labelEl && panel.labelEl.el) {
                 panel.labelEl.el.dom.href=xdata.link.link;
@@ -1129,8 +1131,8 @@ Ext.define('TP.IconWidget', {
             if(panel.el) {
                 panel.removeCls('clickable');
                 panel.addCls('notclickable');
+                panel.el.dom.href='';
             }
-            if(panel.el) { panel.el.dom.href=''; }
             panel.autoEl.href='';
             if(panel.labelEl && panel.labelEl.el) {
                 panel.labelEl.el.dom.href='';
