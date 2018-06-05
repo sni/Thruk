@@ -1433,6 +1433,7 @@ sub get_graph_url {
     resize_grafana => $resize_grafana_images,
     format         => $format,
     show_title     => $showtitle,
+    show_legend    => $showlegend,
   })
 
 return raw pnp/grafana image if possible.
@@ -1443,11 +1444,12 @@ sub get_perf_image {
     my($c, $options) = @_;
     my $pnpurl     = "";
     my $grafanaurl = "";
-    $options->{'format'}     = 'png'  unless $options->{'format'};
-    $options->{'service'}    = ''     unless defined $options->{'service'};
-    $options->{'show_title'} = 1      unless defined $options->{'show_title'};
-    $options->{'end'}        = time() unless defined $options->{'end'};
-    $options->{'start'}      = $options->{'end'} - 86400 unless defined $options->{'start'};
+    $options->{'format'}      = 'png'  unless $options->{'format'};
+    $options->{'service'}     = ''     unless defined $options->{'service'};
+    $options->{'show_title'}  = 1      unless defined $options->{'show_title'};
+    $options->{'show_legend'} = 1      unless defined $options->{'show_legend'};
+    $options->{'end'}         = time() unless defined $options->{'end'};
+    $options->{'start'}       = $options->{'end'} - 86400 unless defined $options->{'start'};
 
     my $custvars;
     if($options->{'service'}) {
@@ -1473,6 +1475,9 @@ sub get_perf_image {
 
     if(!$options->{'show_title'}) {
         $grafanaurl .= '&disablePanelTitle';
+    }
+    if(!$options->{'show_legend'}) {
+        $grafanaurl .= '&legend=false';
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
