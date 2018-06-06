@@ -20,6 +20,10 @@ URL:           http://thruk.org
 %else
 %define fullname %{name}-%{version}-%{release}
 %endif
+# detect obs builds which contains a dot in the release version
+%if %(echo "%{release}" | grep -Fc ".") > 0
+%define fullname %{name}-%{version}
+%endif
 Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Group:         Applications/Monitoring
