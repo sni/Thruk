@@ -1428,9 +1428,9 @@ sub _check_for_waiting_reports {
 ##########################################################
 sub _report_die {
     my($c, $err, $logfile) = @_;
-    Thruk::Utils::CLI::_error($@);
-    Thruk::Utils::IO::write($logfile, $@, undef, 1);
-    $Thruk::Utils::Reports::error = $@;
+    Thruk::Utils::CLI::_error($err);
+    Thruk::Utils::IO::write($logfile, $err, undef, 1);
+    $Thruk::Utils::Reports::error = $err;
     _check_for_waiting_reports($c);
     return $c->detach('/error/index/13');
 }
