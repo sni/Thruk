@@ -145,6 +145,8 @@ mkdir -p %{buildroot}%{_localstatedir}/lib/thruk
     sed -i -e 's/^.*#su/    su/' %{buildroot}/%{_sysconfdir}/logrotate.d/thruk-base
 %endif
 touch plugin-reporting.files
+# files file cannot be empty
+echo "%%defattr(-,root,root)" >> plugin-reporting.files
 if test -e %{buildroot}%{_datadir}/thruk/script/phantomjs; then
   echo "%{_datadir}/thruk/script/phantomjs" >> plugin-reporting.files
 fi
