@@ -585,7 +585,7 @@ sub generate_report {
     }
 
     if($options->{'var'}->{'send_mails_next_time'} && $send_mail_threshold_reached) {
-        Thruk::Utils::Reports::report_send($c, $nr);
+        Thruk::Utils::Reports::report_send($c, $nr, 1);
     }
 
     # update report runtime data
