@@ -783,6 +783,7 @@ sub _process_grafana_page {
         source      => $c->req->parameters->{'source'} || 1,
         format      => $format,
         show_title  => !$c->req->parameters->{'disablePanelTitle'},
+        show_legend => $c->req->parameters->{'legend'} // 1,
     }));
     $c->{'rendered'} = 1;
     if($format eq 'png') {
