@@ -12,6 +12,13 @@ if (version >= 2) {
     page.zoomFactor = 1.4;
 }
 
+function debug(something) {
+    // uncomment to enable debug output
+    //console.log(something);
+}
+
+debug('html2pdf.js starting');
+
 if (system.args.length < 3) {
     console.log('Usage: html2pdf.js INPUT.html OUTPUT.pdf [<options>]');
     console.log('');
@@ -84,7 +91,9 @@ if (system.args.length < 3) {
         });
     }
 
+    debug('page open: '+input);
     page.open(input, function (status) {
+        debug('page ready: '+status);
         if(options.autoscale) {
             page.evaluate(function() {
                 // see https://github.com/ariya/phantomjs/issues/12685
@@ -100,14 +109,22 @@ if (system.args.length < 3) {
                 var retries = 0;
                 window.setInterval(function () {
                     retries++;
-                    if(checkGrafanaLoaded() || retries > 150) {
+                    // wait up to 20 seconds
+                    if(checkGrafanaLoaded() || retries > 400) {
+                        page.evaluate(function() {
+                            document.querySelector('DIV.main-view').style.background = 'white';
+                        });
+                        debug('page render');
                         page.render(output, {format: options.format, quality: 100});
+                        debug('page render done');
                         phantom.exit();
                     }
-                }, 100);
+                }, 50);
             } else {
                 window.setTimeout(function () {
+                    debug('page render');
                     page.render(output, {format: options.format, quality: 100});
+                    debug('page render done');
                     phantom.exit();
                 }, 3000);
             }
@@ -116,13 +133,23 @@ if (system.args.length < 3) {
 }
 
 function checkGrafanaLoaded() {
+    debug("checkGrafanaLoaded");
     var textErrorEl = page.evaluate(function() {
         return [].map.call(document.querySelectorAll('p.panel-text-content'), function(el) {
-            console.log('p.panel-text-content found, export finished');
             return el.className;
         });
     });
     if(textErrorEl.length > 0) {
+        debug('p.panel-text-content found, export finished');
+        return(true);
+    }
+    var textErrorEl = page.evaluate(function() {
+        return [].map.call(document.querySelectorAll('#loginuser'), function(el) {
+            return el.className;
+        });
+    });
+    if(textErrorEl.length > 0) {
+        debug('#loginuser found, export failed');
         return(true);
     }
     var textErrorEl = page.evaluate(function() {
@@ -131,7 +158,7 @@ function checkGrafanaLoaded() {
         });
     });
     if(textErrorEl.length > 0) {
-        console.log('div.alert-error found, export failed');
+        debug('div.alert-error found, export failed');
         return(true);
     }
     var chartEl = page.evaluate(function() {
@@ -140,6 +167,7 @@ function checkGrafanaLoaded() {
         });
     });
     if(chartEl.length == 0) {
+        debug('div.flot-text not found, export still running');
         return(false);
     }
     var loadingEl = page.evaluate(function() {
@@ -148,6 +176,11 @@ function checkGrafanaLoaded() {
         });
     });
     if(loadingEl.length > 0 && loadingEl[0].match(/ng-hide/)) {
+        debug('hidden span.panel-loading found, export finished');
+        return(true);
+    }
+    if(chartEl.length > 0 && loadingEl.length == 0) {
+        debug('export finished, no loading element but a float-text present');
         return(true);
     }
     return(false);
