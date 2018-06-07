@@ -179,23 +179,22 @@ exit 0
 
 %post base
 set +e
-set -x
 case "$*" in
   2)
     # Upgrading, restart apache webserver
     %if %{defined suse_version}
       %if %{?_unitdir:1}0
-        systemctl daemon-reload &>/dev/null
-        systemctl condrestart apache2.service &>/dev/null
+        systemctl daemon-reload >/dev/null
+        systemctl condrestart apache2.service >/dev/null
       %else
-        /etc/init.d/apache2 restart &>/dev/null
+        /etc/init.d/apache2 restart >/dev/null
       %endif
     %else
       %if %{?_unitdir:1}0
-        systemctl daemon-reload &>/dev/null
-        systemctl condrestart httpd.service &>/dev/null
+        systemctl daemon-reload >/dev/null
+        systemctl condrestart httpd.service >/dev/null
       %else
-        /etc/init.d/httpd condrestart &>/dev/null
+        /etc/init.d/httpd condrestart >/dev/null
       %endif
     %endif
 
@@ -290,6 +289,7 @@ esac
 exit 0
 
 %postun base
+set +e
 case "$*" in
   0)
     # POSTUN
@@ -332,7 +332,7 @@ rm -f /etc/thruk/plugins/plugins-enabled/reports2
 ln -s ../plugins-available/reports2 /etc/thruk/plugins/plugins-enabled/reports2
 %if %{?_unitdir:1}0
 %else
-  /etc/init.d/thruk condrestart &>/dev/null || :
+  /etc/init.d/thruk condrestart >/dev/null || :
 %endif
 exit 0
 
@@ -341,7 +341,7 @@ if [ -e /etc/thruk/plugins/plugins-enabled/reports2 ]; then
     rm -f /etc/thruk/plugins/plugins-enabled/reports2
     %if %{?_unitdir:1}0
     %else
-      /etc/init.d/thruk condrestart &>/dev/null || :
+      /etc/init.d/thruk condrestart >/dev/null || :
     %endif
 fi
 exit 0
