@@ -59,6 +59,7 @@ Ext.define('TP.PanletGrafana', {
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
         this.xdata.showtitle  = true;
+        this.xdata.showlegend = true;
         this.lastGraph        = '';
 
         /* update source selector */
@@ -140,6 +141,9 @@ Ext.define('TP.PanletGrafana', {
             if(this.xdata.showtitle != undefined && !this.xdata.showtitle) {
                 url = url + '&disablePanelTitle=1';
             }
+            if(this.xdata.showlegend != undefined && !this.xdata.showlegend) {
+                url = url + '&legend=0';
+            }
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
         };
@@ -188,6 +192,8 @@ Ext.define('TP.PanletGrafana', {
     },
     setGearItems: function() {
         var panel = this;
+        if(panel.xdata.showtitle  == undefined) { panel.xdata.showtitle  = true; }
+        if(panel.xdata.showlegend == undefined) { panel.xdata.showlegend = true; }
         this.callParent();
         this.addGearItems({
             xtype:          'combobox',
@@ -238,6 +244,11 @@ Ext.define('TP.PanletGrafana', {
             xtype:      'checkbox',
             name:       'showtitle',
             boxLabel:   '(requires histou 0.3.10 or newer)'
+        });
+        this.addGearItems({
+            fieldLabel: 'Show Legend',
+            xtype:      'checkbox',
+            name:       'showlegend'
         });
     },
     gearInitCallback: function(panel) {
