@@ -1475,6 +1475,7 @@ sub get_perf_image {
 
     if(!$options->{'show_title'}) {
         $grafanaurl .= '&disablePanelTitle';
+        $grafanaurl .= '&reduce=1';
     }
     if(!$options->{'show_legend'}) {
         $grafanaurl .= '&legend=false';
