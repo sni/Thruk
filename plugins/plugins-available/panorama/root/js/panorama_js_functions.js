@@ -1625,7 +1625,7 @@ var TP = {
     /* returns list of currently active backends for given panel */
     getActiveBackendsPanel: function(tab, panel) {
         var backends;
-        if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0) {
+        if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0 && (panel.xdata.backends.length != 1 || panel.xdata.backends[0] != "")) {
             backends = panel.xdata.backends;
         }
         else if(panel && panel.xdata && panel.xdata.general && panel.xdata.general.backends && panel.xdata.general.backends.length > 0 && (panel.xdata.general.backends.length != 1 || panel.xdata.general.backends[0] != "")) {
