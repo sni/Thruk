@@ -178,27 +178,29 @@ fi
 exit 0
 
 %post base
+set +e
+set -x
 case "$*" in
   2)
     # Upgrading, restart apache webserver
     %if %{defined suse_version}
       %if %{?_unitdir:1}0
-        systemctl daemon-reload &>/dev/null || true
-        systemctl condrestart apache2.service &>/dev/null || true
+        systemctl daemon-reload &>/dev/null
+        systemctl condrestart apache2.service &>/dev/null
       %else
-        /etc/init.d/apache2 restart &>/dev/null || true
+        /etc/init.d/apache2 restart &>/dev/null
       %endif
     %else
       %if %{?_unitdir:1}0
-        systemctl daemon-reload &>/dev/null || true
-        systemctl condrestart httpd.service &>/dev/null || true
+        systemctl daemon-reload &>/dev/null
+        systemctl condrestart httpd.service &>/dev/null
       %else
-        /etc/init.d/httpd condrestart &>/dev/null || true
+        /etc/init.d/httpd condrestart &>/dev/null
       %endif
     %endif
 
     rm -f /var/cache/thruk/thruk.cache
-    /usr/bin/thruk -a clearcache,installcron --local > /dev/null || true
+    /usr/bin/thruk -a clearcache,installcron --local > /dev/null
   ;;
   1)
     # Installing
