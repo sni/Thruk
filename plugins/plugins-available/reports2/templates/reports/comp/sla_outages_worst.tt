@@ -7,7 +7,7 @@
         [% format_date(o.start, reportDateTimeFormat) %] - [% IF o.real_end == end; "..."; ELSE; format_date(o.real_end, reportDateTimeFormat); END; %]
         <span class="duration">([% duration(o.duration) %])</span>
       </div>
-      <div class="output">[% o.plugin_output %]</div>
+      <div class="output">[% o.plugin_output.substr(0, 300) %]</div>
     [% END %]
   [% END %]
 [% END %]

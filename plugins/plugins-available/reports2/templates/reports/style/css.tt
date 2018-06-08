@@ -142,10 +142,9 @@ DIV.logdate IMG {
 
 /* SLA Report */
 DIV.output {
-  white-space: nowrap;
   padding-top: 2px;
   padding-bottom: 10px;
-  font-size: 14px;
+  font-size: 12px;
 }
 SPAN.duration {
   float: right;
