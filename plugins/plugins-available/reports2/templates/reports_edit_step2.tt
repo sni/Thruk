@@ -213,6 +213,10 @@
           <option value="[% languages.$l.abrv %]"[% IF languages.$l.abrv == value %] selected[% END %]>[% l %]</option>
           [% END %]
         </select>
+      [% ELSIF type == 'dateformat' %]
+        <input type="text" name="params.[% key %]" value="[% value %]" placeholder="%d %b %Y">
+      [% ELSIF type == 'datetimeformat' %]
+        <input type="text" name="params.[% key %]" value="[% value %]" placeholder="%d %b %Y  %H:%M:%S">
       [% ELSE %]
       [% PROCESS $temp block = 'edit_types' %]
       [% PROCESS custom_reports_edit_step2.tt %]

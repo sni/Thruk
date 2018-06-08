@@ -12,6 +12,8 @@
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
+        { 'dateformat'                   => [ 'Dateformat',                 'dateformat', ''                                   ] },
+        { 'datetimeformat'               => [ 'Datetimeformat',             'datetimeformat', ''                               ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
         { 'initialassumedservicestate'   => [ 'Initial Assumed State',      'svc_initialassumedstate',          '0'            ] },
         { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                            ] },
@@ -31,8 +33,7 @@
 
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
-  [%# report settings #%]
-  [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
+  [% PROCESS 'reports/comp/sla_render_settings.tt' %]
   [%
     title        = loc('SLA Outage Report')
     subtitle     = r.name

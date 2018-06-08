@@ -45,5 +45,7 @@
     'Description:'                          => 'Beskrivelse:',
     'Your report is attached.'              => 'Din rapport er vedhæftet.',
     'Out of Scope'                          => 'Uden for området',
-  }
+  };
+
+  set_time_locale("da_DK.UTF-8");
 %]

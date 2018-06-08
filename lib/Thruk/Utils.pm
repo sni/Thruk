@@ -2366,6 +2366,7 @@ sub get_template_variable {
 
     $c->stash->{'temp'}  = $template;
     $c->stash->{'var'}   = $var;
+    my $default_time_locale = POSIX::setlocale(POSIX::LC_TIME);
     my $data;
     eval {
         Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', undef, \$data);
@@ -2375,6 +2376,7 @@ sub get_template_variable {
         Thruk::Utils::CLI::_error($@);
         return $c->detach('/error/index/13');
     }
+    POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
 
     my $VAR1;
     ## no critic

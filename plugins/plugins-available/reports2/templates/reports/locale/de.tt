@@ -45,5 +45,7 @@
     'Description:'                          => 'Beschreibung:',
     'Your report is attached.'              => 'Der Bericht befindet sich im Anhang.',
     'Out of Scope'                          => 'Nicht berücksichtigt',
-  }
+  };
+
+  set_time_locale("de_DE.UTF-8");
 %]

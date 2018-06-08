@@ -5,5 +5,7 @@
   weekAbbr             = 'WK';
   monthNames           = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   dayNames             = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  translations         = {}
+  translations         = {};
+
+  set_time_locale("en_US.UTF-8");
 %]

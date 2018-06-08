@@ -1121,6 +1121,21 @@ sub replace_macros {
     return($text);
 }
 
+##############################################
+
+=head2 set_time_locale
+
+  set LC_TIME locale
+
+remember to reset to default after template processing.
+
+=cut
+sub set_time_locale {
+    my($locale) = @_;
+    POSIX::setlocale(POSIX::LC_TIME, $locale);
+    return("");
+}
+
 ########################################
 
 1;

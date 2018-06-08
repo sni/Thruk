@@ -389,6 +389,8 @@ sub generate_report {
         }
     }
 
+    my $default_time_locale = POSIX::setlocale(POSIX::LC_TIME);
+
     $c->req->parameters->{'debug'} = 1 if $ENV{'THRUK_REPORT_DEBUG'};
 
     Thruk::Utils::set_user($c, $options->{'user'});
@@ -505,6 +507,7 @@ sub generate_report {
     if($@) {
         return(_report_die($c, $@, $logfile));
     }
+    POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
 
     # convert to pdf
     if($Thruk::Utils::PDF::ctype eq 'text/html') {

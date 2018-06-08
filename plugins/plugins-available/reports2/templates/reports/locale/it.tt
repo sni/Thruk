@@ -45,5 +45,7 @@
     'Description:'                          => 'Descrizione:',
     'Your report is attached.'              => 'Il tuo rapporto è allegato.',
     'Out of Scope'                          => 'Fuori Ambito',
-  }
+  };
+
+  set_time_locale("it_IT.UTF-8");
 %]
