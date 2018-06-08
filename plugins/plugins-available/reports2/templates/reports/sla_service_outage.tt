@@ -18,7 +18,7 @@
         { 'unavailable'                  => [ 'Unavailable States',         'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
         { 'details_max_level'            => [ 'Details SLA %',              'int_box',         '100' ,'hide details if sla is above threshold', 1, 100 ] },
         { 'mail_max_level'               => [ 'Mail SLA %',                 'int_box',         '100', 'cancel mail if no object breaks this sla', 0, 100] },
-        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '5'          ,'max. # pages per service', 1 ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int_box',         '5'          ,'max. # pages per service', 1, 5 ] },
     ];
   %]
 [% END %]

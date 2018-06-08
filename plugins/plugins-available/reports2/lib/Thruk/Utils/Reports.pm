@@ -1127,6 +1127,13 @@ sub _read_report_file {
         $report->{'readonly'}   = 0 if $authorized == 1;
     }
 
+    # migrate some options
+    if($report->{'params'}) {
+        if(defined $report->{'params'}->{'max_outages_pages'} && $report->{'params'}->{'max_outages_pages'} eq "0") { $report->{'params'}->{'max_outages_pages'} = "-1"; }
+        if(defined $report->{'params'}->{'max_worst_pages'}   && $report->{'params'}->{'max_worst_pages'}   eq "0") { $report->{'params'}->{'max_worst_pages'}   = "-1"; }
+        if(defined $report->{'params'}->{'max_outages_pages'} && $report->{'params'}->{'max_outages_pages'} eq "0") { $report->{'params'}->{'max_outages_pages'} = "-1"; }
+    }
+
     # add some runtime information
     my $rfile = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
     $report->{'var'}->{'file_exists'} = 0;
