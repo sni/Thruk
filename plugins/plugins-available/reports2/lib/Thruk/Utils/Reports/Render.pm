@@ -1035,6 +1035,47 @@ sub _locale {
 }
 
 ##############################################
+sub _hst {
+    my($hostname) = @_;
+    my $c = $Thruk::Request::c or die("not initialized!");
+    my $src = $c->stash->{'param'}->{'hostnameformat'} || 'hostname';
+    if($src eq 'hostname') {
+        return($hostname);
+    }
+    if($src eq 'hostalias') {
+        return($c->stash->{'hosts'}->{$hostname}->{'alias'});
+    }
+    if($src eq 'hostdisplayname') {
+        return($c->stash->{'hosts'}->{$hostname}->{'display_name'});
+    }
+    if($src eq 'hostcustom') {
+        my $key = $c->stash->{'param'}->{'hostnameformat_cust'};
+        my $vars = Thruk::Utils::get_custom_vars($c, $c->stash->{'hosts'}->{$hostname});
+        return($vars->{$key}) if defined $vars->{$key};
+    }
+    return($hostname);
+}
+
+##############################################
+sub _svc {
+    my($hostname, $servicename) = @_;
+    my $c = $Thruk::Request::c or die("not initialized!");
+    my $src = $c->stash->{'param'}->{'servicenameformat'} || 'description';
+    if($src eq 'description') {
+        return($servicename);
+    }
+    if($src eq 'servicedisplayname') {
+        return($c->stash->{'services'}->{$hostname}->{$servicename}->{'display_name'});
+    }
+    if($src eq 'servicecustom') {
+        my $key = $c->stash->{'param'}->{'servicenameformat_cust'};
+        my $vars = Thruk::Utils::get_custom_vars($c, $c->stash->{'services'}->{$hostname}->{$servicename});
+        return($vars->{$key}) if defined $vars->{$key};
+    }
+    return($servicename);
+}
+
+##############################################
 
 =head1 EXAMPLES
 

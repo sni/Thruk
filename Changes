@@ -33,6 +33,7 @@ next:
           - Reporting:
             - add datetime format options
             - use time locale for reports
+            - optionally use host / servicename from alias, displayname or customvariable
 
 2.20-2   Wed Mar 14 00:12:24 CET 2018
           - add optional debug switch for admin users

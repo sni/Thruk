@@ -408,20 +408,29 @@ sub generate_report {
         undef($options->{'var'}->{'debug_file'});
     }
 
-    # do we have errors in our options, ex.: missing required fields?
-    if(defined $options->{'var'}->{'opt_errors'}) {
-        set_running($c, $nr, 0, undef, time());
-        print STDERR join("\n", @{$options->{'var'}->{'opt_errors'}});
-        exit 1;
-    }
-
-    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 1, 'starting') if $ENV{'THRUK_JOB_DIR'};
-    delete $options->{'var'}->{'send_mail_threshold_reached'};
-
     # empty logfile
     my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
     open(my $fh, '>', $logfile);
     Thruk::Utils::IO::close($fh, $logfile);
+
+    # check for exposed custom variables
+    my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
+    for my $key (qw/hostnameformat_cust servicenameformat_cust/) {
+        if($options->{'params'}->{$key}) {
+            if(!Thruk::Utils::check_custom_var_list($options->{'params'}->{$key}, $allowed)) {
+                return(_report_die($c, "report contains custom variable ".$options->{'params'}->{$key}." which is not exposed by: show_custom_vars", $logfile));
+            }
+        }
+    }
+
+    # do we have errors in our options, ex.: missing required fields?
+    if(defined $options->{'var'}->{'opt_errors'}) {
+        set_running($c, $nr, 0, undef, time());
+        return(_report_die($c, join("\n", @{$options->{'var'}->{'opt_errors'}}), $logfile));
+    }
+
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 1, 'starting') if $ENV{'THRUK_JOB_DIR'};
+    delete $options->{'var'}->{'send_mail_threshold_reached'};
 
     if(defined $options->{'backends'}) {
         $options->{'backends'} = ref $options->{'backends'} eq 'ARRAY' ? $options->{'backends'} : [ $options->{'backends'} ];

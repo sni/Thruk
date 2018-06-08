@@ -12,6 +12,7 @@
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
+        { 'servicenameformat'            => [ 'Servicename Format',         'serviceformat', 'description'                     ] },
         { 'dateformat'                   => [ 'Dateformat',                 'dateformat', ''                                   ] },
         { 'datetimeformat'               => [ 'Datetimeformat',             'datetimeformat', ''                               ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
@@ -64,7 +65,7 @@
            IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
            IF param.details_max_level != -1 && p >= param.details_max_level; NEXT;
           END %]
-        [% pagetitle                    = loc("Service: %s on %s", svc, hst) %]
+        [% pagetitle                    = loc("Service: %s on %s", _svc(hst, svc), _hst(hst)) %]
 
         [% WRAPPER 'reports/comp/page_standard.tt'  %]
           [% PROCESS 'reports/comp/sla_graph_page.tt' %]

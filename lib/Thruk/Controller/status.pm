@@ -231,6 +231,7 @@ sub _process_raw_request {
             elsif($type eq 'custom variable' || $type eq 'custom value') {
                 # get available custom variables
                 $data        = [];
+                my $exposed_only = $c->req->parameters->{'exposed_only'} || 0;
                 if($type eq 'custom variable' || !$c->check_user_roles("authorized_for_configuration_information")) {
                     my $vars     = {};
                     # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
@@ -247,7 +248,7 @@ sub _process_raw_request {
                     @{$data} = grep(/$filter/mx, @{$data}) if $filter;
 
                     # filter all of them which are not listed by show_custom_vars unless we have extended permissions
-                    if(!$c->check_user_roles("authorized_for_configuration_information")) {
+                    if($exposed_only || !$c->check_user_roles("authorized_for_configuration_information")) {
                         my $newlist = [];
                         my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
                         for my $varname (@{$data}) {

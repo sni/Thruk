@@ -12,6 +12,7 @@
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
+        { 'hostnameformat'               => [ 'Hostname Format',            'hostformat', 'hostname'                           ] },
         { 'dateformat'                   => [ 'Dateformat',                 'dateformat', ''                                   ] },
         { 'datetimeformat'               => [ 'Datetimeformat',             'datetimeformat', ''                               ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
@@ -62,7 +63,7 @@
          IF param.details_max_level != -1 && p >= param.details_max_level; NEXT;
         END %]
       [% IF p < param.sla %]
-        [% pagetitle                    = loc("Host: %s", hst) %]
+        [% pagetitle                    = loc("Host: %s", _hst(hst)) %]
         [% out = outages(logs, start, end) %]
         [% page_data = page_splice(out, 12, param.max_outages_pages)  %]
         [% FOREACH datablock = page_data %]
