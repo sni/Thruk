@@ -5,18 +5,19 @@
         { 'language'                     => [ 'Language',                   'language',        'en'                  ,'', 1   ] },
         { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                        ] },
         { 'hostgroup'                    => [ 'Hostgroup',                  'hostgroups',      ''                    ,'', 1   ] },
+
         { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'last12months'                 ] },
         { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'months'                       ] },
         { 'rpttimeperiod'                => [ 'Report Timeperiod',          'rpttimeperiod',   ''                             ] },
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1   ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1   ] },
-        { 'details_max_level'            => [ 'Details SLA %',              'int',             '-1' ,'hide details if sla is above threshold', 1 ] },
-        { 'mail_max_level'               => [ 'Mail SLA %',                 'int',             '-1', 'cancel mail if no object breaks this sla'] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1   ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                          ] },
         { 'initialassumedhoststate'      => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'           ] },
         { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                           ] },
         { 'unavailable'                  => [ 'Unavailable States',         'hst_unavailable', ['down', 'unreachable'], '', 1 ] },
+        { 'details_max_level'            => [ 'Details SLA %',              'int_box',         '100' ,'hide details if sla is above threshold', 1, 100 ] },
+        { 'mail_max_level'               => [ 'Mail SLA %',                 'int_box',         '-1', 'cancel mail if no object breaks this sla', 0, 100] },
         { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '0'         ,'max. # pages', 1 ] },
         { 'max_worst_pages'              => [ 'Worst Outages',              'int',             '0'         ,'max. # pages', 1 ] },
         { 'max_pnp_sources'              => [ 'Maximum PNP Sources',        'int',             '1'         ,'max. # pnp images', 1 ] },
@@ -58,7 +59,7 @@
       [% available = get_availability_percents() %]
       [% p = available.total.percent;
          IF p == -1; p = 100; END;
-         IF param.exists('mail_max_level') && param.mail_max_level != -1 && p <= param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
+         IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
          IF param.details_max_level != -1 && p >= param.details_max_level; NEXT;
         END %]
       [% pagetitle                    = loc("Host: %s", hst) %]

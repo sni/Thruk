@@ -715,7 +715,7 @@ return report data for given params
 
 =cut
 sub get_report_data_from_param {
-    my $params = shift;
+    my($params) = @_;
     my $p = {};
     for my $key (keys %{$params}) {
         next unless $key =~ m/^params\.([\w\.]+)$/mx;
@@ -725,6 +725,13 @@ sub get_report_data_from_param {
         }
         if($1 eq 'sla') { $params->{$key} =~ s/,/./gmx }
         $p->{$1} = $params->{$key};
+    }
+
+    for my $key (keys %{$params}) {
+        next unless $key =~ m/^optional\.([\w\.]+)$/mx;
+        if(!$params->{'enabled.'.$1}) {
+            $p->{$1} = -1;
+        }
     }
 
     # only save backends if checkbox checked
