@@ -1,6 +1,6 @@
 ﻿[%
   file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file;
 
-  IF param.dateformat     != ""; reportDateFormat     = param.dateformat;     END;
-  IF param.datetimeformat != ""; reportDateTimeFormat = param.datetimeformat; END;
+  IF param.exists("dateformat")     && param.dateformat     != ""; reportDateFormat     = param.dateformat;     END;
+  IF param.exists("datetimeformat") && param.datetimeformat != ""; reportDateTimeFormat = param.datetimeformat; END;
 %]
