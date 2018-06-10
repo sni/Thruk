@@ -35,6 +35,9 @@ The lmd command controls the LMD process.
 
 use warnings;
 use strict;
+use Thruk::Utils::LMD;
+
+our $skip_backends = 1;
 
 ##############################################
 
@@ -57,9 +60,12 @@ sub cmd {
     Thruk::Backend::Pool::init_backend_thread_pool();
 
     if($mode eq 'start') {
-        Thruk::Utils::LMD::check_procs($c->config, $c, 0, 1);
+        my($status, $started) = Thruk::Utils::LMD::status($c->config);
+        if($started && $status->[0] && $status->[0]->{'pid'}) {
+            return("FAILED - lmd already running with pid ".$status->[0]->{'pid'}."\n", 1);
+        }
+        Thruk::Utils::LMD::check_proc($c->config, $c, 0);
         # wait for the startup
-        my($status, $started);
         for(my $x = 0; $x <= 20; $x++) {
             eval {
                 ($status, $started) = Thruk::Utils::LMD::status($c->config);

@@ -16,6 +16,7 @@ use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep/;
 use File::Copy qw/copy/;
 use Thruk::Utils::External;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
@@ -55,6 +56,7 @@ sub check_proc {
     }
     $cmd .= ' >/dev/null 2>&1 &';
 
+    _debug("start cmd: ". $cmd);
     my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
     $c->log->error(sprintf('starting lmd failed with rc %d: %s', $rc, $output)) if $rc != 0;
 
