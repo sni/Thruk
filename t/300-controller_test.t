@@ -28,7 +28,7 @@ unlink('/tmp/thruk_test_debug.log');
 
 my($res, $c) = ctx_request('/thruk/side.html');
 $c->app->config->{'log4perl_conf'} = "t/data/log4perl.conf";
-$c->app->_init_logging();
+$c->app->init_logging();
 
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/test.cgi',
@@ -42,7 +42,7 @@ unlink('/tmp/thruk_test_error.log');
 unlink('/tmp/thruk_test_debug.log');
 
 # test leak detection
-$c->app->_init_logging();
+$c->app->init_logging();
 $ENV{'THRUK_SRC'} = 'TEST_LEAK';
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/test.cgi?action=leak',
