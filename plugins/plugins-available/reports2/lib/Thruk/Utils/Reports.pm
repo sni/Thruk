@@ -397,6 +397,10 @@ sub generate_report {
     local $ENV{'REMOTE_USER'} = $options->{'user'};
     $c->stash->{'remote_user'} = $options->{'user'};
 
+    $c->stash->{'refresh_rate'}   = 0;
+    $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'inject_stats'}   = 0;
+
     # clean up first
     clean_report_tmp_files($c, $nr);
 
