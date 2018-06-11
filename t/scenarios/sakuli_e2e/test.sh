@@ -17,6 +17,13 @@ for dir in $(ls -1tr _run/ | head -n -20); do
     rm -rf _run/$dir
 done
 
+# check window manager which tends to break all the time
+if [ $(docker-compose exec --user root sakuli bash -ci "wmctrl -m" | grep -c "PID:") -ne 1 ]; then
+  echo "ERROR: sakuli window manager failed to start:"
+  docker-compose exec --user root sakuli bash -ci "wmctrl -m"
+  exit 1
+fi
+
 function finish {
     # clean up
     rm -f $CASEDIR/testsuite.*
