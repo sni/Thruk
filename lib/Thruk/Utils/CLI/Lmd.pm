@@ -77,7 +77,7 @@ sub cmd {
         return("FAILED - starting lmd failed\n", 1);
     }
     elsif($mode eq 'stop') {
-        Thruk::Utils::LMD::shutdown($c->config);
+        Thruk::Utils::LMD::shutdown_procs($c->config);
         # wait for the fully stopped
         my($status, $started, $total, $failed);
         for(my $x = 0; $x <= 20; $x++) {
