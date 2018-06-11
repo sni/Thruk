@@ -391,7 +391,7 @@ sub obj_db_model {
 
 =cut
 sub log {
-    return($_[0]->{'_log'} ||= $_[0]->_init_logging());
+    return($_[0]->{'_log'} ||= $_[0]->init_logging());
 }
 
 ###################################################
@@ -645,9 +645,17 @@ sub _set_ssi {
 }
 
 ###################################################
-# Logging
-sub _init_logging {
-    my($self) = @_;
+
+=head2 init_logging
+
+    initialize logging
+
+returns logger object
+
+=cut
+
+sub init_logging {
+    my($self, $screen) = @_;
     my($log4perl_conf, $logger);
     if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' && $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
         if(defined $self->config->{'log4perl_conf'} && ! -s $self->config->{'log4perl_conf'} ) {
@@ -655,7 +663,7 @@ sub _init_logging {
         }
         $log4perl_conf = $self->config->{'log4perl_conf'} || $self->config->{'home'}.'/log4perl.conf';
     }
-    if(defined $log4perl_conf and -s $log4perl_conf) {
+    if(!$screen && defined $log4perl_conf && -s $log4perl_conf) {
         require Log::Log4perl;
         Log::Log4perl::init($log4perl_conf);
         $logger = Log::Log4perl::get_logger();

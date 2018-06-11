@@ -74,6 +74,7 @@ sub new {
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}   = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
+    $ENV{'THRUK_VERBOSE'}    = $options->{'verbose'}-1 if $options->{'verbose'} >= 2;;
     $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
     $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
     ## use critic
@@ -366,6 +367,11 @@ sub _run {
         if(!defined $c) {
             print STDERR "command failed";
             return 1;
+        }
+
+        if($terminal_attached) {
+            # initialize screen logging
+            $c->app->{'_log'} = $c->app->init_logging(1);
         }
 
         # catch prints when not attached to a terminal and redirect them to our logger
