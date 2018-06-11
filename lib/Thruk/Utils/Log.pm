@@ -38,6 +38,7 @@ sub _debug {
     my($data, $lvl) = @_;
     return unless defined $data;
     $lvl = 'DEBUG' unless defined $lvl;
+    return if !defined $Thruk::Utils::CLI::verbose;
     return if($Thruk::Utils::CLI::verbose < 3 and uc($lvl) eq 'TRACE');
     return if($Thruk::Utils::CLI::verbose < 2 and uc($lvl) eq 'DEBUG');
     return if($Thruk::Utils::CLI::verbose < 1 and uc($lvl) eq 'INFO');
