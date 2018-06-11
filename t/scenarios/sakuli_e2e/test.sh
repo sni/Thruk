@@ -96,7 +96,7 @@ find $CASEDIR -type f -exec chmod 666 {} \;
 
 # clean dashboards, user data and old errors from omd
 docker-compose exec --user root omd bash -ci ">/omd/sites/demo/var/log/thruk.log"
-docker-compose exec --user root omd bash -ci "rm -rf /omd/sites/demo/var/thruk/users/* /omd/sites/demo/var/thruk/panorama/* /omd/sites/demo/etc/thruk/panorama/* /omd/sites/demo/etc/thruk/bp/* /omd/sites/demo/var/thruk/bp/*"
+docker-compose exec --user root omd bash -ci "rm -rf /omd/sites/demo/var/thruk/users/* /omd/sites/demo/var/thruk/panorama/* /omd/sites/demo/etc/thruk/panorama/* /omd/sites/demo/etc/thruk/bp/* /omd/sites/demo/var/thruk/bp/* /omd/sites/demo/var/thruk/reports/*"
 
 docker-compose exec sakuli bash -ci "sakuli run $SAKULI_TEST_DIR $*"
 res=$?

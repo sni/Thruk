@@ -1957,6 +1957,7 @@ t/scenarios/sakuli_e2e/cases/0051_preferences_popup.js
 t/scenarios/sakuli_e2e/cases/0052_bookmarks_and_links.js
 t/scenarios/sakuli_e2e/cases/0100_business_process.js
 t/scenarios/sakuli_e2e/cases/0101_config_tool.js
+t/scenarios/sakuli_e2e/cases/0102_reports.js
 t/scenarios/sakuli_e2e/cases/0200_panorama_start_page.js
 t/scenarios/sakuli_e2e/cases/0201_panorama_basic_controls.js
 t/scenarios/sakuli_e2e/cases/0202_panorama_icon_clone.js
