@@ -18,7 +18,6 @@
         { 'initialassumedservicestate'   => [ 'Initial Assumed State', 'svc_initialassumedstate',          '0'         ] },
         { 'includesoftstates'            => [ 'Include Soft States',   'yes_no',          'no'                         ] },
         { 'unavailable'                  => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
-        { 'details_max_level'            => [ 'Details SLA %',              'int_box',         '100' ,'hide details if sla is above threshold', 1, 100 ] },
         { 'mail_max_level'               => [ 'Mail SLA %',                 'int_box',         '-1', 'cancel mail if no object breaks this sla', 0, 100] },
         { 'max_worst_pages'              => [ 'Worst Outages',              'int_box',          '1'          ,'max. # pages', 1, 1 ] },
         { 'max_outages_pages'            => [ 'Latest Outages',             'int_box',         '-1'          ,'max. # pages', 1, 1 ] },
@@ -64,7 +63,6 @@
         [% p = available.total.percent;
            IF p == -1; p = 100; END;
            IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
-           IF param.details_max_level != -1 && p >= param.details_max_level; NEXT;
           END %]
         [% pagetitle                    = loc("Business Process: %s", hst) %]
 
