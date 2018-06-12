@@ -89,7 +89,7 @@ Contains thruks primary group id.
 
 
 ==== THRUK_GROUPS
-Contains all groups.
+Contains all groups as semicolon separated list.
 
 
 ==== THRUK_NO_COMMANDS

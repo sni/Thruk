@@ -907,7 +907,7 @@ sub _do_finalize_config {
         $ENV{'THRUK_GROUP_ID'} = (getgrnam($ENV{'THRUK_GROUP_ID'}))[2] || die("cannot convert '".$ENV{'THRUK_GROUP_ID'}."' into numerical uid. Does this group really exist?");
     }
 
-    $ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
+    $ENV{'THRUK_GROUPS'}   = join(';', @{$groups});
     ## use critic
 
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {

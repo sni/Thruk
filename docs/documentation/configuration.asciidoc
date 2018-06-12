@@ -1358,7 +1358,7 @@ and then manually import those files.
 There are some useful enviromenet variables set before the script is started:
 
   - standard macros as listed in link:cli.html#_environment-variables[CLI Environment]
-  - THRUK_BACKENDS is a comma separated list of the selected backends.
+  - THRUK_BACKENDS is a semicolon separated list of the selected backends.
   - THRUK_LOGCACHE is the connection string to the thruk logcache database.
 
 ex.:

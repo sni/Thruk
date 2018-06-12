@@ -900,7 +900,7 @@ sub _renew_logcache {
                                                     });
         }
         if($c->config->{'logcache_import_command'}) {
-            local $ENV{'THRUK_BACKENDS'} = join(',', @{$get_results_for});
+            local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});
             local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
             my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
             if($rc != 0) {

@@ -73,7 +73,7 @@ sub new {
     $ENV{'THRUK_SRC'}        = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
-    $ENV{'THRUK_BACKENDS'}   = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
+    $ENV{'THRUK_BACKENDS'}   = join(';', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}    = $options->{'verbose'}-1 if $options->{'verbose'} >= 2;;
     $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
     $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};

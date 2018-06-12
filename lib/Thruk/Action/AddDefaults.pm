@@ -1133,7 +1133,7 @@ sub _set_enabled_backends {
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
-        for my $b (split(/,/mx, $ENV{'THRUK_BACKENDS'})) {
+        for my $b (split(/;/mx, $ENV{'THRUK_BACKENDS'})) {
             # peer key can be name too
             if($b eq 'ALL') {
                 for my $peer (@{$c->{'db'}->get_peers()}) {
