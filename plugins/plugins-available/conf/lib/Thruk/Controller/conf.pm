@@ -870,7 +870,7 @@ sub _process_backends_page {
     }
 
     if(keys %{$conf} > 0) {
-        if(defined $conf->{'Component'}->{'Thruk::Backend'}->{'peer'}) {
+        if($conf->{'Component'}->{'Thruk::Backend'} && ref($conf->{'Component'}->{'Thruk::Backend'}) eq 'HASH' && defined $conf->{'Component'}->{'Thruk::Backend'}->{'peer'}) {
             if(ref $conf->{'Component'}->{'Thruk::Backend'}->{'peer'} eq 'ARRAY') {
                 $backends = $conf->{'Component'}->{'Thruk::Backend'}->{'peer'};
             } else {
