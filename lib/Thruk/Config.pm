@@ -63,6 +63,7 @@ our %config = ('name'                   => 'Thruk',
                                           'nl2br'               => \&Thruk::Utils::Filter::nl2br,
                                           'strip_command_args'  => \&Thruk::Utils::Filter::strip_command_args,
                                           'escape_html'         => \&Thruk::Utils::Filter::escape_html,
+                                          'lc'                  => \&Thruk::Utils::Filter::lc,
                                       },
                   PRE_DEFINE         => {
                                           'sprintf'             => \&Thruk::Utils::Filter::sprintf,

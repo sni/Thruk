@@ -120,7 +120,7 @@
               <td align='right'>
                 <table>
                   [% FOREACH cust = custom_vars %]
-                  <tr>
+                  <tr class="cust_var cust_var_[% cust.0 | uri | lc %]">
                     <td style="padding-right: 7px;" valign="top">
                       <a href="status.cgi?style=detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 %]</i></font></a><br clear="all">
                     </td>
