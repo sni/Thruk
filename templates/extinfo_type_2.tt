@@ -487,6 +487,8 @@
                 <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]
                 [% END %]
+                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt="#########" width="20" height="20"></td>
+                <td class='comment'><a href='showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]' class='comment'>List recent downtimes</a></td>
               </tr>
             </table>
             [% IF downtimes.size > 0 %]
