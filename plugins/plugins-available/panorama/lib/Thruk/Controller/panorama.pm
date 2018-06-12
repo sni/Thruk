@@ -2522,7 +2522,6 @@ sub _task_dashboard_list {
     my($c) = @_;
 
     my $type = $c->req->parameters->{'list'} || 'my';
-    return if($type eq 'all' && !$c->stash->{'is_admin'});
 
     my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, $type);
 
