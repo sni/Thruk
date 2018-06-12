@@ -626,7 +626,7 @@ sub set_default_config {
     $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
 
     # make show_custom_vars a list
-    $config->{'show_custom_vars'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))];
+    $config->{'show_custom_vars'} = array_uniq([split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))]);
 
     # make graph_replace a list
     for my $key (qw/graph_replace commandline_obfuscate_pattern/) {
@@ -1127,6 +1127,25 @@ sub list {
     return([$d]);
 }
 
+######################################
+
+=head2 array_uniq
+
+  array_uniq($array)
+
+return uniq elements of array
+
+=cut
+
+sub array_uniq {
+    my $array = shift;
+
+    my %seen = ();
+    my @unique = grep { ! $seen{ $_ }++ } @{$array};
+
+    return \@unique;
+}
+
 ########################################
 
 =head2 read_config_file
@@ -1279,6 +1298,8 @@ sub _fix_syntax {
     return;
 }
 
+########################################
+
 =head2 load_any( $options )
 
 replacement function for Config::Any->load_files
@@ -1303,7 +1324,7 @@ sub load_any {
     return($result);
 }
 
-######################################
+########################################
 
 =head1 AUTHOR
 
