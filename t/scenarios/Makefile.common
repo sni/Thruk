@@ -36,6 +36,7 @@ clean:
 	docker-compose kill
 	docker-compose rm -f
 	-docker network prune -f
+	-[ $$(docker ps -q | wc -l) -eq 0 ] || docker kill $$(docker ps -q)
 	$(MAKE) extra_clean
 
 update:

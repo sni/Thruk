@@ -32,7 +32,7 @@ for my $dir (@{$scenarios}) {
         next;
     }
     chdir($dir);
-    for my $step (qw/update prepare wait_start test_verbose clean/) {
+    for my $step (qw/clean update prepare wait_start test_verbose clean/) {
         _run($dir, $step);
     }
     chdir($pwd);
