@@ -806,7 +806,15 @@ sub update_cron_file {
     my $max_concurrent_reports = $c->config->{'Thruk::Plugin::Reports2'}->{'max_concurrent_reports'} || 2;
     my $combined = [];
     my $dir = $c->config->{'var_path'}."/reports/";
-    unlink(glob($dir.'/*.sh'));
+
+    use Scalar::Util qw( tainted );
+    die("Impossible unlink $dir because tainted") if tainted($dir);
+
+    for (glob ("$dir/*.sh")) {
+        #This regex matches everything (incl. new line) and generate a string for each file found by the glob
+        unlink(/(.*)/s)
+            or die("Can't delete file $_: $!\n");
+    }
     for my $time (keys %{$cron_entries}) {
         if(scalar @{$cron_entries->{$time}} <= $max_concurrent_reports) {
             for my $entry (@{$cron_entries->{$time}}) {
