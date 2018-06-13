@@ -161,6 +161,12 @@ sub update_objects_from_text {
         }
         next unless $line;
 
+        if($linenr < 10) {
+            if($line =~ m/^\#\s*thruk:\s*readonly/mxo) {
+                $self->{'readonly'} = 1;
+            }
+        }
+
         my $first_char = substr($line, 0, 1);
 
         # full line comments
