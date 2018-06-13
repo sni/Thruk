@@ -20,6 +20,11 @@ _thruk_list_services() {
     return
 }
 
+_thruk_list_contacts() {
+    thruk contact list
+    return
+}
+
 _thruk()
 {
     COMPREPLY=()
@@ -47,7 +52,7 @@ _thruk()
     while [ $i -lt $COMP_CWORD ]; do
         local arg=${COMP_WORDS[$i]}
         case "$arg" in
-            -V)
+            -b)
                 i=$((i + 1))
             ;;
             -*)
@@ -107,6 +112,29 @@ _thruk()
         # thruk service ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
             opts="$(_thruk_list_hosts)"
+        fi
+
+    # thruk find ...
+    elif [[ $subcmd =~ find ]]; then
+
+        # thruk command ...
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="host service contact"
+
+        # thruk find contact ...
+        elif [ ${subcmdargs[0]} = "contact" ]; then
+            opts="$(_thruk_list_contacts)"
+
+        # thruk find host ...
+        elif [ ${subcmdargs[0]} = "host" ]; then
+            opts="$(_thruk_list_hosts)"
+
+        elif [ ${subcmdargs[0]} = "service" -a ${#subcmdargs[@]} -eq 1 ]; then
+            opts="$(_thruk_list_hosts)"
+
+        # thruk find service <host> ...
+        elif [ ${subcmdargs[0]} = "service" -a ${#subcmdargs[@]} -eq 2 ]; then
+            opts="$(_thruk_list_services ${subcmdargs[1]})"
         fi
 
     else

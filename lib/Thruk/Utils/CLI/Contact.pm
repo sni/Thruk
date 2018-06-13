@@ -1,16 +1,16 @@
-package Thruk::Utils::CLI::Hostgroup;
+package Thruk::Utils::CLI::Contact;
 
 =head1 NAME
 
-Thruk::Utils::CLI::Hostgroup - Hostgroup CLI module
+Thruk::Utils::CLI::Contact - Contact CLI module
 
 =head1 DESCRIPTION
 
-The host command lists hosts from livestatus queries.
+The contact command lists contacts from livestatus queries.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] hostgroup <cmd>
+  Usage: thruk [globaloptions] contact <cmd>
 
 =head1 OPTIONS
 
@@ -24,7 +24,7 @@ The host command lists hosts from livestatus queries.
 
     available commands are:
 
-    - list          lists all hostgroups
+    - list          lists all contacts
 
 =back
 
@@ -45,8 +45,10 @@ use strict;
 sub cmd {
     my($c) = @_;
     my $output = '';
-    for my $group (@{$c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' )], sort => {'ASC' => 'name'})}) {
-        $output .= sprintf("%-30s %s\n", $group->{'name'}, join(', ', @{$group->{'members'}}));
+    my $uniq = {};
+    for my $contact (@{$c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' )], sort => {'ASC' => 'name'})}) {
+        $output .= $contact->{'name'}."\n" unless $uniq->{$contact->{'name'}};
+        $uniq->{$contact->{'name'}} = 1;
     }
     return($output, 0);
 }
@@ -55,9 +57,9 @@ sub cmd {
 
 =head1 EXAMPLES
 
-List all hostgroups
+List all contacts
 
-  %> thruk hostgroup list
+  %> thruk contact list
 
 =head1 AUTHOR
 

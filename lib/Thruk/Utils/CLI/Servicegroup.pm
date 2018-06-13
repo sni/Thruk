@@ -55,7 +55,7 @@ sub cmd {
 
 =head1 EXAMPLES
 
-Run all selfchecks
+List all servicegroups
 
   %> thruk servicegroup list
 

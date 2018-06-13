@@ -337,7 +337,7 @@ sub _run {
     }
 
     # force some commands to be local
-    if($action =~ m/^(logcache|livecache|bpd|bp||report|plugin|lmd|)/mx) {
+    if($action =~ m/^(logcache|livecache|bpd|bp||report|plugin|lmd|find)/mx) {
         $self->{'opt'}->{'local'} = 1;
     }
 
@@ -675,9 +675,10 @@ sub _run_command_action {
             $err = $@;
             last unless $err;
 
-            if($err =~ m|^Can't\ locate\ .*\ in\ \@INC|mx) {
+            if($err =~ m|^Can't\ locate\ .*\ in\ \@INC|mx && $err !~ m/Compilation\ failed\ in\ require\ at/mx) {
                 _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
-                $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
+                $data->{'output'} = "FAILED - no such command: ".$action.".\n".
+                                    "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
             } elsif($err) {
                 _error($@);
                 $data->{'output'} = "FAILED - to load command module: ".$action.".\n";
@@ -689,7 +690,7 @@ sub _run_command_action {
         }
 
         # print help only?
-        if(scalar @{$opt->{'commandoptions'}} > 0 && $opt->{'commandoptions'}->[0] =~ /^(help|\-h)$/mx) {
+        if(scalar @{$opt->{'commandoptions'}} > 0 && $opt->{'commandoptions'}->[0] =~ /^(help|\-h|--help)$/mx) {
             return(get_submodule_help(ucfirst($action)));
         }
 

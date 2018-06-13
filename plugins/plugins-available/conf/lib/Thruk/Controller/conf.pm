@@ -30,6 +30,7 @@ sub index {
     #&timing_breakpoint('index start');
 
     if(!$c->config->{'conf_modules_loaded'}) {
+        load Thruk::Utils::Find;
         load Thruk::Utils::Conf;
         load Thruk::Utils::Conf::Defaults;
         load Monitoring::Config;
@@ -1858,9 +1859,11 @@ sub _object_enable {
 sub _object_delete {
     my($c, $obj) = @_;
 
-    my $refs = $c->{'obj_db'}->get_references($obj);
+    my $refs       = $c->{'obj_db'}->get_references($obj);
+    my $other_refs = _get_non_config_tool_references($c, $obj);
+
     if(!$c->req->parameters->{'force'}) {
-        if(scalar keys %{$refs}) {
+        if(scalar keys %{$refs} || scalar keys %{$other_refs}) {
             return $c->redirect_to('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id().'&show_force=1');
         }
     }
@@ -2404,7 +2407,7 @@ sub _host_list_services {
 ##########################################################
 sub _list_references {
     my($c, $obj) = @_;
-    _gather_references($c, $obj);
+    _gather_references($c, $obj, 1);
     $c->stash->{'template'} = 'conf_objects_listref.tt';
     return;
 }
@@ -2522,18 +2525,21 @@ sub _check_external_reload {
 
 ##########################################################
 sub _gather_references {
-    my($c, $obj) = @_;
+    my($c, $obj, $include_outside) = @_;
 
     #&timing_breakpoint('_gather_references');
 
     my($incoming, $outgoing) = $c->{'obj_db'}->gather_references($obj);
+
+    $c->stash->{'other_refs'} = {} unless $c->stash->{'other_refs'};
+    $c->stash->{'other_refs'} = _get_non_config_tool_references($c, $obj) if $include_outside;
 
     # linked from delete object page?
     $c->stash->{'force_delete'} = $c->req->parameters->{'show_force'} ? 1 : 0;
 
     $c->stash->{'incoming'} = $incoming;
     $c->stash->{'outgoing'} = $outgoing;
-    $c->stash->{'has_refs'} = 1 if(scalar keys %{$incoming} || scalar keys %{$outgoing});
+    $c->stash->{'has_refs'} = 1 if(scalar keys %{$incoming} || scalar keys %{$outgoing} || scalar keys %{$c->stash->{'other_refs'}});
 
     #&timing_breakpoint('_gather_references done');
 
@@ -2556,6 +2562,42 @@ sub _is_extra_file {
     }
     return 0;
 }
+
+##########################################################
+sub _get_non_config_tool_references {
+    my($c, $obj) = @_;
+    my $other_refs = {};
+    if($obj->get_type() eq 'host') {
+        Thruk::Utils::Find::get_host_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    if($obj->get_type() eq 'service') {
+        # expand hosts and hostgroups and iterate over all of them
+        my $all_hosts = {};
+        for my $host_name (@{$obj->{'conf'}->{'host_name'}}) {
+            $all_hosts->{$host_name} = 1;
+        }
+        for my $hostgroup_name (@{$obj->{'conf'}->{'hostgroup_name'}}) {
+            my $groups = $c->{'db'}->get_hostgroups(filter => [{ name => $hostgroup_name }], backend => [$c->stash->{'param_backend'}], columns => [qw/name members/]);
+            for my $group (@{$groups}) {
+                for my $host_name (@{$group->{'members'}}) {
+                    $all_hosts->{$host_name} = 1;
+                }
+            }
+        }
+        for my $host_name (sort keys %{$all_hosts}) {
+            Thruk::Utils::Find::get_service_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $host_name, $obj->get_primary_name() || $obj->get_name());
+        }
+    }
+    if($obj->get_type() eq 'contact') {
+        Thruk::Utils::Find::get_contact_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    $other_refs = $other_refs->{$c->stash->{'param_backend'}};
+    delete $other_refs->{'Livestatus'};
+    delete $other_refs->{'Configuration'};
+
+    return($other_refs);
+}
+
 ##########################################################
 
 =head1 AUTHOR

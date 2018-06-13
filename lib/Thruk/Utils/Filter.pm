@@ -1136,6 +1136,20 @@ sub set_time_locale {
     return("");
 }
 
+##############################################
+
+=head2 lc
+
+  lower case text
+
+returns lower case string
+
+=cut
+sub lc {
+    my($text) = @_;
+    return(lc($text));
+}
+
 ########################################
 
 1;

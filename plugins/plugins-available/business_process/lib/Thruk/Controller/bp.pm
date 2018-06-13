@@ -51,6 +51,7 @@ sub index {
     $c->stash->{editmode}              = 0;
     $c->stash->{testmode}              = $c->req->parameters->{'testmode'} || 0;
     $c->stash->{debug}                 = $c->req->parameters->{'debug'} || 0;
+    $c->stash->{highlight_node}        = $c->req->parameters->{'node'} || '';
     $c->stash->{testmodes}             = {};
     $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
     $c->stash->{'objects_save_file'}      = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'}      || '';

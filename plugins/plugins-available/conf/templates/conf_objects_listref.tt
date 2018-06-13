@@ -85,6 +85,30 @@
   [% END %]
   [% END %]
 
+
+  [% IF other_refs.keys.size > 0 %]
+  <tr>
+    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Outside references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
+  </tr>
+  [% IF force_delete %]
+  <tr>
+    <td class='dataVar' colspan=2 style="text-align: center;">These references should be checked manually.</td>
+  </tr>
+  [% END %]
+  [% FOREACH t = other_refs.keys.sort %]
+  <tr>
+    <td class='dataVar'>[% t %]</td>
+    <td class='dataVar'>
+      <ul>
+      [% FOREACH r = other_refs.$t %]
+        <li><a href="[% r.link %]">[% r.name %] ([% r.details %])</a></li>
+      [% END %]
+      </ul>
+    </td>
+  </tr>
+  [% END %]
+  [% END %]
+
 </table>
 [% IF force_delete %]
 </form>

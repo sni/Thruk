@@ -25,6 +25,7 @@ next:
           - Config Tool:
             - make command line a textarea
             - use separate edit sessions for each user
+            - list outside references when deleting hosts and services like dashboards or reports
             - fix adding custom variables from extra_custom_var
           - Business Process:
             - calculate results parallel if there are many bps
@@ -34,6 +35,8 @@ next:
             - add datetime format options
             - use time locale for reports
             - optionally use host / servicename from alias, displayname or customvariable
+          - CLI
+            - add new 'find' command to search for object references
 
 2.20-2   Wed Mar 14 00:12:24 CET 2018
           - add optional debug switch for admin users
