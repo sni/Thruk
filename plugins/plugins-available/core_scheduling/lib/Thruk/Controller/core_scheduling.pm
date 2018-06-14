@@ -173,7 +173,11 @@ sub reschedule_everything {
     Thruk::Controller::cmd::bulk_send($c, $commands2send);
 
 
-    $c->stash->{message} = $c->stash->{scheduled}.' hosts and services rescheduled successfully';
+    if($c->stash->{scheduled} == 0) {
+        $c->stash->{message} = 'All hosts and services are perfectly rebalanced already.';
+    } else {
+        $c->stash->{message} = $c->stash->{scheduled}.' hosts and services rebalanced successfully';
+    }
 
     return;
 }

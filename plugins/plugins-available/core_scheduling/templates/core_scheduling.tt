@@ -95,7 +95,7 @@
   </tr>
 </table>
 <br>
-<a href="#" id="reschedule_btn" class="button wzd_button">balance all hosts and services</a>
+<a href="#" id="reschedule_btn" class="wzd_button">balance all hosts and services</a>
 
 </td></tr></table>
 
