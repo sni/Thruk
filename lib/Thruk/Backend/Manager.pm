@@ -380,8 +380,8 @@ sub get_scheduling_queue {
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}],
                                                  }, $options{'servicefilter'}],
-                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked/,
-                                                    $options{'servicefilter'} ? qw/host_active_checks_enabled host_check_options host_last_check host_next_check host_check_interval host_is_executing host_has_been_checked/ :()],
+                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked in_check_period/,
+                                                    $options{'servicefilter'} ? qw/host_active_checks_enabled host_check_options host_last_check host_next_check host_check_interval host_is_executing host_has_been_checked host_in_check_period/ :()],
                                       );
     my($hosts);
     if($options{'servicefilter'}) {
@@ -401,6 +401,7 @@ sub get_scheduling_queue {
                 check_interval          => $s->{'host_check_interval'},
                 is_executing            => $s->{'host_is_executing'},
                 has_been_checked        => $s->{'host_has_been_checked'},
+                in_check_period         => $s->{'host_in_check_period'},
             };
             $uniq->{$s->{'host_name'}} = $host;
         }
@@ -411,7 +412,7 @@ sub get_scheduling_queue {
                                                              { 'check_options' => { '!=' => '0' }}],
                                                   }, $options{'hostfilter'}],
                                          options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
-                                         columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked/],
+                                         columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked in_check_period/],
                                         );
     }
 
