@@ -95,7 +95,7 @@ function remove_conf_attribute(key, nr) {
 function init_conf_tool_buttons() {
     jQuery('INPUT.conf_button').button();
     jQuery('BUTTON.conf_button').button();
-    jQuery('.radioset').buttonset();
+    jQuery('.radioset').controlgroup();
 
     jQuery('.conf_save_button').button({
         icons: {primary: 'ui-save-button'}
@@ -121,6 +121,13 @@ function init_conf_tool_buttons() {
     jQuery('.conf_next_button').button({
         icons: {primary: 'ui-r-arrow-button'}
     })
+
+    jQuery(".radio_on").checkboxradio({
+        icon: false
+    });
+    jQuery(".radio_off").checkboxradio({
+        icon: false
+    });
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}
