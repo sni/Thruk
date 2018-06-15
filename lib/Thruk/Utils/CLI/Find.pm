@@ -131,6 +131,12 @@ sub cmd {
         $msg .= "\n";
     }
 
+    if(!$msg) {
+        $msg .= "cannot find any reference for ".$type." '".$name."'";
+        $msg .= " - '".$name2."'" if $name2;
+        $msg .= "\n";
+    }
+
     $c->stats->profile(end => "_cmd_find($action)");
     return($msg, $rc);
 }
