@@ -45,6 +45,37 @@ sub get_host_matches {
 
 ##############################################
 
+=head2 get_hostgroup_matches
+
+    returns all matches for given hostgroup
+
+=cut
+sub get_hostgroup_matches {
+    my($c, $peer_key, $config_backends, $res, $name) = @_;
+
+    # find by livestatus
+    _add_livestatus_matches($c, $peer_key, 'hostgroup', $res, $name);
+
+    # get hostgroup from config tool
+    _add_config_tool_matches($c, $peer_key, 'hostgroup', $config_backends, $res, $name);
+
+    # get hostgroup from business processes
+    _add_bp_matches($c, $peer_key, 'hostgroup', $res, $name);
+
+    # get hostgroup from reports
+    _add_report_matches($c, $peer_key, 'hostgroup', $res, $name);
+
+    # get hostgroup from panorama dashboards
+    _add_panorama_matches($c, $peer_key, 'hostgroup', $res, $name);
+
+    # get hostgroup from recurring downtimes
+    _add_recurring_downtime_matches($c, $peer_key, 'hostgroup', $res, $name);
+
+    return;
+}
+
+##############################################
+
 =head2 get_service_matches
 
     returns all matches for given service
@@ -70,6 +101,37 @@ sub get_service_matches {
 
     # get service from recurring downtimes
     _add_recurring_downtime_matches($c, $peer_key, 'service', $res, $description, $host_name);
+
+    return;
+}
+
+##############################################
+
+=head2 get_servicegroup_matches
+
+    returns all matches for given servicegroup
+
+=cut
+sub get_servicegroup_matches {
+    my($c, $peer_key, $config_backends, $res, $name) = @_;
+
+    # find by livestatus
+    _add_livestatus_matches($c, $peer_key, 'servicegroup', $res, $name);
+
+    # get servicegroup from config tool
+    _add_config_tool_matches($c, $peer_key, 'servicegroup', $config_backends, $res, $name);
+
+    # get servicegroup from business processes
+    _add_bp_matches($c, $peer_key, 'servicegroup', $res, $name);
+
+    # get servicegroup from reports
+    _add_report_matches($c, $peer_key, 'servicegroup', $res, $name);
+
+    # get servicegroup from panorama dashboards
+    _add_panorama_matches($c, $peer_key, 'servicegroup', $res, $name);
+
+    # get servicegroup from recurring downtimes
+    _add_recurring_downtime_matches($c, $peer_key, 'servicegroup', $res, $name);
 
     return;
 }
@@ -129,8 +191,14 @@ sub _add_livestatus_matches {
         if($type eq 'host') {
             $matches = $c->{'db'}->get_hosts(filter => [{ name => $name }], backend => [$peer_key]);
         }
+        elsif($type eq 'hostgroup') {
+            $matches = $c->{'db'}->get_hostgroups(filter => [{ name => $name }], backend => [$peer_key]);
+        }
         elsif($type eq 'service') {
             $matches = $c->{'db'}->get_services(filter => [{ host_name => $name2, description => $name }], backend => [$peer_key]);
+        }
+        elsif($type eq 'servicegroup') {
+            $matches = $c->{'db'}->get_hostgroups(filter => [{ name => $name }], backend => [$peer_key]);
         }
         elsif($type eq 'contact') {
             $matches = $c->{'db'}->get_contacts(filter => [{ name => $name }], backend => [$peer_key]);
@@ -218,23 +286,23 @@ sub _add_bp_matches {
         # check direct node matches
         my $found_direct = 0;
         for my $n (@{$bp->{'nodes'}}) {
-            if($type eq 'host' && $n->{'host'} eq $name) {
-                $found_direct++;
-                _add_res($res, $peer_key, 'Business Process', {
-                    name    => $bp->{'name'},
-                    details => sprintf('referenced in business process node \'%s\' hostname',
-                                    $n->{'label'},
-                                ),
-                    link    => 'bp.cgi?action=details&bp='.$bp->{'id'}.'&node='.$n->{'id'},
-                });
-            }
-
             if($type eq 'service' && $n->{'host'} eq $name2 && $n->{'service'} eq $name) {
                 $found_direct++;
                 _add_res($res, $peer_key, 'Business Process', {
                     name    => $bp->{'name'},
                     details => sprintf('referenced in business process node \'%s\' service',
                                     $n->{'label'},
+                                ),
+                    link    => 'bp.cgi?action=details&bp='.$bp->{'id'}.'&node='.$n->{'id'},
+                });
+            }
+             elsif($n->{$type} eq $name) {
+                $found_direct++;
+                _add_res($res, $peer_key, 'Business Process', {
+                    name    => $bp->{'name'},
+                    details => sprintf('referenced in business process node \'%s\' %s',
+                                    $n->{'label'},
+                                    $type,
                                 ),
                     link    => 'bp.cgi?action=details&bp='.$bp->{'id'}.'&node='.$n->{'id'},
                 });
@@ -262,6 +330,8 @@ sub _add_bp_matches {
             if(
                 ($type eq 'host'    && ($livedata->{'hosts'}->{$name} || $livedata->{'services'}->{$name}))
                 || ($type eq 'service' && $livedata->{'services'}->{$name2}->{$name})
+                || ($type eq 'hostgroup' && $livedata->{'hostgroups'}->{$name})
+                || ($type eq 'servicegroup' && $livedata->{'servicegroups'}->{$name})
             ) {
                 _add_res($res, $peer_key, 'Business Process', {
                     name    => $bp->{'name'},
@@ -285,11 +355,15 @@ sub _add_report_matches {
     require Thruk::Utils::Reports;
     my $reports = Thruk::Utils::Reports::get_report_list($c, 1);
     for my $r (@{$reports}) {
-        my $hosts    = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'host'} || '']));
-        my $services = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'service'} || '']));
+        my $hosts         = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'host'} || '']));
+        my $hostgroups    = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'hostgroup'} || '']));
+        my $services      = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'service'} || '']));
+        my $servicegroups = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'servicegroup'} || '']));
         if(
                ($type eq 'host' && $hosts->{$name})
+            || ($type eq 'hostgroup' && $hostgroups->{$name})
             || ($type eq 'service' && $hosts->{$name2} && $services->{$name})
+            || ($type eq 'servicegroup' && $servicegroups->{$name})
          ) {
             _add_res($res, $peer_key, 'Reports', {
                 name    => $r->{'name'},
@@ -329,23 +403,23 @@ sub _add_panorama_matches {
             next unless $key =~ m/^tabpan\-/mx;
             next unless(ref $d->{$key} eq 'HASH' && $d->{$key}->{'xdata'} && $d->{$key}->{'xdata'}->{'general'});
 
-            if($type eq 'host') {
-                if($d->{$key}->{'xdata'}->{'general'}->{'host'} && $d->{$key}->{'xdata'}->{'general'}->{'host'} eq $name) {
-                    _add_res($res, $peer_key, 'Panorama', {
-                        name    => $d->{'tab'}->{'xdata'}->{'title'},
-                        details => sprintf('host referenced in dashboard \'%s\'',
-                                        $d->{'tab'}->{'xdata'}->{'title'},
-                                    ),
-                        link    => 'panorama.cgi?map='.$d->{'nr'},
-                    });
-                }
-            }
             if($type eq 'service') {
                 if(   $d->{$key}->{'xdata'}->{'general'}->{'host'} && $d->{$key}->{'xdata'}->{'general'}->{'host'} eq $name2
                    && $d->{$key}->{'xdata'}->{'general'}->{'service'} && $d->{$key}->{'xdata'}->{'general'}->{'service'} eq $name) {
                     _add_res($res, $peer_key, 'Panorama', {
                         name    => $d->{'tab'}->{'xdata'}->{'title'},
                         details => sprintf('service referenced in dashboard \'%s\'',
+                                        $d->{'tab'}->{'xdata'}->{'title'},
+                                    ),
+                        link    => 'panorama.cgi?map='.$d->{'nr'},
+                    });
+                }
+            } else {
+                if($d->{$key}->{'xdata'}->{'general'}->{$type} && $d->{$key}->{'xdata'}->{'general'}->{$type} eq $name) {
+                    _add_res($res, $peer_key, 'Panorama', {
+                        name    => $d->{'tab'}->{'xdata'}->{'title'},
+                        details => sprintf('%s referenced in dashboard \'%s\'',
+                                        $type,
                                         $d->{'tab'}->{'xdata'}->{'title'},
                                     ),
                         link    => 'panorama.cgi?map='.$d->{'nr'},
@@ -384,12 +458,26 @@ sub _add_recurring_downtime_matches {
             });
         }
     }
-    if($type eq 'service') {
+    elsif($type eq 'service') {
         my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 0, 0, $name2, $name);
         for my $d (@{$downtimes}) {
             _add_res($res, $peer_key, 'Recurring Downtime', {
                 name    => $d->{'comment'},
                 details => sprintf('service listed in recurring downtime \'%s\'',
+                                $d->{'comment'},
+                            ),
+                link    => 'extinfo.cgi?type=6&recurring=edit&nr='.$d->{'file'},
+            });
+        }
+    } else {
+        my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 0, 0);
+        for my $d (@{$downtimes}) {
+            my $list = Thruk::Utils::array2hash($d->{$type} || []);
+            next unless $list->{$name};
+            _add_res($res, $peer_key, 'Recurring Downtime', {
+                name    => $d->{'comment'},
+                details => sprintf('%s listed in recurring downtime \'%s\'',
+                                $type,
                                 $d->{'comment'},
                             ),
                 link    => 'extinfo.cgi?type=6&recurring=edit&nr='.$d->{'file'},

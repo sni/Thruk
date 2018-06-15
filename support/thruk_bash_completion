@@ -10,21 +10,6 @@ _thruk_sub_commands() {
     return
 }
 
-_thruk_list_hosts() {
-    thruk host list
-    return
-}
-
-_thruk_list_services() {
-    thruk service $1
-    return
-}
-
-_thruk_list_contacts() {
-    thruk contact list
-    return
-}
-
 _thruk()
 {
     COMPREPLY=()
@@ -99,11 +84,11 @@ _thruk()
 
         # thruk command ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
-            opts="$(_thruk_list_hosts)"
+            opts="$(thruk host list)"
 
         # thruk command <host> ...
         elif [ ${#subcmdargs[@]} -eq 1 ]; then
-            opts="$(_thruk_list_services ${subcmdargs[0]})"
+            opts="$(thruk service ${subcmdargs[0]})"
         fi
 
     # thruk service ...
@@ -111,7 +96,7 @@ _thruk()
 
         # thruk service ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
-            opts="$(_thruk_list_hosts)"
+            opts="$(thruk host list)"
         fi
 
     # thruk find ...
@@ -119,23 +104,31 @@ _thruk()
 
         # thruk command ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
-            opts="host service contact"
+            opts="host hostgroup service servicegroup contact"
 
         # thruk find contact ...
         elif [ ${subcmdargs[0]} = "contact" ]; then
-            opts="$(_thruk_list_contacts)"
+            opts="$(thruk contact list)"
 
         # thruk find host ...
         elif [ ${subcmdargs[0]} = "host" ]; then
-            opts="$(_thruk_list_hosts)"
+            opts="$(thruk host list)"
+
+        # thruk find hostgroup ...
+        elif [ ${subcmdargs[0]} = "hostgroup" ]; then
+            opts="$(thruk hostgroup list)"
 
         elif [ ${subcmdargs[0]} = "service" -a ${#subcmdargs[@]} -eq 1 ]; then
-            opts="$(_thruk_list_hosts)"
+            opts="$(thruk host list)"
 
         # thruk find service <host> ...
         elif [ ${subcmdargs[0]} = "service" -a ${#subcmdargs[@]} -eq 2 ]; then
-            opts="$(_thruk_list_services ${subcmdargs[1]})"
+            opts="$(thruk service ${subcmdargs[1]})"
         fi
+
+        # thruk find servicegroup ...
+        elif [ ${subcmdargs[0]} = "servicegroup" ]; then
+            opts="$(thruk servicegroup list)"
 
     else
         local SUBCOMMANDS=$(_thruk_sub_commands | tr ' ' '|')

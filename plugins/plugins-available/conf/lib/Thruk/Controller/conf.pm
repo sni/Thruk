@@ -2570,7 +2570,10 @@ sub _get_non_config_tool_references {
     if($obj->get_type() eq 'host') {
         Thruk::Utils::Find::get_host_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
     }
-    if($obj->get_type() eq 'service') {
+    elsif($obj->get_type() eq 'hostgroup') {
+        Thruk::Utils::Find::get_hostgroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    elsif($obj->get_type() eq 'service') {
         # expand hosts and hostgroups and iterate over all of them
         my $all_hosts = {};
         for my $host_name (@{$obj->{'conf'}->{'host_name'}}) {
@@ -2588,7 +2591,10 @@ sub _get_non_config_tool_references {
             Thruk::Utils::Find::get_service_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $host_name, $obj->get_primary_name() || $obj->get_name());
         }
     }
-    if($obj->get_type() eq 'contact') {
+    elsif($obj->get_type() eq 'servicegroup') {
+        Thruk::Utils::Find::get_servicegroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    elsif($obj->get_type() eq 'contact') {
         Thruk::Utils::Find::get_contact_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
     }
     $other_refs = $other_refs->{$c->stash->{'param_backend'}};
