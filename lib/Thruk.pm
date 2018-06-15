@@ -98,6 +98,17 @@ sub startup {
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
+                    path         => sub {
+                                          my $p = Thruk::Context::translate_request_path($_, $class->config);
+                                          return unless $p =~ m%^/thruk/plugins/%mx;
+                                          return unless $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf|svg|woff|woff2|eot|)$/mx;
+                                          $_ =~ s%^/thruk/plugins/([^/]+)/%$1/root/%mx;
+                                          return 1;
+                                        },
+                    root         => './plugins/plugins-enabled/',
+                    pass_through => 1,
+        );
+        $app = Plack::Middleware::Static->wrap($app,
                     path         => sub { my $p = Thruk::Context::translate_request_path($_, $class->config);
                                           $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf|svg|woff|woff2|eot|)$/mx;
                                         },
