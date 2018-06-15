@@ -1,0 +1,26 @@
+{
+   "backends" : [],
+   "childoptions" : 0,
+   "comment" : "automatic test downtime",
+   "duration" : "120",
+   "fixed" : "1",
+   "flex_range" : "720",
+   "host" : [
+      "localhost"
+   ],
+   "hostgroup" : [],
+   "schedule" : [
+      {
+         "cust" : "",
+         "day" : "1",
+         "hour" : "0",
+         "minute" : "0",
+         "month_day" : "1st_Monday",
+         "type" : "month",
+         "week_day" : ""
+      }
+   ],
+   "service" : [],
+   "servicegroup" : [],
+   "target" : "host"
+}

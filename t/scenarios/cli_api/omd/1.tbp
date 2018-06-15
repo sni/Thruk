@@ -1,0 +1,30 @@
+{
+   "filter" : [],
+   "name" : "Test BP",
+   "nodes" : [
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "create_obj" : 1,
+         "depends" : [
+            "node2"
+         ],
+         "filter" : [],
+         "function" : "worst()",
+         "id" : "node1",
+         "label" : "Test BP"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status('localhost', 'Http', '=')",
+         "id" : "node2",
+         "label" : "Host Node"
+      }
+   ],
+   "rankDir" : "TB",
+   "state_type" : "both",
+   "template" : ""
+}

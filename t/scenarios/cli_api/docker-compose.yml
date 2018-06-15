@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  omd:
+    build: omd/
+    ports:
+        - "60080:80"
+        - "60443:443"
+        - "60557:6557"
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ../../../:/thruk:ro
+        - .:/test:ro
