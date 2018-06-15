@@ -142,7 +142,8 @@ sub _logfile_checks  {
     for my $log ($c->config->{'var_path'}.'/cron.log',
                  $c->config->{'log4perl_conf_in_use'},
                 ) {
-        next unless $log; # may not be set
+        next unless $log;    # may not be set
+        next unless -e $log; # may not exist either
         # count errors
         my @out = `grep 'ERROR' $log`;
         $details .= sprintf("  - %s: ", $log);
