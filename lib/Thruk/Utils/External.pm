@@ -758,6 +758,12 @@ sub _finished_job_page {
 
         return;
     }
+
+    if(defined $forward) {
+        $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
+        return $c->redirect_to($forward);
+    }
+
     $c->stash->{text}     = $out;
     $c->stash->{template} = 'passthrough.tt';
     return;
