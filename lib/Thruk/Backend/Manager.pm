@@ -1715,8 +1715,13 @@ sub _get_result_lmd {
             die("did not get a valid response for at least any site");
         }
     }
+    # REMOVE AFTER: 01.01.2020
     if($meta && $meta->{'total'}) {
         $totalsize = $meta->{'total'};
+    }
+    # </REMOVE AFTER>
+    if($meta && $meta->{'total_count'}) {
+        $totalsize = $meta->{'total_count'};
     }
 
     if($function eq 'get_hostgroups' || $function eq 'get_servicegroups' || ($type && (lc($type) eq 'file' || lc($type) eq 'stats'))) {
