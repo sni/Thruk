@@ -11,7 +11,7 @@
             <tr>
               <th width="100">User Profile:</th>
               <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="change theme" width=16 height=16 style="vertical-align:sub;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="show user profile" width=16 height=16 style="vertical-align:sub;">
                 <input type="button" name="submit" value="show user profile" onClick="window.location='[% url_prefix %]cgi-bin/user.cgi'; return false;" class="pref_pane_short_inp">
               </td>
             </tr>
