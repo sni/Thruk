@@ -37,8 +37,7 @@ parse given date and return timestamp
 
 =cut
 sub parse_date {
-    my $c      = shift;
-    my $string = shift;
+    my($c, $string) = @_;
     my $timestamp;
     eval {
         $timestamp = Thruk::Utils::_parse_date($c, $string);
