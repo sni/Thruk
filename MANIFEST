@@ -1897,6 +1897,7 @@ t/scenarios/cli_api/omd/1.tbp
 t/scenarios/cli_api/omd/1.tsk
 t/scenarios/cli_api/omd/Dockerfile
 t/scenarios/cli_api/omd/playbook.yml
+t/scenarios/cli_api/t/reschedule_all.sh
 t/scenarios/cli_api/t/test.sh
 t/scenarios/cli_api/t/thruk_cmd_cli.t
 t/scenarios/cli_api/test.sh

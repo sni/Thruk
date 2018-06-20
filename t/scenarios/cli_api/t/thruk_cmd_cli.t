@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 96;
+plan tests => 108;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -45,10 +45,33 @@ TestUtils::test_command({
 });
 
 ###########################################################
+# thruk bp
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk bp commit',
+    like => ['/OK - wrote 1 business process/'],
+});
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk bp all',
+    like => ['/OK - 1 business processes updated in/'],
+});
+
+###########################################################
+# some tests require non-pending services
+TestUtils::test_command({
+    cmd     => '/test/t/reschedule_all.sh',
+    like    => ['/OK/', '/cmd: COMMAND/', '/SCHEDULE_FORCED_HOST_CHECK/', '/SCHEDULE_FORCED_SVC_CHECK/'],
+});
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk -A omdadmin url "status.cgi?host=all&servicestatustypes=1&style=detail"',
+    like    => ['/Current Network Status/'],
+    waitfor => '0\ Matching\ Service\ Entries',
+});
+
+###########################################################
 # thruk plugin
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk plugin list',
-    like => ['/E\s+business_process/', '/E\s+conf/', '/E\s+reports2/', '/E\s+panorama/',],
+    like => ['/E\s+business_process/', '/E\s+conf/', '/E\s+reports2/', '/E\s+panorama/'],
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk plugin enable core_scheduling',
@@ -102,23 +125,12 @@ TestUtils::test_command({
 # thruk core_scheduling
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk core_scheduling fix',
-    like    => ['/\d+ hosts and services rescheduled successfully/'],
+    like    => ['/hosts and services rebalanced successfully/'],
     errlike => ['/.*/'], # may print executed commands to stderr
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk plugin disable core_scheduling',
     like => ['/disabled plugin core_scheduling/'],
-});
-
-###########################################################
-# thruk bp
-TestUtils::test_command({
-    cmd  => '/usr/bin/env thruk bp commit',
-    like => ['/OK - wrote 1 business process/'],
-});
-TestUtils::test_command({
-    cmd  => '/usr/bin/env thruk bp all',
-    like => ['/OK - 1 business processes updated in/'],
 });
 
 ###########################################################
