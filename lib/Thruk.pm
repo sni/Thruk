@@ -152,7 +152,7 @@ sub _build_app {
     }
     #&timing_breakpoint('startup() cgi.cfg parsed');
 
-    $self->config->{'_original_timezone'} = $ENV{'TZ'};
+    chomp($self->config->{'_original_timezone'} = $ENV{'TZ'} || `date +%Z`);
     $self->_create_secret_file();
     $self->set_timezone();
     $self->_set_ssi();
@@ -351,11 +351,7 @@ sub _dispatcher {
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
 
     ## no critic
-    if(defined $c->config->{'_original_timezone'}) {
-        $ENV{'TZ'} = $c->config->{'_original_timezone'};
-    } else {
-        delete $ENV{'TZ'};
-    }
+    $ENV{'TZ'} = $c->config->{'_original_timezone'};
     ## use critic
     POSIX::tzset();
 
@@ -613,7 +609,7 @@ sub _create_secret_file {
 sub set_timezone {
     my($self, $timezone) = @_;
     if(!defined $timezone) {
-        $timezone = $self->config->{'server_timezone'} || $self->config->{'use_timezone'};
+        $timezone = $self->config->{'server_timezone'} || $self->config->{'use_timezone'} || $self->config->{'_original_timezone'};
     }
     if(!$self->config->{'_server_timezone'}) {
         POSIX::tzset();
@@ -621,17 +617,10 @@ sub set_timezone {
         $self->config->{'_server_timezone'} = $dst;
     }
     require POSIX;
-    if($timezone) {
-        ## no critic
-        $ENV{'TZ'} = $timezone;
-        ## use critic
-        POSIX::tzset();
-    } elsif($ENV{'TZ'}) {
-        ## no critic
-        delete $ENV{'TZ'};
-        ## use critic
-        POSIX::tzset();
-    }
+    ## no critic
+    $ENV{'TZ'} = $timezone;
+    ## use critic
+    POSIX::tzset();
     return;
 }
 
