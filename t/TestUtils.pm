@@ -627,11 +627,13 @@ sub wait_for_job {
   needs test hash
   {
     cmd     => command line to execute
-    exit    => expected exit code
+    exit    => expected exit code (set to undef to ignore exit code verification)
     like    => (list of) regular expressions which have to match stdout
     errlike => (list of) regular expressions which have to match stderr, default: empty
+    unlike  => (list of) regular expressions which must not match stdout
     sleep   => time to wait after executing the command
     env     => hash with extra environment variables
+    waitfor => wait till regex occurs (max 120sec)
   }
 
 =cut
@@ -654,6 +656,45 @@ sub test_command {
 
     my($prg,$arg) = split(/\s+/, $test->{'cmd'}, 2);
     my $t = Test::Cmd->new(prog => $prg, workdir => '') or die($!);
+
+    # wait for something?
+    if(defined $test->{'waitfor'}) {
+        my $start   = time();
+        my $now     = time();
+        my $waitfor = $test->{'waitfor'};
+        my $found   = 0;
+        local $test->{'exit'}    = undef;
+        local $test->{'like'}    = '/.*/';
+        local $test->{'errlike'} = '/.*/';
+        my $expr = '';
+        while($now < $start + 30) {
+            alarm(15);
+            $expr = $waitfor;
+            eval {
+                local $SIG{ALRM} = sub { die "timeout on cmd: ".$test->{'cmd'}."\n" };
+                $t->run(args => $arg, stdin => $test->{'stdin'});
+            };
+            alarm(0);
+
+            if($waitfor =~ m/^\!/) {
+                $expr =~ s/^\!//mx;
+                if($t->stdout !~ m/$expr/mx) {
+                    ok(1, "content ".$expr." disappeared after ".($now - $start)."seconds");
+                    $found = 1;
+                    last;
+                }
+            }
+            elsif($t->stdout =~ m/$waitfor/mx) {
+                ok(1, "content ".$expr." found after ".($now - $start)."seconds");
+                $found = 1;
+                last;
+            }
+            sleep(1);
+            $now = time();
+        }
+        fail("content ".$expr." did not occur within 120 seconds") unless $found;
+    }
+
     alarm(300);
     eval {
         local $SIG{ALRM} = sub { die "timeout on cmd: ".$test->{'cmd'}."\n" };
@@ -675,8 +716,15 @@ sub test_command {
 
     # matches on stdout?
     if(defined $test->{'like'}) {
-        for my $expr (@{_list($test->{'like'})}) {
+        for my $expr (ref $test->{'like'} eq 'ARRAY' ? @{$test->{'like'}} : $test->{'like'} ) {
             like($t->stdout, $expr, "stdout like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
+        }
+    }
+
+    # unlike matches on stdout?
+    if(defined $test->{'unlike'}) {
+        for my $expr (ref $test->{'unlike'} eq 'ARRAY' ? @{$test->{'unlike'}} : $test->{'unlike'} ) {
+            unlike($t->stdout, $expr, "stdout unlike ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
         }
     }
 
