@@ -3,7 +3,7 @@
 [% IF force_delete %]
 <form action="conf.cgi" method="POST">
 [% END %]
-<table border="0" class='data conftoolobj'>
+<table border="0" class='data conftoolobj conftoolrefs'>
   [% IF force_delete %]
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
@@ -27,7 +27,7 @@
   [% FOREACH t = incoming.keys.sort %]
   <tr>
     <td class='dataVar'>[% t | ucfirst %]</td>
-    <td class='dataVar'>
+    <td class='dataVal'>
       <ul [% IF force_delete %]style="padding-left: 15px;"[% END %]>
       [% FOREACH name = incoming.$t.keys.sort %]
         [% oid = incoming.$t.$name %]
@@ -48,7 +48,7 @@
   [% IF force_delete %]
   <tr>
     <td class='dataVar'></td>
-    <td class='dataVar'>
+    <td class='dataVal'>
       select
       <input type="checkbox" name="none" value="">
       <a href="#" onclick="jQuery('input[name=ref]').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
@@ -72,7 +72,7 @@
   [% FOREACH t = outgoing.keys.sort %]
   <tr>
     <td class='dataVar'>[% t | ucfirst %]</td>
-    <td class='dataVar'>
+    <td class='dataVal'>
       <ul>
       [% FOREACH name = outgoing.$t.keys.sort %]
         <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a></li>
@@ -102,10 +102,10 @@
   [% FOREACH t = other_refs.keys.sort %]
   <tr>
     <td class='dataVar'>[% t %]</td>
-    <td class='dataVar'>
+    <td class='dataVal'>
       <ul>
       [% FOREACH r = other_refs.$t %]
-        <li><a href="[% r.link %]">[% r.name %] ([% r.details %])</a></li>
+        <li><a href="[% r.link %]" target="_blank">[% r.name %] ([% r.details %])</a></li>
       [% END %]
       </ul>
     </td>

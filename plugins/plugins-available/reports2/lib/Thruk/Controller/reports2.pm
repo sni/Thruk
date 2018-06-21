@@ -43,6 +43,7 @@ sub index {
     $c->stash->{has_debug_options}     = 1;
     $c->stash->{'phantomjs'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
+    $c->stash->{'filtered'}            = 0;
 
     my $report_nr = $c->req->parameters->{'report'};
     my $action    = $c->req->parameters->{'action'}    || 'show';
@@ -139,6 +140,9 @@ sub index {
         elsif($action eq 'download_debug') {
             return report_download_debug($c, $report_nr);
         }
+        elsif($action eq 'list') {
+            $c->stash->{'filtered'} = 1;
+        }
     }
 
     if($c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'}) {
@@ -150,7 +154,7 @@ sub index {
     $c->stash->{'debug'}          = $c->req->parameters->{'debug'} || 0;
     $c->stash->{'no_auto_reload'} = 0;
     $c->stash->{'highlight'}      = $highlight;
-    $c->stash->{'reports'}        = Thruk::Utils::Reports::get_report_list($c);
+    $c->stash->{'reports'}        = Thruk::Utils::Reports::get_report_list($c, undef, $report_nr);
 
     Thruk::Utils::ssi_include($c);
 

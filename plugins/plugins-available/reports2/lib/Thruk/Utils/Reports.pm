@@ -31,18 +31,20 @@ use Cwd qw//;
 
 =head2 get_report_list
 
-  get_report_list($c)
+  get_report_list($c, [$noauth], [$nr])
 
 return list of all reports for this user
 
 =cut
 sub get_report_list {
-    my($c, $noauth) = @_;
+    my($c, $noauth, $number_filter) = @_;
 
     my $reports = [];
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
-            my $r = _read_report_file($c, $1, undef, $noauth, 1);
+            my $nr = $1;
+            next if $number_filter && $nr != $number_filter;
+            my $r  = _read_report_file($c, $nr, undef, $noauth, 1);
             next unless $r;
             if($r->{'var'} and $r->{'var'}->{'job'}) {
                 my($is_running,$time,$percent,$message,$forward) = Thruk::Utils::External::get_status($c, $r->{'var'}->{'job'});

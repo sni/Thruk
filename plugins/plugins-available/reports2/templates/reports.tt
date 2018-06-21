@@ -25,6 +25,7 @@
 <table border=0 cellpadding=0 cellspacing=0 style="width: 1000px; margin-bottom: 3px;">
   <tr>
     <td align="left" style="padding-top: 3px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</td>
+    [% IF !filtered %]
     <td align="center">
       <div class="radioset">
         <input type="radio" id="view1" name="radio" onclick="reports_view('my')"    ><label for="view1">My</label>
@@ -32,6 +33,13 @@
         <input type="radio" id="view3" name="radio" onclick="reports_view('all')"   ><label for="view3">All</label>
       </div>
     </td>
+    [% ELSE %]
+    <td align="center">
+        <div class="radioset">
+          <input type="radio" id="view4" name="radio" onclick="document.location = 'reports2.cgi';"><label for="view4">Go back to overview</label>
+        </div>
+      </td>
+    [% END %]
     <td align="right">
       <a href="reports2.cgi?action=edit&amp;report=new" class="report_button report_edit_button" style="width: 160px;">create new report</a>
     </td>

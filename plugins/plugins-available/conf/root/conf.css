@@ -367,3 +367,11 @@ TR.tools_category TD {
   width: 400px;
   height: 80px;
 }
+
+.conftoolrefs TD.dataVar {
+  white-space: nowrap;
+}
+.conftoolrefs TD.dataVal UL {
+  padding-left: 20px;
+  margin: 0;
+}
