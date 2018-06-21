@@ -64,7 +64,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk -A omdadmin url "status.cgi?host=all&servicestatustypes=1&style=detail"',
     like    => ['/Current Network Status/'],
-    waitfor => '0\ Matching\ Service\ Entries',
+    waitfor => '(0|1)\ Matching\ Service\ Entries',
 });
 
 ###########################################################
