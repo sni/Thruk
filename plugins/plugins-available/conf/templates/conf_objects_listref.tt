@@ -99,6 +99,24 @@
     <td class='dataVar' colspan=2 style="text-align: center;">These references should be checked manually.</td>
   </tr>
   [% END %]
+  [% IF show_renamed %]
+  <tr>
+    <td class='dataVar' colspan=2 style="text-align: center; padding-top: 10px;">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
+  </tr>
+  <tr>
+    <td class='dataVar' style="text-align:center" colspan=2>
+      <br>
+      <form>
+      [% link = "conf.cgi?sub=objects&data.id=" _ object.get_id() %]
+      [% text = object.get_type() | ucfirst %]
+      [% text = "Continue editing " _ text %]
+      [% button(link, text, 'conf_button', '', '', '', 1) %]
+      </form>
+      <br>
+      <br>
+    </td>
+  </tr>
+  [% END %]
   [% FOREACH t = other_refs.keys.sort %]
   <tr>
     <td class='dataVar'>[% t %]</td>

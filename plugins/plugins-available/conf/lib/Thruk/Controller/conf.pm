@@ -1973,7 +1973,7 @@ sub _object_save {
         return $c->redirect_to($c->req->parameters->{'referer'});
     }
 
-    # try to rename outside dependencies
+    # list outside dependencies after renaming object
     if(!$new && $c->stash->{'data_name'} ne $old_obj->get_name()) {
         my $other_refs = _get_non_config_tool_references($c, $old_obj);
         if(scalar keys %{$other_refs} > 0) {
@@ -1982,6 +1982,7 @@ sub _object_save {
             _list_references($c, $old_obj);
             $c->stash->{'show_incoming'} = 0;
             $c->stash->{'show_outgoing'} = 0;
+            $c->stash->{'show_renamed'}  = 1;
             return;
         }
     }
@@ -2436,6 +2437,7 @@ sub _list_references {
     _gather_references($c, $obj, 1);
     $c->stash->{'show_incoming'} = 1;
     $c->stash->{'show_outgoing'} = 1;
+    $c->stash->{'show_renamed'}  = 0;
     $c->stash->{'template'}      = 'conf_objects_listref.tt';
     return;
 }
