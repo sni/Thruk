@@ -20,6 +20,7 @@
     </td>
   </tr>
   [% END %]
+  [% IF show_incoming %]
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
   </tr>
@@ -61,7 +62,9 @@
     <td class='dataVar' colspan=2 style="text-align: center;">No incoming references found</td>
   </tr>
   [% END %]
+  [% END %]
 
+  [% IF show_outgoing %]
 [% IF !force_delete %]
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Outgoing references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
@@ -82,6 +85,7 @@
   <tr>
     <td class='dataVar' colspan=2 style="text-align: center;">No outgoing references found</td>
   </tr>
+  [% END %]
   [% END %]
   [% END %]
 

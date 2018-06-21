@@ -1,8 +1,8 @@
-package Thruk::Utils::Find;
+package Thruk::Utils::References;
 
 =head1 NAME
 
-Thruk::Utils::Find - Find objects and references by name
+Thruk::Utils::References - Gather objects references by name
 
 =cut
 

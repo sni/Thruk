@@ -36,7 +36,7 @@ The find command looks for references for given objects
 
 use warnings;
 use strict;
-use Thruk::Utils::Find;
+use Thruk::Utils::References;
 
 ##############################################
 
@@ -93,24 +93,24 @@ sub cmd {
 
         if($type eq 'host') {
             return("ERROR: please specify hostname", 1) unless $name;
-            Thruk::Utils::Find::get_host_matches($c, $peer_key, $config_backends, $res, $name);
+            Thruk::Utils::References::get_host_matches($c, $peer_key, $config_backends, $res, $name);
         }
         elsif($type eq 'hostgroup') {
             return("ERROR: please specify hostgroupname", 1) unless $name;
-            Thruk::Utils::Find::get_hostgroup_matches($c, $peer_key, $config_backends, $res, $name);
+            Thruk::Utils::References::get_hostgroup_matches($c, $peer_key, $config_backends, $res, $name);
         }
         elsif($type eq 'service') {
             return("ERROR: please specify hostname", 1) unless $name;
             return("ERROR: please specify servicename", 1) unless $name2;
-            Thruk::Utils::Find::get_service_matches($c, $peer_key, $config_backends, $res, $name, $name2);
+            Thruk::Utils::References::get_service_matches($c, $peer_key, $config_backends, $res, $name, $name2);
         }
         elsif($type eq 'servicegroup') {
             return("ERROR: please specify servicegroupname", 1) unless $name;
-            Thruk::Utils::Find::get_servicegroup_matches($c, $peer_key, $config_backends, $res, $name);
+            Thruk::Utils::References::get_servicegroup_matches($c, $peer_key, $config_backends, $res, $name);
         }
         elsif($type eq 'contact') {
             return("ERROR: please specify contactname", 1) unless $name;
-            Thruk::Utils::Find::get_contact_matches($c, $peer_key, $config_backends, $res, $name);
+            Thruk::Utils::References::get_contact_matches($c, $peer_key, $config_backends, $res, $name);
         }
         else {
             return("ERROR: no such type", 1);

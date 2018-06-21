@@ -242,8 +242,8 @@ sub commit {
         if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'}) {
             my $uniq = {};
             for my $l (@{$self->{'logs'}}) {
-                $c->log->info($l) unless $uniq->{$log};
-                $uniq->{$log} = 1;
+                $c->log->info($l) unless $uniq->{$l};
+                $uniq->{$l} = 1;
             }
         }
         $self->{'logs'} = [];

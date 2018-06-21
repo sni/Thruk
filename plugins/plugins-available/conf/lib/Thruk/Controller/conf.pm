@@ -30,7 +30,7 @@ sub index {
     #&timing_breakpoint('index start');
 
     if(!$c->config->{'conf_modules_loaded'}) {
-        load Thruk::Utils::Find;
+        load Thruk::Utils::References;
         load Thruk::Utils::Conf;
         load Thruk::Utils::Conf::Defaults;
         load Monitoring::Config;
@@ -1918,7 +1918,14 @@ sub _object_save {
     my $new_comment = $c->req->parameters->{'conf_comment'} || '';
     $new_comment    =~ s/\r//gmx;
     my $new         = $c->req->parameters->{'data.id'} eq 'new' ? 1 : 0;
-    my $old_name    = $new ? '' : $obj->get_name();
+
+    # create copy of object to get references later if renamed
+    my $old_obj = Monitoring::Config::Object->new(
+        id       => $obj->get_id(),
+        type     => $obj->get_type(),
+        conf     => $obj->{'conf'},
+        coretype => $c->{'obj_db'}->{'coretype'},
+    );
 
     # save object
     $obj->{'file'}->{'errors'} = [];
@@ -1945,29 +1952,41 @@ sub _object_save {
     # only save or continue to raw edit?
     if(defined $c->req->parameters->{'send'} and $c->req->parameters->{'send'} eq 'raw edit') {
         return $c->redirect_to('conf.cgi?sub=objects&action=editor&file='.encode_utf8($obj->{'file'}->{'display'}).'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
+    }
+
+    if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
+        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed with errors', $obj->{'file'}->{'errors'} );
+        return; # return, otherwise details would not be displayed
+    }
+
+    # does the object have a name?
+    if(!defined $c->stash->{'data_name'} || $c->stash->{'data_name'} eq '') {
+        $obj->set_name('undefined');
+        $c->{'obj_db'}->_rebuild_index();
+        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
     } else {
-        if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
-            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed with errors', $obj->{'file'}->{'errors'} );
-            return; # return, otherwise details would not be displayed
-        } else {
-            # does the object have a name?
-            if(!defined $c->stash->{'data_name'} || $c->stash->{'data_name'} eq '') {
-                $obj->set_name('undefined');
-                $c->{'obj_db'}->_rebuild_index();
-                Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
-            } else {
-                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' ) if !$new;
-                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' created successfully' ) if  $new;
-            }
-        }
-        if($c->req->parameters->{'referer'}) {
-            return $c->redirect_to($c->req->parameters->{'referer'});
-        } else {
-            return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
+        Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' ) if !$new;
+        Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' created successfully' ) if  $new;
+    }
+
+    if($c->req->parameters->{'referer'}) {
+        return $c->redirect_to($c->req->parameters->{'referer'});
+    }
+
+    # try to rename outside dependencies
+    if(!$new && $c->stash->{'data_name'} ne $old_obj->get_name()) {
+        my $other_refs = _get_non_config_tool_references($c, $old_obj);
+        if(scalar keys %{$other_refs} > 0) {
+            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully. Please check external references.' );
+            $c->stash->{object} = $old_obj;
+            _list_references($c, $old_obj);
+            $c->stash->{'show_incoming'} = 0;
+            $c->stash->{'show_outgoing'} = 0;
+            return;
         }
     }
 
-    return 1;
+    return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
 
 ##########################################################
@@ -2415,7 +2434,9 @@ sub _host_list_services {
 sub _list_references {
     my($c, $obj) = @_;
     _gather_references($c, $obj, 1);
-    $c->stash->{'template'} = 'conf_objects_listref.tt';
+    $c->stash->{'show_incoming'} = 1;
+    $c->stash->{'show_outgoing'} = 1;
+    $c->stash->{'template'}      = 'conf_objects_listref.tt';
     return;
 }
 
@@ -2575,10 +2596,10 @@ sub _get_non_config_tool_references {
     my($c, $obj) = @_;
     my $other_refs = {};
     if($obj->get_type() eq 'host') {
-        Thruk::Utils::Find::get_host_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+        Thruk::Utils::References::get_host_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
     }
     elsif($obj->get_type() eq 'hostgroup') {
-        Thruk::Utils::Find::get_hostgroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+        Thruk::Utils::References::get_hostgroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
     }
     elsif($obj->get_type() eq 'service') {
         # expand hosts and hostgroups and iterate over all of them
@@ -2595,14 +2616,14 @@ sub _get_non_config_tool_references {
             }
         }
         for my $host_name (sort keys %{$all_hosts}) {
-            Thruk::Utils::Find::get_service_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $host_name, $obj->get_primary_name() || $obj->get_name());
+            Thruk::Utils::References::get_service_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $host_name, $obj->get_primary_name() || $obj->get_name());
         }
     }
     elsif($obj->get_type() eq 'servicegroup') {
-        Thruk::Utils::Find::get_servicegroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+        Thruk::Utils::References::get_servicegroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
     }
     elsif($obj->get_type() eq 'contact') {
-        Thruk::Utils::Find::get_contact_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+        Thruk::Utils::References::get_contact_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
     }
     $other_refs = $other_refs->{$c->stash->{'param_backend'}};
     delete $other_refs->{'Livestatus'};

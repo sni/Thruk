@@ -122,7 +122,7 @@ lib/Thruk/Utils/CLI/Url.pm
 lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
-lib/Thruk/Utils/Find.pm
+lib/Thruk/Utils/References.pm
 lib/Thruk/Utils/IO.pm
 lib/Thruk/Utils/LMD.pm
 lib/Thruk/Utils/Log.pm
