@@ -2629,6 +2629,27 @@ sub _get_non_config_tool_references {
     delete $other_refs->{'Livestatus'};
     delete $other_refs->{'Configuration'};
 
+    # remove duplicates
+    for my $key (sort keys %{$other_refs}) {
+        my $uniq = {};
+        my @new = ();
+        for my $entry (@{$other_refs->{$key}}) {
+            my $first = 0;
+            if(!$uniq->{$entry->{'name'}}->{$entry->{'details'}}) {
+                $uniq->{$entry->{'name'}}->{$entry->{'details'}} = 0;
+                $first = 1;
+            }
+            $uniq->{$entry->{'name'}}->{$entry->{'details'}}++;
+            push @new, $entry if $first;
+        }
+        for my $n (@new) {
+            if($uniq->{$n->{'name'}}->{$n->{'details'}} > 1) {
+                $n->{'details'} = $n->{'details'}.' ('.$uniq->{$n->{'name'}}->{$n->{'details'}}.' times)';
+            }
+        }
+        $other_refs->{$key} = \@new;
+    }
+
     return($other_refs);
 }
 
