@@ -45,7 +45,7 @@
       </td>
       <td class='dataVal' style="padding-top: 5px; text-align: center;">
         [% IF changed_files.size > 0 %]
-        <input type="submit" name="diff" value="view diff of changed files" style="width:250px" class="conf_button">
+        <input type="submit" name="diff" value="view diff of changed files" style="width:250px" class="conf_button" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
         [% ELSE %]
           There are no pending changes.
         [% END %]
@@ -90,7 +90,7 @@
       </td>
       <td class='dataVal' style="text-align: center;">
         [% IF peer_conftool.exists('obj_check_cmd') %]
-        <input type="submit" name="check" value="check your configuration changes" style="width:250px" class="conf_button">
+        <input type="submit" name="check" value="check your configuration changes" style="width:250px" class="conf_button" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
         [% ELSE %]
         please set a <i>obj_check_cmd</i> option in your peer config in your thruk_local.conf.
         [% END %]
@@ -109,7 +109,7 @@
       </td>
       <td class='dataVal' style="text-align: center;">
         [% IF peer_conftool.exists('obj_reload_cmd') %]
-        <input type="submit" name="reload" value="reload your monitoring core" style="width:250px" class="conf_button">
+        <input type="submit" name="reload" value="reload your monitoring core" style="width:250px" class="conf_button" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
         [% ELSE %]
         please set a <i>obj_reload_cmd</i> option in your peer config in your thruk_local.conf.
         [% END %]
@@ -145,6 +145,7 @@
 </div>
 
 [% IF output %]
+<a name="output"></a>
 <div align="center" style="overflow: auto;">
 <br><br>
 <table>
