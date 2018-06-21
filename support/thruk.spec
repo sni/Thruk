@@ -198,7 +198,7 @@ case "$*" in
       %endif
     %endif
 
-    rm -f /var/cache/thruk/thruk.cache
+    rm -rf /var/cache/thruk/*
     /usr/bin/thruk -a clearcache,installcron --local > /dev/null
   ;;
   1)
