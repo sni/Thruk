@@ -187,7 +187,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd    => $BIN.' selfcheck logfiles',
     like   => ['/Logfiles:/'],
-    unlike => ['/Filesystem:/', '/is writable/', '/no errors/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    unlike => ['/Filesystem:/', '/is writable/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
     exit   => undef,
 });
 
