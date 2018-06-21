@@ -1213,10 +1213,6 @@ sub _apply_config_changes {
         return unless Thruk::Utils::check_csrf($c);
         $c->{'obj_db'}->discard_changes();
         $c->stash->{'obj_model_changed'} = 1;
-        $c->log->info(sprintf("[config][%s][%s] discarded stashed changes",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
-                                $c->stash->{'remote_user'},
-        )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
         Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
     }
@@ -1822,13 +1818,15 @@ sub _object_disable {
     $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
 
-    # create log message
-    $c->log->info(sprintf("[config][%s][%s] disabled %s '%s'",
+    # store log message
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] disabled %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
-    ));
+    );
 
     return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
@@ -1845,12 +1843,14 @@ sub _object_enable {
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
 
     # create log message
-    $c->log->info(sprintf("[config][%s][%s] enabled %s '%s'",
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] enabled %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
-    ));
+    );
 
     return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
@@ -1896,12 +1896,14 @@ sub _object_delete {
     $c->stash->{'obj_model_changed'} = 1;
 
     # create log message
-    $c->log->info(sprintf("[config][%s][%s] removed %s '%s'",
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] removed %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
-    ));
+    );
 
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' removed successfully' );
     return $c->redirect_to('conf.cgi?sub=objects&type='.$obj->get_type());
@@ -1916,6 +1918,7 @@ sub _object_save {
     my $new_comment = $c->req->parameters->{'conf_comment'} || '';
     $new_comment    =~ s/\r//gmx;
     my $new         = $c->req->parameters->{'data.id'} eq 'new' ? 1 : 0;
+    my $old_name    = $new ? '' : $obj->get_name();
 
     # save object
     $obj->{'file'}->{'errors'} = [];
@@ -1928,13 +1931,15 @@ sub _object_save {
         return;
     }
 
-    $c->log->info(sprintf("[config][%s][%s] %s %s '%s'",
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] %s %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $new ? 'created' : 'changed',
                                 $obj->get_type(),
                                 $c->stash->{'data_name'},
-    )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
+    );
     $c->stash->{'obj_model_changed'} = 1;
 
     # only save or continue to raw edit?
@@ -1979,13 +1984,15 @@ sub _object_move {
         }
 
         # create log message
-        $c->log->info(sprintf("[config][%s][%s] moved %s '%s' to '%s'",
+        $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+        push @{$c->{'obj_db'}->{'logs'}},
+            sprintf("[config][%s][%s] moved %s '%s' to '%s'",
                                     $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                     $c->stash->{'remote_user'},
                                     $obj->get_type(),
                                     $obj->get_name(),
                                     $file->{'path'},
-        )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
+        );
         $c->stash->{'obj_model_changed'} = 1;
 
         return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());

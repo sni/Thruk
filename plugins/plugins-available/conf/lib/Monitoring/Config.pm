@@ -237,6 +237,18 @@ sub commit {
         $c->log->debug('pre save hook out: '.$out);
     }
 
+    # log stashed changes
+    if($self->{'logs'}) {
+        if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'}) {
+            my $uniq = {};
+            for my $l (@{$self->{'logs'}}) {
+                $c->log->info($l) unless $uniq->{$log};
+                $uniq->{$log} = 1;
+            }
+        }
+        $self->{'logs'} = [];
+    }
+
     my $files = { changed => [], deleted => []};
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
