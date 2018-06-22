@@ -8,13 +8,14 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 77;
+    plan tests => 80;
 
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
 
+use_ok('Thruk');
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
@@ -291,5 +292,13 @@ is('.*',        Thruk::Utils::convert_wildcards_to_regex('.*'), 'regex wildcard'
 is('a*',        Thruk::Utils::convert_wildcards_to_regex('a*'), 'letter wildcard');
 is('a+',        Thruk::Utils::convert_wildcards_to_regex('a+'), 'normal regex 1');
 is('^a(b|c)d*', Thruk::Utils::convert_wildcards_to_regex('^a(b|c)d*'), 'normal regex 2');
+
+#########################
+# test timezone detection
+my $tz = $c->app->_detect_timezone();
+ok($tz, "got a timezone: ".($tz || '<none>'));
+my $ts     = time();
+my $parsed = Thruk::Utils::_parse_date($c, "now");
+ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for 'now'");
 
 #########################
