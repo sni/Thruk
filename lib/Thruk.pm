@@ -60,7 +60,8 @@ $Carp::MaxArgLen = 500;
 use File::Slurp qw(read_file);
 use Module::Load qw/load/;
 use Data::Dumper qw/Dumper/;
-use Plack::Util qw//;
+use Plack::Util ();
+use POSIX ();
 
 ###################################################
 $Data::Dumper::Sortkeys = 1;
@@ -152,7 +153,6 @@ sub _build_app {
     }
     #&timing_breakpoint('startup() cgi.cfg parsed');
 
-    chomp($self->config->{'_original_timezone'} = $ENV{'TZ'} || `date +%Z`);
     $self->_create_secret_file();
     $self->set_timezone();
     $self->_set_ssi();
@@ -350,10 +350,8 @@ sub _dispatcher {
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
 
-    ## no critic
-    $ENV{'TZ'} = $c->config->{'_original_timezone'};
-    ## use critic
-    POSIX::tzset();
+    # restore timezone setting
+    $thruk->set_timezone($c->config->{'_server_timezone'});
 
     _after_dispatch($c, $res);
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
@@ -608,19 +606,17 @@ sub _create_secret_file {
 =cut
 sub set_timezone {
     my($self, $timezone) = @_;
+    $self->config->{'_server_timezone'} = $self->_detect_timezone() unless $self->config->{'_server_timezone'};
+
     if(!defined $timezone) {
-        $timezone = $self->config->{'server_timezone'} || $self->config->{'use_timezone'} || $self->config->{'_original_timezone'};
+        $timezone = $self->config->{'server_timezone'} || $self->config->{'use_timezone'} || $self->config->{'_server_timezone'};
     }
-    if(!$self->config->{'_server_timezone'}) {
-        POSIX::tzset();
-        my($std, $dst) = POSIX::tzname();
-        $self->config->{'_server_timezone'} = $dst;
-    }
-    require POSIX;
+
     ## no critic
     $ENV{'TZ'} = $timezone;
     ## use critic
     POSIX::tzset();
+
     return;
 }
 
@@ -884,6 +880,54 @@ sub _after_dispatch {
 
     return;
 }
+
+###################################################
+# try to detect current timezone
+# Locations like Europe/Berlin are prefered over CEST
+sub _detect_timezone {
+    my($self) = @_;
+
+    if($ENV{'TZ'}) {
+        $self->log->debug(sprintf("server timezone: %s (from ENV)", $ENV{'TZ'})) if Thruk->verbose;
+        return($ENV{'TZ'});
+    }
+
+    if(-r '/etc/timezone') {
+        chomp(my $tz = read_file('/etc/timezone'));
+        if($tz) {
+            $self->log->debug(sprintf("server timezone: %s (from /etc/timezone)", $tz)) if Thruk->verbose;
+            return $tz;
+        }
+    }
+
+    if(-r '/etc/sysconfig/clock') {
+        my $content = read_file('/etc/sysconfig/clock');
+        if($content =~ m/ZONE="([^"]+)"/mx) {
+            $self->log->debug(sprintf("server timezone: %s (from /etc/sysconfig/clock)", $1)) if Thruk->verbose;
+            return $1;
+        }
+    }
+
+    my $out = `timedatectl 2>/dev/null`;
+    if($out =~ m/^\s*Time\ zone:\s+(\S+)/mx) {
+        $self->log->debug(sprintf("server timezone: %s (from timedatectl)", $1)) if Thruk->verbose;
+        return($1);
+    }
+
+    # returns CEST instead of CET as well
+    POSIX::tzset();
+    my($std, $dst) = POSIX::tzname();
+    if($dst) {
+        $self->log->debug(sprintf("server timezone: %s (from POSIX::tzname)", $dst)) if Thruk->verbose;
+        return($dst);
+    }
+
+    # last ressort, date, fails for ex. to set CET instead of CEST
+    chomp(my $tz = `date +%Z`);
+    $self->log->debug(sprintf("server timezone: %s (from date +%%Z)", $tz)) if Thruk->verbose;
+    return $tz;
+}
+###################################################
 
 =head1 SEE ALSO
 
