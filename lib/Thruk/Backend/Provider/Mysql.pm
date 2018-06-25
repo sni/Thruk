@@ -1138,10 +1138,7 @@ sub _update_logcache {
     };
     my $error = $@ || '';
 
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
-    _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
-    $dbh->commit or $error .= $dbh->errstr;
+    _finish_update($c, $dbh, $prefix) or $error .= $dbh->errstr;
 
     if($error) {
         $c->log->info('logcache '.$mode.' failed: '.$error);
@@ -1149,6 +1146,16 @@ sub _update_logcache {
     }
 
     return $log_count;
+}
+
+##########################################################
+sub _finish_update {
+    my($c, $dbh, $prefix) = @_;
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
+    _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
+    $dbh->commit || return;
+    return 1;
 }
 
 ##########################################################
@@ -1831,6 +1838,7 @@ sub _import_peer_logfiles {
         $plugin_lookup = _get_plugin_lookup($dbh,$prefix) if scalar keys %{$plugin_lookup} > 100000;
 
         my $logs = [];
+        my $file = $peer->{'class'}->{'fetch_command'} ? 1 : undef;
         eval {
             # get logs from peer
             ($logs) = $peer->{'class'}->get_logs(nocache => 1,
@@ -1839,6 +1847,7 @@ sub _import_peer_logfiles {
                                                                     { time => { '<=' => ($time + $blocksize - 1) } },
                                                             ]}, @{$import_filter} ],
                                                  columns => \@columns,
+                                                 file => $file,
                                                 );
             if($mode eq 'update') {
                 # get already stored logs to filter duplicates
@@ -1853,7 +1862,12 @@ sub _import_peer_logfiles {
 
         $time = $time + $blocksize;
 
-        $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c);
+        if($file) {
+            $file = $logs;
+            $log_count += $self->_import_logcache_from_file($mode,$dbh,[$file],$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$c);
+        } else {
+            $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c);
+        }
 
         $c->stats->profile(end => $stime);
     }

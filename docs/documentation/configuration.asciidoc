@@ -1360,10 +1360,35 @@ There are some useful enviromenet variables set before the script is started:
   - standard macros as listed in link:cli.html#_environment-variables[CLI Environment]
   - THRUK_BACKENDS is a semicolon separated list of the selected backends.
   - THRUK_LOGCACHE is the connection string to the thruk logcache database.
+  - THRUK_LOGCACHE_MODE is either 'import' on first initial import or 'update' for further consecutive updates.
 
 ex.:
 
   logcache_import_command = .../importscript.sh
+
+
+=== logcache_fetchlogs_command
+The fetchlogs command is very similar to the `logcache_import_command` but it
+replaces only the the fetching logs part from the bultin logcache.
+This script should return the plain text logfiles on stdout (standard
+naemon/nagios logfile format). This might be useful if you pull the logfiles
+from a ndo/ido database.
+
+See `./support/icinga2_ido_fetchlogs.sh` for an example.
+
+There are some useful enviromenet variables set before the script is started to
+control which logs should be fetched:
+
+  - REMOTE_USER contains the current user.
+  - THRUK_BACKEND  is a the id of the backends to import.
+  - THRUK_LOGCACHE_START is start date to fetch
+  - THRUK_LOGCACHE_END   is the end date to fetch
+  - THRUK_LOGCACHE_LIMIT is the optional limit of logfiles to fetch
+
+ex.:
+
+  logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga ./support/icinga2_ido_fetchlogs.sh
+
 
 
 === logcache_pxc_strict_mode

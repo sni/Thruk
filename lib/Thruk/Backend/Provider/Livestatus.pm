@@ -34,7 +34,7 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config ) = @_;
+    my($class, $peer_config, $config, undef, undef, $thruk_config) = @_;
 
     die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
@@ -43,6 +43,7 @@ sub new {
         'config'               => $config,
         'naemon_optimizations' => 0,
         'lmd_optimizations'    => 0,
+        'fetch_command'        => $config->{'logcache_fetchlogs_command'} || $thruk_config->{'logcache_fetchlogs_command'},
     };
     bless $self, $class;
 
@@ -775,13 +776,18 @@ sub get_logs {
         }
     }
 
-    my @logs = reverse @{$self->_get_table('log', \%options)};
-    unless(wantarray) {
-        confess("get_logs() should not be called in scalar context when not used with file option");
+    if(!wantarray && !$options{'file'}) {
+        confess("get_logs() should not be called in scalar context unless using the file option");
     }
 
-    return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
-    return(\@logs, undef, $size);
+    my $logs;
+    if($self->{'fetch_command'}) {
+        return($self->_fetchlogs_external_command(\%options));
+    }
+
+    $logs = [reverse @{$self->_get_table('log', \%options)}];
+    return(Thruk::Utils::IO::save_logs_to_tempfile($logs), 'file') if $options{'file'};
+    return($logs, undef, $size);
 }
 
 
@@ -1479,6 +1485,16 @@ sub _get_logs_start_end {
         my($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($self);
         return([$start, $end]);
     }
+
+    if($self->{'fetch_command'}) {
+        my($logs) = ($self->_fetchlogs_external_command(\%options));
+        if(scalar @{$logs} > 0) {
+            my $start = $logs->[0]->{'time'};
+            my $end   = $logs->[scalar @{$logs}-1]->{'time'};
+            return([$start, $end]);
+        }
+    }
+
     my $class = $self->_get_class('log', \%options);
     my $rows  = $class->stats([ 'start' => { -isa => [ -min => 'time' ]},
                                 'end'   => { -isa => [ -max => 'time' ]},
@@ -1589,6 +1605,59 @@ sub _optimized_for_wrapped_json {
     }
     $self->{'optimized'} = 1;
     return;
+}
+
+##########################################################
+sub _fetchlogs_external_command {
+    my($self, $options) = @_;
+
+    my($start, $end);
+    if($options->{'filter'} && scalar @{$options->{'filter'}} == 1 && scalar keys %{$options->{'filter'}->[0]} == 1 && $options->{'filter'}->[0]->{'-and'}) {
+        $options->{'filter'}->[0] = $options->{'filter'}->[0]->{'-and'};
+    }
+    while($options->{'filter'} && ref($options->{'filter'}) eq 'ARRAY' && scalar @{$options->{'filter'}} == 1 && ref($options->{'filter'}->[0]) eq 'ARRAY') {
+        $options->{'filter'} = $options->{'filter'}->[0];
+    }
+    for my $f (@{$options->{'filter'}}) {
+        for my $key (keys %{$f}) {
+            confess("unsupported filter: ".$key.Dumper($options)) if $key ne 'time';
+            for my $op (keys %{$f->{$key}}) {
+                if($op eq '<=') {
+                    if($end) { confess("duplicate end filter"); }
+                    $end   = $f->{$key}->{$op};
+                }
+                elsif($op eq '>=') {
+                    if($start) { confess("duplicate start filter"); }
+                    $start = $f->{$key}->{$op};
+                } else {
+                    confess("unsupported operator: ".$op);
+                }
+            }
+        }
+    }
+
+    local $ENV{'THRUK_BACKEND'} = $self->{'id'};
+    local $ENV{'THRUK_LOGCACHE_LIMIT'} = $options->{'options'}->{'limit'} if $options->{'options'}->{'limit'};
+    local $ENV{'THRUK_LOGCACHE_START'} = $start if $start;
+    local $ENV{'THRUK_LOGCACHE_END'}   = $end if $end;
+
+    require File::Temp;
+    my($fh, $filename) = File::Temp::tempfile();
+    my $cmd = $self->{'fetch_command'}.' > '.$filename;
+    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    if($rc != 0) {
+        die("fetchlogs cmd failed, rc ".$rc.": ".$cmd."\n".$output);
+    }
+    if($options->{'file'}) {
+        return($filename, 'file');
+    }
+
+    require Monitoring::Availability::Logs;
+    my $logstore = Monitoring::Availability::Logs->new(log_file => $filename);
+    my $logs = $logstore->get_logs();
+    unlink($filename);
+
+    return($logs, undef, scalar @{$logs});
 }
 
 ##########################################################

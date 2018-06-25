@@ -1,0 +1,27 @@
+---
+- hosts: all
+  tasks:
+  - shell: omd config demo set APACHE_MODE own
+  - shell: omd config demo set CORE icinga2
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - shell: omd config demo set MYSQL on
+  - shell: omd config demo set ICINGA2_IDO mysql
+  - shell: sudo su - demo -c "icinga2 feature disable compatlog"
+  - shell: sed -i -e 's/^skip-networking/#skip-networking\nbind-address = 0.0.0.0\n/g' /opt/omd/sites/demo/.my.cnf
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/utf8.conf
+      dest: /omd/sites/demo/etc/icinga2/conf.d/utf8.conf
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/add_user.sh
+      dest: /omd/sites/demo/etc/init-hooks.d/mysql-start-post
+      mode: 0755
+      owner: demo
+      group: demo

@@ -142,9 +142,12 @@ adjust the paths.
 === Icinga 2
 When using Icinga 2 it is highly recommended to use the logcache with a file
 import because the Livestatus API returns wrong results for the logs table in
-Icinga 2.
+Icinga 2. If the file import is not possible, there is an experimental ido
+import available.
 
-Therefor we recommend the following settings (OMD-Labs):
+==== File Import
+
+For file imports the following settings are recommended (OMD-Labs):
 
 etc/thruk/thruk_local.d/logcache.conf:
 -------
@@ -174,3 +177,26 @@ etc/cron.d/thruk_logcache
   # clean logfiles from cache after two years
   0   1 * * * $OMD_ROOT/bin/thruk -a logcacheclean=730  >>$OMD_ROOT/var/log/thruk.log 2>&1
 -------
+
+
+==== IDO Import
+
+For clustered icinga2 setups were the compat-log feature will result in incorrect
+timestamps you might want to use the experimental ido import script.
+
+However there a few known issues:
+
+  - no support for timeperiods, reports will be 24x7 only
+  - no initial states which might result in unknown states for sla reports
+  - no command names for notifications
+
+thruk_local.conf
+-------
+logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga /usr/share/thruk/support/icinga2_ido_fetchlogs.sh
+-------
+
+if using OMD, change the path to
+
+thruk_local.conf
+-------
+logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga ./share/thruk/support/icinga2_ido_fetchlogs.sh
