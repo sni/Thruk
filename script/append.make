@@ -113,7 +113,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${DATADIR}/plugins
 	mkdir -p ${DESTDIR}${DATADIR}/themes
 	mkdir -p ${DESTDIR}${DATADIR}/script
-	cp -rp lib root templates ${DESTDIR}${DATADIR}/
+	cp -rp lib root templates support ${DESTDIR}${DATADIR}/
 	rm -rf ${DESTDIR}${DATADIR}/root/thruk/themes
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/usercontent/
 	rm -rf ${DESTDIR}${DATADIR}/root/thruk/usercontent
