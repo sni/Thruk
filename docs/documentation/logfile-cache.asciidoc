@@ -180,7 +180,7 @@ etc/cron.d/thruk_logcache
 
 
 ==== IDO Import
-
+{% include new_since.ad version="2.22" %}
 For clustered icinga2 setups were the compat-log feature will result in incorrect
 timestamps you might want to use the experimental ido import script.
 
