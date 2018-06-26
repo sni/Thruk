@@ -455,6 +455,9 @@ sub _bp_list_add_objects {
                     $service = Thruk::Utils::convert_wildcards_to_regex($service);
                     $svc_op  = '~';
                 }
+                if($n->{'function_args'} && ref $n->{'function_args'} eq 'ARRAY' && $n->{'function_args'}->[2]) {
+                    $svc_op  = $n->{'function_args'}->[2];
+                }
                 $params->{'svc_s'.$svc.'_type'}   = ['host', 'service'];
                 $params->{'svc_s'.$svc.'_op'}     = ['=', $svc_op];
                 $params->{'svc_s'.$svc.'_value'}  = [$n->{'host'}, $service];
