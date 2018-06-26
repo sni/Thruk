@@ -1216,7 +1216,8 @@ Ext.define('TP.IconWidget', {
             panel.el.dom.style.border    = "";
             panel.el.dom.style.minWidth  = "";
             panel.el.dom.style.minHeight = "";
-            panel.iconFixSize(xdata);
+            // causes endless loop in chrome
+            //panel.iconFixSize(xdata);
         }
     }
 });
