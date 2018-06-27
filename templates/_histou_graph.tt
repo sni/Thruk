@@ -100,7 +100,10 @@
   }
   set_histou_img(histou_start, histou_end, histou_id, histou_source);
 
-  /* workaround for https://github.com/grafana/grafana/issues/12075 */
+  /* workaround for https://github.com/grafana/grafana/issues/12075
+   * aprox. fixed in grafana 5.3
+   * REMOVE AFTER: 01.01.2020
+   */
   var p = document.getElementById('histou_graph_pane');
   p.style.position = "absolute";
   p.style.visibility = "hidden";
