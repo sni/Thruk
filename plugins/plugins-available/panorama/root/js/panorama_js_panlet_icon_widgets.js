@@ -1069,7 +1069,11 @@ Ext.define('TP.IconWidget', {
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                             if(This.el.down('image')) {
                                 This.el.down('image').on("load", function (evt, ele, opts) {
-                                    panel.iconCheckBorder(xdata);
+                                    // causes endless loop in chrome otherwise
+                                    if(panel.src == undefined || panel.src != panel.prevSrc) {
+                                        panel.prevSrc = panel.src;
+                                        panel.iconCheckBorder(xdata);
+                                    }
                                 });
                                 This.el.down('image').on("error", function (evt, ele, opts) {
                                     panel.iconCheckBorder(xdata, true);
@@ -1216,8 +1220,7 @@ Ext.define('TP.IconWidget', {
             panel.el.dom.style.border    = "";
             panel.el.dom.style.minWidth  = "";
             panel.el.dom.style.minHeight = "";
-            // causes endless loop in chrome
-            //panel.iconFixSize(xdata);
+            panel.iconFixSize(xdata);
         }
     }
 });
