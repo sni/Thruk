@@ -4,6 +4,10 @@
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE icinga2
   - shell: omd config demo set LIVESTATUS_TCP on
+  - shell: omd config demo set GRAFANA on
+  - shell: omd config demo set NAGFLUX on
+  - shell: omd config demo set PNP4NAGIOS off
+  - shell: omd config demo set INFLUXDB off
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:
       path: /omd/sites/demo/var/thruk/secret.key
