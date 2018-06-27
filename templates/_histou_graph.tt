@@ -99,4 +99,22 @@
     }
   }
   set_histou_img(histou_start, histou_end, histou_id, histou_source);
+
+  /* workaround for https://github.com/grafana/grafana/issues/12075 */
+  var p = document.getElementById('histou_graph_pane');
+  p.style.position = "absolute";
+  p.style.visibility = "hidden";
+  p.style.top = "[% IF c.req.parameters.exists('scrollTo'); c.req.parameters.scrollTo; ELSE %]0[% END %]px";
+  var updateScroll = function() {
+    console.log("scroll set to "+getPageScroll());
+    p.style.top = getPageScroll()+"px";
+  };
+  document.getElementById('histou_iframe').onload = function() {
+    p.style.position='relative';
+    p.style.top='';
+    p.style.visibility='';
+    jQuery(document).off('scroll', updateScroll);
+  };
+  jQuery(document).on('scroll', updateScroll);
+  /* end of workaround */
 </script>
