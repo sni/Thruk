@@ -209,6 +209,7 @@ sub insert_sub_item {
 
 =head2 remove_item
 
+  remove_item($category)
   remove_item($category, $item_name)
   remove_item($category, $subcategory, $item_name)
   remove_item($category, $subcategory, $item_name, $hintname)
@@ -224,10 +225,27 @@ sub remove_item {
         $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$item_name}->{$hintname} = 1;
     } elsif($subcategory) {
         $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$item_name}->{'_ALL_'} = 1;
-    } else {
+    } elsif($item_name) {
         $Thruk::Utils::Menu::removed_items->{$category}->{$item_name}->{'_ALL_'} = 1;
+    } else {
+        $Thruk::Utils::Menu::removed_items->{$category}->{'_ALL_'} = 1;
     }
 
+    return 1;
+}
+
+##############################################
+
+=head2 remove_section
+
+  remove_section($category)
+
+removes an existing section completely
+
+=cut
+sub remove_section {
+    my($category) = @_;
+    $Thruk::Utils::Menu::removed_items->{$category}->{'_ALL_'} = 1;
     return 1;
 }
 
@@ -427,6 +445,10 @@ sub _renew_navigation {
     for my $section_name (keys %{$Thruk::Utils::Menu::removed_items}) {
         my $section = _get_section_by_name($section_name) || next;
         for my $item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}}) {
+            if($item_name eq '_ALL_') {
+                $section->{'links'} = [];
+                next;
+            }
             for my $sub_item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}->{$item_name}}) {
                 if($sub_item_name eq '_ALL_') {
                     $section->{'links'} = _remove_item_from_links($section->{'links'}, $item_name);

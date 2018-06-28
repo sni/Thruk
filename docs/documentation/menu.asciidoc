@@ -148,6 +148,15 @@ remove_item('Current Status', 'Problems', 'Services', 'Unhandled');
 -----
 
 
+=== Remove complete Section
+
+Existing sections can be removed completely the 'remove_section' function:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_section('Reports');
+-----
+
+
 === Make item available for some groups only
 
 Just wrap your changes in a 'has_group' condition.
