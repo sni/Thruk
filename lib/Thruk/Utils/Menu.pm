@@ -278,17 +278,22 @@ sub has_group {
 =head2 has_role
 
   has_role($role)
+  has_role([$role, ...])
 
 returns 1 if the current user has this role
 
 =cut
 sub has_role {
-    my($role, $tmp) = @_;
+    my @roles = @_;
     my $c = $Thruk::Request::c;
-    if(defined $tmp) { $role = $tmp; } # keep backwards compatible with the old call has_role($c, $role)
 
-    return 1 if $c->check_user_roles($role);
-    return 0;
+    for my $role (@roles) {
+        for my $role2 (@{Thruk::Utils::list($role)}) {
+            next if(ref $role2 eq 'Thruk::Context'); # keep backwards compatible with the old call has_role($c, $role)
+            return 0 unless $c->check_user_roles($role2);
+        }
+    }
+    return 1;
 }
 
 ##############################################

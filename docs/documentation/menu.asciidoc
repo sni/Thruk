@@ -178,6 +178,13 @@ if(has_role('authorized_for_configuration_information')) {
 }
 -----
 
+You can check multiple roles at once:
+
+-----
+if(has_role('authorized_for_configuration_information', 'authorized_for_system_information')) {
+  insert_item('System', { 'href' => '.../only_for_some_roles.html', 'name' => 'Admin Link' });
+}
+
 
 === Make item available for some specific user only
 
