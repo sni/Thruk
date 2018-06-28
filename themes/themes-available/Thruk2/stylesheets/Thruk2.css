@@ -49,6 +49,10 @@ body {
   margin-right:5px;
 }
 
+body.extinfo, body.status, body.tac, body.showlog {
+  margin-bottom: 20px;
+}
+
 @media print {
   body {
     background:#f1f1f1;
