@@ -1,21 +1,22 @@
-################################################################################
-# DOCS:
-# -- https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/#objecttype-idomysqlconnection
-# -- https://www.icinga.com/docs/icinga1/latest/en/db_model.html
-# -- https://www.icinga.com/docs/icinga2/latest/doc/24-appendix/#db-ido-schema
-#
-# ISSUES:
-#  - missing timeperiod changes
-#  - missing initial states
-#  - missing command names in notifications (maybe an icinga2 issue)
-################################################################################
+/*******************************************************************************
+ * DOCS:
+ *   - https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/#objecttype-idomysqlconnection
+ *   - https://www.icinga.com/docs/icinga1/latest/en/db_model.html
+ *   - https://www.icinga.com/docs/icinga2/latest/doc/24-appendix/#db-ido-schema
+ *
+ * ISSUES:
+ *   - missing timeperiod changes
+ *   - missing initial states
+ *   - missing command names in notifications (maybe an icinga2 issue)
+ ******************************************************************************/
 
 SELECT log FROM (
 SELECT time, log FROM (
 
-################################################################################
-# SERVICE ALERT
-# [123456] SERVICE ALERT: Company App;Application Server;OK;SOFT;3;OK - 0 business processes updated in 0.00s
+/*******************************************************************************
+ * SERVICE ALERT
+ * [123456] SERVICE ALERT: Company App;Application Server;OK;SOFT;3;OK - 0 business processes updated in 0.00s
+ */
     SELECT
     s.state_time as time,
     CONCAT("[", UNIX_TIMESTAMP(s.state_time), "] SERVICE ALERT: ",
@@ -45,9 +46,10 @@ SELECT time, log FROM (
     $LIMIT
 
 
-################################################################################
-# HOST ALERT
-# [123456] HOST ALERT: Company App;UP;SOFT;3;OK - 0 business processes updated in 0.00s
+/*******************************************************************************
+ * HOST ALERT
+ * [123456] HOST ALERT: Company App;UP;SOFT;3;OK - 0 business processes updated in 0.00s
+ */
 UNION
     SELECT
     s.state_time as time,
@@ -76,9 +78,10 @@ UNION
     $LIMIT
 
 
-################################################################################
-# SERVICE NOTIFICATION
-#[123456] SERVICE NOTIFICATION: admin;naemon0;users;WARNING;notify-by-mail;USERS WARNING - 7 users currently logged in
+/*******************************************************************************
+ * SERVICE NOTIFICATION
+ * [123456] SERVICE NOTIFICATION: admin;naemon0;users;WARNING;notify-by-mail;USERS WARNING - 7 users currently logged in
+ */
 UNION
     SELECT
     n.start_time as time,
@@ -136,7 +139,7 @@ UNION
             WHEN n.state = 3 THEN "CUSTOM (UNKNOWN)"
         END
     END, ";",
-    # notification command seems to be NULL in icinga2
+    /* notification command seems to be NULL in icinga2 */
     IFNULL(occ.name1, ""), ";",
     CONVERT(CAST(n.output as BINARY) USING utf8)
     ) as log
@@ -155,9 +158,10 @@ UNION
     $LIMIT
 
 
-################################################################################
-# HOST NOTIFICATION
-#[123456] HOST NOTIFICATION: admin;naemon0;UP;notify-by-mail;USERS WARNING - 7 users currently logged in
+/*******************************************************************************
+ * HOST NOTIFICATION
+ * [123456] HOST NOTIFICATION: admin;naemon0;UP;notify-by-mail;USERS WARNING - 7 users currently logged in
+ */
 UNION
     SELECT
     n.start_time as time,
@@ -208,7 +212,7 @@ UNION
             WHEN n.state = 2 THEN "CUSTOM (UNREACHABLE)"
         END
     END, ";",
-    # notification command seems to be NULL in icinga2
+    /* notification command seems to be NULL in icinga2 */
     IFNULL(occ.name1, "mail-host-notification"), ";",
     CONVERT(CAST(n.output as BINARY) USING utf8)
     ) as log
@@ -227,9 +231,10 @@ UNION
     $LIMIT
 
 
-################################################################################
-# EXTERNAL COMMANDS
-#[123456] EXTERNAL COMMAND: ADD_SVC_COMMENT;host;ping6;1;thrukadmin;blah
+/*******************************************************************************
+ * EXTERNAL COMMANDS
+ * [123456] EXTERNAL COMMAND: ADD_SVC_COMMENT;host;ping6;1;thrukadmin;blah
+ */
 UNION
     SELECT
     e.entry_time as time,
@@ -246,9 +251,10 @@ UNION
     $LIMIT
 
 
-################################################################################
-# HOST DOWNTIME ALERT START
-#[123456] HOST DOWNTIME ALERT: host;STARTED; Checkable has entered a period of scheduled downtime.
+/*******************************************************************************
+ * HOST DOWNTIME ALERT START
+ * [123456] HOST DOWNTIME ALERT: host;STARTED; Checkable has entered a period of scheduled downtime.
+ */
 UNION
     SELECT
     d.actual_start_time as time,
@@ -268,9 +274,10 @@ UNION
     $LIMIT
 
 
-################################################################################
-# HOST DOWNTIME ALERT END
-#[123456] HOST DOWNTIME ALERT: host;CANCELLED; Scheduled downtime for host has been cancelled.
+/*******************************************************************************
+ * HOST DOWNTIME ALERT END
+ * [123456] HOST DOWNTIME ALERT: host;CANCELLED; Scheduled downtime for host has been cancelled.
+ */
 UNION
     SELECT
     d.actual_end_time as time,
@@ -293,9 +300,10 @@ UNION
     $LIMIT
 
 
-################################################################################
-# SERVICE DOWNTIME ALERT START
-#[123456] SERVICE DOWNTIME ALERT: host;http;STARTED; Checkable has entered a period of scheduled downtime.
+/*******************************************************************************
+ * SERVICE DOWNTIME ALERT START
+ * [123456] SERVICE DOWNTIME ALERT: host;http;STARTED; Checkable has entered a period of scheduled downtime.
+ */
 UNION
     SELECT
     d.actual_start_time as time,
@@ -316,9 +324,10 @@ UNION
     $LIMIT
 
 
-################################################################################
-# SERVICE DOWNTIME ALERT END
-#[123456] SERVICE DOWNTIME ALERT: host;http;CANCELLED; Scheduled downtime for service has been cancelled.
+/*******************************************************************************
+ * SERVICE DOWNTIME ALERT END
+ * [123456] SERVICE DOWNTIME ALERT: host;http;CANCELLED; Scheduled downtime for service has been cancelled.
+ */
 UNION
     SELECT
     d.actual_end_time as time,

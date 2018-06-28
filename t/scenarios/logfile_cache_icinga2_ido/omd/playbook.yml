@@ -1,6 +1,10 @@
 ---
 - hosts: all
   tasks:
+  - yum:
+      name:
+      - postgresql
+      state: present
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE icinga2
   - shell: omd config demo set LIVESTATUS_TCP on
@@ -8,6 +12,24 @@
   - shell: omd config demo set ICINGA2_IDO mysql
   - shell: sudo su - demo -c "icinga2 feature disable compatlog"
   - shell: sed -i -e 's/^skip-networking/#skip-networking\nbind-address = 0.0.0.0\n/g' /opt/omd/sites/demo/.my.cnf
+  - shell: sudo su - demo -c "icinga2 feature enable ido-pgsql"
+  - shell: PGPASSWORD=icinga psql -h postgresdb -U icinga -w < /omd/sites/demo/share/icinga2-ido-pgsql/schema/pgsql.sql
+  - lineinfile:
+      path: /opt/omd/sites/demo/etc/icinga2/features-available/ido-pgsql.conf
+      regexp: 'user ='
+      line: '    user = "icinga"'
+  - lineinfile:
+      path: /opt/omd/sites/demo/etc/icinga2/features-available/ido-pgsql.conf
+      regexp: 'password ='
+      line: '    password = "icinga"'
+  - lineinfile:
+      path: /opt/omd/sites/demo/etc/icinga2/features-available/ido-pgsql.conf
+      regexp: 'host ='
+      line: '    host = "postgresdb"'
+  - lineinfile:
+      path: /opt/omd/sites/demo/etc/icinga2/features-available/ido-pgsql.conf
+      regexp: 'database ='
+      line: '    database = "icinga"'
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:
       path: /omd/sites/demo/var/thruk/secret.key

@@ -1396,7 +1396,7 @@ control which logs should be fetched:
 
 ex.:
 
-  logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga ./support/icinga2_ido_fetchlogs.sh
+  logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga ./support/icinga2_ido_fetchlogs.sh mysql
 
 
 

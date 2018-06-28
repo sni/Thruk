@@ -8,7 +8,7 @@ services:
         - "60443:443"
         - "60557:6557"
         - "60306:3306"
-  db:
+  mysqldb:
      image: mysql:5
      restart: always
      environment:
@@ -18,4 +18,12 @@ services:
         MYSQL_PASSWORD: thruk
      ports:
         - "63306:3306"
-
+  postgresdb:
+     image: postgres:latest
+     restart: always
+     environment:
+        POSTGRES_USER: icinga
+        POSTGRES_PASSWORD: icinga
+        POSTGRES_DB: icinga
+     ports:
+        - "60432:5432"
