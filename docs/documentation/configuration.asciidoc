@@ -1030,6 +1030,15 @@ ex.:
   show_modified_attributes = 1
 
 
+=== show_contacts
+
+Show host / service contacts. User must have the configuration_information role.
+
+ex.:
+
+  show_contacts = 1
+
+
 === show_host_attempts
 
 Show check attempts for hosts too. The default is to show

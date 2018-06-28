@@ -449,6 +449,7 @@ sub set_default_config {
         hide_passive_icon               => 0,
         show_full_commandline           => 1,
         show_modified_attributes        => 1,
+        show_contacts                   => 1,
         show_config_edit_buttons        => 0,
         show_backends_in_table          => 0,
         show_logout_button              => 0,

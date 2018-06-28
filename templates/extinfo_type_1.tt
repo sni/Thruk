@@ -302,6 +302,12 @@
                             <td class='dataVar'>Last Update:</td>
                             <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>
+                          [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
+                          <tr>
+                            <td class='dataVar'>Contacts</td>
+                            <td class='dataVal'>[% service.contacts.join(', ') %]</td>
+                          </tr>
+                          [% END %]
                           [% IF show_modified_attributes %]
                           <tr>
                             <td class='dataVar'>Modified Attributes</td>

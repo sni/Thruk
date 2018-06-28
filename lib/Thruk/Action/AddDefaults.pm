@@ -30,7 +30,7 @@ our @stash_config_keys = qw/
     datetime_format datetime_format_today datetime_format_long datetime_format_log
     use_new_search show_notification_number strict_passive_mode hide_passive_icon
     show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
-    priorities show_modified_attributes downtime_duration expire_ack_duration
+    priorities show_modified_attributes downtime_duration expire_ack_duration show_contacts
     show_backends_in_table host_action_icon service_action_icon cookie_path
     use_feature_trends show_error_reports skip_js_errors perf_bar_mode
     bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup

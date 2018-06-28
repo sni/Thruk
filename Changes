@@ -12,6 +12,7 @@ next:
           - fix custom variable filters (#816)
           - deprecate shadownaemon
           - renamed cli livecache cmd to lmd
+          - add option show_contacts to list contacts on extinfo page
           - Broadcasts:
             - add template checkbox
             - add macro support
