@@ -305,7 +305,7 @@
                           [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
                           <tr>
                             <td class='dataVar'>Contacts</td>
-                            <td class='dataVal'>[% service.contacts.join(', ') %]</td>
+                            <td class='dataVal'>[% host.contacts.join(', ') %]</td>
                           </tr>
                           [% END %]
                           [% IF show_modified_attributes %]
