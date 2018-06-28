@@ -437,9 +437,9 @@
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
             <a name="comments" id="comments"></a>
             <div class='commentTitle'>Service Comments</div>
+            [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
             <table border="0">
               <tr>
                 [% UNLESS c.config.command_disabled.exists('3') %]
@@ -454,22 +454,21 @@
                 [% END %]
               </tr>
             </table>
+            [% END %]
             [% IF comments.size > 0 %]
               [% IF sortoption_cmt %]
               <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
               [% END %]
               [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
             [% END %]
-          [% END %]
           </td>
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_user_roles('authorized_for_read_only') %]
-          [% ELSE %]
             <br>
             <a name="downtimes" id="downtimes"></a>
             <div class='commentTitle'>Service Downtimes</div>
+            [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
             <table border="0">
               <tr>
                 [% UNLESS c.config.command_disabled.exists('56') %]
@@ -491,6 +490,7 @@
                 <td class='comment'><a href='showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]' class='comment'>List recent downtimes</a></td>
               </tr>
             </table>
+            [% END %]
             [% IF downtimes.size > 0 %]
               [% IF sortoption_dtm %]
               <div class="statusSort" align="CENTER">Downtimes sorted by <b>[% dtm_orderby %]</b> ([% IF dtm_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
@@ -502,7 +502,6 @@
               <div class='commentTitle'>Recurring Service Downtime</div>
               [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' %]
             [% END %]
-          [% END %]
           </td>
         </tr>
 
