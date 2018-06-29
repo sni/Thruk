@@ -30,7 +30,7 @@ BEGIN {
 
 our $VERSION = '2.22';
 
-my $project_root = home('Thruk::Config');
+my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
 my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
@@ -755,10 +755,13 @@ return home folder
 sub home {
     my($class) = @_;
     (my $file = "$class.pm") =~ s{::}{/}gmx;
-    if ( my $inc_entry = $INC{$file} ) {
+    if(my $inc_entry = $INC{$file}) {
         $inc_entry = Cwd::abs_path($inc_entry);
         $inc_entry =~ s/\Q\/$file\E$//mx;
         $inc_entry =~ s/\/b?lib//gmx;
+        if($inc_entry =~ m#/omd/versions/[^/]*/share/thruk#mx && $ENV{'OMD_ROOT'}) {
+            return $ENV{'OMD_ROOT'}.'/share/thruk';
+        }
         return $inc_entry;
     }
 
