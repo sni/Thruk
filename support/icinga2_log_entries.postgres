@@ -9,7 +9,7 @@
  *   - missing initial states
  *   - missing command names in notifications (maybe an icinga2 issue)
  ******************************************************************************/
- 
+
 SELECT log FROM (
 SELECT time, log FROM (
 
@@ -157,6 +157,7 @@ UNION ALL
       AND os.objecttype_id = 2
     $LIMIT
 
+
 /*******************************************************************************
  * HOST NOTIFICATION
  * [123456] HOST NOTIFICATION: admin;naemon0;UP;notify-by-mail;USERS WARNING - 7 users currently logged in
@@ -212,7 +213,7 @@ UNION ALL
         END
     END, ';',
     /* notification command seems to be NULL in icinga2 */
-    COALESCE(occ.name1, 'mail-host-notification'), ';',
+    COALESCE(occ.name1, ''), ';',
     n.output
     ) as log
     FROM
@@ -355,5 +356,3 @@ ORDER BY time asc
 $LIMIT
 ) as log
 ;
-
-

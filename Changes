@@ -13,6 +13,7 @@ next:
           - deprecate shadownaemon
           - renamed cli livecache cmd to lmd
           - add option show_contacts to list contacts on extinfo page
+          - add logcache fetchlogs option and add example scripts for ido
           - Broadcasts:
             - add template checkbox
             - add macro support
