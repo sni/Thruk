@@ -5838,6 +5838,23 @@ var ajax_search = {
         try {
             // dont hide search result if clicked on the input field
             if(event.type != "blur" && event.target.tagName == 'INPUT') { return; }
+            // don't close if blur is due to a click inside the search results
+            if(event.type == "blur" || event.type == "click") {
+                var result_panel = document.getElementById(ajax_search.result_pan);
+                var p = event.target;
+                var found = false;
+                while(p.parentNode) {
+                    if(p == result_panel) {
+                        found = true;
+                        break;
+                    }
+                    p = p.parentNode;
+                }
+                if(found) {
+                    window.clearTimeout(ajax_search.hideTimer);
+                    return;
+                }
+            }
         }
         catch(err) {
             // doesnt matter
@@ -5859,7 +5876,7 @@ var ajax_search = {
         }
         else if(ajax_search.cur_select == -1) {
             window.clearTimeout(ajax_search.hideTimer);
-            ajax_search.hideTimer = window.setTimeout("if(ajax_search.dont_hide==false){fade('"+ajax_search.result_pan+"', 300)}", 100);
+            ajax_search.hideTimer = window.setTimeout("if(ajax_search.dont_hide==false){fade('"+ajax_search.result_pan+"', 300)}", 150);
         }
     },
 
