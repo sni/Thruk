@@ -254,8 +254,10 @@ sub _extract_front_matter_macros {
         next unless $key;
         $key =~ s/^\s+//gmx;
         $key =~ s/\s+$//gmx;
-        $val =~ s/^\s+//gmx;
-        $val =~ s/\s+$//gmx;
+        if($val) {
+            $val =~ s/^\s+//gmx;
+            $val =~ s/\s+$//gmx;
+        }
         $b->{'frontmatter'}->{$key} = $val;
     }
     return;

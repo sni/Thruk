@@ -71,7 +71,7 @@
   <tr>
     <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
     <td class="dataOdd" align="left" style="position: relative;">
-      <textarea name="text" wrap="hard" cols=74 rows=14 style="width: 99%;">[% broadcast.raw_text %]</textarea>
+      <textarea name="text" cols=74 rows=14 style="width: 99%;">[% broadcast.raw_text %]</textarea>
       <div style="position: absolute; right: -430px; top: 10px; background: #e6e6e6; border-radius: 5px; border: 1px solid gray; padding: 8px;">
         Help:
         <ul style="padding-left: 10px; margin: 0;">
@@ -180,8 +180,12 @@ then use later like: {{variable}} and {{another}}</pre>
     var frontmatter = matches.shift().split(/\n/);
     for(var x=0; x<frontmatter.length; x++) {
       var tmp = splitN(frontmatter[x], ":", 2);
-      tmp[1] = tmp[1].replace(/^\s+/, '');
-      macros[tmp[0]] = tmp[1];
+      if(tmp) {
+        if(tmp[1]) {
+          tmp[1] = tmp[1].replace(/^\s+/, '');
+          macros[tmp[0]] = tmp[1];
+        }
+      }
     }
     text = matches.join("---\n")
     return([text, macros]);
