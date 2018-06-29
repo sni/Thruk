@@ -1138,10 +1138,10 @@ return parsed config file
 =cut
 
 sub read_config_file {
-    my($file) = @_;
-    $file = list($file);
+    my($files) = @_;
+    $files = list($files);
     my @config_lines;
-    for my $f (@{$file}) {
+    for my $f (@{$files}) {
         if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
             print STDERR "reading config file: ".$f."\n";
         }
@@ -1152,13 +1152,13 @@ sub read_config_file {
         CORE::close($fh);
     }
     my $conf = {};
-    _parse_rows($file, \@config_lines, $conf);
+    _parse_rows($files, \@config_lines, $conf);
     return($conf);
 }
 
 ######################################
 sub _parse_rows {
-    my($file, $rows, $conf, $until) = @_;
+    my($files, $rows, $conf, $until) = @_;
     my $lastline = '';
     while(my $line = shift @{$rows}) {
         $line =~ s|(?<!\\)\#.*$||gmxo;
@@ -1184,7 +1184,7 @@ sub _parse_rows {
             if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
                 my($k,$v) = ($1,$2);
                 my $next  = {};
-                _parse_rows($file, $rows, $next, '</'.lc($k).'>');
+                _parse_rows($files, $rows, $next, '</'.lc($k).'>');
                 if(!defined $conf->{$k}->{$v}) {
                     $conf->{$k}->{$v} = $next;
                 } elsif(ref $conf->{$k}->{$v} eq 'ARRAY') {
@@ -1198,7 +1198,7 @@ sub _parse_rows {
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
-                _parse_rows($file, $rows, $next, '</'.lc($k).'>');
+                _parse_rows($files, $rows, $next, '</'.lc($k).'>');
                 if(!defined $conf->{$k}) {
                     $conf->{$k} = $next;
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
@@ -1221,7 +1221,7 @@ sub _parse_rows {
             # try split by space
             ($k,$v) = split(/\s+/mxo, $line, 2);
             if(!defined $v) {
-                die("unknow config entry: ".$line." in ".$file);
+                confess("unknow config entry: ".$line." in ".join(",", @{$files}));
             }
         }
         if(substr($v,0,1) eq '"') {
