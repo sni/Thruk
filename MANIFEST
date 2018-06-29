@@ -1964,10 +1964,10 @@ t/scenarios/logfile_cache_icinga2_ido/omd/Dockerfile
 t/scenarios/logfile_cache_icinga2_ido/omd/playbook.yml
 t/scenarios/logfile_cache_icinga2_ido/omd/utf8.conf
 t/scenarios/logfile_cache_icinga2_ido/t/100-logcache.t
-t/scenarios/logfile_cache_icinga2_ido/t/110-postgres.t
 t/scenarios/logfile_cache_icinga2_ido/t/300-controller_extinfo.t
 t/scenarios/logfile_cache_icinga2_ido/t/300-controller_notifications.t
 t/scenarios/logfile_cache_icinga2_ido/t/300-controller_showlog.t
+t/scenarios/logfile_cache_icinga2_ido/t/400-postgres.t
 t/scenarios/logfile_cache_icinga2_ido/thruk.conf
 t/scenarios/logfile_cache_icinga2_ido/thruk_local.conf
 t/scenarios/Makefile
