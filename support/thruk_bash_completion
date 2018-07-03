@@ -14,7 +14,6 @@ _thruk()
 {
     COMPREPLY=()
 
-
     local subcmd
     local opts=""
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -124,11 +123,11 @@ _thruk()
         # thruk find service <host> ...
         elif [ ${subcmdargs[0]} = "service" -a ${#subcmdargs[@]} -eq 2 ]; then
             opts="$(thruk service ${subcmdargs[1]})"
-        fi
 
         # thruk find servicegroup ...
         elif [ ${subcmdargs[0]} = "servicegroup" ]; then
             opts="$(thruk servicegroup list)"
+        fi
 
     else
         local SUBCOMMANDS=$(_thruk_sub_commands | tr ' ' '|')
