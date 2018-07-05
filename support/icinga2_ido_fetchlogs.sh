@@ -25,5 +25,5 @@ if [ "$1" = "mysql" ]; then
   envsubst < $(dirname $0)/icinga2_log_entries.mysql | mysql -u "$IDO_DB_USER" -h "$IDO_DB_HOST" -P "$IDO_DB_PORT" -p"$IDO_DB_PW" "$IDO_DB_NAME"
 fi
 if [ "$1" = "postgres" ]; then
-  envsubst < $(dirname $0)/icinga2_log_entries.postgres | PGPASSWORD="$IDO_DB_PW" psql -U "$IDO_DB_USER" -h "$IDO_DB_HOST" -p "$IDO_DB_PORT" "$IDO_DB_NAME"
+  envsubst < $(dirname $0)/icinga2_log_entries.postgres | PGPASSWORD="$IDO_DB_PW" psql -A -t -U "$IDO_DB_USER" -h "$IDO_DB_HOST" -p "$IDO_DB_PORT" "$IDO_DB_NAME"
 fi
