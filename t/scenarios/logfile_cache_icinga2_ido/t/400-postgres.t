@@ -8,7 +8,7 @@ BEGIN {
     plan skip_all => 'psql required' if $? != 0;
 }
 
-plan tests => 5;
+plan tests => 9;
 
 BEGIN {
     use lib('t');
@@ -21,10 +21,26 @@ TestUtils::test_command({
     cmd  => './support/icinga2_ido_fetchlogs.sh postgres',
     like => ['/SERVICE ALERT:/', '/HOST ALERT:/'],
     env  => {
-      IDO_DB_USER => "icinga",
-      IDO_DB_HOST => "127.0.0.1",
-      IDO_DB_PORT => "60432",
-      IDO_DB_PW   => "icinga",
-      IDO_DB_NAME => "icinga",
+      IDO_DB_USER          => "icinga",
+      IDO_DB_HOST          => "127.0.0.1",
+      IDO_DB_PORT          => "60432",
+      IDO_DB_PW            => "icinga",
+      IDO_DB_NAME          => "icinga",
+    },
+});
+
+# fetch logs from mysql
+TestUtils::test_command({
+    cmd  => './support/icinga2_ido_fetchlogs.sh postgres',
+    like => ['/^\[/'],
+    env  => {
+      IDO_DB_USER          => "icinga",
+      IDO_DB_HOST          => "127.0.0.1",
+      IDO_DB_PORT          => "60432",
+      IDO_DB_PW            => "icinga",
+      IDO_DB_NAME          => "icinga",
+      THRUK_LOGCACHE_LIMIT => 1,
+      THRUK_LOGCACHE_START => 1,
+      THRUK_LOGCACHE_END   => time(),
     },
 });
