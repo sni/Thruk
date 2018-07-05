@@ -154,8 +154,8 @@ SKIP: {
     is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
     ($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
 
-    is($out,     "blub",  "got result");
-    is($err,     "blah",  "got error");
+    is($out,     "blub",  "got result for job: ".$id);
+    is($err,     "blah",  "got error for job: ".$id);
     ok($time <=3,         "runtime <= 3seconds, (".$time.")");
     isnt($dir,   undef,   "got dir");
 };

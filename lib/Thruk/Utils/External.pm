@@ -381,12 +381,12 @@ sub get_result {
         return('', 'no such job: '.$id, 0, $dir, undef, 1, undef);
     }
 
-    my($out, @err) = ('', ());
+    my($out, $err) = ('', '');
     $out = read_file($dir."/stdout") if -f $dir."/stdout";
-    @err = read_file($dir."/stderr") if -f $dir."/stderr";
+    $err = read_file($dir."/stderr") if -f $dir."/stderr";
 
     # remove known harmless errors
-    my $err = join("\n", grep(!/Bad\ file\ descriptor\ during\ global\ destruction/mx, @err));
+    $err =~ s|Warning:.*?during\ global\ destruction\.\n||gmx;
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir.'/start');
