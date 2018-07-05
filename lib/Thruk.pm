@@ -917,9 +917,9 @@ sub _detect_timezone {
     # returns CEST instead of CET as well
     POSIX::tzset();
     my($std, $dst) = POSIX::tzname();
-    if($dst) {
-        $self->log->debug(sprintf("server timezone: %s (from POSIX::tzname)", $dst)) if Thruk->verbose;
-        return($dst);
+    if($std) {
+        $self->log->debug(sprintf("server timezone: %s (from POSIX::tzname)", $std)) if Thruk->verbose;
+        return($std);
     }
 
     # last ressort, date, fails for ex. to set CET instead of CEST
