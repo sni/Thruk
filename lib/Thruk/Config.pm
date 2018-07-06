@@ -116,6 +116,7 @@ our %config = ('name'                   => 'Thruk',
                                           'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
                                           'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
                                           'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
+                                          'command_disabled'    => \&Thruk::Utils::command_disabled,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
@@ -495,6 +496,7 @@ sub set_default_config {
                     use_expire             => 0,
         },
         command_disabled                    => {},
+        command_enabled                     => {},
         force_sticky_ack                    => 0,
         force_send_notification             => 0,
         force_persistent_ack                => 0,
@@ -582,10 +584,6 @@ sub set_default_config {
     for my $key (qw/cmd_quick_status cmd_defaults/) {
         die(sprintf("%s should be a hash, got %s: %s", $key, ref $config->{$key}, Dumper($config->{$key}))) unless ref $config->{$key} eq 'HASH';
         $config->{$key} = { %{$defaults->{$key}}, %{ $config->{$key}} };
-    }
-    # command disabled should be a hash
-    if(ref $config->{'command_disabled'} ne 'HASH') {
-        $config->{'command_disabled'} = array2hash(expand_numeric_list($config->{'command_disabled'}));
     }
 
     ## no critic

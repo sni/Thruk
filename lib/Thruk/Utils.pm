@@ -2874,6 +2874,38 @@ sub get_timezone_data {
 
 ##############################################
 
+=head2 command_disabled
+
+    command_disabled($c, $nr)
+
+returns true if command is disabled for current user
+
+=cut
+sub command_disabled {
+    my($c, $nr) = @_;
+
+    # command disabled should be a hash
+    if(ref $c->stash->{'_command_disabled'} ne 'HASH') {
+        $c->stash->{'_command_disabled'} = array2hash(Thruk::Config::expand_numeric_list($c->config->{'command_disabled'}));
+    }
+    if(ref $c->stash->{'_command_enabled'} ne 'HASH') {
+        $c->stash->{'_command_enabled'} = array2hash(Thruk::Config::expand_numeric_list($c->config->{'command_enabled'}));
+        if(scalar keys %{$c->stash->{'_command_enabled'}} > 0) {
+            # set disabled commands from enabled list
+            for my $nr (0..999) {
+                $c->stash->{'_command_disabled'}->{$nr} = $nr;
+            }
+            for my $nr (keys %{$c->stash->{'_command_enabled'}}) {
+                delete $c->stash->{'_command_disabled'}->{$nr};
+            }
+        }
+    }
+    return 1 if $c->stash->{'_command_disabled'}->{$nr};
+    return 0;
+}
+
+##############################################
+
 1;
 
 __END__

@@ -38,12 +38,12 @@
       <td align='center' class='[% class %]'>[% d.id %]</td>
       <td align='center' class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
       [% IF type == 'host' %]
-        [% UNLESS c.config.command_disabled.exists('78') %]
+        [% UNLESS command_disabled(c, 78) %]
         <td align='center' class='[% class %]'><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
         [% END %]
       [% END %]
       [% IF type == 'service' %]
-        [% UNLESS c.config.command_disabled.exists('79') %]
+        [% UNLESS command_disabled(c, 79) %]
         <td align='center' class='[% class %]'><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
         [% END %]
       [% END %]

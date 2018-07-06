@@ -332,7 +332,7 @@ sub _check_for_commands {
     my $cmd_mod = $c->req->parameters->{'cmd_mod'} || 0;
     return $c->detach('/error/index/6') unless defined $cmd_typ;
 
-    if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
+    if(Thruk::Utils::command_disabled($c, $cmd_typ)) {
         return $c->detach('/error/index/12');
     }
 
@@ -580,7 +580,7 @@ sub _do_send_command {
 
     return 1 if _check_reschedule_alias($c);
 
-    if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
+    if(Thruk::Utils::command_disabled($c, $cmd_typ)) {
         return $c->detach('/error/index/12');
     }
 

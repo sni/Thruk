@@ -355,6 +355,7 @@ ex.:
 Use this to disabled specific commands. Can be use multiple times to disabled
 multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
 links to the command page.
+If you only want to allow a few commands, use `command_enabled` instead.
 You may use ranges here.
 
 ex.:
@@ -362,6 +363,19 @@ ex.:
   command_disabled = 14
   command_disabled = 35
   command_disabled = 17-34,50-65
+
+
+=== command_enabled
+Enable only specific commands. Overrides `command_disabled` setting by only
+allowing a few specific commands and disabling all others. The syntax is the
+same as in `command_disabled`. If you want to disable all commands, you have to
+use `command_disabled = 0-999` or set the `authorized_for_read_only` role.
+
+ex.:
+
+  command_enabled = 1-4         # allow adding and removing comments
+  command_enabled = 33,34,51,52 # allow acknowledgments
+  command_enabled = 55,56,78,79 # allow downtimes
 
 
 === make_auth_user_lowercase
