@@ -902,7 +902,11 @@ sub _detect_timezone {
 
     if(-r '/etc/sysconfig/clock') {
         my $content = read_file('/etc/sysconfig/clock');
-        if($content =~ m/ZONE="([^"]+)"/mx) {
+        if($content =~ m/^\s*ZONE="([^"]+)"/mx) {
+            $self->log->debug(sprintf("server timezone: %s (from /etc/sysconfig/clock)", $1)) if Thruk->verbose;
+            return $1;
+        }
+        if($content =~ m/^\s*TIMEZONE="([^"]+)"/mx) {
             $self->log->debug(sprintf("server timezone: %s (from /etc/sysconfig/clock)", $1)) if Thruk->verbose;
             return $1;
         }
