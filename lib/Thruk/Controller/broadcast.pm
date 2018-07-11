@@ -83,6 +83,12 @@ sub index {
             return $c->redirect_to('broadcast.cgi');
         }
         if($action eq 'save') {
+            # don't store in demo mode
+            if($c->config->{'demo_mode'}) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'saving broadcasts is disabled in demo mode');
+                return $c->redirect_to('broadcast.cgi');
+            }
+
             my $broadcast = {};
             my $id = $c->req->parameters->{'id'};
             if($id eq 'new') {
