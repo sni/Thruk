@@ -46,7 +46,7 @@
     </tr>
   </table>
 </div>
-<script>
+<script type="text/javascript">
   jQuery(document).ready(function() {
     // pre requires absolute px height, but we just want 90% of the screen
     var height = jQuery(window).height() * 0.8;
