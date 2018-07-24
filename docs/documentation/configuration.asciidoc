@@ -1358,6 +1358,14 @@ it is ok to remove some entries. Can be used multiple times.
 ex.:
 
   logcache_import_exclude = "Warning: Passive check result was received for"
+  logcache_import_exclude = "wproc: "
+  logcache_import_exclude = "PASSIVE SERVICE CHECK: "
+  logcache_import_exclude = "PASSIVE HOST CHECK: "
+  logcache_import_exclude = "Warning: Check of "
+  logcache_import_exclude = "Warning: External command parse error "
+  logcache_import_exclude = "EXTERNAL COMMAND: PROCESS_SERVICE_CHECK_RESULT"
+  logcache_import_exclude = "EXTERNAL COMMAND: PROCESS_HOST_CHECK_RESULT"
+  logcache_import_exclude = "External command error: Failed validation"
 
 
 === logcache_delta_updates
