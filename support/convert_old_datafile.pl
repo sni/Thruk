@@ -30,8 +30,8 @@ use Thruk::Utils::IO;
 use Thruk::Utils;
 
 if(scalar @ARGV == 0) {
-    print STDERR "usage: $0 <files...>";
-    print STDERR "will convert old datafiles into new format.";
+    print STDERR "usage: $0 <files...>\n";
+    print STDERR "will convert old datafiles into new format.\n";
     exit 3;
 }
 
