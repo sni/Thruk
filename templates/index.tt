@@ -9,13 +9,6 @@
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
     <script type="text/javascript">
     <!--
-    /* send debug output to firebug console */
-    function debug(str) {
-        if (window.console != undefined) {
-            console.debug(str);
-        }
-    }
-
     /* return absolute host part of current url */
     function get_host() {
         var host = window.location.protocol + '//' + window.location.host;
@@ -63,7 +56,6 @@
         var patt   = new RegExp('^' + get_host(), 'gi');
         newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
-            //debug('saved -> #'+newloc);
             if (history.replaceState) {
                 history.replaceState({}, "", '#'+newloc);
             } else {
@@ -78,20 +70,24 @@
     /* when framed, and there is a valid url in our
      * hash, load it instead of the main frame
      */
-    var framesrc = "[% IF main %][% main %][% ELSE %][% start_page %][% END %]";
-    var newurl = new String(window.location.hash);
-    newurl     = newurl.replace(/^#/, '');
-    var oldurl = new String(window.location);
-    oldurl     = oldurl.replace(/#.*$/, '');
-    if(window.location.pathname.match(/\/[% product_prefix %]\/$/) && newurl != 'main.html' && newurl != '') {
-        if(newurl.match(/^\w+:\/\//)) {
-            framesrc = newurl;
+    function set_framesrc_from_hash() {
+        var framesrc = "[% IF main %][% main %][% ELSE %][% start_page %][% END %]";
+        var newurl = new String(window.location.hash);
+        newurl     = newurl.replace(/^#/, '');
+        var oldurl = new String(window.location);
+        oldurl     = oldurl.replace(/#.*$/, '');
+        if(window.location.pathname.match(/\/[% product_prefix %]\/$/) && newurl != 'main.html' && newurl != '') {
+            if(newurl.match(/^\w+:\/\//)) {
+                framesrc = newurl;
+            }
+            else if(newurl.match(/^\//)) {
+                framesrc = get_host() + newurl;
+            } else {
+                framesrc = oldurl + newurl;
+            }
         }
-        else if(newurl.match(/^\//)) {
-            framesrc = get_host() + newurl;
-        } else {
-            framesrc = oldurl + newurl;
-        }
+        framesrc = framesrc.replace(/"/g, '&quot;');
+        window.frames[1].location = framesrc;
     }
 
     /* we have to change frame location on hash changes caused by history changes */
@@ -103,14 +99,22 @@
         nohashchange = 1;
         var newurl = e.newURL;
         newurl     = newurl.replace(/^.*#/, '');
-        //debug('hashchange -> ' + newurl);
         window.frames[1].location.replace(newurl);
       }
       nohashchange = 0;
     };
 
-    [%+ index_content = BLOCK %]
-      <noframes>
+    document.addEventListener('DOMContentLoaded', function(){
+        set_framesrc_from_hash();
+        document.getElementById('main').onload = save_url_in_parents_hash;
+    }, false);
+    -->
+    </script>
+  </head>
+  <frameset cols="172,*">
+    <frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />
+    <frame src="[% IF main %][% main %][% ELSE %][% start_page %][% END %]" name="main" frameborder="0" id="main" />
+    <noframes>
         <!--
           This page requires a web browser which supports frames.
           No-Frames mode can be enabled in your thruk_local.conf.
@@ -128,20 +132,5 @@
           </p>
         </body>
       </noframes>
-    </frameset>
-    [% END +%]
-    framesrc = framesrc.replace(/"/g, '&quot;');
-    document.write('<frameset cols="172,*" frameborder="0" framespacing="0" border="0">');
-    document.write('<frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" \/>');
-    document.write('<frame src="'+framesrc+'" name="main" frameborder="0" id="main" onload="save_url_in_parents_hash()" \/>');
-    [%+ FOR line = index_content.split("\n") %]
-    document.write('[% line.replace('/', '\\/') %]');
-    [%+ END +%]
-    -->
-    </script>
-  </head>
-  <frameset cols="172,*">
-    <frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />
-    <frame src="[% IF main %][% main %][% ELSE %][% start_page %][% END %]" name="main" frameborder="0" id="main" />
-  [% index_content %]
+  </frameset>
 </html>
