@@ -197,8 +197,7 @@ sub save_bp_objects {
     # check if something changed
     if($new_hex ne $old_hex) {
         if(!move($filename, $file)) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'move '.$filename.' to '.$file.' failed: '.$! });
-            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
+            return(1, 'move '.$filename.' to '.$file.' failed: '.$!);
         }
         my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
         if(!$result_backend && $Thruk::Backend::Pool::peer_order && scalar @{$Thruk::Backend::Pool::peer_order}) {
