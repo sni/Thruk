@@ -19,12 +19,8 @@
     }
 
     /* save url part in parents hash */
-    var nohashchange = 0;
+    var skipHashChange = 0;
     function save_url_in_parents_hash() {
-        if(nohashchange == 1) {
-          nohashchange = 0;
-          return;
-        }
         var oldloc = new String(window.document.location);
         oldloc     = oldloc.replace(/#+.*$/, '');
         oldloc     = oldloc.replace(/\?.*$/, '');
@@ -59,10 +55,9 @@
             if (history.replaceState) {
                 history.replaceState({}, "", '#'+newloc);
             } else {
-                nohashchange = 1;
+                skipHashChange = skipHashChange + 1;
                 window.location.replace('#'+newloc);
             }
-            window.setTimeout("nohashchange=0", 100);
         }
         return;
     }
@@ -87,7 +82,7 @@
             }
         }
         framesrc = framesrc.replace(/"/g, '&quot;');
-        window.frames[1].location = framesrc;
+        window.frames['main'].location = framesrc;
     }
 
     /* we have to change frame location on hash changes caused by history changes */
@@ -95,13 +90,14 @@
       if(e == null || e.newURL == null) {
         return;
       }
-      if(nohashchange == 0) {
-        nohashchange = 1;
-        var newurl = e.newURL;
-        newurl     = newurl.replace(/^.*#/, '');
-        window.frames[1].location.replace(newurl);
+      if(skipHashChange > 0) {
+         skipHashChange = skipHashChange - 1;
+        return;
       }
-      nohashchange = 0;
+      var newurl = e.newURL;
+      newurl     = newurl.replace(/^.*#/, '');
+      window.frames[1].location.replace(newurl);
+      skipHashChange = 0;
     };
 
     document.addEventListener('DOMContentLoaded', function(){
