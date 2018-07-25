@@ -923,7 +923,11 @@ sub bail_out_req {
         $error = $1;
         $error =~ s/\A\s*//gmsx;
         $error =~ s/\s*\Z//gmsx;
-        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
+        eval {
+            require HTML::Entities;
+            HTML::Entities::decode_entities($error);
+        };
+        BAIL_OUT($0.': '.$req->code.' '.$msg."\n".$error);
     }
     if($page =~ m/<pre\s+id="error">(.*)$/mx) {
         $error = $1;
@@ -931,9 +935,11 @@ sub bail_out_req {
         BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }
     if($page =~ m/\Qsubject=Thruk%20Error%20Report&amp;body=\E(.*?)">/smx) {
-        require URI::Escape;
-        diag($1);
-        $error = URI::Escape::uri_unescape($1);
+        $error = $1;
+        eval {
+            require URI::Escape;
+            $error = URI::Escape::uri_unescape($error);
+        };
         diag($error);
         BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }
