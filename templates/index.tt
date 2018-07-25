@@ -111,7 +111,7 @@
     -->
     </script>
   </head>
-  <frameset cols="172,*">
+  <frameset cols="172,*" frameborder="0" framespacing="0" border="0">
     <frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />
     <frame src="[% IF main %][% main %][% ELSE %][% start_page %][% END %]" name="main" frameborder="0" id="main" />
     <noframes>
