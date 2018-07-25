@@ -2479,6 +2479,7 @@ sub _config_reload {
         $last_reload = $processinfo->{$pkey}->{'program_start'} || (time() - 1);
     }
 
+    $c->stats->profile(comment => "program_start before reload: ".$last_reload);
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
@@ -2505,6 +2506,7 @@ sub _config_reload {
         $c->{'db'}->send_command( %{$options} );
         $c->stash->{'output'} = 'config reloaded by external command.';
     }
+    $c->stats->profile(comment => "reload command issued: ".time());
 
     # wait until core responds again
     if($wait) {

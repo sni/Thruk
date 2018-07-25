@@ -766,6 +766,7 @@ compare too version strings and return 1 if v1 >= v2
 =cut
 sub version_compare {
     my($v1,$v2) = @_;
+    confess("version_compare() needs two params") unless defined $v1;
     confess("version_compare() needs two params") unless defined $v2;
 
     # replace non-numerical characters
@@ -2076,6 +2077,16 @@ sub wait_after_reload {
     # wait until core responds again
     my $procinfo = {};
     my $done     = 0;
+    my $options = {};
+    if(!$ENV{'THRUK_LMD_VERSION'} || Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.3')) {
+        $options = {
+                'header' => {
+                    'WaitTimeout'   => 2000,
+                    'WaitTrigger'   => 'all', # using something else seems not to work all the time
+                    'WaitCondition' => "program_start > ".$time,
+                },
+        };
+    }
     while($start > time() - 30) {
         $procinfo = {};
         eval {
@@ -2083,7 +2094,7 @@ sub wait_after_reload {
             local $SIG{'PIPE'} = sub { die "pipe error\n" };
             alarm(5);
             $c->{'db'}->reset_failed_backends();
-            $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
+            $procinfo = $c->{'db'}->get_processinfo(backend => $pkey, options => $options);
         };
         alarm(0);
         if($@) {
