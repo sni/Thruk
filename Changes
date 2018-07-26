@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - support clustered setups
+          - add rest api
           - add command_enabled option
 
 2.22     Fri Jun 29 13:52:11 CEST 2018

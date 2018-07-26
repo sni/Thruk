@@ -189,16 +189,18 @@ sub store_objects {
 
 =head2 request_url
 
-    request_url($c, $url, $cookies)
+    request_url($c, $url, [$cookies], [$method], [$postdata])
 
 returns requested url as string. In list context returns ($code, $result)
 
 =cut
 sub request_url {
-    my($c, $url, $cookies) = @_;
+    my($c, $url, $cookies, $method, $postdata) = @_;
+    $method = 'GET' unless $method;
 
     # external url?
     if($url =~ m/^https?:/mx) {
+        confess("only GET supported right now") if $method ne 'GET';
         my($response) = _external_request($url, $cookies);
         my $result = {
             code    => $response->code(),
@@ -220,7 +222,7 @@ sub request_url {
     # fork setting may be overriden in child requests
     my $old_no_external_job_forks = $c->config->{'no_external_job_forks'};
 
-    my(undef, undef, $res) = _dummy_c(undef, $url);
+    my(undef, undef, $res) = _dummy_c(undef, $url, $method, $postdata);
 
     my $result = {
         code    => $res->code,
@@ -332,12 +334,20 @@ sub _run {
     ## use critic
     my $log_timestamps = 0;
     my $action = $self->{'opt'}->{'action'} || $self->{'opt'}->{'commandoptions'}->[0] || '';
-    if($action =~ m/^(logcache|bp|report|downtimetask)/mx) {
+    if($ENV{'THRUK_CRON'} || $action =~ m/^(logcache|bp|report|downtimetask)/mx) {
         $log_timestamps = 1;
     }
 
+    # skip cluster if --local is given on command line
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if($self->{'opt'}->{'local'} && !$ENV{'THRUK_CRON'});
+
     # force some commands to be local
     if($action =~ m/^(logcache|livecache|bpd|bp||report|plugin|lmd|find)/mx) {
+        $self->{'opt'}->{'local'} = 1;
+    }
+
+    # force cronjobs to be local
+    if($ENV{'THRUK_CRON'}) {
         $self->{'opt'}->{'local'} = 1;
     }
 
@@ -371,7 +381,7 @@ sub _run {
 
         if($terminal_attached) {
             # initialize screen logging
-            $c->app->{'_log'} = $c->app->init_logging(1);
+            $c->app->{'_log'} = 'screen';
         }
 
         # catch prints when not attached to a terminal and redirect them to our logger
@@ -385,17 +395,6 @@ sub _run {
             ## use critic
         }
 
-        if(!$ENV{'THRUK_JOB_ID'} && $action && $action =~ /^report(\w*)=(.*)$/mx) {
-            # create fake job
-            my($id,$dir) = Thruk::Utils::External::_init_external($c);
-            ## no critic
-            $SIG{CHLD} = 'DEFAULT';
-            Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
-            $ENV{'THRUK_JOB_ID'}       = $id;
-            $ENV{'THRUK_JOB_DIR'}      = $dir;
-            ## use critic
-            Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
-        }
         $result = $self->_from_local($c, $self->{'opt'});
 
         # remove print capture
@@ -484,16 +483,21 @@ sub _external_request {
 
 ##############################################
 sub _dummy_c {
-    my($self, $url) = @_;
+    my($self, $url, $method, $postdata) = @_;
+    $method = 'GET' unless $method;
+
     _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
     delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     $url = '/thruk/cgi-bin/remote.cgi' unless defined $url;
-    require Thruk;
-    require HTTP::Request;
-    require Plack::Test;
-    my $app    = Plack::Test->create(Thruk->startup);
+    our $app;
+    if(!$app) {
+        require Thruk;
+        require HTTP::Request;
+        require Plack::Test;
+        $app = Plack::Test->create(Thruk->startup);
+    }
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
-    my $res    = $app->request(HTTP::Request->new(GET => $url));
+    my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
     my $c      = $Thruk::Request::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
     _debug("_dummy_c() done") if $Thruk::Utils::CLI::verbose >= 2;
@@ -518,7 +522,8 @@ sub _from_fcgi {
     my $data  = decode_json($data_str);
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
-    local $ENV{'THRUK_SRC'}     = 'CLI';
+    local $ENV{'THRUK_SRC'}          = 'CLI';
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
 
     # ensure secret key is fresh
     my $secret_file = $c->config->{'var_path'}.'/secret.key';
@@ -640,7 +645,7 @@ sub _run_command_action {
     # raw query
     if($action eq 'raw') {
         die('no local raw requests!') if $src ne 'fcgi';
-        ($data->{'output'}, $data->{'rc'}) = _cmd_raw($c, $opt);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_raw($c, $opt, $src);
     }
 
     # precompile templates
@@ -916,7 +921,7 @@ sub _cmd_configtool {
 
 ##############################################
 sub _cmd_raw {
-    my($c, $opt) = @_;
+    my($c, $opt, $src) = @_;
     my $function  = $opt->{'sub'};
 
     unless(defined $c->stash->{'defaults_added'}) {
@@ -959,6 +964,46 @@ sub _cmd_raw {
     # result for external job
     elsif($function eq 'job') {
         return _cmd_ext_job($c, $opt);
+    }
+
+    elsif($function =~ /^cmd:\s+(\w+)\s*(.*)/mx) {
+        local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
+        my $action = $1;
+        $opt->{'commandoptions'} = [split/\s+/mx, $2];
+        my $res = _run_command_action($c, $opt, $src, $action);
+        return([$res->{'output'}], $res->{'rc'});
+    }
+
+    # run code
+    elsif($function =~ /::/mx) {
+        local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
+        require Thruk::Utils::Cluster;
+        if($opt->{'args'} && ref $opt->{'args'} eq 'ARRAY') {
+            for(my $x = 0; $x <= scalar @{$opt->{'args'}}; $x++) {
+                if(!ref $opt->{'args'}->[$x] && $opt->{'args'}->[$x]) {
+                    if($opt->{'args'}->[$x] eq 'Thruk::Context') {
+                        $opt->{'args'}->[$x] = $c;
+                    }
+                    if($opt->{'args'}->[$x] eq 'Thruk::Utils::Cluster') {
+                        $opt->{'args'}->[$x] = $c->cluster;
+                    }
+                }
+            }
+        }
+        my $pkg_name     = $function;
+        $pkg_name        =~ s%::[^:]+$%%mx;
+        my $function_ref = \&{$function};
+        my @res;
+        eval {
+            if($pkg_name) {
+                load $pkg_name;
+            }
+            @res = &{$function_ref}(@{$opt->{'args'}});
+        };
+        if($@) {
+            return($@, 1);
+        }
+        return(\@res, 0);
     }
 
     local $ENV{'THRUK_USE_LMD'} = ""; # don't try to do LMD stuff since we directly access the real backend

@@ -83,7 +83,7 @@ sub PRINT {
     my $fh = $self->{'fh'};
 
     if($self->{'newline'}) {
-        print $fh "[".(scalar localtime())."][INFO] ", @data;
+        print $fh "[".(scalar localtime())."][INFO][".$Thruk::HOSTNAME."] ", @data;
     } else {
         print $fh @data;
     }

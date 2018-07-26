@@ -1,0 +1,923 @@
+---
+layout: docs
+title: REST API
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+
+== REST API
+{% include new_since.ad version="2.24" %}
+Thruk offers a rest api to expose various aspects of Thruk itself and
+livestatus information.
+
+The api can be either accessed by http(s) at http://your_webserver/thruk/r/ or
+by cli client:
+
+------
+  %> thruk r /hostgroups
+------
+
+== Versions
+
+Right now, there is only version 1 of the rest api, so you can either use the
+generic url http://your_webserver/thruk/r/ or the version specific
+http://your_webserver/thruk/r/v1/.
+
+
+== Authentication
+
+=== Basic Auth
+
+Using the web api, you can simply pass username and password as http basic
+authentication like:
+
+------
+  %> curl -k https://user:password@your_webserver/thruk/r/
+------
+
+Data is collected with the permissions of the given user.
+
+=== Cookie Auth
+
+Cookies from the cookie authentication are valid as well if you are logged in
+already and will return the results with permissions of the current user.
+
+=== Secret Key
+
+The web rest api accepts the secret key as http header. The secret key
+is usually found in `/var/lib/thruk/secret.key` or `var/thruk/secret.key`
+when using OMD.
+
+------
+  %> curl -H 'X-Thruk-Auth-Key: secretkey' \
+          -H 'X-Thruk-Auth-User: thrukadmin' \
+          -gk 'https://localhost/thruk/r/hosts
+------
+
+Since the secretkey gives you superadminpower. You can set the context of the
+result to any user you like with the `X-Thruk-Auth-User` HTTP header.
+
+=== Command Line
+
+When using the cli clients, use the `-A` option like:
+
+------
+  %> thruk -A user r /
+------
+
+Having command line access gives you superadminpower as well, so you can set
+the user context to any user you need with the `-A` switch.
+
+
+== Filtering
+
+All pages offer filtering using query parameters:
+
+------
+  %> thruk r '/hosts?name=localhost'
+------
+
+Other operators besides equals like regular expressions are possible with the
+bracket syntax:
+
+ex.: return all hosts starting with l:
+
+------
+  %> thruk r '/hosts?name[~]=^l'
+------
+
+
+ex.: list all services which are currently in a downtime:
+
+------
+  %> thruk r '/services?scheduled_downtime_depth[>=]=1'
+------
+
+Curl requires you to set the `globoff` option:
+
+------
+  %> curl -gk 'https://user:pass@localhost/thruk/r/hosts?name[~]=^t'
+------
+
+
+Possible operators with their alias:
+
+[options="header",halign="center"]
+|==========================
+|Operator  |Alias    |Description
+| =        | eq      |Equal match
+| !=       | ne      |Not equal match
+| ~        | regex   |Regular expression match
+| !~       | nregex  |Not regular expression match
+| >        | gt      |Greater than numeric comparisson
+| <        | lt      |Lower than numeric comparisson
+| >=       | gte     |Greater or equal numeric comparisson. `contains` in list context
+| <=       | lte     |Lower or equal numeric comparisson. `contains not` in list context
+|==========================
+
+You can use the alias name to workaround urlencoding issues.
+
+== Sorting
+
+All pages can sort list results by using the `sort` parameter. The sort
+parameter can be used multiple times or use comma-separated lists. The order is
+ascending unless prefixed with an minus.
+
+ex.: sort by name ascending and status descending:
+
+------
+  %> thruk r /hosts?sort=name,-state
+------
+
+== Limits
+
+All pages offer limits and offset through the `limit` and `offset` parameter.
+
+For example show 10 hosts starting at offset 100:
+
+------
+  %> thruk r /hosts?limit=10&offset=100
+------
+
+== Columns
+
+All pages offer setting columns with the `columns` parameter.
+
+ex.: return name and state for all hosts:
+
+------
+  %> thruk r /hosts?columns=name,state
+------
+
+
+== Error Handling
+
+Failed rest requests return a hash result along with a HTTP error code:
+
+------
+  %> thruk r /none
+  {
+    "code" : 404,
+    "message" : "unknown rest path"
+    "description" : "optional additional error messages"
+  }
+------
+
+== Output Formats
+
+=== JSON
+
+JSON is the default output format.
+
+=== CSV
+
+CSV output is available via `/csv/` path prefix.
+
+------
+  %> thruk r /csv/hosts?columns=name,state
+------
+
+------
+  %> curl -g http://localhost/thruk/r/csv/hosts/stats
+------
+
+
+== Endpoints
+
+See examples and detailed description for all available rest api urls:
+
+
+=== GET /
+
+lists all available rest urls.
+alias for /index
+
+=== GET /alerts
+
+lists alerts based on logfiles.
+alias for /logs?type[~]=^(HOST|SERVICE) ALERT
+
+=== GET /checks/stats
+
+lists host / service check statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|hosts_active_15_perc              | 
+|hosts_active_15_sum               | 
+|hosts_active_1_perc               | 
+|hosts_active_1_sum                | 
+|hosts_active_5_perc               | 
+|hosts_active_5_sum                | 
+|hosts_active_60_perc              | 
+|hosts_active_60_sum               | 
+|hosts_active_all_perc             | 
+|hosts_active_all_sum              | 
+|hosts_active_state_change_avg     | 
+|hosts_active_state_change_max     | 
+|hosts_active_state_change_min     | 
+|hosts_active_state_change_sum     | 
+|hosts_active_sum                  | 
+|hosts_execution_time_avg          | 
+|hosts_execution_time_max          | 
+|hosts_execution_time_min          | 
+|hosts_execution_time_sum          | 
+|hosts_latency_avg                 | 
+|hosts_latency_max                 | 
+|hosts_latency_min                 | 
+|hosts_latency_sum                 | 
+|hosts_passive_15_perc             | 
+|hosts_passive_15_sum              | 
+|hosts_passive_1_perc              | 
+|hosts_passive_1_sum               | 
+|hosts_passive_5_perc              | 
+|hosts_passive_5_sum               | 
+|hosts_passive_60_perc             | 
+|hosts_passive_60_sum              | 
+|hosts_passive_all_perc            | 
+|hosts_passive_all_sum             | 
+|hosts_passive_state_change_avg    | 
+|hosts_passive_state_change_max    | 
+|hosts_passive_state_change_min    | 
+|hosts_passive_state_change_sum    | 
+|hosts_passive_sum                 | 
+|services_active_15_perc           | 
+|services_active_15_sum            | 
+|services_active_1_perc            | 
+|services_active_1_sum             | 
+|services_active_5_perc            | 
+|services_active_5_sum             | 
+|services_active_60_perc           | 
+|services_active_60_sum            | 
+|services_active_all_perc          | 
+|services_active_all_sum           | 
+|services_active_state_change_avg  | 
+|services_active_state_change_max  | 
+|services_active_state_change_min  | 
+|services_active_state_change_sum  | 
+|services_active_sum               | 
+|services_execution_time_avg       | 
+|services_execution_time_max       | 
+|services_execution_time_min       | 
+|services_execution_time_sum       | 
+|services_latency_avg              | 
+|services_latency_max              | 
+|services_latency_min              | 
+|services_latency_sum              | 
+|services_passive_15_perc          | 
+|services_passive_15_sum           | 
+|services_passive_1_perc           | 
+|services_passive_1_sum            | 
+|services_passive_5_perc           | 
+|services_passive_5_sum            | 
+|services_passive_60_perc          | 
+|services_passive_60_sum           | 
+|services_passive_all_perc         | 
+|services_passive_all_sum          | 
+|services_passive_state_change_avg | 
+|services_passive_state_change_max | 
+|services_passive_state_change_min | 
+|services_passive_state_change_sum | 
+|services_passive_sum              | 
+|===========================================
+
+
+=== GET /commands
+
+lists livestatus commands.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
+
+=== GET /comments
+
+lists livestatus comments.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
+
+=== GET /contactgroups
+
+lists livestatus contactgroups.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
+
+=== GET /contacts
+
+lists livestatus contacts.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+
+=== GET /downtimes
+
+lists livestatus downtimes.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
+
+=== GET /hostgroups
+
+lists livestatus hostgroups.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
+
+=== GET /hosts
+
+lists livestatus hosts.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
+there is an shortcut /hosts available.
+
+=== GET /hosts/<name>
+
+lists hosts for given name.
+alias for /hosts?name=<name>
+
+=== GET /hosts/<name>/alerts
+
+lists alerts for given host.
+alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
+
+=== GET /hosts/<name>/notifications
+
+lists notifications for given host.
+alias for /logs?class=3&host_name=<name>
+
+=== GET /hosts/<name>/services
+
+lists services for given host.
+alias for /services?host_name=<name>
+
+=== GET /hosts/stats
+
+hash of livestatus host statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|active_checks_disabled_active     | 
+|active_checks_disabled_passive    | 
+|down                              | 
+|down_and_ack                      | 
+|down_and_disabled_active          | 
+|down_and_disabled_passive         | 
+|down_and_scheduled                | 
+|down_and_unhandled                | 
+|eventhandler_disabled             | 
+|flapping                          | 
+|flapping_disabled                 | 
+|notifications_disabled            | 
+|outages                           | 
+|passive_checks_disabled           | 
+|pending                           | 
+|pending_and_disabled              | 
+|pending_and_scheduled             | 
+|plain_down                        | 
+|plain_pending                     | 
+|plain_unreachable                 | 
+|plain_up                          | 
+|total                             | 
+|total_active                      | 
+|total_passive                     | 
+|unreachable                       | 
+|unreachable_and_ack               | 
+|unreachable_and_disabled_active   | 
+|unreachable_and_disabled_passive  | 
+|unreachable_and_scheduled         | 
+|unreachable_and_unhandled         | 
+|up                                | 
+|up_and_disabled_active            | 
+|up_and_disabled_passive           | 
+|up_and_scheduled                  | 
+|===========================================
+
+
+=== GET /hosts/totals
+
+hash of livestatus host totals statistics.
+its basically a reduced set of /hosts/stats.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|down                              | 
+|down_and_unhandled                | 
+|pending                           | 
+|total                             | 
+|unreachable                       | 
+|unreachable_and_unhandled         | 
+|up                                | 
+|===========================================
+
+
+=== GET /index
+
+lists all available rest urls.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|description                       | 
+|protocol                          | 
+|url                               | 
+|===========================================
+
+
+=== GET /lmd/sites
+
+lists connected sites. Only available if LMD (`use_lmd`) is enabled.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|addr                              | 
+|bytes_received                    | 
+|bytes_send                        | 
+|idling                            | 
+|key                               | 
+|last_error                        | 
+|last_online                       | 
+|last_query                        | 
+|last_update                       | 
+|name                              | 
+|parent                            | 
+|peer_key                          | 
+|peer_name                         | 
+|queries                           | 
+|response_time                     | 
+|section                           | 
+|status                            | 
+|===========================================
+
+
+=== GET /logs
+
+lists livestatus logs.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#log for details.
+
+=== GET /notifications
+
+lists notifications based on logfiles.
+alias for /logs?class=3
+
+=== GET /processinfo
+
+lists livestatus sites status.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+
+=== GET /processinfo/stats
+
+lists livestatus sites statistics.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+
+=== GET /servicegroups
+
+lists livestatus servicegroups.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
+
+=== GET /services
+
+lists livestatus services.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
+there is an alias /services.
+
+=== GET /services/stats
+
+livestatus service statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|active_checks_disabled_active     | 
+|active_checks_disabled_passive    | 
+|critical                          | 
+|critical_and_ack                  | 
+|critical_and_disabled_active      | 
+|critical_and_disabled_passive     | 
+|critical_and_scheduled            | 
+|critical_and_unhandled            | 
+|critical_on_down_host             | 
+|eventhandler_disabled             | 
+|flapping                          | 
+|flapping_disabled                 | 
+|notifications_disabled            | 
+|ok                                | 
+|ok_and_disabled_active            | 
+|ok_and_disabled_passive           | 
+|ok_and_scheduled                  | 
+|passive_checks_disabled           | 
+|pending                           | 
+|pending_and_disabled              | 
+|pending_and_scheduled             | 
+|plain_critical                    | 
+|plain_ok                          | 
+|plain_pending                     | 
+|plain_unknown                     | 
+|plain_warning                     | 
+|total                             | 
+|total_active                      | 
+|total_passive                     | 
+|unknown                           | 
+|unknown_and_ack                   | 
+|unknown_and_disabled_active       | 
+|unknown_and_disabled_passive      | 
+|unknown_and_scheduled             | 
+|unknown_and_unhandled             | 
+|unknown_on_down_host              | 
+|warning                           | 
+|warning_and_ack                   | 
+|warning_and_disabled_active       | 
+|warning_and_disabled_passive      | 
+|warning_and_scheduled             | 
+|warning_and_unhandled             | 
+|warning_on_down_host              | 
+|===========================================
+
+
+=== GET /services/totals
+
+livestatus service totals statistics.
+its basically a reduced set of /services/stats.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|critical                          | 
+|critical_and_unhandled            | 
+|ok                                | 
+|pending                           | 
+|total                             | 
+|unknown                           | 
+|unknown_and_unhandled             | 
+|warning                           | 
+|warning_and_unhandled             | 
+|===========================================
+
+
+=== GET /thruk
+
+hash of basic information about this thruk instance
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|rest_version                      | rest api version
+|thruk_version                     | thruk version
+|thruk_branch                      | thruk branch name
+|thruk_release_date                | thruk release date
+|localtime                         | current server unix timestamp / epoch
+|project_root                      | thruk root folder
+|etc_path                          | configuration folder
+|var_path                          | variable data folder
+|===========================================
+
+
+=== GET /thruk/bp
+
+lists business processes.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|draft                             | 
+|file                              | 
+|id                                | 
+|last_check                        | 
+|last_state_change                 | 
+|name                              | 
+|state_type                        | 
+|status                            | 
+|status_text                       | 
+|template                          | 
+|time                              | 
+|===========================================
+
+
+=== GET /thruk/bp/<nr>
+
+business processes for given number.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|filter                            | 
+|id                                | 
+|last_check                        | 
+|last_state_change                 | 
+|name                              | 
+|nodes                             | 
+|rankDir                           | 
+|state_type                        | 
+|status                            | 
+|status_text                       | 
+|template                          | 
+|time                              | 
+|===========================================
+
+
+=== GET /thruk/config
+
+lists configuration information
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|Component                         | 
+|ENCODING                          | 
+|Thruk::Backend                    | 
+|Thruk::Plugin::BP                 | 
+|Thruk::Plugin::ConfigTool         | 
+|Thruk::Plugin::Minemap            | 
+|Thruk::Plugin::Mobile             | 
+|Thruk::Plugin::Panorama           | 
+|Thruk::Plugin::Reports2           | 
+|Thruk::Plugin::Statusmap          | 
+|_rest_paths_loaded                | 
+|_server_timezone                  | 
+|action_menu_actions               | 
+|action_menu_apply                 | 
+|action_menu_items                 | 
+|ajax_search_hostgroups            | 
+|ajax_search_hosts                 | 
+|ajax_search_servicegroups         | 
+|ajax_search_services              | 
+|ajax_search_timeperiods           | 
+|all_problems_link                 | 
+|apache_status                     | 
+|backend_debug                     | 
+|backends_with_obj_config          | 
+|branch                            | 
+|bug_email_rcpt                    | 
+|can_submit_commands               | 
+|cgi.cfg                           | 
+|cgi.cfg_effective                 | 
+|cgi_cfg                           | 
+|cgi_cfg_stat                      | 
+|check_local_states                | 
+|cluster_nodes                     | 
+|cmd_defaults                      | 
+|cmd_quick_status                  | 
+|command_disabled                  | 
+|command_enabled                   | 
+|commandline_obfuscate_pattern     | 
+|compression_format                | 
+|connection_pool_size              | 
+|cookie_auth_direct_agents         | 
+|cookie_auth_domain                | 
+|cookie_auth_login_timeout         | 
+|cookie_auth_login_url             | 
+|cookie_auth_restricted_url        | 
+|cookie_auth_session_cache_timeout | 
+|cookie_auth_session_timeout       | 
+|cookie_path                       | 
+|cron_file                         | 
+|cron_post_edit_cmd                | 
+|cron_pre_edit_cmd                 | 
+|csrf_allowed_hosts                | 
+|datetime_format                   | 
+|datetime_format_log               | 
+|datetime_format_long              | 
+|datetime_format_today             | 
+|datetime_format_trends            | 
+|default_theme                     | 
+|default_view                      | 
+|delay_pages_after_backend_reload  | 
+|demo_mode                         | 
+|deprecations_shown                | 
+|disable_user_password_change      | 
+|documentation_link                | 
+|downtime_duration                 | 
+|etc_path                          | 
+|expand_user_macros                | 
+|expire_ack_duration               | 
+|extra_version                     | 
+|extra_version_link                | 
+|first_day_of_week                 | 
+|force_persistent_ack              | 
+|force_persistent_comments         | 
+|force_send_notification           | 
+|force_sticky_ack                  | 
+|grafana_default_panelId           | 
+|graph_replace                     | 
+|graph_word                        | 
+|group_paging_grid                 | 
+|group_paging_overview             | 
+|group_paging_summary              | 
+|has_feature_minemap               | 
+|hide_passive_icon                 | 
+|home                              | 
+|home_link                         | 
+|host_action_icon                  | 
+|hostname                          | 
+|image_path                        | 
+|info_popup_event_type             | 
+|info_popup_options                | 
+|initial_menu_state                | 
+|lmd_core_bin                      | 
+|lmd_core_config                   | 
+|lmd_version                       | 
+|logcache_delta_updates            | 
+|logo_path_prefix                  | 
+|make_auth_user_lowercase          | 
+|make_auth_user_uppercase          | 
+|max_process_memory                | 
+|mobile_agent                      | 
+|mode_dir                          | 
+|mode_file                         | 
+|nagios                            | 
+|name                              | 
+|no_external_job_forks             | 
+|omd_top_extra_dir                 | 
+|paging_steps                      | 
+|perf_bar_mode                     | 
+|perf_bar_pnp_popup                | 
+|plugin_path                       | 
+|plugin_registry_url               | 
+|precompile_templates              | 
+|priorities                        | 
+|problems_limit                    | 
+|product_prefix                    | 
+|project_root                      | 
+|released                          | 
+|remote_modules_loaded             | 
+|report_include_class2             | 
+|report_max_objects                | 
+|report_update_logcache            | 
+|report_use_temp_files             | 
+|secret_key                        | 
+|service_action_icon               | 
+|show_backends_in_table            | 
+|show_config_edit_buttons          | 
+|show_contacts                     | 
+|show_custom_vars                  | 
+|show_error_reports                | 
+|show_full_commandline             | 
+|show_full_commandline_source      | 
+|show_logout_button                | 
+|show_long_plugin_output           | 
+|show_modified_attributes          | 
+|show_notification_number          | 
+|shown_inline_pnp                  | 
+|sitepanel                         | 
+|skip_js_errors                    | 
+|ssi_includes                      | 
+|ssi_path                          | 
+|ssl_verify_hostnames              | 
+|start_page                        | 
+|status_color_background           | 
+|strict_passive_mode               | 
+|templates_paths                   | 
+|themes_path                       | 
+|thruk_bin                         | 
+|thruk_debug                       | 
+|thruk_init                        | 
+|thruk_shell                       | 
+|title_prefix                      | 
+|tmp_path                          | 
+|url_prefix                        | 
+|url_prefix_fixed                  | 
+|use_ajax_search                   | 
+|use_bookmark_titles               | 
+|use_curl                          | 
+|use_dynamic_titles                | 
+|use_feature_bp                    | 
+|use_feature_configtool            | 
+|use_feature_core_scheduling       | 
+|use_feature_histogram             | 
+|use_feature_mobile                | 
+|use_feature_panorama              | 
+|use_feature_recurring_downtime    | 
+|use_feature_reports               | 
+|use_feature_statusmap             | 
+|use_feature_statuswrl             | 
+|use_feature_trends                | 
+|use_frames                        | 
+|use_lmd_core                      | 
+|use_new_command_box               | 
+|use_new_search                    | 
+|use_pager                         | 
+|use_service_description           | 
+|use_strict_host_authorization     | 
+|use_wait_feature                  | 
+|user_password_min_length          | 
+|useragentcompat                   | 
+|var_path                          | 
+|version                           | 
+|wait_timeout                      | 
+|weekdays                          | 
+|===========================================
+
+
+=== GET /thruk/jobs
+
+lists thruk jobs.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|cmd                               | 
+|end                               | 
+|forward                           | 
+|host_id                           | 
+|host_name                         | 
+|id                                | 
+|is_running                        | 
+|message                           | 
+|percent                           | 
+|pid                               | 
+|rc                                | 
+|remaining                         | 
+|start                             | 
+|stderr                            | 
+|stdout                            | 
+|time                              | 
+|user                              | 
+|===========================================
+
+
+=== GET /thruk/jobs/<id>
+
+get thruk job status for given id.
+alias for /thruk/jobs?id=<id>
+
+=== GET /thruk/panorama
+
+lists panorama dashboards.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|name                              | 
+|nr                                | 
+|user                              | 
+|===========================================
+
+
+=== GET /thruk/panorama/<nr>
+
+panorama dashboards for given number.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|file                              | 
+|file_version                      | 
+|id                                | 
+|nr                                | 
+|objects                           | 
+|readonly                          | 
+|scripted                          | 
+|tab                               | 
+|tabpan-tab_1_panlet_1             | 
+|ts                                | 
+|user                              | 
+|===========================================
+
+
+=== GET /thruk/reports
+
+list of reports.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|cc                                | 
+|is_public                         | 
+|name                              | 
+|nr                                | 
+|template                          | 
+|to                                | 
+|user                              | 
+|===========================================
+
+
+=== GET /thruk/reports/<nr>
+
+report for given number.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|backends                          | 
+|backends_hash                     | 
+|cc                                | 
+|desc                              | 
+|failed                            | 
+|failed_backends                   | 
+|is_public                         | 
+|name                              | 
+|nr                                | 
+|params                            | 
+|readonly                          | 
+|send_types                        | 
+|template                          | 
+|to                                | 
+|user                              | 
+|var                               | 
+|===========================================
+
+
+=== POST /thruk/reports/<nr>/generate
+
+generate report for given number.
+
+=== GET /thruk/reports/<nr>/report
+
+return the actual report file in binary format.
+
+=== GET /timeperiods
+
+lists livestatus timeperiods.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+

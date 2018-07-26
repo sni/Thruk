@@ -1,0 +1,28 @@
+version: "2.3"
+
+services:
+  nginx:
+    build: nginx/
+    ports:
+        - 60080:80
+  omd:
+    build: omd/
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - shared_var:/mnt/var
+  thruk1:
+    build: thruk/
+    scale: 3
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ../../../:/thruk:ro
+        - shared_var:/mnt/var
+        - shared_etc:/mnt/etc
+
+volumes:
+  shared_etc:
+  shared_var:

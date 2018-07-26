@@ -78,6 +78,7 @@ lib/Thruk/Controller/login.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/remote.pm
+lib/Thruk/Controller/rest_v1.pm
 lib/Thruk/Controller/restricted.pm
 lib/Thruk/Controller/Root.pm
 lib/Thruk/Controller/showlog.pm
@@ -115,10 +116,13 @@ lib/Thruk/Utils/CLI/Livecache.pm
 lib/Thruk/Utils/CLI/Lmd.pm
 lib/Thruk/Utils/CLI/Logcache.pm
 lib/Thruk/Utils/CLI/Plugin.pm
+lib/Thruk/Utils/CLI/R.pm
+lib/Thruk/Utils/CLI/Rest.pm
 lib/Thruk/Utils/CLI/Selfcheck.pm
 lib/Thruk/Utils/CLI/Service.pm
 lib/Thruk/Utils/CLI/Servicegroup.pm
 lib/Thruk/Utils/CLI/Url.pm
+lib/Thruk/Utils/Cluster.pm
 lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
@@ -149,6 +153,7 @@ plugins/plugins-available/business_process/lib/Thruk/BP/Components/Node.pm
 plugins/plugins-available/business_process/lib/Thruk/BP/Functions.pm
 plugins/plugins-available/business_process/lib/Thruk/BP/Utils.pm
 plugins/plugins-available/business_process/lib/Thruk/Controller/bp.pm
+plugins/plugins-available/business_process/lib/Thruk/Controller/Rest/V1/bp.pm
 plugins/plugins-available/business_process/lib/Thruk/Utils/CLI/Bp.pm
 plugins/plugins-available/business_process/preview.png
 plugins/plugins-available/business_process/root/bp-2.22-1.css
@@ -393,6 +398,7 @@ plugins/plugins-available/panorama/DEV.txt
 plugins/plugins-available/panorama/examples/hostgroups.tab
 plugins/plugins-available/panorama/examples/iss.tab
 plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm
+plugins/plugins-available/panorama/lib/Thruk/Controller/Rest/V1/panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/CLI/Panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama/Scripted.pm
@@ -1302,6 +1308,7 @@ plugins/plugins-available/panorama/templates/panorama.tt
 plugins/plugins-available/panorama/templates/panorama_js.tt
 plugins/plugins-available/reports2/description.txt
 plugins/plugins-available/reports2/lib/Thruk/Controller/reports2.pm
+plugins/plugins-available/reports2/lib/Thruk/Controller/Rest/V1/reports.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/CLI/Report.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports/Render.pm
@@ -1668,6 +1675,7 @@ script/thruk_patch_makefile.pl
 script/thruk_server.pl
 script/thruk_set_standard_header
 script/thruk_update.sh
+script/thruk_update_docs_rest.pl
 script/thruk_update_help.pl
 script/thruk_version.sh
 ssi/extinfo-header.ssi-tickets
@@ -1767,6 +1775,7 @@ t/300-controller_notifications.t
 t/300-controller_outages.t
 t/300-controller_parts.t
 t/300-controller_remote.t
+t/300-controller_rest_v1.t
 t/300-controller_Root.t
 t/300-controller_showlog.t
 t/300-controller_status.t
@@ -1907,6 +1916,24 @@ t/scenarios/cli_api/t/thruk_cmd_cli.t
 t/scenarios/cli_api/test.sh
 t/scenarios/cli_api/thruk.conf
 t/scenarios/cli_api/thruk_local.conf
+t/scenarios/cluster_e2e/docker-compose.yml
+t/scenarios/cluster_e2e/Makefile
+t/scenarios/cluster_e2e/nginx/Dockerfile
+t/scenarios/cluster_e2e/nginx/loadbalancer.conf
+t/scenarios/cluster_e2e/omd/Dockerfile
+t/scenarios/cluster_e2e/omd/playbook.yml
+t/scenarios/cluster_e2e/omd/test.cfg
+t/scenarios/cluster_e2e/README
+t/scenarios/cluster_e2e/t/300-controller_cluster.t
+t/scenarios/cluster_e2e/t/300-controller_tac.t
+t/scenarios/cluster_e2e/thruk/1.rpt
+t/scenarios/cluster_e2e/thruk/1.tbp
+t/scenarios/cluster_e2e/thruk/1.tsk
+t/scenarios/cluster_e2e/thruk/Dockerfile
+t/scenarios/cluster_e2e/thruk/dot_thruk
+t/scenarios/cluster_e2e/thruk/playbook.yml
+t/scenarios/cluster_e2e/thruk/test.cfg
+t/scenarios/cluster_e2e/thruk/thruk_cluster.conf
 t/scenarios/config_tool/cgi.cfg
 t/scenarios/config_tool/docker-compose.yml
 t/scenarios/config_tool/Makefile
@@ -2322,6 +2349,7 @@ templates/extinfo_type_2.tt
 templates/extinfo_type_3.tt
 templates/extinfo_type_4.tt
 templates/extinfo_type_4_apache_status.tt
+templates/extinfo_type_4_cluster_status.tt
 templates/extinfo_type_5.tt
 templates/extinfo_type_6.tt
 templates/extinfo_type_6_recurring.tt

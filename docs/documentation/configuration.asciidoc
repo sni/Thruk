@@ -192,6 +192,21 @@ ex.:
   default_user_timezone = "Server Setting"
 
 
+=== cluster_nodes
+{% include new_since.ad version="2.22" %}
+Define generic url pattern to connect all cluster nodes. Each
+cluster node must be available on the given address.
+3 variables will be replaced to make this url generic:
+ - $hostname$:   hostname from `hostname`
+ - $url_prefix$: contains the url prefix from `url_prefix`
+ - $proto$:      trying to autodetect either `http` or `https`, autodetect
+                 will only work with OMD and falls back to http otherwise.
+
+ex.:
+
+  cluster_nodes = https://$hostname$/$url_prefix$/
+
+
 === mobile_agent
 Specify user agents which will be redirected to the mobile plugin (if
 enabled).

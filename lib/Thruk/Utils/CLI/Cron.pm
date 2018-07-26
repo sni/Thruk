@@ -71,6 +71,10 @@ sub _install {
     my($c) = @_;
     $c->stats->profile(begin => "_cmd_installcron()");
     Thruk::Utils::switch_realuser($c);
+
+    $c->cluster->run_cluster("others", "cmd: cron install");
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 1; # skip further subsequent cluster calls
+
     require Thruk::Utils::RecurringDowntimes;
     Thruk::Utils::RecurringDowntimes::update_cron_file($c);
     if($c->config->{'use_feature_reports'}) {

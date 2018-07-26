@@ -44,7 +44,7 @@ sub new {
     }
 
     # translate paths, translate ex.: /naemon/cgi-bin to /thruk/cgi-bin/
-    my $path_info         = translate_request_path($env->{'PATH_INFO'}, $app->config);
+    my $path_info         = translate_request_path($env->{'PATH_INFO'}, $app->config, $env);
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
 
@@ -63,7 +63,7 @@ sub new {
         },
         req    => $req,
         res    => $req->new_response(200),
-        stats  => Thruk::Stats->new(),
+        stats  => $Thruk::Request::c ? $Thruk::Request::c->stats : Thruk::Stats->new(),
         user   => undef,
         errors => [],
     };
@@ -99,6 +99,16 @@ return log object
 sub log {
     return($_[0]->app->log);
 }
+
+=head2 cluster
+
+return cluster object
+
+=cut
+sub cluster {
+    return($_[0]->app->cluster);
+}
+
 
 =head2 detach
 
@@ -287,7 +297,7 @@ sub url_with {
 
 =head2 translate_request_path
 
-    translate_request_path(<path_info>, $config)
+    translate_request_path(<path_info>, $config, $env)
 
 translate paths, /naemon/cgi-bin to /thruk/cgi-bin/
 or /<omd-site/thruk/cgi-bin/... to /thruk/cgi-bin/...
@@ -296,7 +306,11 @@ regardless of the deployment path.
 
 =cut
 sub translate_request_path {
-    my($path_info, $config) = @_;
+    my($path_info, $config, $env) = @_;
+
+    if($path_info =~ m%^/?$%mx && $env->{'SCRIPT_NAME'} && $env->{'SCRIPT_NAME'} =~ m%/thruk/cgi\-bin/remote\.cgi(/r/.*)$%mx) {
+        $path_info = '/thruk'.$1;
+    }
     my $product_prefix = $config->{'product_prefix'};
     if($ENV{'OMD_SITE'}) {
         $path_info =~ s|^/\Q$ENV{'OMD_SITE'}\E/|/|mx;

@@ -232,13 +232,6 @@ sub test_page {
     my $start = time();
     my $opts = _set_test_page_defaults(\%opts);
 
-    # make tests with http://localhost/naemon possible
-    my $product = 'thruk';
-    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
-        $product = $2;
-        $opts->{'url'} =~ s|/thruk|/$product|gmx;
-    }
-
     if($opts->{'post'}) {
         local $Data::Dumper::Indent = 0;
         local $Data::Dumper::Varname = 'POST';
@@ -324,7 +317,7 @@ sub test_page {
     elsif(defined $return->{'content'} and $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         # is it a background job page?
         wait_for_job($1);
-        my $location = "/".$product."/cgi-bin/job.cgi?job=".$1;
+        my $location = "/thruk/cgi-bin/job.cgi?job=".$1;
         $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
@@ -434,11 +427,11 @@ sub test_page {
             next if $match =~ m/^ssh/mxo;
             next if $match =~ m/^mailto:/mxo;
             next if $match =~ m/^(\#|'|")/mxo;
-            next if $match =~ m/^\/$product\/cgi\-bin/mxo;
+            next if $match =~ m/^\/thruk\/cgi\-bin/mxo;
             next if $match =~ m/^\w+\.cgi/mxo;
             next if $match =~ m/^javascript:/mxo;
             next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+            next if $match =~ m|^/thruk/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
             next if $match =~ m/data:image\/png;base64/mxo;
@@ -451,7 +444,7 @@ sub test_page {
             next if $test_url =~ m/\/pnp4nagios\//mxo;
             next if $test_url =~ m/\/pnp\//mxo;
             next if $test_url =~ m/\/grafana\//mxo;
-            next if $test_url =~ m|/$product/themes/.*?/images/logos/|mxo;
+            next if $test_url =~ m|/thruk/themes/.*?/images/logos/|mxo;
             if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             my $request = _request($test_url, undef, undef, $opts->{'agent'});
 
@@ -592,7 +585,7 @@ sub get_user {
 
 #########################
 sub wait_for_job {
-    my $job   = shift;
+    my($job) = @_;
     my $start  = time();
     my $config = Thruk::Config::get_config();
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
@@ -604,13 +597,13 @@ sub wait_for_job {
     require Thruk::Utils::External;
     alarm(300);
     eval {
-        while(Thruk::Utils::External::_is_running($jobdir)) {
+        while(Thruk::Utils::External::_is_running(undef, $jobdir)) {
             sleep(0.1);
         }
     };
     alarm(0);
     my $end  = time();
-    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds')
+    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'job is finished in '.($end-$start).' seconds')
         or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
                             scalar `uptime`,
                             scalar `ps -efl`,
@@ -833,16 +826,12 @@ sub _external_request {
     confess("no url") unless $url;
     $retry = 1 unless defined $retry;
 
-    # make tests with http://localhost/naemon possible
-    unless($url =~ m/^http/) {
-        my $product = 'thruk';
-        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
-            $product = $2;
-            $url =~ s|^/$product||mx;
-            $url =~ s|^/thruk||mx;
-        }
+    if($url !~ m/^http/) {
         $url =~ s#//#/#gmx;
-        $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
+        $url =~ s#/demo##gmx;
+        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
+            $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
+        }
     }
 
     our($cookie_jar, $cookie_file);
@@ -869,10 +858,9 @@ sub _external_request {
 
     $req = _check_startup_redirect($req, $start_to);
 
-    if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
+    if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/thruk\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
         die("login failed: ".Dumper($req)) unless $retry;
-        my $product = $1;
-        my $referer = uri_unescape($2);
+        my $referer = uri_unescape($1);
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
         my $r = _external_request($req->{'_headers'}->{'location'}, undef, undef, $agent);
            $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, 0);
@@ -884,23 +872,17 @@ sub _external_request {
 #########################
 sub _check_startup_redirect {
     my($request, $start_to) = @_;
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/startup\.html\?(.*)$/mxo) {
-        my $product = $1;
-        my $link    = $2;
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/thruk\/startup\.html\?(.*)$/mxo) {
+        my $link = $1;
         $link    =~ s/^wait\#//mxo;
-        #diag("starting up... ".$link);
         is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
         # startup fcgid
-        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, {});
-        #diag("startup request:");
-        #diag(Dumper($r));
+        my $r = _request('/thruk/cgi-bin/remote.cgi', undef, {});
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
-        fail("startup failed, no pid: ".Dumper($r)) unless(-f '/var/cache/thruk/thruk.pid' || -f '/var/cache/naemon/thruk/thruk.pid');
+        fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
         sleep(3);
         if($link !~ m/\?/mx && $link =~ m/\&/mx) { $link =~ s/\&/?/mx; }
         $request = _request($link);
-        #diag("original request:");
-        #diag(Dumper($request));
     }
     return($request);
 }

@@ -16,6 +16,7 @@ This module allows you to authenticate the users.
 
 use strict;
 use warnings;
+use File::Slurp qw/read_file/;
 
 =head1 METHODS
 
@@ -37,6 +38,19 @@ sub new {
     # authenticated by ssl
     if(defined $username) {
     }
+
+    # authenticate by secret.key from http header
+    elsif($c->req->header('X-Thruk-Auth-Key')) {
+        my $secret_file = $c->config->{'var_path'}.'/secret.key';
+        $c->config->{'secret_key'}  = read_file($secret_file) if -s $secret_file;
+        chomp($c->config->{'secret_key'});
+        if($c->req->header('X-Thruk-Auth-Key') ne $c->config->{'secret_key'}) {
+            $c->error("wrong authentication key");
+            return;
+        }
+        $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+    }
+
     elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
         and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
             $username = $env->{'SSL_CLIENT_S_DN_CN'};

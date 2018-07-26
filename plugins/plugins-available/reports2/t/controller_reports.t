@@ -5,7 +5,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 216;
+    plan tests => 232;
 }
 
 BEGIN {
@@ -92,7 +92,6 @@ my $pages = [
                                                     },
                                             'follow' => 1, like => 'report successfully sent to testfile:' },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['Profile:','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json;charset=UTF-8', },
-    { url => '/thruk/cgi-bin/reports2.cgi', post => { 'action' => 'remove', 'report' => 999 }, 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
 ];
 
 for my $test (@{$pages}) {
@@ -102,9 +101,10 @@ for my $test (@{$pages}) {
 }
 
 ###########################################################
-# test json some pages
+# test some json pages
 my $json_hash_pages = [
     '/thruk/cgi-bin/reports2.cgi?action=check_affected_objects&host='.$hostname,
+    '/thruk/r/thruk/reports/999',
 ];
 
 for my $url (@{$json_hash_pages}) {
@@ -113,8 +113,27 @@ for my $url (@{$json_hash_pages}) {
         'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
-    is(ref $data, 'HASH', "json result is an hash: ".$url);
+    is(ref $data, 'HASH', "json result is not a hash: ".$url);
 }
+
+###########################################################
+# test list json pages
+my $json_array_pages = [
+    '/thruk/r/thruk/reports',
+];
+
+for my $url (@{$json_array_pages}) {
+    my $page = TestUtils::test_page(
+        'url'          => $url,
+        'content_type' => 'application/json;charset=UTF-8',
+    );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'ARRAY', "json result is not an ARRAY: ".$url);
+}
+
+###########################################################
+# cleanup
+TestUtils::test_page(url => '/thruk/cgi-bin/reports2.cgi', post => { 'action' => 'remove', 'report' => 999 }, 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved');
 
 ###########################################################
 # cleanup

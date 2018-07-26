@@ -9,6 +9,9 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 
 There are several pages which offer json exports.
 
+Also have a look at the new link:rest.html[REST API] which provides
+all of this exports and much more.
+
 === List of Pages
 
 ==== Status Data

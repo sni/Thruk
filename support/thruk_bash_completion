@@ -18,12 +18,6 @@ _thruk()
     local opts=""
     local cur="${COMP_WORDS[COMP_CWORD]}"
 
-    # simply expland files and folders if current item starts with . or /
-    if [[ $cur =~ ^/|^\. ]]; then
-        COMPREPLY=( $(compgen -o default -- ${cur}) )
-        return 0
-    fi
-
     # check if first arg is thruk
     if [[ ${COMP_WORDS[0]} != thruk ]]; then
         COMPREPLY=( $(compgen -o default -- ${cur}) )
@@ -52,6 +46,12 @@ _thruk()
         esac
         i=$((i + 1))
     done
+
+    # simply expland files and folders if current item starts with . or /
+    if [[ $cur =~ ^/|^\. ]] && ! [[ $subcmd =~ r|rest ]]; then
+        COMPREPLY=( $(compgen -o default -- ${cur}) )
+        return 0
+    fi
 
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
 
@@ -101,7 +101,7 @@ _thruk()
     # thruk find ...
     elif [[ $subcmd =~ find ]]; then
 
-        # thruk command ...
+        # thruk find ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
             opts="host hostgroup service servicegroup contact"
 
@@ -127,6 +127,12 @@ _thruk()
         # thruk find servicegroup ...
         elif [ ${subcmdargs[0]} = "servicegroup" ]; then
             opts="$(thruk servicegroup list)"
+        fi
+
+    # thruk r|rest ...
+    elif [[ $subcmd =~ r|rest ]]; then
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="$(thruk rest '/csv/index?columns=url')"
         fi
 
     else

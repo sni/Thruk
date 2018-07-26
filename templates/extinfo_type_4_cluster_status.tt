@@ -1,0 +1,88 @@
+﻿[% PROCESS _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
+      <tr>
+        <td align="left" valign="top" width="33%">
+            [% PROCESS _infobox.tt %]
+            <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+              <tr>
+                <td class='linkBox'>
+                  <a href='extinfo.cgi?type=4'>back to Performance Info</a><br>
+                </td>
+              </tr>
+            </table>
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="top" width="33%">
+          [% PROCESS _help.tt topic = "extinfo_4" %]
+        </td>
+      </tr>
+    </table><br>
+    <div align="center" class="extinfo4 clusterstatus">
+      <div class='dataTitle perfDataTitle'>Cluster Status</div>
+      <table border='0' cellpadding='10'>
+          <tr>
+            <td valign="middle"><div class='perfTypeTitle'>Thruk Nodes:</div></td>
+            <td valign="top" colspan=2>
+              <table border="1" cellspacing="0" cellpadding="0" class="data">
+                <tr>
+                  <td class='stateInfoTable1'>
+                    <table border="0">
+                      <tr class='data'>
+                        <th class='data'>Node</th>
+                        <th class='data'>Status</th>
+                        <th class='data'>Response Time</th>
+                      </tr>
+                      [% FOREACH n = c.cluster.nodes %]
+                      <tr id="row_node_[% loop.index %]">
+                        <td class='dataVal'><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
+                        <td class='dataVal statusimg' style="text-align: center;"><img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" width="16" height="16" alt="waiting"></td>
+                        <td class='dataVal responsetime'></td>
+                      </tr>
+                      [% END %]
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+      </table>
+    </div>
+
+<script type="text/javascript">
+<!--
+  jQuery(function() {
+    [% FOREACH n = c.cluster.nodes %]
+    jQuery.ajax({
+      url: "extinfo.cgi",
+      type: 'POST',
+      data: {
+        type: 4,
+        cluster: 1,
+        state: 1,
+        node: "[% t %]"
+      },
+      dataType: 'json',
+      success: function(data, status, jqXHR) {
+          if(!data['ok']) {
+            jQuery("#row_node_[% loop.index %] .statusimg IMG").attr("src", '[% url_prefix %]themes/[% theme %]/images/error.png');
+            return;
+          }
+          jQuery("#row_node_[% loop.index %] .statusimg IMG").attr("src", '[% url_prefix %]themes/[% theme %]/images/accept.png');
+          jQuery("#row_node_[% loop.index %] .responsetime").html(data['response_time']+"s");
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          jQuery("#row_node_[% loop.index %] .statusimg IMG").attr("src", '[% url_prefix %]themes/[% theme %]/images/error.png');
+          if(jqXHR.responseJSON && jqXHR.responseJSON.details) {
+            jQuery("#row_node_[% loop.index %] .responsetime").html(jqXHR.responseJSON.details);
+          } else {
+            jQuery("#row_node_[% loop.index %] .responsetime").text(textStatus);
+          }
+      }
+    });
+    [% END %]
+  });
+-->
+</script>
+
+[% PROCESS _footer.tt %]

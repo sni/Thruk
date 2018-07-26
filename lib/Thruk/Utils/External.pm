@@ -222,7 +222,7 @@ sub is_running {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
-    return _is_running($dir);
+    return _is_running($c, $dir);
 }
 
 
@@ -249,16 +249,87 @@ sub cancel {
 
     my $pidfile = $dir."/pid";
     if(-f $pidfile) {
+        # is it running on this node?
+        if(-s $dir."/hostname") {
+            my @hosts = split(/\n/mx, read_file($dir."/hostname"));
+            if($hosts[0] ne $Thruk::NODE_ID) {
+                $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::cancel', [$c, $id, $nouser]);
+                return _is_running($c, $dir);
+            }
+        }
+
         my $pid = read_file($pidfile);
+        chomp($pid);
         update_status($dir, 99.9, 'canceled');
-        kill(-15, $pid);
+        CORE::kill(15, $pid);
+        CORE::kill(-15, $pid);
         sleep(1);
-        kill(-2, $pid);
+        CORE::kill(2, $pid);
+        CORE::kill(-2, $pid);
         sleep(1);
+        CORE::kill(9, $pid);
+        CORE::kill(-9, $pid);
     }
-    return _is_running($dir);
+    return _is_running($c, $dir);
 }
 
+
+##############################################
+
+=head2 read_job
+
+  read_job($c, $id)
+
+return status of a job
+
+=cut
+sub read_job {
+    my($c, $id) = @_;
+
+    my($is_running,$time,$percent,$message,$forward,$remaining,$user) = get_status($c, $id);
+    return unless defined $time;
+
+    my $job_dir = $c->config->{'var_path'}.'/jobs/'.$id;
+
+    my $start = -e $job_dir.'/start'    ? (stat($job_dir.'/start'))[9] : 0;
+    my $end   = -e $job_dir.'/rc'       ? (stat($job_dir.'/rc'))[9]    : 0;
+    my $rc    = -e $job_dir.'/rc'       ? read_file($job_dir.'/rc')  : '';
+    my $out   = -e $job_dir.'/stdout'   ? read_file($job_dir.'/stdout')  : '';
+    my $err   = -e $job_dir.'/stderr'   ? read_file($job_dir.'/stderr')  : '';
+    my $host  = -e $job_dir.'/hostname' ? read_file($job_dir.'/hostname')  : '';
+    my $cmd   = -e $job_dir.'/start'    ? read_file($job_dir.'/start')  : '';
+    my $pid   = -e $job_dir.'/pid'      ? read_file($job_dir.'/pid')  : '';
+    if($cmd) {
+        $cmd =~ s%^\d+\n%%gmx;
+        $cmd =~ s%^\$VAR1\s*=\s*%%gmx;
+        $cmd =~ s%\n$%%gmx;
+    }
+    if($rc !~ m/^\d*$/mx) { $rc = -1; }
+    my($hostid, $hostname) = split(/\n/mx, $host);
+
+    $remaining = -1 unless defined $remaining;
+    my $job   = {
+        'id'         => $id,
+        'pid'        => $pid,
+        'user'       => $user,
+        'host_id'    => $hostid // "",
+        'host_name'  => $hostname // "",
+        'cmd'        => $cmd,
+        'rc'         => $rc // '',
+        'stdout'     => $out // '',
+        'stderr'     => $err // '',
+        'is_running' => 0+$is_running,
+        'time'       => 0+$time,
+        'start'      => 0+($start || 0),
+        'end'        => 0+($end || 0),
+        'percent'    => 0+$percent,
+        'message'    => $message // '',
+        'forward'    => $forward // '',
+        'remaining'  => 0+$remaining,
+    };
+
+    return($job);
+}
 
 ##############################################
 
@@ -282,13 +353,18 @@ sub get_status {
     # reap pending zombies
     waitpid(-1, WNOHANG);
 
+    my $user = '';
     if( -f $dir."/user" ) {
-        my $user = read_file($dir."/user");
+        $user = read_file($dir."/user");
         chomp($user);
-        return unless $user eq $c->stash->{'remote_user'};
+        if(!defined $c->stash->{'remote_user'} || $user ne $c->stash->{'remote_user'}) {
+            if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+                return;
+            }
+        }
     }
 
-    my $is_running = _is_running($dir);
+    my $is_running = _is_running($c, $dir);
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start      = stat($dir.'/start');
     my $time       = time() - $start[9];
@@ -315,14 +391,14 @@ sub get_status {
     }
 
     my $remaining;
-    if($percent =~ m/^(\d+)\s+([\d\.\-]+)\s+(.*)$/mx) {
+    if($percent =~ m/^([\d\.]+)\s+([\d\.\-]+)\s+(.*)$/mx) {
         $percent   = $1;
         $remaining = $2;
         $message   = $3;
     }
     if($percent eq "") { $percent = 0; }
 
-    return($is_running,$time,$percent,$message,$forward,$remaining);
+    return($is_running,$time,$percent,$message,$forward,$remaining,$user);
 }
 
 
@@ -339,18 +415,13 @@ sub get_json_status {
     my($c, $id) = @_;
     confess("got no id") unless $id;
 
-    my($is_running,$time,$percent,$message,$forward,$remaining) = get_status($c, $id);
-    return unless defined $time;
+    my $job = read_job($c, $id);
+    return unless $job;
 
-    $remaining = -1 unless defined $remaining;
-    my $json   = {
-            'is_running' => 0+$is_running,
-            'time'       => 0+$time,
-            'percent'    => 0+$percent,
-            'message'    => $message,
-            'forward'    => $forward,
-            'remaining'  => 0+$remaining,
-    };
+    my $json = {};
+    for my $key (qw/is_running time percent message forward remaining/) {
+        $json->{$key} = $job->{$key};
+    }
 
     return $c->render(json => $json);
 }
@@ -427,7 +498,7 @@ sub get_result {
     $profile = read_file($dir."/profile.log") if -f $dir."/profile.log";
     chomp($profile) if defined $profile;
 
-    return($out,$err,$time,$dir,$stash,$rc,$profile);
+    return($out,$err,$time,$dir,$stash,$rc,$profile, $start[9], $end[9]);
 }
 
 ##############################################
@@ -602,6 +673,12 @@ sub _do_parent_stuff {
     print $fh "\n";
     Thruk::Utils::IO::close($fh, $pidfile);
 
+    # write hostname file
+    my $hostfile = $dir."/hostname";
+    open($fh, '>', $hostfile) or die("cannot write pid $hostfile: $!");
+    print $fh $Thruk::NODE_ID, "\n", $Thruk::HOSTNAME, "\n";
+    Thruk::Utils::IO::close($fh, $hostfile);
+
     # write start file
     my $startfile = $dir."/start";
     open($fh, '>', $startfile) or die("cannot write start $startfile: $!");
@@ -684,16 +761,30 @@ sub _init_external {
 
 =head2 _is_running
 
-  _is_running($dir)
+  _is_running($c, $dir)
 
 return true if process is still running
 
 =cut
 sub _is_running {
-    my $dir = shift;
+    my($c, $dir) = @_;
+    confess("no dir") unless $dir;
     $dir = Thruk::Utils::IO::untaint($dir);
 
     return 0 unless -s $dir."/pid";
+
+    # fetch status from remote node
+    if(-s $dir."/hostname") {
+        my @hosts = split(/\n/mx, read_file($dir."/hostname"));
+        if($hosts[0] ne $Thruk::NODE_ID) {
+            confess('clustered _is_running requires $c') unless $c;
+            my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
+            if($res && exists $res->[0]) {
+                return($res->[0]);
+            }
+            return(0);
+        }
+    }
 
     my $pid = read_file($dir."/pid");
     $pid = Thruk::Utils::IO::untaint($pid);

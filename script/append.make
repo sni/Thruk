@@ -56,6 +56,7 @@ version:
 
 docs:
 	script/thruk_update_docs.sh
+	script/thruk_update_docs_rest.pl
 
 staticfiles:
 	script/thruk_create_combined_static_content.pl

@@ -27,6 +27,8 @@ The report command creates reports from the command line.
 use warnings;
 use strict;
 use File::Slurp qw/read_file/;
+use Thruk::Utils::IO;
+use Thruk::Utils::External;
 
 ##############################################
 
@@ -50,47 +52,94 @@ sub cmd {
     if(scalar @{$commandoptions} == 0) {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
-    my $nr = $commandoptions->[0];
 
-    my $output;
     eval {
         require Thruk::Utils::Reports;
     };
     if($@) {
         return("reports plugin is not enabled.\n", 1);
     }
-    my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
-    # set waiting flag for queued reports, so the show up nicely in the gui
-    Thruk::Utils::Reports::process_queue_file($c);
-    if($mail) {
-        if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, 1)) {
-            $output = "report queued successfully\n";
-        } else {
-            my $sent = Thruk::Utils::Reports::report_send($c, $nr);
-            if($sent eq "2") {
-                $output = "mail not sent, threshold not reached\n";
-            } elsif($sent) {
-                $output = "mail sent successfully\n";
-            } else {
-                return("cannot send mail\n", 1)
+
+    # queue all supplied reports
+    my @numbers = split(/\s*\|\s*/mx, $commandoptions->[0]);
+    my $queued  = 0;
+    for my $nr (@numbers) {
+        my $mail_queue = 0;
+        my $report = Thruk::Utils::Reports::get_report($c, $nr, 1);
+        if(defined $report->{'is_running'} && $report->{'is_running'} > 0) {
+            next;
+        }
+        if($ENV{'THRUK_CRON'}) {
+            if($report->{'to'} || $report->{'cc'}) {
+                $mail_queue = 1;
             }
         }
-    } else {
-        if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr)) {
-            $output = "report queued successfully\n";
-        } else {
-            my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
-            if(defined $report_file and -f $report_file) {
-                $output = read_file($report_file);
-            } else {
-                my $errors = read_file($logfile);
-                return("generating report failed:\n".$errors, 1);
-            }
+        if(Thruk::Utils::Reports::queue_report($c, $nr, $mail_queue)) {
+            $queued++;
         }
     }
 
+    # start with first report from list, others will be processed serially via check_for_waiting_reports()
+    my $nr = shift @numbers;
+    my($output, $rc) = _cmd_report($c, $nr, $mail);
+
+    Thruk::Utils::Reports::check_for_waiting_reports($c);
+
     $c->stats->profile(end => "_cmd_report()");
-    return($output, 0);
+    return($output, $rc);
+}
+
+##############################################
+sub _cmd_report {
+    my($c, $nr, $mail) = @_;
+
+    my $report = Thruk::Utils::Reports::get_report($c, $nr, 1);
+    if($ENV{'THRUK_CRON'}) {
+        if(defined $report->{'is_running'} && $report->{'is_running'} > 0) {
+            return("report is already running\n", 0);
+        }
+        if($report->{'to'} || $report->{'cc'}) {
+            $mail = 1;
+        }
+    }
+
+    # create fake job when run from cron to save profile
+    if(!$ENV{'THRUK_JOB_ID'}) {
+        my($id,$dir) = Thruk::Utils::External::_init_external($c);
+        ## no critic
+        $SIG{CHLD} = 'DEFAULT';
+        Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
+        $ENV{'THRUK_JOB_ID'}       = $id;
+        $ENV{'THRUK_JOB_DIR'}      = $dir;
+        ## use critic
+        Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
+    }
+
+    if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, $mail)) {
+        return("report queued successfully\n", 0);
+    }
+
+    if(!$ENV{'THRUK_CRON'} && $mail) {
+        my $sent = Thruk::Utils::Reports::report_send($c, $nr);
+        if($sent eq "-2") {
+            return("report is running on another node already\n", 0);
+        } elsif($sent eq "2") {
+            return("mail not sent, threshold not reached\n", 0);
+        } elsif($sent) {
+            return("mail sent successfully\n", 0);
+        }
+        return("cannot send mail\n", 1);
+    }
+
+    my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+    if(defined $report_file and $report_file eq '-2') {
+        return("report is running on another node already\n", 0);
+    } elsif(defined $report_file and -f $report_file) {
+        return(scalar read_file($report_file), 0);
+    }
+    my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
+    my $errors  = read_file($logfile);
+    return("generating report failed:\n".$errors, 1);
 }
 
 ##############################################

@@ -1,0 +1,76 @@
+---
+- hosts: all
+  tasks:
+  - shell: "crond"
+  - shell: omd config demo set APACHE_MODE own
+  - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
+  - shell: ln -sfn /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
+  - shell: "rsync -avu /omd/sites/demo/{{item}}/thruk/. /mnt/{{item}}/. ; rm -rf /omd/sites/demo/{{item}}/thruk ; ln -sfn /mnt/{{item}} /omd/sites/demo/{{item}}/thruk; chown demo: /mnt/{{item}}/."
+    with_items: ['etc', 'var']
+  - shell: "rm -f /mnt/etc/cgi.cfg; cp -p /omd/sites/demo/etc/nagios/cgi.cfg /mnt/etc/cgi.cfg"
+  - copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - name: wait for /omd/sites/demo/etc/thruk/thruk_local.d/ to become available
+    wait_for:
+      path: /omd/sites/demo/etc/thruk/thruk_local.d/
+  - copy:
+      src: /root/thruk_cluster.conf
+      dest: /omd/sites/demo/etc/thruk/thruk_local.d/cluster.conf
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/dot_thruk
+      dest: /omd/sites/demo/.thruk
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
+  - name: create cp folder
+    file:
+      path: /omd/sites/demo/etc/thruk/bp
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - name: add example business process
+    copy:
+      src: /root/1.tbp
+      dest: /omd/sites/demo/etc/thruk/bp/1.tbp
+      owner: demo
+      group: demo
+  - name: create reports folder
+    file:
+      path: /omd/sites/demo/var/thruk/reports
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - name: add example report
+    copy:
+      src: /root/1.rpt
+      dest: /omd/sites/demo/var/thruk/reports/1.rpt
+      owner: demo
+      group: demo
+  - name: create downtimes folder
+    file:
+      path: /omd/sites/demo/var/thruk/downtimes
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - name: add example recurring downtime
+    copy:
+      src: /root/1.tsk
+      dest: /omd/sites/demo/var/thruk/downtimes/1.tsk
+      owner: demo
+      group: demo
+  - name: wait for omd livestatus to become available
+    wait_for:
+      host: omd
+      port: 6557
+  - shell: sudo su - demo -c "thruk bp commit --local"
+  - shell: sudo su - demo -c "thruk cron install --local"

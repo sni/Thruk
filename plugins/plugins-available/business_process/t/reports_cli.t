@@ -92,6 +92,12 @@ for my $report (@{$test_pdf_reports}) {
         cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=update&report=9999"',
         like => ['/^OK - report scheduled for update$/'],
     });
+
+    TestUtils::test_page(
+        url     => '/thruk/cgi-bin/reports2.cgi',
+        waitfor => 'reports2.cgi\?report=9999\&amp;refresh=0',
+        unlike => '<span[^>]*style="color:\ red;".*?\'([^\']*)\'',
+    );
 }
 
 # remove report

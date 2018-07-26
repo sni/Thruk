@@ -1,0 +1,34 @@
+---
+- hosts: all
+  tasks:
+  - shell: omd config demo set APACHE_MODE off
+  - shell: omd config demo set PNP4NAGIOS off
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - name: copy naemon example.cfg
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - name: copy naemon test.cfg
+    copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - name: ensure thruk_bp_generated.cfg exists
+    copy:
+      content: ""
+      dest: /mnt/var/thruk_bp_generated.cfg
+      force: no
+      group: demo
+      owner: demo
+      mode: 0660
+  - name: create symlink for thruk_bp_generated.cfg
+    file:
+      src: /mnt/var/thruk_bp_generated.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/thruk_bp_generated.cfg
+      owner: demo
+      group: demo
+      state: link
+

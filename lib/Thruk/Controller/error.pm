@@ -267,6 +267,20 @@ sub index {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
+    # return errer as json for rest api calls
+    if($c->req->path_info =~ m%^/thruk/r/%mx || $c->req->header('X-Thruk-Auth-Key')) {
+        if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 2) {
+            cluck($c->stash->{errorMessage});
+        }
+        return $c->render(json => {
+            failed      => Cpanel::JSON::XS::true,
+            message     => $c->stash->{errorMessage},
+            details     => $c->stash->{errorDetails},
+            description => $c->stash->{errorDescription},
+            code        => $code,
+        });
+    }
+
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         Thruk::Utils::CLI::_error($c->stash->{errorMessage});
         Thruk::Utils::CLI::_error($c->stash->{errorDescription});

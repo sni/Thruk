@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 531;
+    plan tests => 540;
 }
 
 BEGIN {
@@ -113,6 +113,7 @@ $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=uploadecho', like => 'missing file in fileupload.', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
     { url => '/thruk/cgi-bin/panorama.cgi?task=save_dashboard&nr=__DASHBOARD__', like => ['Thruk Panorama Dashboard Export:','End Export'], content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
     { url => '/thruk/cgi-bin/panorama.cgi?task=load_dashboard', like => 'missing file in fileupload', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
+    { url => '/thruk/r/thruk/panorama/__DASHBOARD__', method => 'get' },
 ];
 
 for my $url (@{$pages}) {
@@ -191,6 +192,7 @@ sub _test_json_page {
     $taskurl =~ s|task=([a-z_]+).*?$|task=$1|gmx;
     delete $subs->{$taskurl};
     $url->{'post'}         = {} unless $url->{'post'};
+    $url->{'post'}         = undef if($url->{'method'} && lc($url->{'method'}) eq 'get');
     $url->{'content_type'} = 'application/json;charset=UTF-8' unless $url->{'content_type'};
 
     $url = _set_dynamic_url_parts($url);

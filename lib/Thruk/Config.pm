@@ -250,14 +250,16 @@ our %config = ('name'                   => 'Thruk',
               },
 );
 # set TT strict mode only for authors
-$config{'thruk_debug'} = 0;
+$config{'thruk_debug'}  = 0;
+$config{'thruk_author'} = 0;
 $config{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $config{'View::TT'}->{'STAT_TTL'}   = 5 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $config{'View::TT'}->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
-    $config{'thruk_debug'} = 1;
+    $config{'thruk_debug'}  = 1;
+    $config{'thruk_author'} = 1;
 }
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'} = $config{released};
 
@@ -281,7 +283,7 @@ sub get_config {
     if(scalar @files == 0) {
         for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
-            push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
+            push @files, $path.'/thruk.conf' if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
                 my @tmpfiles = sort glob($path.'/thruk_local.d/*');
                 for my $tmpfile (@tmpfiles) {
@@ -409,6 +411,7 @@ sub set_default_config {
         bug_email_rcpt                  => 'bugs@thruk.org',
         home_link                       => 'http://www.thruk.org',
         plugin_registry_url             => ['https://api.thruk.org/v1/plugin/list'],
+        cluster_nodes                   => '$proto$://$hostname$/$url_prefix$/',
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,
@@ -628,7 +631,7 @@ sub set_default_config {
     # make show_custom_vars a list
     $config->{'show_custom_vars'} = array_uniq([split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))]);
 
-    # make graph_replace a list
+    # make some settings a list
     for my $key (qw/graph_replace commandline_obfuscate_pattern/) {
         $config->{$key} = [@{list($config->{$key})}];
     }
@@ -1043,6 +1046,7 @@ sub _do_finalize_config {
         if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi-bin/restricted.cgi$|mx) {
             $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
         }
+        $config->{'omd_apache_proto'} = $proto;
     }
 
     # set default config

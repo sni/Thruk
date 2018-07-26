@@ -388,9 +388,9 @@ update json data
 sub json_lock_patch {
     my($file, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
     my($fh, $lock_fh) = file_lock($file, 'ex');
-    json_patch($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile);
+    my $data = json_patch($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile);
     file_unlock($file, $fh, $lock_fh);
-    return 1;
+    return $data;
 }
 
 ##############################################

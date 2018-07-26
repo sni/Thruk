@@ -1786,6 +1786,9 @@ sub update_cron_file {
         return;
     }
 
+    # this function must be run on all cluster nodes
+    return if $c->cluster->run_cluster("all", "cmd: cron install");
+
     # prevents 'No child processes' error
     local $SIG{CHLD} = 'DEFAULT';
 
@@ -1872,6 +1875,7 @@ sub update_cron_file {
             unless($header_printed) {
                 print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN\n";
                 print $fh "##############################################################\n";
+                print $fh "THRUK_CRON=1\n";
                 $header_printed = 1;
             }
             print $fh '# '.$s."\n";
@@ -1974,6 +1978,7 @@ sub set_user {
     my($c, $username) = @_;
     $c->stash->{'remote_user'} = $username;
     $c->authenticate({});
+    confess("no user") unless $c->user;
     $c->stash->{'remote_user'}= $c->user->get('username');
     set_dynamic_roles($c);
     return;
