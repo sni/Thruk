@@ -288,7 +288,6 @@ sub _dispatcher {
         delete $env->{'HTTP_CONNECTION'};
     }
     my $c = Thruk::Context->new($thruk, $env);
-    $c->cluster->register($c);
     my $enable_profiles = 0;
     if($c->req->cookies->{'thruk_profiling'}) {
         $enable_profiles = 1;
@@ -298,6 +297,7 @@ sub _dispatcher {
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
+    $c->cluster->register($c);
 
     if(Thruk->verbose) {
         $c->log->debug($url);
