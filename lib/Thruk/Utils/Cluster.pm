@@ -42,7 +42,26 @@ sub new {
     };
     bless $self, $class;
 
+    Thruk::Utils::IO::mkdir_r($thruk->config->{'var_path'}.'/cluster');
+
+    return $self;
+}
+
+##########################################################
+
+=head2 load_statefile
+
+load statefile and fill node structures
+
+=cut
+sub load_statefile {
+    my($self) = @_;
+    my $c = $Thruk::Utils::Cluster::context;
+    $c->stats->profile(begin => "cluster::load_statefile") if $c;
     my $now   = time();
+    $self->{'nodes'}        = [];
+    $self->{'nodes_by_id'}  = {};
+    $self->{'nodes_by_url'} = {};
     my $nodes = Thruk::Utils::IO::json_lock_retrieve($self->{'statefile'}) || {};
     for my $key (sort keys %{$nodes}) {
         my $n = $nodes->{$key};
@@ -51,15 +70,14 @@ sub new {
             $self->unregister($key);
             next:
         }
-        my $node = Thruk::Backend::Provider::HTTP->new({ peer => $n->{'node_url'}, auth => $thruk->config->{'secret_key'} }, undef, undef, undef, undef, $thruk->config);
+        my $node = Thruk::Backend::Provider::HTTP->new({ peer => $n->{'node_url'}, auth => $c->config->{'secret_key'} }, undef, undef, undef, undef, $c->config);
         $n->{'node'} = $node;
         push @{$self->{'nodes'}}, $n;
         $self->{'nodes_by_id'}->{$key}              = $n;
         $self->{'nodes_by_url'}->{$n->{'node_url'}} = $n;
     }
-
-    Thruk::Utils::IO::mkdir_r($thruk->config->{'var_path'}.'/cluster');
-    return $self;
+    $c->stats->profile(end => "cluster::load_statefile") if $c;
+    return $nodes;
 }
 
 ##########################################################
@@ -72,6 +90,7 @@ registers this cluster node in the cluster statefile
 sub register {
     my($self, $c) = @_;
     $Thruk::Utils::Cluster::context = $c;
+    $self->load_statefile();
     my $now = time();
     # if we did not exists in the statefile before, run a few things initially
     my $new = 0;
@@ -147,7 +166,7 @@ return 1 if a cluster is configured
 =cut
 sub is_clustered {
     my($self) = @_;
-    return 1 if scalar @{$self->{'nodes'}} > 1;
+    return 1 if scalar keys %{$self->{nodes_by_url}} > 1;
     return 0;
 }
 
@@ -200,7 +219,7 @@ sub run_cluster {
         confess("no args supported") if $args;
         # check if cmd is already running
         my $digest = md5_hex(sprintf("%s-%s-%s", POSIX::strftime("%Y-%m-%d %H:%M", localtime()), $sub, Dumper($args)));
-        my $jobs_path = $self->{'config'}->{'var_path'}.'/cluster/jobs';
+        my $jobs_path = $c->config->{'var_path'}.'/cluster/jobs';
         Thruk::Utils::IO::mkdir_r($jobs_path);
         Thruk::Utils::IO::write($jobs_path.'/'.$digest, $Thruk::NODE_ID."\n", undef, 1);
         my $lock = [split(/\n/mx, Thruk::Utils::IO::read($jobs_path.'/'.$digest))]->[0];
