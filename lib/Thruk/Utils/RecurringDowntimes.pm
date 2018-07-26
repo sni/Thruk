@@ -79,8 +79,8 @@ sub get_downtimes_list {
 
     return [] unless $c->config->{'use_feature_recurring_downtime'};
 
-    my @hostfilter    = (Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ));
-    my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
+    my @hostfilter    = $auth ? (Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )) : [];
+    my @servicefilter = $auth ? (Thruk::Utils::Auth::get_auth_filter( $c, 'services' )) : [];
 
     # skip further auth tests if this user has admins permission anyway
     if($auth) {
@@ -386,7 +386,7 @@ sub get_default_recurring_downtime {
             service      => $service,
             servicegroup => [$servicegroup],
             hostgroup    => [$hostgroup],
-            backends     => $c->req->parameters->{'backend'} || $c->{'db'}->peer_key(),
+            backends     => $c->req->parameters->{'backend'} || ($c->{'db'} && $c->{'db'}->peer_key()),
             schedule     => [],
             duration     => 120,
             comment      => 'automatic downtime',
@@ -484,7 +484,7 @@ sub _get_downtime_cmd {
     Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
     my $log = sprintf(">/dev/null 2>>%s/cron.log", $c->config->{'var_path'});
     $log = sprintf(">>%s/cron.log 2>&1", $c->config->{'var_path'}) if $verbose;
-    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=\"%s\"%s' %s",
+    my $cmd = sprintf("cd %s && %s '%s downtimetask \"%s\"%s' %s",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
                             $c->config->{'thruk_bin'},
