@@ -43,7 +43,7 @@ for my $x (1..$max_proc) {
         for my $nr (1..$test_runs) {
             my($fh, $lock_fh) = Thruk::Utils::IO::file_lock($filename, "ex");
             my $data = Thruk::Utils::IO::json_retrieve($filename, $fh);
-            Thruk::Utils::IO::json_store($filename, $fh, { test => ($data->{'test'}+1) });
+            Thruk::Utils::IO::json_store($filename, { test => ($data->{'test'}+1) });
             Thruk::Utils::IO::file_unlock($filename, $fh, $lock_fh);
         }
     }
