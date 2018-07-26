@@ -2670,10 +2670,12 @@ sub backends_hash_to_list {
     my $backends = [];
     for my $b (@{list($hashlist)}) {
         if(ref $b eq '') {
+            confess("backends uninitialized") unless $c->{'db'};
             my $backend = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
             push @{$backends}, ($backend ? $backend->peer_key() : $b);
         } else {
             for my $key (keys %{$b}) {
+                confess("backends uninitialized") unless $c->{'db'};
                 my $backend = $c->{'db'}->get_peer_by_key($key);
                 if(!defined $backend && defined $b->{$key}) {
                     $backend = $c->{'db'}->get_peer_by_key($b->{$key});
