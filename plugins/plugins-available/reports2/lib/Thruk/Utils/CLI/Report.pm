@@ -125,15 +125,11 @@ sub _cmd_report {
         Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
     }
 
-    if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, $mail)) {
-        return("report queued successfully\n", 0);
-    }
-
     if(!$ENV{'THRUK_CRON'} && $mail) {
         my $sent = Thruk::Utils::Reports::report_send($c, $nr);
-        if($sent eq "-2") {
+        if($sent && $sent eq "-2") {
             return("report is running on another node already\n", 0);
-        } elsif($sent eq "2") {
+        } elsif($sent && $sent eq "2") {
             return("mail not sent, threshold not reached\n", 0);
         } elsif($sent) {
             return("mail sent successfully\n", 0);

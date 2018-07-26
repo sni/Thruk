@@ -194,11 +194,11 @@ sub report_send {
             Thruk::Utils::set_message( $c, 'fail_message', 'report not yet generated' );
             return $c->redirect_to('reports2.cgi');
         }
-        _initialize_report_templates($c, $report);
     } else {
         $attachment = generate_report($c, $nr);
     }
     $report = _read_report_file($c, $nr); # update report data, attachment would be wrong otherwise
+    _initialize_report_templates($c, $report);
     if(!defined $attachment) {
         Thruk::Utils::set_message( $c, 'fail_message', 'failed to send report' );
         return 0;
@@ -414,18 +414,15 @@ sub generate_report {
     set_running($c, $nr, $$, time()) unless $options->{'var'}->{'is_running'} > 0;
 
     # report is already beeing generated, check if the other process is alive
-    if($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::NODE_ID) {
+    if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::NODE_ID)) {
         # if started by cron, just exit, some other node is doing the report already
         return -2 if $ENV{'THRUK_CRON'};
 
-        $options = _read_report_file($c, $nr);
-        while($options->{'var'}->{'is_running'}) {
-            if($c->cluster->kill($c, $options->{'var'}->{'running_node'}, 0, $options->{'var'}->{'is_running'}) != 1) {
-                last;
-            }
-            sleep 1;
-        }
         # just wait till its finished and return
+        while($options->{'var'}->{'is_running'}) {
+            sleep 1;
+            $options = _read_report_file($c, $nr);
+        }
         if(-e $attachment) {
             return $attachment;
         }
@@ -712,7 +709,6 @@ sub queue_report_if_busy {
         }
     }
 
-    set_running($c, $nr, $$);
     return;
 }
 
