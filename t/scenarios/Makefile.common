@@ -23,9 +23,6 @@ test_verbose: wait_start
 	$(MAKE) extra_test
 
 server:
-	$(MAKE) clean
-	$(MAKE) prepare
-	$(MAKE) wait_start
 	cd ../../.. && THRUK_PERFORMANCE_DEBUG=1 ./script/thruk_server.pl -r
 
 prepare:
