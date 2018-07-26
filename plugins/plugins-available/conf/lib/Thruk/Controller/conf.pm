@@ -2519,7 +2519,7 @@ sub _config_reload {
     $c->stash->{'reload_nav'} = 1;
 
     $c->stats->profile(end => "conf::_config_reload");
-    return;
+    return 1;
 }
 
 ##########################################################
