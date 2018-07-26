@@ -73,15 +73,25 @@ sub cmd {
             if($report->{'to'} || $report->{'cc'}) {
                 $mail_queue = 1;
             }
-        }
-        if(Thruk::Utils::Reports::queue_report($c, $nr, $mail_queue)) {
-            $queued++;
+            if(Thruk::Utils::Reports::queue_report($c, $nr, $mail_queue)) {
+                $queued++;
+            }
         }
     }
 
-    # start with first report from list, others will be processed serially via check_for_waiting_reports()
-    my $nr = shift @numbers;
-    my($output, $rc) = _cmd_report($c, $nr, $mail);
+    my($output, $rc) = ("", 0);
+    if($ENV{'THRUK_CRON'}) {
+        # start with first report from list, others will be processed serially via check_for_waiting_reports()
+        my $nr = shift @numbers;
+        ($output, $rc) = _cmd_report($c, $nr, $mail);
+    } else {
+        # do all reports serially
+        for my $nr (@numbers) {
+            my($o, $r) = _cmd_report($c, $nr, $mail);
+            $output .= $o;
+            $rc     += $r;
+        }
+    }
 
     Thruk::Utils::Reports::check_for_waiting_reports($c);
 
