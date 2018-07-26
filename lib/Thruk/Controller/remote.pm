@@ -23,7 +23,7 @@ Thruk Controller.
 
 ##########################################################
 sub index {
-    my ( $c ) = @_;
+    my($c) = @_;
 
     if(!$c->config->{'remote_modules_loaded'}) {
         load Data::Dumper;

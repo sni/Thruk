@@ -32,7 +32,7 @@ command line reports.
 use warnings;
 use strict;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
-use Getopt::Long qw//;
+use Getopt::Long ();
 
 ##############################################
 
