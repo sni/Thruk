@@ -312,7 +312,7 @@ sub update_cron_file {
     if(scalar @files > 0) {
         open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
         Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
-        my $cmd = sprintf("cd %s && %s '%s -a bpd' >/dev/null 2>>%s/cron.log",
+        my $cmd = sprintf("cd %s && %s '%s bp all' >/dev/null 2>>%s/cron.log",
                                 $c->config->{'project_root'},
                                 $c->config->{'thruk_shell'},
                                 $c->config->{'thruk_bin'},
