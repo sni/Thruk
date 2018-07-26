@@ -2078,7 +2078,7 @@ sub wait_after_reload {
     my $procinfo = {};
     my $done     = 0;
     my $options = {};
-    if(!$ENV{'THRUK_LMD_VERSION'} || Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.3')) {
+    if($ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.3')) {
         $options = {
                 'header' => {
                     'WaitTimeout'   => 2000,
