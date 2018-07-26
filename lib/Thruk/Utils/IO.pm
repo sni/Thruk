@@ -196,6 +196,13 @@ sub file_lock {
     alarm(30);
     local $SIG{'ALRM'} = sub { confess("timeout while trying to flock(".$mode."): ".$file); };
 
+    # we can only lock files in existing folders
+    my $basename = $file;
+    $basename    =~ s%/[^/]*$%%gmx;
+    if(!-d $basename.'/.') {
+        confess("cannot lock $file in non-existing folder: ".$!);
+    }
+
     my $lock_file = $file.'.lock';
     my $lock_fh;
     if($mode eq 'ex') {

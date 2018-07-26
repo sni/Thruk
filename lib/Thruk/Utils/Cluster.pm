@@ -120,6 +120,7 @@ removes ourself from the cluster statefile
 =cut
 sub unregister {
     my($self, $nodeid) = @_;
+    return unless -s $self->{'statefile'};
     $nodeid = $Thruk::NODE_ID unless $nodeid;
     my $completly = 1;
     if($nodeid eq $Thruk::NODE_ID) {
