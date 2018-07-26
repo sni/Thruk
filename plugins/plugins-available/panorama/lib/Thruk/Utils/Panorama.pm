@@ -342,7 +342,7 @@ sub _get_runtime_file {
         $user =~ s/[^a-zA-Z\d_\-]/_/gmx;
         $user = $user.'.';
     }
-    return($c->{'panorama_var'}.'/'.$nr.'.tab.'.$user.'runtime');
+    return($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.'.$user.'runtime');
 }
 
 ##########################################################
