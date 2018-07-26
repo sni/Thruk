@@ -83,6 +83,7 @@
           [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
           [% job_time = end_time - r.var.start_time %]
           [% IF r.var.exists('job_data') %]
+                [% job_message = ""; IF r.var.job_data.defined('message'); job_message = r.var.job_data.message; END %]
                 [% PROCESS _progressbar.tt
                             pb_options = {
                                 percent             => r.var.job_data.percent,
@@ -94,6 +95,7 @@
                                 height              =>  20,
                                 percent_per_second  =>  0,
                                 show_message        =>  1,
+                                message             =>  job_message,
                                 hide_cancel_btn     =>  1,
                             }
                 %]
