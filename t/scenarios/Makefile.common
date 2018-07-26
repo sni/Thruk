@@ -28,7 +28,7 @@ server:
 prepare:
 	docker-compose build
 	# try up twice, it fails occacionally with bind errors (bind: address already in use)
-	docker-compose up --remove-orphans -d || docker-compose up --remove-orphans -d
+	docker-compose up --remove-orphans -d || ( sleep 3 && docker-compose up --remove-orphans -d )
 	docker-compose ps
 	$(MAKE) extra_prepare
 
