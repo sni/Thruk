@@ -45,7 +45,7 @@ script:
   - if [ "$TRAVIS_BRANCH" == "e2e" ]; then
         make e2etest;
     else
-        sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_TRAVIS=1 TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test';
+        sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_TRAVIS=1 TEST_AUTHOR=1 TEST_RACE=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test';
     fi
 after_failure:
   - '[ "$TRAVIS_BRANCH" != "e2e" -o ! -f ~/.dropbox_uploader ] || ./t/scenarios/e2e/dropbox_uploader.sh upload t/scenarios/e2e/_run/*/* thruk-travis/$TRAVIS_JOB_NUMBER/'
