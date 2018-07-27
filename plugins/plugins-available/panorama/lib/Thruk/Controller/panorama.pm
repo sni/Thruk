@@ -72,7 +72,7 @@ sub index {
     $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->req->parameters->{'dashboard_ignore_changes'};
 
     $c->stash->{'is_admin'} = 0;
-    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+    if($c->check_user_roles('admin')) {
         $c->stash->{'is_admin'} = 1;
     }
     $c->stash->{one_tab_only}           = '';

@@ -1278,7 +1278,7 @@ sub _process_bookmarks {
 
     # public only allowed for admins
     if($public) {
-        if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+        if(!$c->check_user_roles('admin')) {
             $public = 0;
         }
     }
@@ -1342,7 +1342,7 @@ sub _process_bookmarks {
         }
         $done++;
 
-        if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+        if($c->check_user_roles('admin')) {
             for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
                 next unless defined $bookmark;
                 my($section, $name) = split(/::/mx, $bookmark ,2);

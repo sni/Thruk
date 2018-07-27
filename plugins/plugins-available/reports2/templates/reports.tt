@@ -100,7 +100,7 @@
                             }
                 %]
           [% ELSE %]
-            [% IF c.check_user_roles('authorized_for_system_commands') && c.check_user_roles('authorized_for_configuration_information') %]
+            [% IF c.check_user_roles('admin') %]
               <span onclick="overlib('<div id=\'report_profile\'><center><img src=\'[% url_prefix %]themes/[% theme %]/images/waiting.gif\' alt=\'content is beeing fetched\' title=\'content is beeing fetched\' border=0 height=20 width=20></center><\/div>',CAPTION,'report profile',WIDTH,600,[% c.config.info_popup_options %]); load_overlib_content('report_profile', 'reports2.cgi?report=[% r.nr %]&amp;action=profile', true);">
               [% duration(job_time, 3) %]
               </span>

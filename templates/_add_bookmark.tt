@@ -27,7 +27,7 @@
         <option value="Bookmarks" selected>Bookmarks</option>
       </select>
       with name <input type="text" size="15" value="" name="newname" id="newname">
-      [% IF c.check_user_roles('authorized_for_system_commands') && c.check_user_roles('authorized_for_configuration_information') %]
+      [% IF c.check_user_roles('admin') %]
       (public available <input type="checkbox" name="public" value=1>)<br>
       [% END %]
       <div align="center">
@@ -49,7 +49,7 @@
               [% END %]
           [% END %]
         [% END +%]
-        [% IF c.check_user_roles('authorized_for_system_commands') && c.check_user_roles('authorized_for_configuration_information') %]
+        [% IF c.check_user_roles('admin') %]
           [% IF global_user_data.exists('bookmarks') %]
             [% FOREACH section = global_user_data.bookmarks.keys.sort %]
                 [% FOREACH link = global_user_data.bookmarks.$section %]
@@ -81,7 +81,7 @@
       [% IF nr == 0 %]
         <br>no bookmarks yet
       [% END %]
-      [% IF c.check_user_roles('authorized_for_system_commands') && c.check_user_roles('authorized_for_configuration_information') %]
+      [% IF c.check_user_roles('admin') %]
         [% nr = 0 %]
         <hr>
         <b>Public Bookmarks:</b>

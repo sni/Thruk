@@ -1296,7 +1296,7 @@ sub _is_authorized_for_report {
     my($c, $report) = @_;
 
     # super user have permission for all reports
-    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+    if($c->check_user_roles('admin')) {
         return 1;
     }
 

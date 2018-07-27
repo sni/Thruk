@@ -32,7 +32,7 @@ sub index {
     }
 
     # only admins from here on
-    if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+    if(!$c->check_user_roles('admin')) {
         return $c->detach('/error/index/8');
     }
 

@@ -54,8 +54,7 @@ sub index {
     if($action eq 'user_password') {
         # ok
     }
-    elsif( !$c->check_user_roles("authorized_for_configuration_information")
-        || !$c->check_user_roles("authorized_for_system_commands")) {
+    elsif(!$c->check_user_roles("admin")) {
         if(    !defined $c->{'db'}
             || !defined $c->{'db'}->{'backends'}
             || ref $c->{'db'}->{'backends'} ne 'ARRAY'

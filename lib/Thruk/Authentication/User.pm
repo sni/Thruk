@@ -106,15 +106,8 @@ sub new {
     }
     $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
 
-    if($username eq '(cron)') {
-        $self->{'roles'} = [qw/authorized_for_all_hosts
-                               authorized_for_all_host_commands
-                               authorized_for_all_services
-                               authorized_for_all_service_commands
-                               authorized_for_configuration_information
-                               authorized_for_system_commands
-                               authorized_for_system_information
-                           /];
+    if($username eq '(cron)' || $username eq '(cli)') {
+        $self->grant('admin');
     }
 
     return $self;
@@ -139,11 +132,26 @@ sub get {
 
  for example:
  $c->user->check_user_roles('authorized_for_all_services')
+ $c->user->check_user_roles(['authorized_for_system_commands', 'authorized_for_configuration_information'])
 
 =cut
 
 sub check_user_roles {
     my($self, $role) = @_;
+    if(ref $role eq 'ARRAY') {
+        for my $r (@{$role}) {
+            if(!$self->check_user_roles($r)) {
+                return(0);
+            }
+        }
+        return(1);
+    }
+    if($r eq 'admin') {
+        if($self->check_user_roles('authorized_for_system_commands') && $self->check_user_roles('authorized_for_configuration_information')) {
+            return(1);
+        }
+        return(0);
+    }
     my @found = grep(/^\Q$role\E$/mx, @{$self->{'roles'}});
     return(scalar @found);
 }
@@ -281,6 +289,31 @@ sub transform_username {
         $c->log->debug("authentication regex replace after : ".$username) if $c;
     }
     return($username);
+}
+
+=head2 grant
+
+    grant('role')
+
+grant role to user
+
+=cut
+
+sub grant {
+    my($self, $role) = @_;
+    if($role eq 'admin') {
+        $self->{'roles'} = [qw/authorized_for_all_hosts
+                               authorized_for_all_host_commands
+                               authorized_for_all_services
+                               authorized_for_all_service_commands
+                               authorized_for_configuration_information
+                               authorized_for_system_commands
+                               authorized_for_system_information
+                           /];
+    } else {
+        confess('role '.$role.' not implemented');
+    }
+    return;
 }
 
 1;
