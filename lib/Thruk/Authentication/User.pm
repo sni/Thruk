@@ -146,7 +146,7 @@ sub check_user_roles {
         }
         return(1);
     }
-    if($r eq 'admin') {
+    if($role eq 'admin') {
         if($self->check_user_roles('authorized_for_system_commands') && $self->check_user_roles('authorized_for_configuration_information')) {
             return(1);
         }
