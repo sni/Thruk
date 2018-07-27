@@ -568,6 +568,12 @@ sub _run_commands {
         Thruk::Utils::set_user($c, $opt->{'auth'});
     } elsif(defined $c->config->{'default_cli_user_name'}) {
         Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'});
+    } else {
+        if($ENV{'THRUK_CRON'}) {
+            Thruk::Utils::set_user($c, '(cron)');
+        } else {
+            Thruk::Utils::set_user($c, '(cli)');
+        }
     }
 
     my $data = {
