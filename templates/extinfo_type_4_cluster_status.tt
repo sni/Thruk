@@ -32,12 +32,36 @@
                         <th class='data'>Node</th>
                         <th class='data'>Status</th>
                         <th class='data'>Response Time</th>
+                        <th class='data'>Last Contact</th>
+                        <th class='data'>Processes</th>
                       </tr>
                       [% FOREACH n = c.cluster.nodes %]
                       <tr id="row_node_[% loop.index %]">
                         <td class='dataVal'><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
-                        <td class='dataVal statusimg' style="text-align: center;"><img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" width="16" height="16" alt="waiting"></td>
-                        <td class='dataVal responsetime'></td>
+                        <td class='dataVal' style="text-align: center;">
+                          [% IF n.last_contact > 0 && date.now - n.last_contact < c.config.cluster_node_stale_timeout %]
+                            <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
+                          [% ELSE %]
+                            <img src="[% url_prefix %]themes/[% theme %]/images/error.png" width="16" height="16" alt="error">
+                          [% END %]
+                        </td>
+                        <td class='dataVal' style="text-align: center;">
+                          [% IF n.response_time != ""; sprintf("%.3fs", n.response_time); END %]
+                        </td>
+                        <td class='dataVal' style="text-align: center;">
+                          [% IF n.last_contact > 0 %]
+                            [% IF date.now - n.last_contact < 120 %]
+                              [% date.now - n.last_contact %]s ago
+                            [% ELSE %]
+                              [% date_format(c, n.last_contact) %]
+                            [% END %]
+                          [% ELSE %]
+                          never
+                          [% END %]
+                        </td>
+                        <td class='dataVal' style="text-align: center;">
+                          [% n.pids.keys.size %]
+                        </td>
                       </tr>
                       [% END %]
                     </table>
@@ -48,41 +72,5 @@
           </tr>
       </table>
     </div>
-
-<script type="text/javascript">
-<!--
-  jQuery(function() {
-    [% FOREACH n = c.cluster.nodes %]
-    jQuery.ajax({
-      url: "extinfo.cgi",
-      type: 'POST',
-      data: {
-        type: 4,
-        cluster: 1,
-        state: 1,
-        node: "[% t %]"
-      },
-      dataType: 'json',
-      success: function(data, status, jqXHR) {
-          if(!data['ok']) {
-            jQuery("#row_node_[% loop.index %] .statusimg IMG").attr("src", '[% url_prefix %]themes/[% theme %]/images/error.png');
-            return;
-          }
-          jQuery("#row_node_[% loop.index %] .statusimg IMG").attr("src", '[% url_prefix %]themes/[% theme %]/images/accept.png');
-          jQuery("#row_node_[% loop.index %] .responsetime").html(data['response_time']+"s");
-      },
-      error: function(jqXHR, textStatus, errorThrown) {
-          jQuery("#row_node_[% loop.index %] .statusimg IMG").attr("src", '[% url_prefix %]themes/[% theme %]/images/error.png');
-          if(jqXHR.responseJSON && jqXHR.responseJSON.details) {
-            jQuery("#row_node_[% loop.index %] .responsetime").html(jqXHR.responseJSON.details);
-          } else {
-            jQuery("#row_node_[% loop.index %] .responsetime").text(textStatus);
-          }
-      }
-    });
-    [% END %]
-  });
--->
-</script>
 
 [% PROCESS _footer.tt %]

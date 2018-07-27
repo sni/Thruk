@@ -207,6 +207,26 @@ ex.:
   cluster_nodes = https://$hostname$/$url_prefix$/
 
 
+=== cluster_heartbeat_interval
+{% include new_since.ad version="2.22" %}
+Set interval in seconds to check if cluster nodes are available.
+A value of 0 disables the heartbeat. If value is higher than
+60 seconds, value is rounded to full minutes.
+
+ex.:
+
+  cluster_heartbeat_interval = 15
+
+
+=== cluster_node_stale_timeout
+{% include new_since.ad version="2.22" %}
+Set timeout after which a node is removed from the cluster.
+
+ex.:
+
+  cluster_node_stale_timeout = 120
+
+
 === mobile_agent
 Specify user agents which will be redirected to the mobile plugin (if
 enabled).

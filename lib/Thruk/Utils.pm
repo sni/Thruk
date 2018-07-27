@@ -487,6 +487,7 @@ sub get_dynamic_roles {
         $data = $cached_data->{'can_submit_commands'};
     }
     else {
+        confess("no db") unless $c->{'db'};
         $data = $c->{'db'}->get_can_submit_commands($username);
         $cached_data->{'can_submit_commands'} = $data;
         $c->cache->set('users', $username, $cached_data) if defined $username;

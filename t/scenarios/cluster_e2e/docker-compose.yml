@@ -12,7 +12,7 @@ services:
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - shared_var:/mnt/var
-  thruk1:
+  thruk:
     build: thruk/
     scale: 3
     environment:

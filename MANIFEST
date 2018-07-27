@@ -78,6 +78,7 @@ lib/Thruk/Controller/login.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/remote.pm
+lib/Thruk/Controller/Rest/V1/cluster.pm
 lib/Thruk/Controller/rest_v1.pm
 lib/Thruk/Controller/restricted.pm
 lib/Thruk/Controller/Root.pm
@@ -1924,6 +1925,7 @@ t/scenarios/cluster_e2e/omd/Dockerfile
 t/scenarios/cluster_e2e/omd/playbook.yml
 t/scenarios/cluster_e2e/omd/test.cfg
 t/scenarios/cluster_e2e/README
+t/scenarios/cluster_e2e/scale
 t/scenarios/cluster_e2e/t/300-controller_cluster.t
 t/scenarios/cluster_e2e/t/300-controller_tac.t
 t/scenarios/cluster_e2e/thruk/1.rpt

@@ -358,7 +358,7 @@ sub get_status {
         $user = read_file($dir."/user");
         chomp($user);
         if(!defined $c->stash->{'remote_user'} || $user ne $c->stash->{'remote_user'}) {
-            if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+            if(!$c->check_user_roles('admin')) {
                 return;
             }
         }

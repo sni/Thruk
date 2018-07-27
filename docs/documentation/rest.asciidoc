@@ -606,6 +606,32 @@ business processes for given number.
 |===========================================
 
 
+=== GET /thruk/cluster
+
+lists cluster nodes
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|hostname                          | 
+|last_contact                      | 
+|last_pid_check                    | 
+|last_update                       | 
+|node_id                           | 
+|node_url                          | 
+|pids                              | 
+|response_time                     | 
+|===========================================
+
+
+=== GET /thruk/cluster/<id>
+
+return cluster state for given node
+
+=== GET /thruk/cluster/heartbeat
+
+send cluster heartbeat to all other nodes
+
 === GET /thruk/config
 
 lists configuration information
@@ -615,6 +641,7 @@ lists configuration information
 |Attribute                         | Description
 |Component                         | 
 |ENCODING                          | 
+|Group                             | 
 |Thruk::Backend                    | 
 |Thruk::Plugin::BP                 | 
 |Thruk::Plugin::ConfigTool         | 
@@ -645,6 +672,8 @@ lists configuration information
 |cgi_cfg                           | 
 |cgi_cfg_stat                      | 
 |check_local_states                | 
+|cluster_heartbeat_interval        | 
+|cluster_node_stale_timeout        | 
 |cluster_nodes                     | 
 |cmd_defaults                      | 
 |cmd_quick_status                  | 
@@ -678,6 +707,8 @@ lists configuration information
 |disable_user_password_change      | 
 |documentation_link                | 
 |downtime_duration                 | 
+|downtime_max_duration             | 
+|editor                            | 
 |etc_path                          | 
 |expand_user_macros                | 
 |expire_ack_duration               | 
@@ -690,7 +721,6 @@ lists configuration information
 |force_sticky_ack                  | 
 |grafana_default_panelId           | 
 |graph_replace                     | 
-|graph_word                        | 
 |group_paging_grid                 | 
 |group_paging_overview             | 
 |group_paging_summary              | 
@@ -706,8 +736,9 @@ lists configuration information
 |initial_menu_state                | 
 |lmd_core_bin                      | 
 |lmd_core_config                   | 
-|lmd_version                       | 
+|logcache                          | 
 |logcache_delta_updates            | 
+|logcache_import_filter            | 
 |logo_path_prefix                  | 
 |make_auth_user_lowercase          | 
 |make_auth_user_uppercase          | 
@@ -718,7 +749,6 @@ lists configuration information
 |nagios                            | 
 |name                              | 
 |no_external_job_forks             | 
-|omd_top_extra_dir                 | 
 |paging_steps                      | 
 |perf_bar_mode                     | 
 |perf_bar_pnp_popup                | 
@@ -736,6 +766,7 @@ lists configuration information
 |report_update_logcache            | 
 |report_use_temp_files             | 
 |secret_key                        | 
+|server_timezone                   | 
 |service_action_icon               | 
 |show_backends_in_table            | 
 |show_config_edit_buttons          | 
@@ -759,6 +790,7 @@ lists configuration information
 |strict_passive_mode               | 
 |templates_paths                   | 
 |themes_path                       | 
+|thruk_author                      | 
 |thruk_bin                         | 
 |thruk_debug                       | 
 |thruk_init                        | 

@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 80;
+    plan tests => 87;
 
     use lib('t');
     require TestUtils;
@@ -68,7 +68,25 @@ isa_ok($b, 'Thruk::Backend::Manager');
 my $c = TestUtils::get_c();
 $b->init( 'c' => $c );
 
+#########################
+my $app = $c->app;
+{
+    my $c = Thruk::Context->new($app, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
+    isa_ok($c, 'Thruk::Context');
+    my $res1 = $c->sub_request('/r/thruk');
+    is(ref $res1, 'HASH', 'got hash from sub_request');
+    is($res1->{'rest_version'}, 1, 'got hash from sub_request with content');
 
+    my $res2 = $c->sub_request('/r/thruk/reports');
+    is(ref $res2, 'ARRAY', 'got array from sub_request');
+
+    my $res3 = $c->sub_request('/r/hosts?limit=1&columns=name');
+    is(ref $res3, 'ARRAY', 'got array from sub_request');
+    is(scalar @{$res3}, 1, 'sending url parameters worked');
+    is(scalar keys %{$res3->[0]}, 1, 'sending url parameters worked');
+};
+
+#########################
 my $sorted_by_a = $b->_sort($befor, { 'ASC' => 'a' });
 is_deeply($sorted_by_a, $sorted_by_a_exp, 'sort by colum a');
 

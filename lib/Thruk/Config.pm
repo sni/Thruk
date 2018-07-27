@@ -412,6 +412,8 @@ sub set_default_config {
         home_link                       => 'http://www.thruk.org',
         plugin_registry_url             => ['https://api.thruk.org/v1/plugin/list'],
         cluster_nodes                   => '$proto$://$hostname$/$url_prefix$/',
+        cluster_heartbeat_interval      => 15,
+        cluster_node_stale_timeout      => 120,
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,

@@ -116,7 +116,7 @@ sub get_c {
     my($self) = @_;
     return $Thruk::Request::c if defined $Thruk::Request::c;
     #my($c, $failed)
-    my($c, undef, undef) = $self->_dummy_c();
+    my($c, undef, undef) = $self->_internal_request();
     $c->stats->enable(1);
     return $c;
 }
@@ -222,7 +222,7 @@ sub request_url {
     # fork setting may be overriden in child requests
     my $old_no_external_job_forks = $c->config->{'no_external_job_forks'};
 
-    my(undef, undef, $res) = _dummy_c(undef, $url, $method, $postdata);
+    my(undef, undef, $res) = _internal_request(undef, $url, $method, $postdata);
 
     my $result = {
         code    => $res->code,
@@ -240,7 +240,7 @@ sub request_url {
             $sleep = 1 if $x > 10;
             sleep($sleep);
             $url = $result->{'headers'}->{'location'} if defined $result->{'headers'}->{'location'};
-            (undef, undef, $result) = _dummy_c(undef, $url);
+            (undef, undef, $result) = _internal_request(undef, $url);
             $x++;
         }
     }
@@ -483,12 +483,18 @@ sub _external_request {
 
 ##############################################
 sub _dummy_c {
+    my($self) = @_;
+    my($c) = _internal_request($self, '/thruk/cgi-bin/remote.cgi');
+    return($c);
+}
+
+##############################################
+sub _internal_request {
     my($self, $url, $method, $postdata) = @_;
     $method = 'GET' unless $method;
 
-    _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
+    _debug("_internal_request()") if $Thruk::Utils::CLI::verbose >= 2;
     delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    $url = '/thruk/cgi-bin/remote.cgi' unless defined $url;
     our $app;
     if(!$app) {
         require Thruk;
@@ -499,8 +505,9 @@ sub _dummy_c {
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
     my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
     my $c      = $Thruk::Request::c;
+    undef $Thruk::Request::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
-    _debug("_dummy_c() done") if $Thruk::Utils::CLI::verbose >= 2;
+    _debug("_internal_request() done") if $Thruk::Utils::CLI::verbose >= 2;
     return($c, $failed, $res);
 }
 

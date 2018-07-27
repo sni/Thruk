@@ -1570,6 +1570,7 @@ select backends we want to run functions on
 sub select_backends {
     my($self, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
+    confess("no context") unless $c;
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);

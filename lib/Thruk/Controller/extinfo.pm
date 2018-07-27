@@ -743,7 +743,7 @@ sub _process_perf_info_page {
     # cluster statistics
     if(    $c->check_user_roles("authorized_for_configuration_information")
        and $c->check_user_roles("authorized_for_system_information")) {
-        if($c->req->parameters->{'cluster'} && $c->cluster->is_clustered) {
+        if($c->req->parameters->{'cluster'}) {
             return _process_perf_info_cluster_page($c);
         }
     }
@@ -780,17 +780,6 @@ sub _process_perf_info_page {
 # create the performance info cluster page
 sub _process_perf_info_cluster_page {
     my( $c ) = @_;
-
-    my $clusternodes = Thruk::Utils::array2hash($c->cluster->{'nodes'});
-    if($c->req->parameters->{'state'}) {
-        my $nodeurl = $c->req->parameters->{'node'};
-        if(!$clusternodes->{$nodeurl}) {
-            return $c->render(json => { ok => 0, error => "no such node" });
-        }
-        my($state, $reponsetime, undef) = $c->cluster->ping($nodeurl);
-        return $c->render(json => { ok => $state, response_time => sprintf("%.3f", $reponsetime) });
-    }
-
     $c->stash->{template} = 'extinfo_type_4_cluster_status.tt';
     return 1;
 }

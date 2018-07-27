@@ -3,14 +3,16 @@ package Thruk::Context;
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
+use Scalar::Util qw/weaken/;
+use Time::HiRes qw/gettimeofday/;
+use Module::Load qw/load/;
+
 use Thruk::Authentication::User;
 use Thruk::Controller::error;
 use Thruk::Request;
 use Thruk::Request::Cookie;
 use Thruk::Stats;
-use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
-use Scalar::Util qw/weaken/;
-use Time::HiRes qw/gettimeofday/;
 
 =head1 NAME
 
@@ -332,6 +334,59 @@ $c->has_route(<url>)
 sub has_route {
     my($c, $url) = @_;
     return(defined $c->app->{'routes'}->{$url});
+}
+
+=head2 sub_request
+
+$c->sub_request(<url>, [<method>], [<postdata>])
+
+=cut
+sub sub_request {
+    my($c, $url, $method, $postdata) = @_;
+    $method = 'GET' unless $method;
+    $method = uc($method);
+    $c->stats->profile(begin => "sub_request: ".$method." ".$url);
+    local $Thruk::Request::c = $c unless $Thruk::Request::c;
+
+    $url = '/thruk'.$url;
+    my $query;
+    ($url, $query) = split(/\?/mx, $url, 2);
+    my $env = {
+        'PATH_INFO'           => $url,
+        'REQUEST_METHOD'      => $method,
+        'REQUEST_URI'         => $url,
+        'SCRIPT_NAME'         => '',
+        'QUERY_STRING'        => $query,
+
+        'REMOTE_ADDR'         => $c->env->{'REMOTE_ADDR'},
+        'REMOTE_HOST'         => $c->env->{'REMOTE_HOST'},
+        'SERVER_PROTOCOL'     => $c->env->{'SERVER_PROTOCOL'},
+        'SERVER_PORT'         => $c->env->{'SERVER_PORT'},
+        'REMOTE_USER'         => $c->env->{'REMOTE_USER'},
+        'plack.cookie.parsed' => $c->env->{'plack.cookie.parsed'},
+        'plack.cookie.string' => $c->env->{'plack.cookie.string'},
+    };
+    $env->{'plack.request.body_parameters'} = [%{$postdata}] if $postdata;
+    my $sub_c = Thruk::Context->new($c->app, $env);
+
+    Thruk::Action::AddDefaults::begin($sub_c);
+    my $path_info = $sub_c->req->path_info;
+
+    my $route = $c->app->_find_route_match($path_info);
+    confess("no route") unless $route;
+    if(ref $route eq '') {
+        my($class) = $route =~ m|^(.*)::.*?$|mx;
+        load $class;
+        $c->app->{'routes'}->{$path_info} = \&{$route};
+        $route = $c->app->{'routes'}->{$path_info};
+    }
+    $sub_c->{'rendered'} = 1; # prevent json encoding, we want the data reference
+    my $rc = &{$route}($sub_c, $path_info);
+    Thruk::Action::AddDefaults::end($sub_c);
+
+    local $Thruk::Request::c = undef;
+    $c->stats->profile(end => "sub_request: ".$method." ".$url);
+    return $rc;
 }
 
 1;

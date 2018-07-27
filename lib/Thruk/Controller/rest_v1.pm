@@ -19,6 +19,7 @@ Thruk Controller
 
 use Module::Load qw/load/;
 use File::Slurp qw/read_file/;
+use Cpanel::JSON::XS ();
 use Thruk::Backend::Manager ();
 
 our $VERSION = 1;
@@ -40,7 +41,7 @@ sub index {
     }
 
     my $data = _process_rest_request($c, $path_info);
-    return if $c->{'rendered'};
+    return $data if $c->{'rendered'};
 
     if($format eq 'csv') {
         return(_format_csv_output($c, $data));
@@ -53,7 +54,6 @@ sub _process_rest_request {
     my($c, $path_info) = @_;
 
     my $data = _fetch($c, $path_info);
-    return if $c->{'rendered'};
 
     # generic post processing
     eval {
@@ -68,6 +68,11 @@ sub _process_rest_request {
     }
     if(ref $data eq 'HASH') {
         $c->res->code($data->{'code'}) if $data->{'code'};
+        if($data->{'code'}) {
+            if($data->{'code'} > 400) {
+                $data->{'failed'} = Cpanel::JSON::XS::true;
+            }
+        }
         return($data);
     }
     if(ref $data eq 'ARRAY') {
@@ -130,7 +135,7 @@ sub _fetch {
         $c->{config}->{'_rest_paths_loaded'} = 1;
         my $input_files = [glob(join(" ", (
                             $c->config->{'plugin_path'}."/plugins-enabled/*/lib/Thruk/Controller/Rest/V1/*.pm",
-                            $c->config->{'project_root'}."lib/Thruk/Controller/Rest/V1/*.pm",
+                            $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/*.pm",
                         )))];
         for my $file (@{$input_files}) {
             my $pkg_name = $file;
@@ -151,13 +156,17 @@ sub _fetch {
     my $request_method = $c->req->method;
     my $protos = [];
     for my $r (@{$rest_paths}) {
-        my($proto, $path, $function) = @{$r};
+        my($proto, $path, $function, $roles) = @{$r};
         if((ref $path eq '' && $path eq $path_info) || (ref $path eq 'Regexp' && $path_info =~ $path))  {
             if($proto ne $request_method) {
                 push @{$protos}, $proto;
                 next;
             }
-            $data = &{$function}($c, $path_info, $1, $2, $3);
+            if($roles && !$c->user->check_user_roles($roles)) {
+                $data = { 'message' => 'not authorized', 'description' => 'this path requires certain roles: '.join(', ', @{$roles}), code => 403 };
+            } else {
+                $data = &{$function}($c, $path_info, $1, $2, $3);
+            }
             $found = 1;
             last;
         }
@@ -441,6 +450,7 @@ sub _apply_sort {
 sub _livestatus_filter {
     my($c) = @_;
     my $filter = [];
+    # TODO: support ?limit=...
     for my $f (@{_get_filter($c)}) {
         my($key, $op, $val) = @{$f};
         push @{$filter}, { $key => { $op => $val }};
@@ -461,8 +471,8 @@ returns nothing
 
 =cut
 sub register_rest_path_v1 {
-    my($proto, $path, $function) = @_;
-    push @{$rest_paths}, [$proto, $path, $function];
+    my($proto, $path, $function, $roles) = @_;
+    push @{$rest_paths}, [$proto, $path, $function, $roles];
     return;
 }
 
@@ -759,14 +769,10 @@ sub _rest_get_livestatus_timeperiods {
 # REST PATH: GET /commands
 # lists livestatus commands.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
-register_rest_path_v1('GET', qr%^/commands?$%mx, \&_rest_get_livestatus_commands);
+register_rest_path_v1('GET', qr%^/commands?$%mx, \&_rest_get_livestatus_commands, ['admin']);
 sub _rest_get_livestatus_commands {
     my($c) = @_;
-    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
-        return($c->{'db'}->get_commands(filter => [_livestatus_filter($c)] ));
-    } else {
-        return([]);
-    }
+    return($c->{'db'}->get_commands(filter => [_livestatus_filter($c)] ));
 }
 
 ##########################################################

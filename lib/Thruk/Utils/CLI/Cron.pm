@@ -75,6 +75,9 @@ sub _install {
     $c->cluster->run_cluster("others", "cmd: cron install");
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1; # skip further subsequent cluster calls
 
+    require Thruk::Utils::Cluster;
+    Thruk::Utils::Cluster::update_cron_file($c);
+
     require Thruk::Utils::RecurringDowntimes;
     Thruk::Utils::RecurringDowntimes::update_cron_file($c);
     if($c->config->{'use_feature_reports'}) {
