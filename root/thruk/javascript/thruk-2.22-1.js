@@ -5975,10 +5975,20 @@ var ajax_search = {
                    || (ajax_search.templates == "both" && ( search_type.name == ajax_search.initialized_t + " templates" || ajax_search.search_type + 's' == search_type.name ))
                   ) {
                   jQuery.each(search_type.data, function(index, data) {
-                      result_obj = new Object({ 'name': data, 'relevance': 0 });
+                      var name = data;
+                      var alias = '';
+                      if(data['name']) {
+                          name = data['name'];
+                      }
+                      var search_name = name;
+                      if(data['alias']) {
+                          alias = data['alias'];
+                          search_name = search_name+' '+alias;
+                      }
+                      result_obj = new Object({ 'name': name, 'relevance': 0 });
                       var found = 0;
                       jQuery.each(pattern, function(i, sub_pattern) {
-                          var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
+                          var index = search_name.toLowerCase().indexOf(sub_pattern.toLowerCase());
                           if(index != -1) {
                               found++;
                               if(index == 0) { // perfect match, starts with pattern
@@ -6001,7 +6011,7 @@ var ajax_search = {
                                 ajax_search.error = "regex failed: "+err;
                                 return(false);
                               }
-                              if(re != undefined && ajax_search.regex_matching && data.match(re)) {
+                              if(re != undefined && ajax_search.regex_matching && search_name.match(re)) {
                                   found++;
                                   result_obj.relevance += 1;
                               }
@@ -6010,11 +6020,14 @@ var ajax_search = {
                       // additional filter?
                       var rt = true;
                       if(ajax_search.filter != undefined) {
-                          rt = ajax_search.filter(data, search_type);
+                          rt = ajax_search.filter(name, search_type);
                       }
                       // only if all pattern were found
                       if(rt && found == pattern.length) {
-                          result_obj.display = data;
+                          result_obj.display = name;
+                          if(alias && name != alias) {
+                            result_obj.display = name+" - "+alias;
+                          }
                           result_obj.sorter = (result_obj.relevance) + result_obj.name;
                           sub_results.push(result_obj);
                           if(result_obj.relevance >= 100) { top_hits++; }
@@ -6097,7 +6110,7 @@ var ajax_search = {
                         name = "<img src='" + file[1] + "' style='vertical-align: text-bottom; width: 16px; height: 16px;'> " + file[0];
                     }
                     name        = name.replace(/\ \(disabled\)$/, '<span style="color: #EB6900; margin-left: 20px;"> (disabled)<\/span>');
-                    resultHTML += '<li><a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="ajax_search.set_result(this.rev); return false;" title="' + data.display + '"> ' + name +'<\/a><\/li>';
+                    resultHTML += '<li><a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.name +'" onclick="ajax_search.set_result(this.rev); return false;" title="' + data.display + '"> ' + name +'<\/a><\/li>';
                     ajax_search.res[x] = prefix+data.display;
                     x++;
                     cur_count++;

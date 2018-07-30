@@ -4,6 +4,7 @@ next:
           - support clustered setups
           - add rest api
           - add command_enabled option
+          - show and use alias for hosts, hostgroups and servicegroups search
 
 2.22     Fri Jun 29 13:52:11 CEST 2018
           - cleanup preferences popup
