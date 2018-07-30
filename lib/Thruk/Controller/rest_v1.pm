@@ -645,6 +645,18 @@ sub _rest_get_thruk_jobs {
 register_rest_path_v1('GET', qr%^/thruk/jobs?/([^/]+)$%mx, \&_rest_get_thruk_jobs);
 
 ##########################################################
+# REST PATH: GET /thruk/downtimes
+# lists recurring downtimes.
+register_rest_path_v1('GET', qr%^/thruk/downtimes?$%mx, \&_rest_get_thruk_downtimes);
+sub _rest_get_thruk_downtimes {
+    my($c) = @_;
+    require Thruk::Utils::RecurringDowntimes;
+
+    my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c);
+    return($downtimes);
+}
+
+##########################################################
 # REST PATH: GET /hosts
 # lists livestatus hosts.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
