@@ -506,7 +506,7 @@ sub get_rest_paths {
         $input_files = [glob(join(" ", (
                             $c->config->{'project_root'}."/lib/Thruk/Controller/rest_v1.pm",
                             $c->config->{'plugin_path'}."/plugins-enabled/*/lib/Thruk/Controller/Rest/V1/*.pm",
-                            $c->config->{'project_root'}."lib/Thruk/Controller/Rest/V1/*.pm",
+                            $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/*.pm",
                         )))];
     } else {
         $input_files = [glob("lib/Thruk/Controller/rest_v1.pm
