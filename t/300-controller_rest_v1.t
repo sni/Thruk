@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 260;
+    plan tests => 268;
 }
 
 BEGIN {
@@ -39,8 +39,9 @@ my $list_pages = [
     '/services',
     '/timeperiods',
     '/lmd/sites',
-    '/thruk/jobs',
     '/thruk/bp',
+    '/thruk/cluster',
+    '/thruk/jobs',
     '/thruk/panorama',
     '/thruk/reports',
 ];
@@ -81,6 +82,7 @@ my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
 for my $p (sort keys %{$paths}) {
     if($paths->{$p}->{'GET'}) {
         next if $p =~ m%<%mx;
+        next if $p =~ m%heartbeat%mx;
         if($content !~ m%$p%mx) {
             fail("missing test case for ".$p);
         }
