@@ -1,13 +1,14 @@
 Entry Point
 ===========
 
- - http://localhost:60080/demo/thruk/ (nginx loadbalancer)
+ - http://localhost:60080/demo/thruk/ (haproxy loadbalancer)
  - Login is omdadmin / omd
 
 Setup
 =====
 
  - 3 clustered thruk nodes based on the thruk/ folder
- - 1 nginx load balancer
+ - 1 haproxy load balancer
  - 2 docker volumes etc/ and var/ used for the thruk cluster
  - 1 omd site used as backend for the thruk nodes
+ - use "./scale <nr>" to change number of thruk containers

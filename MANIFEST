@@ -1919,8 +1919,6 @@ t/scenarios/cli_api/thruk.conf
 t/scenarios/cli_api/thruk_local.conf
 t/scenarios/cluster_e2e/docker-compose.yml
 t/scenarios/cluster_e2e/Makefile
-t/scenarios/cluster_e2e/nginx/Dockerfile
-t/scenarios/cluster_e2e/nginx/loadbalancer.conf
 t/scenarios/cluster_e2e/omd/Dockerfile
 t/scenarios/cluster_e2e/omd/playbook.yml
 t/scenarios/cluster_e2e/omd/test.cfg

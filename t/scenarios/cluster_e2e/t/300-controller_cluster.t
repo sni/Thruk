@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    plan tests => 15;
+    plan tests => 13;
 
     use lib('t');
     require TestUtils;
@@ -12,5 +12,5 @@ BEGIN {
 
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/extinfo.cgi?type=4&cluster=1',
-    'like'    => ['Performance Information', 'Cluster Status', 'http://thruk1/demo/thruk/', 'http://thruk2/demo/thruk/', 'http://thruk3/demo/thruk/'],
+    'like'    => ['Performance Information', 'Cluster Status', 'accept.png'],
 );

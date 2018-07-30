@@ -7,7 +7,7 @@
   - shell: ln -sfn /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
   - shell: "rsync -avu /omd/sites/demo/{{item}}/thruk/. /mnt/{{item}}/. ; rm -rf /omd/sites/demo/{{item}}/thruk ; ln -sfn /mnt/{{item}} /omd/sites/demo/{{item}}/thruk; chown demo: /mnt/{{item}}/."
     with_items: ['etc', 'var']
-  - shell: "rm -f /mnt/etc/cgi.cfg; cp -p /omd/sites/demo/etc/nagios/cgi.cfg /mnt/etc/cgi.cfg"
+  - shell: "rsync -avu /omd/sites/demo/etc/nagios/cgi.cfg /mnt/etc/cgi.cfg"
   - copy:
       src: /root/test.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
@@ -28,6 +28,7 @@
       group: demo
   - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
   - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+    creates: /omd/sites/demo/local/share/omd_utils
   - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
   - name: create cp folder
     file:

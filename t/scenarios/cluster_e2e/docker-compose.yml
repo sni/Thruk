@@ -1,10 +1,16 @@
 version: "2.3"
 
 services:
-  nginx:
-    build: nginx/
+  lb:
+    image: 'dockercloud/haproxy:latest'
+    links:
+        - thruk
     ports:
         - 60080:80
+    #environment:
+    #    - EXTRA_GLOBAL_SETTINGS=log 127.0.0.1 local1 debug
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
   omd:
     build: omd/
     environment:
@@ -15,8 +21,12 @@ services:
   thruk:
     build: thruk/
     scale: 3
+    ports:
+        - 80
     environment:
         - TZ=Europe/Berlin
+        - EXCLUDE_PORTS=22,443,4730,5666
+        - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
