@@ -1981,7 +1981,9 @@ sub set_user {
     $c->authenticate({});
     confess("no user") unless $c->user;
     $c->stash->{'remote_user'}= $c->user->get('username');
-    set_dynamic_roles($c);
+    if($username ne '(cli)' && $username ne '(cron)') {
+        set_dynamic_roles($c);
+    }
     return;
 }
 
