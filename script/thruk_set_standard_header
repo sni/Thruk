@@ -3,7 +3,7 @@
 test -f support/standard_script_header
 
 CHECK_ONLY=0
-if [ "x$1" = "check" ]; then
+if [ "x$1" = "xcheck" ]; then
   CHECK_ONLY=1
 fi
 
@@ -29,6 +29,7 @@ for file in $(grep -c "exec perl" examples/* script/* | grep -v :0 | grep -v thr
         echo "$file:"
         echo "$DIFF"
     fi
+    rm -f $file.check
   else
     cat $file.head $file.tmp > $file
   fi
