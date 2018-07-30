@@ -387,7 +387,6 @@ sub update_cron_file {
     my($c) = @_;
 
     my $cron_entries = [];
-    Thruk::Utils::update_cron_file($c, 'cluster', $cron_entries) if $c->config->{'cluster_heartbeat_interval'} <= 0;
 
     # ensure proper cron.log permission
     open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
@@ -399,17 +398,7 @@ sub update_cron_file {
                             $c->config->{'thruk_bin'},
                             $log,
                     );
-    my $time;
-    if($c->config->{'cluster_heartbeat_interval'} <= 60) {
-        $time = '* * * * *';
-    } else {
-        my $interval = sprintf("%.0f", $c->config->{'cluster_heartbeat_interval'}/60);
-        if($interval <= 1) {
-            $time = '* * * * *';
-        } else {
-            $time = '*/'.$interval.' * * * *';
-        }
-    }
+    my $time = '* * * * *';
     $cron_entries = [[$time, $cmd]];
     Thruk::Utils::update_cron_file($c, 'cluster', $cron_entries);
     return;
