@@ -46,6 +46,7 @@ sub _rest_get_thruk_cluster_heartbeat {
         return;
     }
     alarm(60);
+    $c->cluster->load_statefile();
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
         my $t1  = [gettimeofday];

@@ -47,6 +47,11 @@
                             <img src="[% url_prefix %]themes/[% theme %]/images/error.png" width="16" height="16" alt="error">
                           [% END %]
                         </td>
+                        [% IF n.last_error != "" %]
+                        <td class='dataVal' style="text-align: left;" colspan="3">
+                          [% n.last_error %]
+                        </td>
+                        [% ELSE %]
                         <td class='dataVal' style="text-align: center;">
                           [% IF n.response_time != ""; sprintf("%.3fs", n.response_time); END %]
                         </td>
@@ -64,6 +69,7 @@
                         <td class='dataVal' style="text-align: center;">
                           [% n.pids.keys.size %]
                         </td>
+                        [% END %]
                       </tr>
                       [% END %]
                     </table>

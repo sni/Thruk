@@ -72,6 +72,7 @@ sub load_statefile {
         }
         # set some defaults
         $n->{'last_contact'}  =  0 unless $n->{'last_contact'};
+        $n->{'last_error'}    = '' unless $n->{'last_error'};
         $n->{'response_time'} = '' unless defined $n->{'response_time'};
 
         # add node to store
@@ -95,11 +96,6 @@ sub register {
     $Thruk::Utils::Cluster::context = $c;
     $self->load_statefile();
     my $now = time();
-    # if we did not exists in the statefile before, run a few things initially
-    my $new = 0;
-    if(!$self->{'nodes_by_id'}->{$Thruk::NODE_ID}) {
-        $new = 1;
-    }
     my $data = Thruk::Utils::IO::json_lock_patch($self->{'statefile'}, {
         $Thruk::NODE_ID => {
             node_id      => $Thruk::NODE_ID,
@@ -110,7 +106,6 @@ sub register {
         },
     },1);
     return unless $self->is_clustered();
-    $self->_first_join() if $new;
     $self->check_stale_pids($data->{$Thruk::NODE_ID});
     return;
 }
@@ -252,8 +247,9 @@ sub run_cluster {
         };
         if($@) {
             $c->log->error(sprintf("%s failed on %s: %s", $sub, $n, $@));
+            Thruk::Utils::IO::json_lock_patch($c->cluster->{'statefile'}, { $n => { last_error  => $@ }}, 1);
         } else {
-            Thruk::Utils::IO::json_lock_patch($c->cluster->{'statefile'}, { $n => { last_contact  => time() }}, 1);
+            Thruk::Utils::IO::json_lock_patch($c->cluster->{'statefile'}, { $n => { last_contact  => time(), last_error => '' }}, 1);
         }
         if(ref $r eq 'ARRAY' && scalar @{$r} == 1) {
             push @{$res}, $r->[0];
@@ -417,23 +413,6 @@ sub update_cron_file {
     $cron_entries = [[$time, $cmd]];
     Thruk::Utils::update_cron_file($c, 'cluster', $cron_entries);
     return;
-}
-
-##########################################################
-# will be run when cluster node joins cluster first time
-sub _first_join {
-    my($self) = @_;
-    #my $c = $Thruk::Utils::Cluster::context;
-
-    # update cronjobs
-#    require Thruk::Utils::CLI::Cron;
-#    Thruk::Utils::CLI::Cron::cmd($c, 'cron', ['install']);
-
-    # request callback from one other node to verify connection
-    #my $res = $c->sub_request('/thruk/cluster/heartbeat');
-
-    return;
-
 }
 
 ##########################################################
