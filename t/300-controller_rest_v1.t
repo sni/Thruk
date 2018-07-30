@@ -41,6 +41,7 @@ my $list_pages = [
     '/lmd/sites',
     '/thruk/bp',
     '/thruk/cluster',
+    '/thruk/downtimes',
     '/thruk/jobs',
     '/thruk/panorama',
     '/thruk/reports',
