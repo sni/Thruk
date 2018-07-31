@@ -3,58 +3,158 @@
 use warnings;
 use strict;
 use File::Slurp qw/read_file/;
+use Cpanel::JSON::XS qw/encode_json/;
 
 use Thruk::Utils::CLI;
 use Thruk::Controller::rest_v1;
 
-my $output_file = "docs/documentation/rest.asciidoc";
-
-my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
-
-`cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
-`cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
-`cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
-
-my $content = read_file($output_file);
-$content =~ s/^(\QSee examples and detailed description for all available rest api urls\E:\n).*$/$1\n\n/gsmx;
+################################################################################
 my $c = Thruk::Utils::CLI->new()->get_c();
-Thruk::Utils::set_user($c, 'thrukadmin');
+Thruk::Utils::set_user($c, '(cli)');
 $c->stash->{'is_admin'} = 1;
 
-for my $url (sort keys %{$paths}) {
-    for my $proto (sort keys %{$paths->{$url}}) {
-        $content .= "=== $proto $url\n\n";
-        my $doc   = $docs->{$url}->{$proto} ? join("\n", @{$docs->{$url}->{$proto}})."\n\n" : '';
-        $content .= $doc;
-
-        if(!$keys->{$url}->{$proto}) {
-            $keys->{$url}->{$proto} = _fetch_keys($proto, $url, $doc);
-        }
-        if($keys->{$url}->{$proto}) {
-            $content .= '[options="header"]'."\n";
-            $content .= "|===========================================\n";
-            $content .= sprintf("|%-33s | %s\n", 'Attribute', 'Description');
-            for my $doc (@{$keys->{$url}->{$proto}}) {
-                $content .= sprintf("|%-33s | %s\n", $doc->[0], $doc->[1]);
-            }
-            $content .= "|===========================================\n\n\n";
-        }
-    }
-}
-
-open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
-print $fh $content;
-close($fh);
-
-unlink('bp/9999.tbp');
-unlink('var/reports/9999.rpt');
-unlink('panorama/9999.tab');
-
+_update_cmds($c);
+_update_docs($c);
 exit 0;
 
 ################################################################################
+sub _update_cmds {
+    my($c) = @_;
+    my $output_file = "lib/Thruk/Controller/Rest/V1/cmd.pm";
+    my $content = read_file($output_file);
+    $content =~ s/^__DATA__\n.*$/__DATA__\n/gsmx;
+
+    my $input_files = [glob(join(" ", (
+                        $c->config->{'project_root'}."/templates/cmd/*.tt",
+                        $c->config->{'plugin_path'}."/plugins-enabled/*/templates/cmd/*.tt",
+                    )))];
+
+    my $cmds = {};
+    for my $file (@{$input_files}) {
+        next if $file =~ m/cmd_typ_c\d+/gmx;
+        my $template = read_file($file);
+        next if $template =~ m/enable_shinken_features/gmx;
+        my @matches = $template =~ m%^\s*([A-Z_]+)\s*(;|$|)(.*sprintf.*|$)%gmx;
+        die("got no command in ".$file) if scalar @matches == 0;
+        while(scalar @matches > 0) {
+            my $name = shift @matches;
+            shift @matches;
+            my $arg  = shift @matches;
+            my $cmd = {
+                name => lc $name,
+            };
+            my @args;
+            if($arg) {
+                if($arg =~ m/"\s*,([^\)]+)\)/gmx) {
+                    @args = split(/\s*,\s*/mx, $1);
+                } else {
+                    die("cannot parse arguments in ".$file);
+                }
+            }
+            map {s/_unix$//gmx; } @args;
+            if($args[0] && $args[0] eq 'host_name') {
+                shift @args;
+                if($args[0] && $args[0] eq 'service_desc') {
+                    shift @args;
+                    $cmd->{'args'} = \@args;
+                    $cmds->{'services'}->{$cmd->{'name'}} = $cmd;
+                } else {
+                    $cmd->{'args'} = \@args;
+                    $cmds->{'hosts'}->{$cmd->{'name'}} = $cmd;
+                }
+            }
+            elsif($args[0] && $args[0] eq 'hostgroup_name') {
+                shift @args;
+                $cmd->{'args'} = \@args;
+                $cmds->{'hostgroups'}->{$cmd->{'name'}} = $cmd;
+            }
+            elsif($args[0] && $args[0] eq 'servicegroup_name') {
+                shift @args;
+                $cmd->{'args'} = \@args;
+                $cmds->{'servicegroups'}->{$cmd->{'name'}} = $cmd;
+            } else {
+                $cmd->{'args'} = \@args;
+                $cmds->{'system'}->{$cmd->{'name'}} = $cmd;
+            }
+        }
+    }
+
+    for my $category (qw/hosts services hostgroups servicegroups system/) {
+        for my $name (sort keys %{$cmds->{$category}}) {
+            my $cmd = $cmds->{$category}->{$name};
+            if($category =~ m/^(hosts|hostgroups|servicegroups)$/mx) {
+                $content .= "# REST PATH: POST /$category/<name>/cmd/$name\n";
+            }
+            elsif($category =~ m/^(services)$/mx) {
+                $content .= "# REST PATH: POST /$category/<host>/<service>/cmd/$name\n";
+            }
+            elsif($category =~ m/^(system)$/mx) {
+                $content .= "# REST PATH: POST /$category/cmd/$name\n";
+            }
+            $content .= "# sends the ".uc($name)." command.\n";
+            if(scalar @{$cmd->{'args'}} > 0) {
+                $content .= "# required arguments: ".join(", ", @{$cmd->{'args'}})."\n";
+            } else {
+                $content .= "# this command does not require any arguments.\n";
+            }
+            $content .= "# see http://www.naemon.org/documentation/developer/externalcommands/$name.html for details.\n";
+            $content .= "\n";
+        }
+    }
+    $content .= encode_json($cmds);
+
+    open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
+    print $fh $content;
+    close($fh);
+}
+
+################################################################################
+sub _update_docs {
+    my($c) = @_;
+    my $output_file = "docs/documentation/rest.asciidoc";
+
+    my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
+
+    `cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
+    `cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
+    `cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
+
+    my $content = read_file($output_file);
+    $content =~ s/^(\QSee examples and detailed description for all available rest api urls\E:\n).*$/$1\n\n/gsmx;
+
+    for my $url (sort keys %{$paths}) {
+        for my $proto (sort keys %{$paths->{$url}}) {
+            $content .= "=== $proto $url\n\n";
+            my $doc   = $docs->{$url}->{$proto} ? join("\n", @{$docs->{$url}->{$proto}})."\n\n" : '';
+            $content .= $doc;
+
+            if(!$keys->{$url}->{$proto}) {
+                $keys->{$url}->{$proto} = _fetch_keys($c, $proto, $url, $doc);
+            }
+            if($keys->{$url}->{$proto}) {
+                $content .= '[options="header"]'."\n";
+                $content .= "|===========================================\n";
+                $content .= sprintf("|%-33s | %s\n", 'Attribute', 'Description');
+                for my $doc (@{$keys->{$url}->{$proto}}) {
+                    $content .= sprintf("|%-33s | %s\n", $doc->[0], $doc->[1]);
+                }
+                $content .= "|===========================================\n\n\n";
+            }
+        }
+    }
+
+    open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
+    print $fh $content;
+    close($fh);
+
+    unlink('bp/9999.tbp');
+    unlink('var/reports/9999.rpt');
+    unlink('panorama/9999.tab');
+}
+
+################################################################################
 sub _fetch_keys {
-    my($proto, $url, $doc) = @_;
+    my($c, $proto, $url, $doc) = @_;
 
     return if $proto ne 'GET';
     return if $doc =~ m/alias|https?:/mx;

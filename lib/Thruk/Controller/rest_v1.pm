@@ -34,10 +34,25 @@ sub index {
     $path_info =~ s#^/*#/#gmx;
     $path_info =~ s#^.+/$##gmx;
 
-    my $format = 'json';
-    if($path_info =~ m%^/csv(/.*)$%mx) {
-        $path_info = $1;
-        $format    = 'csv';
+    my $format   = 'json';
+    my $backends = [];
+    # strip known path prefixes
+    while($path_info =~ m%^/(csv|sites?|backend)(/.*)$%mx) {
+        my $prefix = $1;
+        $path_info = $2;
+        if($prefix eq 'csv') {
+            $format    = 'csv';
+        }
+        if($prefix eq 'sites' || $prefix eq 'backend') {
+            if($path_info =~ m%^/([^/]+)(/.*)$%mx) {
+                $path_info = $2;
+                my @sites = split(/\s*,\s*/mx, $1);
+                push @{$backends}, @sites;
+            }
+        }
+    }
+    if(scalar @{$backends} > 0) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
     }
 
     my $data = _process_rest_request($c, $path_info);
@@ -661,7 +676,7 @@ sub _rest_get_thruk_downtimes {
 # lists livestatus hosts.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
 # there is an shortcut /hosts available.
-register_rest_path_v1('GET', qr%/hosts?$%mx, \&_rest_get_livestatus_hosts);
+register_rest_path_v1('GET', qr%^/hosts?$%mx, \&_rest_get_livestatus_hosts);
 sub _rest_get_livestatus_hosts {
     my($c) = @_;
     return($c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
@@ -670,7 +685,7 @@ sub _rest_get_livestatus_hosts {
 ##########################################################
 # REST PATH: GET /hosts/stats
 # hash of livestatus host statistics.
-register_rest_path_v1('GET', qr%/hosts?/stats$%mx, \&_rest_get_livestatus_hosts_stats);
+register_rest_path_v1('GET', qr%^/hosts?/stats$%mx, \&_rest_get_livestatus_hosts_stats);
 sub _rest_get_livestatus_hosts_stats {
     my($c) = @_;
     return($c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
@@ -690,7 +705,7 @@ sub _rest_get_livestatus_hosts_totals {
 # REST PATH: GET /hosts/<name>/services
 # lists services for given host.
 # alias for /services?host_name=<name>
-register_rest_path_v1('GET', qr%/hosts?/([^/]+)/services?$%mx, \&_rest_get_livestatus_hosts_services);
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/services?$%mx, \&_rest_get_livestatus_hosts_services);
 sub _rest_get_livestatus_hosts_services {
     my($c, undef, $host) = @_;
     return($c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { 'host_name' => $host }, _livestatus_filter($c) ], %{_livestatus_options($c)}));
@@ -700,7 +715,7 @@ sub _rest_get_livestatus_hosts_services {
 # REST PATH: GET /hosts/<name>
 # lists hosts for given name.
 # alias for /hosts?name=<name>
-register_rest_path_v1('GET', qr%/hosts?/([^/]+)/?$%mx, \&_rest_get_livestatus_hosts_by_name);
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/?$%mx, \&_rest_get_livestatus_hosts_by_name);
 sub _rest_get_livestatus_hosts_by_name {
     my($c, undef, $host) = @_;
     return($c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c) ], %{_livestatus_options($c)}));

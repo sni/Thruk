@@ -13,7 +13,11 @@
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 
-    [% IF c.request.parameters.ptc %]ENABLE_HOST_AND_CHILD_NOTIFICATIONS[% ELSE %]ENABLE_HOST_NOTIFICATIONS[% END %];[% sprintf("%s",host_name) %]
+    [% IF c.request.parameters.ptc %]
+        ENABLE_HOST_AND_CHILD_NOTIFICATIONS;[% sprintf("%s",host_name) %]
+    [% ELSE %]
+        ENABLE_HOST_NOTIFICATIONS;[% sprintf("%s",host_name) %]
+    [% END %]
 [% END %]
 
 [%# definition of the html form data #%]

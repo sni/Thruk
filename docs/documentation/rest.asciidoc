@@ -313,6 +313,66 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes fo
 lists livestatus hostgroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
 
+=== POST /hostgroups/<name>/cmd/disable_hostgroup_host_checks
+
+sends the DISABLE_HOSTGROUP_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_host_checks.html for details.
+
+=== POST /hostgroups/<name>/cmd/disable_hostgroup_host_notifications
+
+sends the DISABLE_HOSTGROUP_HOST_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_host_notifications.html for details.
+
+=== POST /hostgroups/<name>/cmd/disable_hostgroup_svc_checks
+
+sends the DISABLE_HOSTGROUP_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_svc_checks.html for details.
+
+=== POST /hostgroups/<name>/cmd/disable_hostgroup_svc_notifications
+
+sends the DISABLE_HOSTGROUP_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_svc_notifications.html for details.
+
+=== POST /hostgroups/<name>/cmd/enable_hostgroup_host_checks
+
+sends the ENABLE_HOSTGROUP_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_host_checks.html for details.
+
+=== POST /hostgroups/<name>/cmd/enable_hostgroup_host_notifications
+
+sends the ENABLE_HOSTGROUP_HOST_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_host_notifications.html for details.
+
+=== POST /hostgroups/<name>/cmd/enable_hostgroup_svc_checks
+
+sends the ENABLE_HOSTGROUP_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_svc_checks.html for details.
+
+=== POST /hostgroups/<name>/cmd/enable_hostgroup_svc_notifications
+
+sends the ENABLE_HOSTGROUP_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_svc_notifications.html for details.
+
+=== POST /hostgroups/<name>/cmd/schedule_hostgroup_host_downtime
+
+sends the SCHEDULE_HOSTGROUP_HOST_DOWNTIME command.
+required arguments: start_time, end_time, fixed, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_host_downtime.html for details.
+
+=== POST /hostgroups/<name>/cmd/schedule_hostgroup_svc_downtime
+
+sends the SCHEDULE_HOSTGROUP_SVC_DOWNTIME command.
+required arguments: start_time, end_time, fixed, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_svc_downtime.html for details.
+
 === GET /hosts
 
 lists livestatus hosts.
@@ -328,6 +388,222 @@ alias for /hosts?name=<name>
 
 lists alerts for given host.
 alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
+
+=== POST /hosts/<name>/cmd/acknowledge_host_problem
+
+sends the ACKNOWLEDGE_HOST_PROBLEM command.
+required arguments: sticky_ack, send_notification, persistent_comment, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem.html for details.
+
+=== POST /hosts/<name>/cmd/acknowledge_host_problem_expire
+
+sends the ACKNOWLEDGE_HOST_PROBLEM_EXPIRE command.
+required arguments: sticky_ack, send_notification, persistent_comment, end_time, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem_expire.html for details.
+
+=== POST /hosts/<name>/cmd/add_host_comment
+
+sends the ADD_HOST_COMMENT command.
+required arguments: comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/add_host_comment.html for details.
+
+=== POST /hosts/<name>/cmd/change_host_modattr
+
+sends the CHANGE_HOST_MODATTR command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/change_host_modattr.html for details.
+
+=== POST /hosts/<name>/cmd/del_all_host_comments
+
+sends the DEL_ALL_HOST_COMMENTS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/del_all_host_comments.html for details.
+
+=== POST /hosts/<name>/cmd/delay_host_notification
+
+sends the DELAY_HOST_NOTIFICATION command.
+required arguments: notification_time
+see http://www.naemon.org/documentation/developer/externalcommands/delay_host_notification.html for details.
+
+=== POST /hosts/<name>/cmd/disable_all_notifications_beyond_host
+
+sends the DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_all_notifications_beyond_host.html for details.
+
+=== POST /hosts/<name>/cmd/disable_host_check
+
+sends the DISABLE_HOST_CHECK command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_host_check.html for details.
+
+=== POST /hosts/<name>/cmd/disable_host_event_handler
+
+sends the DISABLE_HOST_EVENT_HANDLER command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_host_event_handler.html for details.
+
+=== POST /hosts/<name>/cmd/disable_host_flap_detection
+
+sends the DISABLE_HOST_FLAP_DETECTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_host_flap_detection.html for details.
+
+=== POST /hosts/<name>/cmd/disable_host_notifications
+
+sends the DISABLE_HOST_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_host_notifications.html for details.
+
+=== POST /hosts/<name>/cmd/disable_host_svc_checks
+
+sends the DISABLE_HOST_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_host_svc_checks.html for details.
+
+=== POST /hosts/<name>/cmd/disable_host_svc_notifications
+
+sends the DISABLE_HOST_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_host_svc_notifications.html for details.
+
+=== POST /hosts/<name>/cmd/disable_passive_host_checks
+
+sends the DISABLE_PASSIVE_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_passive_host_checks.html for details.
+
+=== POST /hosts/<name>/cmd/enable_all_notifications_beyond_host
+
+sends the ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_all_notifications_beyond_host.html for details.
+
+=== POST /hosts/<name>/cmd/enable_host_and_child_notifications
+
+sends the ENABLE_HOST_AND_CHILD_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_host_and_child_notifications.html for details.
+
+=== POST /hosts/<name>/cmd/enable_host_check
+
+sends the ENABLE_HOST_CHECK command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_host_check.html for details.
+
+=== POST /hosts/<name>/cmd/enable_host_event_handler
+
+sends the ENABLE_HOST_EVENT_HANDLER command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_host_event_handler.html for details.
+
+=== POST /hosts/<name>/cmd/enable_host_flap_detection
+
+sends the ENABLE_HOST_FLAP_DETECTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_host_flap_detection.html for details.
+
+=== POST /hosts/<name>/cmd/enable_host_notifications
+
+sends the ENABLE_HOST_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_host_notifications.html for details.
+
+=== POST /hosts/<name>/cmd/enable_host_svc_checks
+
+sends the ENABLE_HOST_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_host_svc_checks.html for details.
+
+=== POST /hosts/<name>/cmd/enable_host_svc_notifications
+
+sends the ENABLE_HOST_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_host_svc_notifications.html for details.
+
+=== POST /hosts/<name>/cmd/enable_passive_host_checks
+
+sends the ENABLE_PASSIVE_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_passive_host_checks.html for details.
+
+=== POST /hosts/<name>/cmd/process_host_check_result
+
+sends the PROCESS_HOST_CHECK_RESULT command.
+required arguments: plugin_state, plugin_output, performance_data
+see http://www.naemon.org/documentation/developer/externalcommands/process_host_check_result.html for details.
+
+=== POST /hosts/<name>/cmd/remove_host_acknowledgement
+
+sends the REMOVE_HOST_ACKNOWLEDGEMENT command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/remove_host_acknowledgement.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_and_propagate_host_downtime
+
+sends the SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME command.
+required arguments: start_time, end_time, fixed, triggered_by, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_host_downtime.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_and_propagate_triggered_host_downtime
+
+sends the SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME command.
+required arguments: start_time, end_time, fixed, triggered_by, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_triggered_host_downtime.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_forced_host_check
+
+sends the SCHEDULE_FORCED_HOST_CHECK command.
+required arguments: start_time
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_forced_host_check.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_forced_host_svc_checks
+
+sends the SCHEDULE_FORCED_HOST_SVC_CHECKS command.
+required arguments: start_time
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_forced_host_svc_checks.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_host_check
+
+sends the SCHEDULE_HOST_CHECK command.
+required arguments: start_time
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_host_check.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_host_downtime
+
+sends the SCHEDULE_HOST_DOWNTIME command.
+required arguments: start_time, end_time, fixed, triggered_by, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_host_downtime.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_host_svc_checks
+
+sends the SCHEDULE_HOST_SVC_CHECKS command.
+required arguments: start_time
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_host_svc_checks.html for details.
+
+=== POST /hosts/<name>/cmd/schedule_host_svc_downtime
+
+sends the SCHEDULE_HOST_SVC_DOWNTIME command.
+required arguments: start_time, end_time, fixed, triggered_by, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_host_svc_downtime.html for details.
+
+=== POST /hosts/<name>/cmd/send_custom_host_notification
+
+sends the SEND_CUSTOM_HOST_NOTIFICATION command.
+required arguments: options, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/send_custom_host_notification.html for details.
+
+=== POST /hosts/<name>/cmd/start_obsessing_over_host
+
+sends the START_OBSESSING_OVER_HOST command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_host.html for details.
+
+=== POST /hosts/<name>/cmd/stop_obsessing_over_host
+
+sends the STOP_OBSESSING_OVER_HOST command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_host.html for details.
 
 === GET /hosts/<name>/notifications
 
@@ -466,11 +742,215 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#status for d
 lists livestatus servicegroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
 
+=== POST /servicegroups/<name>/cmd/disable_servicegroup_host_checks
+
+sends the DISABLE_SERVICEGROUP_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_host_checks.html for details.
+
+=== POST /servicegroups/<name>/cmd/disable_servicegroup_host_notifications
+
+sends the DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_host_notifications.html for details.
+
+=== POST /servicegroups/<name>/cmd/disable_servicegroup_svc_checks
+
+sends the DISABLE_SERVICEGROUP_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_svc_checks.html for details.
+
+=== POST /servicegroups/<name>/cmd/disable_servicegroup_svc_notifications
+
+sends the DISABLE_SERVICEGROUP_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_svc_notifications.html for details.
+
+=== POST /servicegroups/<name>/cmd/enable_servicegroup_host_checks
+
+sends the ENABLE_SERVICEGROUP_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_host_checks.html for details.
+
+=== POST /servicegroups/<name>/cmd/enable_servicegroup_host_notifications
+
+sends the ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_host_notifications.html for details.
+
+=== POST /servicegroups/<name>/cmd/enable_servicegroup_svc_checks
+
+sends the ENABLE_SERVICEGROUP_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_svc_checks.html for details.
+
+=== POST /servicegroups/<name>/cmd/enable_servicegroup_svc_notifications
+
+sends the ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_svc_notifications.html for details.
+
+=== POST /servicegroups/<name>/cmd/schedule_servicegroup_host_downtime
+
+sends the SCHEDULE_SERVICEGROUP_HOST_DOWNTIME command.
+required arguments: start_time, end_time, fixed, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_host_downtime.html for details.
+
+=== POST /servicegroups/<name>/cmd/schedule_servicegroup_svc_downtime
+
+sends the SCHEDULE_SERVICEGROUP_SVC_DOWNTIME command.
+required arguments: start_time, end_time, fixed, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
+
 === GET /services
 
 lists livestatus services.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
 there is an alias /services.
+
+=== POST /services/<host>/<service>/cmd/acknowledge_svc_problem
+
+sends the ACKNOWLEDGE_SVC_PROBLEM command.
+required arguments: sticky_ack, send_notification, persistent_comment, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem.html for details.
+
+=== POST /services/<host>/<service>/cmd/acknowledge_svc_problem_expire
+
+sends the ACKNOWLEDGE_SVC_PROBLEM_EXPIRE command.
+required arguments: sticky_ack, send_notification, persistent_comment, end_time, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem_expire.html for details.
+
+=== POST /services/<host>/<service>/cmd/add_svc_comment
+
+sends the ADD_SVC_COMMENT command.
+required arguments: comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/add_svc_comment.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_svc_modattr
+
+sends the CHANGE_SVC_MODATTR command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/change_svc_modattr.html for details.
+
+=== POST /services/<host>/<service>/cmd/del_all_svc_comments
+
+sends the DEL_ALL_SVC_COMMENTS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/del_all_svc_comments.html for details.
+
+=== POST /services/<host>/<service>/cmd/delay_svc_notification
+
+sends the DELAY_SVC_NOTIFICATION command.
+required arguments: notification_time
+see http://www.naemon.org/documentation/developer/externalcommands/delay_svc_notification.html for details.
+
+=== POST /services/<host>/<service>/cmd/disable_passive_svc_checks
+
+sends the DISABLE_PASSIVE_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_passive_svc_checks.html for details.
+
+=== POST /services/<host>/<service>/cmd/disable_svc_check
+
+sends the DISABLE_SVC_CHECK command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_svc_check.html for details.
+
+=== POST /services/<host>/<service>/cmd/disable_svc_event_handler
+
+sends the DISABLE_SVC_EVENT_HANDLER command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_svc_event_handler.html for details.
+
+=== POST /services/<host>/<service>/cmd/disable_svc_flap_detection
+
+sends the DISABLE_SVC_FLAP_DETECTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_svc_flap_detection.html for details.
+
+=== POST /services/<host>/<service>/cmd/disable_svc_notifications
+
+sends the DISABLE_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_svc_notifications.html for details.
+
+=== POST /services/<host>/<service>/cmd/enable_passive_svc_checks
+
+sends the ENABLE_PASSIVE_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_passive_svc_checks.html for details.
+
+=== POST /services/<host>/<service>/cmd/enable_svc_check
+
+sends the ENABLE_SVC_CHECK command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_svc_check.html for details.
+
+=== POST /services/<host>/<service>/cmd/enable_svc_event_handler
+
+sends the ENABLE_SVC_EVENT_HANDLER command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_svc_event_handler.html for details.
+
+=== POST /services/<host>/<service>/cmd/enable_svc_flap_detection
+
+sends the ENABLE_SVC_FLAP_DETECTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_svc_flap_detection.html for details.
+
+=== POST /services/<host>/<service>/cmd/enable_svc_notifications
+
+sends the ENABLE_SVC_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_svc_notifications.html for details.
+
+=== POST /services/<host>/<service>/cmd/process_service_check_result
+
+sends the PROCESS_SERVICE_CHECK_RESULT command.
+required arguments: plugin_state, plugin_output, performance_data
+see http://www.naemon.org/documentation/developer/externalcommands/process_service_check_result.html for details.
+
+=== POST /services/<host>/<service>/cmd/remove_svc_acknowledgement
+
+sends the REMOVE_SVC_ACKNOWLEDGEMENT command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/remove_svc_acknowledgement.html for details.
+
+=== POST /services/<host>/<service>/cmd/schedule_forced_svc_check
+
+sends the SCHEDULE_FORCED_SVC_CHECK command.
+required arguments: start_time
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_forced_svc_check.html for details.
+
+=== POST /services/<host>/<service>/cmd/schedule_svc_check
+
+sends the SCHEDULE_SVC_CHECK command.
+required arguments: start_time
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_svc_check.html for details.
+
+=== POST /services/<host>/<service>/cmd/schedule_svc_downtime
+
+sends the SCHEDULE_SVC_DOWNTIME command.
+required arguments: start_time, end_time, fixed, triggered_by, duration, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/schedule_svc_downtime.html for details.
+
+=== POST /services/<host>/<service>/cmd/send_custom_svc_notification
+
+sends the SEND_CUSTOM_SVC_NOTIFICATION command.
+required arguments: options, comment_author, comment_data
+see http://www.naemon.org/documentation/developer/externalcommands/send_custom_svc_notification.html for details.
+
+=== POST /services/<host>/<service>/cmd/start_obsessing_over_svc
+
+sends the START_OBSESSING_OVER_SVC command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_svc.html for details.
+
+=== POST /services/<host>/<service>/cmd/stop_obsessing_over_svc
+
+sends the STOP_OBSESSING_OVER_SVC command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc.html for details.
 
 === GET /services/stats
 
@@ -545,6 +1025,174 @@ its basically a reduced set of /services/stats.
 |===========================================
 
 
+=== POST /system/cmd/del_host_comment
+
+sends the DEL_HOST_COMMENT command.
+required arguments: comment_id
+see http://www.naemon.org/documentation/developer/externalcommands/del_host_comment.html for details.
+
+=== POST /system/cmd/del_host_downtime
+
+sends the DEL_HOST_DOWNTIME command.
+required arguments: downtime_id
+see http://www.naemon.org/documentation/developer/externalcommands/del_host_downtime.html for details.
+
+=== POST /system/cmd/del_svc_comment
+
+sends the DEL_SVC_COMMENT command.
+required arguments: comment_id
+see http://www.naemon.org/documentation/developer/externalcommands/del_svc_comment.html for details.
+
+=== POST /system/cmd/del_svc_downtime
+
+sends the DEL_SVC_DOWNTIME command.
+required arguments: downtime_id
+see http://www.naemon.org/documentation/developer/externalcommands/del_svc_downtime.html for details.
+
+=== POST /system/cmd/disable_event_handlers
+
+sends the DISABLE_EVENT_HANDLERS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_event_handlers.html for details.
+
+=== POST /system/cmd/disable_failure_prediction
+
+sends the DISABLE_FAILURE_PREDICTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_failure_prediction.html for details.
+
+=== POST /system/cmd/disable_flap_detection
+
+sends the DISABLE_FLAP_DETECTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_flap_detection.html for details.
+
+=== POST /system/cmd/disable_notifications
+
+sends the DISABLE_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_notifications.html for details.
+
+=== POST /system/cmd/disable_performance_data
+
+sends the DISABLE_PERFORMANCE_DATA command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/disable_performance_data.html for details.
+
+=== POST /system/cmd/enable_event_handlers
+
+sends the ENABLE_EVENT_HANDLERS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_event_handlers.html for details.
+
+=== POST /system/cmd/enable_failure_prediction
+
+sends the ENABLE_FAILURE_PREDICTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_failure_prediction.html for details.
+
+=== POST /system/cmd/enable_flap_detection
+
+sends the ENABLE_FLAP_DETECTION command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_flap_detection.html for details.
+
+=== POST /system/cmd/enable_notifications
+
+sends the ENABLE_NOTIFICATIONS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_notifications.html for details.
+
+=== POST /system/cmd/enable_performance_data
+
+sends the ENABLE_PERFORMANCE_DATA command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/enable_performance_data.html for details.
+
+=== POST /system/cmd/restart_process
+
+sends the RESTART_PROCESS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/restart_process.html for details.
+
+=== POST /system/cmd/shutdown_process
+
+sends the SHUTDOWN_PROCESS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/shutdown_process.html for details.
+
+=== POST /system/cmd/start_accepting_passive_host_checks
+
+sends the START_ACCEPTING_PASSIVE_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_accepting_passive_host_checks.html for details.
+
+=== POST /system/cmd/start_accepting_passive_svc_checks
+
+sends the START_ACCEPTING_PASSIVE_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_accepting_passive_svc_checks.html for details.
+
+=== POST /system/cmd/start_executing_host_checks
+
+sends the START_EXECUTING_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_executing_host_checks.html for details.
+
+=== POST /system/cmd/start_executing_svc_checks
+
+sends the START_EXECUTING_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_executing_svc_checks.html for details.
+
+=== POST /system/cmd/start_obsessing_over_host_checks
+
+sends the START_OBSESSING_OVER_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_host_checks.html for details.
+
+=== POST /system/cmd/start_obsessing_over_svc_checks
+
+sends the START_OBSESSING_OVER_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_svc_checks.html for details.
+
+=== POST /system/cmd/stop_accepting_passive_host_checks
+
+sends the STOP_ACCEPTING_PASSIVE_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_accepting_passive_host_checks.html for details.
+
+=== POST /system/cmd/stop_accepting_passive_svc_checks
+
+sends the STOP_ACCEPTING_PASSIVE_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_accepting_passive_svc_checks.html for details.
+
+=== POST /system/cmd/stop_executing_host_checks
+
+sends the STOP_EXECUTING_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_executing_host_checks.html for details.
+
+=== POST /system/cmd/stop_executing_svc_checks
+
+sends the STOP_EXECUTING_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_executing_svc_checks.html for details.
+
+=== POST /system/cmd/stop_obsessing_over_host_checks
+
+sends the STOP_OBSESSING_OVER_HOST_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_host_checks.html for details.
+
+=== POST /system/cmd/stop_obsessing_over_svc_checks
+
+sends the STOP_OBSESSING_OVER_SVC_CHECKS command.
+this command does not require any arguments.
+see http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
+
 === GET /thruk
 
 hash of basic information about this thruk instance
@@ -615,7 +1263,7 @@ lists cluster nodes
 |Attribute                         | Description
 |hostname                          | 
 |last_contact                      | 
-|last_pid_check                    | 
+|last_error                        | 
 |last_update                       | 
 |node_id                           | 
 |node_url                          | 
@@ -828,6 +1476,29 @@ lists configuration information
 |version                           | 
 |wait_timeout                      | 
 |weekdays                          | 
+|===========================================
+
+
+=== GET /thruk/downtimes
+
+lists recurring downtimes.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|backends                          | 
+|childoptions                      | 
+|comment                           | 
+|duration                          | 
+|file                              | 
+|fixed                             | 
+|flex_range                        | 
+|host                              | 
+|hostgroup                         | 
+|schedule                          | 
+|service                           | 
+|servicegroup                      | 
+|target                            | 
 |===========================================
 
 

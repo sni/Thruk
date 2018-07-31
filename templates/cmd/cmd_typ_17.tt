@@ -14,7 +14,11 @@
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 
-    [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_HOST_SVC_CHECKS[% ELSE %]SCHEDULE_HOST_SVC_CHECKS[% END %];[% sprintf("%s;%lu",host_name,start_time_unix) %]
+    [% IF c.request.parameters.force_check %]
+        SCHEDULE_FORCED_HOST_SVC_CHECKS;[% sprintf("%s;%lu",host_name,start_time_unix) %]
+    [% ELSE %]
+        SCHEDULE_HOST_SVC_CHECKS;[% sprintf("%s;%lu",host_name,start_time_unix) %]
+    [% END %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:00'); END %]

@@ -338,11 +338,11 @@ sub has_route {
 
 =head2 sub_request
 
-$c->sub_request(<url>, [<method>], [<postdata>])
+$c->sub_request(<url>, [<method>], [<postdata>], [<rendered>])
 
 =cut
 sub sub_request {
-    my($c, $url, $method, $postdata) = @_;
+    my($c, $url, $method, $postdata, $rendered) = @_;
     $method = 'GET' unless $method;
     $method = uc($method);
     $c->stats->profile(begin => "sub_request: ".$method." ".$url);
@@ -380,12 +380,14 @@ sub sub_request {
         $c->app->{'routes'}->{$path_info} = \&{$route};
         $route = $c->app->{'routes'}->{$path_info};
     }
-    $sub_c->{'rendered'} = 1; # prevent json encoding, we want the data reference
+    $sub_c->{'rendered'} = 1 unless $rendered; # prevent json encoding, we want the data reference
     my $rc = &{$route}($sub_c, $path_info);
     Thruk::Action::AddDefaults::end($sub_c);
 
     local $Thruk::Request::c = undef;
+    Thruk::Views::ToolkitRenderer::render_tt($sub_c) unless $sub_c->{'rendered'};
     $c->stats->profile(end => "sub_request: ".$method." ".$url);
+    return $sub_c if $rendered;
     return $rc;
 }
 
