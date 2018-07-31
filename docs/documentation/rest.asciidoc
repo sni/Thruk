@@ -398,6 +398,10 @@ sends the SCHEDULE_HOSTGROUP_SVC_DOWNTIME command.
 required arguments: start_time, end_time, fixed, duration, comment_author, comment_data
 see http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_svc_downtime.html for details.
 
+=== GET /hostgroups/<name>/config
+
+returns configuration for given hostgroup
+
 === GET /hosts
 
 lists livestatus hosts.
@@ -630,6 +634,10 @@ sends the STOP_OBSESSING_OVER_HOST command.
 this command does not require any arguments.
 see http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_host.html for details.
 
+=== GET /hosts/<name>/config
+
+returns configuration for given host
+
 === GET /hosts/<name>/notifications
 
 lists notifications for given host.
@@ -762,6 +770,10 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#status for d
 lists livestatus sites statistics.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
 
+=== GET /service/<host_name>/<service>/config
+
+returns configuration for given service
+
 === GET /servicegroups
 
 lists livestatus servicegroups.
@@ -826,6 +838,10 @@ see http://www.naemon.org/documentation/developer/externalcommands/schedule_serv
 sends the SCHEDULE_SERVICEGROUP_SVC_DOWNTIME command.
 required arguments: start_time, end_time, fixed, duration, comment_author, comment_data
 see http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
+
+=== GET /servicegroups/<name>/config
+
+returns configuration for given servicegroup
 
 === GET /services
 
@@ -976,6 +992,11 @@ see http://www.naemon.org/documentation/developer/externalcommands/start_obsessi
 sends the STOP_OBSESSING_OVER_SVC command.
 this command does not require any arguments.
 see http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc.html for details.
+
+=== GET /services/<host_name>/<service>
+
+lists services for given host and name.
+alias for /services?host_name=<host_name>&description=<service>
 
 === GET /services/stats
 

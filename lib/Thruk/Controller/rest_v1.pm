@@ -30,10 +30,10 @@ our $rest_paths = [];
 sub index {
     my($c, $path_info) = @_;
 
-    $path_info =~ s#^/thruk/r/?##gmx;
-    $path_info =~ s#^v1/?##gmx;
-    $path_info =~ s#^/*#/#gmx;
-    $path_info =~ s#^.+/$##gmx;
+    $path_info =~ s#^/thruk/r/?##gmx;   # trim rest prefix
+    $path_info =~ s#^v1/?##gmx;         # trim v1 prefix
+    $path_info =~ s#^/*#/#gmx;          # replace multiple slashes
+    $path_info =~ s#/+$##gmx;           # trim trailing slashed
 
     my $format   = 'json';
     my $backends = [];
@@ -194,10 +194,14 @@ sub _fetch {
                 push @{$protos}, $proto;
                 next;
             }
+            $c->stats->profile(comment => $path);
+            my $sub_name = Thruk->verbose ? Thruk::Utils::code2name($function) : '';
             if($roles && !$c->user->check_user_roles($roles)) {
                 $data = { 'message' => 'not authorized', 'description' => 'this path requires certain roles: '.join(', ', @{$roles}), code => 403 };
             } else {
+                $c->stats->profile(begin => "rest: $sub_name");
                 $data = &{$function}($c, $path_info, $1, $2, $3);
+                $c->stats->profile(end => "rest: $sub_name");
             }
             $found = 1;
             last;
@@ -593,7 +597,7 @@ sub _get_help_for_path {
 
 =head2 register_rest_path_v1
 
-    register_rest_path_v1($protocol, $path|$regex, $function)
+    register_rest_path_v1($protocol, $path|$regex, $function, $roles)
 
 register rest path.
 
@@ -821,7 +825,7 @@ sub _rest_get_livestatus_hosts_services {
 # REST PATH: GET /hosts/<name>
 # lists hosts for given name.
 # alias for /hosts?name=<name>
-register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/?$%mx, \&_rest_get_livestatus_hosts_by_name);
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)$%mx, \&_rest_get_livestatus_hosts_by_name);
 sub _rest_get_livestatus_hosts_by_name {
     my($c, undef, $host) = @_;
     return(_expand_perfdata_and_custom_vars($c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c)})));
@@ -846,6 +850,16 @@ register_rest_path_v1('GET', qr%^/services?$%mx, \&_rest_get_livestatus_services
 sub _rest_get_livestatus_services {
     my($c) = @_;
     return(_expand_perfdata_and_custom_vars($c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), _livestatus_filter($c, 'services')  ], %{_livestatus_options($c)})));
+}
+
+##########################################################
+# REST PATH: GET /services/<host_name>/<service>
+# lists services for given host and name.
+# alias for /services?host_name=<host_name>&description=<service>
+register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)$%mx, \&_rest_get_livestatus_services_by_name);
+sub _rest_get_livestatus_services_by_name {
+    my($c, undef, $host, $service) = @_;
+    return(_expand_perfdata_and_custom_vars($c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c)})));
 }
 
 ##########################################################

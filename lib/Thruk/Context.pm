@@ -345,7 +345,8 @@ sub sub_request {
     my($c, $url, $method, $postdata, $rendered) = @_;
     $method = 'GET' unless $method;
     $method = uc($method);
-    $c->stats->profile(begin => "sub_request: ".$method." ".$url);
+    my $orig_url = $url;
+    $c->stats->profile(begin => "sub_request: ".$method." ".$orig_url);
     local $Thruk::Request::c = $c unless $Thruk::Request::c;
 
     $url = '/thruk'.$url;
@@ -368,7 +369,7 @@ sub sub_request {
     };
     $env->{'plack.request.body_parameters'} = [%{$postdata}] if $postdata;
     my $sub_c = Thruk::Context->new($c->app, $env);
-    $sub_c->{'user'} = $c->user;
+    $sub_c->{'user'}  = $c->user;
 
     Thruk::Action::AddDefaults::begin($sub_c);
     my $path_info = $sub_c->req->path_info;
@@ -387,7 +388,7 @@ sub sub_request {
 
     local $Thruk::Request::c = undef;
     Thruk::Views::ToolkitRenderer::render_tt($sub_c) unless $sub_c->{'rendered'};
-    $c->stats->profile(end => "sub_request: ".$method." ".$url);
+    $c->stats->profile(end => "sub_request: ".$method." ".$orig_url);
     return $sub_c if $rendered;
     return $rc;
 }

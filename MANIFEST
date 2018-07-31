@@ -219,6 +219,7 @@ plugins/plugins-available/conf/lib/Monitoring/Config/Object/Serviceextinfo.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Servicegroup.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Timeperiod.pm
 plugins/plugins-available/conf/lib/Thruk/Controller/conf.pm
+plugins/plugins-available/conf/lib/Thruk/Controller/Rest/V1/config.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Defaults.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/CombineIdenticalServices.pm

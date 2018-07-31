@@ -1548,21 +1548,10 @@ sub _get_context_object {
     $c->stash->{'show_secondary_select'} = 0;
 
     if(defined $c->req->parameters->{'service'} and defined $c->req->parameters->{'host'}) {
-        $c->stash->{'type'}       = 'service';
-        my $objs = $c->{'obj_db'}->get_objects_by_name('host', $c->req->parameters->{'host'}, 0);
+        $c->stash->{'type'} = 'service';
+        my $objs = $c->{'obj_db'}->get_services_by_name($c->req->parameters->{'host'}, $c->req->parameters->{'service'});
         if(defined $objs->[0]) {
-            my $services = $c->{'obj_db'}->get_services_for_host($objs->[0]);
-            for my $type (keys %{$services}) {
-                for my $name (keys %{$services->{$type}}) {
-                    if($name eq $c->req->parameters->{'service'}) {
-                        if(defined $services->{$type}->{$name}->{'svc'}) {
-                            $c->stash->{'data_id'} = $services->{$type}->{$name}->{'svc'}->get_id();
-                        } else {
-                            $c->stash->{'data_id'} = $services->{$type}->{$name}->get_id();
-                        }
-                    }
-                }
-            }
+            $c->stash->{'data_id'} = $objs->[0]->get_id();
         }
     }
     elsif(defined $c->req->parameters->{'host'}) {

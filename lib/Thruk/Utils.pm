@@ -2927,6 +2927,23 @@ sub command_disabled {
 
 ##############################################
 
+=head2 code2name
+
+    code2name($coderef)
+
+returns name for given code reference
+
+=cut
+sub code2name {
+    my($code) = @_;
+    require B;
+    my $cv = B::svref_2object ($code);
+    my $gv = $cv->GV;
+    return($gv->NAME);
+}
+
+##############################################
+
 1;
 
 __END__

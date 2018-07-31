@@ -767,6 +767,39 @@ sub get_services_for_host {
     return $services;
 }
 
+##########################################################
+
+=head2 get_services_by_name
+
+    get_services_by_name($host_name, $service_description)
+
+Returns list of services for given host and service names
+
+=cut
+sub get_services_by_name {
+    my($self, $host, $service) = @_;
+
+    my $services = [];
+    my $hosts = $self->get_objects_by_name('host', $host, 0);
+    return $services unless $hosts;
+    for my $h (@{$hosts}) {
+        my $objs = $self->get_services_for_host($h);
+        for my $type (keys %{$objs}) {
+            for my $descr (keys %{$objs->{$type}}) {
+                if($descr eq $service) {
+                    my $o;
+                    if(defined $objs->{$type}->{$descr}->{'svc'}) {
+                        $o = $objs->{$type}->{$service}->{'svc'};
+                    } else {
+                        $o = $objs->{$type}->{$service};
+                    }
+                    push @{$services}, $o;
+                }
+            }
+        }
+    }
+    return($services);
+}
 
 ##########################################################
 
