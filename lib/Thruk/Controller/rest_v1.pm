@@ -75,10 +75,11 @@ sub index {
 sub _process_rest_request {
     my($c, $path_info) = @_;
 
-    my $data = _fetch($c, $path_info);
-
-    # generic post processing
+    my $data;
     eval {
+        $data = _fetch($c, $path_info);
+
+        # generic post processing
         $data = _post_processing($c, $data);
     };
     if($@) {

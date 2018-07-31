@@ -368,6 +368,7 @@ sub sub_request {
     };
     $env->{'plack.request.body_parameters'} = [%{$postdata}] if $postdata;
     my $sub_c = Thruk::Context->new($c->app, $env);
+    $sub_c->{'user'} = $c->user;
 
     Thruk::Action::AddDefaults::begin($sub_c);
     my $path_info = $sub_c->req->path_info;
