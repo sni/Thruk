@@ -20,6 +20,7 @@ Thruk Controller
 use Module::Load qw/load/;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS ();
+use Thruk::Utils::Status ();
 use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
 
@@ -34,17 +35,22 @@ sub index {
     $path_info =~ s#^v1/?##gmx;         # trim v1 prefix
     $path_info =~ s#^/*#/#gmx;          # replace multiple slashes
     $path_info =~ s#/+$##gmx;           # trim trailing slashed
+    $path_info =~ s#^.+/$##gmx;
+    $path_info = '/' if $path_info eq '';
 
     my $format   = 'json';
     my $backends = [];
     # strip known path prefixes
-    while($path_info =~ m%^/(csv|sites?|backend)(/.*)$%mx) {
+    while($path_info =~ m%^/(csv|xls||sites?|backend)(/.*)$%mx) {
         my $prefix = $1;
         $path_info = $2;
         if($prefix eq 'csv') {
-            $format    = 'csv';
+            $format = 'csv';
         }
-        if($prefix eq 'sites' || $prefix eq 'backend') {
+        elsif($prefix eq 'xls') {
+            $format = 'xls';
+        }
+        elsif($prefix eq 'sites' || $prefix eq 'backend') {
             if($path_info =~ m%^/([^/]+)(/.*)$%mx) {
                 $path_info = $2;
                 my @sites = split(/\s*,\s*/mx, $1);
@@ -67,6 +73,9 @@ sub index {
 
     if($format eq 'csv') {
         return(_format_csv_output($c, $data));
+    }
+    if($format eq 'xls') {
+        return(_format_xls_output($c, $data));
     }
     return($c->render(json => $data));
 }
@@ -117,9 +126,7 @@ sub _process_rest_request {
 sub _format_csv_output {
     my($c, $data) = @_;
 
-    my $hash_columns;
     if(ref $data eq 'HASH') {
-        $hash_columns = [qw/key value/];
         my $list = [];
         my $columns = [sort keys %{$data}];
         for my $col (@{$columns}) {
@@ -155,6 +162,38 @@ sub _format_csv_output {
     $c->stash->{'text'}     = $output;
 
     return;
+}
+
+##########################################################
+sub _format_xls_output {
+    my($c, $data) = @_;
+
+    if(ref $data eq 'HASH') {
+        my $list = [];
+        my $columns = [sort keys %{$data}];
+        for my $col (@{$columns}) {
+            push @{$list}, { key => $col, value => $data->{$col} };
+        }
+    }
+
+    my $columns = [];
+    if(ref $data eq 'ARRAY') {
+        $columns = _get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        for my $row (@{$data}) {
+            for my $key (keys %{$row}) {
+                $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
+            }
+        }
+    }
+
+    $c->req->parameters->{'columns'} = $columns;
+    Thruk::Utils::Status::set_selected_columns($c, [''], 'host', $columns);
+    $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . "rest.xls" . q["] );
+    $c->stash->{'name'}      = "data";
+    $c->stash->{'data'}      = $data;
+    $c->stash->{'col_tr'}    = {};
+    $c->stash->{'template'}  = 'excel/generic.tt';
+    return $c->render_excel();
 }
 
 ##########################################################
