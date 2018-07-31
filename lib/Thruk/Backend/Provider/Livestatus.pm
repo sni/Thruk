@@ -26,6 +26,55 @@ $Thruk::Backend::Provider::Livestatus::callbacks = {
                             'empty_callback' => sub { return '' },
 };
 
+$Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
+    accept_passive_checks acknowledged action_url action_url_expanded
+    active_checks_enabled address alias check_command check_freshness check_interval
+    check_options check_period check_type checks_enabled childs comments current_attempt
+    current_notification_number event_handler event_handler_enabled execution_time
+    custom_variable_names custom_variable_values
+    first_notification_delay flap_detection_enabled groups has_been_checked
+    high_flap_threshold icon_image icon_image_alt icon_image_expanded
+    is_executing is_flapping last_check last_notification last_state_change
+    latency low_flap_threshold max_check_attempts name
+    next_check notes notes_expanded notes_url notes_url_expanded notification_interval
+    notification_period notifications_enabled num_services_crit num_services_ok
+    num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
+    parents percent_state_change perf_data plugin_output process_performance_data
+    retry_interval scheduled_downtime_depth state state_type modified_attributes_list
+    last_time_down last_time_unreachable last_time_up display_name
+    in_check_period in_notification_period
+/];
+
+$Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
+    accept_passive_checks acknowledged action_url action_url_expanded
+    active_checks_enabled check_command check_interval check_options
+    check_period check_type checks_enabled comments current_attempt
+    current_notification_number description event_handler event_handler_enabled
+    custom_variable_names custom_variable_values
+    execution_time first_notification_delay flap_detection_enabled groups
+    has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
+    host_active_checks_enabled host_address host_alias host_checks_enabled host_check_type
+    host_latency host_plugin_output host_perf_data host_current_attempt host_check_command
+    host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
+    host_is_executing host_is_flapping host_name host_notes_url_expanded
+    host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
+    host_last_state_change
+    icon_image icon_image_alt icon_image_expanded is_executing is_flapping
+    last_check last_notification last_state_change latency
+    low_flap_threshold max_check_attempts next_check notes notes_expanded
+    notes_url notes_url_expanded notification_interval notification_period
+    notifications_enabled obsess_over_service percent_state_change perf_data
+    plugin_output process_performance_data retry_interval scheduled_downtime_depth
+    state state_type modified_attributes_list
+    last_time_critical last_time_ok last_time_unknown last_time_warning
+    display_name host_display_name host_custom_variable_names host_custom_variable_values
+    in_check_period in_notification_period host_parents
+/];
+
+$Thruk::Backend::Provider::Livestatus::default_contact_columns = [qw/
+    name alias email pager service_notification_period host_notification_period
+/];
+
 ##########################################################
 
 =head2 new
@@ -317,24 +366,7 @@ sub get_hosts {
     }
 
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            accept_passive_checks acknowledged action_url action_url_expanded
-            active_checks_enabled address alias check_command check_freshness check_interval
-            check_options check_period check_type checks_enabled childs comments current_attempt
-            current_notification_number event_handler event_handler_enabled execution_time
-            custom_variable_names custom_variable_values
-            first_notification_delay flap_detection_enabled groups has_been_checked
-            high_flap_threshold icon_image icon_image_alt icon_image_expanded
-            is_executing is_flapping last_check last_notification last_state_change
-            latency low_flap_threshold max_check_attempts name
-            next_check notes notes_expanded notes_url notes_url_expanded notification_interval
-            notification_period notifications_enabled num_services_crit num_services_ok
-            num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
-            parents percent_state_change perf_data plugin_output process_performance_data
-            retry_interval scheduled_downtime_depth state state_type modified_attributes_list
-            last_time_down last_time_unreachable last_time_up display_name
-            in_check_period in_notification_period
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_host_columns}];
         if($options{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem realm poller_tag
                                              got_business_rule parent_dependencies/;
@@ -506,31 +538,7 @@ sub get_services {
     }
 
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            accept_passive_checks acknowledged action_url action_url_expanded
-            active_checks_enabled check_command check_interval check_options
-            check_period check_type checks_enabled comments current_attempt
-            current_notification_number description event_handler event_handler_enabled
-            custom_variable_names custom_variable_values
-            execution_time first_notification_delay flap_detection_enabled groups
-            has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
-            host_active_checks_enabled host_address host_alias host_checks_enabled host_check_type
-            host_latency host_plugin_output host_perf_data host_current_attempt host_check_command
-            host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
-            host_is_executing host_is_flapping host_name host_notes_url_expanded
-            host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
-            host_last_state_change
-            icon_image icon_image_alt icon_image_expanded is_executing is_flapping
-            last_check last_notification last_state_change latency
-            low_flap_threshold max_check_attempts next_check notes notes_expanded
-            notes_url notes_url_expanded notification_interval notification_period
-            notifications_enabled obsess_over_service percent_state_change perf_data
-            plugin_output process_performance_data retry_interval scheduled_downtime_depth
-            state state_type modified_attributes_list
-            last_time_critical last_time_ok last_time_unknown last_time_warning
-            display_name host_display_name host_custom_variable_names host_custom_variable_values
-            in_check_period in_notification_period host_parents
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_service_columns}];
 
         if($options{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem poller_tag
@@ -888,9 +896,7 @@ sub get_contacts {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            name alias email pager service_notification_period host_notification_period
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_contact_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
