@@ -23,7 +23,7 @@ Thruk Controller
 ##########################################################
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(hosts?|hostgroups?|servicegroups?)/([^/]+)/cmd/([^/]+)%mx, \&_rest_get_external_command);
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(services?)/([^/]+)/([^/]+)/cmd/([^/]+)%mx,                 \&_rest_get_external_command);
-Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(system)/cmd/([^/]+)%mx,                                    \&_rest_get_external_command);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(system|core|)/cmd/([^/]+)%mx,                              \&_rest_get_external_command);
 sub _rest_get_external_command {
     my($c, undef, $type, @args) = @_;
     our $cmd_data;
@@ -39,6 +39,7 @@ sub _rest_get_external_command {
     }
     my($cmd, $cmd_name, $name, $description, @cmd_args);
     $type =~ s/s$//gmx;
+    if($type eq 'core') { $type = 'system'; }
     if($type =~ m/^(host|hostgroup|servicegroup)$/mx) {
         $name     = shift @args;
         $cmd_name = shift @args;
@@ -61,7 +62,7 @@ sub _rest_get_external_command {
         }
     } else {
         $cmd_name = shift @args;
-        $cmd      = $cmd_data->{$type.'s'}->{$cmd_name};
+        $cmd      = $cmd_data->{$type}->{$cmd_name};
         if(!$c->check_cmd_permissions('system')) {
             return({ 'message' => 'you are not allowed to run system commands', 'description' => 'you don\' have the system_commands role', code => 403 });
         }
