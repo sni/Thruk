@@ -1101,23 +1101,21 @@ sub _set_enabled_backends {
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
-        if(ref $backends eq '') {
-            my @tmp = split(/\s*,\s*/mx, $backends);
-            $backends = \@tmp;
-        }
-        for my $b (@{$backends}) {
-            # peer key can be name too
-            if($b eq 'ALL') {
-                for my $peer (@{$c->{'db'}->get_peers()}) {
-                    $disabled_backends->{$peer->{'key'}} = 0;
-                }
-            } else {
-                my $peer = $c->{'db'}->get_peer_by_key($b);
-                if($peer) {
-                    $disabled_backends->{$peer->{'key'}} = 0;
+        for my $str (@{Thruk::Utils::list($backends)}) {
+            for my $b (split(/\s*,\s*/mx, $str)) {
+                # peer key can be name too
+                if($b eq 'ALL') {
+                    for my $peer (@{$c->{'db'}->get_peers()}) {
+                        $disabled_backends->{$peer->{'key'}} = 0;
+                    }
                 } else {
-                    # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
-                    #die("got no peer for: ".$b)
+                    my $peer = $c->{'db'}->get_peer_by_key($b);
+                    if($peer) {
+                        $disabled_backends->{$peer->{'key'}} = 0;
+                    } else {
+                        # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
+                        #die("got no peer for: ".$b)
+                    }
                 }
             }
         }

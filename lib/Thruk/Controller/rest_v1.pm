@@ -54,6 +54,12 @@ sub index {
     if(scalar @{$backends} > 0) {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
     }
+    elsif($c->req->parameters->{'backend'}) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backend'});
+    }
+    elsif($c->req->parameters->{'backends'}) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backends'});
+    }
 
     my $data = _process_rest_request($c, $path_info);
     return $data if $c->{'rendered'};
@@ -86,6 +92,15 @@ sub _process_rest_request {
         if($data->{'code'}) {
             if($data->{'code'} > 400) {
                 $data->{'failed'} = Cpanel::JSON::XS::true;
+            }
+            if($data->{'code'} == 400) {
+                my $help = _get_help_for_path($c, $path_info);
+                if($help) {
+                    if($help->{uc($c->req->method)}) {
+                        $help = join("\n", @{$help->{uc($c->req->method)}});
+                    }
+                    $data->{'help'} = $help;
+                }
             }
         }
         return($data);
@@ -258,6 +273,8 @@ sub _get_filter {
         next if $key eq 'offset';
         next if $key eq 'sort';
         next if $key eq 'columns';
+        next if $key eq 'backend';
+        next if $key eq 'backends';
         my $op   = '=';
         my @vals = @{Thruk::Utils::list($c->req->parameters->{$key})};
         if($key =~ m/^(.+)\[(.*?)\]$/mx) {
@@ -481,6 +498,20 @@ sub _livestatus_filter {
     }
 
     return $filter;
+}
+
+##########################################################
+sub _get_help_for_path {
+    my($c, $path_info) = @_;
+    my(undef, undef, $docs) = get_rest_paths($c);
+    for my $path (reverse sort keys %{$docs}) {
+        my $p = $path;
+        $p =~ s%<[^>]+>%[^/]*%gmx;
+        if($path_info =~ qr/$p/mx) {
+            return($docs->{$path});
+        }
+    }
+    return;
 }
 
 ##########################################################

@@ -150,6 +150,31 @@ ex.: return name and state for all hosts:
 ------
 
 
+== Backends / Sites
+
+If you have multiple sites connected to Thruk, you may want to talk only to
+specific sites. There are multiple methods to set the backends for your
+request. You can combine multiple sites with commas.
+
+Use a path prefix `/sites/<sitename,...>`:
+
+------
+  %> thruk r /sites/test,prod/hosts
+------
+
+Use the `backend` option for the cli client:
+
+------
+  %> thruk r -b test,prod /hosts
+------
+
+Use the `backends` url parameter:
+
+------
+  %> thruk r /hosts?backends=test,prod
+------
+
+
 == Error Handling
 
 Failed rest requests return a hash result along with a HTTP error code:
