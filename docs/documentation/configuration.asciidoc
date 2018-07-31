@@ -192,6 +192,14 @@ ex.:
   default_user_timezone = "Server Setting"
 
 
+=== cluster_enabled
+{% include new_since.ad version="2.22" %}
+Set to 1 to enable cluster features or 0 for single node setups.
+
+ex.:
+
+  cluster_enabled = 1
+
 === cluster_nodes
 {% include new_since.ad version="2.22" %}
 Define generic url pattern to connect all cluster nodes. Each

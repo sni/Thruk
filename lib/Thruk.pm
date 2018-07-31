@@ -266,7 +266,7 @@ sub _build_app {
     ###################################################
     my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
     Thruk::Utils::LMD::check_initial_start($c, $config, 1);
-    $self->cluster->register($c);
+    $self->cluster->register($c) if $config->{'cluster_enabled'};
 
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");
@@ -297,7 +297,7 @@ sub _dispatcher {
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
-    $c->cluster->register($c);
+    $c->cluster->register($c) if $config->{'cluster_enabled'};
 
     if(Thruk->verbose) {
         $c->log->debug($url);

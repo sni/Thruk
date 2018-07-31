@@ -101,7 +101,8 @@ sub _update_cmds {
             $content .= "\n";
         }
     }
-    $content .= encode_json($cmds);
+
+    $content .= Cpanel::JSON::XS->new->utf8->canonical->encode($cmds);
 
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
     print $fh $content;

@@ -144,6 +144,7 @@ return 1 if a cluster is configured
 =cut
 sub is_clustered {
     my($self) = @_;
+    return 0 if !$self->{'config'}->{'cluster_enabled'};
     return 1 if scalar keys %{$self->{nodes_by_url}} > 1;
     return 0;
 }
