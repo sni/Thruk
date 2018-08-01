@@ -1294,6 +1294,10 @@ sub _read_report_file {
         }
     }
 
+    if($report->{'var'}->{'is_running'} == 0) {
+        delete $report->{'var'}->{'running_node'};
+    }
+
     _report_save($c, $nr, $report) if $needs_save;
 
     $report->{'backends_hash'} = $report->{'backends'};
