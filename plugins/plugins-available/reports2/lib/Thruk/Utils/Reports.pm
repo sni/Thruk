@@ -25,6 +25,7 @@ use Storable qw/dclone/;
 use File::Temp qw/tempfile/;
 use Cwd qw//;
 use Digest::MD5 qw(md5_hex);
+use Time::HiRes qw/sleep/;
 
 ##########################################################
 
@@ -361,10 +362,14 @@ sub report_remove {
     my $report = _read_report_file($c, $nr);
     return unless defined $report;
     return unless defined $report->{'readonly'};
+    return if $report->{'var'}->{'is_running'};
     return unless $report->{'readonly'} == 0;
 
-    unlink($c->config->{'var_path'}.'/reports/'.$nr.'.rpt') if -e $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
+    unlink($c->config->{'var_path'}.'/reports/'.$nr.'.rpt');
     clean_report_tmp_files($c, $nr);
+
+    my $index_file = $c->config->{'var_path'}.'/reports/.index';
+    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, 1, 1);
 
     # remove cron entries
     update_cron_file($c);
@@ -421,6 +426,7 @@ sub generate_report {
         # just wait till its finished and return
         while($options->{'var'}->{'is_running'}) {
             sleep 1;
+            return unless -f $report_file; # report may have been deleted meanwhile
             $options = _read_report_file($c, $nr);
         }
         if(-e $attachment) {
@@ -461,15 +467,14 @@ sub generate_report {
     for my $key (qw/hostnameformat_cust servicenameformat_cust/) {
         if($options->{'params'}->{$key}) {
             if(!Thruk::Utils::check_custom_var_list($options->{'params'}->{$key}, $allowed)) {
-                return(_report_die($c, "report contains custom variable ".$options->{'params'}->{$key}." which is not exposed by: show_custom_vars", $logfile));
+                return(_report_die($c, $nr, "report contains custom variable ".$options->{'params'}->{$key}." which is not exposed by: show_custom_vars", $logfile));
             }
         }
     }
 
     # do we have errors in our options, ex.: missing required fields?
     if(defined $options->{'var'}->{'opt_errors'}) {
-        set_running($c, $nr, 0, undef, time());
-        return(_report_die($c, join("\n", @{$options->{'var'}->{'opt_errors'}}), $logfile));
+        return(_report_die($c, $nr, join("\n", @{$options->{'var'}->{'opt_errors'}}), $logfile));
     }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 1, 'starting') if $ENV{'THRUK_JOB_DIR'};
@@ -487,7 +492,7 @@ sub generate_report {
         Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
     };
     if($@) {
-        return(_report_die($c, $@, $logfile));
+        return(_report_die($c, $nr, $@, $logfile));
     }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 2, 'getting backends') if $ENV{'THRUK_JOB_DIR'};
@@ -505,7 +510,7 @@ sub generate_report {
         if($options->{'failed_backends'} eq 'cancel') {
             if(scalar @failed > 0) {
                 my $error = "Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n";
-                return(_report_die($c, $error, $logfile));
+                return(_report_die($c, $nr, $error, $logfile));
             }
         }
     }
@@ -527,7 +532,7 @@ sub generate_report {
     $c->req->parameters->{'initialassumedservicestate'} = 0; # Unspecified
 
     if(!defined $options->{'template'}) {
-        confess('template reports/'.$options->{'template'}.' does not exist');
+        return(_report_die($c, $nr, 'template reports/'.$options->{'template'}.' does not exist', $logfile));
     }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 4, 'initializing') if $ENV{'THRUK_JOB_DIR'};
@@ -545,7 +550,7 @@ sub generate_report {
         Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'}, undef, \$discard);
     };
     if($@) {
-        return(_report_die($c, $@, $logfile));
+        return(_report_die($c, $nr, $@, $logfile));
     }
 
     # render report
@@ -557,7 +562,7 @@ sub generate_report {
         Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'}, undef, \$reportdata);
     };
     if($@) {
-        return(_report_die($c, $@, $logfile));
+        return(_report_die($c, $nr, $@, $logfile));
     }
     POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
 
@@ -593,7 +598,7 @@ sub generate_report {
         if($options->{'failed_backends'} eq 'cancel' and scalar @failed > 0) {
             unlink($attachment);
             my $error = "Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n";
-            return(_report_die($c, $error, $logfile));
+            return(_report_die($c, $nr, $error, $logfile));
         }
     }
 
@@ -750,6 +755,17 @@ sub generate_report_background {
                                             });
 
     set_running($c, $report_nr, undef, undef, undef, $job);
+    return unless $job;
+
+    # wait up to 3 seconds till background job is really started
+    my $index_file = $c->config->{'var_path'}.'/reports/.index';
+    for (1..30) {
+        sleep(0.1);
+        my $index   = Thruk::Utils::IO::json_lock_retrieve($index_file);
+        if(!$index->{$report_nr} || !$index->{$report_nr}->{'is_running'} || $index->{$report_nr}->{'is_running'} ne $$) {
+            last;
+        }
+    }
 
     return $job;
 }
@@ -925,10 +941,10 @@ remove any tmp files from this report
 =cut
 sub clean_report_tmp_files {
     my($c, $nr) = @_;
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dat'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.log'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.log';
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.html' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.html';
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dbg'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.log';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.html';
+    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
     return;
 }
 
@@ -1515,10 +1531,11 @@ sub check_for_waiting_reports {
 
 ##########################################################
 sub _report_die {
-    my($c, $err, $logfile) = @_;
+    my($c, $nr, $err, $logfile) = @_;
     Thruk::Utils::CLI::_error($err);
     Thruk::Utils::IO::write($logfile, $err, undef, 1);
     $Thruk::Utils::Reports::error = $err;
+    set_running($c, $nr, 0, undef, time()) if $nr;
     check_for_waiting_reports($c);
     return $c->detach('/error/index/13');
 }
