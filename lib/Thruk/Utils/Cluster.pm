@@ -389,18 +389,20 @@ sub update_cron_file {
 
     my $cron_entries = [];
 
-    # ensure proper cron.log permission
-    open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
-    Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
-    my $log = sprintf(">/dev/null 2>>%s/cron.log", $c->config->{'var_path'});
-    my $cmd = sprintf("cd %s && %s '%s r /thruk/cluster/heartbeat ' %s",
-                            $c->config->{'project_root'},
-                            $c->config->{'thruk_shell'},
-                            $c->config->{'thruk_bin'},
-                            $log,
-                    );
-    my $time = '* * * * *';
-    $cron_entries = [[$time, $cmd]];
+    if($c->config->{'cluster_enabled'}) {
+        # ensure proper cron.log permission
+        open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
+        Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
+        my $log = sprintf(">/dev/null 2>>%s/cron.log", $c->config->{'var_path'});
+        my $cmd = sprintf("cd %s && %s '%s r /thruk/cluster/heartbeat ' %s",
+                                $c->config->{'project_root'},
+                                $c->config->{'thruk_shell'},
+                                $c->config->{'thruk_bin'},
+                                $log,
+                        );
+        my $time = '* * * * *';
+        $cron_entries = [[$time, $cmd]];
+    }
     Thruk::Utils::update_cron_file($c, 'cluster', $cron_entries);
     return;
 }
