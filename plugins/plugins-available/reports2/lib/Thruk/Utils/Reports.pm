@@ -1050,7 +1050,7 @@ sub get_running_reports_number {
     for my $nr (keys %{$index}) {
         if($index->{$nr}->{'is_waiting'}) {
             $waiting++;
-        } elsif($index->{$nr}->{'is_running'} != 0 && $index->{$nr}->{'running_node'} eq $Thruk::NODE_ID) {
+        } elsif(($index->{$nr}->{'is_running'}//0) != 0 && ($index->{$nr}->{'running_node'}//'') eq $Thruk::NODE_ID) {
             $running++;
         }
     }
