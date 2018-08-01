@@ -776,7 +776,8 @@ sub _is_running {
     # fetch status from remote node
     if(-s $dir."/hostname") {
         my @hosts = split(/\n/mx, read_file($dir."/hostname"));
-        if($hosts[0] ne $Thruk::NODE_ID) {
+        my $cluster = $c ? $c->cluster : Thruk->cluster;
+        if($cluster->is_clustered() && $hosts[0] ne $Thruk::NODE_ID) {
             confess('clustered _is_running requires $c') unless $c;
             my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
             if($res && exists $res->[0]) {
