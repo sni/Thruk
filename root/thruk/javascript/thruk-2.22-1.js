@@ -6111,7 +6111,7 @@ var ajax_search = {
                     }
                     name        = name.replace(/\ \(disabled\)$/, '<span style="color: #EB6900; margin-left: 20px;"> (disabled)<\/span>');
                     resultHTML += '<li><a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.name +'" onclick="ajax_search.set_result(this.rev); return false;" title="' + data.display + '"> ' + name +'<\/a><\/li>';
-                    ajax_search.res[x] = prefix+data.display;
+                    ajax_search.res[x] = prefix+data.name;
                     x++;
                     cur_count++;
                 } else {
