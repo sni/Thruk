@@ -98,6 +98,8 @@ my $test_pdf_reports = [{
 
 for my $report (@{$test_pdf_reports}) {
     # create report
+    my $mail_like   = delete $report->{'mail.like'}   || [];
+    my $mail_unlike = delete $report->{'mail.unlike'} || [];
     my $args = [];
     for my $key (keys %{$report}) {
         for my $val (ref $report->{$key} eq 'ARRAY' ? @{$report->{$key}} : $report->{$key}) {
@@ -155,13 +157,11 @@ for my $report (@{$test_pdf_reports}) {
         ok(-s $mailtestfile, 'mail testfile '.$mailtestfile.' does exist');
         if(-s $mailtestfile) {
             my $mail = read_file($mailtestfile);
-            for my $like (@{$report->{'mail.like'}}) {
+            for my $like (@{$mail_like}) {
                 like($mail, $like, 'Mail contains: '.$like);
             }
-            if($report->{'mail.unlike'}) {
-                for my $unlike (@{$report->{'mail.unlike'}}) {
-                    unlike($mail, $unlike, 'Mail must not contain: '.$unlike);
-                }
+            for my $unlike (@{$mail_unlike}) {
+                unlike($mail, $unlike, 'Mail must not contain: '.$unlike);
             }
         }
     };
