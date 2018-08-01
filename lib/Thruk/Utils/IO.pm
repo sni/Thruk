@@ -208,18 +208,19 @@ sub file_lock {
     if($mode eq 'ex') {
         my $locked = 0;
         while(1) {
+            my $old_inode = (stat($lock_file))[1];
             if(sysopen($lock_fh, $lock_file, O_RDWR|O_EXCL|O_CREAT, 0660)) {
                 last;
             }
             my $err = $!;
             # check for orphaned locks
-            if($err eq 'File exists') {
-                my $old_inode = (stat($lock_file))[1];
+            if($err eq 'File exists' && $old_inode) {
+                sleep(3);
                 if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
-                    sleep(3);
-                    my $new_inode = (stat($lock_file))[1];
+                    my $new_inode = (stat($lock_fh))[1];
                     if($new_inode && $new_inode == $old_inode) {
                         # lock seems to be orphaned, continue normally
+                        confess("removed orphaned lock") if $ENV{'TEST_RACE'};
                         $locked = 1;
                         last;
                     }

@@ -33,14 +33,14 @@ for my $x (1..$max_proc) {
     Test::More->builder->no_ending(1);
 
     if($x%2 == 0) {
-        for my $nr (1..$test_runs) {
+        for (1..$test_runs) {
             my $data = Thruk::Utils::IO::json_lock_retrieve($filename);
             if(!$data || ref $data ne 'HASH') {
                 die("got no data");
             }
         }
     } else {
-        for my $nr (1..$test_runs) {
+        for (1..$test_runs) {
             my($fh, $lock_fh) = Thruk::Utils::IO::file_lock($filename, "ex");
             my $data = Thruk::Utils::IO::json_retrieve($filename, $fh);
             Thruk::Utils::IO::json_store($filename, { test => ($data->{'test'}+1) });
