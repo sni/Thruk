@@ -1284,7 +1284,7 @@ sub _read_report_file {
         if(!$report->{'long_error'} && $report->{'error'} =~ m/\n/mx) {
             ($report->{'error'}, $report->{'long_error'}) = split(/\n/mx, $report->{'error'}, 2);
         }
-        $needs_save = 1;
+        $needs_save = 1 if $report->{'error'};
     }
 
     # preset values from data
