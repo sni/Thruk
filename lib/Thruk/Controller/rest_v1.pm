@@ -809,6 +809,46 @@ sub _rest_get_thruk_jobs {
 register_rest_path_v1('GET', qr%^/thruk/jobs?/([^/]+)$%mx, \&_rest_get_thruk_jobs);
 
 ##########################################################
+# REST PATH: GET /thruk/sessions
+# lists thruk sessions.
+register_rest_path_v1('GET', qr%^/thruk/sessions?$%mx, \&_rest_get_thruk_sessions);
+sub _rest_get_thruk_sessions {
+    my($c, undef, $id) = @_;
+    my $is_admin = 0;
+    if($c->check_user_roles('admin')) {
+        $is_admin = 1;
+    }
+
+    my $data = [];
+    for my $session (glob($c->config->{'var_path'}."/sessions/*")) {
+        my $file = $session;
+        $file   =~ s%^.*/%%gmx;
+        next if $id && $id ne $file;
+        my($auth,$ip,$username) = split(/~~~/mx, scalar read_file($session));
+        next unless $is_admin || $username eq $c->stash->{'remote_user'};
+        push @{$data}, {
+            id      => $file,
+            active  => (stat($session))[9],
+            address => $ip,
+            user    => $username,
+        };
+    }
+    if($id) {
+        if(!$data->[0]) {
+            return({ 'message' => 'no such session', code => 404 });
+        }
+        $data = $data->[0];
+    }
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk/sessions/<id>
+# get thruk sessions status for given id.
+# alias for /thruk/sessions?id=<id>
+register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk_sessions);
+
+##########################################################
 # REST PATH: GET /thruk/downtimes
 # lists recurring downtimes.
 register_rest_path_v1('GET', qr%^/thruk/downtimes?$%mx, \&_rest_get_thruk_downtimes);
