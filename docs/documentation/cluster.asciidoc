@@ -4,7 +4,7 @@ title: Cluster Setup
 ---
 
 == Thruk Clustering
-{% include new_since.ad version="2.22" %}
+{% include new_since.ad version="2.24" %}
 Clustered setups provide high-availability and performance improvements at the
 price of higher complexity. All Thruk nodes in a cluster must use shared
 storage for their `etc_path` and `var_path` while the `tmp_path` should remain
@@ -15,7 +15,9 @@ local.
 
     - Create shared storage for `etc_path` and `var_path`
     - Setup a load balancer
-    - Add the node urls to `cluster_node`
+    - Double check the node url in `cluster_nodes`
+    - Enable cluster with `cluster_enabled=1`
+
 
 === Features
 
@@ -26,4 +28,3 @@ downtimes will only run once in a cluster.
 ==== High Availability
 Having more than one Thruk node with a load-balancer in front will share the
 load over all nodes and will still work if at least one node is available.
-
