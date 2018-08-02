@@ -356,7 +356,7 @@ sub _process_raw_request {
         }
         if( $c->config->{ajax_search_servicegroups} ) {
             my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
-            my $alias      = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ], columns => [qw/name alias/] );
+            my $alias      = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ) ], columns => [qw/name alias/] );
             $alias = Thruk::Utils::array2hash($alias, "name");
             my $data = [];
             for my $group (@{$servicegroups}) {
