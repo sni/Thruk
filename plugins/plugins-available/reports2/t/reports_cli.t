@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 use URI::Escape;
 use File::Slurp qw/read_file/;
+use File::Temp qw/tempfile/;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
@@ -101,6 +102,9 @@ for my $report (@{$test_pdf_reports}) {
     my $mail_like   = delete $report->{'mail.like'}   || [];
     my $mail_unlike = delete $report->{'mail.unlike'} || [];
     my $args = [];
+    my $rand = int(rand(1000000));
+    $report->{'desc'} = "Test Report ".$rand.' ('.$report->{'name'}.')';
+    $report->{'desc'} =~ s/\s+/_/gmx;
     for my $key (keys %{$report}) {
         for my $val (ref $report->{$key} eq 'ARRAY' ? @{$report->{$key}} : $report->{$key}) {
             push @{$args}, $key.'='.$val;
@@ -130,14 +134,22 @@ for my $report (@{$test_pdf_reports}) {
     }
 
     # generate report
+    my($fh, $tmpfile) = tempfile();
     TestUtils::test_command({
-        cmd  => $BIN.' -a report=9999 --local',
+        cmd  => $BIN.' -a report=9999 --local > '.$tmpfile.'; cat '.$tmpfile,
         like => $like,
     }) or BAIL_OUT("report failed in ".$0);
-    TestUtils::test_command({
-        cmd  => $BIN.' -a report=9999',
-        like => $like,
-    });
+
+    # do some tests on the actual pdf if possible
+    if(!defined $report->{'type'} or $report->{'type'} eq 'pdf') {
+        SKIP: {
+            skip("pdf content check require pdftotext (install the poppler-utils package)", 1) if !-x '/usr/bin/pdftotext';
+            my $ascii = `/usr/bin/pdftotext -l 1 -f 1 $tmpfile - 2>&1`;
+            my $desc  = quotemeta($report->{'desc'});
+            like($ascii, qr/$desc/, 'PDF contains description: '.$report->{'desc'});
+        };
+    }
+    unlink($tmpfile);
 
     # update report
     TestUtils::test_command({

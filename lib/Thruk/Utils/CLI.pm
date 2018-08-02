@@ -334,7 +334,7 @@ sub _run {
     ## use critic
     my $log_timestamps = 0;
     my $action = $self->{'opt'}->{'action'} || $self->{'opt'}->{'commandoptions'}->[0] || '';
-    if($ENV{'THRUK_CRON'} || $action =~ m/^(logcache|bp|report|downtimetask)/mx) {
+    if($ENV{'THRUK_CRON'} || $action =~ m/^(logcache|bp|downtimetask)/mx) {
         $log_timestamps = 1;
     }
 
@@ -409,7 +409,8 @@ sub _run {
     }
 
     # fix encoding
-    if(!$result->{'content_type'} || $result->{'content_type'} =~ /^text/mx) {
+    my $content_type = $result->{'content_type'} || $c->res->content_type() || 'text/plain';
+    if($content_type =~ /^text/mx) {
         $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
     }
 

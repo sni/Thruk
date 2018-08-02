@@ -13,6 +13,7 @@ before_install:
   - sudo apt-get -y install libfile-bom-perl libhtml-lint-perl libtest-simple-perl libtest-cmd-perl libtest-pod-perl libmodule-install-perl libgd-gd2-perl libdevel-cycle-perl
   - sudo apt-get -y install libtest-pod-coverage-perl libperl-critic-perl libtest-perl-critic-perl libtemplate-perl libdate-calc-perl liblog-log4perl-perl libconfig-general-perl
   - sudo apt-get -y install libmime-lite-perl phantomjs
+  - sudo apt-get -y install poppler-utils
   - sudo apt-get -y install libmysqlclient-dev
   - sudo apt-get -y install naemon-core naemon-livestatus
   - sudo /etc/init.d/naemon restart

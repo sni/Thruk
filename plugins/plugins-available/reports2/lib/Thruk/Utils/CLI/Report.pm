@@ -141,6 +141,7 @@ sub _cmd_report {
     if(defined $report_file and $report_file eq '-2') {
         return("report is running on another node already\n", 0);
     } elsif(defined $report_file and -f $report_file) {
+        $c->res->headers->content_type('application/octet-stream');
         return(scalar read_file($report_file), 0);
     }
     my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
