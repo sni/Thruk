@@ -24,5 +24,5 @@ Fetch list of all host names:
 or by curl:
 
 ------
-  %> curl -g 'http://user@password@localhost/thruk/r/csv/hosts?columns=name'
+  %> curl -g 'http://user:password@localhost/thruk/r/csv/hosts?columns=name'
 ------
