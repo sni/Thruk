@@ -177,12 +177,12 @@ for my $report (@{$test_pdf_reports}) {
             }
         }
     };
-}
 
-# remove report
-TestUtils::test_command({
-    cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=remove&report=9999"',
-    like => ['/^OK - report removed$/'],
-});
+    # remove report
+    TestUtils::test_command({
+        cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=remove&report=9999"',
+        like => ['/^OK - report removed$/'],
+    });
+}
 
 done_testing();

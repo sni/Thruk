@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use URI::Escape;
+use File::Temp qw/tempfile/;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
@@ -50,6 +51,9 @@ my $test_pdf_reports = [{
 for my $report (@{$test_pdf_reports}) {
     # create report
     my $args = [];
+    my $rand = int(rand(1000000));
+    $report->{'desc'} = "Test Report ".$rand.' ('.$report->{'name'}.')';
+    $report->{'desc'} =~ s/\s+/_/gmx;
     for my $key (keys %{$report}) {
         for my $val (ref $report->{$key} eq 'ARRAY' ? @{$report->{$key}} : $report->{$key}) {
             push @{$args}, $key.'='.$val;
@@ -78,14 +82,22 @@ for my $report (@{$test_pdf_reports}) {
     }
 
     # generate report
+    my($fh, $tmpfile) = tempfile();
     TestUtils::test_command({
-        cmd  => $BIN.' -a report=9999 --local',
+        cmd  => $BIN.' -a report=9999 --local > '.$tmpfile.'; cat '.$tmpfile,
         like => $like,
     }) or BAIL_OUT("report failed in ".$0);
-    TestUtils::test_command({
-        cmd  => $BIN.' -a report=9999',
-        like => $like,
-    });
+
+    # do some tests on the actual pdf if possible
+    if(!defined $report->{'type'} or $report->{'type'} eq 'pdf') {
+        SKIP: {
+            skip("pdf content check require pdftotext (install the poppler-utils package)", 1) if !-x '/usr/bin/pdftotext';
+            my $ascii = `/usr/bin/pdftotext -l 1 -f 1 $tmpfile - 2>&1`;
+            my $desc  = quotemeta($report->{'desc'});
+            like($ascii, qr/$desc/, 'PDF contains description: '.$report->{'desc'});
+        };
+    }
+    unlink($tmpfile);
 
     # update report
     TestUtils::test_command({
@@ -98,13 +110,13 @@ for my $report (@{$test_pdf_reports}) {
         waitfor => 'reports2.cgi\?report=9999\&amp;refresh=0',
         unlike => '<span[^>]*style="color:\ red;".*?\'([^\']*)\'',
     );
-}
 
-# remove report
-TestUtils::test_command({
-    cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=remove&report=9999"',
-    like => ['/^OK - report removed$/'],
-});
+    # remove report
+    TestUtils::test_command({
+        cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=remove&report=9999"',
+        like => ['/^OK - report removed$/'],
+    });
+}
 
 # remove bp
 TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1, like => 'business process sucessfully removed');
