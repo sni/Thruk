@@ -68,7 +68,31 @@ sub index {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backends'});
     }
 
-    my $data = _process_rest_request($c, $path_info);
+    my $data;
+    if($c->config->{'rest_api_enabled'} == 0) {
+        $data = {
+            'message'     => 'the rest api is disabled with rest_api_enabled=0.',
+            'description' => 'you have to enable the rest api in order to use it.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } elsif($c->config->{'rest_api_enabled'} == 2 && !$c->check_user_roles('admin')) {
+        $data = {
+            'message'     => 'the rest api is disabled for non-admin users.',
+            'description' => 'you need admin privileges to use the rest api.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } elsif($c->config->{'rest_api_enabled'} == 3 && ($ENV{'THRUK_CLI_SRC'}//'') ne 'CLI' ) {
+        $data = {
+            'message'     => 'the rest api is disabled from web access.',
+            'description' => 'the rest api has been configured to be only allowed from the command line.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } else {
+        $data = _process_rest_request($c, $path_info);
+    }
     return $data if $c->{'rendered'};
 
     if($format eq 'csv') {
@@ -119,24 +143,27 @@ sub _process_rest_request {
     if(ref $data eq 'ARRAY') {
         return($data);
     }
-    return({ 'message' => 'error during request', description => "returned data is of type '".(ref $data || 'text')."'", code => 500 });
+    return({ 'message' => 'error during request', 'description' => "returned data is of type '".(ref $data || 'text')."'", 'code' => 500 });
 }
 
 ##########################################################
 sub _format_csv_output {
     my($c, $data) = @_;
 
+    my $hash_columns;
     if(ref $data eq 'HASH') {
+        $hash_columns = [qw/key value/];
         my $list = [];
         my $columns = [sort keys %{$data}];
         for my $col (@{$columns}) {
             push @{$list}, { key => $col, value => $data->{$col} };
         }
+        $data = $list;
     }
 
     my $output;
     if(ref $data eq 'ARRAY') {
-        my $columns = _get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        my $columns = $hash_columns || _get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         $output = "";
         for my $d (@{$data}) {
             my $x = 0;
@@ -168,17 +195,20 @@ sub _format_csv_output {
 sub _format_xls_output {
     my($c, $data) = @_;
 
+    my $hash_columns;
     if(ref $data eq 'HASH') {
+        $hash_columns = [qw/key value/];
         my $list = [];
         my $columns = [sort keys %{$data}];
         for my $col (@{$columns}) {
             push @{$list}, { key => $col, value => $data->{$col} };
         }
+        $data = $list;
     }
 
     my $columns = [];
     if(ref $data eq 'ARRAY') {
-        $columns = _get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        $columns = $hash_columns || _get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         for my $row (@{$data}) {
             for my $key (keys %{$row}) {
                 $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});

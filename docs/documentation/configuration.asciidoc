@@ -193,7 +193,7 @@ ex.:
 
 
 === cluster_enabled
-{% include new_since.ad version="2.22" %}
+{% include new_since.ad version="2.24" %}
 Set to 1 to enable cluster features or 0 for single node setups.
 
 ex.:
@@ -201,7 +201,7 @@ ex.:
   cluster_enabled = 1
 
 === cluster_nodes
-{% include new_since.ad version="2.22" %}
+{% include new_since.ad version="2.24" %}
 Define generic url pattern to connect all cluster nodes. Each
 cluster node must be available on the given address.
 3 variables will be replaced to make this url generic:
@@ -216,12 +216,28 @@ ex.:
 
 
 === cluster_node_stale_timeout
-{% include new_since.ad version="2.22" %}
+{% include new_since.ad version="2.24" %}
 Set timeout after which a node is removed from the cluster.
 
 ex.:
 
   cluster_node_stale_timeout = 120
+
+
+=== rest_api_enabled
+{% include new_since.ad version="2.24" %}
+The link:rest.html[rest api] is enabled by default, but you can disable or restrict it.
+
+Valid options are:
+  - 0: rest api disabled
+  - 1: rest api enabled for everyone
+  - 2: rest api enabled for admins only
+  - 3: rest api enabled from command line only
+
+ex.:
+
+  rest_api_enabled = 3
+
 
 
 === mobile_agent

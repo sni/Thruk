@@ -414,6 +414,7 @@ sub set_default_config {
         cluster_nodes                   => '$proto$://$hostname$/$url_prefix$/',
         cluster_heartbeat_interval      => 15,
         cluster_node_stale_timeout      => 120,
+        rest_api_enabled                => 1,
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,

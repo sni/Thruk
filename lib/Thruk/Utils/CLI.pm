@@ -517,6 +517,7 @@ sub _from_local {
     ## no critic
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     ## use critic
+    local $ENV{'THRUK_CLI_SRC'}      = 'CLI';
     return _run_commands($c, $options, 'local');
 }
 
@@ -529,6 +530,7 @@ sub _from_fcgi {
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
     local $ENV{'THRUK_SRC'}          = 'CLI';
+    local $ENV{'THRUK_CLI_SRC'}      = 'FCGI';
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
 
     # ensure secret key is fresh
