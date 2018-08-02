@@ -525,11 +525,42 @@ sub _apply_sort {
 
 ##########################################################
 sub _livestatus_options {
-    my($c) = @_;
+    my($c, $type) = @_;
     my $options = {};
     if($c->req->parameters->{'limit'}) {
         $options->{'options'}->{'limit'} = $c->req->parameters->{'limit'};
     }
+
+    # try to reduce the number of requested columns
+    if($type) {
+        my $columns = _get_request_columns($c);
+        if($columns && scalar @{$columns} > 0) {
+            my $ref_columns;
+            if($type eq 'hosts') {
+                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_host_columns);
+            }
+            elsif($type eq 'services') {
+                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_service_columns);
+            }
+            elsif($type eq 'contacts') {
+                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+            } else {
+                confess("unsupported type: ".$type);
+            }
+            # if all requested columns are default columns, we can pass the columns to livestatus
+            my $found = 1;
+            for my $col (@{$columns}) {
+                if(!$ref_columns->{$col}) {
+                    $found = 0;
+                    last;
+                }
+            }
+            if($found) {
+                $options->{'columns'} = $columns;
+            }
+        }
+    }
+
     return $options;
 }
 
@@ -916,7 +947,7 @@ sub _rest_get_thruk_downtimes {
 register_rest_path_v1('GET', qr%^/hosts?$%mx, \&_rest_get_livestatus_hosts);
 sub _rest_get_livestatus_hosts {
     my($c) = @_;
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
     _expand_perfdata_and_custom_vars($c, $data, "hosts");
     return($data);
 }
@@ -947,7 +978,7 @@ sub _rest_get_livestatus_hosts_totals {
 register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/services?$%mx, \&_rest_get_livestatus_hosts_services);
 sub _rest_get_livestatus_hosts_services {
     my($c, undef, $host) = @_;
-    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { 'host_name' => $host }, _livestatus_filter($c, 'services') ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { 'host_name' => $host }, _livestatus_filter($c, 'services') ], %{_livestatus_options($c, "services")});
     _expand_perfdata_and_custom_vars($c, $data, "services");
     return($data);
 }
@@ -959,7 +990,7 @@ sub _rest_get_livestatus_hosts_services {
 register_rest_path_v1('GET', qr%^/hosts?/([^/]+)$%mx, \&_rest_get_livestatus_hosts_by_name);
 sub _rest_get_livestatus_hosts_by_name {
     my($c, undef, $host) = @_;
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
     _expand_perfdata_and_custom_vars($c, $data, "hosts");
     return($data);
 }
@@ -982,7 +1013,7 @@ sub _rest_get_livestatus_hostgroups {
 register_rest_path_v1('GET', qr%^/services?$%mx, \&_rest_get_livestatus_services);
 sub _rest_get_livestatus_services {
     my($c) = @_;
-    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), _livestatus_filter($c, 'services')  ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), _livestatus_filter($c, 'services')  ], %{_livestatus_options($c, "services")});
     _expand_perfdata_and_custom_vars($c, $data, "services");
     return($data);
 }
@@ -994,7 +1025,7 @@ sub _rest_get_livestatus_services {
 register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)$%mx, \&_rest_get_livestatus_services_by_name);
 sub _rest_get_livestatus_services_by_name {
     my($c, undef, $host, $service) = @_;
-    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
     _expand_perfdata_and_custom_vars($c, $data, "services");
     return($data);
 }
@@ -1035,7 +1066,7 @@ sub _rest_get_livestatus_servicegroups {
 register_rest_path_v1('GET', qr%^/contacts?$%mx, \&_rest_get_livestatus_contacts);
 sub _rest_get_livestatus_contacts {
     my($c) = @_;
-    my $data = $c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contact'), _livestatus_filter($c, 'contacts')  ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contact'), _livestatus_filter($c, 'contacts')  ], %{_livestatus_options($c, "contacts")});
     _expand_perfdata_and_custom_vars($c, $data, "contacts");
     return($data);
 }
