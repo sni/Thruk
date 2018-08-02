@@ -5977,11 +5977,11 @@ var ajax_search = {
                   jQuery.each(search_type.data, function(index, data) {
                       var name = data;
                       var alias = '';
-                      if(data['name']) {
+                      if(data && data['name']) {
                           name = data['name'];
                       }
                       var search_name = name;
-                      if(data['alias']) {
+                      if(data && data['alias']) {
                           alias = data['alias'];
                           search_name = search_name+' '+alias;
                       }
