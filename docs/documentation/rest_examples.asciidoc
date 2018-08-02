@@ -1,0 +1,28 @@
+---
+layout: docs
+title: REST API
+breadcrumb: [ "advanced.html", "Advanced", "Rest" ]
+---
+
+
+== REST API Examples
+{% include new_since.ad version="2.24" %}
+Thruk offers a rest api to expose various aspects of Thruk itself and
+livestatus information.
+
+Read more about the link:rest.html[REST API] itself. This page contains
+some useful reallife examples.
+
+=== Simple Host List
+
+Fetch list of all host names:
+
+------
+  %> thruk r /csv/hosts?columns=name
+------
+
+or by curl:
+
+------
+  %> curl -g 'http://user@password@localhost/thruk/r/csv/hosts?columns=name'
+------

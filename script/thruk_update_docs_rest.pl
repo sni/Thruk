@@ -14,7 +14,8 @@ Thruk::Utils::set_user($c, '(cli)');
 $c->stash->{'is_admin'} = 1;
 
 _update_cmds($c);
-_update_docs($c);
+_update_docs($c, "docs/documentation/rest.asciidoc");
+_update_docs($c, "docs/documentation/rest_commands.asciidoc");
 exit 0;
 
 ################################################################################
@@ -111,8 +112,7 @@ sub _update_cmds {
 
 ################################################################################
 sub _update_docs {
-    my($c) = @_;
-    my $output_file = "docs/documentation/rest.asciidoc";
+    my($c, $output_file) = @_;
 
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
 
@@ -121,9 +121,14 @@ sub _update_docs {
     `cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
 
     my $content = read_file($output_file);
-    $content =~ s/^(\QSee examples and detailed description for all available rest api urls\E:\n).*$/$1\n\n/gsmx;
+    $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
     for my $url (sort keys %{$paths}) {
+        if($output_file =~ m/_commands/mx) {
+            next if $url !~ m%/cmd/%mx;
+        } else {
+            next if $url =~ m%/cmd/%mx;
+        }
         for my $proto (sort keys %{$paths->{$url}}) {
             $content .= "=== $proto $url\n\n";
             my $doc   = $docs->{$url}->{$proto} ? join("\n", @{$docs->{$url}->{$proto}})."\n\n" : '';
@@ -144,6 +149,9 @@ sub _update_docs {
         }
     }
 
+    # trim trailing whitespace
+    $content =~ s/\ +$//gmx;
+
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
     print $fh $content;
     close($fh);
@@ -160,6 +168,7 @@ sub _fetch_keys {
     return if $proto ne 'GET';
     return if $doc =~ m/alias|https?:/mx;
     return if $url eq '/thruk/reports/<nr>/report';
+    return if $url eq '/thruk/config';
 
     my $keys = [];
     $c->{'rendered'} = 0;
