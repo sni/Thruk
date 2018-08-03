@@ -218,7 +218,7 @@ sub file_lock {
             # check for orphaned locks
             if($err eq 'File exists' && $old_inode) {
                 sleep(0.3);
-                if($lock_fh || (sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB))) {
+                if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
                     my $new_inode = (stat($lock_fh))[1];
                     if($new_inode && $new_inode == $old_inode) {
                         $retrys++;
@@ -233,10 +233,7 @@ sub file_lock {
                     if($new_inode && $new_inode != $old_inode) {
                         $retrys = 0;
                         undef $old_inode;
-                        undef $lock_fh;
                     }
-                } else {
-                    undef $lock_fh;
                 }
             }
             sleep(0.1);
