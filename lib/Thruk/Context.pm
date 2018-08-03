@@ -72,6 +72,26 @@ sub new {
     bless($self, $class);
     weaken($self->{'app'}) unless $ENV{'THRUK_SRC'} eq 'CLI';
     $self->stats->enable();
+
+    # parse json body parameters
+    if($self->req->content_type && $self->req->content_type eq 'application/json') {
+        my $raw = $self->req->raw_body;
+        if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mx) {
+            my $data;
+            my $json = Cpanel::JSON::XS->new->utf8;
+            $json->relaxed();
+            eval {
+                $data = $json->decode($raw);
+            };
+            if($@) {
+                confess("failed to parse json data argument: ".$@);
+            }
+            for my $key (sort keys %{$data}) {
+                $self->req->parameters->{$key} = $data->{$key};
+            }
+        }
+    }
+
     return($self);
 }
 
