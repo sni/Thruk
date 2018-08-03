@@ -16,7 +16,7 @@ BEGIN {
 
 use_ok("Thruk::Utils::IO");
 
-my $max_proc      = 10;
+my $max_proc      = 4;
 my $test_runs     = 1000;
 
 my($fh, $filename) = tempfile();
@@ -29,6 +29,7 @@ ok(1, "starting $max_proc parallel processes with $test_runs writes each.");
 for my $x (1..$max_proc) {
     fork() && next;
 
+    sleep(1);
     # forked processes should not print Test::More results
     Test::More->builder->no_ending(1);
 
