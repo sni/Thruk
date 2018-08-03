@@ -17,6 +17,7 @@ The rest command is a cli interface to the rest api.
 use warnings;
 use strict;
 use Getopt::Long ();
+use Cpanel::JSON::XS ();
 
 ##############################################
 
@@ -57,6 +58,21 @@ sub cmd {
 
     my $postdata = {};
     for my $d (@{$opt->{'data'}}) {
+        if(ref $d eq '' && $d =~ m/^\{.*\}$/mx) {
+            my $data;
+            my $json = Cpanel::JSON::XS->new->utf8;
+            $json->relaxed();
+            eval {
+                $data = $json->decode($d);
+            };
+            if($@) {
+                return("failed to parse json data argument: ".$@, 1);
+            }
+            for my $key (sort keys %{$data}) {
+                $postdata->{$key} = $data->{$key};
+            }
+            next;
+        }
         my($key,$val) = split(/=/mx, $d, 2);
         next unless $key;
         if(defined $postdata->{$key}) {

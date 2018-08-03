@@ -37,7 +37,6 @@ put objects model into stash
 =cut
 sub set_object_model {
     my ( $c, $no_recursion ) = @_;
-
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
     Thruk::Action::AddDefaults::set_processinfo($c, undef, 2, $cached_data, 1);
@@ -144,8 +143,11 @@ sub read_objects {
     my $c             = shift;
     $c->stats->profile(begin => "read_objects()");
     my $model         = $c->app->obj_db_model;
+    confess('no model') unless $model;
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
+    confess('no config tool') unless $peer_conftool;
     my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, undef, $c->{'stats'}, $peer_conftool);
+    confess('no object database') unless $obj_db;
     store_model_retention($c, $c->stash->{'param_backend'});
     $c->stash->{model_type} = 'Objects';
     $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, $obj_db, $c->{'stats'} ];
@@ -595,6 +597,7 @@ sub store_model_retention {
         # delete some useless references
         delete $model->{'configs'}->{$backend}->{'stats'};
         delete $model->{'configs'}->{$backend}->{'remotepeer'};
+        confess("no data") if(!$model->{'configs'}->{$backend} || ref $model->{'configs'}->{$backend} ne 'Monitoring::Config' || scalar keys %{$model->{'configs'}->{$backend}} == 0);
         my $data = {
             'configs'      => {$backend => $model->{'configs'}->{$backend}},
             'release_date' => $c->config->{'released'},
@@ -847,6 +850,7 @@ sub get_backends_with_obj_config {
     my($c)       = @_;
     my $backends = {};
     my $firstpeer;
+    my $param_backend = $c->stash->{'param_backend'} || '';
     $c->stash->{'param_backend'} = '';
 
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
@@ -934,6 +938,7 @@ sub get_backends_with_obj_config {
             $c->stash->{'param_backend'} = $val;
         }
     }
+    $c->stash->{'param_backend'} = $param_backend unless $c->stash->{'param_backend'};
 
     if($c->stash->{'param_backend'} eq '' and defined $firstpeer) {
         $c->stash->{'param_backend'} = $firstpeer;

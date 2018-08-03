@@ -71,6 +71,38 @@ Having command line access gives you superadminpower as well, so you can set
 the user context to any user you need with the `-A` switch.
 
 
+== Parameters
+You can pass parameters mostly along with `POST` and `PATCH` requests. When
+using the cli tool, you can utilize the `-d` parameter with key/value pairs or
+with json data. Or you can mix those options.
+
+use key/value pairs:
+
+------
+  %> thruk r -m PATCH -d max_check_attempts=3 -d first_notification_delay=10 /hosts/localhost/config
+------
+
+use json structure:
+
+------
+  %> thruk r -m PATCH -d "{'max_check_attempts':3, 'first_notification_delay':10}" /hosts/localhost/config
+------
+
+Using curl, you can set parameters like this:
+
+------
+  %> curl -d "alias=test" -d "max_check_attempts=3" http://your_webserver/thruk/r/hosts/localhost/config
+------
+
+or you can use json data as well:
+
+------
+  %> curl --header "Content-Type: application/json" \
+          --X PATCH \
+          --data '{"max_check_attempts":3, "first_notification=delay":10}' \
+          http://your_webserver/thruk/r/hosts/localhost/config
+------
+
 == Filtering
 
 All pages offer filtering using query parameters:
@@ -326,20 +358,96 @@ lists host / service check statistics.
 lists livestatus commands.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
 
+=== GET /commands/<name>/config
+
+returns configuration for given command
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#command
+
+=== POST /commands/<name>/config
+
+replace command configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /commands/<name>/config
+
+update command configuration partially
+
+=== DELETE /commands/<name>/config
+
+deletes given command from configuration
+
 === GET /comments
 
 lists livestatus comments.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
+
+=== POST /config/check
+
+returns result from config check
+
+=== GET /config/diff
+
+returns diff between filesystem and stashed config changes
+
+=== POST /config/discard
+
+reverts stashed configuration changes.
+alias for /config/revert
+
+=== POST /config/reload
+
+reloads configuration with the configured reload command
+
+=== POST /config/revert
+
+reverts stashed configuration changes
+
+=== POST /config/save
+
+saves stashed config changes to disk
+
+=== DELETE /contact/<name>/config
+
+deletes given contact from configuration
 
 === GET /contactgroups
 
 lists livestatus contactgroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
 
+=== GET /contactgroups/<name>/config
+
+returns configuration for given contactgroup
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contactgroup
+
+=== POST /contactgroups/<name>/config
+
+replace contactgroup configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /contactgroups/<name>/config
+
+update contactgroup configuration partially
+
+=== DELETE /contactgroups/<name>/config
+
+deletes given contactgroup from configuration
+
 === GET /contacts
 
 lists livestatus contacts.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+
+=== GET /contacts/<name>/config
+
+returns configuration for given contact
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contact
+
+=== POST /contacts/<name>/config
+
+replace contact configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /contacts/<name>/config
+
+update contact configuration partially
 
 === GET /downtimes
 
@@ -354,6 +462,19 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups f
 === GET /hostgroups/<name>/config
 
 returns configuration for given hostgroup
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#hostgroup
+
+=== POST /hostgroups/<name>/config
+
+replace hostgroups configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /hostgroups/<name>/config
+
+update hostgroup configuration partially
+
+=== DELETE /hostgroups/<name>/config
+
+deletes given hostgroup from configuration
 
 === GET /hosts
 
@@ -374,6 +495,19 @@ alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
 === GET /hosts/<name>/config
 
 returns configuration for given host
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#host
+
+=== POST /hosts/<name>/config
+
+replace host configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /hosts/<name>/config
+
+update host configuration partially
+
+=== DELETE /hosts/<name>/config
+
+deletes given host from configuration
 
 === GET /hosts/<name>/notifications
 
@@ -507,10 +641,6 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#status for d
 lists livestatus sites statistics.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
 
-=== GET /service/<host_name>/<service>/config
-
-returns configuration for given service
-
 === GET /servicegroups
 
 lists livestatus servicegroups.
@@ -519,6 +649,19 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroup
 === GET /servicegroups/<name>/config
 
 returns configuration for given servicegroup
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#servicegroup
+
+=== POST /servicegroups/<name>/config
+
+replace servicegroup configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /servicegroups/<name>/config
+
+update servicegroup configuration partially
+
+=== DELETE /servicegroups/<name>/config
+
+deletes given servicegroup from configuration
 
 === GET /services
 
@@ -530,6 +673,23 @@ there is an alias /services.
 
 lists services for given host and name.
 alias for /services?host_name=<host_name>&description=<service>
+
+=== GET /services/<host_name>/<service>/config
+
+returns configuration for given service
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
+
+=== POST /services/<host_name>/<service>/config
+
+replace service configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /services/<host_name>/<service>/config
+
+update service configuration partially
+
+=== DELETE /services/<host_name>/<service>/config
+
+deletes given service from configuration
 
 === GET /services/stats
 
@@ -844,4 +1004,21 @@ alias for /thruk/sessions?id=<id>
 
 lists livestatus timeperiods.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+
+=== GET /timeperiods/<name>/config
+
+returns configuration for given timeperiod
+you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#timeperiod
+
+=== POST /timeperiods/<name>/config
+
+replace timeperiod configuration completely, use PATCH to only update specific attributes
+
+=== PATCH /timeperiods/<name>/config
+
+update timeperiods configuration partially
+
+=== DELETE /timeperiods/<name>/config
+
+deletes given timeperiod from configuration
 

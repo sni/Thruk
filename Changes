@@ -1,8 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
-          - support clustered setups
           - add rest api
+            - see https://thruk.org/documentation/rest.html for details
+          - support clustered setups
+            - see https://thruk.org/documentation/cluster.html for details
           - add command_enabled option
           - show and use alias for hosts, hostgroups and servicegroups search
 

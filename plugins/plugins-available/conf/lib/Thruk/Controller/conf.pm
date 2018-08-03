@@ -2435,11 +2435,14 @@ sub _config_check {
     my($c) = @_;
     my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
     $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
+    my $rc = 0;
     if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+        $rc = 1;
     }
     elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $obj_check_cmd)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+        $rc = 1;
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
     }
@@ -2447,7 +2450,7 @@ sub _config_check {
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    return;
+    return $rc;
 }
 
 ##########################################################
@@ -2455,6 +2458,7 @@ sub _config_reload {
     my($c) = @_;
     $c->stats->profile(begin => "conf::_config_reload");
 
+    $c->stash->{'original_output'} = "";
     my $time = time();
     my $name = $c->stash->{'param_backend'};
     my $peer = $c->{'db'}->get_peer_by_key($name);
@@ -2499,7 +2503,8 @@ sub _config_reload {
     # wait until core responds again
     if($wait) {
         if(!Thruk::Utils::wait_after_reload($c, $pkey, $last_reload)) {
-            $c->stash->{'output'} .= "\n<font color='red'>Warning: waiting for core reload failed.</font>";
+            $c->stash->{'original_output'} .= 'Warning: waiting for core reload failed.';
+            $c->stash->{'output'}          .= "\n<font color='red'>".$c->stash->{'original_output'}."</font>";
         }
     }
 
@@ -2513,6 +2518,7 @@ sub _config_reload {
 ##########################################################
 sub _nice_check_output {
     my($c) = @_;
+    $c->stash->{'original_output'} = $c->stash->{'output'};
     $c->stash->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
     $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
     $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;

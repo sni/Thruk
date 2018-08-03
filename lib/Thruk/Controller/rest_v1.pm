@@ -23,6 +23,7 @@ use Cpanel::JSON::XS ();
 use Thruk::Utils::Status ();
 use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
+use Thruk::Utils::Filter ();
 
 our $VERSION = 1;
 our $rest_paths = [];
@@ -41,7 +42,7 @@ sub index {
     my $format   = 'json';
     my $backends = [];
     # strip known path prefixes
-    while($path_info =~ m%^/(csv|xls||sites?|backend)(/.*)$%mx) {
+    while($path_info =~ m%^/(csv|xls|sites?|backends?)(/.*)$%mx) {
         my $prefix = $1;
         $path_info = $2;
         if($prefix eq 'csv') {
@@ -63,9 +64,13 @@ sub index {
     }
     elsif($c->req->parameters->{'backend'}) {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backend'});
+        delete $c->req->parameters->{'backend'};
     }
     elsif($c->req->parameters->{'backends'}) {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backends'});
+        delete $c->req->parameters->{'backends'};
+    } else {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c);
     }
 
     my $data;
@@ -124,7 +129,11 @@ sub _process_rest_request {
     }
     if(ref $data eq 'HASH') {
         $c->res->code($data->{'code'}) if $data->{'code'};
-        if($data->{'code'}) {
+        if($data->{'code'} && $data->{'code'} ne 200) {
+            my($style, $message) = Thruk::Utils::Filter::get_message($c);
+            if($message && $style eq 'fail_message') {
+                $data->{'description'} .= $message;
+            }
             if($data->{'code'} > 400) {
                 $data->{'failed'} = Cpanel::JSON::XS::true;
             }
@@ -246,7 +255,7 @@ sub _fetch {
             };
             if($@) {
                 $c->log->error($@);
-                return({ 'message' => 'error loading rest submodule', code => 500, 'description' => $@ });
+                return({ 'message' => 'error loading '.$pkg_name.' rest submodule', code => 500, 'description' => $@ });
             }
 
         }
@@ -754,7 +763,9 @@ returns nothing
 =cut
 sub register_rest_path_v1 {
     my($proto, $path, $function, $roles) = @_;
-    push @{$rest_paths}, [$proto, $path, $function, $roles];
+    for my $prot (@{Thruk::Utils::list($proto)}) {
+        push @{$rest_paths}, [$prot, $path, $function, $roles];
+    }
     return;
 }
 

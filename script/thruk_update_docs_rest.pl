@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS qw/encode_json/;
+use Data::Dumper;
 
 use Thruk::Utils::CLI;
 use Thruk::Controller::rest_v1;
@@ -129,7 +130,7 @@ sub _update_docs {
         } else {
             next if $url =~ m%/cmd/%mx;
         }
-        for my $proto (sort keys %{$paths->{$url}}) {
+        for my $proto (sort _sort_by_proto (keys %{$paths->{$url}})) {
             $content .= "=== $proto $url\n\n";
             my $doc   = $docs->{$url}->{$proto} ? join("\n", @{$docs->{$url}->{$proto}})."\n\n" : '';
             $content .= $doc;
@@ -176,6 +177,7 @@ sub _fetch_keys {
     print STDERR "fetching keys for ".$url."\n";
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
+    Thruk::Action::AddDefaults::_set_enabled_backends($c);
     my $data = Thruk::Controller::rest_v1::_process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {
         for my $k (sort keys %{$data->[0]}) {
@@ -188,8 +190,21 @@ sub _fetch_keys {
         }
     }
     else {
-        print STDERR "ERROR: got no usable data\n";
+        print STDERR "ERROR: got no usable data in url ".$tst_url."\n".Dumper($data);
         return;
     }
     return $keys;
 }
+
+################################################################################
+sub _sort_by_proto {
+    my $weight = {
+        'GET'    => 1,
+        'POST'   => 2,
+        'PATCH'  => 3,
+        'DELETE' => 4,
+    };
+    ($weight->{$a}//99) <=> ($weight->{$b}//99);
+}
+
+################################################################################
