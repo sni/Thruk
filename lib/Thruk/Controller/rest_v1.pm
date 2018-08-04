@@ -237,7 +237,7 @@ sub _format_xls_output {
 
 ##########################################################
 sub _fetch {
-    my($c, $path_info) = @_;
+    my($c, $path_info, $method) = @_;
     $c->stats->profile(begin => "_fetch");
 
     # load plugin paths
@@ -263,12 +263,13 @@ sub _fetch {
 
     my $data;
     my $found = 0;
-    my $request_method = $c->req->method;
+    my $request_method = $method || $c->req->method;
     my $protos = [];
     for my $r (@{$rest_paths}) {
         my($proto, $path, $function, $roles) = @{$r};
         if((ref $path eq '' && $path eq $path_info) || (ref $path eq 'Regexp' && $path_info =~ $path))  {
             if($proto ne $request_method) {
+                # matching path, but wrong protocol
                 push @{$protos}, $proto;
                 next;
             }
@@ -292,7 +293,12 @@ sub _fetch {
         }
     } else {
         if(scalar @{$protos} > 0) {
-            $data = { 'message' => 'bad request', description => 'available methods for '.$path_info.' are: '.join(', ', @{$protos}), code => 400 };
+            # make GET paths available via POST as well
+            if($request_method eq 'POST' && grep(/^GET$/mx, @{$protos})) {
+                $data = _fetch($c, $path_info, 'GET');
+            } else {
+                $data = { 'message' => 'bad request', description => 'available methods for '.$path_info.' are: '.join(', ', @{$protos}), code => 400 };
+            }
         } else {
             $data = { 'message' => 'unknown rest path: '.$path_info, code => 404 };
         }

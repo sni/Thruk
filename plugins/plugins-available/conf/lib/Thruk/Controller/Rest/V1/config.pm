@@ -146,19 +146,19 @@ sub _rest_get_config {
     my $live = [];
     my $method = $c->req->method();
     if($type eq 'host') {
-        $live = $c->{'db'}->get_hosts(filter => [ name => $name ], columns => [qw/name peer_key/]);
+        $live = $c->{'db'}->get_hosts(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'service') {
-        $live = $c->{'db'}->get_services(filter => [ host_name => $name, description => $name2 ], columns => [qw/host_name description peer_key/]);
+        $live = $c->{'db'}->get_services(filter => [ host_name => $name, description => $name2 ], columns => [qw/host_name description/]);
     } elsif($type eq 'hostgroup') {
-        $live = $c->{'db'}->get_hostgroups(filter => [ name => $name ], columns => [qw/name peer_key/]);
+        $live = $c->{'db'}->get_hostgroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'servicegroup') {
-        $live = $c->{'db'}->get_servicegroups(filter => [ name => $name ], columns => [qw/name peer_key/]);
+        $live = $c->{'db'}->get_servicegroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'contact') {
-        $live = $c->{'db'}->get_contacts(filter => [ name => $name ], columns => [qw/name peer_key/]);
+        $live = $c->{'db'}->get_contacts(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'contactgroups') {
-        $live = $c->{'db'}->get_contactgroups(filter => [ name => $name ], columns => [qw/name peer_key/]);
+        $live = $c->{'db'}->get_contactgroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'timeperiod') {
-        $live = $c->{'db'}->get_timeperiods(filter => [ name => $name ], columns => [qw/name peer_key/]);
+        $live = $c->{'db'}->get_timeperiods(filter => [ name => $name ], columns => [qw/name/]);
     }
     my $data    = [];
     my $changed = 0;
@@ -184,7 +184,7 @@ sub _rest_get_config {
             if($method eq 'PATCH') {
                 $obj_model_changed = 1;
                 for my $key (sort keys %{$c->req->parameters}) {
-                    if(!defined $c->req->parameters->{$key}) {
+                    if(!defined $c->req->parameters->{$key} || $c->req->parameters->{$key} eq '') {
                         delete $o->{'conf'}->{$key};
                     } else {
                         $o->{'conf'}->{$key} = $c->req->parameters->{$key};
@@ -268,7 +268,7 @@ sub _rest_get_config_diff {
 ##########################################################
 # REST PATH: POST /config/check
 # returns result from config check
-Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/check$%mx, \&_rest_get_config_check, ["admin"]);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/check$%mx, \&_rest_get_config_check, ["admin"]);
 sub _rest_get_config_check {
     my($c) = @_;
     local $c->config->{'no_external_job_forks'} = undef;
@@ -394,6 +394,7 @@ sub _set_object_model {
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
     Thruk::Utils::Conf::set_object_model($c);
+    delete $c->req->parameters->{'refreshdata'};
     return 1 if $c->{'obj_db'};
     return;
 }

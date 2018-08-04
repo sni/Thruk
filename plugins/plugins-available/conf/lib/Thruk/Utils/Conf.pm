@@ -55,6 +55,7 @@ sub set_object_model {
     }
 
     my $refresh = $c->req->parameters->{'refreshdata'} || 0;
+    delete $c->req->parameters->{'refreshdata'};
 
     $c->stats->profile(begin => "_update_objects_config()");
     my $model         = $c->app->obj_db_model;

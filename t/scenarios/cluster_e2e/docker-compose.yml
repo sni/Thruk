@@ -26,7 +26,7 @@ services:
     environment:
         - TZ=Europe/Berlin
         - EXCLUDE_PORTS=22,443,4730,5666
-        - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi
+        - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi?lb_ping
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro

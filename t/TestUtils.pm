@@ -20,7 +20,8 @@ use Test::More;
 use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
 use File::Slurp qw/read_file/;
-use HTTP::Request::Common qw(GET POST);
+use HTTP::Request;
+use HTTP::Request::Common;
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/tempfile/;
@@ -207,6 +208,7 @@ sub get_test_hostgroup_cli {
   {
     url             => url to test
     post            => do post request with this data
+    method          => http method, default is GET
     follow          => follow redirects
     fail            => request should fail
     redirect        => request should redirect
@@ -233,14 +235,18 @@ sub test_page {
     my $opts = _set_test_page_defaults(\%opts);
 
     if($opts->{'post'}) {
+        $opts->{'method'} = 'POST' unless $opts->{'method'};
+        $opts->{'method'} = uc($opts->{'method'});
         local $Data::Dumper::Indent = 0;
-        local $Data::Dumper::Varname = 'POST';
-        ok($opts->{'url'}, 'POST '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
+        local $Data::Dumper::Varname = $opts->{'method'};
+        ok($opts->{'url'}, $opts->{'method'}.' '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
     } else {
-        ok($opts->{'url'}, 'GET '.$opts->{'url'});
+        $opts->{'method'} = 'GET' unless $opts->{'method'};
+        $opts->{'method'} = uc($opts->{'method'});
+        ok($opts->{'url'}, $opts->{'method'}.' '.$opts->{'url'});
     }
 
-    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'});
+    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'}, $opts->{'method'});
 
     if(defined $opts->{'follow'}) {
         my $redirects = 0;
@@ -788,7 +794,7 @@ sub _relative_url {
 
 #########################
 sub _request {
-    my($url, $start_to, $post, $agent) = @_;
+    my($url, $start_to, $post, $agent, $method) = @_;
 
     our($cookie_jar, $cookie_file);
     if(!defined $cookie_jar) {
@@ -806,10 +812,14 @@ sub _request {
 
     my $request;
     if($post) {
-        $post->{'token'} = 'test';
-        $request = POST($url, [%{$post}]);
+        $method = 'GET' unless $method;
+        $method = uc($method);
+        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $request = HTTP::Request::Common::request_type_with_data(uc($method), $url, $post);
     } else {
-        $request = HTTP::Request->new(GET => $url);
+        $method = 'GET' unless $method;
+        $method = uc($method);
+        $request = HTTP::Request->new($method => $url);
     }
     $request->header("User-Agent" => $agent) if $agent;
     $cookie_jar->add_cookie_header($request);
@@ -822,7 +832,7 @@ sub _request {
 
 #########################
 sub _external_request {
-    my($url, $start_to, $post, $agent, $retry) = @_;
+    my($url, $start_to, $post, $agent, $method, $retry) = @_;
     confess("no url") unless $url;
     $retry = 1 unless defined $retry;
 
@@ -850,8 +860,10 @@ sub _external_request {
     }
     my $req;
     if($post) {
-        $post->{'token'} = 'test';
-        $req = $ua->post($url, $post);
+        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $method = 'POST' unless $method;
+        my $request = HTTP::Request::Common::request_type_with_data(uc($method), $url, $post);
+        $req = $ua->request($request);
     } else {
         $req = $ua->get($url);
     }
@@ -863,8 +875,8 @@ sub _external_request {
         my $referer = uri_unescape($1);
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
         my $r = _external_request($req->{'_headers'}->{'location'}, undef, undef, $agent);
-           $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, 0);
-        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, 0);
+           $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, undef, 0);
+        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, 0);
     }
     return $req;
 }
