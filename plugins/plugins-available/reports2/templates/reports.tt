@@ -113,11 +113,11 @@
     </td>
     <td class="status [% rowclass %]" nowrap align="left">
       [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=cancel" class="is_running"><img src='[% url_prefix %]themes/[% theme %]/images/stop.png' border="0" alt='Cancel Report' title='Cancel Report' width=16 height=16></a>
+        <input type="button" name="submit" value="" class="thruk_btn cancel_button small" onClick="window.location='reports2.cgi?report=[% r.nr %]&amp;action=cancel'; return false;" title='Cancel Report'>
       [% ELSE %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
+        <input type="button" name="submit" value="" class="thruk_btn update_button small" onClick="window.location='reports2.cgi?report=[% r.nr %]&amp;action=update'; return false;" title='Regenerate Report'>
         [% IF debug %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update&debug=1" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/wand.png' border="0" alt='Create Report in Debug Mode' title='Create Report in Debug Mode' width=16 height=16></a>
+        <input type="button" name="submit" value="" class="thruk_btn wand_button small" onClick="window.location='reports2.cgi?report=[% r.nr %]&amp;action=update&amp;debug=1'; return false;" title='Regenerate Report in Debug Mode'>
         [% IF r.var.exists("debug_file") %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_debug" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_white_text.png' border="0" alt='Download Debug Report' title='Download Debug Report' width=16 height=16></a>
         [% END %]

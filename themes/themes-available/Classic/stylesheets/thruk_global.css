@@ -1379,6 +1379,15 @@ TABLE.broadcast_panel_container span.preview {
   opacity: 0.7;
 }
 
+INPUT.thruk_btn {
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  line-height: 1px;
+}
+
 BUTTON.thruk_btn {
   border: none;
   background-color: transparent;
@@ -1415,13 +1424,22 @@ BUTTON.show_link {
 BUTTON.add_bookmark {
   background-image: url('../images/book_add.png');
 }
+.cancel_button {
+  background-image: url('../images/stop.png');
+}
+.update_button {
+  background-image: url('../images/arrow_refresh.png');
+}
+.wand_button {
+  background-image: url('../images/wand.png');
+}
 
-BUTTON.small {
+BUTTON.small, INPUT.small {
   padding: 0;
   width: 16px;
   height: 16px;
+  background-size: 16px 16px;
 }
-
 
 .text_ellipsis {
   overflow: hidden;
