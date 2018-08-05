@@ -814,7 +814,7 @@ sub _request {
         $method = 'GET' unless $method;
         $method = uc($method);
         $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
-        my $request = POST($url, $post);
+        $request = POST($url, $post);
         $request->method(uc($method));
     } else {
         $method = 'GET' unless $method;
