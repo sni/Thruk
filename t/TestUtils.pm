@@ -20,8 +20,7 @@ use Test::More;
 use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
 use File::Slurp qw/read_file/;
-use HTTP::Request;
-use HTTP::Request::Common;
+use HTTP::Request::Common qw/GET POST/;
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/tempfile/;
@@ -815,7 +814,8 @@ sub _request {
         $method = 'GET' unless $method;
         $method = uc($method);
         $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
-        $request = HTTP::Request::Common::request_type_with_data(uc($method), $url, $post);
+        my $request = POST($url, $post);
+        $request->method(uc($method));
     } else {
         $method = 'GET' unless $method;
         $method = uc($method);
@@ -862,7 +862,8 @@ sub _external_request {
     if($post) {
         $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
         $method = 'POST' unless $method;
-        my $request = HTTP::Request::Common::request_type_with_data(uc($method), $url, $post);
+        my $request = POST($url, $post);
+        $request->method(uc($method));
         $req = $ua->request($request);
     } else {
         $req = $ua->get($url);
