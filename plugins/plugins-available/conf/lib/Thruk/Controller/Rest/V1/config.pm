@@ -195,6 +195,14 @@ sub _rest_get_config {
                 next;
             }
             if($method eq 'POST') {
+                if(scalar keys %{$c->req->parameters} == 0) {
+                    return({
+                        'message'     => 'use DELETE to remove objects completely',
+                        'description' => 'using POST without parameters would remove the object, use the DELETE method instead.',
+                        'code'        => 400,
+                        'failed'      => Cpanel::JSON::XS::true,
+                    });
+                }
                 $obj_model_changed = 1;
                 my $conf = {};
                 for my $key (sort keys %{$c->req->parameters}) {
