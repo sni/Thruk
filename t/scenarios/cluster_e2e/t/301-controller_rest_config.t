@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 185;
+    plan tests => 194;
 
     use lib('t');
     require TestUtils;
@@ -104,6 +104,9 @@ my $pages = [{
     }, {
         url     => '/hosts/'.$host.'/config',
         like    => ['"alias" : "localhost",', '"address" : "127.0.0.1",', '/omd/sites/demo/etc/naemon/conf.d/example.cfg:1', 'linux40.png'],
+    }, {
+        url     => '/config/files',
+        like    => ['/etc/naemon/conf.d/thruk_bp_generated.cfg', '/etc/naemon/conf.d/test.cfg'],
     },
 ];
 

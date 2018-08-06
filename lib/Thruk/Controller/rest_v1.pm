@@ -172,7 +172,7 @@ sub _format_csv_output {
 
     my $output;
     if(ref $data eq 'ARRAY') {
-        my $columns = $hash_columns || _get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        my $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         $output = "";
         for my $d (@{$data}) {
             my $x = 0;
@@ -217,7 +217,7 @@ sub _format_xls_output {
 
     my $columns = [];
     if(ref $data eq 'ARRAY') {
-        $columns = $hash_columns || _get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         for my $row (@{$data}) {
             for my $key (keys %{$row}) {
                 $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
@@ -486,7 +486,15 @@ sub _apply_filter {
 }
 
 ##########################################################
-sub _get_request_columns {
+
+=head2 get_request_columns
+
+    get_request_columns($c)
+
+returns list of requested columns or undef
+
+=cut
+sub get_request_columns {
     my($c) = @_;
 
     return unless $c->req->parameters->{'columns'};
@@ -499,11 +507,49 @@ sub _get_request_columns {
 }
 
 ##########################################################
+
+=head2 column_required
+
+    column_required($c, $column_name)
+
+Can be used to exclude expensive columns from beeing generated.
+
+returns true if column is required, ex. for sorting, filtering, etc...
+
+=cut
+sub column_required {
+    my($c, $col) = @_;
+
+    # from filter ?$col=...
+    for my $p (sort keys %{$c->req->parameters}) {
+        if($p =~ m/^(.+)\[(.*?)\]$/mx) {
+            $p = $1;
+        }
+        return 1 if $p eq $col;
+    }
+
+    # from ?columns=...
+    my $req_col = get_request_columns($c);
+    if(!defined $req_col || scalar @{$req_col} == 0 || grep(/^$col$/mx, @{$req_col})) {
+        return 1;
+    }
+
+    # from ?sort=...
+    for my $sort (@{Thruk::Utils::list($c->req->parameters->{'sort'})}) {
+        for my $s (split(/\s*,\s*/mx, $sort)) {
+            $s =~ s/^[\-\+]+//gmx;
+            return 1 if $col eq $s;
+        }
+    }
+
+    return;
+}
+##########################################################
 sub _apply_columns {
     my($c, $data) = @_;
 
     return $data unless $c->req->parameters->{'columns'};
-    my $columns = _get_request_columns($c);
+    my $columns = get_request_columns($c);
 
     my $res = [];
     for my $d (@{$data}) {
@@ -533,6 +579,8 @@ sub _apply_sort {
         if($key =~ m/^\-/mx) {
             $order = 'desc';
             $key =~ s/^\-//mx;
+        } else {
+            $key =~ s/^\+//mx;
         }
         # sort numeric
         if( defined $data->[0]->{$key} and Thruk::Backend::Manager::looks_like_number($data->[0]->{$key}) ) {
@@ -578,7 +626,7 @@ sub _livestatus_options {
 
     # try to reduce the number of requested columns
     if($type) {
-        my $columns = _get_request_columns($c);
+        my $columns = get_request_columns($c);
         if($columns && scalar @{$columns} > 0) {
             my $ref_columns;
             if($type eq 'hosts') {
@@ -659,7 +707,7 @@ sub _expand_perfdata_and_custom_vars {
     my $allowed_list = Thruk::Utils::list($c->config->{'show_custom_vars'});
 
     # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
-    my $columns = _get_request_columns($c);
+    my $columns = get_request_columns($c);
     if($columns && scalar @{$columns} > 0) {
         my $ref_columns;
         if($type eq 'hosts') {

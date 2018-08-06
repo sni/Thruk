@@ -5,6 +5,7 @@ use warnings;
 use Storable qw/dclone/;
 use Time::HiRes qw/sleep/;
 use Cpanel::JSON::XS qw//;
+use File::Slurp qw/read_file/;
 
 use Thruk::Controller::rest_v1;
 use Thruk::Controller::conf;
@@ -21,6 +22,33 @@ Thruk Controller
 =head1 METHODS
 
 =cut
+
+##########################################################
+# REST PATH: GET /config/files
+# returns all config files
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/files?$%mx, \&_rest_get_config_files, ["admin"]);
+sub _rest_get_config_files {
+    my($c) = @_;
+    my $method = $c->req->method();
+    my($backends) = $c->{'db'}->select_backends("get_");
+    my $data = [];
+    my $content_required = Thruk::Controller::rest_v1::column_required($c, 'content');
+    for my $peer_key (@{$backends}) {
+        _set_object_model($c, $peer_key) || next;
+        for my $file (@{$c->{'obj_db'}->{'files'}}) {
+            my $f = {
+                peer_key => $peer_key,
+                path     => $file->{'display'},
+                md5      => $file->{'md5'},
+                mtime    => $file->{'mtime'},
+                readonly => $file->readonly(),
+            };
+            $f->{'content'} = scalar read_file($file->{'path'}) if $content_required;
+            push @{$data}, $f;
+        }
+    }
+    return($data);
+}
 
 ##########################################################
 # REST PATH: GET /hosts/<name>/config
