@@ -1109,7 +1109,6 @@ sub _process_objects_page {
     return 1;
 }
 
-
 ##########################################################
 # apply config changes
 sub _apply_config_changes {
@@ -2475,13 +2474,15 @@ sub _config_reload {
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->stash->{'last_changed'} = 0;
-            $c->stash->{'needs_commit'} = 0;
+            $c->{'obj_db'}->{'last_changed'} = 0;
+            $c->{'obj_db'}->{'needs_commit'} = 0;
+            Thruk::Utils::Conf::store_model_retention($c, $pkey);
         }
         elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->stash->{'last_changed'} = 0;
-            $c->stash->{'needs_commit'} = 0;
+            $c->{'obj_db'}->{'last_changed'} = 0;
+            $c->{'obj_db'}->{'needs_commit'} = 0;
+            Thruk::Utils::Conf::store_model_retention($c, $pkey);
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
             $wait = 0;
@@ -2543,7 +2544,7 @@ sub _check_external_reload {
         my $last_reloaded = $c->stash->{'pi_detail'}->{$c->stash->{'param_backend'}}->{'program_start'} || 0;
         if($last_reloaded > $c->{'obj_db'}->{'last_changed'}) {
             $c->{'obj_db'}->{'last_changed'} = 0;
-            $c->stash->{'last_changed'}      = 0;
+            $c->stash->{'obj_model_changed'} = 1;
         }
     }
     return;

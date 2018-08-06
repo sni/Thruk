@@ -607,6 +607,7 @@ sub store_model_retention {
         store($data, $file);
         $c->config->{'conf_retention'}      = [stat($file)];
         $c->config->{'conf_retention_file'} = $file;
+        $c->config->{'conf_retention_md5'}  = $c->cluster->is_clustered() ? md5_hex(scalar read_file($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
         $c->log->debug('saved object retention data');
     };
@@ -645,9 +646,11 @@ sub get_model_retention {
     if(! -f $file) {
         $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     }
+    # REMOVE AFTER: 01.01.2020
     if(! -f $file) {
         $file  = $c->config->{'var_path'}."/obj_retention.dat";
     }
+    # </REMOVE AFTER>
 
     if(! -f $file) {
         return 1 if $model->cache_exists($backend);
@@ -661,10 +664,16 @@ sub get_model_retention {
         and $stat[9] <= $c->config->{'conf_retention'}->[9]
         and $c->config->{'conf_retention_file'} eq $file
     ) {
-       return 1;
+        return 1 unless $c->cluster->is_clustered();
+        # cannot trust file timestamp in cluster mode since clocks might not be synchronous
+        my $md5 = md5_hex(scalar read_file($file));
+        if($c->config->{'conf_retention_md5'} eq $md5) {
+            return 1;
+        }
     }
     $c->config->{'conf_retention'}      = \@stat;
     $c->config->{'conf_retention_file'} = $file;
+    $c->config->{'conf_retention_md5'}  = $c->cluster->is_clustered() ? md5_hex(scalar read_file($file)) : '';
 
     # try to retrieve retention data
     eval {

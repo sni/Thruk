@@ -264,7 +264,7 @@ sub commit {
                                         $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
-                                        $file->{'path'},
+                                        $file->{'display'},
             )) if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'});
         }
         push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
@@ -280,7 +280,7 @@ sub commit {
                 $c->log->info(sprintf("[config][%s][%s] deleted file '%s'",
                                             $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
-                                            $f->{'path'},
+                                            $f->{'display'},
                 )) if $c;
             }
             push @{$files->{'deleted'}}, $f->{'display'};
@@ -1171,7 +1171,7 @@ sub rename_dependencies {
         for my $oid (keys %{$refs->{$t}}) {
             my $obj = $self->get_object_by_id($oid);
             if($obj->{'file'}->{'readonly'}) {
-                push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
+                push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'display'};
                 next;
             }
             for my $key (keys %{$refs->{$t}->{$oid}}) {
@@ -1839,7 +1839,7 @@ sub _check_files_changed {
         if($check == 1) {
             if(!$reload || $file->{'changed'}) {
                 push @newfiles, $file;
-                push @{$self->{'errors'}}, "file ".$file->{'path'}." has been deleted.";
+                push @{$self->{'errors'}}, "file ".$file->{'display'}." has been deleted.";
                 $self->{'needs_index_update'} = 1;
                 next;
             }
@@ -1856,7 +1856,7 @@ sub _check_files_changed {
                     $self->{'obj_model_changed'}  = 1;
                     $self->{'needs_index_update'} = 1;
                 } else {
-                    push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
+                    push @{$self->{'errors'}}, "Conflict in file ".$file->{'display'}.". File has been changed on disk and via config tool.";
                     push @{$self->{'errors'}}, @{$file->{'errors'}} if $file->{'errors'};
                 }
             }
