@@ -93,13 +93,14 @@ sub _update_cmds {
             elsif($category =~ m/^(system)$/mx) {
                 $content .= "# REST PATH: POST /$category/cmd/$name\n";
             }
-            $content .= "# sends the ".uc($name)." command.\n";
+            $content .= "# Sends the ".uc($name)." command.\n#\n";
             if(scalar @{$cmd->{'args'}} > 0) {
-                $content .= "# required arguments: ".join(", ", @{$cmd->{'args'}})."\n";
+                $content .= "# Required arguments:\n#\n#   * ".join("\n#   * ", @{$cmd->{'args'}})."\n";
             } else {
-                $content .= "# this command does not require any arguments.\n";
+                $content .= "# This command does not require any arguments.\n";
             }
-            $content .= "# see http://www.naemon.org/documentation/developer/externalcommands/$name.html for details.\n";
+            $content .= "#\n";
+            $content .= "# See http://www.naemon.org/documentation/developer/externalcommands/$name.html for details.\n";
             $content .= "\n";
         }
     }
@@ -116,7 +117,7 @@ sub _update_docs {
     my($c, $output_file) = @_;
 
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
-
+    Thruk::Utils::get_fake_session($c);
     `cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
     `cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
     `cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
@@ -160,6 +161,7 @@ sub _update_docs {
     unlink('bp/9999.tbp');
     unlink('var/reports/9999.rpt');
     unlink('panorama/9999.tab');
+    unlink($c->stash->{'fake_session_file'});
 }
 
 ################################################################################

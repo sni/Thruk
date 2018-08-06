@@ -866,7 +866,7 @@ sub get_rest_paths {
                 $paths->{$last_path}->{$last_proto} = 1;
                 $in_comment = 1;
             }
-            elsif($in_comment && $line =~ m%^\s*\#\s*(.*?)$%mx) {
+            elsif($in_comment && $line =~ m%^\s*\#\s?(.*?)$%mx) {
                 $docs->{$last_path}->{$last_proto} = [] unless $docs->{$last_path}->{$last_proto};
                 push @{$docs->{$last_path}->{$last_proto}}, $1;
             }

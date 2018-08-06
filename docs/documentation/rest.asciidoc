@@ -393,6 +393,22 @@ returns diff between filesystem and stashed config changes
 reverts stashed configuration changes.
 alias for /config/revert
 
+=== GET /config/files
+
+returns all config files
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|content                           |
+|md5                               |
+|mtime                             |
+|path                              |
+|peer_key                          |
+|readonly                          |
+|===========================================
+
+
 === POST /config/reload
 
 reloads configuration with the configured reload command
