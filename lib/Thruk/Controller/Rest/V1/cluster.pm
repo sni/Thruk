@@ -73,7 +73,9 @@ sub _rest_get_thruk_cluster_heartbeat {
 
 ##########################################################
 # REST PATH: GET /thruk/cluster/<id>
-# return cluster state for given node
+# return cluster state for given node.
+#
+# See `/thruk/cluster/` for the description of the attributes.
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/cluster/([^/]+)$%mx, \&_rest_get_thruk_cluster_node_by_id, ['authorized_for_system_information']);
 sub _rest_get_thruk_cluster_node_by_id {
     my($c, $path_info, $node_id) = @_;

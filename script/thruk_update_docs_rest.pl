@@ -13,10 +13,14 @@ use Thruk::Controller::rest_v1;
 my $c = Thruk::Utils::CLI->new()->get_c();
 Thruk::Utils::set_user($c, '(cli)');
 $c->stash->{'is_admin'} = 1;
+$c->config->{'cluster_enabled'} = 1; # fake cluster
+$c->app->cluster->register($c);
+$c->app->cluster->load_statefile();
 
 _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
 _update_docs($c, "docs/documentation/rest_commands.asciidoc");
+unlink('var/cluster/nodes');
 exit 0;
 
 ################################################################################
@@ -122,7 +126,8 @@ sub _update_docs {
     `cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
     `cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
 
-    my $content = read_file($output_file);
+    my $content    = read_file($output_file);
+    my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
     for my $url (sort keys %{$paths}) {
@@ -139,12 +144,18 @@ sub _update_docs {
             if(!$keys->{$url}->{$proto}) {
                 $keys->{$url}->{$proto} = _fetch_keys($c, $proto, $url, $doc);
             }
+            if(!$keys->{$url}->{$proto} && $attributes->{$url}->{$proto}) {
+                $keys->{$url}->{$proto} = [];
+                for my $key (sort keys %{$attributes->{$url}->{$proto}}) {
+                    push @{$keys->{$url}->{$proto}}, [$key, $attributes->{$url}->{$proto}->{$key}];
+                }
+            }
             if($keys->{$url}->{$proto}) {
                 $content .= '[options="header"]'."\n";
                 $content .= "|===========================================\n";
                 $content .= sprintf("|%-33s | %s\n", 'Attribute', 'Description');
                 for my $doc (@{$keys->{$url}->{$proto}}) {
-                    $content .= sprintf("|%-33s | %s\n", $doc->[0], $doc->[1]);
+                    $content .= sprintf("|%-33s | %s\n", $doc->[0], ($doc->[1] || $attributes->{$url}->{$proto}->{$doc->[0]} || '' ));
                 }
                 $content .= "|===========================================\n\n\n";
             }
@@ -154,6 +165,7 @@ sub _update_docs {
     # trim trailing whitespace
     $content =~ s/\ +$//gmx;
 
+    $output_file = $output_file.'.tst' if $ENV{'TEST_MODE'};
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
     print $fh $content;
     close($fh);
@@ -169,9 +181,11 @@ sub _fetch_keys {
     my($c, $proto, $url, $doc) = @_;
 
     return if $proto ne 'GET';
-    return if $doc =~ m/alias|https?:/mx;
+    return if $doc =~ m/alias|https?:/mxi;
     return if $url eq '/thruk/reports/<nr>/report';
+    return if $url eq '/thruk/cluster/heartbeat';
     return if $url eq '/thruk/config';
+    return if $doc =~ m/see\ /mxi;
 
     my $keys = [];
     $c->{'rendered'} = 0;
@@ -179,6 +193,7 @@ sub _fetch_keys {
     print STDERR "fetching keys for ".$url."\n";
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
+    $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
     Thruk::Action::AddDefaults::_set_enabled_backends($c);
     my $data = Thruk::Controller::rest_v1::_process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {
@@ -209,4 +224,24 @@ sub _sort_by_proto {
     ($weight->{$a}//99) <=> ($weight->{$b}//99);
 }
 
+################################################################################
+sub _parse_attribute_docs {
+    my($content) = @_;
+    my $attributes = {};
+    my($url, $proto);
+    for my $line (split/\n/mx, $content) {
+        if($line =~ m%^=%mx) {
+            $url = undef;
+        }
+        if($line =~ m%^===\ (\w+)\ (/.*)$%mx) {
+            $proto = $1;
+            $url   = $2;
+        }
+        if($url && $line =~ m%^\|([^\|]+?)\s*\|\s*(.*)$%mx) {
+            next if $1 eq 'Attribute';
+            $attributes->{$url}->{$proto}->{$1} = $2;
+        }
+    }
+    return $attributes;
+}
 ################################################################################

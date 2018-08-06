@@ -854,9 +854,25 @@ business processes for given number.
 
 lists cluster nodes
 
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|hostname                          |
+|last_contact                      |
+|last_error                        |
+|last_update                       |
+|node_id                           |
+|node_url                          |
+|pids                              |
+|response_time                     |
+|===========================================
+
+
 === GET /thruk/cluster/<id>
 
-return cluster state for given node
+return cluster state for given node.
+
+See `/thruk/cluster/` for the description of the attributes.
 
 === GET /thruk/cluster/heartbeat
 
@@ -1061,3 +1077,4 @@ update timeperiods configuration partially
 === DELETE /timeperiods/<name>/config
 
 deletes given timeperiod from configuration
+
