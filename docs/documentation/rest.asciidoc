@@ -248,6 +248,15 @@ Excel output is available via `/xls/` path prefix.
   %> thruk r /xls/hosts?columns=name,state
 ------
 
+== HTTP Methods
+
+HTTP Methods are implemented according to link:https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9[RFC2616] which
+is in short:
+
+  * GET: retrieve ressources, ex.: `GET /thruk/reports` to list all reports.
+  * POST: update/create ressources or trigger actions, ex.: `POST /thruk/reports` to create a new report.
+  * PUT: overwrite existing ressource, ex.: `PUT /thruk/reports/1` to update an entire existing report.
+  * PATCH: replace parts of existing ressource, ex.: `PATCH /thruk/reports/1` to set specific attributes of an existing report.
 
 == Endpoints
 
@@ -1037,4 +1046,3 @@ update timeperiods configuration partially
 === DELETE /timeperiods/<name>/config
 
 deletes given timeperiod from configuration
-
