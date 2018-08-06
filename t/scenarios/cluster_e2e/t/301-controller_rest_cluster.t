@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 160;
+    plan tests => 185;
 
     use lib('t');
     require TestUtils;
@@ -70,6 +70,19 @@ my $pages = [{
     }, {
         url     => '/config/diff',
         like    => ['/omd/sites/demo/etc/naemon/conf.d/example.cfg', 'linux40.png'],
+    }, {
+        url     => '/config/revert',
+        post    => {},
+        like    => ['successfully reverted stashed changes for 1 site.'],
+    }, {
+# try deleting things
+        url     => '/hosts/'.$host.'/config',
+        method  => 'delete',
+        post    => {},
+        like    => ['removed 1 objects successfully.'],
+    }, {
+        url     => '/config/diff',
+        like    => ['/omd/sites/demo/etc/naemon/conf.d/example.cfg', '-\s*alias'],
     }, {
         url     => '/config/revert',
         post    => {},
