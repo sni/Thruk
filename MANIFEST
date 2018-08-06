@@ -1930,6 +1930,7 @@ t/scenarios/cluster_e2e/t/300-controller_cluster.t
 t/scenarios/cluster_e2e/t/300-controller_rest_v1.t
 t/scenarios/cluster_e2e/t/300-controller_tac.t
 t/scenarios/cluster_e2e/t/301-controller_rest_config.t
+t/scenarios/cluster_e2e/t/301-controller_rest_reports.t
 t/scenarios/cluster_e2e/thruk/1.rpt
 t/scenarios/cluster_e2e/thruk/1.tbp
 t/scenarios/cluster_e2e/thruk/1.tsk

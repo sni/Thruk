@@ -23,31 +23,91 @@ sub _rest_get_thruk_reports {
     my($c, $path_info) = @_;
     require Thruk::Utils::Reports;
 
-    my $reports = Thruk::Utils::Reports::get_report_list($c);
-    my $data    = [];
-    my @exposed_keys = qw/nr name user template is_public to cc/;
-    for my $r (@{$reports}) {
-        my $exposed = {};
-        for my $key (@exposed_keys) {
-            $exposed->{$key} = $r->{$key};
-        }
-        push @{$data}, $exposed;
+    my $reports = _clean_reports(Thruk::Utils::Reports::get_report_list($c));
+    return $reports;
+}
+
+##########################################################
+# REST PATH: POST /thruk/reports
+# create new report.
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/reports?$%mx, \&_rest_get_thruk_reports_new);
+sub _rest_get_thruk_reports_new {
+    my($c, $path_info) = @_;
+    require Thruk::Utils::Reports;
+
+    my $report = \%{$c->req->parameters};
+    if($report = Thruk::Utils::Reports::report_save($c, "new", $report)) {
+        return({
+            'message' => 'successfully saved 1 report.',
+            'id'      => $report->{'nr'},
+            'count'   => 1,
+        });
     }
-    return $data;
+    return({
+        'message' => 'failed to save report',
+        'code'    => 500,
+    });
 }
 
 ##########################################################
 # REST PATH: GET /thruk/reports/<nr>
 # report for given number.
-Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/reports?/(\d+)$%mx, \&_rest_get_thruk_report_by_id);
+
+# REST PATH: PATCH /thruk/reports/<nr>
+# update attributes for given number.
+
+# REST PATH: POST /thruk/reports/<nr>
+# update entire report for given number.
+Thruk::Controller::rest_v1::register_rest_path_v1(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], qr%^/thruk/reports?/(\d+)$%mx, \&_rest_get_thruk_report_by_id);
 sub _rest_get_thruk_report_by_id {
     my($c, $path_info, $nr) = @_;
     require Thruk::Utils::Reports;
 
-    my $reports = Thruk::Utils::Reports::get_report_list($c, undef, $nr);
+    my $reports = _clean_reports(Thruk::Utils::Reports::get_report_list($c, undef, $nr));
     if(!$reports->[0]) {
         return({ 'message' => 'no such report', code => 404 });
     }
+
+    my $method = $c->req->method();
+    if($method eq 'PATCH') {
+        Thruk::Utils::IO::merge_deep_hash($reports->[0], $c->req->parameters);
+        if(Thruk::Utils::Reports::report_save($c, $nr, $reports->[0])) {
+            return({
+                'message' => 'successfully saved 1 report.',
+                'count'   => 1,
+            });
+        }
+        return({
+            'message' => 'failed to save report',
+            'code'    => 500,
+        });
+    }
+    elsif($method eq 'POST' || $method eq 'PUT') {
+        $reports->[0] = \%{$c->req->parameters};
+        if(Thruk::Utils::Reports::report_save($c, $nr, $reports->[0])) {
+            return({
+                'message' => 'successfully saved 1 report.',
+                'count'   => 1,
+            });
+        }
+        return({
+            'message' => 'failed to save report',
+            'code'    => 500,
+        });
+    }
+    elsif($method eq 'DELETE') {
+        if(Thruk::Utils::Reports::report_remove($c, $nr)) {
+            return({
+                'message' => 'successfully removed 1 report.',
+                'count'   => 1,
+            });
+        }
+        return({
+            'message' => 'failed to removed report',
+            'code'    => 500,
+        });
+    }
+
     return($reports->[0]);
 }
 
@@ -59,7 +119,7 @@ sub _rest_get_thruk_report_by_id_file {
     my($c, $path_info, $nr) = @_;
     require Thruk::Utils::Reports;
 
-    my $reports = Thruk::Utils::Reports::get_report_list($c, undef, $nr);
+    my $reports = _clean_reports(Thruk::Utils::Reports::get_report_list($c, undef, $nr));
     if(!$reports->[0]) {
         return({ 'message' => 'no such report', code => 404 });
     }
@@ -84,6 +144,19 @@ sub _rest_get_thruk_report_by_id_generate {
         return({ 'message' => 'report started in background', job => $job });
     }
     return({ 'message' => 'report finished' });
+}
+
+##########################################################
+sub _clean_reports {
+    my($reports) = @_;
+    return unless $reports;
+    my $remove_keys = [qw/backends_hash long_error failed_backends var/];
+    for my $r (@{$reports}) {
+        for my $key (@{$remove_keys}) {
+            delete $r->{$key};
+        }
+    }
+    return($reports);
 }
 
 ##########################################################

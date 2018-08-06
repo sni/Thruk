@@ -425,7 +425,7 @@ sub json_patch {
     my($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
     confess("got no filehandle") unless defined $fh;
     my $data = -s $file ? json_retrieve($file, $fh) : {};
-    $data = _merge_deep_hash($data, $patch_data);
+    $data = merge_deep_hash($data, $patch_data);
     json_store($file, $data, $pretty, $changed_only, $tmpfile);
     return $data;
 }
@@ -557,7 +557,6 @@ sub cmd {
 return untainted variable
 
 =cut
-
 sub untaint {
     my($v) = @_;
     if($v && $v =~ /\A(.*)\z/msx) { $v = $1; }
@@ -565,14 +564,22 @@ sub untaint {
 }
 
 ##############################################
-sub _merge_deep_hash {
+
+=head2 merge_deep_hash
+
+  merge_deep_hash($hash, $merge_hash)
+
+returns merge_hash merged into hash
+
+=cut
+sub merge_deep_hash {
     my($hash, $merge) = @_;
     for my $key (keys %{$merge}) {
         if(ref $merge->{$key} eq 'HASH') {
             if(!defined $hash->{$key}) {
                 $hash->{$key} = {};
             }
-            _merge_deep_hash($hash->{$key}, $merge->{$key});
+            merge_deep_hash($hash->{$key}, $merge->{$key});
         }
         elsif(!defined $merge->{$key}) {
             delete $hash->{$key};

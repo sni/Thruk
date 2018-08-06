@@ -962,29 +962,10 @@ list of reports.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|cc                                |
-|is_public                         |
-|name                              |
-|nr                                |
-|template                          |
-|to                                |
-|user                              |
-|===========================================
-
-
-=== GET /thruk/reports/<nr>
-
-report for given number.
-
-[options="header"]
-|===========================================
-|Attribute                         | Description
 |backends                          |
-|backends_hash                     |
 |cc                                |
 |desc                              |
 |failed                            |
-|failed_backends                   |
 |is_public                         |
 |name                              |
 |nr                                |
@@ -994,9 +975,43 @@ report for given number.
 |template                          |
 |to                                |
 |user                              |
-|var                               |
 |===========================================
 
+
+=== POST /thruk/reports
+
+create new report.
+
+=== GET /thruk/reports/<nr>
+
+report for given number.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|backends                          | list of selected backends.
+|cc                                | carbon-copy for report email.
+|desc                              | description.
+|failed                            | failed flag.
+|is_public                         | flag for public reports.
+|name                              | name of the report.
+|nr                                | primary id.
+|params                            | report parameters.
+|readonly                          | readonly flag.
+|send_types                        | list of crontab entries.
+|template                          | report template.
+|to                                | email address the report email.
+|user                              | owner of the report.
+|===========================================
+
+
+=== POST /thruk/reports/<nr>
+
+update entire report for given number.
+
+=== PATCH /thruk/reports/<nr>
+
+update attributes for given number.
 
 === POST /thruk/reports/<nr>/generate
 

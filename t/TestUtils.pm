@@ -26,6 +26,7 @@ use LWP::UserAgent;
 use File::Temp qw/tempfile/;
 use Carp qw/confess/;
 use Plack::Test;
+use Cpanel::JSON::XS qw/encode_json/;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -814,8 +815,11 @@ sub _request {
         $method = 'GET' unless $method;
         $method = uc($method);
         $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
-        $request = POST($url, $post);
+        $request = POST($url, {});
         $request->method(uc($method));
+        $request->header('Content-Type' => 'application/json');
+        $request->content(encode_json($post));
+        $request->header('Content-Length' => undef);
     } else {
         $method = 'GET' unless $method;
         $method = uc($method);
@@ -855,15 +859,21 @@ sub _external_request {
     $ua->cookie_jar($cookie_jar);
     $ua->agent( $agent ) if $agent;
 
-    if($post and ref $post ne 'HASH') {
+    if($post && ref $post eq 'REF') {
+        $post = ${$post};
+    }
+    if($post && ref $post ne 'HASH') {
         confess("unknown post data: ".Dumper($post));
     }
     my $req;
     if($post) {
         $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
         $method = 'POST' unless $method;
-        my $request = POST($url, $post);
+        my $request = POST($url, {});
         $request->method(uc($method));
+        $request->header('Content-Type' => 'application/json');
+        $request->content(encode_json($post));
+        $request->header('Content-Length' => undef);
         $req = $ua->request($request);
     } else {
         $req = $ua->get($url);

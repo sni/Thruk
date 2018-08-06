@@ -130,7 +130,7 @@ is($rc, 0, "exit code is: ".$rc);
         'k4' => [5,6,7],
         'k6' => {},
     };
-    my $c = Thruk::Utils::IO::_merge_deep_hash($a, $b);
+    my $c = Thruk::Utils::IO::merge_deep_hash($a, $b);
     is_deeply($c, $expect, "merge hashes worked");
 };
 
