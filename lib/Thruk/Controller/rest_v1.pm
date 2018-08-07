@@ -100,6 +100,12 @@ sub index {
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
          };
+    } elsif($c->config->{'demo_mode'} && $c->req->method ne 'GET') {
+        $data = {
+            'message'     => 'only GET requests allowed in demo_mode.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
     } else {
         $data = _process_rest_request($c, $path_info);
     }
