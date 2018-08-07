@@ -16,11 +16,13 @@ $c->stash->{'is_admin'} = 1;
 $c->config->{'cluster_enabled'} = 1; # fake cluster
 $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
+$c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
 
 _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
 _update_docs($c, "docs/documentation/rest_commands.asciidoc");
 unlink('var/cluster/nodes');
+$c->sub_request('/r/config/revert', 'POST', {});
 exit 0;
 
 ################################################################################
@@ -187,6 +189,7 @@ sub _fetch_keys {
     return if $url eq '/thruk/reports/<nr>/report';
     return if $url eq '/thruk/cluster/heartbeat';
     return if $url eq '/thruk/config';
+    return if $url eq '/config/objects';
     return if $doc =~ m/see\ /mxi;
 
     my $keys = [];

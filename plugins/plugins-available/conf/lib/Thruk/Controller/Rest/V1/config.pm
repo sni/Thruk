@@ -5,7 +5,6 @@ use warnings;
 use Storable qw/dclone/;
 use Time::HiRes qw/sleep/;
 use Cpanel::JSON::XS qw//;
-use File::Slurp qw/read_file/;
 
 use Thruk::Controller::rest_v1;
 use Thruk::Controller::conf;
@@ -43,7 +42,7 @@ sub _rest_get_config_files {
                 mtime    => $file->{'mtime'},
                 readonly => $file->readonly(),
             };
-            $f->{'content'} = scalar read_file($file->{'path'}) if $content_required;
+            $f->{'content'} = $file->get_new_file_content() if $content_required;
             push @{$data}, $f;
         }
     }

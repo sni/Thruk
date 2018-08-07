@@ -397,6 +397,15 @@ Returns result from config check.
 
 Returns differences between filesystem and stashed config changes.
 
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|file                              |
+|output                            |
+|peer_key                          |
+|===========================================
+
+
 === POST /config/discard
 
 Reverts stashed configuration changes.
@@ -425,13 +434,11 @@ Returns list of all objects.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|:FILE                             |
-|:ID                               |
-|:PEER_KEY                         |
-|:READONLY                         |
-|:TYPE                             |
-|command_line                      |
-|command_name                      |
+|:FILE                             | filename and line number
+|:ID                               | internal uniq id
+|:PEER_KEY                         | id of remote site
+|:READONLY                         | flag whether file is readonly
+|:TYPE                             | object type, ex.: host
 |===========================================
 
 
