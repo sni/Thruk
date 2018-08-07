@@ -25,14 +25,8 @@ sub _rest_get_thruk_bp {
 
     my $bps = Thruk::BP::Utils::load_bp_data($c);
     my $data = [];
-    my @exposed_keys = qw/id name file last_check last_state_change
-                            state_type status status_text template time draft/;
     for my $bp (@{$bps}) {
-        my $exposed = {};
-        for my $key (@exposed_keys) {
-            $exposed->{$key} = $bp->{$key};
-        }
-        push @{$data}, $exposed;
+        push @{$data}, $bp->TO_JSON();
     }
     return($data);
 }
@@ -40,6 +34,7 @@ sub _rest_get_thruk_bp {
 ##########################################################
 # REST PATH: GET /thruk/bp/<nr>
 # business processes for given number.
+# alias for /thruk/bp?id=<nr>
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/bp/(\d+)$%mx, \&_rest_get_thruk_bp_by_id);
 sub _rest_get_thruk_bp_by_id {
     my($c, $path_info, $nr) = @_;

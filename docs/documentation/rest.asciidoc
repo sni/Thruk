@@ -860,12 +860,13 @@ lists business processes.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|draft                             | flag wheter this business process is a draft or not
-|file                              | file name
+|filter                            | list of enabled filters
 |id                                | primary id
 |last_check                        | timestamp of last check result submited
 |last_state_change                 | timestamp of last state change
 |name                              | name of this business proces
+|nodes                             | all nodes of this business process
+|rankDir                           | flag wheter this business process is horizontal or vertical
 |state_type                        | flag if this business process uses hard or soft state types
 |status                            | current status
 |status_text                       | current status text
@@ -877,24 +878,7 @@ lists business processes.
 === GET /thruk/bp/<nr>
 
 business processes for given number.
-
-[options="header"]
-|===========================================
-|Attribute                         | Description
-|filter                            | list of enabled filters
-|id                                | primary id
-|last_check                        | timestamp of last check result submited
-|last_state_change                 | timestamp of last state change
-|name                              | name of this business process
-|nodes                             | all nodes of this business process
-|rankDir                           | flag wheter this business process is horizontal or vertical
-|state_type                        | flag if this business process uses hard or soft state types
-|status                            | current status
-|status_text                       | current status text
-|template                          | naemon template used for the generated object
-|time                              | calculation duration
-|===========================================
-
+alias for /thruk/bp?id=<nr>
 
 === GET /thruk/cluster
 

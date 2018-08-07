@@ -124,9 +124,9 @@ sub _update_docs {
 
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
     Thruk::Utils::get_fake_session($c);
-    `mkdir bp;             cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
+    `mkdir -p bp;          cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
     `mkdir -p var/reports; cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
-    `mkdir panorama;       cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
+    `mkdir -p panorama;    cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
 
     my $content    = read_file($output_file);
     my $attributes = _parse_attribute_docs($content);
