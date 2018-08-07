@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 540;
+    plan tests => 541;
 }
 
 BEGIN {
@@ -205,7 +205,13 @@ sub _test_json_page {
     if($url->{'url'} =~ m|save_dashboard|gmx) {
         return($data);
     }
-    is(ref $data, 'HASH', "json result is an array: ".$url->{'url'});
+
+    if($url->{'url'} =~ m%/thruk/r/thruk/panorama/%mx) {
+        is(ref $data, 'ARRAY', "json result is an array: ".$url->{'url'});
+        $data = $data->[0];
+    }
+
+    is(ref $data, 'HASH', "json result is an hash: ".$url->{'url'});
     if($url->{'url'} !~ m/gearman/mx) {
         ok(scalar keys %{$data} > 0, "json result has content: ".$url->{'url'});
     }
