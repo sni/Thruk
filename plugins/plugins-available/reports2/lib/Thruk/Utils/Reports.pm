@@ -339,9 +339,10 @@ sub report_save {
         $fields       = _get_required_fields($c, $report);
     };
     if($@) {
-        Thruk::Utils::set_message( $c, 'fail_message', 'report template had errors or does not exist');
-        $c->log->error($@);
+        Thruk::Utils::set_message( $c, 'fail_message', 'report template had errors or does not exist', $@);
+        $c->log->debug($@);
         $report->{'var'}->{'opt_errors'} = ['report template had errors or does not exist'];
+        return;
     }
     _verify_fields($c, $fields, $report);
     return _report_save($c, $nr, $report);

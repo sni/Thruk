@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 308;
+    plan tests => 316;
 }
 
 BEGIN {
@@ -71,7 +71,6 @@ for my $url (@{$list_pages}) {
     is(ref $data, 'ARRAY', "json result is an array: ".$url);
 }
 
-
 for my $url (@{$hash_pages}) {
     my $page = TestUtils::test_page(
         'url'          => '/thruk/r'.$url,
@@ -93,3 +92,14 @@ for my $p (sort keys %{$paths}) {
         }
     }
 }
+
+################################################################################
+# make sure PUT requests are handled like POST
+TestUtils::test_page(
+    'url'          => '/thruk/r/thruk/reports',
+    'content_type' => 'application/json;charset=UTF-8',
+    'method'       => 'PUT',
+    'post'         => {},
+    'like'         => ['report template had errors or does not exist'],
+    'fail'         => 1,
+);

@@ -39,6 +39,11 @@ sub index {
     $path_info =~ s#^.+/$##gmx;
     $path_info = '/' if $path_info eq '';
 
+    # handle PUT requests like POST.
+    if($c->req->method() eq 'PUT') {
+        $c->req->env->{'REQUEST_METHOD'} = "POST";
+    }
+
     my $format   = 'json';
     my $backends = [];
     # strip known path prefixes

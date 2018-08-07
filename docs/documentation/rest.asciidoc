@@ -10,7 +10,8 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 Thruk offers a rest api to expose various aspects of Thruk itself and
 livestatus information.
 
-You can find lots of examples on the link:rest_examples.html[REST API examples page].
+ * You can find lots of examples on the link:rest_examples.html[REST API examples page].
+ * A list of external commands is here: link:rest_commands.html[REST API commands].
 
 The api can be either accessed by http(s) at http://your_webserver/thruk/r/ or
 by cli client:
@@ -253,10 +254,14 @@ Excel output is available via `/xls/` path prefix.
 HTTP Methods are implemented according to link:https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9[RFC2616] which
 is in short:
 
-  * GET: retrieve ressources, ex.: `GET /thruk/reports` to list all reports.
-  * POST: update/create ressources or trigger actions, ex.: `POST /thruk/reports` to create a new report.
-  * PUT: overwrite existing ressource, ex.: `PUT /thruk/reports/1` to update an entire existing report.
-  * PATCH: replace parts of existing ressource, ex.: `PATCH /thruk/reports/1` to set specific attributes of an existing report.
+[options="header"]
+|===========================================
+| GET     | retrieve ressources, ex.: `GET /thruk/reports` to list all reports.
+| POST    | update/create ressources or trigger actions, ex.: `POST /thruk/reports` to create a new report.
+| PUT     | overwrite existing ressource, ex.: `PUT /thruk/reports/1` to update an entire existing report. Thruk makes no difference between POST and PUT. You can use PUT for all POST urls and vice versa.
+| PATCH   | replace parts of existing ressource, ex.: `PATCH /thruk/reports/1` to set specific attributes of an existing report.
+| DELETE  | remove existing ressource, ex.: `DELETE /thruk/reports/1` to remove the report entirely.
+|===========================================
 
 == Endpoints
 

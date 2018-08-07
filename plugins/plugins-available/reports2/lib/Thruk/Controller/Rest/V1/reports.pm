@@ -36,7 +36,7 @@ sub _rest_get_thruk_reports_new {
     require Thruk::Utils::Reports;
 
     my $report = \%{$c->req->parameters};
-    if($report = Thruk::Utils::Reports::report_save($c, "new", $report)) {
+    if($report = Thruk::Utils::Reports::report_save($c, "new", $report) && $report->{'nr'}) {
         return({
             'message' => 'successfully saved 1 report.',
             'id'      => $report->{'nr'},
@@ -58,7 +58,7 @@ sub _rest_get_thruk_reports_new {
 
 # REST PATH: POST /thruk/reports/<nr>
 # update entire report for given number.
-Thruk::Controller::rest_v1::register_rest_path_v1(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], qr%^/thruk/reports?/(\d+)$%mx, \&_rest_get_thruk_report_by_id);
+Thruk::Controller::rest_v1::register_rest_path_v1(['GET', 'POST', 'PATCH', 'DELETE'], qr%^/thruk/reports?/(\d+)$%mx, \&_rest_get_thruk_report_by_id);
 sub _rest_get_thruk_report_by_id {
     my($c, $path_info, $nr) = @_;
     require Thruk::Utils::Reports;
@@ -82,7 +82,7 @@ sub _rest_get_thruk_report_by_id {
             'code'    => 500,
         });
     }
-    elsif($method eq 'POST' || $method eq 'PUT') {
+    elsif($method eq 'POST') {
         $reports->[0] = \%{$c->req->parameters};
         if(Thruk::Utils::Reports::report_save($c, $nr, $reports->[0])) {
             return({

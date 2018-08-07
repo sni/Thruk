@@ -167,7 +167,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: DELETE /commands/<name>/config
 # Deletes given command from configuration.
-Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH','POST', 'PUT'], qr%^/(host|hostgroup|servicegroup|timeperiod|contact|contactgroup|command|)s?/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
+Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH','POST'], qr%^/(host|hostgroup|servicegroup|timeperiod|contact|contactgroup|command|)s?/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
 sub _rest_get_config {
     my($c, undef, $type, $name, $name2) = @_;
     my $live = [];
@@ -212,7 +212,7 @@ sub _rest_get_config {
             Thruk::Utils::Conf::store_model_retention($c, $peer_key);
         }
     }
-    if($method eq 'DELETE' || $method eq 'PATCH' || $method eq 'POST' || $method eq 'PUT') {
+    if($method eq 'DELETE' || $method eq 'PATCH' || $method eq 'POST') {
         return({
             'message'     => sprintf('%s %d objects successfully.', $method eq 'DELETE' ? 'removed' : 'changed', $changed),
             'count'       => $changed,
@@ -239,7 +239,7 @@ sub _rest_get_config {
 ##########################################################
 # REST PATH: DELETE /services/<host_name>/<service>/config
 # Deletes given service from configuration.
-Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH', 'POST', 'PUT'], qr%^/(service)s?/([^/]+)/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
+Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH', 'POST'], qr%^/(service)s?/([^/]+)/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
 
 ##########################################################
 # REST PATH: GET /config/objects
@@ -313,7 +313,7 @@ sub _rest_get_config_objects_new {
 # Replace object configuration completely.
 # REST PATH: DELETE /config/objects/<id>
 # Remove given object from configuration.
-Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE', 'POST', 'PUT', 'PATCH'], qr%^/config/objects?/([^/]+)$%mx, \&_rest_get_config_objects_update, ["admin"]);
+Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE', 'POST', 'PATCH'], qr%^/config/objects?/([^/]+)$%mx, \&_rest_get_config_objects_update, ["admin"]);
 sub _rest_get_config_objects_update {
     my($c, undef, $id) = @_;
     my($backends) = $c->{'db'}->select_backends("get_");
