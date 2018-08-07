@@ -425,7 +425,7 @@ sub json_patch {
     my($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
     confess("got no filehandle") unless defined $fh;
     my $data = -s $file ? json_retrieve($file, $fh) : {};
-    $data = merge_deep_hash($data, $patch_data);
+    $data = merge_deep($data, $patch_data);
     json_store($file, $data, $pretty, $changed_only, $tmpfile);
     return $data;
 }
@@ -565,29 +565,71 @@ sub untaint {
 
 ##############################################
 
-=head2 merge_deep_hash
+=head2 merge_deep
 
-  merge_deep_hash($hash, $merge_hash)
+  merge_deep($var, $merge_var)
 
-returns merge_hash merged into hash
+returns merged variables
+
+merge will be as follows:
+
+    - hash keys will be replaced with the last level of hash keys
+    - arrays will will be replaced completly, unless $merge_var is a hash of
+      the form: { array_index => replacement }
+    - everything else will be replaced
 
 =cut
-sub merge_deep_hash {
-    my($hash, $merge) = @_;
-    for my $key (keys %{$merge}) {
-        if(ref $merge->{$key} eq 'HASH') {
-            if(!defined $hash->{$key}) {
-                $hash->{$key} = {};
+sub merge_deep {
+    my($var, $merge) = @_;
+
+    if(ref $var eq 'HASH' && ref $merge eq 'HASH') {
+        for my $key (keys %{$merge}) {
+            if(!defined $merge->{$key}) {
+                delete $var->{$key};
             }
-            merge_deep_hash($hash->{$key}, $merge->{$key});
+            elsif(!defined $var->{$key}) {
+                # remove all undefined values from $merge
+                if(ref $merge->{$key} eq 'HASH') {
+                    $var->{$key} = {};
+                    $var->{$key} = merge_deep($var->{$key}, $merge->{$key});
+                } else {
+                    $var->{$key} = $merge->{$key};
+                }
+            } else {
+                $var->{$key} = merge_deep($var->{$key}, $merge->{$key});
+            }
         }
-        elsif(!defined $merge->{$key}) {
-            delete $hash->{$key};
-        } else {
-            $hash->{$key} = $merge->{$key};
-        }
+        return($var);
     }
-    return($hash);
+    if(ref $var eq 'ARRAY' && ref $merge eq 'HASH') {
+        for my $key (sort keys %{$merge}) {
+            if(!defined $merge->{$key}) {
+                $var->[$key] = undef;
+            }
+            elsif(!defined $var->[$key]) {
+                $var->[$key] = $merge->{$key};
+            } else {
+                $var->[$key] = merge_deep($var->[$key], $merge->{$key});
+            }
+        }
+        # remove undefs
+        @{$var} = grep defined, @{$var};
+        return($var);
+    }
+    if(ref $var eq 'ARRAY' && ref $merge eq 'ARRAY') {
+        for my $x (0..(scalar @{$merge} -1)) {
+            if(ref $merge->[$x] && ref $var->[$x]) {
+                $var->[$x] = merge_deep($var->[$x], $merge->[$x]);
+            }
+            else {
+                $var->[$x] = $merge->[$x];
+            }
+        }
+        # remove undefs
+        @{$var} = grep defined, @{$var};
+        return($var);
+    }
+    return($merge);
 }
 ##############################################
 

@@ -130,8 +130,30 @@ is($rc, 0, "exit code is: ".$rc);
         'k4' => [5,6,7],
         'k6' => {},
     };
-    my $c = Thruk::Utils::IO::merge_deep_hash($a, $b);
+    my $c = Thruk::Utils::IO::merge_deep($a, $b);
     is_deeply($c, $expect, "merge hashes worked");
+};
+
+#########################
+# merge hashes with arrays
+{
+    my $a = {
+        'k1' => [[1,2,3], {4 => 5, 6 => 7}, "c", "d"],
+        'k2' => "a",
+        'k3' => [1,2,3],
+    };
+    my $b = {
+        'k1' => [{ 1 => "a" }, { 1 => "b" }],
+        'k2' => "b",
+        'k3' => { 1 => undef },
+    };
+    my $expect = {
+        'k1' => [[1,"a", 3], {1 => "b", 4 => 5, 6 => 7}, "c", "d"],
+        'k2' => "b",
+        'k3' => [1,3],
+    };
+    my $c = Thruk::Utils::IO::merge_deep($a, $b);
+    is_deeply($c, $expect, "merge hashes with arrays worked");
 };
 
 #########################
