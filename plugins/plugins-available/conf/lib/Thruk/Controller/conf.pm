@@ -1567,7 +1567,7 @@ sub _get_context_object {
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
         my $new_file   = $c->req->parameters->{'data.file'} || '';
-        my $file = _get_context_file($c, $obj, $new_file);
+        my $file = get_context_file($c, $obj, $new_file);
         return $obj unless $file;
         $obj->set_file($file);
         $obj->set_uniq_id($c->{'obj_db'});
@@ -1627,7 +1627,13 @@ sub _get_context_object {
 }
 
 ##########################################################
-sub _get_context_file {
+
+=head2 get_context_file
+
+    returns file for name, creates new file unless already existing.
+
+=cut
+sub get_context_file {
     my($c, $obj, $new_file) = @_;
     my $files_root = $c->{'obj_db'}->get_files_root();
     if($files_root eq '') {
@@ -1985,7 +1991,7 @@ sub _object_move {
     if($c->stash->{action} eq 'movefile') {
         return unless Thruk::Utils::check_csrf($c);
         my $new_file = $c->req->parameters->{'newfile'};
-        my $file     = _get_context_file($c, $obj, $new_file);
+        my $file     = get_context_file($c, $obj, $new_file);
         if(defined $file and $c->{'obj_db'}->move_object($obj, $file)) {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' moved successfully' );
         }

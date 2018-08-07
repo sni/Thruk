@@ -155,7 +155,9 @@ sub _update_docs {
                 $content .= "|===========================================\n";
                 $content .= sprintf("|%-33s | %s\n", 'Attribute', 'Description');
                 for my $doc (@{$keys->{$url}->{$proto}}) {
-                    $content .= sprintf("|%-33s | %s\n", $doc->[0], ($doc->[1] || $attributes->{$url}->{$proto}->{$doc->[0]} || '' ));
+                    my $desc = ($doc->[1] || $attributes->{$url}->{$proto}->{$doc->[0]} || '' );
+                    printf(STDERR "WARNING: no documentation on url %s for attribute %s\n", $url, $doc->[0]);
+                    $content .= sprintf("|%-33s | %s\n", $doc->[0], $desc);
                 }
                 $content .= "|===========================================\n\n\n";
             }

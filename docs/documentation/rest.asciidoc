@@ -369,20 +369,20 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for
 
 === GET /commands/<name>/config
 
-returns configuration for given command
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#command
+Returns configuration for given command.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#command
 
 === POST /commands/<name>/config
 
-replace command configuration completely, use PATCH to only update specific attributes
+Replace command configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /commands/<name>/config
 
-update command configuration partially
+Update command configuration partially.
 
 === DELETE /commands/<name>/config
 
-deletes given command from configuration
+Deletes given command from configuration.
 
 === GET /comments
 
@@ -391,16 +391,16 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for
 
 === POST /config/check
 
-returns result from config check
+Returns result from config check.
 
 === GET /config/diff
 
-returns diff between filesystem and stashed config changes
+Returns differences between filesystem and stashed config changes.
 
 === POST /config/discard
 
-reverts stashed configuration changes.
-alias for /config/revert
+Reverts stashed configuration changes.
+Alias for /config/revert
 
 === GET /config/files
 
@@ -418,21 +418,55 @@ returns all config files
 |===========================================
 
 
+=== GET /config/objects
+
+Returns list of all objects.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|:FILE                             |
+|:ID                               |
+|:PEER_KEY                         |
+|:READONLY                         |
+|:TYPE                             |
+|command_line                      |
+|command_name                      |
+|===========================================
+
+
+=== POST /config/objects
+
+Create new object. Besides the actual object config, requires
+2 special paramters :FILE and :TYPE.
+
+=== POST /config/objects/<id>
+
+Replace object configuration completely.
+
+=== PATCH /config/objects/<id>
+
+Update object configuration partially.
+
+=== DELETE /config/objects/<id>
+
+Remove given object from configuration.
+
 === POST /config/reload
 
-reloads configuration with the configured reload command
+Reloads configuration with the configured reload command.
 
 === POST /config/revert
 
-reverts stashed configuration changes
+Reverts stashed configuration changes.
 
 === POST /config/save
 
-saves stashed config changes to disk
+Saves stashed configuration changes to disk.
 
 === DELETE /contact/<name>/config
 
-deletes given contact from configuration
+Deletes given contact from configuration.
 
 === GET /contactgroups
 
@@ -441,20 +475,20 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroup
 
 === GET /contactgroups/<name>/config
 
-returns configuration for given contactgroup
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contactgroup
+Returns configuration for given contactgroup.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contactgroup
 
 === POST /contactgroups/<name>/config
 
-replace contactgroup configuration completely, use PATCH to only update specific attributes
+Replace contactgroup configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /contactgroups/<name>/config
 
-update contactgroup configuration partially
+Update contactgroup configuration partially.
 
 === DELETE /contactgroups/<name>/config
 
-deletes given contactgroup from configuration
+Deletes given contactgroup from configuration.
 
 === GET /contacts
 
@@ -463,16 +497,16 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for
 
 === GET /contacts/<name>/config
 
-returns configuration for given contact
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contact
+Returns configuration for given contact.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contact
 
 === POST /contacts/<name>/config
 
-replace contact configuration completely, use PATCH to only update specific attributes
+Replace contact configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /contacts/<name>/config
 
-update contact configuration partially
+Update contact configuration partially.
 
 === GET /downtimes
 
@@ -486,20 +520,20 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups f
 
 === GET /hostgroups/<name>/config
 
-returns configuration for given hostgroup
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#hostgroup
+Returns configuration for given hostgroup.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#hostgroup
 
 === POST /hostgroups/<name>/config
 
-replace hostgroups configuration completely, use PATCH to only update specific attributes
+Replace hostgroups configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /hostgroups/<name>/config
 
-update hostgroup configuration partially
+Update hostgroup configuration partially.
 
 === DELETE /hostgroups/<name>/config
 
-deletes given hostgroup from configuration
+Deletes given hostgroup from configuration.
 
 === GET /hosts
 
@@ -519,20 +553,20 @@ alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
 
 === GET /hosts/<name>/config
 
-returns configuration for given host
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#host
+Returns configuration for given host.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#host
 
 === POST /hosts/<name>/config
 
-replace host configuration completely, use PATCH to only update specific attributes
+Replace host configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /hosts/<name>/config
 
-update host configuration partially
+Update host configuration partially.
 
 === DELETE /hosts/<name>/config
 
-deletes given host from configuration
+Deletes given host from configuration.
 
 === GET /hosts/<name>/notifications
 
@@ -673,20 +707,20 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroup
 
 === GET /servicegroups/<name>/config
 
-returns configuration for given servicegroup
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#servicegroup
+Returns configuration for given servicegroup.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#servicegroup
 
 === POST /servicegroups/<name>/config
 
-replace servicegroup configuration completely, use PATCH to only update specific attributes
+Replace servicegroup configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /servicegroups/<name>/config
 
-update servicegroup configuration partially
+Update servicegroup configuration partially.
 
 === DELETE /servicegroups/<name>/config
 
-deletes given servicegroup from configuration
+Deletes given servicegroup from configuration.
 
 === GET /services
 
@@ -701,20 +735,20 @@ alias for /services?host_name=<host_name>&description=<service>
 
 === GET /services/<host_name>/<service>/config
 
-returns configuration for given service
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
+Returns configuration for given service.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
 
 === POST /services/<host_name>/<service>/config
 
-replace service configuration completely, use PATCH to only update specific attributes
+Replace service configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /services/<host_name>/<service>/config
 
-update service configuration partially
+Update service configuration partially.
 
 === DELETE /services/<host_name>/<service>/config
 
-deletes given service from configuration
+Deletes given service from configuration.
 
 === GET /services/stats
 
@@ -1063,18 +1097,18 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods 
 
 === GET /timeperiods/<name>/config
 
-returns configuration for given timeperiod
-you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#timeperiod
+Returns configuration for given timeperiod.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#timeperiod
 
 === POST /timeperiods/<name>/config
 
-replace timeperiod configuration completely, use PATCH to only update specific attributes
+Replace timeperiod configuration completely, use PATCH to only update specific attributes.
 
 === PATCH /timeperiods/<name>/config
 
-update timeperiods configuration partially
+Update timeperiods configuration partially.
 
 === DELETE /timeperiods/<name>/config
 
-deletes given timeperiod from configuration
+Deletes given timeperiod from configuration.
 

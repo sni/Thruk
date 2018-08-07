@@ -52,123 +52,123 @@ sub _rest_get_config_files {
 
 ##########################################################
 # REST PATH: GET /hosts/<name>/config
-# returns configuration for given host
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#host
+# Returns configuration for given host.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#host
 
 ##########################################################
 # REST PATH: POST /hosts/<name>/config
-# replace host configuration completely, use PATCH to only update specific attributes
+# Replace host configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /hosts/<name>/config
-# update host configuration partially
+# Update host configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /hosts/<name>/config
-# deletes given host from configuration
+# Deletes given host from configuration.
 
 ##########################################################
 # REST PATH: GET /hostgroups/<name>/config
-# returns configuration for given hostgroup
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#hostgroup
+# Returns configuration for given hostgroup.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#hostgroup
 
 ##########################################################
 # REST PATH: POST /hostgroups/<name>/config
-# replace hostgroups configuration completely, use PATCH to only update specific attributes
+# Replace hostgroups configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /hostgroups/<name>/config
-# update hostgroup configuration partially
+# Update hostgroup configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /hostgroups/<name>/config
-# deletes given hostgroup from configuration
+# Deletes given hostgroup from configuration.
 
 ##########################################################
 # REST PATH: GET /servicegroups/<name>/config
-# returns configuration for given servicegroup
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#servicegroup
+# Returns configuration for given servicegroup.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#servicegroup
 
 ##########################################################
 # REST PATH: POST /servicegroups/<name>/config
-# replace servicegroup configuration completely, use PATCH to only update specific attributes
+# Replace servicegroup configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /servicegroups/<name>/config
-# update servicegroup configuration partially
+# Update servicegroup configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /servicegroups/<name>/config
-# deletes given servicegroup from configuration
+# Deletes given servicegroup from configuration.
 
 ##########################################################
 # REST PATH: GET /contacts/<name>/config
-# returns configuration for given contact
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contact
+# Returns configuration for given contact.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contact
 
 ##########################################################
 # REST PATH: POST /contacts/<name>/config
-# replace contact configuration completely, use PATCH to only update specific attributes
+# Replace contact configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /contacts/<name>/config
-# update contact configuration partially
+# Update contact configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /contact/<name>/config
-# deletes given contact from configuration
+# Deletes given contact from configuration.
 
 ##########################################################
 # REST PATH: GET /contactgroups/<name>/config
-# returns configuration for given contactgroup
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contactgroup
+# Returns configuration for given contactgroup.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contactgroup
 
 ##########################################################
 # REST PATH: POST /contactgroups/<name>/config
-# replace contactgroup configuration completely, use PATCH to only update specific attributes
+# Replace contactgroup configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /contactgroups/<name>/config
-# update contactgroup configuration partially
+# Update contactgroup configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /contactgroups/<name>/config
-# deletes given contactgroup from configuration
+# Deletes given contactgroup from configuration.
 
 ##########################################################
 # REST PATH: GET /timeperiods/<name>/config
-# returns configuration for given timeperiod
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#timeperiod
+# Returns configuration for given timeperiod.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#timeperiod
 
 ##########################################################
 # REST PATH: POST /timeperiods/<name>/config
-# replace timeperiod configuration completely, use PATCH to only update specific attributes
+# Replace timeperiod configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /timeperiods/<name>/config
-# update timeperiods configuration partially
+# Update timeperiods configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /timeperiods/<name>/config
-# deletes given timeperiod from configuration
+# Deletes given timeperiod from configuration.
 
 ##########################################################
 # REST PATH: GET /commands/<name>/config
-# returns configuration for given command
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#command
+# Returns configuration for given command.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#command
 
 ##########################################################
 # REST PATH: POST /commands/<name>/config
-# replace command configuration completely, use PATCH to only update specific attributes
+# Replace command configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /commands/<name>/config
-# update command configuration partially
+# Update command configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /commands/<name>/config
-# deletes given command from configuration
-Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH','POST'], qr%^/(host|hostgroup|servicegroup|timeperiod|contact|contactgroup|command|)s?/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
+# Deletes given command from configuration.
+Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH','POST', 'PUT'], qr%^/(host|hostgroup|servicegroup|timeperiod|contact|contactgroup|command|)s?/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
 sub _rest_get_config {
     my($c, undef, $type, $name, $name2) = @_;
     my $live = [];
@@ -202,86 +202,142 @@ sub _rest_get_config {
         next unless $objs;
         my $obj_model_changed = 0;
         for my $o (@{$objs}) {
-            if($method eq 'DELETE') {
-                next if $o->{'file'}->readonly();
-                $c->{'obj_db'}->delete_object($o);
-                $obj_model_changed = 1;
+            if(_update_object($c, $method, $o)) {
                 $changed++;
+                $obj_model_changed = 1;
                 next;
             }
-            if($method eq 'PATCH') {
-                $obj_model_changed = 1;
-                for my $key (sort keys %{$c->req->parameters}) {
-                    if(!defined $c->req->parameters->{$key} || $c->req->parameters->{$key} eq '') {
-                        delete $o->{'conf'}->{$key};
-                    } else {
-                        $o->{'conf'}->{$key} = $c->req->parameters->{$key};
-                    }
-                }
-                $c->{'obj_db'}->update_object($o, $o->{'conf'}, join("\n", @{$o->{'comments'}}));
-                $changed++;
-                next;
-            }
-            if($method eq 'POST') {
-                if(scalar keys %{$c->req->parameters} == 0) {
-                    return({
-                        'message'     => 'use DELETE to remove objects completely',
-                        'description' => 'using POST without parameters would remove the object, use the DELETE method instead.',
-                        'code'        => 400,
-                        'failed'      => Cpanel::JSON::XS::true,
-                    });
-                }
-                $obj_model_changed = 1;
-                my $conf = {};
-                for my $key (sort keys %{$c->req->parameters}) {
-                    if(defined $c->req->parameters->{$key}) {
-                        $conf->{$key} = $c->req->parameters->{$key};
-                    }
-                }
-                $c->{'obj_db'}->update_object($o, $conf, join("\n", @{$o->{'comments'}}));
-                $changed++;
-                next;
-            }
-            my $conf = dclone($o->{'conf'});
-            $conf->{'_FILE'}     = $o->{'file'}->{'path'}.':'.$o->{'line'};
-            $conf->{'_READONLY'} = 1 if $o->{'file'}->readonly();
-            $conf->{'peer_key'} = $l->{'peer_key'};
-            push @{$data}, $conf;
+            push @{$data}, _add_object($o, $peer_key);
         }
         if($obj_model_changed) {
             Thruk::Utils::Conf::store_model_retention($c, $peer_key);
         }
     }
-    if($method eq 'DELETE' || $method eq 'PATCH' || $method eq 'POST') {
+    if($method eq 'DELETE' || $method eq 'PATCH' || $method eq 'POST' || $method eq 'PUT') {
         return({
             'message'     => sprintf('%s %d objects successfully.', $method eq 'DELETE' ? 'removed' : 'changed', $changed),
             'count'       => $changed,
         });
     }
+
+    $c->req->parameters->{'sort'} = '.TYPE,.ID' unless $c->req->parameters->{'sort'};
     return($data);
 }
 
 ##########################################################
 # REST PATH: GET /services/<host_name>/<service>/config
-# returns configuration for given service
-# you will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
+# Returns configuration for given service.
+# You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
 
 ##########################################################
 # REST PATH: POST /services/<host_name>/<service>/config
-# replace service configuration completely, use PATCH to only update specific attributes
+# Replace service configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
 # REST PATH: PATCH /services/<host_name>/<service>/config
-# update service configuration partially
+# Update service configuration partially.
 
 ##########################################################
 # REST PATH: DELETE /services/<host_name>/<service>/config
-# deletes given service from configuration
-Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH', 'POST'], qr%^/(service)s?/([^/]+)/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
+# Deletes given service from configuration.
+Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH', 'POST', 'PUT'], qr%^/(service)s?/([^/]+)/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
+
+##########################################################
+# REST PATH: GET /config/objects
+# Returns list of all objects.
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/objects?$%mx, \&_rest_get_config_objects, ["admin"]);
+sub _rest_get_config_objects {
+    my($c) = @_;
+    my($backends) = $c->{'db'}->select_backends("get_");
+    my $data = [];
+    for my $peer_key (@{$backends}) {
+        _set_object_model($c, $peer_key) || next;
+        my $objs = $c->{'obj_db'}->get_objects();
+        for my $o (@{$objs}) {
+            push @{$data}, _add_object($o, $peer_key);
+        }
+    }
+    $c->req->parameters->{'sort'} = '.TYPE,.ID' unless $c->req->parameters->{'sort'};
+    return($data);
+}
+
+##########################################################
+# REST PATH: POST /config/objects
+# Create new object. Besides the actual object config, requires
+# 2 special paramters :FILE and :TYPE.
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/objects?$%mx, \&_rest_get_config_objects_new, ["admin"]);
+sub _rest_get_config_objects_new {
+    my($c) = @_;
+    my($backends) = $c->{'db'}->select_backends("get_");
+    my $type      = delete $c->req->parameters->{':TYPE'};
+    my $new_file  = delete $c->req->parameters->{':FILE'};
+    my $created   = 0;
+    if(!$type) {
+        return({
+            'message'     => ':TYPE is a required parameter.',
+            'code'        => 400,
+        });
+    }
+    if(!$new_file) {
+        return({
+            'message'     => ':FILE is a required parameter.',
+            'code'        => 400,
+        });
+    }
+    my $objs = [];
+    for my $peer_key (@{$backends}) {
+        _set_object_model($c, $peer_key) || next;
+        my $obj = Monitoring::Config::Object->new( type     => $type,
+                                                   coretype => $c->{'obj_db'}->{'coretype'},
+                                              );
+        my $file = Thruk::Controller::conf::get_context_file($c, $obj, $new_file);
+        next unless $file;
+        $obj->set_file($file);
+        $obj->set_uniq_id($c->{'obj_db'});
+        if($c->{'obj_db'}->update_object($obj, \%{$c->req->parameters}, "", 1)) {
+            $created++;
+            Thruk::Utils::Conf::store_model_retention($c, $peer_key);
+            push @{$objs}, _add_object($obj, $peer_key);
+        }
+    }
+    return({
+        'message' => sprintf('created %d objects successfully.', $created),
+        'count'   => $created,
+        'objects' => $objs,
+    });
+}
+
+##########################################################
+# REST PATH: PATCH /config/objects/<id>
+# Update object configuration partially.
+# REST PATH: POST /config/objects/<id>
+# Replace object configuration completely.
+# REST PATH: DELETE /config/objects/<id>
+# Remove given object from configuration.
+Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE', 'POST', 'PUT', 'PATCH'], qr%^/config/objects?/([^/]+)$%mx, \&_rest_get_config_objects_update, ["admin"]);
+sub _rest_get_config_objects_update {
+    my($c, undef, $id) = @_;
+    my($backends) = $c->{'db'}->select_backends("get_");
+    my $changed = 0;
+    my $method = $c->req->method();
+    for my $peer_key (@{$backends}) {
+        _set_object_model($c, $peer_key) || next;
+        my $obj = $c->{'obj_db'}->get_object_by_id($id);
+        next unless $obj;
+        if(_update_object($c, $method, $obj)) {
+            $changed++;
+            Thruk::Utils::Conf::store_model_retention($c, $peer_key);
+        }
+    }
+    return({
+        'message'     => sprintf('%s %d objects successfully.', $method eq 'DELETE' ? 'removed' : 'changed', $changed),
+        'count'       => $changed,
+    });
+}
 
 ##########################################################
 # REST PATH: GET /config/diff
-# returns diff between filesystem and stashed config changes
+# Returns differences between filesystem and stashed config changes.
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/diff$%mx, \&_rest_get_config_diff, ["admin"]);
 sub _rest_get_config_diff {
     my($c) = @_;
@@ -303,7 +359,7 @@ sub _rest_get_config_diff {
 
 ##########################################################
 # REST PATH: POST /config/check
-# returns result from config check
+# Returns result from config check.
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/check$%mx, \&_rest_get_config_check, ["admin"]);
 sub _rest_get_config_check {
     my($c) = @_;
@@ -341,7 +397,7 @@ sub _rest_get_config_check {
 
 ##########################################################
 # REST PATH: POST /config/save
-# saves stashed config changes to disk
+# Saves stashed configuration changes to disk.
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/save$%mx, \&_rest_get_config_save, ["admin"]);
 sub _rest_get_config_save {
     my($c) = @_;
@@ -362,7 +418,7 @@ sub _rest_get_config_save {
 
 ##########################################################
 # REST PATH: POST /config/reload
-# reloads configuration with the configured reload command
+# Reloads configuration with the configured reload command.
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/reload$%mx, \&_rest_get_config_reload, ["admin"]);
 sub _rest_get_config_reload {
     my($c) = @_;
@@ -400,13 +456,13 @@ sub _rest_get_config_reload {
 
 ##########################################################
 # REST PATH: POST /config/revert
-# reverts stashed configuration changes
+# Reverts stashed configuration changes.
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/revert$%mx, \&_rest_get_config_revert, ["admin"]);
 
 ##########################################################
 # REST PATH: POST /config/discard
-# reverts stashed configuration changes.
-# alias for /config/revert
+# Reverts stashed configuration changes.
+# Alias for /config/revert
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/discard$%mx, \&_rest_get_config_revert, ["admin"]);
 sub _rest_get_config_revert {
     my($c) = @_;
@@ -433,6 +489,57 @@ sub _set_object_model {
     delete $c->req->parameters->{'refreshdata'};
     return 1 if $c->{'obj_db'};
     return;
+}
+##########################################################
+sub _add_object {
+    my($o, $peer_key) = @_;
+    my $conf = dclone($o->{'conf'});
+    $conf->{':ID'}       = $o->{'id'};
+    $conf->{':TYPE'}     = $o->{'type'};
+    $conf->{':FILE'}     = $o->{'file'}->{'path'}.':'.$o->{'line'};
+    $conf->{':READONLY'} = $o->{'file'}->readonly() ? 1 : 0;
+    $conf->{':PEER_KEY'} = $peer_key;
+    return($conf);
+}
+
+##########################################################
+sub _update_object {
+    my($c, $method, $o) = @_;
+    my $changed = 0;
+    if($method eq 'DELETE') {
+        next if $o->{'file'}->readonly();
+        $c->{'obj_db'}->delete_object($o);
+        $changed++;
+    }
+    elsif($method eq 'PATCH') {
+        for my $key (sort keys %{$c->req->parameters}) {
+            if(!defined $c->req->parameters->{$key} || $c->req->parameters->{$key} eq '') {
+                delete $o->{'conf'}->{$key};
+            } else {
+                $o->{'conf'}->{$key} = $c->req->parameters->{$key};
+            }
+        }
+        $c->{'obj_db'}->update_object($o, $o->{'conf'}, join("\n", @{$o->{'comments'}}));
+        $changed++;
+    }
+    elsif($method eq 'POST') {
+        if(scalar keys %{$c->req->parameters} == 0) {
+            return({
+                'message'     => 'use DELETE to remove objects completely',
+                'description' => 'using POST without parameters would remove the object, use the DELETE method instead.',
+                'code'        => 400,
+            });
+        }
+        my $conf = {};
+        for my $key (sort keys %{$c->req->parameters}) {
+            if(defined $c->req->parameters->{$key}) {
+                $conf->{$key} = $c->req->parameters->{$key};
+            }
+        }
+        $c->{'obj_db'}->update_object($o, $conf, join("\n", @{$o->{'comments'}}));
+        $changed++;
+    }
+    return($changed);
 }
 ##########################################################
 
