@@ -17,39 +17,29 @@ Thruk Controller
 
 ##########################################################
 # REST PATH: GET /thruk/panorama
-# lists panorama dashboards.
+# lists all panorama dashboards.
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/panorama$%mx, \&_rest_get_thruk_panorama);
 sub _rest_get_thruk_panorama {
-    my($c, $path_info) = @_;
+    my($c, undef, $id) = @_;
     require Thruk::Utils::Panorama;
 
-    my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all');
     my $data = [];
-    my @exposed_keys = qw/nr name user/;
+    my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all');
     for my $d (@{$dashboards}) {
-        my $exposed = {};
-        for my $key (@exposed_keys) {
-            $exposed->{$key} = $d->{$key};
-        }
-        push @{$data}, $exposed;
+        my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $d->{'nr'});
+        push @{$data}, $dashboard;
+    }
+    if($id && scalar @{$data} == 0) {
+        return({ 'message' => 'no such dashboard', code => 404 });
     }
     return $data;
 }
 
 ##########################################################
 # REST PATH: GET /thruk/panorama/<nr>
-# panorama dashboards for given number.
-Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/panorama/(\d+)$%mx, \&_rest_get_thruk_panorama_by_id);
-sub _rest_get_thruk_panorama_by_id {
-    my($c, $path_info, $nr) = @_;
-    require Thruk::Utils::Panorama;
-
-    my $data = Thruk::Utils::Panorama::load_dashboard($c, $nr);
-    if(!$data) {
-        return({ 'message' => 'no such dashboard', code => 404 });
-    }
-    return $data;
-}
+# returns panorama dashboard for given number.
+# alias for /thruk/panorama?nr=<nr>
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/panorama/(\d+)$%mx, \&_rest_get_thruk_panorama);
 
 ##########################################################
 

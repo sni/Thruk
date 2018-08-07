@@ -158,7 +158,10 @@ sub _update_docs {
                 $content .= sprintf("|%-33s | %s\n", 'Attribute', 'Description');
                 for my $doc (@{$keys->{$url}->{$proto}}) {
                     my $desc = ($doc->[1] || $attributes->{$url}->{$proto}->{$doc->[0]} || '' );
-                    printf(STDERR "WARNING: no documentation on url %s for attribute %s\n", $url, $doc->[0]);
+                    if(!$desc && $doc->[0] eq 'peer_key') {
+                        $desc = "backend id when having multiple sites connected";
+                    }
+                    printf(STDERR "WARNING: no documentation on url %s for attribute %s\n", $url, $doc->[0]) unless $desc;
                     $content .= sprintf("|%-33s | %s\n", $doc->[0], $desc);
                 }
                 $content .= "|===========================================\n\n\n";
@@ -203,6 +206,7 @@ sub _fetch_keys {
     my $data = Thruk::Controller::rest_v1::_process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {
         for my $k (sort keys %{$data->[0]}) {
+            next if $k =~ m/^tabpan/mx;
             push @{$keys}, [$k, ""];
         }
     }

@@ -283,82 +283,82 @@ lists host / service check statistics.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|hosts_active_15_perc              |
-|hosts_active_15_sum               |
-|hosts_active_1_perc               |
-|hosts_active_1_sum                |
-|hosts_active_5_perc               |
-|hosts_active_5_sum                |
-|hosts_active_60_perc              |
-|hosts_active_60_sum               |
-|hosts_active_all_perc             |
-|hosts_active_all_sum              |
-|hosts_active_state_change_avg     |
-|hosts_active_state_change_max     |
-|hosts_active_state_change_min     |
-|hosts_active_state_change_sum     |
-|hosts_active_sum                  |
-|hosts_execution_time_avg          |
-|hosts_execution_time_max          |
-|hosts_execution_time_min          |
-|hosts_execution_time_sum          |
-|hosts_latency_avg                 |
-|hosts_latency_max                 |
-|hosts_latency_min                 |
-|hosts_latency_sum                 |
-|hosts_passive_15_perc             |
-|hosts_passive_15_sum              |
-|hosts_passive_1_perc              |
-|hosts_passive_1_sum               |
-|hosts_passive_5_perc              |
-|hosts_passive_5_sum               |
-|hosts_passive_60_perc             |
-|hosts_passive_60_sum              |
-|hosts_passive_all_perc            |
-|hosts_passive_all_sum             |
-|hosts_passive_state_change_avg    |
-|hosts_passive_state_change_max    |
-|hosts_passive_state_change_min    |
-|hosts_passive_state_change_sum    |
-|hosts_passive_sum                 |
-|services_active_15_perc           |
-|services_active_15_sum            |
-|services_active_1_perc            |
-|services_active_1_sum             |
-|services_active_5_perc            |
-|services_active_5_sum             |
-|services_active_60_perc           |
-|services_active_60_sum            |
-|services_active_all_perc          |
-|services_active_all_sum           |
-|services_active_state_change_avg  |
-|services_active_state_change_max  |
-|services_active_state_change_min  |
-|services_active_state_change_sum  |
-|services_active_sum               |
-|services_execution_time_avg       |
-|services_execution_time_max       |
-|services_execution_time_min       |
-|services_execution_time_sum       |
-|services_latency_avg              |
-|services_latency_max              |
-|services_latency_min              |
-|services_latency_sum              |
-|services_passive_15_perc          |
-|services_passive_15_sum           |
-|services_passive_1_perc           |
-|services_passive_1_sum            |
-|services_passive_5_perc           |
-|services_passive_5_sum            |
-|services_passive_60_perc          |
-|services_passive_60_sum           |
-|services_passive_all_perc         |
-|services_passive_all_sum          |
-|services_passive_state_change_avg |
-|services_passive_state_change_max |
-|services_passive_state_change_min |
-|services_passive_state_change_sum |
-|services_passive_sum              |
+|hosts_active_15_perc              | percent of active hosts during the last 15 minutes
+|hosts_active_15_sum               | amount of active hosts during the last 15 minutes
+|hosts_active_1_perc               | same for last minute
+|hosts_active_1_sum                | same for last minute
+|hosts_active_5_perc               | same for last 5 minutes
+|hosts_active_5_sum                | same for last 5 minutes
+|hosts_active_60_perc              | same for last 60 minutes
+|hosts_active_60_sum               | same for last 60 minutes
+|hosts_active_all_perc             | percent of total active hosts
+|hosts_active_all_sum              | amount of total active hosts
+|hosts_active_state_change_avg     | average percent state change
+|hosts_active_state_change_max     | maximum state change over all active hosts
+|hosts_active_state_change_min     | minimum state change over all active hosts
+|hosts_active_state_change_sum     | sum state change over all hosts
+|hosts_active_sum                  | number of active hosts
+|hosts_execution_time_avg          | average execution time over all hosts
+|hosts_execution_time_max          | maximum execution time over all hosts
+|hosts_execution_time_min          | minimum execution time over all hosts
+|hosts_execution_time_sum          | sum execution time over all hosts
+|hosts_latency_avg                 | host latency average
+|hosts_latency_max                 | minimum host latency
+|hosts_latency_min                 | minimum host latency
+|hosts_latency_sum                 | sum latency over all hosts
+|hosts_passive_15_perc             | percent of passive hosts during the last 15 minutes
+|hosts_passive_15_sum              | amount of passive hosts during the last 15 minutes
+|hosts_passive_1_perc              | same for last minute
+|hosts_passive_1_sum               | same for last minute
+|hosts_passive_5_perc              | same for last 5 minutes
+|hosts_passive_5_sum               | same for last 5 minutes
+|hosts_passive_60_perc             | same for last 60 minutes
+|hosts_passive_60_sum              | same for last 60 minutes
+|hosts_passive_all_perc            | percent of total passive hosts
+|hosts_passive_all_sum             | amount of total passive hosts
+|hosts_passive_state_change_avg    | average percent state change for passive hosts
+|hosts_passive_state_change_max    | maximum state change over all passive hosts
+|hosts_passive_state_change_min    | minimum state change over all passive hosts
+|hosts_passive_state_change_sum    | sum state change over all passive hosts
+|hosts_passive_sum                 | number of passive hosts
+|services_active_15_perc           | percent of active services during the last 15 minutes
+|services_active_15_sum            | amount of active services during the last 15 minutes
+|services_active_1_perc            | same for last minute
+|services_active_1_sum             | same for last minute
+|services_active_5_perc            | same for last 5 minutes
+|services_active_5_sum             | same for last 5 minutes
+|services_active_60_perc           | same for last 60 minutes
+|services_active_60_sum            | same for last 60 minutes
+|services_active_all_perc          | percent of total active services
+|services_active_all_sum           | amount of total active services
+|services_active_state_change_avg  | average percent state change
+|services_active_state_change_max  | maximum state change over all active services
+|services_active_state_change_min  | minimum state change over all active services
+|services_active_state_change_sum  | sum state change over all services
+|services_active_sum               | number of active services
+|services_execution_time_avg       | average execution time over all services
+|services_execution_time_max       | maximum execution time over all services
+|services_execution_time_min       | minimum execution time over all services
+|services_execution_time_sum       | sum execution time over all services
+|services_latency_avg              | services latency average
+|services_latency_max              | minimum services latency
+|services_latency_min              | minimum services latency
+|services_latency_sum              | sum latency over all services
+|services_passive_15_perc          | percent of passive services during the last 15 minutes
+|services_passive_15_sum           | amount of passive services during the last 15 minutes
+|services_passive_1_perc           | same for last minute
+|services_passive_1_sum            | same for last minute
+|services_passive_5_perc           | same for last 5 minutes
+|services_passive_5_sum            | same for last 5 minutes
+|services_passive_60_perc          | same for last 60 minutes
+|services_passive_60_sum           | same for last 60 minutes
+|services_passive_all_perc         | percent of total passive services
+|services_passive_all_sum          | amount of total passive services
+|services_passive_state_change_avg | average percent state change for passive services
+|services_passive_state_change_max | maximum state change over all passive services
+|services_passive_state_change_min | minimum state change over all passive services
+|services_passive_state_change_sum | sum state change over all passive services
+|services_passive_sum              | number of passive services
 |===========================================
 
 
@@ -400,9 +400,9 @@ Returns differences between filesystem and stashed config changes.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|file                              |
-|output                            |
-|peer_key                          |
+|file                              | file name of changed file
+|output                            | diff output
+|peer_key                          | backend id when having multiple sites connected
 |===========================================
 
 
@@ -418,12 +418,12 @@ returns all config files
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|content                           |
-|md5                               |
-|mtime                             |
-|path                              |
-|peer_key                          |
-|readonly                          |
+|content                           | raw file content
+|md5                               | md5 checksum
+|mtime                             | unix timestamp of last modification
+|path                              | filesystem path
+|peer_key                          | backend id when having multiple sites connected
+|readonly                          | readonly flag
 |===========================================
 
 
@@ -592,40 +592,40 @@ hash of livestatus host statistics.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|active_checks_disabled_active     |
-|active_checks_disabled_passive    |
-|down                              |
-|down_and_ack                      |
-|down_and_disabled_active          |
-|down_and_disabled_passive         |
-|down_and_scheduled                |
-|down_and_unhandled                |
-|eventhandler_disabled             |
-|flapping                          |
-|flapping_disabled                 |
-|notifications_disabled            |
-|outages                           |
-|passive_checks_disabled           |
-|pending                           |
-|pending_and_disabled              |
-|pending_and_scheduled             |
-|plain_down                        |
-|plain_pending                     |
-|plain_unreachable                 |
-|plain_up                          |
-|total                             |
-|total_active                      |
-|total_passive                     |
-|unreachable                       |
-|unreachable_and_ack               |
-|unreachable_and_disabled_active   |
-|unreachable_and_disabled_passive  |
-|unreachable_and_scheduled         |
-|unreachable_and_unhandled         |
-|up                                |
-|up_and_disabled_active            |
-|up_and_disabled_passive           |
-|up_and_scheduled                  |
+|active_checks_disabled_active     | number of active hosts which have active checks disabled
+|active_checks_disabled_passive    | number of passive hosts which have active checks disabled
+|down                              | number of down hosts
+|down_and_ack                      | number of down hosts which are acknowledged
+|down_and_disabled_active          | number of active down hosts which have active checks disabled
+|down_and_disabled_passive         | number of passive down hosts which have active checks disabled
+|down_and_scheduled                | number of down hosts which are in a scheduled downtime
+|down_and_unhandled                | number of unhandled down hosts
+|eventhandler_disabled             | number of hosts with eventhandlers disabled
+|flapping                          | number of flapping hosts
+|flapping_disabled                 | number of hosts with flapping detection disabled
+|notifications_disabled            | number of hosts with notifications disabled
+|outages                           | number of network outages
+|passive_checks_disabled           | number of hosts which do not accept passive check results
+|pending                           | number of pending hosts
+|pending_and_disabled              | number of pending hosts with active checks disabled
+|pending_and_scheduled             | number of pending hosts which are in a scheduled downtime
+|plain_down                        | number of down hosts which are not acknowleded or in a downtime
+|plain_pending                     | number of pending hosts which are not acknowleded or in a downtime
+|plain_unreachable                 | number of unreachable hosts which are not acknowleded or in a downtime
+|plain_up                          | number of up hosts which are not acknowleded or in a downtime
+|total                             | total number of hosts
+|total_active                      | total number of active hosts
+|total_passive                     | total number of passive hosts
+|unreachable                       | number of unreachable hosts
+|unreachable_and_ack               | number of unreachable hosts which are acknowledged
+|unreachable_and_disabled_active   | number of active unreachable hosts which have active checks disabled
+|unreachable_and_disabled_passive  | number of passive unreachable hosts which have active checks disabled
+|unreachable_and_scheduled         | number of unreachable hosts which are in a scheduled downtime
+|unreachable_and_unhandled         | number of unhandled unreachable hosts
+|up                                | number of up hosts
+|up_and_disabled_active            | number of active up hosts which have active checks disabled
+|up_and_disabled_passive           | number of passive up hosts which have active checks disabled
+|up_and_scheduled                  | number of up hosts which are in a scheduled downtime
 |===========================================
 
 
@@ -637,13 +637,13 @@ its basically a reduced set of /hosts/stats.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|down                              |
-|down_and_unhandled                |
-|pending                           |
-|total                             |
-|unreachable                       |
-|unreachable_and_unhandled         |
-|up                                |
+|down                              | number of down hosts
+|down_and_unhandled                | number of down hosts which are neither acknowledged nor in scheduled downtime
+|pending                           | number of pending hosts
+|total                             | total number of hosts
+|unreachable                       | number of unreachable hosts
+|unreachable_and_unhandled         | number of unreachable hosts which are neither acknowledged nor in scheduled downtime
+|up                                | number of up hosts
 |===========================================
 
 
@@ -654,9 +654,9 @@ lists all available rest urls.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|description                       |
-|protocol                          |
-|url                               |
+|description                       | description of the url
+|protocol                          | protocol to use for this url
+|url                               | the rest url
 |===========================================
 
 
@@ -667,23 +667,23 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|addr                              |
-|bytes_received                    |
-|bytes_send                        |
-|idling                            |
-|key                               |
-|last_error                        |
-|last_online                       |
-|last_query                        |
-|last_update                       |
-|name                              |
-|parent                            |
-|peer_key                          |
-|peer_name                         |
-|queries                           |
-|response_time                     |
-|section                           |
-|status                            |
+|addr                              | address of the remote site
+|bytes_received                    | total bytes received from this site
+|bytes_send                        | total bytes send to this site
+|idling                            | flag if the connection is in idle mode
+|key                               | primary id of this site
+|last_error                        | last error message
+|last_online                       | timestamp when the site was last time online
+|last_query                        | timestamp of the last received query for this site
+|last_update                       | timestamp of the last update
+|name                              | name of the site
+|parent                            | parent id for lmd federation setups
+|peer_key                          | same as `key`
+|peer_name                         | same as `name`
+|queries                           | number of queries received
+|response_time                     | response time in seconds
+|section                           | thruks section
+|status                            | connection status of this site
 |===========================================
 
 
@@ -764,49 +764,49 @@ livestatus service statistics.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|active_checks_disabled_active     |
-|active_checks_disabled_passive    |
-|critical                          |
-|critical_and_ack                  |
-|critical_and_disabled_active      |
-|critical_and_disabled_passive     |
-|critical_and_scheduled            |
-|critical_and_unhandled            |
-|critical_on_down_host             |
-|eventhandler_disabled             |
-|flapping                          |
-|flapping_disabled                 |
-|notifications_disabled            |
-|ok                                |
-|ok_and_disabled_active            |
-|ok_and_disabled_passive           |
-|ok_and_scheduled                  |
-|passive_checks_disabled           |
-|pending                           |
-|pending_and_disabled              |
-|pending_and_scheduled             |
-|plain_critical                    |
-|plain_ok                          |
-|plain_pending                     |
-|plain_unknown                     |
-|plain_warning                     |
-|total                             |
-|total_active                      |
-|total_passive                     |
-|unknown                           |
-|unknown_and_ack                   |
-|unknown_and_disabled_active       |
-|unknown_and_disabled_passive      |
-|unknown_and_scheduled             |
-|unknown_and_unhandled             |
-|unknown_on_down_host              |
-|warning                           |
-|warning_and_ack                   |
-|warning_and_disabled_active       |
-|warning_and_disabled_passive      |
-|warning_and_scheduled             |
-|warning_and_unhandled             |
-|warning_on_down_host              |
+|active_checks_disabled_active     | number of active services which have active checks disabled
+|active_checks_disabled_passive    | number of passive services which have active checks disabled
+|critical                          | number of critical services
+|critical_and_ack                  | number of critical services which are acknowledged
+|critical_and_disabled_active      | number of active critical services which have active checks disabled
+|critical_and_disabled_passive     | number of passive critical services which have active checks disabled
+|critical_and_scheduled            | number of critical services which are in a scheduled downtime
+|critical_and_unhandled            | number of unhandled critical services
+|critical_on_down_host             | number of unhandled critical services on down hosts
+|eventhandler_disabled             | number of services with eventhandlers disabled
+|flapping                          | number of flapping services
+|flapping_disabled                 | number of services with flapping detection disabled
+|notifications_disabled            | number of services with notifications disabled
+|ok                                | number of ok services
+|ok_and_disabled_active            | number of active ok services which have active checks disabled
+|ok_and_disabled_passive           | number of passive ok services which have active checks disabled
+|ok_and_scheduled                  | number of ok services which are in a scheduled downtime
+|passive_checks_disabled           | number of services which do not accept passive check results
+|pending                           | number of pending services
+|pending_and_disabled              | number of pending services with active checks disabled
+|pending_and_scheduled             | number of pending services which are in a scheduled downtime
+|plain_critical                    | number of critical services which are not acknowleded or in a downtime
+|plain_ok                          | number of ok services which are not acknowleded or in a downtime
+|plain_pending                     | number of pending services which are not acknowleded or in a downtime
+|plain_unknown                     | number of unknown services which are not acknowleded or in a downtime
+|plain_warning                     | number of warning services which are not acknowleded or in a downtime
+|total                             | total number of services
+|total_active                      | total number of active services
+|total_passive                     | total number of passive services
+|unknown                           | number of unknown services
+|unknown_and_ack                   | number of unknown services which are acknowledged
+|unknown_and_disabled_active       | number of active unknown services which have active checks disabled
+|unknown_and_disabled_passive      | number of passive unknown services which have active checks disabled
+|unknown_and_scheduled             | number of unknown services which are in a scheduled downtime
+|unknown_and_unhandled             | number of unhandled unknown services
+|unknown_on_down_host              | number of unhandled unknown services on down hosts
+|warning                           | number of warning services
+|warning_and_ack                   | number of warning services which are acknowledged
+|warning_and_disabled_active       | number of active warning services which have active checks disabled
+|warning_and_disabled_passive      | number of passive warning services which have active checks disabled
+|warning_and_scheduled             | number of warning services which are in a scheduled downtime
+|warning_and_unhandled             | number of unhandled warning services
+|warning_on_down_host              | number of unhandled warning services on down hosts
 |===========================================
 
 
@@ -818,15 +818,15 @@ its basically a reduced set of /services/stats.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|critical                          |
-|critical_and_unhandled            |
-|ok                                |
-|pending                           |
-|total                             |
-|unknown                           |
-|unknown_and_unhandled             |
-|warning                           |
-|warning_and_unhandled             |
+|critical                          | number of critical services
+|critical_and_unhandled            | number of critical services which are neither acknowledged nor in scheduled downtime
+|ok                                | number of ok services
+|pending                           | number of pending services
+|total                             | total number of services
+|unknown                           | number of unknown services
+|unknown_and_unhandled             | number of unknown services which are neither acknowledged nor in scheduled downtime
+|warning                           | number of warning services
+|warning_and_unhandled             | number of warning services which are neither acknowledged nor in scheduled downtime
 |===========================================
 
 
@@ -855,17 +855,17 @@ lists business processes.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|draft                             |
-|file                              |
-|id                                |
-|last_check                        |
-|last_state_change                 |
-|name                              |
-|state_type                        |
-|status                            |
-|status_text                       |
-|template                          |
-|time                              |
+|draft                             | flag wheter this business process is a draft or not
+|file                              | file name
+|id                                | primary id
+|last_check                        | timestamp of last check result submited
+|last_state_change                 | timestamp of last state change
+|name                              | name of this business proces
+|state_type                        | flag if this business process uses hard or soft state types
+|status                            | current status
+|status_text                       | current status text
+|template                          | naemon template used for the generated object
+|time                              | calculation duration
 |===========================================
 
 
@@ -876,18 +876,18 @@ business processes for given number.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|filter                            |
-|id                                |
-|last_check                        |
-|last_state_change                 |
-|name                              |
-|nodes                             |
-|rankDir                           |
-|state_type                        |
-|status                            |
-|status_text                       |
-|template                          |
-|time                              |
+|filter                            | list of enabled filters
+|id                                | primary id
+|last_check                        | timestamp of last check result submited
+|last_state_change                 | timestamp of last state change
+|name                              | name of this business process
+|nodes                             | all nodes of this business process
+|rankDir                           | flag wheter this business process is horizontal or vertical
+|state_type                        | flag if this business process uses hard or soft state types
+|status                            | current status
+|status_text                       | current status text
+|template                          | naemon template used for the generated object
+|time                              | calculation duration
 |===========================================
 
 
@@ -898,14 +898,14 @@ lists cluster nodes
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|hostname                          |
-|last_contact                      |
-|last_error                        |
-|last_update                       |
-|node_id                           |
-|node_url                          |
-|pids                              |
-|response_time                     |
+|hostname                          | host name of the cluster node
+|last_contact                      | timestamp of last successful contact
+|last_error                        | text of last error message
+|last_update                       | timestamp of last update
+|node_id                           | internal id for this node
+|node_url                          | url to access this node directly
+|pids                              | list of current process ids of this node
+|response_time                     | response time in seconds
 |===========================================
 
 
@@ -930,19 +930,19 @@ lists recurring downtimes.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|backends                          |
-|childoptions                      |
-|comment                           |
-|duration                          |
-|file                              |
-|fixed                             |
-|flex_range                        |
-|host                              |
-|hostgroup                         |
-|schedule                          |
-|service                           |
-|servicegroup                      |
-|target                            |
+|backends                          | list of backends this downtime is used for
+|childoptions                      | flag used for the downtime command
+|comment                           | comment used for the downtime command
+|duration                          | duration in minutes
+|file                              | file number
+|fixed                             | flag whether this should create a fixed downtime
+|flex_range                        | range in minutes for flexible downtimes
+|host                              | list of hostnames
+|hostgroup                         | list of hostgroups
+|schedule                          | list of schedules
+|service                           | list of services
+|servicegroup                      | list of servicegroups
+|target                            | sets the type of the downtime, ex. host or hostgroup
 |===========================================
 
 
@@ -953,23 +953,23 @@ lists thruk jobs.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|cmd                               |
-|end                               |
-|forward                           |
-|host_id                           |
-|host_name                         |
-|id                                |
-|is_running                        |
-|message                           |
-|percent                           |
-|pid                               |
-|rc                                |
-|remaining                         |
-|start                             |
-|stderr                            |
-|stdout                            |
-|time                              |
-|user                              |
+|cmd                               | the executed command line or perl code
+|end                               | timestamp when the job finished
+|forward                           | url to forward when the job is done
+|host_id                           | thruk node id this job is run on
+|host_name                         | hostname of the node
+|id                                | job id
+|is_running                        | flag whether the job is still running
+|message                           | current status text
+|percent                           | percent of completion
+|pid                               | process id
+|rc                                | return code
+|remaining                         | remaining seconds for the job to complete
+|start                             | timestamp when the job started
+|stderr                            | stderr output
+|stdout                            | stdout output
+|time                              | duration in seconds
+|user                              | username of the owner
 |===========================================
 
 
@@ -980,37 +980,28 @@ alias for /thruk/jobs?id=<id>
 
 === GET /thruk/panorama
 
-lists panorama dashboards.
+lists all panorama dashboards.
 
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|name                              |
-|nr                                |
-|user                              |
+|file                              | filename of the dashboard
+|file_version                      | version of dashboard format
+|id                                | internal id
+|nr                                | number of the dashboard
+|objects                           | number of objects
+|readonly                          | flag whether this dashboard is read-only
+|scripted                          | flag whether this is a scripted dashboard
+|tab                               | structure of global dashboard settings
+|ts                                | timestamp of last modification
+|user                              | owner of this dashboard
 |===========================================
 
 
 === GET /thruk/panorama/<nr>
 
-panorama dashboards for given number.
-
-[options="header"]
-|===========================================
-|Attribute                         | Description
-|file                              |
-|file_version                      |
-|id                                |
-|nr                                |
-|objects                           |
-|readonly                          |
-|scripted                          |
-|tab                               |
-|tabpan-tab_1_panlet_1             |
-|ts                                |
-|user                              |
-|===========================================
-
+returns panorama dashboard for given number.
+alias for /thruk/panorama?nr=<nr>
 
 === GET /thruk/reports
 
@@ -1019,19 +1010,19 @@ list of reports.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|backends                          |
-|cc                                |
-|desc                              |
-|failed                            |
-|is_public                         |
-|name                              |
-|nr                                |
-|params                            |
-|readonly                          |
-|send_types                        |
-|template                          |
-|to                                |
-|user                              |
+|backends                          | list of backends used in this report
+|cc                                | email cc address if this report is send by mail
+|desc                              | report description
+|failed                            | flag wheter the report failed to generate last time
+|is_public                         | flag wheter the report is public or not
+|name                              | name of the report
+|nr                                | number of the report
+|params                            | reporting parameters
+|readonly                          | flag wheter the report is read-only
+|send_types                        | list of cron entries
+|template                          | template of the report
+|to                                | email to address if this report is send by mail
+|user                              | owner
 |===========================================
 
 
@@ -1085,10 +1076,10 @@ lists thruk sessions.
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|active                            |
-|address                           |
-|id                                |
-|user                              |
+|active                            | timestamp when session was last time used
+|address                           | remote address of user
+|id                                | session id
+|user                              | username
 |===========================================
 
 
