@@ -812,13 +812,13 @@ sub _request {
 
     my $request;
     if($post) {
-        $method = 'GET' unless $method;
+        $method = 'POST' unless $method;
         $method = uc($method);
         $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
         $request = POST($url, {});
         $request->method(uc($method));
-        $request->header('Content-Type' => 'application/json');
-        $request->content(encode_json($post));
+        $request->header('Content-Type' => 'application/json; charset=utf-8');
+        $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
     } else {
         $method = 'GET' unless $method;
@@ -871,8 +871,8 @@ sub _external_request {
         $method = 'POST' unless $method;
         my $request = POST($url, {});
         $request->method(uc($method));
-        $request->header('Content-Type' => 'application/json');
-        $request->content(encode_json($post));
+        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
         $req = $ua->request($request);
     } else {

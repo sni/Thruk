@@ -74,7 +74,7 @@ sub new {
     $self->stats->enable();
 
     # parse json body parameters
-    if($self->req->content_type && $self->req->content_type eq 'application/json') {
+    if($self->req->content_type && $self->req->content_type =~ m%^application/json%mx) {
         my $raw = $self->req->raw_body;
         if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mx) {
             my $data;
