@@ -635,7 +635,9 @@ sub merge_deep {
 # returns true if $var is a hash
 sub _is_hash {
     my($o) = @_;
+    # normal hash ref
     return 1 if(ref $o eq 'HASH');
+    # blessed objects
     return 1 if(UNIVERSAL::isa($o, 'HASH'));
     return 0;
 }
