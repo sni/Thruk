@@ -875,10 +875,26 @@ lists business processes.
 |===========================================
 
 
+=== POST /thruk/bp
+
+create new business process.
+
 === GET /thruk/bp/<nr>
 
 business processes for given number.
 alias for /thruk/bp?id=<nr>
+
+=== POST /thruk/bp/<nr>
+
+update business processes configuration for given number.
+
+=== PATCH /thruk/bp/<nr>
+
+update business processes configuration partially for given number.
+
+=== DELETE /thruk/bp/<nr>
+
+remove business processes for given number.
 
 === GET /thruk/cluster
 

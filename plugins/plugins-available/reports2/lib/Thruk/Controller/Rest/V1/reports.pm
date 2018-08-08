@@ -70,7 +70,7 @@ sub _rest_get_thruk_report_by_id {
 
     my $method = $c->req->method();
     if($method eq 'PATCH') {
-        Thruk::Utils::IO::merge_deep_hash($reports->[0], $c->req->parameters);
+        Thruk::Utils::IO::merge_deep($reports->[0], $c->req->parameters);
         if(Thruk::Utils::Reports::report_save($c, $nr, $reports->[0])) {
             return({
                 'message' => 'successfully saved 1 report.',
