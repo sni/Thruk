@@ -581,15 +581,14 @@ merge will be as follows:
 =cut
 sub merge_deep {
     my($var, $merge) = @_;
-
-    if(ref $var eq 'HASH' && ref $merge eq 'HASH') {
+    if(_is_hash($var) && _is_hash($merge)) {
         for my $key (keys %{$merge}) {
             if(!defined $merge->{$key}) {
                 delete $var->{$key};
             }
             elsif(!defined $var->{$key}) {
                 # remove all undefined values from $merge
-                if(ref $merge->{$key} eq 'HASH') {
+                if(_is_hash($merge->{$key})) {
                     $var->{$key} = {};
                     $var->{$key} = merge_deep($var->{$key}, $merge->{$key});
                 } else {
@@ -601,7 +600,7 @@ sub merge_deep {
         }
         return($var);
     }
-    if(ref $var eq 'ARRAY' && ref $merge eq 'HASH') {
+    if(ref $var eq 'ARRAY' && _is_hash($merge)) {
         for my $key (sort keys %{$merge}) {
             if(!defined $merge->{$key}) {
                 $var->[$key] = undef;
@@ -631,6 +630,16 @@ sub merge_deep {
     }
     return($merge);
 }
+
+##############################################
+# returns true if $var is a hash
+sub _is_hash {
+    my($o) = @_;
+    return 1 if(ref $o eq 'HASH');
+    return 1 if(UNIVERSAL::isa($o, 'HASH'));
+    return 0;
+}
+
 ##############################################
 
 1;
