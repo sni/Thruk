@@ -1229,7 +1229,7 @@ sub _avail_calc {
                                                                     $service,
                                                                    );
         return("found no data for service: ".$host." - ".$service) if($service && $totals->{'total'}->{'percent'} == -1);
-        return("found no data for host: ".$host) if $totals->{'total'}->{'percent'} == -1;
+        return("found no data for host: ".$host) if (!defined $totals->{'total'}->{'percent'} || $totals->{'total'}->{'percent'} == -1);
         return($totals->{'total'}->{'percent'});
     } else {
         my($num, $total) = (0,0);
