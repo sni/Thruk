@@ -476,10 +476,6 @@ Reverts stashed configuration changes.
 
 Saves stashed configuration changes to disk.
 
-=== DELETE /contact/<name>/config
-
-Deletes given contact from configuration.
-
 === GET /contactgroups
 
 lists livestatus contactgroups.
@@ -519,6 +515,10 @@ Replace contact configuration completely, use PATCH to only update specific attr
 === PATCH /contacts/<name>/config
 
 Update contact configuration partially.
+
+=== DELETE /contacts/<name>/config
+
+Deletes given contact from configuration.
 
 === GET /downtimes
 

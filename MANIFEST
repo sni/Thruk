@@ -101,6 +101,7 @@ lib/Thruk/UserAgent.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Avail.pm
+lib/Thruk/Utils/Bash.pm
 lib/Thruk/Utils/Broadcast.pm
 lib/Thruk/Utils/Cache.pm
 lib/Thruk/Utils/CLI.pm

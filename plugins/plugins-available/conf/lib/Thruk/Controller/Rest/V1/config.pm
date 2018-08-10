@@ -114,7 +114,7 @@ sub _rest_get_config_files {
 # Update contact configuration partially.
 
 ##########################################################
-# REST PATH: DELETE /contact/<name>/config
+# REST PATH: DELETE /contacts/<name>/config
 # Deletes given contact from configuration.
 
 ##########################################################

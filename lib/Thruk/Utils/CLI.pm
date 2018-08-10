@@ -338,6 +338,11 @@ sub _run {
         $log_timestamps = 1;
     }
 
+    if($action eq 'bash_complete') {
+        require Thruk::Utils::Bash;
+        return(Thruk::Utils::Bash::complete());
+    }
+
     # skip cluster if --local is given on command line
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if($self->{'opt'}->{'local'} && !$ENV{'THRUK_CRON'});
 

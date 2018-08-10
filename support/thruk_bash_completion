@@ -10,6 +10,10 @@ _thruk_sub_commands() {
     return
 }
 
+_thruk_mangle () {
+  printf '%q ' "${@}"
+}
+
 _thruk()
 {
     COMPREPLY=()
@@ -131,9 +135,18 @@ _thruk()
 
     # thruk r|rest ...
     elif [[ $subcmd =~ r|rest ]]; then
-        if [ ${#subcmdargs[@]} -eq 0 ]; then
-            opts="$(thruk rest '/csv/index?columns=url')"
+        export COMP_WORD_JOINED="${COMP_WORDS[*]}";
+        export COMP_CWORD;
+        export COMP_LINE;
+        local cur=${COMP_WORDS[COMP_CWORD]}
+        mapfile -t opts < <( thruk bash_complete )
+        mapfile -t COMPREPLY < <( compgen -W "$(_thruk_mangle "${opts[@]}")" -- "$cur" )
+
+        # if there are more than one completion or it does end with a /, expand without spaces
+        if [ ${#COMPREPLY[@]} -gt 1 ] || [ "${COMPREPLY: -1}" = "/" ]; then
+            compopt -o nospace;
         fi
+        return 0
 
     else
         local SUBCOMMANDS=$(_thruk_sub_commands | tr ' ' '|')
