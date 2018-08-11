@@ -7,6 +7,8 @@ next:
             - see https://thruk.org/documentation/cluster.html for details
           - add command_enabled option
           - show and use alias for hosts, hostgroups and servicegroups search
+          - Business Process:
+            - only show business processes where the contact is allowed to see the generated service (#810)
 
 2.22     Fri Jun 29 13:52:11 CEST 2018
           - cleanup preferences popup

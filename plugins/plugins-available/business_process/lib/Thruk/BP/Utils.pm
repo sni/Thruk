@@ -47,15 +47,36 @@ sub load_bp_data {
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);
 
-    my $bps   = [];
-    my $pattern = '*.tbp';
+    my $bps       = [];
+    my $pattern   = '*.tbp';
+    my $svcfilter = { 'custom_variables' => { '>=' => "THRUK_BP_ID 0" }};
     if($num) {
         return($bps) unless $num =~ m/^\d+$/mx;
-        $pattern = $num.'.tbp';
+        $pattern   = $num.'.tbp';
+        $svcfilter = { 'custom_variables' => { '=' => "THRUK_BP_ID ".$num }};
     }
+
+    # check permissions
+    my $is_admin = 0;
+    my $allowed  = {};
+    if($c->check_user_roles("admin")) {
+        $is_admin = 1;
+    } else {
+        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $svcfilter ], columns => ['custom_variable_names', 'custom_variable_values'] );
+        for my $s (@{$services}) {
+            my $vars = Thruk::Utils::get_custom_vars($c, $s);
+            if($vars->{'THRUK_BP_ID'}) {
+                $allowed->{$vars->{'THRUK_BP_ID'}} = 1;
+            }
+        }
+    }
+
     my $numbers = {};
     my @files   = glob($base_folder.'/'.$pattern);
     for my $file (@files) {
+        my $nr = $file;
+        $nr =~ s|^.*/(\d+)\.tbp$|$1|mx;
+        next if(!$is_admin && !$allowed->{$nr});
         my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
         if($bp) {
             push @{$bps}, $bp;
@@ -69,6 +90,7 @@ sub load_bp_data {
             my $nr = $file;
             $nr =~ s|^.*/(\d+)\.tbp\.edit$|$1|mx;
             next if $numbers->{$nr};
+            next if(!$is_admin && !$allowed->{$nr});
             $file  = $base_folder.'/'.$nr.'.tbp';
             my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1);
             if($bp) {
