@@ -307,6 +307,36 @@ sub _rest_get_config_objects_new {
 }
 
 ##########################################################
+# REST PATH: PATCH /config/objects
+# Change attributes for all matching objects.
+# This is a very powerful url, for example you could change all hosts which
+# have max_check_attempts=3 to max_check_attempts=5 with this command:
+#
+#   thruk r -m PATCH -d max_check_attempts=5 '/config/objects?:TYPE=host&max_check_attempts=3'
+Thruk::Controller::rest_v1::register_rest_path_v1('PATCH', qr%^/config/objects?$%mx, \&_rest_get_config_objects_patch, ["admin"]);
+sub _rest_get_config_objects_patch {
+    my($c) = @_;
+    my($backends) = $c->{'db'}->select_backends("get_");
+    local $ENV{'THRUK_BACKENDS'} = join(',', @{$backends}); # required for sub requests
+    my $changed = 0;
+    my $objs = $c->sub_request('/r/config/objects', 'GET', $c->req->query_parameters);
+    for my $conf (@{$objs}) {
+        my $peer_key = $conf->{':PEER_KEY'};
+        _set_object_model($c, $peer_key) || next;
+        my $o = $c->{'obj_db'}->get_object_by_id($conf->{':ID'});
+        next unless $o;
+        if(_update_object($c, 'PATCH', $o)) {
+            $changed++;
+            Thruk::Utils::Conf::store_model_retention($c, $peer_key);
+        }
+    }
+    return({
+        'message' => sprintf('changed %d objects successfully.', $changed),
+        'count'   => $changed,
+    });
+}
+
+##########################################################
 # REST PATH: PATCH /config/objects/<id>
 # Update object configuration partially.
 # REST PATH: POST /config/objects/<id>
@@ -511,18 +541,18 @@ sub _update_object {
         $changed++;
     }
     elsif($method eq 'PATCH') {
-        for my $key (sort keys %{$c->req->parameters}) {
-            if(!defined $c->req->parameters->{$key} || $c->req->parameters->{$key} eq '') {
+        for my $key (sort keys %{$c->req->body_parameters}) {
+            if(!defined $c->req->body_parameters->{$key} || $c->req->body_parameters->{$key} eq '') {
                 delete $o->{'conf'}->{$key};
             } else {
-                $o->{'conf'}->{$key} = $c->req->parameters->{$key};
+                $o->{'conf'}->{$key} = $c->req->body_parameters->{$key};
             }
         }
         $c->{'obj_db'}->update_object($o, $o->{'conf'}, join("\n", @{$o->{'comments'}}));
         $changed++;
     }
     elsif($method eq 'POST') {
-        if(scalar keys %{$c->req->parameters} == 0) {
+        if(scalar keys %{$c->req->body_parameters} == 0) {
             return({
                 'message'     => 'use DELETE to remove objects completely',
                 'description' => 'using POST without parameters would remove the object, use the DELETE method instead.',
@@ -530,9 +560,9 @@ sub _update_object {
             });
         }
         my $conf = {};
-        for my $key (sort keys %{$c->req->parameters}) {
-            if(defined $c->req->parameters->{$key}) {
-                $conf->{$key} = $c->req->parameters->{$key};
+        for my $key (sort keys %{$c->req->body_parameters}) {
+            if(defined $c->req->body_parameters->{$key}) {
+                $conf->{$key} = $c->req->body_parameters->{$key};
             }
         }
         $c->{'obj_db'}->update_object($o, $conf, join("\n", @{$o->{'comments'}}));

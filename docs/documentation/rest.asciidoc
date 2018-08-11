@@ -452,6 +452,14 @@ Returns list of all objects.
 Create new object. Besides the actual object config, requires
 2 special paramters :FILE and :TYPE.
 
+=== PATCH /config/objects
+
+Change attributes for all matching objects.
+This is a very powerful url, for example you could change all hosts which
+have max_check_attempts=3 to max_check_attempts=5 with this command:
+
+  thruk r -m PATCH -d max_check_attempts=5 '/config/objects?:TYPE=host&max_check_attempts=3'
+
 === POST /config/objects/<id>
 
 Replace object configuration completely.
