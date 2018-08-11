@@ -113,6 +113,7 @@ sub _update_cmds {
 
     $content .= Cpanel::JSON::XS->new->utf8->canonical->encode($cmds);
 
+    $output_file = 'cmd.pm.tst' if $ENV{'TEST_MODE'};
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
     print $fh $content;
     close($fh);
