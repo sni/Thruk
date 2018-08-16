@@ -380,7 +380,7 @@ sub _get_filter {
         my @vals = @{Thruk::Utils::list($c->req->parameters->{$key})};
         if($key =~ m/^(.+)\[(.*?)\]$/mx) {
             $key = $1;
-            $op  = $2;
+            $op  = lc($2);
         }
         if(   $op eq 'eq')     { $op = '=';  }
         elsif($op eq 'ne')     { $op = '!='; }
@@ -391,7 +391,6 @@ sub _get_filter {
         elsif($op eq 'lt')     { $op = '<';  }
         elsif($op eq 'lte')    { $op = '<='; }
         for my $val (@vals) {
-            $val = lc($val);
             push @{$filter}, [$key, $op, $val];
         }
     }
