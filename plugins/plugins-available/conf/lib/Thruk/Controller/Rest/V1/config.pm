@@ -186,6 +186,8 @@ sub _rest_get_config {
         $live = $c->{'db'}->get_contactgroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'timeperiod') {
         $live = $c->{'db'}->get_timeperiods(filter => [ name => $name ], columns => [qw/name/]);
+    } elsif($type eq 'command') {
+        $live = $c->{'db'}->get_commands(filter => [ name => $name ], columns => [qw/name/]);
     }
     my $data    = [];
     my $changed = 0;
