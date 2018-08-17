@@ -28,6 +28,19 @@ use Thruk::Utils::Filter ();
 our $VERSION = 1;
 our $rest_paths = [];
 
+my $reserved_query_parameters = [qw/limit offset sort columns backend backends filter query q/];
+my $op_translation_words      = {
+    'eq'     => '=',
+    'ne'     => '!=',
+    'regex'  => '~',
+    'nregex' => '!~',
+    'gt'     => '>',
+    'gte'    => '>=',
+    'lt'     => '<',
+    'lte'    => '<=',
+};
+
+
 ##########################################################
 sub index {
     my($c, $path_info) = @_;
@@ -369,27 +382,17 @@ sub _get_filter {
     my($c) = @_;
     my $filter = [];
 
+    my $reserved = Thruk::Utils::array2hash($reserved_query_parameters);
+
     for my $key (keys %{$c->req->parameters}) {
-        next if $key eq 'limit';
-        next if $key eq 'offset';
-        next if $key eq 'sort';
-        next if $key eq 'columns';
-        next if $key eq 'backend';
-        next if $key eq 'backends';
+        next if $reserved->{$key};
         my $op   = '=';
         my @vals = @{Thruk::Utils::list($c->req->parameters->{$key})};
         if($key =~ m/^(.+)\[(.*?)\]$/mx) {
             $key = $1;
             $op  = lc($2);
         }
-        if(   $op eq 'eq')     { $op = '=';  }
-        elsif($op eq 'ne')     { $op = '!='; }
-        elsif($op eq 'regex')  { $op = '~';  }
-        elsif($op eq 'nregex') { $op = '!~'; }
-        elsif($op eq 'gt')     { $op = '>';  }
-        elsif($op eq 'gte')    { $op = '>='; }
-        elsif($op eq 'lt')     { $op = '<';  }
-        elsif($op eq 'lte')    { $op = '<='; }
+        $op = $op_translation_words->{$op} if $op_translation_words->{$op};
         for my $val (@vals) {
             push @{$filter}, [$key, $op, $val];
         }
