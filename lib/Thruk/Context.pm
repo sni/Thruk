@@ -7,6 +7,7 @@ use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
 use Scalar::Util qw/weaken/;
 use Time::HiRes qw/gettimeofday/;
 use Module::Load qw/load/;
+use URI::Escape qw/uri_escape uri_unescape/;
 
 use Thruk::Authentication::User;
 use Thruk::Controller::error;
@@ -50,6 +51,14 @@ sub new {
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
 
+    # extract non-url encoded q= param from raw body parameters
+    if($env->{'QUERY_STRING'} && $env->{'QUERY_STRING'} =~ m/(^|\&)q=(.{3})/mx) {
+        my $separator = $2;
+        if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
+            $env->{'QUERY_STRING'} =~ s/\Q$separator\E(.*?)\Q$separator\E/&_url_encode($1)/gemx;
+        }
+    }
+
     my $req = Thruk::Request->new($env);
     my $self = {
         app    => $app,
@@ -73,6 +82,18 @@ sub new {
     weaken($self->{'app'}) unless $ENV{'THRUK_SRC'} eq 'CLI';
     $self->stats->enable();
 
+    # extract non-url encoded q= param from raw body parameters
+    $self->req->parameters();
+    if($self->req->raw_body && $self->req->raw_body =~ m/(^|\?|\&)q=(.{3})/mx) {
+        my $separator = $2;
+        if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
+            if($self->req->raw_body =~ m/\Q$separator\E(.*?)\Q$separator\E/gmx) {
+                $self->req->body_parameters->{'q'} = $1;
+                $self->req->parameters->{'q'} = $1;
+            }
+        }
+    }
+
     # parse json body parameters
     if($self->req->content_type && $self->req->content_type =~ m%^application/json%mx) {
         my $raw = $self->req->raw_body;
@@ -87,6 +108,7 @@ sub new {
                 confess("failed to parse json data argument: ".$@);
             }
             for my $key (sort keys %{$data}) {
+                $self->req->body_parameters->{$key} = $data->{$key};
                 $self->req->parameters->{$key} = $data->{$key};
             }
         }
@@ -411,6 +433,11 @@ sub sub_request {
     $c->stats->profile(end => "sub_request: ".$method." ".$orig_url);
     return $sub_c if $rendered;
     return $rc;
+}
+
+sub _url_encode {
+    my($str) = @_;
+    return(uri_escape(uri_unescape($str)));
 }
 
 1;

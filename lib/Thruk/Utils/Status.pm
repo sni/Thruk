@@ -2389,6 +2389,84 @@ sub _get_search_ids {
 }
 ##############################################
 
+=head2 parse_lexical_filter
+
+  parse_lexical_filter($string)
+
+parse lexical filter from string. returns filter structure.
+
+=cut
+sub parse_lexical_filter {
+    my($string) = @_;
+    if(ref $string ne 'SCALAR') {
+        my $copy = $string;
+        $string = \$copy;
+    }
+    my $filter = [];
+    my($token,$key,$op,$val,$combine);
+    while(${$string}) {
+        if(${$string} =~ s/^\s*(
+                              \(
+                            | \)
+                            | \w+
+                            | \d+
+                            | '[^']*'
+                            | "[^"]*"
+                            | [=\!~><]+
+                        )\s*//mx) {
+            $token = $1;
+            if(!defined $key) {
+                $key = $token;
+                if($key eq '(') {
+                    undef $key;
+                    my $f = parse_lexical_filter($string);
+                    push @{$filter}, $f;
+                    next;
+                }
+                if($key eq ')') {
+                    return($filter);
+                }
+                if(lc($key) eq 'and' || lc($key) eq 'or') {
+                    if(scalar @{$filter} == 0) { die("unexpected ".uc($key)." at ".${$string}); }
+                    $combine = lc($key);
+                    undef $key;
+                }
+                next;
+            }
+            elsif(!defined $op) {
+                $op = $token;
+                next;
+            }
+            elsif(!defined $val) {
+                $val = $token;
+                if(substr($val, 0, 1) eq '"') { $val = substr($val, 1, -1); }
+                if(substr($val, 0, 1) eq "'") { $val = substr($val, 1, -1); }
+                push @{$filter}, { $key => { $op => $val } };
+                undef $key;
+                undef $op;
+                undef $val;
+                if($combine) {
+                    my $prev1 = pop @{$filter};
+                    my $prev2 = pop @{$filter};
+                    if(ref $prev2 eq 'HASH' && $prev2->{'-'.$combine}) {
+                        push @{$prev2->{'-'.$combine}},  $prev1;
+                        push @{$filter}, $prev2;
+                    } else {
+                        push @{$filter}, { '-'.$combine => [$prev2, $prev1]};
+                    }
+                }
+                undef $combine;
+                next;
+            }
+        } else {
+            die("parse error at ".${$string});
+        }
+    }
+    return $filter;
+}
+
+##############################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2009-present, <sven@nierlein.org>

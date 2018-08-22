@@ -152,6 +152,38 @@ Possible operators with their alias:
 
 You can use the alias name to workaround urlencoding issues.
 
+
+== Complex Filtering
+
+Complex filtering logic is possible by using a simple query language which
+supports logical operators. The query can be passed urlencoded with the `q`
+parameter. An alternative to url encoding is using a special quote syntax by
+encapsulating the query in `***`. Everything between `***` will be
+automatically url encoded. (You still need to get quoting right).
+
+------
+  %> thruk r '/hosts?q=***name = "test" or name = "other"***'
+------
+
+Another example, fetch all hosts from hostgroups linux and windows which are not ok.
+
+------
+  %> thruk r '/hosts?q=***(groups >= "linux" or groups >= "windows") and status != 0***'
+------
+
+Example using curl:
+
+------
+  %> curl -d 'q=***name = "test"***' 'http://.../thruk/r/hosts'
+------
+
+If you need `***` in the query itself, any other three characters will do as well:
+
+------
+  %> thruk r '/notifications?q=///message = "test" or name = "other"///
+------
+
+
 == Sorting
 
 All pages can sort list results by using the `sort` parameter. The sort

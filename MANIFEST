@@ -1763,6 +1763,7 @@ t/104-thruk_utils_cache.t
 t/105-thruk-utils-ssi.t
 t/106-thruk_context.t
 t/107-thruk_utils_avail.t
+t/108-thruk_utils_status.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t
@@ -1934,6 +1935,7 @@ t/scenarios/cluster_e2e/t/300-controller_tac.t
 t/scenarios/cluster_e2e/t/301-controller_rest_bp.t
 t/scenarios/cluster_e2e/t/301-controller_rest_config.t
 t/scenarios/cluster_e2e/t/301-controller_rest_reports.t
+t/scenarios/cluster_e2e/t/301-controller_rest_v1_scenario.t
 t/scenarios/cluster_e2e/thruk/1.rpt
 t/scenarios/cluster_e2e/thruk/1.tbp
 t/scenarios/cluster_e2e/thruk/1.tsk

@@ -235,6 +235,9 @@ sub test_page {
     my $opts = _set_test_page_defaults(\%opts);
 
     if($opts->{'post'}) {
+        if(ref $opts->{'post'} eq 'REF') {
+            $opts->{'post'} = ${$opts->{'post'}};
+        }
         $opts->{'method'} = 'POST' unless $opts->{'method'};
         $opts->{'method'} = uc($opts->{'method'});
         local $Data::Dumper::Indent = 0;
@@ -859,9 +862,6 @@ sub _external_request {
     $ua->cookie_jar($cookie_jar);
     $ua->agent( $agent ) if $agent;
 
-    if($post && ref $post eq 'REF') {
-        $post = ${$post};
-    }
     if($post && ref $post ne 'HASH') {
         confess("unknown post data: ".Dumper($post));
     }

@@ -28,7 +28,7 @@ use Thruk::Utils::Filter ();
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters = [qw/limit offset sort columns backend backends filter query q/];
+my $reserved_query_parameters = [qw/limit offset sort columns backend backends q/];
 my $op_translation_words      = {
     'eq'     => '=',
     'ne'     => '!=',
@@ -397,7 +397,18 @@ sub _get_filter {
             push @{$filter}, [$key, $op, $val];
         }
     }
+
+    _append_lexical_filter($filter, $c->req->parameters->{'q'}) if $c->req->parameters->{'q'};
+
     return $filter;
+}
+
+##########################################################
+sub _append_lexical_filter {
+    my($filter, $string) = @_;
+    return unless $string;
+    push @{$filter}, Thruk::Utils::Status::parse_lexical_filter($string);
+    return;
 }
 
 ##########################################################
@@ -407,10 +418,20 @@ sub _apply_filter {
     for my $filter (@{_get_filter($c)}) {
         my($key, $op, $val) = @{$filter};
 
+        my @filtered;
+        if(!defined $op && !defined $val && ref $key ne '') {
+            for my $d (@{$data}) {
+                if(_match_complex_filter($d, $key)) {
+                    push @filtered, $d;
+                }
+            }
+            $data = \@filtered;
+            next;
+        }
+
         ## no critic
         no warnings;
         ## use critic
-        my @filtered;
         if($op eq '=') {
             for my $d (@{$data}) {
                 next unless lc($d->{$key}) eq $val;
@@ -1331,6 +1352,111 @@ sub _rest_get_lmd_sites {
         $data = $c->{'db'}->get_sites();
     }
     return($data);
+}
+
+##########################################################
+sub _match_complex_filter {
+    my($data, $filter) = @_;
+    if(ref $filter eq 'ARRAY') {
+        # simple and filter from list
+        for my $f (@{$filter}) {
+            return unless _match_complex_filter($data, $f);
+        }
+        return 1;
+    }
+    if(ref $filter eq 'HASH') {
+        for my $key (sort keys %{$filter}) {
+            # or filter from hash: { -or => [...] }
+            if($key eq '-or') {
+                for my $f (@{$filter->{$key}}) {
+                    return 1 if _match_complex_filter($data, $f);
+                }
+                return;
+            }
+            # and filter from hash: { and => [...] }
+            if($key eq '-and') {
+                return _match_complex_filter($data, $filter->{$key});
+            }
+            my $val = $filter->{$key};
+            if(ref $val eq 'HASH') {
+                for my $op (%{$val}) {
+                    return(_compare($op, $data->{$key}, $val->{$op}));
+                }
+                return;
+            }
+        }
+    }
+    require Data::Dumper;
+    confess("unknown filter: ".Data::Dumper($filter));
+}
+
+##########################################################
+sub _compare {
+    my($op, $data, $val) = @_;
+
+    ## no critic
+    no warnings;
+    ## use critic
+    my @filtered;
+    if($op eq '=') {
+        return 1 if lc($data) eq $val;
+        return;
+    }
+    elsif($op eq '!=') {
+        return 1 if lc($data) ne $val;
+        return;
+    }
+    elsif($op eq '~') {
+        ## no critic
+        return 1 if $data =~ m/$val/i;
+        ## use critic
+        return;
+    }
+    elsif($op eq '!~') {
+        ## no critic
+        return 1 if $data !~ m/$val/i;
+        ## use critic
+        return;
+    }
+    elsif($op eq '>') {
+        return 1 if $data > $val;
+        return;
+    }
+    elsif($op eq '<') {
+        return 1 if $data < $val;
+    }
+    elsif($op eq '>=') {
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                if($v eq $val) {
+                    $found = 1;
+                    last;
+                }
+            }
+            return $found;
+        } else {
+            return 1 if $data >= $val;
+            return;
+        }
+    }
+    elsif($op eq '<=') {
+        if(ref $data eq 'ARRAY') {
+            my $found = 0;
+            for my $v (@{$data}) {
+                if($v eq $val) {
+                    $found = 1;
+                }
+            }
+            return !$found;
+        } else {
+            return 1 if $data <= $val;
+            return;
+        }
+    } else {
+        die("unsupported operator: ".$op);
+    }
+    return;
 }
 
 ##########################################################
