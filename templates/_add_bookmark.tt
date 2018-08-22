@@ -20,7 +20,7 @@
   </tr>
   <tr class="sub_2">
     <td colspan=3 align="center" style="padding: 10px;">
-      Url <input type="text" size="60" value="[% clean_referer(uri(c)) %]" name="bookmark">
+      Url <input type="text" size="60" value="[% clean_referer(uri(c)) | html %]" name="bookmark">
       <br>
       in category
       <select name="section" id="bookmark_sections">

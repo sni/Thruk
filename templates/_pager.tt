@@ -1,4 +1,5 @@
 ﻿[% IF use_pager AND pager %]
+[% IF pages > 1 %]
 
   <form action="" method="GET">
   [% FOREACH par = c.request.parameters.keys %]
@@ -23,11 +24,10 @@
     [% NEXT IF par == 'total_pages' %]
     [% NEXT IF par == 'noheader' %]
     [% FOR value IN c.request.parameters.$par.list %]
-      <input type="hidden" name="[% par %]" value="[% value %]">
+      <input type="hidden" name="[% par %]" value="[% value | html %]">
     [% END %]
   [% END %]
 
-  [% IF pages > 1 %]
   <br>
   <input type="hidden" name="page" value="[% current_page %]">
   [% IF pager_previous_page %]
@@ -67,7 +67,6 @@
   [% IF pager_next_page AND pages > 1 %]
     &nbsp;<input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_next.png" name="next" alt="next" value="1" class="pager_input_img"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_last.png" name="last" alt="last" value="1" class="pager_input_img">
   [% END %]
-  [% END %]
 
   [% IF paging_steps.0 && pager.total_entries > paging_steps.0 %]
     &nbsp;&nbsp;
@@ -83,4 +82,5 @@
   [% END %]
   <input type="hidden" name="total_pages" value="[% pages %]">
   </form>
+[% END %]
 [% END %]
