@@ -461,6 +461,7 @@ sub _process_details_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
     $c->stash->{'show_column_select'} = 1;
+    $c->stash->{'hide_filter'}        = 0;
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -480,6 +481,12 @@ sub _process_details_page {
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
+
+    if($c->req->parameters->{'q'}) {
+        $c->stash->{'has_service_filter'}= 1;
+        $c->stash->{'hide_filter'}= 1;
+        $servicefilter = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'});
+    }
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;

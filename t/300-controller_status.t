@@ -5,7 +5,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1140;
+    plan tests => 1152;
 }
 
 BEGIN {
@@ -63,6 +63,7 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?sortoption=5&sorttype=1&host=all',
     '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
     '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
+    { url => '/thruk/cgi-bin/status.cgi?q=***host_name = "'.$host.'"***', like => ['Service Status Details', 'Matching Service Entries Displayed'] },
 
 # Servicegroups
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=detail',
