@@ -35,8 +35,8 @@ sub _rest_get_thruk_reports_new {
     my($c, $path_info) = @_;
     require Thruk::Utils::Reports;
 
-    my $report = \%{$c->req->parameters};
-    if($report = Thruk::Utils::Reports::report_save($c, "new", $report) && $report->{'nr'}) {
+    my $report = Thruk::Utils::Reports::report_save($c, "new", \%{$c->req->parameters});
+    if(ref $report eq 'HASH' && $report->{'nr'}) {
         return({
             'message' => 'successfully saved 1 report.',
             'id'      => $report->{'nr'},

@@ -1142,6 +1142,7 @@ sub _report_save {
 
     $report->{'backends_hash'} = $report->{'backends'};
 
+    $report->{'nr'} = $nr;
     return $report;
 }
 
