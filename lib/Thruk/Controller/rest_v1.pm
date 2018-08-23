@@ -290,8 +290,13 @@ sub _fetch {
     my $request_method = $method || $c->req->method;
     my $protos = [];
     for my $r (@{$rest_paths}) {
+        my @matches;
         my($proto, $path, $function, $roles) = @{$r};
-        if((ref $path eq '' && $path eq $path_info) || (ref $path eq 'Regexp' && $path_info =~ $path))  {
+        if((ref $path eq '' && $path eq $path_info) || (ref $path eq 'Regexp' && (@matches = $path_info =~ $path)))  {
+            if(ref $path eq 'Regexp' && "$path" !~ m/^.*:.*\(.*\)/mx) {
+                # if regex does not contain any matching (), @matches will contain a single value instead of empty args
+                @matches = ();
+            }
             if($proto ne $request_method) {
                 # matching path, but wrong protocol
                 push @{$protos}, $proto;
@@ -303,7 +308,7 @@ sub _fetch {
                 $data = { 'message' => 'not authorized', 'description' => 'this path requires certain roles: '.join(', ', @{$roles}), code => 403 };
             } else {
                 $c->stats->profile(begin => "rest: $sub_name");
-                $data = &{$function}($c, $path_info, $1, $2, $3);
+                $data = &{$function}($c, $path_info, @matches);
                 $c->stats->profile(end => "rest: $sub_name");
             }
             $found = 1;
