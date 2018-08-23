@@ -841,7 +841,7 @@ sub _expand_perfdata_and_custom_vars {
 sub _get_help_for_path {
     my($c, $path_info) = @_;
     my(undef, undef, $docs) = get_rest_paths($c);
-    for my $path (reverse sort keys %{$docs}) {
+    for my $path (reverse sort { length $a <=> length $b } keys %{$docs}) {
         my $p = $path;
         $p =~ s%<[^>]+>%[^/]*%gmx;
         if($path_info =~ qr/$p/mx) {

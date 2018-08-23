@@ -780,27 +780,27 @@ lists livestatus services.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
 there is an alias /services.
 
-=== GET /services/<host_name>/<service>
-
-lists services for given host and name.
-alias for /services?host_name=<host_name>&description=<service>
-
-=== GET /services/<host_name>/<service>/config
+=== GET /services/<host>/<service>/config
 
 Returns configuration for given service.
 You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
 
-=== POST /services/<host_name>/<service>/config
+=== POST /services/<host>/<service>/config
 
 Replace service configuration completely, use PATCH to only update specific attributes.
 
-=== PATCH /services/<host_name>/<service>/config
+=== PATCH /services/<host>/<service>/config
 
 Update service configuration partially.
 
-=== DELETE /services/<host_name>/<service>/config
+=== DELETE /services/<host>/<service>/config
 
 Deletes given service from configuration.
+
+=== GET /services/<host_name>/<service>
+
+lists services for given host and name.
+alias for /services?host_name=<host_name>&description=<service>
 
 === GET /services/stats
 

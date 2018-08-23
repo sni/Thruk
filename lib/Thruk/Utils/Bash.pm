@@ -93,20 +93,17 @@ sub _complete_rest_path {
                 $rest_tree = $rest_tree->{$p};
                 $result_prefix = $result_prefix.'/'.$p;
             } else {
-                if($last && $rest_tree->{'<name>'}) {
-                    $rest_tree = $rest_tree->{'<name>'};
-                    $result_prefix = $result_prefix.'/'.$p;
-                    next;
-                }
-                if($last && $rest_tree->{'<host_name>'}) {
-                    $rest_tree = $rest_tree->{'<host_name>'};
-                    $result_prefix = $result_prefix.'/'.$p;
-                    next;
-                }
-                if($last && $rest_tree->{'<service>'}) {
-                    $rest_tree = $rest_tree->{'<service>'};
-                    $result_prefix = $result_prefix.'/'.$p;
-                    next;
+                if($last) {
+                    my $replaced = 0;
+                    for my $replace (qw/<name> <host> <host_name> <service>/) {
+                        if($rest_tree->{$replace}) {
+                            $rest_tree = $rest_tree->{$replace};
+                            $result_prefix = $result_prefix.'/'.$p;
+                            $replaced = 1;
+                            last;
+                        }
+                    }
+                    next if $replaced;
                 }
                 $rest_tree = {};
                 last;

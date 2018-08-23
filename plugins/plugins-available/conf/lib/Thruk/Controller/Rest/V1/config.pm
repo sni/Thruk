@@ -226,20 +226,20 @@ sub _rest_get_config {
 }
 
 ##########################################################
-# REST PATH: GET /services/<host_name>/<service>/config
+# REST PATH: GET /services/<host>/<service>/config
 # Returns configuration for given service.
 # You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
 
 ##########################################################
-# REST PATH: POST /services/<host_name>/<service>/config
+# REST PATH: POST /services/<host>/<service>/config
 # Replace service configuration completely, use PATCH to only update specific attributes.
 
 ##########################################################
-# REST PATH: PATCH /services/<host_name>/<service>/config
+# REST PATH: PATCH /services/<host>/<service>/config
 # Update service configuration partially.
 
 ##########################################################
-# REST PATH: DELETE /services/<host_name>/<service>/config
+# REST PATH: DELETE /services/<host>/<service>/config
 # Deletes given service from configuration.
 Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH', 'POST'], qr%^/(service)s?/([^/]+)/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
 
