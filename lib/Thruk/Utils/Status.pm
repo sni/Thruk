@@ -2404,7 +2404,7 @@ sub parse_lexical_filter {
     }
     my $filter = [];
     my($token,$key,$op,$val,$combine);
-    while(${$string}) {
+    while(${$string} ne '') {
         if(${$string} =~ s/^\s*(
                               \(
                             | \)
@@ -2435,6 +2435,8 @@ sub parse_lexical_filter {
             }
             elsif(!defined $op) {
                 $op = $token;
+                if($op eq '~')  { $op = '~~'; }
+                if($op eq '!~') { $op = '!~~'; }
                 next;
             }
             elsif(!defined $val) {

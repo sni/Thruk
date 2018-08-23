@@ -319,6 +319,8 @@ sub _fetch {
         if(scalar @{$protos} > 0) {
             # make GET paths available via POST as well
             if($request_method eq 'POST' && grep(/^GET$/mx, @{$protos})) {
+                $c->req->{'_method'} = 'GET';
+                $c->req->{'env'}->{'REQUEST_METHOD'} = 'GET';
                 $data = _fetch($c, $path_info, 'GET');
             } else {
                 $data = { 'message' => 'bad request', description => 'available methods for '.$path_info.' are: '.join(', ', @{$protos}), code => 400 };
@@ -345,8 +347,10 @@ sub _post_processing {
     }
 
     if(ref $data eq 'ARRAY') {
-        # Filtering
-        $data = _apply_filter($c, $data);
+        if($c->req->method eq 'GET') {
+            # Filtering
+            $data = _apply_filter($c, $data);
+        }
 
         # Sorting
         $data = _apply_sort($c, $data);
@@ -710,6 +714,10 @@ sub _livestatus_filter {
     my $filter = [];
     for my $f (@{_get_filter($c)}) {
         my($key, $op, $val) = @{$f};
+        if(ref $key ne "") {
+            push @{$filter}, $f;
+            next;
+        }
         # convert custom variable filter
         if($key =~ m/^_/mx) {
             $key =~ s/^_//mx;
@@ -1406,13 +1414,13 @@ sub _compare {
         return 1 if lc($data) ne $val;
         return;
     }
-    elsif($op eq '~') {
+    elsif($op eq '~' || $op eq '~~') {
         ## no critic
         return 1 if $data =~ m/$val/i;
         ## use critic
         return;
     }
-    elsif($op eq '!~') {
+    elsif($op eq '!~' || $op eq '!~~') {
         ## no critic
         return 1 if $data !~ m/$val/i;
         ## use critic

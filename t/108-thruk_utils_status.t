@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 use Test::More;
 
-plan tests => 15;
+plan tests => 17;
 
 use_ok('Thruk::Utils::Status');
 use_ok('Monitoring::Livestatus::Class::Lite');
@@ -22,6 +22,8 @@ _test_filter("(name = 'test')", 'Filter: name = test');
 _test_filter('(host = "a" OR host = "b") AND host = "c"', "Filter: host = a\nFilter: host = b\nOr: 2\nFilter: host = c\nAnd: 2");
 _test_filter("name = 'te\"st'", 'Filter: name = te"st');
 _test_filter("name = 'te(st)'", 'Filter: name = te(st)');
+_test_filter("host_name = \"test\" or host_name = \"localhost\" and status = 0", "Filter: host_name = test\nFilter: host_name = localhost\nOr: 2\nFilter: status = 0\nAnd: 2");
+_test_filter(' name ~~  "test"  ', 'Filter: name ~~ test');
 
 sub _test_filter {
     my($filter, $expect) = @_;

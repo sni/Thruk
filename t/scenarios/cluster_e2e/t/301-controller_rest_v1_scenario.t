@@ -5,7 +5,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 7;
+    plan tests => 15;
 
     use lib('t');
     require TestUtils;
@@ -20,7 +20,11 @@ my $pages = [{
         like         => ['Https'],
         unlike       => ['Cert'],
         content_type => 'text/plain; charset=UTF-8',
-    },
+    }, {
+        url          => '/csv/services/totals?q=***description ~ http and description !~ cert***&columns=total',
+        like         => ['total;2'],
+        content_type => 'text/plain; charset=UTF-8',
+    }
 ];
 
 for my $test (@{$pages}) {
