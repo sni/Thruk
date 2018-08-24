@@ -12,6 +12,11 @@ BEGIN {
     plan skip_all => 'docker-compose required' unless TestUtils::has_util('docker-compose');
 }
 
+my $filter;
+if($0 =~ m/scenario\-(.*)\.t$/mx) {
+    $filter = 't/scenarios/'.$1;
+}
+
 use_ok("Thruk::Utils::IO");
 
 my $verbose = $ENV{'HARNESS_IS_VERBOSE'} ? 1 : undef;
@@ -20,22 +25,35 @@ my $make = $ENV{'MAKE'} || 'make';
 my $scenarios = [map($_ =~ s/\/\.$//gmx && $_, split/\n/mx, `ls -1d t/scenarios/*/.`)];
 
 for my $dir (@{$scenarios}) {
+    next if $filter && $filter ne $dir;
     chdir($dir);
     _run($dir, "clean");
     chdir($pwd);
 }
 
 for my $dir (@{$scenarios}) {
-    next if $dir =~ /nagios4/mx;
-    if($dir =~ /e2e$/mx && !$ENV{'THRUK_TEST_E2E'}) {
-        diag('E2E tests skiped, set THRUK_TEST_E2E env to run them');
-        next;
+    if($filter) {
+        next if $filter ne $dir;
+        if($dir =~ /e2e$/mx && !$ENV{'THRUK_TEST_E2E'}) {
+            diag('E2E tests skiped, set THRUK_TEST_E2E env to run them');
+            next;
+        }
+        chdir($dir);
+        for my $step (qw/clean update prepare wait_start test_verbose clean/) {
+            _run($dir, $step);
+        }
+        chdir($pwd);
     }
-    chdir($dir);
-    for my $step (qw/clean update prepare wait_start test_verbose clean/) {
-        _run($dir, $step);
+    else {
+        next if $dir =~ /nagios4/mx;
+        my $dirname = $dir;
+        $dirname =~ s%^.*/%%gmx;
+        if(-e 't/610-scenario-'.$dirname.'.t') {
+            ok(1, "test case for $dirname exists");
+        } else {
+            fail("missing test case for $dir");
+        }
     }
-    chdir($pwd);
 }
 
 # make simple normal final request since the tests kill existing lmd childs and upcoming
