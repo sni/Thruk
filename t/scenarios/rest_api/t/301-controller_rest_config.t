@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 216;
+    plan tests => 218;
 
     use lib('t');
     require TestUtils;
@@ -22,6 +22,9 @@ my $pages = [{
         url     => 'POST /hosts/<name>/cmd/schedule_forced_host_check',
         post    => { start_time => 'now' },
         like    => ['Command successfully submitted'],
+    }, {
+        url     => 'GET /hosts/<name>',
+        waitfor => 'rta_unit',
     }, {
         url     => 'GET /hosts/<name>',
         like    => ['"rta_unit" : "ms",', '"rta" : "0.0', ''],
