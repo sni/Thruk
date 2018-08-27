@@ -347,7 +347,7 @@ sub _run {
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if($self->{'opt'}->{'local'} && !$ENV{'THRUK_CRON'});
 
     # force some commands to be local
-    if($action =~ m/^(logcache|livecache|bpd|bp||report|plugin|lmd|find)/mx) {
+    if($action =~ m/^(logcache|livecache|bpd|bp|report|plugin|lmd|find)/mx) {
         $self->{'opt'}->{'local'} = 1;
     }
 
@@ -356,7 +356,7 @@ sub _run {
         $self->{'opt'}->{'local'} = 1;
     }
 
-    my($result, $response);
+    my($c, $result, $response);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = _request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
@@ -367,7 +367,7 @@ sub _run {
         }
     }
 
-    my($c, $capture);
+    my($capture);
     unless(defined $result) {
         # initialize backend pool here to safe some memory
         require Thruk::Backend::Pool;
@@ -406,6 +406,8 @@ sub _run {
         ## no critic
         select *STDOUT;
         ## use critic
+
+        $response = $c->res;
     }
 
     # no output?
@@ -414,7 +416,7 @@ sub _run {
     }
 
     # fix encoding
-    my $content_type = $result->{'content_type'} || $c->res->content_type() || 'text/plain';
+    my $content_type = $result->{'content_type'} || $response->content_type() || 'text/plain';
     if($content_type =~ /^text/mx) {
         $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
     }
