@@ -2549,8 +2549,19 @@ sub check_memory_usage {
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
         $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
-        $c->env->{'psgix.harakiri.commit'} = 1;
-        kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
+        if($c->env->{'psgix.harakiri'}) {
+            # if plack server does support harakiri mode, only supported if plack uses a procmanager
+            $c->env->{'psgix.harakiri.commit'} = 1;
+        }
+        elsif($c->env->{'psgix.cleanup'}) {
+            # supported since plack 1.0046
+            push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
+                kill(15, $$);
+            };
+        } else {
+            # kill it the hard way
+            kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
+        }
     }
     return;
 }

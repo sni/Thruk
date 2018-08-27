@@ -931,7 +931,7 @@ sub _after_dispatch {
 
     # does this process need a restart?
     if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        if($c->config->{'max_process_memory'} && $Thruk::COUNT && $Thruk::COUNT%10 == 0) {
+        if($c->config->{'max_process_memory'} && ($Thruk::COUNT && $Thruk::COUNT%10 == 0 || $elapsed > 5)) {
             Thruk::Utils::check_memory_usage($c);
         }
     }
