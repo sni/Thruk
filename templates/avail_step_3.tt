@@ -16,7 +16,7 @@
 
     <div align="center" class='dateSelectTitle'>Step 3: Select Report Options</div>
     <div align="center">
-      <form method="get" action="avail.cgi">
+      <form method="get" action="avail.cgi" id="avail_form">
         <input type='hidden' name='show_log_entries' value=''>
         [% IF host %]<input type='hidden' name='host' value='[% host %]'>[% END %]
         [% IF hostgroup %]<input type='hidden' name='hostgroup' value='[% hostgroup %]'>[% END %]
@@ -179,6 +179,20 @@
           </tr>
         </table>
       </form>
+
+      <div class="report_permalink">
+        Permanent url for this report: <a href="" id="permalink"></a>
+      </div>
+
     </div>
+
+<script type="text/javascript">
+  function update_permalink() {
+    var link = 'avail.cgi?'+jQuery("#avail_form").serialize();
+    jQuery('#permalink').text(link).attr('href', link);
+  }
+  jQuery("#avail_form INPUT, #avail_form SELECT").on("change", update_permalink);
+  update_permalink();
+</script>
 
 [% PROCESS _footer.tt %]

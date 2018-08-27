@@ -1511,3 +1511,10 @@ BUTTON.small, INPUT.small {
   height: 20px;
   cursor: pointer;
 }
+
+.report_permalink {
+  width: 600px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
