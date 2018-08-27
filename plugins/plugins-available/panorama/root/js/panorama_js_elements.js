@@ -516,6 +516,8 @@ Ext.define('Ext.ux.SearchCombobox', {
     selectOnTab:    true,
     typeAhead:      true,
     minChars:       0,
+    valueField:    'value',
+    displayField:  'text',
     initComponent: function() {
         var me = this;
         me.callParent();

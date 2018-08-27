@@ -336,7 +336,17 @@ sub _process_raw_request {
                 my $total = scalar @{$data};
                 Thruk::Backend::Manager::page_data($c, $data);
                 my $list = [];
-                for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
+                if(scalar @{$c->stash->{'data'}} > 0 && ref $c->stash->{'data'}->[0] eq 'HASH') {
+                    for my $d (@{$c->stash->{'data'}}) {
+                        if($d->{'name'} ne $d->{'alias'}) {
+                            push @{$list}, { 'text' => $d->{'name'}.' - '.$d->{'alias'}, value => $d->{'name'} };
+                        } else {
+                            push @{$list}, { 'text' => $d->{'name'}, value => $d->{'name'} };
+                        }
+                    }
+                } else {
+                    for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
+                }
                 $json = { 'data' => $list, 'total' => $total };
             }
             return $c->render(json => $json);
