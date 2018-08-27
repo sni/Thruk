@@ -1513,7 +1513,7 @@ BUTTON.small, INPUT.small {
 }
 
 .report_permalink {
-  width: 600px;
+  width: 500px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

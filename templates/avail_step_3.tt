@@ -24,19 +24,19 @@
         [% IF servicegroup %]<input type='hidden' name='servicegroup' value='[% servicegroup %]'>[% END %]
         <table border="0" cellpadding="5">
           <tr>
-            <td valign="top" class='reportSelectSubTitle'>Report Period:</td>
+            <td valign="top" class='reportSelectSubTitle' align="right">Report Period:</td>
             <td valign="top" align="left" class='optBoxItem'>
-              <select name='timeperiod'>
+              <select name='timeperiod' onchange="update_report_period_options()" id="report_timeperiod">
                 [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" %]
                 <option value="custom">* CUSTOM REPORT PERIOD *</option>
               </select>
             </td>
           </tr>
-          <tr>
-            <td valign="top" class='reportSelectSubTitle'>If Custom Report Period...</td>
+          <tr class="custom_time">
+            <td valign="top" class='reportSelectSubTitle' colspan="2" align="center">If Custom Report Period...</td>
           </tr>
-          <tr>
-            <td valign="top" class='reportSelectSubTitle'>Start Date (Inclusive):</td>
+          <tr class="custom_time">
+            <td valign="top" class='reportSelectSubTitle' align="right">Start Date (Inclusive):</td>
             <td align="left" valign="top" class='reportSelectItem'>
               [% SET yesterday = date.now - 86400 %]
               <select name='smon'>
@@ -60,8 +60,8 @@
               <input type='hidden' name='ssec' value='0'>
             </td>
           </tr>
-          <tr>
-            <td valign="top" class='reportSelectSubTitle'>End Date (Inclusive):</td>
+          <tr class="custom_time">
+            <td valign="top" class='reportSelectSubTitle' align="right">End Date (Inclusive):</td>
             <td align="left" valign="top" class='reportSelectItem'>
               <select name='emon'>
                 <option value='1'[%  IF format_date(date.now, '%m') == "01" %] selected[% END %]>January</option>
@@ -85,10 +85,7 @@
             </td>
           </tr>
           <tr>
-            <td colspan="2"><br></td>
-          </tr>
-          <tr>
-            <td valign="top" class='reportSelectSubTitle'>Report time Period:</td>
+            <td valign="top" class='reportSelectSubTitle' align="right">Report time Period:</td>
             <td valign="top" align="left" class='optBoxItem'>
               <select name='rpttimeperiod'>
                 <option value="">None</option>
@@ -97,9 +94,6 @@
                 [% END %]
               </select>
             </td>
-          </tr>
-          <tr>
-            <td colspan="2"><br></td>
           </tr>
           <tr>
             <td class='reportSelectSubTitle' align="right">Assume Initial States:</td>
@@ -165,7 +159,7 @@
             </td>
           </tr>
           <tr>
-            <td valign="top" class='reportSelectSubTitle'>Output Format:</td>
+            <td valign="top" class='reportSelectSubTitle' align="right">Output Format:</td>
             <td valign="top" class='reportSelectItem'>
               <input type="radio" name="view_mode" value="html" checked>HTML
               <input type="radio" name="view_mode" value="xls">XLS
@@ -174,8 +168,7 @@
             </td>
           </tr>
           <tr>
-            <td></td>
-            <td align="left" class='dateSelectItem'><input type='submit' value='Create Availability Report!'></td>
+            <td colspan=2 align="center" class='dateSelectItem'><input type='submit' value='Create Availability Report!'></td>
           </tr>
         </table>
       </form>
@@ -193,6 +186,17 @@
   }
   jQuery("#avail_form INPUT, #avail_form SELECT").on("change", update_permalink);
   update_permalink();
+
+  function update_report_period_options() {
+    if(jQuery('#report_timeperiod').val() == "custom") {
+      jQuery('.custom_time').show();
+    } else {
+      jQuery('.custom_time').hide();
+    }
+  }
+
+  update_report_period_options();
+
 </script>
 
 [% PROCESS _footer.tt %]
