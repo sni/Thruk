@@ -286,7 +286,7 @@ sub report_send {
                  Path        => $attachment,
                  Filename    => encode_utf8($report->{'var'}->{'attachment'}),
                  Disposition => 'attachment',
-                 Encoding    => 'quoted-printable', # default encoding 8bit adds linebreaks after 1000chars which breaks csv reports
+                 Encoding    => 'base64', # default encoding 8bit adds linebreaks after 1000chars which breaks csv reports
         );
     }
     elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
