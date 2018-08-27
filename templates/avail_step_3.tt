@@ -173,9 +173,20 @@
         </table>
       </form>
 
+      <br>
+      <hr>
+      <b>Other options:</b>
+      <br>
       <div class="report_permalink">
         Permanent url for this report: <a href="" id="permalink"></a>
       </div>
+
+      [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
+      <br>
+      <div>
+        <input name="email" value="Create E-Mail Report" onclick="window.location='reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+encodeURIComponent(jQuery('#permalink').attr('href')); return false;" type="button">
+      </div>
+      [% END %]
 
     </div>
 
