@@ -2727,11 +2727,10 @@ sub _initialassumedservicestate_to_state {
 ##############################################
 sub _parse_date {
     my($c, $string) = @_;
-    my $timestamp;
 
     # just a timestamp?
     if($string =~ m/^(\d+)$/mx) {
-        $timestamp = $1;
+        return($1);
     }
 
     # relative time?
@@ -2739,39 +2738,39 @@ sub _parse_date {
         my $direction = $1;
         my $val = expand_duration($2);
         if($direction eq '-') {
-            $timestamp = time() - $val;
-        } else {
-            $timestamp = time() + $val;
+            return(time() - $val);
         }
+        return(time() + $val);
     }
 
     # real date (YYYY-MM-DD HH:MM:SS)
-    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
-        $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+    if($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+        my $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+        return($timestamp);
     }
 
     # real date without seconds (YYYY-MM-DD HH:MM)
-    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
-        $timestamp = Mktime($1,$2,$3, $4,$5,0);
+    if($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
+        my $timestamp = Mktime($1,$2,$3, $4,$5,0);
+        return($timestamp);
     }
 
     # US date format (MM-DD-YYYY HH:MM:SS)
-    elsif($string =~ m/(\d{1,2})\-(\d{1,2})\-(\d{2,4})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
-        $timestamp = Mktime($3,$1,$2, $4,$5,$6);
+    if($string =~ m/(\d{1,2})\-(\d{1,2})\-(\d{2,4})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+        my $timestamp = Mktime($3,$1,$2, $4,$5,$6);
+        return($timestamp);
     }
 
     # everything else
-    else {
-        # Date::Manip increases start time, so load it here upon request
-        require Date::Manip;
-        Date::Manip->import(qw/UnixDate/);
-        $timestamp = UnixDate($string, '%s');
-        $c->log->debug("not a valid date: ".$string) if $c;
-        if(!defined $timestamp) {
-            return;
-        }
+    # Date::Manip increases start time, so load it here upon request
+    require Date::Manip;
+    Date::Manip->import(qw/UnixDate/);
+    my $timestamp = UnixDate($string, '%s');
+    $c->log->debug("not a valid date: ".$string) if $c;
+    if(!defined $timestamp) {
+        return;
     }
-    return $timestamp;
+    return($timestamp);
 }
 
 ########################################
