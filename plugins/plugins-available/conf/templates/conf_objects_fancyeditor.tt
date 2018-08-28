@@ -34,55 +34,63 @@
   <tr>
     <td class="dataVar" colspan=3>
         <div id="editor"></div>
-        <script type="text/javascript">
-            var editor = ace.edit("editor");
-            var original_value;
-            /* set up editor */
-            window.onload = function() {
-                editor.setTheme("ace/theme/clouds");
-                editor.session.setMode("ace/mode/nagios");
-                editor.setOptions({
-                    enableLiveAutocompletion: true,
-                    highlightActiveLine: true
-                });
-                editor.setValue(document.getElementById('filecontent').value);
-                original_value = document.getElementById('filecontent').value;
-                editor.gotoLine([% line %]);
-            };
-
-            /* intercept when there are unsaved changes */
-            function confirm_discard_changes() {
-                form = document.getElementById('saveform');
-                if(has_changed() && !form.needs_reload) {
-                    return confirm("File has been changed. Really discard changes?");
-                }
-                return true;
-            }
-
-            function has_changed() {
-                if(editor.session.getValue() != original_value) {
-                    return true;
-                }
-                return false;
-            }
-
-            function save_file() {
-                form = document.getElementById('saveform');
-                document.getElementById('filecontent').value = editor.session.getValue();
-                [%+ IF show_object && back == "edit" +%]
-                document.getElementById('fileline').value = editor.getCursorPosition().row;
-                [%+ END +%]
-
-                form.submit();
-            }
-        </script>
-        <!--[IF IE]>
-        <![ENDIF]-->
     </td>
   </tr>
 </table>
 </div>
 </form>
+
+<script type="text/javascript">
+    var editor = ace.edit("editor");
+    var original_value;
+    /* set up editor */
+    window.onload = function() {
+        editor.setTheme("ace/theme/clouds");
+        editor.session.setMode("ace/mode/nagios");
+        editor.setOptions({
+            enableLiveAutocompletion: true,
+            highlightActiveLine: true
+        });
+        editor.setValue(document.getElementById('filecontent').value);
+        original_value = document.getElementById('filecontent').value;
+        editor.gotoLine([% line %]);
+    };
+
+    /* intercept when there are unsaved changes */
+    function confirm_discard_changes() {
+        form = document.getElementById('saveform');
+        if(has_changed() && !form.needs_reload) {
+            return confirm("File has been changed. Really discard changes?");
+        }
+        return true;
+    }
+
+    function has_changed() {
+        if(editor.session.getValue() != original_value) {
+            return true;
+        }
+        return false;
+    }
+
+    function save_file() {
+        form = document.getElementById('saveform');
+        document.getElementById('filecontent').value = editor.session.getValue();
+        [%+ IF show_object && back == "edit" +%]
+        document.getElementById('fileline').value = editor.getCursorPosition().row;
+        [%+ END +%]
+
+        form.submit();
+    }
+    var _resize_editor = function() {
+        var editor = document.getElementById('editor');
+        var h = jQuery(window).height() - editor.offsetTop;
+        editor.style.height = (h - 18)  + 'px';
+        var editor = ace.edit("editor");
+        editor.resize();
+    }
+    window.onresize = _resize_editor;
+    _resize_editor();
+</script>
 
 [% END %]
 
