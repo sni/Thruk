@@ -2734,6 +2734,17 @@ sub _parse_date {
         $timestamp = $1;
     }
 
+    # relative time?
+    if($string =~ m/^(\-|\+)(\d+\w)+$/mx) {
+        my $direction = $1;
+        my $val = expand_duration($2);
+        if($direction eq '-') {
+            $timestamp = time() - $val;
+        } else {
+            $timestamp = time() + $val;
+        }
+    }
+
     # real date (YYYY-MM-DD HH:MM:SS)
     elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);

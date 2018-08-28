@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 87;
+    plan tests => 89;
 
     use lib('t');
     require TestUtils;
@@ -319,4 +319,12 @@ my $ts     = time();
 my $parsed = Thruk::Utils::_parse_date($c, "now");
 ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for 'now'");
 
+#########################
+$ts     = time() + 3600;
+$parsed = Thruk::Utils::_parse_date($c, "+60m");
+ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '+60m'");
+#########################
+$ts     = time() - 3600;
+$parsed = Thruk::Utils::_parse_date($c, "-60m");
+ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '-60m'");
 #########################
