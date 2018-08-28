@@ -13,6 +13,10 @@ livestatus information.
 Read more about the link:rest.html[REST API] itself. This page contains
 the comprehensive list of all available external commands.
 
+== Example Usage
+
+All examples can be found on the link:rest_examples.html#sending_commands[REST API Examples page].
+
 == Endpoints
 
 See examples and detailed description for all available rest api command urls:
@@ -87,12 +91,15 @@ Sends the SCHEDULE_HOSTGROUP_HOST_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_host_downtime.html for details.
 
@@ -102,12 +109,15 @@ Sends the SCHEDULE_HOSTGROUP_SVC_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_svc_downtime.html for details.
 
@@ -117,11 +127,14 @@ Sends the ACKNOWLEDGE_HOST_PROBLEM command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * sticky_ack
   * send_notification
   * persistent_comment
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem.html for details.
 
@@ -131,12 +144,15 @@ Sends the ACKNOWLEDGE_HOST_PROBLEM_EXPIRE command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * sticky_ack
   * send_notification
   * persistent_comment
   * end_time
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem_expire.html for details.
 
@@ -146,8 +162,12 @@ Sends the ADD_HOST_COMMENT command.
 
 Required arguments:
 
-  * comment_author
   * comment_data
+
+Optional arguments:
+
+  * persistent_comment
+  * comment_author
 
 See http://www.naemon.org/documentation/developer/externalcommands/add_host_comment.html for details.
 
@@ -184,6 +204,14 @@ Sends the DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/disable_all_notifications_beyond_host.html for details.
+
+=== POST /hosts/<name>/cmd/disable_host_and_child_notifications
+
+Sends the DISABLE_HOST_AND_CHILD_NOTIFICATIONS command.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_host_and_child_notifications.html for details.
 
 === POST /hosts/<name>/cmd/disable_host_check
 
@@ -319,8 +347,11 @@ Sends the PROCESS_HOST_CHECK_RESULT command.
 
 Required arguments:
 
-  * plugin_state
   * plugin_output
+
+Optional arguments:
+
+  * plugin_state
   * performance_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/process_host_check_result.html for details.
@@ -339,13 +370,16 @@ Sends the SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * triggered_by
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_host_downtime.html for details.
 
@@ -355,13 +389,16 @@ Sends the SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * triggered_by
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_triggered_host_downtime.html for details.
 
@@ -369,7 +406,7 @@ See http://www.naemon.org/documentation/developer/externalcommands/schedule_and_
 
 Sends the SCHEDULE_FORCED_HOST_CHECK command.
 
-Required arguments:
+Optional arguments:
 
   * start_time
 
@@ -379,7 +416,7 @@ See http://www.naemon.org/documentation/developer/externalcommands/schedule_forc
 
 Sends the SCHEDULE_FORCED_HOST_SVC_CHECKS command.
 
-Required arguments:
+Optional arguments:
 
   * start_time
 
@@ -389,7 +426,7 @@ See http://www.naemon.org/documentation/developer/externalcommands/schedule_forc
 
 Sends the SCHEDULE_HOST_CHECK command.
 
-Required arguments:
+Optional arguments:
 
   * start_time
 
@@ -401,13 +438,16 @@ Sends the SCHEDULE_HOST_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * triggered_by
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_downtime.html for details.
 
@@ -415,7 +455,7 @@ See http://www.naemon.org/documentation/developer/externalcommands/schedule_host
 
 Sends the SCHEDULE_HOST_SVC_CHECKS command.
 
-Required arguments:
+Optional arguments:
 
   * start_time
 
@@ -427,13 +467,16 @@ Sends the SCHEDULE_HOST_SVC_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * triggered_by
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_svc_downtime.html for details.
 
@@ -443,9 +486,12 @@ Sends the SEND_CUSTOM_HOST_NOTIFICATION command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * options
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/send_custom_host_notification.html for details.
 
@@ -535,12 +581,15 @@ Sends the SCHEDULE_SERVICEGROUP_HOST_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_host_downtime.html for details.
 
@@ -550,12 +599,15 @@ Sends the SCHEDULE_SERVICEGROUP_SVC_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
 
@@ -565,11 +617,14 @@ Sends the ACKNOWLEDGE_SVC_PROBLEM command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * sticky_ack
   * send_notification
   * persistent_comment
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem.html for details.
 
@@ -579,12 +634,15 @@ Sends the ACKNOWLEDGE_SVC_PROBLEM_EXPIRE command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * sticky_ack
   * send_notification
   * persistent_comment
   * end_time
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem_expire.html for details.
 
@@ -594,8 +652,12 @@ Sends the ADD_SVC_COMMENT command.
 
 Required arguments:
 
-  * comment_author
   * comment_data
+
+Optional arguments:
+
+  * persistent_comment
+  * comment_author
 
 See http://www.naemon.org/documentation/developer/externalcommands/add_svc_comment.html for details.
 
@@ -711,8 +773,11 @@ Sends the PROCESS_SERVICE_CHECK_RESULT command.
 
 Required arguments:
 
-  * plugin_state
   * plugin_output
+
+Optional arguments:
+
+  * plugin_state
   * performance_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/process_service_check_result.html for details.
@@ -729,7 +794,7 @@ See http://www.naemon.org/documentation/developer/externalcommands/remove_svc_ac
 
 Sends the SCHEDULE_FORCED_SVC_CHECK command.
 
-Required arguments:
+Optional arguments:
 
   * start_time
 
@@ -739,7 +804,7 @@ See http://www.naemon.org/documentation/developer/externalcommands/schedule_forc
 
 Sends the SCHEDULE_SVC_CHECK command.
 
-Required arguments:
+Optional arguments:
 
   * start_time
 
@@ -751,13 +816,16 @@ Sends the SCHEDULE_SVC_DOWNTIME command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * start_time
   * end_time
   * fixed
   * triggered_by
   * duration
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/schedule_svc_downtime.html for details.
 
@@ -767,9 +835,12 @@ Sends the SEND_CUSTOM_SVC_NOTIFICATION command.
 
 Required arguments:
 
+  * comment_data
+
+Optional arguments:
+
   * options
   * comment_author
-  * comment_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/send_custom_svc_notification.html for details.
 

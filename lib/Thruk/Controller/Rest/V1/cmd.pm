@@ -71,10 +71,24 @@ sub _rest_get_external_command {
         return({ 'message' => 'no such command', 'description' => 'there is no command '.$cmd_name.' for type '.$type, code => 404 });
     }
 
+    my $required = Thruk::Utils::array2hash($cmd->{'required'});
     for my $arg (@{$cmd->{'args'}}) {
         my $val = $c->req->parameters->{$arg};
+        # set some defaults
         if(!defined $val) {
-            return({ 'message' => 'missing argument: '.$arg, 'description' => $arg.' is a required argument', code => 400 });
+            if($arg eq 'comment_author') { $val = $c->stash->{'remote_user'}; }
+            if($arg eq 'fixed')          { $val = 0; }
+            if($arg eq 'duration')       { $val = 0; }
+            if($arg eq 'triggered_by')   { $val = 0; }
+            if($arg eq 'start_time')     { $val = time(); }
+            if($arg eq 'end_time')       { $val = time() + $c->config->{'downtime_duration'}; }
+        }
+        # still not defined?
+        if(!defined $val) {
+            if($required->{$arg}) {
+                return({ 'message' => 'missing argument: '.$arg, 'description' => $arg.' is a required argument', code => 400 });
+            }
+            $val = "";
         }
         if($arg eq 'start_time' || $arg eq 'end_time') {
             $val = Thruk::Utils::parse_date( $c, $val);
@@ -116,11 +130,14 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * sticky_ack
 #   * send_notification
 #   * persistent_comment
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem.html for details.
 
@@ -129,12 +146,15 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * sticky_ack
 #   * send_notification
 #   * persistent_comment
 #   * end_time
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem_expire.html for details.
 
@@ -143,8 +163,12 @@ __DATA__
 #
 # Required arguments:
 #
-#   * comment_author
 #   * comment_data
+#
+# Optional arguments:
+#
+#   * persistent_comment
+#   * comment_author
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/add_host_comment.html for details.
 
@@ -177,6 +201,13 @@ __DATA__
 # This command does not require any arguments.
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/disable_all_notifications_beyond_host.html for details.
+
+# REST PATH: POST /hosts/<name>/cmd/disable_host_and_child_notifications
+# Sends the DISABLE_HOST_AND_CHILD_NOTIFICATIONS command.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_and_child_notifications.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_check
 # Sends the DISABLE_HOST_CHECK command.
@@ -295,8 +326,11 @@ __DATA__
 #
 # Required arguments:
 #
-#   * plugin_state
 #   * plugin_output
+#
+# Optional arguments:
+#
+#   * plugin_state
 #   * performance_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/process_host_check_result.html for details.
@@ -313,13 +347,16 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * triggered_by
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_host_downtime.html for details.
 
@@ -328,20 +365,23 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * triggered_by
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_triggered_host_downtime.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_forced_host_check
 # Sends the SCHEDULE_FORCED_HOST_CHECK command.
 #
-# Required arguments:
+# Optional arguments:
 #
 #   * start_time
 #
@@ -350,7 +390,7 @@ __DATA__
 # REST PATH: POST /hosts/<name>/cmd/schedule_forced_host_svc_checks
 # Sends the SCHEDULE_FORCED_HOST_SVC_CHECKS command.
 #
-# Required arguments:
+# Optional arguments:
 #
 #   * start_time
 #
@@ -359,7 +399,7 @@ __DATA__
 # REST PATH: POST /hosts/<name>/cmd/schedule_host_check
 # Sends the SCHEDULE_HOST_CHECK command.
 #
-# Required arguments:
+# Optional arguments:
 #
 #   * start_time
 #
@@ -370,20 +410,23 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * triggered_by
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_downtime.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_host_svc_checks
 # Sends the SCHEDULE_HOST_SVC_CHECKS command.
 #
-# Required arguments:
+# Optional arguments:
 #
 #   * start_time
 #
@@ -394,13 +437,16 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * triggered_by
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_svc_downtime.html for details.
 
@@ -409,9 +455,12 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * options
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/send_custom_host_notification.html for details.
 
@@ -434,11 +483,14 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * sticky_ack
 #   * send_notification
 #   * persistent_comment
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem.html for details.
 
@@ -447,12 +499,15 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * sticky_ack
 #   * send_notification
 #   * persistent_comment
 #   * end_time
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem_expire.html for details.
 
@@ -461,8 +516,12 @@ __DATA__
 #
 # Required arguments:
 #
-#   * comment_author
 #   * comment_data
+#
+# Optional arguments:
+#
+#   * persistent_comment
+#   * comment_author
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/add_svc_comment.html for details.
 
@@ -564,8 +623,11 @@ __DATA__
 #
 # Required arguments:
 #
-#   * plugin_state
 #   * plugin_output
+#
+# Optional arguments:
+#
+#   * plugin_state
 #   * performance_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/process_service_check_result.html for details.
@@ -580,7 +642,7 @@ __DATA__
 # REST PATH: POST /services/<host>/<service>/cmd/schedule_forced_svc_check
 # Sends the SCHEDULE_FORCED_SVC_CHECK command.
 #
-# Required arguments:
+# Optional arguments:
 #
 #   * start_time
 #
@@ -589,7 +651,7 @@ __DATA__
 # REST PATH: POST /services/<host>/<service>/cmd/schedule_svc_check
 # Sends the SCHEDULE_SVC_CHECK command.
 #
-# Required arguments:
+# Optional arguments:
 #
 #   * start_time
 #
@@ -600,13 +662,16 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * triggered_by
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_svc_downtime.html for details.
 
@@ -615,9 +680,12 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * options
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/send_custom_svc_notification.html for details.
 
@@ -696,12 +764,15 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_host_downtime.html for details.
 
@@ -710,12 +781,15 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_svc_downtime.html for details.
 
@@ -780,12 +854,15 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_host_downtime.html for details.
 
@@ -794,12 +871,15 @@ __DATA__
 #
 # Required arguments:
 #
+#   * comment_data
+#
+# Optional arguments:
+#
 #   * start_time
 #   * end_time
 #   * fixed
 #   * duration
 #   * comment_author
-#   * comment_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
 
@@ -1007,4 +1087,122 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
 
-{"hostgroups":{"disable_hostgroup_host_checks":{"args":[],"name":"disable_hostgroup_host_checks"},"disable_hostgroup_host_notifications":{"args":[],"name":"disable_hostgroup_host_notifications"},"disable_hostgroup_svc_checks":{"args":[],"name":"disable_hostgroup_svc_checks"},"disable_hostgroup_svc_notifications":{"args":[],"name":"disable_hostgroup_svc_notifications"},"enable_hostgroup_host_checks":{"args":[],"name":"enable_hostgroup_host_checks"},"enable_hostgroup_host_notifications":{"args":[],"name":"enable_hostgroup_host_notifications"},"enable_hostgroup_svc_checks":{"args":[],"name":"enable_hostgroup_svc_checks"},"enable_hostgroup_svc_notifications":{"args":[],"name":"enable_hostgroup_svc_notifications"},"schedule_hostgroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_host_downtime"},"schedule_hostgroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_svc_downtime"}},"hosts":{"acknowledge_host_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_host_problem"},"acknowledge_host_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_host_problem_expire"},"add_host_comment":{"args":["comment_author","comment_data"],"name":"add_host_comment"},"change_host_modattr":{"args":[],"name":"change_host_modattr"},"del_all_host_comments":{"args":[],"name":"del_all_host_comments"},"delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification"},"disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host"},"disable_host_check":{"args":[],"name":"disable_host_check"},"disable_host_event_handler":{"args":[],"name":"disable_host_event_handler"},"disable_host_flap_detection":{"args":[],"name":"disable_host_flap_detection"},"disable_host_notifications":{"args":[],"name":"disable_host_notifications"},"disable_host_svc_checks":{"args":[],"name":"disable_host_svc_checks"},"disable_host_svc_notifications":{"args":[],"name":"disable_host_svc_notifications"},"disable_passive_host_checks":{"args":[],"name":"disable_passive_host_checks"},"enable_all_notifications_beyond_host":{"args":[],"name":"enable_all_notifications_beyond_host"},"enable_host_and_child_notifications":{"args":[],"name":"enable_host_and_child_notifications"},"enable_host_check":{"args":[],"name":"enable_host_check"},"enable_host_event_handler":{"args":[],"name":"enable_host_event_handler"},"enable_host_flap_detection":{"args":[],"name":"enable_host_flap_detection"},"enable_host_notifications":{"args":[],"name":"enable_host_notifications"},"enable_host_svc_checks":{"args":[],"name":"enable_host_svc_checks"},"enable_host_svc_notifications":{"args":[],"name":"enable_host_svc_notifications"},"enable_passive_host_checks":{"args":[],"name":"enable_passive_host_checks"},"process_host_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_host_check_result"},"remove_host_acknowledgement":{"args":[],"name":"remove_host_acknowledgement"},"schedule_and_propagate_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_host_downtime"},"schedule_and_propagate_triggered_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_triggered_host_downtime"},"schedule_forced_host_check":{"args":["start_time"],"name":"schedule_forced_host_check"},"schedule_forced_host_svc_checks":{"args":["start_time"],"name":"schedule_forced_host_svc_checks"},"schedule_host_check":{"args":["start_time"],"name":"schedule_host_check"},"schedule_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_downtime"},"schedule_host_svc_checks":{"args":["start_time"],"name":"schedule_host_svc_checks"},"schedule_host_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_svc_downtime"},"send_custom_host_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_host_notification"},"start_obsessing_over_host":{"args":[],"name":"start_obsessing_over_host"},"stop_obsessing_over_host":{"args":[],"name":"stop_obsessing_over_host"}},"servicegroups":{"disable_servicegroup_host_checks":{"args":[],"name":"disable_servicegroup_host_checks"},"disable_servicegroup_host_notifications":{"args":[],"name":"disable_servicegroup_host_notifications"},"disable_servicegroup_svc_checks":{"args":[],"name":"disable_servicegroup_svc_checks"},"disable_servicegroup_svc_notifications":{"args":[],"name":"disable_servicegroup_svc_notifications"},"enable_servicegroup_host_checks":{"args":[],"name":"enable_servicegroup_host_checks"},"enable_servicegroup_host_notifications":{"args":[],"name":"enable_servicegroup_host_notifications"},"enable_servicegroup_svc_checks":{"args":[],"name":"enable_servicegroup_svc_checks"},"enable_servicegroup_svc_notifications":{"args":[],"name":"enable_servicegroup_svc_notifications"},"schedule_servicegroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_host_downtime"},"schedule_servicegroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_svc_downtime"}},"services":{"acknowledge_svc_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_svc_problem"},"acknowledge_svc_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_svc_problem_expire"},"add_svc_comment":{"args":["comment_author","comment_data"],"name":"add_svc_comment"},"change_svc_modattr":{"args":[],"name":"change_svc_modattr"},"del_all_svc_comments":{"args":[],"name":"del_all_svc_comments"},"delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification"},"disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks"},"disable_svc_check":{"args":[],"name":"disable_svc_check"},"disable_svc_event_handler":{"args":[],"name":"disable_svc_event_handler"},"disable_svc_flap_detection":{"args":[],"name":"disable_svc_flap_detection"},"disable_svc_notifications":{"args":[],"name":"disable_svc_notifications"},"enable_passive_svc_checks":{"args":[],"name":"enable_passive_svc_checks"},"enable_svc_check":{"args":[],"name":"enable_svc_check"},"enable_svc_event_handler":{"args":[],"name":"enable_svc_event_handler"},"enable_svc_flap_detection":{"args":[],"name":"enable_svc_flap_detection"},"enable_svc_notifications":{"args":[],"name":"enable_svc_notifications"},"process_service_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_service_check_result"},"remove_svc_acknowledgement":{"args":[],"name":"remove_svc_acknowledgement"},"schedule_forced_svc_check":{"args":["start_time"],"name":"schedule_forced_svc_check"},"schedule_svc_check":{"args":["start_time"],"name":"schedule_svc_check"},"schedule_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_svc_downtime"},"send_custom_svc_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_svc_notification"},"start_obsessing_over_svc":{"args":[],"name":"start_obsessing_over_svc"},"stop_obsessing_over_svc":{"args":[],"name":"stop_obsessing_over_svc"}},"system":{"del_host_comment":{"args":["comment_id"],"name":"del_host_comment"},"del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime"},"del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment"},"del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime"},"disable_event_handlers":{"args":[],"name":"disable_event_handlers"},"disable_failure_prediction":{"args":[],"name":"disable_failure_prediction"},"disable_flap_detection":{"args":[],"name":"disable_flap_detection"},"disable_notifications":{"args":[],"name":"disable_notifications"},"disable_performance_data":{"args":[],"name":"disable_performance_data"},"enable_event_handlers":{"args":[],"name":"enable_event_handlers"},"enable_failure_prediction":{"args":[],"name":"enable_failure_prediction"},"enable_flap_detection":{"args":[],"name":"enable_flap_detection"},"enable_notifications":{"args":[],"name":"enable_notifications"},"enable_performance_data":{"args":[],"name":"enable_performance_data"},"restart_process":{"args":[],"name":"restart_process"},"shutdown_process":{"args":[],"name":"shutdown_process"},"start_accepting_passive_host_checks":{"args":[],"name":"start_accepting_passive_host_checks"},"start_accepting_passive_svc_checks":{"args":[],"name":"start_accepting_passive_svc_checks"},"start_executing_host_checks":{"args":[],"name":"start_executing_host_checks"},"start_executing_svc_checks":{"args":[],"name":"start_executing_svc_checks"},"start_obsessing_over_host_checks":{"args":[],"name":"start_obsessing_over_host_checks"},"start_obsessing_over_svc_checks":{"args":[],"name":"start_obsessing_over_svc_checks"},"stop_accepting_passive_host_checks":{"args":[],"name":"stop_accepting_passive_host_checks"},"stop_accepting_passive_svc_checks":{"args":[],"name":"stop_accepting_passive_svc_checks"},"stop_executing_host_checks":{"args":[],"name":"stop_executing_host_checks"},"stop_executing_svc_checks":{"args":[],"name":"stop_executing_svc_checks"},"stop_obsessing_over_host_checks":{"args":[],"name":"stop_obsessing_over_host_checks"},"stop_obsessing_over_svc_checks":{"args":[],"name":"stop_obsessing_over_svc_checks"}}}
+{"hostgroups":{
+  "disable_hostgroup_host_checks":{"args":[],"name":"disable_hostgroup_host_checks","required":[]},
+  "disable_hostgroup_host_notifications":{"args":[],"name":"disable_hostgroup_host_notifications","required":[]},
+  "disable_hostgroup_svc_checks":{"args":[],"name":"disable_hostgroup_svc_checks","required":[]},
+  "disable_hostgroup_svc_notifications":{"args":[],"name":"disable_hostgroup_svc_notifications","required":[]},
+  "enable_hostgroup_host_checks":{"args":[],"name":"enable_hostgroup_host_checks","required":[]},
+  "enable_hostgroup_host_notifications":{"args":[],"name":"enable_hostgroup_host_notifications","required":[]},
+  "enable_hostgroup_svc_checks":{"args":[],"name":"enable_hostgroup_svc_checks","required":[]},
+  "enable_hostgroup_svc_notifications":{"args":[],"name":"enable_hostgroup_svc_notifications","required":[]},
+  "schedule_hostgroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_host_downtime","required":["comment_data"]},
+  "schedule_hostgroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_svc_downtime","required":["comment_data"]}
+},
+"hosts":{
+  "acknowledge_host_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_host_problem","required":["comment_data"]},
+  "acknowledge_host_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_host_problem_expire","required":["comment_data"]},
+  "add_host_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_host_comment","required":["comment_data"]},
+  "change_host_modattr":{"args":[],"name":"change_host_modattr","required":[]},
+  "del_all_host_comments":{"args":[],"name":"del_all_host_comments","required":[]},
+  "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","required":["notification_time"]},
+  "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","required":[]},
+  "disable_host_and_child_notifications":{"args":[],"name":"disable_host_and_child_notifications","required":[],"requires_comment":1},
+  "disable_host_check":{"args":[],"name":"disable_host_check","required":[],"requires_comment":1},
+  "disable_host_event_handler":{"args":[],"name":"disable_host_event_handler","required":[],"requires_comment":1},
+  "disable_host_flap_detection":{"args":[],"name":"disable_host_flap_detection","required":[]},
+  "disable_host_notifications":{"args":[],"name":"disable_host_notifications","required":[],"requires_comment":1},
+  "disable_host_svc_checks":{"args":[],"name":"disable_host_svc_checks","required":[],"requires_comment":1},
+  "disable_host_svc_notifications":{"args":[],"name":"disable_host_svc_notifications","required":[],"requires_comment":1},
+  "disable_passive_host_checks":{"args":[],"name":"disable_passive_host_checks","required":[]},
+  "enable_all_notifications_beyond_host":{"args":[],"name":"enable_all_notifications_beyond_host","required":[]},
+  "enable_host_and_child_notifications":{"args":[],"name":"enable_host_and_child_notifications","required":[]},
+  "enable_host_check":{"args":[],"name":"enable_host_check","required":[]},
+  "enable_host_event_handler":{"args":[],"name":"enable_host_event_handler","required":[]},
+  "enable_host_flap_detection":{"args":[],"name":"enable_host_flap_detection","required":[]},
+  "enable_host_notifications":{"args":[],"name":"enable_host_notifications","required":[]},
+  "enable_host_svc_checks":{"args":[],"name":"enable_host_svc_checks","required":[]},
+  "enable_host_svc_notifications":{"args":[],"name":"enable_host_svc_notifications","required":[]},
+  "enable_passive_host_checks":{"args":[],"name":"enable_passive_host_checks","required":[]},
+  "process_host_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_host_check_result","required":["plugin_output"]},
+  "remove_host_acknowledgement":{"args":[],"name":"remove_host_acknowledgement","required":[]},
+  "schedule_and_propagate_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_host_downtime","required":["comment_data"]},
+  "schedule_and_propagate_triggered_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_triggered_host_downtime","required":["comment_data"]},
+  "schedule_forced_host_check":{"args":["start_time"],"name":"schedule_forced_host_check","required":[]},
+  "schedule_forced_host_svc_checks":{"args":["start_time"],"name":"schedule_forced_host_svc_checks","required":[]},
+  "schedule_host_check":{"args":["start_time"],"name":"schedule_host_check","required":[]},
+  "schedule_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_downtime","required":["comment_data"]},
+  "schedule_host_svc_checks":{"args":["start_time"],"name":"schedule_host_svc_checks","required":[]},
+  "schedule_host_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_svc_downtime","required":["comment_data"]},
+  "send_custom_host_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_host_notification","required":["comment_data"]},
+  "start_obsessing_over_host":{"args":[],"name":"start_obsessing_over_host","required":[]},
+  "stop_obsessing_over_host":{"args":[],"name":"stop_obsessing_over_host","required":[]}
+},
+"servicegroups":{
+  "disable_servicegroup_host_checks":{"args":[],"name":"disable_servicegroup_host_checks","required":[]},
+  "disable_servicegroup_host_notifications":{"args":[],"name":"disable_servicegroup_host_notifications","required":[]},
+  "disable_servicegroup_svc_checks":{"args":[],"name":"disable_servicegroup_svc_checks","required":[]},
+  "disable_servicegroup_svc_notifications":{"args":[],"name":"disable_servicegroup_svc_notifications","required":[]},
+  "enable_servicegroup_host_checks":{"args":[],"name":"enable_servicegroup_host_checks","required":[]},
+  "enable_servicegroup_host_notifications":{"args":[],"name":"enable_servicegroup_host_notifications","required":[]},
+  "enable_servicegroup_svc_checks":{"args":[],"name":"enable_servicegroup_svc_checks","required":[]},
+  "enable_servicegroup_svc_notifications":{"args":[],"name":"enable_servicegroup_svc_notifications","required":[]},
+  "schedule_servicegroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_host_downtime","required":["comment_data"]},
+  "schedule_servicegroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_svc_downtime","required":["comment_data"]}
+},
+"services":{
+  "acknowledge_svc_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_svc_problem","required":["comment_data"]},
+  "acknowledge_svc_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_svc_problem_expire","required":["comment_data"]},
+  "add_svc_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_svc_comment","required":["comment_data"]},
+  "change_svc_modattr":{"args":[],"name":"change_svc_modattr","required":[]},
+  "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","required":[]},
+  "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","required":["notification_time"]},
+  "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","required":[]},
+  "disable_svc_check":{"args":[],"name":"disable_svc_check","required":[],"requires_comment":1},
+  "disable_svc_event_handler":{"args":[],"name":"disable_svc_event_handler","required":[],"requires_comment":1},
+  "disable_svc_flap_detection":{"args":[],"name":"disable_svc_flap_detection","required":[]},
+  "disable_svc_notifications":{"args":[],"name":"disable_svc_notifications","required":[],"requires_comment":1},
+  "enable_passive_svc_checks":{"args":[],"name":"enable_passive_svc_checks","required":[]},
+  "enable_svc_check":{"args":[],"name":"enable_svc_check","required":[]},
+  "enable_svc_event_handler":{"args":[],"name":"enable_svc_event_handler","required":[]},
+  "enable_svc_flap_detection":{"args":[],"name":"enable_svc_flap_detection","required":[]},
+  "enable_svc_notifications":{"args":[],"name":"enable_svc_notifications","required":[]},
+  "process_service_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_service_check_result","required":["plugin_output"]},
+  "remove_svc_acknowledgement":{"args":[],"name":"remove_svc_acknowledgement","required":[]},
+  "schedule_forced_svc_check":{"args":["start_time"],"name":"schedule_forced_svc_check","required":[]},
+  "schedule_svc_check":{"args":["start_time"],"name":"schedule_svc_check","required":[]},
+  "schedule_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_svc_downtime","required":["comment_data"]},
+  "send_custom_svc_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_svc_notification","required":["comment_data"]},
+  "start_obsessing_over_svc":{"args":[],"name":"start_obsessing_over_svc","required":[]},
+  "stop_obsessing_over_svc":{"args":[],"name":"stop_obsessing_over_svc","required":[]}
+},
+"system":{
+  "del_host_comment":{"args":["comment_id"],"name":"del_host_comment","required":["comment_id"]},
+  "del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime","required":["downtime_id"]},
+  "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","required":["comment_id"]},
+  "del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime","required":["downtime_id"]},
+  "disable_event_handlers":{"args":[],"name":"disable_event_handlers","required":[]},
+  "disable_failure_prediction":{"args":[],"name":"disable_failure_prediction","required":[]},
+  "disable_flap_detection":{"args":[],"name":"disable_flap_detection","required":[]},
+  "disable_notifications":{"args":[],"name":"disable_notifications","required":[]},
+  "disable_performance_data":{"args":[],"name":"disable_performance_data","required":[]},
+  "enable_event_handlers":{"args":[],"name":"enable_event_handlers","required":[]},
+  "enable_failure_prediction":{"args":[],"name":"enable_failure_prediction","required":[]},
+  "enable_flap_detection":{"args":[],"name":"enable_flap_detection","required":[]},
+  "enable_notifications":{"args":[],"name":"enable_notifications","required":[]},
+  "enable_performance_data":{"args":[],"name":"enable_performance_data","required":[]},
+  "restart_process":{"args":[],"name":"restart_process","required":[]},
+  "shutdown_process":{"args":[],"name":"shutdown_process","required":[]},
+  "start_accepting_passive_host_checks":{"args":[],"name":"start_accepting_passive_host_checks","required":[]},
+  "start_accepting_passive_svc_checks":{"args":[],"name":"start_accepting_passive_svc_checks","required":[]},
+  "start_executing_host_checks":{"args":[],"name":"start_executing_host_checks","required":[]},
+  "start_executing_svc_checks":{"args":[],"name":"start_executing_svc_checks","required":[]},
+  "start_obsessing_over_host_checks":{"args":[],"name":"start_obsessing_over_host_checks","required":[]},
+  "start_obsessing_over_svc_checks":{"args":[],"name":"start_obsessing_over_svc_checks","required":[]},
+  "stop_accepting_passive_host_checks":{"args":[],"name":"stop_accepting_passive_host_checks","required":[]},
+  "stop_accepting_passive_svc_checks":{"args":[],"name":"stop_accepting_passive_svc_checks","required":[]},
+  "stop_executing_host_checks":{"args":[],"name":"stop_executing_host_checks","required":[]},
+  "stop_executing_svc_checks":{"args":[],"name":"stop_executing_svc_checks","required":[]},
+  "stop_obsessing_over_host_checks":{"args":[],"name":"stop_obsessing_over_host_checks","required":[]},
+  "stop_obsessing_over_svc_checks":{"args":[],"name":"stop_obsessing_over_svc_checks","required":[]}}
+}

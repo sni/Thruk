@@ -44,6 +44,7 @@ sub _update_cmds {
         next if $template =~ m/enable_shinken_features/gmx;
         my @matches = $template =~ m%^\s*([A-Z_]+)\s*(;|$|)(.*sprintf.*|$)%gmx;
         die("got no command in ".$file) if scalar @matches == 0;
+        my $require_comments = $template =~ m/require_comments_for_disable_cmds/gmx ? 1 : 0;
         while(scalar @matches > 0) {
             my $name = shift @matches;
             shift @matches;
@@ -59,31 +60,68 @@ sub _update_cmds {
                     die("cannot parse arguments in ".$file);
                 }
             }
+            my @required_args;
+            if(my @req = $template =~ m/class='(optBoxRequiredItem|optBoxItem)'>(?:.*?):<\/td>.*?input\s+type='.*?'\s+name='(.*?)'/gmx ) {
+                while ( scalar @req > 0 ) {
+                    my $req  = shift @req;
+                    my $key  = shift @req;
+                    if($req eq 'optBoxRequiredItem') {
+                        # unfortunatly naming is different, so we need to translate some names
+                        $key = 'triggered_by'       if $key eq 'trigger';
+                        $key = 'comment_data'       if $key eq 'com_data';
+                        $key = 'comment_data'       if $key eq 'com_data_disable_cmd';
+                        $key = 'comment_author'     if $key eq 'com_author';
+                        $key = 'persistent_comment' if $key eq 'persistent';
+                        $key = 'sticky_ack'         if $key eq 'sticky';
+                        $key = 'notification_time'  if $key eq 'not_dly';
+                        $key = 'downtime_id'        if $key eq 'down_id';
+                        $key = 'comment_id'         if $key eq 'com_id';
+                        # some are required but have defaults, so they are not strictly required
+                        next if $key eq 'comment_author';
+                        next if $key eq 'start_time';
+                        next if $key eq 'end_time';
+
+                        # comment_data is a false positive if comments are added to other commands
+                        next if($require_comments && $key eq 'comment_data');
+                        push @required_args, $key;
+                    }
+                }
+            }
+
+            next if $require_comments && $cmd->{'name'} =~ m/add_.*_comment/;
+
             map {s/_unix$//gmx; } @args;
             if($args[0] && $args[0] eq 'host_name') {
                 shift @args;
+                shift @required_args;
                 if($args[0] && $args[0] eq 'service_desc') {
                     shift @args;
-                    $cmd->{'args'} = \@args;
+                    shift @required_args;
                     $cmds->{'services'}->{$cmd->{'name'}} = $cmd;
                 } else {
-                    $cmd->{'args'} = \@args;
                     $cmds->{'hosts'}->{$cmd->{'name'}} = $cmd;
                 }
             }
             elsif($args[0] && $args[0] eq 'hostgroup_name') {
                 shift @args;
-                $cmd->{'args'} = \@args;
+                shift @required_args;
                 $cmds->{'hostgroups'}->{$cmd->{'name'}} = $cmd;
             }
             elsif($args[0] && $args[0] eq 'servicegroup_name') {
                 shift @args;
-                $cmd->{'args'} = \@args;
+                shift @required_args;
                 $cmds->{'servicegroups'}->{$cmd->{'name'}} = $cmd;
             } else {
-                $cmd->{'args'} = \@args;
                 $cmds->{'system'}->{$cmd->{'name'}} = $cmd;
             }
+            $cmd->{'args'}     = \@args;
+            $cmd->{'required'} = \@required_args;
+            # sanity check, there should not be any required parameters which cannot be found in the args list
+            my $args_hash = Thruk::Utils::array2hash(\@args);
+            for my $r (@required_args) {
+                die("cannot find required $r in args list for file: ".$file) unless $args_hash->{$r};
+            }
+            $cmd->{'requires_comment'} = 1 if $require_comments;
         }
     }
 
@@ -101,7 +139,21 @@ sub _update_cmds {
             }
             $content .= "# Sends the ".uc($name)." command.\n#\n";
             if(scalar @{$cmd->{'args'}} > 0) {
-                $content .= "# Required arguments:\n#\n#   * ".join("\n#   * ", @{$cmd->{'args'}})."\n";
+                my $optional = [];
+                my $required = Thruk::Utils::array2hash($cmd->{'required'});
+                for my $a (@{$cmd->{'args'}}) {
+                    next if $required->{$a};
+                    push @{$optional}, $a;
+                }
+                if(scalar @{$cmd->{'required'}} > 0) {
+                    $content .= "# Required arguments:\n#\n#   * ".join("\n#   * ", @{$cmd->{'required'}})."\n";
+                    if(scalar @{$optional} > 0) {
+                        $content .= "#\n";
+                    }
+                }
+                if(scalar @{$optional} > 0) {
+                    $content .= "# Optional arguments:\n#\n#   * ".join("\n#   * ", @{$optional})."\n";
+                }
             } else {
                 $content .= "# This command does not require any arguments.\n";
             }
@@ -111,7 +163,12 @@ sub _update_cmds {
         }
     }
 
-    $content .= Cpanel::JSON::XS->new->utf8->canonical->encode($cmds);
+    my $cmd_dump = Cpanel::JSON::XS->new->utf8->canonical->encode($cmds);
+    $cmd_dump    =~ s/\},/},\n  /gmx;
+    $cmd_dump    =~ s/\ *"(hostgroups|hosts|services|servicegroups|system)":\{/"$1":{\n  /gmx;
+    $cmd_dump    =~ s/\}$/\n}/gmx;
+    $cmd_dump    =~ s/\}\},$/}\n},/gmx;
+    $content .= $cmd_dump;
 
     $output_file = 'cmd.pm.tst' if $ENV{'TEST_MODE'};
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);

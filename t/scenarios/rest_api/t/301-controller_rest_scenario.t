@@ -5,7 +5,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 15;
+    plan tests => 32;
 
     use lib('t');
     require TestUtils;
@@ -14,6 +14,8 @@ BEGIN {
 }
 
 use_ok 'Thruk::Controller::rest_v1';
+
+my($host,$service) = ('localhost', 'Users');
 
 my $pages = [{
         url          => '/csv/services?q=***description ~ http and description !~ cert***&columns=description',
@@ -24,6 +26,13 @@ my $pages = [{
         url          => '/csv/services/totals?q=***description ~ http and description !~ cert***&columns=total',
         like         => ['total;2'],
         content_type => 'text/plain; charset=UTF-8',
+    }, {
+        url          => '/services/'.$host.'/'.$service.'/cmd/schedule_svc_downtime',
+        post         => { 'start_time' => 'now', 'end_time' => '+60m', 'comment_data' => 'test comment' },
+        like         => ['Command successfully submitted'],
+    }, {
+        url          => '/downtimes',
+        like         => ['"test comment",', 'omdadmin'],
     }
 ];
 
