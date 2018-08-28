@@ -5386,7 +5386,10 @@ function show_cal(id, defaultDate) {
   }
 
   var tmp = parseDate(id);
-  if(!tmp[0] && defaultDate != undefined) {
+  if(!tmp[0]) {
+    if(defaultDate == undefined) {
+        defaultDate = Calendar.printDate(new Date, '%Y-%m-%d %H:%M:%S');
+    }
     document.getElementById(id).value = defaultDate;
     tmp = parseDate(id);
   }
