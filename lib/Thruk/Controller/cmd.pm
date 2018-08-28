@@ -3,7 +3,6 @@ package Thruk::Controller::cmd;
 use strict;
 use warnings;
 use Data::Dumper;
-use Thruk::Utils::CLI;
 
 =head1 NAME
 
@@ -712,38 +711,10 @@ sub _do_send_command {
         }
     }
 
+    # remove comments added by require_comments_for_disable_cmds
     # delete associated comment(s) if we are about to re-enable active checks,
     # notifications or handlers
-    my %cmds_for_type = (
-        47 => ['DISABLE_HOST_CHECK'],
-        15 => ['DISABLE_HOST_SVC_CHECKS', 'DISABLE_HOST_CHECK'],
-        24 => ['DISABLE_HOST_NOTIFICATIONS', 'DISABLE_HOST_AND_CHILD_NOTIFICATIONS'],
-        28 => ['DISABLE_HOST_SVC_NOTIFICATIONS', 'DISABLE_HOST_NOTIFICATIONS'],
-        43 => ['DISABLE_HOST_EVENT_HANDLER'],
-        5  => ['DISABLE_SVC_CHECK'],
-        22 => ['DISABLE_SVC_NOTIFICATIONS'],
-        45 => ['DISABLE_SVC_EVENT_HANDLER'],
-    );
-    if (exists $cmds_for_type{$cmd_typ}) {
-        my $cli = Thruk::Utils::CLI->new;
-        my $db  = $cli->get_db();
-        for my $cmd (@{$cmds_for_type{$cmd_typ}}) {
-            for my $comm (@{$db->get_comments_by_pattern($c,
-                                                         $c->req->parameters->{'host'},
-                                                         $c->req->parameters->{'service'},
-                                                         $cmd)}) {
-                $c->log->debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
-                if ($cmd =~ m/HOST/mx) {
-                    push @{$c->stash->{'commands2send'}->{$comm->{'backend'}}},
-                        sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d\n", time(), $comm->{'id'});
-                }
-                else {
-                    push @{$c->stash->{'commands2send'}->{$comm->{'backend'}}},
-                        sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d\n", time(), $comm->{'id'});
-                }
-            }
-        }
-    }
+    add_remove_comments_commands_from_disabled_commands($c, $c->stash->{'commands2send'}, $cmd_typ, $c->req->parameters->{'host'}, $c->req->parameters->{'service'});
 
     $c->stash->{'start_time_unix'} = $start_time_unix;
     $c->stash->{'lasthost'}        = $c->req->parameters->{'host'};
@@ -970,6 +941,43 @@ sub _get_affected_backends {
         }
     }
     return([keys %{$affected_backends}]);
+}
+
+######################################
+
+=head2 add_remove_comments_commands_from_disabled_commands
+
+    add comment remove commands for comments added from the `require_comments_for_disable_cmds` option.
+
+=cut
+sub add_remove_comments_commands_from_disabled_commands {
+    my($c, $list, $cmd_typ, $host, $service) = @_;
+    my $cmds_for_type = {
+        47 => ['DISABLE_HOST_CHECK'],
+        15 => ['DISABLE_HOST_SVC_CHECKS', 'DISABLE_HOST_CHECK'],
+        24 => ['DISABLE_HOST_NOTIFICATIONS', 'DISABLE_HOST_AND_CHILD_NOTIFICATIONS'],
+        28 => ['DISABLE_HOST_SVC_NOTIFICATIONS', 'DISABLE_HOST_NOTIFICATIONS'],
+        43 => ['DISABLE_HOST_EVENT_HANDLER'],
+        5  => ['DISABLE_SVC_CHECK'],
+        22 => ['DISABLE_SVC_NOTIFICATIONS'],
+        45 => ['DISABLE_SVC_EVENT_HANDLER'],
+    };
+    return unless exists $cmds_for_type->{$cmd_typ};
+
+    for my $cmd (@{$cmds_for_type->{$cmd_typ}}) {
+        for my $comm (@{$c->{'db'}->get_comments_by_pattern($c, $host, $service, $cmd)}) {
+            $c->log->debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
+            if ($cmd =~ m/HOST/mx) {
+                push @{$list->{$comm->{'backend'}}},
+                    sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d\n", time(), $comm->{'id'});
+            }
+            else {
+                push @{$list->{$comm->{'backend'}}},
+                    sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d\n", time(), $comm->{'id'});
+            }
+        }
+    }
+    return;
 }
 
 ######################################

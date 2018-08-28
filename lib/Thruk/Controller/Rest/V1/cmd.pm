@@ -3,6 +3,7 @@ package Thruk::Controller::Rest::V1::cmd;
 use strict;
 use warnings;
 use Cpanel::JSON::XS qw/decode_json/;
+use Storable qw/dclone/;
 
 use Thruk::Utils;
 use Thruk::Controller::rest_v1;
@@ -95,16 +96,30 @@ sub _rest_get_external_command {
         }
         push @cmd_args, $val;
     }
+
     my $cmd_line = "COMMAND [".time()."] ".uc($cmd->{'name'});
     if(scalar @cmd_args > 0) {
         $cmd_line .= ';'.join(';', @cmd_args);
+    }
+    my $cmd_list = [$cmd_line];
+
+    if($cmd->{'requires_comment'}) {
+        if(!$c->req->parameters->{'comment_data'}) {
+            return({ 'message' => 'missing argument: comment_data', 'description' => 'comment_data is a required argument', code => 400 });
+        }
+        if($description) {
+            push @{$cmd_list}, sprintf("COMMAND [%d] ADD_SVC_COMMENT;%s;%s;1;%s;%s: %s", time(), $name, $description, $c->stash->{'remote_user'}, uc($cmd->{'name'}), $c->req->parameters->{'comment_data'});
+        } else {
+            push @{$cmd_list}, sprintf("COMMAND [%d] ADD_HOST_COMMENT;%s;1;%s;%s: %s", time(), $name, $c->stash->{'remote_user'}, uc($cmd->{'name'}), $c->req->parameters->{'comment_data'});
+        }
     }
 
     my($backends) = $c->{'db'}->select_backends('send_command');
     my $commands = {};
     for my $b (@{$backends}) {
-        $commands->{$b} = [$cmd_line];
+        $commands->{$b} = dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
     }
+    Thruk::Controller::cmd::add_remove_comments_commands_from_disabled_commands($c, $commands, $cmd->{'nr'}, $name, $description);
     Thruk::Controller::cmd::bulk_send($c, $commands);
     return({ 'message' => 'Command successfully submitted' });
 }
@@ -1088,121 +1103,121 @@ __DATA__
 # See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
 
 {"hostgroups":{
-  "disable_hostgroup_host_checks":{"args":[],"name":"disable_hostgroup_host_checks","required":[]},
-  "disable_hostgroup_host_notifications":{"args":[],"name":"disable_hostgroup_host_notifications","required":[]},
-  "disable_hostgroup_svc_checks":{"args":[],"name":"disable_hostgroup_svc_checks","required":[]},
-  "disable_hostgroup_svc_notifications":{"args":[],"name":"disable_hostgroup_svc_notifications","required":[]},
-  "enable_hostgroup_host_checks":{"args":[],"name":"enable_hostgroup_host_checks","required":[]},
-  "enable_hostgroup_host_notifications":{"args":[],"name":"enable_hostgroup_host_notifications","required":[]},
-  "enable_hostgroup_svc_checks":{"args":[],"name":"enable_hostgroup_svc_checks","required":[]},
-  "enable_hostgroup_svc_notifications":{"args":[],"name":"enable_hostgroup_svc_notifications","required":[]},
-  "schedule_hostgroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_host_downtime","required":["comment_data"]},
-  "schedule_hostgroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_svc_downtime","required":["comment_data"]}
+  "disable_hostgroup_host_checks":{"args":[],"name":"disable_hostgroup_host_checks","nr":"68","required":[]},
+  "disable_hostgroup_host_notifications":{"args":[],"name":"disable_hostgroup_host_notifications","nr":"66","required":[]},
+  "disable_hostgroup_svc_checks":{"args":[],"name":"disable_hostgroup_svc_checks","nr":"68","required":[]},
+  "disable_hostgroup_svc_notifications":{"args":[],"name":"disable_hostgroup_svc_notifications","nr":"64","required":[]},
+  "enable_hostgroup_host_checks":{"args":[],"name":"enable_hostgroup_host_checks","nr":"67","required":[]},
+  "enable_hostgroup_host_notifications":{"args":[],"name":"enable_hostgroup_host_notifications","nr":"65","required":[]},
+  "enable_hostgroup_svc_checks":{"args":[],"name":"enable_hostgroup_svc_checks","nr":"67","required":[]},
+  "enable_hostgroup_svc_notifications":{"args":[],"name":"enable_hostgroup_svc_notifications","nr":"63","required":[]},
+  "schedule_hostgroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_host_downtime","nr":"85","required":["comment_data"]},
+  "schedule_hostgroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_svc_downtime","nr":"85","required":["comment_data"]}
 },
 "hosts":{
-  "acknowledge_host_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_host_problem","required":["comment_data"]},
-  "acknowledge_host_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_host_problem_expire","required":["comment_data"]},
-  "add_host_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_host_comment","required":["comment_data"]},
-  "change_host_modattr":{"args":[],"name":"change_host_modattr","required":[]},
-  "del_all_host_comments":{"args":[],"name":"del_all_host_comments","required":[]},
-  "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","required":["notification_time"]},
-  "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","required":[]},
-  "disable_host_and_child_notifications":{"args":[],"name":"disable_host_and_child_notifications","required":[],"requires_comment":1},
-  "disable_host_check":{"args":[],"name":"disable_host_check","required":[],"requires_comment":1},
-  "disable_host_event_handler":{"args":[],"name":"disable_host_event_handler","required":[],"requires_comment":1},
-  "disable_host_flap_detection":{"args":[],"name":"disable_host_flap_detection","required":[]},
-  "disable_host_notifications":{"args":[],"name":"disable_host_notifications","required":[],"requires_comment":1},
-  "disable_host_svc_checks":{"args":[],"name":"disable_host_svc_checks","required":[],"requires_comment":1},
-  "disable_host_svc_notifications":{"args":[],"name":"disable_host_svc_notifications","required":[],"requires_comment":1},
-  "disable_passive_host_checks":{"args":[],"name":"disable_passive_host_checks","required":[]},
-  "enable_all_notifications_beyond_host":{"args":[],"name":"enable_all_notifications_beyond_host","required":[]},
-  "enable_host_and_child_notifications":{"args":[],"name":"enable_host_and_child_notifications","required":[]},
-  "enable_host_check":{"args":[],"name":"enable_host_check","required":[]},
-  "enable_host_event_handler":{"args":[],"name":"enable_host_event_handler","required":[]},
-  "enable_host_flap_detection":{"args":[],"name":"enable_host_flap_detection","required":[]},
-  "enable_host_notifications":{"args":[],"name":"enable_host_notifications","required":[]},
-  "enable_host_svc_checks":{"args":[],"name":"enable_host_svc_checks","required":[]},
-  "enable_host_svc_notifications":{"args":[],"name":"enable_host_svc_notifications","required":[]},
-  "enable_passive_host_checks":{"args":[],"name":"enable_passive_host_checks","required":[]},
-  "process_host_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_host_check_result","required":["plugin_output"]},
-  "remove_host_acknowledgement":{"args":[],"name":"remove_host_acknowledgement","required":[]},
-  "schedule_and_propagate_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_host_downtime","required":["comment_data"]},
-  "schedule_and_propagate_triggered_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_triggered_host_downtime","required":["comment_data"]},
-  "schedule_forced_host_check":{"args":["start_time"],"name":"schedule_forced_host_check","required":[]},
-  "schedule_forced_host_svc_checks":{"args":["start_time"],"name":"schedule_forced_host_svc_checks","required":[]},
-  "schedule_host_check":{"args":["start_time"],"name":"schedule_host_check","required":[]},
-  "schedule_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_downtime","required":["comment_data"]},
-  "schedule_host_svc_checks":{"args":["start_time"],"name":"schedule_host_svc_checks","required":[]},
-  "schedule_host_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_svc_downtime","required":["comment_data"]},
-  "send_custom_host_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_host_notification","required":["comment_data"]},
-  "start_obsessing_over_host":{"args":[],"name":"start_obsessing_over_host","required":[]},
-  "stop_obsessing_over_host":{"args":[],"name":"stop_obsessing_over_host","required":[]}
+  "acknowledge_host_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_host_problem","nr":"33","required":["comment_data"]},
+  "acknowledge_host_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_host_problem_expire","nr":"33","required":["comment_data"]},
+  "add_host_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_host_comment","nr":"1","required":["comment_data"]},
+  "change_host_modattr":{"args":[],"name":"change_host_modattr","nr":"154","required":[]},
+  "del_all_host_comments":{"args":[],"name":"del_all_host_comments","nr":"20","required":[]},
+  "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","nr":"10","required":["notification_time"]},
+  "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","nr":"27","required":[]},
+  "disable_host_and_child_notifications":{"args":[],"name":"disable_host_and_child_notifications","nr":"25","required":[],"requires_comment":1},
+  "disable_host_check":{"args":[],"name":"disable_host_check","nr":"48","required":[],"requires_comment":1},
+  "disable_host_event_handler":{"args":[],"name":"disable_host_event_handler","nr":"44","required":[],"requires_comment":1},
+  "disable_host_flap_detection":{"args":[],"name":"disable_host_flap_detection","nr":"58","required":[]},
+  "disable_host_notifications":{"args":[],"name":"disable_host_notifications","nr":"29","required":[],"requires_comment":1},
+  "disable_host_svc_checks":{"args":[],"name":"disable_host_svc_checks","nr":"16","required":[],"requires_comment":1},
+  "disable_host_svc_notifications":{"args":[],"name":"disable_host_svc_notifications","nr":"29","required":[],"requires_comment":1},
+  "disable_passive_host_checks":{"args":[],"name":"disable_passive_host_checks","nr":"93","required":[]},
+  "enable_all_notifications_beyond_host":{"args":[],"name":"enable_all_notifications_beyond_host","nr":"26","required":[]},
+  "enable_host_and_child_notifications":{"args":[],"name":"enable_host_and_child_notifications","nr":"24","required":[]},
+  "enable_host_check":{"args":[],"name":"enable_host_check","nr":"47","required":[]},
+  "enable_host_event_handler":{"args":[],"name":"enable_host_event_handler","nr":"43","required":[]},
+  "enable_host_flap_detection":{"args":[],"name":"enable_host_flap_detection","nr":"57","required":[]},
+  "enable_host_notifications":{"args":[],"name":"enable_host_notifications","nr":"28","required":[]},
+  "enable_host_svc_checks":{"args":[],"name":"enable_host_svc_checks","nr":"15","required":[]},
+  "enable_host_svc_notifications":{"args":[],"name":"enable_host_svc_notifications","nr":"28","required":[]},
+  "enable_passive_host_checks":{"args":[],"name":"enable_passive_host_checks","nr":"92","required":[]},
+  "process_host_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_host_check_result","nr":"87","required":["plugin_output"]},
+  "remove_host_acknowledgement":{"args":[],"name":"remove_host_acknowledgement","nr":"51","required":[]},
+  "schedule_and_propagate_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_host_downtime","nr":"55","required":["comment_data"]},
+  "schedule_and_propagate_triggered_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_triggered_host_downtime","nr":"55","required":["comment_data"]},
+  "schedule_forced_host_check":{"args":["start_time"],"name":"schedule_forced_host_check","nr":"96","required":[]},
+  "schedule_forced_host_svc_checks":{"args":["start_time"],"name":"schedule_forced_host_svc_checks","nr":"17","required":[]},
+  "schedule_host_check":{"args":["start_time"],"name":"schedule_host_check","nr":"96","required":[]},
+  "schedule_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_downtime","nr":"55","required":["comment_data"]},
+  "schedule_host_svc_checks":{"args":["start_time"],"name":"schedule_host_svc_checks","nr":"17","required":[]},
+  "schedule_host_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_svc_downtime","nr":"86","required":["comment_data"]},
+  "send_custom_host_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_host_notification","nr":"159","required":["comment_data"]},
+  "start_obsessing_over_host":{"args":[],"name":"start_obsessing_over_host","nr":"101","required":[]},
+  "stop_obsessing_over_host":{"args":[],"name":"stop_obsessing_over_host","nr":"102","required":[]}
 },
 "servicegroups":{
-  "disable_servicegroup_host_checks":{"args":[],"name":"disable_servicegroup_host_checks","required":[]},
-  "disable_servicegroup_host_notifications":{"args":[],"name":"disable_servicegroup_host_notifications","required":[]},
-  "disable_servicegroup_svc_checks":{"args":[],"name":"disable_servicegroup_svc_checks","required":[]},
-  "disable_servicegroup_svc_notifications":{"args":[],"name":"disable_servicegroup_svc_notifications","required":[]},
-  "enable_servicegroup_host_checks":{"args":[],"name":"enable_servicegroup_host_checks","required":[]},
-  "enable_servicegroup_host_notifications":{"args":[],"name":"enable_servicegroup_host_notifications","required":[]},
-  "enable_servicegroup_svc_checks":{"args":[],"name":"enable_servicegroup_svc_checks","required":[]},
-  "enable_servicegroup_svc_notifications":{"args":[],"name":"enable_servicegroup_svc_notifications","required":[]},
-  "schedule_servicegroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_host_downtime","required":["comment_data"]},
-  "schedule_servicegroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_svc_downtime","required":["comment_data"]}
+  "disable_servicegroup_host_checks":{"args":[],"name":"disable_servicegroup_host_checks","nr":"114","required":[]},
+  "disable_servicegroup_host_notifications":{"args":[],"name":"disable_servicegroup_host_notifications","nr":"112","required":[]},
+  "disable_servicegroup_svc_checks":{"args":[],"name":"disable_servicegroup_svc_checks","nr":"114","required":[]},
+  "disable_servicegroup_svc_notifications":{"args":[],"name":"disable_servicegroup_svc_notifications","nr":"110","required":[]},
+  "enable_servicegroup_host_checks":{"args":[],"name":"enable_servicegroup_host_checks","nr":"113","required":[]},
+  "enable_servicegroup_host_notifications":{"args":[],"name":"enable_servicegroup_host_notifications","nr":"111","required":[]},
+  "enable_servicegroup_svc_checks":{"args":[],"name":"enable_servicegroup_svc_checks","nr":"113","required":[]},
+  "enable_servicegroup_svc_notifications":{"args":[],"name":"enable_servicegroup_svc_notifications","nr":"109","required":[]},
+  "schedule_servicegroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_host_downtime","nr":"122","required":["comment_data"]},
+  "schedule_servicegroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_svc_downtime","nr":"122","required":["comment_data"]}
 },
 "services":{
-  "acknowledge_svc_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_svc_problem","required":["comment_data"]},
-  "acknowledge_svc_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_svc_problem_expire","required":["comment_data"]},
-  "add_svc_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_svc_comment","required":["comment_data"]},
-  "change_svc_modattr":{"args":[],"name":"change_svc_modattr","required":[]},
-  "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","required":[]},
-  "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","required":["notification_time"]},
-  "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","required":[]},
-  "disable_svc_check":{"args":[],"name":"disable_svc_check","required":[],"requires_comment":1},
-  "disable_svc_event_handler":{"args":[],"name":"disable_svc_event_handler","required":[],"requires_comment":1},
-  "disable_svc_flap_detection":{"args":[],"name":"disable_svc_flap_detection","required":[]},
-  "disable_svc_notifications":{"args":[],"name":"disable_svc_notifications","required":[],"requires_comment":1},
-  "enable_passive_svc_checks":{"args":[],"name":"enable_passive_svc_checks","required":[]},
-  "enable_svc_check":{"args":[],"name":"enable_svc_check","required":[]},
-  "enable_svc_event_handler":{"args":[],"name":"enable_svc_event_handler","required":[]},
-  "enable_svc_flap_detection":{"args":[],"name":"enable_svc_flap_detection","required":[]},
-  "enable_svc_notifications":{"args":[],"name":"enable_svc_notifications","required":[]},
-  "process_service_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_service_check_result","required":["plugin_output"]},
-  "remove_svc_acknowledgement":{"args":[],"name":"remove_svc_acknowledgement","required":[]},
-  "schedule_forced_svc_check":{"args":["start_time"],"name":"schedule_forced_svc_check","required":[]},
-  "schedule_svc_check":{"args":["start_time"],"name":"schedule_svc_check","required":[]},
-  "schedule_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_svc_downtime","required":["comment_data"]},
-  "send_custom_svc_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_svc_notification","required":["comment_data"]},
-  "start_obsessing_over_svc":{"args":[],"name":"start_obsessing_over_svc","required":[]},
-  "stop_obsessing_over_svc":{"args":[],"name":"stop_obsessing_over_svc","required":[]}
+  "acknowledge_svc_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_svc_problem","nr":"34","required":["comment_data"]},
+  "acknowledge_svc_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_svc_problem_expire","nr":"34","required":["comment_data"]},
+  "add_svc_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_svc_comment","nr":"3","required":["comment_data"]},
+  "change_svc_modattr":{"args":[],"name":"change_svc_modattr","nr":"155","required":[]},
+  "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","nr":"21","required":[]},
+  "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","nr":"9","required":["notification_time"]},
+  "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","nr":"40","required":[]},
+  "disable_svc_check":{"args":[],"name":"disable_svc_check","nr":"6","required":[],"requires_comment":1},
+  "disable_svc_event_handler":{"args":[],"name":"disable_svc_event_handler","nr":"46","required":[],"requires_comment":1},
+  "disable_svc_flap_detection":{"args":[],"name":"disable_svc_flap_detection","nr":"60","required":[]},
+  "disable_svc_notifications":{"args":[],"name":"disable_svc_notifications","nr":"23","required":[],"requires_comment":1},
+  "enable_passive_svc_checks":{"args":[],"name":"enable_passive_svc_checks","nr":"39","required":[]},
+  "enable_svc_check":{"args":[],"name":"enable_svc_check","nr":"5","required":[]},
+  "enable_svc_event_handler":{"args":[],"name":"enable_svc_event_handler","nr":"45","required":[]},
+  "enable_svc_flap_detection":{"args":[],"name":"enable_svc_flap_detection","nr":"59","required":[]},
+  "enable_svc_notifications":{"args":[],"name":"enable_svc_notifications","nr":"22","required":[]},
+  "process_service_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_service_check_result","nr":"30","required":["plugin_output"]},
+  "remove_svc_acknowledgement":{"args":[],"name":"remove_svc_acknowledgement","nr":"52","required":[]},
+  "schedule_forced_svc_check":{"args":["start_time"],"name":"schedule_forced_svc_check","nr":"7","required":[]},
+  "schedule_svc_check":{"args":["start_time"],"name":"schedule_svc_check","nr":"7","required":[]},
+  "schedule_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_svc_downtime","nr":"56","required":["comment_data"]},
+  "send_custom_svc_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_svc_notification","nr":"160","required":["comment_data"]},
+  "start_obsessing_over_svc":{"args":[],"name":"start_obsessing_over_svc","nr":"99","required":[]},
+  "stop_obsessing_over_svc":{"args":[],"name":"stop_obsessing_over_svc","nr":"100","required":[]}
 },
 "system":{
-  "del_host_comment":{"args":["comment_id"],"name":"del_host_comment","required":["comment_id"]},
-  "del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime","required":["downtime_id"]},
-  "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","required":["comment_id"]},
-  "del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime","required":["downtime_id"]},
-  "disable_event_handlers":{"args":[],"name":"disable_event_handlers","required":[]},
-  "disable_failure_prediction":{"args":[],"name":"disable_failure_prediction","required":[]},
-  "disable_flap_detection":{"args":[],"name":"disable_flap_detection","required":[]},
-  "disable_notifications":{"args":[],"name":"disable_notifications","required":[]},
-  "disable_performance_data":{"args":[],"name":"disable_performance_data","required":[]},
-  "enable_event_handlers":{"args":[],"name":"enable_event_handlers","required":[]},
-  "enable_failure_prediction":{"args":[],"name":"enable_failure_prediction","required":[]},
-  "enable_flap_detection":{"args":[],"name":"enable_flap_detection","required":[]},
-  "enable_notifications":{"args":[],"name":"enable_notifications","required":[]},
-  "enable_performance_data":{"args":[],"name":"enable_performance_data","required":[]},
-  "restart_process":{"args":[],"name":"restart_process","required":[]},
-  "shutdown_process":{"args":[],"name":"shutdown_process","required":[]},
-  "start_accepting_passive_host_checks":{"args":[],"name":"start_accepting_passive_host_checks","required":[]},
-  "start_accepting_passive_svc_checks":{"args":[],"name":"start_accepting_passive_svc_checks","required":[]},
-  "start_executing_host_checks":{"args":[],"name":"start_executing_host_checks","required":[]},
-  "start_executing_svc_checks":{"args":[],"name":"start_executing_svc_checks","required":[]},
-  "start_obsessing_over_host_checks":{"args":[],"name":"start_obsessing_over_host_checks","required":[]},
-  "start_obsessing_over_svc_checks":{"args":[],"name":"start_obsessing_over_svc_checks","required":[]},
-  "stop_accepting_passive_host_checks":{"args":[],"name":"stop_accepting_passive_host_checks","required":[]},
-  "stop_accepting_passive_svc_checks":{"args":[],"name":"stop_accepting_passive_svc_checks","required":[]},
-  "stop_executing_host_checks":{"args":[],"name":"stop_executing_host_checks","required":[]},
-  "stop_executing_svc_checks":{"args":[],"name":"stop_executing_svc_checks","required":[]},
-  "stop_obsessing_over_host_checks":{"args":[],"name":"stop_obsessing_over_host_checks","required":[]},
-  "stop_obsessing_over_svc_checks":{"args":[],"name":"stop_obsessing_over_svc_checks","required":[]}}
+  "del_host_comment":{"args":["comment_id"],"name":"del_host_comment","nr":"2","required":["comment_id"]},
+  "del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime","nr":"78","required":["downtime_id"]},
+  "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","nr":"4","required":["comment_id"]},
+  "del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime","nr":"79","required":["downtime_id"]},
+  "disable_event_handlers":{"args":[],"name":"disable_event_handlers","nr":"42","required":[]},
+  "disable_failure_prediction":{"args":[],"name":"disable_failure_prediction","nr":"81","required":[]},
+  "disable_flap_detection":{"args":[],"name":"disable_flap_detection","nr":"62","required":[]},
+  "disable_notifications":{"args":[],"name":"disable_notifications","nr":"11","required":[]},
+  "disable_performance_data":{"args":[],"name":"disable_performance_data","nr":"83","required":[]},
+  "enable_event_handlers":{"args":[],"name":"enable_event_handlers","nr":"41","required":[]},
+  "enable_failure_prediction":{"args":[],"name":"enable_failure_prediction","nr":"80","required":[]},
+  "enable_flap_detection":{"args":[],"name":"enable_flap_detection","nr":"61","required":[]},
+  "enable_notifications":{"args":[],"name":"enable_notifications","nr":"12","required":[]},
+  "enable_performance_data":{"args":[],"name":"enable_performance_data","nr":"82","required":[]},
+  "restart_process":{"args":[],"name":"restart_process","nr":"13","required":[]},
+  "shutdown_process":{"args":[],"name":"shutdown_process","nr":"14","required":[]},
+  "start_accepting_passive_host_checks":{"args":[],"name":"start_accepting_passive_host_checks","nr":"90","required":[]},
+  "start_accepting_passive_svc_checks":{"args":[],"name":"start_accepting_passive_svc_checks","nr":"37","required":[]},
+  "start_executing_host_checks":{"args":[],"name":"start_executing_host_checks","nr":"88","required":[]},
+  "start_executing_svc_checks":{"args":[],"name":"start_executing_svc_checks","nr":"35","required":[]},
+  "start_obsessing_over_host_checks":{"args":[],"name":"start_obsessing_over_host_checks","nr":"94","required":[]},
+  "start_obsessing_over_svc_checks":{"args":[],"name":"start_obsessing_over_svc_checks","nr":"49","required":[]},
+  "stop_accepting_passive_host_checks":{"args":[],"name":"stop_accepting_passive_host_checks","nr":"91","required":[]},
+  "stop_accepting_passive_svc_checks":{"args":[],"name":"stop_accepting_passive_svc_checks","nr":"38","required":[]},
+  "stop_executing_host_checks":{"args":[],"name":"stop_executing_host_checks","nr":"89","required":[]},
+  "stop_executing_svc_checks":{"args":[],"name":"stop_executing_svc_checks","nr":"36","required":[]},
+  "stop_obsessing_over_host_checks":{"args":[],"name":"stop_obsessing_over_host_checks","nr":"95","required":[]},
+  "stop_obsessing_over_svc_checks":{"args":[],"name":"stop_obsessing_over_svc_checks","nr":"50","required":[]}}
 }

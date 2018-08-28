@@ -40,6 +40,10 @@ sub _update_cmds {
     my $cmds = {};
     for my $file (@{$input_files}) {
         next if $file =~ m/cmd_typ_c\d+/gmx;
+        my $nr;
+        if($file =~ m/cmd_typ_(\d+)\./gmx) {
+            $nr = $1;
+        }
         my $template = read_file($file);
         next if $template =~ m/enable_shinken_features/gmx;
         my @matches = $template =~ m%^\s*([A-Z_]+)\s*(;|$|)(.*sprintf.*|$)%gmx;
@@ -122,6 +126,7 @@ sub _update_cmds {
                 die("cannot find required $r in args list for file: ".$file) unless $args_hash->{$r};
             }
             $cmd->{'requires_comment'} = 1 if $require_comments;
+            $cmd->{'nr'} = $nr;
         }
     }
 
