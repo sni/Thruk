@@ -78,7 +78,7 @@ sub _rest_get_external_command {
         # set some defaults
         if(!defined $val) {
             if($arg eq 'comment_author') { $val = $c->stash->{'remote_user'}; }
-            if($arg eq 'fixed')          { $val = 0; }
+            if($arg eq 'fixed')          { $val = 1; }
             if($arg eq 'duration')       { $val = 0; }
             if($arg eq 'triggered_by')   { $val = 0; }
             if($arg eq 'start_time')     { $val = time(); }
