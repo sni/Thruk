@@ -382,11 +382,11 @@ sub get_default_recurring_downtime {
     my($c, $host, $service, $hostgroup, $servicegroup) = @_;
     my $default_rd = {
             target       => 'service',
-            host         => [$host],
+            host         => [],
             service      => $service,
-            servicegroup => [$servicegroup],
-            hostgroup    => [$hostgroup],
-            backends     => $c->req->parameters->{'backend'} || ($c->{'db'} && $c->{'db'}->peer_key()),
+            servicegroup => [],
+            hostgroup    => [],
+            backends     => [],
             schedule     => [],
             duration     => 120,
             comment      => 'automatic downtime',
@@ -394,6 +394,14 @@ sub get_default_recurring_downtime {
             fixed        => 1,
             flex_range   => 720,
     };
+    push @{$default_rd->{'host'}},         $host         if $host;
+    push @{$default_rd->{'servicegroup'}}, $servicegroup if $servicegroup;
+    push @{$default_rd->{'hostgroup'}},    $hostgroup    if $hostgroup;
+    if($c->req->parameters->{'backend'}) {
+        $default_rd->{'backends'} = [split/\s*,\s*/mx, $c->req->parameters->{'backend'}];
+    } elsif($c->{'db'}) {
+        $default_rd->{'backends'} = $c->{'db'}->peer_key();
+    }
     return($default_rd);
 }
 
@@ -458,7 +466,7 @@ sub get_downtime_backends {
 
 =head2 get_data_file_name
 
-    get_data_file_name($c,  [$nr])
+    get_data_file_name($c, [$nr])
 
 return filename for data file
 

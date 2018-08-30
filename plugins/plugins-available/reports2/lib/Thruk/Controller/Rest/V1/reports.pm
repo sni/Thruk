@@ -58,6 +58,9 @@ sub _rest_get_thruk_reports_new {
 
 # REST PATH: POST /thruk/reports/<nr>
 # update entire report for given number.
+
+# REST PATH: DELETE /thruk/reports/<nr>
+# remove report for given number.
 Thruk::Controller::rest_v1::register_rest_path_v1(['GET', 'POST', 'PATCH', 'DELETE'], qr%^/thruk/reports?/(\d+)$%mx, \&_rest_get_thruk_report_by_id);
 sub _rest_get_thruk_report_by_id {
     my($c, $path_info, $nr) = @_;

@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 316;
+    plan tests => 324;
 }
 
 BEGIN {
@@ -44,10 +44,11 @@ my $list_pages = [
     '/lmd/sites',
     '/thruk/bp',
     '/thruk/cluster',
-    '/thruk/downtimes',
+    '/thruk/recurring_downtimes',
     '/thruk/jobs',
     '/thruk/panorama',
     '/thruk/reports',
+    '/thruk/broadcasts',
     '/thruk/sessions',
 ];
 
@@ -90,6 +91,23 @@ for my $p (sort keys %{$paths}) {
         if($content !~ m%$p%mx) {
             fail("missing test case for ".$p);
         }
+    }
+}
+
+################################################################################
+# check if there is a doc entry for every registered path and method
+for my $registered (@{$Thruk::Controller::rest_v1::rest_paths}) {
+    my($method, $regex) = @{$registered};
+    my $found = 0;
+    for my $p (sort keys %{$paths}) {
+        my $available_methods = $paths->{$p};
+        $p =~ s/<[^>]*>/0/gmx;
+        if($p =~ $regex && $available_methods->{$method}) {
+            $found = 1;
+        }
+    }
+    if(!$found) {
+        fail("missing documentation for $method $regex");
     }
 }
 

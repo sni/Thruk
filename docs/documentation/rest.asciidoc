@@ -936,6 +936,48 @@ update business processes configuration partially for given number.
 
 remove business processes for given number.
 
+=== GET /thruk/broadcasts
+
+lists broadcasts
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|annotation                        | annotation icon for this broadcast
+|author                            | author of the broadcast
+|authoremail                       | authors E-Mail address, mainly used as macro
+|contactgroups                     | list of contactgroups if broadcast should be limited to specific groups
+|contacts                          | list of contacts if broadcast should be limited to specific contacts
+|expires                           | expire date after which the broadcast won't be displayed anymore
+|file                              | filename
+|hide_before                       | do not show broadcast before this date
+|loginpage                         | flag wether broadcast should be displayed on the loginpage as well
+|panorama                          | flag wether broadcast should be displayed on panorama dashboards
+|template                          | flag wether this broadcast is a template
+|text                              | displayed text
+|===========================================
+
+
+=== POST /thruk/broadcasts
+
+create new broadcast.
+
+=== GET /thruk/broadcasts/<file>
+
+alias for /thruk/broadcasts?file=<file>
+
+=== POST /thruk/broadcasts/<file>
+
+update entire broadcast for given file.
+
+=== PATCH /thruk/broadcasts/<file>
+
+update attributes for given broadcast.
+
+=== DELETE /thruk/broadcasts/<file>
+
+remove broadcast for given file.
+
 === GET /thruk/cluster
 
 lists cluster nodes
@@ -967,29 +1009,6 @@ send cluster heartbeat to all other nodes
 === GET /thruk/config
 
 lists configuration information
-
-=== GET /thruk/downtimes
-
-lists recurring downtimes.
-
-[options="header"]
-|===========================================
-|Attribute                         | Description
-|backends                          | list of backends this downtime is used for
-|childoptions                      | flag used for the downtime command
-|comment                           | comment used for the downtime command
-|duration                          | duration in minutes
-|file                              | file number
-|fixed                             | flag whether this should create a fixed downtime
-|flex_range                        | range in minutes for flexible downtimes
-|host                              | list of hostnames
-|hostgroup                         | list of hostgroups
-|schedule                          | list of schedules
-|service                           | list of services
-|servicegroup                      | list of servicegroups
-|target                            | sets the type of the downtime, ex. host or hostgroup
-|===========================================
-
 
 === GET /thruk/jobs
 
@@ -1048,6 +1067,49 @@ lists all panorama dashboards.
 returns panorama dashboard for given number.
 alias for /thruk/panorama?nr=<nr>
 
+=== GET /thruk/recurring_downtimes
+
+lists recurring downtimes.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|backends                          | list of backends this downtime is used for
+|childoptions                      | flag used for the downtime command
+|comment                           | comment used for the downtime command
+|duration                          | duration in minutes
+|file                              | file number
+|fixed                             | flag whether this should create a fixed downtime
+|flex_range                        | range in minutes for flexible downtimes
+|host                              | list of hostnames
+|hostgroup                         | list of hostgroups
+|schedule                          | list of schedules
+|service                           | list of services
+|servicegroup                      | list of servicegroups
+|target                            | sets the type of the downtime, ex. host or hostgroup
+|===========================================
+
+
+=== POST /thruk/recurring_downtimes
+
+create new downtime.
+
+=== GET /thruk/recurring_downtimes/<file>
+
+alias for /thruk/recurring_downtimes?file=<file>
+
+=== POST /thruk/recurring_downtimes/<file>
+
+update entire downtime for given file.
+
+=== PATCH /thruk/recurring_downtimes/<file>
+
+update attributes for given downtime.
+
+=== DELETE /thruk/recurring_downtimes/<file>
+
+remove downtime for given file.
+
 === GET /thruk/reports
 
 list of reports.
@@ -1105,6 +1167,10 @@ update entire report for given number.
 === PATCH /thruk/reports/<nr>
 
 update attributes for given number.
+
+=== DELETE /thruk/reports/<nr>
+
+remove report for given number.
 
 === POST /thruk/reports/<nr>/generate
 

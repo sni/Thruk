@@ -29,10 +29,6 @@ sub get_broadcasts {
     my $list = [];
 
     my $now    = time();
-    my $groups = {};
-    if($c->stash->{'remote_user'}) {
-        $groups = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'};
-    }
     my @files  = glob($c->config->{'var_path'}.'/broadcast/*.json');
     return([]) unless scalar @files > 0;
 
@@ -65,52 +61,8 @@ sub get_broadcasts {
         $broadcast->{'contacts'}      = Thruk::Utils::list($broadcast->{'contacts'});
         $broadcast->{'contactgroups'} = Thruk::Utils::list($broadcast->{'contactgroups'});
 
-        my $contacts           = [grep(!/^\!/mx, @{$broadcast->{'contacts'}})];
-        my $contactgroups      = [grep(!/^\!/mx, @{$broadcast->{'contactgroups'}})];
-
-        if(!$unfiltered && (scalar @{$contacts} > 0 || scalar @{$contactgroups} > 0)) {
-            my $allowed = 0;
-            # allowed for specific contacts
-            if(scalar @{$contacts}) {
-                my $contacts = Thruk::Utils::array2hash($contacts);
-                if($contacts->{$c->stash->{'remote_user'}}) {
-                    $allowed = 1;
-                }
-            }
-            # allowed for specific contactgroups
-            if(scalar @{$contactgroups}) {
-                my $contactgroups = Thruk::Utils::array2hash($contactgroups);
-                for my $group (keys %{$groups}) {
-                    if($contactgroups->{$group}) {
-                        $allowed = 1;
-                        last;
-                    }
-                }
-            }
-            next if(!$allowed && !$unfiltered);
-        }
-
-        # hide from certain contacts or groups by exclamation mark
         if(!$unfiltered) {
-            my $contacts_hide      = [grep(/^\!/mx, @{$broadcast->{'contacts'}})];
-            if(scalar @{$contacts_hide}) {
-                my $contacts = Thruk::Utils::array2hash($contacts_hide);
-                if($contacts->{$c->stash->{'remote_user'}}) {
-                    next;
-                }
-            }
-            my $contactgroups_hide = [grep(/^\!/mx, @{$broadcast->{'contactgroups'}})];
-            if(scalar @{$contactgroups_hide}) {
-                my $contactgroups = Thruk::Utils::array2hash($contactgroups_hide);
-                my $hidden = 0;
-                for my $group (keys %{$groups}) {
-                    if($contactgroups->{$group}) {
-                        $hidden = 1;
-                        last;
-                    }
-                }
-                next if $hidden;
-            }
+            next unless is_authorized_for_broadcast($c, $broadcast);
         }
 
         # date / time filter
@@ -166,6 +118,73 @@ sub get_broadcasts {
     @{$list} = sort { $b->{'new'} <=> $a->{'new'} || $b->{'basefile'} cmp $a->{'basefile'} } @{$list};
 
     return($list);
+}
+
+########################################
+
+=head2 is_authorized_for_broadcast($c, $broadcast)
+
+  is_authorized_for_broadcast($c, $broadcast)
+
+returns true if user is allowed to view this broadcast
+
+=cut
+sub is_authorized_for_broadcast {
+    my($c, $broadcast) = @_;
+
+    my $contacts           = [grep(!/^\!/mx, @{$broadcast->{'contacts'}})];
+    my $contactgroups      = [grep(!/^\!/mx, @{$broadcast->{'contactgroups'}})];
+
+    return 1 if $c->user->check_user_roles('admin');
+
+    my $groups = {};
+    if($c->stash->{'remote_user'}) {
+        $groups = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'};
+    }
+
+    if(scalar @{$contacts} > 0 || scalar @{$contactgroups} > 0) {
+        my $allowed = 0;
+        # allowed for specific contacts
+        if(scalar @{$contacts}) {
+            my $contacts = Thruk::Utils::array2hash($contacts);
+            if($contacts->{$c->stash->{'remote_user'}}) {
+                $allowed = 1;
+            }
+        }
+        # allowed for specific contactgroups
+        if(scalar @{$contactgroups}) {
+            my $contactgroups = Thruk::Utils::array2hash($contactgroups);
+            for my $group (keys %{$groups}) {
+                if($contactgroups->{$group}) {
+                    $allowed = 1;
+                    last;
+                }
+            }
+        }
+        return unless $allowed;
+    }
+
+    # hide from certain contacts or groups by exclamation mark
+    my $contacts_hide      = [grep(/^\!/mx, @{$broadcast->{'contacts'}})];
+    if(scalar @{$contacts_hide}) {
+        my $contacts = Thruk::Utils::array2hash($contacts_hide);
+        if($contacts->{$c->stash->{'remote_user'}}) {
+            return;
+        }
+    }
+    my $contactgroups_hide = [grep(/^\!/mx, @{$broadcast->{'contactgroups'}})];
+    if(scalar @{$contactgroups_hide}) {
+        my $contactgroups = Thruk::Utils::array2hash($contactgroups_hide);
+        my $hidden = 0;
+        for my $group (keys %{$groups}) {
+            if($contactgroups->{$group}) {
+                $hidden = 1;
+                last;
+            }
+        }
+        return if $hidden;
+    }
+    return 1;
 }
 
 ########################################
@@ -261,6 +280,32 @@ sub _extract_front_matter_macros {
         $b->{'frontmatter'}->{$key} = $val;
     }
     return;
+}
+
+##########################################################
+
+=head2 update_broadcast_from_param($c, $broadcast)
+
+  update_broadcast_from_param($c, $broadcast)
+
+return broadcast with updated fields from parameters
+
+=cut
+sub update_broadcast_from_param {
+    my($c, $broadcast) = @_;
+    $broadcast->{'author'}        = $c->stash->{'remote_user'};
+    $broadcast->{'authoremail'}   = $c->user ? $c->user->{'email'} : 'none';
+    $broadcast->{'contacts'}      = [split(/\s*,\s*/mx, $c->req->parameters->{'contacts'})];
+    $broadcast->{'contactgroups'} = [split(/\s*,\s*/mx, $c->req->parameters->{'contactgroups'})];
+    $broadcast->{'text'}          = $c->req->parameters->{'text'};
+    $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
+    $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
+    $broadcast->{'loginpage'}     = $c->req->parameters->{'loginpage'} || 0;
+    $broadcast->{'annotation'}    = $c->req->parameters->{'annotation'} || '';
+    $broadcast->{'panorama'}      = $c->req->parameters->{'panorama'} || 0;
+    $broadcast->{'template'}      = $c->req->parameters->{'template'} || 0;
+    delete $broadcast->{'macros'};
+    return($broadcast);
 }
 
 ########################################

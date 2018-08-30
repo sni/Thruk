@@ -24,6 +24,7 @@ use Thruk::Utils::Status ();
 use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 
 our $VERSION = 1;
 our $rest_paths = [];
@@ -88,7 +89,8 @@ sub index {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backends'});
         delete $c->req->parameters->{'backends'};
     } else {
-        Thruk::Action::AddDefaults::_set_enabled_backends($c);
+        my($disabled_backends) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
+        Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
     }
 
     my $data;
@@ -942,6 +944,44 @@ sub _append_time_filter {
 }
 
 ##########################################################
+
+=head2 load_json_files
+
+    load_json_files($c, {
+        files                   => $files,
+       [ pre_process_callback   => &code_ref ],
+       [ authorization_callback => &code_ref ],
+       [ post_process_callback  => &code_ref ],
+    });
+
+generic function to expose json files
+
+returns list of authorized loaded files
+
+=cut
+sub load_json_files {
+    my($c, $options) = @_;
+    my $list = [];
+    for my $file (@{$options->{'files'}}) {
+        next unless -e $file;
+        my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+        $data->{'file'} = $file;
+        $data->{'file'} =~ s%.*?([^/]+)\.\w+$%$1%mx;
+        if($options->{'pre_process_callback'}) {
+            $data = &{$options->{'pre_process_callback'}}($c, $data);
+        }
+        if($options->{'authorization_callback'}) {
+            next unless &{$options->{'authorization_callback'}}($c, $data);
+        }
+        if($options->{'post_process_callback'}) {
+            $data = &{$options->{'post_process_callback'}}($c, $data);
+        }
+        push @{$list}, $data;
+    }
+    return $list;
+}
+
+##########################################################
 # REST PATH: GET /
 # lists all available rest urls.
 # alias for /index
@@ -1068,18 +1108,6 @@ sub _rest_get_thruk_sessions {
 # get thruk sessions status for given id.
 # alias for /thruk/sessions?id=<id>
 register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk_sessions);
-
-##########################################################
-# REST PATH: GET /thruk/downtimes
-# lists recurring downtimes.
-register_rest_path_v1('GET', qr%^/thruk/downtimes?$%mx, \&_rest_get_thruk_downtimes);
-sub _rest_get_thruk_downtimes {
-    my($c) = @_;
-    require Thruk::Utils::RecurringDowntimes;
-
-    my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c);
-    return($downtimes);
-}
 
 ##########################################################
 # REST PATH: GET /hosts

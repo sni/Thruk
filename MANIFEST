@@ -78,8 +78,10 @@ lib/Thruk/Controller/login.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/remote.pm
+lib/Thruk/Controller/Rest/V1/broadcast.pm
 lib/Thruk/Controller/Rest/V1/cluster.pm
 lib/Thruk/Controller/Rest/V1/cmd.pm
+lib/Thruk/Controller/Rest/V1/recurring_downtimes.pm
 lib/Thruk/Controller/rest_v1.pm
 lib/Thruk/Controller/restricted.pm
 lib/Thruk/Controller/Root.pm
@@ -2041,7 +2043,9 @@ t/scenarios/rest_api/omd/playbook.yml
 t/scenarios/rest_api/omd/test.cfg
 t/scenarios/rest_api/t/300-controller_rest_v1.t
 t/scenarios/rest_api/t/301-controller_rest_bp.t
+t/scenarios/rest_api/t/301-controller_rest_broadcast.t
 t/scenarios/rest_api/t/301-controller_rest_config.t
+t/scenarios/rest_api/t/301-controller_rest_recurring_downtimes.t
 t/scenarios/rest_api/t/301-controller_rest_reports.t
 t/scenarios/rest_api/t/301-controller_rest_scenario.t
 t/scenarios/rest_api/thruk.conf
