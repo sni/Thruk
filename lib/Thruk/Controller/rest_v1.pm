@@ -427,6 +427,11 @@ sub _append_lexical_filter {
 sub _apply_filter {
     my($c, $data) = @_;
 
+    if($c->stash->{'livestatus_filter'}) {
+        delete $c->stash->{'livestatus_filter'};
+        return $data;
+    }
+
     for my $filter (@{_get_filter($c)}) {
         my($key, $op, $val) = @{$filter};
 
@@ -748,6 +753,7 @@ sub _livestatus_filter {
         push @{$filter}, { $key => { $op => $val }};
     }
 
+    $c->stash->{'livestatus_filter'} = 1;
     return $filter;
 }
 
