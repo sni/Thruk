@@ -148,6 +148,7 @@ sub _process_rest_request {
     };
     if($@) {
         $data = { 'message' => 'error during request', description => $@, code => 500 };
+        $c->log->error($@);
     }
 
     if(!$data) {
@@ -720,6 +721,10 @@ sub _livestatus_filter {
     }
     my $filter = [];
     for my $f (@{_get_filter($c)}) {
+        if(ref $f ne "ARRAY") {
+            push @{$filter}, $f;
+            next;
+        }
         my($key, $op, $val) = @{$f};
         if(ref $key ne "") {
             push @{$filter}, $f;
@@ -934,6 +939,8 @@ sub get_rest_paths {
 ##########################################################
 sub _append_time_filter {
     my($c, $filter) = @_;
+
+    return if($c->req->parameters->{'q'} && $c->req->parameters->{'q'} =~ m/time/mx);
     for my $f (@{$filter}) {
         if($f->{'time'}) {
             return;

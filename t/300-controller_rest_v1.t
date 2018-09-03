@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 324;
+    plan tests => 334;
 }
 
 BEGIN {
@@ -121,3 +121,47 @@ TestUtils::test_page(
     'like'         => ['report template had errors or does not exist'],
     'fail'         => 1,
 );
+
+################################################################################
+{
+    my $c = TestUtils::get_c();
+    _set_params($c, {'test' => 1});
+    my $filter = Thruk::Controller::rest_v1::_livestatus_filter($c);
+    my $expect = [{ 'test' => { '=' => 1 }}];
+    is_deeply($filter, $expect, "simple livestatus filter");
+
+    _set_params($c, { q => 'host = "test" and time > 1 and time < 10'});
+    $filter = Thruk::Controller::rest_v1::_livestatus_filter($c);
+    $expect = [[{
+        '-and' => [
+                { 'host' => { '=' => 'test' } },
+                { 'time' => { '>' => '1'    } },
+                { 'time' => { '<' => '10'   } }
+            ]
+    }]];
+    is_deeply($filter, $expect, "simple livestatus filter");
+};
+
+################################################################################
+# test query filter
+{
+    local $ENV{'NO_POST_TOKEN'} = 1;
+    TestUtils::test_page(
+        'url'          => '/thruk/r/logs?q=***host_name = "test" AND time > 1 AND time < 10***',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['\[\]'],
+    );
+};
+
+################################################################################
+sub _set_params {
+    my($c, $params) = @_;
+    for my $key (keys %{$c->req->parameters}) {
+        delete $c->req->parameters->{$key};
+    }
+    for my $key (keys %{$params}) {
+        $c->req->parameters->{$key} = $params->{$key};
+    }
+}
+################################################################################
