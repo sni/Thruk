@@ -38,15 +38,15 @@ my $pages = [{
         url          => '/downtimes',
         like         => ['"test comment",', 'omdadmin'],
     }, {
+        url          => '/services/localhost/Ping',
+        like         => ['"rta"'],
+        waitfor      => '"rta"',
+    }, {
         url          => '/services?columns=rta&rta[gt]=0',
         like         => ['"rta" : "0.\d+'],
     }, {
         url          => '/logs?q=***type = "EXTERNAL COMMAND"***',
         like         => ['EXTERNAL COMMAND'],
-    }, {
-        url          => '/services/localhost/Ping',
-        like         => ['"rta"'],
-        waitfor      => '"rta"',
     }, {
         url          => '/logs?q=***type = "EXTERNAL COMMAND" and time > '.(time() - 600).'***',
         like         => ['EXTERNAL COMMAND'],
