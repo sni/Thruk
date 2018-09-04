@@ -427,11 +427,6 @@ sub _append_lexical_filter {
 sub _apply_filter {
     my($c, $data) = @_;
 
-    if($c->stash->{'livestatus_filter'}) {
-        delete $c->stash->{'livestatus_filter'};
-        return $data;
-    }
-
     for my $filter (@{_get_filter($c)}) {
         my($key, $op, $val) = @{$filter};
 
@@ -753,7 +748,6 @@ sub _livestatus_filter {
         push @{$filter}, { $key => { $op => $val }};
     }
 
-    $c->stash->{'livestatus_filter'} = 1;
     return $filter;
 }
 
@@ -948,8 +942,15 @@ sub _append_time_filter {
 
     return if($c->req->parameters->{'q'} && $c->req->parameters->{'q'} =~ m/time/mx);
     for my $f (@{$filter}) {
-        if($f->{'time'}) {
+        if(ref $f eq 'HASH' && $f->{'time'}) {
             return;
+        }
+        if(ref $f eq 'ARRAY') {
+            for my $f2 (@{$f}) {
+                if(ref $f2 eq 'HASH' && $f2->{'time'}) {
+                    return;
+                }
+            }
         }
     }
     push @{$filter}, { time => { '>=' => time() - 86400 } };
@@ -1453,11 +1454,11 @@ sub _compare {
     ## use critic
     my @filtered;
     if($op eq '=') {
-        return 1 if lc($data) eq $val;
+        return 1 if lc($data) eq lc($val);
         return;
     }
     elsif($op eq '!=') {
-        return 1 if lc($data) ne $val;
+        return 1 if lc($data) ne lc($val);
         return;
     }
     elsif($op eq '~' || $op eq '~~') {
@@ -1483,7 +1484,7 @@ sub _compare {
         if(ref $data eq 'ARRAY') {
             my $found;
             for my $v (@{$data}) {
-                if($v eq $val) {
+                if(lc($v) eq lc($val)) {
                     $found = 1;
                     last;
                 }
@@ -1498,7 +1499,7 @@ sub _compare {
         if(ref $data eq 'ARRAY') {
             my $found = 0;
             for my $v (@{$data}) {
-                if($v eq $val) {
+                if(lc($v) eq lc($val)) {
                     $found = 1;
                 }
             }

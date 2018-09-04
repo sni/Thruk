@@ -5,7 +5,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 32;
+    plan tests => 66;
 
     use lib('t');
     require TestUtils;
@@ -18,6 +18,10 @@ use_ok 'Thruk::Controller::rest_v1';
 my($host,$service) = ('localhost', 'Users');
 
 my $pages = [{
+        url          => '/services/localhost/Ping/cmd/schedule_forced_svc_check',
+        post         => { 'start_time' => 'now' },
+        like         => ['Command successfully submitted'],
+    }, {
         url          => '/csv/services?q=***description ~ http and description !~ cert***&columns=description',
         like         => ['Https'],
         unlike       => ['Cert'],
@@ -33,6 +37,19 @@ my $pages = [{
     }, {
         url          => '/downtimes',
         like         => ['"test comment",', 'omdadmin'],
+    }, {
+        url          => '/services?columns=rta&rta[gt]=0',
+        like         => ['"rta" : "0.\d+'],
+    }, {
+        url          => '/logs?q=***type = "EXTERNAL COMMAND"***',
+        like         => ['EXTERNAL COMMAND'],
+    }, {
+        url          => '/services/localhost/Ping',
+        like         => ['"rta"'],
+        waitfor      => '"rta"',
+    }, {
+        url          => '/logs?q=***type = "EXTERNAL COMMAND" and time > '.(time() - 600).'***',
+        like         => ['EXTERNAL COMMAND'],
     }
 ];
 
