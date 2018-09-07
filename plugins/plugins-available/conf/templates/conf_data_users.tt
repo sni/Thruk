@@ -68,7 +68,30 @@
       <td class='dataVal'><input type="password" name="data.password2" value="" size=15 autocomplete="off"></td>
     </tr>
     [% END %]
+    [% IF account_is_locked %]
+    <tr>
+      <td class='dataVar' align="left" style="color: red;">Account is Locked</td>
+      <td class='dataVal'><input type="submit" name="send" value="unlock account"></td>
+    </tr>
+    [% ELSE %]
+    <tr>
+      <td class='dataVar' align="left">Account is not Locked</td>
+      <td class='dataVal'><input type="submit" name="send" value="lock account"></td>
+    </tr>
+    [% END %]
+    [% IF userdata.exists('login') && userdata.login.exists('last_failed') %]
+    <tr>
+      <td class='dataVar' align="left" style="color: red;">Failed Logins</td>
+      <td class='dataVal'>
+        There had been [% userdata.login.failed %] failed login attempts.<br>
+        (Date: [% date_format(c, userdata.login.last_failed.time) %] - IP: [% userdata.login.last_failed.ip %][% IF userdata.login.last_failed.defined('forwarded_for') %] ([% userdata.login.last_failed.forwarded_for %][% END %])
+      </td>
+    </tr>
+    [% END %]
     [% IF conf_config.exists('cgi.cfg') %]
+    <tr>
+      <td colspan=2 class='dataVar dataUserVar'>Roles (cgi.cfg)</td>
+    </tr>
     [% FOR auth = role_keys %]
     <tr>
       <td class='dataVar' align="left">[% auth %]</td>

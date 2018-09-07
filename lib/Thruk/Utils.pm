@@ -1127,22 +1127,27 @@ sub _initialassumedhoststate_to_state {
 
 =head2 get_user_data
 
-  get_user_data($c)
+  get_user_data($c, [$username])
 
 returns user data
 
 =cut
 
 sub get_user_data {
-    my($c) = @_;
+    my($c, $username) = @_;
 
-    return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
+    if(defined $username) {
+        confess("username not allowed") if check_for_nasty_filename($username);
+    } else {
+        return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
+        $username = $c->stash->{'remote_user'};
+    }
 
-    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
+    if(!defined $username || $username eq '?') {
         return {};
     }
 
-    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    my $file = $c->config->{'var_path'}."/users/".$username;
     if(-s $file) {
         $c->stash->{'user_data_cached'} = read_data_file($file);
     } else {
@@ -1156,14 +1161,14 @@ sub get_user_data {
 
 =head2 store_user_data
 
-  store_user_data($c, $data)
+  store_user_data($c, $data, [$username])
 
 store user data for section
 
 =cut
 
 sub store_user_data {
-    my($c, $data) = @_;
+    my($c, $data, $username) = @_;
 
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
@@ -1171,7 +1176,13 @@ sub store_user_data {
         return;
     }
 
-    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
+    if(defined $username) {
+        confess("username not allowed") if check_for_nasty_filename($username);
+    } else {
+        $username = $c->stash->{'remote_user'};
+    }
+
+    if(!defined $username || $username eq '?') {
         return 1;
     }
 
@@ -1187,7 +1198,7 @@ sub store_user_data {
     # update cached data
     $c->stash->{'user_data_cached'} = $data;
 
-    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    my $file = $c->config->{'var_path'}."/users/".$username;
     my $rc;
     eval {
         $rc = write_data_file($file, $data);
@@ -2961,6 +2972,23 @@ sub code2name {
     my $cv = B::svref_2object ($code);
     my $gv = $cv->GV;
     return($gv->NAME);
+}
+
+##############################################
+
+=head2 check_for_nasty_filename
+
+    check_for_nasty_filenameode2($filename)
+
+returns true if nasty characters have been found and the filename is NOT safe for use
+
+=cut
+sub check_for_nasty_filename {
+    my($name) = @_;
+    if($name =~ m/(\.\.|\/)/mx) {
+        return(1);
+    }
+    return;
 }
 
 ##############################################

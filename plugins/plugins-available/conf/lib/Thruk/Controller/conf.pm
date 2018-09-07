@@ -594,6 +594,7 @@ sub _process_users_page {
     # save changes to user
     my $user = $c->req->parameters->{'data.username'} || '';
     if($user ne '' and defined $file and $c->stash->{action} eq 'store') {
+        my($name, $alias) = split(/\ \-\ /mx,$user, 2);
         return unless Thruk::Utils::check_csrf($c);
         my $redirect = 'conf.cgi?action=change&sub=users&data.username='.$user;
         if($c->stash->{'readonly'}) {
@@ -604,6 +605,17 @@ sub _process_users_page {
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );
             return $c->redirect_to($redirect);
+        }
+
+        my $send = $c->req->parameters->{'send'} || '';
+        if($send eq 'lock account' || $send eq 'unlock account') {
+            my $userdata = Thruk::Utils::get_user_data($c, $name);
+            if($send eq 'unlock account') {
+                delete $userdata->{'login'}->{'locked'};
+            } else {
+                $userdata->{'login'}->{'locked'} = 1;
+            }
+            Thruk::Utils::store_user_data($c, $userdata, $name);
         }
 
         # save changes to cgi.cfg
@@ -674,6 +686,10 @@ sub _process_users_page {
         $c->stash->{'contact_roles'}  = $croles;
         $c->stash->{'contact_can_submit_commands'} = $can_submit_commands;
         $c->stash->{'roles_by_group'} = $roles_by_group;
+
+        my $userdata = Thruk::Utils::get_user_data($c, $name);
+        $c->stash->{'account_is_locked'} = $userdata->{'login'}->{'locked'} ? 1 : 0;
+        $c->stash->{'userdata'} = $userdata;
     }
 
     $c->stash->{'subtitle'} = "User Configuration";
@@ -1390,7 +1406,7 @@ sub _update_password {
             return unless Thruk::Utils::check_csrf($c);
             my $err = _htpasswd_password($c, $user, undef);
             return $err if $err;
-            $c->log->info("admin removed password for ".$user);
+            $c->log->info($c->stash->{remote_user}." removed password for ".$user);
             return;
         }
 
@@ -1402,7 +1418,7 @@ sub _update_password {
             if($pass1 eq $pass2) {
                 my $err = _htpasswd_password($c, $user, $pass1);
                 return $err if $err;
-                $c->log->info("admin changed password for ".$user);
+                $c->log->info($c->stash->{remote_user}." changed password for ".$user);
                 return;
             } else {
                 return('Passwords do not match');

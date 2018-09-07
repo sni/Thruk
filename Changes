@@ -9,6 +9,10 @@ next:
           - show and use alias for hosts, hostgroups and servicegroups search
           - Business Process:
             - only show business processes where the contact is allowed to see the generated service (#810)
+          - Cookie Auth:
+            - lock account after 10 failed login attempts
+            - add `cookie_auth_disable_after_failed_logins` option
+            - add lock/unlock actions to admin users page
 
 2.22     Fri Jun 29 13:52:11 CEST 2018
           - cleanup preferences popup

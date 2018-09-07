@@ -1636,6 +1636,17 @@ ex.:
   cookie_auth_direct_agents = (wget|curl|python|Go-http-client)
 
 
+=== cookie_auth_disable_after_failed_logins
+{% include new_since.ad version="2.12" %}
+Disable account after this number of failed login attempts.
+This feature will be disabled if set to zero.
+
+Default: 10
+
+ex.:
+
+  cookie_auth_disable_after_failed_logins = 3
+
 
 
 == Command Settings
