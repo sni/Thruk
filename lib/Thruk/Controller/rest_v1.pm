@@ -446,13 +446,13 @@ sub _apply_filter {
         ## use critic
         if($op eq '=') {
             for my $d (@{$data}) {
-                next unless lc($d->{$key}) eq $val;
+                next unless lc($d->{$key}) eq lc($val);
                 push @filtered, $d;
             }
         }
         elsif($op eq '!=') {
             for my $d (@{$data}) {
-                next unless lc($d->{$key}) ne $val;
+                next unless lc($d->{$key}) ne lc($val);
                 push @filtered, $d;
             }
         }
