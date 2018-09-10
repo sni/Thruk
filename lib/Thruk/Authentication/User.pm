@@ -103,6 +103,12 @@ sub new {
                            /];
     }
 
+    # Does this user have all roles?
+    if (@{$self->{'roles'}} == @{$possible_roles}) {
+        # Yes he/she does. Remove read only role
+        $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
+    }
+
     return $self;
 }
 
