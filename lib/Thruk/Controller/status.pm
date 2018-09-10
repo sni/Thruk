@@ -181,25 +181,33 @@ sub _process_raw_request {
                 if(!$c->check_user_roles("authorized_for_configuration_information")) {
                     $data = ["you are not authorized for configuration information"];
                 } else {
-                    my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ] );
-                    if(ref($contacts) eq 'ARRAY') {
-                        for my $contact (@{$contacts}) {
-                            push @{$data}, $contact->{'name'} . ' - '.$contact->{'alias'};
-                        }
-                    }
-                    $data = Thruk::Utils::array_uniq($data);
+                    my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/] );
+                    $data = Thruk::Utils::array_uniq($contacts);
                 }
             }
             elsif($type eq 'host' or $type eq 'hosts') {
-                $data = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ] );
+                $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ], columns => [qw/name alias/] );
+                $data = Thruk::Utils::array_uniq($data);
             }
             elsif($type eq 'hostgroup' or $type eq 'hostgroups') {
-                $data = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
-                @{$data} = grep {/$filter/mx} @{$data} if $filter;
+                $data = [];
+                my $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+                my $alias      = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ], columns => [qw/name alias/] );
+                $alias = Thruk::Utils::array2hash($alias, "name");
+                @{$hostgroups} = grep {/$filter/mx} @{$hostgroups} if $filter;
+                for my $group (@{$hostgroups}) {
+                    push @{$data}, $alias->{$group};
+                }
             }
             elsif($type eq 'servicegroup' or $type eq 'servicegroups') {
-                $data = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
-                @{$data} = grep {/$filter/mx} @{$data} if $filter;
+                $data = [];
+                my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+                my $alias      = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ], columns => [qw/name alias/] );
+                $alias = Thruk::Utils::array2hash($alias, "name");
+                @{$servicegroups} = grep {/$filter/mx} @{$servicegroups} if $filter;
+                for my $group (@{$servicegroups}) {
+                    push @{$data}, $alias->{$group};
+                }
             }
             elsif($type eq 'service' or $type eq 'services') {
                 my $host = $c->req->parameters->{'host'};
@@ -328,35 +336,57 @@ sub _process_raw_request {
                 my $total = scalar @{$data};
                 Thruk::Backend::Manager::page_data($c, $data);
                 my $list = [];
-                for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
+                if(scalar @{$c->stash->{'data'}} > 0 && ref $c->stash->{'data'}->[0] eq 'HASH') {
+                    for my $d (@{$c->stash->{'data'}}) {
+                        if($d->{'name'} ne $d->{'alias'}) {
+                            push @{$list}, { 'text' => $d->{'name'}.' - '.$d->{'alias'}, value => $d->{'name'} };
+                        } else {
+                            push @{$list}, { 'text' => $d->{'name'}, value => $d->{'name'} };
+                        }
+                    }
+                } else {
+                    for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
+                }
                 $json = { 'data' => $list, 'total' => $total };
             }
             return $c->render(json => $json);
         }
 
         # search type all
-        my( $hostgroups, $servicegroups, $hosts, $services, $timeperiods );
         my @json;
         if( $c->config->{ajax_search_hostgroups} ) {
-            $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
-            push @json, { 'name' => 'hostgroups', 'data' => $hostgroups };
+            my $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+            my $alias      = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ], columns => [qw/name alias/] );
+            $alias = Thruk::Utils::array2hash($alias, "name");
+            my $data = [];
+            for my $group (@{$hostgroups}) {
+                push @{$data}, $alias->{$group};
+            }
+            push @json, { 'name' => 'hostgroups', 'data' => $data };
         }
         if( $c->config->{ajax_search_servicegroups} ) {
-            $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
-            push @json, { 'name' => 'servicegroups', 'data' => $servicegroups };
+            my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+            my $alias      = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ) ], columns => [qw/name alias/] );
+            $alias = Thruk::Utils::array2hash($alias, "name");
+            my $data = [];
+            for my $group (@{$servicegroups}) {
+                push @{$data}, $alias->{$group};
+            }
+            push @json, { 'name' => 'servicegroups', 'data' => $data };
         }
         if( $c->config->{ajax_search_hosts} ) {
-            $hosts = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+            my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ], columns => [qw/name alias/] );
+            $hosts = Thruk::Utils::array_uniq($hosts);
             push @json, { 'name' => 'hosts', 'data'=> $hosts };
         }
         if( $c->config->{ajax_search_services} ) {
             my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
             Thruk::Utils::Status::set_default_filter($c, \@servicefilter);
-            $services = $c->{'db'}->get_service_names( filter => \@servicefilter );
+            my $services = $c->{'db'}->get_service_names( filter => \@servicefilter );
             push @json, { 'name' => 'services', 'data' => $services };
         }
         if( $c->config->{ajax_search_timeperiods} ) {
-            $timeperiods = $c->{'db'}->get_timeperiod_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'timeperiods' ) ] );
+            my $timeperiods = $c->{'db'}->get_timeperiod_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'timeperiods' ) ] );
             push @json, { 'name' => 'timeperiods', 'data' => $timeperiods };
         }
         return $c->render(json => \@json);
@@ -441,6 +471,7 @@ sub _process_details_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
     $c->stash->{'show_column_select'} = 1;
+    $c->stash->{'hide_filter'}        = 0;
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -460,6 +491,12 @@ sub _process_details_page {
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
+
+    if($c->req->parameters->{'q'}) {
+        $c->stash->{'has_service_filter'}= 1;
+        $c->stash->{'hide_filter'}= 1;
+        $servicefilter = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'});
+    }
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
@@ -1278,7 +1315,7 @@ sub _process_bookmarks {
 
     # public only allowed for admins
     if($public) {
-        if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+        if(!$c->check_user_roles('admin')) {
             $public = 0;
         }
     }
@@ -1342,7 +1379,7 @@ sub _process_bookmarks {
         }
         $done++;
 
-        if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+        if($c->check_user_roles('admin')) {
             for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
                 next unless defined $bookmark;
                 my($section, $name) = split(/::/mx, $bookmark ,2);

@@ -1,0 +1,1530 @@
+package Thruk::Controller::rest_v1;
+
+use strict;
+use warnings;
+
+=head1 NAME
+
+Thruk::Controller::rest_v1 - Rest interface version 1
+
+=head1 DESCRIPTION
+
+Thruk Controller
+
+=head1 METHODS
+
+=head2 index
+
+=cut
+
+use Module::Load qw/load/;
+use File::Slurp qw/read_file/;
+use Cpanel::JSON::XS ();
+use Thruk::Utils::Status ();
+use Thruk::Backend::Manager ();
+use Thruk::Backend::Provider::Livestatus ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
+
+our $VERSION = 1;
+our $rest_paths = [];
+
+my $reserved_query_parameters = [qw/limit offset sort columns backend backends q/];
+my $op_translation_words      = {
+    'eq'     => '=',
+    'ne'     => '!=',
+    'regex'  => '~',
+    'nregex' => '!~',
+    'gt'     => '>',
+    'gte'    => '>=',
+    'lt'     => '<',
+    'lte'    => '<=',
+};
+
+
+##########################################################
+sub index {
+    my($c, $path_info) = @_;
+
+    $path_info =~ s#^/thruk/r/?##gmx;   # trim rest prefix
+    $path_info =~ s#^v1/?##gmx;         # trim v1 prefix
+    $path_info =~ s#^/*#/#gmx;          # replace multiple slashes
+    $path_info =~ s#/+$##gmx;           # trim trailing slashed
+    $path_info =~ s#^.+/$##gmx;
+    $path_info = '/' if $path_info eq '';
+
+    # handle PUT requests like POST.
+    if($c->req->method() eq 'PUT') {
+        $c->req->env->{'REQUEST_METHOD'} = "POST";
+    }
+
+    my $format   = 'json';
+    my $backends = [];
+    # strip known path prefixes
+    while($path_info =~ m%^/(csv|xls|sites?|backends?)(/.*)$%mx) {
+        my $prefix = $1;
+        $path_info = $2;
+        if($prefix eq 'csv') {
+            $format = 'csv';
+        }
+        elsif($prefix eq 'xls') {
+            $format = 'xls';
+        }
+        elsif($prefix eq 'sites' || $prefix eq 'backend') {
+            if($path_info =~ m%^/([^/]+)(/.*)$%mx) {
+                $path_info = $2;
+                my @sites = split(/\s*,\s*/mx, $1);
+                push @{$backends}, @sites;
+            }
+        }
+    }
+    if(scalar @{$backends} > 0) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
+    }
+    elsif($c->req->parameters->{'backend'}) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backend'});
+        delete $c->req->parameters->{'backend'};
+    }
+    elsif($c->req->parameters->{'backends'}) {
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backends'});
+        delete $c->req->parameters->{'backends'};
+    } else {
+        my($disabled_backends) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
+        Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
+    }
+
+    my $data;
+    if($c->config->{'rest_api_enabled'} == 0) {
+        $data = {
+            'message'     => 'the rest api is disabled with rest_api_enabled=0.',
+            'description' => 'you have to enable the rest api in order to use it.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } elsif($c->config->{'rest_api_enabled'} == 2 && !$c->check_user_roles('admin')) {
+        $data = {
+            'message'     => 'the rest api is disabled for non-admin users.',
+            'description' => 'you need admin privileges to use the rest api.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } elsif($c->config->{'rest_api_enabled'} == 3 && ($ENV{'THRUK_CLI_SRC'}//'') ne 'CLI' ) {
+        $data = {
+            'message'     => 'the rest api is disabled from web access.',
+            'description' => 'the rest api has been configured to be only allowed from the command line.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } elsif($c->config->{'demo_mode'} && $c->req->method ne 'GET') {
+        $data = {
+            'message'     => 'only GET requests allowed in demo_mode.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } else {
+        $data = _process_rest_request($c, $path_info);
+    }
+    return $data if $c->{'rendered'};
+
+    if($format eq 'csv') {
+        return(_format_csv_output($c, $data));
+    }
+    if($format eq 'xls') {
+        return(_format_xls_output($c, $data));
+    }
+    return($c->render(json => $data));
+}
+
+##########################################################
+sub _process_rest_request {
+    my($c, $path_info) = @_;
+
+    my $data;
+    eval {
+        $data = _fetch($c, $path_info);
+
+        # generic post processing
+        $data = _post_processing($c, $data);
+    };
+    if($@) {
+        $data = { 'message' => 'error during request', description => $@, code => 500 };
+        $c->log->error($@);
+    }
+
+    if(!$data) {
+        $data = { 'message' => sprintf("unknown rest path %s '%s'", $c->req->method, $path_info), code => 404 };
+    }
+    if(ref $data eq 'HASH') {
+        $c->res->code($data->{'code'}) if $data->{'code'};
+        if($data->{'code'} && $data->{'code'} ne 200) {
+            my($style, $message) = Thruk::Utils::Filter::get_message($c);
+            if($message && $style eq 'fail_message') {
+                $data->{'description'} .= $message;
+            }
+            if($data->{'code'} > 400) {
+                $data->{'failed'} = Cpanel::JSON::XS::true;
+            }
+            if($data->{'code'} == 400) {
+                my $help = _get_help_for_path($c, $path_info);
+                if($help) {
+                    if($help->{uc($c->req->method)}) {
+                        $help = join("\n", @{$help->{uc($c->req->method)}});
+                    }
+                    $data->{'help'} = $help;
+                }
+            }
+        }
+        return($data);
+    }
+    if(ref $data eq 'ARRAY') {
+        return($data);
+    }
+    return({ 'message' => 'error during request', 'description' => "returned data is of type '".(ref $data || 'text')."'", 'code' => 500 });
+}
+
+##########################################################
+sub _format_csv_output {
+    my($c, $data) = @_;
+
+    my $hash_columns;
+    if(ref $data eq 'HASH') {
+        $hash_columns = [qw/key value/];
+        my $list = [];
+        my $columns = [sort keys %{$data}];
+        for my $col (@{$columns}) {
+            push @{$list}, { key => $col, value => $data->{$col} };
+        }
+        $data = $list;
+    }
+
+    my $output;
+    if(ref $data eq 'ARRAY') {
+        my $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        $output = "";
+        for my $d (@{$data}) {
+            my $x = 0;
+            for my $col (@{$columns}) {
+                $output .= ';' unless $x == 0;
+                if(ref($d->{$col}) eq 'ARRAY') {
+                    $output .= join(',', @{$d->{$col}});
+                } else {
+                    $output .= $d->{$col} // '';
+                }
+                $x++;
+            }
+            $output .= "\n";
+        }
+    }
+
+    if(!defined $output) {
+        $output .= "ERROR: failed to generate output, rerun with -v to get more details.\n";
+    }
+
+    $c->res->headers->content_type('text/plain');
+    $c->stash->{'template'} = 'passthrough.tt';
+    $c->stash->{'text'}     = $output;
+
+    return;
+}
+
+##########################################################
+sub _format_xls_output {
+    my($c, $data) = @_;
+
+    my $hash_columns;
+    if(ref $data eq 'HASH') {
+        $hash_columns = [qw/key value/];
+        my $list = [];
+        my $columns = [sort keys %{$data}];
+        for my $col (@{$columns}) {
+            push @{$list}, { key => $col, value => $data->{$col} };
+        }
+        $data = $list;
+    }
+
+    my $columns = [];
+    if(ref $data eq 'ARRAY') {
+        $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        for my $row (@{$data}) {
+            for my $key (keys %{$row}) {
+                $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
+            }
+        }
+    }
+
+    $c->req->parameters->{'columns'} = $columns;
+    Thruk::Utils::Status::set_selected_columns($c, [''], 'host', $columns);
+    $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . "rest.xls" . q["] );
+    $c->stash->{'name'}      = "data";
+    $c->stash->{'data'}      = $data;
+    $c->stash->{'col_tr'}    = {};
+    $c->stash->{'template'}  = 'excel/generic.tt';
+    return $c->render_excel();
+}
+
+##########################################################
+sub _fetch {
+    my($c, $path_info, $method) = @_;
+    $c->stats->profile(begin => "_fetch");
+
+    # load plugin paths
+    if(!$c->{config}->{'_rest_paths_loaded'}) {
+        $c->{config}->{'_rest_paths_loaded'} = 1;
+        my $input_files = [glob(join(" ", (
+                            $c->config->{'plugin_path'}."/plugins-enabled/*/lib/Thruk/Controller/Rest/V1/*.pm",
+                            $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/*.pm",
+                        )))];
+        for my $file (@{$input_files}) {
+            my $pkg_name = $file;
+            $pkg_name =~ s%^.*/lib/Thruk/Controller/Rest/V1/(.*?)\.pm%Thruk::Controller::Rest::V1::$1%gmx;
+            eval {
+                load $pkg_name;
+            };
+            if($@) {
+                $c->log->error($@);
+                return({ 'message' => 'error loading '.$pkg_name.' rest submodule', code => 500, 'description' => $@ });
+            }
+
+        }
+    }
+
+    my $data;
+    my $found = 0;
+    my $request_method = $method || $c->req->method;
+    my $protos = [];
+    for my $r (@{$rest_paths}) {
+        my @matches;
+        my($proto, $path, $function, $roles) = @{$r};
+        if((ref $path eq '' && $path eq $path_info) || (ref $path eq 'Regexp' && (@matches = $path_info =~ $path)))  {
+            if(ref $path eq 'Regexp' && "$path" !~ m/^.*:.*\(.*\)/mx) {
+                # if regex does not contain any matching (), @matches will contain a single value instead of empty args
+                @matches = ();
+            }
+            if($proto ne $request_method) {
+                # matching path, but wrong protocol
+                push @{$protos}, $proto;
+                next;
+            }
+            $c->stats->profile(comment => $path);
+            my $sub_name = Thruk->verbose ? Thruk::Utils::code2name($function) : '';
+            if($roles && !$c->user->check_user_roles($roles)) {
+                $data = { 'message' => 'not authorized', 'description' => 'this path requires certain roles: '.join(', ', @{$roles}), code => 403 };
+            } else {
+                $c->stats->profile(begin => "rest: $sub_name");
+                $data = &{$function}($c, $path_info, @matches);
+                $c->stats->profile(end => "rest: $sub_name");
+            }
+            $found = 1;
+            last;
+        }
+    }
+
+    if($found) {
+        if(!$data) {
+            $data = { 'message' => 'rest path: '.$path_info.' did not return any data.', code => 500 };
+        }
+    } else {
+        if(scalar @{$protos} > 0) {
+            # make GET paths available via POST as well
+            if($request_method eq 'POST' && grep(/^GET$/mx, @{$protos})) {
+                $c->req->{'_method'} = 'GET';
+                $c->req->{'env'}->{'REQUEST_METHOD'} = 'GET';
+                $data = _fetch($c, $path_info, 'GET');
+            } else {
+                $data = { 'message' => 'bad request', description => 'available methods for '.$path_info.' are: '.join(', ', @{$protos}), code => 400 };
+            }
+        } else {
+            $data = { 'message' => 'unknown rest path: '.$path_info, code => 404 };
+        }
+    }
+
+    $c->stats->profile(end => "_fetch");
+    return $data;
+}
+
+##########################################################
+sub _post_processing {
+    my($c, $data) = @_;
+    return unless $data;
+
+    $c->stats->profile(begin => "_post_processing");
+
+    # errors should not be post-processed
+    if(ref $data eq 'HASH' && $data->{'code'} && $data->{'message'}) {
+        return($data);
+    }
+
+    if(ref $data eq 'ARRAY') {
+        if($c->req->method eq 'GET') {
+            # Filtering
+            $data = _apply_filter($c, $data);
+        }
+
+        # Sorting
+        $data = _apply_sort($c, $data);
+
+        # Offset
+        my $offset = $c->req->parameters->{'offset'} || 0;
+        if($offset) {
+            if(scalar @{$data} <= $offset) { return([]); }
+            splice(@{$data}, 0, $offset);
+        }
+
+        # Limit
+        my $limit  = $c->req->parameters->{'limit'};
+        if($limit && scalar @{$data} > $limit) {
+            @{$data} = @{$data}[ 0 .. ($limit-1) ];
+        }
+
+        # Columns
+        $data = _apply_columns($c, $data);
+    }
+
+    if(ref $data eq 'HASH') {
+        # Columns
+        $data = shift @{_apply_columns($c, [$data])};
+    }
+
+    $c->stats->profile(end => "_post_processing");
+    return $data;
+}
+
+##########################################################
+sub _get_filter {
+    my($c) = @_;
+    my $filter = [];
+
+    my $reserved = Thruk::Utils::array2hash($reserved_query_parameters);
+
+    for my $key (keys %{$c->req->parameters}) {
+        next if $reserved->{$key};
+        my $op   = '=';
+        my @vals = @{Thruk::Utils::list($c->req->parameters->{$key})};
+        if($key =~ m/^(.+)\[(.*?)\]$/mx) {
+            $key = $1;
+            $op  = lc($2);
+        }
+        $op = $op_translation_words->{$op} if $op_translation_words->{$op};
+        for my $val (@vals) {
+            push @{$filter}, [$key, $op, $val];
+        }
+    }
+
+    _append_lexical_filter($filter, $c->req->parameters->{'q'}) if $c->req->parameters->{'q'};
+
+    return $filter;
+}
+
+##########################################################
+sub _append_lexical_filter {
+    my($filter, $string) = @_;
+    return unless $string;
+    push @{$filter}, Thruk::Utils::Status::parse_lexical_filter($string);
+    return;
+}
+
+##########################################################
+sub _apply_filter {
+    my($c, $data) = @_;
+
+    for my $filter (@{_get_filter($c)}) {
+        my($key, $op, $val) = @{$filter};
+
+        my @filtered;
+        if(!defined $op && !defined $val && ref $key ne '') {
+            for my $d (@{$data}) {
+                if(_match_complex_filter($d, $key)) {
+                    push @filtered, $d;
+                }
+            }
+            $data = \@filtered;
+            next;
+        }
+
+        ## no critic
+        no warnings;
+        ## use critic
+        if($op eq '=') {
+            for my $d (@{$data}) {
+                next unless lc($d->{$key}) eq $val;
+                push @filtered, $d;
+            }
+        }
+        elsif($op eq '!=') {
+            for my $d (@{$data}) {
+                next unless lc($d->{$key}) ne $val;
+                push @filtered, $d;
+            }
+        }
+        elsif($op eq '~') {
+            for my $d (@{$data}) {
+                ## no critic
+                next unless $d->{$key} =~ m/$val/i;
+                ## use critic
+                push @filtered, $d;
+            }
+        }
+        elsif($op eq '!~') {
+            for my $d (@{$data}) {
+                ## no critic
+                next unless $d->{$key} !~ m/$val/i;
+                ## use critic
+                push @filtered, $d;
+            }
+        }
+        elsif($op eq '>') {
+            for my $d (@{$data}) {
+                next unless $d->{$key} > $val;
+                push @filtered, $d;
+            }
+        }
+        elsif($op eq '<') {
+            for my $d (@{$data}) {
+                next unless $d->{$key} < $val;
+                push @filtered, $d;
+            }
+        }
+        elsif($op eq '>=') {
+            for my $d (@{$data}) {
+                if(ref $d->{$key} eq 'ARRAY') {
+                    my $found = 0;
+                    for my $v (@{$d->{$key}}) {
+                        if($v eq $val) {
+                            $found = 1;
+                            last;
+                        }
+                    }
+                    if($found) {
+                        push @filtered, $d;
+                    }
+                } else {
+                    next unless $d->{$key} >= $val;
+                    push @filtered, $d;
+                }
+            }
+        }
+        elsif($op eq '<=') {
+            for my $d (@{$data}) {
+                if(ref $d->{$key} eq 'ARRAY') {
+                    my $found = 0;
+                    for my $v (@{$d->{$key}}) {
+                        if($v eq $val) {
+                            $found = 1;
+                        }
+                    }
+                    if(!$found) {
+                        push @filtered, $d;
+                    }
+                } else {
+                    next unless $d->{$key} <= $val;
+                    push @filtered, $d;
+                }
+            }
+        } else {
+            die("unsupported operator: ".$op);
+        }
+        use warnings;
+
+        $data = \@filtered;
+    }
+
+    return $data;
+}
+
+##########################################################
+
+=head2 get_request_columns
+
+    get_request_columns($c)
+
+returns list of requested columns or undef
+
+=cut
+sub get_request_columns {
+    my($c) = @_;
+
+    return unless $c->req->parameters->{'columns'};
+
+    my $columns = [];
+    for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
+        push @{$columns}, split(/\s*,\s*/mx, $col);
+    }
+    return($columns);
+}
+
+##########################################################
+
+=head2 column_required
+
+    column_required($c, $column_name)
+
+Can be used to exclude expensive columns from beeing generated.
+
+returns true if column is required, ex. for sorting, filtering, etc...
+
+=cut
+sub column_required {
+    my($c, $col) = @_;
+
+    # from filter ?$col=...
+    for my $p (sort keys %{$c->req->parameters}) {
+        if($p =~ m/^(.+)\[(.*?)\]$/mx) {
+            $p = $1;
+        }
+        return 1 if $p eq $col;
+    }
+
+    # from ?columns=...
+    my $req_col = get_request_columns($c);
+    if(!defined $req_col || scalar @{$req_col} == 0 || grep(/^$col$/mx, @{$req_col})) {
+        return 1;
+    }
+
+    # from ?sort=...
+    for my $sort (@{Thruk::Utils::list($c->req->parameters->{'sort'})}) {
+        for my $s (split(/\s*,\s*/mx, $sort)) {
+            $s =~ s/^[\-\+]+//gmx;
+            return 1 if $col eq $s;
+        }
+    }
+
+    return;
+}
+##########################################################
+sub _apply_columns {
+    my($c, $data) = @_;
+
+    return $data unless $c->req->parameters->{'columns'};
+    my $columns = get_request_columns($c);
+
+    my $res = [];
+    for my $d (@{$data}) {
+        my $row = {};
+        for my $c (@{$columns}) {
+            $row->{$c} = $d->{$c};
+        }
+        push @{$res}, $row;
+    }
+
+    return $res;
+}
+
+##########################################################
+sub _apply_sort {
+    my($c, $data) = @_;
+
+    return $data unless $c->req->parameters->{'sort'};
+    my $sort = [];
+    for my $s (@{Thruk::Utils::list($c->req->parameters->{'sort'})}) {
+        push @{$sort}, split(/\s*,\s*/mx, $s);
+    }
+
+    my @compares;
+    for my $key (@{$sort}) {
+        my $order = 'asc';
+        if($key =~ m/^\-/mx) {
+            $order = 'desc';
+            $key =~ s/^\-//mx;
+        } else {
+            $key =~ s/^\+//mx;
+        }
+        # sort numeric
+        if( defined $data->[0]->{$key} and Thruk::Backend::Manager::looks_like_number($data->[0]->{$key}) ) {
+            if($order eq 'asc') {
+                push @compares, '$a->{"'.$key.'"} <=> $b->{"'.$key.'"}';
+            } else {
+                push @compares, '$b->{"'.$key.'"} <=> $a->{"'.$key.'"}';
+            }
+        }
+
+        # sort alphanumeric
+        else {
+            if($order eq 'asc') {
+                push @compares, '$a->{"'.$key.'"} cmp $b->{"'.$key.'"}';
+            } else {
+                push @compares, '$b->{"'.$key.'"} cmp $a->{"'.$key.'"}';
+            }
+        }
+    }
+    my $sortstring = join( ' || ', @compares );
+
+    my @sorted;
+    ## no critic
+    no warnings;    # sorting by undef values generates lots of errors
+    eval '@sorted = sort {'.$sortstring.'} @{$data};';
+    use warnings;
+    ## use critic
+
+    if(scalar @sorted == 0 && $@) {
+        confess($@);
+    }
+
+    return \@sorted;
+}
+
+##########################################################
+sub _livestatus_options {
+    my($c, $type) = @_;
+    my $options = {};
+    if($c->req->parameters->{'limit'}) {
+        $options->{'options'}->{'limit'} = $c->req->parameters->{'limit'};
+    }
+
+    # try to reduce the number of requested columns
+    if($type) {
+        my $columns = get_request_columns($c);
+        if($columns && scalar @{$columns} > 0) {
+            my $ref_columns;
+            if($type eq 'hosts') {
+                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_host_columns);
+            }
+            elsif($type eq 'services') {
+                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_service_columns);
+            }
+            elsif($type eq 'contacts') {
+                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+            } else {
+                confess("unsupported type: ".$type);
+            }
+            # if all requested columns are default columns, we can pass the columns to livestatus
+            my $found = 1;
+            for my $col (@{$columns}) {
+                if(!$ref_columns->{$col}) {
+                    $found = 0;
+                    last;
+                }
+            }
+            if($found) {
+                $options->{'columns'} = $columns;
+            }
+        }
+    }
+
+    return $options;
+}
+
+##########################################################
+sub _livestatus_filter {
+    my($c, $ref_columns) = @_;
+    if($ref_columns && ref $ref_columns eq '') {
+        if($ref_columns eq 'hosts') {
+            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_host_columns);
+        }
+        elsif($ref_columns eq 'services') {
+            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_service_columns);
+        }
+        elsif($ref_columns eq 'contacts') {
+            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+        } else {
+            confess("unsupported type: ".$ref_columns);
+        }
+    }
+    my $filter = [];
+    for my $f (@{_get_filter($c)}) {
+        if(ref $f ne "ARRAY") {
+            push @{$filter}, $f;
+            next;
+        }
+        my($key, $op, $val) = @{$f};
+        if(ref $key ne "") {
+            push @{$filter}, $f;
+            next;
+        }
+        # convert custom variable filter
+        if($key =~ m/^_/mx) {
+            $key =~ s/^_//mx;
+            $val = $key.' '.$val;
+            if($key =~ m/^host/mxi) {
+                $key = 'host_custom_variables';
+            } else {
+                $key = 'custom_variables';
+            }
+        } else {
+            # skip non-default-columns filter, it might be perfdata
+            if($ref_columns && !$ref_columns->{$key}) {
+                next;
+            }
+        }
+        push @{$filter}, { $key => { $op => $val }};
+    }
+
+    return $filter;
+}
+
+##########################################################
+sub _expand_perfdata_and_custom_vars {
+    my($c, $data, $type) = @_;
+    return $data unless ref $data eq 'ARRAY';
+
+    # check wether user is allowed to see all custom variables
+    my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+    my $allowed_list = Thruk::Utils::list($c->config->{'show_custom_vars'});
+
+    # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
+    my $columns = get_request_columns($c);
+    if($columns && scalar @{$columns} > 0) {
+        my $ref_columns;
+        if($type eq 'hosts') {
+            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_host_columns);
+        }
+        elsif($type eq 'services') {
+            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_service_columns);
+        }
+        elsif($type eq 'contacts') {
+            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+        } else {
+            confess("unsupported type: ".$type);
+        }
+        # if all requested columns are default columns, simply return our data, no expanding required
+        my $found = 1;
+        for my $col (@{$columns}) {
+            if(!$ref_columns->{$col}) {
+                $found = 0;
+                last;
+            }
+        }
+        return($data) if $found;
+    }
+
+    for my $row (@{$data}) {
+        if($row->{'custom_variable_names'}) {
+            $row->{'custom_variables'} = Thruk::Utils::get_custom_vars(undef, $row);
+            for my $key (@{$row->{'custom_variable_names'}}) {
+                if($allowed || Thruk::Utils::check_custom_var_list($key, $allowed_list)) {
+                    $row->{'_'.uc($key)} = $row->{'custom_variables'}->{$key};
+                } else {
+                    delete $row->{'custom_variables'}->{$key};
+                }
+            }
+            if(!$allowed) {
+                $row->{'custom_variable_names'}  = [keys   %{$row->{'custom_variables'}}];
+                $row->{'custom_variable_values'} = [values %{$row->{'custom_variables'}}];
+            }
+        }
+        if($row->{'host_custom_variable_names'}) {
+            $row->{'host_custom_variables'} = Thruk::Utils::get_custom_vars(undef, $row, 'host_');
+            for my $key (@{$row->{'host_custom_variable_names'}}) {
+                if($allowed || Thruk::Utils::check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
+                    $row->{'_HOST'.uc($key)} = $row->{'host_custom_variables'}->{$key};
+                } else {
+                    delete $row->{'host_custom_variables'}->{$key};
+                }
+            }
+            if(!$allowed) {
+                $row->{'host_custom_variable_names'}  = [keys   %{$row->{'host_custom_variables'}}];
+                $row->{'host_custom_variable_values'} = [values %{$row->{'host_custom_variables'}}];
+            }
+        }
+
+        if($row->{'perf_data'}) {
+            my $perfdata = (Thruk::Utils::Filter::split_perfdata($row->{'perf_data'}))[0];
+            for my $p (@{$perfdata}) {
+                my $name = $p->{'name'};
+                if($p->{'parent'}) {
+                    $name = $p->{'parent'}.'::'.$p->{'name'};
+                }
+                next if $row->{$name}; # don't overwrite existing values
+                $row->{$name} = $p->{'value'};
+                $row->{$name.'_unit'} = $p->{'unit'};
+            }
+        }
+        if($row->{'host_perf_data'}) {
+            my $perfdata = (Thruk::Utils::Filter::split_perfdata($row->{'host_perf_data'}))[0];
+            for my $p (@{$perfdata}) {
+                my $name = 'host_'.$p->{'name'};
+                if($p->{'parent'}) {
+                    $name = 'host_'.$p->{'parent'}.'::'.$p->{'name'};
+                }
+                next if $row->{$name}; # don't overwrite existing values
+                $row->{$name} = $p->{'value'};
+                $row->{$name.'_unit'} = $p->{'unit'};
+            }
+        }
+    }
+    return($data);
+}
+
+##########################################################
+sub _get_help_for_path {
+    my($c, $path_info) = @_;
+    my(undef, undef, $docs) = get_rest_paths($c);
+    for my $path (reverse sort { length $a <=> length $b } keys %{$docs}) {
+        my $p = $path;
+        $p =~ s%<[^>]+>%[^/]*%gmx;
+        if($path_info =~ qr/$p/mx) {
+            return($docs->{$path});
+        }
+    }
+    return;
+}
+
+##########################################################
+
+=head2 register_rest_path_v1
+
+    register_rest_path_v1($protocol, $path|$regex, $function, $roles)
+
+register rest path.
+
+returns nothing
+
+=cut
+sub register_rest_path_v1 {
+    my($proto, $path, $function, $roles) = @_;
+    for my $prot (@{Thruk::Utils::list($proto)}) {
+        push @{$rest_paths}, [$prot, $path, $function, $roles];
+    }
+    return;
+}
+
+##########################################################
+
+=head2 get_rest_paths
+
+    get_rest_paths([$c])
+
+gather list of available rest paths. If $c is supplied, only enabled plugins
+will be returned.
+
+returns (path_hash, keys_hash, docs_hash)
+
+=cut
+sub get_rest_paths {
+    my($c, $input_files) = @_;
+
+    if($input_files) {
+        # already set
+    } elsif($c) {
+        $input_files = [glob(join(" ", (
+                            $c->config->{'project_root'}."/lib/Thruk/Controller/rest_v1.pm",
+                            $c->config->{'plugin_path'}."/plugins-enabled/*/lib/Thruk/Controller/Rest/V1/*.pm",
+                            $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/*.pm",
+                        )))];
+    } else {
+        $input_files = [glob("lib/Thruk/Controller/rest_v1.pm
+                             plugins/plugins-available/*/lib/Thruk/Controller/Rest/V1/*.pm
+                             lib/Thruk/Controller/Rest/V1/*.pm")];
+    }
+
+    my $paths = {};
+    my $keys  = {};
+    my $docs  = {};
+    my $last_path;
+    my $last_proto;
+    my $in_comment = 0;
+    for my $file (@{$input_files}) {
+        for my $line (read_file($file)) {
+            if($line =~ m%REST\ PATH:\ (\w+)\ (.*?)$%mx) {
+                $last_path  = $2;
+                $last_proto = $1;
+                $paths->{$last_path}->{$last_proto} = 1;
+                $in_comment = 1;
+            }
+            elsif($in_comment && $line =~ m%^\s*\#\s?(.*?)$%mx) {
+                $docs->{$last_path}->{$last_proto} = [] unless $docs->{$last_path}->{$last_proto};
+                push @{$docs->{$last_path}->{$last_proto}}, $1;
+            }
+            elsif($last_path && $line =~ m%([\w\_]+)\s+=>\s+.*\#\s+(.*)$%mx) {
+                $keys->{$last_path}->{$last_proto} = [] unless $keys->{$last_path}->{$last_proto};
+                push @{$keys->{$last_path}->{$last_proto}}, [$1, $2];
+                $in_comment = 0;
+            } else {
+                $in_comment = 0;
+            }
+        }
+    }
+    return($paths, $keys, $docs);
+}
+
+##########################################################
+sub _append_time_filter {
+    my($c, $filter) = @_;
+
+    return if($c->req->parameters->{'q'} && $c->req->parameters->{'q'} =~ m/time/mx);
+    for my $f (@{$filter}) {
+        if(ref $f eq 'HASH' && $f->{'time'}) {
+            return;
+        }
+        if(ref $f eq 'ARRAY') {
+            for my $f2 (@{$f}) {
+                if(ref $f2 eq 'HASH' && $f2->{'time'}) {
+                    return;
+                }
+            }
+        }
+    }
+    push @{$filter}, { time => { '>=' => time() - 86400 } };
+    return;
+}
+
+##########################################################
+
+=head2 load_json_files
+
+    load_json_files($c, {
+        files                   => $files,
+       [ pre_process_callback   => &code_ref ],
+       [ authorization_callback => &code_ref ],
+       [ post_process_callback  => &code_ref ],
+    });
+
+generic function to expose json files
+
+returns list of authorized loaded files
+
+=cut
+sub load_json_files {
+    my($c, $options) = @_;
+    my $list = [];
+    for my $file (@{$options->{'files'}}) {
+        next unless -e $file;
+        my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+        $data->{'file'} = $file;
+        $data->{'file'} =~ s%.*?([^/]+)\.\w+$%$1%mx;
+        if($options->{'pre_process_callback'}) {
+            $data = &{$options->{'pre_process_callback'}}($c, $data);
+        }
+        if($options->{'authorization_callback'}) {
+            next unless &{$options->{'authorization_callback'}}($c, $data);
+        }
+        if($options->{'post_process_callback'}) {
+            $data = &{$options->{'post_process_callback'}}($c, $data);
+        }
+        push @{$list}, $data;
+    }
+    return $list;
+}
+
+##########################################################
+# REST PATH: GET /
+# lists all available rest urls.
+# alias for /index
+# REST PATH: GET /index
+# lists all available rest urls.
+register_rest_path_v1('GET', '/',      \&_rest_get_index);
+register_rest_path_v1('GET', '/index', \&_rest_get_index);
+sub _rest_get_index {
+    my($c) = @_;
+    my($paths, $keys, $docs) = get_rest_paths($c);
+    my $data = [];
+    for my $path (sort keys %{$paths}) {
+        for my $proto (sort keys %{$paths->{$path}}) {
+            push @{$data}, {
+                url         => $path,
+                protocol    => $proto,
+                description => $docs->{$path}->{$proto}->[0] || '',
+            };
+        }
+    }
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk
+# hash of basic information about this thruk instance
+register_rest_path_v1('GET', '/thruk', \&_rest_get_thruk);
+sub _rest_get_thruk {
+    my($c) = @_;
+    return({
+        rest_version        => $VERSION,                            # rest api version
+        thruk_version       => $c->config->{'version'},             # thruk version
+        thruk_branch        => $c->config->{'branch'},              # thruk branch name
+        thruk_release_date  => $c->config->{'released'},            # thruk release date
+        localtime           => time(),                              # current server unix timestamp / epoch
+        project_root        => $c->config->{'project_root'},        # thruk root folder
+        etc_path            => $c->config->{'etc_path'},            # configuration folder
+        var_path            => $c->config->{'var_path'},            # variable data folder
+    });
+}
+
+##########################################################
+# REST PATH: GET /thruk/config
+# lists configuration information
+register_rest_path_v1('GET', '/thruk/config', \&_rest_get_thruk_config);
+register_rest_path_v1('GET', '/thruk/config', \&_rest_get_thruk_config);
+sub _rest_get_thruk_config {
+    my($c) = @_;
+    my $data = {};
+    for my $key (keys %{$c->config}) {
+        next if $key eq 'View::TT';
+        $data->{$key} = $c->config->{$key};
+    }
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk/jobs
+# lists thruk jobs.
+register_rest_path_v1('GET', qr%^/thruk/jobs?$%mx, \&_rest_get_thruk_jobs);
+sub _rest_get_thruk_jobs {
+    my($c, undef, $job) = @_;
+    require Thruk::Utils::External;
+
+    my $data = [];
+    for my $dir (glob($c->config->{'var_path'}."/jobs/*/.")) {
+        if($dir =~ m%/([^/]+)/\.$%mx) {
+            my $id = $1;
+            next if $job && $job ne $id;
+            push @{$data}, Thruk::Utils::External::read_job($c, $id);
+        }
+    }
+    if($job) {
+        if(!$data->[0]) {
+            return({ 'message' => 'no such job', code => 404 });
+        }
+        $data = $data->[0];
+    }
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk/jobs/<id>
+# get thruk job status for given id.
+# alias for /thruk/jobs?id=<id>
+register_rest_path_v1('GET', qr%^/thruk/jobs?/([^/]+)$%mx, \&_rest_get_thruk_jobs);
+
+##########################################################
+# REST PATH: GET /thruk/sessions
+# lists thruk sessions.
+register_rest_path_v1('GET', qr%^/thruk/sessions?$%mx, \&_rest_get_thruk_sessions);
+sub _rest_get_thruk_sessions {
+    my($c, undef, $id) = @_;
+    my $is_admin = 0;
+    if($c->check_user_roles('admin')) {
+        $is_admin = 1;
+    }
+
+    my $data = [];
+    for my $session (glob($c->config->{'var_path'}."/sessions/*")) {
+        my $file = $session;
+        $file   =~ s%^.*/%%gmx;
+        next if $id && $id ne $file;
+        my($auth,$ip,$username) = split(/~~~/mx, scalar read_file($session));
+        next unless $is_admin || $username eq $c->stash->{'remote_user'};
+        push @{$data}, {
+            id      => $file,
+            active  => (stat($session))[9],
+            address => $ip,
+            user    => $username,
+        };
+    }
+    if($id) {
+        if(!$data->[0]) {
+            return({ 'message' => 'no such session', code => 404 });
+        }
+        $data = $data->[0];
+    }
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk/sessions/<id>
+# get thruk sessions status for given id.
+# alias for /thruk/sessions?id=<id>
+register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk_sessions);
+
+##########################################################
+# REST PATH: GET /hosts
+# lists livestatus hosts.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
+# there is an shortcut /hosts available.
+register_rest_path_v1('GET', qr%^/hosts?$%mx, \&_rest_get_livestatus_hosts);
+sub _rest_get_livestatus_hosts {
+    my($c) = @_;
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
+    _expand_perfdata_and_custom_vars($c, $data, "hosts");
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /hosts/stats
+# hash of livestatus host statistics.
+register_rest_path_v1('GET', qr%^/hosts?/stats$%mx, \&_rest_get_livestatus_hosts_stats);
+sub _rest_get_livestatus_hosts_stats {
+    my($c) = @_;
+    return($c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /hosts/totals
+# hash of livestatus host totals statistics.
+# its basically a reduced set of /hosts/stats.
+register_rest_path_v1('GET', qr%^/hosts?/totals$%mx, \&_rest_get_livestatus_hosts_totals);
+sub _rest_get_livestatus_hosts_totals {
+    my($c) = @_;
+    return($c->{'db'}->get_host_totals_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /hosts/<name>/services
+# lists services for given host.
+# alias for /services?host_name=<name>
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/services?$%mx, \&_rest_get_livestatus_hosts_services);
+sub _rest_get_livestatus_hosts_services {
+    my($c, undef, $host) = @_;
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { 'host_name' => $host }, _livestatus_filter($c, 'services') ], %{_livestatus_options($c, "services")});
+    _expand_perfdata_and_custom_vars($c, $data, "services");
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /hosts/<name>
+# lists hosts for given name.
+# alias for /hosts?name=<name>
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)$%mx, \&_rest_get_livestatus_hosts_by_name);
+sub _rest_get_livestatus_hosts_by_name {
+    my($c, undef, $host) = @_;
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
+    _expand_perfdata_and_custom_vars($c, $data, "hosts");
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /hostgroups
+# lists livestatus hostgroups.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
+register_rest_path_v1('GET', qr%^/hostgroups?$%mx, \&_rest_get_livestatus_hostgroups);
+sub _rest_get_livestatus_hostgroups {
+    my($c) = @_;
+    return($c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), _livestatus_filter($c)  ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /services
+# lists livestatus services.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
+# there is an alias /services.
+register_rest_path_v1('GET', qr%^/services?$%mx, \&_rest_get_livestatus_services);
+sub _rest_get_livestatus_services {
+    my($c) = @_;
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), _livestatus_filter($c, 'services')  ], %{_livestatus_options($c, "services")});
+    _expand_perfdata_and_custom_vars($c, $data, "services");
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /services/<host_name>/<service>
+# lists services for given host and name.
+# alias for /services?host_name=<host_name>&description=<service>
+register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)$%mx, \&_rest_get_livestatus_services_by_name);
+sub _rest_get_livestatus_services_by_name {
+    my($c, undef, $host, $service) = @_;
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
+    _expand_perfdata_and_custom_vars($c, $data, "services");
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /services/stats
+# livestatus service statistics.
+register_rest_path_v1('GET', qr%^/services?/stats$%mx, \&_rest_get_livestatus_services_stats);
+sub _rest_get_livestatus_services_stats {
+    my($c) = @_;
+    return($c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /services/totals
+# livestatus service totals statistics.
+# its basically a reduced set of /services/stats.
+register_rest_path_v1('GET', qr%^/services?/totals$%mx, \&_rest_get_livestatus_services_totals);
+sub _rest_get_livestatus_services_totals {
+    my($c) = @_;
+    return($c->{'db'}->get_service_totals_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /servicegroups
+# lists livestatus servicegroups.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
+register_rest_path_v1('GET', qr%^/servicegroups?$%mx, \&_rest_get_livestatus_servicegroups);
+sub _rest_get_livestatus_servicegroups {
+    my($c) = @_;
+    return($c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), _livestatus_filter($c)  ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /contacts
+# lists livestatus contacts.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+register_rest_path_v1('GET', qr%^/contacts?$%mx, \&_rest_get_livestatus_contacts);
+sub _rest_get_livestatus_contacts {
+    my($c) = @_;
+    my $data = $c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contact'), _livestatus_filter($c, 'contacts')  ], %{_livestatus_options($c, "contacts")});
+    _expand_perfdata_and_custom_vars($c, $data, "contacts");
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /contactgroups
+# lists livestatus contactgroups.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
+register_rest_path_v1('GET', qr%^/contactgroups?$%mx, \&_rest_get_livestatus_contactgroups);
+sub _rest_get_livestatus_contactgroups {
+    my($c) = @_;
+    return($c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /timeperiods
+# lists livestatus timeperiods.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+register_rest_path_v1('GET', qr%^/timeperiods?$%mx, \&_rest_get_livestatus_timeperiods);
+sub _rest_get_livestatus_timeperiods {
+    my($c) = @_;
+    return($c->{'db'}->get_timeperiods(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /commands
+# lists livestatus commands.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
+register_rest_path_v1('GET', qr%^/commands?$%mx, \&_rest_get_livestatus_commands, ['admin']);
+sub _rest_get_livestatus_commands {
+    my($c) = @_;
+    return($c->{'db'}->get_commands(filter => [_livestatus_filter($c)], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /comments
+# lists livestatus comments.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
+register_rest_path_v1('GET', qr%^/comments?$%mx, \&_rest_get_livestatus_comments);
+sub _rest_get_livestatus_comments {
+    my($c) = @_;
+    return($c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /downtimes
+# lists livestatus downtimes.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
+register_rest_path_v1('GET', qr%^/downtimes?$%mx, \&_rest_get_livestatus_downtimes);
+sub _rest_get_livestatus_downtimes {
+    my($c) = @_;
+    return($c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /logs
+# lists livestatus logs.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#log for details.
+register_rest_path_v1('GET', qr%^/logs?$%mx, \&_rest_get_livestatus_logs);
+sub _rest_get_livestatus_logs {
+    my($c) = @_;
+    my $filter = _livestatus_filter($c);
+    _append_time_filter($c, $filter);
+    return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /notifications
+# lists notifications based on logfiles.
+# alias for /logs?class=3
+register_rest_path_v1('GET', qr%^/notifications?$%mx, \&_rest_get_livestatus_notifications);
+sub _rest_get_livestatus_notifications {
+    my($c) = @_;
+    my $filter = _livestatus_filter($c);
+    _append_time_filter($c, $filter);
+    return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /hosts/<name>/notifications
+# lists notifications for given host.
+# alias for /logs?class=3&host_name=<name>
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/notifications?$%mx, \&_rest_get_livestatus_host_notifications);
+sub _rest_get_livestatus_host_notifications {
+    my($c, undef, $host) = @_;
+    my $filter = _livestatus_filter($c);
+    _append_time_filter($c, $filter);
+    return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /alerts
+# lists alerts based on logfiles.
+# alias for /logs?type[~]=^(HOST|SERVICE) ALERT
+register_rest_path_v1('GET', qr%^/alerts?$%mx, \&_rest_get_livestatus_alerts);
+sub _rest_get_livestatus_alerts {
+    my($c) = @_;
+    my $filter = _livestatus_filter($c);
+    _append_time_filter($c, $filter);
+    return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /hosts/<name>/alerts
+# lists alerts for given host.
+# alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/alerts?$%mx, \&_rest_get_livestatus_host_alerts);
+sub _rest_get_livestatus_host_alerts {
+    my($c, undef, $host) = @_;
+    my $filter = _livestatus_filter($c);
+    _append_time_filter($c, $filter);
+    return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { host_name => $host, type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /processinfo
+# lists livestatus sites status.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+register_rest_path_v1('GET', qr%^/processinfos?$%mx, \&_rest_get_livestatus_processinfos);
+sub _rest_get_livestatus_processinfos {
+    my($c) = @_;
+    my $data = $c->{'db'}->get_processinfo(filter => [ _livestatus_filter($c) ], %{_livestatus_options($c)});
+    $data = [values(%{$data})] if ref $data eq 'HASH';
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /processinfo/stats
+# lists livestatus sites statistics.
+# see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+register_rest_path_v1('GET', qr%^/processinfos?/stats$%mx, \&_rest_get_livestatus_processinfos_stats);
+sub _rest_get_livestatus_processinfos_stats {
+    my($c) = @_;
+    return($c->{'db'}->get_extra_perf_stats(filter => [ _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /checks/stats
+# lists host / service check statistics.
+register_rest_path_v1('GET', qr%^/checks?/stats$%mx, \&_rest_get_livestatus_checks_stats);
+sub _rest_get_livestatus_checks_stats {
+    my($c) = @_;
+    return($c->{'db'}->get_performance_stats(filter => [ _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /lmd/sites
+# lists connected sites. Only available if LMD (`use_lmd`) is enabled.
+register_rest_path_v1('GET', qr%^/lmd/sites?$%mx, \&_rest_get_lmd_sites);
+sub _rest_get_lmd_sites {
+    my($c) = @_;
+    my $data = [];
+    if($c->config->{'use_lmd_core'}) {
+        $data = $c->{'db'}->get_sites();
+    }
+    return($data);
+}
+
+##########################################################
+sub _match_complex_filter {
+    my($data, $filter) = @_;
+    if(ref $filter eq 'ARRAY') {
+        # simple and filter from list
+        for my $f (@{$filter}) {
+            return unless _match_complex_filter($data, $f);
+        }
+        return 1;
+    }
+    if(ref $filter eq 'HASH') {
+        for my $key (sort keys %{$filter}) {
+            # or filter from hash: { -or => [...] }
+            if($key eq '-or') {
+                for my $f (@{$filter->{$key}}) {
+                    return 1 if _match_complex_filter($data, $f);
+                }
+                return;
+            }
+            # and filter from hash: { and => [...] }
+            if($key eq '-and') {
+                return _match_complex_filter($data, $filter->{$key});
+            }
+            my $val = $filter->{$key};
+            if(ref $val eq 'HASH') {
+                for my $op (%{$val}) {
+                    return(_compare($op, $data->{$key}, $val->{$op}));
+                }
+                return;
+            }
+        }
+    }
+    require Data::Dumper;
+    confess("unknown filter: ".Data::Dumper($filter));
+}
+
+##########################################################
+sub _compare {
+    my($op, $data, $val) = @_;
+
+    ## no critic
+    no warnings;
+    ## use critic
+    my @filtered;
+    if($op eq '=') {
+        return 1 if lc($data) eq lc($val);
+        return;
+    }
+    elsif($op eq '!=') {
+        return 1 if lc($data) ne lc($val);
+        return;
+    }
+    elsif($op eq '~' || $op eq '~~') {
+        ## no critic
+        return 1 if $data =~ m/$val/i;
+        ## use critic
+        return;
+    }
+    elsif($op eq '!~' || $op eq '!~~') {
+        ## no critic
+        return 1 if $data !~ m/$val/i;
+        ## use critic
+        return;
+    }
+    elsif($op eq '>') {
+        return 1 if $data > $val;
+        return;
+    }
+    elsif($op eq '<') {
+        return 1 if $data < $val;
+    }
+    elsif($op eq '>=') {
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                if(lc($v) eq lc($val)) {
+                    $found = 1;
+                    last;
+                }
+            }
+            return $found;
+        } else {
+            return 1 if $data >= $val;
+            return;
+        }
+    }
+    elsif($op eq '<=') {
+        if(ref $data eq 'ARRAY') {
+            my $found = 0;
+            for my $v (@{$data}) {
+                if(lc($v) eq lc($val)) {
+                    $found = 1;
+                }
+            }
+            return !$found;
+        } else {
+            return 1 if $data <= $val;
+            return;
+        }
+    } else {
+        die("unsupported operator: ".$op);
+    }
+    return;
+}
+
+##########################################################
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-present, <sven@nierlein.org>
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+1;

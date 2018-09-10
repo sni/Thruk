@@ -9,10 +9,10 @@ How to setup Multisite with OMD
 == Introduction
 
 === What is OMD?
-The OMD Labs-Edition is a monitoring platform and a new concept of how to install, 
-maintain and update a monitoring system built on Nagios. It contains most monitoring 
-related components from labs.consol.de and others useful addons from companioned authors. 
-It is not another linux distribution, instead it integrates well in your current 
+The OMD Labs-Edition is a monitoring platform and a new concept of how to install,
+maintain and update a monitoring system built on Nagios. It contains most monitoring
+related components from labs.consol.de and others useful addons from companioned authors.
+It is not another linux distribution, instead it integrates well in your current
 system in form of a single rpm or deb package.
 
 === What use is a multisite?
@@ -21,7 +21,7 @@ If you are a service provider that monitors hosts and services for several clien
 can host each clients' monitoring site on a single server. With OMD you can easily manipulate
 several aspects of each clients' site without affect the site of another client. This also
 allows you to create accounts for the client user without having to expose data for
-organizations that they do not belong to. 
+organizations that they do not belong to.
 
 === What will this article cover?
 
@@ -115,34 +115,33 @@ omd stop clientb
 Afterwards, we will need to use `omd config [sitename]` TUI utility to enable Livestatus. However, it is
 worth noting that for two of the sites, you will need to specify non-standard TCP ports for Livestatus.
 
-For each site, use `omd config [sitename], go to `Distributed Monitoring`,`LIVESTATUS_TCP` (accept the 
+For each site, use `omd config [sitename], go to `Distributed Monitoring`,`LIVESTATUS_TCP` (accept the
 warning and stop the site if prompted), and specify the `LIVESTATUS_TCP_PORT`. Exit the config tool.
 
 After we restart our sites, we can use the Thruk UI to add the backends to our `abcmsp` site:
 Go to `Config Tool` > `Backend / Sites` > `add new connection`.
-For the `name` and `section` fields, use the client name. Leave the `type` as livestatus, 
-and for the connection use `127.0.0.1:6558` and `127.0.0.1:6559` -- or whichever ports you 
+For the `name` and `section` fields, use the client name. Leave the `type` as livestatus,
+and for the connection use `127.0.0.1:6558` and `127.0.0.1:6559` -- or whichever ports you
 opted to use -- and then save the changes.
 
 === Creating Read-Only Users for Thruk
 
 We can create our Apache users and Thruk authorized users within Thruk:
 
-`Config Tool` > `User settings` > type a new username in the `username` field > specify a password, 
+`Config Tool` > `User settings` > type a new username in the `username` field > specify a password,
 and leave all authorization settings to `no` and click `save`.
 
-Next, we can change the `Configuration Type` in the drop-down at the top-right of the page to 
-`CGI & Access`. Under the `authorized_for_read_only` field, select the new user and click the 
+Next, we can change the `Configuration Type` in the drop-down at the top-right of the page to
+`CGI & Access`. Under the `authorized_for_read_only` field, select the new user and click the
 `>>` button to move them to the `selected` field.
 
 == Conclusion
 
 In this article, we covered some basics of OMD and Thruk to get a multi-site environment going.
 It is worthing noting again: THIS IS NOT AN ALL INCLUSIVE GUIDE FOR CONFIGURING THRUK AND/OR OMD.
-It is also worth noting that there are other ways to answer the question: "How do I expose Thruk 
+It is also worth noting that there are other ways to answer the question: "How do I expose Thruk
 to a client without exposing data belonging to other clients?"
 
 Containers, coupled with livestatus backends can solve this problem. Additionally, you can export
-a given dashboard as a PNG file to display on a web page: 
+a given dashboard as a PNG file to display on a web page:
 https://github.com/sni/Thruk/blob/master/support/panorama2img
-

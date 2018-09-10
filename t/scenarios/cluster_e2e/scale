@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "x$1" = "x" ]; then
+  echo "usage: $0 <target number>"
+  exit 2
+fi
+
+docker-compose up -d --scale=thruk=$1

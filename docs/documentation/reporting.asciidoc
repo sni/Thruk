@@ -104,8 +104,7 @@ BODY {
 }
 TD.header DIV.title {
     /* change gradient on page cover and page header */
-    background: rgba(0, 0, 0, 0) -moz-linear-gradient(45deg, #ffd972 0%, #fff9a1 100%) repeat scroll 0 0;
-    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#ffd972), color-stop(100%,#fff9a1));
+    background: linear-gradient(to bottom, #d0e4f7 0%,#73b1e7 24%,#0a77d5 50%,#539fe1 79%,#87bcea 100%);
 }
 </style>
 
@@ -113,6 +112,9 @@ TD.header DIV.title {
   /* add complete new elements by javascript, ex.: company logo on page cover */
   jQuery(document).ready(function() {
     jQuery('<img src="http://www.thruk.org/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
+
+    // note: the image must be accesible from the monitoring host, sometimes its easier to use embedded base64 encoded images:
+    //jQuery('<img src="data:image/png;base64,...">').insertBefore('DIV.page.cover DIV.titletext');
   });
 </script>
 ------

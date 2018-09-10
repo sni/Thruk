@@ -70,7 +70,21 @@ sub cmd {
 
     my $mode = shift @{$commandoptions} || '';
 
+    # backwards compatibility for thruk -a bpd command
+    my $id = $mode;
+    if($mode eq 'd') {
+        $id = 'all';
+    }
+
+    # this function must be run on one cluster node only
+    if($id eq 'all') {
+        return("command send to cluster\n", 0) if $c->cluster->run_cluster("once", "cmd: bp all");
+    }
+
     if($mode eq 'commit') {
+        # this function must be run on all cluster nodes
+        return if $c->cluster->run_cluster("all", "cmd: bp commit");
+
         my $bps = Thruk::BP::Utils::load_bp_data($c);
         my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
         if($rc != 0) {
@@ -80,12 +94,6 @@ sub cmd {
         Thruk::BP::Utils::update_cron_file($c); # check cronjob
         $c->stats->profile(end => "_cmd_bp($action)");
         return('OK - wrote '.(scalar @{$bps})." business process(es)\n", 0);
-    }
-
-    # backwards compatibility for thruk -a bpd command
-    my $id = $mode;
-    if($mode eq 'd') {
-        $id = 'all';
     }
 
     if(!$id) {

@@ -20,7 +20,7 @@
 
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Host Downtimes</div>
-    [% UNLESS c.config.command_disabled.exists('55') || c.check_user_roles('authorized_for_read_only') %]
+    [% UNLESS command_disabled(c, '55') || c.check_user_roles('authorized_for_read_only') %]
     <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div>
     [% END %]
     <br>
@@ -55,7 +55,7 @@
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtimes</div>
-    [% UNLESS c.config.command_disabled.exists('56') || c.check_user_roles('authorized_for_read_only') %]
+    [% UNLESS command_disabled(c, '56') || c.check_user_roles('authorized_for_read_only') %]
     <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div>
     [% END %]
     <br>

@@ -54,8 +54,7 @@ sub index {
     if($action eq 'user_password') {
         # ok
     }
-    elsif( !$c->check_user_roles("authorized_for_configuration_information")
-        || !$c->check_user_roles("authorized_for_system_commands")) {
+    elsif(!$c->check_user_roles("admin")) {
         if(    !defined $c->{'db'}
             || !defined $c->{'db'}->{'backends'}
             || ref $c->{'db'}->{'backends'} ne 'ARRAY'
@@ -595,6 +594,7 @@ sub _process_users_page {
     # save changes to user
     my $user = $c->req->parameters->{'data.username'} || '';
     if($user ne '' and defined $file and $c->stash->{action} eq 'store') {
+        my($name, $alias) = split(/\ \-\ /mx,$user, 2);
         return unless Thruk::Utils::check_csrf($c);
         my $redirect = 'conf.cgi?action=change&sub=users&data.username='.$user;
         if($c->stash->{'readonly'}) {
@@ -605,6 +605,17 @@ sub _process_users_page {
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );
             return $c->redirect_to($redirect);
+        }
+
+        my $send = $c->req->parameters->{'send'} || '';
+        if($send eq 'lock account' || $send eq 'unlock account') {
+            my $userdata = Thruk::Utils::get_user_data($c, $name);
+            if($send eq 'unlock account') {
+                delete $userdata->{'login'}->{'locked'};
+            } else {
+                $userdata->{'login'}->{'locked'} = 1;
+            }
+            Thruk::Utils::store_user_data($c, $userdata, $name);
         }
 
         # save changes to cgi.cfg
@@ -675,6 +686,10 @@ sub _process_users_page {
         $c->stash->{'contact_roles'}  = $croles;
         $c->stash->{'contact_can_submit_commands'} = $can_submit_commands;
         $c->stash->{'roles_by_group'} = $roles_by_group;
+
+        my $userdata = Thruk::Utils::get_user_data($c, $name);
+        $c->stash->{'account_is_locked'} = $userdata->{'login'}->{'locked'} ? 1 : 0;
+        $c->stash->{'userdata'} = $userdata;
     }
 
     $c->stash->{'subtitle'} = "User Configuration";
@@ -1110,7 +1125,6 @@ sub _process_objects_page {
     return 1;
 }
 
-
 ##########################################################
 # apply config changes
 sub _apply_config_changes {
@@ -1392,7 +1406,7 @@ sub _update_password {
             return unless Thruk::Utils::check_csrf($c);
             my $err = _htpasswd_password($c, $user, undef);
             return $err if $err;
-            $c->log->info("admin removed password for ".$user);
+            $c->log->info($c->stash->{remote_user}." removed password for ".$user);
             return;
         }
 
@@ -1404,7 +1418,7 @@ sub _update_password {
             if($pass1 eq $pass2) {
                 my $err = _htpasswd_password($c, $user, $pass1);
                 return $err if $err;
-                $c->log->info("admin changed password for ".$user);
+                $c->log->info($c->stash->{remote_user}." changed password for ".$user);
                 return;
             } else {
                 return('Passwords do not match');
@@ -1549,21 +1563,10 @@ sub _get_context_object {
     $c->stash->{'show_secondary_select'} = 0;
 
     if(defined $c->req->parameters->{'service'} and defined $c->req->parameters->{'host'}) {
-        $c->stash->{'type'}       = 'service';
-        my $objs = $c->{'obj_db'}->get_objects_by_name('host', $c->req->parameters->{'host'}, 0);
+        $c->stash->{'type'} = 'service';
+        my $objs = $c->{'obj_db'}->get_services_by_name($c->req->parameters->{'host'}, $c->req->parameters->{'service'});
         if(defined $objs->[0]) {
-            my $services = $c->{'obj_db'}->get_services_for_host($objs->[0]);
-            for my $type (keys %{$services}) {
-                for my $name (keys %{$services->{$type}}) {
-                    if($name eq $c->req->parameters->{'service'}) {
-                        if(defined $services->{$type}->{$name}->{'svc'}) {
-                            $c->stash->{'data_id'} = $services->{$type}->{$name}->{'svc'}->get_id();
-                        } else {
-                            $c->stash->{'data_id'} = $services->{$type}->{$name}->get_id();
-                        }
-                    }
-                }
-            }
+            $c->stash->{'data_id'} = $objs->[0]->get_id();
         }
     }
     elsif(defined $c->req->parameters->{'host'}) {
@@ -1580,7 +1583,7 @@ sub _get_context_object {
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
         my $new_file   = $c->req->parameters->{'data.file'} || '';
-        my $file = _get_context_file($c, $obj, $new_file);
+        my $file = get_context_file($c, $obj, $new_file);
         return $obj unless $file;
         $obj->set_file($file);
         $obj->set_uniq_id($c->{'obj_db'});
@@ -1640,7 +1643,13 @@ sub _get_context_object {
 }
 
 ##########################################################
-sub _get_context_file {
+
+=head2 get_context_file
+
+    returns file for name, creates new file unless already existing.
+
+=cut
+sub get_context_file {
     my($c, $obj, $new_file) = @_;
     my $files_root = $c->{'obj_db'}->get_files_root();
     if($files_root eq '') {
@@ -1998,7 +2007,7 @@ sub _object_move {
     if($c->stash->{action} eq 'movefile') {
         return unless Thruk::Utils::check_csrf($c);
         my $new_file = $c->req->parameters->{'newfile'};
-        my $file     = _get_context_file($c, $obj, $new_file);
+        my $file     = get_context_file($c, $obj, $new_file);
         if(defined $file and $c->{'obj_db'}->move_object($obj, $file)) {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' moved successfully' );
         }
@@ -2447,11 +2456,14 @@ sub _config_check {
     my($c) = @_;
     my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
     $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
+    my $rc = 0;
     if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+        $rc = 1;
     }
     elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $obj_check_cmd)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+        $rc = 1;
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
     }
@@ -2459,7 +2471,7 @@ sub _config_check {
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    return;
+    return $rc;
 }
 
 ##########################################################
@@ -2467,6 +2479,7 @@ sub _config_reload {
     my($c) = @_;
     $c->stats->profile(begin => "conf::_config_reload");
 
+    $c->stash->{'original_output'} = "";
     my $time = time();
     my $name = $c->stash->{'param_backend'};
     my $peer = $c->{'db'}->get_peer_by_key($name);
@@ -2479,16 +2492,19 @@ sub _config_reload {
         $last_reload = $processinfo->{$pkey}->{'program_start'} || (time() - 1);
     }
 
+    $c->stats->profile(comment => "program_start before reload: ".$last_reload);
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->stash->{'last_changed'} = 0;
-            $c->stash->{'needs_commit'} = 0;
+            $c->{'obj_db'}->{'last_changed'} = 0;
+            $c->{'obj_db'}->{'needs_commit'} = 0;
+            Thruk::Utils::Conf::store_model_retention($c, $pkey);
         }
         elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->stash->{'last_changed'} = 0;
-            $c->stash->{'needs_commit'} = 0;
+            $c->{'obj_db'}->{'last_changed'} = 0;
+            $c->{'obj_db'}->{'needs_commit'} = 0;
+            Thruk::Utils::Conf::store_model_retention($c, $pkey);
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
             $wait = 0;
@@ -2505,11 +2521,13 @@ sub _config_reload {
         $c->{'db'}->send_command( %{$options} );
         $c->stash->{'output'} = 'config reloaded by external command.';
     }
+    $c->stats->profile(comment => "reload command issued: ".time());
 
     # wait until core responds again
     if($wait) {
         if(!Thruk::Utils::wait_after_reload($c, $pkey, $last_reload)) {
-            $c->stash->{'output'} .= "\n<font color='red'>Warning: waiting for core reload failed.</font>";
+            $c->stash->{'original_output'} .= 'Warning: waiting for core reload failed.';
+            $c->stash->{'output'}          .= "\n<font color='red'>".$c->stash->{'original_output'}."</font>";
         }
     }
 
@@ -2517,12 +2535,13 @@ sub _config_reload {
     $c->stash->{'reload_nav'} = 1;
 
     $c->stats->profile(end => "conf::_config_reload");
-    return;
+    return 1;
 }
 
 ##########################################################
 sub _nice_check_output {
     my($c) = @_;
+    $c->stash->{'original_output'} = $c->stash->{'output'};
     $c->stash->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
     $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
     $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
@@ -2547,7 +2566,7 @@ sub _check_external_reload {
         my $last_reloaded = $c->stash->{'pi_detail'}->{$c->stash->{'param_backend'}}->{'program_start'} || 0;
         if($last_reloaded > $c->{'obj_db'}->{'last_changed'}) {
             $c->{'obj_db'}->{'last_changed'} = 0;
-            $c->stash->{'last_changed'}      = 0;
+            $c->stash->{'obj_model_changed'} = 1;
         }
     }
     return;

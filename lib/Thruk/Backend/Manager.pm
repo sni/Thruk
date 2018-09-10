@@ -7,6 +7,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
+use Thruk ();
 use Thruk::Utils ();
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -1353,7 +1354,7 @@ sub _do_on_peers {
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
-    $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for}));
+    $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
 
     # send query to selected backends
     my $num_selected_backends = scalar @{$get_results_for};
@@ -1569,6 +1570,7 @@ select backends we want to run functions on
 sub select_backends {
     my($self, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
+    confess("no context") unless $c;
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);

@@ -81,14 +81,22 @@ like($content, '/{"a":"b"}/', 'file contains json');
 unlink($tmpfilename);
 
 #########################
+# lock store with orphaned lock
+($tfh, $tmpfilename) = tempfile();
+Thruk::Utils::IO::write($tmpfilename.'.lock', '');
+$rc = Thruk::Utils::IO::json_lock_store($tmpfilename, {'a' => 'b' });
+is($rc, 1, "json_lock_store succeeded on tmpfile with orphaned lock file");
+unlink($tmpfilename);
+
+#########################
 # some tests for full disks
 if(-e '/dev/full') {
     eval {
-        Thruk::Utils::IO::json_lock_store('/dev/full', {'a' => 'b' }, undef, undef, '/dev/full');
+        Thruk::Utils::IO::json_store('/dev/full', {'a' => 'b' }, undef, undef, '/dev/full');
     };
     my $err = $@;
-    like($err, '/cannot write to/', "json_lock_store failed on full filesystem");
-    like($err, '/No space left on device/', "json_lock_store failed on full filesystem, no space error message");
+    like($err, '/cannot write to/', "json_store failed on full filesystem");
+    like($err, '/No space left on device/', "json_store failed on full filesystem, no space error message");
 }
 
 #########################
@@ -98,6 +106,55 @@ my $start = time();
 my $time = time()- $start;
 ok($time < 5, "runtime < 5 (".$time."s)");
 is($rc, 0, "exit code is: ".$rc);
+
+#########################
+# merge hashes
+{
+    my $a = {
+        'k1' => { 'sk1' => 'v1' },
+        'k2' => { 'sk3' => 'v3', 'sk4' => 'v4' },
+        'k4' => [1,2,3],
+        'k5' => 'xyz'
+    };
+    my $b = {
+        'k1' => { 'sk2' => 'v2'},
+        'k3' => { 'sk5' => 'v5'},
+        'k4' => [5,6,7],
+        'k5' => undef,
+        'k6' => { 'a' => undef },
+    };
+    my $expect = {
+        'k1' => { 'sk1' => 'v1', 'sk2' => 'v2' },
+        'k2' => { 'sk3' => 'v3', 'sk4' => 'v4' },
+        'k3' => { 'sk5' => 'v5' },
+        'k4' => [5,6,7],
+        'k6' => {},
+    };
+    my $c = Thruk::Utils::IO::merge_deep($a, $b);
+    is_deeply($c, $expect, "merge hashes worked");
+};
+
+#########################
+# merge hashes with arrays
+{
+    my $a = {
+        'k1' => [[1,2,3], {4 => 5, 6 => 7}, "c", "d"],
+        'k2' => "a",
+        'k3' => [1,2,3],
+    };
+    my $b = {
+        'k1' => [{ 1 => "a" }, { 1 => "b" }],
+        'k2' => "b",
+        'k3' => { 1 => undef },
+    };
+    my $expect = {
+        'k1' => [[1,"a", 3], {1 => "b", 4 => 5, 6 => 7}, "c", "d"],
+        'k2' => "b",
+        'k3' => [1,3],
+    };
+    my $c = Thruk::Utils::IO::merge_deep($a, $b);
+    is_deeply($c, $expect, "merge hashes with arrays worked");
+};
 
 #########################
 done_testing();

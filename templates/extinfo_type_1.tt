@@ -452,12 +452,12 @@
             [% IF c.check_cmd_permissions('host', host.name) %]
             <table border="0">
               <tr>
-                [% UNLESS c.config.command_disabled.exists('1') %]
+                [% UNLESS command_disabled(c, '1') %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new comment</a></td>
                 [% END %]
                 [% IF comments %]
-                [% UNLESS c.config.command_disabled.exists('20') %]
+                [% UNLESS command_disabled(c, '20') %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Delete all comments</a></td>
                 [% END %]
@@ -481,7 +481,7 @@
             [% IF c.check_cmd_permissions('host', host.name) %]
             <table border="0">
               <tr>
-                [% UNLESS c.config.command_disabled.exists('55') %]
+                [% UNLESS command_disabled(c, '55') %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'>
                   <a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a>
@@ -491,7 +491,7 @@
                 </td>
                 [% END %]
                 [% IF downtimes %]
-                [% UNLESS c.config.command_disabled.exists('5') %]
+                [% UNLESS command_disabled(c, '5') %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]

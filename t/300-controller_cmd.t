@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2209;
+    plan tests => 2165;
 }
 
 BEGIN {
@@ -74,6 +74,7 @@ for my $file (sort glob("templates/cmd/*")) {
 
     # normal commands
     if($file =~ m/templates\/cmd\/cmd_typ_(\d+)\.tt/mx) {
+        next if($1 == 200 || $1 == 201);
         $post->{cmd_typ} = $1;
         TestUtils::test_page(
             'url'     => '/thruk/cgi-bin/cmd.cgi?cmd_typ='.$1,

@@ -195,23 +195,23 @@ sub begin {
 
     ###############################
     # Authentication
-    $c->log->debug("checking auth");
+    $c->log->debug("checking auth") if Thruk->verbose;
     if($c->req->path_info =~ m~cgi-bin/remote\.cgi~mx) {
-        $c->log->debug("remote.cgi does not use authentication");
+        $c->log->debug("remote.cgi does not use authentication") if Thruk->debug;
     }
     elsif($c->req->path_info =~ m~cgi-bin/login\.cgi~mx) {
         $c->log->debug("login.cgi does not use authentication");
     } else {
         unless($c->user_exists) {
-            $c->log->debug("user not authenticated yet");
+            $c->log->debug("user not authenticated yet") if Thruk->verbose;
             unless ($c->authenticate()) {
                 # return 403 forbidden or kick out the user in other way
-                $c->log->debug("user is not authenticated");
+                $c->log->debug("user is not authenticated") if Thruk->verbose;
                 return $c->detach('/error/index/10');
             }
         }
         if($c->user_exists) {
-            $c->log->debug("user authenticated as: ".$c->user->get('username'));
+            $c->log->debug("user authenticated as: ".$c->user->get('username')) if Thruk->verbose;
             $c->stash->{'remote_user'}= $c->user->get('username');
         }
     }
@@ -530,7 +530,7 @@ sub add_defaults {
             $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
         };
         last unless $@;
-        $c->log->debug("retry $x, data source error: $@");
+        $c->log->debug("retry $x, data source error: $@") if Thruk->debug;
         last if $x == $retrys;
         sleep 1;
     }
@@ -597,10 +597,7 @@ sub add_defaults {
 
     # config edit buttons?
     $c->stash->{'show_config_edit_buttons'} = 0;
-    if(    $c->config->{'use_feature_configtool'}
-       and $c->check_user_roles("authorized_for_configuration_information")
-       and $c->check_user_roles("authorized_for_system_commands")
-      ) {
+    if($c->config->{'use_feature_configtool'} && $c->check_user_roles("admin")) {
         # get backends with object config
         for my $peer (@{$c->{'db'}->get_peers(1)}) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
@@ -1099,28 +1096,26 @@ sub _set_enabled_backends {
     ###############################
     # by args
     if(defined $backends) {
-        $c->log->debug('_set_enabled_backends() by args');
+        $c->log->debug('_set_enabled_backends() by args') if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
-        if(ref $backends eq '') {
-            my @tmp = split(/\s*,\s*/mx, $backends);
-            $backends = \@tmp;
-        }
-        for my $b (@{$backends}) {
-            # peer key can be name too
-            if($b eq 'ALL') {
-                for my $peer (@{$c->{'db'}->get_peers()}) {
-                    $disabled_backends->{$peer->{'key'}} = 0;
-                }
-            } else {
-                my $peer = $c->{'db'}->get_peer_by_key($b);
-                if($peer) {
-                    $disabled_backends->{$peer->{'key'}} = 0;
+        for my $str (@{Thruk::Utils::list($backends)}) {
+            for my $b (split(/\s*,\s*/mx, $str)) {
+                # peer key can be name too
+                if($b eq 'ALL') {
+                    for my $peer (@{$c->{'db'}->get_peers()}) {
+                        $disabled_backends->{$peer->{'key'}} = 0;
+                    }
                 } else {
-                    # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
-                    #die("got no peer for: ".$b)
+                    my $peer = $c->{'db'}->get_peer_by_key($b);
+                    if($peer) {
+                        $disabled_backends->{$peer->{'key'}} = 0;
+                    } else {
+                        # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
+                        #die("got no peer for: ".$b)
+                    }
                 }
             }
         }
@@ -1128,7 +1123,7 @@ sub _set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
-        $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'}));
+        $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
@@ -1150,7 +1145,7 @@ sub _set_enabled_backends {
     ###############################
     # by param
     elsif($num_backends > 1 and defined $backend) {
-        $c->log->debug('_set_enabled_backends() by param');
+        $c->log->debug('_set_enabled_backends() by param') if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
@@ -1163,7 +1158,7 @@ sub _set_enabled_backends {
     ###############################
     # by cookie
     elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
-        $c->log->debug('_set_enabled_backends() by cookie');
+        $c->log->debug('_set_enabled_backends() by cookie') if Thruk->debug;
         for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -1171,7 +1166,7 @@ sub _set_enabled_backends {
         }
     }
     elsif(defined $c->{'db'}) {
-        $c->log->debug('_set_enabled_backends() using defaults');
+        $c->log->debug('_set_enabled_backends() using defaults') if Thruk->debug;
         my $display_too = 0;
         if(defined $c->req->header('user-agent') and $c->req->header('user-agent') !~ m/thruk/mxi) {
             $display_too = 1;
@@ -1202,7 +1197,7 @@ sub _set_enabled_backends {
     if(defined $backends) {
         _set_possible_backends($c, $disabled_backends);
     }
-    $c->log->debug('disabled_backends: '.Dumper($disabled_backends));
+    $c->log->debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
     return($disabled_backends, $has_groups);
 }
 

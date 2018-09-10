@@ -92,6 +92,11 @@ This package contains the base files for thruk.
 Summary:     Thruk Gui Reporting Addon
 Group:       Applications/System
 Requires:    %{name}-base = %{version}-%{release}
+%if %{defined suse_version}
+Requires:    xorg-x11-fonts
+%else
+Requires:    urw-fonts
+%endif
 AutoReqProv: no
 
 %description plugin-reporting

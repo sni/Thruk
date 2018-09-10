@@ -15,6 +15,9 @@ if(grep {/^\-r/} @ARGV) {
         push @watch, $plugin;
     }
     push @ARGV, '-R', join(',', @watch);
+    # make Filesys-Notify-Simple fallback to simple folder watch.
+    # linux-inotify2 somehow watch . as well
+    $ENV{'PERL_FNS_NO_OPT'} = 1;
 }
 # set default port to 3000 unless port is specified
 if(!grep {/^\-p/} @ARGV) {

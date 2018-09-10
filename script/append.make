@@ -56,6 +56,7 @@ version:
 
 docs:
 	script/thruk_update_docs.sh
+	script/thruk_update_docs_rest.pl
 
 staticfiles:
 	script/thruk_create_combined_static_content.pl
@@ -195,6 +196,7 @@ quicktest:
 	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \
 	    t/xt/panorama/javascript.t \
 	    t/0*.t \
+	    t/*rest_v1.t \
 	    t/9*.t
 
 timedtest:

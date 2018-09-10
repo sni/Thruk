@@ -766,17 +766,6 @@ sub single_search {
 
         my $value  = $filter->{'value'};
 
-        # skip most empty filter
-        # 2010-10-25: 3bc748da2 - fixes "livestatus: Sorry, Operator 4 for lists not implemented" error with blank searches
-        # 2016-10-14: cannot reproduce anymore, blank searches do what they should do
-        #if(    $value =~ m/^\s*$/mx
-        #   and $filter->{'type'} ne 'next check'
-        #   and $filter->{'type'} ne 'last check'
-        #   and $filter->{'type'} ne 'event handler'
-        #) {
-        #    next;
-        #}
-
         my $op     = '=';
         my $rop    = '=';
         my $listop = '>=';
@@ -814,7 +803,11 @@ sub single_search {
             # skip empty searches
             next if $value eq '';
 
-            my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
+            my($hfilter, $sfilter, $num) = get_comments_filter($c, $op, $value);
+            if(defined $num && $num == 0) {
+                undef $hfilter;
+                undef $sfilter;
+            }
 
             my $host_search_filter = [ { name               => { $op     => $value } },
                                        { display_name       => { $op     => $value } },
@@ -996,7 +989,7 @@ sub single_search {
             push @servicefilter, { criticity => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
-            my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
+            my($hfilter, $sfilter) = get_comments_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
         }
@@ -1500,6 +1493,7 @@ sub get_comments_filter {
 
     return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
 
+    my $num;
     if($value eq '') {
         if($op eq '=' or $op eq '~~') {
             push @hostfilter,          { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
@@ -1512,10 +1506,11 @@ sub get_comments_filter {
     else {
         my $comments     = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @comment_ids  = sort keys %{ Thruk::Utils::array2hash([@{$comments}], 'id') };
-        if(scalar @comment_ids == 0) { @comment_ids = (-1); }
 
         my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
+        $num             = scalar @downtime_ids + scalar @comment_ids;
+        if(scalar @comment_ids == 0) { @comment_ids = (-1); }
         if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
 
         my $comment_op = '!>=';
@@ -1528,7 +1523,7 @@ sub get_comments_filter {
         push @servicefilter,       { $combine => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
     }
 
-    return(\@hostfilter, \@servicefilter);
+    return(\@hostfilter, \@servicefilter, $num);
 }
 
 
@@ -2387,6 +2382,86 @@ sub _get_search_ids {
     my @list = sort keys %{$ids};
     return(\@list);
 }
+##############################################
+
+=head2 parse_lexical_filter
+
+  parse_lexical_filter($string)
+
+parse lexical filter from string. returns filter structure.
+
+=cut
+sub parse_lexical_filter {
+    my($string) = @_;
+    if(ref $string ne 'SCALAR') {
+        my $copy = $string;
+        $string = \$copy;
+    }
+    my $filter = [];
+    my($token,$key,$op,$val,$combine);
+    while(${$string} ne '') {
+        if(${$string} =~ s/^\s*(
+                              \(
+                            | \)
+                            | \w+
+                            | \d+
+                            | '[^']*'
+                            | "[^"]*"
+                            | [=\!~><]+
+                        )\s*//mx) {
+            $token = $1;
+            if(!defined $key) {
+                $key = $token;
+                if($key eq '(') {
+                    undef $key;
+                    my $f = parse_lexical_filter($string);
+                    push @{$filter}, $f;
+                    next;
+                }
+                if($key eq ')') {
+                    return($filter);
+                }
+                if(lc($key) eq 'and' || lc($key) eq 'or') {
+                    if(scalar @{$filter} == 0) { die("unexpected ".uc($key)." at ".${$string}); }
+                    $combine = lc($key);
+                    undef $key;
+                }
+                next;
+            }
+            elsif(!defined $op) {
+                $op = $token;
+                if($op eq '~')  { $op = '~~'; }
+                if($op eq '!~') { $op = '!~~'; }
+                next;
+            }
+            elsif(!defined $val) {
+                $val = $token;
+                if(substr($val, 0, 1) eq '"') { $val = substr($val, 1, -1); }
+                if(substr($val, 0, 1) eq "'") { $val = substr($val, 1, -1); }
+                push @{$filter}, { $key => { $op => $val } };
+                undef $key;
+                undef $op;
+                undef $val;
+                if($combine) {
+                    my $prev1 = pop @{$filter};
+                    my $prev2 = pop @{$filter};
+                    if(ref $prev2 eq 'HASH' && $prev2->{'-'.$combine}) {
+                        push @{$prev2->{'-'.$combine}},  $prev1;
+                        push @{$filter}, $prev2;
+                    } else {
+                        push @{$filter}, { '-'.$combine => [$prev2, $prev1]};
+                    }
+                }
+                undef $combine;
+                next;
+            }
+        } else {
+            die("parse error at ".${$string});
+        }
+    }
+    return $filter;
+}
+
 ##############################################
 
 =head1 AUTHOR

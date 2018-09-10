@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 80;
+    plan tests => 89;
 
     use lib('t');
     require TestUtils;
@@ -68,7 +68,25 @@ isa_ok($b, 'Thruk::Backend::Manager');
 my $c = TestUtils::get_c();
 $b->init( 'c' => $c );
 
+#########################
+my $app = $c->app;
+{
+    my $c = Thruk::Context->new($app, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
+    isa_ok($c, 'Thruk::Context');
+    my $res1 = $c->sub_request('/r/thruk');
+    is(ref $res1, 'HASH', 'got hash from sub_request');
+    is($res1->{'rest_version'}, 1, 'got hash from sub_request with content');
 
+    my $res2 = $c->sub_request('/r/thruk/reports');
+    is(ref $res2, 'ARRAY', 'got array from sub_request');
+
+    my $res3 = $c->sub_request('/r/hosts?limit=1&columns=name');
+    is(ref $res3, 'ARRAY', 'got array from sub_request');
+    is(scalar @{$res3}, 1, 'sending url parameters worked');
+    is(scalar keys %{$res3->[0]}, 1, 'sending url parameters worked');
+};
+
+#########################
 my $sorted_by_a = $b->_sort($befor, { 'ASC' => 'a' });
 is_deeply($sorted_by_a, $sorted_by_a_exp, 'sort by colum a');
 
@@ -154,8 +172,8 @@ SKIP: {
     is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
     ($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
 
-    is($out,     "blub",  "got result");
-    is($err,     "blah",  "got error");
+    is($out,     "blub",  "got result for job: ".$id);
+    is($err,     "blah",  "got error for job: ".$id);
     ok($time <=3,         "runtime <= 3seconds, (".$time.")");
     isnt($dir,   undef,   "got dir");
 };
@@ -301,4 +319,12 @@ my $ts     = time();
 my $parsed = Thruk::Utils::_parse_date($c, "now");
 ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for 'now'");
 
+#########################
+$ts     = time() + 3600;
+$parsed = Thruk::Utils::_parse_date($c, "+60m");
+ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '+60m'");
+#########################
+$ts     = time() - 3600;
+$parsed = Thruk::Utils::_parse_date($c, "-60m");
+ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '-60m'");
 #########################

@@ -12,6 +12,7 @@ Monitoring web interface for Naemon, Nagios, Icinga and Shinken.
 
 use strict;
 use warnings;
+use Cwd qw/abs_path/;
 
 use 5.008000;
 
@@ -66,6 +67,7 @@ use POSIX ();
 ###################################################
 $Data::Dumper::Sortkeys = 1;
 our $config;
+our $cluster;
 our $COUNT = 0;
 our $thruk;
 
@@ -102,7 +104,7 @@ sub startup {
                     path         => sub {
                                           my $p = Thruk::Context::translate_request_path($_, $class->config);
                                           return unless $p =~ m%^/thruk/plugins/%mx;
-                                          return unless $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf|svg|woff|woff2|eot|)$/mx;
+                                          return unless $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot|)$/mx;
                                           $_ =~ s%^/thruk/plugins/([^/]+)/%$1/root/%mx;
                                           return 1;
                                         },
@@ -111,7 +113,7 @@ sub startup {
         );
         $app = Plack::Middleware::Static->wrap($app,
                     path         => sub { my $p = Thruk::Context::translate_request_path($_, $class->config);
-                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|ttf|svg|woff|woff2|eot|)$/mx;
+                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot|)$/mx;
                                         },
                     root         => './root/',
                     pass_through => 1,
@@ -139,6 +141,7 @@ sub _build_app {
         $config = Thruk::Config::get_config();
     }
     $self->{'config'} = $config;
+    $Thruk::Utils::IO::config = $config;
 
     for my $key (@Thruk::Action::AddDefaults::stash_config_keys) {
         confess("$key not defined in config,\n".Dumper($config)) unless defined $config->{$key};
@@ -157,6 +160,7 @@ sub _build_app {
     $self->set_timezone();
     $self->_set_ssi();
     $self->_setup_pidfile();
+    $self->_setup_cluster();
 
     ###################################################
     # create backends
@@ -209,6 +213,11 @@ sub _build_app {
         '/thruk/cgi-bin/docs.cgi'          => 'Thruk::Controller::Root::thruk_docs',
     };
 
+    $self->{'route_pattern'} = [
+        [ '^/thruk/r/v1.*'                   ,'Thruk::Controller::rest_v1::index' ],
+        [ '^/thruk/r/.*'                     ,'Thruk::Controller::rest_v1::index' ],
+    ];
+
     ###################################################
     # load routes dynamically from plugins
     our $routes_already_loaded;
@@ -255,8 +264,9 @@ sub _build_app {
     Thruk::Views::ToolkitRenderer::register($self, {config => $self->{'config'}->{'View::TT'}});
 
     ###################################################
-    my $c = Thruk::Context->new($self, {'PATH_INFO' => '/'});
+    my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
     Thruk::Utils::LMD::check_initial_start($c, $config, 1);
+    $self->cluster->register($c) if $config->{'cluster_enabled'};
 
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");
@@ -284,11 +294,13 @@ sub _dispatcher {
         $c->stash->{'user_profiling'} = 1;
     }
     local $ENV{'THRUK_PERFORMANCE_DEBUG'} = 1 if $enable_profiles;
-    $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
-    $c->stats->profile(comment => sprintf('local time: %s - pid: %s - req: %s', (scalar localtime), $$, $Thruk::COUNT));
+    my $url = $c->req->url;
+    $c->stats->profile(begin => "_dispatcher: ".$url);
+    $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
+    $c->cluster->register($c) if $config->{'cluster_enabled'};
 
     if(Thruk->verbose) {
-        $c->log->debug($c->req->url);
+        $c->log->debug($url);
         $c->log->debug(Dumper($c->req->parameters));
     }
 
@@ -307,8 +319,7 @@ sub _dispatcher {
         my $path_info = $c->req->path_info;
         eval {
             my $rc;
-            if($thruk->{'routes'}->{$path_info}) {
-                my $route = $thruk->{'routes'}->{$path_info};
+            if(my $route = $thruk->_find_route_match($path_info)) {
                 if(ref $route eq '') {
                     my($class) = $route =~ m|^(.*)::.*?$|mx;
                     load $class;
@@ -316,7 +327,7 @@ sub _dispatcher {
                     $route = $thruk->{'routes'}->{$path_info};
                 }
                 #&timing_breakpoint("_dispatcher route");
-                $rc = &{$route}($c);
+                $rc = &{$route}($c, $path_info);
                 #&timing_breakpoint("_dispatcher route done");
             }
             else {
@@ -348,7 +359,7 @@ sub _dispatcher {
     }
 
     my $res = $c->res->finalize;
-    $c->stats->profile(end => "_dispatcher: ".$c->req->url);
+    $c->stats->profile(end => "_dispatcher: ".$url);
 
     # restore timezone setting
     $thruk->set_timezone($c->config->{'_server_timezone'});
@@ -356,6 +367,18 @@ sub _dispatcher {
     _after_dispatch($c, $res);
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
     return($res);
+}
+
+###################################################
+sub _find_route_match {
+    my($self, $path_info) = @_;
+    return $self->{'routes'}->{$path_info} if $self->{'routes'}->{$path_info};
+    for my $r (@{$self->{'route_pattern'}}) {
+        if($path_info =~ m/$r->[0]/mx) {
+            return($r->[1]);
+        }
+    }
+    return;
 }
 
 ###################################################
@@ -372,6 +395,23 @@ sub config {
     }
     return($config);
 }
+
+###################################################
+
+=head2 cluster
+
+    make cluster accessible via Thruk->cluster
+
+=cut
+sub cluster {
+    my($self) = @_;
+    unless($cluster) {
+        require Thruk::Utils::Cluster;
+        $cluster = Thruk::Utils::Cluster->new($self);
+    }
+    return($cluster);
+}
+
 
 ###################################################
 
@@ -396,6 +436,9 @@ sub obj_db_model {
 
 =cut
 sub log {
+    if($_[0]->{'_log'} && $_[0]->{'_log'} eq 'screen') {
+        $_[0]->init_logging(1);
+    }
     return($_[0]->{'_log'} ||= $_[0]->init_logging());
 }
 
@@ -501,8 +544,9 @@ sub _check_exit_reason {
         my $c = $Thruk::Request::c;
         my $url = $c->req->url;
         printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
-        printf(STDERR "ERROR: User: %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
-        printf(STDERR "ERROR: Address: %s\n", $c->req->address) if $c->req->address;
+        printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
+        printf(STDERR "ERROR: Address:    %s\n", $c->req->address) if $c->req->address;
+        printf(STDERR "ERROR: Parameters: %s\n", _dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
         if($c->stash->{errorDetails}) {
             for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                 printf(STDERR "ERROR: %s\n", $row);
@@ -539,9 +583,9 @@ sub _remove_pid {
     $SIG{PIPE} = 'IGNORE';
     ## use critic
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+        my $remaining = [];
         if($pidfile && -f $pidfile) {
             my $pids = [split(/\s/mx, read_file($pidfile))];
-            my $remaining = [];
             for my $pid (@{$pids}) {
                 next unless($pid and $pid =~ m/^\d+$/mx);
                 next if $pid == $$;
@@ -568,6 +612,7 @@ $SIG{ALRM} = sub { _check_exit_reason("ALRM"); _remove_pid(); exit; };
 ## use critic
 END {
     _remove_pid();
+    $cluster->unregister() if $cluster;
 }
 
 ###################################################
@@ -617,6 +662,19 @@ sub set_timezone {
     ## use critic
     POSIX::tzset();
 
+    return;
+}
+
+###################################################
+# create cluster files
+sub _setup_cluster {
+    my($self) = @_;
+    load Digest::MD5, qw(md5_hex);
+    chomp(my $hostname = `hostname`);
+    $self->config->{'hostname'} = $hostname unless $self->config->{'hostname'};
+    $Thruk::HOSTNAME            = $self->config->{'hostname'};
+    $Thruk::NODE_ID_HUMAN       = $self->config->{'hostname'}."-".$self->{'config'}->{'home'}."-".abs_path($ENV{'THRUK_CONFIG'} || '.');
+    $Thruk::NODE_ID             = md5_hex($Thruk::NODE_ID_HUMAN);
     return;
 }
 
@@ -873,7 +931,7 @@ sub _after_dispatch {
 
     # does this process need a restart?
     if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        if($c->config->{'max_process_memory'} && $Thruk::COUNT && $Thruk::COUNT%10 == 0) {
+        if($c->config->{'max_process_memory'} && ($Thruk::COUNT && $Thruk::COUNT%10 == 0 || $elapsed > 5)) {
             Thruk::Utils::check_memory_usage($c);
         }
     }
@@ -902,7 +960,11 @@ sub _detect_timezone {
 
     if(-r '/etc/sysconfig/clock') {
         my $content = read_file('/etc/sysconfig/clock');
-        if($content =~ m/ZONE="([^"]+)"/mx) {
+        if($content =~ m/^\s*ZONE="([^"]+)"/mx) {
+            $self->log->debug(sprintf("server timezone: %s (from /etc/sysconfig/clock)", $1)) if Thruk->verbose;
+            return $1;
+        }
+        if($content =~ m/^\s*TIMEZONE="([^"]+)"/mx) {
             $self->log->debug(sprintf("server timezone: %s (from /etc/sysconfig/clock)", $1)) if Thruk->verbose;
             return $1;
         }
@@ -917,15 +979,27 @@ sub _detect_timezone {
     # returns CEST instead of CET as well
     POSIX::tzset();
     my($std, $dst) = POSIX::tzname();
-    if($dst) {
-        $self->log->debug(sprintf("server timezone: %s (from POSIX::tzname)", $dst)) if Thruk->verbose;
-        return($dst);
+    if($std) {
+        $self->log->debug(sprintf("server timezone: %s (from POSIX::tzname)", $std)) if Thruk->verbose;
+        return($std);
     }
 
     # last ressort, date, fails for ex. to set CET instead of CEST
     chomp(my $tz = `date +%Z`);
     $self->log->debug(sprintf("server timezone: %s (from date +%%Z)", $tz)) if Thruk->verbose;
     return $tz;
+}
+###################################################
+sub _dump_params {
+    my($params) = @_;
+    delete $params->{'credential'};
+    delete $params->{'options'}->{'credential'} if $params->{'options'};
+    local $Data::Dumper::Indent = 0;
+    my $dump = Dumper($params);
+    $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
+    $dump    =~ s%"credential":"[^"]+",?%%gmx;
+    $dump    = substr($dump, 0, 250) if length($dump) > 250;
+    return($dump);
 }
 ###################################################
 

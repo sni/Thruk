@@ -8,6 +8,7 @@ my $cmds = {
   "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/ t/" => {},
   "grep -nr 'use Thruk::Timer' lib/ plugins/plugins-available/ t/"    => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
   "grep -nr 'timing_breakpoint' lib/ plugins/plugins-available/ t/"   => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
+  "grep -nr '^sleep' lib/ plugins/plugins-available/ t/"              => { 'skip_comments' => 1, exclude => [qr/\.t:/] },
 };
 
 # find all missed debug outputs

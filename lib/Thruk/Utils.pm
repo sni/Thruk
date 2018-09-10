@@ -487,6 +487,7 @@ sub get_dynamic_roles {
         $data = $cached_data->{'can_submit_commands'};
     }
     else {
+        confess("no db") unless $c->{'db'};
         $data = $c->{'db'}->get_can_submit_commands($username);
         $cached_data->{'can_submit_commands'} = $data;
         $c->cache->set('users', $username, $cached_data) if defined $username;
@@ -737,7 +738,7 @@ sub read_resource_file {
     $macros   = {} unless defined $macros;
     open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
     while(my $line = <$fh>) {
-        if($line =~ m/^\s*(\$[A-Z0-9]+\$)\s*=\s*(.*)$/mx) {
+        if($line =~ m/^\s*(\$[A-Z0-9_]+\$)\s*=\s*(.*)$/mx) {
             $macros->{$1}   = $2;
             $comments->{$1} = $lastcomment;
             $lastcomment    = "";
@@ -766,6 +767,7 @@ compare too version strings and return 1 if v1 >= v2
 =cut
 sub version_compare {
     my($v1,$v2) = @_;
+    confess("version_compare() needs two params") unless defined $v1;
     confess("version_compare() needs two params") unless defined $v2;
 
     # replace non-numerical characters
@@ -1125,22 +1127,27 @@ sub _initialassumedhoststate_to_state {
 
 =head2 get_user_data
 
-  get_user_data($c)
+  get_user_data($c, [$username])
 
 returns user data
 
 =cut
 
 sub get_user_data {
-    my($c) = @_;
+    my($c, $username) = @_;
 
-    return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
+    if(defined $username) {
+        confess("username not allowed") if check_for_nasty_filename($username);
+    } else {
+        return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
+        $username = $c->stash->{'remote_user'};
+    }
 
-    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
+    if(!defined $username || $username eq '?') {
         return {};
     }
 
-    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    my $file = $c->config->{'var_path'}."/users/".$username;
     if(-s $file) {
         $c->stash->{'user_data_cached'} = read_data_file($file);
     } else {
@@ -1154,14 +1161,14 @@ sub get_user_data {
 
 =head2 store_user_data
 
-  store_user_data($c, $data)
+  store_user_data($c, $data, [$username])
 
 store user data for section
 
 =cut
 
 sub store_user_data {
-    my($c, $data) = @_;
+    my($c, $data, $username) = @_;
 
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
@@ -1169,7 +1176,13 @@ sub store_user_data {
         return;
     }
 
-    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
+    if(defined $username) {
+        confess("username not allowed") if check_for_nasty_filename($username);
+    } else {
+        $username = $c->stash->{'remote_user'};
+    }
+
+    if(!defined $username || $username eq '?') {
         return 1;
     }
 
@@ -1185,7 +1198,7 @@ sub store_user_data {
     # update cached data
     $c->stash->{'user_data_cached'} = $data;
 
-    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    my $file = $c->config->{'var_path'}."/users/".$username;
     my $rc;
     eval {
         $rc = write_data_file($file, $data);
@@ -1785,6 +1798,9 @@ sub update_cron_file {
         return;
     }
 
+    # this function must be run on all cluster nodes
+    return if $c->cluster->run_cluster("all", "cmd: cron install");
+
     # prevents 'No child processes' error
     local $SIG{CHLD} = 'DEFAULT';
 
@@ -1871,6 +1887,7 @@ sub update_cron_file {
             unless($header_printed) {
                 print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN\n";
                 print $fh "##############################################################\n";
+                print $fh "THRUK_CRON=1\n";
                 $header_printed = 1;
             }
             print $fh '# '.$s."\n";
@@ -1973,8 +1990,11 @@ sub set_user {
     my($c, $username) = @_;
     $c->stash->{'remote_user'} = $username;
     $c->authenticate({});
+    confess("no user") unless $c->user;
     $c->stash->{'remote_user'}= $c->user->get('username');
-    set_dynamic_roles($c);
+    if($username ne '(cli)' && $username ne '(cron)') {
+        set_dynamic_roles($c);
+    }
     return;
 }
 
@@ -2076,6 +2096,16 @@ sub wait_after_reload {
     # wait until core responds again
     my $procinfo = {};
     my $done     = 0;
+    my $options = {};
+    if($ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.3')) {
+        $options = {
+                'header' => {
+                    'WaitTimeout'   => 2000,
+                    'WaitTrigger'   => 'all', # using something else seems not to work all the time
+                    'WaitCondition' => "program_start > ".$time,
+                },
+        };
+    }
     while($start > time() - 30) {
         $procinfo = {};
         eval {
@@ -2083,7 +2113,7 @@ sub wait_after_reload {
             local $SIG{'PIPE'} = sub { die "pipe error\n" };
             alarm(5);
             $c->{'db'}->reset_failed_backends();
-            $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
+            $procinfo = $c->{'db'}->get_processinfo(backend => $pkey, options => $options);
         };
         alarm(0);
         if($@) {
@@ -2530,8 +2560,19 @@ sub check_memory_usage {
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
         $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
-        $c->env->{'psgix.harakiri.commit'} = 1;
-        kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
+        if($c->env->{'psgix.harakiri'}) {
+            # if plack server does support harakiri mode, only supported if plack uses a procmanager
+            $c->env->{'psgix.harakiri.commit'} = 1;
+        }
+        elsif($c->env->{'psgix.cleanup'}) {
+            # supported since plack 1.0046
+            push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
+                kill(15, $$);
+            };
+        } else {
+            # kill it the hard way
+            kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
+        }
     }
     return;
 }
@@ -2659,10 +2700,12 @@ sub backends_hash_to_list {
     my $backends = [];
     for my $b (@{list($hashlist)}) {
         if(ref $b eq '') {
+            confess("backends uninitialized") unless $c->{'db'};
             my $backend = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
             push @{$backends}, ($backend ? $backend->peer_key() : $b);
         } else {
             for my $key (keys %{$b}) {
+                confess("backends uninitialized") unless $c->{'db'};
                 my $backend = $c->{'db'}->get_peer_by_key($key);
                 if(!defined $backend && defined $b->{$key}) {
                     $backend = $c->{'db'}->get_peer_by_key($b->{$key});
@@ -2695,40 +2738,50 @@ sub _initialassumedservicestate_to_state {
 ##############################################
 sub _parse_date {
     my($c, $string) = @_;
-    my $timestamp;
 
     # just a timestamp?
     if($string =~ m/^(\d+)$/mx) {
-        $timestamp = $1;
+        return($1);
+    }
+
+    # relative time?
+    if($string =~ m/^(\-|\+)(\d+\w)+$/mx) {
+        my $direction = $1;
+        my $val = expand_duration($2);
+        if($direction eq '-') {
+            return(time() - $val);
+        }
+        return(time() + $val);
     }
 
     # real date (YYYY-MM-DD HH:MM:SS)
-    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
-        $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+    if($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+        my $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+        return($timestamp);
     }
 
     # real date without seconds (YYYY-MM-DD HH:MM)
-    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
-        $timestamp = Mktime($1,$2,$3, $4,$5,0);
+    if($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
+        my $timestamp = Mktime($1,$2,$3, $4,$5,0);
+        return($timestamp);
     }
 
     # US date format (MM-DD-YYYY HH:MM:SS)
-    elsif($string =~ m/(\d{1,2})\-(\d{1,2})\-(\d{2,4})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
-        $timestamp = Mktime($3,$1,$2, $4,$5,$6);
+    if($string =~ m/(\d{1,2})\-(\d{1,2})\-(\d{2,4})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+        my $timestamp = Mktime($3,$1,$2, $4,$5,$6);
+        return($timestamp);
     }
 
     # everything else
-    else {
-        # Date::Manip increases start time, so load it here upon request
-        require Date::Manip;
-        Date::Manip->import(qw/UnixDate/);
-        $timestamp = UnixDate($string, '%s');
-        $c->log->debug("not a valid date: ".$string) if $c;
-        if(!defined $timestamp) {
-            return;
-        }
+    # Date::Manip increases start time, so load it here upon request
+    require Date::Manip;
+    Date::Manip->import(qw/UnixDate/);
+    my $timestamp = UnixDate($string, '%s');
+    $c->log->debug("not a valid date: ".$string) if $c;
+    if(!defined $timestamp) {
+        return;
     }
-    return $timestamp;
+    return($timestamp);
 }
 
 ########################################
@@ -2870,6 +2923,72 @@ sub get_timezone_data {
         };
     }
     return($timezones);
+}
+
+##############################################
+
+=head2 command_disabled
+
+    command_disabled($c, $nr)
+
+returns true if command is disabled for current user
+
+=cut
+sub command_disabled {
+    my($c, $nr) = @_;
+
+    # command disabled should be a hash
+    if(ref $c->stash->{'_command_disabled'} ne 'HASH') {
+        $c->stash->{'_command_disabled'} = array2hash(Thruk::Config::expand_numeric_list($c->config->{'command_disabled'}));
+    }
+    if(ref $c->stash->{'_command_enabled'} ne 'HASH') {
+        $c->stash->{'_command_enabled'} = array2hash(Thruk::Config::expand_numeric_list($c->config->{'command_enabled'}));
+        if(scalar keys %{$c->stash->{'_command_enabled'}} > 0) {
+            # set disabled commands from enabled list
+            for my $nr (0..999) {
+                $c->stash->{'_command_disabled'}->{$nr} = $nr;
+            }
+            for my $nr (keys %{$c->stash->{'_command_enabled'}}) {
+                delete $c->stash->{'_command_disabled'}->{$nr};
+            }
+        }
+    }
+    return 1 if $c->stash->{'_command_disabled'}->{$nr};
+    return 0;
+}
+
+##############################################
+
+=head2 code2name
+
+    code2name($coderef)
+
+returns name for given code reference
+
+=cut
+sub code2name {
+    my($code) = @_;
+    require B;
+    my $cv = B::svref_2object ($code);
+    my $gv = $cv->GV;
+    return($gv->NAME);
+}
+
+##############################################
+
+=head2 check_for_nasty_filename
+
+    check_for_nasty_filenameode2($filename)
+
+returns true if nasty characters have been found and the filename is NOT safe for use
+
+=cut
+sub check_for_nasty_filename {
+    my($name) = @_;
+    if($name =~ m/(\.\.|\/)/mx) {
+        return(1);
+    }
+    return;
 }
 
 ##############################################

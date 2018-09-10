@@ -2,6 +2,8 @@
 [%# which one is authorized? #%]
 [% IF !c.check_cmd_permissions('service', c.request.parameters.service, c.request.parameters.host) %]
   [% WRAPPER error.tt errorMessage = "you are not authorized for this command" errorDescription = "check your configuration if you believe this is an error" %][% END %]
+[% ELSIF !enable_shinken_features %]
+  [% WRAPPER error.tt errorMessage = "this command is for shinken backends only" errorDescription = "check your configuration if you believe this is an error" %][% END %]
 [% ELSE %]
 
 [%# description used by the commands page #%]
@@ -15,7 +17,7 @@
     [% service_desc         = c.request.parameters.service %]
     [% host_name            = c.request.parameters.host %]
 
-    [% IF c.request.parameters.force_check %]LAUNCH_SVC_EVENT_HANDLER[% ELSE %]LAUNCH_SVC_EVENT_HANDLER[% END %];[% sprintf("%s;%s",host_name,service_desc) %]
+    LAUNCH_SVC_EVENT_HANDLER;[% sprintf("%s;%s",host_name,service_desc) %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:00'); END %]

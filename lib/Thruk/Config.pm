@@ -30,7 +30,7 @@ BEGIN {
 
 our $VERSION = '2.22';
 
-my $project_root = home('Thruk::Config');
+my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
 my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
@@ -116,6 +116,7 @@ our %config = ('name'                   => 'Thruk',
                                           'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
                                           'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
                                           'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
+                                          'command_disabled'    => \&Thruk::Utils::command_disabled,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
@@ -249,14 +250,16 @@ our %config = ('name'                   => 'Thruk',
               },
 );
 # set TT strict mode only for authors
-$config{'thruk_debug'} = 0;
+$config{'thruk_debug'}  = 0;
+$config{'thruk_author'} = 0;
 $config{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $config{'View::TT'}->{'STAT_TTL'}   = 5 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $config{'View::TT'}->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
-    $config{'thruk_debug'} = 1;
+    $config{'thruk_debug'}  = 1;
+    $config{'thruk_author'} = 1;
 }
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'} = $config{released};
 
@@ -280,7 +283,7 @@ sub get_config {
     if(scalar @files == 0) {
         for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
-            push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
+            push @files, $path.'/thruk.conf' if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
                 my @tmpfiles = sort glob($path.'/thruk_local.d/*');
                 for my $tmpfile (@tmpfiles) {
@@ -408,6 +411,10 @@ sub set_default_config {
         bug_email_rcpt                  => 'bugs@thruk.org',
         home_link                       => 'http://www.thruk.org',
         plugin_registry_url             => ['https://api.thruk.org/v1/plugin/list'],
+        cluster_nodes                   => '$proto$://$hostname$/$url_prefix$/',
+        cluster_heartbeat_interval      => 15,
+        cluster_node_stale_timeout      => 120,
+        rest_api_enabled                => 1,
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,
@@ -495,6 +502,7 @@ sub set_default_config {
                     use_expire             => 0,
         },
         command_disabled                    => {},
+        command_enabled                     => {},
         force_sticky_ack                    => 0,
         force_send_notification             => 0,
         force_persistent_ack                => 0,
@@ -583,10 +591,6 @@ sub set_default_config {
         die(sprintf("%s should be a hash, got %s: %s", $key, ref $config->{$key}, Dumper($config->{$key}))) unless ref $config->{$key} eq 'HASH';
         $config->{$key} = { %{$defaults->{$key}}, %{ $config->{$key}} };
     }
-    # command disabled should be a hash
-    if(ref $config->{'command_disabled'} ne 'HASH') {
-        $config->{'command_disabled'} = array2hash(expand_numeric_list($config->{'command_disabled'}));
-    }
 
     ## no critic
     $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
@@ -630,7 +634,7 @@ sub set_default_config {
     # make show_custom_vars a list
     $config->{'show_custom_vars'} = array_uniq([split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))]);
 
-    # make graph_replace a list
+    # make some settings a list
     for my $key (qw/graph_replace commandline_obfuscate_pattern/) {
         $config->{$key} = [@{list($config->{$key})}];
     }
@@ -755,10 +759,13 @@ return home folder
 sub home {
     my($class) = @_;
     (my $file = "$class.pm") =~ s{::}{/}gmx;
-    if ( my $inc_entry = $INC{$file} ) {
+    if(my $inc_entry = $INC{$file}) {
         $inc_entry = Cwd::abs_path($inc_entry);
         $inc_entry =~ s/\Q\/$file\E$//mx;
         $inc_entry =~ s/\/b?lib//gmx;
+        if($inc_entry =~ m#/omd/versions/[^/]*/share/thruk#mx && $ENV{'OMD_ROOT'}) {
+            return $ENV{'OMD_ROOT'}.'/share/thruk';
+        }
         return $inc_entry;
     }
 
@@ -1042,6 +1049,7 @@ sub _do_finalize_config {
         if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi-bin/restricted.cgi$|mx) {
             $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
         }
+        $config->{'omd_apache_proto'} = $proto;
     }
 
     # set default config

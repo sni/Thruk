@@ -17,7 +17,7 @@ var $case = function() {
 
     click(_submit("Create Report"));
 
-    click(_image("Refresh Report"));
+    click(_button("/update_button/"));
     isVisible(_div("job_time"));
 
     _wait(30000, _isVisible(_image("View Report Preview"), true));

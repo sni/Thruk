@@ -54,49 +54,49 @@
           <td align="center" valign="top" class='stateInfoPanel'>
             <div class='dataTitle'>Servicegroup Commands</div>
             <table border="0" cellspacing="0" cellpadding="0" class='command'>
-              [% UNLESS c.config.command_disabled.exists('121') %]
+              [% UNLESS command_disabled(c, '121') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Servicegroup' title='Schedule Downtime For All Hosts In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=121&amp;servicegroup=[% servicegroup.name | uri %]'>Schedule downtime for all hosts in this servicegroup</a></td>
               </tr>
               [% END %]
-              [% UNLESS c.config.command_disabled.exists('122') %]
+              [% UNLESS command_disabled(c, '122') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Servicegroup' title='Schedule Downtime For All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=122&amp;servicegroup=[% servicegroup.name | uri %]'>Schedule downtime for all services in this servicegroup</a></td>
               </tr>
               [% END %]
-              [% UNLESS c.config.command_disabled.exists('111') %]
+              [% UNLESS command_disabled(c, '111') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Servicegroup' title='Enable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=111&amp;servicegroup=[% servicegroup.name | uri %]'>Enable notifications for all hosts in this servicegroup</a></td>
               </tr>
               [% END %]
-              [% UNLESS c.config.command_disabled.exists('112') %]
+              [% UNLESS command_disabled(c, '112') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Servicegroup' title='Disable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=112&amp;servicegroup=[% servicegroup.name | uri %]'>Disable notifications for all hosts in this servicegroup</a></td>
               </tr>
               [% END %]
-              [% UNLESS c.config.command_disabled.exists('109') %]
+              [% UNLESS command_disabled(c, '109') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Servicegroup' title='Enable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=109&amp;servicegroup=[% servicegroup.name | uri %]'>Enable notifications for all services in this servicegroup</a></td>
               </tr>
               [% END %]
-              [% UNLESS c.config.command_disabled.exists('110') %]
+              [% UNLESS command_disabled(c, '110') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Servicegroup' title='Disable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=110&amp;servicegroup=[% servicegroup.name | uri %]'>Disable notifications for all services in this servicegroup</a></td>
               </tr>
               [% END %]
-              [% UNLESS c.config.command_disabled.exists('113') %]
+              [% UNLESS command_disabled(c, '113') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Servicegroup' title='Enable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=113&amp;servicegroup=[% servicegroup.name | uri %]'>Enable active checks of all services in this servicegroup</a></td>
               </tr>
               [% END %]
-              [% UNLESS c.config.command_disabled.exists('114') %]
+              [% UNLESS command_disabled(c, '114') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Servicegroup' title='Disable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=114&amp;servicegroup=[% servicegroup.name | uri %]'>Disable active checks of all services in this servicegroup</a></td>

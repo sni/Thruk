@@ -60,13 +60,13 @@
         ref = ref.replace(/\/\w+\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         ref = ref.replace(/\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         if(keepflag == undefined || keepflag == false) {
-            ref = ref.replace(/^\?(expired|invalid|problem|nocookie)\&/, '?');
-            ref = ref.replace(/^\?(expired|invalid|problem|nocookie)$/,  '');
+            ref = ref.replace(/^\?(expired|invalid|problem|nocookie|locked)\&/, '?');
+            ref = ref.replace(/^\?(expired|invalid|problem|nocookie|locked)$/,  '');
         }
         ref = ref.replace(/^\?/, '/');
         ref = ref.replace(/^\/+/, '/');
         ref = ref.replace(/^\?/, '/');
-        ref = ref.replace(/^\/(expired|invalid|problem|nocookie)\&/,  '$1&/');
+        ref = ref.replace(/^\/(expired|invalid|problem|nocookie|locked)\&/,  '$1&/');
         ref = ref.replace(/_=\d+/, '');
         ref = ref.replace(/\?$/, '');
         ref = ref.replace(/\#side.html$/, '');

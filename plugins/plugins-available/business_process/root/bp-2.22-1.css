@@ -206,6 +206,9 @@ DIV.bp_zoom_container {
 TABLE.minimal .bp_container {
     border: 0;
 }
+TABLE.minimal DIV.bp_zoom_container {
+    border: 0;
+}
 
 .bp_container_inner {
     position: relative;

@@ -32,7 +32,7 @@ sub index {
     }
 
     # only admins from here on
-    if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+    if(!$c->check_user_roles('admin')) {
         return $c->detach('/error/index/8');
     }
 
@@ -83,6 +83,12 @@ sub index {
             return $c->redirect_to('broadcast.cgi');
         }
         if($action eq 'save') {
+            # don't store in demo mode
+            if($c->config->{'demo_mode'}) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'saving broadcasts is disabled in demo mode');
+                return $c->redirect_to('broadcast.cgi');
+            }
+
             my $broadcast = {};
             my $id = $c->req->parameters->{'id'};
             if($id eq 'new') {
@@ -97,18 +103,7 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Broadcast cannot be saved with that name' );
                 return $c->redirect_to('broadcast.cgi');
             }
-            $broadcast->{'author'}        = $c->stash->{'remote_user'};
-            $broadcast->{'authoremail'}   = $c->user ? $c->user->{'email'} : 'none';
-            $broadcast->{'contacts'}      = [split(/\s*,\s*/mx, $c->req->parameters->{'contacts'})];
-            $broadcast->{'contactgroups'} = [split(/\s*,\s*/mx, $c->req->parameters->{'contactgroups'})];
-            $broadcast->{'text'}          = $c->req->parameters->{'text'};
-            $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
-            $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
-            $broadcast->{'loginpage'}     = $c->req->parameters->{'loginpage'} || 0;
-            $broadcast->{'annotation'}    = $c->req->parameters->{'annotation'} || '';
-            $broadcast->{'panorama'}      = $c->req->parameters->{'panorama'} || 0;
-            $broadcast->{'template'}      = $c->req->parameters->{'template'} || 0;
-            delete $broadcast->{'macros'};
+            $broadcast = Thruk::Utils::Broadcast::update_broadcast_from_param($c, $broadcast);
 
             Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
             Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);

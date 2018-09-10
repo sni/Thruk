@@ -89,6 +89,7 @@ feature     ('author_test',
   'Test::JavaScript'                                                        => 0,
   'Test::Vars'                                                              => 0,
   'Devel::Cycle'                                                            => 0,
+  'Devel::Gladiator'                                                        => 0,
 );
 };
 

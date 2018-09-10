@@ -73,8 +73,13 @@ sub index {
             Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
         }
         if($keywords =~ /^problem\&(.*)$/mx or $keywords eq 'problem') {
-            _invalidate_current_session($c, $cookie_path, $sdir);
+            # don't remove all sessions when there is a (temporary) technical problem
+            #_invalidate_current_session($c, $cookie_path, $sdir);
             Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
+        }
+        if($keywords =~ /^locked\&(.*)$/mx or $keywords eq 'locked') {
+            _invalidate_current_session($c, $cookie_path, $sdir);
+            Thruk::Utils::set_message( $c, 'fail_message', 'account is locked, please contact an administrator' );
         }
     }
 
@@ -111,6 +116,11 @@ sub index {
            && (!defined $c->req->header('user-agent') || $c->req->header('user-agent') !~ m/wget/mix)) {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
         } else {
+            my $userdata = Thruk::Utils::get_user_data($c, $login);
+            if($userdata->{'login'}->{'locked'}) {
+                return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
+            }
+
             $c->stats->profile(begin => "login::external_authentication");
             my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->address, $c->stats);
             $c->stats->profile(end => "login::external_authentication");
@@ -123,6 +133,23 @@ sub index {
                     path    => $cookie_path,
                     domain  => $cookie_domain,
                 });
+
+                # clean failed logins
+                my $userdata = Thruk::Utils::get_user_data($c, $login);
+                if($userdata->{'login'}) {
+                    if($userdata->{'login'}->{'failed'}) {
+                        Thruk::Utils::set_message( $c, 'warn_message',
+                            sprintf("There had been %d failed login attempts. (Date: %s - IP: %s%s)",
+                                        $userdata->{'login'}->{'failed'},
+                                        Thruk::Utils::Filter::date_format($c, $userdata->{'login'}->{'last_failed'}->{'time'}),
+                                        $userdata->{'login'}->{'last_failed'}->{'ip'},
+                                        $userdata->{'login'}->{'last_failed'}->{'forwarded_for'} ? ' ('.$userdata->{'login'}->{'last_failed'}->{'forwarded_for'} : '',
+                        ));
+                    }
+                    delete $userdata->{'login'};
+                    Thruk::Utils::store_user_data($c, $userdata, $login);
+                }
+
                 # call a script hook after successful login?
                 if($c->config->{'cookie_auth_login_hook'}) {
                     Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
@@ -136,6 +163,19 @@ sub index {
                                        ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
                               ));
                 Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
+                if($c->config->{cookie_auth_disable_after_failed_logins}) {
+                    # increase failed login counter and disable account if it exceeds
+                    my $userdata = Thruk::Utils::get_user_data($c, $login);
+                    $userdata->{'login'}->{'failed'}++;
+                    $userdata->{'login'}->{'last_failed'} = { time => time(), ip => $c->req->address, forwarded_for => $c->env->{'HTTP_X_FORWARDED_FOR'} };
+                    if($userdata->{'login'}->{'failed'} >= $c->config->{cookie_auth_disable_after_failed_logins}) {
+                        $userdata->{'login'}->{'locked'} = 1;
+                    }
+                    Thruk::Utils::store_user_data($c, $userdata, $login);
+                    if($userdata->{'login'}->{'locked'}) {
+                        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
+                    }
+                }
                 return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
             }
         }

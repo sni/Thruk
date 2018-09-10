@@ -43,6 +43,9 @@ sub cmd {
     require URI::Escape;
     require Thruk::Utils::RecurringDowntimes;
 
+    # this function must be run on one cluster node only
+    return("command send to cluster\n", 0) if $c->cluster->run_cluster("once", "cmd: $action ".join(" ",@{$commandoptions}));
+
     my $files = [split(/\|/mx, shift @{$commandoptions})];
 
     my $total_retries = 5;

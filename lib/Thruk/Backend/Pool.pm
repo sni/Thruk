@@ -146,7 +146,7 @@ sub init_backend_thread_pool {
         }
         #&timing_breakpoint('peers created');
         if($pool_size > 1) {
-            printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            #printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             ## no critic
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
             ## use critic
@@ -155,9 +155,9 @@ sub init_backend_thread_pool {
                 size    => $pool_size,
                 handler => \&Thruk::Backend::Pool::_do_thread,
             );
-            printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            #printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
-            printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            #printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             ## no critic
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
             ## use critic

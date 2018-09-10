@@ -12,9 +12,9 @@ UserAgent wrapper for Thruk
 
 use strict;
 use warnings;
-use Carp;
-use HTTP::Response;
-use Thruk::Utils::IO;
+use Carp qw/confess/;
+use HTTP::Response ();
+use Thruk::Utils::IO ();
 
 ##############################################
 =head1 METHODS

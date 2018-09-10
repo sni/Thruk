@@ -1,8 +1,11 @@
 ﻿<!-- thruk: waiting for job [% pb_options.job_id %] -->
 <div id="[% pb_options.id %]" style="position: relative; width: [% pb_options.width %]px; height:[% pb_options.height %]px; color: inherit;" [% IF pb_options.show_message %]onmouseover="return pb_overlib_[% pb_options.id %]()"[% ELSE %]onmouseover="return pb_overin_[% pb_options.id %]()"[% END %] onmouseout="return pb_overout_[% pb_options.id %]()">
-  <div align="center" class="job_time" style="z-index: 100; line-height: [% pb_options.lineheight %]px; position: absolute; width: [% pb_options.width %]px; color: inherit;">[% pb_options.time %]s</div>
+  <div align="center" class="job_time" style="z-index: 100; line-height: [% pb_options.lineheight %]px; position: absolute; width: [% pb_options.width %]px; color: inherit;">
+      [% pb_options.time %]s
+      [% IF pb_options.show_message && pb_options.exists('message') && pb_options.message %] - [% pb_options.message %][% END %]
+  </div>
   <div id="cancel_[% pb_options.id %]" title="terminate this job" style="z-index: 100; line-height: [% pb_options.lineheight %]px; position: absolute; left: 3px; display: none;" class="clickable" onclick="return pb_cancel_[% pb_options.id %]()">
-    <img src="[% url_prefix %]themes/[% theme %]/images/stop.png">
+    <img src="[% url_prefix %]themes/[% theme %]/images/stop.png" alt='cancel' title='cancel' width=16 height=16>
   </div>
 </div>
 <script type="text/javascript">
@@ -16,7 +19,7 @@
 
     jQuery(function() {
         jQuery( "#[% pb_options.id %]" ).progressbar({
-            value: [% pb_options.percent %]
+            value: Number("[% pb_options.percent %]")
         });
     });
 

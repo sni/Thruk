@@ -1,15 +1,12 @@
-﻿[% PROCESS _header.tt css=["plugins/editor/editor.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
-                      js=["plugins/editor/ace-builds/src-min-noconflict/ace.js",
-                          "plugins/editor/ace-builds/src-min-noconflict/ext-language_tools.js",
-                          "javascript/jstree-3.0.9/jstree.min.js"]
-%]
-[% WRAPPER _conf_frame.tt %]
-<!--<script src="[% url_prefix %]plugins/conf/linedtextarea/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>-->
+﻿[% WRAPPER _conf_frame.tt %]
+<link rel="stylesheet" href="[% url_prefix %]plugins/editor/editor.css">
+<script src="[% url_prefix %]plugins/editor/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="[% url_prefix %]plugins/editor/ace-builds/src-min-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 <form action="conf.cgi" method="POST" id="saveform">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="action" value="savefile">
 <input type="hidden" name="file" value="[% file_link %]">
-<input type="hidden" name="content" value="[% file_content %]" id='filecontent'>
+<input type="hidden" name="content" value="[% file_content | html %]" id='filecontent'>
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
 [% IF show_object && back == "edit" %]
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
@@ -37,55 +34,63 @@
   <tr>
     <td class="dataVar" colspan=3>
         <div id="editor"></div>
-        <script type="text/javascript">
-            var editor = ace.edit("editor");
-            var original_value;
-            /* set up editor */
-            window.onload = function() {
-                editor.setTheme("ace/theme/clouds");
-                editor.session.setMode("ace/mode/nagios");
-                editor.setOptions({
-                    enableLiveAutocompletion: true,
-                    highlightActiveLine: true
-                });
-                editor.setValue(document.getElementById('filecontent').value);
-                original_value = document.getElementById('filecontent').value;
-                editor.gotoLine([% line %]);
-            };
-
-            /* intercept when there are unsaved changes */
-            function confirm_discard_changes() {
-                form = document.getElementById('saveform');
-                if(has_changed() && !form.needs_reload) {
-                    return confirm("File has been changed. Really discard changes?");
-                }
-                return true;
-            }
-
-            function has_changed() {
-                if(editor.session.getValue() != original_value) {
-                    return true;
-                }
-                return false;
-            }
-
-            function save_file() {
-                form = document.getElementById('saveform');
-                document.getElementById('filecontent').value = editor.session.getValue();
-                [%+ IF show_object && back == "edit" +%]
-                document.getElementById('fileline').value = editor.getCursorPosition().row;
-                [%+ END +%]
-
-                form.submit();
-            }
-        </script>
-        <!--[IF IE]>
-        <![ENDIF]-->
     </td>
   </tr>
 </table>
 </div>
 </form>
+
+<script type="text/javascript">
+    var editor = ace.edit("editor");
+    var original_value;
+    /* set up editor */
+    window.onload = function() {
+        editor.setTheme("ace/theme/clouds");
+        editor.session.setMode("ace/mode/nagios");
+        editor.setOptions({
+            enableLiveAutocompletion: true,
+            highlightActiveLine: true
+        });
+        editor.setValue(document.getElementById('filecontent').value);
+        original_value = document.getElementById('filecontent').value;
+        editor.gotoLine([% line %]);
+    };
+
+    /* intercept when there are unsaved changes */
+    function confirm_discard_changes() {
+        form = document.getElementById('saveform');
+        if(has_changed() && !form.needs_reload) {
+            return confirm("File has been changed. Really discard changes?");
+        }
+        return true;
+    }
+
+    function has_changed() {
+        if(editor.session.getValue() != original_value) {
+            return true;
+        }
+        return false;
+    }
+
+    function save_file() {
+        form = document.getElementById('saveform');
+        document.getElementById('filecontent').value = editor.session.getValue();
+        [%+ IF show_object && back == "edit" +%]
+        document.getElementById('fileline').value = editor.getCursorPosition().row;
+        [%+ END +%]
+
+        form.submit();
+    }
+    var _resize_editor = function() {
+        var editor = document.getElementById('editor');
+        var h = jQuery(window).height() - editor.offsetTop;
+        editor.style.height = (h - 18)  + 'px';
+        var editor = ace.edit("editor");
+        editor.resize();
+    }
+    window.onresize = _resize_editor;
+    _resize_editor();
+</script>
 
 [% END %]
 

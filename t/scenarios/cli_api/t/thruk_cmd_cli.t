@@ -124,7 +124,7 @@ TestUtils::test_command({
 ###########################################################
 # thruk core_scheduling
 TestUtils::test_command({
-    cmd     => '/usr/bin/env thruk core_scheduling fix',
+    cmd     => '/usr/bin/env thruk --local core_scheduling fix',
     like    => ['/hosts and services rebalanced successfully/'],
     errlike => ['/.*/'], # may print executed commands to stderr
 });

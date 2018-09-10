@@ -301,7 +301,16 @@ sub report_remove {
 
     return unless Thruk::Utils::check_csrf($c);
 
-    if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
+    my $report = Thruk::Utils::Reports::get_report($c, $report_nr);
+    if($report && $report->{'var'}->{'is_running'}) {
+        # try to stop it
+        report_cancel($c, $report_nr, 1);
+        $report = Thruk::Utils::Reports::get_report($c, $report_nr);
+    }
+    if($report && $report->{'var'}->{'is_running'}) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot remove report which is currently running.' });
+    }
+    elsif(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report removed' });
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
@@ -315,7 +324,7 @@ sub report_remove {
 
 =cut
 sub report_cancel {
-    my($c, $report_nr) = @_;
+    my($c, $report_nr, $skip_redirect) = @_;
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if($report) {
@@ -333,6 +342,7 @@ sub report_cancel {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
+    return if $skip_redirect;
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 

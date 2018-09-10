@@ -83,7 +83,6 @@ sub new {
     }
     $self->set_label($c, $bpdata->{'name'});
 
-
     return unless $self->{'name'};
 
     # read in nodes
@@ -398,27 +397,10 @@ sub remove_node {
 }
 
 ##########################################################
-# replace list of node names/ids with references
-sub _resolve_nodes {
-    my($self) = @_;
-
-    for my $node (@{$self->{'nodes'}}) {
-        # make sure we have an id now
-        if(!$node->{'id'}) {
-            $node->set_id($self->make_new_node_id());
-            $self->{'nodes_by_id'}->{$node->{'id'}} = $node;
-        }
-        $node->resolve_depends($self);
-    }
-
-    return;
-}
-
-##########################################################
 
 =head2 remove
 
-remove business process data to file
+remove business process along with all data files
 
 =cut
 sub remove {
@@ -889,6 +871,48 @@ sub TO_JSON {
         push @{$data->{'nodes'}}, $n->TO_JSON();
     }
     return $data;
+}
+
+##########################################################
+
+=head2 FROM_JSON
+
+    FROM_JSON()
+
+creates BP object from json data
+
+=cut
+sub FROM_JSON {
+    my($self, $c, $json) = @_;
+    my $file  = delete $self->{'file'};
+    my $nr    = delete $self->{'id'};
+    my $nodes = delete $json->{'nodes'} || [];
+    for my $key (keys %{$self}) {
+        delete $self->{$key};
+    }
+    for my $key (keys %{$json}) {
+        $self->{$key} = $json->{$key};
+    }
+
+    $self->set_file($c, $file);
+    $self->{'id'} = $nr;
+    $self->set_label($c, $json->{'name'});
+
+    return unless $self->{'name'};
+
+    # read in nodes
+    for my $n (@{Thruk::Utils::list($nodes)}) {
+        my $node = Thruk::BP::Components::Node->new($n);
+        $self->add_node($node, 1);
+    }
+
+    $self->load_runtime_data();
+
+    for my $n (@{$self->{'nodes'}}) {
+        $n->update_parents($self);
+    }
+
+    return $self;
 }
 
 ##########################################################

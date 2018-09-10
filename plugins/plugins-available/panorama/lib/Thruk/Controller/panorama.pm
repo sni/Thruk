@@ -72,7 +72,7 @@ sub index {
     $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->req->parameters->{'dashboard_ignore_changes'};
 
     $c->stash->{'is_admin'} = 0;
-    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+    if($c->check_user_roles('admin')) {
         $c->stash->{'is_admin'} = 1;
     }
     $c->stash->{one_tab_only}           = '';
@@ -1229,7 +1229,7 @@ sub _avail_calc {
                                                                     $service,
                                                                    );
         return("found no data for service: ".$host." - ".$service) if($service && $totals->{'total'}->{'percent'} == -1);
-        return("found no data for host: ".$host) if $totals->{'total'}->{'percent'} == -1;
+        return("found no data for host: ".$host) if (!defined $totals->{'total'}->{'percent'} || $totals->{'total'}->{'percent'} == -1);
         return($totals->{'total'}->{'percent'});
     } else {
         my($num, $total) = (0,0);

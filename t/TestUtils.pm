@@ -20,12 +20,13 @@ use Test::More;
 use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
 use File::Slurp qw/read_file/;
-use HTTP::Request::Common qw(GET POST);
+use HTTP::Request::Common qw/GET POST/;
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/tempfile/;
 use Carp qw/confess/;
 use Plack::Test;
+use Cpanel::JSON::XS qw/encode_json/;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -207,6 +208,7 @@ sub get_test_hostgroup_cli {
   {
     url             => url to test
     post            => do post request with this data
+    method          => http method, default is GET
     follow          => follow redirects
     fail            => request should fail
     redirect        => request should redirect
@@ -232,22 +234,22 @@ sub test_page {
     my $start = time();
     my $opts = _set_test_page_defaults(\%opts);
 
-    # make tests with http://localhost/naemon possible
-    my $product = 'thruk';
-    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
-        $product = $2;
-        $opts->{'url'} =~ s|/thruk|/$product|gmx;
-    }
-
     if($opts->{'post'}) {
+        if(ref $opts->{'post'} eq 'REF') {
+            $opts->{'post'} = ${$opts->{'post'}};
+        }
+        $opts->{'method'} = 'POST' unless $opts->{'method'};
+        $opts->{'method'} = uc($opts->{'method'});
         local $Data::Dumper::Indent = 0;
-        local $Data::Dumper::Varname = 'POST';
-        ok($opts->{'url'}, 'POST '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
+        local $Data::Dumper::Varname = $opts->{'method'};
+        ok($opts->{'url'}, $opts->{'method'}.' '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
     } else {
-        ok($opts->{'url'}, 'GET '.$opts->{'url'});
+        $opts->{'method'} = 'GET' unless $opts->{'method'};
+        $opts->{'method'} = uc($opts->{'method'});
+        ok($opts->{'url'}, $opts->{'method'}.' '.$opts->{'url'});
     }
 
-    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'});
+    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'}, $opts->{'method'});
 
     if(defined $opts->{'follow'}) {
         my $redirects = 0;
@@ -324,7 +326,7 @@ sub test_page {
     elsif(defined $return->{'content'} and $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         # is it a background job page?
         wait_for_job($1);
-        my $location = "/".$product."/cgi-bin/job.cgi?job=".$1;
+        my $location = "/thruk/cgi-bin/job.cgi?job=".$1;
         $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
@@ -434,11 +436,11 @@ sub test_page {
             next if $match =~ m/^ssh/mxo;
             next if $match =~ m/^mailto:/mxo;
             next if $match =~ m/^(\#|'|")/mxo;
-            next if $match =~ m/^\/$product\/cgi\-bin/mxo;
+            next if $match =~ m/^\/thruk\/cgi\-bin/mxo;
             next if $match =~ m/^\w+\.cgi/mxo;
             next if $match =~ m/^javascript:/mxo;
             next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+            next if $match =~ m|^/thruk/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
             next if $match =~ m/data:image\/png;base64/mxo;
@@ -451,7 +453,7 @@ sub test_page {
             next if $test_url =~ m/\/pnp4nagios\//mxo;
             next if $test_url =~ m/\/pnp\//mxo;
             next if $test_url =~ m/\/grafana\//mxo;
-            next if $test_url =~ m|/$product/themes/.*?/images/logos/|mxo;
+            next if $test_url =~ m|/thruk/themes/.*?/images/logos/|mxo;
             if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             my $request = _request($test_url, undef, undef, $opts->{'agent'});
 
@@ -592,7 +594,7 @@ sub get_user {
 
 #########################
 sub wait_for_job {
-    my $job   = shift;
+    my($job) = @_;
     my $start  = time();
     my $config = Thruk::Config::get_config();
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
@@ -604,13 +606,13 @@ sub wait_for_job {
     require Thruk::Utils::External;
     alarm(300);
     eval {
-        while(Thruk::Utils::External::_is_running($jobdir)) {
+        while(Thruk::Utils::External::_is_running(undef, $jobdir)) {
             sleep(0.1);
         }
     };
     alarm(0);
     my $end  = time();
-    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds')
+    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'job is finished in '.($end-$start).' seconds')
         or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
                             scalar `uptime`,
                             scalar `ps -efl`,
@@ -795,7 +797,7 @@ sub _relative_url {
 
 #########################
 sub _request {
-    my($url, $start_to, $post, $agent) = @_;
+    my($url, $start_to, $post, $agent, $method) = @_;
 
     our($cookie_jar, $cookie_file);
     if(!defined $cookie_jar) {
@@ -813,10 +815,18 @@ sub _request {
 
     my $request;
     if($post) {
-        $post->{'token'} = 'test';
-        $request = POST($url, [%{$post}]);
+        $method = 'POST' unless $method;
+        $method = uc($method);
+        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $request = POST($url, {});
+        $request->method(uc($method));
+        $request->header('Content-Type' => 'application/json; charset=utf-8');
+        $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
+        $request->header('Content-Length' => undef);
     } else {
-        $request = HTTP::Request->new(GET => $url);
+        $method = 'GET' unless $method;
+        $method = uc($method);
+        $request = HTTP::Request->new($method => $url);
     }
     $request->header("User-Agent" => $agent) if $agent;
     $cookie_jar->add_cookie_header($request);
@@ -829,20 +839,16 @@ sub _request {
 
 #########################
 sub _external_request {
-    my($url, $start_to, $post, $agent, $retry) = @_;
+    my($url, $start_to, $post, $agent, $method, $retry) = @_;
     confess("no url") unless $url;
     $retry = 1 unless defined $retry;
 
-    # make tests with http://localhost/naemon possible
-    unless($url =~ m/^http/) {
-        my $product = 'thruk';
-        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
-            $product = $2;
-            $url =~ s|^/$product||mx;
-            $url =~ s|^/thruk||mx;
-        }
+    if($url !~ m/^http/) {
         $url =~ s#//#/#gmx;
-        $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
+        $url =~ s#/demo##gmx;
+        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
+            $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
+        }
     }
 
     our($cookie_jar, $cookie_file);
@@ -856,27 +862,32 @@ sub _external_request {
     $ua->cookie_jar($cookie_jar);
     $ua->agent( $agent ) if $agent;
 
-    if($post and ref $post ne 'HASH') {
+    if($post && ref $post ne 'HASH') {
         confess("unknown post data: ".Dumper($post));
     }
     my $req;
     if($post) {
-        $post->{'token'} = 'test';
-        $req = $ua->post($url, $post);
+        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $method = 'POST' unless $method;
+        my $request = POST($url, {});
+        $request->method(uc($method));
+        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
+        $request->header('Content-Length' => undef);
+        $req = $ua->request($request);
     } else {
         $req = $ua->get($url);
     }
 
     $req = _check_startup_redirect($req, $start_to);
 
-    if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
+    if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/thruk\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
         die("login failed: ".Dumper($req)) unless $retry;
-        my $product = $1;
-        my $referer = uri_unescape($2);
+        my $referer = uri_unescape($1);
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
         my $r = _external_request($req->{'_headers'}->{'location'}, undef, undef, $agent);
-           $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, 0);
-        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, 0);
+           $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, undef, 0);
+        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, 0);
     }
     return $req;
 }
@@ -884,23 +895,17 @@ sub _external_request {
 #########################
 sub _check_startup_redirect {
     my($request, $start_to) = @_;
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/startup\.html\?(.*)$/mxo) {
-        my $product = $1;
-        my $link    = $2;
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/thruk\/startup\.html\?(.*)$/mxo) {
+        my $link = $1;
         $link    =~ s/^wait\#//mxo;
-        #diag("starting up... ".$link);
         is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
         # startup fcgid
-        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, {});
-        #diag("startup request:");
-        #diag(Dumper($r));
+        my $r = _request('/thruk/cgi-bin/remote.cgi', undef, {});
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
-        fail("startup failed, no pid: ".Dumper($r)) unless(-f '/var/cache/thruk/thruk.pid' || -f '/var/cache/naemon/thruk/thruk.pid');
+        fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
         sleep(3);
         if($link !~ m/\?/mx && $link =~ m/\&/mx) { $link =~ s/\&/?/mx; }
         $request = _request($link);
-        #diag("original request:");
-        #diag(Dumper($request));
     }
     return($request);
 }
@@ -923,7 +928,11 @@ sub bail_out_req {
         $error = $1;
         $error =~ s/\A\s*//gmsx;
         $error =~ s/\s*\Z//gmsx;
-        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
+        eval {
+            require HTML::Entities;
+            HTML::Entities::decode_entities($error);
+        };
+        BAIL_OUT($0.': '.$req->code.' '.$msg."\n".$error);
     }
     if($page =~ m/<pre\s+id="error">(.*)$/mx) {
         $error = $1;
@@ -931,9 +940,11 @@ sub bail_out_req {
         BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }
     if($page =~ m/\Qsubject=Thruk%20Error%20Report&amp;body=\E(.*?)">/smx) {
-        require URI::Escape;
-        diag($1);
-        $error = URI::Escape::uri_unescape($1);
+        $error = $1;
+        eval {
+            require URI::Escape;
+            $error = URI::Escape::uri_unescape($error);
+        };
         diag($error);
         BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }

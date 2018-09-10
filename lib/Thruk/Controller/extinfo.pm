@@ -740,6 +740,15 @@ sub _process_perf_info_page {
         }
     }
 
+    # cluster statistics
+    if(    $c->check_user_roles("authorized_for_configuration_information")
+       and $c->check_user_roles("authorized_for_system_information")) {
+        if($c->req->parameters->{'cluster'}) {
+            return _process_perf_info_cluster_page($c);
+        }
+    }
+
+
     $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
@@ -764,6 +773,14 @@ sub _process_perf_info_page {
         $c->stash->{'lmd_stats'} = $c->{'db'}->lmd_stats($c);
     }
 
+    return 1;
+}
+
+##########################################################
+# create the performance info cluster page
+sub _process_perf_info_cluster_page {
+    my( $c ) = @_;
+    $c->stash->{template} = 'extinfo_type_4_cluster_status.tt';
     return 1;
 }
 

@@ -1,0 +1,1223 @@
+---
+layout: docs
+title: REST API
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+
+== REST API
+{% include new_since.ad version="2.24" %}
+Thruk offers a rest api to expose various aspects of Thruk itself and
+livestatus information.
+
+ * You can find lots of examples on the link:rest_examples.html[REST API examples page].
+ * A list of external commands is here: link:rest_commands.html[REST API commands].
+
+The api can be either accessed by http(s) at http://your_webserver/thruk/r/ or
+by cli client:
+
+------
+  %> thruk r /hostgroups
+------
+
+== Versions
+
+Right now, there is only version 1 of the rest api, so you can either use the
+generic url http://your_webserver/thruk/r/ or the version specific
+http://your_webserver/thruk/r/v1/.
+
+
+== Authentication
+
+=== Basic Auth
+
+Using the web api, you can simply pass username and password as http basic
+authentication like:
+
+------
+  %> curl -k https://user:password@your_webserver/thruk/r/
+------
+
+Data is collected with the permissions of the given user.
+
+=== Cookie Auth
+
+Cookies from the cookie authentication are valid as well if you are logged in
+already and will return the results with permissions of the current user.
+
+=== Secret Key
+
+The web rest api accepts the secret key as http header. The secret key
+is usually found in `/var/lib/thruk/secret.key` or `var/thruk/secret.key`
+when using OMD.
+
+------
+  %> curl -H 'X-Thruk-Auth-Key: secretkey' \
+          -H 'X-Thruk-Auth-User: thrukadmin' \
+          -gk 'https://localhost/thruk/r/hosts
+------
+
+Since the secretkey gives you superadminpower. You can set the context of the
+result to any user you like with the `X-Thruk-Auth-User` HTTP header.
+
+=== Command Line
+
+When using the cli clients, use the `-A` option like:
+
+------
+  %> thruk -A user r /
+------
+
+Having command line access gives you superadminpower as well, so you can set
+the user context to any user you need with the `-A` switch.
+
+
+== Parameters
+You can pass parameters mostly along with `POST` and `PATCH` requests. When
+using the cli tool, you can utilize the `-d` parameter with key/value pairs or
+with json data. Or you can mix those options.
+
+use key/value pairs:
+
+------
+  %> thruk r -m PATCH -d max_check_attempts=3 -d first_notification_delay=10 /hosts/localhost/config
+------
+
+use json structure:
+
+------
+  %> thruk r -m PATCH -d "{'max_check_attempts':3, 'first_notification_delay':10}" /hosts/localhost/config
+------
+
+Using curl, you can set parameters like this:
+
+------
+  %> curl -d "alias=test" -d "max_check_attempts=3" http://your_webserver/thruk/r/hosts/localhost/config
+------
+
+or you can use json data as well:
+
+------
+  %> curl --header "Content-Type: application/json" \
+          --X PATCH \
+          --data '{"max_check_attempts":3, "first_notification=delay":10}' \
+          http://your_webserver/thruk/r/hosts/localhost/config
+------
+
+== Filtering
+
+All pages offer filtering using query parameters:
+
+------
+  %> thruk r '/hosts?name=localhost'
+------
+
+Other operators besides equals like regular expressions are possible with the
+bracket syntax:
+
+ex.: return all hosts starting with literal `m`:
+
+------
+  %> thruk r '/hosts?name[regex]=^m'
+------
+
+
+ex.: list all services which are currently in a downtime:
+
+------
+  %> thruk r '/services?scheduled_downtime_depth[gte]=1'
+------
+
+Curl requires you to set the `globoff` option:
+
+------
+  %> curl -gk 'https://user:pass@localhost/thruk/r/hosts?name[regex]=^t'
+------
+
+
+Possible operators with their alias:
+
+[options="header",halign="center"]
+|==========================
+|Operator  |Alias    |Description
+| =        | eq      |Equal match
+| !=       | ne      |Not equal match
+| ~        | regex   |Regular expression match
+| !~       | nregex  |Not regular expression match
+| >        | gt      |Greater than numeric comparisson
+| <        | lt      |Lower than numeric comparisson
+| >=       | gte     |Greater or equal numeric comparisson. `contains` in list context
+| <=       | lte     |Lower or equal numeric comparisson. `contains not` in list context
+|==========================
+
+You can use the alias name to workaround urlencoding issues.
+
+
+== Complex Filtering
+
+Complex filtering logic is possible by using a simple query language which
+supports logical operators. The query can be passed urlencoded with the `q`
+parameter. An alternative to url encoding is using a special quote syntax by
+encapsulating the query in `***`. Everything between `***` will be
+automatically url encoded. (You still need to get quoting right).
+
+------
+  %> thruk r '/hosts?q=***name = "test" or name = "other"***'
+------
+
+Another example, fetch all hosts from hostgroups linux and windows which are not ok.
+
+------
+  %> thruk r '/hosts?q=***(groups >= "linux" or groups >= "windows") and status != 0***'
+------
+
+Example using curl:
+
+------
+  %> curl -d 'q=***name = "test"***' 'http://.../thruk/r/hosts'
+------
+
+If you need `***` in the query itself, any other three characters will do as well:
+
+------
+  %> thruk r '/notifications?q=///message = "test" or name = "other"///
+------
+
+
+== Sorting
+
+All pages can sort list results by using the `sort` parameter. The sort
+parameter can be used multiple times or use comma-separated lists. The order is
+ascending unless prefixed with an minus.
+
+ex.: sort by name ascending and status descending:
+
+------
+  %> thruk r /hosts?sort=name,-state
+------
+
+== Limits
+
+All pages offer limits and offset through the `limit` and `offset` parameter.
+
+For example show 10 hosts starting at offset 100:
+
+------
+  %> thruk r /hosts?limit=10&offset=100
+------
+
+== Columns
+
+All pages offer setting columns with the `columns` parameter.
+
+ex.: return name and state for all hosts:
+
+------
+  %> thruk r /hosts?columns=name,state
+------
+
+
+== Backends / Sites
+
+If you have multiple sites connected to Thruk, you may want to talk only to
+specific sites. There are multiple methods to set the backends for your
+request. You can combine multiple sites with commas.
+
+Use a path prefix `/sites/<sitename,...>`:
+
+------
+  %> thruk r /sites/test,prod/hosts
+------
+
+Use the `backends` option with the cli client:
+
+------
+  %> thruk r -b test,prod /hosts
+------
+
+Set the `backends` url parameter:
+
+------
+  %> thruk r /hosts?backends=test,prod
+------
+
+
+== Error Handling
+
+Failed rest requests return a hash result along with a HTTP error code:
+
+------
+  %> thruk r /none
+  {
+    "code" : 404,
+    "message" : "unknown rest path"
+    "description" : "optional additional error messages"
+  }
+------
+
+== Output Formats
+
+=== JSON
+
+JSON is the default output format.
+
+=== CSV
+
+CSV output is available via `/csv/` path prefix.
+
+------
+  %> thruk r /csv/hosts?columns=name,state
+------
+
+------
+  %> curl -g http://localhost/thruk/r/csv/hosts/stats
+------
+
+=== XLS
+
+Excel output is available via `/xls/` path prefix.
+
+------
+  %> thruk r /xls/hosts?columns=name,state
+------
+
+== HTTP Methods
+
+HTTP Methods are implemented according to link:https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9[RFC2616] which
+is in short:
+
+[options="header"]
+|===========================================
+| GET     | retrieve ressources, ex.: `GET /thruk/reports` to list all reports.
+| POST    | update/create ressources or trigger actions, ex.: `POST /thruk/reports` to create a new report.
+| PUT     | overwrite existing ressource, ex.: `PUT /thruk/reports/1` to update an entire existing report. Thruk makes no difference between POST and PUT. You can use PUT for all POST urls and vice versa.
+| PATCH   | replace parts of existing ressource, ex.: `PATCH /thruk/reports/1` to set specific attributes of an existing report.
+| DELETE  | remove existing ressource, ex.: `DELETE /thruk/reports/1` to remove the report entirely.
+|===========================================
+
+== Endpoints
+
+You can find lots of examples on the link:rest_examples.html[REST API examples page].
+
+The complete list of available external commands can be found on the link:rest_commands.html[REST API commands page].
+
+See examples and detailed description for all other available rest api urls:
+
+=== GET /
+
+lists all available rest urls.
+alias for /index
+
+=== GET /alerts
+
+lists alerts based on logfiles.
+alias for /logs?type[~]=^(HOST|SERVICE) ALERT
+
+=== GET /checks/stats
+
+lists host / service check statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|hosts_active_15_perc              | percent of active hosts during the last 15 minutes
+|hosts_active_15_sum               | amount of active hosts during the last 15 minutes
+|hosts_active_1_perc               | same for last minute
+|hosts_active_1_sum                | same for last minute
+|hosts_active_5_perc               | same for last 5 minutes
+|hosts_active_5_sum                | same for last 5 minutes
+|hosts_active_60_perc              | same for last 60 minutes
+|hosts_active_60_sum               | same for last 60 minutes
+|hosts_active_all_perc             | percent of total active hosts
+|hosts_active_all_sum              | amount of total active hosts
+|hosts_active_state_change_avg     | average percent state change
+|hosts_active_state_change_max     | maximum state change over all active hosts
+|hosts_active_state_change_min     | minimum state change over all active hosts
+|hosts_active_state_change_sum     | sum state change over all hosts
+|hosts_active_sum                  | number of active hosts
+|hosts_execution_time_avg          | average execution time over all hosts
+|hosts_execution_time_max          | maximum execution time over all hosts
+|hosts_execution_time_min          | minimum execution time over all hosts
+|hosts_execution_time_sum          | sum execution time over all hosts
+|hosts_latency_avg                 | host latency average
+|hosts_latency_max                 | minimum host latency
+|hosts_latency_min                 | minimum host latency
+|hosts_latency_sum                 | sum latency over all hosts
+|hosts_passive_15_perc             | percent of passive hosts during the last 15 minutes
+|hosts_passive_15_sum              | amount of passive hosts during the last 15 minutes
+|hosts_passive_1_perc              | same for last minute
+|hosts_passive_1_sum               | same for last minute
+|hosts_passive_5_perc              | same for last 5 minutes
+|hosts_passive_5_sum               | same for last 5 minutes
+|hosts_passive_60_perc             | same for last 60 minutes
+|hosts_passive_60_sum              | same for last 60 minutes
+|hosts_passive_all_perc            | percent of total passive hosts
+|hosts_passive_all_sum             | amount of total passive hosts
+|hosts_passive_state_change_avg    | average percent state change for passive hosts
+|hosts_passive_state_change_max    | maximum state change over all passive hosts
+|hosts_passive_state_change_min    | minimum state change over all passive hosts
+|hosts_passive_state_change_sum    | sum state change over all passive hosts
+|hosts_passive_sum                 | number of passive hosts
+|services_active_15_perc           | percent of active services during the last 15 minutes
+|services_active_15_sum            | amount of active services during the last 15 minutes
+|services_active_1_perc            | same for last minute
+|services_active_1_sum             | same for last minute
+|services_active_5_perc            | same for last 5 minutes
+|services_active_5_sum             | same for last 5 minutes
+|services_active_60_perc           | same for last 60 minutes
+|services_active_60_sum            | same for last 60 minutes
+|services_active_all_perc          | percent of total active services
+|services_active_all_sum           | amount of total active services
+|services_active_state_change_avg  | average percent state change
+|services_active_state_change_max  | maximum state change over all active services
+|services_active_state_change_min  | minimum state change over all active services
+|services_active_state_change_sum  | sum state change over all services
+|services_active_sum               | number of active services
+|services_execution_time_avg       | average execution time over all services
+|services_execution_time_max       | maximum execution time over all services
+|services_execution_time_min       | minimum execution time over all services
+|services_execution_time_sum       | sum execution time over all services
+|services_latency_avg              | services latency average
+|services_latency_max              | minimum services latency
+|services_latency_min              | minimum services latency
+|services_latency_sum              | sum latency over all services
+|services_passive_15_perc          | percent of passive services during the last 15 minutes
+|services_passive_15_sum           | amount of passive services during the last 15 minutes
+|services_passive_1_perc           | same for last minute
+|services_passive_1_sum            | same for last minute
+|services_passive_5_perc           | same for last 5 minutes
+|services_passive_5_sum            | same for last 5 minutes
+|services_passive_60_perc          | same for last 60 minutes
+|services_passive_60_sum           | same for last 60 minutes
+|services_passive_all_perc         | percent of total passive services
+|services_passive_all_sum          | amount of total passive services
+|services_passive_state_change_avg | average percent state change for passive services
+|services_passive_state_change_max | maximum state change over all passive services
+|services_passive_state_change_min | minimum state change over all passive services
+|services_passive_state_change_sum | sum state change over all passive services
+|services_passive_sum              | number of passive services
+|===========================================
+
+
+=== GET /commands
+
+lists livestatus commands.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
+
+=== GET /commands/<name>/config
+
+Returns configuration for given command.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#command
+
+=== POST /commands/<name>/config
+
+Replace command configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /commands/<name>/config
+
+Update command configuration partially.
+
+=== DELETE /commands/<name>/config
+
+Deletes given command from configuration.
+
+=== GET /comments
+
+lists livestatus comments.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
+
+=== POST /config/check
+
+Returns result from config check.
+
+=== GET /config/diff
+
+Returns differences between filesystem and stashed config changes.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|file                              | file name of changed file
+|output                            | diff output
+|peer_key                          | backend id when having multiple sites connected
+|===========================================
+
+
+=== POST /config/discard
+
+Reverts stashed configuration changes.
+Alias for /config/revert
+
+=== GET /config/files
+
+returns all config files
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|content                           | raw file content
+|md5                               | md5 checksum
+|mtime                             | unix timestamp of last modification
+|path                              | filesystem path
+|peer_key                          | backend id when having multiple sites connected
+|readonly                          | readonly flag
+|===========================================
+
+
+=== GET /config/objects
+
+Returns list of all objects.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|:FILE                             | filename and line number
+|:ID                               | internal uniq id
+|:PEER_KEY                         | id of remote site
+|:READONLY                         | flag whether file is readonly
+|:TYPE                             | object type, ex.: host
+|===========================================
+
+
+=== POST /config/objects
+
+Create new object. Besides the actual object config, requires
+2 special paramters :FILE and :TYPE.
+
+=== PATCH /config/objects
+
+Change attributes for all matching objects.
+This is a very powerful url, for example you could change all hosts which
+have max_check_attempts=3 to max_check_attempts=5 with this command:
+
+  thruk r -m PATCH -d max_check_attempts=5 '/config/objects?:TYPE=host&max_check_attempts=3'
+
+=== POST /config/objects/<id>
+
+Replace object configuration completely.
+
+=== PATCH /config/objects/<id>
+
+Update object configuration partially.
+
+=== DELETE /config/objects/<id>
+
+Remove given object from configuration.
+
+=== POST /config/reload
+
+Reloads configuration with the configured reload command.
+
+=== POST /config/revert
+
+Reverts stashed configuration changes.
+
+=== POST /config/save
+
+Saves stashed configuration changes to disk.
+
+=== GET /contactgroups
+
+lists livestatus contactgroups.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
+
+=== GET /contactgroups/<name>/config
+
+Returns configuration for given contactgroup.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contactgroup
+
+=== POST /contactgroups/<name>/config
+
+Replace contactgroup configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /contactgroups/<name>/config
+
+Update contactgroup configuration partially.
+
+=== DELETE /contactgroups/<name>/config
+
+Deletes given contactgroup from configuration.
+
+=== GET /contacts
+
+lists livestatus contacts.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+
+=== GET /contacts/<name>/config
+
+Returns configuration for given contact.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contact
+
+=== POST /contacts/<name>/config
+
+Replace contact configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /contacts/<name>/config
+
+Update contact configuration partially.
+
+=== DELETE /contacts/<name>/config
+
+Deletes given contact from configuration.
+
+=== GET /downtimes
+
+lists livestatus downtimes.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
+
+=== GET /hostgroups
+
+lists livestatus hostgroups.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
+
+=== GET /hostgroups/<name>/config
+
+Returns configuration for given hostgroup.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#hostgroup
+
+=== POST /hostgroups/<name>/config
+
+Replace hostgroups configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /hostgroups/<name>/config
+
+Update hostgroup configuration partially.
+
+=== DELETE /hostgroups/<name>/config
+
+Deletes given hostgroup from configuration.
+
+=== GET /hosts
+
+lists livestatus hosts.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
+there is an shortcut /hosts available.
+
+=== GET /hosts/<name>
+
+lists hosts for given name.
+alias for /hosts?name=<name>
+
+=== GET /hosts/<name>/alerts
+
+lists alerts for given host.
+alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
+
+=== GET /hosts/<name>/config
+
+Returns configuration for given host.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#host
+
+=== POST /hosts/<name>/config
+
+Replace host configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /hosts/<name>/config
+
+Update host configuration partially.
+
+=== DELETE /hosts/<name>/config
+
+Deletes given host from configuration.
+
+=== GET /hosts/<name>/notifications
+
+lists notifications for given host.
+alias for /logs?class=3&host_name=<name>
+
+=== GET /hosts/<name>/services
+
+lists services for given host.
+alias for /services?host_name=<name>
+
+=== GET /hosts/stats
+
+hash of livestatus host statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|active_checks_disabled_active     | number of active hosts which have active checks disabled
+|active_checks_disabled_passive    | number of passive hosts which have active checks disabled
+|down                              | number of down hosts
+|down_and_ack                      | number of down hosts which are acknowledged
+|down_and_disabled_active          | number of active down hosts which have active checks disabled
+|down_and_disabled_passive         | number of passive down hosts which have active checks disabled
+|down_and_scheduled                | number of down hosts which are in a scheduled downtime
+|down_and_unhandled                | number of unhandled down hosts
+|eventhandler_disabled             | number of hosts with eventhandlers disabled
+|flapping                          | number of flapping hosts
+|flapping_disabled                 | number of hosts with flapping detection disabled
+|notifications_disabled            | number of hosts with notifications disabled
+|outages                           | number of network outages
+|passive_checks_disabled           | number of hosts which do not accept passive check results
+|pending                           | number of pending hosts
+|pending_and_disabled              | number of pending hosts with active checks disabled
+|pending_and_scheduled             | number of pending hosts which are in a scheduled downtime
+|plain_down                        | number of down hosts which are not acknowleded or in a downtime
+|plain_pending                     | number of pending hosts which are not acknowleded or in a downtime
+|plain_unreachable                 | number of unreachable hosts which are not acknowleded or in a downtime
+|plain_up                          | number of up hosts which are not acknowleded or in a downtime
+|total                             | total number of hosts
+|total_active                      | total number of active hosts
+|total_passive                     | total number of passive hosts
+|unreachable                       | number of unreachable hosts
+|unreachable_and_ack               | number of unreachable hosts which are acknowledged
+|unreachable_and_disabled_active   | number of active unreachable hosts which have active checks disabled
+|unreachable_and_disabled_passive  | number of passive unreachable hosts which have active checks disabled
+|unreachable_and_scheduled         | number of unreachable hosts which are in a scheduled downtime
+|unreachable_and_unhandled         | number of unhandled unreachable hosts
+|up                                | number of up hosts
+|up_and_disabled_active            | number of active up hosts which have active checks disabled
+|up_and_disabled_passive           | number of passive up hosts which have active checks disabled
+|up_and_scheduled                  | number of up hosts which are in a scheduled downtime
+|===========================================
+
+
+=== GET /hosts/totals
+
+hash of livestatus host totals statistics.
+its basically a reduced set of /hosts/stats.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|down                              | number of down hosts
+|down_and_unhandled                | number of down hosts which are neither acknowledged nor in scheduled downtime
+|pending                           | number of pending hosts
+|total                             | total number of hosts
+|unreachable                       | number of unreachable hosts
+|unreachable_and_unhandled         | number of unreachable hosts which are neither acknowledged nor in scheduled downtime
+|up                                | number of up hosts
+|===========================================
+
+
+=== GET /index
+
+lists all available rest urls.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|description                       | description of the url
+|protocol                          | protocol to use for this url
+|url                               | the rest url
+|===========================================
+
+
+=== GET /lmd/sites
+
+lists connected sites. Only available if LMD (`use_lmd`) is enabled.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|addr                              | address of the remote site
+|bytes_received                    | total bytes received from this site
+|bytes_send                        | total bytes send to this site
+|idling                            | flag if the connection is in idle mode
+|key                               | primary id of this site
+|last_error                        | last error message
+|last_online                       | timestamp when the site was last time online
+|last_query                        | timestamp of the last received query for this site
+|last_update                       | timestamp of the last update
+|name                              | name of the site
+|parent                            | parent id for lmd federation setups
+|peer_key                          | same as `key`
+|peer_name                         | same as `name`
+|queries                           | number of queries received
+|response_time                     | response time in seconds
+|section                           | thruks section
+|status                            | connection status of this site
+|===========================================
+
+
+=== GET /logs
+
+lists livestatus logs.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#log for details.
+
+=== GET /notifications
+
+lists notifications based on logfiles.
+alias for /logs?class=3
+
+=== GET /processinfo
+
+lists livestatus sites status.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+
+=== GET /processinfo/stats
+
+lists livestatus sites statistics.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+
+=== GET /servicegroups
+
+lists livestatus servicegroups.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
+
+=== GET /servicegroups/<name>/config
+
+Returns configuration for given servicegroup.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#servicegroup
+
+=== POST /servicegroups/<name>/config
+
+Replace servicegroup configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /servicegroups/<name>/config
+
+Update servicegroup configuration partially.
+
+=== DELETE /servicegroups/<name>/config
+
+Deletes given servicegroup from configuration.
+
+=== GET /services
+
+lists livestatus services.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
+there is an alias /services.
+
+=== GET /services/<host>/<service>/config
+
+Returns configuration for given service.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
+
+=== POST /services/<host>/<service>/config
+
+Replace service configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /services/<host>/<service>/config
+
+Update service configuration partially.
+
+=== DELETE /services/<host>/<service>/config
+
+Deletes given service from configuration.
+
+=== GET /services/<host_name>/<service>
+
+lists services for given host and name.
+alias for /services?host_name=<host_name>&description=<service>
+
+=== GET /services/stats
+
+livestatus service statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|active_checks_disabled_active     | number of active services which have active checks disabled
+|active_checks_disabled_passive    | number of passive services which have active checks disabled
+|critical                          | number of critical services
+|critical_and_ack                  | number of critical services which are acknowledged
+|critical_and_disabled_active      | number of active critical services which have active checks disabled
+|critical_and_disabled_passive     | number of passive critical services which have active checks disabled
+|critical_and_scheduled            | number of critical services which are in a scheduled downtime
+|critical_and_unhandled            | number of unhandled critical services
+|critical_on_down_host             | number of unhandled critical services on down hosts
+|eventhandler_disabled             | number of services with eventhandlers disabled
+|flapping                          | number of flapping services
+|flapping_disabled                 | number of services with flapping detection disabled
+|notifications_disabled            | number of services with notifications disabled
+|ok                                | number of ok services
+|ok_and_disabled_active            | number of active ok services which have active checks disabled
+|ok_and_disabled_passive           | number of passive ok services which have active checks disabled
+|ok_and_scheduled                  | number of ok services which are in a scheduled downtime
+|passive_checks_disabled           | number of services which do not accept passive check results
+|pending                           | number of pending services
+|pending_and_disabled              | number of pending services with active checks disabled
+|pending_and_scheduled             | number of pending services which are in a scheduled downtime
+|plain_critical                    | number of critical services which are not acknowleded or in a downtime
+|plain_ok                          | number of ok services which are not acknowleded or in a downtime
+|plain_pending                     | number of pending services which are not acknowleded or in a downtime
+|plain_unknown                     | number of unknown services which are not acknowleded or in a downtime
+|plain_warning                     | number of warning services which are not acknowleded or in a downtime
+|total                             | total number of services
+|total_active                      | total number of active services
+|total_passive                     | total number of passive services
+|unknown                           | number of unknown services
+|unknown_and_ack                   | number of unknown services which are acknowledged
+|unknown_and_disabled_active       | number of active unknown services which have active checks disabled
+|unknown_and_disabled_passive      | number of passive unknown services which have active checks disabled
+|unknown_and_scheduled             | number of unknown services which are in a scheduled downtime
+|unknown_and_unhandled             | number of unhandled unknown services
+|unknown_on_down_host              | number of unhandled unknown services on down hosts
+|warning                           | number of warning services
+|warning_and_ack                   | number of warning services which are acknowledged
+|warning_and_disabled_active       | number of active warning services which have active checks disabled
+|warning_and_disabled_passive      | number of passive warning services which have active checks disabled
+|warning_and_scheduled             | number of warning services which are in a scheduled downtime
+|warning_and_unhandled             | number of unhandled warning services
+|warning_on_down_host              | number of unhandled warning services on down hosts
+|===========================================
+
+
+=== GET /services/totals
+
+livestatus service totals statistics.
+its basically a reduced set of /services/stats.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|critical                          | number of critical services
+|critical_and_unhandled            | number of critical services which are neither acknowledged nor in scheduled downtime
+|ok                                | number of ok services
+|pending                           | number of pending services
+|total                             | total number of services
+|unknown                           | number of unknown services
+|unknown_and_unhandled             | number of unknown services which are neither acknowledged nor in scheduled downtime
+|warning                           | number of warning services
+|warning_and_unhandled             | number of warning services which are neither acknowledged nor in scheduled downtime
+|===========================================
+
+
+=== GET /thruk
+
+hash of basic information about this thruk instance
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|rest_version                      | rest api version
+|thruk_version                     | thruk version
+|thruk_branch                      | thruk branch name
+|thruk_release_date                | thruk release date
+|localtime                         | current server unix timestamp / epoch
+|project_root                      | thruk root folder
+|etc_path                          | configuration folder
+|var_path                          | variable data folder
+|===========================================
+
+
+=== GET /thruk/bp
+
+lists business processes.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|filter                            | list of enabled filters
+|id                                | primary id
+|last_check                        | timestamp of last check result submited
+|last_state_change                 | timestamp of last state change
+|name                              | name of this business proces
+|nodes                             | all nodes of this business process
+|rankDir                           | flag wheter this business process is horizontal or vertical
+|state_type                        | flag if this business process uses hard or soft state types
+|status                            | current status
+|status_text                       | current status text
+|template                          | naemon template used for the generated object
+|time                              | calculation duration
+|===========================================
+
+
+=== POST /thruk/bp
+
+create new business process.
+
+=== GET /thruk/bp/<nr>
+
+business processes for given number.
+alias for /thruk/bp?id=<nr>
+
+=== POST /thruk/bp/<nr>
+
+update business processes configuration for given number.
+
+=== PATCH /thruk/bp/<nr>
+
+update business processes configuration partially for given number.
+
+=== DELETE /thruk/bp/<nr>
+
+remove business processes for given number.
+
+=== GET /thruk/broadcasts
+
+lists broadcasts
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|annotation                        | annotation icon for this broadcast
+|author                            | author of the broadcast
+|authoremail                       | authors E-Mail address, mainly used as macro
+|contactgroups                     | list of contactgroups if broadcast should be limited to specific groups
+|contacts                          | list of contacts if broadcast should be limited to specific contacts
+|expires                           | expire date after which the broadcast won't be displayed anymore
+|file                              | filename
+|hide_before                       | do not show broadcast before this date
+|loginpage                         | flag wether broadcast should be displayed on the loginpage as well
+|panorama                          | flag wether broadcast should be displayed on panorama dashboards
+|template                          | flag wether this broadcast is a template
+|text                              | displayed text
+|===========================================
+
+
+=== POST /thruk/broadcasts
+
+create new broadcast.
+
+=== GET /thruk/broadcasts/<file>
+
+alias for /thruk/broadcasts?file=<file>
+
+=== POST /thruk/broadcasts/<file>
+
+update entire broadcast for given file.
+
+=== PATCH /thruk/broadcasts/<file>
+
+update attributes for given broadcast.
+
+=== DELETE /thruk/broadcasts/<file>
+
+remove broadcast for given file.
+
+=== GET /thruk/cluster
+
+lists cluster nodes
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|hostname                          | host name of the cluster node
+|last_contact                      | timestamp of last successful contact
+|last_error                        | text of last error message
+|last_update                       | timestamp of last update
+|node_id                           | internal id for this node
+|node_url                          | url to access this node directly
+|pids                              | list of current process ids of this node
+|response_time                     | response time in seconds
+|===========================================
+
+
+=== GET /thruk/cluster/<id>
+
+return cluster state for given node.
+
+See `/thruk/cluster/` for the description of the attributes.
+
+=== GET /thruk/cluster/heartbeat
+
+send cluster heartbeat to all other nodes
+
+=== GET /thruk/config
+
+lists configuration information
+
+=== GET /thruk/jobs
+
+lists thruk jobs.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|cmd                               | the executed command line or perl code
+|end                               | timestamp when the job finished
+|forward                           | url to forward when the job is done
+|host_id                           | thruk node id this job is run on
+|host_name                         | hostname of the node
+|id                                | job id
+|is_running                        | flag whether the job is still running
+|message                           | current status text
+|percent                           | percent of completion
+|pid                               | process id
+|rc                                | return code
+|remaining                         | remaining seconds for the job to complete
+|start                             | timestamp when the job started
+|stderr                            | stderr output
+|stdout                            | stdout output
+|time                              | duration in seconds
+|user                              | username of the owner
+|===========================================
+
+
+=== GET /thruk/jobs/<id>
+
+get thruk job status for given id.
+alias for /thruk/jobs?id=<id>
+
+=== GET /thruk/panorama
+
+lists all panorama dashboards.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|file                              | filename of the dashboard
+|file_version                      | version of dashboard format
+|id                                | internal id
+|nr                                | number of the dashboard
+|objects                           | number of objects
+|readonly                          | flag whether this dashboard is read-only
+|scripted                          | flag whether this is a scripted dashboard
+|tab                               | structure of global dashboard settings
+|ts                                | timestamp of last modification
+|user                              | owner of this dashboard
+|===========================================
+
+
+=== GET /thruk/panorama/<nr>
+
+returns panorama dashboard for given number.
+alias for /thruk/panorama?nr=<nr>
+
+=== GET /thruk/recurring_downtimes
+
+lists recurring downtimes.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|backends                          | list of backends this downtime is used for
+|childoptions                      | flag used for the downtime command
+|comment                           | comment used for the downtime command
+|duration                          | duration in minutes
+|file                              | file number
+|fixed                             | flag whether this should create a fixed downtime
+|flex_range                        | range in minutes for flexible downtimes
+|host                              | list of hostnames
+|hostgroup                         | list of hostgroups
+|schedule                          | list of schedules
+|service                           | list of services
+|servicegroup                      | list of servicegroups
+|target                            | sets the type of the downtime, ex. host or hostgroup
+|===========================================
+
+
+=== POST /thruk/recurring_downtimes
+
+create new downtime.
+
+=== GET /thruk/recurring_downtimes/<file>
+
+alias for /thruk/recurring_downtimes?file=<file>
+
+=== POST /thruk/recurring_downtimes/<file>
+
+update entire downtime for given file.
+
+=== PATCH /thruk/recurring_downtimes/<file>
+
+update attributes for given downtime.
+
+=== DELETE /thruk/recurring_downtimes/<file>
+
+remove downtime for given file.
+
+=== GET /thruk/reports
+
+list of reports.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|backends                          | list of backends used in this report
+|cc                                | email cc address if this report is send by mail
+|desc                              | report description
+|failed                            | flag wheter the report failed to generate last time
+|is_public                         | flag wheter the report is public or not
+|name                              | name of the report
+|nr                                | number of the report
+|params                            | reporting parameters
+|readonly                          | flag wheter the report is read-only
+|send_types                        | list of cron entries
+|template                          | template of the report
+|to                                | email to address if this report is send by mail
+|user                              | owner
+|===========================================
+
+
+=== POST /thruk/reports
+
+create new report.
+
+=== GET /thruk/reports/<nr>
+
+report for given number.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|backends                          | list of selected backends.
+|cc                                | carbon-copy for report email.
+|desc                              | description.
+|failed                            | failed flag.
+|is_public                         | flag for public reports.
+|name                              | name of the report.
+|nr                                | primary id.
+|params                            | report parameters.
+|readonly                          | readonly flag.
+|send_types                        | list of crontab entries.
+|template                          | report template.
+|to                                | email address the report email.
+|user                              | owner of the report.
+|===========================================
+
+
+=== POST /thruk/reports/<nr>
+
+update entire report for given number.
+
+=== PATCH /thruk/reports/<nr>
+
+update attributes for given number.
+
+=== DELETE /thruk/reports/<nr>
+
+remove report for given number.
+
+=== POST /thruk/reports/<nr>/generate
+
+generate report for given number.
+
+=== GET /thruk/reports/<nr>/report
+
+return the actual report file in binary format.
+
+=== GET /thruk/sessions
+
+lists thruk sessions.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|active                            | timestamp when session was last time used
+|address                           | remote address of user
+|id                                | session id
+|user                              | username
+|===========================================
+
+
+=== GET /thruk/sessions/<id>
+
+get thruk sessions status for given id.
+alias for /thruk/sessions?id=<id>
+
+=== GET /timeperiods
+
+lists livestatus timeperiods.
+see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+
+=== GET /timeperiods/<name>/config
+
+Returns configuration for given timeperiod.
+You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#timeperiod
+
+=== POST /timeperiods/<name>/config
+
+Replace timeperiod configuration completely, use PATCH to only update specific attributes.
+
+=== PATCH /timeperiods/<name>/config
+
+Update timeperiods configuration partially.
+
+=== DELETE /timeperiods/<name>/config
+
+Deletes given timeperiod from configuration.
+

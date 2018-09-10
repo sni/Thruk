@@ -192,6 +192,54 @@ ex.:
   default_user_timezone = "Server Setting"
 
 
+=== cluster_enabled
+{% include new_since.ad version="2.24" %}
+Set to 1 to enable cluster features or 0 for single node setups.
+
+ex.:
+
+  cluster_enabled = 1
+
+=== cluster_nodes
+{% include new_since.ad version="2.24" %}
+Define generic url pattern to connect all cluster nodes. Each
+cluster node must be available on the given address.
+3 variables will be replaced to make this url generic:
+ - $hostname$:   hostname from `hostname`
+ - $url_prefix$: contains the url prefix from `url_prefix`
+ - $proto$:      trying to autodetect either `http` or `https`, autodetect
+                 will only work with OMD and falls back to http otherwise.
+
+ex.:
+
+  cluster_nodes = https://$hostname$/$url_prefix$/
+
+
+=== cluster_node_stale_timeout
+{% include new_since.ad version="2.24" %}
+Set timeout after which a node is removed from the cluster.
+
+ex.:
+
+  cluster_node_stale_timeout = 120
+
+
+=== rest_api_enabled
+{% include new_since.ad version="2.24" %}
+The link:rest.html[rest api] is enabled by default, but you can disable or restrict it.
+
+Valid options are:
+  - 0: rest api disabled
+  - 1: rest api enabled for everyone
+  - 2: rest api enabled for admins only
+  - 3: rest api enabled from command line only
+
+ex.:
+
+  rest_api_enabled = 3
+
+
+
 === mobile_agent
 Specify user agents which will be redirected to the mobile plugin (if
 enabled).
@@ -355,6 +403,7 @@ ex.:
 Use this to disabled specific commands. Can be use multiple times to disabled
 multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
 links to the command page.
+If you only want to allow a few commands, use `command_enabled` instead.
 You may use ranges here.
 
 ex.:
@@ -362,6 +411,19 @@ ex.:
   command_disabled = 14
   command_disabled = 35
   command_disabled = 17-34,50-65
+
+
+=== command_enabled
+Enable only specific commands. Overrides `command_disabled` setting by only
+allowing a few specific commands and disabling all others. The syntax is the
+same as in `command_disabled`. If you want to disable all commands, you have to
+use `command_disabled = 0-999` or set the `authorized_for_read_only` role.
+
+ex.:
+
+  command_enabled = 1-4         # allow adding and removing comments
+  command_enabled = 33,34,51,52 # allow acknowledgments
+  command_enabled = 55,56,78,79 # allow downtimes
 
 
 === make_auth_user_lowercase
@@ -1344,6 +1406,14 @@ it is ok to remove some entries. Can be used multiple times.
 ex.:
 
   logcache_import_exclude = "Warning: Passive check result was received for"
+  logcache_import_exclude = "wproc: "
+  logcache_import_exclude = "PASSIVE SERVICE CHECK: "
+  logcache_import_exclude = "PASSIVE HOST CHECK: "
+  logcache_import_exclude = "Warning: Check of "
+  logcache_import_exclude = "Warning: External command parse error "
+  logcache_import_exclude = "EXTERNAL COMMAND: PROCESS_SERVICE_CHECK_RESULT"
+  logcache_import_exclude = "EXTERNAL COMMAND: PROCESS_HOST_CHECK_RESULT"
+  logcache_import_exclude = "External command error: Failed validation"
 
 
 === logcache_delta_updates
@@ -1565,6 +1635,17 @@ ex.:
 
   cookie_auth_direct_agents = (wget|curl|python|Go-http-client)
 
+
+=== cookie_auth_disable_after_failed_logins
+{% include new_since.ad version="2.12" %}
+Disable account after this number of failed login attempts.
+This feature will be disabled if set to zero.
+
+Default: 10
+
+ex.:
+
+  cookie_auth_disable_after_failed_logins = 3
 
 
 

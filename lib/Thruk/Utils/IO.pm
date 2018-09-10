@@ -13,12 +13,13 @@ IO Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp qw/confess longmess/;
-use Fcntl qw/:mode :flock/;
+use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
 use Cpanel::JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move/;
+use Time::HiRes qw/sleep/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::config = undef;
@@ -177,15 +178,120 @@ sub ensure_permissions {
 
 ##############################################
 
-=head2 json_lock_store
+=head2 file_lock
 
-  json_lock_store($file, $data, [$pretty], [$changed_only])
+  file_lock($file, $mode)
+
+  $mode can be
+    - 'ex' exclusive
+    - 'sh' shared
+
+locks given file. Returns locked filehandle.
+
+=cut
+
+sub file_lock {
+    my($file, $mode) = @_;
+
+    alarm(30);
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to flock(".$mode."): ".$file); };
+
+    # we can only lock files in existing folders
+    my $basename = $file;
+    $basename    =~ s%/[^/]*$%%gmx;
+    if(!-d $basename.'/.') {
+        confess("cannot lock $file in non-existing folder: ".$!);
+    }
+
+    my $lock_file = $file.'.lock';
+    my $lock_fh;
+    if($mode eq 'ex') {
+        my $locked    = 0;
+        my $old_inode = (stat($lock_file))[1];
+        my $retrys    = 0;
+        while(1) {
+            $old_inode = (stat($lock_file))[1] unless $old_inode;
+            if(sysopen($lock_fh, $lock_file, O_RDWR|O_EXCL|O_CREAT, 0660)) {
+                last;
+            }
+            my $err = $!;
+            # check for orphaned locks
+            if($err eq 'File exists' && $old_inode) {
+                sleep(0.3);
+                if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
+                    my $new_inode = (stat($lock_fh))[1];
+                    if($new_inode && $new_inode == $old_inode) {
+                        $retrys++;
+                        if($retrys > 20) {
+                            # lock seems to be orphaned, continue normally unless in test mode
+                            confess("got orphaned lock") if $ENV{'TEST_RACE'};
+                            $locked = 1;
+                            last;
+                        }
+                        next;
+                    }
+                    if($new_inode && $new_inode != $old_inode) {
+                        $retrys = 0;
+                        undef $old_inode;
+                    }
+                }
+            }
+            sleep(0.1);
+        }
+        if(!$locked) {
+            flock($lock_fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
+        }
+    }
+    elsif($mode eq 'sh') {
+        # nothing to do
+    } else {
+        confess("unknown mode: ".$mode);
+    }
+
+    sysopen(my $fh, $file, O_RDWR|O_CREAT) or die("cannot open file ".$file.": ".$!);
+    if($mode eq 'ex') {
+        flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
+    }
+    elsif($mode eq 'sh') {
+        flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
+    }
+
+    seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
+    sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
+
+    alarm(0);
+    return($fh, $lock_fh);
+}
+
+##############################################
+
+=head2 file_unlock
+
+  file_unlock($file, $fh)
+
+unlocks file lock previously with file_lock exclusivly. Returns nothing.
+
+=cut
+
+sub file_unlock {
+    my($file, $fh, $lock_fh) = @_;
+    flock($fh, LOCK_UN) if $fh;
+    unlink($file.'.lock');
+    flock($lock_fh, LOCK_UN);
+    return;
+}
+
+##############################################
+
+=head2 json_store
+
+  json_store($file, $data, [$pretty], [$changed_only])
 
 stores data json encoded
 
 =cut
 
-sub json_lock_store {
+sub json_store {
     my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
 
     my $json = Cpanel::JSON::XS->new->utf8;
@@ -200,16 +306,72 @@ sub json_lock_store {
     }
 
     $tmpfile = $file.'.new' unless $tmpfile;
-    open(my $fh, '>', $file) or confess('cannot write file '.$file.': '.$!);
-    alarm(30);
-    local $SIG{'ALRM'} = sub { confess("timeout while trying to lock_ex: ".$file); };
-    flock($fh, LOCK_EX) or confess 'Cannot lock '.$file.': '.$!;
     open(my $fh2, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
     print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
     Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
+
+    if($Thruk::Utils::IO::config && $Thruk::Utils::IO::config->{'thruk_author'}) {
+        eval {
+            my $test = $json->decode(scalar read_file($tmpfile));
+        };
+        confess("json_store failed to write a valid file: ".$@) if $@;
+    }
+
+
     move($tmpfile, $file) or confess("cannot replace $file with $tmpfile: $!");
-    alarm(0);
+
     return 1;
+}
+
+##############################################
+
+=head2 json_lock_store
+
+  json_lock_store($file, $data, [$pretty], [$changed_only])
+
+stores data json encoded
+
+=cut
+
+sub json_lock_store {
+    my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
+    my($fh, $lock_fh) = file_lock($file, 'ex');
+    json_store($file, $data, $pretty, $changed_only, $tmpfile);
+    file_unlock($file, $fh, $lock_fh);
+    return 1;
+}
+
+##############################################
+
+=head2 json_retrieve
+
+  json_retrieve($file, $fh)
+
+retrieve json data
+
+=cut
+
+sub json_retrieve {
+    my($file, $fh) = @_;
+    confess("got no filehandle") unless defined $fh;
+
+    my $json = Cpanel::JSON::XS->new->utf8;
+    $json->relaxed();
+
+    local $/ = undef;
+    my $data;
+
+    seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
+    sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
+
+    eval {
+        $data = $json->decode(scalar <$fh>);
+    };
+    my $err = $@;
+    if($err && !$data) {
+        confess("error while reading $file: ".$@);
+    }
+    return $data;
 }
 
 ##############################################
@@ -224,27 +386,47 @@ retrieve json data
 
 sub json_lock_retrieve {
     my($file) = @_;
-
     return unless -s $file;
-
-    my $json = Cpanel::JSON::XS->new->utf8;
-    $json->relaxed();
-    local $/=undef;
-
-    open(my $fh, '<', $file) or die('cannot read file '.$file.': '.$!);
-    alarm(30);
-    local $SIG{'ALRM'} = sub { die("timeout while trying to lock_sh: ".$file); };
-    flock($fh, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
-    my $data;
-    eval {
-        $data = $json->decode(<$fh>);
-    };
-    my $err = $@;
+    my($fh) = file_lock($file, 'sh');
+    my $data = json_retrieve($file, $fh);
     CORE::close($fh) or die("cannot close file ".$file.": ".$!);
-    alarm(0);
-    if($err && !$data) {
-        die("error while reading $file: ".$@);
-    }
+    return $data;
+}
+
+##############################################
+
+=head2 json_lock_patch
+
+  json_lock_patch($file, $patch_data, [$pretty], [$changed_only], [$tmpfile])
+
+update json data
+
+=cut
+
+sub json_lock_patch {
+    my($file, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
+    my($fh, $lock_fh) = file_lock($file, 'ex');
+    my $data = json_patch($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile);
+    file_unlock($file, $fh, $lock_fh);
+    return $data;
+}
+
+##############################################
+
+=head2 json_patch
+
+  json_patch($file, $fh, $patch_data, [$pretty], [$changed_only], [$tmpfile])
+
+update json data
+
+=cut
+
+sub json_patch {
+    my($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
+    confess("got no filehandle") unless defined $fh;
+    my $data = -s $file ? json_retrieve($file, $fh) : {};
+    $data = merge_deep($data, $patch_data);
+    json_store($file, $data, $pretty, $changed_only, $tmpfile);
     return $data;
 }
 
@@ -375,11 +557,89 @@ sub cmd {
 return untainted variable
 
 =cut
-
 sub untaint {
     my($v) = @_;
-    if($v =~ /\A(.*)\z/msx) { $v = $1; }
+    if($v && $v =~ /\A(.*)\z/msx) { $v = $1; }
     return($v);
+}
+
+##############################################
+
+=head2 merge_deep
+
+  merge_deep($var, $merge_var)
+
+returns merged variables
+
+merge will be as follows:
+
+    - hash keys will be replaced with the last level of hash keys
+    - arrays will will be replaced completly, unless $merge_var is a hash of
+      the form: { array_index => replacement }
+    - everything else will be replaced
+
+=cut
+sub merge_deep {
+    my($var, $merge) = @_;
+    if(_is_hash($var) && _is_hash($merge)) {
+        for my $key (keys %{$merge}) {
+            if(!defined $merge->{$key}) {
+                delete $var->{$key};
+            }
+            elsif(!defined $var->{$key}) {
+                # remove all undefined values from $merge
+                if(_is_hash($merge->{$key})) {
+                    $var->{$key} = {};
+                    $var->{$key} = merge_deep($var->{$key}, $merge->{$key});
+                } else {
+                    $var->{$key} = $merge->{$key};
+                }
+            } else {
+                $var->{$key} = merge_deep($var->{$key}, $merge->{$key});
+            }
+        }
+        return($var);
+    }
+    if(ref $var eq 'ARRAY' && _is_hash($merge)) {
+        for my $key (sort keys %{$merge}) {
+            if(!defined $merge->{$key}) {
+                $var->[$key] = undef;
+            }
+            elsif(!defined $var->[$key]) {
+                $var->[$key] = $merge->{$key};
+            } else {
+                $var->[$key] = merge_deep($var->[$key], $merge->{$key});
+            }
+        }
+        # remove undefs
+        @{$var} = grep defined, @{$var};
+        return($var);
+    }
+    if(ref $var eq 'ARRAY' && ref $merge eq 'ARRAY') {
+        for my $x (0..(scalar @{$merge} -1)) {
+            if(ref $merge->[$x] && ref $var->[$x]) {
+                $var->[$x] = merge_deep($var->[$x], $merge->[$x]);
+            }
+            else {
+                $var->[$x] = $merge->[$x];
+            }
+        }
+        # remove undefs
+        @{$var} = grep defined, @{$var};
+        return($var);
+    }
+    return($merge);
+}
+
+##############################################
+# returns true if $var is a hash
+sub _is_hash {
+    my($o) = @_;
+    # normal hash ref
+    return 1 if(ref $o eq 'HASH');
+    # blessed objects
+    return 1 if(UNIVERSAL::isa($o, 'HASH'));
+    return 0;
 }
 
 ##############################################
