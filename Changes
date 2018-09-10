@@ -9,6 +9,8 @@ next:
           - show and use alias for hosts, hostgroups and servicegroups search
           - Business Process:
             - only show business processes where the contact is allowed to see the generated service (#810)
+          - Panorama:
+            - fix playing recovery or host alert sounds
           - Cookie Auth:
             - lock account after 10 failed login attempts
             - add `cookie_auth_disable_after_failed_logins` option

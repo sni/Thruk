@@ -1665,6 +1665,7 @@ var TP = {
 
     /* play a wave file*/
     playWave: function(url, endedCallback) {
+        console.log("playing sound: "+url);
         var el = Ext.DomHelper.insertFirst(document.body, '<audio src="'+url+'" />' , true);
         el.dom.addEventListener('ended', function() {
             if(endedCallback) {
@@ -1700,7 +1701,7 @@ var TP = {
             if(p.iconType && p.xdata) {
                 var alertState = p.xdata.state;
                 if(p.acknowledged || p.downtime) { alertState = 0; }
-                if(p.iconType == 'host') {
+                if(p.iconType == 'host' || p.hostProblem) {
                     if(alertState == 0) { totals.recovery++    }
                     if(alertState == 1) { totals.down++        }
                     if(alertState == 2) { totals.unreachable++ }
@@ -1713,22 +1714,24 @@ var TP = {
             }
         }
 
+        if(TP.alertNumbers         == undefined) { TP.alertNumbers         = {}; }
+        if(TP.alertNumbers[tab_id] == undefined) { TP.alertNumbers[tab_id] = {recovery: 0, warning: 0, critical: 0, unknown: 0, down: 0, unreachable: 0}; }
+
         /* inital display does not alert */
         if(TP.alertTotals[tab_id] == undefined) {
             TP.alertTotals[tab_id] = totals;
+            TP.alertNumbers[tab_id]["recovery"] = 1; // do not send initial recovery alerts
             return;
         }
-
-        if(TP.alertNumbers         == undefined) { TP.alertNumbers         = {}; }
-        if(TP.alertNumbers[tab_id] == undefined) { TP.alertNumbers[tab_id] = {recovery: 0, warning: 0, critical: 0, unknown: 0, down: 0, unreachable: 0}; }
 
         for(var x=0; x<order.length; x++) {
             var name = order[x];
             /* sounds enabled and there are alerts */
             if(tab.xdata[name+'_sound'] != "" && totals[name] > 0) {
                 /* repeat enabled or new alerts */
+                if(tab.xdata[name+'_repeat'] == undefined) { tab.xdata[name+'_repeat'] = 1; } // don't repeat if not set, ex.: recoveries
                 if(   totals[name] > TP.alertTotals[tab_id][name]
-                   || tab.xdata[name+'_repeat'] == 0
+                   || tab.xdata[name+'_repeat'] == 0 // forever
                    || tab.xdata[name+'_repeat'] > TP.alertNumbers[tab_id][name])
                 {
                     var tabpan = Ext.getCmp('tabpan');
