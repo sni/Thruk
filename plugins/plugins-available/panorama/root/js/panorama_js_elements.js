@@ -387,7 +387,13 @@ Ext.define('TP.SoundField', {
         xtype:       'button',
         text:        'Test',
         icon:        url_prefix+'plugins/panorama/images/sound.png',
-        handler:      function(btn, evt) { var wav = btn.up().items.getAt(0).getValue(); if(wav != "") { btn.disable(); TP.playWave(wav, function() { btn.enable() }); } }
+        handler:      function(btn, evt) {
+            var wav = btn.up().items.getAt(0).getValue();
+            if(wav != "") {
+                btn.disable();
+                TP.playWave(wav, function() { btn.enable() });
+            }
+        }
     }],
     initComponent: function() {
         this.callParent();

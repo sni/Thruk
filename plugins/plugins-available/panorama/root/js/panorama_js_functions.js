@@ -1666,12 +1666,18 @@ var TP = {
     /* play a wave file*/
     playWave: function(url, endedCallback) {
         var el = Ext.DomHelper.insertFirst(document.body, '<audio src="'+url+'" />' , true);
-        el.dom.play();
         el.dom.addEventListener('ended', function() {
             if(endedCallback) {
                 endedCallback();
             }
         });
+        el.dom.addEventListener('error', function(a,b,c,d) {
+            TP.Msg.msg("fail_message~~failed to play sound file.");
+            if(endedCallback) {
+                endedCallback();
+            }
+        });
+        el.dom.play();
     },
     /* put a new alert onto the queue */
     checkSoundAlerts: function(tab) {
