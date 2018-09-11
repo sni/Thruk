@@ -93,7 +93,7 @@ my $start   = Thruk::Utils::parse_date($c, $opt->{'start'});
 my $end     = Thruk::Utils::parse_date($c, $opt->{'end'});
 
 my $db      = $cli->get_db();
-$options = { filter => [{ time => { '>=' => $start }}, { time => { '<=' => $end }}], sort => {'ASC' => 'time'} };
+$options = { filter => [{ time => { '>=' => $start }}, { time => { '<=' => $end }}] };
 $options->{'nocache'} = 1 if $opt->{'nocache'};
 my $logs    = $db->get_logs(%{$options});
 
