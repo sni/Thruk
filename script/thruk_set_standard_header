@@ -17,7 +17,7 @@ for file in $(grep -c "exec perl" examples/* script/* | grep -v :0 | grep -v thr
   tail -n +$linenr $file > $file.tmp
   cp support/standard_script_header $file.head
   if [ $(echo $file | grep -c 'examples/') -eq 0 ]; then
-    sed -i $file.head -e 's/\-a.*examples'"'"' //g'
+    sed -i $file.head -e 's/\ \&\&.*examples.*\]\]//g'
   fi
   if [ $(grep -c Monitoring::Config $file) -eq 0 -a $(grep -c get_object_db $file) -eq 0 ]; then
     sed -i $file.head -e 's%:[^:]*conf/lib%%g'
