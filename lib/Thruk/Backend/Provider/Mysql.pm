@@ -1335,7 +1335,8 @@ sub _update_logcache_auth {
     #my($self, $c, $peer, $dbh, $prefix, $verbose) = @_;
     my($self, undef, $peer, $dbh, $prefix, $verbose) = @_;
 
-    $dbh->do("TRUNCATE TABLE `".$prefix."_contact`");
+    # bad idea, this moves contact ids which are also used in notifications log entries
+    #$dbh->do("TRUNCATE TABLE `".$prefix."_contact`");
     my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix);
     my $host_lookup    = _get_host_lookup($dbh,$peer,$prefix);
     my $service_lookup = _get_service_lookup($dbh,$peer,$prefix);
