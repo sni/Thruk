@@ -777,6 +777,13 @@ sub single_search {
         if( $filter->{'op'} eq '>=' ) { $op = '>='; $rop = '<='; $dateop = '>='; }
         if( $filter->{'op'} eq '<=' ) { $op = '<='; $rop = '>='; $dateop = '<='; }
 
+        if($op eq '~~' || $op eq '!~~') {
+            # regular expression filter are supported since LMD 1.3.4
+            if($ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4')) {
+                $listop = $op;
+            }
+        }
+
         if( $op eq '!~~' or $op eq '~~' ) {
             $value = Thruk::Utils::convert_wildcards_to_regex($value);
             $errors++ unless Thruk::Utils::is_valid_regular_expression( $c, $value );
@@ -863,7 +870,7 @@ sub single_search {
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
-            if($op eq '~~' or $op eq '!~~') {
+            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
                 my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'hostgroup');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
@@ -878,7 +885,7 @@ sub single_search {
             push @hostgroupfilter,     { name        => { $op     => $value } };
         }
         elsif ( $filter->{'type'} eq 'servicegroup' ) {
-            if($op eq '~~' or $op eq '!~~') {
+            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
                 my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'servicegroup');
                 push @servicefilter,       $sfilter;
                 push @servicetotalsfilter, $sfilter;
@@ -890,7 +897,7 @@ sub single_search {
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
-            if($op eq '~~' or $op eq '!~~') {
+            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
                 my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'contacts');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
