@@ -406,7 +406,7 @@ sub _get_filter {
         }
         $op = $op_translation_words->{$op} if $op_translation_words->{$op};
         for my $val (@vals) {
-            push @{$filter}, [$key, $op, $val];
+            push @{$filter}, { $key => { $op =>  $val }};
         }
     }
 
@@ -427,108 +427,14 @@ sub _append_lexical_filter {
 sub _apply_filter {
     my($c, $data) = @_;
 
-    for my $filter (@{_get_filter($c)}) {
-        my($key, $op, $val) = @{$filter};
-
-        my @filtered;
-        if(!defined $op && !defined $val && ref $key ne '') {
-            for my $d (@{$data}) {
-                if(_match_complex_filter($d, $key)) {
-                    push @filtered, $d;
-                }
-            }
-            $data = \@filtered;
-            next;
+    my @filtered;
+    my $filter = _get_filter($c);
+    for my $d (@{$data}) {
+        if(_match_complex_filter($d, $filter)) {
+            push @filtered, $d;
         }
-
-        ## no critic
-        no warnings;
-        ## use critic
-        if($op eq '=') {
-            for my $d (@{$data}) {
-                next unless lc($d->{$key}) eq lc($val);
-                push @filtered, $d;
-            }
-        }
-        elsif($op eq '!=') {
-            for my $d (@{$data}) {
-                next unless lc($d->{$key}) ne lc($val);
-                push @filtered, $d;
-            }
-        }
-        elsif($op eq '~') {
-            for my $d (@{$data}) {
-                ## no critic
-                next unless $d->{$key} =~ m/$val/i;
-                ## use critic
-                push @filtered, $d;
-            }
-        }
-        elsif($op eq '!~') {
-            for my $d (@{$data}) {
-                ## no critic
-                next unless $d->{$key} !~ m/$val/i;
-                ## use critic
-                push @filtered, $d;
-            }
-        }
-        elsif($op eq '>') {
-            for my $d (@{$data}) {
-                next unless $d->{$key} > $val;
-                push @filtered, $d;
-            }
-        }
-        elsif($op eq '<') {
-            for my $d (@{$data}) {
-                next unless $d->{$key} < $val;
-                push @filtered, $d;
-            }
-        }
-        elsif($op eq '>=') {
-            for my $d (@{$data}) {
-                if(ref $d->{$key} eq 'ARRAY') {
-                    my $found = 0;
-                    for my $v (@{$d->{$key}}) {
-                        if($v eq $val) {
-                            $found = 1;
-                            last;
-                        }
-                    }
-                    if($found) {
-                        push @filtered, $d;
-                    }
-                } else {
-                    next unless $d->{$key} >= $val;
-                    push @filtered, $d;
-                }
-            }
-        }
-        elsif($op eq '<=') {
-            for my $d (@{$data}) {
-                if(ref $d->{$key} eq 'ARRAY') {
-                    my $found = 0;
-                    for my $v (@{$d->{$key}}) {
-                        if($v eq $val) {
-                            $found = 1;
-                        }
-                    }
-                    if(!$found) {
-                        push @filtered, $d;
-                    }
-                } else {
-                    next unless $d->{$key} <= $val;
-                    push @filtered, $d;
-                }
-            }
-        } else {
-            die("unsupported operator: ".$op);
-        }
-        use warnings;
-
-        $data = \@filtered;
     }
-
-    return $data;
+    return \@filtered;
 }
 
 ##########################################################
@@ -550,6 +456,47 @@ sub get_request_columns {
         push @{$columns}, split(/\s*,\s*/mx, $col);
     }
     return($columns);
+}
+
+##########################################################
+
+=head2 get_filter_columns
+
+    get_filter_columns($c)
+
+returns list of columns required for filtering
+
+=cut
+sub get_filter_columns {
+    my($c) = @_;
+
+    my $columns = {};
+    my $filter = _get_filter($c);
+    _set_filter_keys($filter, $columns);
+
+    return([sort keys %{$columns}]);
+}
+
+##########################################################
+sub _set_filter_keys {
+    my($f, $columns) = @_;
+    if(ref $f eq 'ARRAY') {
+        for my $f2 (@{$f}) {
+            _set_filter_keys($f2, $columns);
+        }
+    }
+    elsif(ref $f eq 'HASH') {
+        for my $f2 (keys %{$f}) {
+            if($f2 eq '-and' || $f2 eq '-or') {
+                _set_filter_keys($f2, $columns);
+            } else {
+                $columns->{$f2} = 1;
+            }
+        }
+    } else {
+        die("unsupported ".$f);
+    }
+    return;
 }
 
 ##########################################################
@@ -576,7 +523,7 @@ sub column_required {
 
     # from ?columns=...
     my $req_col = get_request_columns($c);
-    if(!defined $req_col || scalar @{$req_col} == 0 || grep(/^$col$/mx, @{$req_col})) {
+    if(defined $req_col && scalar @{$req_col} >= 0 && grep(/^$col$/mx, @{$req_col})) {
         return 1;
     }
 
@@ -586,6 +533,11 @@ sub column_required {
             $s =~ s/^[\-\+]+//gmx;
             return 1 if $col eq $s;
         }
+    }
+
+    my $filter_cols = get_filter_columns($c);
+    if(defined $filter_cols && scalar @{$filter_cols} >= 0 && grep(/^$col$/mx, @{$filter_cols})) {
+        return 1;
     }
 
     return;
@@ -672,8 +624,9 @@ sub _livestatus_options {
 
     # try to reduce the number of requested columns
     if($type) {
-        my $columns = get_request_columns($c);
-        if($columns && scalar @{$columns} > 0) {
+        my $columns = get_request_columns($c) || [];
+        push @{$columns}, @{get_filter_columns($c)};
+        if(scalar @{$columns} > 0) {
             my $ref_columns;
             if($type eq 'hosts') {
                 $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_host_columns);
@@ -1462,16 +1415,42 @@ sub _compare {
         return;
     }
     elsif($op eq '~' || $op eq '~~') {
-        ## no critic
-        return 1 if $data =~ m/$val/i;
-        ## use critic
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                ## no critic
+                if($v =~ m/$val/i) {
+                    $found = 1;
+                    last;
+                }
+                ## use critic
+            }
+            return $found;
+        } else {
+            ## no critic
+            return 1 if $data =~ m/$val/i;
+            ## use critic
+        }
         return;
     }
     elsif($op eq '!~' || $op eq '!~~') {
-        ## no critic
-        return 1 if $data !~ m/$val/i;
-        ## use critic
-        return;
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                ## no critic
+                if($v =~ m/$val/i) {
+                    $found = 1;
+                    last;
+                }
+                ## use critic
+            }
+            return !$found;
+        } else {
+            ## no critic
+            return 1 if $data !~ m/$val/i;
+            ## use critic
+            return;
+        }
     }
     elsif($op eq '>') {
         return 1 if $data > $val;

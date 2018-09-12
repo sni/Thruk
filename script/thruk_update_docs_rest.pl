@@ -266,10 +266,15 @@ sub _fetch_keys {
     my $keys = [];
     $c->{'rendered'} = 0;
     $c->req->parameters->{'limit'} = 1;
+    delete $c->req->parameters->{'sort'};
     print STDERR "fetching keys for ".$url."\n";
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
     $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
+    if($tst_url eq "/config/files") {
+        # column would be optimized away otherwise
+        $c->req->parameters->{'sort'} = "content";
+    }
     Thruk::Action::AddDefaults::_set_enabled_backends($c);
     my $data = Thruk::Controller::rest_v1::_process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {

@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 334;
+    plan tests => 366;
 }
 
 BEGIN {
@@ -151,6 +151,54 @@ TestUtils::test_page(
         'content_type' => 'application/json;charset=UTF-8',
         'method'       => 'GET',
         'like'         => ['\[\]'],
+    );
+};
+
+################################################################################
+# test query filter II
+{
+    local $ENV{'NO_POST_TOKEN'} = 1;
+    TestUtils::test_page(
+        'url'          => '/thruk/r/logs?q=***host_name = "test" AND (time > 1 AND time < 10)***',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['\[\]'],
+    );
+};
+
+################################################################################
+# test query filter when the filtered item is not in the columns list
+{
+    local $ENV{'NO_POST_TOKEN'} = 1;
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name&state[ne]=5',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['name'],
+    );
+};
+
+################################################################################
+# test query filter when the filtered item is not in the columns list II
+{
+    local $ENV{'NO_POST_TOKEN'} = 1;
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name&q=***state = 0***',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['name'],
+    );
+};
+
+################################################################################
+# test query filter when the filtered item is not in the columns list III
+{
+    local $ENV{'NO_POST_TOKEN'} = 1;
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name&state=0',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['name'],
     );
 };
 
