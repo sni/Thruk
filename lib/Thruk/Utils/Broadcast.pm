@@ -295,8 +295,8 @@ sub update_broadcast_from_param {
     my($c, $broadcast) = @_;
     $broadcast->{'author'}        = $c->stash->{'remote_user'};
     $broadcast->{'authoremail'}   = $c->user ? $c->user->{'email'} : 'none';
-    $broadcast->{'contacts'}      = [split(/\s*,\s*/mx, $c->req->parameters->{'contacts'})];
-    $broadcast->{'contactgroups'} = [split(/\s*,\s*/mx, $c->req->parameters->{'contactgroups'})];
+    $broadcast->{'contacts'}      = [split(/\s*,\s*/mx, ($c->req->parameters->{'contacts'}      || ''))];
+    $broadcast->{'contactgroups'} = [split(/\s*,\s*/mx, ($c->req->parameters->{'contactgroups'} || ''))];
     $broadcast->{'text'}          = $c->req->parameters->{'text'};
     $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
     $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';
