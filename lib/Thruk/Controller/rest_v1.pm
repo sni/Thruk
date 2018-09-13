@@ -721,8 +721,11 @@ sub _fixup_livestatus_filter {
                     } else {
                         # replace filter with something that always matches
                         # because this is probably performance a data filter
-                        my @keys = sort keys %{$ref_columns};
-                        $filter->{$keys[0]} = { '!=' => '__do not match anything__' };
+                        if($ref_columns->{'name'}) {
+                            $filter->{'name'} = { '!=' => '' };
+                        } else {
+                            $filter->{'description'} = { '!=' => '' };
+                        }
                     }
                 }
             }
