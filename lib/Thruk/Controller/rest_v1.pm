@@ -748,7 +748,8 @@ sub _expand_perfdata_and_custom_vars {
     my $allowed_list = Thruk::Utils::list($c->config->{'show_custom_vars'});
 
     # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
-    my $columns = get_request_columns($c);
+    my $columns = get_request_columns($c) || [];
+    push @{$columns}, @{get_filter_columns($c)};
     if($columns && scalar @{$columns} > 0) {
         my $ref_columns;
         if($type eq 'hosts') {
