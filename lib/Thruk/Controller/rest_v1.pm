@@ -488,7 +488,7 @@ sub _set_filter_keys {
     elsif(ref $f eq 'HASH') {
         for my $f2 (keys %{$f}) {
             if($f2 eq '-and' || $f2 eq '-or') {
-                _set_filter_keys($f2, $columns);
+                _set_filter_keys($f->{$f2}, $columns);
             } else {
                 $columns->{$f2} = 1;
             }
