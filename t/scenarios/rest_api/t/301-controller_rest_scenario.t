@@ -5,7 +5,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 66;
+    plan tests => 74;
 
     use lib('t');
     require TestUtils;
@@ -43,6 +43,9 @@ my $pages = [{
         waitfor      => '"rta"',
     }, {
         url          => '/services?columns=rta&rta[gt]=0',
+        like         => ['"rta" : "0.\d+'],
+    }, {
+        url          => '/services?columns=rta&rta[gt]=0&_WORKER[ne]=test&_HOSTWORKER[ne]=test',
         like         => ['"rta" : "0.\d+'],
     }, {
         url          => '/logs?q=***type = "EXTERNAL COMMAND"***',

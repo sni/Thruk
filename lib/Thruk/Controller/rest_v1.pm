@@ -494,7 +494,8 @@ sub _set_filter_keys {
             }
         }
     } else {
-        die("unsupported ".$f);
+        require Data::Dumper;
+        confess("unsupported _set_filter_keys: ".Data::Dumper($f));
     }
     return;
 }
@@ -627,6 +628,7 @@ sub _livestatus_options {
         my $columns = get_request_columns($c) || [];
         push @{$columns}, @{get_filter_columns($c)};
         if(scalar @{$columns} > 0) {
+            $columns = Thruk::Utils::array_uniq($columns);
             my $ref_columns;
             if($type eq 'hosts') {
                 $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_host_columns);
@@ -672,36 +674,65 @@ sub _livestatus_filter {
             confess("unsupported type: ".$ref_columns);
         }
     }
-    my $filter = [];
-    for my $f (@{_get_filter($c)}) {
-        if(ref $f ne "ARRAY") {
-            push @{$filter}, $f;
-            next;
+    my $filter = _get_filter($c);
+    _fixup_livestatus_filter($filter, $ref_columns);
+    return $filter;
+}
+
+##########################################################
+sub _fixup_livestatus_filter {
+    my($filter, $ref_columns) = @_;
+
+    if(ref $filter eq 'ARRAY') {
+        for my $f (@{$filter}) {
+            _fixup_livestatus_filter($f, $ref_columns);
         }
-        my($key, $op, $val) = @{$f};
-        if(ref $key ne "") {
-            push @{$filter}, $f;
-            next;
-        }
-        # convert custom variable filter
-        if($key =~ m/^_/mx) {
-            $key =~ s/^_//mx;
-            $val = $key.' '.$val;
-            if($key =~ m/^host/mxi) {
-                $key = 'host_custom_variables';
+    }
+    elsif(ref $filter eq 'HASH') {
+        for my $f (keys %{$filter}) {
+            if($f eq '-and' || $f eq '-or') {
+                _fixup_livestatus_filter($filter->{$f}, $ref_columns);
             } else {
-                $key = 'custom_variables';
-            }
-        } else {
-            # skip non-default-columns filter, it might be perfdata
-            if($ref_columns && !$ref_columns->{$key}) {
-                next;
+                if($ref_columns && !$ref_columns->{$f}) {
+                    # normalize filter
+                    if(ref $filter->{$f} ne 'HASH') {
+                        my $val = $filter->{$f};
+                        $filter->{$f} = { '=' => $val };
+                    }
+                    my @ops = keys %{$filter->{$f}};
+                    if(scalar @ops != 1) {
+                        require Data::Dumper;
+                        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper([$filter, $f]));
+                    }
+                    my $op  = $ops[0];
+                    my $val = $filter->{$f}->{$op};
+                    delete $filter->{$f};
+
+                    if($f =~ m/^_/mx) {
+                        # convert custom variable filter
+                        $f =~ s/^_//mx;
+                        $val = $f.' '.$val;
+                        if($f =~ m/^host/mxi) {
+                            $f = 'host_custom_variables';
+                        } else {
+                            $f = 'custom_variables';
+                        }
+                        $filter->{$f} = { $op => $val };
+                    } else {
+                        # replace filter with something that always matches
+                        # because this is probably performance a data filter
+                        my @keys = sort keys %{$ref_columns};
+                        $filter->{$keys[0]} = { '!=' => '__do not match anything__' };
+                    }
+                }
             }
         }
-        push @{$filter}, { $key => { $op => $val }};
+    } else {
+        require Data::Dumper;
+        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper($filter));
     }
 
-    return $filter;
+    return;
 }
 
 ##########################################################
