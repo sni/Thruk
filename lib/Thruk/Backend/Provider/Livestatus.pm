@@ -44,6 +44,9 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
     last_time_down last_time_unreachable last_time_up display_name
     in_check_period in_notification_period
 /];
+$Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
+    contacts contact_groups
+/];
 
 $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
     accept_passive_checks acknowledged action_url action_url_expanded
@@ -69,6 +72,9 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
     last_time_critical last_time_ok last_time_unknown last_time_warning
     display_name host_display_name host_custom_variable_names host_custom_variable_values
     in_check_period in_notification_period host_parents
+/];
+$Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
+    contacts contact_groups
 /];
 
 $Thruk::Backend::Provider::Livestatus::default_contact_columns = [qw/
