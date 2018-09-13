@@ -75,6 +75,10 @@ $Thruk::Backend::Provider::Livestatus::default_contact_columns = [qw/
     name alias email pager service_notification_period host_notification_period
 /];
 
+$Thruk::Backend::Provider::Livestatus::default_logs_columns = [qw/
+    class time type state host_name service_description plugin_output message options state_type contact_name
+/];
+
 ##########################################################
 
 =head2 new
@@ -776,9 +780,7 @@ sub get_logs {
         }
     }
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            class time type state host_name service_description plugin_output message options state_type contact_name
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_logs_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }

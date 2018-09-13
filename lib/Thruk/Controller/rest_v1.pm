@@ -350,18 +350,18 @@ sub _post_processing {
     $c->stats->profile(begin => "_post_processing");
 
     # errors should not be post-processed
-    if(ref $data eq 'HASH' && $data->{'code'} && $data->{'message'}) {
-        return($data);
-    }
+    return($data) if _is_failed($data);
 
     if(ref $data eq 'ARRAY') {
         if($c->req->method eq 'GET') {
             # Filtering
             $data = _apply_filter($c, $data);
         }
+        return($data) if _is_failed($data);
 
         # Sorting
         $data = _apply_sort($c, $data);
+        return($data) if _is_failed($data);
 
         # Offset
         my $offset = $c->req->parameters->{'offset'} || 0;
@@ -380,10 +380,13 @@ sub _post_processing {
         $data = _apply_columns($c, $data);
     }
 
+    return($data) if _is_failed($data);
     if(ref $data eq 'HASH') {
         # Columns
         $data = shift @{_apply_columns($c, [$data])};
     }
+
+    return($data) if _is_failed($data);
 
     $c->stats->profile(end => "_post_processing");
     return $data;
@@ -429,10 +432,29 @@ sub _apply_filter {
 
     my @filtered;
     my $filter = _get_filter($c);
+    my $nr     = 1;
+    my $missed = {};
     for my $d (@{$data}) {
-        if(_match_complex_filter($d, $filter)) {
+        if(_match_complex_filter($d, $filter, $missed, $nr)) {
             push @filtered, $d;
         }
+        $nr++;
+    }
+
+    # did we have filter for not existing keys
+    my $missing_keys = [];
+    for my $key (keys %{$missed}) {
+        if(scalar keys %{$missed->{$key}} == scalar @{$data}) {
+            push @{$missing_keys}, $key;
+        }
+    }
+    if(scalar @{$missing_keys} > 0) {
+        return({
+            'message'     => 'possible typo in filter',
+            'description' => "no datarow has a attribute named: ".join(", ", @{$missing_keys}),
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+        });
     }
     return \@filtered;
 }
@@ -670,6 +692,9 @@ sub _livestatus_filter {
         }
         elsif($ref_columns eq 'contacts') {
             $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+        }
+        elsif($ref_columns eq 'logs') {
+            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
         } else {
             confess("unsupported type: ".$ref_columns);
         }
@@ -721,10 +746,13 @@ sub _fixup_livestatus_filter {
                     } else {
                         # replace filter with something that always matches
                         # because this is probably performance a data filter
-                        if($ref_columns->{'name'}) {
+                        if($ref_columns->{'state'}) {
+                            $filter->{'state'} = { '!=' => -17 };
+                        }
+                        elsif($ref_columns->{'name'}) {
                             $filter->{'name'} = { '!=' => '' };
                         } else {
-                            $filter->{'description'} = { '!=' => '' };
+                            die("no idea how to replace column: ".$f);
                         }
                     }
                 }
@@ -1300,7 +1328,7 @@ sub _rest_get_livestatus_downtimes {
 register_rest_path_v1('GET', qr%^/logs?$%mx, \&_rest_get_livestatus_logs);
 sub _rest_get_livestatus_logs {
     my($c) = @_;
-    my $filter = _livestatus_filter($c);
+    my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
     return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}));
 }
@@ -1312,7 +1340,7 @@ sub _rest_get_livestatus_logs {
 register_rest_path_v1('GET', qr%^/notifications?$%mx, \&_rest_get_livestatus_notifications);
 sub _rest_get_livestatus_notifications {
     my($c) = @_;
-    my $filter = _livestatus_filter($c);
+    my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
     return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}));
 }
@@ -1324,7 +1352,7 @@ sub _rest_get_livestatus_notifications {
 register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/notifications?$%mx, \&_rest_get_livestatus_host_notifications);
 sub _rest_get_livestatus_host_notifications {
     my($c, undef, $host) = @_;
-    my $filter = _livestatus_filter($c);
+    my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
     return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}));
 }
@@ -1336,7 +1364,7 @@ sub _rest_get_livestatus_host_notifications {
 register_rest_path_v1('GET', qr%^/alerts?$%mx, \&_rest_get_livestatus_alerts);
 sub _rest_get_livestatus_alerts {
     my($c) = @_;
-    my $filter = _livestatus_filter($c);
+    my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
     return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)}));
 }
@@ -1348,7 +1376,7 @@ sub _rest_get_livestatus_alerts {
 register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/alerts?$%mx, \&_rest_get_livestatus_host_alerts);
 sub _rest_get_livestatus_host_alerts {
     my($c, undef, $host) = @_;
-    my $filter = _livestatus_filter($c);
+    my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
     return($c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { host_name => $host, type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)}));
 }
@@ -1399,11 +1427,11 @@ sub _rest_get_lmd_sites {
 
 ##########################################################
 sub _match_complex_filter {
-    my($data, $filter) = @_;
+    my($data, $filter, $missed, $nr) = @_;
     if(ref $filter eq 'ARRAY') {
         # simple and filter from list
         for my $f (@{$filter}) {
-            return unless _match_complex_filter($data, $f);
+            return unless _match_complex_filter($data, $f, $missed, $nr);
         }
         return 1;
     }
@@ -1412,17 +1440,18 @@ sub _match_complex_filter {
             # or filter from hash: { -or => [...] }
             if($key eq '-or') {
                 for my $f (@{$filter->{$key}}) {
-                    return 1 if _match_complex_filter($data, $f);
+                    return 1 if _match_complex_filter($data, $f, $missed, $nr);
                 }
                 return;
             }
             # and filter from hash: { and => [...] }
             if($key eq '-and') {
-                return _match_complex_filter($data, $filter->{$key});
+                return _match_complex_filter($data, $filter->{$key}, $missed, $nr);
             }
             my $val = $filter->{$key};
             if(ref $val eq 'HASH') {
                 for my $op (%{$val}) {
+                    $missed->{$key}->{$nr} = 1 if !defined $data->{$key};
                     return(_compare($op, $data->{$key}, $val->{$op}));
                 }
                 return;
@@ -1524,6 +1553,15 @@ sub _compare {
         }
     } else {
         die("unsupported operator: ".$op);
+    }
+    return;
+}
+
+##########################################################
+sub _is_failed {
+    my($data) = @_;
+    if(ref $data eq 'HASH' && $data->{'code'} && $data->{'message'}) {
+        return 1;
     }
     return;
 }
