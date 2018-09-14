@@ -56,6 +56,12 @@ sub new {
             $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
             Thruk::Utils::IO::json_lock_patch($apipath.'/'.$apikey, { last_used => time(), last_from => $addr }, 1);
             $username = $data->{'user'};
+
+            my $userdata = Thruk::Utils::get_user_data($c, $username);
+            if($userdata->{'login'}->{'locked'}) {
+                $c->error("account is locked, please contact an administrator");
+                return;
+            }
         }
         elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
             $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};

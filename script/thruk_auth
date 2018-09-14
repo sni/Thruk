@@ -107,6 +107,7 @@ sub process {
                 my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$extra->[3]);
                 return "/loginok/".$data->{'user'}."/".$path."\n";
             }
+            return $loginurl."?invalid&".$path."\n";
         }
 
         # direct access
