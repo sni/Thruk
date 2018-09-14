@@ -1485,16 +1485,15 @@ sub get_perf_image {
         $custvars              = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
     }
 
-    if(!$options->{'show_title'}) {
-        $grafanaurl .= '&disablePanelTitle';
-        $grafanaurl .= '&reduce=1';
-    }
-    if(!$options->{'show_legend'}) {
-        $grafanaurl .= '&legend=false';
-    }
-
     $c->stash->{'last_graph_type'} = 'pnp';
     if($grafanaurl) {
+        if(!$options->{'show_title'}) {
+            $grafanaurl .= '&disablePanelTitle';
+            $grafanaurl .= '&reduce=1';
+        }
+        if(!$options->{'show_legend'}) {
+            $grafanaurl .= '&legend=false';
+        }
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
