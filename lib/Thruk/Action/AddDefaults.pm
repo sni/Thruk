@@ -1146,12 +1146,18 @@ sub _set_enabled_backends {
     # by param
     elsif($num_backends > 1 and defined $backend) {
         $c->log->debug('_set_enabled_backends() by param') if Thruk->debug;
-        # reset
-        for my $peer (@{$c->{'db'}->get_peers()}) {
-            $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
-        }
-        for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
-            $disabled_backends->{$b} = 0;
+        if($backend eq 'ALL') {
+            for my $peer (@{$c->{'db'}->get_peers()}) {
+                $disabled_backends->{$peer->{'key'}} = 0;
+            }
+        } else {
+            # reset
+            for my $peer (@{$c->{'db'}->get_peers()}) {
+                $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
+            }
+            for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
+                $disabled_backends->{$b} = 0;
+            }
         }
     }
 

@@ -695,6 +695,7 @@ sub _do_send_command {
         if(scalar @{$backends_list} > 1) {
             $backends_list = _get_affected_backends($c, $required_fields, $backends_list);
             if(scalar @{$backends_list} == 0) {
+                Thruk::Utils::set_message( $c, 'fail_message', "cannot send command, affected backend list is empty." );
                 return;
             }
         }
