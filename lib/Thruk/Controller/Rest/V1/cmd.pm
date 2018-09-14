@@ -39,6 +39,7 @@ sub _rest_get_external_command {
         $cmd_data = decode_json($data);
     }
     my($cmd, $cmd_name, $name, $description, @cmd_args);
+    my $required_fields = {};
     $type =~ s/s$//gmx;
     if($type eq 'core') { $type = 'system'; }
     if($type =~ m/^(host|hostgroup|servicegroup)$/mx) {
@@ -46,6 +47,7 @@ sub _rest_get_external_command {
         $cmd_name = shift @args;
         $cmd      = $cmd_data->{$type.'s'}->{$cmd_name};
         push @cmd_args, $name;
+        $required_fields->{$type} = $name;
 
         if(!$c->check_cmd_permissions($type, $name)) {
             return({ 'message' => 'you are not allowed to run this command', 'description' => 'you don\' have command permissions for '.$type.' '.$name, code => 403 });
@@ -56,6 +58,7 @@ sub _rest_get_external_command {
         $description = shift @args;
         $cmd_name    = shift @args;
         $cmd         = $cmd_data->{$type.'s'}->{$cmd_name};
+        $required_fields->{$type} = $name;
         push @cmd_args, $name;
         push @cmd_args, $description;
         if(!$c->check_cmd_permissions($type, $description, $name)) {
@@ -115,6 +118,13 @@ sub _rest_get_external_command {
     }
 
     my($backends) = $c->{'db'}->select_backends('send_command');
+    if(scalar @{$backends} > 1) {
+        $backends= Thruk::Controller::cmd::_get_affected_backends($c, $required_fields, $backends);
+        if(scalar @{$backends} == 0) {
+            return({ 'message' => 'cannot send command, affected backend list is empty.', code => 400 });
+        }
+    }
+
     my $commands = {};
     for my $b (@{$backends}) {
         $commands->{$b} = dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
