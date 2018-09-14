@@ -683,6 +683,12 @@ sub add_defaults {
             }
             add_defaults($c, $safe, 1);
         }
+
+        # now double check if this user is allowed to use api keys
+        if(!$c->config->{'api_keys_enabled'} && $c->req->header('X-Thruk-Auth-Key')) {
+            $c->error("this account is not allowed to use api keys.");
+            return;
+        }
     }
 
     ###############################
