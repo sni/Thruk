@@ -427,6 +427,7 @@ sub set_default_config {
         ajax_search_services            => 1,
         ajax_search_servicegroups       => 1,
         ajax_search_timeperiods         => 1,
+        maximum_search_boxes            => 9,
         shown_inline_pnp                => 1,
         use_feature_trends              => 1,
         use_wait_feature                => 1,

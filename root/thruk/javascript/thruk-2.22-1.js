@@ -5043,6 +5043,11 @@ function new_filter(cloneObj, parentObj, btnId) {
   }
   showElement(pane_prefix + new_prefix + 'btn_del_search');
 
+  // hide add button if maximum search boxes reached
+  if(maximum_search_boxes > 0 && jQuery('TABLE.filter_box').length >= maximum_search_boxes) {
+    hideElement(pane_prefix + new_prefix + 'new_filter');
+  }
+
   hideBtn = document.getElementById(pane_prefix + new_prefix + 'filter_title');
   if(hideBtn) { hideElement(hideBtn); }
 

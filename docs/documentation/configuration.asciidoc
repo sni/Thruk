@@ -702,6 +702,15 @@ ex.:
   use_new_search = 1
 
 
+=== maximum_search_boxes
+{% include new_since.ad version="2.24" %}
+maximum number of allowed search boxes
+
+ex.:
+
+  maximum_search_boxes = 9
+
+
 === default_service_filter
 {% include new_since.ad version="1.86-2" %}
 The `default_service_filter` set a default service filter which is used when no

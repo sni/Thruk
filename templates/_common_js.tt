@@ -41,6 +41,7 @@
   var info_popup_options  = [[% c.config.info_popup_options %]];
   var downtime_duration   = [% downtime_duration %];
   var has_debug_options   = [% has_debug_options %];
+  var maximum_search_boxes = [% c.config.maximum_search_boxes %];
   [% PROCESS _common_js_bugs.tt %]
 
   [% IF disable_backspace %]

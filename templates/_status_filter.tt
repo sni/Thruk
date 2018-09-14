@@ -14,7 +14,7 @@
 [% SET prefix = 's' _ loop.index %]
 [% IF loop.index > 0 && loop.index % 3 == 0 %]</tr><tr>[% END %]
 <td valign="top" class="filter_table">
-<table border="1" class='filter' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
+<table border="1" class='filter filter_box' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
   <tr>
     <td class='filter'>
       <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable" width="100%">
