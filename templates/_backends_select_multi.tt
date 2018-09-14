@@ -84,13 +84,13 @@
       jQuery('#available_backends').prop('disabled', false);
       jQuery('#filter_selected').prop('disabled', false);
       jQuery('#[% param_name %]').prop('disabled', false);
-      jQuery('.backends_toggle_table BUTTON').prop('disabled', false);
+      jQuery('#backends_toggle_table BUTTON').button("enable");
     } else {
       jQuery('#filter_available').prop('disabled', true);
       jQuery('#available_backends').prop('disabled', true);
       jQuery('#filter_selected').prop('disabled', true);
       jQuery('#[% param_name %]').prop('disabled', true);
-      jQuery('.backends_toggle_table BUTTON').prop('disabled', true);
+      jQuery('#backends_toggle_table BUTTON').button("disable");
     }
   }
 -->
