@@ -239,6 +239,14 @@ ex.:
   rest_api_enabled = 3
 
 
+=== api_keys_enabled
+{% include new_since.ad version="2.24" %}
+Using api keys can be disabled by setting this to 0.
+
+ex.:
+
+  api_keys_enabled = 1
+
 
 === mobile_agent
 Specify user agents which will be redirected to the mobile plugin (if

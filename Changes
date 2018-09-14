@@ -5,6 +5,7 @@ next:
             - see https://thruk.org/documentation/rest.html for details
           - support clustered setups
             - see https://thruk.org/documentation/cluster.html for details
+          - add api keys
           - add command_enabled option
           - show and use alias for hosts, hostgroups and servicegroups search
           - Business Process:

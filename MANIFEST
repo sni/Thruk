@@ -101,6 +101,7 @@ lib/Thruk/Template/Exception.pm
 lib/Thruk/Timer.pm
 lib/Thruk/UserAgent.pm
 lib/Thruk/Utils.pm
+lib/Thruk/Utils/APIKeys.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Avail.pm
 lib/Thruk/Utils/Bash.pm

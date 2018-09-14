@@ -64,6 +64,51 @@
     [% END %]
 
     <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
+    <tr><th colspan=2 class='data conftoolheader' style="text-align:center">API Keys</th></tr>
+    [% IF !c.config.api_keys_enabled %]
+    <tr>
+      <td class='dataVar'></td>
+      <td class='dataVal'>
+        API keys have to be enabled in the thruk_local.conf via <i>api_keys_enabled=1</i>
+      </td>
+    </tr>
+    [% ELSE %]
+    [% IF api_keys.size > 0 %]
+    <tr>
+      <td class='dataVal' colspan="2">
+        <table style="width: 100%;">
+          <tr>
+            <th>Key</th>
+            <th>Comment</th>
+            <th>Last Used</th>
+            <th>From</th>
+            <th></th>
+          </tr>
+          [% FOREACH key = api_keys %]
+          <tr>
+            <td>[% key.key %]</td>
+            <td>[% IF key.exists('comment') %][% key.comment %][% END %]</td>
+            <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %][% ELSE %]never[% END %]</td>
+            <td>[% IF key.exists('last_from') %][% key.last_from %][% END %]</td>
+            <td>
+              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?key=[% key.key %]&amp;action=remove_key'; return false;" title='Remove API Key'>
+            </td>
+          </tr>
+          [% END %]
+        </table>
+      </td>
+    </tr>
+    [% END %]
+    <tr>
+      <td class='dataVar'></td>
+      <td class='dataVal'>
+        <input type="text" name="comment" value="" placeholder="comment" style="width: 307px;">
+        <input type="submit" name="send" value="Create New API Key">
+      </td>
+    </tr>
+    [% END %]
+
+    <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
     <tr><th colspan=2 class='data conftoolheader' style="text-align:center">Advanced Settings</th></tr>
     <tr>
       <td class='dataVar'>Debug Profiles</td>

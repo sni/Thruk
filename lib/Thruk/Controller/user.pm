@@ -2,6 +2,7 @@ package Thruk::Controller::user;
 
 use strict;
 use warnings;
+use Thruk::Utils::APIKeys;
 
 =head1 NAME
 
@@ -49,6 +50,21 @@ sub index {
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
+        my $send   = $c->req->parameters->{'send'};
+        if($send && $send eq 'Create New API Key') {
+            if(!$c->config->{'api_keys_enabled'}) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'API keys are disabled' );
+                return $c->redirect_to('user.cgi');
+            }
+            Thruk::Utils::APIKeys::create_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'comment'});
+            Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
+            return $c->redirect_to('user.cgi');
+        }
+        if($action eq 'remove_key') {
+            Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'key'});
+            Thruk::Utils::set_message( $c, 'success_message', 'API key removed' );
+            return $c->redirect_to('user.cgi');
+        }
         if($action eq 'save') {
             my $data = Thruk::Utils::get_user_data($c);
             $data->{'tz'} = $c->req->parameters->{'timezone'};
@@ -58,6 +74,8 @@ sub index {
             return $c->redirect_to('user.cgi');
         }
     }
+
+    $c->stash->{api_keys} = Thruk::Utils::APIKeys::get_keys($c, $c->stash->{'remote_user'});
 
     $c->stash->{template} = 'user_profile.tt';
 

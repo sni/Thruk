@@ -41,6 +41,7 @@ $guest = $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'} if $ENV{'THRUK_COOKIE_AUTH_GUEST_U
 my $config              = Thruk::Config::get_config();
 my $spath               = $config->{'var_path'}."/sessions";
 my $secret_file         = $config->{'var_path'}.'/secret.key';
+my $apipath             = $config->{'var_path'}."/api_keys";
 my $urlprefix           = $config->{'url_prefix'};
 my $loginurl            = $config->{'cookie_auth_login_url'}       || $urlprefix."cgi-bin/login.cgi";
 my $sessiontimeout      = $config->{'cookie_auth_session_timeout'} || 86400;
@@ -95,12 +96,16 @@ sub process {
         }
 
         # direct login by secret/api key
-        if($extra->[3]) {
+        if($extra->[3] && $extra->[3] =~ m/[a-zA-Z0-9]+/mx) {
             my $secret_key  = read_file($secret_file) if -s $secret_file;
             chomp($secret_key);
             if($extra->[4] && $extra->[3] eq $secret_key) {
                 my $user = $extra->[4];
                 return "/loginok/".$user."/".$path."\n";
+            }
+            if($config->{'api_keys_enabled'} && -e $apipath.'/'.$extra->[3]) {
+                my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$extra->[3]);
+                return "/loginok/".$data->{'user'}."/".$path."\n";
             }
         }
 

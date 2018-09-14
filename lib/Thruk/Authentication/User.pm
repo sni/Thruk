@@ -33,22 +33,40 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    my $env = $c->env;
+    my $env    = $c->env;
+    my $apikey = $c->req->header('X-Thruk-Auth-Key');
 
     # authenticated by ssl
     if(defined $username) {
     }
 
     # authenticate by secret.key from http header
-    elsif($c->req->header('X-Thruk-Auth-Key')) {
+    elsif($apikey) {
+        my $apipath = $c->config->{'var_path'}."/api_keys";
         my $secret_file = $c->config->{'var_path'}.'/secret.key';
         $c->config->{'secret_key'}  = read_file($secret_file) if -s $secret_file;
         chomp($c->config->{'secret_key'});
-        if($c->req->header('X-Thruk-Auth-Key') ne $c->config->{'secret_key'}) {
+        if($apikey !~ m/^[a-zA-Z0-9]+$/mx) {
             $c->error("wrong authentication key");
             return;
         }
-        $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+        elsif($c->config->{'api_keys_enabled'} && -e $apipath.'/'.$apikey) {
+            my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$apikey);
+            my $addr = $c->req->address;
+            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
+            Thruk::Utils::IO::json_lock_patch($apipath.'/'.$apikey, { last_used => time(), last_from => $addr }, 1);
+            $username = $data->{'user'};
+        }
+        elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
+            $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+            if(!$username) {
+                $c->error("authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header");
+                return;
+            }
+        } else {
+            $c->error("wrong authentication key");
+            return;
+        }
     }
 
     elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
