@@ -199,6 +199,8 @@ sub index {
 
     $c->stats->profile(end => "login::index");
 
+    $c->res->code(401);
+
     return 1;
 }
 

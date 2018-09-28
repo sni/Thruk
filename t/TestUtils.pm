@@ -211,6 +211,7 @@ sub get_test_hostgroup_cli {
     method          => http method, default is GET
     follow          => follow redirects
     fail            => request should fail
+    code            => expect this response code
     redirect        => request should redirect
     location        => redirect location
     fail_message_ok => page can contain error message without failing
@@ -309,6 +310,9 @@ sub test_page {
             fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
             bail_out_req('request failed', $request);
         }
+    }
+    elsif(defined $opts->{'code'}) {
+        is($request->code, $opts->{'code'}, 'Request '.$opts->{'url'}.' returns code: '.$opts->{'code'} );
     }
     elsif(defined $opts->{'fail'}) {
         ok( $request->is_error, 'Request '.$opts->{'url'}.' should fail' );
