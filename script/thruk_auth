@@ -53,9 +53,6 @@ $loginurl               =~ s|//|/|gmx;
 my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
 my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
 my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|images|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
-my $direct_auth_agents  = $config->{'cookie_auth_direct_agents'} || '(wget|curl|python|Go-http-client)';
-my $direct_auth_regex_agent = qr#$direct_auth_agents#mxi;
-my $direct_auth_regex_path = qr#^$prefix(r/)#mx;
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $session_split       = qr/~~~/mx;
 my $last_cache_clean    = 0;
@@ -96,22 +93,22 @@ sub process {
         }
 
         # direct login by secret/api key
-        if($extra->[3] && $extra->[3] =~ m/[a-zA-Z0-9]+/mx) {
+        if($extra->[2] && $extra->[2] =~ m/[a-zA-Z0-9]+/mx) {
             my $secret_key  = read_file($secret_file) if -s $secret_file;
             chomp($secret_key);
-            if($extra->[4] && $extra->[3] eq $secret_key) {
-                my $user = $extra->[4];
+            if($extra->[3] && $extra->[2] eq $secret_key) {
+                my $user = $extra->[3];
                 return "/loginok/".$user."/".$path."\n";
             }
-            if($config->{'api_keys_enabled'} && -e $apipath.'/'.$extra->[3]) {
-                my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$extra->[3]);
+            if($config->{'api_keys_enabled'} && -e $apipath.'/'.$extra->[2]) {
+                my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$extra->[2]);
                 return "/loginok/".$data->{'user'}."/".$path."\n";
             }
             return $loginurl."?invalid&".$path."\n";
         }
 
-        # direct access
-        if($extra->[1] && ($extra->[2] =~ $direct_auth_regex_agent || $path =~ $direct_auth_regex_path)) {
+        # direct access with basic auth
+        if($extra->[1]) {
             print STDERR "thruk_auth: script bypass cookie auth for $path" if $verbose;
             my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
             if($session && $session ne '-1') {

@@ -19,7 +19,7 @@ RewriteMap  thruk_users              prg:@DATADIR@/thruk_auth
 RewriteCond %{REQUEST_URI}           !^@HTMLURL@/cgi-bin/restricted.cgi
 RewriteCond %{REQUEST_URI}           ^@HTMLURL@
 RewriteCond %{HTTP_COOKIE}           (thruk_auth=[^;]+|$)  [NC]
-RewriteRule ^/(.*)$                  /%1/%{REMOTE_ADDR}~~%{HTTP:Authorization}~~%{HTTP_USER_AGENT}~~%{HTTP:X-Thruk-Auth-Key}~~%{HTTP:X-Thruk-Auth-User}/____/$1/____/%{QUERY_STRING} [C,NS]
+RewriteRule ^/(.*)$                  /%1/%{REMOTE_ADDR}~~%{HTTP:Authorization}~~%{HTTP:X-Thruk-Auth-Key}~~%{HTTP:X-Thruk-Auth-User}/____/$1/____/%{QUERY_STRING} [C,NS]
 RewriteRule ^(.*)$                   ${thruk_users:$1|/loginbad/} [C,NS]
 RewriteRule ^/pass/(.*)$             /$1 [NS,PT,L,E=!REMOTE_USER]
 RewriteRule ^/redirect/(.*)$         /$1 [NS,L,R=302]

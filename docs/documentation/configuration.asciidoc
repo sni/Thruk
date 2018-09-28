@@ -1638,21 +1638,6 @@ ex.:
   cookie_auth_login_hook = ./bin/hook.sh
 
 
-=== cookie_auth_direct_agents
-{% include new_since.ad version="2.10" %}
-This is a regular expression to set user agents which are allowed to request
-pages with normal basic auth.
-Use it to allow scripts easy access with bypassing the cookie auth and directly
-accessing pages.
-See an example in the link:cli.html#_curl-wget[cli section].
-
-Default: (curl|wget)
-
-ex.:
-
-  cookie_auth_direct_agents = (wget|curl|python|Go-http-client)
-
-
 === cookie_auth_disable_after_failed_logins
 {% include new_since.ad version="2.12" %}
 Disable account after this number of failed login attempts.
