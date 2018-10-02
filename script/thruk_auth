@@ -52,7 +52,7 @@ $loginurl               = "/redirect/".$loginurl;
 $loginurl               =~ s|//|/|gmx;
 my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
 my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
-my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|images|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
+my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|images|usercontent|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $session_split       = qr/~~~/mx;
 my $last_cache_clean    = 0;
