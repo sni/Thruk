@@ -1518,3 +1518,10 @@ BUTTON.small, INPUT.small {
   overflow: hidden;
   white-space: nowrap;
 }
+
+SPAN.btn_sitesplus {
+  position: relative;
+  left: -10px;
+  color: #FFFFFF;
+  font-size: 9px;
+}

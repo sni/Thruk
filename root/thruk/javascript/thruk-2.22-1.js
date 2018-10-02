@@ -952,6 +952,7 @@ function add_site_panel_popup_collapsed_section(section, prefix) {
             if(subsection.up  > 0 && subsection.disabled > 0 && subsection.down == 0) { cls = 'button_peerUPDIS'; }
             if(subsection.up == 0 && subsection.disabled > 0 && subsection.down > 0) { cls = 'button_peerDOWNDIS'; }
             panel += "<input type='button' class='"+cls+" btn_sites btn_sites_"+prefixCls+"_"+toClsName(sectionname)+"' value='"+sectionname+"' onClick='toggleSubSectionVisibility("+JSON.stringify(new_prefix)+")'>";
+            panel += "<span class='btn_sitesplus'>+</span>";
         });
         panel += '    </th>';
         panel += '  </tr>';
