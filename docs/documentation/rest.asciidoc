@@ -591,7 +591,6 @@ Deletes given hostgroup from configuration.
 
 lists livestatus hosts.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
-there is an shortcut /hosts available.
 
 === GET /hosts/<name>
 
@@ -872,6 +871,23 @@ its basically a reduced set of /services/stats.
 |unknown_and_unhandled             | number of unknown services which are neither acknowledged nor in scheduled downtime
 |warning                           | number of warning services
 |warning_and_unhandled             | number of warning services which are neither acknowledged nor in scheduled downtime
+|===========================================
+
+
+=== GET /sites
+
+lists configured backends
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|addr                              | address for this connection
+|connected                         | flag wether sites is connected (1) or not (0)
+|id                                | id for this backend
+|last_error                        | error message if backend is not connected
+|name                              | name of the backend
+|section                           | section name
+|type                              | type of the backend
 |===========================================
 
 

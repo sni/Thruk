@@ -1152,10 +1152,38 @@ sub _rest_get_thruk_sessions {
 register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk_sessions);
 
 ##########################################################
+# REST PATH: GET /sites
+# lists configured backends
+register_rest_path_v1('GET', qr%^/sites?$%mx, \&_rest_get_sites);
+sub _rest_get_sites {
+    my($c) = @_;
+    my $data = [];
+    $c->{'db'}->enable_backends();
+    eval {
+        $c->{'db'}->get_processinfo();
+    };
+    Thruk::Action::AddDefaults::_set_possible_backends($c, {});
+    for my $key (@{$c->stash->{'backends'}}) {
+        my $addr  = $c->stash->{'backend_detail'}->{$key}->{'addr'};
+        my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
+        chomp($error);
+        push @{$data}, {
+            addr       => $addr,
+            id         => $key,
+            name       => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            section    => $c->stash->{'backend_detail'}->{$key}->{'section'},
+            type       => $c->stash->{'backend_detail'}->{$key}->{'type'},
+            last_error => $error ne 'OK' ? $error : '',
+            connected  => $error ? 0 : 1,
+        };
+    }
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /hosts
 # lists livestatus hosts.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
-# there is an shortcut /hosts available.
 register_rest_path_v1('GET', qr%^/hosts?$%mx, \&_rest_get_livestatus_hosts);
 sub _rest_get_livestatus_hosts {
     my($c) = @_;
