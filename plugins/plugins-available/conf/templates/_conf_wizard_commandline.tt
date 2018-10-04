@@ -7,7 +7,7 @@
     <tr>
       <td class="attrName"><b>Choose Plugin</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion(); update_command_preview('[% id %]');" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:true, autosubmit:false})"[% END %] style="width:650px" onkeyup="update_command_preview('[% id %]')">
+        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion(); update_command_preview('[% id %]');" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:false, autosubmit:false})"[% END %] style="width:650px" onkeyup="update_command_preview('[% id %]')">
       </td>
     </tr>
     <tr>

@@ -415,7 +415,7 @@
     <tr class="supports_link">
       <th align="right" valign="top">Contacts</th>
       <td align="left">
-        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: true })"[% END %]>
+        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: false })"[% END %]>
         <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contacts" onclick="bpRemoveAttribute('contacts'); return false;">
       </td>
     </tr>

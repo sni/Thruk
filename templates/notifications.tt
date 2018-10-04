@@ -104,7 +104,7 @@
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Contacts:</td>
-              <td><input type='text' name='contact' id='contact' value='[% IF contact != "all"; contact; END %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, striped:true })"[% END %]></td>
+              <td><input type='text' name='contact' id='contact' value='[% IF contact != "all"; contact; END %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, striped:false })"[% END %]></td>
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Host:</td>
