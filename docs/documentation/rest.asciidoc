@@ -587,6 +587,11 @@ Update hostgroup configuration partially.
 
 Deletes given hostgroup from configuration.
 
+=== GET /hostgroups/<name>/stats
+
+hash of livestatus hostgroup statistics.
+alias for /hosts/stats?groups[gte]=<name>
+
 === GET /hosts
 
 lists livestatus hosts.
@@ -772,6 +777,11 @@ Update servicegroup configuration partially.
 === DELETE /servicegroups/<name>/config
 
 Deletes given servicegroup from configuration.
+
+=== GET /servicegroups/<name>/stats
+
+hash of livestatus servicegroup statistics.
+alias for /services/stats?service_groups[gte]=<name>
 
 === GET /services
 

@@ -1247,6 +1247,16 @@ sub _rest_get_livestatus_hostgroups {
 }
 
 ##########################################################
+# REST PATH: GET /hostgroups/<name>/stats
+# hash of livestatus hostgroup statistics.
+# alias for /hosts/stats?groups[gte]=<name>
+register_rest_path_v1('GET', qr%^/hostgroups?/([^/]+)/stats$%mx, \&_rest_get_livestatus_hostgroup_stats);
+sub _rest_get_livestatus_hostgroup_stats {
+    my($c, undef, $group) = @_;
+    return($c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), [{ 'groups' => { '>=' => $group } }], _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
 # REST PATH: GET /services
 # lists livestatus services.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
@@ -1298,6 +1308,16 @@ register_rest_path_v1('GET', qr%^/servicegroups?$%mx, \&_rest_get_livestatus_ser
 sub _rest_get_livestatus_servicegroups {
     my($c) = @_;
     return($c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), _livestatus_filter($c)  ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /servicegroups/<name>/stats
+# hash of livestatus servicegroup statistics.
+# alias for /services/stats?service_groups[gte]=<name>
+register_rest_path_v1('GET', qr%^/servicegroups?/([^/]+)/stats$%mx, \&_rest_get_livestatus_servicegroup_stats);
+sub _rest_get_livestatus_servicegroup_stats {
+    my($c, undef, $group) = @_;
+    return($c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), [{ 'service_groups' => { '>=' => $group } }], _livestatus_filter($c) ], %{_livestatus_options($c)}));
 }
 
 ##########################################################
