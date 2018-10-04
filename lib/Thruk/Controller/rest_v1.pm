@@ -589,6 +589,7 @@ sub _apply_sort {
     my($c, $data) = @_;
 
     return $data unless $c->req->parameters->{'sort'};
+    return $data if scalar @{$data} == 0;
     my $sort = [];
     for my $s (@{Thruk::Utils::list($c->req->parameters->{'sort'})}) {
         push @{$sort}, split(/\s*,\s*/mx, $s);
