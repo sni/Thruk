@@ -649,8 +649,8 @@ sub _livestatus_options {
     # try to reduce the number of requested columns
     if($type) {
         my $columns = get_request_columns($c) || [];
-        push @{$columns}, @{get_filter_columns($c)};
         if(scalar @{$columns} > 0) {
+            push @{$columns}, @{get_filter_columns($c)};
             $columns = Thruk::Utils::array_uniq($columns);
             my $ref_columns;
             if($type eq 'hosts') {
