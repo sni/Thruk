@@ -1991,6 +1991,8 @@ t/scenarios/lmd_federation_e2e/Makefile
 t/scenarios/lmd_federation_e2e/omd/Dockerfile
 t/scenarios/lmd_federation_e2e/omd/playbook.yml
 t/scenarios/lmd_federation_e2e/omd/thruk_local.demo2
+t/scenarios/lmd_federation_e2e/omd/thruk_local.demo5
+t/scenarios/lmd_federation_e2e/README
 t/scenarios/lmd_federation_e2e/t/100-lmd_federation.t
 t/scenarios/lmd_federation_e2e/thruk.conf
 t/scenarios/lmd_federation_e2e/thruk_local.conf

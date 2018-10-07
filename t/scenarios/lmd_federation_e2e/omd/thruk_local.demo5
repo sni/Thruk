@@ -1,0 +1,39 @@
+ssl_verify_hostnames=0
+
+<Component Thruk::Backend>
+    <peer>
+        name  = demo5
+        id    = demo5id
+        type  = livestatus
+        <options>
+            peer = /omd/sites/demo5/tmp/run/live
+       </options>
+       <configtool>
+            core_conf      = /omd/sites/demo5/tmp/core/core.cfg
+            obj_check_cmd  = /omd/sites/demo5/etc/init.d/core check
+            obj_reload_cmd = /omd/sites/demo5/etc/init.d/core reload
+       </configtool>
+    </peer>
+    <peer>
+        name    = demo6
+        id      = demo6id
+        type    = livestatus
+        section = section
+        <options>
+            peer = localhost:7003
+        </options>
+    </peer>
+    <peer>
+        name    = demo7
+        id      = demo7id
+        type    = http
+        section = section/subsection
+        <options>
+            peer = https://localhost/demo7/
+            auth = testkey
+        </options>
+    </peer>
+</Component>
+
+
+
