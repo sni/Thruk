@@ -53,6 +53,22 @@ use constant {
     HIDDEN_LMD_PARENT => 8,
 };
 
+use base 'Exporter';
+our @EXPORT_OK = (
+    'REACHABLE',
+    'UNREACHABLE',
+    'HIDDEN_USER',
+    'HIDDEN_PARAM',
+    'DISABLED_AUTH',
+
+    'DISABLED_CONF',
+    'HIDDEN_CONF',
+    'UP_CONF',
+
+    'HIDDEN_LMD_PARENT',
+);
+our %EXPORT_TAGS = ( peer_states => \@EXPORT_OK );
+
 ######################################
 
 =head2 begin

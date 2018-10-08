@@ -13,6 +13,7 @@ Utilities Collection for Checking Thruks Integrity
 use warnings;
 use strict;
 use Thruk::Utils::RecurringDowntimes;
+use Thruk::Action::AddDefaults ':peer_states';
 
 my $rc_codes = {
     '0'     => 'OK',
@@ -330,7 +331,11 @@ sub _lmd_checks  {
     my $start_time = $status->[0]->{'start_time'};
     $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
 
-    my $total = scalar @{$c->{'db'}->peer_key()};
+    my $total = 0;
+    for my $p (@{$c->{'db'}->get_peers()}) {
+        next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
+        $total++;
+    }
     my $stats = $c->{'db'}->lmd_stats($c);
     my $online = 0;
     for my $stat (@{$stats}) {
