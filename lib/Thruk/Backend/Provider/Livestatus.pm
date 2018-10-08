@@ -173,7 +173,8 @@ send a raw query to the backend
 =cut
 sub _raw_query {
     my($self, $query) = @_;
-    my $socket = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
+    my($socket, $msg, undef) = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
+    die($msg) if $msg;
     local $/ = undef;
     my $res = <$socket>;
     $self->{'live'}->{'backend_obj'}->_close();
