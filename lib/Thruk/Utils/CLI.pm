@@ -561,6 +561,11 @@ sub _from_fcgi {
     } else {
         $res = _run_commands($c, $data->{'options'}, 'fcgi');
     }
+    if(defined $res->{'output'} && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
+        $c->res->body($res->{'output'});
+        $c->{'rendered'} = 1;
+        return;
+    }
     if(ref $res eq 'HASH') {
         $res->{'version'} = $c->config->{'version'} unless defined $res->{'version'};
         $res->{'branch'}  = $c->config->{'branch'}  unless defined $res->{'branch'};
@@ -1031,6 +1036,17 @@ sub _cmd_raw {
             return($@, 1);
         }
         return(\@res, 0);
+    }
+
+    # passthrough livestatus results if possible
+    if($ENV{'THRUK_USE_LMD'} && $function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
+        my $peer = $Thruk::Backend::Pool::lmd_peer;
+        my $query = $opt->{'args'}->[0];
+        chomp($query);
+        $query .= "\nBackends: ".$key."\n";
+        $c->res->body($peer->_raw_query($query));
+        $c->{'rendered'} = 1;
+        return;
     }
 
     local $ENV{'THRUK_USE_LMD'} = ""; # don't try to do LMD stuff since we directly access the real backend
