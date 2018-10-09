@@ -28,3 +28,16 @@ downtimes will only run once in a cluster.
 ==== High Availability
 Having more than one Thruk node with a load-balancer in front will share the
 load over all nodes and will still work if at least one node is available.
+
+===== Load Balancer Configuration
+Loadbalancing is not included automatically, but you can put any loadbalancer you like in front. Use this url for heartbeats to detect which cluster nodes are online.
+
+    /thruk/cgi-bin/remote.cgi?lb_ping
+
+If supported, you can check for the string `OK`.
+
+=== Troubleshooting
+
+    - Try to get Thruk working without cluster mode first. If that works, enable clustering.
+    - You might run into issues with relative symlinks when moving etc and var onto shares. Eventually you have to link some folders to the share to make relative symlinks work again.
+    - Run the command `thruk r /thruk/cluster` and `thruk r /thruk/cluster/heartbeat` to see if cluster nodes are detected correctly.
