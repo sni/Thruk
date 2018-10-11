@@ -452,6 +452,9 @@ sub _process_cgi_page {
                         authorized_for_system_information
                         authorized_for_system_commands
                         authorized_for_configuration_information
+                        authorized_for_broadcasts
+                        authorized_for_reports
+                        authorized_for_business_processes
                         authorized_for_read_only
                     /],
         ],
@@ -463,6 +466,9 @@ sub _process_cgi_page {
                       authorized_contactgroup_for_system_information
                       authorized_contactgroup_for_system_commands
                       authorized_contactgroup_for_configuration_information
+                      authorized_contactgroup_for_broadcasts
+                      authorized_contactgroup_for_reports
+                      authorized_contactgroup_for_business_processes
                       authorized_contactgroup_for_read_only
                     /],
         ],
@@ -658,6 +664,9 @@ sub _process_users_page {
                         authorized_for_system_information
                         authorized_for_system_commands
                         authorized_for_configuration_information
+                        authorized_for_broadcasts
+                        authorized_for_reports
+                        authorized_for_business_processes
                     /];
         $c->stash->{'role_keys'}  = $roles;
         for my $role (@{$roles}) {
