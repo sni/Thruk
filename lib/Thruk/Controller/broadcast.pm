@@ -31,8 +31,8 @@ sub index {
         }
     }
 
-    # only admins from here on
-    if(!$c->check_user_roles('admin')) {
+    # user allowed to manage broadcasts?
+    if(!$c->check_user_roles('authorized_for_broadcasts')) {
         return $c->detach('/error/index/8');
     }
 
