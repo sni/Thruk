@@ -68,7 +68,7 @@ sub index {
 
     # check roles
     my $allowed_for_edit = 0;
-    if($c->check_user_roles("admin")) {
+    if( $c->check_user_roles( "authorized_for_business_processes")) {
         $allowed_for_edit = 1;
     }
     $c->stash->{allowed_for_edit} = $allowed_for_edit;
