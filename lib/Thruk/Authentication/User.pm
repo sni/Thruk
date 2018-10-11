@@ -120,6 +120,9 @@ sub new {
                       'authorized_for_configuration_information',
                       'authorized_for_system_commands',
                       'authorized_for_system_information',
+                      'authorized_for_broadcasts',
+                      'authorized_for_reports',
+                      'authorized_for_business_processes',
                       'authorized_for_read_only',
                     ];
     for my $role (@{$possible_roles}) {
