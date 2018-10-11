@@ -26,6 +26,10 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
+    if(!$c->check_user_roles('authorized_for_reports')) {
+        return $c->detach('/error/index/26');
+    }
+
     if(!$c->config->{'reports2_modules_loaded'}) {
         load Carp, qw/confess carp/;
         load Thruk::Utils::Reports;
