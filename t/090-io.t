@@ -21,6 +21,7 @@ my $cmds = [
   "grep -nr 'mkdir\(' lib/ plugins/plugins-available/",
   "grep -nr 'chown\(' lib/ plugins/plugins-available/",
   "grep -nr 'chmod\(' lib/ plugins/plugins-available/",
+  "grep -Pnr 'sleep\\(\\d+\\.' lib/ plugins/plugins-available/",
 ];
 
 # find all close / mkdirs not ensuring permissions
@@ -46,10 +47,12 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m|\Qmake sure the core can read it\E|mx;
     next if $line =~ m|secretfile|mx;
     next if $line =~ m|_close|mx;
+    next if $line =~ m|Time::HiRes|mx;
 
     push @fails, $line;
   }
   close($ph);
+  ok($? == 0, "exit code is: ".$?);
 }
 
 for my $fail (sort @fails) {

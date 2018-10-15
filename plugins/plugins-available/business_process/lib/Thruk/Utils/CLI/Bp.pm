@@ -170,7 +170,7 @@ sub cmd {
             } else {
                 _debug("worker ".$pid." exited with rc: ".$rc);
             }
-            sleep(0.1);
+            Time::HiRes::sleep(0.1);
         }
     }
     alarm(0);

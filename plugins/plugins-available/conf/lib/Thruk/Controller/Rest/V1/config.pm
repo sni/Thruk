@@ -414,7 +414,7 @@ sub _rest_get_config_check {
         my($is_running) = Thruk::Utils::External::get_status($c, $job);
         while($is_running) {
             ($is_running) = Thruk::Utils::External::get_status($c, $job);
-            sleep(0.2);
+            Time::HiRes::sleep(0.2);
         }
         my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $job);
         push @{$check}, {
@@ -473,7 +473,7 @@ sub _rest_get_config_reload {
         my($is_running) = Thruk::Utils::External::get_status($c, $job);
         while($is_running) {
             ($is_running) = Thruk::Utils::External::get_status($c, $job);
-            sleep(0.2);
+            Time::HiRes::sleep(0.2);
         }
         my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $job);
         push @{$reloads}, {

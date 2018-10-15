@@ -762,7 +762,7 @@ sub generate_report_background {
     # wait up to 3 seconds till background job is really started
     my $index_file = $c->config->{'var_path'}.'/reports/.index';
     for (1..30) {
-        sleep(0.1);
+        Time::HiRes::sleep(0.1);
         my $index   = Thruk::Utils::IO::json_lock_retrieve($index_file);
         if(!$index->{$report_nr} || !$index->{$report_nr}->{'is_running'} || $index->{$report_nr}->{'is_running'} ne $$) {
             last;
