@@ -648,8 +648,12 @@ sub _do_child_stuff {
 
     # close open filehandles
     for my $fd (2..1024) {
-        POSIX::close($fd);
+        POSIX::close($fd) if fileno($fd);
     }
+
+    # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
+    open(STDOUT, '>', '/dev/null');
+    open(STDERR, '>', '/dev/null');
 
     # logging must be reset after closing the filehandles
     $c && $c->app->reset_logging();
