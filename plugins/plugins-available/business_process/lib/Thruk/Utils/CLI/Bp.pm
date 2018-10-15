@@ -133,6 +133,7 @@ sub cmd {
             $worker_num = 5;
         }
     }
+    _debug("calculating business process with ".$worker_num." workers");
     my $chunks = Thruk::Utils::array_chunk($bps, $worker_num);
 
     my @pids;
@@ -154,15 +155,26 @@ sub cmd {
             }
             exit if $worker_num > 1;
         } else {
+            _debug("worker start with pid: ".$child_pid);
             push @pids, $child_pid;
         }
     }
+    _debug("waiting ".$timeout." seconds for workers to finish");
     if($worker_num > 1) {
-        while(wait() != -1) {
+        while(1) {
+            my $pid = wait();
+            my $rc  = $?;
+            last if $pid == -1;
+            if($rc != 0) {
+                _error("worker ".$pid." exited with rc: ".$rc) if $rc != 0;
+            } else {
+                _debug("worker ".$pid." exited with rc: ".$rc);
+            }
             sleep(0.1);
         }
     }
     alarm(0);
+    _debug("all worker finished");
     my $elapsed = tv_interval($t0);
     my $output = sprintf("OK - %d business processes updated in %.2fs\n", $num_bp, $elapsed);
 
