@@ -13,6 +13,7 @@ IO Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp qw/confess longmess/;
+use Errno qw(EEXIST);
 use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
 use Cpanel::JSON::XS ();
 use POSIX ":sys_wait_h";
@@ -214,9 +215,8 @@ sub file_lock {
             if(sysopen($lock_fh, $lock_file, O_RDWR|O_EXCL|O_CREAT, 0660)) {
                 last;
             }
-            my $err = $!;
             # check for orphaned locks
-            if($err eq 'File exists' && $old_inode) {
+            if($!{EEXIST} && $old_inode) {
                 sleep(0.3);
                 if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
                     my $new_inode = (stat($lock_fh))[1];
