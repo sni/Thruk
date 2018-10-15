@@ -206,16 +206,15 @@ sub _format_csv_output {
             for my $col (@{$columns}) {
                 $output .= ';' unless $x == 0;
                 if(ref($d->{$col}) eq 'ARRAY') {
-                    $output .= join(',', @{$d->{$col}});
+                    $output .= _escape_newlines(join(',', @{$d->{$col}}));
                 } else {
-                    $output .= $d->{$col} // '';
+                    $output .= _escape_newlines($d->{$col} // '');
                 }
                 $x++;
             }
             $output .= "\n";
         }
     }
-
     if(!defined $output) {
         $output .= "ERROR: failed to generate output, rerun with -v to get more details.\n";
     }
@@ -225,6 +224,14 @@ sub _format_csv_output {
     $c->stash->{'text'}     = $output;
 
     return;
+}
+##########################################################
+sub _escape_newlines {
+    my($str) = @_;
+    return $str unless $str;
+    $str =~ s/\n/\\n/gmx;
+    $str =~ s/\r//gmx;
+    return $str;
 }
 
 ##########################################################
