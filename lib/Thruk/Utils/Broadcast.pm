@@ -68,10 +68,10 @@ sub get_broadcasts {
 
         process_broadcast($c, $broadcast);
 
-        if($now > $broadcast->{'expires_ts'}) {
+        if($broadcast->{'expires'} && $now > $broadcast->{'expires_ts'}) {
             next unless $unfiltered;
         }
-        if($now < $broadcast->{'hide_before_ts'}) {
+        if($broadcast->{'hide_before'} && $now < $broadcast->{'hide_before_ts'}) {
             next unless $unfiltered;
         }
 
