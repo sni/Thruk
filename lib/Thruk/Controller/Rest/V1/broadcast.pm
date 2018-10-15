@@ -30,6 +30,12 @@ sub _rest_get_thruk_broadcast {
             authorization_callback => \&Thruk::Utils::Broadcast::is_authorized_for_broadcast,
     });
 
+    for my $b (@{$broadcasts}) {
+        Thruk::Utils::Broadcast::process_broadcast($c, $b);
+        $b->{'text'} = Thruk::Utils::Filter::replace_macros($b->{'text'}, $b->{'macros'});
+        $b->{'text'} = Thruk::Utils::Filter::replace_macros($b->{'text'}, $b->{'frontmatter'});
+    }
+
     if($file eq '*') {
         return($broadcasts);
     }

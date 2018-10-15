@@ -48,6 +48,7 @@ sub get_broadcasts {
             $c->log->error("could not read broadcast file $file: ".$@);
             next;
         }
+
         $broadcast->{'file'} = $file;
         my $basename = $file;
         $basename =~ s%.*?([^/]+\.json)$%$1%mx;
@@ -65,40 +66,14 @@ sub get_broadcasts {
             next unless is_authorized_for_broadcast($c, $broadcast);
         }
 
-        # date / time filter
-        $broadcast->{'expires_ts'} = 0;
-        if($broadcast->{'expires'}) {
-            my $expires_ts = Thruk::Utils::_parse_date($c, $broadcast->{'expires'});
-            $broadcast->{'expires_ts'} = $expires_ts;
-            if($now > $expires_ts) {
-                next unless $unfiltered;
-            }
-        }
+        process_broadcast($c, $broadcast);
 
-        $broadcast->{'hide_before_ts'} = 0;
-        if($broadcast->{'hide_before'}) {
-            my $hide_before_ts = Thruk::Utils::_parse_date($c, $broadcast->{'hide_before'});
-            $broadcast->{'hide_before_ts'} = $hide_before_ts;
-            if($now < $hide_before_ts) {
-                next unless $unfiltered;
-            }
+        if($now > $broadcast->{'expires_ts'}) {
+            next unless $unfiltered;
         }
-
-        $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
-        $broadcast->{'authoremail'} = $broadcast->{'authoremail'}   // 'none';
-        $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';
-        $broadcast->{'hide_before'} = $broadcast->{'hide_before'}   // '';
-        $broadcast->{'loginpage'}   = $broadcast->{'loginpage'}     // 0;
-        $broadcast->{'panorama'}    = $broadcast->{'panorama'}      // 0;
-        $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
-        $broadcast->{'template'}    = $broadcast->{'template'}      // 0;
-        $broadcast->{'macros'}      = {
-            date         => Thruk::Utils::Filter::date_format($c, (stat($broadcast->{'file'}))[9]),
-            contact      => $broadcast->{'author'},
-            contactemail => $broadcast->{'authoremail'},
-            theme        => $c->stash->{'theme'},
-        };
-        _extract_front_matter_macros($broadcast);
+        if($now < $broadcast->{'hide_before_ts'}) {
+            next unless $unfiltered;
+        }
 
         next if($panorama_only && !$broadcast->{'panorama'});
         next if(!$unfiltered && $broadcast->{'template'});
@@ -118,6 +93,51 @@ sub get_broadcasts {
     @{$list} = sort { $b->{'new'} <=> $a->{'new'} || $b->{'basefile'} cmp $a->{'basefile'} } @{$list};
 
     return($list);
+}
+
+########################################
+
+=head2 process_broadcast($c, $broadcast)
+
+  process_broadcast($c, $broadcast)
+
+replace macros, frontmatter, etc...
+
+=cut
+sub process_broadcast {
+    my($c, $broadcast) = @_;
+
+    # date / time filter
+    $broadcast->{'expires_ts'} = 0;
+    if($broadcast->{'expires'}) {
+        my $expires_ts = Thruk::Utils::_parse_date($c, $broadcast->{'expires'});
+        $broadcast->{'expires_ts'} = $expires_ts;
+    }
+
+    $broadcast->{'hide_before_ts'} = 0;
+    if($broadcast->{'hide_before'}) {
+        my $hide_before_ts = Thruk::Utils::_parse_date($c, $broadcast->{'hide_before'});
+        $broadcast->{'hide_before_ts'} = $hide_before_ts;
+    }
+
+    $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
+    $broadcast->{'authoremail'} = $broadcast->{'authoremail'}   // 'none';
+    $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';
+    $broadcast->{'hide_before'} = $broadcast->{'hide_before'}   // '';
+    $broadcast->{'loginpage'}   = $broadcast->{'loginpage'}     // 0;
+    $broadcast->{'panorama'}    = $broadcast->{'panorama'}      // 0;
+    $broadcast->{'annotation'}  = $broadcast->{'annotation'}    // '';
+    $broadcast->{'template'}    = $broadcast->{'template'}      // 0;
+    $broadcast->{'macros'}      = {
+        date         => Thruk::Utils::Filter::date_format($c, (stat($broadcast->{'file'}))[9]),
+        contact      => $broadcast->{'author'},
+        contactemail => $broadcast->{'authoremail'},
+        theme        => $c->stash->{'theme'},
+    };
+    _set_macros($c, $broadcast);
+    _extract_front_matter_macros($broadcast);
+
+    return;
 }
 
 ########################################
@@ -258,6 +278,18 @@ sub get_default_broadcast {
 }
 
 ########################################
+sub _set_macros {
+    my($c, $b) = @_;
+    $b->{'macros'}      = {
+        date         => Thruk::Utils::Filter::date_format($c, (stat($b->{'file'}))[9]),
+        contact      => $b->{'author'},
+        contactemail => $b->{'authoremail'},
+        theme        => $c->stash->{'theme'},
+    };
+    return;
+}
+
+########################################
 sub _extract_front_matter_macros {
     my($b) = @_;
     $b->{'raw_text'}    = $b->{'text'};
@@ -305,6 +337,13 @@ sub update_broadcast_from_param {
     $broadcast->{'panorama'}      = $c->req->parameters->{'panorama'} || 0;
     $broadcast->{'template'}      = $c->req->parameters->{'template'} || 0;
     delete $broadcast->{'macros'};
+    delete $broadcast->{'frontmatter'};
+    delete $broadcast->{'expires_ts'};
+    delete $broadcast->{'hide_before_ts'};
+    if($broadcast->{'raw_text'}) {
+        $broadcast->{'text'} = $broadcast->{'raw_text'};
+        delete $broadcast->{'raw_text'};
+    }
     return($broadcast);
 }
 

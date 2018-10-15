@@ -975,12 +975,17 @@ lists broadcasts
 |contactgroups                     | list of contactgroups if broadcast should be limited to specific groups
 |contacts                          | list of contacts if broadcast should be limited to specific contacts
 |expires                           | expire date after which the broadcast won't be displayed anymore
+|expires_ts                        | expire data as unix timestamp
 |file                              | filename
+|frontmatter                       | hash list of extraceted frontmatter variables
 |hide_before                       | do not show broadcast before this date
+|hide_before_ts                    | hide_before as unix timestamp
 |loginpage                         | flag wether broadcast should be displayed on the loginpage as well
+|macros                            | hash list of macros
 |panorama                          | flag wether broadcast should be displayed on panorama dashboards
+|raw_text                          | raw broadcast text
 |template                          | flag wether this broadcast is a template
-|text                              | displayed text
+|text                              | processed broadcast message
 |===========================================
 
 
