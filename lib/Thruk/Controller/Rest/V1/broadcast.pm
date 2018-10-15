@@ -32,7 +32,7 @@ sub _rest_get_thruk_broadcast {
 
     for my $b (@{$broadcasts}) {
         Thruk::Utils::Broadcast::process_broadcast($c, $b);
-        $b->{'macros'}->{'date'} = Thruk::Utils::Filter::date_format($c, (stat($c->config->{'var_path'}.'/broadcast/'.$b->{'file'}.'.json'))[9]),
+        $b->{'macros'}->{'date'} = Thruk::Utils::Filter::date_format($c, (stat($c->config->{'var_path'}.'/broadcast/'.$b->{'file'}.'.json'))[9]);
         $b->{'text'} = Thruk::Utils::Filter::replace_macros($b->{'text'}, $b->{'macros'});
         $b->{'text'} = Thruk::Utils::Filter::replace_macros($b->{'text'}, $b->{'frontmatter'});
     }
