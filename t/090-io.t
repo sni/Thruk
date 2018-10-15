@@ -17,16 +17,18 @@ my $c = TestUtils::get_c();
 use_ok("Thruk::Utils::IO");
 
 my $cmds = [
-  "grep -nr 'close\(' lib/ plugins/plugins-available/",
-  "grep -nr 'mkdir\(' lib/ plugins/plugins-available/",
-  "grep -nr 'chown\(' lib/ plugins/plugins-available/",
-  "grep -nr 'chmod\(' lib/ plugins/plugins-available/",
-  "grep -Pnr 'sleep\\(\\d+\\.' lib/ plugins/plugins-available/",
+  "grep -nr 'close\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::close",
+  "grep -nr 'mkdir\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::mkdir",
+  "grep -nr 'chown\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::ensure_permissions",
+  "grep -nr 'chmod\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::ensure_permissions",
+  "grep -Pnr 'sleep\\(\\d+\\.' lib/ plugins/plugins-available/",  "better use Time::HiRes::sleep directly",
 ];
 
 # find all close / mkdirs not ensuring permissions
 my @fails;
-for my $cmd (@{$cmds}) {
+while(scalar @{$cmds} > 0) {
+  my $cmd  = shift @{$cmds};
+  my $desc = shift @{$cmds};
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
   ok($ph, 'cmd started');
   while(<$ph>) {
@@ -49,7 +51,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m|_close|mx;
     next if $line =~ m|Time::HiRes|mx;
 
-    push @fails, $line;
+    push @fails, $desc." in\n".$line;
   }
   close($ph);
   ok($? == 0, "exit code is: ".$?);
