@@ -365,10 +365,13 @@ sub get_status {
     }
 
     my $is_running = _is_running($c, $dir);
+    my $percent    = 0;
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start      = stat($dir.'/start');
+    if(!defined $start[9]) {
+        return($is_running,0,$percent,"not started",undef,undef,$user);
+    }
     my $time       = time() - $start[9];
-    my $percent    = 0;
     if($is_running == 0) {
         $percent = 100;
         my @end  = stat($dir."/stdout");
