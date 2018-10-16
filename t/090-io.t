@@ -30,7 +30,7 @@ while(scalar @{$cmds} > 0) {
   my $cmd  = shift @{$cmds};
   my $desc = shift @{$cmds};
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
-  ok($ph, 'cmd started');
+  ok($ph, 'cmd '.$cmd.' started');
   while(<$ph>) {
     my $line = $_;
     chomp($line);
@@ -54,7 +54,7 @@ while(scalar @{$cmds} > 0) {
     push @fails, $desc." in\n".$line;
   }
   close($ph);
-  ok($? == 0, "exit code is: ".$?);
+  ok($? == 0, "exit code is: ".$?." (cmd: ".$cmd.")");
 }
 
 for my $fail (sort @fails) {
