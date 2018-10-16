@@ -273,13 +273,14 @@ returns uri to current page.
 
 =cut
 sub full_uri {
-    my $c        = shift;
-    my $full     = shift || 0;
-    carp("no c") unless defined $c;
+    my($c, $full) = @_;
+    $full = 0 unless $full;
+    confess("no c") unless defined $c;
     my $uri = ''.uri_with($c, $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}, 1);
 
     # uri always contains /thruk/, so replace it with our product prefix
-    my $url_prefix = $c->stash->{'url_prefix'};
+    my $url_prefix = $c->stash->{'url_prefix'} || $c->config->{'url_prefix'};
+    confess("no url_prefix") unless defined $url_prefix;
     if($full) {
         $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
     } else {
