@@ -647,13 +647,15 @@ sub _do_child_stuff {
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
     # close open filehandles
-    for my $fd (2..1024) {
-        POSIX::close($fd) if fileno($fd);
+    for my $fd (0..1024) {
+        POSIX::close($fd) if defined fileno($fd);
     }
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
-    open(STDOUT, '>', '/dev/null');
-    open(STDERR, '>', '/dev/null');
+    my $fallback_log = '/dev/null';
+    $fallback_log    = $ENV{'OMD_ROOT'}.'/var/log/thruk.log' if $ENV{'OMD_ROOT'};
+    open(STDOUT, '>>', $fallback_log);
+    open(STDERR, '>>', $fallback_log);
 
     # logging must be reset after closing the filehandles
     $c && $c->app->reset_logging();
