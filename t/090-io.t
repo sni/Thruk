@@ -17,11 +17,11 @@ my $c = TestUtils::get_c();
 use_ok("Thruk::Utils::IO");
 
 my $cmds = [
-  "grep -nr 'close\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::close",
-  "grep -nr 'mkdir\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::mkdir",
-  "grep -nr 'chown\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::ensure_permissions",
-  "grep -nr 'chmod\(' lib/ plugins/plugins-available/",           "better use Thruk::Utils::IO::ensure_permissions",
-  "grep -Pnr 'sleep\\(\\d+\\.' lib/ plugins/plugins-available/",  "better use Time::HiRes::sleep directly",
+  "grep -nr  'close\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::close",
+  "grep -nr  'mkdir\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::mkdir",
+  "grep -nr  'chown\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::ensure_permissions",
+  "grep -nr  'chmod\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::ensure_permissions",
+  "grep -Pnr 'sleep\\(\\d+\\.' lib/ plugins/plugins-available/*/lib",  "better use Time::HiRes::sleep directly",
 ];
 
 # find all close / mkdirs not ensuring permissions
