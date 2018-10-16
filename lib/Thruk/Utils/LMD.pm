@@ -171,6 +171,7 @@ sub check_initial_start {
         ## use critic
         my $pid = fork();
         if(!$pid) {
+            $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
             Thruk::Utils::External::_do_child_stuff();
             ## no critic
             $SIG{CHLD} = 'DEFAULT';
