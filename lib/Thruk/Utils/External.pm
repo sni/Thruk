@@ -882,6 +882,7 @@ sub _clean_unstorable_refs {
 ##############################################
 sub _reconnect {
     my($c) = @_;
+    return unless $c->{'db'};
     $c->{'db'}->reconnect() or do {
         print STDERR "reconnect failed: ".$@;
         kill($$);
