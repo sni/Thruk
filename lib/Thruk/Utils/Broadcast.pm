@@ -155,7 +155,7 @@ sub is_authorized_for_broadcast {
     my $contacts           = [grep(!/^\!/mx, @{$broadcast->{'contacts'}})];
     my $contactgroups      = [grep(!/^\!/mx, @{$broadcast->{'contactgroups'}})];
 
-    return 1 if $c->user->check_user_roles('admin');
+    return 1 if ($c->user && $c->user->check_user_roles('admin'));
 
     my $groups = {};
     if($c->stash->{'remote_user'}) {
