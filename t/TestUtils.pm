@@ -276,6 +276,13 @@ sub test_page {
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
         while($now < $start + 300) {
+            # text that should appear
+            if(defined $opts->{'like'}) {
+                for my $like (@{_list($opts->{'like'})}) {
+                    like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
+                }
+            }
+
             # text that shouldn't appear
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
