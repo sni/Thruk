@@ -276,13 +276,6 @@ sub test_page {
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
         while($now < $start + 300) {
-            # text that should appear
-            if(defined $opts->{'like'}) {
-                for my $like (@{_list($opts->{'like'})}) {
-                    like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
-                }
-            }
-
             # text that shouldn't appear
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
@@ -303,7 +296,18 @@ sub test_page {
             $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
             $return->{'content'} = $request->content;
         }
-        fail("content did not occur within 300 seconds") unless $found;
+
+        if(!$found) {
+            fail("content did not occur within 300 seconds");
+        } else {
+            # text that should appear
+            if(defined $opts->{'like'}) {
+                for my $like (@{_list($opts->{'like'})}) {
+                    like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
+                }
+            }
+        }
+
         return $return;
     }
 
