@@ -13,6 +13,8 @@ The livecache command is deprecated and replaced by the lmd command
 use warnings;
 use strict;
 
+our $skip_backends = 1;
+
 ##############################################
 
 =head1 METHODS
