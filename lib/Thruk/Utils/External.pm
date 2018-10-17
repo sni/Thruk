@@ -651,7 +651,7 @@ sub _do_child_stuff {
 
     # close open filehandles
     for my $fd (0..1024) {
-        POSIX::close($fd) if defined fileno($fd);
+        POSIX::close($fd);
     }
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
