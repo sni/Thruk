@@ -6091,7 +6091,7 @@ var ajax_search = {
             resultHTML += '<li><b><i>' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
             jQuery.each(type.results, function(index, data) {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
-                    var name = data.display;
+                    var name = data.display || data.name || "";
                     jQuery.each(pattern, function(index, sub_pattern) {
                         if(ajax_search.regex_matching && sub_pattern != "*") {
                             var re = new RegExp('('+sub_pattern+')', "gi");
