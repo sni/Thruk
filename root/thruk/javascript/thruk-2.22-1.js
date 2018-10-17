@@ -1920,7 +1920,7 @@ function showBugReport(id, text) {
 
 /* show popup with the current error text */
 function showErrorTextPopup(text) {
-    text      = "<pre style='text-align:left;'>"+text+"<\/pre>";
+    text      = "<pre style='text-align:left;'>"+escapeHTML(text)+"<\/pre>";
     var title = "Error Report";
     if(window.overlib != undefined) {
         try {
