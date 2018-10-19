@@ -1035,6 +1035,10 @@ See `/thruk/cluster/` for the description of the attributes.
 
 === GET /thruk/cluster/heartbeat
 
+redirects to POST method
+
+=== POST /thruk/cluster/heartbeat
+
 send cluster heartbeat to all other nodes
 
 === GET /thruk/config

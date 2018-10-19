@@ -12,6 +12,7 @@ BEGIN {
 
 TestUtils::test_page(
     'url'     => '/thruk/r/thruk/cluster/heartbeat',
+    'post'    => {},
     'like'    => ['heartbeat send'],
 );
 

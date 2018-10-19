@@ -28,11 +28,17 @@ sub _rest_get_thruk_cluster {
 
 ##########################################################
 # REST PATH: GET /thruk/cluster/heartbeat
+# redirects to POST method
+# REST PATH: POST /thruk/cluster/heartbeat
 # send cluster heartbeat to all other nodes
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/cluster/heartbeat$%mx, \&_rest_get_thruk_cluster_heartbeat, ['authorized_for_system_commands']);
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/cluster/heartbeat$%mx, \&_rest_get_thruk_cluster_heartbeat, ['authorized_for_system_commands']);
 sub _rest_get_thruk_cluster_heartbeat {
     my($c) = @_;
     return({ 'message' => 'cluster disabled', 'description' => 'this is a single node installation and not clustered', code => 501 }) unless $c->cluster->is_clustered();
+    if($c->req->method() eq 'GET') {
+        return({ 'message' => 'bad request', description => 'POST method required', code => 400 });
+    }
 
     # cron mode: cron starts heartbeat every minute, if heartbeat interval is less than a minute, do multiple checks and sleep meanwhile
     if($ENV{'THRUK_CRON'} && $c->config->{'cluster_heartbeat_interval'} > 0 && $c->config->{'cluster_heartbeat_interval'} < 60) {
@@ -46,6 +52,7 @@ sub _rest_get_thruk_cluster_heartbeat {
         return;
     }
     alarm(60);
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 0;
     $c->cluster->load_statefile();
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);

@@ -1,6 +1,10 @@
 ---
 - hosts: all
   tasks:
+  - yum:
+      name:
+      - perl-Test-Harness
+      state: present
   - shell: "crond"
   - shell: omd config demo set APACHE_MODE own
   - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg

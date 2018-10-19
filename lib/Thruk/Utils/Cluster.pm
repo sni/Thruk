@@ -394,7 +394,7 @@ sub update_cron_file {
         open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
         Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
         my $log = sprintf(">/dev/null 2>>%s/cron.log", $c->config->{'var_path'});
-        my $cmd = sprintf("cd %s && %s '%s r /thruk/cluster/heartbeat ' %s",
+        my $cmd = sprintf("cd %s && %s '%s r -m POST /thruk/cluster/heartbeat ' %s",
                                 $c->config->{'project_root'},
                                 $c->config->{'thruk_shell'},
                                 $c->config->{'thruk_bin'},

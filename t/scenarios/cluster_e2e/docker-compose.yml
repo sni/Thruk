@@ -30,6 +30,7 @@ services:
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
+        - .:/test:ro
         - shared_var:/mnt/var
         - shared_etc:/mnt/etc
 
