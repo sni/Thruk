@@ -75,9 +75,9 @@
       mode: 0600
       owner: demo5
       group: demo5
-  - shell: sudo su - demo5 -c "cpanm -n File::ChangeNotify"
-  - shell: sudo su - demo5 -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
-  - shell: sudo su - demo5 -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
+  #- shell: sudo su - demo5 -c "cpanm -n File::ChangeNotify"
+  #- shell: sudo su - demo5 -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  #- shell: sudo su - demo5 -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
 
 
 # demo 6 site
