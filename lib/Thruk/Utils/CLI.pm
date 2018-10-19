@@ -117,7 +117,8 @@ sub get_c {
     return $Thruk::Request::c if defined $Thruk::Request::c;
     #my($c, $failed)
     my($c, undef, undef) = _dummy_c();
-    $c->stats->enable(1);
+    confess("internal request failed") unless $c;
+    $c->stats->enable(1) if $c;
     return $c;
 }
 
