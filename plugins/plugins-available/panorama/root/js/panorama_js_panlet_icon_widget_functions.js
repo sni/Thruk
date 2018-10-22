@@ -141,7 +141,7 @@ TP.get_group_status = function(options) {
                 if(incl_hst && group.hosts.downtime_pending > 0)      { s = 4; hostProblem = true; downtime = true; }
                 break;
             default:
-                throw new Error("unhandled state: '"+order[x]+"'");
+                //throw new Error("unhandled state: '"+order[x]+"'");
                 break;
         }
         // first hit sets the current overall state
