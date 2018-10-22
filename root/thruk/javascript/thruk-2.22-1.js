@@ -3092,43 +3092,106 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     menu.className = 'action_menu';
 
     jQuery(items).each(function(i, el) {
-        var item = document.createElement('li');
-        menu.appendChild(item);
-        if(el == "-") {
-            var hr = document.createElement('hr');
-            item.appendChild(hr);
-            item.className = 'nohover';
-            return(true);
-        }
-
-        item.className = 'clickable';
-        var link = document.createElement('a');
-        if(el.icon) {
-            var span       = document.createElement('span');
-            span.className = 'icon';
-            var img        = document.createElement('img');
-            img.src        = replace_macros(el.icon);
-            img.title      = el.title ? el.title : '';
-            span.appendChild(img);
-            link.appendChild(span);
-        }
-        var label = document.createElement('span');
-        label.innerHTML = el.label;
-        link.appendChild(label);
-        link.href       = replace_macros(el.action);
-
-        item.appendChild(link);
-
-        /* apply other attributes */
-        set_action_menu_attr(link, el, backend, host, service, function() {
-            // must be added as callback, otherwise the order of the binds gets mixed up and "onclick confirms" would be called after the click itself
-            check_server_action(id, link, backend, host, service, undefined, undefined, undefined, el);
-        });
-        return(true);
+        menu.appendChild(actionGetMenuItem(el, id, backend, host, service));
     });
 
     document.body.appendChild(container);
     check_position_and_show_action_menu(id, icon, container, orientation);
+}
+
+function actionGetMenuItem(el, id, backend, host, service) {
+    var item = document.createElement('li');
+    if(el == "-") {
+        var hr = document.createElement('hr');
+        item.appendChild(hr);
+        item.className = 'nohover';
+        return(item);
+    }
+
+    item.className = 'clickable';
+    var link = document.createElement('a');
+    if(el.icon) {
+        var span       = document.createElement('span');
+        span.className = 'icon';
+        var img        = document.createElement('img');
+        img.src        = replace_macros(el.icon);
+        img.title      = el.title ? el.title : '';
+        span.appendChild(img);
+        link.appendChild(span);
+    }
+    var label = document.createElement('span');
+    label.innerHTML = el.label;
+    link.appendChild(label);
+    if(el.action) {
+        link.href = replace_macros(el.action);
+    }
+    if(el.menu) {
+        var expandLabel = document.createElement('span');
+        expandLabel.className = "expandable";
+        expandLabel.innerHTML = "&gt;";
+        link.appendChild(expandLabel);
+        var submenu = document.createElement('ul');
+        submenu.className = "action_menu submenu";
+        submenu.style.display = 'none';
+        item.appendChild(submenu);
+        item.style.position = 'relative';
+        jQuery(link).bind("mouseover", function() {
+            expandActionSubMenu(item, el, submenu, id, backend, host, service);
+        });
+    }
+    jQuery(link).bind("mouseover", function() {
+        // hide all submenus (unless required)
+        jQuery('#'+id+' .submenu').each(function(i, s) {
+            if(s.parentNode != item) {
+                s.required = false;
+            }
+        });
+        var p = link;
+        while(p.parentNode && p.id != id) {
+            if(jQuery(p).hasClass('submenu')) {
+                p.required = true;
+            }
+            p = p.parentNode;
+        }
+        jQuery('#'+id+' .submenu').each(function(i, s) {
+            if(!s.required) {
+                s.ready = false;
+                removeChilds(s);
+            }
+        });
+    });
+
+    item.appendChild(link);
+
+    /* apply other attributes */
+    set_action_menu_attr(link, el, backend, host, service, function() {
+        // must be added as callback, otherwise the order of the binds gets mixed up and "onclick confirms" would be called after the click itself
+        check_server_action(id, link, backend, host, service, undefined, undefined, undefined, el);
+    });
+    return(item);
+}
+
+function expandActionSubMenu(parent, el, submenu, id, backend, host, service) {
+    if(!submenu.ready) {
+        submenu.required = true;
+        submenu.ready = true;
+        jQuery(el.menu).each(function(i, submenuitem) {
+            submenu.appendChild(actionGetMenuItem(submenuitem, id, backend, host, service));
+        });
+        var coords = jQuery('#'+id).offset();
+        var screenW = jQuery(document).width();
+        submenu.style.top  = "-1px";
+        if(coords.left > (screenW / 2)) {
+            // we are on the right side of the screen, so place it left of the parent
+            var w = jQuery(submenu).outerWidth();
+            submenu.style.left = (Math.floor(-w)) + "px";
+        } else {
+            // place right of parent
+            var w = jQuery(parent).outerWidth();
+            submenu.style.left = (Math.floor(w)-1) + "px";
+        }
+    }
+    submenu.style.display = "";
 }
 
 function check_position_and_show_action_menu(id, icon, container, orientation) {
@@ -3144,6 +3207,7 @@ function check_position_and_show_action_menu(id, icon, container, orientation) {
     }
     container.style.top  = (Math.floor(coords.top) + icon.offsetHeight + 14) + "px";
 
+    jQuery('#'+id+' .submenu').css('display', 'none')
     showElement(id, undefined, true, 'DIV#'+id+' DIV.shadowcontent', reset_action_menu_icons);
 }
 

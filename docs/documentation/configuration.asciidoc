@@ -1947,6 +1947,7 @@ The menu item can have the following attributes:
 
      ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
      ** `label`         label name of the menu item.
+     ** `menu`          sub menu items.
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.

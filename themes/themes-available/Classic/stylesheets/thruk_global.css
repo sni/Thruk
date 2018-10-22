@@ -1262,6 +1262,17 @@ UL.action_menu LI HR {
   margin: 2px 8px;
 }
 
+UL.action_menu.submenu {
+  position: absolute;
+  min-width: 120px;
+  z-index: 1001;
+}
+
+UL.action_menu SPAN.expandable {
+  position: absolute;
+  right: 5px;
+}
+
 DIV.pnpSelector {
   display: inline;
   position: absolute;

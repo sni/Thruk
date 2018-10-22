@@ -9,6 +9,8 @@ next:
           - add command_enabled option
           - show and use alias for hosts, hostgroups and servicegroups search
           - removed cookie_auth_direct_agents option
+          - action menus:
+            - add support for submenus
           - Business Process:
             - only show business processes where the contact is allowed to see the generated service (#810)
           - Panorama:
