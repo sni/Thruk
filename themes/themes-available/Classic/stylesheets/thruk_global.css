@@ -1248,6 +1248,10 @@ UL.action_menu LI.clickable A SPAN.icon {
   display: inline-block;
 }
 
+UL.action_menu SPAN {
+  white-space: nowrap;
+}
+
 UL.action_menu A:hover {
   text-decoration: none;
 }

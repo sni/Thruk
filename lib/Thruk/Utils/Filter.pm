@@ -496,38 +496,49 @@ returns menu and error
 =cut
 sub get_action_menu {
     my($c, $menu) = @_;
-    our $already_checked_action_menus;
-    $already_checked_action_menus = {} unless defined $already_checked_action_menus;
+    $c->stash->{'checked_action_menus'} = {} unless defined $c->stash->{'checked_action_menus'};
 
     my $sourcefile;
     if($menu !~ m/^[\[\{]/mx) {
-        my $new = $c->config->{'action_menu_items'}->{$menu};
-        if(!$new) {
-            return(["no $menu in action_menu_items", "{}"]);
+        if($c->stash->{'checked_action_menus'}->{$menu}) {
+            return($c->stash->{'checked_action_menus'}->{$menu});
         }
-        if($new =~ m%^file://(.*)$%mx) {
+
+        if(!$c->config->{'action_menu_items'}->{$menu}) {
+            return({err => "no $menu in action_menu_items"});
+        }
+
+        if($c->config->{'action_menu_items'}->{$menu} =~ m%^file://(.*)$%mx) {
             $sourcefile = $1;
             if(!-r $sourcefile) {
-                my $err = $new.': '.$!;
-                unless(exists $already_checked_action_menus->{$menu}) {
-                    $c->log->error("error in action menu ".$menu.": ".$err);
-                    $already_checked_action_menus->{$menu} = $err;
-                }
-                return([$already_checked_action_menus->{$menu}, $new]);
+                my $err = $sourcefile.': '.$!;
+                $c->log->error("error in action menu ".$menu.": ".$err);
+                $c->stash->{'checked_action_menus'}->{$menu} = { err => $err };
+                return($c->stash->{'checked_action_menus'}->{$menu});
             }
-            $new = read_file($sourcefile);
-            $c->config->{'action_menu_items'}->{$menu} = $new;
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = decode_utf8(read_file($sourcefile));
+        } else {
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = $c->config->{'action_menu_items'}->{$menu};
         }
-        # fix trailing commas in menu
-        $new =~ s/\,\s*([\}\]\)]+)/$1/gmx;
-        unless(exists $already_checked_action_menus->{$menu}) {
-            my $err = validate_json($new);
-            $already_checked_action_menus->{$menu} = $err;
+
+        if($sourcefile && $sourcefile =~ m/\.js$/mx) {
+            # js file
+            $c->stash->{'checked_action_menus'}->{$menu}->{'type'} = 'js';
+            if($c->stash->{'checked_action_menus'}->{$menu}->{'data'} =~ m/function\s+([^\(\s]+)\(/mx) {
+                $c->stash->{'checked_action_menus'}->{$menu}->{'function'} = $1;
+            }
+        } else {
+            # json file
+            $c->stash->{'checked_action_menus'}->{$menu}->{'type'} = 'json';
+            # fix trailing commas in menu
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} =~ s/\,\s*([\}\]\)]+)/$1/gmx;
+            my $err = validate_json($c->stash->{'checked_action_menus'}->{$menu}->{'data'});
             if($err) {
-                $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$new);
+                $c->stash->{'checked_action_menus'}->{$menu}->{'err'} = $err;
+                $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$c->stash->{'checked_action_menus'}->{$menu}->{'data'});
             }
         }
-        return([$already_checked_action_menus->{$menu}, $new]);
+        return($c->stash->{'checked_action_menus'}->{$menu});
     }
 
     # fix trailing commas in menu
@@ -544,9 +555,9 @@ sub get_action_menu {
         for my $item (@{Thruk::Utils::list($items)}) {
             $image_data->{$item->{'icon'}} = '' if $item->{'icon'};
         }
-        return([$err, $menu, Thruk::Utils::Reports::Render::set_action_image_data_urls($c, $image_data)]);
+        return({err => $err, type => 'json', data => $menu, icons => Thruk::Utils::Reports::Render::set_action_image_data_urls($c, $image_data)});
     }
-    return([$err, $menu]);
+    return({err => $err, type => 'json', data => $menu });
 }
 
 ########################################

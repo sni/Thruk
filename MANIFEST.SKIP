@@ -93,3 +93,4 @@ plugins/plugins-enabled/editor
 ^thruk_local.d/.*.conf
 t/scenarios/sakuli_e2e/_run/
 t/scenarios/*/panorama/
+action_menus/*.js

@@ -1030,9 +1030,9 @@ sub _do_finalize_config {
     my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
     for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
         next unless -d $folder.'/.';
-        my @files = glob($folder.'/*.json');
+        my @files = glob($folder.'/*');
         for my $file (@files) {
-            if($file =~ m%([^/]+)\.json$%mx) {
+            if($file =~ m%([^/]+)\.(json|js)$%mx) {
                 my $basename = $1;
                 $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
             }

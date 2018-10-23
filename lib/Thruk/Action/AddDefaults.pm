@@ -205,6 +205,8 @@ sub begin {
         }
     }
 
+    $c->stash->{'action_menus_inserted'} = {};
+
     ###############################
     # parse cgi.cfg
     Thruk::Utils::read_cgi_cfg($c);

@@ -11,6 +11,7 @@ next:
           - removed cookie_auth_direct_agents option
           - action menus:
             - add support for submenus
+            - add support for scripted js menus
           - Business Process:
             - only show business processes where the contact is allowed to see the generated service (#810)
           - Panorama:

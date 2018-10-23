@@ -113,7 +113,23 @@
           [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
               <td align='left'>
-                [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">[% IF tmp.size > 2 %]action_images = [% json_encode(tmp.2) %]; [% END %]print_action_menu([% action_menu %], '[% host.peer_key %]', '[% host.name %]', undefined, 'b-l', true);</script>[% END %]
+                [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
+                [% IF menu.defined('err') && menu.err %]
+                  <img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(menu.err) %]" alt="json error" width=16 height=16>
+                [% ELSE %]
+                  <script type="text/javascript">
+                  [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
+                  [% IF menu.type == "js" %]
+                    [% IF !action_menus_inserted.defined(menu.data) %]
+                    [% menu.data %]
+                    [% action_menus_inserted.item(menu.data) = 1 %]
+                    [% END %]
+                    print_action_menu([% menu.function %], '[% host.peer_key %]', '[% host.name %]', undefined, 'b-l', true);
+                  [% ELSE %]
+                    print_action_menu([% menu.data %], '[% host.peer_key %]', '[% host.name %]', undefined, 'b-l', true);
+                  [% END %]
+                  </script>
+                [% END %]
                 <br clear="all">
               </td>
             </tr>

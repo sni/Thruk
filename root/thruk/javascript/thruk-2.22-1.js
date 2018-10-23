@@ -2940,6 +2940,9 @@ var menu_nr = 0;
 function print_action_menu(src, backend, host, service, orientation, show_title) {
     try {
         if(orientation == undefined) { orientation = 'b-r'; }
+        if(typeof src === "function") {
+            src = src({config: src, submenu: null, menu_id: 'actionmenu_'+menu_nr, backend: backend, host: host, service: service})
+        }
         src = is_array(src) ? src : [src];
         jQuery(src).each(function(i, el) {
             var icon       = document.createElement('img');
@@ -3123,7 +3126,11 @@ function actionGetMenuItem(el, id, backend, host, service) {
     label.innerHTML = el.label;
     link.appendChild(label);
     if(el.action) {
-        link.href = replace_macros(el.action);
+        if(typeof el.action === "function") {
+            jQuery(link).bind("click", {backend: backend, host: host, service: service}, el.action);
+        } else {
+            link.href = replace_macros(el.action);
+        }
     }
     if(el.menu) {
         var expandLabel = document.createElement('span');
@@ -3157,6 +3164,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
             if(!s.required) {
                 s.ready = false;
                 removeChilds(s);
+                s.style.display = "none";
             }
         });
     });
@@ -3172,26 +3180,50 @@ function actionGetMenuItem(el, id, backend, host, service) {
 }
 
 function expandActionSubMenu(parent, el, submenu, id, backend, host, service) {
-    if(!submenu.ready) {
-        submenu.required = true;
-        submenu.ready = true;
+    if(submenu.ready) { return; }
+
+    submenu.required = true;
+    submenu.ready = true;
+    if(is_array(el.menu)) {
         jQuery(el.menu).each(function(i, submenuitem) {
             submenu.appendChild(actionGetMenuItem(submenuitem, id, backend, host, service));
         });
-        var coords = jQuery('#'+id).offset();
-        var screenW = jQuery(document).width();
-        submenu.style.top  = "-1px";
-        if(coords.left > (screenW / 2)) {
-            // we are on the right side of the screen, so place it left of the parent
-            var w = jQuery(submenu).outerWidth();
-            submenu.style.left = (Math.floor(-w)) + "px";
-        } else {
-            // place right of parent
-            var w = jQuery(parent).outerWidth();
-            submenu.style.left = (Math.floor(w)-1) + "px";
-        }
+        submenu.style.display = "";
+        checkSubMenuPosition(id, parent, submenu);
+        return;
     }
+
+    if(typeof el.menu !== "function") {
+        return;
+    }
+    submenu.appendChild(actionGetMenuItem({icon: url_prefix+'themes/'+theme+'/images/waiting.gif', label: 'loading...'}, id, backend, host, service));
     submenu.style.display = "";
+    checkSubMenuPosition(id, parent, submenu);
+
+    jQuery.when(el.menu({config: el, submenu: submenu, menu_id: id, backend: backend, host: host, service: service})).done(function(data) {
+        removeChilds(submenu);
+        if(!data || !is_array(data)) { return; }
+        jQuery(data).each(function(i, submenuitem) {
+            submenu.appendChild(actionGetMenuItem(submenuitem, id, backend, host, service));
+        });
+        checkSubMenuPosition(id, parent, submenu);
+        return;
+    });
+}
+
+function checkSubMenuPosition(id, parent, submenu) {
+    var coords = jQuery('#'+id).offset();
+    var screenW = jQuery(document).width();
+    submenu.style.top  = "-1px";
+    if(coords.left > (screenW / 2)) {
+        // we are on the right side of the screen, so place it left of the parent
+        var w = jQuery(submenu).outerWidth();
+        submenu.style.left = (Math.floor(-w)) + "px";
+    } else {
+        // place right of parent
+        var w = jQuery(parent).outerWidth();
+        submenu.style.left = (Math.floor(w)-1) + "px";
+    }
 }
 
 function check_position_and_show_action_menu(id, icon, container, orientation) {
