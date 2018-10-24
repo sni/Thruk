@@ -538,6 +538,7 @@ sub get_action_menu {
                 $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$c->stash->{'checked_action_menus'}->{$menu}->{'data'});
             }
         }
+        $c->stash->{'checked_action_menus'}->{$menu}->{'name'} = $menu;
         return($c->stash->{'checked_action_menus'}->{$menu});
     }
 

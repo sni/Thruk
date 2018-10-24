@@ -211,6 +211,7 @@ our %config = ('name'                   => 'Thruk',
                                           ],
                                           'jquery_ui' => '1.12.1',
                                           'all_in_one_javascript_panorama' => [
+                                              'javascript/jquery-1.12.4.min.js',
                                               'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'plugins/panorama/ux/form/MultiSelect.js',
                                               'plugins/panorama/ux/form/ItemSelector.js',

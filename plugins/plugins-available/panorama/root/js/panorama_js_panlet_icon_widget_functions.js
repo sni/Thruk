@@ -216,6 +216,11 @@ TP.iconClickHandlerDo = function(id) {
 TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions) {
     if(config       == undefined) { config       = {}; }
     if(extraOptions == undefined) { extraOptions = {}; }
+    if(typeof link === "function") {
+        var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: null };
+        link(args);
+        return;
+    }
     var special = link.match(/dashboard:\/\/(.+)$/);
     var action  = link.match(/server:\/\/(.+)$/);
     var menu    = link.match(/menu:\/\/(.+)$/);
@@ -362,24 +367,33 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
     var tmp = str.split(/\//);
     var menuName = tmp.shift();
     var menuArgs = tmp;
-    var menuRaw;
+    var menu;
     Ext.Array.each(action_menu_items, function(val, i) {
-        var name    = val[0];
-        if(name == menuName) {
-            menuRaw = val[1];
+        if(val.name == menuName) {
+            menu = val;
             return(false);
         }
     });
-    if(!menuRaw) {
+    if(!menu) {
         TP.Msg.msg("fail_message~~no such menu: "+str);
         return(false);
     }
     var menuData;
-    try {
-        menuData  = Ext.JSON.decode(menuRaw);
-    } catch(e) {
-        TP.Msg.msg("fail_message~~menu "+str+": failed to parse json - "+e);
-        return(false);
+    if(menu.type == "js" && menu["function"] && window[menu["function"]]) {
+        try {
+            var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: menuArgs};
+            menuData = window[menu["function"]](args);
+        } catch(e) {
+            TP.Msg.msg("fail_message~~menu "+str+": failed to run js menu - "+e);
+            return(false);
+        }
+    } else {
+        try {
+            menuData  = Ext.JSON.decode(menu.data);
+        } catch(e) {
+            TP.Msg.msg("fail_message~~menu "+str+": failed to parse json - "+e);
+            return(false);
+        }
     }
     if(!menuData['menu']) {
         return(menuData);
@@ -388,6 +402,11 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
 }
 
 TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
+    if(typeof items === "function") {
+        var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: null};
+        items = items(args);
+        return;
+    }
     var menuItems = [];
     Ext.Array.each(items, function(i, x) {
         if(Ext.isString(i)) {
@@ -428,6 +447,36 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
                 menuItem.handler = handler;
             }
             menuItem.listeners = listeners;
+
+            // submenus?
+            if(i.menu) {
+                if(typeof i.menu === "function") {
+                    menuItem.menu = {
+                        items: [{
+                            text:    'Loading...',
+                            icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
+                            disabled: true
+                        }],
+                        listeners: {
+                            beforeshow: function(This, eOpts) {
+                                var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: null};
+                                jQuery.when(i.menu(args)).then(function(items) {
+                                    var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions);
+                                    This.removeAll();
+                                    Ext.Array.each(parsed, function(i) {
+                                        This.add(i);
+                                    });
+                                })
+                            }
+                        }
+                    };
+                } else {
+                    menuItem.menu = {
+                        items: TP.parseActionMenuItems(i.menu, id, panel, target, extraOptions)
+                    }
+                }
+            }
+
             menuItems.push(menuItem);
         }
     });

@@ -90,6 +90,7 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_p
         $file = 'root/thruk/'.$file;
     }
     next if $file =~ m|OpenLayers|mx;
+    next if $file =~ m|jquery|mxi;
     ok($file, $file);
     js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
 }

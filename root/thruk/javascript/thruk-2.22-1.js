@@ -2941,7 +2941,7 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
     try {
         if(orientation == undefined) { orientation = 'b-r'; }
         if(typeof src === "function") {
-            src = src({config: src, submenu: null, menu_id: 'actionmenu_'+menu_nr, backend: backend, host: host, service: service})
+            src = src({config: null, submenu: null, menu_id: 'actionmenu_'+menu_nr, backend: backend, host: host, service: service})
         }
         src = is_array(src) ? src : [src];
         jQuery(src).each(function(i, el) {
@@ -3200,15 +3200,16 @@ function expandActionSubMenu(parent, el, submenu, id, backend, host, service) {
     submenu.style.display = "";
     checkSubMenuPosition(id, parent, submenu);
 
-    jQuery.when(el.menu({config: el, submenu: submenu, menu_id: id, backend: backend, host: host, service: service})).done(function(data) {
-        removeChilds(submenu);
-        if(!data || !is_array(data)) { return; }
-        jQuery(data).each(function(i, submenuitem) {
-            submenu.appendChild(actionGetMenuItem(submenuitem, id, backend, host, service));
+    jQuery.when(el.menu({config: el, submenu: submenu, menu_id: id, backend: backend, host: host, service: service}))
+        .done(function(data) {
+            removeChilds(submenu);
+            if(!data || !is_array(data)) { return; }
+            jQuery(data).each(function(i, submenuitem) {
+                submenu.appendChild(actionGetMenuItem(submenuitem, id, backend, host, service));
+            });
+            checkSubMenuPosition(id, parent, submenu);
+            return;
         });
-        checkSubMenuPosition(id, parent, submenu);
-        return;
-    });
 }
 
 function checkSubMenuPosition(id, parent, submenu) {

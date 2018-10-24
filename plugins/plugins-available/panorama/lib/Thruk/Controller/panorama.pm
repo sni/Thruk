@@ -335,21 +335,17 @@ sub _js {
     }
     $c->stash->{action_menu_actions}   = $action_menu_actions;
 
-    my $action_menu_items = [];
+    my $action_menu_items    = [];
+    my $action_menu_items_js = '';
     if($c->config->{'action_menu_items'}) {
         for my $name (sort keys %{$c->config->{'action_menu_items'}}) {
-            my $data = $c->config->{'action_menu_items'}->{$name};
-            if($data =~ m%^file://(.*)$%mx) {
-                my $sourcefile = $1;
-                $data = "[]";
-                if(-r $sourcefile) {
-                    $data = read_file($sourcefile);
-                }
-            }
-            push @{$action_menu_items}, [$name, $data];
+            my $menu = Thruk::Utils::Filter::get_action_menu($c, $name);
+            $action_menu_items_js .= delete $menu->{'data'} if $menu->{'type'} eq 'js';
+            push @{$action_menu_items}, $menu;
         }
     }
-    $c->stash->{action_menu_items} = $action_menu_items;
+    $c->stash->{action_menu_items}    = $action_menu_items;
+    $c->stash->{action_menu_items_js} = $action_menu_items_js;
 
     $c->stash->{shape_data}         = _task_userdata_shapes($c, 1);
     $c->stash->{iconset_data}       = _task_userdata_iconsets($c, 1);
