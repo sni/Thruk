@@ -3010,16 +3010,18 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
             continue;
         }
         if(key.match(/^on/)) {
-            var cmd = attr;
-            jQuery(item).bind(key.substring(2), {cmd: cmd}, function(evt) {
-                var cmd = evt.data.cmd;
-                var res = new Function(cmd)();
-                if(!res) {
-                    /* cancel default/other binds when callback returns false */
-                    evt.stopImmediatePropagation();
-                }
-                return(res);
-            });
+            if(!data.disabled) {
+                var cmd = attr;
+                jQuery(item).bind(key.substring(2), {cmd: cmd}, function(evt) {
+                    var cmd = evt.data.cmd;
+                    var res = new Function(cmd)();
+                    if(!res) {
+                        /* cancel default/other binds when callback returns false */
+                        evt.stopImmediatePropagation();
+                    }
+                    return(res);
+                });
+            }
         } else {
             item[key] = attr;
         }
@@ -3111,7 +3113,11 @@ function actionGetMenuItem(el, id, backend, host, service) {
         return(item);
     }
 
-    item.className = 'clickable';
+    if(el.disabled) {
+        item.className = 'clickable disabled nohover';
+    } else {
+        item.className = 'clickable';
+    }
     var link = document.createElement('a');
     if(el.icon) {
         var span       = document.createElement('span');
@@ -3125,7 +3131,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
     var label = document.createElement('span');
     label.innerHTML = el.label;
     link.appendChild(label);
-    if(el.action) {
+    if(el.action && !el.disabled) {
         if(typeof el.action === "function") {
             jQuery(link).bind("click", {backend: backend, host: host, service: service}, el.action);
         } else {

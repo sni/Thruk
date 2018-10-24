@@ -1207,6 +1207,11 @@ UL.action_menu {
   margin: 0px;
 }
 
+UL.action_menu LI.disabled SPAN {
+  filter: alpha(opacity=50);
+  opacity: 0.5;
+}
+
 UL.action_menu LI {
   list-style: none;
   border: 1px solid #F0F1EE;
