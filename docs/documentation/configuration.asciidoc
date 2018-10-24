@@ -1947,7 +1947,7 @@ The menu item can have the following attributes:
 
      ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
      ** `label`         label name of the menu item.
-     ** `menu`          sub menu items.
+     ** `menu`          list of sub menu items.
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
@@ -1956,6 +1956,7 @@ The menu item can have the following attributes:
      ** `target`        Use '_blank' here to open link in a new window.
      ** `onclick`       confirmation dialog or any other callback, ex: "return(confirm('Really restart service?'));"
      ** `close_timeout` timeout till the result popup will close, defaults to 5 seconds if ok or 30 seconds if failed. Set to zero to never close the result popup.
+     ** `disabled`      menu item will be disabled.
      ** `...`           arbitrary attributes will be used as attributes of the menu item link html element.
 
 
