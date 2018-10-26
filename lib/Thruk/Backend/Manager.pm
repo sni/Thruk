@@ -845,7 +845,7 @@ retrieve backend and ID of host or service comment(s) that match the given patte
 
 sub get_comments_by_pattern {
     my ($self, $c, $host, $svc, $pattern) = @_;
-    $c->log->debug("get_comments_by_pattern() has been called: host = $host, service = $svc, pattern = $pattern");
+    $c->log->debug("get_comments_by_pattern() has been called: host = $host, service = ".($svc||'').", pattern = $pattern");
     my $options  = {'filter' => [{'host_name' => $host}, {'service_description' => $svc}, {'comment' => {'~' => $pattern}}]};
     my $comments = $self->get_comments(%{$options});
     my $ids      = [];
