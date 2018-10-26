@@ -106,7 +106,7 @@ sub _rest_get_external_command {
     }
     my $cmd_list = [$cmd_line];
 
-    if($cmd->{'requires_comment'}) {
+    if($cmd->{'requires_comment'} && $c->config->{'require_comments_for_disable_cmds'}) {
         if(!$c->req->parameters->{'comment_data'}) {
             return({ 'message' => 'missing argument: comment_data', 'description' => 'comment_data is a required argument', code => 400 });
         }
