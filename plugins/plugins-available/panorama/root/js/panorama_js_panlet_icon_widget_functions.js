@@ -294,32 +294,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         if(!menuData) {
             return(false);
         }
-        var autoOpen = false;
-        if(!Ext.isArray(menuData)) {
-            menuData = TP.parseActionMenuItems(menuData, id, panel, target, extraOptions);
-            autoOpen = true;
-        }
-        TP.suppressIconTip = true;
-        menu = Ext.create('Ext.menu.Menu', {
-            id: 'iconActionMenu',
-            items: menuData,
-            listeners: {
-                beforehide: function(This) {
-                    TP.suppressIconTip = false;
-                    This.destroy();
-                },
-                move: function(This, x, y) {
-                    // somehow menu is place offset, even if showBy is called, force the location to our aligned element
-                    This.showBy(extraOptions.alignTo || panel);
-                }
-            },
-            cls: autoOpen ? 'hidden' : ''
-        }).showBy(extraOptions.alignTo || panel);
-        if(autoOpen) {
-            link = menu.items.get(0);
-            link.fireEvent("click");
-            menu.hide();
-        }
+        TP.showIconMenu(menuData, id, panel, target, extraOptions);
         return(false);
     }
     if(link) {
@@ -363,6 +338,44 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
     return(true);
 };
 
+TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
+    if(menuData && menuData.then) {
+        menuData.then(function(items) {
+            var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions);
+            TP.showIconMenu(parsed, id, panel, target, extraOptions);
+            return(false);
+        });
+        return(false);
+    }
+    var autoOpen = false;
+    if(!Ext.isArray(menuData)) {
+        menuData = TP.parseActionMenuItems(menuData, id, panel, target, extraOptions);
+        autoOpen = true;
+    }
+    TP.suppressIconTip = true;
+    var menu = Ext.create('Ext.menu.Menu', {
+        id: 'iconActionMenu',
+        items: menuData,
+        listeners: {
+            beforehide: function(This) {
+                TP.suppressIconTip = false;
+                This.destroy();
+            },
+            move: function(This, x, y) {
+                // somehow menu is place offset, even if showBy is called, force the location to our aligned element
+                This.showBy(extraOptions.alignTo || panel);
+            }
+        },
+        cls: autoOpen ? 'hidden' : ''
+    }).showBy(extraOptions.alignTo || panel);
+    if(autoOpen) {
+        link = menu.items.get(0);
+        link.fireEvent("click");
+        menu.hide();
+    }
+    return(false);
+}
+
 /* parse action menu from json string data */
 TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
     var tmp = str.split(/\//);
@@ -405,8 +418,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
 TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
     if(typeof items === "function") {
         var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: null};
-        items = items(args);
-        return;
+        return(items(args));
     }
     var menuItems = [];
     Ext.Array.each(items, function(i, x) {
