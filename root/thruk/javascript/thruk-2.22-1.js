@@ -216,8 +216,10 @@ function bodyOnLoad(refresh) {
             stopRefresh();
         } else {
             setRefreshRate(refresh);
+            jQuery(document).bind("mousemove keyup", resetRefresh);
         }
     }
+
     init_page();
 }
 
