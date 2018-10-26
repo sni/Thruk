@@ -91,6 +91,9 @@ The first function will be called and expected to return a json structure with t
 Althought the first function will be called to generate the menu, the file
 may contain multiple functions, for example to generate submenus.
 
+The first function in the file must return an array of (link:configuration.html#action_menu_items[action_menu_items]). The menu
+itself can be a function again to create more dynamic menus.
+
 [WARNING]
 =======
 All defined functions are running in the same namespace, so make sure your functions use uniq names over all your menus. Best practice is to use the filename as prefix.

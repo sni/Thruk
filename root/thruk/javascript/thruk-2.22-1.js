@@ -3061,13 +3061,9 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     var id = 'actionmenu_'+nr;
     var container = document.getElementById(id);
     if(container) {
-        if(container.style.display == '') {
-            /* close if already open */
-            reset_action_menu_icons();
-            container.style.display = 'none';
-            return;
-        }
-        check_position_and_show_action_menu(id, icon, container, orientation);
+        // always recreate the menu
+        container.parentNode.removeChild(container);
+        container = null;
     }
 
     window.setTimeout(function() {
@@ -3096,9 +3092,23 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     s2.appendChild(menu);
     menu.className = 'action_menu';
 
-    jQuery(items).each(function(i, el) {
-        menu.appendChild(actionGetMenuItem(el, id, backend, host, service));
-    });
+    if(typeof(items) === "function") {
+        menu.appendChild(actionGetMenuItem({icon: url_prefix+'themes/'+theme+'/images/waiting.gif', label: 'loading...'}, id, backend, host, service));
+        jQuery.when(items({config: null, submenu: menu, menu_id: id, backend: backend, host: host, service: service}))
+        .done(function(data) {
+            removeChilds(menu);
+            if(!data || !is_array(data)) { return; }
+            jQuery(data).each(function(i, submenuitem) {
+                menu.appendChild(actionGetMenuItem(submenuitem, id, backend, host, service));
+            });
+            check_position_and_show_action_menu(id, icon, container, orientation);
+            return;
+        });
+    } else {
+        jQuery(items).each(function(i, el) {
+            menu.appendChild(actionGetMenuItem(el, id, backend, host, service));
+        });
+    }
 
     document.body.appendChild(container);
     check_position_and_show_action_menu(id, icon, container, orientation);
@@ -3147,6 +3157,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
         }
     }
     if(el.menu) {
+        link.className = link.className+' hasSubMenu';
         var expandLabel = document.createElement('span');
         expandLabel.className = "expandable";
         expandLabel.innerHTML = "&gt;";

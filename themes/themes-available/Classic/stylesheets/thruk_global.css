@@ -1279,7 +1279,11 @@ UL.action_menu.submenu {
 
 UL.action_menu SPAN.expandable {
   position: absolute;
-  right: 5px;
+  right: 3px;
+}
+
+A.hasSubMenu {
+  margin-right: 15px;
 }
 
 DIV.pnpSelector {
