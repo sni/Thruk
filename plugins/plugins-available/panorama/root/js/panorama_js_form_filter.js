@@ -113,7 +113,7 @@ Ext.define('TP.formFilterSelect', {
         store:          getFilterTypeOptions(),
         tpl: '<ul class="' + Ext.plainListCls + '"><tpl for=".">'
             +'<tpl if="field1 == \'----------------\'">'
-            +'<li class="item-disabled">'
+            +'<li class="x-boundlist-item item-disabled">'
             +'<tpl else>'
             +'<li class="x-boundlist-item" unselectable="on">'
             +'</tpl>'
@@ -240,6 +240,9 @@ Ext.define('TP.formFilterSelect', {
     /* check datetime or input field */
     check_changed: function(v) {
         if(!this.items.getAt(1).rendered || !this.items.getAt(3).rendered || !this.items.getAt(4).rendered) {
+            return;
+        }
+        if(v.match("-----")) {
             return;
         }
         v = v.toLowerCase();
