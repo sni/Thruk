@@ -218,7 +218,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
     if(config       == undefined) { config       = {}; }
     if(extraOptions == undefined) { extraOptions = {}; }
     if(typeof link === "function") {
-        var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: null };
+        var args = TP.getMenuArgs(panel, target, {menu_id: id, config: config, extraOptions: extraOptions });
         link(args);
         return;
     }
@@ -395,7 +395,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
     var menuData;
     if(menu.type == "js" && menu["function"] && window[menu["function"]]) {
         try {
-            var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: menuArgs};
+            var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions, args: menuArgs });
             menuData = window[menu["function"]](args);
         } catch(e) {
             TP.Msg.msg("fail_message~~menu "+str+": failed to run js menu - "+e);
@@ -417,7 +417,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
 
 TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
     if(typeof items === "function") {
-        var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: null};
+        var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions });
         return(items(args));
     }
     var menuItems = [];
@@ -479,7 +479,7 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
                         }],
                         listeners: {
                             beforeshow: function(This, eOpts) {
-                                var args = {config: null, submenu: null, menu_id: id, backend: null, host: null, service: null, panel: panel, target: target, extraOptions: extraOptions, args: null};
+                                var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions });
                                 jQuery.when(i.menu(args)).then(function(items) {
                                     var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions);
                                     This.removeAll();
@@ -503,6 +503,19 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
     return(menuItems);
 }
 
+TP.getMenuArgs = function(panel, target, args) {
+    var tab      = Ext.getCmp(panel.panel_id);
+    args.panel   = panel;
+    args.target  = target;
+    args.backend = TP.getActiveBackendsPanel(tab);
+    args.host    = null;
+    args.service = null;
+    if(panel && panel.xdata && panel.xdata.general) {
+        args.host = panel.xdata.general.host;
+        args.service = panel.xdata.general.service;
+    }
+    return(args);
+}
 
 TP.iconClickHandlerClickLink = function(panel, link, target) {
     var oldOnClick=panel.el.dom.onclick;
