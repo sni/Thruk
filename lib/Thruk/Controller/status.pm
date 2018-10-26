@@ -345,7 +345,7 @@ sub _process_raw_request {
                         }
                     }
                 } else {
-                    for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
+                    for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d, 'value' => $d } }
                 }
                 $json = { 'data' => $list, 'total' => $total };
             }
