@@ -29,12 +29,12 @@
     [% ELSE %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
     [% END %]
-    jQuery.noConflict();
 </head>
 <body onunload="TP.unload()">
 <div id="iconContainer"></div>
 <script type="text/javascript">
 <!--
+jQuery.noConflict();
 /*
 console.profile("Page Load Profile");
 window.setTimeout(function() {
