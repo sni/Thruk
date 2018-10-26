@@ -42,6 +42,13 @@ HTML, BODY {
   border: 1px dashed black;
 }
 
+.success_message {
+  color: #008000;
+}
+.fail_message {
+  color: #FF0000;
+}
+
 .statusdata TD.PENDING,
 .statusdata TD.UP,
 .statusdata TD.UNREACHABLE,

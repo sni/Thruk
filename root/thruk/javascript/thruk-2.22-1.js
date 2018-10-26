@@ -3128,9 +3128,17 @@ function actionGetMenuItem(el, id, backend, host, service) {
         span.appendChild(img);
         link.appendChild(span);
     }
-    var label = document.createElement('span');
-    label.innerHTML = el.label;
+
+    var label;
+    if(el.html) {
+        label = document.createElement('span');
+        label.innerHTML = el.html;
+    } else {
+        label = document.createElement('span');
+        label.innerHTML = el.label;
+    }
     link.appendChild(label);
+
     if(el.action && !el.disabled) {
         if(typeof el.action === "function") {
             jQuery(link).bind("click", {backend: backend, host: host, service: service}, el.action);

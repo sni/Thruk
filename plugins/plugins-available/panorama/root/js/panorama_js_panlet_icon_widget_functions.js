@@ -214,6 +214,7 @@ TP.iconClickHandlerDo = function(id) {
 
 /* open link or special action for given link */
 TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions) {
+    if(!link) { return; }
     if(config       == undefined) { config       = {}; }
     if(extraOptions == undefined) { extraOptions = {}; }
     if(typeof link === "function") {
@@ -447,6 +448,13 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
                 menuItem.handler = handler;
             }
             menuItem.listeners = listeners;
+
+            if(i.html) {
+                menuItem.text = i.html;
+                menuItem.hideOnClick = false;
+                menuItem.disabled = true; // hack to prevent item stealing focus from input fields
+                menuItem.disabledCls = '';
+            }
 
             // submenus?
             if(i.menu) {

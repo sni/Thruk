@@ -1957,6 +1957,7 @@ The menu item can have the following attributes:
      ** `onclick`       confirmation dialog or any other callback, ex: "return(confirm('Really restart service?'));"
      ** `close_timeout` timeout till the result popup will close, defaults to 5 seconds if ok or 30 seconds if failed. Set to zero to never close the result popup.
      ** `disabled`      menu item will be disabled.
+     ** `html`          raw html code instead of any other logic.
      ** `...`           arbitrary attributes will be used as attributes of the menu item link html element.
 
 
@@ -2073,6 +2074,9 @@ unless you want to change the menu from external commands.
 {% include new_since.ad version="2.10" %}
 Organize action_menu_items in a folder. Each file in this folder will be read as
 action menu.
+
+{% include new_since.ad version="2.24" %}
+This folder may also contain .js files since version 2.24.
 
 Both examples are equivalent and result in the same menu assuming there is
 a `/etc/thruk/action_menus/hostmenu.json` file.
