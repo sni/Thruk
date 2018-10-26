@@ -22,6 +22,8 @@ next:
             - add lock/unlock actions to admin users page
           - Logcache:
             - fix issue with wrong contacts in notifications after authupdate command
+          - Broadcasts:
+            - add variable editor
 
 2.22     Fri Jun 29 13:52:11 CEST 2018
           - cleanup preferences popup

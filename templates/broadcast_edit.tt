@@ -68,8 +68,32 @@
         <input type="radio" name="annotation" value="warning"[% IF broadcast.annotation == "warning" %] checked[% END %]> <img src='[% url_prefix %]themes/[% theme %]/images/warning.png' border="0" alt='warning' title='warning' width="16" height="16" style="vertical-align: text-bottom;">
     </td>
   </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
+  [% IF broadcast.frontmatter.keys.size > 0 %]
+  <tr class="frontmatter_edit">
+    <td class="dataEven" align="center">
+      <b>Variables</b>
+      <br>
+      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', ''); jQuery('TR.frontmatter_edit').css('display', 'none')"; return(false); value="raw edit">
+    </td>
+    <td class="dataOdd" align="left" style="position: relative;">
+      <table>
+      [% FOREACH f = broadcast.frontmatter.keys.sort %]
+      <tr>
+      <td align="right"><b>[% f %]:</b></td><td><input type="text" class="frontmatter" name="frontmatter.[% f %]" value="[% broadcast.frontmatter.$f %]"></td>
+      </tr>
+      [% END %]
+      </table>
+    </td>
+  </tr>
+  [% END %]
+  <tr class="raw"[% IF broadcast.frontmatter.keys.size > 0 %] style="display: none;"[% END %]>
+    <td class="dataEven" align="center">
+      <b>Text</b><span class="required">*</span>
+      [% IF broadcast.frontmatter.keys.size > 0 %]
+      <br>
+      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', 'none'); jQuery('TR.frontmatter_edit').css('display', '')"; return(false); value="edit variables">
+      [% END %]
+    </td>
     <td class="dataOdd" align="left" style="position: relative;">
       <textarea name="text" cols=74 rows=14 style="width: 99%;">[% broadcast.raw_text %]</textarea>
       <div style="position: absolute; right: -430px; top: 10px; background: #e6e6e6; border-radius: 5px; border: 1px solid gray; padding: 8px;">
@@ -145,11 +169,28 @@ then use later like: {{variable}} and {{another}}</pre>
 
 <script type="text/javascript">
 <!--
-  function update_broadcast_preview() {
+  function update_broadcast_preview(frontmatter_first) {
     var val        = jQuery('TEXTAREA[name=text]').val();
     var annotation = jQuery('INPUT[name=annotation]:checked').val();
     var tmp        = extract_frontmatter(val);
     val = tmp[0];
+    if(frontmatter_first) {
+      // update macros
+      var newVal = '---\n';
+      jQuery('INPUT.frontmatter').each(function(i, e) {
+        var name = e.name.replace(/^frontmatter\./, '');
+        tmp[1][name] = e.value;
+        newVal += name+': '+e.value+'\n';
+      });
+      // update text from new variables
+      newVal += '---\n\n';
+      newVal += val;
+      jQuery('TEXTAREA[name=text]').val(newVal);
+    } else {
+      for(var key in tmp[1]) {
+        jQuery('INPUT[name="frontmatter.'+key+'"]').val(tmp[1][key]);
+      }
+    }
     val            = replace_macros(val, tmp[1]);
     val            = replace_macros(val, [% json_encode(broadcast.macros) %]);
     if(annotation) {
@@ -167,6 +208,7 @@ then use later like: {{variable}} and {{another}}</pre>
     jQuery('.broadcast_panel_container DIV.dismiss A').prop('onclick',null).off('click').on('click', function(e) { e.preventDefault(); alert("preview cannot be dismissed."); return false; })
     jQuery('TEXTAREA[name=text]').on('keyup', function() { update_broadcast_preview(); });
     jQuery('INPUT[name=annotation]').on('change', function() { update_broadcast_preview(); });
+    jQuery('INPUT.frontmatter').on('keyup', function() { update_broadcast_preview(true); });
     update_broadcast_preview();
   });
 
