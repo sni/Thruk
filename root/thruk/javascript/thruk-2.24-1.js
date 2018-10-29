@@ -5468,11 +5468,15 @@ function toggleTopPane() {
   var formInput = document.getElementById('hidetop');
   if(toggleElement('top_pane')) {
     additionalParams['hidetop'] = 0;
-    formInput.value = 0;
+    if(formInput) {
+        formInput.value = 0;
+    }
     document.getElementById('btn_toggle_top_pane').src = url_prefix + "themes/" + theme + "/images/icon_minimize.gif";
   } else {
     additionalParams['hidetop'] = 1;
-    formInput.value = 1;
+    if(formInput) {
+        formInput.value = 1;
+    }
     document.getElementById('btn_toggle_top_pane').src = url_prefix + "themes/" + theme + "/images/icon_maximize.gif";
   }
 }

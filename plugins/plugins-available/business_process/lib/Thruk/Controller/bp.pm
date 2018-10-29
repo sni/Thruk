@@ -63,6 +63,9 @@ sub index {
     my $nodeid = $c->req->parameters->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{hidetop} = 1 if $c->stash->{hidetop} eq '';
+
     # check roles
     my $allowed_for_edit = 0;
     if($c->check_user_roles("admin")) {
