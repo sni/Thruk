@@ -424,8 +424,9 @@ TP.renderTipDetails = function(data) {
             skipped = 0;
         }
         if(skipped > 0) {
+            var link = TP.getIconDetailsLink(panel);
             details += '<tr>';
-            details += '<td class="more_hosts" colspan=3>'+(skipped)+' more host'+(skipped > 1 ? 's' : '')+'...<\/td>';
+            details += '<td class="more_hosts" colspan=3><a href="'+link+'" target="_blank">'+(skipped)+' more host'+(skipped > 1 ? 's' : '')+'...</a><\/td>';
             details += '<\/tr>';
         }
         details += '<\/table>';
@@ -458,8 +459,9 @@ TP.renderTipDetails = function(data) {
             num_shown++;
         }
         if(skipped > 0) {
+            var link = TP.getIconDetailsLink(panel);
             details += '<tr>';
-            details += '<td class="more_services" colspan=4>'+skipped+' more service'+(skipped > 1 ? 's' : '')+'...<\/td>';
+            details += '<td class="more_services" colspan=4><a href="'+link+'" target="_blank">'+(skipped)+' more service'+(skipped > 1 ? 's' : '')+'...</a><\/td>';
             details += '<\/tr>';
         }
         details += '<\/table>';
