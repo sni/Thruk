@@ -478,7 +478,7 @@ TABLE.linkBox {
   background-color:#fff;
   border: 0px none;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-  padding-top: 3px;
+  padding-top: 0;
   padding-right: 3px;
   padding-bottom: 3px;
   padding-left: 5px;
@@ -514,7 +514,7 @@ TABLE.serviceTotals,TABLE.hostTotals {
   background-color: #ffffff;
   border: 0px none;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36);
-  margin:2px;
+  margin: -1px 2px 2px 2px;
   text-align:center;
   width:280px;
 }

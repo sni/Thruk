@@ -28,7 +28,6 @@
     [% END %]
   [% END %]
 
-  <br>
   <input type="hidden" name="page" value="[% current_page %]">
   [% IF pager_previous_page %]
     <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_first.png" name="first" alt="first" value="1" class="pager_input_img"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" name="previous" alt="previous" value="1" class="pager_input_img">&nbsp;
