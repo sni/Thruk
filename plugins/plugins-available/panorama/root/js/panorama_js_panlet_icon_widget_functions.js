@@ -150,6 +150,10 @@ TP.get_group_status = function(options) {
         }
     }
 
+    if(s == undefined) {
+        s = 3;
+    }
+
     return({state: s, downtime: downtime, acknowledged: acknowledged, hostProblem: hostProblem });
 }
 
