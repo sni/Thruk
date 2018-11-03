@@ -560,8 +560,8 @@ sub _task_status {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
             }
             $c->req->parameters->{'filter'} = $filter;
-            my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
-            $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter, $state_type);
+            my( $hfilter, $sfilter, $hostgroupfilter, $servicegroupfilter, $has_service_filter ) = _do_filter($c);
+            $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter, $state_type, $has_service_filter);
         }
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     }
@@ -607,7 +607,7 @@ sub _task_redirect_status {
     my($c) = @_;
     my $types = {};
     if($c->req->parameters->{'filter'}) {
-        _do_filter($c);
+        my($hfilter, $sfilter, $hostgroupfilter, $servicegroupfilter, $has_service_filter) = _do_filter($c);
         $c->req->parameters->{'filter'} = '';
         $c->req->parameters->{'task'}   = '';
         my $url = Thruk::Utils::Filter::uri_with($c, $c->req->parameters);
@@ -615,6 +615,9 @@ sub _task_redirect_status {
         $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
         $url    =~ s/\&amp;task=.*?\&amp;/&amp;/gmx;
         $url    =~ s/\&amp;/&/gmx;
+        if($has_service_filter) {
+            $url =~ s/style=hostdetail/style=detail/gmx;
+        }
         return $c->redirect_to($url);
     }
     return $c->redirect_to("status.cgi");
@@ -2965,7 +2968,7 @@ sub _summarize_servicegroup_query {
 
 ##########################################################
 sub _summarize_query {
-    my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter, $state_type) = @_;
+    my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter, $state_type, $has_service_filter) = @_;
     my $sum   = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0,
                                 plain_ok => 0, plain_warning => 0, plain_critical => 0, plain_unknown => 0, plain_pending => 0,
                                 ack_warning => 0, ack_critical => 0, ack_unknown => 0,
@@ -2978,7 +2981,12 @@ sub _summarize_query {
                               },
                 };
     if($incl_hst) {
-        my $host_sum = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+        my $host_sum;
+        if(!$has_service_filter) {
+            $host_sum = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+        } else {
+            $host_sum = $c->{'db'}->get_host_stats_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+        }
         for my $k (qw/up down unreachable pending/) {
             $sum->{'hosts'}->{$k} = $host_sum->{$k};
             $sum->{'hosts'}->{'plain_'.$k} = $host_sum->{'plain_'.$k};

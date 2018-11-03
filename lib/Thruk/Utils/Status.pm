@@ -117,7 +117,7 @@ sub summary_set_group_defaults {
 
   summary_add_host_stats($prefix, $group, $host)
 
-count host status for this host
+count host statstics for this host
 
 =cut
 sub summary_add_host_stats {
@@ -154,7 +154,7 @@ sub summary_add_host_stats {
 
   summary_add_service_stats($prefix, $group, $host)
 
-count host status for this host
+count service statistics for this service
 
 =cut
 sub summary_add_service_stats {
@@ -348,7 +348,7 @@ sub do_filter {
         $c->stash->{'show_filter_table'} = 1;
     }
 
-    return ( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
+    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'});
 }
 
 ##############################################
