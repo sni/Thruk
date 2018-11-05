@@ -1,6 +1,7 @@
 ---
 - hosts: all
   tasks:
+  - shell: sudo su - demo -c "set_admin_password omd"
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set PNP4NAGIOS off
   - shell: omd config demo set LIVESTATUS_TCP on
