@@ -2407,6 +2407,14 @@ sub parse_lexical_filter {
         my $copy = $string;
         $string = \$copy;
     }
+    if(${$string} =~ m/^(.{3})/mx) {
+        my $separator = $1;
+        if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
+            if(${$string} =~ m/\Q$separator\E(.*?)\Q$separator\E/gmx) {
+                ${$string} = $1;
+            }
+        }
+    }
     my $filter = [];
     my($token,$key,$op,$val,$combine);
     while(${$string} ne '') {
