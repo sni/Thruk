@@ -265,7 +265,7 @@ Ext.define('TP.PanletSquares', {
             available_buttons.push(["s:"+name, name]);
         });
         Ext.Array.each(action_menu_items, function(val, i) {
-            var name = val[0];
+            var name = val.name;
             available_buttons.push(["m:"+name, name]);
         });
         panel.addGearItems({

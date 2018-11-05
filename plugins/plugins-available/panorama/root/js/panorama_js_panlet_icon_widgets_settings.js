@@ -442,7 +442,7 @@ TP.iconShowEditDialog = function(panel) {
     });
     var action_menus_menu = [];
     Ext.Array.each(action_menu_items, function(val, i) {
-        var name = val[0];
+        var name = val.name;
         action_menus_menu.push({
             text:    name,
             icon:    url_prefix+'plugins/panorama/images/cog.png',
