@@ -1076,8 +1076,7 @@ sub _rest_get_thruk {
 ##########################################################
 # REST PATH: GET /thruk/config
 # lists configuration information
-register_rest_path_v1('GET', '/thruk/config', \&_rest_get_thruk_config);
-register_rest_path_v1('GET', '/thruk/config', \&_rest_get_thruk_config);
+register_rest_path_v1('GET', '/thruk/config', \&_rest_get_thruk_config, ['admin']);
 sub _rest_get_thruk_config {
     my($c) = @_;
     my $data = {};
