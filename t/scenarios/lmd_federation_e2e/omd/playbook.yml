@@ -1,6 +1,8 @@
 ---
 - hosts: all
   tasks:
+  - shell: "sudo su - {{item}} -c 'set_admin_password omd'"
+    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
 # demo site, directly connected
   - shell: "omd config demo set LIVESTATUS_TCP on"
 
