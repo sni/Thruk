@@ -1265,6 +1265,7 @@ UL.action_menu LI.clickable A {
   width: 100%;
   height: 100%;
   display: block;
+  white-space: nowrap;
 }
 
 UL.action_menu LI HR {
