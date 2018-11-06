@@ -24,10 +24,10 @@ The cache handles thruk plugins itself.
 
     Available commands are:
 
-        - list [enabled]            list all available (or enabled) plugins
+        - list [enabled|all|installed] list all available (or enabled) plugins
         - enable <plugin>           enable this plugin
         - disable <plugin>          disable this plugin
-        - search <patter>           search internet plugin registry for plugins
+        - search [<pattern>]        search internet plugin registry for plugins
         - update [<plugin>]         update all or specified plugin
         - install <plugin|tarball>  install and enable this plugin
         - remove <plugin>           uninstall and disable this plugin
@@ -67,14 +67,10 @@ sub cmd {
     my $rc     = 0;
     my $command = shift @{$commandoptions} || 'help';
     if($command eq 'list') {
-        my $enabled = shift @{$commandoptions} || '';
-        my $plugins  = Thruk::Utils::Plugin::get_plugins($c);
-        $output .= _get_plugin_list_header();
-        for my $name (sort keys %{$plugins} ) {
-            if($enabled ne 'enabled' || $plugins->{$name}->{'enabled'}) {
-                $output .= _get_plugin_list_entry($plugins->{$name});
-            }
+        if(!defined $commandoptions->[0]) {
+            push @{$commandoptions}, 'local';
         }
+        ($output, $rc) = _plugin_search($c, $commandoptions, $globaloptions);
     }
     elsif($command eq 'enable') {
         my $name = shift @{$commandoptions};
@@ -127,7 +123,7 @@ sub _get_plugin_list_entry {
     my $output = sprintf("%-8s %-20s %-15s %-40s\n",
                        $plugin->{'enabled'} ? 'E' : ($plugin->{'installed'} ? ' I' : ''),
                        $plugin->{'dir'},
-                       $plugin->{'version'},
+                       ($plugin->{'version'} || 'core'),
                        (split(/\n/mx, $plugin->{'description'}))[0],
                     );
     return($output);
@@ -138,18 +134,21 @@ sub _plugin_search {
     my($c, $commandoptions, $globaloptions) = @_;
     my $output = "";
     my $search = shift @{$commandoptions};
-    if(!$search) {
-        return("usage: $0 plugin search <pattern>\n", 1);
-    }
+    $search = 'all' unless $search;
+
     # add local plugins
     my $plugins = [values %{Thruk::Utils::Plugin::get_plugins($c)}];
     # get remote plugins
-    my $remote_plugins = Thruk::Utils::Plugin::get_online_plugins($c, $globaloptions->{'force'});
-    push @{$plugins}, @{$remote_plugins};
+    if($search !~ m/^(local|enabled|installed)$/mx) {
+        my $remote_plugins = Thruk::Utils::Plugin::get_online_plugins($c, $globaloptions->{'force'});
+        push @{$plugins}, @{$remote_plugins};
+    }
 
     my $dups = {};
     for my $plugin (sort _plugin_sort @{$plugins}) {
-        if($plugin->{'name'} =~ m/\Q$search\E/gmxi || $plugin->{'dir'} =~ m/\Q$search\E/gmxi || $plugin->{'description'} =~ m/\Q$search\E/gmxi) {
+        if($search =~ /^(all|local|enabled|installed)$/mx || $plugin->{'name'} =~ m/\Q$search\E/gmxi || $plugin->{'dir'} =~ m/\Q$search\E/gmxi || $plugin->{'description'} =~ m/\Q$search\E/gmxi) {
+            next if $search eq 'enabled' && !$plugin->{'enabled'};
+            next if $search eq 'installed' && !$plugin->{'installed'};
             if(!$dups->{$plugin->{'dir'}}->{$plugin->{'version'}}) {
                 $output .= _get_plugin_list_entry($plugin);
                 $dups->{$plugin->{'dir'}}->{$plugin->{'version'}} = 1;
