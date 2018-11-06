@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.24-2   Tue Nov  6 16:18:50 CET 2018
+          - add new (optional) roles
           - fix rest api issues
           - Panorama:
             - make icon unknown if filter does not return any objects
