@@ -137,6 +137,14 @@ sub new {
         $self->grant('admin');
     }
 
+    # Grant broadcast, report and business process permissions to admins
+    if (
+        grep({ $_ eq 'authorized_for_system_information'} @{$self->{'roles'}}) and
+        grep({ $_ eq 'authorized_for_configuration_information'} @{$self->{'roles'}})
+    ) {
+        push(@{$self->{'roles'}}, qw/authorized_for_broadcasts authorized_for_reports authorized_for_business_processes/);
+    }
+
     # Does this user have all roles?
     if (@{$self->{'roles'}} == @{$possible_roles}) {
         # Yes he/she does. Remove read only role
