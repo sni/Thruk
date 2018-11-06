@@ -408,6 +408,7 @@ sub _get_filter {
 
     for my $key (keys %{$c->req->parameters}) {
         next if $reserved->{$key};
+        next if $key =~ m/^\s*$/mx; # skip empty keys
         my $op   = '=';
         my @vals = @{Thruk::Utils::list($c->req->parameters->{$key})};
         if($key =~ m/^(.+)\[(.*?)\]$/mx) {
