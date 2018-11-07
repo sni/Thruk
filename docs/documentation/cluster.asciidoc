@@ -19,6 +19,25 @@ local.
     - Enable cluster with `cluster_enabled=1`
 
 
+==== Static Cluster
+Having a fixed number of cluster nodes will be set if you configure multiple
+cluster_nodes with fixed hostnames like:
+
+    cluster_enabled = 1
+    cluster_nodes = http://clusternode1/$url_prefix$/
+    cluster_nodes = http://clusternode2/$url_prefix$/
+
+
+==== Autoscaling / Dynamic Cluster
+When having no (the default) or only one generic cluster_node url defined, Thruk
+uses autoscaling / registering cluster mode and new nodes are registered
+automatically when they startup.
+
+    cluster_enabled = 1
+    # optionally set generic url if the default does not work
+    #cluster_nodes = http://$hostname$/$url_prefix$/
+
+
 === Features
 
 ==== Shared cronjobs

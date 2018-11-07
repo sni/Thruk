@@ -44,6 +44,13 @@ sub new {
 
     Thruk::Utils::IO::mkdir_r($thruk->config->{'var_path'}.'/cluster');
 
+    if(scalar @{$self->{'config'}->{'cluster_nodes'}} > 1) {
+        $self->{'cluster_nodes_map'} = {};
+        for my $url (@{$self->{'config'}->{'cluster_nodes'}}) {
+            $self->{'cluster_nodes_map'}->{$url} = $url;
+        }
+    }
+
     return $self;
 }
 
@@ -63,8 +70,52 @@ sub load_statefile {
     $self->{'nodes_by_id'}  = {};
     $self->{'nodes_by_url'} = {};
     my $nodes = Thruk::Utils::IO::json_lock_retrieve($self->{'statefile'}) || {};
+
+    for my $key (sort keys %{$nodes}) {
+        delete $nodes->{$key} unless $nodes->{$key}->{'node_url'};
+    }
+
+    # when using fixed nodes, verify all of them are available in $nodes
+    if(scalar @{$self->{'config'}->{'cluster_nodes'}} > 1) {
+        for my $key (sort keys %{$nodes}) {
+            delete $nodes->{$key} if $key =~ m/^dummy/mx;
+        }
+
+        if(scalar @{$self->{'config'}->{'cluster_nodes'}} != scalar keys %{$nodes}) {
+            # add dummy node(s)
+            for my $x (1..(scalar @{$self->{'config'}->{'cluster_nodes'}} - scalar keys %{$nodes})) {
+                # find first unused cluster_node url
+                my $next_url = "";
+                for my $url (sort keys %{$self->{'cluster_nodes_map'}}) {
+                    my $found = 0;
+                    for my $key (sort keys %{$nodes}) {
+                        if($nodes->{$key}->{'node_url'} eq $self->{'cluster_nodes_map'}->{$url}) {
+                            $found = 1;
+                            last;
+                        }
+                    }
+                    if(!$found) {
+                        $next_url = $url;
+                        last;
+                    }
+                }
+                $self->{'cluster_nodes_map'}->{$next_url} = $self->_replace_url_macros($next_url);
+                $nodes->{"dummy".$x} = {
+                    node_url => $self->{'cluster_nodes_map'}->{$next_url},
+                    pids     => {},
+                };
+            }
+        }
+
+        # cleanup orphaned fixed nodes
+        for my $key (sort keys %{$nodes}) {
+            delete $nodes->{$key} unless $nodes->{$key}->{'node_url'};
+        }
+    }
+
     for my $key (sort keys %{$nodes}) {
         my $n = $nodes->{$key};
+        $n->{'last_update'} =  0 unless $n->{'last_update'};
         # no contact in last x seconds, remove it completely from cluster
         if($n->{'last_update'} < $now - $c->config->{'cluster_node_stale_timeout'} && $key ne $Thruk::NODE_ID) {
             $self->unregister($key);
@@ -80,6 +131,7 @@ sub load_statefile {
         $self->{'nodes_by_id'}->{$key}              = $n;
         $self->{'nodes_by_url'}->{$n->{'node_url'}} = $n;
     }
+
     $c->stats->profile(end => "cluster::load_statefile") if $c;
     return $nodes;
 }
@@ -128,6 +180,9 @@ sub unregister {
             },
         },1);
     } else {
+        # do not completely unregister a node if using fixed nodes
+        return if scalar @{$self->{'config'}->{'cluster_nodes'}} > 1;
+
         Thruk::Utils::IO::json_lock_patch($self->{'statefile'}, {
             $nodeid => undef,
         },1);
@@ -146,6 +201,7 @@ sub is_clustered {
     my($self) = @_;
     return 0 if !$self->{'config'}->{'cluster_enabled'};
     return 1 if scalar keys %{$self->{nodes_by_url}} > 1;
+    return 1 if scalar @{$self->{'config'}->{'cluster_nodes'}} > 1;
     return 0;
 }
 
@@ -317,15 +373,36 @@ sub is_it_me {
     if($self->{'nodes_by_url'}->{$n} && $self->{'nodes_by_url'}->{$n}->{'key'} eq $Thruk::NODE_ID) {
         return(1);
     }
-    return;
+    return(0);
 }
 
 ##########################################################
 sub _build_node_url {
-    my($self) = @_;
-    my $url = $self->{'config'}->{'cluster_nodes'};
-    my $hostname = $Thruk::HOSTNAME;
+    my($self, $hostname) = @_;
+    $hostname = $Thruk::HOSTNAME unless $hostname;
+    my $url;
+    if(scalar @{$self->{'config'}->{'cluster_nodes'}} == 1) {
+        $url = $self->{'config'}->{'cluster_nodes'}->[0];
+    } else {
+        # is there a url in cluster_nodes which matches our hostname?
+        for my $tst (@{$self->{'config'}->{'cluster_nodes'}}) {
+            if($tst =~ m/\Q$hostname\E/mx) {
+                $url = $tst;
+                last;
+            }
+        }
+        return "" unless $url;
+    }
+    my $orig_url = $url;
     $url =~ s%\$hostname\$%$hostname%mxi;
+    $url = $self->_replace_url_macros($url);
+    $self->{'cluster_nodes_map'}->{$orig_url} = $url;
+    return($url);
+}
+
+##########################################################
+sub _replace_url_macros {
+    my($self, $url) = @_;
     my $proto = $self->{'config'}->{'omd_apache_proto'} ? $self->{'config'}->{'omd_apache_proto'} : 'http';
     $url =~ s%\$proto\$%$proto%mxi;
     my $url_prefix = $self->{'config'}->{'url_prefix'};

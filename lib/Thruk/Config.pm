@@ -412,7 +412,7 @@ sub set_default_config {
         bug_email_rcpt                  => 'bugs@thruk.org',
         home_link                       => 'http://www.thruk.org',
         plugin_registry_url             => ['https://api.thruk.org/v1/plugin/list'],
-        cluster_nodes                   => '$proto$://$hostname$/$url_prefix$/',
+        cluster_nodes                   => ['$proto$://$hostname$/$url_prefix$/'],
         cluster_heartbeat_interval      => 15,
         cluster_node_stale_timeout      => 120,
         rest_api_enabled                => 1,
