@@ -216,11 +216,16 @@ function bodyOnLoad(refresh) {
             stopRefresh();
         } else {
             setRefreshRate(refresh);
-            jQuery(document).bind("mousemove keyup", resetRefresh);
+            jQuery(document).bind("mousemove click keyup", updateLastUserInteraction);
         }
     }
 
     init_page();
+}
+
+var lastUserInteraction;
+function updateLastUserInteraction() {
+    lastUserInteraction = (new Date()).getTime();
 }
 
 /* save scroll value */
@@ -514,6 +519,13 @@ function readCookie(name,c,C,i){
 
 /* page refresh rate */
 function setRefreshRate(rate) {
+  if(rate >= 0 && rate < 20) {
+      // check lastUserInteraction date to not refresh while user is interacting with the page
+      if(lastUserInteraction > ((new Date).getTime() - 20000)) {
+          lastUserInteraction = undefined;
+          rate = 20;
+      }
+  }
   curRefreshVal = rate;
   var obj = document.getElementById('refresh_rate');
   if(refreshPage == 0) {
