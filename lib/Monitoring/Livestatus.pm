@@ -1189,7 +1189,7 @@ sub _read_socket_do {
                 or return($self->_socket_error($statement, $sock,
                             'reading body from socket failed: '
                             .($json_decoder->incr_text // '')
-                            .($json_decoder->incr_reset // '')
+                            .($json_decoder->incr_reset // ''),
                         ));
             $json_decoder->incr_reset;
         } else {
