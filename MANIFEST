@@ -77,6 +77,7 @@ lib/Thruk/Controller/history.pm
 lib/Thruk/Controller/login.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
+lib/Thruk/Controller/proxy.pm
 lib/Thruk/Controller/remote.pm
 lib/Thruk/Controller/Rest/V1/broadcast.pm
 lib/Thruk/Controller/Rest/V1/cluster.pm

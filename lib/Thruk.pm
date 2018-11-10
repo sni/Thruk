@@ -104,7 +104,7 @@ sub startup {
                     path         => sub {
                                           my $p = Thruk::Context::translate_request_path($_, $class->config);
                                           return unless $p =~ m%^/thruk/plugins/%mx;
-                                          return unless $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot|)$/mx;
+                                          return unless $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot)$/mx;
                                           $_ =~ s%^/thruk/plugins/([^/]+)/%$1/root/%mx;
                                           return 1;
                                         },
@@ -112,8 +112,10 @@ sub startup {
                     pass_through => 1,
         );
         $app = Plack::Middleware::Static->wrap($app,
-                    path         => sub { my $p = Thruk::Context::translate_request_path($_, $class->config);
-                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot|)$/mx;
+                    path         => sub {
+                                          my $p = Thruk::Context::translate_request_path($_, $class->config);
+                                          return if $p =~ m%^/thruk/cgi-bin/proxy\.cgi%mx;
+                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot)$/mx;
                                         },
                     root         => './root/',
                     pass_through => 1,
@@ -216,6 +218,7 @@ sub _build_app {
     $self->{'route_pattern'} = [
         [ '^/thruk/r/v1.*'                   ,'Thruk::Controller::rest_v1::index' ],
         [ '^/thruk/r/.*'                     ,'Thruk::Controller::rest_v1::index' ],
+        [ '^/thruk/cgi-bin/proxy.cgi/.*'     ,'Thruk::Controller::proxy::index' ],
     ];
 
     ###################################################

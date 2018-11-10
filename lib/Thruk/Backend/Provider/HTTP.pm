@@ -176,7 +176,7 @@ sub reconnect {
         }
     }
     push @{ $self->{'ua'}->requests_redirectable }, 'POST';
-    return;
+    return($self->{'ua'});
 }
 
 ##########################################################
@@ -756,6 +756,23 @@ sub _get_logs_start_end {
 
 ##########################################################
 
+=head2 propagate_session_file
+
+  propagate_session_file($c)
+
+propagate local session to remote site
+
+=cut
+sub propagate_session_file {
+    my($self, $c) = @_;
+    my $session_id = $c->req->cookies->{'thruk_auth'};
+    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id], undef, $c->stash->{'remote_user'});
+    $session_id = $r->[0] if $r && ref($r) eq 'ARRAY';
+    return $session_id;
+}
+
+##########################################################
+
 =head2 _req
 
   _req($sub, $options)
@@ -764,7 +781,7 @@ returns result for given request
 
 =cut
 sub _req {
-    my($self, $sub, $args, $redirects) = @_;
+    my($self, $sub, $args, $redirects, $auth) = @_;
     $redirects = 0 unless defined $redirects;
 
     # clean code refs
@@ -779,6 +796,7 @@ sub _req {
     if(defined $args and ref $args eq 'HASH') {
         $options->{'auth'} = $args->{'auth'} if defined $args->{'auth'};
     }
+    $options->{'auth'} = $auth if $auth;
 
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});

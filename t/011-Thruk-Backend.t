@@ -21,6 +21,7 @@ sub get_subs {
     while(<$fh>) {
         if($_ =~ /^\s*sub\s+([\w\d_\_]+)/mx) {
             next if $1 =~ m/^_/mx; # skip private subs
+            next if $1 eq 'propagate_session_file'; # not required
             push @subs, $1;
         }
     }

@@ -1231,6 +1231,17 @@ graph_replace = s/[^\w\-]/_/gmx
 .....
 
 
+=== graph_proxy_enabled
+The graph_proxy will proxy requests for pnp or grafana action_urls via the
+http backend if possible. This only works for http backends and if cookie auth is enabled.
+Set to 0 to disable.
+
+ex.:
+
+  graph_proxy_enabled = 1
+
+
+
 === show_custom_vars
 Show custom vars in host / service ext info. List variable names to
 display in the host and service extinfo details page. Can be specified

@@ -951,60 +951,7 @@ sub _read_static_content_file {
 =cut
 sub _absolutize_url {
     my($baseurl, $link) = @_;
-
-    return($link) if $link =~ m/^https?:/mx;
-
-    $baseurl = '' unless defined $baseurl;
-    confess("empty") if($baseurl eq '' and $link eq '');
-
-    my $c = $Thruk::Request::c or die("not initialized!");
-    my $product_prefix = $c->config->{'product_prefix'};
-
-    # append trailing slash
-    if($baseurl =~ m/^https?:\/\/[^\/]+$/mx) {
-        $baseurl .= '/';
-    }
-
-    if($link !~ m/^https?:/mx && $link !~ m|^/|mx) {
-        my $newloc = $baseurl;
-        $newloc    =~ s/^(.*\/).*$/$1/gmxo;
-        $newloc    .= $link;
-        while($newloc =~ s|/[^\/]+/\.\./|/|gmxo) {}
-        $link = $newloc;
-    }
-    return($link) if $link    =~ m%^(/||[^/]*/|/[^/]*/)\Q$product_prefix\E/%mx;
-
-    # split original baseurl in host, path and file
-    if($baseurl =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
-        my $host     = $1."://".$2.$3;
-        my $fullpath = $4 || '';
-        $host        =~ s/\/$//mx;      # remove last /
-        $fullpath    =~ s/\?.*$//mx;
-        $fullpath    =~ s/^\///mx;
-        my($path,$file) = ('', '');
-        if($fullpath =~ m/^(.+)\/(.*)$/mx) {
-            $path = $1;
-            $file = $2;
-        }
-        else {
-            $file = $fullpath;
-        }
-        $path =~ s/^\///mx; # remove first /
-
-        if($link =~ m/^(http|https):\/\//mx) {
-            return $link;
-        }
-        elsif($link =~ m/^\//mx) { # absolute link
-            return $host.$link;
-        }
-        elsif($path eq '') {
-            return $host."/".$link;
-        } else {
-            return $host."/".$path."/".$link;
-        }
-    }
-
-    confess("unknown url scheme in _absolutize_url('".$baseurl."', '".$link."')");
+    return(Thruk::Utils::absolute_url($baseurl, $link));
 }
 
 ##############################################

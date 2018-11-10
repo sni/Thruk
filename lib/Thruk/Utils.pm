@@ -1356,7 +1356,13 @@ sub get_pnp_url {
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
         for my $regex (qw|/pnp[^/]*/|) {
-            return($1.'/index.php') if $obj->{$type} =~ m|(^.*?$regex)|mx;
+            if($obj->{$type} =~ m|(^.*?$regex)|mx) {
+                my $url = $1.'/index.php';
+                if($url !~ m/^https?:/mx && $c->config->{'graph_proxy_enabled'}) {
+                    $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
+                }
+                return($url);
+            }
         }
     }
 
@@ -1381,7 +1387,11 @@ sub get_histou_url {
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
         if($obj->{$type} =~ m%histou\.js\?|/grafana/%mx) {
-            return($obj->{$type});
+            my $url = $obj->{$type};
+            if($url !~ m/^https?:/mx && $c->config->{'graph_proxy_enabled'}) {
+                $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
+            }
+            return($url);
         }
     }
 
@@ -1558,21 +1568,91 @@ sub get_perf_image {
 
 ##############################################
 
+=head2 absolute_url
+
+  returns a absolute url
+
+  expects
+  $VAR1 = origin url
+  $VAR2 = target link
+
+=cut
+sub absolute_url {
+    my($baseurl, $link) = @_;
+
+    return($link) if $link =~ m/^https?:/mx;
+
+    $baseurl = '' unless defined $baseurl;
+    confess("empty") if($baseurl eq '' and $link eq '');
+
+    my $c = $Thruk::Request::c or die("not initialized!");
+    my $product_prefix = $c->config->{'product_prefix'};
+
+    # append trailing slash
+    if($baseurl =~ m/^https?:\/\/[^\/]+$/mx) {
+        $baseurl .= '/';
+    }
+
+    if($link !~ m/^https?:/mx && $link !~ m|^/|mx) {
+        my $newloc = $baseurl;
+        $newloc    =~ s/^(.*\/).*$/$1/gmxo;
+        $newloc    .= $link;
+        while($newloc =~ s|/[^\/]+/\.\./|/|gmxo) {}
+        $link = $newloc;
+    }
+    return($link) if $link    =~ m%^(/||[^/]*/|/[^/]*/)\Q$product_prefix\E/%mx;
+
+    # split original baseurl in host, path and file
+    if($baseurl =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
+        my $host     = $1."://".$2.$3;
+        my $fullpath = $4 || '';
+        $host        =~ s/\/$//mx;      # remove last /
+        $fullpath    =~ s/\?.*$//mx;
+        $fullpath    =~ s/^\///mx;
+        my($path,$file) = ('', '');
+        if($fullpath =~ m/^(.+)\/(.*)$/mx) {
+            $path = $1;
+            $file = $2;
+        }
+        else {
+            $file = $fullpath;
+        }
+        $path =~ s/^\///mx; # remove first /
+
+        if($link =~ m/^(http|https):\/\//mx) {
+            return $link;
+        }
+        elsif($link =~ m/^\//mx) { # absolute link
+            return $host.$link;
+        }
+        elsif($path eq '') {
+            return $host."/".$link;
+        } else {
+            return $host."/".$path."/".$link;
+        }
+    }
+
+    confess("unknown url scheme in _absolutize_url('".$baseurl."', '".$link."')");
+}
+
+##############################################
+
 =head2 get_fake_session
 
-  get_fake_session($c)
+  get_fake_session($c, [$sessionid])
 
 create and return fake session id for current user
 
 =cut
 
 sub get_fake_session {
-    my($c) = @_;
+    my($c, $sessionid, $username) = @_;
     my $sdir        = $c->config->{'var_path'}.'/sessions';
-    my $sessionid   = md5_hex(rand(1000).time());
+    $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
+    $username       = $c->stash->{'remote_user'} unless $username;
     my $sessionfile = $sdir.'/'.$sessionid;
     Thruk::Utils::IO::mkdir_r($sdir);
-    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
+    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$username);
     push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;
