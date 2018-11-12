@@ -52,8 +52,8 @@
         var patt   = new RegExp('^' + get_host(), 'gi');
         newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
-            if (history.replaceState) {
-                history.replaceState({}, "", '#'+newloc);
+            if(history.pushState) {
+                history.pushState({}, "", '#'+newloc);
             } else {
                 skipHashChange = skipHashChange + 1;
                 window.location.replace('#'+newloc);
