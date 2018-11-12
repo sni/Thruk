@@ -117,6 +117,7 @@ our %config = ('name'                   => 'Thruk',
                                           'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
                                           'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
                                           'command_disabled'    => \&Thruk::Utils::command_disabled,
+                                          'proxifiy_url'        => \&Thruk::Utils::proxifiy_url,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

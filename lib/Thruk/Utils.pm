@@ -1340,6 +1340,36 @@ sub savexls {
 
 ########################################
 
+=head2 proxifiy_url
+
+  prepend proxy url to action url which might be proxied via thruk http
+
+returns url with optional proxy prepended
+
+=cut
+sub proxifiy_url {
+    my($c, $obj, $url) = @_;
+    if($url =~ m/^https?:/mx) {
+        return($url);
+    }
+    if(!$c->config->{'graph_proxy_enabled'}) {
+        return($url);
+    }
+    my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
+    if($peer->{'type'} ne 'http') {
+        return($url);
+    }
+
+    my $proxy_prefix = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'};
+
+    # fix pnp/grafana url hacks
+    $url =~ s%(\s+rel=)('|")%$1$2$proxy_prefix%gmx;
+
+    return($proxy_prefix.$url);
+}
+
+########################################
+
 =head2 get_pnp_url
 
   get_pnp_url($c, $object)
@@ -1357,14 +1387,7 @@ sub get_pnp_url {
         next unless defined $obj->{$type};
         for my $regex (qw|/pnp[^/]*/|) {
             if($obj->{$type} =~ m|(^.*?$regex)|mx) {
-                my $url = $1.'/index.php';
-                if($url !~ m/^https?:/mx && $c->config->{'graph_proxy_enabled'}) {
-                    my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
-                    if($peer->{'type'} eq 'http') {
-                        $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
-                    }
-                }
-                return($url);
+                return(proxifiy_url($c, $obj, $1.'/index.php'));
             }
         }
     }
@@ -1390,14 +1413,7 @@ sub get_histou_url {
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
         if($obj->{$type} =~ m%histou\.js\?|/grafana/%mx) {
-            my $url = $obj->{$type};
-            if($url !~ m/^https?:/mx && $c->config->{'graph_proxy_enabled'}) {
-                my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
-                if($peer->{'type'} eq 'http') {
-                    $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
-                }
-            }
-            return($url);
+            return(proxifiy_url($c, $obj, $obj->{$type}));
         }
     }
 
