@@ -564,7 +564,7 @@ sub set_default_config {
         'user_password_min_length'          => 5,
         'grafana_default_panelId'           => 1,
         'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
-        'graph_proxy_enabled'               => 1,
+        'graph_proxy_enabled'               => 0,
         'logcache_delta_updates'            => 1,
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
