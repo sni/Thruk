@@ -43,10 +43,10 @@
       [% END %]
       <row>
         [% FOREACH col = columns %]
-        [% IF    col == "Site"          %]<cell>[% pi_detail.$peer_key.peer_name %]</cell>
-        [% ELSIF col == "Hostname"      %]<cell>[% h.name %]</cell>
-        [% ELSIF col == "Displayname"   %]<cell>[% h.display_name %]</cell>
-        [% ELSIF col == "IP"            %]<cell>[% h.address %]</cell>
+        [% IF    col == "Site"          %]<cell>[% escape_xml(pi_detail.$peer_key.peer_name) %]</cell>
+        [% ELSIF col == "Hostname"      %]<cell>[% escape_xml(h.name) %]</cell>
+        [% ELSIF col == "Displayname"   %]<cell>[% escape_xml(h.display_name) %]</cell>
+        [% ELSIF col == "IP"            %]<cell>[% escape_xml(h.address) %]</cell>
         [% ELSIF col == "Status"        %]<format bg_color='[% state_color %]'><cell>[% state %]</cell></format>
         [% ELSIF col == "Acknowledged"  %]<cell>[% IF h.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Downtime"      %]<cell>[% IF h.scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>

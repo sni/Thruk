@@ -54,17 +54,17 @@
       [% END %]
       <row>
         [% FOREACH col = columns %]
-        [% IF    col == "Site"                     %]<cell>[% pi_detail.$peer_key.peer_name %]</cell>
-        [% ELSIF col == "Hostname"                 %]<cell>[% s.host_name %]</cell>
-        [% ELSIF col == "Hostdisplayname"          %]<cell>[% s.host_display_name %]</cell>
-        [% ELSIF col == "IP"                       %]<cell>[% s.host_address %]</cell>
+        [% IF    col == "Site"                     %]<cell>[% escape_xml(pi_detail.$peer_key.peer_name) %]</cell>
+        [% ELSIF col == "Hostname"                 %]<cell>[% escape_xml(s.host_name) %]</cell>
+        [% ELSIF col == "Hostdisplayname"          %]<cell>[% escape_xml(s.host_display_name) %]</cell>
+        [% ELSIF col == "IP"                       %]<cell>[% escape_xml(s.host_address) %]</cell>
         [% ELSIF col == "Host Acknowledged"        %]<cell>[% IF s.host_acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Host Downtime"            %]<cell>[% IF s.host_scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Host Notifications"       %]<cell>[% IF s.host_notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Host Active Checks"       %]<cell>[% IF s.host_active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Host Flapping"            %]<cell>[% IF s.host_is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
-        [% ELSIF col == "Service"                  %]<cell>[% s.description %]</cell>
-        [% ELSIF col == "Displayname"              %]<cell>[% s.display_name %]</cell>
+        [% ELSIF col == "Service"                  %]<cell>[% escape_xml(s.description) %]</cell>
+        [% ELSIF col == "Displayname"              %]<cell>[% escape_xml(s.display_name) %]</cell>
         [% ELSIF col == "Status"                   %]<format bg_color='[% state_color %]'><cell>[% state %]</cell></format>
         [% ELSIF col == "Last Check"               %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell type='date_time'>[% IF s.has_been_checked == 0 %][% ELSE %][% format_date(s.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell></format>
         [% ELSIF col == "Duration"                 %]<cell>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>
