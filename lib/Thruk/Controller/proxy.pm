@@ -30,12 +30,12 @@ sub index {
         $url  = $2;
     }
     if(!$c->config->{'graph_proxy_enabled'} || !$site || !$url) {
-        return $c->detach('/error/index/24');
+        return $c->redirect_to($url);
     }
 
     my $peer = $c->{'db'}->get_peer_by_key($site);
     if(!$peer || $peer->{'type'} ne 'http') {
-        return $c->detach('/error/index/24');
+        return $c->redirect_to($url);
     }
 
     my $session_id  = $c->req->cookies->{'thruk_auth'} || $peer->{'class'}->propagate_session_file($c);
