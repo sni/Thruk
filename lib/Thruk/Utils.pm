@@ -1359,7 +1359,10 @@ sub get_pnp_url {
             if($obj->{$type} =~ m|(^.*?$regex)|mx) {
                 my $url = $1.'/index.php';
                 if($url !~ m/^https?:/mx && $c->config->{'graph_proxy_enabled'}) {
-                    $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
+                    my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
+                    if($peer->{'type'} eq 'http') {
+                        $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
+                    }
                 }
                 return($url);
             }
@@ -1389,7 +1392,10 @@ sub get_histou_url {
         if($obj->{$type} =~ m%histou\.js\?|/grafana/%mx) {
             my $url = $obj->{$type};
             if($url !~ m/^https?:/mx && $c->config->{'graph_proxy_enabled'}) {
-                $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
+                my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
+                if($peer->{'type'} eq 'http') {
+                    $url = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'}.$url;
+                }
             }
             return($url);
         }

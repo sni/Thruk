@@ -825,9 +825,11 @@ sub _req {
         };
         die($@."\nrequest:\n".Dumper($response)) if $@;
         die($@."\n") if $@;
+        my $remote_version = $data->{'version'};
+        $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
+        $self->{'remote_version'} = $data->{'version'};
+        $self->{'remote_branch'}  = $data->{'branch'};
         if($data->{'rc'} == 1) {
-            my $remote_version = $data->{'version'};
-            $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
             if($data->{'output'} =~ m/no\ such\ command/mx) {
                 die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
