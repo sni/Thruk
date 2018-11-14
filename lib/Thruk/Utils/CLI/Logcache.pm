@@ -112,7 +112,7 @@ sub cmd {
     my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
 
-    my $verbose = $Thruk::Utils::CLI::verbose;
+    my $verbose = $Thruk::Utils::CLI::verbose // 0;
 
     eval {
         if($type eq 'mysql') {
