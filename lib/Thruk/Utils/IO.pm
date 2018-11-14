@@ -19,7 +19,7 @@ use Cpanel::JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 use File::Slurp qw/read_file/;
-use File::Copy qw/move/;
+use File::Copy qw/move copy/;
 use Time::HiRes qw/sleep/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -234,6 +234,19 @@ sub file_lock {
                         $retrys = 0;
                         undef $old_inode;
                     }
+                } else {
+                    $retrys++;
+                    if($retrys > 20) {
+                        unlink($lock_file);
+                        # we have to move and copy the file itself, otherwise
+                        # the orphaned process may overwrite the file
+                        # and the later flock() might hang again
+                        copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
+                        move($file, $file.'.orphaned') or confess("cannot move file $file: $!");
+                        move($file.'.copy', $file) or confess("cannot move file $file: $!");
+                        unlink($file.'.orphaned');
+                        $retrys = 0;
+                    }
                 }
             }
             sleep(0.1);
@@ -389,6 +402,7 @@ sub json_lock_retrieve {
     return unless -s $file;
     my($fh) = file_lock($file, 'sh');
     my $data = json_retrieve($file, $fh);
+    flock($fh, LOCK_UN);
     CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     return $data;
 }
