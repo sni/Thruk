@@ -259,6 +259,12 @@ function show_circle_map(id_to_show, w, h) {
         duration: 700,
         fps: 30,
 
+        Navigation: {
+         enable: true,
+         panning: true,
+         zooming: 20
+        },
+
         'background': {
           'CanvasStyles': {
             'strokeStyle': '#CCCCCC',
