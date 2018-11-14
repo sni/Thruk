@@ -112,8 +112,7 @@ sub cmd {
     my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
 
-    my $verbose = 0;
-    $verbose = 1 if $src eq 'local';
+    my $verbose = $Thruk::Utils::CLI::verbose;
 
     eval {
         if($type eq 'mysql') {
