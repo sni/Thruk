@@ -1008,6 +1008,7 @@ imports logs into Mysql
 sub _import_logs {
     my($self, $c, $mode, $verbose, $backends, $blocksize, $options) = @_;
     my $files = $options->{'files'} || [];
+    $verbose = 0 unless defined $verbose;
     $c->stats->profile(begin => "Mysql::_import_logs($mode)");
 
     my $forcestart;
