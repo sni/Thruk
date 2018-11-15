@@ -57,7 +57,7 @@ sub _rest_get_thruk_cluster_heartbeat {
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
         my $t1  = [gettimeofday];
-        my $res = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}])->[0];
+        my $res = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
         my $elapsed = tv_interval($t1);
         if(!$res) {
             next;
@@ -71,7 +71,7 @@ sub _rest_get_thruk_cluster_heartbeat {
                 last_contact  => time(),
                 response_time => $elapsed,
             },
-        },1);
+        },1) if $n->{'node_id'} !~ m/^dummy/mx;
     }
     alarm(0);
     $c->cluster->check_stale_pids();
