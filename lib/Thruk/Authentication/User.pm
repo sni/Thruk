@@ -145,9 +145,9 @@ sub new {
         push(@{$self->{'roles'}}, qw/authorized_for_broadcasts authorized_for_reports authorized_for_business_processes/);
     }
 
-    # Does this user have all roles?
-    if (@{$self->{'roles'}} == @{$possible_roles}) {
-        # Yes he/she does. Remove read only role
+    # Is this user an admin?
+    if ($self->check_user_roles('admin')) {
+        # Yes. Remove read only role
         $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
     }
 
