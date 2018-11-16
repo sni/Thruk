@@ -58,7 +58,9 @@ sub index {
     my $format = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_format'} || 'nagios';
     if($format ne 'icinga2') { $format = 'nagios'; }
     $c->stash->{'objects_save_format'}  = $format;
+    my $bp_backend_id;
     my $id = $c->req->parameters->{'bp'} || '';
+    if($id =~ m/^([^:]+):(\d+)$/mx) { $bp_backend_id = $1; $id = $2; }
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     my $nodeid = $c->req->parameters->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }

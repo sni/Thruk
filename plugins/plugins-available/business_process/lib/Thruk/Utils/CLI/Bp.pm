@@ -106,12 +106,23 @@ sub cmd {
     };
 
     # calculate bps
+    my @child_pids;
     my $last_bp;
     my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
     if($rate < 1) { $rate = 1; }
     if($rate > 5) { $rate = 5; }
     my $timeout = ($rate*60) -5;
-    local $SIG{ALRM} = sub { die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown')) };
+    local $SIG{ALRM} = sub {
+        # kill child pids
+        for my $pid (@child_pids) {
+            kill(2, $pid);
+        }
+        sleep(1);
+        for my $pid (@child_pids) {
+            kill(9, $pid);
+        }
+        die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown'));
+    };
     alarm($timeout);
 
     # enable all backends for now till configuration is possible for each BP
@@ -136,7 +147,6 @@ sub cmd {
     _debug("calculating business process with ".$worker_num." workers");
     my $chunks = Thruk::Utils::array_chunk($bps, $worker_num);
 
-    my @pids;
     for my $chunk (@{$chunks}) {
         my $child_pid;
         if($worker_num > 1) {
@@ -156,9 +166,10 @@ sub cmd {
             exit if $worker_num > 1;
         } else {
             _debug("worker start with pid: ".$child_pid);
-            push @pids, $child_pid;
+            push @child_pids, $child_pid;
         }
     }
+    alarm($timeout);
     _debug("waiting ".$timeout." seconds for workers to finish");
     if($worker_num > 1) {
         while(1) {
@@ -170,6 +181,7 @@ sub cmd {
             } else {
                 _debug("worker ".$pid." exited with rc: ".$rc);
             }
+            @child_pids = grep(!/^$pid$/mx, @child_pids);
             Time::HiRes::sleep(0.1);
         }
     }

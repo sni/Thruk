@@ -918,7 +918,7 @@ sub has_business_process {
     $prefix = '' unless defined $prefix;
     my $x = 0;
     for my $var (@{$obj->{$prefix.'custom_variable_names'}}) {
-        return $obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'THRUK_BP_ID';
+        return $obj->{'peer_key'}.':'.$obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'THRUK_BP_ID';
         $x++;
     }
     return 0;

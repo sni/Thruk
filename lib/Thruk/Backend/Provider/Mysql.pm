@@ -1008,6 +1008,7 @@ imports logs into Mysql
 sub _import_logs {
     my($self, $c, $mode, $verbose, $backends, $blocksize, $options) = @_;
     my $files = $options->{'files'} || [];
+    $verbose = 0 unless defined $verbose;
     $c->stats->profile(begin => "Mysql::_import_logs($mode)");
 
     my $forcestart;
@@ -1045,7 +1046,7 @@ sub _import_logs {
         $peer->logcache->reconnect();
         my $dbh = $peer->logcache->_dbh;
 
-        print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
+        print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose > 1;
 
         # backends maybe down, we still want to continue updates
         eval {
@@ -1132,7 +1133,7 @@ sub _update_logcache {
         }
 
         if($mode eq 'import') {
-            print "updateing auth cache\n" if $verbose;
+            print "updateing auth cache\n" if $verbose > 1;
             $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
         }
     };
@@ -1141,7 +1142,7 @@ sub _update_logcache {
     _finish_update($c, $dbh, $prefix) or $error .= $dbh->errstr;
 
     if($error) {
-        $c->log->info('logcache '.$mode.' failed: '.$error);
+        $c->log->error('logcache '.$mode.' failed: '.$error);
         die($error);
     }
 
@@ -1166,7 +1167,7 @@ sub _create_tables_if_not_exist {
     # check if our tables exist
     my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'%"')};
     if(scalar @tables == 0) {
-        print "creating logcache tables\n" if $verbose;
+        print "creating logcache tables\n" if $verbose > 1;
         _create_tables($dbh, $prefix);
         return 1;
     }
@@ -1186,7 +1187,7 @@ sub _check_lock {
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
-                print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
+                print "WARNING: logcache update already running with pid ".$pids[0]."\n" if $verbose;
                 $skip = 1;
             }
         }
@@ -1243,7 +1244,7 @@ sub _update_logcache_version {
         # only log message if not importing already
         my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$Thruk::Backend::Provider::Mysql::cache_version.'...';
         print "WARNING: ".$msg."\n" if $verbose;
-        $c->log->info($msg);
+        $c->log->error($msg);
         return;
     }
 
@@ -1260,13 +1261,13 @@ sub _update_logcache_clean {
     }
 
     my $start = time() - ($blocksize * 86400);
-    print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
+    print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose > 1;
     my $plugin_ref_count = 0;
     my $log_count = $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
     return([$log_count, $plugin_ref_count]) if $log_count == 0;
 
     # clean old plugin outputs
-    print "cleaning old orphaned plugin outputs\n" if $verbose;
+    print "cleaning old orphaned plugin outputs\n" if $verbose > 1;
     my($db_id, $db_id2);
     my($fh, $tempfile) = tempfile();
     eval {
@@ -1278,13 +1279,13 @@ sub _update_logcache_clean {
             print $fh $db_id, "\n", $db_id2, "\n";
         }
         CORE::close($fh) or confess("writing ids failed: $!");
-        print "fetched ids\n" if $verbose;
+        print "fetched ids\n" if $verbose > 1;
 
         # sort all used ids
         my $sortcmd = 'sort -nu -o '.$tempfile.'2 '.$tempfile.' && mv '.$tempfile.'2 '.$tempfile;
         `$sortcmd`;
         confess("sorting ids failed") if $? != 0;
-        print "sorted used ids\n" if $verbose;
+        print "sorted used ids\n" if $verbose > 1;
 
         # iterate existing ids and bulk remove those not in use anymore
         open($fh, '<', $tempfile) or confess('cannot open '.$tempfile.' for reading: '.$!);
@@ -1343,7 +1344,7 @@ sub _update_logcache_auth {
 
     # update hosts
     my($hosts)    = $peer->{'class'}->get_hosts(columns => [qw/name contacts/]);
-    print "hosts" if $verbose;
+    print "hosts" if $verbose > 1;
     my $stm = "INSERT INTO `".$prefix."_contact_host_rel` (contact_id, host_id) VALUES";
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
     for my $host (@{$hosts}) {
@@ -1354,12 +1355,12 @@ sub _update_logcache_auth {
             push @values, '('.$contact_id.','.$host_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
-        print "." if $verbose;
+        print "." if $verbose > 1;
     }
-    print "\n" if $verbose;
+    print "\n" if $verbose > 1;
 
     # update services
-    print "services" if $verbose;
+    print "services" if $verbose > 1;
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_service_rel`");
     $stm = "INSERT INTO `".$prefix."_contact_service_rel` (contact_id, service_id) VALUES";
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description contacts/]);
@@ -1371,10 +1372,10 @@ sub _update_logcache_auth {
             push @values, '('.$contact_id.','.$service_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
-        print "." if $verbose;
+        print "." if $verbose > 1;
     }
 
-    print "\n" if $verbose;
+    print "\n" if $verbose > 1;
 
     $dbh->commit or die $dbh->errstr;
 
@@ -1388,26 +1389,26 @@ sub _update_logcache_optimize {
     # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
     if(!$options->{'force'} && scalar @times > 0 && $times[0] && $times[0] > time()-86400) {
-        print "no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force\n" if $verbose;
+        print "no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force\n" if $verbose > 1;
         return(-1);
     }
 
     eval {
-        print "update logs table order..." if $verbose;
+        print "update logs table order..." if $verbose > 1;
         $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
         $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-        print "done\n" if $verbose;
+        print "done\n" if $verbose > 1;
     };
     print "$@\n" if($@ && $verbose);
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
         # repair / optimize tables
-        print "optimizing / repairing tables\n" if $verbose;
+        print "optimizing / repairing tables\n" if $verbose > 1;
         for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
-            print $table.'...' if $verbose;
+            print $table.'...' if $verbose > 1;
             $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
             $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
-            print "OK\n" if $verbose;
+            print "OK\n" if $verbose > 1;
         }
     }
 
@@ -1789,7 +1790,7 @@ sub _import_peer_logfiles {
         # get last timestamp from Mysql
         ($mstart, $mend) = @{$peer->logcache->get_logs_start_end(collection => $prefix)};
         if(defined $mend) {
-            print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
+            print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose > 1;
             push @{$filter}, {time => { '>=' => $mend }};
         }
         $c->stats->profile(end => "get last mysql timestamp");
@@ -1813,8 +1814,8 @@ sub _import_peer_logfiles {
     $c->stats->profile(end => "get livestatus timestamp");
 
     $start = $forcestart if $forcestart;
-    print "importing ", scalar localtime $start, "\n" if $verbose;
-    print "until latest entry in logfile: ", scalar localtime $end, "\n" if($end && $verbose);
+    print "importing ", scalar localtime $start, "\n" if $verbose > 1;
+    print "until latest entry in logfile: ", scalar localtime $end, "\n" if($end && $verbose > 1);
     my $time = $start;
     $end = time() unless $end;
 
@@ -1833,7 +1834,7 @@ sub _import_peer_logfiles {
         my $stime = scalar localtime $time;
         $c->stats->profile(begin => $stime);
         my $duplicate_lookup = {};
-        print scalar localtime $time if $verbose;
+        print scalar localtime $time if $verbose > 1;
 
         # do not let lookup grow to much, recreate from latest logfiles, otherwise import would consume lots of memory
         $plugin_lookup = _get_plugin_lookup($dbh,$prefix) if scalar keys %{$plugin_lookup} > 100000;
@@ -1894,7 +1895,7 @@ sub _import_logcache_from_file {
     my $foreign_key_stash = {};
 
     for my $f (@{$files}) {
-        print $f if $verbose;
+        print $f if $verbose > 1;
         my $duplicate_lookup  = {};
         my $last_duplicate_ts = 0;
         my @values;
@@ -1972,7 +1973,7 @@ sub _import_logcache_from_file {
         $self->_safe_insert($dbh, $stm, \@values, $verbose);
         $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
         CORE::close($fh);
-        print "\n" if $verbose;
+        print "\n" if $verbose > 1;
     }
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
@@ -1997,7 +1998,7 @@ sub _insert_logs {
     # check pid / lock
     my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
     if(scalar @pids == 1 && $pids[0] != $$) {
-        print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
+        print "WARNING: logcache update already running with pid ".$pids[0]."\n" if $verbose;
         return $log_count;
     }
 
@@ -2012,7 +2013,7 @@ sub _insert_logs {
             next if defined $duplicate_lookup->{$l->{'message'}};
         }
         $log_count++;
-        print '.' if $log_count%1000 == 0 and $verbose;
+        print '.' if $log_count%1000 == 0 and $verbose > 1;
 
         $l->{'type'} = '' unless defined $l->{'type'};
         $l->{'type'} = 'TIMEPERIOD TRANSITION' if $l->{'type'} =~ m/^TIMEPERIOD\ TRANSITION/mxo;
@@ -2063,7 +2064,7 @@ sub _insert_logs {
     $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
     _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
-    print '. '.$log_count . " entries added\n" if $verbose;
+    print '. '.$log_count . " entries added\n" if $verbose > 1;
     return $log_count;
 }
 

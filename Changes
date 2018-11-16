@@ -5,6 +5,8 @@ next:
           - remove cluetip library for popup graphs
           - fix reload issue in firefox
           - fix escaping hostnames and service description in excel exports
+          - Business Process:
+            - fix timeouts
 
 2.24-2   Tue Nov  6 16:18:50 CET 2018
           - add new (optional) roles
