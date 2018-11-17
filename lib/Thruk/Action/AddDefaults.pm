@@ -533,47 +533,48 @@ sub add_defaults {
     # add program status
     # this is also the first query on every page, so do the
     # backend availability checks here
-    $c->stats->profile(begin => "AddDefaults::get_proc_info");
-    my $last_program_restart = 0;
-    my $retrys = 1;
-    # try 3 times if all cores are local
-    $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
-    $retrys = 1 if $safe; # but only once on safe/cached pages
+    if(!$no_config_adjustments && !$c->stash->{'config_adjustments'}->{'extra_backends'}) {
+        $c->stats->profile(begin => "AddDefaults::get_proc_info");
+        my $last_program_restart = 0;
+        my $retrys = 1;
+        # try 3 times if all cores are local
+        $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
+        $retrys = 1 if $safe; # but only once on safe/cached pages
 
-    for my $x (1..$retrys) {
-        # reset failed states, otherwise retry would be useless
-        $c->{'db'}->reset_failed_backends($c);
+        for my $x (1..$retrys) {
+            # reset failed states, otherwise retry would be useless
+            $c->{'db'}->reset_failed_backends($c);
 
-        eval {
-            $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
-        };
-        last unless $@;
-        $c->log->debug("retry $x, data source error: $@") if Thruk->debug;
-        last if $x == $retrys;
-        sleep 1;
-    }
-    if($@) {
-        # side.html and some other pages should not be redirect to the error page on backend errors
+            eval {
+                $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
+            };
+            last unless $@;
+            $c->log->debug("retry $x, data source error: $@") if Thruk->debug;
+            last if $x == $retrys;
+            sleep 1;
+        }
+        if($@) {
+            # side.html and some other pages should not be redirect to the error page on backend errors
+            _set_possible_backends($c, $disabled_backends);
+            print STDERR $@ if $c->config->{'thruk_debug'};
+            return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
+            $c->log->debug("data source error: $@");
+            return $c->detach('/error/index/9');
+        }
+        $c->stash->{'last_program_restart'} = $last_program_restart;
+
+        ###############################
+        # read cached data again, groups could have changed
+        $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
+
+        ###############################
+        # disable backends by groups
+        if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
+            $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_user_data);
+        }
         _set_possible_backends($c, $disabled_backends);
-        print STDERR $@ if $c->config->{'thruk_debug'};
-        return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
-        $c->log->debug("data source error: $@");
-        return $c->detach('/error/index/9');
+        $c->stats->profile(end => "AddDefaults::get_proc_info");
     }
-    $c->stash->{'last_program_restart'} = $last_program_restart;
-
-    ###############################
-    # read cached data again, groups could have changed
-    $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
-
-    ###############################
-    # disable backends by groups
-    if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
-        $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_user_data);
-    }
-    _set_possible_backends($c, $disabled_backends);
-
-    $c->stats->profile(end => "AddDefaults::get_proc_info");
 
     ###############################
     # set some more roles
