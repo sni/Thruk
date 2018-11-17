@@ -294,10 +294,11 @@ sub _dispatcher {
     my $c = Thruk::Context->new($thruk, $env);
     my $enable_profiles = 0;
     if($c->req->cookies->{'thruk_profiling'}) {
-        $enable_profiles = 1;
-        $c->stash->{'user_profiling'} = 1;
+        $enable_profiles = $c->req->cookies->{'thruk_profiling'};
+        $c->stash->{'user_profiling'} = $enable_profiles;
     }
-    local $ENV{'THRUK_PERFORMANCE_DEBUG'} = 1 if $enable_profiles;
+    local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $enable_profiles;
+    local $ENV{'THRUK_PERFORMANCE_STACKS'} = 1 if $enable_profiles > 1;
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
@@ -913,7 +914,7 @@ sub _after_dispatch {
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'}) {
         # inject stats into html page
-        push @{$c->stash->{'profile'}}, $c->stats->report();
+        push @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
         push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
         my $stats = "";
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);

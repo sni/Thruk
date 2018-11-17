@@ -20,7 +20,14 @@
         </div>
         [% END %]
         [% FOREACH p = profile %]
-        <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</pre>
+          [% IF p.list.size > 1 %]
+          <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p.0 %]</pre>
+          <pre style="display: none;">
+           [% p.1 %]
+          </pre>
+          [% ELSE %]
+          <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</pre>
+          [% END %]
         [% END %]
       </td>
       <td valign="bottom">
