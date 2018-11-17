@@ -488,7 +488,7 @@ optional detached will run the command detached in the background
 sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached) = @_;
 
-    local $SIG{CHLD} = '';
+    local $SIG{CHLD} = 'DEFAULT';
     local $SIG{PIPE} = 'DEFAULT';
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
@@ -521,6 +521,10 @@ sub cmd {
             print $wtr $stdin,"\n";
             CORE::close($wtr);
         }
+
+        # make reading non-block
+        fcntl($rdr, F_SETFL, O_NONBLOCK) or die "couldn't set flags for process reader: $!\n";
+
         while(POSIX::waitpid($pid, WNOHANG) == 0) {
             my @line = <$rdr>;
             push @lines, @line;
