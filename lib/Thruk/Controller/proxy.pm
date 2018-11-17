@@ -48,6 +48,10 @@ sub index {
     }
     my $req = HTTP::Request->new($c->req->method, $request_url, $c->req->headers->clone);
     $req->content($c->req->content());
+    # cleanup a few headers
+    for my $h (qw/host via x-forwarded-for referer/) {
+        $req->header($h, undef);
+    }
     my $ua = LWP::UserAgent->new;
     $ua->max_redirect(0);
 
