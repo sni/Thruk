@@ -160,13 +160,16 @@ detach to other controller
 
 =cut
 sub detach {
+    my($c, $url) = @_;
+    my($package, $filename, $line) = caller;
+    $c->stats->profile(comment => 'detached to '.$url.' from '.$package.':'.$line);
     # errored flag is set in error controller to avoid recursion if error controller
     # itself throws an error, just bail out in that case
-    if(!$_[0]->{'errored'} && $_[1] =~ m|/error/index/(\d+)$|mx) {
-        Thruk::Controller::error::index($_[0], $1);
+    if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
+        Thruk::Controller::error::index($c, $1);
         return;
     }
-    confess("detach: ".$_[1]." at ".$_[0]->req->url);
+    confess("detach: ".$url." at ".$c->req->url);
 }
 
 =head2 render
