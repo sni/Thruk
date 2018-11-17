@@ -416,16 +416,12 @@ sub sub_request {
     Thruk::Action::AddDefaults::begin($sub_c);
     my $path_info = $sub_c->req->path_info;
 
-    my $route = $c->app->_find_route_match($path_info);
+    my($route, $routename) = $c->app->find_route_match($c, $path_info);
     confess("no route") unless $route;
-    if(ref $route eq '') {
-        my($class) = $route =~ m|^(.*)::.*?$|mx;
-        load $class;
-        $c->app->{'routes'}->{$path_info} = \&{$route};
-        $route = $c->app->{'routes'}->{$path_info};
-    }
     $sub_c->{'rendered'} = 1 unless $rendered; # prevent json encoding, we want the data reference
+    $c->stats->profile(begin => $routename);
     my $rc = &{$route}($sub_c, $path_info);
+    $c->stats->profile(end => $routename);
     Thruk::Action::AddDefaults::end($sub_c);
 
     local $Thruk::Request::c = undef;

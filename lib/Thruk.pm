@@ -214,6 +214,7 @@ sub _build_app {
         '/thruk/cgi-bin/error.cgi'         => 'Thruk::Controller::error::index',
         '/thruk/cgi-bin/docs.cgi'          => 'Thruk::Controller::Root::thruk_docs',
     };
+    $self->{'routes_code'} = {};
 
     $self->{'route_pattern'} = [
         [ '^/thruk/r/v1.*'                   ,'Thruk::Controller::rest_v1::index' ],
@@ -322,16 +323,10 @@ sub _dispatcher {
         my $path_info = $c->req->path_info;
         eval {
             my $rc;
-            if(my $route = $thruk->_find_route_match($path_info)) {
-                if(ref $route eq '') {
-                    my($class) = $route =~ m|^(.*)::.*?$|mx;
-                    load $class;
-                    $thruk->{'routes'}->{$path_info} = \&{$route};
-                    $route = $thruk->{'routes'}->{$path_info};
-                }
-                #&timing_breakpoint("_dispatcher route");
+            if(my($route, $routename) = $thruk->find_route_match($c, $path_info)) {
+                $c->stats->profile(begin => $routename);
                 $rc = &{$route}($c, $path_info);
-                #&timing_breakpoint("_dispatcher route done");
+                $c->stats->profile(end => $routename);
             }
             else {
                 $rc = Thruk::Controller::error::index($c, 25);
@@ -373,12 +368,38 @@ sub _dispatcher {
 }
 
 ###################################################
-sub _find_route_match {
-    my($self, $path_info) = @_;
-    return $self->{'routes'}->{$path_info} if $self->{'routes'}->{$path_info};
+
+=head2 find_route_match
+
+    lookup code ref for route
+
+returns code ref and name of the route entry
+
+=cut
+sub find_route_match {
+    my($self, $c, $path_info) = @_;
+    if($self->{'routes_code'}->{$path_info}) {
+        return($self->{'routes_code'}->{$path_info}, $self->{'routes'}->{$path_info});
+    }
+    if($self->{'routes'}->{$path_info}) {
+        my $route = $self->{'routes'}->{$path_info};
+        if(ref $route eq '') {
+            my($class) = $route =~ m|^(.*)::.*?$|mx;
+            load $class;
+            $self->{'routes_code'}->{$path_info} = \&{$route};
+        }
+        return($self->{'routes_code'}->{$path_info}, $self->{'routes'}->{$path_info});
+    }
     for my $r (@{$self->{'route_pattern'}}) {
         if($path_info =~ m/$r->[0]/mx) {
-            return($r->[1]);
+            my $function = $self->{'routes_code'}->{$r->[1]} || $r->[1];
+            if(ref $function eq '') {
+                my($class) = $function =~ m|^(.*)::.*?$|mx;
+                load $class;
+                $self->{'routes_code'}->{$r->[1]} = \&{$function};
+                $function = $self->{'routes_code'}->{$r->[1]};
+            }
+            return($function, $r->[1]);
         }
     }
     return;
