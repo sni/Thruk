@@ -182,7 +182,7 @@ sub _format_html_row {
     my $output  = "<tr>";
     my $clickable = '';
     if($row->{'stack'}) {
-        $clickable = " class='clickable' onclick='jQuery(\".pstack_details\").css(\"display\",\"none\"); toggleElement(\"pstack_".$id."\")' ";
+        $clickable = " class='clickable' onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")' ";
     }
     $output .= "<td".$clickable.">".$name."</td>\n";
     $output .= "<td>".$elapsed."</td>\n";
@@ -203,12 +203,14 @@ sub _format_html_row {
             }
         }
         $output .= "<tr style='display:none;' id='pstack_".$id."' class='pstack_details'>\n";
-        $output .= "<td colspan=2><pre style='overflow: scroll; width: 794px; padding: 0; margin: 0; height: inherit; min-width: inherit; border: 1px solid grey;'>\n";
+        $output .= "<td colspan=2><pre style='overflow: scroll; width: 794px; padding: 0 0 15px 0; margin: 0; height: inherit; min-width: inherit; border: 1px solid grey;'>\n";
         $output .= join("\n", @show);
-        $output .= "<span class='clickable' onclick='toggleElement(\"pstack_more_".$id."\"); this.style.display=\"none\";'>\n...</span>";
-        $output .= "<span id='pstack_more_".$id."' style='display: none;'>";
-        $output .= join("\n", @rest);
-        $output .= "</span>";
+        if(scalar @rest > 0) {
+            $output .= "<span class='clickable pstack_expand' onclick='toggleElement(\"pstack_more_".$id."\"); this.style.display=\"none\";'>\n...</span>";
+            $output .= "<span id='pstack_more_".$id."' class='pstack_more' style='display: none;'>";
+            $output .= "\n".join("\n", @rest);
+            $output .= "</span>";
+        }
         $output .= "</pre></td>\n";
         $output .= "</tr>\n";
     }
