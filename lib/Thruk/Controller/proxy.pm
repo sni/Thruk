@@ -52,7 +52,10 @@ sub index {
     $ua->max_redirect(0);
 
     $req->header('cookie', 'thruk_auth='.$session_id);
+    $c->stats->profile(begin => "req: ".$request_url);
     my $res = $ua->request($req);
+    $c->stats->profile(end => "req: ".$request_url);
+    $c->stats->profile(comment => sprintf('code: %s%s', $res->code, $res->header('location') ? "redirect: ".$res->header('location') : ''));
 
     # check if we need to login
     if($res->header('location') && $res->header('location') =~ m%\Q/cgi-bin/login.cgi?\E%mx) {
