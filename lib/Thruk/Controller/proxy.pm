@@ -29,7 +29,10 @@ sub index {
         $site = $1;
         $url  = $2;
     }
-    if(!$c->config->{'graph_proxy_enabled'} || !$site || !$url) {
+    if(!$url) {
+        return $c->detach('/error/index/25');
+    }
+    if(!$c->config->{'graph_proxy_enabled'} || !$site) {
         return $c->redirect_to($url);
     }
 
