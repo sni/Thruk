@@ -6235,7 +6235,14 @@ var ajax_search = {
                     jQuery.each(pattern, function(index, sub_pattern) {
                         if(ajax_search.regex_matching && sub_pattern != "*") {
                             var re = new RegExp('('+sub_pattern+')', "gi");
-                            name = name.replace(re, "<b>$1<\/b>");
+                            // only replace parts of the string which are not bold yet
+                            var parts = name.split(/(<b>.*?<\/b>)/);
+                            jQuery.each(parts, function(index2, part) {
+                                if(!part.match(/^<b>/)) {
+                                    parts[index2] = part.replace(re, "<b>$1<\/b>");
+                                }
+                            });
+                            name = parts.join("");
                         } else {
                             name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
                         }
