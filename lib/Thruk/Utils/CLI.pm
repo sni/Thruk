@@ -1028,7 +1028,7 @@ sub _cmd_raw {
         my $function_ref = \&{$function};
         my @res;
         eval {
-            if($pkg_name) {
+            if($pkg_name && $pkg_name !~ m/^CORE/mx) {
                 load $pkg_name;
             }
             @res = &{$function_ref}(@{$opt->{'args'}});
