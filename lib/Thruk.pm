@@ -477,6 +477,7 @@ sub log {
 sub reset_logging {
     my($self) = @_;
 
+    return unless $self->{'_log'};
     my $appenders = Log::Log4perl::appenders();
     for my $name (keys %{$appenders}) {
         my $appender = $appenders->{$name};

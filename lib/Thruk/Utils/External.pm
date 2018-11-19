@@ -179,10 +179,10 @@ sub perl {
             CORE::close($fh);
         }
     };
+    my $err = $@;
     $c->stats->profile(end => 'External::perl');
     save_profile($c, $dir);
-    if($@) {
-        my $err = $@;
+    if($err) {
         eval {
             open(my $fh, '>>', $dir."/stderr");
             print $fh "ERROR: perl eval failed:";
