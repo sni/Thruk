@@ -129,9 +129,6 @@ sub init_backend_thread_pool {
     }
 
     if($num_peers > 0) {
-        ## no critic
-        $SIG{'ALRM'} = 'IGNORE'; # shared signals will kill waiting threads
-        ## use critic
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
             my $peer = Thruk::Backend::Peer->new($peer_config, $config, $peer_keys);

@@ -570,6 +570,7 @@ sub _check_exit_reason {
         my $url = $c->req->url;
         printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
         printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
+        printf(STDERR "ERROR: timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
         printf(STDERR "ERROR: Address:    %s\n", $c->req->address) if $c->req->address;
         printf(STDERR "ERROR: Parameters: %s\n", _dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
         if($c->stash->{errorDetails}) {
@@ -630,6 +631,23 @@ sub _remove_pid {
 }
 
 ## no critic
+{
+    no warnings qw(redefine prototype);
+    *CORE::GLOBAL::alarm = sub {
+        if($_[0] == 0) {
+            $Thruk::last_alarm = undef;
+        }
+        elsif($_[0] != 0) {
+            my @caller = caller;
+            $Thruk::last_alarm = {
+                caller => \@caller,
+                time   => time(),
+                value  => $_[0],
+            };
+        }
+        CORE::alarm($_[0]);
+    };
+};
 $SIG{INT}  = sub { _check_exit_reason("INT");  _remove_pid(); exit; };
 $SIG{TERM} = sub { _check_exit_reason("TERM"); _remove_pid(); exit; };
 $SIG{PIPE} = sub { _check_exit_reason("PIPE"); _remove_pid(); exit; };
