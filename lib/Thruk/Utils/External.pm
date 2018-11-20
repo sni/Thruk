@@ -167,6 +167,8 @@ sub perl {
             open(my $fh, '>>', $dir."/rc");
             print $fh $rc;
             Thruk::Utils::IO::close($fh, $dir."/rc");
+            CORE::close(STDERR);
+            CORE::close(STDOUT);
         };
 
         # save stash
