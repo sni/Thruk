@@ -522,19 +522,17 @@ sub cmd {
             CORE::close($wtr);
         }
 
-        # make reading non-block
-        fcntl($rdr, F_SETFL, O_NONBLOCK) or die "couldn't set flags for process reader: $!\n";
-
         while(POSIX::waitpid($pid, WNOHANG) == 0) {
             my @line = <$rdr>;
             push @lines, @line;
             print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
         }
         $rc = $?;
-        my @line = <$rdr>;
-        push @lines, @line;
-        print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
-        chomp($output = join('', @lines) || '');
+        while(defined <$rdr>) {
+            push @lines, $_;
+            print $print_prefix.$_ if defined $print_prefix;
+        }
+        $output = join('', @lines) // '';
         # restore original array
         unshift @{$cmd}, $prog;
     } else {

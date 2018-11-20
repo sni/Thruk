@@ -151,8 +151,6 @@ sub perl {
             _reconnect($c);
 
             ## no critic
-            local *STDOUT;
-            local *STDERR;
             open STDERR, '>', $dir."/stderr";
             open STDOUT, '>', $dir."/stdout";
 
@@ -169,9 +167,6 @@ sub perl {
             open(my $fh, '>>', $dir."/rc");
             print $fh $rc;
             Thruk::Utils::IO::close($fh, $dir."/rc");
-
-            close(STDOUT);
-            close(STDERR);
         };
 
         # save stash
@@ -649,8 +644,8 @@ sub _do_child_stuff {
 
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
-    # close open filehandles
-    for my $fd (0..1024) {
+    # close open standard filehandles
+    for my $fd (0..2) {
         POSIX::close($fd);
     }
 
@@ -749,8 +744,7 @@ sub _init_external {
         next unless -f $olddir.'/stdout';
         my @stat = stat($olddir.'/stdout');
         if($stat[9] < $max_age) {
-            unlink(glob($olddir."/*"));
-            rmdir($olddir);
+            remove_job_dir($olddir);
         }
     }
 
@@ -765,6 +759,21 @@ sub _init_external {
     return($id, $dir);
 }
 
+##############################################
+
+=head2 remove_job_dir
+
+  remove_job_dir($c, $dir)
+
+return true if process is still running
+
+=cut
+sub remove_job_dir {
+    my($dir) = @_;
+    unlink(glob($dir."/*"));
+    rmdir($dir);
+    return;
+}
 
 ##############################################
 
