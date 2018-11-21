@@ -647,7 +647,6 @@ sub _do_child_stuff {
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
     # close open standard filehandles
-    my $pid = $$;
     for my $fd (0..3) { # 3 is the fcgid communication socket when running as fcgid process
         POSIX::close($fd);
     }
