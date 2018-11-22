@@ -751,6 +751,7 @@ sub _bulk_send_backend {
     my($c, $backends, $commands2send) = @_;
 
     my $options = {};
+    map(chomp, @{$commands2send});
     $options->{'command'} = join("\n\n", @{$commands2send});
     $options->{'backend'} = [ split(/,/mx, $backends) ];
     return 1 if $options->{'command'} eq '';
