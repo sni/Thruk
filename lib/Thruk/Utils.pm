@@ -540,6 +540,10 @@ sub get_dynamic_roles {
                       'authorized_contactgroup_for_configuration_information' => 'authorized_for_configuration_information',
                       'authorized_contactgroup_for_system_commands'           => 'authorized_for_system_commands',
                       'authorized_contactgroup_for_system_information'        => 'authorized_for_system_information',
+                      'authorized_contactgroup_for_broadcasts'                => 'authorized_for_broadcasts',
+                      'authorized_contactgroup_for_reports'                   => 'authorized_for_reports',
+                      'authorized_contactgroup_for_business_processes'        => 'authorized_for_business_processes',
+
                       'authorized_contactgroup_for_read_only'                 => 'authorized_for_read_only',
                     };
     my $roles_by_group = {};
