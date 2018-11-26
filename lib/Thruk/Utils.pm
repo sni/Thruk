@@ -513,6 +513,25 @@ sub get_dynamic_roles {
         push @{$roles}, $r;
     }
 
+    my $groups = $cached_data->{'contactgroups'};
+
+    # add roles from groups in cgi.cfg
+    my $roles_by_group = {};
+    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+        my $role = $key;
+        $role =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
+        if(defined $c->config->{'cgi_cfg'}->{$role}) {
+            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
+            for my $contactgroup (keys %contactgroups) {
+                if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
+                    $roles_by_group->{$key} = [] unless defined $roles_by_group->{$key};
+                    push @{$roles_by_group->{$key}}, $contactgroup;
+                    push @{$roles}, $key;
+                }
+            }
+        }
+    }
+
     # override can_submit_commands from cgi.cfg
     if(grep /authorized_for_all_host_commands/mx, @{$roles}) {
         $can_submit_commands = 1;
@@ -527,38 +546,6 @@ sub get_dynamic_roles {
     $c->log->debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
         push @{$roles}, 'authorized_for_read_only';
-    }
-
-    my $groups = $cached_data->{'contactgroups'};
-
-    # add roles from groups in cgi.cfg
-    my $possible_roles = {
-                      'authorized_contactgroup_for_all_host_commands'         => 'authorized_for_all_host_commands',
-                      'authorized_contactgroup_for_all_hosts'                 => 'authorized_for_all_hosts',
-                      'authorized_contactgroup_for_all_service_commands'      => 'authorized_for_all_service_commands',
-                      'authorized_contactgroup_for_all_services'              => 'authorized_for_all_services',
-                      'authorized_contactgroup_for_configuration_information' => 'authorized_for_configuration_information',
-                      'authorized_contactgroup_for_system_commands'           => 'authorized_for_system_commands',
-                      'authorized_contactgroup_for_system_information'        => 'authorized_for_system_information',
-                      'authorized_contactgroup_for_broadcasts'                => 'authorized_for_broadcasts',
-                      'authorized_contactgroup_for_reports'                   => 'authorized_for_reports',
-                      'authorized_contactgroup_for_business_processes'        => 'authorized_for_business_processes',
-
-                      'authorized_contactgroup_for_read_only'                 => 'authorized_for_read_only',
-                    };
-    my $roles_by_group = {};
-    for my $key (keys %{$possible_roles}) {
-        my $role = $possible_roles->{$key};
-        if(defined $c->config->{'cgi_cfg'}->{$key}) {
-            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$key};
-            for my $contactgroup (keys %contactgroups) {
-                if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
-                    $roles_by_group->{$role} = [] unless defined $roles_by_group->{$role};
-                    push @{$roles_by_group->{$role}}, $contactgroup;
-                    push @{$roles}, $role;
-                }
-            }
-        }
     }
 
     # roles could be duplicated
@@ -596,6 +583,10 @@ sub set_dynamic_roles {
 
     for my $role (@{$roles}) {
         push @{$c->user->{'roles'}}, $role;
+    }
+
+    if($c->user->check_user_roles('admin')) {
+        $c->user->grant('admin');
     }
 
     $c->user->{'roles'} = array_uniq($c->user->{'roles'});

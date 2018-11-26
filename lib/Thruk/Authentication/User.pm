@@ -18,6 +18,21 @@ use strict;
 use warnings;
 use File::Slurp qw/read_file/;
 
+our $possible_roles = [
+    'authorized_for_admin',
+    'authorized_for_all_host_commands',
+    'authorized_for_all_hosts',
+    'authorized_for_all_service_commands',
+    'authorized_for_all_services',
+    'authorized_for_configuration_information',
+    'authorized_for_system_commands',
+    'authorized_for_system_information',
+    'authorized_for_broadcasts',
+    'authorized_for_reports',
+    'authorized_for_business_processes',
+    'authorized_for_read_only',
+];
+
 =head1 METHODS
 
 =head2 new
@@ -112,19 +127,6 @@ sub new {
     $self->{'alias'}         = undef;
 
     # add roles from cgi_conf
-    my $possible_roles = [
-                      'authorized_for_all_host_commands',
-                      'authorized_for_all_hosts',
-                      'authorized_for_all_service_commands',
-                      'authorized_for_all_services',
-                      'authorized_for_configuration_information',
-                      'authorized_for_system_commands',
-                      'authorized_for_system_information',
-                      'authorized_for_broadcasts',
-                      'authorized_for_reports',
-                      'authorized_for_business_processes',
-                      'authorized_for_read_only',
-                    ];
     for my $role (@{$possible_roles}) {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
             my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
@@ -133,22 +135,9 @@ sub new {
     }
     $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
 
-    if($username eq '(cron)' || $username eq '(cli)') {
-        $self->grant('admin');
-    }
-
-    # Grant broadcast, report and business process permissions to admins
-    if (
-        grep({ $_ eq 'authorized_for_system_information'} @{$self->{'roles'}}) and
-        grep({ $_ eq 'authorized_for_configuration_information'} @{$self->{'roles'}})
-    ) {
-        push(@{$self->{'roles'}}, qw/authorized_for_broadcasts authorized_for_reports authorized_for_business_processes/);
-    }
-
     # Is this user an admin?
-    if ($self->check_user_roles('admin')) {
-        # Yes. Remove read only role
-        $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
+    if($username eq '(cron)' || $username eq '(cli)' || $self->check_user_roles('admin')) {
+        $self->grant('admin');
     }
 
     return $self;
@@ -187,14 +176,18 @@ sub check_user_roles {
         }
         return(1);
     }
+    my @found = grep(/^\Q$role\E$/mx, @{$self->{'roles'}});
+    return 1 if scalar @found >= 1;
+
     if($role eq 'admin') {
+        if($self->check_user_roles('authorized_for_admin')) {
+            return(1);
+        }
         if($self->check_user_roles('authorized_for_system_commands') && $self->check_user_roles('authorized_for_configuration_information')) {
             return(1);
         }
-        return(0);
     }
-    my @found = grep(/^\Q$role\E$/mx, @{$self->{'roles'}});
-    return(scalar @found);
+    return(0);
 }
 
 =head2 check_permissions
@@ -343,14 +336,9 @@ grant role to user
 sub grant {
     my($self, $role) = @_;
     if($role eq 'admin') {
-        $self->{'roles'} = [qw/authorized_for_all_hosts
-                               authorized_for_all_host_commands
-                               authorized_for_all_services
-                               authorized_for_all_service_commands
-                               authorized_for_configuration_information
-                               authorized_for_system_commands
-                               authorized_for_system_information
-                           /];
+        $self->{'roles'} = [@{$possible_roles}];
+        # remove read only role
+        $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
     } else {
         confess('role '.$role.' not implemented');
     }
