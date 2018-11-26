@@ -186,12 +186,12 @@ sub _process_raw_request {
                 }
             }
             elsif($type eq 'host' or $type eq 'hosts') {
-                $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ], columns => [qw/name alias/] );
+                $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/] );
                 $data = Thruk::Utils::array_uniq($data);
             }
             elsif($type eq 'hostgroup' or $type eq 'hostgroups') {
                 $data = [];
-                my $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+                my $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ] );
                 my $alias      = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ], columns => [qw/name alias/] );
                 $alias = Thruk::Utils::array2hash($alias, "name");
                 @{$hostgroups} = grep {/$filter/mx} @{$hostgroups} if $filter;
@@ -201,8 +201,8 @@ sub _process_raw_request {
             }
             elsif($type eq 'servicegroup' or $type eq 'servicegroups') {
                 $data = [];
-                my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
-                my $alias      = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ], columns => [qw/name alias/] );
+                my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), name => { '~~' => $filter } ] );
+                my $alias      = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicgroups' ) ], columns => [qw/name alias/] );
                 $alias = Thruk::Utils::array2hash($alias, "name");
                 @{$servicegroups} = grep {/$filter/mx} @{$servicegroups} if $filter;
                 for my $group (@{$servicegroups}) {
@@ -253,7 +253,7 @@ sub _process_raw_request {
                         }
                     }
                     @{$data} = sort keys %{$vars};
-                    @{$data} = grep(/$filter/mx, @{$data}) if $filter;
+                    @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
 
                     # filter all of them which are not listed by show_custom_vars unless we have extended permissions
                     if($exposed_only || !$c->check_user_roles("authorized_for_configuration_information")) {
@@ -282,7 +282,7 @@ sub _process_raw_request {
                             $uniq->{$vars{$varname}} = 1;
                         }
                         @{$data} = sort keys %{$uniq};
-                        @{$data} = grep(/$filter/mx, @{$data}) if $filter;
+                        @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
                     }
                 }
             }
@@ -321,6 +321,7 @@ sub _process_raw_request {
                     push @{$data}, $b->{'name'};
                 }
                 @{$data} = sort @{$data};
+                @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
             }
             elsif($type eq 'navsection') {
                 Thruk::Utils::Menu::read_navigation($c);
@@ -328,6 +329,8 @@ sub _process_raw_request {
                 for my $section (@{$c->stash->{'navigation'}}) {
                     push @{$data}, $section->{'name'};
                 }
+                @{$data} = sort @{$data};
+                @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
             } else {
                 die("unknown type: " . $type);
             }
