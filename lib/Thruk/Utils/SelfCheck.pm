@@ -141,7 +141,7 @@ sub _logfile_checks  {
 
     my $rc = 0;
     for my $log ($c->config->{'var_path'}.'/cron.log',
-                 $c->config->{'log4perl_conf_in_use'},
+                 $c->config->{'log4perl_logfile_in_use'},
                 ) {
         next unless $log;    # may not be set
         next unless -e $log; # may not exist either
