@@ -481,6 +481,7 @@ sub audit_log {
 
     # if screen logging is active, log to thruk.log as well
     if($self->{'_log_type'} && $self->{'_log_type'} eq 'screen') {
+        local $ENV{'THRUK_SRC'} = undef;
         $self->init_logging();
         # if no logfile is set, do not log it twice
         if($self->{'_log_type'} ne 'screen') {
@@ -782,20 +783,23 @@ sub init_logging {
     my($self, $screen) = @_;
     require Log::Log4perl;
     my($log4perl_conf, $logger);
-    if(defined $self->config->{'log4perl_conf'} && ! -s $self->config->{'log4perl_conf'} ) {
-        die("\n\n*****\nfailed to load log4perl config: ".$self->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
+
+    if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' && $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
+        if(defined $self->config->{'log4perl_conf'} && ! -s $self->config->{'log4perl_conf'} ) {
+            die("\n\n*****\nfailed to load log4perl config: ".$self->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
+        }
+        $log4perl_conf = $self->config->{'log4perl_conf'} || $self->config->{'home'}.'/log4perl.conf';
     }
-    $log4perl_conf = $self->config->{'log4perl_conf'} || $self->config->{'home'}.'/log4perl.conf';
-    if(defined $log4perl_conf && -s $log4perl_conf) {
+    require Log::Log4perl;
+    if(!$screen && defined $log4perl_conf && -s $log4perl_conf) {
         $log4perl_conf = read_file($log4perl_conf);
         if($log4perl_conf =~ m/log4perl\.appender\..*\.filename=(.*)\s*$/mx) {
             $self->config->{'log4perl_logfile_in_use'} = $1;
         }
         Log::Log4perl::init(\$log4perl_conf);
-        $logger = Log::Log4perl->get_logger("thruk.log");
+        $logger = Log::Log4perl::get_logger("thruk.log");
         $self->{'_log_type'} = 'file';
-    }
-    if($screen || !$logger) {
+    } else {
         my $log_conf = q(
         log4perl.logger                    = DEBUG, Screen
         log4perl.appender.Screen           = Log::Log4perl::Appender::Screen
