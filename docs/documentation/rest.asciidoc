@@ -45,6 +45,16 @@ Data is collected with the permissions of the given user.
 Cookies from the cookie authentication are valid as well if you are logged in
 already and will return the results with permissions of the current user.
 
+=== API Key
+
+The web rest api accepts the api key as http header. You can create API keys from
+the user profile page if `api_keys_enabled` is enabled in your thruk config.
+
+------
+  %> curl -H 'X-Thruk-Auth-Key: apikey' \
+          -gk 'https://localhost/thruk/r/hosts
+------
+
 === Secret Key
 
 The web rest api accepts the secret key as http header. The secret key
@@ -1255,4 +1265,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
