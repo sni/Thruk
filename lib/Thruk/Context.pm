@@ -144,6 +144,16 @@ sub log {
     return($_[0]->app->log);
 }
 
+=head2 audit_log
+
+return audit_log object
+
+=cut
+sub audit_log {
+    my($c, $msg) = @_;
+    return($c->app->audit_log($msg));
+}
+
 =head2 cluster
 
 return cluster object

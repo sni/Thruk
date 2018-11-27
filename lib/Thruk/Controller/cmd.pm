@@ -778,7 +778,7 @@ sub _bulk_send_backend {
         if($ENV{'THRUK_TEST_CMD_NO_LOG'}) {
             $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
         } else {
-            $c->log->info($logstr);
+            $c->audit_log($logstr);
         }
     }
     if(!$testmode) {

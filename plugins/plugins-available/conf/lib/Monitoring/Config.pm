@@ -228,7 +228,7 @@ sub commit {
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
-        $c->log->info("pre save hook: '" . $cmd . "', rc: " . $rc);
+        $c->log->debug("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('pre save hook out: '.$out);
             Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre_obj_save_cmd hook!\n".$out );
@@ -242,7 +242,7 @@ sub commit {
         if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'}) {
             my $uniq = {};
             for my $l (@{$self->{'logs'}}) {
-                $c->log->info($l) unless $uniq->{$l};
+                $c->audit_log($l) unless $uniq->{$l};
                 $uniq->{$l} = 1;
             }
         }
@@ -260,7 +260,7 @@ sub commit {
             $rc = 0;
         } else {
             # do some logging
-            $c->log->info(sprintf("[config][%s][%s] %s file '%s'",
+            $c->audit_log(sprintf("[config][%s][%s] %s file '%s'",
                                         $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
@@ -277,7 +277,7 @@ sub commit {
             push @new_files, $f;
         } else {
             if($c && $f->{'deleted'}) {
-                $c->log->info(sprintf("[config][%s][%s] deleted file '%s'",
+                $c->audit_log(sprintf("[config][%s][%s] deleted file '%s'",
                                             $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $f->{'display'},
@@ -305,7 +305,7 @@ sub commit {
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}." post '".$filesroot."' 2>&1";
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
-        $c->log->info("post save hook: '" . $cmd . "', rc: " . $rc);
+        $c->log->debug("post save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('post save hook out: '.$out);
             Thruk::Utils::set_message( $c, 'fail_message', "post_obj_save_cmd hook failed!\n".$out );
