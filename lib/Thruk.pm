@@ -793,10 +793,9 @@ sub init_logging {
         }
         Log::Log4perl::init(\$log4perl_conf);
         $logger = Log::Log4perl->get_logger("thruk.log");
-        $self->{'_log'} = $logger;
         $self->{'_log_type'} = 'file';
     }
-    if($screen || !$self->{'_log'}) {
+    if($screen || !$logger) {
         my $log_conf = q(
         log4perl.logger                    = DEBUG, Screen
         log4perl.appender.Screen           = Log::Log4perl::Appender::Screen
@@ -807,9 +806,9 @@ sub init_logging {
         $log_conf =~ s/Threshold\s*=\s*\w+$/Threshold = ERROR/gmx if $ENV{'THRUK_QUIET'};
         Log::Log4perl::init(\$log_conf);
         $logger = Log::Log4perl->get_logger("thruk.screen");
-        $self->{'_log'} = $logger;
         $self->{'_log_type'} = 'screen';
     }
+    $self->{'_log'} = $logger;
     if(Thruk->verbose) {
         $logger->level('DEBUG');
         $logger->debug("logging initialized");
