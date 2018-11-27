@@ -197,6 +197,32 @@ sub _update_docs {
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
+    # add generic cmd url with cross links to command page
+    my $command_urls = {};
+    for my $url (sort keys %{$paths}) {
+        next if $url !~ m%/cmd/%mx;
+        my $baseurl = $url;
+        $baseurl =~ s%/cmd/.*%/cmd%gmx;
+        $command_urls->{$baseurl} = [] unless defined $command_urls->{$baseurl};
+        push @{$command_urls->{$baseurl}}, $url;
+    }
+    for my $url (sort keys %{$command_urls}) {
+        my $doc = [
+            "external commands are documented in detail on a separate commands page.",
+            "list of supported commands:",
+            "",
+        ];
+        for my $cmd (@{$command_urls->{$url}}) {
+            my $name = $cmd;
+            $name =~ s%.*/cmd/%%gmx;
+            my $link = $cmd;
+            $link =~ s%[^a-z]+%-%gmx;
+            push @{$doc}, " - link:rest_commands.html#post".$link."[".$name."]";
+        }
+        $docs->{$url.'/...'}->{'POST'} = $doc;
+        $paths->{$url.'/...'}->{'POST'} = 1;
+    }
+
     for my $url (sort keys %{$paths}) {
         if($output_file =~ m/_commands/mx) {
             next if $url !~ m%/cmd/%mx;
