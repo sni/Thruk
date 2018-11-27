@@ -225,9 +225,9 @@ sub _update_docs {
 
     for my $url (sort keys %{$paths}) {
         if($output_file =~ m/_commands/mx) {
-            next if $url !~ m%/cmd/%mx;
+            next if($url !~ m%/cmd/%mx || $url =~ m%/cmd/\.\.\.%mx);
         } else {
-            next if $url =~ m%/cmd/%mx;
+            next if($url =~ m%/cmd/%mx && $url !~ m%/cmd/\.\.\.%mx);
         }
         for my $proto (sort _sort_by_proto (keys %{$paths->{$url}})) {
             $content .= "=== $proto $url\n\n";
