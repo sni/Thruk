@@ -1,10 +1,12 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add admin role in cgi.cfg
           - add graph_proxy_enabled option to passthrough pnp and grafana from remote http sites
           - remove cluetip library for popup graphs
           - fix reload issue in firefox
           - fix escaping hostnames and service description in excel exports
+          - fix command issues in rest api
           - Business Process:
             - fix timeouts
 
