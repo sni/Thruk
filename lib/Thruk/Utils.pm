@@ -476,8 +476,13 @@ gets the authorized_for_read_only role and group based roles
 sub get_dynamic_roles {
     my($c, $username, $user) = @_;
 
-    $user = Thruk::Authentication::User->new($c, $username) if $username;
-    $user = $c->user unless defined $user;
+    if($user) {
+    } elsif($username) {
+        $user = Thruk::Authentication::User->new($c, $username);
+    } else {
+        $user = $c->user;
+    }
+    confess("no user") unless $user;
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$data,$email);
@@ -551,48 +556,53 @@ sub get_dynamic_roles {
     # roles could be duplicated
     $roles = array_uniq($roles);
 
-    return($roles, $can_submit_commands, $alias, $roles_by_group, $email);
+    return($user, $roles, $can_submit_commands, $alias, $roles_by_group, $email, $groups);
 }
 
 ########################################
 
 =head2 set_dynamic_roles
 
-  set_dynamic_roles($c)
+  set_dynamic_roles($c, [$username], [$user])
 
 sets the authorized_for_read_only role and group based roles
 
 =cut
 sub set_dynamic_roles {
-    my $c = shift;
-
-    return unless $c->user_exists;
-    my $username = $c->user->{'username'};
-    return unless defined $username;
-
+    my($c, $username, $user) = @_;
     $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
 
-    my($roles, undef, $alias, undef, $email) = get_dynamic_roles($c, $username, $c->user);
+    if($user) {
+    } elsif($username) {
+        $user = Thruk::Authentication::User->new($c, $username);
+    } else {
+        $user = $c->user;
+    }
+    confess("no user") unless $user;
 
-    if(defined $alias) {
-        $c->user->{'alias'} = $alias;
-    }
-    if(defined $email) {
-        $c->user->{'email'} = $email;
-    }
+    $username = $user->{'username'};
+    return unless defined $username;
+
+    my(undef, $roles, $can_submit_commands, $alias, $roles_by_group, $email, $groups) = get_dynamic_roles($c, $username, $user);
+
+    $user->{'alias'} = $alias // $user->{'alias'};
+    $user->{'email'} = $email // $user->{'email'};
+    $user->{'roles_from_groups'} = $roles_by_group;
+    $user->{'groups'} = $groups || {};
+    $user->{'can_submit_commands'} = $can_submit_commands;
 
     for my $role (@{$roles}) {
-        push @{$c->user->{'roles'}}, $role;
+        push @{$user->{'roles'}}, $role;
     }
 
-    if($c->user->check_user_roles('admin')) {
-        $c->user->grant('admin');
+    if($user->check_user_roles('admin')) {
+        $user->grant('admin');
     }
 
-    $c->user->{'roles'} = array_uniq($c->user->{'roles'});
+    $user->{'roles'} = array_uniq($user->{'roles'});
 
     $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
-    return 1;
+    return($user);
 }
 
 
@@ -2089,7 +2099,7 @@ sub set_user {
     confess("no user") unless $c->user;
     $c->stash->{'remote_user'}= $c->user->get('username');
     if($username ne '(cli)' && $username ne '(cron)') {
-        set_dynamic_roles($c);
+        set_dynamic_roles($c, undef, $c->user);
     }
     return;
 }

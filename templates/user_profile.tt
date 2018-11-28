@@ -30,11 +30,13 @@
     </tr>
     <tr>
       <td class='dataVar'>Contactgroups</td>
-      <td class='dataVal' style="white-space: normal;">[% IF contactgroups.size > 0; contactgroups.sort.join('<br>'); ELSE %]&lt;none&gt;[% END %]</td>
+      <td class='dataVal' style="white-space: normal;">[% IF profile_user.groups.size > 0; profile_user.groups.keys.sort.join('<br>'); ELSE %]&lt;none&gt;[% END %]</td>
     </tr>
     <tr>
-      <td class='dataVar'>Roles</td>
-      <td class='dataVal' style="white-space: normal;">[% c.user.roles.sort.join('<br>') %]</td>
+      <td class='dataVar'>Effective Roles</td>
+      <td class='dataVal' style="white-space: normal;">
+        [% PROCESS _user_roles.tt %]
+      </td>
     </tr>
     <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
     <tr><th colspan=2 class='data conftoolheader' style="text-align:center">Timezone</th></tr>

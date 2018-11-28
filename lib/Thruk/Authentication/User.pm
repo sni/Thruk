@@ -134,6 +134,7 @@ sub new {
         }
     }
     $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
+    $self->{'roles_from_cgi_cfg'} = Thruk::Utils::array2hash($self->{'roles'});
 
     # Is this user an admin?
     if($username eq '(cron)' || $username eq '(cli)' || $self->check_user_roles('admin')) {

@@ -664,12 +664,7 @@ sub _process_users_page {
             $c->stash->{'contact'}        = $contacts->[0];
         }
 
-        $c->stash->{'contact_groups'} = $c->{'db'}->get_contactgroups_by_contact($c, $name);
-        my($croles, $can_submit_commands, $calias, $roles_by_group)
-                = Thruk::Utils::get_dynamic_roles($c, $name);
-        $c->stash->{'contact_roles'}  = $croles;
-        $c->stash->{'contact_can_submit_commands'} = $can_submit_commands;
-        $c->stash->{'roles_by_group'} = $roles_by_group;
+        $c->stash->{'profile_user'} = Thruk::Utils::set_dynamic_roles($c, $name);
 
         my $userdata = Thruk::Utils::get_user_data($c, $name);
         $c->stash->{'account_is_locked'} = $userdata->{'login'}->{'locked'} ? 1 : 0;

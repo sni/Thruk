@@ -1,0 +1,19 @@
+﻿[% IF profile_user.roles.list.size == 0 %]
+  none
+[% ELSE %]
+<table cellpadding=0 cellspacing=0>
+  [% FOREACH r = profile_user.roles.list.sort %]
+  <tr>
+    <td style="vertical-align: top;">[% r %]</td>
+    <td style="padding-left: 8px;">
+      [% IF profile_user.roles_from_groups.exists(r) %](from group: [% profile_user.roles_from_groups.$r.join(', ') %])
+      [% ELSIF profile_user.roles_from_cgi_cfg.exists(r) %](from cgi.cfg)
+      [% ELSIF r == "authorized_for_read_only" && !profile_user.can_submit_commands %](from can_submit_commands)
+      [% ELSIF r != "authorized_for_admin" %](from authorized_for_admin)
+      [% ELSIF r == "authorized_for_admin" %](from authorized_for_system_commands and<br>authorized_for_configuration_information)
+      [% END %]
+    </td>
+  </tr>
+  [% END %]
+</table>
+[% END %]
