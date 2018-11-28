@@ -578,7 +578,7 @@ sub add_defaults {
 
     ###############################
     # set some more roles
-    Thruk::Utils::set_dynamic_roles($c, undef, $c->user);
+    Thruk::Utils::set_dynamic_roles($c, undef, $c->user) if $c->user_exists;
 
     ###############################
     die_when_no_backends($c);
