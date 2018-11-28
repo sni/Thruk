@@ -158,7 +158,7 @@
         <td class='dataVal'>[% IF contact_can_submit_commands %]Yes[% ELSE %]No[% END %]</td>
       </tr>
       <tr>
-        <td class='dataVar' align="left">Roles</td>
+        <td class='dataVar' align="left">Effective Roles</td>
         <td class='dataVal'>
             [% IF contact_roles.list.size == 0 %]
               none
