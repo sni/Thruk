@@ -58,7 +58,8 @@ sub _rest_get_external_command {
         $description = shift @args;
         $cmd_name    = shift @args;
         $cmd         = $cmd_data->{$type.'s'}->{$cmd_name};
-        $required_fields->{$type} = $name;
+        $required_fields->{'host'} = $name;
+        $required_fields->{$type} = $description;
         push @cmd_args, $name;
         push @cmd_args, $description;
         if(!$c->check_cmd_permissions($type, $description, $name)) {
