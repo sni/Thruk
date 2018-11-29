@@ -20,6 +20,7 @@ Thruk Controller
 use Module::Load qw/load/;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS ();
+use URI::Escape qw/uri_unescape/;
 use Thruk::Utils::Status ();
 use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
@@ -312,6 +313,7 @@ sub _fetch {
                 push @{$protos}, $proto;
                 next;
             }
+            @matches = map { uri_unescape($_) } @matches;
             $c->stats->profile(comment => $path);
             my $sub_name = Thruk->verbose ? Thruk::Utils::code2name($function) : '';
             if($roles && !$c->user->check_user_roles($roles)) {
