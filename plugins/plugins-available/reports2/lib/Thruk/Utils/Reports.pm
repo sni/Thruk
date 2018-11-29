@@ -124,7 +124,13 @@ sub report_show {
             $name    =~ s/\s+/_/gmx;
             $name    =~ s/[^\wöäüÖÄÜß\-_\.]+//gmx;
             $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
-            $c->res->headers->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
+            if($report->{'var'}->{'ctype'}) {
+                if($report->{'var'}->{'ctype'} eq 'text/html') {
+                    $c->res->headers->content_type("text/html;charset=utf-8");
+                } else {
+                    $c->res->headers->content_type($report->{'var'}->{'ctype'});
+                }
+            }
             my $fh;
             if($report->{'var'}->{'ctype'} eq 'text/html') {
                 open($fh, '<', $c->config->{'var_path'}.'/reports/'.$nr.'.html');
