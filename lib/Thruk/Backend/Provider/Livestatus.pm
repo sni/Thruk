@@ -772,11 +772,6 @@ sub get_logs {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
-    # optimized naemon with wrapped_json output
-    if($self->{'naemon_optimizations'}) {
-        $self->_optimized_for_wrapped_json(\%options, "log");
-        #&timing_breakpoint('optimized get_logs') if $self->{'optimized'};
-    }
     # try to reduce the amount of transfered data
     my($size, $limit);
     if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'}) {
