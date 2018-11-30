@@ -3,12 +3,18 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    plan tests => 20;
+    plan tests => 22;
 
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
+
+TestUtils::test_page(
+    'url'     => '/thruk/r/thruk/cluster/heartbeat',
+    'post'    => {},
+    'waitfor' => 'heartbeat\ send',
+);
 
 TestUtils::test_page(
     'url'     => '/thruk/r/thruk/cluster/heartbeat',
