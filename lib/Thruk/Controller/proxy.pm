@@ -82,7 +82,7 @@ sub _cleanup_response {
     my($c, $site, $url, $res) = @_;
 
     my $replace_prefix;
-    if($url =~ s%^(.*/(pnp|pnp4nagios|grafana)/)%%mx) {
+    if($url =~ m%^(.*/(pnp|pnp4nagios|grafana)/)%mx) {
         $replace_prefix = $1;
     }
     my $url_prefix   = $c->stash->{'url_prefix'};
@@ -95,8 +95,8 @@ sub _cleanup_response {
         $res->header('location', $proxy_prefix.$loc);
     }
 
-    if($res->header('content-type') =~ m/^(text\/html|application\/json)/mx) {
-        my $body = $res->content;
+    if($res->header('content-type') =~ m/^(text\/html|application\/json)/mxi) {
+        my $body = $res->decoded_content || $res->content;
         if($replace_prefix) {
             # make thruk links work
             $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
@@ -105,8 +105,14 @@ sub _cleanup_response {
 
             # length has changed
             $res->headers()->remove_header('content-length');
+
+            # unset content encoding header, because its no longer gziped content but plain text
+            $res->headers()->remove_header('content-encoding');
+
+            # replace content
+            $res->content(undef);
+            $res->add_content_utf8($body);
         }
-        $res->content($body);
     }
 
     return;
