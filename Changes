@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.26     Fri Dec  7 21:34:29 CET 2018
           - add admin role in cgi.cfg
           - add graph_proxy_enabled option to passthrough pnp and grafana from remote http sites
           - remove cluetip library for popup graphs
