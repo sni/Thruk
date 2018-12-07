@@ -29,7 +29,10 @@ sub index {
         $site = $1;
         $url  = $2;
     }
-    if(!$c->config->{'graph_proxy_enabled'} || !$site || !$url) {
+    if(!$url) {
+        return $c->detach('/error/index/25');
+    }
+    if(!$c->config->{'graph_proxy_enabled'} || !$site) {
         return $c->redirect_to($url);
     }
 
@@ -45,11 +48,18 @@ sub index {
     }
     my $req = HTTP::Request->new($c->req->method, $request_url, $c->req->headers->clone);
     $req->content($c->req->content());
+    # cleanup a few headers
+    for my $h (qw/host via x-forwarded-for referer/) {
+        $req->header($h, undef);
+    }
     my $ua = LWP::UserAgent->new;
     $ua->max_redirect(0);
 
     $req->header('cookie', 'thruk_auth='.$session_id);
+    $c->stats->profile(begin => "req: ".$request_url);
     my $res = $ua->request($req);
+    $c->stats->profile(end => "req: ".$request_url);
+    $c->stats->profile(comment => sprintf('code: %s%s', $res->code, $res->header('location') ? "redirect: ".$res->header('location') : ''));
 
     # check if we need to login
     if($res->header('location') && $res->header('location') =~ m%\Q/cgi-bin/login.cgi?\E%mx) {
@@ -72,7 +82,7 @@ sub _cleanup_response {
     my($c, $site, $url, $res) = @_;
 
     my $replace_prefix;
-    if($url =~ s%^(.*/(pnp|pnp4nagios|grafana)/)%%mx) {
+    if($url =~ m%^(.*/(pnp|pnp4nagios|grafana)/)%mx) {
         $replace_prefix = $1;
     }
     my $url_prefix   = $c->stash->{'url_prefix'};
@@ -85,8 +95,8 @@ sub _cleanup_response {
         $res->header('location', $proxy_prefix.$loc);
     }
 
-    if($res->header('content-type') =~ m/^(text\/html|application\/json)/mx) {
-        my $body = $res->content;
+    if($res->header('content-type') =~ m/^(text\/html|application\/json)/mxi) {
+        my $body = $res->decoded_content || $res->content;
         if($replace_prefix) {
             # make thruk links work
             $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
@@ -95,8 +105,14 @@ sub _cleanup_response {
 
             # length has changed
             $res->headers()->remove_header('content-length');
+
+            # unset content encoding header, because its no longer gziped content but plain text
+            $res->headers()->remove_header('content-encoding');
+
+            # replace content
+            $res->content(undef);
+            $res->add_content_utf8($body);
         }
-        $res->content($body);
     }
 
     return;

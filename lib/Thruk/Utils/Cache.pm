@@ -35,7 +35,6 @@ sub new {
         '_cachefile'    => $cachefile,
         '_data'         => {},
         '_stat'         => [],
-        '_checked'      => 0,
     };
     bless $self, $class;
     $self->_update();
@@ -110,7 +109,7 @@ sub set {
     }
     my $value    = pop(@keys);
     my $last_key = pop(@keys);
-    $self->_update('force' => 1);
+    $self->_update();
     my $data = $self->{'_data'};
     while(my $key = shift @keys) {
         $data->{$key} = {} unless defined $data->{$key};
@@ -161,18 +160,13 @@ update cache from file
 
 =cut
 sub _update {
-    my($self, %args) = @_;
+    my($self) = @_;
     if(-f $self->{'_cachefile'}) {
-        my $now = time();
-        # only check every x seconds
-        if($now > $self->{'_checked'} + 5 || $args{'force'}) {
-            $self->{'_checked'} = $now;
-            my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-            if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
-                $self->{'_data'} = $self->_retrieve();
-                $self->{'_stat'} = \@stat;
-                return;
-            }
+        my @stat = stat(_);
+        if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
+            $self->{'_data'} = $self->_retrieve();
+            $self->{'_stat'} = \@stat;
+            return;
         }
     } else {
         # did not exist before, so create an empty cache
@@ -196,8 +190,7 @@ sub _store {
     move($self->{'_cachefile'}.'.'.$$, $self->{'_cachefile'});
     Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
     my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-    $self->{'_stat'}    = \@stat;
-    $self->{'_checked'} = time();
+    $self->{'_stat'} = \@stat;
     return;
 }
 

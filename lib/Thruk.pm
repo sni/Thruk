@@ -214,6 +214,7 @@ sub _build_app {
         '/thruk/cgi-bin/error.cgi'         => 'Thruk::Controller::error::index',
         '/thruk/cgi-bin/docs.cgi'          => 'Thruk::Controller::Root::thruk_docs',
     };
+    $self->{'routes_code'} = {};
 
     $self->{'route_pattern'} = [
         [ '^/thruk/r/v1.*'                   ,'Thruk::Controller::rest_v1::index' ],
@@ -293,10 +294,11 @@ sub _dispatcher {
     my $c = Thruk::Context->new($thruk, $env);
     my $enable_profiles = 0;
     if($c->req->cookies->{'thruk_profiling'}) {
-        $enable_profiles = 1;
-        $c->stash->{'user_profiling'} = 1;
+        $enable_profiles = $c->req->cookies->{'thruk_profiling'};
+        $c->stash->{'user_profiling'} = $enable_profiles;
     }
-    local $ENV{'THRUK_PERFORMANCE_DEBUG'} = 1 if $enable_profiles;
+    local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $enable_profiles;
+    local $ENV{'THRUK_PERFORMANCE_STACKS'} = 1 if $enable_profiles > 1;
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
@@ -322,16 +324,10 @@ sub _dispatcher {
         my $path_info = $c->req->path_info;
         eval {
             my $rc;
-            if(my $route = $thruk->_find_route_match($path_info)) {
-                if(ref $route eq '') {
-                    my($class) = $route =~ m|^(.*)::.*?$|mx;
-                    load $class;
-                    $thruk->{'routes'}->{$path_info} = \&{$route};
-                    $route = $thruk->{'routes'}->{$path_info};
-                }
-                #&timing_breakpoint("_dispatcher route");
+            if(my($route, $routename) = $thruk->find_route_match($c, $path_info)) {
+                $c->stats->profile(begin => $routename);
                 $rc = &{$route}($c, $path_info);
-                #&timing_breakpoint("_dispatcher route done");
+                $c->stats->profile(end => $routename);
             }
             else {
                 $rc = Thruk::Controller::error::index($c, 25);
@@ -373,12 +369,38 @@ sub _dispatcher {
 }
 
 ###################################################
-sub _find_route_match {
-    my($self, $path_info) = @_;
-    return $self->{'routes'}->{$path_info} if $self->{'routes'}->{$path_info};
+
+=head2 find_route_match
+
+    lookup code ref for route
+
+returns code ref and name of the route entry
+
+=cut
+sub find_route_match {
+    my($self, $c, $path_info) = @_;
+    if($self->{'routes_code'}->{$path_info}) {
+        return($self->{'routes_code'}->{$path_info}, $self->{'routes'}->{$path_info});
+    }
+    if($self->{'routes'}->{$path_info}) {
+        my $route = $self->{'routes'}->{$path_info};
+        if(ref $route eq '') {
+            my($class) = $route =~ m|^(.*)::.*?$|mx;
+            load $class;
+            $self->{'routes_code'}->{$path_info} = \&{$route};
+        }
+        return($self->{'routes_code'}->{$path_info}, $self->{'routes'}->{$path_info});
+    }
     for my $r (@{$self->{'route_pattern'}}) {
         if($path_info =~ m/$r->[0]/mx) {
-            return($r->[1]);
+            my $function = $self->{'routes_code'}->{$r->[1]} || $r->[1];
+            if(ref $function eq '') {
+                my($class) = $function =~ m|^(.*)::.*?$|mx;
+                load $class;
+                $self->{'routes_code'}->{$r->[1]} = \&{$function};
+                $function = $self->{'routes_code'}->{$r->[1]};
+            }
+            return($function, $r->[1]);
         }
     }
     return;
@@ -447,6 +469,33 @@ sub log {
 
 ###################################################
 
+=head2 audit_log
+
+    audit_log logs something with info log level and
+    in case screen logger is active, logs it also to the logfile.
+
+=cut
+sub audit_log {
+    my($self, $msg) = @_;
+    $self->log->info($msg);
+
+    # if screen logging is active, log to thruk.log as well
+    if($self->{'_log_type'} && $self->{'_log_type'} eq 'screen') {
+        local $ENV{'THRUK_SRC'} = undef;
+        $self->init_logging();
+        # if no logfile is set, do not log it twice
+        if($self->{'_log_type'} ne 'screen') {
+            $self->log->info($msg);
+            # change back
+            $self->{'_log'} = 'screen';
+        }
+    }
+
+    return;
+}
+
+###################################################
+
 =head2 reset_logging
 
     reset logging system, for example after starting child processes
@@ -455,6 +504,7 @@ sub log {
 sub reset_logging {
     my($self) = @_;
 
+    return unless $self->{'_log'};
     my $appenders = Log::Log4perl::appenders();
     for my $name (keys %{$appenders}) {
         my $appender = $appenders->{$name};
@@ -548,6 +598,7 @@ sub _check_exit_reason {
         my $url = $c->req->url;
         printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
         printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
+        printf(STDERR "ERROR: timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
         printf(STDERR "ERROR: Address:    %s\n", $c->req->address) if $c->req->address;
         printf(STDERR "ERROR: Parameters: %s\n", _dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
         if($c->stash->{errorDetails}) {
@@ -608,6 +659,23 @@ sub _remove_pid {
 }
 
 ## no critic
+{
+    no warnings qw(redefine prototype);
+    *CORE::GLOBAL::alarm = sub {
+        if($_[0] == 0) {
+            $Thruk::last_alarm = undef;
+        }
+        elsif($_[0] != 0) {
+            my @caller = caller;
+            $Thruk::last_alarm = {
+                caller => \@caller,
+                time   => time(),
+                value  => $_[0],
+            };
+        }
+        CORE::alarm($_[0]);
+    };
+};
 $SIG{INT}  = sub { _check_exit_reason("INT");  _remove_pid(); exit; };
 $SIG{TERM} = sub { _check_exit_reason("TERM"); _remove_pid(); exit; };
 $SIG{PIPE} = sub { _check_exit_reason("PIPE"); _remove_pid(); exit; };
@@ -713,34 +781,38 @@ returns logger object
 
 sub init_logging {
     my($self, $screen) = @_;
+    require Log::Log4perl;
     my($log4perl_conf, $logger);
+
     if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' && $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
         if(defined $self->config->{'log4perl_conf'} && ! -s $self->config->{'log4perl_conf'} ) {
             die("\n\n*****\nfailed to load log4perl config: ".$self->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
         }
         $log4perl_conf = $self->config->{'log4perl_conf'} || $self->config->{'home'}.'/log4perl.conf';
     }
+    require Log::Log4perl;
     if(!$screen && defined $log4perl_conf && -s $log4perl_conf) {
-        require Log::Log4perl;
-        Log::Log4perl::init($log4perl_conf);
-        $logger = Log::Log4perl::get_logger();
-        $self->{'_log'} = $logger;
-        $self->config->{'log4perl_conf_in_use'} = $log4perl_conf;
-    }
-    else {
-        require Log::Log4perl;
+        $log4perl_conf = read_file($log4perl_conf);
+        if($log4perl_conf =~ m/log4perl\.appender\..*\.filename=(.*)\s*$/mx) {
+            $self->config->{'log4perl_logfile_in_use'} = $1;
+        }
+        Log::Log4perl::init(\$log4perl_conf);
+        $logger = Log::Log4perl::get_logger("thruk.log");
+        $self->{'_log_type'} = 'file';
+    } else {
         my $log_conf = q(
         log4perl.logger                    = DEBUG, Screen
         log4perl.appender.Screen           = Log::Log4perl::Appender::Screen
         log4perl.appender.Screen.Threshold = DEBUG
         log4perl.appender.Screen.layout    = Log::Log4perl::Layout::PatternLayout
-        log4perl.appender.Screen.layout.ConversionPattern = [%d{ABSOLUTE}][%p][%c] %m%n
+        log4perl.appender.Screen.layout.ConversionPattern = [%d{ABSOLUTE}][%p] %m{chomp}%n
         );
         $log_conf =~ s/Threshold\s*=\s*\w+$/Threshold = ERROR/gmx if $ENV{'THRUK_QUIET'};
         Log::Log4perl::init(\$log_conf);
-        $logger = Log::Log4perl->get_logger();
-        $self->{'_log'} = $logger;
+        $logger = Log::Log4perl->get_logger("thruk.screen");
+        $self->{'_log_type'} = 'screen';
     }
+    $self->{'_log'} = $logger;
     if(Thruk->verbose) {
         $logger->level('DEBUG');
         $logger->debug("logging initialized");
@@ -892,7 +964,7 @@ sub _after_dispatch {
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'}) {
         # inject stats into html page
-        push @{$c->stash->{'profile'}}, $c->stats->report();
+        push @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
         push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
         my $stats = "";
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);

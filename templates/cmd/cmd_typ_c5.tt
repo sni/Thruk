@@ -16,9 +16,9 @@
     [% END %]
 
     [%# definition of the html form data #%]
-    <tr class="hidden"><td colspan=2><input type='text' name='active_downtimes' value='1'></td></tr>
-    <tr class="hidden"><td colspan=2><input type='text' name='future_downtimes' value='2'></td></tr>
     <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
+    <tr><td class='optBoxItem'>Active Downtimes:</td><td><b><input type='checkbox' name='active_downtimes' checked></b></td></tr>
+    <tr><td class='optBoxItem'>Future Downtimes:</td><td><b><input type='checkbox' name='future_downtimes' checked></b></td></tr>
 
     [% END %]
     [% END %]
@@ -43,10 +43,10 @@
     [% END %]
 
     [%# definition of the html form data #%]
-    <tr class="hidden"><td colspan=2><input type='text' name='active_downtimes' value='1'></td></tr>
-    <tr class="hidden"><td colspan=2><input type='text' name='future_downtimes' value='2'></td></tr>
     <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></td></tr>
     <tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value='[% c.request.parameters.service %]'></b></td></tr>
+    <tr><td class='optBoxItem'>Active Downtimes:</td><td><b><input type='checkbox' name='active_downtimes' checked></b></td></tr>
+    <tr><td class='optBoxItem'>Future Downtimes:</td><td><b><input type='checkbox' name='future_downtimes' checked></b></td></tr>
 
     [% END %]
     [% END %]

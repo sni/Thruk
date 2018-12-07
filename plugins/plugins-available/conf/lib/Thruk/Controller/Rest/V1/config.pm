@@ -182,7 +182,7 @@ sub _rest_get_config {
         $live = $c->{'db'}->get_servicegroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'contact') {
         $live = $c->{'db'}->get_contacts(filter => [ name => $name ], columns => [qw/name/]);
-    } elsif($type eq 'contactgroups') {
+    } elsif($type eq 'contactgroup') {
         $live = $c->{'db'}->get_contactgroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'timeperiod') {
         $live = $c->{'db'}->get_timeperiods(filter => [ name => $name ], columns => [qw/name/]);
@@ -192,26 +192,28 @@ sub _rest_get_config {
     my $data    = [];
     my $changed = 0;
     for my $l (@{$live}) {
-        my $peer_key = $c->stash->{'param_backend'} = $l->{'peer_key'};
-        _set_object_model($c, $peer_key) || next;
-        my $objs;
-        if($type eq 'service') {
-            $objs = $c->{'obj_db'}->get_services_by_name($name, $name2);
-        } else {
-            $objs = $c->{'obj_db'}->get_objects_by_name($type, $name, 0);
-        }
-        next unless $objs;
-        my $obj_model_changed = 0;
-        for my $o (@{$objs}) {
-            if(_update_object($c, $method, $o)) {
-                $changed++;
-                $obj_model_changed = 1;
-                next;
+        for my $peer_key (@{Thruk::Utils::list($l->{'peer_key'})}) {
+            $c->stash->{'param_backend'} = $peer_key;
+            _set_object_model($c, $peer_key) || next;
+            my $objs;
+            if($type eq 'service') {
+                $objs = $c->{'obj_db'}->get_services_by_name($name, $name2);
+            } else {
+                $objs = $c->{'obj_db'}->get_objects_by_name($type, $name, 0);
             }
-            push @{$data}, _add_object($o, $peer_key);
-        }
-        if($obj_model_changed) {
-            Thruk::Utils::Conf::store_model_retention($c, $peer_key);
+            next unless $objs;
+            my $obj_model_changed = 0;
+            for my $o (@{$objs}) {
+                if(_update_object($c, $method, $o)) {
+                    $changed++;
+                    $obj_model_changed = 1;
+                    next;
+                }
+                push @{$data}, _add_object($o, $peer_key);
+            }
+            if($obj_model_changed) {
+                Thruk::Utils::Conf::store_model_retention($c, $peer_key);
+            }
         }
     }
     if($method eq 'DELETE' || $method eq 'PATCH' || $method eq 'POST') {

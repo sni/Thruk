@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 218;
+    plan tests => 234;
 
     use lib('t');
     require TestUtils;
@@ -16,6 +16,7 @@ BEGIN {
 
 use_ok 'Thruk::Controller::rest_v1';
 my($host,$service) = ('localhost', 'Users');
+my($hostgroup,$servicegroup) = ('Everything', 'Http Check');
 
 my $pages = [{
 # force reschedule so we get some performance data
@@ -32,6 +33,12 @@ my $pages = [{
 # verify configuration from config tool
         url     => 'GET /hosts/<name>/config',
         like    => ['"alias" : "localhost",', '"address" : "127.0.0.1",', '/omd/sites/demo/etc/naemon/conf.d/example.cfg:1'],
+    }, {
+        url     => 'GET /hostgroups/'.$hostgroup.'/config',
+        like    => ['Just all hosts'],
+    }, {
+        url     => 'GET /servicegroups/'.$servicegroup.'/config',
+        like    => ['Http Checks'],
     }, {
 # change a few things
         url     => 'PATCH /hosts/<name>/config',

@@ -18,7 +18,7 @@ if(isChrome()) {
 }
 
 _setSpeed(50);              // default is 100ms
-env.setSimilarity(0.90);    // default is 0.7
+env.setSimilarity(0.85);    // default is 0.7
 
 function runTest($case) {
     try {

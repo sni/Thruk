@@ -51,7 +51,6 @@ sub _rest_get_thruk_cluster_heartbeat {
         }
         return;
     }
-    alarm(60);
     local $ENV{'THRUK_SKIP_CLUSTER'} = 0;
     $c->cluster->load_statefile();
     for my $n (@{$c->cluster->{'nodes'}}) {
@@ -73,7 +72,6 @@ sub _rest_get_thruk_cluster_heartbeat {
             },
         },1) if $n->{'node_id'} !~ m/^dummy/mx;
     }
-    alarm(0);
     $c->cluster->check_stale_pids();
     return({ 'message' => 'heartbeat send' });
 }

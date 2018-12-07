@@ -38,11 +38,15 @@ sub index {
     $c->stash->{'extra_log_comment'} = {};
 
     # fill in some defaults
-    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup backend/) {
+    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup/) {
         $c->req->parameters->{$param} = '' unless defined $c->req->parameters->{$param};
     }
     for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly/) {
         $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
+    }
+    if(!defined $c->req->parameters->{'backend'}) {
+        my($backends_list) = $c->{'db'}->select_backends('send_command');
+        $c->req->parameters->{'backend'} = $backends_list;
     }
 
     $c->req->parameters->{com_data} =~ s/\n//gmx;
@@ -58,13 +62,6 @@ sub index {
 
     # read only user?
     return $c->detach('/error/index/11') if $c->check_user_roles('authorized_for_read_only');
-
-    # set authorization information
-    my $query_options = { Slice => 1 };
-    if( defined $c->req->parameters->{'backend'} ) {
-        my $backend = $c->req->parameters->{'backend'};
-        $query_options = { Slice => 1, Backend => [$backend] };
-    }
 
     _set_host_service_from_down_com_ids($c);
 
@@ -751,6 +748,7 @@ sub _bulk_send_backend {
     my($c, $backends, $commands2send) = @_;
 
     my $options = {};
+    map(chomp, @{$commands2send});
     $options->{'command'} = join("\n\n", @{$commands2send});
     $options->{'backend'} = [ split(/,/mx, $backends) ];
     return 1 if $options->{'command'} eq '';
@@ -777,7 +775,7 @@ sub _bulk_send_backend {
         if($ENV{'THRUK_TEST_CMD_NO_LOG'}) {
             $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
         } else {
-            $c->log->info($logstr);
+            $c->audit_log($logstr);
         }
     }
     if(!$testmode) {

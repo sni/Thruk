@@ -120,15 +120,15 @@
       <tr>
         <td class='dataVar' align="left">Groups</td>
         <td class='dataVal'>
-          [% IF contact_groups.keys.size == 0 %]
+          [% IF profile_user.groups.keys.size == 0 %]
             this contact has no groups.
           [% ELSE %]
             [% IF backends_with_obj_config.keys.size > 0 %]
-              [% FOREACH group = contact_groups.keys.sort %]
+              [% FOREACH group = profile_user.groups.keys.sort %]
                 <a href="conf.cgi?sub=objects&amp;type=contactgroup&amp;data.name=[% group %]">[% group %]</a>[% UNLESS loop.last %], [% END %]
               [% END %]
             [% ELSE %]
-              [% contact_groups.keys.sort.join(', ') %]
+              [% profile_user.groups.keys.sort.join(', ') %]
             [% END %]
           [% END %]
         </td>
@@ -155,28 +155,12 @@
       [% END %]
       <tr>
         <td class='dataVar' align="left" nowrap>Can Submit Commands</td>
-        <td class='dataVal'>[% IF contact_can_submit_commands %]Yes[% ELSE %]No[% END %]</td>
+        <td class='dataVal'>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</td>
       </tr>
       <tr>
-        <td class='dataVar' align="left">Roles</td>
+        <td class='dataVar' align="left">Effective Roles</td>
         <td class='dataVal'>
-            [% IF contact_roles.list.size == 0 %]
-              none
-            [% ELSE %]
-            <table cellpadding=0 cellspacing=0>
-              [% FOREACH r = contact_roles.list.sort %]
-              <tr>
-                <td>[% r %]</td>
-                <td style="padding-left: 8px;">
-                  [% IF roles_by_group.exists(r) %](from group: [% roles_by_group.$r.join(', ') %])
-                  [% ELSIF r == "authorized_for_read_only" && !contact_can_submit_commands %](from can_submit_commands)
-                  [% ELSE %](from cgi.cfg)
-                  [% END %]
-                </td>
-              </tr>
-              [% END %]
-            </table>
-            [% END %]
+          [% PROCESS _user_roles.tt %]
         </td>
       </tr>
     </table>

@@ -17,6 +17,10 @@ $c->config->{'cluster_enabled'} = 1; # fake cluster
 $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
 $c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
+# get sample host and service
+my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' => 'host_name,description' })->[0] || die("need at least one service");
+my $host_name = $test_svc->{'host_name'};
+my $service_description = $test_svc->{'description'};
 
 _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
@@ -197,11 +201,37 @@ sub _update_docs {
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
+    # add generic cmd url with cross links to command page
+    my $command_urls = {};
+    for my $url (sort keys %{$paths}) {
+        next if $url !~ m%/cmd/%mx;
+        my $baseurl = $url;
+        $baseurl =~ s%/cmd/.*%/cmd%gmx;
+        $command_urls->{$baseurl} = [] unless defined $command_urls->{$baseurl};
+        push @{$command_urls->{$baseurl}}, $url;
+    }
+    for my $url (sort keys %{$command_urls}) {
+        my $doc = [
+            "external commands are documented in detail on a separate commands page.",
+            "list of supported commands:",
+            "",
+        ];
+        for my $cmd (@{$command_urls->{$url}}) {
+            my $name = $cmd;
+            $name =~ s%.*/cmd/%%gmx;
+            my $link = $cmd;
+            $link =~ s%[^a-z_]+%-%gmx;
+            push @{$doc}, " - link:rest_commands.html#post".$link."[".$name."]";
+        }
+        $docs->{$url.'/...'}->{'POST'} = $doc;
+        $paths->{$url.'/...'}->{'POST'} = 1;
+    }
+
     for my $url (sort keys %{$paths}) {
         if($output_file =~ m/_commands/mx) {
-            next if $url !~ m%/cmd/%mx;
+            next if($url !~ m%/cmd/%mx || $url =~ m%/cmd/\.\.\.%mx);
         } else {
-            next if $url =~ m%/cmd/%mx;
+            next if($url =~ m%/cmd/%mx && $url !~ m%/cmd/\.\.\.%mx);
         }
         for my $proto (sort _sort_by_proto (keys %{$paths->{$url}})) {
             $content .= "=== $proto $url\n\n";
@@ -271,6 +301,9 @@ sub _fetch_keys {
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
     $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
+    $tst_url =~ s|<name>|$host_name|gmx;
+    $tst_url =~ s|<host>|$host_name|gmx;
+    $tst_url =~ s|<service>|$service_description|gmx;
     if($tst_url eq "/config/files") {
         # column would be optimized away otherwise
         $c->req->parameters->{'sort'} = "content";

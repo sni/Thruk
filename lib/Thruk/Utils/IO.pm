@@ -488,7 +488,7 @@ optional detached will run the command detached in the background
 sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached) = @_;
 
-    local $SIG{CHLD} = '';
+    local $SIG{CHLD} = 'DEFAULT';
     local $SIG{PIPE} = 'DEFAULT';
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
@@ -521,16 +521,18 @@ sub cmd {
             print $wtr $stdin,"\n";
             CORE::close($wtr);
         }
+
         while(POSIX::waitpid($pid, WNOHANG) == 0) {
             my @line = <$rdr>;
             push @lines, @line;
             print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
         }
         $rc = $?;
-        my @line = <$rdr>;
-        push @lines, @line;
-        print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
-        chomp($output = join('', @lines) || '');
+        while(defined <$rdr>) {
+            push @lines, $_;
+            print $print_prefix.$_ if defined $print_prefix;
+        }
+        $output = join('', @lines) // '';
         # restore original array
         unshift @{$cmd}, $prog;
     } else {

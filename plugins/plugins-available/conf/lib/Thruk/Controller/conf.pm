@@ -3,6 +3,7 @@ package Thruk::Controller::conf;
 use strict;
 use warnings;
 use Module::Load qw/load/;
+use Thruk::Authentication::User;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
@@ -430,6 +431,20 @@ sub _process_cgi_page {
         $data->{$key}->[2] = $cgi_groups;
     }
 
+    my $authkeys = [qw/
+        use_authentication
+        use_ssl_authentication
+        default_user_name
+        lock_author_names
+    /];
+    my $authgroupkeys = [];
+    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+        push @{$authkeys}, $key;
+        my $groupkey = $key;
+        $groupkey =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
+        push @{$authgroupkeys}, $groupkey;
+    }
+
     my $keys = [
         [ 'CGI Settings', [qw/
                         show_context_help
@@ -440,38 +455,8 @@ sub _process_cgi_page {
                         notes_url_target
                     /],
         ],
-        [ 'Authorization', [qw/
-                        use_authentication
-                        use_ssl_authentication
-                        default_user_name
-                        lock_author_names
-                        authorized_for_all_services
-                        authorized_for_all_hosts
-                        authorized_for_all_service_commands
-                        authorized_for_all_host_commands
-                        authorized_for_system_information
-                        authorized_for_system_commands
-                        authorized_for_configuration_information
-                        authorized_for_broadcasts
-                        authorized_for_reports
-                        authorized_for_business_processes
-                        authorized_for_read_only
-                    /],
-        ],
-        [ 'Authorization Groups', [qw/
-                      authorized_contactgroup_for_all_services
-                      authorized_contactgroup_for_all_hosts
-                      authorized_contactgroup_for_all_service_commands
-                      authorized_contactgroup_for_all_host_commands
-                      authorized_contactgroup_for_system_information
-                      authorized_contactgroup_for_system_commands
-                      authorized_contactgroup_for_configuration_information
-                      authorized_contactgroup_for_broadcasts
-                      authorized_contactgroup_for_reports
-                      authorized_contactgroup_for_business_processes
-                      authorized_contactgroup_for_read_only
-                    /],
-        ],
+        [ 'Authorization', $authkeys],
+        [ 'Authorization Groups', $authgroupkeys],
     ];
 
     $c->stash->{'keys'}     = $keys;
@@ -657,17 +642,7 @@ sub _process_users_page {
         $c->stash->{'user_name'}  = $name;
         $c->stash->{'md5'}        = $md5;
         $c->stash->{'roles'}      = {};
-        my $roles = [qw/authorized_for_all_services
-                        authorized_for_all_hosts
-                        authorized_for_all_service_commands
-                        authorized_for_all_host_commands
-                        authorized_for_system_information
-                        authorized_for_system_commands
-                        authorized_for_configuration_information
-                        authorized_for_broadcasts
-                        authorized_for_reports
-                        authorized_for_business_processes
-                    /];
+        my $roles = $Thruk::Authentication::User::possible_roles;
         $c->stash->{'role_keys'}  = $roles;
         for my $role (@{$roles}) {
             $c->stash->{'roles'}->{$role} = 0;
@@ -689,12 +664,7 @@ sub _process_users_page {
             $c->stash->{'contact'}        = $contacts->[0];
         }
 
-        $c->stash->{'contact_groups'} = $c->{'db'}->get_contactgroups_by_contact($c, $name);
-        my($croles, $can_submit_commands, $calias, $roles_by_group)
-                = Thruk::Utils::get_dynamic_roles($c, $name);
-        $c->stash->{'contact_roles'}  = $croles;
-        $c->stash->{'contact_can_submit_commands'} = $can_submit_commands;
-        $c->stash->{'roles_by_group'} = $roles_by_group;
+        $c->stash->{'profile_user'} = Thruk::Utils::set_dynamic_roles($c, $name);
 
         my $userdata = Thruk::Utils::get_user_data($c, $name);
         $c->stash->{'account_is_locked'} = $userdata->{'login'}->{'locked'} ? 1 : 0;
@@ -1366,7 +1336,7 @@ sub _process_user_password_page {
                 $c->log->error("changing password for ".$user." failed: ".$err);
                 Thruk::Utils::set_message($c, 'fail_message', "Password change failed.");
             } else {
-                $c->log->info("user changed password for ".$user);
+                $c->audit_log("user changed password for ".$user);
                 Thruk::Utils::set_message($c, 'success_message', "Password changed successfully");
             }
         }
@@ -1415,7 +1385,7 @@ sub _update_password {
             return unless Thruk::Utils::check_csrf($c);
             my $err = _htpasswd_password($c, $user, undef);
             return $err if $err;
-            $c->log->info($c->stash->{remote_user}." removed password for ".$user);
+            $c->audit_log($c->stash->{remote_user}." removed password for ".$user);
             return;
         }
 
@@ -1427,7 +1397,7 @@ sub _update_password {
             if($pass1 eq $pass2) {
                 my $err = _htpasswd_password($c, $user, $pass1);
                 return $err if $err;
-                $c->log->info($c->stash->{remote_user}." changed password for ".$user);
+                $c->audit_log($c->stash->{remote_user}." changed password for ".$user);
                 return;
             } else {
                 return('Passwords do not match');

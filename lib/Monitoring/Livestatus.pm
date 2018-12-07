@@ -1185,12 +1185,7 @@ sub _read_socket_do {
                 $remaining = $remaining -$length;
                 if($remaining < $length) { $length = $remaining; }
             }
-            $recv = $json_decoder->incr_parse
-                or return($self->_socket_error($statement, $sock,
-                            'reading body from socket failed: '
-                            .($json_decoder->incr_text // '')
-                            .($json_decoder->incr_reset // ''),
-                        ));
+            $recv = $json_decoder->incr_parse or return($self->_socket_error($statement, $sock, 'reading remaining '.$length.' bytes from socket failed: '.$!));
             $json_decoder->incr_reset;
         } else {
             $sock->read($recv, $content_length) or return($self->_socket_error($statement, $sock, 'reading body from socket failed'));

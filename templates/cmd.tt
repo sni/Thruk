@@ -60,7 +60,12 @@
                       [% END %]
                       <tr>
                         <td class='optBoxItem'></td>
-                        <td class='optBoxItem'><input type='submit' name='btnSubmit' value='Commit'> <input type='reset' value='Reset'></td>
+                        <td class='optBoxItem'>
+                          [% IF backends.size == 1 %]
+                          <input type="hidden" name="backend" value="[% backends.0 %]">
+                          [% END %]
+                          <input type='submit' name='btnSubmit' value='Commit'> <input type='reset' value='Reset'>
+                        </td>
                       </tr>
                     </table>
                   </form>

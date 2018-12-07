@@ -870,25 +870,14 @@ return http response but ensure timeout on request.
 sub _ua_post_with_timeout {
     my($ua, $url, $data) = @_;
     my $timeout_for_client = $ua->timeout();
-    # set alarm
-    local $SIG{ALRM} = sub { die("hit ".$timeout_for_client."s timeout on ".$url) };
-    alarm($timeout_for_client);
     $ua->ssl_opts(timeout => $timeout_for_client, Timeout => $timeout_for_client);
-
-    # make sure nobody else calls alarm in between
-    {
-        ## no critic
-        no warnings qw(redefine prototype);
-        *CORE::GLOBAL::alarm = sub {};
-        ## use critic
-    }
 
     # try to fetch result
     my $res = $ua->post($url, $data);
 
-    # restore alarm handler and disable alarm
-    *CORE::GLOBAL::alarm = *CORE::alarm;
-    alarm(0);
+    if($res->is_error && $res->code == 408) { # HTTP::Status::HTTP_REQUEST_TIMEOUT
+        die("hit ".$timeout_for_client."s timeout on ".$url);
+    }
 
     return $res;
 }

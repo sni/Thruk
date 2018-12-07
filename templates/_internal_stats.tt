@@ -20,22 +20,29 @@
         </div>
         [% END %]
         [% FOREACH p = profile %]
-        <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</pre>
+          [% IF p.list.size > 1 %]
+          <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p.0 %]</pre>
+          <pre style="display: none;">
+           [% p.1 %]
+          </pre>
+          [% ELSE %]
+          <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</pre>
+          [% END %]
         [% END %]
       </td>
       <td valign="bottom">
         <table width="200" style="position: relative; bottom: 20px;">
           <tr>
             <th width="20%">Backend</th>
-            <td width="80%"><div class="thruk_dev_panel_square" style="background: #7FDBFF;"></div>[% sprintf("%.3f", total_backend_waited) %]s</td>
+            <td width="80%"><div class="thruk_dev_panel_square" style="background: #7FDBFF;"></div>[% sprintf("%.3f", total_backend_waited) %]s ([% perc = total_backend_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
           </tr>
           <tr>
             <th>Controller</th>
-            <td><div class="thruk_dev_panel_square" style="background: #FFDC00;"></div>[% sprintf("%.3f", (time_total - total_backend_waited - total_render_waited)) %]s</td>
+            <td><div class="thruk_dev_panel_square" style="background: #FFDC00;"></div>[% time_controler = time_total - total_backend_waited - total_render_waited;  sprintf("%.3f", time_controler) %]s ([% perc = time_controler / time_total * 100; sprintf("%.0f", perc) %]%)</td>
           </tr>
           <tr>
             <th>View</th>
-            <td><div class="thruk_dev_panel_square" style="background: #FF851B;"></div>[% sprintf("%.3f", total_render_waited) %]s</td>
+            <td><div class="thruk_dev_panel_square" style="background: #FF851B;"></div>[% sprintf("%.3f", total_render_waited) %]s ([% perc = total_render_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
           </tr>
           <tr>
             <th style="border-top: 1px solid gray;">Total</th>

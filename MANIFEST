@@ -1767,6 +1767,7 @@ t/105-thruk-utils-ssi.t
 t/106-thruk_context.t
 t/107-thruk_utils_avail.t
 t/108-thruk_utils_status.t
+t/110-thruk_authentication_user.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t
@@ -2239,6 +2240,7 @@ templates/_status_hostdetail_table.tt
 templates/_table_search_field.tt
 templates/_third_graph.tt
 templates/_timeperiods_select_options.tt
+templates/_user_roles.tt
 templates/_wizard_list.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt

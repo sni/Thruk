@@ -47,7 +47,7 @@ sub new {
     }
 
     # translate paths, translate ex.: /naemon/cgi-bin to /thruk/cgi-bin/
-    my $path_info         = translate_request_path($env->{'PATH_INFO'}, $app->config, $env);
+    my $path_info         = translate_request_path($env->{'PATH_INFO'} || $env->{'REQUEST_URI'}, $app->config, $env);
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
 
@@ -144,6 +144,16 @@ sub log {
     return($_[0]->app->log);
 }
 
+=head2 audit_log
+
+return audit_log object
+
+=cut
+sub audit_log {
+    my($c, $msg) = @_;
+    return($c->app->audit_log($msg));
+}
+
 =head2 cluster
 
 return cluster object
@@ -160,13 +170,16 @@ detach to other controller
 
 =cut
 sub detach {
+    my($c, $url) = @_;
+    my($package, $filename, $line) = caller;
+    $c->stats->profile(comment => 'detached to '.$url.' from '.$package.':'.$line);
     # errored flag is set in error controller to avoid recursion if error controller
     # itself throws an error, just bail out in that case
-    if(!$_[0]->{'errored'} && $_[1] =~ m|/error/index/(\d+)$|mx) {
-        Thruk::Controller::error::index($_[0], $1);
+    if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
+        Thruk::Controller::error::index($c, $1);
         return;
     }
-    confess("detach: ".$_[1]." at ".$_[0]->req->url);
+    confess("detach: ".$url." at ".$c->req->url);
 }
 
 =head2 render
@@ -416,16 +429,12 @@ sub sub_request {
     Thruk::Action::AddDefaults::begin($sub_c);
     my $path_info = $sub_c->req->path_info;
 
-    my $route = $c->app->_find_route_match($path_info);
+    my($route, $routename) = $c->app->find_route_match($c, $path_info);
     confess("no route") unless $route;
-    if(ref $route eq '') {
-        my($class) = $route =~ m|^(.*)::.*?$|mx;
-        load $class;
-        $c->app->{'routes'}->{$path_info} = \&{$route};
-        $route = $c->app->{'routes'}->{$path_info};
-    }
     $sub_c->{'rendered'} = 1 unless $rendered; # prevent json encoding, we want the data reference
+    $c->stats->profile(begin => $routename);
     my $rc = &{$route}($sub_c, $path_info);
+    $c->stats->profile(end => $routename);
     Thruk::Action::AddDefaults::end($sub_c);
 
     local $Thruk::Request::c = undef;

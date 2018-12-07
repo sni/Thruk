@@ -118,7 +118,7 @@ is_deeply($befor_case, $sorted_case, 'sort by colum case a,b');
 
 #########################
 SKIP: {
-    skip 'external tests', 15 if Thruk->config->{'no_external_job_forks'};
+    skip 'external tests', 16 if Thruk->config->{'no_external_job_forks'};
 
     my($res, $c) = ctx_request('/thruk/side.html');
     my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');

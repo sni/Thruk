@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 108;
+plan tests => 116;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -138,6 +138,18 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk hosts list',
     like => ['/localhost/', '/Test BP/'],
+});
+
+###########################################################
+# thruk cmd.cgi
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now'",
+    like => ['/Command request successfully submitted/'],
+});
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now' --local",
+    like => ['/Command request successfully submitted/'],
+    errlike => ['/SCHEDULE_HOST_CHECK/'],
 });
 
 ###########################################################
