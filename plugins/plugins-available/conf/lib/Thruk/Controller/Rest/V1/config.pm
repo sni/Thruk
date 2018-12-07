@@ -182,7 +182,7 @@ sub _rest_get_config {
         $live = $c->{'db'}->get_servicegroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'contact') {
         $live = $c->{'db'}->get_contacts(filter => [ name => $name ], columns => [qw/name/]);
-    } elsif($type eq 'contactgroups') {
+    } elsif($type eq 'contactgroup') {
         $live = $c->{'db'}->get_contactgroups(filter => [ name => $name ], columns => [qw/name/]);
     } elsif($type eq 'timeperiod') {
         $live = $c->{'db'}->get_timeperiods(filter => [ name => $name ], columns => [qw/name/]);
