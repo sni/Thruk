@@ -676,6 +676,21 @@ list of supported commands:
  - link:rest_commands.html#post-hosts-name-cmd-start_obsessing_over_host[start_obsessing_over_host]
  - link:rest_commands.html#post-hosts-name-cmd-stop_obsessing_over_host[stop_obsessing_over_host]
 
+=== GET /hosts/<name>/commandline
+
+displays commandline for check command of given hosts.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|check_command                     | name of the check_command including arguments
+|command_line                      | full expanded command line (if possible)
+|error                             | contains the error if expanding failed for some reason
+|host_name                         | host name
+|peer_key                          | backend id when having multiple sites connected
+|===========================================
+
+
 === GET /hosts/<name>/config
 
 Returns configuration for given host.
@@ -874,6 +889,11 @@ lists livestatus services.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
 there is an alias /services.
 
+=== GET /services/<host>/<service>
+
+lists services for given host and name.
+alias for /services?host_name=<host_name>&description=<service>
+
 === POST /services/<host>/<service>/cmd/...
 
 external commands are documented in detail on a separate commands page.
@@ -904,6 +924,22 @@ list of supported commands:
  - link:rest_commands.html#post-services-host-service-cmd-start_obsessing_over_svc[start_obsessing_over_svc]
  - link:rest_commands.html#post-services-host-service-cmd-stop_obsessing_over_svc[stop_obsessing_over_svc]
 
+=== GET /services/<host>/<service>/commandline
+
+displays commandline for check command of given services.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|check_command                     | name of the check_command including arguments
+|command_line                      | full expanded command line (if possible)
+|error                             | contains the error if expanding failed for some reason
+|host_name                         | host name
+|peer_key                          | backend id when having multiple sites connected
+|service_description               | service name
+|===========================================
+
+
 === GET /services/<host>/<service>/config
 
 Returns configuration for given service.
@@ -920,11 +956,6 @@ Update service configuration partially.
 === DELETE /services/<host>/<service>/config
 
 Deletes given service from configuration.
-
-=== GET /services/<host_name>/<service>
-
-lists services for given host and name.
-alias for /services?host_name=<host_name>&description=<service>
 
 === GET /services/stats
 

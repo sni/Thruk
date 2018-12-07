@@ -1235,6 +1235,30 @@ sub _rest_get_livestatus_hosts_services {
 }
 
 ##########################################################
+# REST PATH: GET /hosts/<name>/commandline
+# displays commandline for check command of given hosts.
+register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/commandline?$%mx, \&_rest_get_livestatus_hosts_commandline);
+sub _rest_get_livestatus_hosts_commandline {
+    my($c, undef, $host) = @_;
+    unless($c->config->{'show_full_commandline'} == 2 || ($c->config->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ))) {
+        return({ 'message' => 'not authorized', 'description' => 'you are not authorized to view the command line', code => 403 });
+    }
+    my $data = [];
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
+    for my $hst (@{$hosts}) {
+        my $command = $c->{'db'}->expand_command('host' => $hst, 'source' => $c->config->{'show_full_commandline_source'} );
+        push @{$data}, {
+            'command_line'  => $command->{'line_expanded'},
+            'check_command' => $command->{'line'},
+            'error'         => $command->{'note'},
+            'host_name'     => $hst->{'name'},
+            'peer_key'      => $hst->{'peer_key'},
+        };
+    }
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /hosts/<name>
 # lists hosts for given name.
 # alias for /hosts?name=<name>
@@ -1280,7 +1304,7 @@ sub _rest_get_livestatus_services {
 }
 
 ##########################################################
-# REST PATH: GET /services/<host_name>/<service>
+# REST PATH: GET /services/<host>/<service>
 # lists services for given host and name.
 # alias for /services?host_name=<host_name>&description=<service>
 register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)$%mx, \&_rest_get_livestatus_services_by_name);
@@ -1288,6 +1312,32 @@ sub _rest_get_livestatus_services_by_name {
     my($c, undef, $host, $service) = @_;
     my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
     _expand_perfdata_and_custom_vars($c, $data, "services");
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /services/<host>/<service>/commandline
+# displays commandline for check command of given services.
+register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)/commandline$%mx, \&_rest_get_livestatus_services_commandline);
+sub _rest_get_livestatus_services_commandline {
+    my($c, undef, $host, $service) = @_;
+    unless($c->config->{'show_full_commandline'} == 2 || ($c->config->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ))) {
+        return({'message' => 'not authorized', 'description' => 'you are not authorized to view the command line', code => 403 });
+    }
+    my $data = [];
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
+    for my $svc (@{$services}) {
+        my $command = $c->{'db'}->expand_command('host' => $svc, 'service' => $svc, 'source' => $c->config->{'show_full_commandline_source'} );
+        push @{$data}, {
+            'command_line'        => $command->{'line_expanded'},
+            'check_command'       => $command->{'line'},
+            'error'               => $command->{'note'},
+            'host_name'           => $svc->{'host_name'},
+            'service_description' => $svc->{'description'},
+            'peer_key'            => $svc->{'peer_key'},
+        };
+        push @{$data}, $command;
+    }
     return($data);
 }
 

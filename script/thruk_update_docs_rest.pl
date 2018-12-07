@@ -17,6 +17,10 @@ $c->config->{'cluster_enabled'} = 1; # fake cluster
 $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
 $c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
+# get sample host and service
+my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' => 'host_name,description' })->[0] || die("need at least one service");
+my $host_name = $test_svc->{'host_name'};
+my $service_description = $test_svc->{'description'};
 
 _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
@@ -297,6 +301,9 @@ sub _fetch_keys {
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
     $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
+    $tst_url =~ s|<name>|$host_name|gmx;
+    $tst_url =~ s|<host>|$host_name|gmx;
+    $tst_url =~ s|<service>|$service_description|gmx;
     if($tst_url eq "/config/files") {
         # column would be optimized away otherwise
         $c->req->parameters->{'sort'} = "content";
