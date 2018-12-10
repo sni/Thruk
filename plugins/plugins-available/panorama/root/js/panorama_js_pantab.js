@@ -450,9 +450,18 @@ Ext.define('TP.Pantab', {
                 });
             }
         });
+
+        // adding panels completed
         if(TP.initMask && tab.keepMask) {
             TP.timeouts['timeout_'+tab.id+'_remove_mask'] = window.setTimeout(function() {
                 if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete tab.keepMask; }
+            }, TP.initial_create_delay_active);
+            TP.initial_create_delay_active = TP.initial_create_delay_active + 200;
+        }
+        if(one_tab_only) {
+            TP.timeouts['timeout_' + tab.id + '_starttimeouts'] = window.setTimeout(function() {
+                TP.initComplete();
+                tab.startTimeouts();
             }, TP.initial_create_delay_active);
         }
     },
