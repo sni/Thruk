@@ -1043,7 +1043,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         tab.applyXdata(undefined, false);
                         var newstate = Ext.JSON.encode(tab.getState());
                         tab.forceSaveState();
-                        if(oldstate != newstate) {
+
+                        if(oldstate != newstate && !one_tab_only) {
                             tabpan.startTimeouts();
                         }
 
@@ -1056,7 +1057,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         Ext.apply(tabpan.xdata, values);
                         var newstate = Ext.JSON.encode(tabpan.getState());
                         /* avoid useless updates */
-                        if(oldstate != newstate) {
+                        if(oldstate != newstate && !one_tab_only) {
                             TP.log('['+tab.id+'] settings changed: '+newstate);
                             tabpan.saveState();
                             tabpan.startTimeouts();
