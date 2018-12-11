@@ -313,7 +313,9 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
-    TP.shapesStore.load();
+    if(panel.xdata.appearance.type == 'shape') {
+        TP.shapesStore.load();
+    }
     var renderUpdateDo = function(forceColor, forceRenderItem) {
         if(TP.skipRender) { return; }
         var xdata = TP.get_icon_form_xdata(settingsWindow);
@@ -324,6 +326,9 @@ TP.iconShowEditDialog = function(panel) {
         if(xdata.appearance.type == 'shape') { forceRenderItem = true; }
         if(xdata.appearance.type != lastType || forceRenderItem) {
             if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem, forceColor); }
+            if(xdata.appearance.type == 'shape') {
+                TP.shapesStore.load();
+            }
         }
         lastType = xdata.appearance.type;
 
@@ -437,7 +442,7 @@ TP.iconShowEditDialog = function(panel) {
     });
     var action_menus_menu = [];
     Ext.Array.each(action_menu_items, function(val, i) {
-        var name = val[0];
+        var name = val.name;
         action_menus_menu.push({
             text:    name,
             icon:    url_prefix+'plugins/panorama/images/cog.png',
@@ -890,6 +895,105 @@ TP.iconShowEditDialog = function(panel) {
         };
     }
 
+    /* permissions Tab */
+    var access = [];
+    if(panel.xdata.groups == undefined) { panel.xdata.groups = []; }
+    Ext.Array.each(panel.xdata.groups, function(item, idx, len) {
+        var group = Ext.Object.getKeys(item)[0];
+        var perm  = item[group];
+        access.push({ contactgroup: group, permission: perm });
+    });
+    var permissionsStore = Ext.create('Ext.data.Store', {
+        fields: ['contactgroup', 'permission'],
+        data: access
+    });
+    var permissionsItems = [,{
+            xtype: 'label',
+            text:  'Hide/show this icon for specific contactgroups',
+            style: "margin-left: 26%;"
+        },{
+            xtype:      'gridpanel',
+            name:       'permissions',
+            id:         'permissionsGrid',
+            columns:    [
+                    { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
+                            xtype:            'searchCbo',
+                            panel:             panel,
+                            store:             searchStore,
+                            storeExtraParams: { wildcards: 1 },
+                            lazyRender:        true,
+                            allowBlank:        false
+                        }
+                    },
+                    { header: 'Permission', width: 140,  dataIndex: 'permission', align: 'left', tdCls: 'editable', editor: {
+                            xtype:         'combobox',
+                            triggerAction: 'all',
+                            selectOnTab:    true,
+                            lazyRender:     true,
+                            editable:       false,
+                            store:        ['show', 'hide']
+                        }
+                    },
+                    { header: '',  width: 30,
+                      xtype: 'actioncolumn',
+                      items: [{
+                            icon: '../plugins/panorama/images/delete.png',
+                            handler: TP.removeGridRow,
+                            action: 'remove'
+                      }],
+                      tdCls: 'clickable icon_column'
+                    }
+            ],
+            store: permissionsStore,
+            selType:    'rowmodel',
+            viewConfig: {
+                plugins: {
+                    ptype: 'gridviewdragdrop',
+                    dragText: 'Drag and drop to reorganize'
+                }
+            },
+            plugins:     [Ext.create('Ext.grid.plugin.RowEditing', {
+                clicksToEdit: 1
+            })],
+            height: 230,
+            width:  300,
+            fbar: [{
+                type: 'button',
+                text: 'Add Contactgroup',
+                iconCls: 'user-tab',
+                handler: function(btn, eOpts) {
+                    var store = btn.up('gridpanel').store;
+                    store.add({contactgroup:'*', permission:'hide'})
+                    btn.up('gridpanel').plugins[0].startEdit(store.last(), 0);
+                }
+            }]
+        },{
+            xtype: 'label',
+            text:  'Hint: order from top to bottom, first match wins',
+            cls:   'form-hint',
+            style: "margin-left: 30%;"
+        }
+    ];
+    var permissionsTab = {
+        title : 'Permissions',
+        type  : 'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                    xtype:          'form',
+                    id:             'permissionForm',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:      'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults:      { anchor: '-12', labelWidth: 130 },
+                    items:           permissionsItems
+            }]
+        }]
+    };
+
     /* Source Tab */
     var sourceTab = {
         title: 'Source',
@@ -964,6 +1068,7 @@ TP.iconShowEditDialog = function(panel) {
             linkTab,
             labelTab,
             popupTab,
+            permissionsTab,
             sourceTab
         ]
     });
@@ -977,7 +1082,7 @@ TP.iconShowEditDialog = function(panel) {
 
     var settingsWindow = new Ext.Window({
         height:  350,
-        width:   470,
+        width:   540,
         layout: 'fit',
         hidden:  true,
         items:   tabPanel,
@@ -1071,6 +1176,7 @@ TP.iconShowEditDialog = function(panel) {
         }
     }).show();
     Ext.getBody().unmask();
+    settingsWindow.permissionsStore = permissionsStore;
 
     TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
@@ -1158,6 +1264,14 @@ TP.get_icon_form_xdata = function(settingsWindow) {
         label:      Ext.getCmp('labelForm').getForm().getValues(),
         popup:      Ext.getCmp('popupForm') && Ext.getCmp('popupForm').getForm().getValues()
     }
+    xdata.groups = [];
+    TP.iconSettingsWindow.permissionsStore.each(function(rec) {
+        var row = {};
+        row[rec.data.contactgroup] = rec.data.permission;
+        xdata.groups.push(row);
+    });
+    if(xdata.groups.length == 0) { delete xdata.groups }
+
     // clean up
     if(xdata.label.labeltext == '')   { delete xdata.label; }
     if(xdata.link.link == '')         { delete xdata.link;  }

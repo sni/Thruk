@@ -1,0 +1,62 @@
+---
+layout: docs
+title: Cluster Setup
+---
+
+== Thruk Clustering
+{% include new_since.ad version="2.24" %}
+Clustered setups provide high-availability and performance improvements at the
+price of higher complexity. All Thruk nodes in a cluster must use shared
+storage for their `etc_path` and `var_path` while the `tmp_path` should remain
+local.
+
+
+=== Setup
+
+    - Create shared storage for `etc_path` and `var_path`
+    - Setup a load balancer
+    - Double check the node url in `cluster_nodes`
+    - Enable cluster with `cluster_enabled=1`
+
+
+==== Static Cluster
+Having a fixed number of cluster nodes will be set if you configure multiple
+cluster_nodes with fixed hostnames like:
+
+    cluster_enabled = 1
+    cluster_nodes = http://clusternode1/$url_prefix$/
+    cluster_nodes = http://clusternode2/$url_prefix$/
+
+
+==== Autoscaling / Dynamic Cluster
+When having no (the default) or only one generic cluster_node url defined, Thruk
+uses autoscaling / registering cluster mode and new nodes are registered
+automatically when they startup.
+
+    cluster_enabled = 1
+    # optionally set generic url if the default does not work
+    #cluster_nodes = http://$hostname$/$url_prefix$/
+
+
+=== Features
+
+==== Shared cronjobs
+Cluster setups will share their cronjobs, so reports or scheduling recurring
+downtimes will only run once in a cluster.
+
+==== High Availability
+Having more than one Thruk node with a load-balancer in front will share the
+load over all nodes and will still work if at least one node is available.
+
+===== Load Balancer Configuration
+Loadbalancing is not included automatically, but you can put any loadbalancer you like in front. Use this url for heartbeats to detect which cluster nodes are online.
+
+    /thruk/cgi-bin/remote.cgi?lb_ping
+
+If supported, you can check for the string `OK`.
+
+=== Troubleshooting
+
+    - Try to get Thruk working without cluster mode first. If that works, enable clustering.
+    - You might run into issues with relative symlinks when moving etc and var onto shares. Eventually you have to link some folders to the share to make relative symlinks work again.
+    - Run the command `thruk r /thruk/cluster` and `thruk r /thruk/cluster/heartbeat` to see if cluster nodes are detected correctly.

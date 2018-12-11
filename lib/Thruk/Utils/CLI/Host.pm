@@ -57,7 +57,7 @@ sub cmd {
 
 =head1 EXAMPLES
 
-Run all selfchecks
+List all hosts
 
   %> thruk host list
 

@@ -58,7 +58,7 @@ TestUtils::test_command({
 # list backends
 my $test = {
     cmd  => $BIN.' -l',
-    like => ['/\s+\*\s*\w{5}\s*[^\s]+/',
+    like => ['/\s+\*\s*\w{1,5}\s*[^\s]+/',
              '/Def\s+Key\s+Name/'
             ],
 };
@@ -187,7 +187,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd    => $BIN.' selfcheck logfiles',
     like   => ['/Logfiles:/'],
-    unlike => ['/Filesystem:/', '/is writable/', '/no errors/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    unlike => ['/Filesystem:/', '/is writable/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
     exit   => undef,
 });
 

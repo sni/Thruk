@@ -950,6 +950,7 @@ sub outages {
 
         # start of new outage
         if(!$current && $in_outage) {
+            $last    = $l;
             $current = $l;
             next;
         }

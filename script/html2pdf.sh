@@ -23,6 +23,12 @@ PHANTOMJS=$4
 
 [ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
 
+# workaround for
+# "DSO support routines:DLFCN_LOAD:could not load the shared library:dso_dlfcn.c:185:filename(libssl_conf.so): libssl_conf.so: cannot open shared object file: No such file or directory"
+# issue on debian 10
+[ -z $OPENSSL_CONF ] && OPENSSL_CONF="" 
+export OPENSSL_CONF
+
 EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true $PHANTOMJSOPTIONS"
 
 rm -f $OUTPUT

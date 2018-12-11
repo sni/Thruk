@@ -273,13 +273,14 @@ returns uri to current page.
 
 =cut
 sub full_uri {
-    my $c        = shift;
-    my $full     = shift || 0;
-    carp("no c") unless defined $c;
+    my($c, $full) = @_;
+    $full = 0 unless $full;
+    confess("no c") unless defined $c;
     my $uri = ''.uri_with($c, $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}, 1);
 
     # uri always contains /thruk/, so replace it with our product prefix
-    my $url_prefix = $c->stash->{'url_prefix'};
+    my $url_prefix = $c->stash->{'url_prefix'} || $c->config->{'url_prefix'};
+    confess("no url_prefix") unless defined $url_prefix;
     if($full) {
         $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
     } else {
@@ -495,38 +496,50 @@ returns menu and error
 =cut
 sub get_action_menu {
     my($c, $menu) = @_;
-    our $already_checked_action_menus;
-    $already_checked_action_menus = {} unless defined $already_checked_action_menus;
+    $c->stash->{'checked_action_menus'} = {} unless defined $c->stash->{'checked_action_menus'};
 
     my $sourcefile;
     if($menu !~ m/^[\[\{]/mx) {
-        my $new = $c->config->{'action_menu_items'}->{$menu};
-        if(!$new) {
-            return(["no $menu in action_menu_items", "{}"]);
+        if($c->stash->{'checked_action_menus'}->{$menu}) {
+            return($c->stash->{'checked_action_menus'}->{$menu});
         }
-        if($new =~ m%^file://(.*)$%mx) {
+
+        if(!$c->config->{'action_menu_items'}->{$menu}) {
+            return({err => "no $menu in action_menu_items"});
+        }
+
+        if($c->config->{'action_menu_items'}->{$menu} =~ m%^file://(.*)$%mx) {
             $sourcefile = $1;
             if(!-r $sourcefile) {
-                my $err = $new.': '.$!;
-                unless(exists $already_checked_action_menus->{$menu}) {
-                    $c->log->error("error in action menu ".$menu.": ".$err);
-                    $already_checked_action_menus->{$menu} = $err;
-                }
-                return([$already_checked_action_menus->{$menu}, $new]);
+                my $err = $sourcefile.': '.$!;
+                $c->log->error("error in action menu ".$menu.": ".$err);
+                $c->stash->{'checked_action_menus'}->{$menu} = { err => $err };
+                return($c->stash->{'checked_action_menus'}->{$menu});
             }
-            $new = read_file($sourcefile);
-            $c->config->{'action_menu_items'}->{$menu} = $new;
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = decode_utf8(read_file($sourcefile));
+        } else {
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = $c->config->{'action_menu_items'}->{$menu};
         }
-        # fix trailing commas in menu
-        $new =~ s/\,\s*([\}\]\)]+)/$1/gmx;
-        unless(exists $already_checked_action_menus->{$menu}) {
-            my $err = validate_json($new);
-            $already_checked_action_menus->{$menu} = $err;
+
+        if($sourcefile && $sourcefile =~ m/\.js$/mx) {
+            # js file
+            $c->stash->{'checked_action_menus'}->{$menu}->{'type'} = 'js';
+            if($c->stash->{'checked_action_menus'}->{$menu}->{'data'} =~ m/function\s+([^\(\s]+)\(/mx) {
+                $c->stash->{'checked_action_menus'}->{$menu}->{'function'} = $1;
+            }
+        } else {
+            # json file
+            $c->stash->{'checked_action_menus'}->{$menu}->{'type'} = 'json';
+            # fix trailing commas in menu
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} =~ s/\,\s*([\}\]\)]+)/$1/gmx;
+            my $err = validate_json($c->stash->{'checked_action_menus'}->{$menu}->{'data'});
             if($err) {
-                $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$new);
+                $c->stash->{'checked_action_menus'}->{$menu}->{'err'} = $err;
+                $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$c->stash->{'checked_action_menus'}->{$menu}->{'data'});
             }
         }
-        return([$already_checked_action_menus->{$menu}, $new]);
+        $c->stash->{'checked_action_menus'}->{$menu}->{'name'} = $menu;
+        return($c->stash->{'checked_action_menus'}->{$menu});
     }
 
     # fix trailing commas in menu
@@ -543,9 +556,9 @@ sub get_action_menu {
         for my $item (@{Thruk::Utils::list($items)}) {
             $image_data->{$item->{'icon'}} = '' if $item->{'icon'};
         }
-        return([$err, $menu, Thruk::Utils::Reports::Render::set_action_image_data_urls($c, $image_data)]);
+        return({err => $err, type => 'json', data => $menu, icons => Thruk::Utils::Reports::Render::set_action_image_data_urls($c, $image_data)});
     }
-    return([$err, $menu]);
+    return({err => $err, type => 'json', data => $menu });
 }
 
 ########################################
@@ -905,7 +918,7 @@ sub has_business_process {
     $prefix = '' unless defined $prefix;
     my $x = 0;
     for my $var (@{$obj->{$prefix.'custom_variable_names'}}) {
-        return $obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'THRUK_BP_ID';
+        return $obj->{'peer_key'}.':'.$obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'THRUK_BP_ID';
         $x++;
     }
     return 0;
@@ -1101,6 +1114,53 @@ sub get_cmd_submit_hash {
         confess("no such type: $type");
     }
     return(Cpanel::JSON::XS::encode_json($hash));
+}
+
+########################################
+
+=head2 replace_macros
+
+  replace_macros($text, $macros)
+
+return text with replaced macros
+
+=cut
+sub replace_macros {
+    my($text, $macros) = @_;
+    return($text) unless $macros;
+    for my $key (keys %{$macros}) {
+        $text =~ s/\{\{\s*$key\s*\}\}/$macros->{$key}/gmxi;
+    }
+    return($text);
+}
+
+##############################################
+
+=head2 set_time_locale
+
+  set LC_TIME locale
+
+remember to reset to default after template processing.
+
+=cut
+sub set_time_locale {
+    my($locale) = @_;
+    POSIX::setlocale(POSIX::LC_TIME, $locale);
+    return("");
+}
+
+##############################################
+
+=head2 lc
+
+  lower case text
+
+returns lower case string
+
+=cut
+sub lc {
+    my($text) = @_;
+    return(lc($text));
 }
 
 ########################################

@@ -7,28 +7,33 @@
     <tr>
       <td class="attrName"><b>Choose Plugin</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion()" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:true, autosubmit:false})"[% END %] style="width:650px">
+        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion(); update_command_preview('[% id %]');" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:false, autosubmit:false})"[% END %] style="width:650px" onkeyup="update_command_preview('[% id %]')">
       </td>
     </tr>
     <tr>
       <td class="attrName"><b>Plugin Arguments</b></td>
       <td>
-        <textarea id="[% id %]_inp_args" style="width:650px; height: 150px;"[% IF use_ajax_search %]onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})"[% END %]></textarea>
+        <textarea id="[% id %]_inp_args" style="width:650px; height: 150px;"[% IF use_ajax_search %]onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})"[% END %] onkeyup="update_command_preview('[% id %]')" onchange="update_command_preview('[% id %]')"></textarea>
       </td>
     </tr>
-    [% IF conf_config.show_plugin_syntax_helper %]
     <tr>
       <td class="attrName" colspan=2>
         <div id="[% id %]_help_accordion" style="width: 780px;">
-            <h3><a href="#">Plugin Help</a></h3>
-            <div style="max-width:1000px;">
-                <span id="[% id %]_plugin_help" style="text-align: left;"></span>
-                <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
-            </div>
+          [% IF conf_config.show_plugin_syntax_helper %]
+          <h3><a href="#">Plugin Help</a></h3>
+          <div style="max-width:1000px;">
+              <span id="[% id %]_plugin_help" style="text-align: left;"></span>
+              <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
+          </div>
+          [% END %]
+          <h3><a href="#">Input Preview</a></h3>
+          <div style="max-width:1000px;">
+            <span id="[% id %]_command_line" class="cmd_line_wizard_wrapper"></span>
+            <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the command line is loaded" title="please wait till the command line is loaded" border="0" height="20" width="20"></div>
+          </div>
         </div>
       </td>
     </tr>
-    [% END %]
     <tr>
       <td colspan=2 align="center"><br><button id="[% id %]_accept">accept</button></td>
     </tr>

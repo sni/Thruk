@@ -43,11 +43,12 @@ my @tables          = sort keys %{$data};
 
 for my $type (@tables) {
     my $filter = "";
-    $filter  = "Filter: time > ".(time() - 86400)."\n" if $type eq 'log';
-    $filter .= "Filter: time < ".(time())."\n"       if $type eq 'log';
+    $filter  = "Filter: time > ".(time() - 86400)."\n" if $type =~ m/(log|statehist)/mi;
+    $filter .= "Filter: time < ".(time())."\n"         if $type =~ m/(log|statehist)/mi;
 
     my $statement = "GET $type\n".$filter."Limit: ".$opt_l;
-    my $keys  = $ml->selectrow_hashref($statement );
+    print STDERR $statement,"\n";
+    my $keys  = $ml->selectrow_hashref($statement);
 
     my $file = 'docs/development/tables/'.$type.'.txt';
     open(my $fh, '>', $file) or die("cannot write to $file: $!");

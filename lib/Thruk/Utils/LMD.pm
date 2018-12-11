@@ -55,6 +55,7 @@ sub check_proc {
     }
     $cmd .= ' >/dev/null 2>&1 &';
 
+    $c->log->debug("start cmd: ". $cmd);
     my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
     $c->log->error(sprintf('starting lmd failed with rc %d: %s', $rc, $output)) if $rc != 0;
 
@@ -170,6 +171,7 @@ sub check_initial_start {
         ## use critic
         my $pid = fork();
         if(!$pid) {
+            $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
             Thruk::Utils::External::_do_child_stuff();
             ## no critic
             $SIG{CHLD} = 'DEFAULT';

@@ -367,13 +367,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             store: permissionsStore,
             selType:    'rowmodel',
             plugins:     [Ext.create('Ext.grid.plugin.RowEditing', {
-                clicksToEdit: 1,
-                listeners: {
-                    canceledit: function(grid, eOpts) {
-                        // remove new elements
-                        if(eOpts.record.phantom) { eOpts.store.remove(eOpts.record); }
-                    }
-                }
+                clicksToEdit: 1
             })],
             height: 280,
             width:  300,
@@ -789,23 +783,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 id:         'state_order',
                 value:      ''
             }]
-        }/*,{
-            fieldLabel:  'Service State Order',
-            xtype:       'fieldcontainer',
-            defaultType: 'button',
-            layout:      'hbox',
-            plugins :     Ext.create('Ext.ux.BoxReorderer', {}),
-            defaults:   { reorderable: true, width: 80 },
-            id:          'svc_state_order',
-            items:        serviceStateOrderItems
-        }, {
-            xtype:      'panel',
-            html:       '(drag items to desired order)',
-            style:      'text-align: center;',
-            bodyCls:    'form-hint',
-            padding:    '2 0 0 0',
-            border:      0
-        }*/];
+        }];
     var dashboardTab = {
         title : 'Dashboard',
         type  : 'panel',
@@ -968,7 +946,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         modal:       true,
         width:       620,
         height:      400,
-        title:       'Settings',
+        title:       'Settings: '+(tab.xdata.title ? tab.xdata.title+' - ' : '')+'#'+tab.nr(),
         layout :     'fit',
         buttonAlign: 'center',
         items:       tabPanel,
@@ -1065,7 +1043,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         tab.applyXdata(undefined, false);
                         var newstate = Ext.JSON.encode(tab.getState());
                         tab.forceSaveState();
-                        if(oldstate != newstate) {
+
+                        if(oldstate != newstate && !one_tab_only) {
                             tabpan.startTimeouts();
                         }
 
@@ -1078,7 +1057,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         Ext.apply(tabpan.xdata, values);
                         var newstate = Ext.JSON.encode(tabpan.getState());
                         /* avoid useless updates */
-                        if(oldstate != newstate) {
+                        if(oldstate != newstate && !one_tab_only) {
                             TP.log('['+tab.id+'] settings changed: '+newstate);
                             tabpan.saveState();
                             tabpan.startTimeouts();

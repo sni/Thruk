@@ -166,6 +166,20 @@ Ext.define('TP.SmallWidget', {
             }
             This.setIconLabel();
         },
+        beforeshow: function( This, eOpts ) {
+            // check view permissions
+            if(!This.locked) { return(true); }
+            if(!This.hasViewPermissions()) {
+                // make sure label is hidden as well
+                if(This.labelEl) { This.labelEl.hide(); }
+                if(TP.removeLabel && TP.removeLabel[This.id]) {
+                    TP.removeLabel[This.id].destroy();
+                    delete TP.removeLabel[This.id];
+                }
+                return(false);
+            }
+            return(true);
+        },
         show: function( This, eOpts ) {
             This.addDDListener(This);
             /* update label */
@@ -737,6 +751,23 @@ Ext.define('TP.SmallWidget', {
         panel.resumeEvents();
         panel.setIconLabelPosition();
         return(panel);
+    },
+
+    hasViewPermissions: function() {
+        var panel = this;
+        if(!panel.xdata.groups || panel.xdata.groups.length == 0) {
+            return(true);
+        }
+        // first hit wins
+        var perm = "show";
+        for(var x = 0; x < panel.xdata.groups.length; x++) {
+            var group = panel.xdata.groups[x];
+            var g = Ext.Object.getKeys(group)[0];
+            if(g == "*" || contactgroupsHash[g]) {
+                return(group[g] == "show");
+            }
+        }
+        return(true);
     }
 });
 
@@ -987,14 +1018,14 @@ Ext.define('TP.IconWidget', {
             }
             /* shrink panel size to icon size if possible (non-edit mode and not rotated) */
             delete panel.shrinked;
-            if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && scale == 1 && panel.locked && !tab.map) {
-                var offsetX = (size-width)/2;
-                var offsetY = (size-height)/2;
+            if(panel.appearance.shrinkable && xdata.layout.rotation == 0 && panel.locked && !tab.map) {
+                var offsetX = (size-(width*scale))/2;
+                var offsetY = (size-(height*scale))/2;
                 panel.shrinked = { size: size, x: panel.xdata.layout.x, y: panel.xdata.layout.y, offsetX: offsetX, offsetY: offsetY };
                 x=0;
                 y=0;
-                drawWidth  = width;
-                drawHeight = height;
+                drawWidth  = width * scale;
+                drawHeight = height * scale;
                 panel.setSize(drawWidth, drawHeight);
                 var newX = panel.xdata.layout.x+offsetX;
                 var newY = panel.xdata.layout.y+offsetY;
@@ -1038,7 +1069,11 @@ Ext.define('TP.IconWidget', {
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                             if(This.el.down('image')) {
                                 This.el.down('image').on("load", function (evt, ele, opts) {
-                                    panel.iconCheckBorder(xdata);
+                                    // causes endless loop in chrome otherwise
+                                    if(panel.src == undefined || panel.src != panel.prevSrc) {
+                                        panel.prevSrc = panel.src;
+                                        panel.iconCheckBorder(xdata);
+                                    }
                                 });
                                 This.el.down('image').on("error", function (evt, ele, opts) {
                                     panel.iconCheckBorder(xdata, true);
@@ -1085,9 +1120,11 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
-            panel.addCls('clickable');
-            panel.removeCls('notclickable');
-            if(panel.el) { panel.el.dom.href=xdata.link.link; }
+            if(panel.el) {
+                panel.addCls('clickable');
+                panel.removeCls('notclickable');
+                panel.el.dom.href=xdata.link.link;
+            }
             panel.autoEl.href=xdata.link.link;
             if(panel.labelEl && panel.labelEl.el) {
                 panel.labelEl.el.dom.href=xdata.link.link;
@@ -1098,8 +1135,8 @@ Ext.define('TP.IconWidget', {
             if(panel.el) {
                 panel.removeCls('clickable');
                 panel.addCls('notclickable');
+                panel.el.dom.href='';
             }
-            if(panel.el) { panel.el.dom.href=''; }
             panel.autoEl.href='';
             if(panel.labelEl && panel.labelEl.el) {
                 panel.labelEl.el.dom.href='';
@@ -1141,9 +1178,9 @@ Ext.define('TP.IconWidget', {
             if(scale <= 0) { scale = 1; }
             size = Math.ceil(size * scale);
             if(panel.shrinked) {
-                panel.setSize(naturalWidth, naturalHeight);
+                panel.setSize(naturalWidth * scale, naturalHeight * scale);
                 if(panel.items.getAt && panel.items.getAt(0)) {
-                    panel.items.getAt(0).setSize(naturalWidth, naturalHeight);
+                    panel.items.getAt(0).setSize(naturalWidth * scale, naturalHeight * scale);
                 }
             } else {
                 panel.setSize(size, size);
@@ -1154,7 +1191,14 @@ Ext.define('TP.IconWidget', {
             xdata.size  = size;
             xdata.nsize = [naturalWidth, naturalHeight];
             if(isNaN(scale)) { return; }
-            panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:scale, y:scale}}, true);
+            var translationX = 0;
+            var translationY = 0;
+            if(scale != 1 && panel.shrinked) {
+                translationX = (naturalWidth  * scale - naturalWidth)  / 2;
+                translationY = (naturalHeight * scale - naturalHeight) / 2;
+            }
+            panel.icon.setAttributes({translation:{x:translationX, y:translationY}, scale: {x:scale, y:scale}}, true);
+
             // image size has changed
             if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight || panel.lastScale != scale) {
                 panel.setRenderItem(xdata, true);

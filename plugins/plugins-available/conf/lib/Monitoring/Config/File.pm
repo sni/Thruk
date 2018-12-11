@@ -161,6 +161,12 @@ sub update_objects_from_text {
         }
         next unless $line;
 
+        if($linenr < 10) {
+            if($line =~ m/^\#\s*thruk:\s*readonly/mxo) {
+                $self->{'readonly'} = 1;
+            }
+        }
+
         my $first_char = substr($line, 0, 1);
 
         # full line comments
@@ -563,7 +569,6 @@ sub set_backup {
     return if $self->{'is_new_file'};
     # read file from disk
     $self->{'backup'}  = scalar read_file($self->{'path'});
-    $self->{'changed'} = 1;
     return;
 }
 
@@ -579,8 +584,14 @@ returns true if file has been updated and false if merge fails.
 sub try_merge {
     my($self) = @_;
     return 1 unless $self->{'changed'};
-    return if $self->{'is_new_file'};
-    return unless $self->{'backup'};
+    if($self->{'is_new_file'}) {
+        push @{$self->{'errors'}}, "a file with the same name has been created on disk meanwhile.";
+        return;
+    }
+    if(!$self->{'backup'}) {
+        push @{$self->{'errors'}}, "cannot merge, got no backup";
+        return;
+    }
 
     my $tmpdir = File::Temp::tempdir();
 
@@ -616,6 +627,9 @@ sub try_merge {
 
     my $text = Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg'));
 
+    my $rej;
+    $rej = ":\n".Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
+
     # cleanup
     unlink(glob($tmpdir.'/*'));
     rmdir($tmpdir);
@@ -630,7 +644,9 @@ sub try_merge {
         return 1;
     }
 
-    push @{$self->{'errors'}}, "unable to merge local disk changes: ".$out;
+    my $error = "unable to merge local disk changes:\n".$out;
+    $error .= ":\n".$rej if $rej;
+    push @{$self->{'errors'}}, $error;
     return;
 }
 

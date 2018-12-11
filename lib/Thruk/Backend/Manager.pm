@@ -7,6 +7,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
+use Thruk ();
 use Thruk::Utils ();
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -380,8 +381,8 @@ sub get_scheduling_queue {
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}],
                                                  }, $options{'servicefilter'}],
-                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked/,
-                                                    $options{'servicefilter'} ? qw/host_active_checks_enabled host_check_options host_last_check host_next_check host_check_interval host_is_executing host_has_been_checked/ :()],
+                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked in_check_period/,
+                                                    $options{'servicefilter'} ? qw/host_active_checks_enabled host_check_options host_last_check host_next_check host_check_interval host_is_executing host_has_been_checked host_in_check_period/ :()],
                                       );
     my($hosts);
     if($options{'servicefilter'}) {
@@ -401,6 +402,7 @@ sub get_scheduling_queue {
                 check_interval          => $s->{'host_check_interval'},
                 is_executing            => $s->{'host_is_executing'},
                 has_been_checked        => $s->{'host_has_been_checked'},
+                in_check_period         => $s->{'host_in_check_period'},
             };
             $uniq->{$s->{'host_name'}} = $host;
         }
@@ -411,7 +413,7 @@ sub get_scheduling_queue {
                                                              { 'check_options' => { '!=' => '0' }}],
                                                   }, $options{'hostfilter'}],
                                          options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
-                                         columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked/],
+                                         columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked in_check_period/],
                                         );
     }
 
@@ -476,6 +478,68 @@ sub get_services {
     # inject last_program_starts
     push @args, ('last_program_starts', $self->{'last_program_starts'});
     return $self->_do_on_peers('get_services', \@args );
+}
+
+########################################
+
+=head2 get_host_stats_by_servicequery
+
+  get_host_stats_by_servicequery
+
+calculate host statistics from services query
+
+=cut
+
+sub get_host_stats_by_servicequery {
+    my($self, @args) = @_;
+    my %args = @args;
+    $args{'columns'} = [qw/host_name host_check_type host_has_been_checked host_scheduled_downtime_depth host_state
+                           host_acknowledged host_is_flapping host_event_handler_enabled host_accept_passive_checks
+                           host_active_checks_enabled host_flap_detection_enabled host_notifications_enabled host_childs
+                          /];
+    @args = %args;
+    my $services = $self->_do_on_peers('get_services', \@args );
+    my $data = $self->_set_result_defaults('get_host_stats', []);
+    my $uniq = {};
+    for my $s (@{$services}) {
+        next if $uniq->{$s->{'host_name'}};
+        $uniq->{$s->{'host_name'}} = 1;
+        $data->{'total'}++;
+        $data->{'total_active'}++                      if $s->{'host_check_type'} == 0;
+        $data->{'total_passive'}++                     if $s->{'host_check_type'} == 1;
+        $data->{'pending'}++                           if $s->{'host_has_been_checked'} == 0;
+        $data->{'plain_pending'}++                     if $s->{'host_has_been_checked'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
+        $data->{'pending_and_disabled'}++              if $s->{'host_has_been_checked'} == 0 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'pending_and_scheduled'}++             if $s->{'host_has_been_checked'} == 0 && $s->{'host_scheduled_downtime_depth'} > 0;
+        $data->{'up'}++                                if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0;
+        $data->{'plain_up'}++                          if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
+        $data->{'up_and_disabled_active'}++            if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'up_and_disabled_passive'}++           if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'up_and_scheduled'}++                  if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_scheduled_downtime_depth'} > 0;
+        $data->{'down'}++                              if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1;
+        $data->{'plain_down'}++                        if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
+        $data->{'down_and_ack'}++                      if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_acknowledged'} == 1;
+        $data->{'down_and_scheduled'}++                if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_scheduled_downtime_depth'} > 0;
+        $data->{'down_and_disabled_active'}++          if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'down_and_disabled_passive'}++         if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'down_and_unhandled'}++                if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_active_checks_enabled'} == 1 && $s->{'host_acknowledged'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0;
+        $data->{'unreachable'}++                       if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2;
+        $data->{'plain_unreachable'}++                 if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
+        $data->{'unreachable_and_ack'}++               if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_acknowledged'} == 1;
+        $data->{'unreachable_and_scheduled'}++         if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_scheduled_downtime_depth'} > 0;
+        $data->{'unreachable_and_disabled_active'}++   if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'unreachable_and_disabled_passive'}++  if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'unreachable_and_unhandled'}++         if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_active_checks_enabled'} == 1 && $s->{'host_acknowledged'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0;
+        $data->{'flapping'}++                          if $s->{'host_is_flapping'} == 1;
+        $data->{'flapping_disabled'}++                 if $s->{'host_flap_detection_enabled'} == 0;
+        $data->{'notifications_disabled'}++            if $s->{'host_notifications_enabled'} == 0;
+        $data->{'eventhandler_disabled'}++             if $s->{'host_event_handler_enabled'} == 0;
+        $data->{'active_checks_disabled_active'}++     if $s->{'host_check_type'} == 0 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'active_checks_disabled_passive'}++    if $s->{'host_check_type'} == 1 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'passive_checks_disabled'}++           if $s->{'host_accept_passive_checks'} == 0;
+        $data->{'outages'}++                           if $s->{'host_state'} == 1 && scalar @{$s->{'host_childs'}} > 0;
+    }
+    return($data);
 }
 
 ########################################
@@ -790,7 +854,7 @@ sub logcache_stats {
     if($with_dates) {
         for my $key (keys %{$stats}) {
             my $peer  = $self->get_peer_by_key($key);
-            my($start, $end) = @{$peer->logcache->_get_logs_start_end()};
+            my($start, $end) = @{$peer->logcache->get_logs_start_end()};
             $stats->{$key}->{'start'} = $start;
             $stats->{$key}->{'end'}   = $end;
         }
@@ -833,6 +897,30 @@ sub renew_logcache {
 
 ########################################
 
+=head2 get_comments_by_pattern
+
+  get_comments_by_pattern($c, $host, $svc, $pattern)
+
+retrieve backend and ID of host or service comment(s) that match the given pattern
+
+=cut
+
+sub get_comments_by_pattern {
+    my ($self, $c, $host, $svc, $pattern) = @_;
+    $c->log->debug("get_comments_by_pattern() has been called: host = $host, service = ".($svc||'').", pattern = $pattern");
+    my $options  = {'filter' => [{'host_name' => $host}, {'service_description' => $svc}, {'comment' => {'~' => $pattern}}]};
+    my $comments = $self->get_comments(%{$options});
+    my $ids      = [];
+    for my $comm (@{$comments}) {
+        my ($cmd) = $comm->{'comment'} =~ m/^DISABLE_([A-Z_]+):/mx;
+        $c->log->debug("found comment for command DISABLE_$cmd with ID $comm->{'id'} on backend $comm->{'peer_key'}");
+        push @{$ids}, {'backend' => $comm->{'peer_key'}, 'id' => $comm->{'id'}};
+    }
+    return $ids;
+}
+
+########################################
+
 =head2 _renew_logcache
 
   _renew_logcache($c)
@@ -860,29 +948,42 @@ sub _renew_logcache {
 
     if($check) {
         $c->stash->{'backends'} = $get_results_for;
-        my $type = '';
-        $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         my $stats = $self->logcache_stats($c);
         my $backends2import = [];
         for my $key (@{$get_results_for}) {
             push @{$backends2import}, $key unless defined $stats->{$key};
         }
-        if(scalar @{$backends2import} > 0) {
-            return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
-                                                      message   => 'please stand by while your initial logfile cache will be created...',
-                                                      forward   => $c->req->url,
-                                                      backends  => $backends2import,
-                                                      nofork    => $noforks,
-                                                    });
-        }
+
         if($c->config->{'logcache_import_command'}) {
-            local $ENV{'THRUK_BACKENDS'} = join(',', @{$get_results_for});
+            local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});
             local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
-            my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
-            if($rc != 0) {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
+            if(scalar @{$backends2import} > 0) {
+                local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
+                local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
+                return Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
+                                                        message   => 'please stand by while your initial logfile cache will be created...',
+                                                        forward   => $c->req->url,
+                                                        nofork    => $noforks,
+                                                        });
+            } else {
+                local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
+                my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
+                if($rc != 0) {
+                    Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
+                }
             }
         } else {
+            my $type = '';
+            $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+            if(scalar @{$backends2import} > 0) {
+                return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
+                                                        message   => 'please stand by while your initial logfile cache will be created...',
+                                                        forward   => $c->req->url,
+                                                        backends  => $backends2import,
+                                                        nofork    => $noforks,
+                                                        });
+            }
+
             $self->_do_on_peers( 'renew_logcache', \@args, 1);
         }
     }
@@ -908,6 +1009,51 @@ sub close_logcache_connections {
     return;
 }
 
+########################################
+
+=head2 get_logs_start_end_no_filter
+
+  get_logs_start_end_no_filter($peer)
+
+returns date of first and last log entry
+
+=cut
+sub get_logs_start_end_no_filter {
+    my($peer) = @_;
+    my($start, $end);
+
+    my @steps = (86400*365, 86400*30, 86400*7, 86400);
+
+    my $time = time();
+    for my $step (reverse @steps) {
+        (undef, $end) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => time() - $step }}])};
+        last if $end;
+    }
+
+    # fetching logs without any filter is a terrible bad idea
+    # try to determine start date, simply requesting min/max without filter parses all logfiles
+    # so we try a very early date, since requests with an non-existing timerange a super fast
+    # (livestatus has an index on all files with start and end timestamp and only parses the file if it matches)
+
+    $time = time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
+    for my $step (@steps) {
+        while($time <= time()) {
+            my($data) = $peer->get_logs(nocache => 1, filter => [{ time => { '<=' => $time }}], columns => [qw/time/], options => { limit => 1 });
+            if($data && $data->[0]) {
+                $time  = $time - $step;
+                last;
+            }
+            $time = $time + $step;
+        }
+        if($time > time()) {
+            $time  = $time - $step;
+        }
+        $start = $time;
+    }
+    ($start, undef) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => $start - 86400 }}, { time => {'<=' => $start + 86400 }}])};
+
+    return($start, $end);
+}
 
 ########################################
 
@@ -1270,7 +1416,7 @@ sub _do_on_peers {
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
-    $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for}));
+    $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
 
     # send query to selected backends
     my $num_selected_backends = scalar @{$get_results_for};
@@ -1486,6 +1632,7 @@ select backends we want to run functions on
 sub select_backends {
     my($self, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
+    confess("no context") unless $c;
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
@@ -1583,9 +1730,9 @@ sub _get_result {
        or $force_serial
        or scalar @{$peers} <= 1)
     {
-        return $self->_get_result_serial($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
+        return $self->_get_result_serial($peers, $function, $arg);
     }
-    return $self->_get_result_parallel($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
+    return $self->_get_result_parallel($peers, $function, $arg);
 }
 
 ########################################
@@ -1634,7 +1781,6 @@ sub _get_result_lmd {
             $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
             $peer->{'runnning'}   = 1;
             $peer->{'last_error'} = 'OK';
-
         }
         for my $key (keys %{$meta->{'failed'}}) {
             $c->stash->{'failed_backends'}->{$key} = $meta->{'failed'}->{$key};
@@ -1646,8 +1792,13 @@ sub _get_result_lmd {
             die("did not get a valid response for at least any site");
         }
     }
+    # REMOVE AFTER: 01.01.2020
     if($meta && $meta->{'total'}) {
         $totalsize = $meta->{'total'};
+    }
+    # </REMOVE AFTER>
+    if($meta && $meta->{'total_count'}) {
+        $totalsize = $meta->{'total_count'};
     }
 
     if($function eq 'get_hostgroups' || $function eq 'get_servicegroups' || ($type && (lc($type) eq 'file' || lc($type) eq 'stats'))) {
@@ -1674,22 +1825,18 @@ returns result for given function
 =cut
 
 sub _get_result_serial {
-    my($self,$peers, $function, $arg, $use_shadow) = @_;
+    my($self,$peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c  = $Thruk::Request::c;
     my $t1 = [gettimeofday];
     $c->stats->profile( begin => "_get_result_serial($function)");
-
-    if($Thruk::Backend::Pool::xs and $use_shadow and $function =~ m/^get_/mxo and $function ne 'get_logs' and $function ne 'send_command') {
-        ($peers, $result, $type, $totalsize) = $self->_get_results_xs_pool($peers, $function, $arg);
-    }
 
     for my $key (@{$peers}) {
         my $peer = $self->get_peer_by_key($key);
         # skip already failed peers for this request
         next if $c->stash->{'failed_backends'}->{$key};
 
-        my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg, $use_shadow);
+        my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg);
         my $res = shift @res;
         my($typ, $size, $data, $last_error) = @{$res};
         chomp($last_error) if $last_error;
@@ -1721,7 +1868,7 @@ returns result for given function and args using the worker pool
 =cut
 
 sub _get_result_parallel {
-    my($self, $peers, $function, $arg, $use_shadow) = @_;
+    my($self, $peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Request::c;
 
@@ -1731,7 +1878,7 @@ sub _get_result_parallel {
     for my $key (@{$peers}) {
         # skip already failed peers for this request
         if(!$c->stash->{'failed_backends'}->{$key}) {
-            push @jobs, [$key, $function, $arg, $use_shadow];
+            push @jobs, [$key, $function, $arg];
         }
     }
     $Thruk::Backend::Pool::pool->add_bulk(\@jobs);
@@ -1758,178 +1905,6 @@ sub _get_result_parallel {
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
     return($result, $type, $totalsize);
-}
-
-
-########################################
-
-=head2 _get_results_xs_pool
-
-  _get_results_xs_pool($peers, $function, $arg)
-
-get result from xs thread pool
-
-=cut
-sub _get_results_xs_pool {
-    my($self, $peers, $function, $arg) = @_;
-    my $c = $Thruk::Request::c;
-
-    $c->stats->profile( begin => '_get_results_xs_pool('.$function.')');
-
-    my $result;
-    my $remaining_peers = [];
-    my $totalsize       = 0;
-    my $type;
-
-    my @pool_do;
-    my @cache_args;
-    my $sorted_results = {};
-    for my $key (@{$peers}) {
-        my $peer = $self->get_peer_by_key($key);
-        if(!$peer->{'cacheproxy'}) {
-            push @{$remaining_peers}, $key;
-            next;
-        }
-
-        $sorted_results->{$key} = {
-            'keys'   => [],
-            'res'    => [],
-            'opts'   => [],
-            'failed' => 0,
-        };
-        local $ENV{'THRUK_SELECT'} = 1;
-        if(!@cache_args) {
-            @cache_args = @{$peer->{'cacheproxy'}->$function(@{$arg})};
-            my($statement, $keys, $opt) = @cache_args;
-            if(ref $statement ne 'ARRAY') {
-                @cache_args = ([$statement, $keys, $opt]);
-            }
-            for my $tmp (@cache_args) {
-                if($tmp->[0] =~ m/^Stats/mxo) {
-                    ($tmp->[0],$tmp->[1]) = Monitoring::Livestatus::extract_keys_from_stats_statement($tmp->[0]);
-                }
-                if($tmp->[2] && $tmp->[2]->{'header'}) {
-                    for my $key ( keys %{$tmp->[2]->{'header'}}) {
-                        $tmp->[0] .= $key.': '.$tmp->[2]->{'header'}->{$key}."\n";
-                    }
-                }
-                if($opt && ref $opt eq 'HASH' && $opt->{'limit'}) {
-                    chomp($tmp->[0]);
-                    $tmp->[0] .= "\nLimit: ".$opt->{'limit'}."\n";
-                }
-            }
-        }
-
-        my $x = 0;
-        for my $tmp (@cache_args) {
-            push @pool_do, $x;
-            push @pool_do, $peer->{'key'};
-            push @pool_do, $peer->{'cacheproxy'}->{'live'}->{'peer'};
-            my($statement, $keys, $opt) = @{$tmp};
-            push @pool_do, $statement;
-            $sorted_results->{$key}->{'keys'}->[$x] = $keys;
-            $sorted_results->{$key}->{'opts'}->[$x] = $opt;
-            $x++;
-        }
-    }
-
-    # collect pool results
-    if(@pool_do) {
-        #&timing_breakpoint('_get_results_xs_pool socket_pool_do');
-        my $thread_num = scalar @pool_do;
-        if($thread_num > 100) { $thread_num = 100; } # limit thread size, tests showed that higher number do not increase performance
-        my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
-        #&timing_breakpoint('_get_results_xs_pool socket_pool_do done');
-        my $decoder = Cpanel::JSON::XS->new->utf8->relaxed;
-        for my $row (@{$raw}) {
-            if($row->{'success'}) {
-                $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $decoder->decode(delete $row->{'result'});
-            } else {
-                $sorted_results->{$row->{'key'}}->{'failed'} = $row->{'result'};
-            }
-        }
-        $raw = undef;
-        #&timing_breakpoint('_get_results_xs_pool sorted and decoded');
-        my $post_process;
-        # iterate over original peers to retain order
-        # this keeps identical results in the order of our backends
-        for my $peer ( @{ $self->get_peers() } ) {
-            my $key  = $peer->{'key'};
-            my $name = $peer->{'name'};
-            my $sorted   = $sorted_results->{$key};
-            next if !defined $sorted;
-            if($sorted->{'failed'}) {
-                $c->stash->{'failed_backends'}->{$key} = $sorted->{'failed'};
-                $peer->{'last_error'} = $sorted->{'failed'};
-                next;
-            }
-            my $optimized = 0;
-            my $res_size = scalar @{$sorted->{'res'}};
-            for(my $x=0; $x<$res_size;$x++) {
-                $sorted->{'opts'}->[$x]->{wrapped_json} = 1;
-                $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
-                $totalsize += $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
-                if($res_size == 1
-                   && $sorted->{'keys'}->[$x]
-                   && $sorted->{'opts'}->[$x]->{limit}
-                   && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY'
-                   && $function ne 'get_processinfo'
-                ) {
-                    # optimized postprocessing
-                    if(!defined $post_process) {
-                        $post_process = {
-                            'results'  => [],
-                            'opts'     => $sorted->{'opts'}->[$x],
-                            'keys'     => $sorted->{'keys'}->[$x],
-                        };
-                        push @{$sorted->{'keys'}->[$x]}, ('peer_key', 'peer_name');
-                    }
-                    # add peer key
-                    map { push(@{$_}, ($key, $name)) } @{$sorted->{'res'}->[$x]->{'result'}};
-                    push @{$post_process->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
-                    $optimized = 1;
-                } else {
-                    $sorted->{'opts'}->[$x]->{slice} = 1 if $sorted->{'keys'}->[$x];
-                    $sorted->{'res'}->[$x] = Monitoring::Livestatus::selectall_arrayref(undef, "", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
-                }
-            }
-            if(!$optimized) {
-                my @res = $peer->{'cacheproxy'}->$function(data => ($res_size == 1 ? $sorted->{'res'}->[0] : $sorted->{'res'}));
-                my($data,$typ,$size) = @res;
-                $type                = $typ;
-                $result->{$key}      = $data;
-            }
-        }
-
-        if($post_process) {
-            # get sort keys
-            my $sortkeys = [];
-            for my $sortk (@{$post_process->{'opts'}->{sort}}) {
-                my($key, $dir) = split/\s+/mx, $sortk;
-                my $x = 0;
-                for my $k (@{$post_process->{'keys'}}) {
-                    if($k eq $key) {
-                        push(@{$sortkeys}, $x, $dir);
-                        last;
-                    }
-                    $x++;
-                }
-            }
-            # sort our arrays
-            if((!$type || $type ne 'sorted') && scalar @{$sortkeys} > 0) {
-                $post_process->{'results'} = _sort_nr($post_process->{'results'}, $sortkeys);
-            }
-            # apply limit
-            $post_process->{'results'}  = _limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
-            # splice result, callbacks are missing...
-            $post_process->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $post_process->{keys}, result => $post_process->{'results'}});
-            $result->{'_all_'} = $post_process->{'results'};
-        }
-    }
-
-    $c->stats->profile( end => '_get_results_xs_pool('.$function.')');
-
-    return($remaining_peers, $result, $type, $totalsize);
 }
 
 ########################################
@@ -2772,11 +2747,12 @@ sub _set_result_defaults {
     elsif($function eq "get_host_stats" || $function eq "get_host_totals_stats") {
         $data = {};
         for my $key (qw{
-                        total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
-                        down down_and_ack down_and_scheduled down_and_disabled down_and_unhandled unreachable unreachable_and_ack unreachable_and_scheduled
-                        unreachable_and_disabled unreachable_and_unhandled flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled outages
-                        down_and_disabled_active down_and_disabled_passive unreachable_and_disabled_active unreachable_and_disabled_passive up_and_disabled_active
-                        up_and_disabled_passive active_checks_disabled_active active_checks_disabled_passive
+                        total total_active total_passive
+                        pending plain_pending pending_and_disabled pending_and_scheduled
+                        up plain_up up_and_disabled_active up_and_disabled_passive up_and_scheduled
+                        down plain_down down_and_ack down_and_scheduled down_and_disabled_active down_and_disabled_passive down_and_unhandled
+                        unreachable plain_unreachable unreachable_and_ack unreachable_and_scheduled unreachable_and_disabled_active unreachable_and_disabled_passive unreachable_and_unhandled
+                        flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled_active active_checks_disabled_passive passive_checks_disabled outages
                      }) {
             $data->{$key} = 0;
         }

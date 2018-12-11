@@ -47,3 +47,23 @@ Files will be statically placed inside the output of the normal cgi
 output. Executables will be executed and the output will then be used
 as content.
 
+
+=== Examples
+
+To change the logo of the login page and add some help text, you could create a ssi file like this and store the company.png in your `usercontent/images` folder.
+
+.login-header.ssi:
+------
+<script language="javascript" type="text/javascript">
+<!--
+  var note = "<span style='color: #EE6E00; font-size: 25px;'>Test Server</span>";
+  jQuery(document).ready(function() {
+    jQuery("IMG.mainlogo")
+      .attr('src', '../usercontent/images/company.png')
+      .attr('width', '50%')
+      .attr('height', '50%');
+    jQuery("<br><b><div align='center'>"+note+"</div></b>").insertAfter("IMG.mainlogo");
+  });
+-->
+</script>
+------

@@ -1,0 +1,29 @@
+{
+   "name" : "Test Report",
+   "desc" : "Test Report Body",
+   "params" : {
+      "assumeinitialstates" : "yes",
+      "breakdown" : "days",
+      "decimals" : "2",
+      "details_max_level" : "-1",
+      "graph_min_sla" : "90",
+      "host" : "localhost",
+      "includesoftstates" : "no",
+      "initialassumedhoststate" : 0,
+      "language" : "en",
+      "max_outages_pages" : "1",
+      "max_pnp_sources" : "1",
+      "max_worst_pages" : "1",
+      "rpttimeperiod" : "",
+      "sla" : "98",
+      "timeperiod" : "lastweek",
+      "unavailable" : [
+         "down",
+         "unreachable"
+      ]
+   },
+   "send_types" : [],
+   "template" : "sla_host.tt",
+   "to" : "demo@localhost",
+   "user" : "omdadmin"
+}

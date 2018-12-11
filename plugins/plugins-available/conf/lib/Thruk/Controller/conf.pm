@@ -3,6 +3,7 @@ package Thruk::Controller::conf;
 use strict;
 use warnings;
 use Module::Load qw/load/;
+use Thruk::Authentication::User;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
@@ -30,6 +31,7 @@ sub index {
     #&timing_breakpoint('index start');
 
     if(!$c->config->{'conf_modules_loaded'}) {
+        load Thruk::Utils::References;
         load Thruk::Utils::Conf;
         load Thruk::Utils::Conf::Defaults;
         load Monitoring::Config;
@@ -53,8 +55,7 @@ sub index {
     if($action eq 'user_password') {
         # ok
     }
-    elsif( !$c->check_user_roles("authorized_for_configuration_information")
-        || !$c->check_user_roles("authorized_for_system_commands")) {
+    elsif(!$c->check_user_roles("admin")) {
         if(    !defined $c->{'db'}
             || !defined $c->{'db'}->{'backends'}
             || ref $c->{'db'}->{'backends'} ne 'ARRAY'
@@ -430,6 +431,20 @@ sub _process_cgi_page {
         $data->{$key}->[2] = $cgi_groups;
     }
 
+    my $authkeys = [qw/
+        use_authentication
+        use_ssl_authentication
+        default_user_name
+        lock_author_names
+    /];
+    my $authgroupkeys = [];
+    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+        push @{$authkeys}, $key;
+        my $groupkey = $key;
+        $groupkey =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
+        push @{$authgroupkeys}, $groupkey;
+    }
+
     my $keys = [
         [ 'CGI Settings', [qw/
                         show_context_help
@@ -440,32 +455,8 @@ sub _process_cgi_page {
                         notes_url_target
                     /],
         ],
-        [ 'Authorization', [qw/
-                        use_authentication
-                        use_ssl_authentication
-                        default_user_name
-                        lock_author_names
-                        authorized_for_all_services
-                        authorized_for_all_hosts
-                        authorized_for_all_service_commands
-                        authorized_for_all_host_commands
-                        authorized_for_system_information
-                        authorized_for_system_commands
-                        authorized_for_configuration_information
-                        authorized_for_read_only
-                    /],
-        ],
-        [ 'Authorization Groups', [qw/
-                      authorized_contactgroup_for_all_services
-                      authorized_contactgroup_for_all_hosts
-                      authorized_contactgroup_for_all_service_commands
-                      authorized_contactgroup_for_all_host_commands
-                      authorized_contactgroup_for_system_information
-                      authorized_contactgroup_for_system_commands
-                      authorized_contactgroup_for_configuration_information
-                      authorized_contactgroup_for_read_only
-                    /],
-        ],
+        [ 'Authorization', $authkeys],
+        [ 'Authorization Groups', $authgroupkeys],
     ];
 
     $c->stash->{'keys'}     = $keys;
@@ -511,7 +502,8 @@ sub _process_thruk_page {
                         use_wait_feature
                         wait_timeout
                         use_frames
-                        use_timezone
+                        server_timezone
+                        default_user_timezone
                         use_strict_host_authorization
                         show_long_plugin_output
                         info_popup_event_type
@@ -593,6 +585,7 @@ sub _process_users_page {
     # save changes to user
     my $user = $c->req->parameters->{'data.username'} || '';
     if($user ne '' and defined $file and $c->stash->{action} eq 'store') {
+        my($name, $alias) = split(/\ \-\ /mx,$user, 2);
         return unless Thruk::Utils::check_csrf($c);
         my $redirect = 'conf.cgi?action=change&sub=users&data.username='.$user;
         if($c->stash->{'readonly'}) {
@@ -603,6 +596,17 @@ sub _process_users_page {
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );
             return $c->redirect_to($redirect);
+        }
+
+        my $send = $c->req->parameters->{'send'} || '';
+        if($send eq 'lock account' || $send eq 'unlock account') {
+            my $userdata = Thruk::Utils::get_user_data($c, $name);
+            if($send eq 'unlock account') {
+                delete $userdata->{'login'}->{'locked'};
+            } else {
+                $userdata->{'login'}->{'locked'} = 1;
+            }
+            Thruk::Utils::store_user_data($c, $userdata, $name);
         }
 
         # save changes to cgi.cfg
@@ -638,14 +642,7 @@ sub _process_users_page {
         $c->stash->{'user_name'}  = $name;
         $c->stash->{'md5'}        = $md5;
         $c->stash->{'roles'}      = {};
-        my $roles = [qw/authorized_for_all_services
-                        authorized_for_all_hosts
-                        authorized_for_all_service_commands
-                        authorized_for_all_host_commands
-                        authorized_for_system_information
-                        authorized_for_system_commands
-                        authorized_for_configuration_information
-                    /];
+        my $roles = $Thruk::Authentication::User::possible_roles;
         $c->stash->{'role_keys'}  = $roles;
         for my $role (@{$roles}) {
             $c->stash->{'roles'}->{$role} = 0;
@@ -667,12 +664,11 @@ sub _process_users_page {
             $c->stash->{'contact'}        = $contacts->[0];
         }
 
-        $c->stash->{'contact_groups'} = $c->{'db'}->get_contactgroups_by_contact($c, $name);
-        my($croles, $can_submit_commands, $calias, $roles_by_group)
-                = Thruk::Utils::get_dynamic_roles($c, $name);
-        $c->stash->{'contact_roles'}  = $croles;
-        $c->stash->{'contact_can_submit_commands'} = $can_submit_commands;
-        $c->stash->{'roles_by_group'} = $roles_by_group;
+        $c->stash->{'profile_user'} = Thruk::Utils::set_dynamic_roles($c, $name);
+
+        my $userdata = Thruk::Utils::get_user_data($c, $name);
+        $c->stash->{'account_is_locked'} = $userdata->{'login'}->{'locked'} ? 1 : 0;
+        $c->stash->{'userdata'} = $userdata;
     }
 
     $c->stash->{'subtitle'} = "User Configuration";
@@ -838,6 +834,7 @@ sub _process_backends_page {
         my $remote_name = $c->req->parameters->{'remote_name'};
         my @test;
         eval {
+            local $ENV{'THRUK_USE_LMD'} = "";
             my $con = Thruk::Backend::Peer->new({
                                                  type    => $type,
                                                  name    => 'test connection',
@@ -868,7 +865,7 @@ sub _process_backends_page {
     }
 
     if(keys %{$conf} > 0) {
-        if(defined $conf->{'Component'}->{'Thruk::Backend'}->{'peer'}) {
+        if($conf->{'Component'}->{'Thruk::Backend'} && ref($conf->{'Component'}->{'Thruk::Backend'}) eq 'HASH' && defined $conf->{'Component'}->{'Thruk::Backend'}->{'peer'}) {
             if(ref $conf->{'Component'}->{'Thruk::Backend'}->{'peer'} eq 'ARRAY') {
                 $backends = $conf->{'Component'}->{'Thruk::Backend'}->{'peer'};
             } else {
@@ -1088,6 +1085,9 @@ sub _process_objects_page {
         if(!defined $obj->{'file'} || !defined $obj->{'file'}->{'path'}) {
             delete $obj->{'file'};
         }
+        if($obj->{'file'} && $obj->{'file'}->{'path'} && !$obj->{'file'}->readonly()) {
+            Thruk::Utils::Conf::start_file_edit($c, $obj->{'file'}->{'path'});
+        }
         $c->stash->{'file_link'} = $obj->{'file'}->{'display'} if defined $obj->{'file'};
         _gather_references($c, $obj);
     }
@@ -1103,7 +1103,6 @@ sub _process_objects_page {
     $c->{'obj_db'}->_reset_errors(1);
     return 1;
 }
-
 
 ##########################################################
 # apply config changes
@@ -1207,10 +1206,6 @@ sub _apply_config_changes {
         return unless Thruk::Utils::check_csrf($c);
         $c->{'obj_db'}->discard_changes();
         $c->stash->{'obj_model_changed'} = 1;
-        $c->log->info(sprintf("[config][%s][%s] discarded stashed changes",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
-                                $c->stash->{'remote_user'},
-        )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
         Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
     }
@@ -1341,7 +1336,7 @@ sub _process_user_password_page {
                 $c->log->error("changing password for ".$user." failed: ".$err);
                 Thruk::Utils::set_message($c, 'fail_message', "Password change failed.");
             } else {
-                $c->log->info("user changed password for ".$user);
+                $c->audit_log("user changed password for ".$user);
                 Thruk::Utils::set_message($c, 'success_message', "Password changed successfully");
             }
         }
@@ -1390,7 +1385,7 @@ sub _update_password {
             return unless Thruk::Utils::check_csrf($c);
             my $err = _htpasswd_password($c, $user, undef);
             return $err if $err;
-            $c->log->info("admin removed password for ".$user);
+            $c->audit_log($c->stash->{remote_user}." removed password for ".$user);
             return;
         }
 
@@ -1402,7 +1397,7 @@ sub _update_password {
             if($pass1 eq $pass2) {
                 my $err = _htpasswd_password($c, $user, $pass1);
                 return $err if $err;
-                $c->log->info("admin changed password for ".$user);
+                $c->audit_log($c->stash->{remote_user}." changed password for ".$user);
                 return;
             } else {
                 return('Passwords do not match');
@@ -1547,21 +1542,10 @@ sub _get_context_object {
     $c->stash->{'show_secondary_select'} = 0;
 
     if(defined $c->req->parameters->{'service'} and defined $c->req->parameters->{'host'}) {
-        $c->stash->{'type'}       = 'service';
-        my $objs = $c->{'obj_db'}->get_objects_by_name('host', $c->req->parameters->{'host'}, 0);
+        $c->stash->{'type'} = 'service';
+        my $objs = $c->{'obj_db'}->get_services_by_name($c->req->parameters->{'host'}, $c->req->parameters->{'service'});
         if(defined $objs->[0]) {
-            my $services = $c->{'obj_db'}->get_services_for_host($objs->[0]);
-            for my $type (keys %{$services}) {
-                for my $name (keys %{$services->{$type}}) {
-                    if($name eq $c->req->parameters->{'service'}) {
-                        if(defined $services->{$type}->{$name}->{'svc'}) {
-                            $c->stash->{'data_id'} = $services->{$type}->{$name}->{'svc'}->get_id();
-                        } else {
-                            $c->stash->{'data_id'} = $services->{$type}->{$name}->get_id();
-                        }
-                    }
-                }
-            }
+            $c->stash->{'data_id'} = $objs->[0]->get_id();
         }
     }
     elsif(defined $c->req->parameters->{'host'}) {
@@ -1578,7 +1562,7 @@ sub _get_context_object {
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
         my $new_file   = $c->req->parameters->{'data.file'} || '';
-        my $file = _get_context_file($c, $obj, $new_file);
+        my $file = get_context_file($c, $obj, $new_file);
         return $obj unless $file;
         $obj->set_file($file);
         $obj->set_uniq_id($c->{'obj_db'});
@@ -1638,7 +1622,13 @@ sub _get_context_object {
 }
 
 ##########################################################
-sub _get_context_file {
+
+=head2 get_context_file
+
+    returns file for name, creates new file unless already existing.
+
+=cut
+sub get_context_file {
     my($c, $obj, $new_file) = @_;
     my $files_root = $c->{'obj_db'}->get_files_root();
     if($files_root eq '') {
@@ -1816,13 +1806,15 @@ sub _object_disable {
     $c->stash->{'obj_model_changed'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
 
-    # create log message
-    $c->log->info(sprintf("[config][%s][%s] disabled %s '%s'",
+    # store log message
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] disabled %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
-    ));
+    );
 
     return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
@@ -1839,12 +1831,14 @@ sub _object_enable {
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
 
     # create log message
-    $c->log->info(sprintf("[config][%s][%s] enabled %s '%s'",
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] enabled %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
-    ));
+    );
 
     return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
@@ -1853,9 +1847,11 @@ sub _object_enable {
 sub _object_delete {
     my($c, $obj) = @_;
 
-    my $refs = $c->{'obj_db'}->get_references($obj);
+    my $refs       = $c->{'obj_db'}->get_references($obj);
+    my $other_refs = _get_non_config_tool_references($c, $obj);
+
     if(!$c->req->parameters->{'force'}) {
-        if(scalar keys %{$refs}) {
+        if(scalar keys %{$refs} || scalar keys %{$other_refs}) {
             return $c->redirect_to('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id().'&show_force=1');
         }
     }
@@ -1888,12 +1884,14 @@ sub _object_delete {
     $c->stash->{'obj_model_changed'} = 1;
 
     # create log message
-    $c->log->info(sprintf("[config][%s][%s] removed %s '%s'",
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] removed %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
-    ));
+    );
 
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' removed successfully' );
     return $c->redirect_to('conf.cgi?sub=objects&type='.$obj->get_type());
@@ -1905,9 +1903,17 @@ sub _object_save {
 
     my $data        = $obj->get_data_from_param($c->req->parameters);
     my $old_comment = join("\n", @{$obj->{'comments'}});
-    my $new_comment = $c->req->parameters->{'conf_comment'};
+    my $new_comment = $c->req->parameters->{'conf_comment'} || '';
     $new_comment    =~ s/\r//gmx;
     my $new         = $c->req->parameters->{'data.id'} eq 'new' ? 1 : 0;
+
+    # create copy of object to get references later if renamed
+    my $old_obj = Monitoring::Config::Object->new(
+        id       => $obj->get_id(),
+        type     => $obj->get_type(),
+        conf     => $obj->{'conf'},
+        coretype => $c->{'obj_db'}->{'coretype'},
+    );
 
     # save object
     $obj->{'file'}->{'errors'} = [];
@@ -1920,41 +1926,56 @@ sub _object_save {
         return;
     }
 
-    $c->log->info(sprintf("[config][%s][%s] %s %s '%s'",
+    $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+    push @{$c->{'obj_db'}->{'logs'}},
+        sprintf("[config][%s][%s] %s %s '%s'",
                                 $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $new ? 'created' : 'changed',
                                 $obj->get_type(),
                                 $c->stash->{'data_name'},
-    )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
+    );
     $c->stash->{'obj_model_changed'} = 1;
 
     # only save or continue to raw edit?
     if(defined $c->req->parameters->{'send'} and $c->req->parameters->{'send'} eq 'raw edit') {
         return $c->redirect_to('conf.cgi?sub=objects&action=editor&file='.encode_utf8($obj->{'file'}->{'display'}).'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
+    }
+
+    if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
+        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed with errors', $obj->{'file'}->{'errors'} );
+        return; # return, otherwise details would not be displayed
+    }
+
+    # does the object have a name?
+    if(!defined $c->stash->{'data_name'} || $c->stash->{'data_name'} eq '') {
+        $obj->set_name('undefined');
+        $c->{'obj_db'}->_rebuild_index();
+        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
     } else {
-        if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
-            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed with errors', $obj->{'file'}->{'errors'} );
-            return; # return, otherwise details would not be displayed
-        } else {
-            # does the object have a name?
-            if(!defined $c->stash->{'data_name'} || $c->stash->{'data_name'} eq '') {
-                $obj->set_name('undefined');
-                $c->{'obj_db'}->_rebuild_index();
-                Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
-            } else {
-                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' ) if !$new;
-                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' created successfully' ) if  $new;
-            }
-        }
-        if($c->req->parameters->{'referer'}) {
-            return $c->redirect_to($c->req->parameters->{'referer'});
-        } else {
-            return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
+        Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' ) if !$new;
+        Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' created successfully' ) if  $new;
+    }
+
+    if($c->req->parameters->{'referer'}) {
+        return $c->redirect_to($c->req->parameters->{'referer'});
+    }
+
+    # list outside dependencies after renaming object
+    if(!$new && $c->stash->{'data_name'} ne $old_obj->get_name()) {
+        my $other_refs = _get_non_config_tool_references($c, $old_obj);
+        if(scalar keys %{$other_refs} > 0) {
+            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully. Please check external references.' );
+            $c->stash->{object} = $old_obj;
+            _list_references($c, $old_obj);
+            $c->stash->{'show_incoming'} = 0;
+            $c->stash->{'show_outgoing'} = 0;
+            $c->stash->{'show_renamed'}  = 1;
+            return;
         }
     }
 
-    return 1;
+    return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
 
 ##########################################################
@@ -1965,19 +1986,21 @@ sub _object_move {
     if($c->stash->{action} eq 'movefile') {
         return unless Thruk::Utils::check_csrf($c);
         my $new_file = $c->req->parameters->{'newfile'};
-        my $file     = _get_context_file($c, $obj, $new_file);
+        my $file     = get_context_file($c, $obj, $new_file);
         if(defined $file and $c->{'obj_db'}->move_object($obj, $file)) {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' moved successfully' );
         }
 
         # create log message
-        $c->log->info(sprintf("[config][%s][%s] moved %s '%s' to '%s'",
+        $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
+        push @{$c->{'obj_db'}->{'logs'}},
+            sprintf("[config][%s][%s] moved %s '%s' to '%s'",
                                     $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                     $c->stash->{'remote_user'},
                                     $obj->get_type(),
                                     $obj->get_name(),
                                     $file->{'path'},
-        )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
+        );
         $c->stash->{'obj_model_changed'} = 1;
 
         return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
@@ -2152,7 +2175,7 @@ sub _file_editor {
         $c->stash->{'file_name'}     = $file->{'display'};
         $c->stash->{'file_name'}     =~ s/^$files_root//gmx;
         $c->stash->{'file_content'}  = decode_utf8($file->get_new_file_content());
-        $c->stash->{'template'}      = 'conf_objects_fileeditor.tt';
+        $c->stash->{'template'}      = $c->config->{'use_feature_editor'} ? 'conf_objects_fancyeditor.tt' : 'conf_objects_fileeditor.tt';
     }
     elsif(_is_extra_file($filename, $c->config->{'Thruk::Plugin::ConfigTool'}->{'edit_files'})) {
         $file = Monitoring::Config::File->new($filename, [], $c->{'obj_db'}->{'coretype'}, 1);
@@ -2165,7 +2188,7 @@ sub _file_editor {
             my $content                  = read_file($filename);
             $c->stash->{'file_content'}  = decode_utf8($content);
         }
-        $c->stash->{'template'}      = 'conf_objects_fileeditor.tt';
+        $c->stash->{'template'}      = $c->config->{'use_feature_editor'} ? 'conf_objects_fancyeditor.tt' : 'conf_objects_fileeditor.tt';
         $c->stash->{'subtitle'}      = "";
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
@@ -2399,8 +2422,11 @@ sub _host_list_services {
 ##########################################################
 sub _list_references {
     my($c, $obj) = @_;
-    _gather_references($c, $obj);
-    $c->stash->{'template'} = 'conf_objects_listref.tt';
+    _gather_references($c, $obj, 1);
+    $c->stash->{'show_incoming'} = 1;
+    $c->stash->{'show_outgoing'} = 1;
+    $c->stash->{'show_renamed'}  = 0;
+    $c->stash->{'template'}      = 'conf_objects_listref.tt';
     return;
 }
 
@@ -2409,11 +2435,14 @@ sub _config_check {
     my($c) = @_;
     my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
     $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
+    my $rc = 0;
     if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+        $rc = 1;
     }
     elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $obj_check_cmd)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+        $rc = 1;
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
     }
@@ -2421,7 +2450,7 @@ sub _config_check {
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    return;
+    return $rc;
 }
 
 ##########################################################
@@ -2429,6 +2458,7 @@ sub _config_reload {
     my($c) = @_;
     $c->stats->profile(begin => "conf::_config_reload");
 
+    $c->stash->{'original_output'} = "";
     my $time = time();
     my $name = $c->stash->{'param_backend'};
     my $peer = $c->{'db'}->get_peer_by_key($name);
@@ -2441,16 +2471,19 @@ sub _config_reload {
         $last_reload = $processinfo->{$pkey}->{'program_start'} || (time() - 1);
     }
 
+    $c->stats->profile(comment => "program_start before reload: ".$last_reload);
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->stash->{'last_changed'} = 0;
-            $c->stash->{'needs_commit'} = 0;
+            $c->{'obj_db'}->{'last_changed'} = 0;
+            $c->{'obj_db'}->{'needs_commit'} = 0;
+            Thruk::Utils::Conf::store_model_retention($c, $pkey);
         }
         elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->stash->{'last_changed'} = 0;
-            $c->stash->{'needs_commit'} = 0;
+            $c->{'obj_db'}->{'last_changed'} = 0;
+            $c->{'obj_db'}->{'needs_commit'} = 0;
+            Thruk::Utils::Conf::store_model_retention($c, $pkey);
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
             $wait = 0;
@@ -2467,11 +2500,13 @@ sub _config_reload {
         $c->{'db'}->send_command( %{$options} );
         $c->stash->{'output'} = 'config reloaded by external command.';
     }
+    $c->stats->profile(comment => "reload command issued: ".time());
 
     # wait until core responds again
     if($wait) {
         if(!Thruk::Utils::wait_after_reload($c, $pkey, $last_reload)) {
-            $c->stash->{'output'} .= "\n<font color='red'>Warning: waiting for core reload failed.</font>";
+            $c->stash->{'original_output'} .= 'Warning: waiting for core reload failed.';
+            $c->stash->{'output'}          .= "\n<font color='red'>".$c->stash->{'original_output'}."</font>";
         }
     }
 
@@ -2479,12 +2514,13 @@ sub _config_reload {
     $c->stash->{'reload_nav'} = 1;
 
     $c->stats->profile(end => "conf::_config_reload");
-    return;
+    return 1;
 }
 
 ##########################################################
 sub _nice_check_output {
     my($c) = @_;
+    $c->stash->{'original_output'} = $c->stash->{'output'};
     $c->stash->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
     $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
     $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
@@ -2509,7 +2545,7 @@ sub _check_external_reload {
         my $last_reloaded = $c->stash->{'pi_detail'}->{$c->stash->{'param_backend'}}->{'program_start'} || 0;
         if($last_reloaded > $c->{'obj_db'}->{'last_changed'}) {
             $c->{'obj_db'}->{'last_changed'} = 0;
-            $c->stash->{'last_changed'}      = 0;
+            $c->stash->{'obj_model_changed'} = 1;
         }
     }
     return;
@@ -2517,18 +2553,21 @@ sub _check_external_reload {
 
 ##########################################################
 sub _gather_references {
-    my($c, $obj) = @_;
+    my($c, $obj, $include_outside) = @_;
 
     #&timing_breakpoint('_gather_references');
 
     my($incoming, $outgoing) = $c->{'obj_db'}->gather_references($obj);
+
+    $c->stash->{'other_refs'} = {} unless $c->stash->{'other_refs'};
+    $c->stash->{'other_refs'} = _get_non_config_tool_references($c, $obj) if $include_outside;
 
     # linked from delete object page?
     $c->stash->{'force_delete'} = $c->req->parameters->{'show_force'} ? 1 : 0;
 
     $c->stash->{'incoming'} = $incoming;
     $c->stash->{'outgoing'} = $outgoing;
-    $c->stash->{'has_refs'} = 1 if(scalar keys %{$incoming} || scalar keys %{$outgoing});
+    $c->stash->{'has_refs'} = 1 if(scalar keys %{$incoming} || scalar keys %{$outgoing} || scalar keys %{$c->stash->{'other_refs'}});
 
     #&timing_breakpoint('_gather_references done');
 
@@ -2551,6 +2590,69 @@ sub _is_extra_file {
     }
     return 0;
 }
+
+##########################################################
+sub _get_non_config_tool_references {
+    my($c, $obj) = @_;
+    my $other_refs = {};
+    if($obj->get_type() eq 'host') {
+        Thruk::Utils::References::get_host_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    elsif($obj->get_type() eq 'hostgroup') {
+        Thruk::Utils::References::get_hostgroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    elsif($obj->get_type() eq 'service') {
+        # expand hosts and hostgroups and iterate over all of them
+        my $all_hosts = {};
+        for my $host_name (@{$obj->{'conf'}->{'host_name'}}) {
+            $all_hosts->{$host_name} = 1;
+        }
+        for my $hostgroup_name (@{$obj->{'conf'}->{'hostgroup_name'}}) {
+            my $groups = $c->{'db'}->get_hostgroups(filter => [{ name => $hostgroup_name }], backend => [$c->stash->{'param_backend'}], columns => [qw/name members/]);
+            for my $group (@{$groups}) {
+                for my $host_name (@{$group->{'members'}}) {
+                    $all_hosts->{$host_name} = 1;
+                }
+            }
+        }
+        for my $host_name (sort keys %{$all_hosts}) {
+            Thruk::Utils::References::get_service_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $host_name, $obj->get_primary_name() || $obj->get_name());
+        }
+    }
+    elsif($obj->get_type() eq 'servicegroup') {
+        Thruk::Utils::References::get_servicegroup_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    elsif($obj->get_type() eq 'contact') {
+        Thruk::Utils::References::get_contact_matches($c, $c->stash->{'param_backend'}, { $c->stash->{'param_backend'} => 1 }, $other_refs, $obj->get_primary_name() || $obj->get_name());
+    }
+    $other_refs = $other_refs->{$c->stash->{'param_backend'}};
+    delete $other_refs->{'Livestatus'};
+    delete $other_refs->{'Configuration'};
+
+    # remove duplicates
+    for my $key (sort keys %{$other_refs}) {
+        my $uniq = {};
+        my @new = ();
+        for my $entry (@{$other_refs->{$key}}) {
+            my $first = 0;
+            if(!$uniq->{$entry->{'name'}}->{$entry->{'details'}}) {
+                $uniq->{$entry->{'name'}}->{$entry->{'details'}} = 0;
+                $first = 1;
+            }
+            $uniq->{$entry->{'name'}}->{$entry->{'details'}}++;
+            push @new, $entry if $first;
+        }
+        for my $n (@new) {
+            if($uniq->{$n->{'name'}}->{$n->{'details'}} > 1) {
+                $n->{'details'} = $n->{'details'}.' ('.$uniq->{$n->{'name'}}->{$n->{'details'}}.' times)';
+            }
+        }
+        $other_refs->{$key} = \@new;
+    }
+
+    return($other_refs);
+}
+
 ##########################################################
 
 =head1 AUTHOR

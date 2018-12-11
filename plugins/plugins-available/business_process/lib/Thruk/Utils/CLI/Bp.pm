@@ -39,7 +39,8 @@ The bp command provides all business process related cli commands.
 
 use warnings;
 use strict;
-use Time::HiRes qw/gettimeofday tv_interval/;
+use Time::HiRes qw/gettimeofday tv_interval sleep/;
+use Thruk::Utils;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 ##############################################
@@ -67,14 +68,23 @@ sub cmd {
         return("business process plugin is disabled.\n", 1);
     }
 
-    # loading Clone makes BPs with filters lot faster
-    eval {
-        require Clone;
-    };
-
     my $mode = shift @{$commandoptions} || '';
 
+    # backwards compatibility for thruk -a bpd command
+    my $id = $mode;
+    if($mode eq 'd') {
+        $id = 'all';
+    }
+
+    # this function must be run on one cluster node only
+    if($id eq 'all') {
+        return("command send to cluster\n", 0) if $c->cluster->run_cluster("once", "cmd: bp all");
+    }
+
     if($mode eq 'commit') {
+        # this function must be run on all cluster nodes
+        return if $c->cluster->run_cluster("all", "cmd: bp commit");
+
         my $bps = Thruk::BP::Utils::load_bp_data($c);
         my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
         if($rc != 0) {
@@ -86,41 +96,99 @@ sub cmd {
         return('OK - wrote '.(scalar @{$bps})." business process(es)\n", 0);
     }
 
-    # backwards compatibility for thruk -a bpd command
-    my $id = $mode;
-    if($mode eq 'd') {
-        $id = 'all';
-    }
-
     if(!$id) {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 
+    # loading Clone makes BPs with filters lot faster
+    eval {
+        require Clone;
+    };
+
     # calculate bps
+    my @child_pids;
     my $last_bp;
     my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
     if($rate < 1) { $rate = 1; }
     if($rate > 5) { $rate = 5; }
     my $timeout = ($rate*60) -5;
-    local $SIG{ALRM} = sub { die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown')) };
+    local $SIG{ALRM} = sub {
+        # kill child pids
+        for my $pid (@child_pids) {
+            kill(2, $pid);
+        }
+        sleep(1);
+        for my $pid (@child_pids) {
+            kill(9, $pid);
+        }
+        die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown'));
+    };
     alarm($timeout);
 
     # enable all backends for now till configuration is possible for each BP
     $c->{'db'}->enable_backends();
 
     undef $id if $id eq 'all';
-    my $t0 = [gettimeofday];
-    my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
-    for my $bp (@{$bps}) {
-        $last_bp = $bp;
-        _debug("updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
-        $bp->update_status($c);
-        _debug("OK") if $Thruk::Utils::CLI::verbose >= 1;
+    my $t0     = [gettimeofday];
+    my $bps    = Thruk::BP::Utils::load_bp_data($c, $id);
+    my $num_bp = scalar @{$bps};
+
+    my $worker_num = int($c->config->{'Thruk::Plugin::BP'}->{'worker'} || 0);
+    if($worker_num == 0) {
+        # try to autmatically find a suitable number of workers
+        $worker_num = 1;
+        if($num_bp > 20) {
+            $worker_num = 3;
+        }
+        if($num_bp > 100) {
+            $worker_num = 5;
+        }
+    }
+    _debug("calculating business process with ".$worker_num." workers");
+    my $chunks = Thruk::Utils::array_chunk($bps, $worker_num);
+
+    for my $chunk (@{$chunks}) {
+        my $child_pid;
+        if($worker_num > 1) {
+            $child_pid = fork();
+            die("failed to fork: $!") if $child_pid == -1;
+        }
+        if(!$child_pid) {
+            if($worker_num > 1) {
+                Thruk::Utils::External::_do_child_stuff();
+            }
+            for my $bp (@{$chunk}) {
+                $last_bp = $bp;
+                _debug("[$$] updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
+                $bp->update_status($c);
+                _debug("[$$] OK") if $Thruk::Utils::CLI::verbose >= 1;
+            }
+            exit if $worker_num > 1;
+        } else {
+            _debug("worker start with pid: ".$child_pid);
+            push @child_pids, $child_pid;
+        }
+    }
+    alarm($timeout);
+    _debug("waiting ".$timeout." seconds for workers to finish");
+    if($worker_num > 1) {
+        while(1) {
+            my $pid = wait();
+            my $rc  = $?;
+            last if $pid == -1;
+            if($rc != 0) {
+                _error("worker ".$pid." exited with rc: ".$rc) if $rc != 0;
+            } else {
+                _debug("worker ".$pid." exited with rc: ".$rc);
+            }
+            @child_pids = grep(!/^$pid$/mx, @child_pids);
+            Time::HiRes::sleep(0.1);
+        }
     }
     alarm(0);
-    my $nr = scalar @{$bps};
+    _debug("all worker finished");
     my $elapsed = tv_interval($t0);
-    my $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
+    my $output = sprintf("OK - %d business processes updated in %.2fs\n", $num_bp, $elapsed);
 
     $c->stats->profile(end => "_cmd_bp($action)");
     return($output, 0);

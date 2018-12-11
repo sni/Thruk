@@ -399,7 +399,7 @@ sub _process_host_page {
     my $hostname = $c->req->parameters->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output/] );
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output contacts/] );
 
     return $c->detach('/error/index/5') unless defined $hosts;
 
@@ -537,7 +537,7 @@ sub _process_service_page {
 
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename } ], extra_columns => [qw/long_plugin_output/] );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename } ], extra_columns => [qw/long_plugin_output contacts/] );
 
     return $c->detach('/error/index/15') unless defined $services;
 
@@ -740,6 +740,15 @@ sub _process_perf_info_page {
         }
     }
 
+    # cluster statistics
+    if(    $c->check_user_roles("authorized_for_configuration_information")
+       and $c->check_user_roles("authorized_for_system_information")) {
+        if($c->req->parameters->{'cluster'}) {
+            return _process_perf_info_cluster_page($c);
+        }
+    }
+
+
     $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
@@ -757,7 +766,7 @@ sub _process_perf_info_page {
         }
     }
 
-    # add logfile cache statistics
+    # add lmd cache statistics
     $c->stash->{'has_lmd'} = 0;
     if($c->config->{'use_lmd_core'}) {
         $c->stash->{'has_lmd'}   = 1;
@@ -768,21 +777,31 @@ sub _process_perf_info_page {
 }
 
 ##########################################################
+# create the performance info cluster page
+sub _process_perf_info_cluster_page {
+    my( $c ) = @_;
+    $c->stash->{template} = 'extinfo_type_4_cluster_status.tt';
+    return 1;
+}
+
+##########################################################
 # create the grafana page
 sub _process_grafana_page {
     my($c) = @_;
 
-    my $hst     = $c->req->parameters->{'host'};
-    my $svc     = $c->req->parameters->{'service'};
-    my $source  = $c->req->parameters->{'source'} || 1;
-    my $start   = $c->req->parameters->{'from'};
-    my $end     = $c->req->parameters->{'to'};
-    my $width   = $c->req->parameters->{'width'}  || 800;
-    my $height  = $c->req->parameters->{'height'} || 300;
-    my $format  = $c->req->parameters->{'format'} || 'png';
-    my $title   = $c->req->parameters->{'disablePanelTitel'};
-
-    $c->res->body(Thruk::Utils::get_perf_image($c, $hst, $svc, $start, $end, $width, $height, $source, undef, $format, !$title));
+    my $format = $c->req->parameters->{'format'} || 'png';
+    $c->res->body(Thruk::Utils::get_perf_image($c, {
+        host        => $c->req->parameters->{'host'},
+        service     => $c->req->parameters->{'service'},
+        start       => $c->req->parameters->{'from'},
+        end         => $c->req->parameters->{'to'},
+        width       => $c->req->parameters->{'width'} || 800,
+        height      => $c->req->parameters->{'height'} || 300,
+        source      => $c->req->parameters->{'source'} || 1,
+        format      => $format,
+        show_title  => !$c->req->parameters->{'disablePanelTitle'},
+        show_legend => $c->req->parameters->{'legend'} // 1,
+    }));
     $c->{'rendered'} = 1;
     if($format eq 'png') {
         $c->res->headers->content_type('image/png');

@@ -399,18 +399,18 @@ TP.renderTipDetails = function(data) {
                 prefix = 'host_';
             }
             if(uniq_hosts[d[prefix+'name']]) { continue; }
-            if(host_details_skipped.length > 5) { skipped++; continue; }
             uniq_hosts[d[prefix+'name']] = true;
+            if(host_details.length > 10) { skipped++; continue; }
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
             var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, d);
             var statename = TP.render_host_status(d[prefix+'state'], {}, {data:d});
-            detail  = '<tr>';
+            var detail  = '<tr>';
             detail += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
             detail += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
             detail += '<td class="plugin_output">'+d[prefix+'plugin_output']+'<\/td>';
             detail += '<\/tr>';
-            if(data.length > 10 && (num_shown >= 5 || (panel.xdata.state != 0 && d[prefix+'state'] == 0))) {
+            if(data.length > 10 && (num_shown >= 10 || (panel.xdata.state != 0 && d[prefix+'state'] == 0))) {
                 skipped++;
                 host_details_skipped.push(detail);
                 continue;
@@ -424,8 +424,9 @@ TP.renderTipDetails = function(data) {
             skipped = 0;
         }
         if(skipped > 0) {
+            var link = TP.getIconDetailsLink(panel);
             details += '<tr>';
-            details += '<td class="more_hosts" colspan=3>'+(skipped)+' more host'+(skipped > 1 ? 's' : '')+'...<\/td>';
+            details += '<td class="more_hosts" colspan=3><a href="'+link+'" target="_blank">'+(skipped)+' more host'+(skipped > 1 ? 's' : '')+'...</a><\/td>';
             details += '<\/tr>';
         }
         details += '<\/table>';
@@ -458,8 +459,9 @@ TP.renderTipDetails = function(data) {
             num_shown++;
         }
         if(skipped > 0) {
+            var link = TP.getIconDetailsLink(panel);
             details += '<tr>';
-            details += '<td class="more_services" colspan=4>'+skipped+' more service'+(skipped > 1 ? 's' : '')+'...<\/td>';
+            details += '<td class="more_services" colspan=4><a href="'+link+'" target="_blank">'+(skipped)+' more service'+(skipped > 1 ? 's' : '')+'...</a><\/td>';
             details += '<\/tr>';
         }
         details += '<\/table>';

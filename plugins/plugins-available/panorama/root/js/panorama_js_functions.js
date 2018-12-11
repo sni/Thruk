@@ -1625,10 +1625,10 @@ var TP = {
     /* returns list of currently active backends for given panel */
     getActiveBackendsPanel: function(tab, panel) {
         var backends;
-        if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0) {
+        if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0 && (panel.xdata.backends.length != 1 || panel.xdata.backends[0] != "")) {
             backends = panel.xdata.backends;
         }
-        else if(panel && panel.xdata.general && panel.xdata.general.backends && panel.xdata.general.backends.length > 0 && (panel.xdata.general.backends.length != 1 || panel.xdata.general.backends[0] != "")) {
+        else if(panel && panel.xdata && panel.xdata.general && panel.xdata.general.backends && panel.xdata.general.backends.length > 0 && (panel.xdata.general.backends.length != 1 || panel.xdata.general.backends[0] != "")) {
             backends = panel.xdata.general.backends;
         }
         else if(tab.xdata.select_backends) {
@@ -1665,13 +1665,20 @@ var TP = {
 
     /* play a wave file*/
     playWave: function(url, endedCallback) {
+        console.log("playing sound: "+url);
         var el = Ext.DomHelper.insertFirst(document.body, '<audio src="'+url+'" />' , true);
-        el.dom.play();
         el.dom.addEventListener('ended', function() {
             if(endedCallback) {
                 endedCallback();
             }
         });
+        el.dom.addEventListener('error', function(a,b,c,d) {
+            TP.Msg.msg("fail_message~~failed to play sound file.");
+            if(endedCallback) {
+                endedCallback();
+            }
+        });
+        el.dom.play();
     },
     /* put a new alert onto the queue */
     checkSoundAlerts: function(tab) {
@@ -1694,7 +1701,7 @@ var TP = {
             if(p.iconType && p.xdata) {
                 var alertState = p.xdata.state;
                 if(p.acknowledged || p.downtime) { alertState = 0; }
-                if(p.iconType == 'host') {
+                if(p.iconType == 'host' || p.hostProblem) {
                     if(alertState == 0) { totals.recovery++    }
                     if(alertState == 1) { totals.down++        }
                     if(alertState == 2) { totals.unreachable++ }
@@ -1707,22 +1714,24 @@ var TP = {
             }
         }
 
+        if(TP.alertNumbers         == undefined) { TP.alertNumbers         = {}; }
+        if(TP.alertNumbers[tab_id] == undefined) { TP.alertNumbers[tab_id] = {recovery: 0, warning: 0, critical: 0, unknown: 0, down: 0, unreachable: 0}; }
+
         /* inital display does not alert */
         if(TP.alertTotals[tab_id] == undefined) {
             TP.alertTotals[tab_id] = totals;
+            TP.alertNumbers[tab_id]["recovery"] = 1; // do not send initial recovery alerts
             return;
         }
-
-        if(TP.alertNumbers         == undefined) { TP.alertNumbers         = {}; }
-        if(TP.alertNumbers[tab_id] == undefined) { TP.alertNumbers[tab_id] = {recovery: 0, warning: 0, critical: 0, unknown: 0, down: 0, unreachable: 0}; }
 
         for(var x=0; x<order.length; x++) {
             var name = order[x];
             /* sounds enabled and there are alerts */
             if(tab.xdata[name+'_sound'] != "" && totals[name] > 0) {
                 /* repeat enabled or new alerts */
+                if(tab.xdata[name+'_repeat'] == undefined) { tab.xdata[name+'_repeat'] = 1; } // don't repeat if not set, ex.: recoveries
                 if(   totals[name] > TP.alertTotals[tab_id][name]
-                   || tab.xdata[name+'_repeat'] == 0
+                   || tab.xdata[name+'_repeat'] == 0 // forever
                    || tab.xdata[name+'_repeat'] > TP.alertNumbers[tab_id][name])
                 {
                     var tabpan = Ext.getCmp('tabpan');
@@ -2124,15 +2133,18 @@ var TP = {
         for(var x = 0; x < broadcasts.length; x++) {
             var b   = broadcasts[x];
             var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
-            if(TP.broadcasts[id]) {
-                broadcast_list[id] = TP.broadcasts[id];
-                continue;
-            }
-            var text = b.text;
+            var text = replace_macros(replace_macros(b.text, b.frontmatter), b.macros)
             if(b.annotation) {
                 text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
             }
-            var msg = TP.Msg.msg("info_message~~"+text, 0, TP.broadcastCt, "Announcement", function() {
+            if(TP.broadcasts[id]) {
+                broadcast_list[id] = TP.broadcasts[id];
+                // update text for existing broadcasts
+                Ext.get(id+"_content").update(text);
+                continue;
+            }
+            // create missing broadcasts
+            var msg = TP.Msg.msg("info_message~~<div id="+id+"_content>"+text+"</div>", 0, TP.broadcastCt, "Announcement", function() {
                 Ext.Ajax.request({
                     url: 'broadcast.cgi',
                     method: 'POST',
@@ -2146,6 +2158,7 @@ var TP = {
             });
             broadcast_list[id] = msg.id;
         }
+        // remove exceeding broadcasts
         for(var key in TP.broadcasts) {
             if(!broadcast_list[key]) {
                 Ext.get(TP.broadcasts[key]).destroy();

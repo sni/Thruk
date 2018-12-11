@@ -1,21 +1,91 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Panorama:
+            - fix panels not beeing updated in single window mode
+
+2.26     Fri Dec  7 21:34:29 CET 2018
+          - add admin role in cgi.cfg
+          - add graph_proxy_enabled option to passthrough pnp and grafana from remote http sites
+          - remove cluetip library for popup graphs
+          - fix reload issue in firefox
+          - fix escaping hostnames and service description in excel exports
+          - fix command issues in rest api
+          - Business Process:
+            - fix timeouts
+
+2.24-2   Tue Nov  6 16:18:50 CET 2018
+          - add new (optional) roles
+          - fix rest api issues
+          - add cluster mode with fixed number of nodes
+          - Panorama:
+            - make icon unknown if filter does not return any objects
+
+2.24     Fri Oct 26 18:40:37 CEST 2018
+          - add rest api
+            - see https://thruk.org/documentation/rest.html for details
+          - support clustered setups
+            - see https://thruk.org/documentation/cluster.html for details
+          - add api keys
+          - add command_enabled option
+          - show and use alias for hosts, hostgroups and servicegroups search
+          - removed cookie_auth_direct_agents option
+          - action menus:
+            - add support for submenus
+            - add support for scripted js menus
+          - Business Process:
+            - only show business processes where the contact is allowed to see the generated service (#810)
+          - Panorama:
+            - fix playing recovery or host alert sounds
+          - Cookie Auth:
+            - lock account after 10 failed login attempts
+            - add `cookie_auth_disable_after_failed_logins` option
+            - add lock/unlock actions to admin users page
+          - Logcache:
+            - fix issue with wrong contacts in notifications after authupdate command
+          - Broadcasts:
+            - add variable editor
+          - show external command errors when using naemon core
+
+2.22     Fri Jun 29 13:52:11 CEST 2018
           - cleanup preferences popup
           - add user profile page
+          - add timezone setting to users profile page
+          - add require_comments_for_disable_cmds option
           - move broadcast into side navigation
           - move important filters up (#792)
           - support macros in action menu onclicks
           - fix wrong number of backends (#809)
+          - fix custom variable filters (#816)
+          - deprecate shadownaemon
+          - renamed cli livecache cmd to lmd
+          - add option show_contacts to list contacts on extinfo page
+          - add logcache fetchlogs option and add example scripts for ido
+          - Broadcasts:
+            - add template checkbox
+            - add macro support
+            - add frontmatter support
           - Panorama:
             - optionally show broadcasts in panorama dashboards
             - make determing worst state for group/filter icons configurable
             - add new configuration option 'default_state_order'
+            - add view permission option to icon widgets
             - fix tab rotation
           - Config Tool:
             - make command line a textarea
             - use separate edit sessions for each user
+            - list outside references when deleting hosts and services like dashboards or reports
             - fix adding custom variables from extra_custom_var
+          - Business Process:
+            - calculate results parallel if there are many bps
+            - add details link to each node
+            - add max_check_attempts to bp nodes
+          - Reporting:
+            - add datetime format options
+            - use time locale for reports
+            - optionally use host / servicename from alias, displayname or customvariable
+          - CLI
+            - add new 'find' command to search for object references
 
 2.20-2   Wed Mar 14 00:12:24 CET 2018
           - add optional debug switch for admin users

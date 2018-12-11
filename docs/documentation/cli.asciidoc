@@ -39,7 +39,6 @@ There are also some scripting examples in the examples folder.
 {% include new_since.ad version="2.10" %}
 Even when using the Cookie Authentication, it is still possible to use wget
 or curl for fetching pages.
-Make sure you have your link:configuration.html#cookie_auth_direct_agents[cookie_auth_direct_agents] set accordingly.
 
 ------------
   %> curl "http://thrukadmin:thrukadmin@localhost/thruk/cgi-bin/status.cgi?format=json"

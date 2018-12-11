@@ -38,11 +38,15 @@ sub index {
     $c->stash->{'extra_log_comment'} = {};
 
     # fill in some defaults
-    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup backend/) {
+    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup/) {
         $c->req->parameters->{$param} = '' unless defined $c->req->parameters->{$param};
     }
     for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly/) {
         $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
+    }
+    if(!defined $c->req->parameters->{'backend'}) {
+        my($backends_list) = $c->{'db'}->select_backends('send_command');
+        $c->req->parameters->{'backend'} = $backends_list;
     }
 
     $c->req->parameters->{com_data} =~ s/\n//gmx;
@@ -58,13 +62,6 @@ sub index {
 
     # read only user?
     return $c->detach('/error/index/11') if $c->check_user_roles('authorized_for_read_only');
-
-    # set authorization information
-    my $query_options = { Slice => 1 };
-    if( defined $c->req->parameters->{'backend'} ) {
-        my $backend = $c->req->parameters->{'backend'};
-        $query_options = { Slice => 1, Backend => [$backend] };
-    }
 
     _set_host_service_from_down_com_ids($c);
 
@@ -215,7 +212,7 @@ sub index {
                     } else {
                         Thruk::Utils::set_message( $c, 'fail_message', "command for host $host failed" );
                     }
-                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]) if $c->stash->{'form_errors'}->[0];
+                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for host $host failed");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
@@ -257,7 +254,7 @@ sub index {
                     } else {
                         Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
                     }
-                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]) if $c->stash->{'form_errors'}->[0];
+                    Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for $service on host $host failed");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
@@ -331,7 +328,7 @@ sub _check_for_commands {
     my $cmd_mod = $c->req->parameters->{'cmd_mod'} || 0;
     return $c->detach('/error/index/6') unless defined $cmd_typ;
 
-    if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
+    if(Thruk::Utils::command_disabled($c, $cmd_typ)) {
         return $c->detach('/error/index/12');
     }
 
@@ -579,7 +576,7 @@ sub _do_send_command {
 
     return 1 if _check_reschedule_alias($c);
 
-    if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
+    if(Thruk::Utils::command_disabled($c, $cmd_typ)) {
         return $c->detach('/error/index/12');
     }
 
@@ -667,8 +664,8 @@ sub _do_send_command {
         }
     }
     if($c->config->{downtime_max_duration}) {
-        if($c->req->parameters->{'cmd_typ'} == 55 or $c->req->parameters->{'cmd_typ'} == 56 or $c->req->parameters->{'cmd_typ'} == 84 or $c->req->parameters->{'cmd_typ'} == 121) {
-            my $max_duration = Thruk::Utils::Status::convert_time_amount($c->config->{downtime_max_duration});
+        if($cmd_typ == 55 or $cmd_typ == 56 or $cmd_typ == 84 or $cmd_typ == 121) {
+            my $max_duration = Thruk::Utils::expand_duration($c->config->{downtime_max_duration});
             my $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} );
             if(($end_time_unix - $start_time_unix) > $max_duration) {
                 $c->stash->{'form_errors'} = [{ message => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration) }];
@@ -695,6 +692,7 @@ sub _do_send_command {
         if(scalar @{$backends_list} > 1) {
             $backends_list = _get_affected_backends($c, $required_fields, $backends_list);
             if(scalar @{$backends_list} == 0) {
+                Thruk::Utils::set_message( $c, 'fail_message', "cannot send command, affected backend list is empty." );
                 return;
             }
         }
@@ -710,6 +708,11 @@ sub _do_send_command {
             $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
         }
     }
+
+    # remove comments added by require_comments_for_disable_cmds
+    # delete associated comment(s) if we are about to re-enable active checks,
+    # notifications or handlers
+    add_remove_comments_commands_from_disabled_commands($c, $c->stash->{'commands2send'}, $cmd_typ, $c->req->parameters->{'host'}, $c->req->parameters->{'service'});
 
     $c->stash->{'start_time_unix'} = $start_time_unix;
     $c->stash->{'lasthost'}        = $c->req->parameters->{'host'};
@@ -745,6 +748,7 @@ sub _bulk_send_backend {
     my($c, $backends, $commands2send) = @_;
 
     my $options = {};
+    map(chomp, @{$commands2send});
     $options->{'command'} = join("\n\n", @{$commands2send});
     $options->{'backend'} = [ split(/,/mx, $backends) ];
     return 1 if $options->{'command'} eq '';
@@ -771,11 +775,19 @@ sub _bulk_send_backend {
         if($ENV{'THRUK_TEST_CMD_NO_LOG'}) {
             $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
         } else {
-            $c->log->info($logstr);
+            $c->audit_log($logstr);
         }
     }
     if(!$testmode) {
-        $c->{'db'}->send_command( %{$options} );
+        eval {
+            $c->{'db'}->send_command(%{$options});
+        };
+        my $err = $@;
+        if($err) {
+            $err =~ s/(\ at\ .*?\.pm\ line\ \d+\.)//gmx;
+            Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
+            return;
+        }
         my $cached_proc = $c->cache->get->{'global'} || {};
         for my $key (split(/,/mx, $backends)) {
             delete $cached_proc->{'processinfo'}->{$key};
@@ -936,6 +948,43 @@ sub _get_affected_backends {
         }
     }
     return([keys %{$affected_backends}]);
+}
+
+######################################
+
+=head2 add_remove_comments_commands_from_disabled_commands
+
+    add comment remove commands for comments added from the `require_comments_for_disable_cmds` option.
+
+=cut
+sub add_remove_comments_commands_from_disabled_commands {
+    my($c, $list, $cmd_typ, $host, $service) = @_;
+    my $cmds_for_type = {
+        47 => ['DISABLE_HOST_CHECK'],
+        15 => ['DISABLE_HOST_SVC_CHECKS', 'DISABLE_HOST_CHECK'],
+        24 => ['DISABLE_HOST_NOTIFICATIONS', 'DISABLE_HOST_AND_CHILD_NOTIFICATIONS'],
+        28 => ['DISABLE_HOST_SVC_NOTIFICATIONS', 'DISABLE_HOST_NOTIFICATIONS'],
+        43 => ['DISABLE_HOST_EVENT_HANDLER'],
+        5  => ['DISABLE_SVC_CHECK'],
+        22 => ['DISABLE_SVC_NOTIFICATIONS'],
+        45 => ['DISABLE_SVC_EVENT_HANDLER'],
+    };
+    return unless exists $cmds_for_type->{$cmd_typ};
+
+    for my $cmd (@{$cmds_for_type->{$cmd_typ}}) {
+        for my $comm (@{$c->{'db'}->get_comments_by_pattern($c, $host, $service, $cmd)}) {
+            $c->log->debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
+            if ($cmd =~ m/HOST/mx) {
+                push @{$list->{$comm->{'backend'}}},
+                    sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d\n", time(), $comm->{'id'});
+            }
+            else {
+                push @{$list->{$comm->{'backend'}}},
+                    sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d\n", time(), $comm->{'id'});
+            }
+        }
+    }
+    return;
 }
 
 ######################################

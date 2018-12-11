@@ -164,14 +164,88 @@ ex.:
 
 === use_timezone
 
+*deprecated* use `server_timezone` now.
+
+=== server_timezone
+{% include new_since.ad version="2.22" %}
 Changes the timezone from the systems default to this timezone.
 Only set this if you have trouble with displaying the right timestamps.
-Use /usr/share/zoneinfo on most linux systems for reference, as some
+Use `/usr/share/zoneinfo` on most linux systems for reference, as some
 timezones are set using the Region/Country format.
 
 ex.:
 
-  use_timezone = CET
+  server_timezone = CET
+
+
+=== default_user_timezone
+{% include new_since.ad version="2.22" %}
+Since users can change their timezone setting, this changes their default.
+Possible values are:
+
+  - "Server Setting"
+  - "Local Browser"
+  - all from `/usr/share/zoneinfo`
+
+ex.:
+
+  default_user_timezone = "Server Setting"
+
+
+=== cluster_enabled
+{% include new_since.ad version="2.24" %}
+Set to 1 to enable cluster features or 0 for single node setups.
+
+ex.:
+
+  cluster_enabled = 1
+
+=== cluster_nodes
+{% include new_since.ad version="2.24" %}
+Define generic url pattern to connect all cluster nodes. Each
+cluster node must be available on the given address.
+3 variables will be replaced to make this url generic:
+ - $hostname$:   hostname from `hostname`
+ - $url_prefix$: contains the url prefix from `url_prefix`
+ - $proto$:      trying to autodetect either `http` or `https`, autodetect
+                 will only work with OMD and falls back to http otherwise.
+
+ex.:
+
+  cluster_nodes = https://$hostname$/$url_prefix$/
+
+
+=== cluster_node_stale_timeout
+{% include new_since.ad version="2.24" %}
+Set timeout after which a node is removed from the cluster.
+
+ex.:
+
+  cluster_node_stale_timeout = 120
+
+
+=== rest_api_enabled
+{% include new_since.ad version="2.24" %}
+The link:rest.html[rest api] is enabled by default, but you can disable or restrict it.
+
+Valid options are:
+  - 0: rest api disabled
+  - 1: rest api enabled for everyone
+  - 2: rest api enabled for admins only
+  - 3: rest api enabled from command line only
+
+ex.:
+
+  rest_api_enabled = 3
+
+
+=== api_keys_enabled
+{% include new_since.ad version="2.24" %}
+Using api keys can be disabled by setting this to 0.
+
+ex.:
+
+  api_keys_enabled = 1
 
 
 === mobile_agent
@@ -337,6 +411,7 @@ ex.:
 Use this to disabled specific commands. Can be use multiple times to disabled
 multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
 links to the command page.
+If you only want to allow a few commands, use `command_enabled` instead.
 You may use ranges here.
 
 ex.:
@@ -344,6 +419,19 @@ ex.:
   command_disabled = 14
   command_disabled = 35
   command_disabled = 17-34,50-65
+
+
+=== command_enabled
+Enable only specific commands. Overrides `command_disabled` setting by only
+allowing a few specific commands and disabling all others. The syntax is the
+same as in `command_disabled`. If you want to disable all commands, you have to
+use `command_disabled = 0-999` or set the `authorized_for_read_only` role.
+
+ex.:
+
+  command_enabled = 1-4         # allow adding and removing comments
+  command_enabled = 33,34,51,52 # allow acknowledgments
+  command_enabled = 55,56,78,79 # allow downtimes
 
 
 === make_auth_user_lowercase
@@ -612,6 +700,15 @@ example: plugin_output, groups, names, descriptions
 ex.:
 
   use_new_search = 1
+
+
+=== maximum_search_boxes
+{% include new_since.ad version="2.24" %}
+maximum number of allowed search boxes
+
+ex.:
+
+  maximum_search_boxes = 9
 
 
 === default_service_filter
@@ -1012,6 +1109,15 @@ ex.:
   show_modified_attributes = 1
 
 
+=== show_contacts
+
+Show host / service contacts. User must have the configuration_information role.
+
+ex.:
+
+  show_contacts = 1
+
+
 === show_host_attempts
 
 Show check attempts for hosts too. The default is to show
@@ -1123,6 +1229,17 @@ sample service configuration for graphios:
 graph_replace = s/\s//gmx
 graph_replace = s/[^\w\-]/_/gmx
 .....
+
+
+=== graph_proxy_enabled
+The graph_proxy will proxy requests for pnp or grafana action_urls via the
+http backend if possible. This only works for http backends and if cookie auth is enabled.
+Set to 0 to disable.
+
+ex.:
+
+  graph_proxy_enabled = 1
+
 
 
 === show_custom_vars
@@ -1297,20 +1414,15 @@ ex.:
 
 === logcache
 Enables caching logfiles for faster access and less memory usage for
-the naemon process. Cache supports MongoDB and Mysql only. Prefered
-type is Mysql. Format is a Mysql/MongoDB connection string like
+the naemon process. Cache supports only Mysql. Prefered
+type is Mysql. Format is a Mysql connection string like
 'mysql://hostname:port/db'. Using a cache dramatically decreases cpu and
 memory usage of Thruk and Naemon when accessing logfiles, for example when
 creating reports.
 
-[WARNING]
-The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
-
 ex.:
 
   logcache = mysql://user:password@localhost:3306/thruk_log_cache
-
-  logcache = mongodb://localhost:27017/thruk_log_cache
 
 
 === logcache_import_exclude
@@ -1322,6 +1434,14 @@ it is ok to remove some entries. Can be used multiple times.
 ex.:
 
   logcache_import_exclude = "Warning: Passive check result was received for"
+  logcache_import_exclude = "wproc: "
+  logcache_import_exclude = "PASSIVE SERVICE CHECK: "
+  logcache_import_exclude = "PASSIVE HOST CHECK: "
+  logcache_import_exclude = "Warning: Check of "
+  logcache_import_exclude = "Warning: External command parse error "
+  logcache_import_exclude = "EXTERNAL COMMAND: PROCESS_SERVICE_CHECK_RESULT"
+  logcache_import_exclude = "EXTERNAL COMMAND: PROCESS_HOST_CHECK_RESULT"
+  logcache_import_exclude = "External command error: Failed validation"
 
 
 === logcache_delta_updates
@@ -1345,12 +1465,37 @@ and then manually import those files.
 There are some useful enviromenet variables set before the script is started:
 
   - standard macros as listed in link:cli.html#_environment-variables[CLI Environment]
-  - THRUK_BACKENDS is a comma separated list of the selected backends.
+  - THRUK_BACKENDS is a semicolon separated list of the selected backends.
   - THRUK_LOGCACHE is the connection string to the thruk logcache database.
+  - THRUK_LOGCACHE_MODE is either 'import' on first initial import or 'update' for further consecutive updates.
 
 ex.:
 
   logcache_import_command = .../importscript.sh
+
+
+=== logcache_fetchlogs_command
+The fetchlogs command is very similar to the `logcache_import_command` but it
+replaces only the the fetching logs part from the bultin logcache.
+This script should return the plain text logfiles on stdout (standard
+naemon/nagios logfile format). This might be useful if you pull the logfiles
+from a ndo/ido database.
+
+See `./support/icinga2_ido_fetchlogs.sh` for an example.
+
+There are some useful enviromenet variables set before the script is started to
+control which logs should be fetched:
+
+  - REMOTE_USER contains the current user.
+  - THRUK_BACKEND  is a the id of the backends to import.
+  - THRUK_LOGCACHE_START is start date to fetch
+  - THRUK_LOGCACHE_END   is the end date to fetch
+  - THRUK_LOGCACHE_LIMIT is the optional limit of logfiles to fetch
+
+ex.:
+
+  logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga ./support/icinga2_ido_fetchlogs.sh mysql
+
 
 
 === logcache_pxc_strict_mode
@@ -1504,20 +1649,16 @@ ex.:
   cookie_auth_login_hook = ./bin/hook.sh
 
 
-=== cookie_auth_direct_agents
-{% include new_since.ad version="2.10" %}
-This is a regular expression to set user agents which are allowed to request
-pages with normal basic auth.
-Use it to allow scripts easy access with bypassing the cookie auth and directly
-accessing pages.
-See an example in the link:cli.html#_curl-wget[cli section].
+=== cookie_auth_disable_after_failed_logins
+{% include new_since.ad version="2.12" %}
+Disable account after this number of failed login attempts.
+This feature will be disabled if set to zero.
 
-Default: (curl|wget)
+Default: 10
 
 ex.:
 
-  cookie_auth_direct_agents = (wget|curl|python|Go-http-client)
-
+  cookie_auth_disable_after_failed_logins = 3
 
 
 
@@ -1656,14 +1797,6 @@ ex.:
   use_feature_recurring_downtime = 1
 
 
-=== use_feature_histogram
-Use histograms, shows histogram links.
-
-ex.:
-
-  use_feature_histogram = 1
-
-
 === use_service_description
 Use service's description instead of display name.
 
@@ -1698,6 +1831,18 @@ will wait this amount and display the result immediately.
 ex.:
 
   wait_timeout = 10
+
+
+=== require_comments_for_disable_cmds
+If set to 1, the user has to enter a comment for all disable active checks /
+disable notifications / disable event handler commands. These comments are
+automatically prefixed with the command name and will be deleted when checks /
+notifications / handlers are enabled again. They are also used by the
+'reenable_actions' utility.
+
+ex.:
+
+  require_comments_for_disable_cmds = 1
 
 
 
@@ -1813,6 +1958,7 @@ The menu item can have the following attributes:
 
      ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
      ** `label`         label name of the menu item.
+     ** `menu`          list of sub menu items.
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
@@ -1821,6 +1967,8 @@ The menu item can have the following attributes:
      ** `target`        Use '_blank' here to open link in a new window.
      ** `onclick`       confirmation dialog or any other callback, ex: "return(confirm('Really restart service?'));"
      ** `close_timeout` timeout till the result popup will close, defaults to 5 seconds if ok or 30 seconds if failed. Set to zero to never close the result popup.
+     ** `disabled`      menu item will be disabled.
+     ** `html`          raw html code instead of any other logic.
      ** `...`           arbitrary attributes will be used as attributes of the menu item link html element.
 
 
@@ -1937,6 +2085,9 @@ unless you want to change the menu from external commands.
 {% include new_since.ad version="2.10" %}
 Organize action_menu_items in a folder. Each file in this folder will be read as
 action menu.
+
+{% include new_since.ad version="2.24" %}
+This folder may also contain .js files since version 2.24.
 
 Both examples are equivalent and result in the same menu assuming there is
 a `/etc/thruk/action_menus/hostmenu.json` file.
@@ -2512,6 +2663,7 @@ Configuration Example:
     #post_save_cmd         =
     refresh_interval       = 1
     #favorite_custom_function = echo ; echo_function
+    #worker                = 5
   </Component>
 
 
@@ -2557,6 +2709,11 @@ will be recalculated and refreshed. (in minutes)
 Favorite custom function will be displayed on the 'Type' tab
 so you don't have to select custom first. Syntax is <name>;<function>
 
+
+=== worker
+Set the number of parallel business process calculations. Setting it
+to 1 disables parallelization. Setting it to 0 trys to autodetect a
+suitable value.
 
 == Component Thruk::Plugin::Mobile
 

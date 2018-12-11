@@ -16,7 +16,6 @@ general:
     - add backend name to logs
     - add go back button on error page
     - include comments in export
-    - suggest custom variables?
 
 config:
     - add missing values
@@ -62,16 +61,6 @@ summary:
 addons:
   config tool:
     - propagate settings
-    - add tabs with contacts (notification contacts, readonly contacts,
-      contacts)
     - nagios.cfg editor (with omd support)
     - resource.cfg editor
     - wizards: new host, scan services
-
-
-=========================================
-Version 2
-
-Themes:
-    - only include Thruk theme and make others downloadable
-    - same for plugins

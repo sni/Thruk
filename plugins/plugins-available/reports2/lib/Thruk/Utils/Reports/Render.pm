@@ -514,12 +514,24 @@ sub get_graph_source {
   get_pnp_image(hst, svc, start, end, width, height, source)
 
 return base64 encoded pnp image if possible.
-A string will be returned if no PNP graph can be exported.
+An empty string will be returned if no PNP graph can be exported.
 
 =cut
 sub get_pnp_image {
+    my($hst, $svc, $start, $end, $width, $height, $source) = @_;
     my $c = $Thruk::Request::c or die("not initialized!");
-    my $imgdata = Thruk::Utils::get_perf_image($c, @_, 1);
+    my $imgdata = Thruk::Utils::get_perf_image($c, {
+        host           => $hst,
+        service        => $svc,
+        start          => $start,
+        end            => $end,
+        width          => $width,
+        height         => $height,
+        source         => $source,
+        resize_grafana => 1,
+        show_title     => 0,
+        show_legend    => 0,
+    });
     return "" unless $imgdata;
     return 'data:image/png;base64,'.encode_base64($imgdata, '');
 }
@@ -939,60 +951,7 @@ sub _read_static_content_file {
 =cut
 sub _absolutize_url {
     my($baseurl, $link) = @_;
-
-    return($link) if $link =~ m/^https?:/mx;
-
-    $baseurl = '' unless defined $baseurl;
-    confess("empty") if($baseurl eq '' and $link eq '');
-
-    my $c = $Thruk::Request::c or die("not initialized!");
-    my $product_prefix = $c->config->{'product_prefix'};
-
-    # append trailing slash
-    if($baseurl =~ m/^https?:\/\/[^\/]+$/mx) {
-        $baseurl .= '/';
-    }
-
-    if($link !~ m/^https?:/mx && $link !~ m|^/|mx) {
-        my $newloc = $baseurl;
-        $newloc    =~ s/^(.*\/).*$/$1/gmxo;
-        $newloc    .= $link;
-        while($newloc =~ s|/[^\/]+/\.\./|/|gmxo) {}
-        $link = $newloc;
-    }
-    return($link) if $link    =~ m%^(/||[^/]*/|/[^/]*/)\Q$product_prefix\E/%mx;
-
-    # split original baseurl in host, path and file
-    if($baseurl =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
-        my $host     = $1."://".$2.$3;
-        my $fullpath = $4 || '';
-        $host        =~ s/\/$//mx;      # remove last /
-        $fullpath    =~ s/\?.*$//mx;
-        $fullpath    =~ s/^\///mx;
-        my($path,$file) = ('', '');
-        if($fullpath =~ m/^(.+)\/(.*)$/mx) {
-            $path = $1;
-            $file = $2;
-        }
-        else {
-            $file = $fullpath;
-        }
-        $path =~ s/^\///mx; # remove first /
-
-        if($link =~ m/^(http|https):\/\//mx) {
-            return $link;
-        }
-        elsif($link =~ m/^\//mx) { # absolute link
-            return $host.$link;
-        }
-        elsif($path eq '') {
-            return $host."/".$link;
-        } else {
-            return $host."/".$path."/".$link;
-        }
-    }
-
-    confess("unknown url scheme in _absolutize_url('".$baseurl."', '".$link."')");
+    return(Thruk::Utils::absolute_url($baseurl, $link));
 }
 
 ##############################################
@@ -1020,6 +979,47 @@ sub _locale {
     my $tr  = $Thruk::Utils::Reports::Render::locale;
     $fmt = $tr->{$fmt} || $fmt;
     return sprintf($fmt, @args);
+}
+
+##############################################
+sub _hst {
+    my($hostname) = @_;
+    my $c = $Thruk::Request::c or die("not initialized!");
+    my $src = $c->stash->{'param'}->{'hostnameformat'} || 'hostname';
+    if($src eq 'hostname') {
+        return($hostname);
+    }
+    if($src eq 'hostalias') {
+        return($c->stash->{'hosts'}->{$hostname}->{'alias'});
+    }
+    if($src eq 'hostdisplayname') {
+        return($c->stash->{'hosts'}->{$hostname}->{'display_name'});
+    }
+    if($src eq 'hostcustom') {
+        my $key = $c->stash->{'param'}->{'hostnameformat_cust'};
+        my $vars = Thruk::Utils::get_custom_vars($c, $c->stash->{'hosts'}->{$hostname});
+        return($vars->{$key}) if defined $vars->{$key};
+    }
+    return($hostname);
+}
+
+##############################################
+sub _svc {
+    my($hostname, $servicename) = @_;
+    my $c = $Thruk::Request::c or die("not initialized!");
+    my $src = $c->stash->{'param'}->{'servicenameformat'} || 'description';
+    if($src eq 'description') {
+        return($servicename);
+    }
+    if($src eq 'servicedisplayname') {
+        return($c->stash->{'services'}->{$hostname}->{$servicename}->{'display_name'});
+    }
+    if($src eq 'servicecustom') {
+        my $key = $c->stash->{'param'}->{'servicenameformat_cust'};
+        my $vars = Thruk::Utils::get_custom_vars($c, $c->stash->{'services'}->{$hostname}->{$servicename});
+        return($vars->{$key}) if defined $vars->{$key};
+    }
+    return($servicename);
 }
 
 ##############################################

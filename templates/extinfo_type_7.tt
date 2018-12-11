@@ -82,28 +82,28 @@
           <td class='[% class %]'>
           [% IF q.description %]
             [% IF q.active_checks_enabled %]
-            [% UNLESS c.config.command_disabled.exists('6') %]
+            [% UNLESS command_disabled(c, '6') %]
             <a href='cmd.cgi?cmd_typ=6&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service' width="20" height="20"></a>
             [% END %]
             [% ELSE %]
-            [% UNLESS c.config.command_disabled.exists('5') %]
+            [% UNLESS command_disabled(c, '5') %]
             <a href='cmd.cgi?cmd_typ=5&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service' width="20" height="20"></a>
             [% END %]
             [% END %]
-            [% UNLESS c.config.command_disabled.exists('7') %]
+            [% UNLESS command_disabled(c, '7') %]
             <a href='cmd.cgi?cmd_typ=7&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]&amp;force_check'><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check' width="20" height="20"></a>
             [% END %]
           [% ELSE %]
             [% IF q.active_checks_enabled %]
-            [% UNLESS c.config.command_disabled.exists('4') %]
+            [% UNLESS command_disabled(c, '4') %]
             <a href='cmd.cgi?cmd_typ=4&amp;host=[% q.host_name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host' width="20" height="20"></a>
             [% END %]
             [% ELSE %]
-            [% UNLESS c.config.command_disabled.exists('47') %]
+            [% UNLESS command_disabled(c, '47') %]
             <a href='cmd.cgi?cmd_typ=47&amp;host=[% q.host_name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host' width="20" height="20"></a>
             [% END %]
             [% END %]
-            [% UNLESS c.config.command_disabled.exists('96') %]
+            [% UNLESS command_disabled(c, '96') %]
             <a href='cmd.cgi?cmd_typ=96&amp;host=[% q.host_name | uri %]&amp;force_check'><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule This Host Check' title='Re-schedule This Host Check' width="20" height="20"></a>
             [% END %]
           [% END %]

@@ -6,6 +6,7 @@
         var form = document.getElementById('[% form %]');
         jQuery('#[% form %] INPUT, #[% form %] TEXTAREA, #[% form %] SELECT').on('change keypress', function(el){
             if(form.edit_started) { return; }
+            form.edit_started = true;
             jQuery.ajax({
                 url: url_prefix + 'cgi-bin/conf.cgi',
                 type: 'POST',
@@ -21,6 +22,9 @@
                     } else {
                         form.edit_started = true;
                     }
+                },
+                error: function() {
+                    form.edit_started = false;
                 }
             });
         });

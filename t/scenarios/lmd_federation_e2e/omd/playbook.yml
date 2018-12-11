@@ -6,24 +6,26 @@
 
 # create additional sites
   - shell: "omd create {{item}}"
-    with_items: ['demo2', 'demo3', 'demo4']
+    with_items: ['demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
     args:
       creates: "/omd/sites/{{item}}"
+  - shell: "sudo su - {{item}} -c 'set_admin_password omd'"
+    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
   - shell: "omd stop {{item}}"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+    with_items: ['demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
   - shell: "omd config {{item}} set TMPFS off"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
   - copy:
       src: "/omd/sites/{{item}}/share/doc/naemon/example.cfg"
       dest: "/omd/sites/{{item}}/etc/naemon/conf.d/example.cfg"
       owner: "{{item}}"
       group: "{{item}}"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
   - replace:
       path: "/omd/sites/{{item}}/etc/naemon/conf.d/example.cfg"
       regexp: 'localhost'
       replace: "{{item}}"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
 
 
 # demo 2 site, connects by lmd to demo 3 / 4
@@ -32,12 +34,21 @@
       dest: "/omd/sites/demo2/etc/thruk/thruk_local.conf"
       owner: "demo2"
       group: "demo2"
-  - shell: sed -e "s/id\ *=\s*/id    = {{ lookup('env','PREFIX') }}/g" -i /omd/sites/demo2/etc/thruk/thruk_local.conf
+  #- shell: sed -e "s/id\ *=\s*/id    = {{ lookup('env','PREFIX') }}/g" -i /omd/sites/demo2/etc/thruk/thruk_local.conf
   - lineinfile:
      path: "/omd/sites/demo2/etc/thruk/lmd.ini"
      state: present
      regexp: 'Listen'
      line: "Listen = ['0.0.0.0:7000']"
+  - shell: echo "testkey" > /omd/sites/demo2/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo2/var/thruk/secret.key
+      mode: 0600
+      owner: demo2
+      group: demo2
+#  - shell: sudo su - demo2 -c "cpanm -n File::ChangeNotify"
+#  - shell: sudo su - demo2 -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+#  - shell: sudo su - demo2 -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
 
 # demo 3 site
   - shell: "omd config demo3 set LIVESTATUS_TCP on"
@@ -53,7 +64,45 @@
       owner: demo4
       group: demo4
 
+# demo 5 site, connects by http to demo 6 / 7
+  - copy:
+      src: "/scenario/omd/thruk_local.demo5"
+      dest: "/omd/sites/demo5/etc/thruk/thruk_local.conf"
+      owner: "demo5"
+      group: "demo5"
+  #- shell: sed -e "s/id\ *=\s*/id    = {{ lookup('env','PREFIX') }}/g" -i /omd/sites/demo5/etc/thruk/thruk_local.conf
+  - shell: echo "testkey" > /omd/sites/demo5/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo5/var/thruk/secret.key
+      mode: 0600
+      owner: demo5
+      group: demo5
+  #- shell: sudo su - demo5 -c "cpanm -n File::ChangeNotify"
+  #- shell: sudo su - demo5 -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  #- shell: sudo su - demo5 -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
+
+
+# demo 6 site
+  - shell: "omd config demo6 set LIVESTATUS_TCP on"
+  - shell: "omd config demo6 set LIVESTATUS_TCP_PORT 7003"
+  - shell: echo "testkey" > /omd/sites/demo6/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo6/var/thruk/secret.key
+      mode: 0600
+      owner: demo6
+      group: demo6
+
+# demo 7 site
+  - shell: "omd config demo7 set LIVESTATUS_TCP on"
+  - shell: "omd config demo7 set LIVESTATUS_TCP_PORT 7004"
+  - shell: echo "testkey" > /omd/sites/demo7/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo7/var/thruk/secret.key
+      mode: 0600
+      owner: demo7
+      group: demo7
+
 
 # start all sites
   - shell: "omd start {{item}}"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4']
+    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']

@@ -12,7 +12,7 @@ elif [ ! -z $OMD_ROOT ]; then
   export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
   if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
 else
-  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5:/usr/lib64/thruk/perl5;
   if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
 fi
 
@@ -21,7 +21,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 
 #! -*- perl -*-
 # vim: expandtab:ts=4:sw=4:syntax=perl
-#line 24
+#line 25
 
 use strict;
 use warnings;

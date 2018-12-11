@@ -1,0 +1,12 @@
+== Overview
+
+this scenario tests federation with lmd or http. The topology looks like:
+
+  thruk
+  ├── demo
+  ├── demo2  (connects to LMD)
+  │   ├── demo3
+  │   └── demo4
+  └── demo5  (normal http backend)
+      ├── demo6
+      └── demo7

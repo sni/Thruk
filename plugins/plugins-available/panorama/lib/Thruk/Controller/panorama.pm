@@ -72,7 +72,7 @@ sub index {
     $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->req->parameters->{'dashboard_ignore_changes'};
 
     $c->stash->{'is_admin'} = 0;
-    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+    if($c->check_user_roles('admin')) {
         $c->stash->{'is_admin'} = 1;
     }
     $c->stash->{one_tab_only}           = '';
@@ -335,21 +335,17 @@ sub _js {
     }
     $c->stash->{action_menu_actions}   = $action_menu_actions;
 
-    my $action_menu_items = [];
+    my $action_menu_items    = [];
+    my $action_menu_items_js = '';
     if($c->config->{'action_menu_items'}) {
         for my $name (sort keys %{$c->config->{'action_menu_items'}}) {
-            my $data = $c->config->{'action_menu_items'}->{$name};
-            if($data =~ m%^file://(.*)$%mx) {
-                my $sourcefile = $1;
-                $data = "[]";
-                if(-r $sourcefile) {
-                    $data = read_file($sourcefile);
-                }
-            }
-            push @{$action_menu_items}, [$name, $data];
+            my $menu = Thruk::Utils::Filter::get_action_menu($c, $name);
+            $action_menu_items_js .= delete $menu->{'data'} if $menu->{'type'} eq 'js';
+            push @{$action_menu_items}, $menu;
         }
     }
-    $c->stash->{action_menu_items} = $action_menu_items;
+    $c->stash->{action_menu_items}    = $action_menu_items;
+    $c->stash->{action_menu_items_js} = $action_menu_items_js;
 
     $c->stash->{shape_data}         = _task_userdata_shapes($c, 1);
     $c->stash->{iconset_data}       = _task_userdata_iconsets($c, 1);
@@ -564,8 +560,8 @@ sub _task_status {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
             }
             $c->req->parameters->{'filter'} = $filter;
-            my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
-            $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter, $state_type);
+            my( $hfilter, $sfilter, $hostgroupfilter, $servicegroupfilter, $has_service_filter ) = _do_filter($c);
+            $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter, $state_type, $has_service_filter);
         }
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     }
@@ -611,7 +607,7 @@ sub _task_redirect_status {
     my($c) = @_;
     my $types = {};
     if($c->req->parameters->{'filter'}) {
-        _do_filter($c);
+        my($hfilter, $sfilter, $hostgroupfilter, $servicegroupfilter, $has_service_filter) = _do_filter($c);
         $c->req->parameters->{'filter'} = '';
         $c->req->parameters->{'task'}   = '';
         my $url = Thruk::Utils::Filter::uri_with($c, $c->req->parameters);
@@ -619,6 +615,9 @@ sub _task_redirect_status {
         $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
         $url    =~ s/\&amp;task=.*?\&amp;/&amp;/gmx;
         $url    =~ s/\&amp;/&/gmx;
+        if($has_service_filter) {
+            $url =~ s/style=hostdetail/style=detail/gmx;
+        }
         return $c->redirect_to($url);
     }
     return $c->redirect_to("status.cgi");
@@ -931,7 +930,7 @@ sub _task_timezones {
 
     my $query = $c->req->parameters->{'query'} || '';
     my $data  = [];
-    for my $tz (@{_get_timezone_data($c)}) {
+    for my $tz (@{Thruk::Utils::get_timezone_data($c)}) {
         next if($query && $tz->{'text'} !~ m/$query/mxi);
         push @{$data}, $tz;
     }
@@ -939,51 +938,6 @@ sub _task_timezones {
     my $json = { 'rc' => 0, 'data' => $data };
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json);
-}
-
-##########################################################
-sub _get_timezone_data {
-    my($c) = @_;
-
-    my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
-    my $data  = $cache->get('timezones');
-    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H");
-    if(defined $data && $data->{'timestamp'} eq $timestamp) {
-        return($data->{'timezones'});
-    }
-
-    my $timezones = [];
-    my $localname = 'Local Browser';
-    push @{$timezones}, {
-        text   => $localname,
-        abbr   => '',
-        offset => 0,
-    };
-    load DateTime;
-    load DateTime::TimeZone;
-    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-    for my $name (DateTime::TimeZone->all_names) {
-        my $dt = DateTime->new(
-            year      => $year+1900,
-            month     => $mon+1,
-            day       => $mday,
-            hour      => $hour,
-            minute    => $min,
-            second    => $sec,
-            time_zone => $name,
-        );
-        push @{$timezones}, {
-            text   => $name,
-            abbr   => $dt->time_zone()->short_name_for_datetime($dt),
-            offset => $dt->offset(),
-            isdst  => $dt->is_dst() ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
-        };
-    }
-    $cache->set('timezones', {
-        timestamp => $timestamp,
-        timezones => $timezones,
-    });
-    return($timezones);
 }
 
 
@@ -1196,7 +1150,7 @@ sub _avail_clean_cache {
 ##########################################################
 sub _avail_calc {
     my($c, $cached_only, $now, $cached, $opts, $host, $service, $filter) = @_;
-    my $duration = Thruk::Utils::Status::convert_time_amount($opts->{'d'});
+    my $duration = Thruk::Utils::expand_duration($opts->{'d'});
     my $unavailable_states = {'down' => 1, 'unreachable' => 1, 'critical' => 1, 'unknown' => 1};
     my $cache_retrieve_factor = $c->config->{'Thruk::Plugin::Panorama'}->{'cache_retrieve_factor'} || 0.0025; # ~ once a day for yearly values, every ~ 3.5 minutes for daily averages
 
@@ -1274,7 +1228,7 @@ sub _avail_calc {
                                                                     $service,
                                                                    );
         return("found no data for service: ".$host." - ".$service) if($service && $totals->{'total'}->{'percent'} == -1);
-        return("found no data for host: ".$host) if $totals->{'total'}->{'percent'} == -1;
+        return("found no data for host: ".$host) if (!defined $totals->{'total'}->{'percent'} || $totals->{'total'}->{'percent'} == -1);
         return($totals->{'total'}->{'percent'});
     } else {
         my($num, $total) = (0,0);
@@ -1514,7 +1468,7 @@ sub _task_show_logs {
 
     my $filter;
     my $end   = time();
-    my $start = $end - Thruk::Utils::Status::convert_time_amount($c->req->parameters->{'time'} || '15m');
+    my $start = $end - Thruk::Utils::expand_duration($c->req->parameters->{'time'} || '15m');
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<=' => $end }};
 
@@ -2567,7 +2521,6 @@ sub _task_dashboard_list {
     my($c) = @_;
 
     my $type = $c->req->parameters->{'list'} || 'my';
-    return if($type eq 'all' && !$c->stash->{'is_admin'});
 
     my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, $type);
 
@@ -3015,7 +2968,7 @@ sub _summarize_servicegroup_query {
 
 ##########################################################
 sub _summarize_query {
-    my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter, $state_type) = @_;
+    my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter, $state_type, $has_service_filter) = @_;
     my $sum   = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0,
                                 plain_ok => 0, plain_warning => 0, plain_critical => 0, plain_unknown => 0, plain_pending => 0,
                                 ack_warning => 0, ack_critical => 0, ack_unknown => 0,
@@ -3028,7 +2981,12 @@ sub _summarize_query {
                               },
                 };
     if($incl_hst) {
-        my $host_sum = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+        my $host_sum;
+        if(!$has_service_filter) {
+            $host_sum = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+        } else {
+            $host_sum = $c->{'db'}->get_host_stats_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+        }
         for my $k (qw/up down unreachable pending/) {
             $sum->{'hosts'}->{$k} = $host_sum->{$k};
             $sum->{'hosts'}->{'plain_'.$k} = $host_sum->{'plain_'.$k};

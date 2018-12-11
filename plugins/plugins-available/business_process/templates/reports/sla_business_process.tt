@@ -2,21 +2,25 @@
 [% IF block == 'edit' %]
   [%
     required_fields = [
-        { 'language'                    => [ 'Language',              'language',        'en'                  ,'', 1 ] },
-        { 'businessprocess'             => [ 'Business Process',      'business process',''                    ,'', 1 ] },
-        { 'timeperiod'                  => [ 'Timeperiod',            'rptimeperiod',    'last12months'               ] },
-        { 'breakdown'                   => [ 'Breakdown by',          'breakdowns',      'months'                     ] },
-        { 'rpttimeperiod'               => [ 'Report Timeperiod',     'rpttimeperiod',   ''                           ] },
-        { 'sla'                         => [ 'SLA %',                 'int',             '98'                  ,'', 1 ] },
-        { 'graph_min_sla'               => [ 'Graph SLA %',           'int',             '90'                  ,'', 1 ] },
-        { 'decimals'                    => [ 'Decimal Points',        'int',             '2'                   ,'', 1 ] },
-        { 'assumeinitialstates'         => [ 'Assume Initial States', 'yes_no',          'yes'                        ] },
-        { 'initialassumedservicestate'  => [ 'Initial Assumed State', 'svc_initialassumedstate',          '0'         ] },
-        { 'includesoftstates'           => [ 'Include Soft States',   'yes_no',          'no'                         ] },
-        { 'unavailable'                 => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
-        { 'includeoutages'              => [ 'Include Outage Events', 'yes_no',          'yes'                        ] },
-        { 'max_outages_pages'           => [ 'Latest Outages',        'int',             '1'          ,'max. # pages', 1 ] },
-        { 'max_worst_pages'             => [ 'Worst Outages',         'int',             '1'          ,'max. # pages', 1 ] },
+        { 'language'                     => [ 'Language',              'language',        'en'                  ,'', 1 ] },
+
+        { 'businessprocess'              => [ 'Business Process',      'business process',''                    ,'', 1 ] },
+
+        { 'timeperiod'                   => [ 'Timeperiod',            'rptimeperiod',    'last12months'               ] },
+        { 'breakdown'                    => [ 'Breakdown by',          'breakdowns',      'months'                     ] },
+        { 'rpttimeperiod'                => [ 'Report Timeperiod',     'rpttimeperiod',   ''                           ] },
+        { 'sla'                          => [ 'SLA %',                 'int',             '98'                  ,'', 1 ] },
+        { 'graph_min_sla'                => [ 'Graph SLA %',           'int',             '90'                  ,'', 1 ] },
+        { 'decimals'                     => [ 'Decimal Points',        'int',             '2'                   ,'', 1 ] },
+        { 'dateformat'                   => [ 'Dateformat',                 'dateformat', ''                                   ] },
+        { 'datetimeformat'               => [ 'Datetimeformat',             'datetimeformat', ''                               ] },
+        { 'assumeinitialstates'          => [ 'Assume Initial States', 'yes_no',          'yes'                        ] },
+        { 'initialassumedservicestate'   => [ 'Initial Assumed State', 'svc_initialassumedstate',          '0'         ] },
+        { 'includesoftstates'            => [ 'Include Soft States',   'yes_no',          'no'                         ] },
+        { 'unavailable'                  => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
+        { 'mail_max_level'               => [ 'Mail SLA %',                 'int_box',         '-1', 'cancel mail if no object breaks this sla', 0, 100] },
+        { 'max_worst_pages'              => [ 'Worst Outages',              'int_box',          '1'          ,'max. # pages', 1, 1 ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int_box',         '-1'          ,'max. # pages', 1, 1 ] },
     ];
   %]
 [% END %]
@@ -39,8 +43,7 @@
 
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
-  [%# report settings #%]
-  [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
+  [% PROCESS 'reports/comp/sla_render_settings.tt' %]
   [%
     title        = loc('SLA Report')
     subtitle     = r.name
@@ -56,14 +59,17 @@
       [% FOREACH svc = avail_data.services.$hst.keys.sort %]
         [% c.req.parameters.host    = hst %]
         [% c.req.parameters.service = svc %]
+        [% available = get_availability_percents() %]
+        [% p = available.total.percent;
+           IF p == -1; p = 100; END;
+           IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
+        %]
         [% pagetitle                    = loc("Business Process: %s", hst) %]
 
         [% WRAPPER 'reports/comp/page_standard.tt'  %]
           [% PROCESS 'reports/comp/sla_graph_page.tt' %]
         [% END %]
-        [% IF param.includeoutages %]
         [% PROCESS 'reports/comp/sla_outages.tt' %]
-        [% END %]
       [% END %]
     [% END %]
 

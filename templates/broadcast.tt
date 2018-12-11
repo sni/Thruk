@@ -43,7 +43,7 @@
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="[%+ IF loop.first +%]firstrow[% END %]">
-    <td class="status [% rowclass %] text_ellipsis" align="left" style="white-space: inherit;"> [% b.text.split('<br>').0 %]</td>
+    <td class="status [% rowclass %] text_ellipsis" align="left" style="white-space: inherit;"><a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit" style="padding-left: 3px;">[% b.raw_text.split('<br>').0.substr(0, 100) | html %][% IF b.template %]<span style="color: #eb6900; padding-left: 10px; float: right;">(DRAFT)</span>[% END %]</a></td>
     <td class="status [% rowclass %]" align="left">[% b.author %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
     <td class="status [% rowclass %]" align="left">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>
@@ -51,7 +51,7 @@
     <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contacts.join(', ') %]</td>
     <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contactgroups.join(', ') %]</td>
     <td class="status [% rowclass %]" nowrap align="left">
-      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=delete" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt='Remove Broadcast' title='Remove Broadcast' width=16 height=16></a>
+      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=delete" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt='Remove Broadcast' title='Remove Broadcast' width=16 height=16 onclick="return confirm('really remove?')"></a>
       <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=clone" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_copy.png' border="0" alt='Clone Broadcast' title='Clone Broadcast' width=16 height=16></a>
       <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Broadcast' title='Edit Broadcast' width=16 height=16></a>
     </td>

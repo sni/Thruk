@@ -116,6 +116,7 @@ THRUKCOMPRESS    = $options->{'compress'}
 EOT
 
 close($fh);
+unlink("Makefile");
 my $out = `yes n | $^X Makefile.PL 2>&1`;
 if(!-e "Makefile") {
     print "configure failed:\n\n";
@@ -166,7 +167,6 @@ print <<EOT;
   css/js compression = $options->{'compress'}
 
 now run
-  perl Makefile.PL
   make
   make install
 to install thruk with these settings.

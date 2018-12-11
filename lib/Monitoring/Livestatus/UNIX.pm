@@ -61,12 +61,11 @@ sub _open {
         return;
     }
     my $sock;
-    my $remaining = alarm($self->{'connect_timeout'});
     eval {
-        local $SIG{'ALRM'} = sub { die("connection timeout"); };
         $sock = IO::Socket::UNIX->new(
                                         Peer     => $self->{'peer'},
                                         Type     => IO::Socket::UNIX::SOCK_STREAM,
+                                        Timeout  => $self->{'connect_timeout'},
                                     );
         if(!defined $sock || !$sock->connected()) {
             my $msg = "failed to connect to $self->{'peer'}: $!";
@@ -78,8 +77,6 @@ sub _open {
             return;
         }
     };
-    alarm(0);
-    alarm($remaining) if $remaining;
 
     if($@) {
         $Monitoring::Livestatus::ErrorCode    = 500;

@@ -177,7 +177,7 @@ sub get_auth_filter {
         if($c->check_user_roles('authorized_for_configuration_information')) {
             return();
         }
-        return('name' => { '>=' => $c->user->get('username') });
+        return('name' => $c->user->get('username'));
     }
 
     else {

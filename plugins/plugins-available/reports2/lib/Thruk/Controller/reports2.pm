@@ -26,6 +26,10 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
+    if(!$c->check_user_roles('authorized_for_reports')) {
+        return $c->detach('/error/index/26');
+    }
+
     if(!$c->config->{'reports2_modules_loaded'}) {
         load Carp, qw/confess carp/;
         load Thruk::Utils::Reports;
@@ -40,8 +44,10 @@ sub index {
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
+    $c->stash->{has_debug_options}     = 1;
     $c->stash->{'phantomjs'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
+    $c->stash->{'filtered'}            = 0;
 
     my $report_nr = $c->req->parameters->{'report'};
     my $action    = $c->req->parameters->{'action'}    || 'show';
@@ -138,6 +144,9 @@ sub index {
         elsif($action eq 'download_debug') {
             return report_download_debug($c, $report_nr);
         }
+        elsif($action eq 'list') {
+            $c->stash->{'filtered'} = 1;
+        }
     }
 
     if($c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'}) {
@@ -149,7 +158,7 @@ sub index {
     $c->stash->{'debug'}          = $c->req->parameters->{'debug'} || 0;
     $c->stash->{'no_auto_reload'} = 0;
     $c->stash->{'highlight'}      = $highlight;
-    $c->stash->{'reports'}        = Thruk::Utils::Reports::get_report_list($c);
+    $c->stash->{'reports'}        = Thruk::Utils::Reports::get_report_list($c, undef, $report_nr);
 
     Thruk::Utils::ssi_include($c);
 
@@ -296,7 +305,16 @@ sub report_remove {
 
     return unless Thruk::Utils::check_csrf($c);
 
-    if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
+    my $report = Thruk::Utils::Reports::get_report($c, $report_nr);
+    if($report && $report->{'var'}->{'is_running'}) {
+        # try to stop it
+        report_cancel($c, $report_nr, 1);
+        $report = Thruk::Utils::Reports::get_report($c, $report_nr);
+    }
+    if($report && $report->{'var'}->{'is_running'}) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot remove report which is currently running.' });
+    }
+    elsif(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report removed' });
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
@@ -310,7 +328,7 @@ sub report_remove {
 
 =cut
 sub report_cancel {
-    my($c, $report_nr) = @_;
+    my($c, $report_nr, $skip_redirect) = @_;
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if($report) {
@@ -328,6 +346,7 @@ sub report_cancel {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
+    return if $skip_redirect;
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 

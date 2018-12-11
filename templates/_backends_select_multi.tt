@@ -1,6 +1,6 @@
 ﻿[% backends_selected=0 %]
 [% IF selected_backends.size < backends.size && selected_backends.size > 0 %][% backends_selected=1 %][% END %]
-  <input type="checkbox" id="backends_toggle" name="backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('backends_toggle_table');" class="clickable"[% IF !can_edit %] disabled[% END %]><span> Select Backends</span><br>
+  <input type="checkbox" id="backends_toggle" name="backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('backends_toggle_table'); check_backends_input(this);" class="clickable"[% IF !can_edit %] disabled[% END %]><span> Select Backends</span><br>
   <table style="height: 150px;[% IF !backends_selected %] display: none;[% END %]" class="filter" id="backends_toggle_table">
     <tr>
       <td class="attrName"><b>Available</b></td>
@@ -15,8 +15,8 @@
       </select>
     </td>
     <td align="center" valign="middle" style="width: 42px;">
-      <button class="button btn_small" onclick="data_select_move('available_backends', '[% param_name %]', true); return false;"[% IF !can_edit %] disabled[% END %]>&gt;&gt;</button><br>
-      <button class="button btn_small" onclick="data_select_move('[% param_name %]', 'available_backends'); return false;"[% IF !can_edit %] disabled[% END %]>&lt;&lt;</button>
+      <button class="button btn_small" onclick="data_select_move('available_backends', '[% param_name %]', true); return false;"[% IF !can_edit || !backends_selected %] disabled[% END %]>&gt;&gt;</button><br>
+      <button class="button btn_small" onclick="data_select_move('[% param_name %]', 'available_backends'); return false;"[% IF !can_edit || !backends_selected %] disabled[% END %]>&lt;&lt;</button>
     </td>
     <td class="attrName" style="height: 100%;">
       <input type="text" id="filter_selected" class="filter_selected" placeholder="filter..." style="width:220px; padding:0;" onkeyup="data_filter_select('[% param_name %]', this.value)"[% IF !can_edit || !backends_selected %] disabled[% END %]><br>
@@ -77,5 +77,21 @@
 
   // add eventhandler to form
   jQuery('#[% param_name %]').closest('FORM').on('submit', function() { select_all_options('[% param_name %]') });
+
+  function check_backends_input(checkbox) {
+    if(checkbox.checked) {
+      jQuery('#filter_available').prop('disabled', false);
+      jQuery('#available_backends').prop('disabled', false);
+      jQuery('#filter_selected').prop('disabled', false);
+      jQuery('#[% param_name %]').prop('disabled', false);
+      jQuery('#backends_toggle_table BUTTON').button("enable");
+    } else {
+      jQuery('#filter_available').prop('disabled', true);
+      jQuery('#available_backends').prop('disabled', true);
+      jQuery('#filter_selected').prop('disabled', true);
+      jQuery('#[% param_name %]').prop('disabled', true);
+      jQuery('#backends_toggle_table BUTTON').button("disable");
+    }
+  }
 -->
 </script>

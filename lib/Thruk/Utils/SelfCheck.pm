@@ -13,6 +13,7 @@ Utilities Collection for Checking Thruks Integrity
 use warnings;
 use strict;
 use Thruk::Utils::RecurringDowntimes;
+use Thruk::Action::AddDefaults ':peer_states';
 
 my $rc_codes = {
     '0'     => 'OK',
@@ -140,9 +141,10 @@ sub _logfile_checks  {
 
     my $rc = 0;
     for my $log ($c->config->{'var_path'}.'/cron.log',
-                 $c->config->{'log4perl_conf_in_use'},
+                 $c->config->{'log4perl_logfile_in_use'},
                 ) {
-        next unless $log; # may not be set
+        next unless $log;    # may not be set
+        next unless -e $log; # may not exist either
         # count errors
         my @out = `grep 'ERROR' $log`;
         $details .= sprintf("  - %s: ", $log);
@@ -303,7 +305,7 @@ sub _lmd_checks  {
     return unless $c->config->{'use_lmd_core'};
 
     my $details = "LMD:\n";
-    if($c->config->{'lmd_core_bin'}) {
+    if($c->config->{'lmd_core_bin'} && $c->config->{'lmd_core_bin'} ne 'lmd') {
         if(! -x $c->config->{'lmd_core_bin'}) {
             chomp(my $err = $!);
             $details .= sprintf("  - lmd binary %s not executable: %s\n", $c->config->{'lmd_core_bin'}, $err);
@@ -329,7 +331,11 @@ sub _lmd_checks  {
     my $start_time = $status->[0]->{'start_time'};
     $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
 
-    my $total = scalar @{$c->{'db'}->peer_key()};
+    my $total = 0;
+    for my $p (@{$c->{'db'}->get_peers()}) {
+        next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
+        $total++;
+    }
     my $stats = $c->{'db'}->lmd_stats($c);
     my $online = 0;
     for my $stat (@{$stats}) {

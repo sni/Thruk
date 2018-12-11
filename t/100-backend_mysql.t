@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 90;
+use Test::More tests => 92;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');
@@ -294,6 +294,18 @@ test_filter(
     'WHERE (time >= 1432677600 AND time <= 1432764000) HAVING (message RLIKE \'test pattern\')',
     'test_contact'
 );
+
+#####################################################################
+test_filter(
+    'time filter',
+    [{ '-and' => [
+        { 'time' => { '>=' => 1524053699 } },
+        { 'time' => { '<' => 1524140099 } }
+      ]
+    }],
+    " WHERE (time >= 1524053699 AND time < 1524140099)",
+);
+
 #####################################################################
 # SUBS
 sub test_filter {

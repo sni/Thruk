@@ -29,9 +29,9 @@ jQuery(document).ready(function() {
       [% x=0; FOREACH hst = avail_data.hosts.keys.sort.reverse %]
         [% val = round_decimals(values.$x.0, param.decimals) %]
         [% IF values.$x.0 == -1 %][%# no data at all... #%]
-        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% _hst(hst) %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
         [% ELSE %]
-        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% _hst(hst) %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
         [% sla_averages_total = sla_averages_total + val; sla_averages_num = sla_averages_num + 1; %]
         [% END %]
       [% END %]
@@ -41,9 +41,9 @@ jQuery(document).ready(function() {
           label[[% x %]] = "";
           [% val = round_decimals(values.$x.0, param.decimals) %]
           [% IF loop.last %]
-          label[[% x %]] += "<span class='graph_svc_hst_legend'>[% hst %]<\/span>";
+          label[[% x %]] += "<span class='graph_svc_hst_legend'>[% _hst(hst) %]<\/span>";
           [% END %]
-          label[[% x %]] += "<span class='graph_svc_legend'> - [% svc %]<\/span>";
+          label[[% x %]] += "<span class='graph_svc_legend'> - [% _svc(hst, svc)  %]<\/span>";
           [% IF values.$x.0 == -1 %][%# no data at all... #%]
           label[[% x %]] += "<span class='graph_percent_legend'>n/a<\/span>";
           [% ELSE %]

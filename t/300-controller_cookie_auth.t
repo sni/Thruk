@@ -22,7 +22,7 @@ SKIP: {
 }
 
 my $pages = [
-    { url => '/thruk/cgi-bin/login.cgi',      like => ['Thruk Monitoring Webinterface', 'loginbutton' ] },
+    { url => '/thruk/cgi-bin/login.cgi',      like => ['Thruk Monitoring Webinterface', 'loginbutton' ], code => 401 },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi', 'redirect' => 1, location => 'tac.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi%3ftest=blah', 'redirect' => 1, location => 'tac.cgi\?test=blah', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi%3ftest=blah&test2=blub', 'redirect' => 1, location => 'tac.cgi\?test=blah&test2=blub', like => 'This item has moved' },

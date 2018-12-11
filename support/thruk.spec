@@ -9,8 +9,8 @@
 %endif
 
 Name:          thruk
-Version:       2.20
-Release: 2
+Version:       2.26
+Release: 1
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
@@ -19,6 +19,10 @@ URL:           http://thruk.org
 %define fullname %{name}-%{version}
 %else
 %define fullname %{name}-%{version}-%{release}
+%endif
+# detect obs builds which contains a dot in the release version
+%if %(echo "%{release}" | grep -Fc ".") > 0
+%define fullname %{name}-%{version}
 %endif
 Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
@@ -31,6 +35,9 @@ Requires:      thruk-base = %{version}-%{release}
 Requires:      thruk-plugin-reporting = %{version}-%{release}
 %if 0%{?suse_version} < 1315
 Requires(pre): shadow-utils
+%endif
+%if 0%{?systemd_requires}
+%systemd_requires
 %endif
 
 %description
@@ -54,25 +61,27 @@ Requires(preun): libthruk
 Requires(post): libthruk
 Requires:    perl logrotate gd wget
 AutoReqProv: no
+
+#sles and opensuse
 %if %{defined suse_version}
+%if 0%{?suse_version} >= 1315
+Requires:    apache2 apache2-mod_fcgid cronie
+%endif
+%if 0%{?suse_version} < 1315
 Requires:    apache2 apache2-mod_fcgid cron
-%else
-# rhel specific requirements
-# >=rhel7
-%if 0%{?el7}%{?fc20}%{?fc21}%{?fc22}
-BuildRequires: perl-ExtUtils-Install
+%endif
+%endif
+
+# >=rhel7 and fedora
+%if 0%{?el7}%{?fedora}
+BuildRequires: perl(ExtUtils::Install)
 Requires: httpd mod_fcgid cronie
-%else
-# rhel6 specific requirements
+%endif
+
+# rhel6 requirements
 %if 0%{?el6}
-BuildRequires: perl-ExtUtils-MakeMaker
+BuildRequires: perl(ExtUtils::MakeMaker)
 Requires: httpd mod_fcgid cronie
-%else
-# rhel5 specific requirements (centos support no el5 tag)
-BuildRequires: perl-ExtUtils-MakeMaker
-Requires: httpd mod_fcgid
-%endif
-%endif
 %endif
 
 %description base
@@ -83,6 +92,11 @@ This package contains the base files for thruk.
 Summary:     Thruk Gui Reporting Addon
 Group:       Applications/System
 Requires:    %{name}-base = %{version}-%{release}
+%if %{defined suse_version}
+Requires:    xorg-x11-fonts
+%else
+Requires:    urw-fonts
+%endif
 AutoReqProv: no
 
 %description plugin-reporting
@@ -93,6 +107,7 @@ and event reporting.
 %setup -q -n %{fullname}
 
 %build
+export PERL5LIB=/usr/lib/thruk/perl5:/usr/lib64/thruk/perl5
 %configure \
     --bindir="%{_bindir}" \
     --datadir="%{_datadir}/thruk" \
@@ -134,6 +149,17 @@ mkdir -p %{buildroot}%{_localstatedir}/lib/thruk
 %if 0%{?fedora} >= 16 || 0%{?rhel} >= 7 || 0%{?sles_version} >= 12
     sed -i -e 's/^.*#su/    su/' %{buildroot}/%{_sysconfdir}/logrotate.d/thruk-base
 %endif
+touch plugin-reporting.files
+# files file cannot be empty
+echo "%%defattr(-,root,root)" >> plugin-reporting.files
+if test -e %{buildroot}%{_datadir}/thruk/script/phantomjs; then
+  echo "%{_datadir}/thruk/script/phantomjs" >> plugin-reporting.files
+fi
+
+%if %{?_unitdir:1}0
+rm %{buildroot}%{_initrddir}/thruk
+%endif
+
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -157,47 +183,73 @@ fi
 exit 0
 
 %post base
-chkconfig --add thruk
-mkdir -p /var/cache/thruk/reports \
-         /var/log/thruk \
-         /etc/thruk/bp \
-         /etc/thruk/panorama \
-         /var/lib/thruk \
-         /etc/thruk/thruk_local.d
-touch /var/log/thruk/thruk.log
-chown -R %{apacheuser}:%{apachegroup} \
-                /var/lib/thruk \
-                /var/cache/thruk \
-                /var/log/thruk \
-                /etc/thruk/plugins/plugins-enabled \
-                /etc/thruk/thruk_local.conf \
-                /etc/thruk/bp \
-                /etc/thruk/panorama \
-                /etc/thruk/thruk_local.d
-/usr/bin/crontab -l -u %{apacheuser} 2>/dev/null | /usr/bin/crontab -u %{apacheuser} -
-%if %{defined suse_version}
-a2enmod alias
-a2enmod fcgid
-a2enmod auth_basic
-a2enmod rewrite
-%if 0%{?suse_version} < 1315
-/etc/init.d/apache2 restart || /etc/init.d/apache2 start
-%else
-systemctl restart apache2.service
-%endif
-%else
-service httpd condrestart
+set +e
+case "$*" in
+  2)
+    # Upgrading, restart apache webserver
+    %if %{defined suse_version}
+      %if %{?_unitdir:1}0
+        systemctl daemon-reload >/dev/null
+        systemctl condrestart apache2.service >/dev/null
+      %else
+        /etc/init.d/apache2 restart >/dev/null
+      %endif
+    %else
+      %if %{?_unitdir:1}0
+        systemctl daemon-reload >/dev/null
+        systemctl condrestart httpd.service >/dev/null
+      %else
+        /etc/init.d/httpd condrestart >/dev/null
+      %endif
+    %endif
+
+    rm -rf /var/cache/thruk/*
+    /usr/bin/thruk -a clearcache,installcron --local > /dev/null
+  ;;
+  1)
+    # Installing
+    mkdir -p /var/cache/thruk/reports \
+             /var/log/thruk \
+             /etc/thruk/bp \
+             /etc/thruk/panorama \
+             /var/lib/thruk \
+             /etc/thruk/thruk_local.d
+    touch /var/log/thruk/thruk.log
+    chown -R %{apacheuser}:%{apachegroup} \
+                    /var/lib/thruk \
+                    /var/cache/thruk \
+                    /var/log/thruk \
+                    /etc/thruk/plugins/plugins-enabled \
+                    /etc/thruk/thruk_local.conf \
+                    /etc/thruk/bp \
+                    /etc/thruk/panorama \
+                    /etc/thruk/thruk_local.d
+    /usr/bin/crontab -l -u %{apacheuser} 2>/dev/null | /usr/bin/crontab -u %{apacheuser} -
+    %if %{defined suse_version}
+      /usr/sbin/a2enmod alias
+      /usr/sbin/a2enmod fcgid
+      /usr/sbin/a2enmod auth_basic
+      /usr/sbin/a2enmod rewrite
+    %endif
+    %if %{?_unitdir:1}0
+      #%systemd_post thruk.service
+    %else
+      chkconfig --add thruk
+    %endif
+
+    echo "Thruk have been configured for http://$(hostname)/thruk/."
+    echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
+  ;;
+  *) echo case "$*" not handled in post
+esac
+
 if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
   echo "******************************************";
   echo "Thruk will not work when SELinux is enabled";
   echo "SELinux: "$(getenforce);
   echo "******************************************";
 fi
-%endif
-rm -f /var/cache/thruk/thruk.cache
-/usr/bin/thruk -a clearcache,installcron --local > /dev/null
-echo "Thruk have been configured for http://$(hostname)/thruk/."
-echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
+
 exit 0
 
 
@@ -220,19 +272,29 @@ if [ -d /tmp/thruk_update/ssi/. ]; then
   cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
 fi
 rm -rf /tmp/thruk_update
+exit 0
 
 %preun base
-set -x
-if [ $1 = 0 ]; then
+case "$*" in
+  1)
+    # Upgrade, don't do anything
+  ;;
+  0)
+    # Uninstall, go ahead and stop before removing
     # last version will be deinstalled
     /usr/bin/thruk -a uninstallcron --local
-fi
-/etc/init.d/thruk stop
-chkconfig --del thruk 2>/dev/null
+    %if %{?_unitdir:1}0
+    %else
+    /etc/init.d/thruk stop
+    chkconfig --del thruk 2>/dev/null
+    %endif
+  ;;
+  *) echo case "$*" not handled in preun
+esac
 exit 0
 
 %postun base
-set -x
+set +e
 case "$*" in
   0)
     # POSTUN
@@ -273,13 +335,19 @@ exit 0
 %post plugin-reporting
 rm -f /etc/thruk/plugins/plugins-enabled/reports2
 ln -s ../plugins-available/reports2 /etc/thruk/plugins/plugins-enabled/reports2
-/etc/init.d/thruk condrestart &>/dev/null || :
+%if %{?_unitdir:1}0
+%else
+  /etc/init.d/thruk condrestart >/dev/null || :
+%endif
 exit 0
 
 %preun plugin-reporting
 if [ -e /etc/thruk/plugins/plugins-enabled/reports2 ]; then
     rm -f /etc/thruk/plugins/plugins-enabled/reports2
-    /etc/init.d/thruk condrestart &>/dev/null || :
+    %if %{?_unitdir:1}0
+    %else
+      /etc/init.d/thruk condrestart >/dev/null || :
+    %endif
 fi
 exit 0
 
@@ -312,7 +380,10 @@ exit 0
 %attr(0755,root,root) %{_bindir}/thruk
 %attr(0755,root,root) %{_bindir}/naglint
 %attr(0755,root,root) %{_bindir}/nagexp
+%if %{?_unitdir:1}0
+%else
 %attr(0755,root,root) %{_initrddir}/thruk
+%endif
 %config %{_sysconfdir}/thruk/ssi
 %config %{_sysconfdir}/thruk/action_menus
 %config %{_sysconfdir}/thruk/thruk.conf
@@ -366,6 +437,7 @@ exit 0
 %attr(0755,root,root) %{_datadir}/thruk/script/html2pdf.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/pnp_export.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/convert_old_datafile
+%{_datadir}/thruk/support
 %{_datadir}/thruk/root
 %{_datadir}/thruk/templates
 %{_datadir}/thruk/themes
@@ -382,12 +454,24 @@ exit 0
 %doc %{_mandir}/man3/thruk.3
 %doc %{_mandir}/man8/thruk.8
 %docdir %{_defaultdocdir}
+%if 0%{?suse_version} >= 1315
+%attr(0755,root,root) %dir %{_sysconfdir}/apache2
+%attr(0755,root,root) %dir %{_sysconfdir}/apache2/conf.d
+%attr(0755,root,root) %dir %{_sysconfdir}/thruk
+%attr(0755,root,root) %dir %{_sysconfdir}/thruk/bp
+%attr(0755,root,root) %dir %{_sysconfdir}/thruk/plugins
+%attr(0755,root,root) %dir %{_sysconfdir}/thruk/plugins/plugins-available
+%attr(0755,root,root) %dir %{_sysconfdir}/thruk/plugins/plugins-enabled
+%attr(0755,root,root) %dir %{_datadir}/thruk
+%attr(0755,root,root) %dir %{_datadir}/thruk/plugins
+%attr(0755,root,root) %dir %{_datadir}/thruk/script
+%attr(0755,root,root) %dir %{_datadir}/thruk/plugins/plugins-available
+%endif
 
 
-%files plugin-reporting
+%files plugin-reporting -f plugin-reporting.files
 %{_sysconfdir}/thruk/plugins/plugins-available/reports2
 %{_datadir}/thruk/plugins/plugins-available/reports2
-%{_datadir}/thruk/script/phantomjs
 
 
 

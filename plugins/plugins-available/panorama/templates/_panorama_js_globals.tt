@@ -16,6 +16,7 @@ var cookie_path         = '[% cookie_path %]';
 var cookie_auth         = [% IF cookie_auth %]true[% ELSE %]false[% END %];
 var base                = url_prefix+'plugins/panorama';
 var user_token          = '[% get_user_token(c) %]';
+var contactgroups       = [% json_encode(contactgroups) %];
 var host_action_icon    = '[% host_action_icon %]';
 var service_action_icon = '[% service_action_icon %]';
 var downtime_duration   = [% downtime_duration %];
@@ -49,5 +50,15 @@ var available_fonts          = [% json_encode(fonts) %];
 var omd_site                 = '[% omd_site %]';
 var grafana_default_panelId  = [% c.config.grafana_default_panelId %];
 var enable_shinken_features  = [% enable_shinken_features %];
+var has_jquery_ui            = false;
+var jquery_ui_css            = '[% url_prefix %]javascript/jquery-ui/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css';
+var jquery_ui_url            = '[% url_prefix %]javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js';
 
 [%+ PROCESS _header_initial_states.tt +%]
+var contactgroupsHash = {};
+for(var x = 0; x < contactgroups.length; x++) {
+    var g = contactgroups[x];
+    contactgroupsHash[g] = true;
+}
+
+[% action_menu_items_js %]

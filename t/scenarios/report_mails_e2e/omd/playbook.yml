@@ -1,6 +1,7 @@
 ---
 - hosts: all
   tasks:
+  - shell: sudo su - demo -c "set_admin_password omd"
   - yum:
       name: sendmail
       state: present

@@ -28,11 +28,11 @@ for my $place (qw/header footer/) {
 
     Thruk::Utils::IO::write('ssi/login-'.$place.'.ssi', "test ssi string: ".$rand);
     $c->app->_set_ssi();
-    TestUtils::test_page(url => '/thruk/cgi-bin/login.cgi', like => [ 'test ssi string', $rand ] );
+    TestUtils::test_page(url => '/thruk/cgi-bin/login.cgi', like => [ 'test ssi string', $rand ], code => 401 );
 
     Thruk::Utils::IO::write('ssi/login-'.$place.'-foo.ssi', "second ssi string");
     $c->app->_set_ssi();
-    TestUtils::test_page(url => '/thruk/cgi-bin/login.cgi', like => [ 'test ssi string', $rand, 'second ssi string' ] );
+    TestUtils::test_page(url => '/thruk/cgi-bin/login.cgi', like => [ 'test ssi string', $rand, 'second ssi string' ], code => 401 );
 
     unlink('ssi/login-'.$place.'.ssi');
     unlink('ssi/login-'.$place.'-foo.ssi');

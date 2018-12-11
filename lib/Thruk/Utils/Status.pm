@@ -117,7 +117,7 @@ sub summary_set_group_defaults {
 
   summary_add_host_stats($prefix, $group, $host)
 
-count host status for this host
+count host statstics for this host
 
 =cut
 sub summary_add_host_stats {
@@ -154,7 +154,7 @@ sub summary_add_host_stats {
 
   summary_add_service_stats($prefix, $group, $host)
 
-count host status for this host
+count service statistics for this service
 
 =cut
 sub summary_add_service_stats {
@@ -332,7 +332,7 @@ sub do_filter {
 
         # complex filter search?
         push @{$searches}, Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s0', 1 );
-        for my $x (@{_get_search_ids($c->req->parameters, $prefix)}) {
+        for my $x (@{_get_search_ids($c->req->parameters, $prefix, $c->config->{'maximum_search_boxes'})}) {
             next if $x == 0; # already added
             my $search = Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s' . $x );
             push @{$searches}, $search if defined $search;
@@ -348,7 +348,7 @@ sub do_filter {
         $c->stash->{'show_filter_table'} = 1;
     }
 
-    return ( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
+    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'});
 }
 
 ##############################################
@@ -766,17 +766,6 @@ sub single_search {
 
         my $value  = $filter->{'value'};
 
-        # skip most empty filter
-        # 2010-10-25: 3bc748da2 - fixes "livestatus: Sorry, Operator 4 for lists not implemented" error with blank searches
-        # 2016-10-14: cannot reproduce anymore, blank searches do what they should do
-        #if(    $value =~ m/^\s*$/mx
-        #   and $filter->{'type'} ne 'next check'
-        #   and $filter->{'type'} ne 'last check'
-        #   and $filter->{'type'} ne 'event handler'
-        #) {
-        #    next;
-        #}
-
         my $op     = '=';
         my $rop    = '=';
         my $listop = '>=';
@@ -787,6 +776,13 @@ sub single_search {
         if( $filter->{'op'} eq '!=' ) { $op = '!='; $joinop = "-and"; $listop = '!>='; $dateop = '!='; }
         if( $filter->{'op'} eq '>=' ) { $op = '>='; $rop = '<='; $dateop = '>='; }
         if( $filter->{'op'} eq '<=' ) { $op = '<='; $rop = '>='; $dateop = '<='; }
+
+        if($op eq '~~' || $op eq '!~~') {
+            # regular expression filter are supported since LMD 1.3.4
+            if($ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4')) {
+                $listop = $op;
+            }
+        }
 
         if( $op eq '!~~' or $op eq '~~' ) {
             $value = Thruk::Utils::convert_wildcards_to_regex($value);
@@ -814,7 +810,11 @@ sub single_search {
             # skip empty searches
             next if $value eq '';
 
-            my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
+            my($hfilter, $sfilter, $num) = get_comments_filter($c, $op, $value);
+            if(defined $num && $num == 0) {
+                undef $hfilter;
+                undef $sfilter;
+            }
 
             my $host_search_filter = [ { name               => { $op     => $value } },
                                        { display_name       => { $op     => $value } },
@@ -870,7 +870,7 @@ sub single_search {
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
-            if($op eq '~~' or $op eq '!~~') {
+            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
                 my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'hostgroup');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
@@ -885,7 +885,7 @@ sub single_search {
             push @hostgroupfilter,     { name        => { $op     => $value } };
         }
         elsif ( $filter->{'type'} eq 'servicegroup' ) {
-            if($op eq '~~' or $op eq '!~~') {
+            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
                 my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'servicegroup');
                 push @servicefilter,       $sfilter;
                 push @servicetotalsfilter, $sfilter;
@@ -897,7 +897,7 @@ sub single_search {
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
-            if($op eq '~~' or $op eq '!~~') {
+            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
                 my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'contacts');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
@@ -931,7 +931,7 @@ sub single_search {
             push @servicefilter, { latency => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'execution time' ) {
-            $value = Thruk::Utils::Status::convert_time_amount($value);
+            $value = Thruk::Utils::expand_duration($value);
             push @hostfilter,    { execution_time => { $op => $value } };
             push @servicefilter, { execution_time => { $op => $value } };
         }
@@ -996,7 +996,7 @@ sub single_search {
             push @servicefilter, { criticity => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
-            my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
+            my($hfilter, $sfilter) = get_comments_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
         }
@@ -1006,14 +1006,14 @@ sub single_search {
         }
         # Filter on the downtime duration
         elsif ( $filter->{'type'} eq 'downtime duration' ) {
-            $value                 = Thruk::Utils::Status::convert_time_amount($value);
+            $value                 = Thruk::Utils::expand_duration($value);
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_downtimes_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
         }
         elsif ( $filter->{'type'} eq 'duration' ) {
             my $now = time();
-            $value = Thruk::Utils::Status::convert_time_amount($value);
+            $value = Thruk::Utils::expand_duration($value);
             if(    ($op eq '>=' and ($now - $c->stash->{'last_program_restart'}) >= $value)
                 or ($op eq '<=' and ($now - $c->stash->{'last_program_restart'}) <= $value)
                 or ($op eq '!=' and ($now - $c->stash->{'last_program_restart'}) != $value)
@@ -1500,6 +1500,7 @@ sub get_comments_filter {
 
     return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
 
+    my $num;
     if($value eq '') {
         if($op eq '=' or $op eq '~~') {
             push @hostfilter,          { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
@@ -1512,10 +1513,11 @@ sub get_comments_filter {
     else {
         my $comments     = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @comment_ids  = sort keys %{ Thruk::Utils::array2hash([@{$comments}], 'id') };
-        if(scalar @comment_ids == 0) { @comment_ids = (-1); }
 
         my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
+        $num             = scalar @downtime_ids + scalar @comment_ids;
+        if(scalar @comment_ids == 0) { @comment_ids = (-1); }
         if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
 
         my $comment_op = '!>=';
@@ -1528,7 +1530,7 @@ sub get_comments_filter {
         push @servicefilter,       { $combine => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
     }
 
-    return(\@hostfilter, \@servicefilter);
+    return(\@hostfilter, \@servicefilter, $num);
 }
 
 
@@ -1823,34 +1825,6 @@ sub get_downtimes_filter {
     }
 
     return(\@hostfilter, \@servicefilter);
-}
-
-##############################################
-
-=head2 convert_time_amount
-
-  convert_time_amount($value)
-
-returns converted amount of time
-
-possible conversions are
-1w => 604800
-1d => 86400
-1h => 3600
-1m => 60
-
-=cut
-sub convert_time_amount {
-    my $value = shift;
-    if($value =~ m/^(\d+)(y|w|d|h|m|s)/gmx) {
-        if($2 eq 'y') { return $1 * 86400*365; }# year
-        if($2 eq 'w') { return $1 * 86400*7; }  # weeks
-        if($2 eq 'd') { return $1 * 86400; }    # days
-        if($2 eq 'h') { return $1 * 3600; }     # hours
-        if($2 eq 'm') { return $1 * 60; }       # minutes
-        if($2 eq 's') { return $1 }             # seconds
-    }
-    return $value;
 }
 
 ##############################################
@@ -2404,7 +2378,7 @@ sub set_comments_and_downtimes {
 
 ##############################################
 sub _get_search_ids {
-    my($params, $prefix) = @_;
+    my($params, $prefix, $maximum) = @_;
     my $ids = {};
     my $search = $prefix.'s';
     for my $key (grep /^$prefix/mx, keys %{$params}) {
@@ -2412,9 +2386,100 @@ sub _get_search_ids {
             $ids->{$1} = 1;
         }
     }
-    my @list = sort keys %{$ids};
+    my @list = sort { $a <=> $b } keys %{$ids};
+    if($maximum > 0 && scalar @list > $maximum) {
+        splice(@list,$maximum);
+    }
     return(\@list);
 }
+##############################################
+
+=head2 parse_lexical_filter
+
+  parse_lexical_filter($string)
+
+parse lexical filter from string. returns filter structure.
+
+=cut
+sub parse_lexical_filter {
+    my($string) = @_;
+    if(ref $string ne 'SCALAR') {
+        my $copy = $string;
+        $string = \$copy;
+    }
+    if(${$string} =~ m/^(.{3})/mx) {
+        my $separator = $1;
+        if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
+            if(${$string} =~ m/\Q$separator\E(.*?)\Q$separator\E/gmx) {
+                ${$string} = $1;
+            }
+        }
+    }
+    my $filter = [];
+    my($token,$key,$op,$val,$combine);
+    while(${$string} ne '') {
+        if(${$string} =~ s/^\s*(
+                              \(
+                            | \)
+                            | \w+
+                            | \d+
+                            | '[^']*'
+                            | "[^"]*"
+                            | [=\!~><]+
+                        )\s*//mx) {
+            $token = $1;
+            if(!defined $key) {
+                $key = $token;
+                if($key eq '(') {
+                    undef $key;
+                    my $f = parse_lexical_filter($string);
+                    push @{$filter}, $f;
+                    next;
+                }
+                if($key eq ')') {
+                    return($filter);
+                }
+                if(lc($key) eq 'and' || lc($key) eq 'or') {
+                    if(scalar @{$filter} == 0) { die("unexpected ".uc($key)." at ".${$string}); }
+                    $combine = lc($key);
+                    undef $key;
+                }
+                next;
+            }
+            elsif(!defined $op) {
+                $op = $token;
+                if($op eq '~')  { $op = '~~'; }
+                if($op eq '!~') { $op = '!~~'; }
+                next;
+            }
+            elsif(!defined $val) {
+                $val = $token;
+                if(substr($val, 0, 1) eq '"') { $val = substr($val, 1, -1); }
+                if(substr($val, 0, 1) eq "'") { $val = substr($val, 1, -1); }
+                push @{$filter}, { $key => { $op => $val } };
+                undef $key;
+                undef $op;
+                undef $val;
+                if($combine) {
+                    my $prev1 = pop @{$filter};
+                    my $prev2 = pop @{$filter};
+                    if(ref $prev2 eq 'HASH' && $prev2->{'-'.$combine}) {
+                        push @{$prev2->{'-'.$combine}},  $prev1;
+                        push @{$filter}, $prev2;
+                    } else {
+                        push @{$filter}, { '-'.$combine => [$prev2, $prev1]};
+                    }
+                }
+                undef $combine;
+                next;
+            }
+        } else {
+            die("parse error at ".${$string});
+        }
+    }
+    return $filter;
+}
+
 ##############################################
 
 =head1 AUTHOR

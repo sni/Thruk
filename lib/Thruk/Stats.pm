@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Time::HiRes qw/gettimeofday tv_interval/;
+use Carp qw/longmess/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {
@@ -21,7 +22,11 @@ sub profile {
     #&timing_breakpoint($arg[1], undef, 1) if $arg[0] eq 'end';
     return unless $self->{'enabled'};
     my $t0 = [gettimeofday];
-    push @{$self->{'profile'}}, [$t0, \@arg, [caller]];
+    my $longmess;
+    if($ENV{'THRUK_PERFORMANCE_STACKS'} && $arg[0] ne 'end') {
+        $longmess = longmess;
+    }
+    push @{$self->{'profile'}}, [$t0, \@arg, [caller], $longmess];
     return;
 }
 sub enable {
@@ -34,15 +39,15 @@ sub clear {
     return;
 }
 
-sub report {
+sub _result {
     my($self) = @_;
     my $data = $self->{'profile'};
     my $result = [];
     my $childs = $result;
     my $cur;
     for my $d (@{$data}) {
-        my($time, $args, $caller) = @{$d};
-        my($key,$val)             = @{$args};
+        my($time, $args, $caller, $stack) = @{$d};
+        my($key,$val) = @{$args};
         die("corrupt profile entry: ".Dumper($d)) unless $key;
         die("corrupt profile entry: ".Dumper($d)) unless $val;
         if($key eq 'begin') {
@@ -52,6 +57,7 @@ sub report {
                 'name'       => $val,
                 'start'      => $time,
                 'start_call' => $caller,
+                'stack'      => $stack,
                 'level'      => defined $cur->{'level'} ? $cur->{'level'} + 1 : 1,
             };
             push @{$childs}, $entry;
@@ -86,23 +92,41 @@ sub report {
                 'name'       => $val,
                 'time'       => $time,
                 'start_call' => $caller,
+                'stack'      => $stack,
                 'level'      => defined $cur->{'level'} ? $cur->{'level'} + 1 : 1,
             };
             push @{$childs}, $entry;
         }
     }
+    return($result);
+}
 
+sub report_html {
+    my($self) = @_;
+    my $result = $self->_result();
+    my $report = "Profile:\n";
+    $report .= "<table style='border: 1px solid black; width: 800px;'>";
+    for my $r (@{$result}) {
+        $report .= $self->_format_html_row($r);
+    }
+    $report .= "</table>";
+    return($report);
+}
+
+sub report {
+    my($self) = @_;
+    my $result = $self->_result();
     my $report = "Profile:\n";
     $report .= '+'.("-"x82)."+-------------+\n";
     for my $r (@{$result}) {
-        $report .= $self->_format_row($r);
+        $report .= $self->_format_text_row($r);
     }
     $report .= '+'.("-"x82)."+-------------+\n";
 
     return($report);
 }
 
-sub _format_row {
+sub _format_text_row {
     my($self, $row) = @_;
     my $output  = "";
     my $indent  = " "x(2*($row->{'level'}-1));
@@ -126,7 +150,73 @@ sub _format_row {
     $output .= sprintf("| %-80s | %11s |\n", $name, $elapsed);
     if($row->{'childs'} && scalar @{$row->{'childs'}} > 0) {
         for my $r (@{$row->{'childs'}}) {
-            $output .= $self->_format_row($r);
+            $output .= $self->_format_text_row($r);
+        }
+    }
+    return($output);
+}
+
+sub _format_html_row {
+    my($self, $row) = @_;
+    our $id;
+    $id = 0 unless defined $id;
+    $id++;
+    my $indent  = " "x(2*($row->{'level'}-1));
+    my $elapsed = "";
+    if($row->{start}) {
+        if(!defined $row->{end}) {
+            # get parents end date
+            my $parent = $row->{'parent'};
+            while(defined $parent->{'parent'} && !defined $parent->{'end'}) {
+                $parent = $parent->{'parent'};
+            }
+            my $end = $parent->{'end'};
+            if(defined $end) {
+                $elapsed = sprintf("~%.5fs", tv_interval($row->{start}, $end));
+            }
+        } else {
+            $elapsed = sprintf("%.5fs", tv_interval($row->{start}, $row->{end}));
+        }
+    }
+    my $name    = substr($indent.$row->{'name'}, 0, 78);
+    my $output  = "<tr>";
+    my $clickable = '';
+    if($row->{'stack'}) {
+        $clickable = " class='clickable' onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")' ";
+    }
+    $output .= "<td".$clickable.">".$name."</td>\n";
+    $output .= "<td>".$elapsed."</td>\n";
+    $output .= "</tr>\n";
+    if($row->{'stack'}) {
+        my @stack = split(/\n/mx, $row->{'stack'});
+        my @show;
+        my @rest;
+        my $rest = 0;
+        for my $s (@stack) {
+            if($s =~ m/^\s*Plack/mx) {
+                $rest = 1;
+            }
+            if($rest) {
+                push @rest, $s;
+            } else {
+                push @show, $s;
+            }
+        }
+        $output .= "<tr style='display:none;' id='pstack_".$id."' class='pstack_details'>\n";
+        $output .= "<td colspan=2><pre style='overflow: scroll; width: 794px; padding: 0 0 15px 0; margin: 0; height: inherit; min-width: inherit; border: 1px solid grey;'>\n";
+        $output .= join("\n", @show);
+        if(scalar @rest > 0) {
+            $output .= "<span class='clickable pstack_expand' onclick='toggleElement(\"pstack_more_".$id."\"); this.style.display=\"none\";'>\n...</span>";
+            $output .= "<span id='pstack_more_".$id."' class='pstack_more' style='display: none;'>";
+            $output .= "\n".join("\n", @rest);
+            $output .= "</span>";
+        }
+        $output .= "</pre></td>\n";
+        $output .= "</tr>\n";
+    }
+    if($row->{'childs'} && scalar @{$row->{'childs'}} > 0) {
+        for my $r (@{$row->{'childs'}}) {
+            $output .= $self->_format_html_row($r);
         }
     }
     return($output);
@@ -181,6 +271,12 @@ reset current profile
     report()
 
 return report from profiled data
+
+=head2 report_html
+
+    report_html()
+
+return report from profiled data in html format
 
 =cut
 

@@ -148,6 +148,15 @@ remove_item('Current Status', 'Problems', 'Services', 'Unhandled');
 -----
 
 
+=== Remove complete Section
+
+Existing sections can be removed completely the 'remove_section' function:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_section('Reports');
+-----
+
+
 === Make item available for some groups only
 
 Just wrap your changes in a 'has_group' condition.
@@ -165,6 +174,14 @@ Just wrap your changes in a 'has_role' condition.
 
 -----
 if(has_role('authorized_for_configuration_information')) {
+  insert_item('System', { 'href' => '.../only_for_some_roles.html', 'name' => 'Admin Link' });
+}
+-----
+
+You can check multiple roles at once:
+
+-----
+if(has_role('authorized_for_configuration_information', 'authorized_for_system_information')) {
   insert_item('System', { 'href' => '.../only_for_some_roles.html', 'name' => 'Admin Link' });
 }
 -----

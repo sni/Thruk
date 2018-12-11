@@ -28,10 +28,10 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.20';
+our $VERSION = '2.26';
 
-my $project_root = home('Thruk::Config');
-my $branch       = '2';
+my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
+my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
 if($branch) {
@@ -46,7 +46,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'March 14, 2018',
+              'released'               => 'December 07, 2018',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -63,6 +63,7 @@ our %config = ('name'                   => 'Thruk',
                                           'nl2br'               => \&Thruk::Utils::Filter::nl2br,
                                           'strip_command_args'  => \&Thruk::Utils::Filter::strip_command_args,
                                           'escape_html'         => \&Thruk::Utils::Filter::escape_html,
+                                          'lc'                  => \&Thruk::Utils::Filter::lc,
                                       },
                   PRE_DEFINE         => {
                                           'sprintf'             => \&Thruk::Utils::Filter::sprintf,
@@ -97,6 +98,8 @@ our %config = ('name'                   => 'Thruk',
                                           'encode_json_obj'     => \&Thruk::Utils::Filter::encode_json_obj,
                                           'get_user_token'      => \&Thruk::Utils::Filter::get_user_token,
                                           'uniqnumber'          => \&Thruk::Utils::Filter::uniqnumber,
+                                          'replace_macros'      => \&Thruk::Utils::Filter::replace_macros,
+                                          'set_time_locale'     => \&Thruk::Utils::Filter::set_time_locale,
                                           'calculate_first_notification_delay_remaining' => \&Thruk::Utils::Filter::calculate_first_notification_delay_remaining,
                                           'has_business_process' => \&Thruk::Utils::Filter::has_business_process,
                                           'set_favicon_counter' => \&Thruk::Utils::Status::set_favicon_counter,
@@ -113,6 +116,8 @@ our %config = ('name'                   => 'Thruk',
                                           'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
                                           'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
                                           'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
+                                          'command_disabled'    => \&Thruk::Utils::command_disabled,
+                                          'proxifiy_url'        => \&Thruk::Utils::proxifiy_url,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
@@ -159,6 +164,8 @@ our %config = ('name'                   => 'Thruk',
                                           'backend_chooser'         => 'select',
                                           'enable_shinken_features' => 0,
                                           'disable_backspace'       => 0,
+                                          'server_timezone'       => '',
+                                          'default_user_timezone' => 'Server Setting',
                                           'play_sounds'    => 0,
                                           'fav_counter'    => 0,
                                           'menu_states'      => {},
@@ -205,6 +212,7 @@ our %config = ('name'                   => 'Thruk',
                                           ],
                                           'jquery_ui' => '1.12.1',
                                           'all_in_one_javascript_panorama' => [
+                                              'javascript/jquery-1.12.4.min.js',
                                               'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'plugins/panorama/ux/form/MultiSelect.js',
                                               'plugins/panorama/ux/form/ItemSelector.js',
@@ -244,14 +252,16 @@ our %config = ('name'                   => 'Thruk',
               },
 );
 # set TT strict mode only for authors
-$config{'thruk_debug'} = 0;
+$config{'thruk_debug'}  = 0;
+$config{'thruk_author'} = 0;
 $config{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $config{'View::TT'}->{'STAT_TTL'}   = 5 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $config{'View::TT'}->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
-    $config{'thruk_debug'} = 1;
+    $config{'thruk_debug'}  = 1;
+    $config{'thruk_author'} = 1;
 }
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'} = $config{released};
 
@@ -275,7 +285,7 @@ sub get_config {
     if(scalar @files == 0) {
         for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
-            push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
+            push @files, $path.'/thruk.conf' if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
                 my @tmpfiles = sort glob($path.'/thruk_local.d/*');
                 for my $tmpfile (@tmpfiles) {
@@ -403,6 +413,11 @@ sub set_default_config {
         bug_email_rcpt                  => 'bugs@thruk.org',
         home_link                       => 'http://www.thruk.org',
         plugin_registry_url             => ['https://api.thruk.org/v1/plugin/list'],
+        cluster_nodes                   => ['$proto$://$hostname$/$url_prefix$/'],
+        cluster_heartbeat_interval      => 15,
+        cluster_node_stale_timeout      => 120,
+        rest_api_enabled                => 1,
+        api_keys_enabled                => 1,
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,
@@ -414,6 +429,7 @@ sub set_default_config {
         ajax_search_services            => 1,
         ajax_search_servicegroups       => 1,
         ajax_search_timeperiods         => 1,
+        maximum_search_boxes            => 9,
         shown_inline_pnp                => 1,
         use_feature_trends              => 1,
         use_wait_feature                => 1,
@@ -444,6 +460,7 @@ sub set_default_config {
         hide_passive_icon               => 0,
         show_full_commandline           => 1,
         show_modified_attributes        => 1,
+        show_contacts                   => 1,
         show_config_edit_buttons        => 0,
         show_backends_in_table          => 0,
         show_logout_button              => 0,
@@ -489,6 +506,7 @@ sub set_default_config {
                     use_expire             => 0,
         },
         command_disabled                    => {},
+        command_enabled                     => {},
         force_sticky_ack                    => 0,
         force_send_notification             => 0,
         force_persistent_ack                => 0,
@@ -546,6 +564,7 @@ sub set_default_config {
         'user_password_min_length'          => 5,
         'grafana_default_panelId'           => 1,
         'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
+        'graph_proxy_enabled'               => 1,
         'logcache_delta_updates'            => 1,
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
@@ -576,10 +595,6 @@ sub set_default_config {
     for my $key (qw/cmd_quick_status cmd_defaults/) {
         die(sprintf("%s should be a hash, got %s: %s", $key, ref $config->{$key}, Dumper($config->{$key}))) unless ref $config->{$key} eq 'HASH';
         $config->{$key} = { %{$defaults->{$key}}, %{ $config->{$key}} };
-    }
-    # command disabled should be a hash
-    if(ref $config->{'command_disabled'} ne 'HASH') {
-        $config->{'command_disabled'} = array2hash(expand_numeric_list($config->{'command_disabled'}));
     }
 
     ## no critic
@@ -622,9 +637,9 @@ sub set_default_config {
     $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
 
     # make show_custom_vars a list
-    $config->{'show_custom_vars'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))];
+    $config->{'show_custom_vars'} = array_uniq([split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))]);
 
-    # make graph_replace a list
+    # make some settings a list
     for my $key (qw/graph_replace commandline_obfuscate_pattern/) {
         $config->{$key} = [@{list($config->{$key})}];
     }
@@ -749,10 +764,13 @@ return home folder
 sub home {
     my($class) = @_;
     (my $file = "$class.pm") =~ s{::}{/}gmx;
-    if ( my $inc_entry = $INC{$file} ) {
+    if(my $inc_entry = $INC{$file}) {
         $inc_entry = Cwd::abs_path($inc_entry);
         $inc_entry =~ s/\Q\/$file\E$//mx;
         $inc_entry =~ s/\/b?lib//gmx;
+        if($inc_entry =~ m#/omd/versions/[^/]*/share/thruk#mx && $ENV{'OMD_ROOT'}) {
+            return $ENV{'OMD_ROOT'}.'/share/thruk';
+        }
         return $inc_entry;
     }
 
@@ -903,7 +921,7 @@ sub _do_finalize_config {
         $ENV{'THRUK_GROUP_ID'} = (getgrnam($ENV{'THRUK_GROUP_ID'}))[2] || die("cannot convert '".$ENV{'THRUK_GROUP_ID'}."' into numerical uid. Does this group really exist?");
     }
 
-    $ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
+    $ENV{'THRUK_GROUPS'}   = join(';', @{$groups});
     ## use critic
 
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
@@ -944,27 +962,6 @@ sub _do_finalize_config {
             print STDERR " -> templates\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
             unshift @{$config->{templates_paths}}, $addon.'templates';
         }
-
-        # static content included?
-        # only needed for development server, handled by apache aliasmatch otherwise
-        if($ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST')) {
-            if( -d $addon.'root' and -w $config->{home}.'/root/thruk/plugins/.' ) {
-                print STDERR " -> root\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-                my $target_symlink = $config->{home}.'/root/thruk/plugins/'.$addon_name;
-                if(-e $target_symlink) {
-                    my @s1 = stat($target_symlink."/.");
-                    my @s2 = stat($addon.'root/.');
-                    if($s1[1] != $s2[1]) {
-                        print STDERR " -> inodes mismatch, trying to delete\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-                        unlink($target_symlink) or die("failed to unlink: ".$target_symlink." : ".$!);
-                    }
-                }
-                if(!-e $target_symlink) {
-                    unlink($target_symlink);
-                    symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
-                }
-            }
-        }
     }
 
     ###################################################
@@ -993,8 +990,8 @@ sub _do_finalize_config {
     $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
 
     ###################################################
-    # when using shadow naemon, some settings don't make sense
-    if($config->{'use_shadow_naemon'} || $config->{'use_lmd_core'}) {
+    # when using lmd, some settings don't make sense
+    if($config->{'use_lmd_core'}) {
         $config->{'connection_pool_size'} = 1; # no pool required when using caching
         $config->{'check_local_states'}   = 0; # local state checking not required
     }
@@ -1036,9 +1033,9 @@ sub _do_finalize_config {
     my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
     for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
         next unless -d $folder.'/.';
-        my @files = glob($folder.'/*.json');
+        my @files = glob($folder.'/*');
         for my $file (@files) {
-            if($file =~ m%([^/]+)\.json$%mx) {
+            if($file =~ m%([^/]+)\.(json|js)$%mx) {
                 my $basename = $1;
                 $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
             }
@@ -1054,9 +1051,10 @@ sub _do_finalize_config {
         my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
         $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
         # bypass system reverse proxy for restricted cgi for permormance and locking reasons
-        if($config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi-bin/restricted.cgi$|mx) {
+        if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi-bin/restricted.cgi$|mx) {
             $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
         }
+        $config->{'omd_apache_proto'} = $proto;
     }
 
     # set default config
@@ -1123,6 +1121,25 @@ sub list {
     return([$d]);
 }
 
+######################################
+
+=head2 array_uniq
+
+  array_uniq($array)
+
+return uniq elements of array
+
+=cut
+
+sub array_uniq {
+    my $array = shift;
+
+    my %seen = ();
+    my @unique = grep { ! $seen{ $_ }++ } @{$array};
+
+    return \@unique;
+}
+
 ########################################
 
 =head2 read_config_file
@@ -1134,10 +1151,10 @@ return parsed config file
 =cut
 
 sub read_config_file {
-    my($file) = @_;
-    $file = list($file);
+    my($files) = @_;
+    $files = list($files);
     my @config_lines;
-    for my $f (@{$file}) {
+    for my $f (@{$files}) {
         if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
             print STDERR "reading config file: ".$f."\n";
         }
@@ -1148,13 +1165,13 @@ sub read_config_file {
         CORE::close($fh);
     }
     my $conf = {};
-    _parse_rows($file, \@config_lines, $conf);
+    _parse_rows($files, \@config_lines, $conf);
     return($conf);
 }
 
 ######################################
 sub _parse_rows {
-    my($file, $rows, $conf, $until) = @_;
+    my($files, $rows, $conf, $until) = @_;
     my $lastline = '';
     while(my $line = shift @{$rows}) {
         $line =~ s|(?<!\\)\#.*$||gmxo;
@@ -1180,7 +1197,7 @@ sub _parse_rows {
             if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
                 my($k,$v) = ($1,$2);
                 my $next  = {};
-                _parse_rows($file, $rows, $next, '</'.lc($k).'>');
+                _parse_rows($files, $rows, $next, '</'.lc($k).'>');
                 if(!defined $conf->{$k}->{$v}) {
                     $conf->{$k}->{$v} = $next;
                 } elsif(ref $conf->{$k}->{$v} eq 'ARRAY') {
@@ -1194,7 +1211,7 @@ sub _parse_rows {
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
-                _parse_rows($file, $rows, $next, '</'.lc($k).'>');
+                _parse_rows($files, $rows, $next, '</'.lc($k).'>');
                 if(!defined $conf->{$k}) {
                     $conf->{$k} = $next;
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
@@ -1217,7 +1234,7 @@ sub _parse_rows {
             # try split by space
             ($k,$v) = split(/\s+/mxo, $line, 2);
             if(!defined $v) {
-                die("unknow config entry: ".$line." in ".$file);
+                confess("unknow config entry: ".$line." in ".join(",", @{$files}));
             }
         }
         if(substr($v,0,1) eq '"') {
@@ -1275,6 +1292,8 @@ sub _fix_syntax {
     return;
 }
 
+########################################
+
 =head2 load_any( $options )
 
 replacement function for Config::Any->load_files
@@ -1299,7 +1318,7 @@ sub load_any {
     return($result);
 }
 
-######################################
+########################################
 
 =head1 AUTHOR
 

@@ -17,7 +17,11 @@
     [%# rescheduling with date in the past breaks latency #%]
     [% IF start_time_unix < date.now %][% start_time_unix = date.now %][% END %]
 
-    [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_SVC_CHECK[% ELSE %]SCHEDULE_SVC_CHECK[% END %];[% sprintf("%s;%s;%lu",host_name,service_desc,start_time_unix) %]
+    [% IF c.request.parameters.force_check %]
+        SCHEDULE_FORCED_SVC_CHECK;[% sprintf("%s;%s;%lu",host_name,service_desc,start_time_unix) %]
+    [% ELSE %]
+        SCHEDULE_SVC_CHECK;[% sprintf("%s;%s;%lu",host_name,service_desc,start_time_unix) %]
+    [% END %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:00'); END %]

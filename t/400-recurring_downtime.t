@@ -58,7 +58,7 @@ for my $downtime (@{$test_downtime}) {
     my $user      = defined $ENV{THRUK_USER} ? ' -u '.$ENV{THRUK_USER} : '';
     my $cronentry = `crontab -l $user | grep downtimetask | grep '9999'`;
     chomp($cronentry);
-    like($cronentry, '/downtimetask=/', "got cron entry: ".$cronentry) or BAIL_OUT("$0: got no cron entry");
+    like($cronentry, '/downtimetask /', "got cron entry: ".$cronentry) or BAIL_OUT("$0: got no cron entry");
 
     my($logfile) = ($cronentry =~ m/>>(.*?cron\.log)/mx);
     like($logfile, '/cron\.log$/', "got cron log: ".$logfile);
@@ -79,7 +79,7 @@ for my $downtime (@{$test_downtime}) {
     if(!$found) {
         fail("downtime did not occur in time");
         for my $cmd ("cat $logfile",
-                     "crontab -l",
+                     "crontab -l $user",
                      "ps -efl",
                      "$BIN 'extinfo.cgi?type=6'",
                      "$BIN 'showlog.cgi?pattern=EXTERNAL+COMMAND&start=yesterday&end=now'",

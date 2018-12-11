@@ -176,7 +176,7 @@ sub reconnect {
         }
     }
     push @{ $self->{'ua'}->requests_redirectable }, 'POST';
-    return;
+    return($self->{'ua'});
 }
 
 ##########################################################
@@ -510,11 +510,16 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, @options) = @_;
+
     my %options = @options;
     if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
+
+    # just because we don't cache, doesn't mean our remote site is not allowed to cache
+    delete $options{'nocache'};
+    @options = %options;
 
     my $use_file = 0;
     if($options{'file'}) {
@@ -524,10 +529,8 @@ sub get_logs {
     }
     # increased timeout for logs
     $self->{'ua'} || $self->reconnect();
-    $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);
     #my($typ, $size, $data) = @{$res};
-    $self->{'ua'}->timeout($self->{'timeout'});
 
     return(Thruk::Utils::IO::save_logs_to_tempfile($res->[2]), 'file') if $use_file;
     return $res->[2];
@@ -712,6 +715,19 @@ sub get_extra_perf_stats {
 
 ##########################################################
 
+=head2 get_logs_start_end
+
+  get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub get_logs_start_end {
+    return(_get_logs_start_end(@_));
+}
+
+##########################################################
+
 =head2 _get_logs_start_end
 
   _get_logs_start_end
@@ -721,10 +737,38 @@ returns first and last logfile entry
 =cut
 sub _get_logs_start_end {
     my($self, @options) = @_;
+
+    my %options = @options;
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
+        $options{'collection'} = 'logs_'.$self->peer_key();
+        return $self->{'_peer'}->logcache->_get_logs_start_end(%options);
+    }
+
+    # just because we don't cache, doesn't mean our remote site is not allowed to cache
+    delete $options{'nocache'};
+    @options = %options;
+
     my $res = $self->_req('_get_logs_start_end', \@options);
     # old thruk versions return the data in index 0 accidently
     my($start, $end) = @{$res->[2] || $res->[0]};
     return([$start, $end]);
+}
+
+##########################################################
+
+=head2 propagate_session_file
+
+  propagate_session_file($c)
+
+propagate local session to remote site
+
+=cut
+sub propagate_session_file {
+    my($self, $c) = @_;
+    my $session_id = $c->req->cookies->{'thruk_auth'};
+    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id], undef, $c->stash->{'remote_user'});
+    $session_id = $r->[0] if $r && ref($r) eq 'ARRAY';
+    return $session_id;
 }
 
 ##########################################################
@@ -737,7 +781,7 @@ returns result for given request
 
 =cut
 sub _req {
-    my($self, $sub, $args, $redirects) = @_;
+    my($self, $sub, $args, $redirects, $auth) = @_;
     $redirects = 0 unless defined $redirects;
 
     # clean code refs
@@ -752,8 +796,11 @@ sub _req {
     if(defined $args and ref $args eq 'HASH') {
         $options->{'auth'} = $args->{'auth'} if defined $args->{'auth'};
     }
+    $options->{'auth'} = $auth if $auth;
 
     $self->{'ua'} || $self->reconnect();
+    $self->{'ua'}->timeout($self->{'timeout'});
+    $self->{'ua'}->timeout($self->{'logs_timeout'}) if $sub =~ m/logs/gmx;
     my $response = _ua_post_with_timeout(
                         $self->{'ua'},
                         $self->{'addr'},
@@ -776,11 +823,13 @@ sub _req {
         eval {
             $data = decode_json($response->decoded_content);
         };
-        #die($@."\nrequest:\n".Dumper($response)) if $@;
+        die($@."\nrequest:\n".Dumper($response)) if $@;
         die($@."\n") if $@;
+        my $remote_version = $data->{'version'};
+        $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
+        $self->{'remote_version'} = $data->{'version'};
+        $self->{'remote_branch'}  = $data->{'branch'};
         if($data->{'rc'} == 1) {
-            my $remote_version = $data->{'version'};
-            $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
             if($data->{'output'} =~ m/no\ such\ command/mx) {
                 die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
@@ -821,25 +870,14 @@ return http response but ensure timeout on request.
 sub _ua_post_with_timeout {
     my($ua, $url, $data) = @_;
     my $timeout_for_client = $ua->timeout();
-    # set alarm
-    local $SIG{ALRM} = sub { die("hit ".$timeout_for_client."s timeout on ".$url) };
-    alarm($timeout_for_client);
     $ua->ssl_opts(timeout => $timeout_for_client, Timeout => $timeout_for_client);
-
-    # make sure nobody else calls alarm in between
-    {
-        ## no critic
-        no warnings qw(redefine prototype);
-        *CORE::GLOBAL::alarm = sub {};
-        ## use critic
-    }
 
     # try to fetch result
     my $res = $ua->post($url, $data);
 
-    # restore alarm handler and disable alarm
-    *CORE::GLOBAL::alarm = *CORE::alarm;
-    alarm(0);
+    if($res->is_error && $res->code == 408) { # HTTP::Status::HTTP_REQUEST_TIMEOUT
+        die("hit ".$timeout_for_client."s timeout on ".$url);
+    }
 
     return $res;
 }

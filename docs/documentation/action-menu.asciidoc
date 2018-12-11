@@ -82,6 +82,80 @@ Available standard environment variables are listed on the
 link:cli.html#_environment-variables[CLI Environment] page.
 
 
+== Dynamic Javascript Menus
+
+{% include new_since.ad version="2.24" %}
+Since version 2.24 you can use javascript to dynamically create menus. Basically you create a file ending on `.js` in your `action_menus` folder.
+The first function will be called and expected to return a json structure with the actual menu.
+
+Althought the first function will be called to generate the menu, the file
+may contain multiple functions, for example to generate submenus.
+
+The first function in the file must return an array of (link:configuration.html#action_menu_items[action_menu_items]). The menu
+itself can be a function again to create more dynamic menus.
+
+[WARNING]
+=======
+All defined functions are running in the same namespace, so make sure your functions use uniq names over all your menus. Best practice is to use the filename as prefix.
+=======
+
+A very simple example:
+
+.action_menus/js_basic_menu.js
+.....
+{% raw %}
+function js_basic_menu(data) {
+    return({
+      "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+      "title": "javascript menu",
+      "menu":[{
+          "icon":"/thruk/themes/{{theme}}/images/link.png",
+          "label":"test menu item",
+          "action":"http://..."
+        }]
+    });
+}
+{% endraw %}
+.....
+
+
+A more advanced example with dynamic submenus. Menu callbacks may return thenables (in jQuery context). This makes it possible to do ajax requests and use the result to create submenus. This example creates a submenu listing all hosts.
+
+.action_menus/js_adv_menu.js
+.....
+{% raw %}
+function js_adv_menu(cfg) {
+    return({
+      "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+      "title": "javascript advanced menu",
+      "menu":[
+        {
+          "icon":"/thruk/themes/{{theme}}/images/link.png",
+          "label":"test menu item",
+          "action":"http://..."
+        },
+        {
+          "icon":"/thruk/themes/{{theme}}/images/folder.png",
+          "label":"list all hosts",
+          "menu": js_adv_menu_submenu
+        }
+      ]
+    });
+}
+
+function js_adv_menu_submenu(cfg) {
+  return(jQuery.get("../r/hosts?columns=name").then(function(data, textStatus, jqXHR) {
+    var result = [];
+    jQuery(data).each(function(i, r) {
+      result.push({ label: r.name });
+    });
+    return(result);
+  }));
+}
+{% endraw %}
+.....
+
+
 == Examples
 
 === Panorama Dashboard
@@ -137,7 +211,7 @@ Using arbitrary attributes, you can easily add a confirmation dialog to your
 server actions.
 
 .action_menus/confirm_restart.json
-++++++++++++++++++++++++
+.....
 {% raw %}
 {
   "icon":"../themes/{{theme}}/images/arrow_refresh.png",
@@ -146,4 +220,112 @@ server actions.
   "onclick": "return(confirm('Really restart service?'));"
 }
 {% endraw %}
-++++++++++++++++++++++++
+.....
+
+
+=== Custom Form Elements
+Combining the raw html menu item with javascript menus can create any arbitrary
+menu.
+
+.action_menus/js_form_menu.js
+.....
+{% raw %}
+function js_form_menu(cfg) {
+    return({
+      "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+      "title": "javascript advanced menu",
+      "menu":[{
+        "icon":"/thruk/themes/{{theme}}/images/page_white_key.png",
+        "html":"<b>test</b><input type='text' id='menu_input'><input type='button' value='ok' onclick='test_form_handler()'>"
+      }]
+    });
+}
+
+function test_form_handler() {
+  thruk_message(0, "user input: "+jQuery('#menu_input').val());
+}
+
+{% endraw %}
+.....
+
+
+
+=== Sending Commands
+This example fetches some host details from the rest api and shows a dynamic
+host menu based on some attributes. It also sends some commands.
+
+.action_menus/js_cmd_menu.js
+.....
+{% raw %}
+function js_menu(d) {
+  return({
+    "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+    "title": "confirm menu",
+    "menu": js_menu_items
+  });
+}
+
+function js_menu_items(d) {
+  // fetch host attributes
+  return(jQuery.get("../r/sites/"+d.backend+"/hosts/"+d.host).then(function(data, textStatus, jqXHR) {
+    var result = [];
+    host_data = data[0];
+    if(!host_data) {
+      return({ 'label': 'host not found?'});
+    }
+
+    result.push({ label: d.host+":", disabled: true });
+
+    // add submenu with all parents
+    if(host_data.parents.length > 0) {
+      parents_menu = [];
+      jQuery(host_data.parents).each(function(i, r) {
+        parents_menu.push({ label: r, action: "extinfo.cgi?type=1&host="+r });
+      });
+      var parents = {
+        'label': 'parents',
+        'menu': parents_menu
+      };
+      result.push(parents);
+    }
+
+    // add submenu with all child hosts
+    if(host_data.childs.length > 0) {
+      childs_menu = [];
+      jQuery(host_data.childs).each(function(i, r) {
+        childs_menu.push({ label: r, action: "extinfo.cgi?type=1&host="+r });
+      });
+      var childs = {
+        'label': 'childs',
+        'menu': childs_menu
+      };
+      result.push(childs);
+    }
+
+    // add active checks switch
+    result.push({
+      'label': "active checks",
+      'menu': [{
+        'label': 'disable active checks',
+        'disabled': !host_data.active_checks_enabled,
+        'action': function() {
+          jQuery.post("../r/sites/"+d.backend+"/hosts/"+d.host+'/cmd/disable_host_check').then(function(data, textStatus, jqXHR) {
+            thruk_message(0, "active checks disabled");
+          });
+        }
+      }, {
+        'label':   'enable active checks',
+        'disabled': host_data.active_checks_enabled,
+        'action': function() {
+          jQuery.post("../r/sites/"+d.backend+"/hosts/"+d.host+'/cmd/enable_host_check').then(function(data, textStatus, jqXHR) {
+            thruk_message(0, "active checks enabled");
+          });
+        }
+      }]
+    });
+
+    return(result);
+  }));
+}
+{% endraw %}
+.....

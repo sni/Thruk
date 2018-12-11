@@ -23,10 +23,16 @@
 <input type="hidden" name="action" value="save">
 <input type="hidden" name="id" value="[% broadcast.id %]">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
-<table border="1" class='data'>
+<table border="1" class='data' width=1000>
   <tr>
     <th class='data' style="width:125px;"><a href='broadcast.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>[% IF broadcast.id != "new" %]Edit[% ELSE%]Create[% END %] Broadcast</th>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Template</b></td>
+    <td class="dataOdd" align="left">
+        <input type="checkbox" value="1" name="template"[% IF broadcast.template %] checked[% END %]> Templates will never be displayed but can be cloned.
+    </td>
   </tr>
   <tr>
     <td class="dataEven" align="center"><b>Hide Before</b></td>
@@ -62,10 +68,49 @@
         <input type="radio" name="annotation" value="warning"[% IF broadcast.annotation == "warning" %] checked[% END %]> <img src='[% url_prefix %]themes/[% theme %]/images/warning.png' border="0" alt='warning' title='warning' width="16" height="16" style="vertical-align: text-bottom;">
     </td>
   </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Text</b><span class="required">*</span></td>
-    <td class="dataOdd" align="left">
-      <textarea name="text" wrap="hard" cols=74 rows=10 style="width: 99%;">[% broadcast.text %]</textarea>
+  [% IF broadcast.frontmatter.keys.size > 0 %]
+  <tr class="frontmatter_edit">
+    <td class="dataEven" align="center">
+      <b>Variables</b>
+      <br>
+      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', ''); jQuery('TR.frontmatter_edit').css('display', 'none')"; return(false); value="raw edit">
+    </td>
+    <td class="dataOdd" align="left" style="position: relative;">
+      <table>
+      [% FOREACH f = broadcast.frontmatter.keys.sort %]
+      <tr>
+      <td align="right"><b>[% f %]:</b></td><td><input type="text" class="frontmatter" name="frontmatter.[% f %]" value="[% broadcast.frontmatter.$f %]"></td>
+      </tr>
+      [% END %]
+      </table>
+    </td>
+  </tr>
+  [% END %]
+  <tr class="raw"[% IF broadcast.frontmatter.keys.size > 0 %] style="display: none;"[% END %]>
+    <td class="dataEven" align="center">
+      <b>Text</b><span class="required">*</span>
+      [% IF broadcast.frontmatter.keys.size > 0 %]
+      <br>
+      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', 'none'); jQuery('TR.frontmatter_edit').css('display', '')"; return(false); value="edit variables">
+      [% END %]
+    </td>
+    <td class="dataOdd" align="left" style="position: relative;">
+      <textarea name="text" cols=74 rows=14 style="width: 99%;">[% broadcast.raw_text %]</textarea>
+      <div style="position: absolute; right: -430px; top: 10px; background: #e6e6e6; border-radius: 5px; border: 1px solid gray; padding: 8px;">
+        Help:
+        <ul style="padding-left: 10px; margin: 0;">
+         <li>HTML is allowed, ex: <b>&lt;b&gt;bold text&lt;/b&gt;</b></li>
+         <li>Images: &lt;img src="../themes/{{theme}}/images/ack.gif" width=16 height=16&gt;</li>
+         <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</li>
+         <li>Frontmatter variables:<br>
+<pre>---
+variable: create variables first
+another: test
+---
+then use later like: {{variable}} and {{another}}</pre>
+         </li>
+        </ul>
+      </div>
     </td>
   </tr>
   <tr>
@@ -75,11 +120,11 @@
       <input type="text"
              name="contacts"
              id="contacts"
-             style="width: 99%;"
+             style="width: 97%;"
              value="[% broadcast.contacts.join(', ') %]"
              [% IF use_ajax_search %]
                onfocus="this.click()"
-               onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:true, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+               onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
              [% END %]
       >
     </td>
@@ -91,11 +136,11 @@
       <input type="text"
              name="contactgroups"
              id="contactgroups"
-             style="width: 99%;"
+             style="width: 97%;"
              value="[% broadcast.contactgroups.join(', ') %]"
              [% IF use_ajax_search %]
                onfocus="this.click()"
-               onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:true, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+               onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
              [% END %]>
     </td>
   </tr>
@@ -124,9 +169,30 @@
 
 <script type="text/javascript">
 <!--
-  function update_broadcast_preview() {
+  function update_broadcast_preview(frontmatter_first) {
     var val        = jQuery('TEXTAREA[name=text]').val();
     var annotation = jQuery('INPUT[name=annotation]:checked').val();
+    var tmp        = extract_frontmatter(val);
+    val = tmp[0];
+    if(frontmatter_first) {
+      // update macros
+      var newVal = '---\n';
+      jQuery('INPUT.frontmatter').each(function(i, e) {
+        var name = e.name.replace(/^frontmatter\./, '');
+        tmp[1][name] = e.value;
+        newVal += name+': '+e.value+'\n';
+      });
+      // update text from new variables
+      newVal += '---\n\n';
+      newVal += val;
+      jQuery('TEXTAREA[name=text]').val(newVal);
+    } else {
+      for(var key in tmp[1]) {
+        jQuery('INPUT[name="frontmatter.'+key+'"]').val(tmp[1][key]);
+      }
+    }
+    val            = replace_macros(val, tmp[1]);
+    val            = replace_macros(val, [% json_encode(broadcast.macros) %]);
     if(annotation) {
       val = "<img src='[% url_prefix %]themes/[% theme %]/images/"+annotation+".png' border='0' width='16' height='16' style='vertical-align: text-bottom; padding-right: 5px;'>" + val;
     }
@@ -142,8 +208,30 @@
     jQuery('.broadcast_panel_container DIV.dismiss A').prop('onclick',null).off('click').on('click', function(e) { e.preventDefault(); alert("preview cannot be dismissed."); return false; })
     jQuery('TEXTAREA[name=text]').on('keyup', function() { update_broadcast_preview(); });
     jQuery('INPUT[name=annotation]').on('change', function() { update_broadcast_preview(); });
+    jQuery('INPUT.frontmatter').on('keyup', function() { update_broadcast_preview(true); });
     update_broadcast_preview();
   });
+
+  function extract_frontmatter(text) {
+    var macros = {};
+    var matches = text.split(/(?:^|\n)\-\-\-\s*\n/);
+    if(matches[0] || !matches[1]) {
+      return([text, macros]);
+    }
+    matches.shift();
+    var frontmatter = matches.shift().split(/\n/);
+    for(var x=0; x<frontmatter.length; x++) {
+      var tmp = splitN(frontmatter[x], ":", 2);
+      if(tmp) {
+        if(tmp[1]) {
+          tmp[1] = tmp[1].replace(/^\s+/, '');
+          macros[tmp[0]] = tmp[1];
+        }
+      }
+    }
+    text = matches.join("---\n")
+    return([text, macros]);
+  }
 -->
 </script>
 

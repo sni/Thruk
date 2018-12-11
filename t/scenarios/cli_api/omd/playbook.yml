@@ -1,0 +1,39 @@
+---
+- hosts: all
+  tasks:
+  - shell: sudo su - demo -c "set_admin_password omd"
+  - yum:
+      name:
+      - perl-Test-Harness
+      state: present
+  - copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - shell: omd config demo set APACHE_MODE own
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - copy:
+      src: /root/1.rpt
+      dest: /omd/sites/demo/var/thruk/reports/
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.tab
+      dest: /omd/sites/demo/etc/thruk/panorama/
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.tsk
+      dest: /omd/sites/demo/var/thruk/downtimes/
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.tbp
+      dest: /omd/sites/demo/etc/thruk/bp/
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
+  - shell: sudo su - demo -c "sed -e 's/^#use_/use_/' -i etc/thruk/thruk_local.d/lmd.conf"

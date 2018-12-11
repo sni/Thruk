@@ -157,6 +157,18 @@ image:source/backends.png[Thruk Backends Manager]
 .Livestatus Architecture
 image:source/livestatus.png[Livestatus Architecture]
 
+.thruk_local.conf:
+-------
+  <Component Thruk::Backend>
+      <peer>
+          name    = local livestatus
+          type    = livestatus
+          <options>
+              peer    = /var/run/live
+          </options>
+      </peer>
+  </Component>
+-------
 
 
 === TLS Livestatus
@@ -165,6 +177,7 @@ image:source/livestatus.png[Livestatus Architecture]
 TLS Livestatus is just like livestatus but encrypted with TLS/SSL. Therefor
 you need to create certificates and configure your backend(s) for example like:
 
+.thruk_local.conf:
 -------
   <Component Thruk::Backend>
       <peer>
@@ -258,26 +271,25 @@ It's strongly recommended to use HTTPS for remote connections.
 image:source/livestatus_http.png[HTTP Architecture]
 
 
+.thruk_local.conf:
+-------
+  <Component Thruk::Backend>
+      <peer>
+          name    = remote_http
+          type    = http
+          <options>
+              peer  = http://remote_host/thruk/
+              auth  = key from remote installation var/thruk/secret.key
+          </options>
+      </peer>
+  </Component>
+-------
 
-=== MongoDB
-The MongoDB is not a real backend for status data, but it can be used as a
-logfile cache. If unsure whether to use MongoDB or MySQL, use MySQL which is
-newer and faster. The MongoDB logfile cache may be deprecated in the future.
-
-[WARNING]
-The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
-
-ex.:
-
-  logcache = mongodb://localhost:27017/thruk_logs
-
-Details are explained in the link:logfile-cache.html[Logfile Cache] section.
 
 
 === MySQL
 The MySQL Database is not a real backend for status data, but it can be used as a
-logfile cache. If unsure whether to use MongoDB or MySQL, use MySQL which is
-newer and faster. The MongoDB logfile cache may be deprecated in the future.
+logfile cache.
 
 ex.:
 

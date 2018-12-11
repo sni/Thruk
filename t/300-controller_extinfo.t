@@ -4,7 +4,7 @@ use Test::More;
 use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan tests => 240;
 }
 

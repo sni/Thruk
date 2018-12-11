@@ -89,6 +89,7 @@ feature     ('author_test',
   'Test::JavaScript'                                                        => 0,
   'Test::Vars'                                                              => 0,
   'Devel::Cycle'                                                            => 0,
+  'Devel::Gladiator'                                                        => 0,
 );
 };
 
@@ -153,6 +154,11 @@ print `./script/thruk_patch_makefile.pl`;
 # create combined javascript/css files
 print `./script/thruk_create_combined_static_content.pl`;
 print "created cached js/css files\n";
+
+print `./script/thruk_set_standard_header`;
+if($? != 0) {
+  die("failed to update standard headers");
+}
 
 print "finished\n";
 exit 0

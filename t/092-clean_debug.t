@@ -5,9 +5,10 @@ use Test::More;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $cmds = {
-  "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/" => {},
-  "grep -nr 'use Thruk::Timer' lib/ plugins/plugins-available/"    => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
-  "grep -nr 'timing_breakpoint' lib/ plugins/plugins-available/"   => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
+  "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/ t/" => {},
+  "grep -nr 'use Thruk::Timer' lib/ plugins/plugins-available/ t/"    => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
+  "grep -nr 'timing_breakpoint' lib/ plugins/plugins-available/ t/"   => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
+  "grep -nr '^sleep' lib/ plugins/plugins-available/ t/"              => { 'skip_comments' => 1, exclude => [qr/\.t:/] },
 };
 
 # find all missed debug outputs
@@ -25,6 +26,7 @@ for my $cmd (keys %{$cmds}) {
        or $line =~ m|Unicode/Encoding\.pm|mx
        or $line =~ m|/excanvas.js|mx
        or $line =~ m|jquery\.mobile\-.*.js|mx
+       or $line =~ m|092\-clean_debug\.t|mx
     ) {
       next;
     }

@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5:/usr/lib64/thruk/perl5;
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 25
+
+##############################################
+use strict;
+use warnings;
+use Pod::Usage;
+use Getopt::Long;
+use Thruk::Utils::CLI;
+
+my $SECONDS_PER_DAY = 86400;
+
+my $opt = {
+    'help'      => 0,
+    'verbose'   => 0,
+    'age'       => 7,
+    'action'    => 'all',
+
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+GetOptions (
+    "h|help"         => \$opt->{'help'},
+    "age=i"          => \$opt->{'age'},
+    "action=s"       => \$opt->{'action'},
+    "v|verbose"      => sub { $opt->{'verbose'}++ },
+) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
+pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
+
+my $cli      = Thruk::Utils::CLI->new;
+my $c        = $cli->get_c();
+my $db       = $cli->get_db();
+my $options  = {'filter' => [{'comment' => {'~' => 'DISA'}}]};
+my $comments = $db->get_comments(%{$options});
+
+for my $comm (@{$comments}) {
+    my ($cmd) = $comm->{'comment'} =~ /^DISABLE_([A-Z_]+):/;
+    if ($cmd) {
+        $c->log->debug("found comment for command DISABLE_$cmd");
+        if (($opt->{'action'} =~ /all/i) || ($cmd =~ /$opt->{'action'}/i)) {
+            $c->log->debug("command is of correct type - checking age of comment");
+            if ($comm->{'entry_time'} < time() - $opt->{'age'} * $SECONDS_PER_DAY) {
+                $c->log->debug("comment is older than " . $opt->{'age'} . " day(s) - undoing command and deleting comment");
+                $options->{'backend'} = [$comm->{'peer_key'}];
+                # undo command
+                if ($cmd =~ /HOST/) {
+                    # host commands only need the host name as argument
+                    $options->{'command'} = sprintf("COMMAND [%d] ENABLE_%s;%s\n", time(), $cmd, $comm->{'host_name'});
+                }
+                else {
+                    # service commands need both host and service name
+                    $options->{'command'} = sprintf("COMMAND [%d] ENABLE_%s;%s;%s\n", time(), $cmd, $comm->{'host_name'}, $comm->{'service_description'});
+                }
+                $db->send_command(%{$options});
+
+                # delete comment
+                if ($cmd =~ /HOST/) {
+                    $options->{'command'} = sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d\n", time(), $comm->{'id'});
+                }
+                else {
+                    $options->{'command'} = sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d\n", time(), $comm->{'id'});
+                }
+                $db->send_command(%{$options});
+            }
+        }
+    }
+}
+exit 0;
+
+##############################################
+
+=head1 NAME
+
+reenable_actions - Command line utility which re-enables disabled active checks / notifications / event handlers
+
+=head1 SYNOPSIS
+
+Usage: reenable_actions
+
+=head1 DESCRIPTION
+
+This tool re-enables disabled active checks / notifications / event handlers which have previously been disabled
+via the Thruk GUI. They are found by looking for comments in a certain format.
+
+=head1 OPTIONS
+
+    --age       number of days after which checks / notifications / event handlers are re-enabled (default = 7)
+    --action    type of action to re-enable ('check', 'notif', 'handler' or 'all', default = 'all')
+
+=head1 AUTHOR
+
+2018, Constantin Wiemer, <constantin.wiemer@consol.de>
+
+=cut

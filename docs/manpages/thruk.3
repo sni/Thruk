@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2018-03-14" "perl v5.20.2" "User Contributed Perl Documentation"
+.TH thruk 3 "2018-12-07" "perl v5.20.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -165,6 +165,7 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 \&    \-f, \-\-force                   some actions need to be forced
 \&
 \&  Compatibility options:
+\&        \-\-list\-commands           List available commands.
 \&    \-l, \-\-list\-backends           List available backends/sites. Alias for \*(Aqbackend list\*(Aq.
 \&    \-a, \-\-action=<command>        Perform given action. see below for a list.
 .Ve
@@ -173,8 +174,15 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 This script gives access to various parts of the Thruk gui and allows to generate
 excel reports, csv exports or any other url by using command line and bypassing the
 webserver.
-.SH "OPTIONS"
-.IX Header "OPTIONS"
+.SH "COMMANDS"
+.IX Header "COMMANDS"
+Available commands will be listed when running thruk without any argument or by
+.PP
+.Vb 1
+\&  %> thruk \-\-list\-commands
+.Ve
+.SH "GLOBALOPTIONS"
+.IX Header "GLOBALOPTIONS"
 script has the following arguments
 .IP "\fB\-h\fR , \fB\-\-help\fR" 4
 .IX Item "-h , --help"
@@ -207,6 +215,11 @@ script has the following arguments
 .IX Item "-l , --list-backends"
 .Vb 1
 \&    get list of available backends
+.Ve
+.IP "\fB\-\-list\-commands\fR" 4
+.IX Item "--list-commands"
+.Vb 1
+\&    get list of available commands.
 .Ve
 .IP "\fB\-a\fR \fIaction\fR, \fB\-\-action\fR=\fIaction\fR" 4
 .IX Item "-a action, --action=action"
@@ -263,6 +276,12 @@ List available backends:
 .PP
 .Vb 1
 \&  %> thruk \-l
+.Ve
+.PP
+List available commands:
+.PP
+.Vb 1
+\&  %> thruk
 .Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"

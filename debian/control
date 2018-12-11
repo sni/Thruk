@@ -2,7 +2,7 @@ Source: thruk
 Section: net
 Priority: extra
 Maintainer: Sven Nierlein <sven.nierlein@consol.de>
-Build-Depends: debhelper (>= 7), libthruk (>=2.20)
+Build-Depends: debhelper (>= 7), libthruk (>=2.20), lsb-release
 Standards-Version: 3.7.3
 Homepage: http://www.thruk.org
 Bugs: https://github.com/sni/Thruk/issues
@@ -40,7 +40,7 @@ Description: Monitoring Webinterface for Nagios/Icinga and Shinken
 
 Package: thruk-plugin-reporting
 Architecture: any
-Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
-         thruk-base (= ${source:Version})
+Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends}, phantomjs,
+         thruk-base (= ${source:Version}), fonts-liberation
 Description: This package contains the reporting addon for thruk useful for sla
  and event reporting.

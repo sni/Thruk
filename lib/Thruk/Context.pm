@@ -3,14 +3,17 @@ package Thruk::Context;
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
+use Scalar::Util qw/weaken/;
+use Time::HiRes qw/gettimeofday/;
+use Module::Load qw/load/;
+use URI::Escape qw/uri_escape uri_unescape/;
+
 use Thruk::Authentication::User;
 use Thruk::Controller::error;
 use Thruk::Request;
 use Thruk::Request::Cookie;
 use Thruk::Stats;
-use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
-use Scalar::Util qw/weaken/;
-use Time::HiRes qw/gettimeofday/;
 
 =head1 NAME
 
@@ -44,9 +47,17 @@ sub new {
     }
 
     # translate paths, translate ex.: /naemon/cgi-bin to /thruk/cgi-bin/
-    my $path_info         = translate_request_path($env->{'PATH_INFO'}, $app->config);
+    my $path_info         = translate_request_path($env->{'PATH_INFO'} || $env->{'REQUEST_URI'}, $app->config, $env);
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
+
+    # extract non-url encoded q= param from raw body parameters
+    if($env->{'QUERY_STRING'} && $env->{'QUERY_STRING'} =~ m/(^|\&)q=(.{3})/mx) {
+        my $separator = $2;
+        if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
+            $env->{'QUERY_STRING'} =~ s/\Q$separator\E(.*?)\Q$separator\E/&_url_encode($1)/gemx;
+        }
+    }
 
     my $req = Thruk::Request->new($env);
     my $self = {
@@ -63,13 +74,46 @@ sub new {
         },
         req    => $req,
         res    => $req->new_response(200),
-        stats  => Thruk::Stats->new(),
+        stats  => $Thruk::Request::c ? $Thruk::Request::c->stats : Thruk::Stats->new(),
         user   => undef,
         errors => [],
     };
     bless($self, $class);
     weaken($self->{'app'}) unless $ENV{'THRUK_SRC'} eq 'CLI';
     $self->stats->enable();
+
+    # extract non-url encoded q= param from raw body parameters
+    $self->req->parameters();
+    if($self->req->raw_body && $self->req->raw_body =~ m/(^|\?|\&)q=(.{3})/mx) {
+        my $separator = $2;
+        if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
+            if($self->req->raw_body =~ m/\Q$separator\E(.*?)\Q$separator\E/gmx) {
+                $self->req->body_parameters->{'q'} = $1;
+                $self->req->parameters->{'q'} = $1;
+            }
+        }
+    }
+
+    # parse json body parameters
+    if($self->req->content_type && $self->req->content_type =~ m%^application/json%mx) {
+        my $raw = $self->req->raw_body;
+        if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mx) {
+            my $data;
+            my $json = Cpanel::JSON::XS->new->utf8;
+            $json->relaxed();
+            eval {
+                $data = $json->decode($raw);
+            };
+            if($@) {
+                confess("failed to parse json data argument: ".$@);
+            }
+            for my $key (sort keys %{$data}) {
+                $self->req->body_parameters->{$key} = $data->{$key};
+                $self->req->parameters->{$key} = $data->{$key};
+            }
+        }
+    }
+
     return($self);
 }
 
@@ -100,19 +144,42 @@ sub log {
     return($_[0]->app->log);
 }
 
+=head2 audit_log
+
+return audit_log object
+
+=cut
+sub audit_log {
+    my($c, $msg) = @_;
+    return($c->app->audit_log($msg));
+}
+
+=head2 cluster
+
+return cluster object
+
+=cut
+sub cluster {
+    return($_[0]->app->cluster);
+}
+
+
 =head2 detach
 
 detach to other controller
 
 =cut
 sub detach {
+    my($c, $url) = @_;
+    my($package, $filename, $line) = caller;
+    $c->stats->profile(comment => 'detached to '.$url.' from '.$package.':'.$line);
     # errored flag is set in error controller to avoid recursion if error controller
     # itself throws an error, just bail out in that case
-    if(!$_[0]->{'errored'} && $_[1] =~ m|/error/index/(\d+)$|mx) {
-        Thruk::Controller::error::index($_[0], $1);
+    if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
+        Thruk::Controller::error::index($c, $1);
         return;
     }
-    confess("detach: ".$_[1]." at ".$_[0]->req->url);
+    confess("detach: ".$url." at ".$c->req->url);
 }
 
 =head2 render
@@ -287,7 +354,7 @@ sub url_with {
 
 =head2 translate_request_path
 
-    translate_request_path(<path_info>, $config)
+    translate_request_path(<path_info>, $config, $env)
 
 translate paths, /naemon/cgi-bin to /thruk/cgi-bin/
 or /<omd-site/thruk/cgi-bin/... to /thruk/cgi-bin/...
@@ -296,7 +363,11 @@ regardless of the deployment path.
 
 =cut
 sub translate_request_path {
-    my($path_info, $config) = @_;
+    my($path_info, $config, $env) = @_;
+
+    if($path_info =~ m%^/?$%mx && $env->{'SCRIPT_NAME'} && $env->{'SCRIPT_NAME'} =~ m%/thruk/cgi\-bin/remote\.cgi(/r/.*)$%mx) {
+        $path_info = '/thruk'.$1;
+    }
     my $product_prefix = $config->{'product_prefix'};
     if($ENV{'OMD_SITE'}) {
         $path_info =~ s|^/\Q$ENV{'OMD_SITE'}\E/|/|mx;
@@ -318,6 +389,64 @@ $c->has_route(<url>)
 sub has_route {
     my($c, $url) = @_;
     return(defined $c->app->{'routes'}->{$url});
+}
+
+=head2 sub_request
+
+$c->sub_request(<url>, [<method>], [<postdata>], [<rendered>])
+
+=cut
+sub sub_request {
+    my($c, $url, $method, $postdata, $rendered) = @_;
+    $method = 'GET' unless $method;
+    $method = uc($method);
+    my $orig_url = $url;
+    $c->stats->profile(begin => "sub_request: ".$method." ".$orig_url);
+    local $Thruk::Request::c = $c unless $Thruk::Request::c;
+
+    $url = '/thruk'.$url;
+    my $query;
+    ($url, $query) = split(/\?/mx, $url, 2);
+    my $env = {
+        'PATH_INFO'           => $url,
+        'REQUEST_METHOD'      => $method,
+        'REQUEST_URI'         => $url,
+        'SCRIPT_NAME'         => '',
+        'QUERY_STRING'        => $query,
+
+        'REMOTE_ADDR'         => $c->env->{'REMOTE_ADDR'},
+        'REMOTE_HOST'         => $c->env->{'REMOTE_HOST'},
+        'SERVER_PROTOCOL'     => $c->env->{'SERVER_PROTOCOL'},
+        'SERVER_PORT'         => $c->env->{'SERVER_PORT'},
+        'REMOTE_USER'         => $c->env->{'REMOTE_USER'},
+        'plack.cookie.parsed' => $c->env->{'plack.cookie.parsed'},
+        'plack.cookie.string' => $c->env->{'plack.cookie.string'},
+    };
+    $env->{'plack.request.body_parameters'} = [%{$postdata}] if $postdata;
+    my $sub_c = Thruk::Context->new($c->app, $env);
+    $sub_c->{'user'}  = $c->user;
+
+    Thruk::Action::AddDefaults::begin($sub_c);
+    my $path_info = $sub_c->req->path_info;
+
+    my($route, $routename) = $c->app->find_route_match($c, $path_info);
+    confess("no route") unless $route;
+    $sub_c->{'rendered'} = 1 unless $rendered; # prevent json encoding, we want the data reference
+    $c->stats->profile(begin => $routename);
+    my $rc = &{$route}($sub_c, $path_info);
+    $c->stats->profile(end => $routename);
+    Thruk::Action::AddDefaults::end($sub_c);
+
+    local $Thruk::Request::c = undef;
+    Thruk::Views::ToolkitRenderer::render_tt($sub_c) unless $sub_c->{'rendered'};
+    $c->stats->profile(end => "sub_request: ".$method." ".$orig_url);
+    return $sub_c if $rendered;
+    return $rc;
+}
+
+sub _url_encode {
+    my($str) = @_;
+    return(uri_escape(uri_unescape($str)));
 }
 
 1;

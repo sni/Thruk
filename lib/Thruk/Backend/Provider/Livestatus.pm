@@ -26,6 +26,65 @@ $Thruk::Backend::Provider::Livestatus::callbacks = {
                             'empty_callback' => sub { return '' },
 };
 
+$Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
+    accept_passive_checks acknowledged action_url action_url_expanded
+    active_checks_enabled address alias check_command check_freshness check_interval
+    check_options check_period check_type checks_enabled childs comments current_attempt
+    current_notification_number event_handler event_handler_enabled execution_time
+    custom_variable_names custom_variable_values
+    first_notification_delay flap_detection_enabled groups has_been_checked
+    high_flap_threshold icon_image icon_image_alt icon_image_expanded
+    is_executing is_flapping last_check last_notification last_state_change
+    latency low_flap_threshold max_check_attempts name
+    next_check notes notes_expanded notes_url notes_url_expanded notification_interval
+    notification_period notifications_enabled num_services_crit num_services_ok
+    num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
+    parents percent_state_change perf_data plugin_output process_performance_data
+    retry_interval scheduled_downtime_depth state state_type modified_attributes_list
+    last_time_down last_time_unreachable last_time_up display_name
+    in_check_period in_notification_period
+/];
+$Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
+    contacts contact_groups
+/];
+
+$Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
+    accept_passive_checks acknowledged action_url action_url_expanded
+    active_checks_enabled check_command check_interval check_options
+    check_period check_type checks_enabled comments current_attempt
+    current_notification_number description event_handler event_handler_enabled
+    custom_variable_names custom_variable_values
+    execution_time first_notification_delay flap_detection_enabled groups
+    has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
+    host_active_checks_enabled host_address host_alias host_checks_enabled host_check_type
+    host_latency host_plugin_output host_perf_data host_current_attempt host_check_command
+    host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
+    host_is_executing host_is_flapping host_name host_notes_url_expanded
+    host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
+    host_last_state_change
+    icon_image icon_image_alt icon_image_expanded is_executing is_flapping
+    last_check last_notification last_state_change latency
+    low_flap_threshold max_check_attempts next_check notes notes_expanded
+    notes_url notes_url_expanded notification_interval notification_period
+    notifications_enabled obsess_over_service percent_state_change perf_data
+    plugin_output process_performance_data retry_interval scheduled_downtime_depth
+    state state_type modified_attributes_list
+    last_time_critical last_time_ok last_time_unknown last_time_warning
+    display_name host_display_name host_custom_variable_names host_custom_variable_values
+    in_check_period in_notification_period host_parents
+/];
+$Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
+    contacts contact_groups
+/];
+
+$Thruk::Backend::Provider::Livestatus::default_contact_columns = [qw/
+    name alias email pager service_notification_period host_notification_period
+/];
+
+$Thruk::Backend::Provider::Livestatus::default_logs_columns = [qw/
+    class time type state host_name service_description plugin_output message options state_type contact_name
+/];
+
 ##########################################################
 
 =head2 new
@@ -34,7 +93,7 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config ) = @_;
+    my($class, $peer_config, $config, undef, undef, $thruk_config) = @_;
 
     die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
@@ -43,6 +102,7 @@ sub new {
         'config'               => $config,
         'naemon_optimizations' => 0,
         'lmd_optimizations'    => 0,
+        'fetch_command'        => $config->{'logcache_fetchlogs_command'} || $thruk_config->{'logcache_fetchlogs_command'},
     };
     bless $self, $class;
 
@@ -113,7 +173,8 @@ send a raw query to the backend
 =cut
 sub _raw_query {
     my($self, $query) = @_;
-    my $socket = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
+    my($socket, $msg, undef) = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
+    die($msg) if $msg;
     local $/ = undef;
     my $res = <$socket>;
     $self->{'live'}->{'backend_obj'}->_close();
@@ -169,6 +230,10 @@ sub get_processinfo {
             }
             if($ENV{'THRUK_USE_LMD'} && $ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.0')) {
                 push @{$options{'columns'}}, 'configtool';
+            }
+            if($ENV{'THRUK_USE_LMD'}) {
+                push @{$options{'columns'}}, 'peer_name';
+                push @{$options{'columns'}}, 'peer_addr';
             }
         }
 
@@ -312,24 +377,7 @@ sub get_hosts {
     }
 
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            accept_passive_checks acknowledged action_url action_url_expanded
-            active_checks_enabled address alias check_command check_freshness check_interval
-            check_options check_period check_type checks_enabled childs comments current_attempt
-            current_notification_number event_handler event_handler_enabled execution_time
-            custom_variable_names custom_variable_values
-            first_notification_delay flap_detection_enabled groups has_been_checked
-            high_flap_threshold icon_image icon_image_alt icon_image_expanded
-            is_executing is_flapping last_check last_notification last_state_change
-            latency low_flap_threshold max_check_attempts name
-            next_check notes notes_expanded notes_url notes_url_expanded notification_interval
-            notification_period notifications_enabled num_services_crit num_services_ok
-            num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
-            parents percent_state_change perf_data plugin_output process_performance_data
-            retry_interval scheduled_downtime_depth state state_type modified_attributes_list
-            last_time_down last_time_unreachable last_time_up display_name
-            in_check_period in_notification_period
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_host_columns}];
         if($options{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem realm poller_tag
                                              got_business_rule parent_dependencies/;
@@ -501,31 +549,7 @@ sub get_services {
     }
 
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            accept_passive_checks acknowledged action_url action_url_expanded
-            active_checks_enabled check_command check_interval check_options
-            check_period check_type checks_enabled comments current_attempt
-            current_notification_number description event_handler event_handler_enabled
-            custom_variable_names custom_variable_values
-            execution_time first_notification_delay flap_detection_enabled groups
-            has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
-            host_active_checks_enabled host_address host_alias host_checks_enabled host_check_type
-            host_latency host_plugin_output host_perf_data host_current_attempt host_check_command
-            host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
-            host_is_executing host_is_flapping host_name host_notes_url_expanded
-            host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
-            host_last_state_change
-            icon_image icon_image_alt icon_image_expanded is_executing is_flapping
-            last_check last_notification last_state_change latency
-            low_flap_threshold max_check_attempts next_check notes notes_expanded
-            notes_url notes_url_expanded notification_interval notification_period
-            notifications_enabled obsess_over_service percent_state_change perf_data
-            plugin_output process_performance_data retry_interval scheduled_downtime_depth
-            state state_type modified_attributes_list
-            last_time_critical last_time_ok last_time_unknown last_time_warning
-            display_name host_display_name host_custom_variable_names host_custom_variable_values
-            in_check_period in_notification_period host_parents
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_service_columns}];
 
         if($options{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem poller_tag
@@ -748,11 +772,6 @@ sub get_logs {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
-    # optimized naemon with wrapped_json output
-    if($self->{'naemon_optimizations'}) {
-        $self->_optimized_for_wrapped_json(\%options, "log");
-        #&timing_breakpoint('optimized get_logs') if $self->{'optimized'};
-    }
     # try to reduce the amount of transfered data
     my($size, $limit);
     if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'}) {
@@ -763,21 +782,24 @@ sub get_logs {
         }
     }
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            class time type state host_name service_description plugin_output message options state_type contact_name
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_logs_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
 
-    my @logs = reverse @{$self->_get_table('log', \%options)};
-    unless(wantarray) {
-        confess("get_logs() should not be called in scalar context when not used with file option");
+    if(!wantarray && !$options{'file'}) {
+        confess("get_logs() should not be called in scalar context unless using the file option");
     }
 
-    return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
-    return(\@logs, undef, $size);
+    my $logs;
+    if($self->{'fetch_command'}) {
+        return($self->_fetchlogs_external_command(\%options));
+    }
+
+    $logs = [reverse @{$self->_get_table('log', \%options)}];
+    return(Thruk::Utils::IO::save_logs_to_tempfile($logs), 'file') if $options{'file'};
+    return($logs, undef, $size);
 }
 
 
@@ -878,9 +900,7 @@ sub get_contacts {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            name alias email pager service_notification_period host_notification_period
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_contact_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
@@ -1444,6 +1464,19 @@ sub _get_query_size {
 
 ##########################################################
 
+=head2 get_logs_start_end
+
+  get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub get_logs_start_end {
+    return(_get_logs_start_end(@_));
+}
+
+##########################################################
+
 =head2 _get_logs_start_end
 
   _get_logs_start_end
@@ -1453,6 +1486,25 @@ returns the min/max timestamp for given logs
 =cut
 sub _get_logs_start_end {
     my($self, %options) = @_;
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
+        $options{'collection'} = 'logs_'.$self->peer_key();
+        return $self->{'_peer'}->logcache->_get_logs_start_end(%options);
+    }
+    if(!$options{'filter'} || scalar @{$options{'filter'}} == 0) {
+        # not a good idea, try to assume earliest date without parsing all logfiles
+        my($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($self);
+        return([$start, $end]);
+    }
+
+    if($self->{'fetch_command'}) {
+        my($logs) = ($self->_fetchlogs_external_command(\%options));
+        if(scalar @{$logs} > 0) {
+            my $start = $logs->[0]->{'time'};
+            my $end   = $logs->[scalar @{$logs}-1]->{'time'};
+            return([$start, $end]);
+        }
+    }
+
     my $class = $self->_get_class('log', \%options);
     my $rows  = $class->stats([ 'start' => { -isa => [ -min => 'time' ]},
                                 'end'   => { -isa => [ -max => 'time' ]},
@@ -1563,6 +1615,59 @@ sub _optimized_for_wrapped_json {
     }
     $self->{'optimized'} = 1;
     return;
+}
+
+##########################################################
+sub _fetchlogs_external_command {
+    my($self, $options) = @_;
+
+    my($start, $end);
+    if($options->{'filter'} && scalar @{$options->{'filter'}} == 1 && scalar keys %{$options->{'filter'}->[0]} == 1 && $options->{'filter'}->[0]->{'-and'}) {
+        $options->{'filter'}->[0] = $options->{'filter'}->[0]->{'-and'};
+    }
+    while($options->{'filter'} && ref($options->{'filter'}) eq 'ARRAY' && scalar @{$options->{'filter'}} == 1 && ref($options->{'filter'}->[0]) eq 'ARRAY') {
+        $options->{'filter'} = $options->{'filter'}->[0];
+    }
+    for my $f (@{$options->{'filter'}}) {
+        for my $key (keys %{$f}) {
+            confess("unsupported filter: ".$key.Dumper($options)) if $key ne 'time';
+            for my $op (keys %{$f->{$key}}) {
+                if($op eq '<=') {
+                    if($end) { confess("duplicate end filter"); }
+                    $end   = $f->{$key}->{$op};
+                }
+                elsif($op eq '>=') {
+                    if($start) { confess("duplicate start filter"); }
+                    $start = $f->{$key}->{$op};
+                } else {
+                    confess("unsupported operator: ".$op);
+                }
+            }
+        }
+    }
+
+    local $ENV{'THRUK_BACKEND'} = $self->{'id'};
+    local $ENV{'THRUK_LOGCACHE_LIMIT'} = $options->{'options'}->{'limit'} if $options->{'options'}->{'limit'};
+    local $ENV{'THRUK_LOGCACHE_START'} = $start if $start;
+    local $ENV{'THRUK_LOGCACHE_END'}   = $end if $end;
+
+    require File::Temp;
+    my($fh, $filename) = File::Temp::tempfile();
+    my $cmd = $self->{'fetch_command'}.' > '.$filename;
+    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    if($rc != 0) {
+        die("fetchlogs cmd failed, rc ".$rc.": ".$cmd."\n".$output);
+    }
+    if($options->{'file'}) {
+        return($filename, 'file');
+    }
+
+    require Monitoring::Availability::Logs;
+    my $logstore = Monitoring::Availability::Logs->new(log_file => $filename);
+    my $logs = $logstore->get_logs();
+    unlink($filename);
+
+    return($logs, undef, scalar @{$logs});
 }
 
 ##########################################################

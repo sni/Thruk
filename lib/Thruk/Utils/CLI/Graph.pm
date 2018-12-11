@@ -118,15 +118,15 @@ sub cmd {
     }
 
     # create new image
-    my $img = Thruk::Utils::get_perf_image($c,
-                                           $opt->{'host'},
-                                           $opt->{'service'},
-                                           $start,
-                                           $end,
-                                           $width,
-                                           $height,
-                                           $opt->{'source'},
-                                        );
+    my $img = Thruk::Utils::get_perf_image($c, {
+            host    => $opt->{'host'},
+            service => $opt->{'service'},
+            start   => $start,
+            end     => $end,
+            width   => $width,
+            height  => $height,
+            source  => $opt->{'source'},
+    });
     if(!$img) {
         _debug("could not export any image, check if the host/service has a valid graph url.");
         return("", 1);

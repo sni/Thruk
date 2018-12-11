@@ -58,8 +58,21 @@ var searchStore = Ext.create('Ext.data.Store', {
             if(type == 'parent') {
                 type = 'host';
             }
-            if(type == 'host' || type == 'service' || type == 'hostgroup' || type == 'servicegroup' || type == 'timeperiod' || type == 'site' || type == 'contactgroup') {
+            if(  type == 'host'
+              || type == 'service'
+              || type == 'hostgroup'
+              || type == 'servicegroup'
+              || type == 'timeperiod'
+              || type == 'site'
+              || type == 'contactgroup'
+              || type == 'eventhandler'
+              || type == 'custom variable'
+              || type == 'custom value'
+            ) {
                 store.proxy.extraParams['type'] = type;
+                if(type == 'custom value') {
+                    store.proxy.extraParams['var'] = searchStore.pre_val;
+                }
             } else {
                 store.removeAll();
                 debug("type: "+type+" not supported");
@@ -113,7 +126,7 @@ Ext.define('TP.formFilterSelect', {
         store:          getFilterTypeOptions(),
         tpl: '<ul class="' + Ext.plainListCls + '"><tpl for=".">'
             +'<tpl if="field1 == \'----------------\'">'
-            +'<li class="item-disabled">'
+            +'<li class="x-boundlist-item item-disabled">'
             +'<tpl else>'
             +'<li class="x-boundlist-item" unselectable="on">'
             +'</tpl>'
@@ -126,7 +139,7 @@ Ext.define('TP.formFilterSelect', {
         }
     }, {
         name:           'val_pre',
-        xtype:          'textfield',
+        xtype:          'combobox',
         width:          100,
         value:          [],
         tooltip:        'Name of the custom variable. e.x: VAR1 (without the underline)',
@@ -182,24 +195,35 @@ Ext.define('TP.formFilterSelect', {
         selectOnFocus:  true,
         typeAhead:      true,
         minChars:       0,
+        displayField:   'text',
+        valueField:     'value',
         listeners: {
             'expand': function(field, eOpts) {
-                if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
-                    searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                var search_type = this.up('panel').items.getAt(0).getValue().toLowerCase();
+                searchStore.pre_val = this.up('panel').items.getAt(1).getValue();
+                if(search_type == "custom variable") { search_type = "custom value"; }
+                if(searchStore.search_type != search_type) {
+                    searchStore.search_type = search_type;
                     searchStore.panel       = this.up().panel;
                     searchStore.load();
                 }
             },
             'change': function(This, newValue, oldValue, eOpts) {
-                if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
-                    searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                var search_type = this.up('panel').items.getAt(0).getValue().toLowerCase();
+                searchStore.pre_val = this.up('panel').items.getAt(1).getValue();
+                if(search_type == "custom variable") { search_type = "custom value"; }
+                if(searchStore.search_type != search_type) {
+                    searchStore.search_type = search_type;
                     searchStore.panel       = this.up().panel;
                     searchStore.load();
                 }
             },
             'keyup': function() {
-                if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
-                    searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                var search_type = this.up('panel').items.getAt(0).getValue().toLowerCase();
+                searchStore.pre_val = this.up('panel').items.getAt(1).getValue();
+                if(search_type == "custom variable") { search_type = "custom value"; }
+                if(searchStore.search_type != search_type) {
+                    searchStore.search_type = search_type;
                     searchStore.panel       = this.up().panel;
                     searchStore.load();
                 }
@@ -240,6 +264,9 @@ Ext.define('TP.formFilterSelect', {
     /* check datetime or input field */
     check_changed: function(v) {
         if(!this.items.getAt(1).rendered || !this.items.getAt(3).rendered || !this.items.getAt(4).rendered) {
+            return;
+        }
+        if(v.match("-----")) {
             return;
         }
         v = v.toLowerCase();

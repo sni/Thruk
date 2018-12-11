@@ -95,7 +95,7 @@ function remove_conf_attribute(key, nr) {
 function init_conf_tool_buttons() {
     jQuery('INPUT.conf_button').button();
     jQuery('BUTTON.conf_button').button();
-    jQuery('.radioset').buttonset();
+    jQuery('.radioset').controlgroup();
 
     jQuery('.conf_save_button').button({
         icons: {primary: 'ui-save-button'}
@@ -121,6 +121,13 @@ function init_conf_tool_buttons() {
     jQuery('.conf_next_button').button({
         icons: {primary: 'ui-r-arrow-button'}
     })
+
+    jQuery(".radio_on").checkboxradio({
+        icon: false
+    });
+    jQuery(".radio_off").checkboxradio({
+        icon: false
+    });
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}
@@ -218,8 +225,8 @@ function init_conf_tool_command_wizard(id) {
       .dialog({
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
-        width:       642,
-        position:   'top',
+        closeOnEscape: false,
+        width:       750,
         close:       function(event, ui) { do_command_line_updates=0; ajax_search.hide_results(undefined, 1); return true; }
     });
     jQuery('#' + id + 'accept').button({
@@ -241,7 +248,7 @@ function init_conf_tool_command_wizard(id) {
 
     last_cmd_name_value = '';
     do_command_line_updates=1;
-    update_command_line(id, cmd_name);
+    update_command_line(id);
 
     return;
 }
@@ -295,23 +302,7 @@ function update_command_line(id) {
             token:   user_token
         },
         success: function(data) {
-            hideElement(id + 'wait');
-            var cmd_line = data[0].cmd_line;
-            for(var nr=1;nr<=100;nr++) {
-                var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
-                cmd_line = cmd_line.replace(regex, "<\/td><td><input type='text' id='"+id+"arg"+nr+"' class='cmd_line_inp_wzd "+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1&plugin=', append_value_of:'"+id+"inp_command', hideempty:true, list:'[ =\\\']'})\" onkeyup='update_other_inputs(this)'><\/td><td>");
-            }
-
-            cmd_line = cmd_line.replace(/\ \-/g, "<\/td><\/tr><\/table><table class='command_line_wzd'><tr><td>-");
-            cmd_line = "<table class='command_line_wzd first'><tr><td>"+cmd_line+"<\/td><\/tr><\/table>"
-            cmd_line = cmd_line.replace(/<td>\s*<\/td>/g, "");
-            document.getElementById(id + 'command_line').innerHTML = cmd_line;
-
-            // now set the values to avoid escaping
-            for(var nr=1;nr<=100;nr++) {
-                jQuery('.'+id+'arg'+nr).val(args[nr-1]);
-            }
-
+            updateCommandLine(id, data[0].cmd_line, args);
             close_accordion();
         },
         error: function() {
@@ -321,6 +312,32 @@ function update_command_line(id) {
     });
 
     window.setTimeout("update_command_line('"+id+"')", 300);
+}
+
+function updateCommandLine(id, cmd_line, args, disabled) {
+    hideElement(id + 'wait');
+    for(var nr=1;nr<=100;nr++) {
+        var tr = "";
+        if(nr > 0 && nr%3 == 0) {
+            tr = '<\/tr><tr>';
+        }
+        var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
+        cmd_line = cmd_line.replace(regex, "<\/td><td><input type='text' id='"+id+"arg"+nr+"' class='cmd_line_inp_wzd "+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1&plugin=', append_value_of:'"+id+"inp_command', hideempty:true, list:'[ =\\\']'})\" onkeyup='update_other_inputs(this)'><\/td>"+tr+"<td>");
+    }
+
+    cmd_line = cmd_line.replace(/(\ |\n)\-/g, "<\/td><\/tr><\/table><table class='command_line_wzd'><tr><td>-");
+    cmd_line = "<table class='command_line_wzd first'><tr><td>"+cmd_line+"<\/td><\/tr><\/table>"
+    cmd_line = cmd_line.replace(/<td>\s*<\/td>/g, "");
+    document.getElementById(id + 'command_line').innerHTML = cmd_line;
+
+    // now set the values to avoid escaping
+    for(var nr=1;nr<=100;nr++) {
+        if(disabled) {
+            jQuery('.'+id+'arg'+nr).val("$ARG"+nr+"$").attr("disabled", true);
+        } else {
+            jQuery('.'+id+'arg'+nr).val(args[nr-1]);
+        }
+    }
 }
 
 function collect_args(id) {
@@ -361,8 +378,9 @@ function init_conf_tool_plugin_wizard(id) {
     var cmd_line   = document.getElementById(cmd_inp_id).value;
     document.getElementById(id + "inp_args").value = '';
     var index = cmd_line.indexOf(" ");
+    var args;
     if(index != -1) {
-        var args = cmd_line.substr(index + 1);
+        args = cmd_line.substr(index + 1);
         // format args nicely
         args = args.replace(/\s+(\-|>)/g, "\n    $1");
         document.getElementById(id + "inp_args").value = args;
@@ -374,9 +392,9 @@ function init_conf_tool_plugin_wizard(id) {
       .dialog({
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
+        closeOnEscape: false,
         width:       'auto',
         maxWidth:    1024,
-        position:    'top',
         close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
     });
     jQuery('#' + id + 'accept').button({
@@ -394,10 +412,20 @@ function init_conf_tool_plugin_wizard(id) {
     });
 
     init_plugin_help_accordion(id);
+    update_command_preview(id);
 
     $d.dialog('open');
 
     return;
+}
+
+function update_command_preview(id) {
+    id = id.replace(/_$/, '')+"_";
+    var cmd_line = document.getElementById(id+'inp_plugin').value;
+    if(document.getElementById(id+'inp_args').value != '') {
+        cmd_line = cmd_line + " " + document.getElementById(id+'inp_args').value
+    }
+    updateCommandLine(id, cmd_line, [], true);
 }
 
 var $accordion;

@@ -93,6 +93,13 @@ $Monitoring::Config::Object::Service::ShinkenSpecific = {
     'host_dependency_enabled'      => { type => 'BOOL', cat => 'Extended' },
 };
 
+# Icinga specific things
+$Monitoring::Config::Object::Service::IcingaSpecific = {
+    'is_volatile'                  => { type => 'CHOOSE', values => ['0','1','2'], keys => [ '0', '1', '2' ], cat => 'Extended' },
+};
+$Monitoring::Config::Object::Service::Restore = {};
+
+
 $Monitoring::Config::Object::Service::primary_keys  = [ 'service_description', [ 'host_name', 'hostgroup_name' ] ];
 $Monitoring::Config::Object::Service::standard_keys = [ 'service_description', 'use', 'host_name', 'check_command', 'contact_groups' ];
 
@@ -117,6 +124,16 @@ sub BUILD {
         } else {
             for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
                 delete $Monitoring::Config::Object::Service::Defaults->{$key};
+            }
+        }
+        if($coretype eq 'any' or $coretype eq 'icinga') {
+            for my $key (keys %{$Monitoring::Config::Object::Service::IcingaSpecific}) {
+                $Monitoring::Config::Object::Service::Restore->{$key}  = $Monitoring::Config::Object::Service::Defaults->{$key} unless $Monitoring::Config::Object::Service::Restore->{$key};
+                $Monitoring::Config::Object::Service::Defaults->{$key} = $Monitoring::Config::Object::Service::IcingaSpecific->{$key};
+            }
+        } else {
+            for my $key (keys %{$Monitoring::Config::Object::Service::Restore}) {
+                $Monitoring::Config::Object::Service::Defaults->{$key} = $Monitoring::Config::Object::Service::Restore->{$key};
             }
         }
         $Monitoring::Config::Object::Service::defaults_cleaned = $coretype;

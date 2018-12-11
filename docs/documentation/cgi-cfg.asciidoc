@@ -10,7 +10,7 @@ The cgi.cfg is mainly the same as in Nagios or Icinga but not all
 values are used.
 
 
-=== show_context_help
+== show_context_help
 Displays an icon with context specific help on most pages.
 
 ex.:
@@ -18,7 +18,7 @@ ex.:
   show_context_help = 1
 
 
-=== use_authentication
+== use_authentication
 Determines whether to use authentication or not. If enabled, Thruk will
 use the REMOTE_USER from the apache environment as authenticated user
 name. So the authentication has to be done by the webserver.
@@ -29,7 +29,7 @@ ex.:
   use_authentication = 1
 
 
-=== use_ssl_authentication
+== use_ssl_authentication
 If enabled, the authenticated username is taken from the
 SSL_CLIENT_S_DN_CN environment instead of the remote user.
 
@@ -38,13 +38,70 @@ ex.:
   use_ssl_authentication = 1
 
 
-=== default_user_name
+== default_user_name
 The default user will be used if no username has been provided by the
 webserver. You don't have to set a default user.
 
 ex.:
 
   default_user_name = thrukadmin
+
+=== refresh_rate
+Number of seconds after which most pages are refreshed automatically.
+
+ex.:
+
+  refresh_rate = 90
+
+
+=== escape_html_tags
+Determines whether html output from plugins is escaped or not.
+
+ex.:
+
+  escape_html_tags = 1
+
+
+=== action_url_target
+Sets the target of the action url links.
+
+ex.:
+
+  action_url_target = _blank
+
+
+=== notes_url_target
+Sets the target of the notes url links.
+
+ex.:
+
+  notes_url_target = _blank
+
+
+=== lock_author_names
+If enabled, user are not allowed to change the author name for
+commands.
+
+ex.:
+
+  lock_author_names = 1
+
+== roles
+
+There are several roles available through the `authorized_for_` options. Each
+role can also be assigned with the coresponding contact_group option `authorized_contactgroup_for_`.
+
+You can use the the `*` asterix to assign everyone to a certain role.
+
+=== authorized_for_admin
+List of usernames who have privileged access to everything. These contacts will
+receive all other roles except the read_only role.
+
+You may use wildcards here.
+
+ex.:
+
+  authorized_for_admin = thrukadmin
 
 
 === authorized_for_system_information
@@ -114,42 +171,38 @@ ex.:
   authorized_for_all_host_commands = thrukadmin
 
 
-=== refresh_rate
-Number of seconds after which most pages are refreshed automatically.
+=== authorized_for_broadcasts
+A comma-delimited list of usernames that can manage broadcasts.
 
 ex.:
 
-  refresh_rate = 90
+  authorized_for_broadcasts = thrukadmin
 
 
-=== escape_html_tags
-Determines whether html output from plugins is escaped or not.
-
-ex.:
-
-  escape_html_tags = 1
-
-
-=== action_url_target
-Sets the target of the action url links.
+=== authorized_for_business_processes
+A comma-delimited list of usernames that have the permission to create and
+edit business processes.
 
 ex.:
 
-  action_url_target = _blank
+  authorized_for_business_processes = thrukadmin
 
 
-=== notes_url_target
-Sets the target of the notes url links.
-
-ex.:
-
-  notes_url_target = _blank
-
-
-=== lock_author_names
-If enabled, user are not allowed to change the author name for
-commands.
+=== authorized_for_reports
+A comma-delimited list of usernames that have full access to the reporting
+feature.
 
 ex.:
 
-  lock_author_names = 1
+  authorized_for_reports = thrukadmin
+
+
+=== authorized_for_read_only
+A comma-delimited list of usernames that have read-only rights in
+the CGIs.  This will block any service or host commands normally shown
+on the extinfo CGI pages. It will also block comments from being shown
+to read-only users.
+
+ex.:
+
+  authorized_for_read_only = viewer

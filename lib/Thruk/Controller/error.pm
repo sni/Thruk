@@ -56,7 +56,6 @@ sub index {
     } else {
         $c->stash->{'remote_user'}  = '?';
     }
-    $c->stash->{errorDetails} .= sprintf("User: %s\n", $c->stash->{'remote_user'});
 
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
@@ -227,16 +226,17 @@ sub index {
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500) {
+            $c->log->error("***************************");
             $c->log->error($errors->{$arg1}->{'mess'});
-            $c->log->error("on page: ".$c->req->url) if defined $c->req->url;
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
                 }
             }
+            $c->log->error(sprintf("on page: %s\n", $c->req->url)) if defined $c->req->url;
+            $c->log->error(sprintf("User: %s\n", $c->stash->{'remote_user'}));
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
-            $c->log->debug("on page: ".$c->req->url) if defined $c->req->url;
         }
     }
 
@@ -267,6 +267,20 @@ sub index {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
+    # return errer as json for rest api calls
+    if($c->req->path_info =~ m%^/thruk/r/%mx || $c->req->header('X-Thruk-Auth-Key')) {
+        if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 2) {
+            cluck($c->stash->{errorMessage});
+        }
+        return $c->render(json => {
+            failed      => Cpanel::JSON::XS::true,
+            message     => $c->stash->{errorMessage},
+            details     => $c->stash->{errorDetails},
+            description => $c->stash->{errorDescription},
+            code        => $code,
+        });
+    }
+
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         Thruk::Utils::CLI::_error($c->stash->{errorMessage});
         Thruk::Utils::CLI::_error($c->stash->{errorDescription});
@@ -291,6 +305,18 @@ sub index {
     $c->res->headers->last_modified(time);
     $c->res->headers->expires(time - 3600);
     $c->res->headers->header(cache_control => "public, max-age=0");
+
+    # return error as json
+    if($c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
+        return $c->render(json => {
+            failed      => Cpanel::JSON::XS::true,
+            error       => $c->stash->{errorMessage},
+            details     => $c->stash->{errorDetails},
+            description => $c->stash->{errorDescription},
+            code        => $code,
+        });
+    }
+
     $c->{'rendered'} = 0; # force rerendering
     return 1;
 }

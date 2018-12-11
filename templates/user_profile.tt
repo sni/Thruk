@@ -16,10 +16,12 @@
   </tr>
 </table>
 
-<form action="" method="GET">
+<form action="user.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+<input type="hidden" name="action" value="save">
   <div align="center">
   <div style="width: 600px; position: relative;">
-  <button class="thruk_button_save" style="position: absolute; right: 0; top: -25px; display: none;">Save changes</button>
+  <button class="thruk_button thruk_button_save" style="position: absolute; right: 0; top: -30px;">Save changes</button>
   <table border="0" class='data conftooluserprofile' style="width:600px;">
     <tr><th colspan=2 class='data conftoolheader' style="text-align:center">User Information</th></tr>
     <tr>
@@ -28,11 +30,29 @@
     </tr>
     <tr>
       <td class='dataVar'>Contactgroups</td>
-      <td class='dataVal' style="white-space: normal;">[% IF contactgroups.size > 0; contactgroups.sort.join('<br>'); ELSE %]&lt;none&gt;[% END %]</td>
+      <td class='dataVal' style="white-space: normal;">[% IF profile_user.groups.size > 0; profile_user.groups.keys.sort.join('<br>'); ELSE %]&lt;none&gt;[% END %]</td>
     </tr>
     <tr>
-      <td class='dataVar'>Roles</td>
-      <td class='dataVal' style="white-space: normal;">[% c.user.roles.sort.join('<br>') %]</td>
+      <td class='dataVar'>Effective Roles</td>
+      <td class='dataVal' style="white-space: normal;">
+        [% PROCESS _user_roles.tt %]
+      </td>
+    </tr>
+    <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
+    <tr><th colspan=2 class='data conftoolheader' style="text-align:center">Timezone</th></tr>
+    <tr>
+      <td class='dataVar'>Set Timezone</td>
+      <td class='dataVal'>
+        <select name="timezone" style="float: left; margin-right: 15px;">
+          [% FOR tz = timezones %]
+          <option value="[% tz.text %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text %]</option>
+          [% END %]
+        </select>
+        <div>
+          <span>Server: <span id="server_tz">[% c.config._server_timezone %]</span></span><br>
+          <span>Browser: <span id="browser_tz"></span></span>
+        </div>
+      </td>
     </tr>
     [% IF c.config.exists('use_feature_configtool') && c.config.use_feature_configtool && !c.config.disable_user_password_change %]
     <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
@@ -46,23 +66,74 @@
     [% END %]
 
     <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
+    <tr><th colspan=2 class='data conftoolheader' style="text-align:center">API Keys</th></tr>
+    [% IF !c.config.api_keys_enabled %]
+    <tr>
+      <td class='dataVar'></td>
+      <td class='dataVal'>
+        API keys have to be enabled in the thruk_local.conf via <i>api_keys_enabled=1</i>
+      </td>
+    </tr>
+    [% ELSE %]
+    [% IF api_keys.size > 0 %]
+    <tr>
+      <td class='dataVal' colspan="2">
+        <table style="width: 100%;">
+          <tr>
+            <th>Key</th>
+            <th>Comment</th>
+            <th>Last Used</th>
+            <th>From</th>
+            <th></th>
+          </tr>
+          [% FOREACH key = api_keys %]
+          <tr>
+            <td>[% key.key %]</td>
+            <td>[% IF key.exists('comment') %][% key.comment %][% END %]</td>
+            <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %][% ELSE %]never[% END %]</td>
+            <td>[% IF key.exists('last_from') %][% key.last_from %][% END %]</td>
+            <td>
+              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?key=[% key.key %]&amp;action=remove_key'; return false;" title='Remove API Key'>
+            </td>
+          </tr>
+          [% END %]
+        </table>
+      </td>
+    </tr>
+    [% END %]
+    <tr>
+      <td class='dataVar'></td>
+      <td class='dataVal'>
+        <input type="text" name="comment" value="" placeholder="comment" style="width: 307px;">
+        <input type="submit" name="send" value="Create New API Key">
+      </td>
+    </tr>
+    [% END %]
+
+    <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
     <tr><th colspan=2 class='data conftoolheader' style="text-align:center">Advanced Settings</th></tr>
     <tr>
       <td class='dataVar'>Debug Profiles</td>
     <td class='dataVal'>
-      [% IF user_profiling %]
-      <img src="[% url_prefix %]themes/[% theme %]/images/detail.gif" alt="disable debug profiles" width=16 height=16 style="vertical-align:top;">
-      <input type="button" name="submit" value="Disable Debug Profiling for this User" onClick="cookieRemove('thruk_profiling'); return reloadPage();">
-      [% ELSE %]
-      <img src="[% url_prefix %]themes/[% theme %]/images/detail.gif" alt="enable debug profiles" width=16 height=16 style="vertical-align:top;">
-      <input type="button" name="submit" value="Enable Debug Profiling for this User" onClick="cookieSave('thruk_profiling', 1, 0); return reloadPage();">
-      (current session only)
-      [% END %]
+      <img src="[% url_prefix %]themes/[% theme %]/images/detail.gif" alt="debug profiles" width=16 height=16 style="vertical-align:top;">
+      <input type="radio" name="submit" value="0" onClick="cookieRemove('thruk_profiling'); thruk_message(0, 'profiling disabled');" [% IF !user_profiling %] checked[% END %]> Off
+      <input type="radio" name="submit" value="1" onClick="cookieSave('thruk_profiling', 1, 0); thruk_message(0, 'profiling enabled');" [% IF user_profiling == 1 %] checked[% END %] style="margin-left: 20px;"> On
+      <input type="radio" name="submit" value="2" onClick="cookieSave('thruk_profiling', 2, 0); thruk_message(0, 'profiling enabled with stacktraces');" [% IF user_profiling == 2 %] checked[% END %] style="margin-left: 20px;"> Incl. Stacktrace
+      <br>(current browser session only)
       </td>
     </tr>
   </table>
 </div>
 </div>
 </form>
+
+<script type="text/javascript">
+  <!--
+  jQuery(function() {
+    var timezone = getBrowserTimezone();
+    jQuery('#browser_tz').html(timezone);
+  });
+  -->
+</script>
 
 [% PROCESS _footer.tt %]

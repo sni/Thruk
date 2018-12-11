@@ -141,13 +141,17 @@ TP.get_group_status = function(options) {
                 if(incl_hst && group.hosts.downtime_pending > 0)      { s = 4; hostProblem = true; downtime = true; }
                 break;
             default:
-                throw new Error("unhandled state: '"+order[x]+"'");
+                //throw new Error("unhandled state: '"+order[x]+"'");
                 break;
         }
         // first hit sets the current overall state
         if(s != undefined) {
             break;
         }
+    }
+
+    if(s == undefined) {
+        s = 3;
     }
 
     return({state: s, downtime: downtime, acknowledged: acknowledged, hostProblem: hostProblem });
@@ -214,8 +218,14 @@ TP.iconClickHandlerDo = function(id) {
 
 /* open link or special action for given link */
 TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions) {
+    if(!link) { return; }
     if(config       == undefined) { config       = {}; }
     if(extraOptions == undefined) { extraOptions = {}; }
+    if(typeof link === "function") {
+        var args = TP.getMenuArgs(panel, target, {menu_id: id, config: config, extraOptions: extraOptions });
+        link(args);
+        return;
+    }
     var special = link.match(/dashboard:\/\/(.+)$/);
     var action  = link.match(/server:\/\/(.+)$/);
     var menu    = link.match(/menu:\/\/(.+)$/);
@@ -288,32 +298,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         if(!menuData) {
             return(false);
         }
-        var autoOpen = false;
-        if(!Ext.isArray(menuData)) {
-            menuData = TP.parseActionMenuItems(menuData, id, panel, target, extraOptions);
-            autoOpen = true;
-        }
-        TP.suppressIconTip = true;
-        menu = Ext.create('Ext.menu.Menu', {
-            id: 'iconActionMenu',
-            items: menuData,
-            listeners: {
-                beforehide: function(This) {
-                    TP.suppressIconTip = false;
-                    This.destroy();
-                },
-                move: function(This, x, y) {
-                    // somehow menu is place offset, even if showBy is called, force the location to our aligned element
-                    This.showBy(extraOptions.alignTo || panel);
-                }
-            },
-            cls: autoOpen ? 'hidden' : ''
-        }).showBy(extraOptions.alignTo || panel);
-        if(autoOpen) {
-            link = menu.items.get(0);
-            link.fireEvent("click");
-            menu.hide();
-        }
+        TP.showIconMenu(menuData, id, panel, target, extraOptions);
         return(false);
     }
     if(link) {
@@ -357,29 +342,76 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
     return(true);
 };
 
+TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
+    if(menuData && menuData.then) {
+        menuData.then(function(items) {
+            var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions);
+            TP.showIconMenu(parsed, id, panel, target, extraOptions);
+            return(false);
+        });
+        return(false);
+    }
+    var autoOpen = false;
+    if(!Ext.isArray(menuData)) {
+        menuData = TP.parseActionMenuItems(menuData, id, panel, target, extraOptions);
+        autoOpen = true;
+    }
+    TP.suppressIconTip = true;
+    var menu = Ext.create('Ext.menu.Menu', {
+        id: 'iconActionMenu',
+        items: menuData,
+        listeners: {
+            beforehide: function(This) {
+                TP.suppressIconTip = false;
+                This.destroy();
+            },
+            move: function(This, x, y) {
+                // somehow menu is place offset, even if showBy is called, force the location to our aligned element
+                This.showBy(extraOptions.alignTo || panel);
+            }
+        },
+        cls: autoOpen ? 'hidden' : ''
+    }).showBy(extraOptions.alignTo || panel);
+    if(autoOpen) {
+        link = menu.items.get(0);
+        link.fireEvent("click");
+        menu.hide();
+    }
+    return(false);
+}
+
 /* parse action menu from json string data */
 TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
     var tmp = str.split(/\//);
     var menuName = tmp.shift();
     var menuArgs = tmp;
-    var menuRaw;
+    var menu;
     Ext.Array.each(action_menu_items, function(val, i) {
-        var name    = val[0];
-        if(name == menuName) {
-            menuRaw = val[1];
+        if(val.name == menuName) {
+            menu = val;
             return(false);
         }
     });
-    if(!menuRaw) {
+    if(!menu) {
         TP.Msg.msg("fail_message~~no such menu: "+str);
         return(false);
     }
     var menuData;
-    try {
-        menuData  = Ext.JSON.decode(menuRaw);
-    } catch(e) {
-        TP.Msg.msg("fail_message~~menu "+str+": failed to parse json - "+e);
-        return(false);
+    if(menu.type == "js" && menu["function"] && window[menu["function"]]) {
+        try {
+            var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions, args: menuArgs });
+            menuData = window[menu["function"]](args);
+        } catch(e) {
+            TP.Msg.msg("fail_message~~menu "+str+": failed to run js menu - "+e);
+            return(false);
+        }
+    } else {
+        try {
+            menuData  = Ext.JSON.decode(menu.data);
+        } catch(e) {
+            TP.Msg.msg("fail_message~~menu "+str+": failed to parse json - "+e);
+            return(false);
+        }
     }
     if(!menuData['menu']) {
         return(menuData);
@@ -388,6 +420,10 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
 }
 
 TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
+    if(typeof items === "function") {
+        var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions });
+        return(items(args));
+    }
     var menuItems = [];
     Ext.Array.each(items, function(i, x) {
         if(Ext.isString(i)) {
@@ -428,12 +464,62 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
                 menuItem.handler = handler;
             }
             menuItem.listeners = listeners;
+
+            if(i.html) {
+                menuItem.text = i.html;
+                menuItem.hideOnClick = false;
+                menuItem.disabled = true; // hack to prevent item stealing focus from input fields
+                menuItem.disabledCls = '';
+            }
+
+            // submenus?
+            if(i.menu) {
+                if(typeof i.menu === "function") {
+                    menuItem.menu = {
+                        items: [{
+                            text:    'Loading...',
+                            icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
+                            disabled: true
+                        }],
+                        listeners: {
+                            beforeshow: function(This, eOpts) {
+                                var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions });
+                                jQuery.when(i.menu(args)).then(function(items) {
+                                    var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions);
+                                    This.removeAll();
+                                    Ext.Array.each(parsed, function(i) {
+                                        This.add(i);
+                                    });
+                                })
+                            }
+                        }
+                    };
+                } else {
+                    menuItem.menu = {
+                        items: TP.parseActionMenuItems(i.menu, id, panel, target, extraOptions)
+                    }
+                }
+            }
+
             menuItems.push(menuItem);
         }
     });
     return(menuItems);
 }
 
+TP.getMenuArgs = function(panel, target, args) {
+    var tab      = Ext.getCmp(panel.panel_id);
+    args.panel   = panel;
+    args.target  = target;
+    args.backend = TP.getActiveBackendsPanel(tab);
+    args.host    = null;
+    args.service = null;
+    if(panel && panel.xdata && panel.xdata.general) {
+        args.host = panel.xdata.general.host;
+        args.service = panel.xdata.general.service;
+    }
+    return(args);
+}
 
 TP.iconClickHandlerClickLink = function(panel, link, target) {
     var oldOnClick=panel.el.dom.onclick;

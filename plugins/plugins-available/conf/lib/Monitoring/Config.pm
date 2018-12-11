@@ -228,13 +228,25 @@ sub commit {
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
-        $c->log->info("pre save hook: '" . $cmd . "', rc: " . $rc);
+        $c->log->debug("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('pre save hook out: '.$out);
             Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre_obj_save_cmd hook!\n".$out );
             return;
         }
         $c->log->debug('pre save hook out: '.$out);
+    }
+
+    # log stashed changes
+    if($self->{'logs'}) {
+        if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'}) {
+            my $uniq = {};
+            for my $l (@{$self->{'logs'}}) {
+                $c->audit_log($l) unless $uniq->{$l};
+                $uniq->{$l} = 1;
+            }
+        }
+        $self->{'logs'} = [];
     }
 
     my $files = { changed => [], deleted => []};
@@ -248,11 +260,11 @@ sub commit {
             $rc = 0;
         } else {
             # do some logging
-            $c->log->info(sprintf("[config][%s][%s] %s file '%s'",
+            $c->audit_log(sprintf("[config][%s][%s] %s file '%s'",
                                         $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
-                                        $file->{'path'},
+                                        $file->{'display'},
             )) if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'});
         }
         push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
@@ -265,10 +277,10 @@ sub commit {
             push @new_files, $f;
         } else {
             if($c && $f->{'deleted'}) {
-                $c->log->info(sprintf("[config][%s][%s] deleted file '%s'",
+                $c->audit_log(sprintf("[config][%s][%s] deleted file '%s'",
                                             $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
-                                            $f->{'path'},
+                                            $f->{'display'},
                 )) if $c;
             }
             push @{$files->{'deleted'}}, $f->{'display'};
@@ -293,7 +305,7 @@ sub commit {
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}." post '".$filesroot."' 2>&1";
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
-        $c->log->info("post save hook: '" . $cmd . "', rc: " . $rc);
+        $c->log->debug("post save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('post save hook out: '.$out);
             Thruk::Utils::set_message( $c, 'fail_message', "post_obj_save_cmd hook failed!\n".$out );
@@ -755,6 +767,39 @@ sub get_services_for_host {
     return $services;
 }
 
+##########################################################
+
+=head2 get_services_by_name
+
+    get_services_by_name($host_name, $service_description)
+
+Returns list of services for given host and service names
+
+=cut
+sub get_services_by_name {
+    my($self, $host, $service) = @_;
+
+    my $services = [];
+    my $hosts = $self->get_objects_by_name('host', $host, 0);
+    return $services unless $hosts;
+    for my $h (@{$hosts}) {
+        my $objs = $self->get_services_for_host($h);
+        for my $type (keys %{$objs}) {
+            for my $descr (keys %{$objs->{$type}}) {
+                if($descr eq $service) {
+                    my $o;
+                    if(defined $objs->{$type}->{$descr}->{'svc'}) {
+                        $o = $objs->{$type}->{$service}->{'svc'};
+                    } else {
+                        $o = $objs->{$type}->{$service};
+                    }
+                    push @{$services}, $o;
+                }
+            }
+        }
+    }
+    return($services);
+}
 
 ##########################################################
 
@@ -1126,7 +1171,7 @@ sub rename_dependencies {
         for my $oid (keys %{$refs->{$t}}) {
             my $obj = $self->get_object_by_id($oid);
             if($obj->{'file'}->{'readonly'}) {
-                push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
+                push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'display'};
                 next;
             }
             for my $key (keys %{$refs->{$t}->{$oid}}) {
@@ -1794,7 +1839,7 @@ sub _check_files_changed {
         if($check == 1) {
             if(!$reload || $file->{'changed'}) {
                 push @newfiles, $file;
-                push @{$self->{'errors'}}, "file ".$file->{'path'}." has been deleted.";
+                push @{$self->{'errors'}}, "file ".$file->{'display'}." has been deleted.";
                 $self->{'needs_index_update'} = 1;
                 next;
             }
@@ -1811,7 +1856,8 @@ sub _check_files_changed {
                     $self->{'obj_model_changed'}  = 1;
                     $self->{'needs_index_update'} = 1;
                 } else {
-                    push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
+                    push @{$self->{'errors'}}, "Conflict in file ".$file->{'display'}.". File has been changed on disk and via config tool.";
+                    push @{$self->{'errors'}}, @{$file->{'errors'}} if $file->{'errors'};
                 }
             }
         }

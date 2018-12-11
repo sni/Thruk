@@ -1,0 +1,54 @@
+---
+- hosts: all
+  tasks:
+  - shell: sudo su - demo -c "set_admin_password omd"
+  - shell: omd config demo set APACHE_MODE own
+  - shell: omd config demo set PNP4NAGIOS off
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - name: copy naemon example.cfg
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - name: copy naemon test.cfg
+    copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.rpt
+      dest: /omd/sites/demo/var/thruk/reports/
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.tab
+      dest: /omd/sites/demo/etc/thruk/panorama/
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.tsk
+      dest: /omd/sites/demo/var/thruk/downtimes/
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.tbp
+      dest: /omd/sites/demo/etc/thruk/bp/
+      owner: demo
+      group: demo
+  - name: add example business process
+    copy:
+      src: /root/1.tbp
+      dest: /omd/sites/demo/etc/thruk/bp/1.tbp
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

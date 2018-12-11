@@ -21,7 +21,7 @@
   jQuery(document).ready(function() {
     jQuery('INPUT.conf_button').button();
     jQuery('BUTTON.conf_button').button();
-    jQuery('.radioset').buttonset();
+    jQuery('.radioset').controlgroup();
     if(typeof(init_tree_buttons) == "function") {
         init_tree_buttons();
     }

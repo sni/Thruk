@@ -51,21 +51,26 @@ sub index {
     $c->stash->{editmode}              = 0;
     $c->stash->{testmode}              = $c->req->parameters->{'testmode'} || 0;
     $c->stash->{debug}                 = $c->req->parameters->{'debug'} || 0;
+    $c->stash->{highlight_node}        = $c->req->parameters->{'node'} || '';
     $c->stash->{testmodes}             = {};
     $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
     $c->stash->{'objects_save_file'}      = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'}      || '';
     my $format = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_format'} || 'nagios';
     if($format ne 'icinga2') { $format = 'nagios'; }
     $c->stash->{'objects_save_format'}  = $format;
+    my $bp_backend_id;
     my $id = $c->req->parameters->{'bp'} || '';
+    if($id =~ m/^([^:]+):(\d+)$/mx) { $bp_backend_id = $1; $id = $2; }
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     my $nodeid = $c->req->parameters->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{hidetop} = 1 if $c->stash->{hidetop} eq '';
+
     # check roles
     my $allowed_for_edit = 0;
-    if( $c->check_user_roles( "authorized_for_configuration_information")
-        and $c->check_user_roles( "authorized_for_system_commands")) {
+    if( $c->check_user_roles( "authorized_for_business_processes")) {
         $allowed_for_edit = 1;
     }
     $c->stash->{allowed_for_edit} = $allowed_for_edit;
@@ -235,7 +240,7 @@ sub index {
             $node->{'depends'} = Thruk::Utils::list($c->req->parameters->{'bp_'.$id.'_selected_nodes'} || []);
 
             # save object creating attributes
-            for my $key (qw/host service template notification_period event_handler/) {
+            for my $key (qw/host service template notification_period event_handler max_check_attempts/) {
                 $node->{$key} = $c->req->parameters->{'bp_'.$key} || '';
             }
             # node array options
@@ -453,6 +458,9 @@ sub _bp_list_add_objects {
                     $service =~ s/^(b|w)://gmx;
                     $service = Thruk::Utils::convert_wildcards_to_regex($service);
                     $svc_op  = '~';
+                }
+                if($n->{'function_args'} && ref $n->{'function_args'} eq 'ARRAY' && $n->{'function_args'}->[2]) {
+                    $svc_op  = $n->{'function_args'}->[2];
                 }
                 $params->{'svc_s'.$svc.'_type'}   = ['host', 'service'];
                 $params->{'svc_s'.$svc.'_op'}     = ['=', $svc_op];

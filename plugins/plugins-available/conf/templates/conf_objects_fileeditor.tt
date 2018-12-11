@@ -68,8 +68,17 @@
         }
 
         function set_current_line(line) {
-            var pos = editor.value.split("\n").slice(0, line-1).join("\n").length + 1;
-            editor.focus();
+            var visibleLines = Math.round(editor.clientHeight / Number(editor.style.lineHeight.replace("px", "")));
+            var pos = editor.value.split("\n").slice(0, line+Math.round(visibleLines/2)).join("\n").length + 1;
+            var texteditor = jQuery(editor);
+            var text = texteditor.val();
+            var textBeforePosition = text.substr(0, pos);
+            texteditor.blur();
+            texteditor.val(textBeforePosition);
+            texteditor.focus();
+            texteditor.val(text);
+
+            pos = editor.value.split("\n").slice(0, line-1).join("\n").length + 1;
             editor.selectionStart = pos;
             editor.selectionEnd   = pos;
         }

@@ -36,6 +36,7 @@ TABLE.command_line_wzd INPUT {
   width: 100%;
   padding: 0;
   margin: 0;
+  min-width: 100px;
 }
 TABLE.command_line_wzd TD, TABLE.command_line_wzd TR {
   height: 10px;
@@ -365,4 +366,12 @@ TR.tools_category TD {
 #summary-dialog-form textarea {
   width: 400px;
   height: 80px;
+}
+
+.conftoolrefs TD.dataVar {
+  white-space: nowrap;
+}
+.conftoolrefs TD.dataVal UL {
+  padding-left: 20px;
+  margin: 0;
 }

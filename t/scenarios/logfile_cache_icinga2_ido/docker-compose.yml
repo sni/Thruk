@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+  omd:
+    build: omd/
+    ports:
+        - "60080:80"
+        - "60443:443"
+        - "60557:6557"
+        - "60306:3306"
+  mysqldb:
+     image: mysql:5
+     restart: always
+     environment:
+        MYSQL_ROOT_PASSWORD: thruk
+        MYSQL_DATABASE: thruk
+        MYSQL_USER: thruk
+        MYSQL_PASSWORD: thruk
+     ports:
+        - "63306:3306"
+  postgresdb:
+     image: postgres:latest
+     restart: always
+     environment:
+        POSTGRES_USER: icinga
+        POSTGRES_PASSWORD: icinga
+        POSTGRES_DB: icinga
+     ports:
+        - "60432:5432"

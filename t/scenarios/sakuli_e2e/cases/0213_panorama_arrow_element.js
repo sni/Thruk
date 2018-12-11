@@ -32,10 +32,17 @@ var $case = function() {
     _setValue(_textbox("service"), "Example Check");
 
     click(_span("Appearance"));
-    _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
-    _assertEqual("136 px", _getValue(_textbox("connectorfromy")));
-    _assertEqual("387 px", _getValue(_textbox("connectortox")));
-    _assertEqual("136 px", _getValue(_textbox("connectortoy")));
+    if(isChrome()) {
+        _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
+        _assertEqual("137 px", _getValue(_textbox("connectorfromy")));
+        _assertEqual("387 px", _getValue(_textbox("connectortox")));
+        _assertEqual("137 px", _getValue(_textbox("connectortoy")));
+    } else {
+        _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
+        _assertEqual("136 px", _getValue(_textbox("connectorfromy")));
+        _assertEqual("387 px", _getValue(_textbox("connectortox")));
+        _assertEqual("136 px", _getValue(_textbox("connectortoy")));
+    }
 
     click(_span("save"));
 
@@ -50,10 +57,17 @@ var $case = function() {
     click(_span("Settings"));
     click(_span("Appearance"));
 
-    _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
-    _assertEqual("211 px", _getValue(_textbox("connectorfromy")));
-    _assertEqual("387 px", _getValue(_textbox("connectortox")));
-    _assertEqual("136 px", _getValue(_textbox("connectortoy")));
+    if(isChrome()) {
+        _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
+        _assertEqual("212 px", _getValue(_textbox("connectorfromy")));
+        _assertEqual("387 px", _getValue(_textbox("connectortox")));
+        _assertEqual("137 px", _getValue(_textbox("connectortoy")));
+    } else {
+        _assertEqual("187 px", _getValue(_textbox("connectorfromx")));
+        _assertEqual("211 px", _getValue(_textbox("connectorfromy")));
+        _assertEqual("387 px", _getValue(_textbox("connectortox")));
+        _assertEqual("136 px", _getValue(_textbox("connectortoy")));
+    }
 
     _setValue(_textbox("connectorfromx"), "187");
     _setValue(_textbox("connectorfromy"), "136");

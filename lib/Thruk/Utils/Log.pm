@@ -38,6 +38,7 @@ sub _debug {
     my($data, $lvl) = @_;
     return unless defined $data;
     $lvl = 'DEBUG' unless defined $lvl;
+    return if !defined $Thruk::Utils::CLI::verbose;
     return if($Thruk::Utils::CLI::verbose < 3 and uc($lvl) eq 'TRACE');
     return if($Thruk::Utils::CLI::verbose < 2 and uc($lvl) eq 'DEBUG');
     return if($Thruk::Utils::CLI::verbose < 1 and uc($lvl) eq 'INFO');
@@ -82,7 +83,7 @@ sub PRINT {
     my $fh = $self->{'fh'};
 
     if($self->{'newline'}) {
-        print $fh "[".(scalar localtime())."][INFO] ", @data;
+        print $fh "[".(scalar localtime())."][INFO][".$Thruk::HOSTNAME."] ", @data;
     } else {
         print $fh @data;
     }

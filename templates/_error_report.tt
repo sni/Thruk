@@ -13,7 +13,7 @@ LMD:        [% c.config.lmd_version +%]
 [%- END -%]
 Backends:   State / Program Version / Data Source Version
 [% FOREACH pd IN backends -%]
-            [% backend_detail.$pd.state %] / [% IF pi_detail.exists(pd) && pi_detail.$pd.exists('program_version') %][% pi_detail.$pd.program_version %][% END %] / [% IF pi_detail.$pd.exists('data_source_version') %][% pi_detail.$pd.data_source_version %][% END +%]
+            [% backend_detail.$pd.state %] / [% IF pi_detail.exists(pd) %][% IF pi_detail.$pd.exists('program_version'); pi_detail.$pd.program_version; END %] / [% IF pi_detail.$pd.exists('data_source_version'); pi_detail.$pd.data_source_version; END %][% END +%]
 [% END +%]
 [%+ debug_details %]
 Stacktrace:

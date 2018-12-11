@@ -131,6 +131,7 @@ sub core_scheduling_page {
     for my $d (@{$data}) {
         next unless $d->{'check_interval'};
         next unless $d->{'has_been_checked'};
+        next unless $d->{'in_check_period'};
         $intervals->{$d->{'check_interval'}}++;
         $total += 1/$d->{'check_interval'};
     }
@@ -173,7 +174,11 @@ sub reschedule_everything {
     Thruk::Controller::cmd::bulk_send($c, $commands2send);
 
 
-    $c->stash->{message} = $c->stash->{scheduled}.' hosts and services rescheduled successfully';
+    if($c->stash->{scheduled} == 0) {
+        $c->stash->{message} = 'All hosts and services are perfectly rebalanced already.';
+    } else {
+        $c->stash->{message} = $c->stash->{scheduled}.' hosts and services rebalanced successfully';
+    }
 
     return;
 }
@@ -189,9 +194,11 @@ sub _reschedule_backend {
         next unless $d->{'check_interval'};
         next unless $d->{'has_been_checked'};
         next unless $d->{'in_check_period'};
+        next if $d->{'is_executing'};
         push @{$intervals->{$d->{'check_interval'}}}, $d;
     }
     for my $interval (keys %{$intervals}) {
+        # rescheduling is only useful if there are at least 2 services/hosts
         next if scalar @{$intervals->{$interval}} <= 1;
 
         # generate time slots for our checks
@@ -206,12 +213,21 @@ sub _reschedule_backend {
 
         # remove some which are in the right place already
         my $slots_to_fill = [];
-        for my $ts (@{$slots}) {
-            if(defined $sorted_by_ts->{$ts}) {
-                my $next = shift @{$sorted_by_ts->{$ts}};
-                delete $sorted_by_ts->{$ts} if scalar @{$sorted_by_ts->{$ts}} == 0;
-            } else {
-                push @{$slots_to_fill}, $ts;
+        for(my $x = 0; $x < scalar @{$slots}; $x++) {
+            my $start = $slots->[$x];
+            my $end   = $slots->[$x+1] || $start;
+            my $found = 0;
+            for my $ts ($start..$end) {
+                if(defined $sorted_by_ts->{$ts}) {
+                    shift @{$sorted_by_ts->{$ts}};
+                    delete $sorted_by_ts->{$ts} if scalar @{$sorted_by_ts->{$ts}} == 0;
+                    $found++;
+                }
+                last if $found;
+            }
+
+            if(!$found) {
+                push @{$slots_to_fill}, $start;
             }
         }
 
@@ -236,7 +252,6 @@ sub _reschedule_backend {
                 }
                 $c->stash->{scheduled}++;
                 push @{$cmds}, $cmd_line;
-
             }
         }
     }

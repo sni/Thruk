@@ -3,6 +3,7 @@ package Thruk::Utils::Conf::Defaults;
 use strict;
 use warnings;
 use Thruk::Utils::Conf;
+use Thruk::Authentication::User;
 
 =head1 NAME
 
@@ -28,6 +29,8 @@ sub get_thruk_cfg {
     my $conf = {
                 title_prefix                            => ['STRING', ''],
                 use_timezone                            => ['STRING', 'CET'],
+                server_timezone                         => ['STRING', ''],
+                default_user_timezone                   => ['STRING', ''],
                 use_strict_host_authorization           => ['BOOL',   '0'],
                 use_frames                              => ['BOOL',   '0'],
                 strict_passive_mode                     => ['BOOL',   '1'],
@@ -80,6 +83,8 @@ sub get_thruk_cfg {
         } elsif(exists $c->config->{$key}) {
             $conf->{$key}->[1] = $c->config->{$key};
         } elsif(   $key eq 'use_timezone'
+                or $key eq 'server_timezone'
+                or $key eq 'default_user_timezone'
                 or $key eq 'allowed_frame_links'
                 or $key eq 'resource_file'
                 or $key eq 'plugin_path'
@@ -113,28 +118,18 @@ sub get_cgi_cfg {
         'default_user_name'                         => ['STRING', 'thrukadmin' ],
         'use_authentication'                        => ['BOOL',   '1'],
         'use_ssl_authentication'                    => ['BOOL',   '0'],
-        'authorized_for_system_commands'            => ['MULTI_LIST', [], {} ],
-        'authorized_for_all_services'               => ['MULTI_LIST', [], {} ],
-        'authorized_for_all_hosts'                  => ['MULTI_LIST', [], {} ],
-        'authorized_for_all_service_commands'       => ['MULTI_LIST', [], {} ],
-        'authorized_for_all_host_commands'          => ['MULTI_LIST', [], {} ],
-        'authorized_for_system_information'         => ['MULTI_LIST', [], {} ],
-        'authorized_for_configuration_information'  => ['MULTI_LIST', [], {} ],
-        'authorized_for_read_only'                  => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_all_host_commands'         => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_all_hosts'                 => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_all_service_commands'      => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_all_services'              => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_configuration_information' => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_system_commands'           => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_system_information'        => ['MULTI_LIST', [], {} ],
-        'authorized_contactgroup_for_read_only'                 => ['MULTI_LIST', [], {} ],
         'lock_author_names'                         => ['BOOL',   '1'],
         'refresh_rate'                              => ['INT', '90'],
         'escape_html_tags'                          => ['BOOL',   '1'],
         'action_url_target'                         => ['STRING', ''],
         'notes_url_target'                          => ['STRING', ''],
     };
+    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+        $conf->{$key} = ['MULTI_LIST', [], {} ];
+        my $groupkey = $key;
+        $groupkey =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
+        $conf->{$groupkey} = ['MULTI_LIST', [], {} ];
+    }
     return $conf;
 }
 

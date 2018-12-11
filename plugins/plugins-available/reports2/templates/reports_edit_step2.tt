@@ -13,6 +13,11 @@
     <td class="dataOdd" align="left" colspan=2>
       [% IF type == 'int' %]
         <input type="text" name="params.[% key %]" value="[% value %]">
+      [% ELSIF type == 'int_box' %]
+        <input type="hidden" name="optional.[% key %]" value="1">[% checked = 0 %]
+        <input type="checkbox" name="enabled.[% key %]" value="1" onchange="var el = document.getElementsByName('params.[% key %]')[0]; if(this.checked) { el.disabled = false; } else { el.disabled = true;  }"[% IF value != -1; checked = 1; %]checked[% END %]>
+        [% IF value == -1 || value == "" %][% value = default %][% END %]
+        <input type="text" name="params.[% key %]" value="[% IF default == value %][% f.values.0.5 %][% ELSE %][% value %][% END %]" class="with_checkbox"[% IF ! checked %] disabled[% END %]>
       [% ELSIF type == 'textarea' %]
         <textarea name="params.[% key %]" wrap="hard" cols=74>[% value %]</textarea>
       [% ELSIF type == 'yes_no' %]
@@ -208,6 +213,27 @@
           <option value="[% languages.$l.abrv %]"[% IF languages.$l.abrv == value %] selected[% END %]>[% l %]</option>
           [% END %]
         </select>
+      [% ELSIF type == 'dateformat' %]
+        <input type="text" name="params.[% key %]" value="[% value %]" placeholder="%d %b %Y">
+      [% ELSIF type == 'datetimeformat' %]
+        <input type="text" name="params.[% key %]" value="[% value %]" placeholder="%d %b %Y  %H:%M:%S">
+      [% ELSIF type == 'hostformat' %]
+        <select name="params.[% key %]" onchange="var el = document.getElementById('params.[% key %]_cust'); if(this.value == 'hostcustom') { el.style.display = ''; } else { el.style.display = 'none'; }">
+          <option value="hostname"[%        IF value == 'hostname'        %] selected[% END %]>Name</option>
+          <option value="hostalias"[%       IF value == 'hostalias'       %] selected[% END %]>Alias</option>
+          <option value="hostdisplayname"[% IF value == 'hostdisplayname' %] selected[% END %]>Displayname</option>
+          <option value="hostcustom"[%      IF value == 'hostcustom'      %] selected[% END %]>Customvariable</option>
+        </select>
+        [% cust_value = ""; cust_key = key _ '_cust'; IF r.params.exists(cust_key) %][% cust_value = r.params.$cust_key %][% END %]
+        <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '[ ,]' })"[% END %] style="width: 150px; [% IF value != 'hostcustom' %]display: none;[% END %]">
+      [% ELSIF type == 'serviceformat' %]
+        <select name="params.[% key %]" onchange="var el = document.getElementById('params.[% key %]_cust'); if(this.value == 'servicecustom') { el.style.display = ''; } else { el.style.display = 'none'; }">
+          <option value="servicedescription"[% IF value == 'description'        %] selected[% END %]>Description</option>
+          <option value="servicedisplayname"[% IF value == 'servicedisplayname' %] selected[% END %]>Displayname</option>
+          <option value="servicecustom"[%      IF value == 'servicecustom'      %] selected[% END %]>Customvariable</option>
+        </select>
+        [% cust_value = ""; cust_key = key _ '_cust'; IF r.params.exists(cust_key) %][% cust_value = r.params.$cust_key %][% END %]
+        <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '[ ,]' })"[% END %] style="width: 150px; [% IF value != 'servicecustom' %]display: none;[% END %]">
       [% ELSE %]
       [% PROCESS $temp block = 'edit_types' %]
       [% PROCESS custom_reports_edit_step2.tt %]

@@ -2,7 +2,6 @@ package Thruk::Utils::Conf;
 
 use strict;
 use warnings;
-use POSIX ();
 use Carp qw/confess/;
 use File::Slurp qw/read_file/;
 use Digest::MD5 qw(md5_hex);
@@ -38,7 +37,6 @@ put objects model into stash
 =cut
 sub set_object_model {
     my ( $c, $no_recursion ) = @_;
-
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
     Thruk::Action::AddDefaults::set_processinfo($c, undef, 2, $cached_data, 1);
@@ -57,6 +55,7 @@ sub set_object_model {
     }
 
     my $refresh = $c->req->parameters->{'refreshdata'} || 0;
+    delete $c->req->parameters->{'refreshdata'};
 
     $c->stats->profile(begin => "_update_objects_config()");
     my $model         = $c->app->obj_db_model;
@@ -145,8 +144,11 @@ sub read_objects {
     my $c             = shift;
     $c->stats->profile(begin => "read_objects()");
     my $model         = $c->app->obj_db_model;
+    confess('no model') unless $model;
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
+    confess('no config tool') unless $peer_conftool;
     my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, undef, $c->{'stats'}, $peer_conftool);
+    confess('no object database') unless $obj_db;
     store_model_retention($c, $c->stash->{'param_backend'});
     $c->stash->{model_type} = 'Objects';
     $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, $obj_db, $c->{'stats'} ];
@@ -203,15 +205,8 @@ sub update_conf {
     if($update_c) {
         for my $key (keys %{$data}) {
             $update_c->config->{$key} = $data->{$key};
-            if($key eq 'use_timezone') {
-                ## no critic
-                if($data->{$key} ne '') {
-                    $ENV{'TZ'} = $data->{$key};
-                } else {
-                    delete $ENV{'TZ'};
-                }
-                ## use critic
-                POSIX::tzset();
+            if($key eq 'server_timezone') {
+                $update_c->app->set_timezone($data->{$key});
             }
         }
     }
@@ -583,7 +578,7 @@ sub store_model_retention {
     my $model   = $c->app->obj_db_model;
     my $user_id = md5_hex($c->stash->{'remote_user'} || '');
 
-    # store changed/stashed changed to local user, unchanged config can be stored in a generic file
+    # store changes/stashed changes to local user, unchanged config can be stored in a generic file
     my $file      = $c->config->{'conf_retention_file'};
     my $user_file = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";
     if(!$file) {
@@ -603,6 +598,7 @@ sub store_model_retention {
         # delete some useless references
         delete $model->{'configs'}->{$backend}->{'stats'};
         delete $model->{'configs'}->{$backend}->{'remotepeer'};
+        confess("no data") if(!$model->{'configs'}->{$backend} || ref $model->{'configs'}->{$backend} ne 'Monitoring::Config' || scalar keys %{$model->{'configs'}->{$backend}} == 0);
         my $data = {
             'configs'      => {$backend => $model->{'configs'}->{$backend}},
             'release_date' => $c->config->{'released'},
@@ -611,6 +607,7 @@ sub store_model_retention {
         store($data, $file);
         $c->config->{'conf_retention'}      = [stat($file)];
         $c->config->{'conf_retention_file'} = $file;
+        $c->config->{'conf_retention_md5'}  = $c->cluster->is_clustered() ? md5_hex(scalar read_file($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
         $c->log->debug('saved object retention data');
     };
@@ -649,9 +646,11 @@ sub get_model_retention {
     if(! -f $file) {
         $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     }
+    # REMOVE AFTER: 01.01.2020
     if(! -f $file) {
         $file  = $c->config->{'var_path'}."/obj_retention.dat";
     }
+    # </REMOVE AFTER>
 
     if(! -f $file) {
         return 1 if $model->cache_exists($backend);
@@ -665,10 +664,16 @@ sub get_model_retention {
         and $stat[9] <= $c->config->{'conf_retention'}->[9]
         and $c->config->{'conf_retention_file'} eq $file
     ) {
-       return 1;
+        return 1 unless $c->cluster->is_clustered();
+        # cannot trust file timestamp in cluster mode since clocks might not be synchronous
+        my $md5 = md5_hex(scalar read_file($file));
+        if($c->config->{'conf_retention_md5'} eq $md5) {
+            return 1;
+        }
     }
     $c->config->{'conf_retention'}      = \@stat;
     $c->config->{'conf_retention_file'} = $file;
+    $c->config->{'conf_retention_md5'}  = $c->cluster->is_clustered() ? md5_hex(scalar read_file($file)) : '';
 
     # try to retrieve retention data
     eval {
@@ -855,6 +860,7 @@ sub get_backends_with_obj_config {
     my($c)       = @_;
     my $backends = {};
     my $firstpeer;
+    my $param_backend = $c->stash->{'param_backend'} || '';
     $c->stash->{'param_backend'} = '';
 
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
@@ -942,6 +948,7 @@ sub get_backends_with_obj_config {
             $c->stash->{'param_backend'} = $val;
         }
     }
+    $c->stash->{'param_backend'} = $param_backend unless $c->stash->{'param_backend'};
 
     if($c->stash->{'param_backend'} eq '' and defined $firstpeer) {
         $c->stash->{'param_backend'} = $firstpeer;
@@ -1018,9 +1025,9 @@ sub start_file_edit {
     my $file = $c->{'obj_db'}->get_file_by_path($path);
     if(defined $file && !$file->{'backup'} && !$file->{'is_new_file'}) {
         $file->set_backup();
-        $c->stash->{'obj_model_changed'}             = 1;
-        $c->stash->{'use_user_model_retention_file'} = 1;
+        $c->stash->{'obj_model_changed'} = 1;
     }
+    $c->stash->{'use_user_model_retention_file'} = 1;
     return $file;
 }
 

@@ -3,7 +3,7 @@
 [% IF force_delete %]
 <form action="conf.cgi" method="POST">
 [% END %]
-<table border="0" class='data conftoolobj'>
+<table border="0" class='data conftoolobj conftoolrefs'>
   [% IF force_delete %]
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
@@ -20,13 +20,14 @@
     </td>
   </tr>
   [% END %]
+  [% IF show_incoming %]
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
   </tr>
   [% FOREACH t = incoming.keys.sort %]
   <tr>
     <td class='dataVar'>[% t | ucfirst %]</td>
-    <td class='dataVar'>
+    <td class='dataVal'>
       <ul [% IF force_delete %]style="padding-left: 15px;"[% END %]>
       [% FOREACH name = incoming.$t.keys.sort %]
         [% oid = incoming.$t.$name %]
@@ -47,7 +48,7 @@
   [% IF force_delete %]
   <tr>
     <td class='dataVar'></td>
-    <td class='dataVar'>
+    <td class='dataVal'>
       select
       <input type="checkbox" name="none" value="">
       <a href="#" onclick="jQuery('input[name=ref]').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
@@ -61,7 +62,9 @@
     <td class='dataVar' colspan=2 style="text-align: center;">No incoming references found</td>
   </tr>
   [% END %]
+  [% END %]
 
+  [% IF show_outgoing %]
 [% IF !force_delete %]
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Outgoing references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
@@ -69,7 +72,7 @@
   [% FOREACH t = outgoing.keys.sort %]
   <tr>
     <td class='dataVar'>[% t | ucfirst %]</td>
-    <td class='dataVar'>
+    <td class='dataVal'>
       <ul>
       [% FOREACH name = outgoing.$t.keys.sort %]
         <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a></li>
@@ -81,6 +84,49 @@
   [% IF outgoing.keys.size == 0 %]
   <tr>
     <td class='dataVar' colspan=2 style="text-align: center;">No outgoing references found</td>
+  </tr>
+  [% END %]
+  [% END %]
+  [% END %]
+
+
+  [% IF other_refs.keys.size > 0 %]
+  <tr>
+    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Outside references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
+  </tr>
+  [% IF force_delete %]
+  <tr>
+    <td class='dataVar' colspan=2 style="text-align: center;">These references should be checked manually.</td>
+  </tr>
+  [% END %]
+  [% IF show_renamed %]
+  <tr>
+    <td class='dataVar' colspan=2 style="text-align: center; padding-top: 10px;">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
+  </tr>
+  <tr>
+    <td class='dataVar' style="text-align:center" colspan=2>
+      <br>
+      <form>
+      [% link = "conf.cgi?sub=objects&data.id=" _ object.get_id() %]
+      [% text = object.get_type() | ucfirst %]
+      [% text = "Continue editing " _ text %]
+      [% button(link, text, 'conf_button', '', '', '', 1) %]
+      </form>
+      <br>
+      <br>
+    </td>
+  </tr>
+  [% END %]
+  [% FOREACH t = other_refs.keys.sort %]
+  <tr>
+    <td class='dataVar'>[% t %]</td>
+    <td class='dataVal'>
+      <ul>
+      [% FOREACH r = other_refs.$t %]
+        <li><a href="[% r.link %]" target="_blank">[% r.name %] ([% r.details %])</a></li>
+      [% END %]
+      </ul>
+    </td>
   </tr>
   [% END %]
   [% END %]

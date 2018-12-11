@@ -121,7 +121,7 @@ sub new {
     $current_object->{'line'}     = $conf{'line'} || 0;
     $current_object->set_file($conf{'file'}) if defined $conf{'file'};
     $current_object->{'comments'} = $conf{'comments'} || [];
-    $current_object->{'id'}       = 'new';
+    $current_object->{'id'}       = $conf{'id'} || 'new';
     $current_object->{'disabled'} = defined $conf{'disabled'} ? $conf{'disabled'} : 0;
 
     if(defined $conf{'name'}) {

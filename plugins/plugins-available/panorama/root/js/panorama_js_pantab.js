@@ -92,7 +92,6 @@ Ext.define('TP.Pantab', {
             return(true);
         },
         activate: function(This, eOpts) {
-
             /* close start page */
             var startPage = Ext.getCmp('tabpan-tab_0');
             if(startPage && startPage.id != This.id) {
@@ -140,8 +139,9 @@ Ext.define('TP.Pantab', {
                 }, delay + 100);
             }
 
-            var curNr = this.id.replace(/^tabpan-tab_/, '');
+            var curNr = this.nr();
             cookieSave('thruk_panorama_active', curNr);
+            tabpan.getState(); // saves open dashboards
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
@@ -211,6 +211,11 @@ Ext.define('TP.Pantab', {
             if(one_tab_only) {
                 document.title = This.xdata.title;
             }
+            if(readonly || dashboard_ignore_changes) {
+                This.updateHeaderTooltip("this is dashboard #"+This.nr());
+            } else {
+                This.updateHeaderTooltip("double click to open settings (dashboard #"+This.nr()+")");
+            }
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -234,6 +239,37 @@ Ext.define('TP.Pantab', {
             }
             return(true);
         }
+    },
+    updateHeaderTooltip: function(text) {
+        var tab         = this;
+        var tabpan      = Ext.getCmp('tabpan');
+        if(!tabpan || !tabpan.getTabBar) { return; }
+        var tabbarItems = tabpan.getTabBar().items.items;
+        var tabhead;
+        for(var x = 0; x < tabbarItems.length; x++) {
+            if(tabbarItems[x].card && tabbarItems[x].card.id == tab.id) {
+                tabhead = tabbarItems[x];
+            }
+        }
+        if(tabhead == undefined) {
+            return;
+        } else if(tabhead.rendered == false) {
+            tabhead.addListener('afterrender', function(This, eOpts) {
+                This.getEl().set({
+                    'data-qtip': text
+                });
+            });
+        } else {
+            tabhead.getEl().set({
+                'data-qtip': text
+            });
+        }
+        return;
+    },
+    nr: function() {
+        var tab = this;
+        var nr  = tab.id.replace(/^tabpan-tab_/, '');
+        return(nr);
     },
     tabBodyClick: function(evt) {
         if(!TP.skipResetMoveIcons) {
@@ -414,9 +450,18 @@ Ext.define('TP.Pantab', {
                 });
             }
         });
+
+        // adding panels completed
         if(TP.initMask && tab.keepMask) {
             TP.timeouts['timeout_'+tab.id+'_remove_mask'] = window.setTimeout(function() {
                 if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete tab.keepMask; }
+            }, TP.initial_create_delay_active);
+            TP.initial_create_delay_active = TP.initial_create_delay_active + 200;
+        }
+        if(one_tab_only) {
+            TP.timeouts['timeout_' + tab.id + '_starttimeouts'] = window.setTimeout(function() {
+                TP.initComplete();
+                tab.startTimeouts();
             }, TP.initial_create_delay_active);
         }
     },
@@ -908,7 +953,7 @@ Ext.define('TP.Pantab', {
         TP.resetMoveIcons();
         tab.disableMapControlsTemp();
         var pos = [evt.getX(), evt.getY()];
-        var nr = tab.id.replace(/^tabpan-tab_/, '');
+        var nr = tab.nr();
 
         var menu_items = [];
         if(tab.xdata.locked) { hidePasteAndNew = true; }

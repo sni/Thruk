@@ -16,6 +16,22 @@ This module allows you to authenticate the users.
 
 use strict;
 use warnings;
+use File::Slurp qw/read_file/;
+
+our $possible_roles = [
+    'authorized_for_admin',
+    'authorized_for_all_host_commands',
+    'authorized_for_all_hosts',
+    'authorized_for_all_service_commands',
+    'authorized_for_all_services',
+    'authorized_for_configuration_information',
+    'authorized_for_system_commands',
+    'authorized_for_system_information',
+    'authorized_for_broadcasts',
+    'authorized_for_reports',
+    'authorized_for_business_processes',
+    'authorized_for_read_only',
+];
 
 =head1 METHODS
 
@@ -32,11 +48,48 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    my $env = $c->env;
+    my $env    = $c->env;
+    my $apikey = $c->req->header('X-Thruk-Auth-Key');
 
     # authenticated by ssl
     if(defined $username) {
     }
+
+    # authenticate by secret.key from http header
+    elsif($apikey) {
+        my $apipath = $c->config->{'var_path'}."/api_keys";
+        my $secret_file = $c->config->{'var_path'}.'/secret.key';
+        $c->config->{'secret_key'}  = read_file($secret_file) if -s $secret_file;
+        chomp($c->config->{'secret_key'});
+        if($apikey !~ m/^[a-zA-Z0-9]+$/mx) {
+            $c->error("wrong authentication key");
+            return;
+        }
+        elsif($c->config->{'api_keys_enabled'} && -e $apipath.'/'.$apikey) {
+            my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$apikey);
+            my $addr = $c->req->address;
+            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
+            Thruk::Utils::IO::json_lock_patch($apipath.'/'.$apikey, { last_used => time(), last_from => $addr }, 1);
+            $username = $data->{'user'};
+
+            my $userdata = Thruk::Utils::get_user_data($c, $username);
+            if($userdata->{'login'}->{'locked'}) {
+                $c->error("account is locked, please contact an administrator");
+                return;
+            }
+        }
+        elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
+            $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+            if(!$username) {
+                $c->error("authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header");
+                return;
+            }
+        } else {
+            $c->error("wrong authentication key");
+            return;
+        }
+    }
+
     elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
         and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
             $username = $env->{'SSL_CLIENT_S_DN_CN'};
@@ -74,16 +127,6 @@ sub new {
     $self->{'alias'}         = undef;
 
     # add roles from cgi_conf
-    my $possible_roles = [
-                      'authorized_for_all_host_commands',
-                      'authorized_for_all_hosts',
-                      'authorized_for_all_service_commands',
-                      'authorized_for_all_services',
-                      'authorized_for_configuration_information',
-                      'authorized_for_system_commands',
-                      'authorized_for_system_information',
-                      'authorized_for_read_only',
-                    ];
     for my $role (@{$possible_roles}) {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
             my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
@@ -91,16 +134,11 @@ sub new {
         }
     }
     $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
+    $self->{'roles_from_cgi_cfg'} = Thruk::Utils::array2hash($self->{'roles'});
 
-    if($username eq '(cron)') {
-        $self->{'roles'} = [qw/authorized_for_all_hosts
-                               authorized_for_all_host_commands
-                               authorized_for_all_services
-                               authorized_for_all_service_commands
-                               authorized_for_configuration_information
-                               authorized_for_system_commands
-                               authorized_for_system_information
-                           /];
+    # Is this user an admin?
+    if($username eq '(cron)' || $username eq '(cli)' || $self->check_user_roles('admin')) {
+        $self->grant('admin');
     }
 
     return $self;
@@ -125,13 +163,32 @@ sub get {
 
  for example:
  $c->user->check_user_roles('authorized_for_all_services')
+ $c->user->check_user_roles(['authorized_for_system_commands', 'authorized_for_configuration_information'])
 
 =cut
 
 sub check_user_roles {
     my($self, $role) = @_;
+    if(ref $role eq 'ARRAY') {
+        for my $r (@{$role}) {
+            if(!$self->check_user_roles($r)) {
+                return(0);
+            }
+        }
+        return(1);
+    }
     my @found = grep(/^\Q$role\E$/mx, @{$self->{'roles'}});
-    return(scalar @found);
+    return 1 if scalar @found >= 1;
+
+    if($role eq 'admin') {
+        if($self->check_user_roles('authorized_for_admin')) {
+            return(1);
+        }
+        if($self->check_user_roles('authorized_for_system_commands') && $self->check_user_roles('authorized_for_configuration_information')) {
+            return(1);
+        }
+    }
+    return(0);
 }
 
 =head2 check_permissions
@@ -267,6 +324,26 @@ sub transform_username {
         $c->log->debug("authentication regex replace after : ".$username) if $c;
     }
     return($username);
+}
+
+=head2 grant
+
+    grant('role')
+
+grant role to user
+
+=cut
+
+sub grant {
+    my($self, $role) = @_;
+    if($role eq 'admin') {
+        $self->{'roles'} = [@{$possible_roles}];
+        # remove read only role
+        $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
+    } else {
+        confess('role '.$role.' not implemented');
+    }
+    return;
 }
 
 1;

@@ -34,6 +34,7 @@
 <div id="iconContainer"></div>
 <script type="text/javascript">
 <!--
+jQuery.noConflict();
 /*
 console.profile("Page Load Profile");
 window.setTimeout(function() {

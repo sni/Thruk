@@ -91,23 +91,8 @@ sub init_backend_thread_pool {
         }
     }
 
-    my $use_shadow_naemon;
-    if($ENV{'USE_SHADOW_NAEMON'} || (defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer'))) {
-        if($config->{'use_shadow_naemon'}) {
-            die("missing configuration option: shadow_naemon_dir") unless $config->{'shadow_naemon_dir'};
-            $use_shadow_naemon = $config->{'shadow_naemon_dir'};
-            eval {
-                Thruk::Utils::IO::mkdir_r($config->{'shadow_naemon_dir'}) ;
-            };
-            die("could not create shadow_naemon_dir ".$config->{'shadow_naemon_dir'}.': '.$@) if $@;
-            if($xs) {
-                $pool_size = 1; # no pool required when using xs caching
-            }
-        }
-    }
     if($config->{'use_lmd_core'}) {
         $pool_size = 1; # no pool required when using lmd core
-        $use_shadow_naemon = "";
         ## no critic
         $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         $ENV{'THRUK_USE_LMD'} = 1;
@@ -144,12 +129,9 @@ sub init_backend_thread_pool {
     }
 
     if($num_peers > 0) {
-        ## no critic
-        $SIG{'ALRM'} = 'IGNORE'; # shared signals will kill waiting threads
-        ## use critic
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
-            my $peer = Thruk::Backend::Peer->new($peer_config, $config, $peer_keys, $use_shadow_naemon);
+            my $peer = Thruk::Backend::Peer->new($peer_config, $config, $peer_keys);
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;
             push @{$peer_order}, $peer->{'key'};
@@ -161,7 +143,7 @@ sub init_backend_thread_pool {
         }
         #&timing_breakpoint('peers created');
         if($pool_size > 1) {
-            printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            #printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             ## no critic
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
             ## use critic
@@ -170,9 +152,9 @@ sub init_backend_thread_pool {
                 size    => $pool_size,
                 handler => \&Thruk::Backend::Pool::_do_thread,
             );
-            printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            #printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
-            printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            #printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             ## no critic
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
             ## use critic
@@ -219,9 +201,9 @@ do the work on threads
 =cut
 
 sub _do_thread {
-    my($key, $function, $arg, $use_shadow) = @_;
+    my($key, $function, $arg) = @_;
     my $t1 = [gettimeofday];
-    my $res = do_on_peer($key, $function, $arg, $use_shadow);
+    my $res = do_on_peer($key, $function, $arg);
     my $elapsed = tv_interval($t1);
     unshift @{$res}, $elapsed;
     unshift @{$res}, $key;
@@ -239,7 +221,7 @@ run a function on a backend peer
 =cut
 
 sub do_on_peer {
-    my($key, $function, $arg, $use_shadow) = @_;
+    my($key, $function, $arg) = @_;
 
     # make it possible to run code in thread context
     if(ref $arg eq 'ARRAY') {
@@ -277,27 +259,7 @@ sub do_on_peer {
     my $errors = 0;
     while($errors < 3) {
         eval {
-            if($use_shadow and $peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs') {
-                ($data,$type,$size) = $peer->{'cacheproxy'}->$function(@{$arg});
-            } else {
-                ($data,$type,$size) = $peer->{'class'}->$function(@{$arg});
-                if($use_shadow and $peer->{'cacheproxy'} and $function eq 'send_command') {
-                    # duplicate command to cache, otherwise we would have to wait
-                    # for a full sync of this host/service
-                    my $filename = $peer->{'cacheproxy'}->{'live'}->{'peer'};
-                    $filename    =~ s/live$//mx;
-                    my $tmpfile  = $filename.'/tmp/'.time().'.tmp';
-                    $filename    = $filename.'/tmp/'.time().'.cmds';
-                    my %arg      = @{$arg};
-                    open(my $fh, '>>', $tmpfile);
-                    my $commands = $arg{'command'};
-                    $commands    =~ s/^COMMAND\s+//gmx;
-                    print $fh $commands,"\n";
-                    Thruk::Utils::IO::close($fh, $filename);
-                    require File::Copy;
-                    File::Copy::move($tmpfile, $filename);
-                }
-            }
+            ($data,$type,$size) = $peer->{'class'}->$function(@{$arg});
             if(defined $data && !defined $size) {
                 if(ref $data eq 'ARRAY') {
                     $size = scalar @{$data};

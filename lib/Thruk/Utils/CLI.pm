@@ -73,7 +73,8 @@ sub new {
     $ENV{'THRUK_SRC'}        = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
-    $ENV{'THRUK_BACKENDS'}   = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
+    $ENV{'THRUK_BACKENDS'}   = join(';', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
+    $ENV{'THRUK_VERBOSE'}    = $options->{'verbose'}-1 if $options->{'verbose'} >= 2;;
     $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
     $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
     ## use critic
@@ -115,8 +116,9 @@ sub get_c {
     my($self) = @_;
     return $Thruk::Request::c if defined $Thruk::Request::c;
     #my($c, $failed)
-    my($c, undef, undef) = $self->_dummy_c();
-    $c->stats->enable(1);
+    my($c, undef, undef) = _dummy_c();
+    confess("internal request failed") unless $c;
+    $c->stats->enable(1) if $c;
     return $c;
 }
 
@@ -188,16 +190,18 @@ sub store_objects {
 
 =head2 request_url
 
-    request_url($c, $url, $cookies)
+    request_url($c, $url, [$cookies], [$method], [$postdata])
 
 returns requested url as string. In list context returns ($code, $result)
 
 =cut
 sub request_url {
-    my($c, $url, $cookies) = @_;
+    my($c, $url, $cookies, $method, $postdata) = @_;
+    $method = 'GET' unless $method;
 
     # external url?
     if($url =~ m/^https?:/mx) {
+        confess("only GET supported right now") if $method ne 'GET';
         my($response) = _external_request($url, $cookies);
         my $result = {
             code    => $response->code(),
@@ -219,7 +223,7 @@ sub request_url {
     # fork setting may be overriden in child requests
     my $old_no_external_job_forks = $c->config->{'no_external_job_forks'};
 
-    my(undef, undef, $res) = _dummy_c(undef, $url);
+    my(undef, undef, $res) = _internal_request($url, $method, $postdata);
 
     my $result = {
         code    => $res->code,
@@ -237,7 +241,7 @@ sub request_url {
             $sleep = 1 if $x > 10;
             sleep($sleep);
             $url = $result->{'headers'}->{'location'} if defined $result->{'headers'}->{'location'};
-            (undef, undef, $result) = _dummy_c(undef, $url);
+            (undef, undef, $result) = _internal_request($url);
             $x++;
         }
     }
@@ -331,16 +335,29 @@ sub _run {
     ## use critic
     my $log_timestamps = 0;
     my $action = $self->{'opt'}->{'action'} || $self->{'opt'}->{'commandoptions'}->[0] || '';
-    if($action =~ m/^(logcache|bp|report|downtimetask)/mx) {
+    if($ENV{'THRUK_CRON'} || $action =~ m/^(logcache|bp|downtimetask)/mx) {
         $log_timestamps = 1;
     }
 
+    if($action eq 'bash_complete') {
+        require Thruk::Utils::Bash;
+        return(Thruk::Utils::Bash::complete());
+    }
+
+    # skip cluster if --local is given on command line
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if($self->{'opt'}->{'local'} && !$ENV{'THRUK_CRON'});
+
     # force some commands to be local
-    if($action =~ m/^(logcache|livecache|bpd|report|plugin)/mx) {
+    if($action =~ m/^(logcache|livecache|bpd|bp|report|plugin|lmd|find)/mx) {
         $self->{'opt'}->{'local'} = 1;
     }
 
-    my($result, $response);
+    # force cronjobs to be local
+    if($ENV{'THRUK_CRON'}) {
+        $self->{'opt'}->{'local'} = 1;
+    }
+
+    my($c, $result, $response);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = _request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
@@ -351,12 +368,11 @@ sub _run {
         }
     }
 
-    my($c, $capture);
+    my($capture);
     unless(defined $result) {
         # initialize backend pool here to safe some memory
         require Thruk::Backend::Pool;
         if($action and $action =~ m/livecache/mx) {
-            local $ENV{'USE_SHADOW_NAEMON'}        = 1;
             local $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
             Thruk::Backend::Pool::init_backend_thread_pool();
         } else {
@@ -367,6 +383,11 @@ sub _run {
         if(!defined $c) {
             print STDERR "command failed";
             return 1;
+        }
+
+        if($terminal_attached) {
+            # initialize screen logging
+            $c->app->{'_log'} = 'screen';
         }
 
         # catch prints when not attached to a terminal and redirect them to our logger
@@ -380,23 +401,14 @@ sub _run {
             ## use critic
         }
 
-        if(!$ENV{'THRUK_JOB_ID'} && $action && $action =~ /^report(\w*)=(.*)$/mx) {
-            # create fake job
-            my($id,$dir) = Thruk::Utils::External::_init_external($c);
-            ## no critic
-            $SIG{CHLD} = 'DEFAULT';
-            Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
-            $ENV{'THRUK_JOB_ID'}       = $id;
-            $ENV{'THRUK_JOB_DIR'}      = $dir;
-            ## use critic
-            Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
-        }
         $result = $self->_from_local($c, $self->{'opt'});
 
         # remove print capture
         ## no critic
         select *STDOUT;
         ## use critic
+
+        $response = $c->res;
     }
 
     # no output?
@@ -405,7 +417,8 @@ sub _run {
     }
 
     # fix encoding
-    if(!$result->{'content_type'} || $result->{'content_type'} =~ /^text/mx) {
+    my $content_type = $result->{'content_type'} || $response->content_type() || 'text/plain';
+    if($content_type =~ /^text/mx) {
         $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
     }
 
@@ -479,19 +492,29 @@ sub _external_request {
 
 ##############################################
 sub _dummy_c {
-    my($self, $url) = @_;
-    _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
+    my($c) = _internal_request('/thruk/cgi-bin/remote.cgi');
+    return($c);
+}
+
+##############################################
+sub _internal_request {
+    my($url, $method, $postdata) = @_;
+    $method = 'GET' unless $method;
+
+    _debug("_internal_request()") if $Thruk::Utils::CLI::verbose >= 2;
     delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    $url = '/thruk/cgi-bin/remote.cgi' unless defined $url;
-    require Thruk;
-    require HTTP::Request;
-    require Plack::Test;
-    my $app    = Plack::Test->create(Thruk->startup);
+    our $app;
+    if(!$app) {
+        require Thruk;
+        require HTTP::Request;
+        require Plack::Test;
+        $app = Plack::Test->create(Thruk->startup);
+    }
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
-    my $res    = $app->request(HTTP::Request->new(GET => $url));
+    my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
     my $c      = $Thruk::Request::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
-    _debug("_dummy_c() done") if $Thruk::Utils::CLI::verbose >= 2;
+    _debug("_internal_request() done") if $Thruk::Utils::CLI::verbose >= 2;
     return($c, $failed, $res);
 }
 
@@ -502,6 +525,7 @@ sub _from_local {
     ## no critic
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     ## use critic
+    local $ENV{'THRUK_CLI_SRC'}      = 'CLI';
     return _run_commands($c, $options, 'local');
 }
 
@@ -513,7 +537,9 @@ sub _from_fcgi {
     my $data  = decode_json($data_str);
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
-    local $ENV{'THRUK_SRC'}     = 'CLI';
+    local $ENV{'THRUK_SRC'}          = 'CLI';
+    local $ENV{'THRUK_CLI_SRC'}      = 'FCGI';
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
 
     # ensure secret key is fresh
     my $secret_file = $c->config->{'var_path'}.'/secret.key';
@@ -535,6 +561,11 @@ sub _from_fcgi {
         };
     } else {
         $res = _run_commands($c, $data->{'options'}, 'fcgi');
+    }
+    if(defined $res->{'output'} && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
+        $c->res->body($res->{'output'});
+        $c->{'rendered'} = 1;
+        return;
     }
     if(ref $res eq 'HASH') {
         $res->{'version'} = $c->config->{'version'} unless defined $res->{'version'};
@@ -558,6 +589,12 @@ sub _run_commands {
         Thruk::Utils::set_user($c, $opt->{'auth'});
     } elsif(defined $c->config->{'default_cli_user_name'}) {
         Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'});
+    } else {
+        if($ENV{'THRUK_CRON'}) {
+            Thruk::Utils::set_user($c, '(cron)');
+        } else {
+            Thruk::Utils::set_user($c, '(cli)');
+        }
     }
 
     my $data = {
@@ -635,7 +672,7 @@ sub _run_command_action {
     # raw query
     if($action eq 'raw') {
         die('no local raw requests!') if $src ne 'fcgi';
-        ($data->{'output'}, $data->{'rc'}) = _cmd_raw($c, $opt);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_raw($c, $opt, $src);
     }
 
     # precompile templates
@@ -670,9 +707,10 @@ sub _run_command_action {
             $err = $@;
             last unless $err;
 
-            if($err =~ m|^Can't\ locate\ .*\ in\ \@INC|mx) {
+            if($err =~ m|^Can't\ locate\ .*\ in\ \@INC|mx && $err !~ m/Compilation\ failed\ in\ require\ at/mx) {
                 _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
-                $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
+                $data->{'output'} = "FAILED - no such command: ".$action.".\n".
+                                    "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
             } elsif($err) {
                 _error($@);
                 $data->{'output'} = "FAILED - to load command module: ".$action.".\n";
@@ -684,7 +722,7 @@ sub _run_command_action {
         }
 
         # print help only?
-        if(scalar @{$opt->{'commandoptions'}} > 0 && $opt->{'commandoptions'}->[0] =~ /^(help|\-h)$/mx) {
+        if(scalar @{$opt->{'commandoptions'}} > 0 && $opt->{'commandoptions'}->[0] =~ /^(help|\-h|--help)$/mx) {
             return(get_submodule_help(ucfirst($action)));
         }
 
@@ -910,7 +948,7 @@ sub _cmd_configtool {
 
 ##############################################
 sub _cmd_raw {
-    my($c, $opt) = @_;
+    my($c, $opt, $src) = @_;
     my $function  = $opt->{'sub'};
 
     unless(defined $c->stash->{'defaults_added'}) {
@@ -920,6 +958,12 @@ sub _cmd_raw {
     my $key = $keys[0];
     # do we have a hint about remote peer?
     if($opt->{'remote_name'}) {
+        if(ref $opt->{'remote_name'} eq 'ARRAY') {
+            if(scalar @{$opt->{'remote_name'}} != 1) {
+                die('multiple remote_name not supported');
+            }
+            $opt->{'remote_name'} = $opt->{'remote_name'}->[0];
+        }
         my $peer = $c->{'db'}->get_peer_by_name($opt->{'remote_name'});
         die('no such backend: '.$opt->{'remote_name'}) unless defined $peer;
         $key = $peer->peer_key();
@@ -955,6 +999,58 @@ sub _cmd_raw {
         return _cmd_ext_job($c, $opt);
     }
 
+    elsif($function =~ /^cmd:\s+(\w+)\s*(.*)/mx) {
+        local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
+        my $action = $1;
+        $opt->{'commandoptions'} = [split/\s+/mx, $2];
+        my $res = _run_command_action($c, $opt, $src, $action);
+        return([$res->{'output'}], $res->{'rc'});
+    }
+
+    # run code
+    elsif($function =~ /::/mx) {
+        local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
+        require Thruk::Utils::Cluster;
+        if($opt->{'args'} && ref $opt->{'args'} eq 'ARRAY') {
+            for(my $x = 0; $x <= scalar @{$opt->{'args'}}; $x++) {
+                if(!ref $opt->{'args'}->[$x] && $opt->{'args'}->[$x]) {
+                    if($opt->{'args'}->[$x] eq 'Thruk::Context') {
+                        $opt->{'args'}->[$x] = $c;
+                    }
+                    if($opt->{'args'}->[$x] eq 'Thruk::Utils::Cluster') {
+                        $opt->{'args'}->[$x] = $c->cluster;
+                    }
+                }
+            }
+        }
+        my $pkg_name     = $function;
+        $pkg_name        =~ s%::[^:]+$%%mx;
+        my $function_ref = \&{$function};
+        my @res;
+        eval {
+            if($pkg_name && $pkg_name !~ m/^CORE/mx) {
+                load $pkg_name;
+            }
+            @res = &{$function_ref}(@{$opt->{'args'}});
+        };
+        if($@) {
+            return($@, 1);
+        }
+        return(\@res, 0);
+    }
+
+    # passthrough livestatus results if possible
+    if($ENV{'THRUK_USE_LMD'} && $function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
+        my $peer = $Thruk::Backend::Pool::lmd_peer;
+        my $query = $opt->{'args'}->[0];
+        chomp($query);
+        $query .= "\nBackends: ".$key."\n";
+        $c->res->body($peer->_raw_query($query));
+        $c->{'rendered'} = 1;
+        return;
+    }
+
+    local $ENV{'THRUK_USE_LMD'} = ""; # don't try to do LMD stuff since we directly access the real backend
     my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 

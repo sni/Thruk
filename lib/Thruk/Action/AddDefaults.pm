@@ -30,7 +30,7 @@ our @stash_config_keys = qw/
     datetime_format datetime_format_today datetime_format_long datetime_format_log
     use_new_search show_notification_number strict_passive_mode hide_passive_icon
     show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
-    priorities show_modified_attributes downtime_duration expire_ack_duration
+    priorities show_modified_attributes downtime_duration expire_ack_duration show_contacts
     show_backends_in_table host_action_icon service_action_icon cookie_path
     use_feature_trends show_error_reports skip_js_errors perf_bar_mode
     bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
@@ -52,6 +52,22 @@ use constant {
 
     HIDDEN_LMD_PARENT => 8,
 };
+
+use base 'Exporter';
+our @EXPORT_OK = (
+    'REACHABLE',
+    'UNREACHABLE',
+    'HIDDEN_USER',
+    'HIDDEN_PARAM',
+    'DISABLED_AUTH',
+
+    'DISABLED_CONF',
+    'HIDDEN_CONF',
+    'UP_CONF',
+
+    'HIDDEN_LMD_PARENT',
+);
+our %EXPORT_TAGS = ( peer_states => \@EXPORT_OK );
 
 ######################################
 
@@ -100,6 +116,7 @@ sub begin {
     $c->stash->{'show_nav_button'}    = $show_nav_button;
     $c->stash->{'reload_nav'}         = $c->req->parameters->{'reload_nav'} || '';
     $c->stash->{'show_sounds'}        = 0;
+    $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} || 0;
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
@@ -188,29 +205,31 @@ sub begin {
         }
     }
 
+    $c->stash->{'action_menus_inserted'} = {};
+
     ###############################
     # parse cgi.cfg
     Thruk::Utils::read_cgi_cfg($c);
 
     ###############################
     # Authentication
-    $c->log->debug("checking auth");
+    $c->log->debug("checking auth") if Thruk->verbose;
     if($c->req->path_info =~ m~cgi-bin/remote\.cgi~mx) {
-        $c->log->debug("remote.cgi does not use authentication");
+        $c->log->debug("remote.cgi does not use authentication") if Thruk->debug;
     }
     elsif($c->req->path_info =~ m~cgi-bin/login\.cgi~mx) {
         $c->log->debug("login.cgi does not use authentication");
     } else {
         unless($c->user_exists) {
-            $c->log->debug("user not authenticated yet");
+            $c->log->debug("user not authenticated yet") if Thruk->verbose;
             unless ($c->authenticate()) {
                 # return 403 forbidden or kick out the user in other way
-                $c->log->debug("user is not authenticated");
+                $c->log->debug("user is not authenticated") if Thruk->verbose;
                 return $c->detach('/error/index/10');
             }
         }
         if($c->user_exists) {
-            $c->log->debug("user authenticated as: ".$c->user->get('username'));
+            $c->log->debug("user authenticated as: ".$c->user->get('username')) if Thruk->verbose;
             $c->stash->{'remote_user'}= $c->user->get('username');
         }
     }
@@ -245,12 +264,6 @@ sub begin {
             $c->stash->{'fav_counter'} = 1;
         }
     }
-
-    # bypass shadownaemon by url
-    ## no critic
-    $ENV{'THRUK_USE_SHADOW'} = 1;
-    $ENV{'THRUK_USE_SHADOW'} = 0 if $c->req->parameters->{'nocache'};
-    ## use critic
 
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
     # make usercontent folder based on env var if set. But only if it exists. Fallback to standard folder
@@ -418,21 +431,45 @@ sub add_defaults {
     $c->stash->{'defaults_added'} = 1;
 
     ###############################
+    # timezone settings
+    my $user_tz = $c->stash->{user_data}->{'tz'} || $c->config->{'default_user_timezone'} || "Server Setting";
+    my $timezone;
+    if($user_tz ne 'Server Setting') {
+        if($user_tz eq 'Local Browser') {
+            $timezone = $c->req->cookies->{'thruk_tz'};
+        } else {
+            $timezone = $user_tz;
+        }
+        if($timezone =~ m/^UTC(.+)$/mx) {
+            my $offset = $1*3600;
+            for my $tz (@{Thruk::Utils::get_timezone_data($c)}) {
+                if($tz->{'offset'} == $offset) {
+                    $timezone = $tz->{'text'};
+                    last;
+                }
+            }
+        }
+    }
+    ## no critic
+    if($timezone) {
+        # set users timezone
+        $ENV{'TZ'} = $timezone;
+        POSIX::tzset();
+    } else {
+        # set back to server timezone
+        $c->app->set_timezone();
+    }
+    ## use critic
+    $c->stash->{'user_tz'} = $user_tz;
+
+    ###############################
     $c->stash->{'escape_html_tags'}      = exists $c->config->{'cgi_cfg'}->{'escape_html_tags'}  ? $c->config->{'cgi_cfg'}->{'escape_html_tags'}  : 1;
     $c->stash->{'show_context_help'}     = exists $c->config->{'cgi_cfg'}->{'show_context_help'} ? $c->config->{'cgi_cfg'}->{'show_context_help'} : 0;
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
-    $c->stash->{'enable_shinken_features'} = 0;
-    if(exists $c->config->{'enable_shinken_features'}) {
-        $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
-    }
-
-    ###############################
-    $c->stash->{'enable_icinga_features'} = 0;
-    if(exists $c->config->{'enable_icinga_features'}) {
-        $c->stash->{'enable_icinga_features'} = $c->config->{'enable_icinga_features'};
-    }
+    $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'} || 0;
+    $c->stash->{'enable_icinga_features'}  = $c->config->{'enable_icinga_features'}  || 0;
 
     ###############################
     # redirect to error page unless we have a connection
@@ -462,6 +499,7 @@ sub add_defaults {
         # redirect to backends manager if admin user
         if( $c->config->{'use_feature_configtool'} ) {
             $c->req->parameters->{'sub'} = 'backends';
+            Thruk::Utils::set_message( $c, 'fail_message fixed', 'Please setup backend(s) connections first.');
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/conf.cgi?sub=backends");
         } else {
             return $c->detach("/error/index/14");
@@ -489,61 +527,58 @@ sub add_defaults {
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
-    # start shadow naemon process on first request
-    Thruk::Utils::Livecache::check_initial_start($c, $c->config);
-
-    ###############################
     my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe, $cached_data);
 
     ###############################
     # add program status
     # this is also the first query on every page, so do the
     # backend availability checks here
-    $c->stats->profile(begin => "AddDefaults::get_proc_info");
-    my $last_program_restart = 0;
-    my $retrys = 1;
-    # try 3 times if all cores are local
-    $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
-    $retrys = 1 if $safe; # but only once on safe/cached pages
+    if(!$no_config_adjustments && !$c->stash->{'config_adjustments'}->{'extra_backends'}) {
+        $c->stats->profile(begin => "AddDefaults::get_proc_info");
+        my $last_program_restart = 0;
+        my $retrys = 1;
+        # try 3 times if all cores are local
+        $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
+        $retrys = 1 if $safe; # but only once on safe/cached pages
 
-    for my $x (1..$retrys) {
-        # reset failed states, otherwise retry would be useless
-        $c->{'db'}->reset_failed_backends($c);
+        for my $x (1..$retrys) {
+            # reset failed states, otherwise retry would be useless
+            $c->{'db'}->reset_failed_backends($c);
 
-        eval {
-            $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
-        };
-        last unless $@;
-        $c->log->debug("retry $x, data source error: $@");
-        last if $x == $retrys;
-        sleep 1;
-    }
-    if($@) {
-        # side.html and some other pages should not be redirect to the error page on backend errors
+            eval {
+                $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
+            };
+            last unless $@;
+            $c->log->debug("retry $x, data source error: $@") if Thruk->debug;
+            last if $x == $retrys;
+            sleep 1;
+        }
+        if($@) {
+            # side.html and some other pages should not be redirect to the error page on backend errors
+            _set_possible_backends($c, $disabled_backends);
+            print STDERR $@ if $c->config->{'thruk_debug'};
+            return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
+            $c->log->debug("data source error: $@");
+            return $c->detach('/error/index/9');
+        }
+        $c->stash->{'last_program_restart'} = $last_program_restart;
+
+        ###############################
+        # read cached data again, groups could have changed
+        $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
+
+        ###############################
+        # disable backends by groups
+        if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
+            $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_user_data);
+        }
         _set_possible_backends($c, $disabled_backends);
-        print STDERR $@ if $c->config->{'thruk_debug'};
-        return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
-        $c->log->debug("data source error: $@");
-        return $c->detach('/error/index/9');
+        $c->stats->profile(end => "AddDefaults::get_proc_info");
     }
-    $c->stash->{'last_program_restart'} = $last_program_restart;
-
-    ###############################
-    # read cached data again, groups could have changed
-    $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
-
-    ###############################
-    # disable backends by groups
-    if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
-        $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_user_data);
-    }
-    _set_possible_backends($c, $disabled_backends);
-
-    $c->stats->profile(end => "AddDefaults::get_proc_info");
 
     ###############################
     # set some more roles
-    Thruk::Utils::set_dynamic_roles($c);
+    Thruk::Utils::set_dynamic_roles($c, undef, $c->user) if $c->user_exists;
 
     ###############################
     die_when_no_backends($c);
@@ -581,10 +616,7 @@ sub add_defaults {
 
     # config edit buttons?
     $c->stash->{'show_config_edit_buttons'} = 0;
-    if(    $c->config->{'use_feature_configtool'}
-       and $c->check_user_roles("authorized_for_configuration_information")
-       and $c->check_user_roles("authorized_for_system_commands")
-      ) {
+    if($c->config->{'use_feature_configtool'} && $c->check_user_roles("admin")) {
         # get backends with object config
         for my $peer (@{$c->{'db'}->get_peers(1)}) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
@@ -607,6 +639,9 @@ sub add_defaults {
             last;
         }
     }
+
+    ###############################
+    $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
 
     ###############################
     # user / group specific config?
@@ -666,6 +701,12 @@ sub add_defaults {
                 $c->{'db'}->init();
             }
             add_defaults($c, $safe, 1);
+        }
+
+        # now double check if this user is allowed to use api keys
+        if(!$c->config->{'api_keys_enabled'} && $c->req->header('X-Thruk-Auth-Key')) {
+            $c->error("this account is not allowed to use api keys.");
+            return;
         }
     }
 
@@ -773,13 +814,13 @@ sub _set_possible_backends {
             next;
         }
         $backend_detail{$back} = {
-            'name'       => $peer->{'name'},
-            'addr'       => $peer->{'addr'},
-            'type'       => $peer->{'type'},
-            'disabled'   => $disabled_backends->{$back} || REACHABLE,
-            'running'    => 0,
-            'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
-            'section'    => $peer->{'section'} || 'Default',
+            'name'        => $peer->{'name'},
+            'addr'        => $peer->{'addr'},
+            'type'        => $peer->{'type'},
+            'disabled'    => $disabled_backends->{$back} || REACHABLE,
+            'running'     => 0,
+            'last_error'  => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
+            'section'     => $peer->{'section'} || 'Default',
         };
         if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
             $backend_detail{$back}->{'running'} = 1;
@@ -826,6 +867,9 @@ sub update_site_panel_hashes {
             data_src_version => '',
             program_start    => '',
         };
+        if($peer->{'last_online'}) {
+            $initial_backends->{$back}->{'last_online'} = time() - $peer->{'last_online'};
+        }
         if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}) {
             $initial_backends->{$back}->{'version'}          = $c->stash->{'pi_detail'}->{$back}->{'program_version'};
             $initial_backends->{$back}->{'data_src_version'} = $c->stash->{'pi_detail'}->{$back}->{'data_source_version'};
@@ -898,7 +942,7 @@ sub _calculate_section_totals {
             $section->{$total_key}++;
             $section->{'total'}++;
             $initial_backends->{$pd}->{'cls'} = $class;
-            my $last_error = ($initial_backends->{$pd}->{'name'} || '').': OK';
+            my $last_error =  'OK';
             if($c->stash->{'failed_backends'}->{$pd}) {
                 $last_error = $c->stash->{'failed_backends'}->{$pd};
             }
@@ -992,46 +1036,6 @@ sub set_processinfo {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
         $processinfo = $c->{'db'}->get_processinfo();
         if(ref $processinfo eq 'HASH') {
-            my $missing_keys = [];
-            for my $peer (@{$c->{'db'}->get_peers()}) {
-                my $key  = $peer->peer_key();
-                my $name = $peer->peer_name();
-                $processinfo->{$key}->{'peer_name'} = $name;
-                if(scalar keys %{$processinfo->{$key}} > 5) {
-                    $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
-                }
-
-                # check if we have original datasource and core version when using shadownaemon
-                # but only if the backend itself is available
-                if($peer->{'cacheproxy'} && !$cached_data->{'real_processinfo'}->{$key} && !$c->stash->{'failed_backends'}->{$key}) {
-                    push @{$missing_keys}, $key;
-                }
-            }
-            if(scalar @{$missing_keys} > 0) {
-                local $ENV{'THRUK_USE_SHADOW'} = 0;
-                $c->stats->profile(begin => "AddDefaults::set_processinfo fetch shadowed info");
-                my $real_processinfo;
-                eval {
-                    $real_processinfo = $c->{'db'}->get_processinfo(backend => $missing_keys);
-                };
-                $c->log->debug("get_processinfo: ".$@) if $@;
-                if(ref $real_processinfo eq 'HASH') {
-                    for my $k (keys %{$real_processinfo}) {
-                        if(scalar keys %{$real_processinfo->{$k}} > 5) {
-                            $cached_data->{'real_processinfo'}->{$k} = $real_processinfo->{$k};
-                        }
-                    }
-                }
-                $c->stats->profile(end => "AddDefaults::set_processinfo fetch shadowed info");
-            }
-
-            my $missing = 0;
-            for my $key (keys %{$processinfo}) {
-                if(!$Thruk::Backend::Pool::peers->{$key}) {
-                    $missing++;
-                }
-            }
-
             if($ENV{'THRUK_USE_LMD'}) {
                 ($processinfo, $cached_data) = check_federation_peers($c, $processinfo, $cached_data);
             }
@@ -1117,28 +1121,26 @@ sub _set_enabled_backends {
     ###############################
     # by args
     if(defined $backends) {
-        $c->log->debug('_set_enabled_backends() by args');
+        $c->log->debug('_set_enabled_backends() by args') if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
-        if(ref $backends eq '') {
-            my @tmp = split(/\s*,\s*/mx, $backends);
-            $backends = \@tmp;
-        }
-        for my $b (@{$backends}) {
-            # peer key can be name too
-            if($b eq 'ALL') {
-                for my $peer (@{$c->{'db'}->get_peers()}) {
-                    $disabled_backends->{$peer->{'key'}} = 0;
-                }
-            } else {
-                my $peer = $c->{'db'}->get_peer_by_key($b);
-                if($peer) {
-                    $disabled_backends->{$peer->{'key'}} = 0;
+        for my $str (@{Thruk::Utils::list($backends)}) {
+            for my $b (split(/\s*,\s*/mx, $str)) {
+                # peer key can be name too
+                if($b eq 'ALL') {
+                    for my $peer (@{$c->{'db'}->get_peers()}) {
+                        $disabled_backends->{$peer->{'key'}} = 0;
+                    }
                 } else {
-                    # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
-                    #die("got no peer for: ".$b)
+                    my $peer = $c->{'db'}->get_peer_by_key($b);
+                    if($peer) {
+                        $disabled_backends->{$peer->{'key'}} = 0;
+                    } else {
+                        # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
+                        #die("got no peer for: ".$b)
+                    }
                 }
             }
         }
@@ -1146,12 +1148,12 @@ sub _set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
-        $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'}));
+        $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
-        for my $b (split(/,/mx, $ENV{'THRUK_BACKENDS'})) {
+        for my $b (split(/;/mx, $ENV{'THRUK_BACKENDS'})) {
             # peer key can be name too
             if($b eq 'ALL') {
                 for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -1168,20 +1170,26 @@ sub _set_enabled_backends {
     ###############################
     # by param
     elsif($num_backends > 1 and defined $backend) {
-        $c->log->debug('_set_enabled_backends() by param');
-        # reset
-        for my $peer (@{$c->{'db'}->get_peers()}) {
-            $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
-        }
-        for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
-            $disabled_backends->{$b} = 0;
+        $c->log->debug('_set_enabled_backends() by param') if Thruk->debug;
+        if($backend eq 'ALL') {
+            for my $peer (@{$c->{'db'}->get_peers()}) {
+                $disabled_backends->{$peer->{'key'}} = 0;
+            }
+        } else {
+            # reset
+            for my $peer (@{$c->{'db'}->get_peers()}) {
+                $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
+            }
+            for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
+                $disabled_backends->{$b} = 0;
+            }
         }
     }
 
     ###############################
     # by cookie
     elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
-        $c->log->debug('_set_enabled_backends() by cookie');
+        $c->log->debug('_set_enabled_backends() by cookie') if Thruk->debug;
         for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -1189,7 +1197,7 @@ sub _set_enabled_backends {
         }
     }
     elsif(defined $c->{'db'}) {
-        $c->log->debug('_set_enabled_backends() using defaults');
+        $c->log->debug('_set_enabled_backends() using defaults') if Thruk->debug;
         my $display_too = 0;
         if(defined $c->req->header('user-agent') and $c->req->header('user-agent') !~ m/thruk/mxi) {
             $display_too = 1;
@@ -1220,7 +1228,7 @@ sub _set_enabled_backends {
     if(defined $backends) {
         _set_possible_backends($c, $disabled_backends);
     }
-    $c->log->debug('disabled_backends: '.Dumper($disabled_backends));
+    $c->log->debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
     return($disabled_backends, $has_groups);
 }
 
@@ -1369,6 +1377,15 @@ sub check_federation_peers {
         $processinfo = $c->{'db'}->get_processinfo();
         for my $key (keys %{$processinfo}) {
             $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
+        }
+    }
+    # set a few extra infos
+    for my $d (@{$all_sites_info}) {
+        my $key = $d->{'key'};
+        my $peer = $Thruk::Backend::Pool::peers->{$key};
+        next unless $peer;
+        for my $col (qw/last_online last_update last_error/) {
+            $peer->{$col} = $d->{$col};
         }
     }
     return($processinfo, $cached_data);

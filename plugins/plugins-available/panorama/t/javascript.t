@@ -13,6 +13,7 @@ BEGIN {
     eval "use Test::JavaScript";
     plan skip_all => 'Test::JavaScript required' if $@;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    $ENV{'THRUK_QUIET'} = 1;
 }
 
 #################################################
@@ -89,6 +90,7 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_p
         $file = 'root/thruk/'.$file;
     }
     next if $file =~ m|OpenLayers|mx;
+    next if $file =~ m|jquery|mxi;
     ok($file, $file);
     js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
 }

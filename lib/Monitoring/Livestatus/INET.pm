@@ -74,9 +74,7 @@ sub _open {
         $tls = 1;
     }
 
-    my $remaining = alarm($self->{'connect_timeout'});
     eval {
-        local $SIG{'ALRM'} = sub { die("connection timeout"); };
         if($tls) {
             $sock = IO::Socket::SSL->new(%{$options});
         } else {
@@ -89,15 +87,12 @@ sub _open {
             }
             $Monitoring::Livestatus::ErrorCode    = 500;
             $Monitoring::Livestatus::ErrorMessage = $msg;
-            alarm(0);
             return;
         }
 
         setsockopt($sock, IPPROTO_TCP, TCP_NODELAY, 1);
 
     };
-    alarm(0);
-    alarm($remaining) if $remaining;
 
     if($@) {
         $Monitoring::Livestatus::ErrorCode    = 500;

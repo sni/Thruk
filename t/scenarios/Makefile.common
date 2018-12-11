@@ -7,26 +7,28 @@ EXPECTED_BACKENDS=1
 
 wait_start:
 	$(THRUK) cache clean
-	$(MAKE) extra_wait_start
 	for x in $$(seq $(STARTUPWAIT)); do \
 	   if [ $$($(THRUK) -l 2>&1 | grep -v ^Def | grep -v ^- | grep -v ERROR | grep OK | wc -l) -eq $(EXPECTED_BACKENDS) ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "ERROR: startup failed"; docker ps; $(THRUK) -l; exit 1; fi; \
 	done
 	$(THRUK) -l
+	$(MAKE) extra_wait_start
 
 test: wait_start
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t
+	$(MAKE) extra_test
 
 test_verbose: wait_start
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
+	$(MAKE) extra_test
 
 server:
-	$(MAKE) clean
-	$(MAKE) prepare
 	cd ../../.. && THRUK_PERFORMANCE_DEBUG=1 ./script/thruk_server.pl -r
 
 prepare:
-	docker-compose up --build --remove-orphans -d
+	docker-compose build
+	# try up twice, it fails occacionally with bind errors (bind: address already in use)
+	docker-compose up --remove-orphans -d || ( echo "*** startup failed retrying in 5 seconds... ***" && sleep 5 && docker-compose up --remove-orphans -d )
 	docker-compose ps
 	$(MAKE) extra_prepare
 
@@ -34,6 +36,7 @@ clean:
 	docker-compose kill
 	docker-compose rm -f
 	-docker network prune -f
+	-[ $$(docker ps -q | wc -l) -eq 0 ] || docker kill $$(docker ps -q)
 	$(MAKE) extra_clean
 
 update:
@@ -44,3 +47,5 @@ extra_wait_start:
 extra_clean:
 
 extra_prepare:
+
+extra_test:

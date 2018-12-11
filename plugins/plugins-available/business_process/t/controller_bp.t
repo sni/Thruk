@@ -5,7 +5,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 39;
+    plan tests => 47;
 }
 
 BEGIN {
@@ -30,6 +30,7 @@ for my $url (@{$pages}) {
 # test json some pages
 my $json_pages = [
     '/thruk/cgi-bin/bp.cgi?action=templates',
+    '/thruk/r/thruk/bp',
 ];
 
 for my $url (@{$json_pages}) {
