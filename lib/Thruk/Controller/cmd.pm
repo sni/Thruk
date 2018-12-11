@@ -779,7 +779,15 @@ sub _bulk_send_backend {
         }
     }
     if(!$testmode) {
-        $c->{'db'}->send_command( %{$options} );
+        eval {
+            $c->{'db'}->send_command(%{$options});
+        };
+        my $err = $@;
+        if($err) {
+            $err =~ s/(\ at\ .*?\.pm\ line\ \d+\.)//gmx;
+            Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
+            return;
+        }
         my $cached_proc = $c->cache->get->{'global'} || {};
         for my $key (split(/,/mx, $backends)) {
             delete $cached_proc->{'processinfo'}->{$key};

@@ -8,6 +8,7 @@ use Carp qw/carp croak confess/;
 use Digest::MD5 qw(md5_hex);
 use Cpanel::JSON::XS ();
 use Storable qw/dclone/;
+use IO::Select;
 
 use Monitoring::Livestatus::INET qw//;
 use Monitoring::Livestatus::UNIX qw//;
@@ -1158,9 +1159,20 @@ sub _read_socket_do {
     my($self, $sock, $statement) = @_;
     my($recv,$header);
 
-    # COMMAND statements never return something
+    # COMMAND statements might return a error message
     if($statement && $statement =~ m/^COMMAND/mx) {
-        return('201', $self->_get_error(201), undef);
+        my $s = IO::Select->new();
+        $s->add($sock);
+        if($s->can_read(0.5)) {
+            chomp($recv = <$sock>);
+        }
+        if($recv) {
+            if($recv =~ m/^(\d+):\s*(.*)$/mx) {
+                return($1, $2, undef);
+            }
+            return('400', $self->_get_error(400), $recv);
+        }
+        return('200', $self->_get_error(200), undef);
     }
 
     $sock->read($header, 16) or return($self->_socket_error($statement, $sock, 'reading header from socket failed, check your livestatus logfile: '.$!));
