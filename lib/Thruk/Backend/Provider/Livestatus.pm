@@ -175,6 +175,7 @@ sub _raw_query {
     my($self, $query) = @_;
     my($socket, $msg, undef) = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
     die($msg) if $msg;
+    shutdown($socket, 1) if $query =~ m/^COMMAND/mx;
     local $/ = undef;
     my $res = <$socket>;
     $self->{'live'}->{'backend_obj'}->_close();

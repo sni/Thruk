@@ -986,11 +986,10 @@ sub _open {
 
 ########################################
 sub _close {
-    my($self, $sock) = @_;
-    undef $self->{'sock'};
+    my($self) = @_;
+    my $sock = delete $self->{'sock'};
     return($self->{'CONNECTOR'}->_close($sock));
 }
-
 
 ########################################
 
@@ -1204,7 +1203,7 @@ sub _read_socket_do {
         }
     }
 
-    $self->_close($sock) unless $self->{'keepalive'};
+    $self->_close() unless $self->{'keepalive'};
     if($status >= 400 && $recv) {
         $msg .= ' - '.$recv;
     }
