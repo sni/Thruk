@@ -478,6 +478,8 @@ sub log {
 sub audit_log {
     my($self, $msg) = @_;
 
+    $self->log->info($msg);
+
     # log to thruk.log but remain screen log setting
     if($self->{'_log_type'} && $self->{'_log_type'} eq 'screen') {
         local $ENV{'THRUK_SRC'} = undef;
@@ -488,8 +490,6 @@ sub audit_log {
             # change back
             $self->{'_log'} = 'screen';
         }
-    } else {
-        $self->log->info($msg);
     }
 
     return;
