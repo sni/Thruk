@@ -1164,9 +1164,10 @@ sub _read_socket_do {
         my $s = IO::Select->new();
         $s->add($sock);
         if($s->can_read(0.5)) {
-            chomp($recv = <$sock>);
+            $recv = <$sock>;
         }
         if($recv) {
+            chomp($recv);
             if($recv =~ m/^(\d+):\s*(.*)$/mx) {
                 return($1, $recv, undef);
             }

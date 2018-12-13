@@ -842,7 +842,9 @@ sub _req {
         if(ref $data->{'output'} eq 'ARRAY') {
             # type, size, data
             if($data->{'output'}->[3]) {
-                die($data->{'output'}->[3]);
+                my $err = $data->{'output'}->[3];
+                $err =~ s/^ERROR:\s*//gmx;
+                die($err);
             }
             $self->_replace_peer_key($data->{'output'}->[2]);
 
