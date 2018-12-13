@@ -1160,6 +1160,7 @@ sub _read_socket_do {
 
     # COMMAND statements might return a error message
     if($statement && $statement =~ m/^COMMAND/mx) {
+        shutdown($sock, 1);
         my $s = IO::Select->new();
         $s->add($sock);
         if($s->can_read(0.5)) {
@@ -1167,7 +1168,7 @@ sub _read_socket_do {
         }
         if($recv) {
             if($recv =~ m/^(\d+):\s*(.*)$/mx) {
-                return($1, $2, undef);
+                return($1, $recv, undef);
             }
             return('400', $self->_get_error(400), $recv);
         }

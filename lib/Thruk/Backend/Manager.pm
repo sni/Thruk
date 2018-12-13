@@ -1433,7 +1433,12 @@ sub _do_on_peers {
         eval {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
         };
-        if($@ && !$c->stash->{'lmd_ok'}) {
+        my $err = $@;
+        if($err && !$c->stash->{'lmd_ok'}) {
+            # catch command errors
+            if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
+                die($err);
+            }
             Thruk::Utils::LMD::check_proc($c->config, $c, 1);
             sleep(1);
             # then retry again
