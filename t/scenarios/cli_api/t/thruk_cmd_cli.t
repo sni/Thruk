@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 116;
+plan tests => 139;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -65,6 +65,27 @@ TestUtils::test_command({
     cmd     => '/usr/bin/env thruk -A omdadmin url "status.cgi?host=all&servicestatustypes=1&style=detail"',
     like    => ['/Current Network Status/'],
     waitfor => '(0|1)\ Matching\ Service\ Entries',
+});
+
+###########################################################
+# logging on rest api
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk r -d "" /hosts/localhost/cmd/schedule_forced_host_check',
+    like    => ['/successfully submitted/', '/COMMAND/', '/SCHEDULE_FORCED_HOST_CHECK/'],
+    unlike  => ['/cmd:/'],
+});
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk r --local -d "" /hosts/localhost/cmd/schedule_forced_host_check',
+    like    => ['/successfully submitted/', '/COMMAND/', '/SCHEDULE_FORCED_HOST_CHECK/'],
+    unlike  => ['/cmd:/'],
+});
+
+###########################################################
+# errors on external commands
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk r -d "comment_data=test" -d "triggered_by=test" /hosts/localhost/cmd/schedule_host_downtime',
+    errlike => ['/"error"/', '/parse ulong argument trigger_id/', '/No digits found in ulong/'],
+    unlike  => ['/successfully submitted/', '/COMMAND/', '/SCHEDULE_HOST_DOWNTIME/'],
 });
 
 ###########################################################

@@ -11,3 +11,6 @@ services:
         - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
         - .:/test:ro
+    # required for strace
+    #cap_add:
+    #    - SYS_PTRACE
