@@ -477,9 +477,8 @@ sub log {
 =cut
 sub audit_log {
     my($self, $msg) = @_;
-    $self->log->info($msg);
 
-    # if screen logging is active, log to thruk.log as well
+    # log to thruk.log but remain screen log setting
     if($self->{'_log_type'} && $self->{'_log_type'} eq 'screen') {
         local $ENV{'THRUK_SRC'} = undef;
         $self->init_logging();
@@ -489,6 +488,8 @@ sub audit_log {
             # change back
             $self->{'_log'} = 'screen';
         }
+    } else {
+        $self->log->info($msg);
     }
 
     return;

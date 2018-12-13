@@ -732,6 +732,7 @@ sub bulk_send {
     my($c, $commands) = @_;
 
     delete $c->stash->{'last_command_error'};
+    delete $c->stash->{'last_command_lines'};
     my $rc = 1;
     for my $backends (keys %{$commands}) {
         # remove duplicate commands
@@ -780,6 +781,8 @@ sub _bulk_send_backend {
             $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
         } else {
             $c->audit_log($logstr);
+            $c->stash->{'last_command_lines'} = [] unless $c->stash->{'last_command_lines'};
+            push @{$c->stash->{'last_command_lines'}}, sprintf("%s%s", $cmd, ($c->stash->{'extra_log_comment'}->{$cmd} || ''));
         }
     }
     if(!$testmode) {

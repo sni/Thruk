@@ -133,9 +133,9 @@ sub _rest_get_external_command {
     Thruk::Controller::cmd::add_remove_comments_commands_from_disabled_commands($c, $commands, $cmd->{'nr'}, $name, $description);
     Thruk::Controller::cmd::bulk_send($c, $commands);
     if($c->stash->{'last_command_error'}) {
-        return({ 'message' => 'sending command failed', 'error' => $c->stash->{'last_command_error'}, code => 400 });
+        return({ 'message' => 'sending command failed', 'error' => $c->stash->{'last_command_error'}, code => 400, commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
     }
-    return({ 'message' => 'Command successfully submitted' });
+    return({ 'message' => 'Command successfully submitted', commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
 }
 
 ##########################################################
