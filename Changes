@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - display external commands errors if possible
+            - right now only naemon >= 1.0.9 does support this
           - Panorama:
             - fix panels not beeing updated in single window mode
 

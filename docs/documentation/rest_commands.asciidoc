@@ -13,6 +13,34 @@ livestatus information.
 Read more about the link:rest.html[REST API] itself. This page contains
 the comprehensive list of all available external commands.
 
+== Response
+
+In case the command was successful, a simple json message is returned:
+
+```
+    %> thruk r -d "comment_data=test" /hosts/localhost/cmd/schedule_host_downtime
+    {
+      "message" : "Command successfully submitted"
+    }
+```
+
+However, due to the way external commands are implemented throughout the various
+cores, this message does not neccessarily mean the command was successful. Only
+the submission was successful.
+
+If the core supports it (which is currently only Naemon >= 1.0.9) you will get
+a error response if something did not work like this:
+
+```
+    %> thruk r -d "comment_data=test" -d "triggered_by=xxx" /hosts/localhost/cmd/schedule_host_downtime
+    {
+      "code" : 400,
+      "error" : "400: Couldn't parse ulong argument trigger_id (argument 4): No digits found in ulong 'xxx'\n",
+      "message" : "sending command failed"
+    }
+```
+
+
 == Example Usage
 
 All examples can be found on the link:rest_examples.html#sending_commands[REST API Examples page].
