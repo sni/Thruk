@@ -50,7 +50,7 @@ sub cmd {
         delete $c->app->{'_log'};
         local $ENV{'THRUK_SRC'} = undef;
         $c->app->init_logging();
-    };
+    }
     my $url = shift @{$commandoptions} || '';
     if(!$url) {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
