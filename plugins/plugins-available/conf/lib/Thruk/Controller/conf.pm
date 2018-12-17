@@ -966,6 +966,36 @@ sub _process_objects_page {
                     _clone_refs($c, $obj, $c->req->parameters->{'cloned'}, $c->req->parameters->{'clone_ref'});
                 }
             }
+
+            # save changes to cgi.cfg
+            my $type = $obj->get_type();
+            my $file = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
+            if($c->stash->{'conf_config'}->{'cgi.cfg'} && ($type eq 'contactgroup' || $type eq 'contact') && -w $file) {
+                my $name     = $obj->get_name();
+                my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+                my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+                my $new_data              = {};
+                for my $key (keys %{$c->req->parameters}) {
+                    next unless $key =~ m/authdata\.authorized_for_/mx;
+                    $key =~ s/^authdata\.//gmx;
+                    my $key2 = $key;
+                    if($type eq 'contactgroup') {
+                        $key2 =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
+                    }
+                    my $users = {};
+                    for my $usr (@{$data->{$key2}->[1]}) {
+                        $users->{$usr} = 1;
+                    }
+                    if($c->req->parameters->{'authdata.'.$key}) {
+                        $users->{$name} = 1;
+                    } else {
+                        delete $users->{$name};
+                    }
+                    @{$new_data->{$key2}} = sort keys %{$users};
+                }
+                _store_changes($c, $file, $new_data, $defaults);
+            }
+
             if(defined $c->req->parameters->{'save_and_reload'}) {
                 return if _apply_config_changes($c);
             }
@@ -1090,6 +1120,26 @@ sub _process_objects_page {
         }
         $c->stash->{'file_link'} = $obj->{'file'}->{'display'} if defined $obj->{'file'};
         _gather_references($c, $obj);
+
+        # add roles
+        if($c->stash->{'conf_config'}->{'cgi.cfg'} && ($c->stash->{'type'} eq 'contactgroup' || $c->stash->{'type'} eq 'contact')) {
+            my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
+            my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+            my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+            my $roles = $Thruk::Authentication::User::possible_roles;
+            $c->stash->{'md5'}       = $md5;
+            $c->stash->{'role_keys'} = $roles;
+            for my $role (@{$roles}) {
+                $c->stash->{'roles'}->{$role} = 0;
+                my $tstrole = $role;
+                if($c->stash->{'type'} eq 'contactgroup') {
+                    $tstrole =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
+                }
+                for my $tst (@{$data->{$tstrole}->[1]}) {
+                    $c->stash->{'roles'}->{$role}++ if $tst eq $c->stash->{'data_name'};
+                }
+            }
+        }
     }
 
     # set default type for start page

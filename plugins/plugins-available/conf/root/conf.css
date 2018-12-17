@@ -1,8 +1,8 @@
 body.config TABLE.conftoolobj {
-  min-width: 670px;
+  width: 720px;
 }
 body.config TABLE.conftoolobj INPUT[type=text] {
-  width: 400px;
+  width: 450px;
 }
 body.config TABLE.conftoolobj TEXTAREA {
   white-space: pre-wrap; /* needed for IE8 */
@@ -12,7 +12,7 @@ body.config TABLE.conftoolobj INPUT#id_check_command_1 {
   width: 370px;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_2 {
-  width: 400px;
+  width: 450px;
 }
 body.config TABLE.conftoolobj INPUT[type=text].attrkey {
   width: 170px;

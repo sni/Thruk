@@ -30,11 +30,14 @@
 [% END %]
 <input type="hidden" name="referer" value="[% referer %]">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
-  <table border="0" class='data conftoolobj'[% IF bare %] width="100%"[% END %]>
+  <table border="0" class='data conftoolobj' style="table-layout: fixed;"[% IF bare %] width="100%"[% END %]>
     <tr>
-      <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' style="width:33%" id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
-      <th class='data[% IF subcat == 'templates' %] confSelected[% END %]' style="width:33%" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
-      <th class='data[% IF subcat == 'comp'      %] confSelected[% END %]' style="width:33%" id="sub_3" onclick="window.location.hash='#comp';set_sub(3)"><a href="#comp">Computed</a></th>
+      <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
+      <th class='data[% IF subcat == 'templates' %] confSelected[% END %]' id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
+      <th class='data[% IF subcat == 'comp'      %] confSelected[% END %]' id="sub_3" onclick="window.location.hash='#comp';set_sub(3)"><a href="#comp">Computed</a></th>
+      [% has_auth_section = 0; IF conf_config.exists('cgi.cfg') && ( type == "contactgroup" || type == "contact" ); has_auth_section = 1; %]
+      <th class='data[% IF subcat == 'auth'      %] confSelected[% END %]' id="sub_4" onclick="window.location.hash='#auth';set_sub(4)"><a href="#auth">Authorization</a></th>
+      [% END %]
     </tr>
     <tr>
       <td colspan=3>
@@ -47,7 +50,7 @@
             </td>
             <td class='dataVar dataUserVar'>
               [% IF object.defined('file') %]
-                [% object.get_type() | ucfirst %][% IF object.conf.defined('register') && object.conf.register == 0 %]&nbsp;Template[% END %]:
+                [% type | ucfirst %][% IF object.conf.defined('register') && object.conf.register == 0 %]&nbsp;Template[% END %]:
                 [%+ object.get_long_name('&nbsp;') %]
                 [% IF object.disabled %]<span style="color: #EB6900"> (disabled)</span>[% END %]
               [% ELSE %]
@@ -152,11 +155,33 @@
       </td>
     </tr>
 
+    [% IF has_auth_section %]
+    <tr style="[% IF subcat != 'auth' %]display:none[% END %]" class="sub_4">
+      <td class='dataVal' colspan=3 style="text-align: center;">
+        <input type="hidden" name="md5" value="[% md5 %]">
+        <table>
+          <tr>
+            <td colspan=2 class='dataVar dataUserVar'>Roles (cgi.cfg)</td>
+          </tr>
+          [% FOR auth = role_keys %]
+          <tr>
+            <td class='dataVar' align="left">[% auth %]</td>
+            <td class='dataVal'>
+              <input type="radio" name="authdata.[% auth %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
+              <input type="radio" name="authdata.[% auth %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
+            </td>
+          </tr>
+          [% END %]
+        </table>
+      </td>
+    </tr>
+    [% END %]
+
     [% IF ! readonly %]
-    <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
+    <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1 sub_4">
       <td colspan=3 class="data dataSubmit">
         [% IF object.get_id() != 'new' && ! bare %]
-        <input type="submit" name="send" value="raw edit" style="width:90px" class="conf_button">
+        <input type="submit" name="send" value="raw edit" style="width:90px" class="conf_button sub_1">
         [% END %]
         <button class="conf_apply_button conf_button" style="width:90px">apply</button>
       </td>
@@ -172,6 +197,7 @@
   if(window.location.hash == '#config')    { set_sub(1); }
   if(window.location.hash == '#templates') { set_sub(2); }
   if(window.location.hash == '#comp')      { set_sub(3); }
+  if(window.location.hash == '#auth')      { set_sub(4); }
 
   init_conf_tool_buttons();
 
