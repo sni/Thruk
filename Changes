@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.26-2   Tue Dec 18 17:33:08 CET 2018
           - display external commands errors if possible
             - right now only naemon >= 1.0.9 does support this
           - Panorama:
