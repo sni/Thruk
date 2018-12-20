@@ -621,11 +621,6 @@ sub set_default_config {
         chomp($config->{'extra_version'});
     }
 
-    # set apache status url
-    if($ENV{'CONFIG_APACHE_TCP_PORT'}) {
-        $config->{'apache_status'}->{'Site'} = 'http://127.0.0.1:'.$ENV{'CONFIG_APACHE_TCP_PORT'}.'/server-status';
-    }
-
     # additional user template paths?
     if(defined $config->{'user_template_path'} and defined $config->{templates_paths}) {
         if(scalar @{$config->{templates_paths}} == 0 || $config->{templates_paths}->[0] ne $config->{'user_template_path'}) {
@@ -1051,8 +1046,14 @@ sub _do_finalize_config {
         my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
         $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
         # bypass system reverse proxy for restricted cgi for permormance and locking reasons
-        if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi-bin/restricted.cgi$|mx) {
+        if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi\-bin/restricted\.cgi$|mx) {
             $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
+        }
+        if(scalar keys %{$config->{'apache_status'}} == 0) {
+            $config->{'apache_status'} = {
+                'Site'   => $proto.'://127.0.0.1:'.$siteport.'/server-status',
+                'System' => $proto.'://127.0.0.1/server-status',
+            };
         }
         $config->{'omd_apache_proto'} = $proto;
     }
