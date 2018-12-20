@@ -101,6 +101,11 @@ sub _rest_get_external_command {
         push @cmd_args, $val;
     }
 
+    # add missing value for reseting modified attributes
+    if($cmd->{'name'} eq 'change_host_modattr' || $cmd->{'name'} eq 'change_svc_modattr') {
+        push @cmd_args, 0;
+    }
+
     my $cmd_line = "COMMAND [".time()."] ".uc($cmd->{'name'});
     if(scalar @cmd_args > 0) {
         $cmd_line .= ';'.join(';', @cmd_args);
