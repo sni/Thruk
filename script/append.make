@@ -47,7 +47,7 @@ resetdaily:
 
 versionprecheck:
 	[ -e .git ] || { echo "changing versions only works in git clones!"; exit 1; }
-	[ `git status | grep -c 'working directory clean'` -eq 1 ] || { echo "git project is not clean, cannot tag version"; exit 1; }
+	[ `git status | grep -cP 'working (directory|tree) clean'` -eq 1 ] || { echo "git project is not clean, cannot tag version"; exit 1; }
 
 version:
 	script/thruk_version.sh
