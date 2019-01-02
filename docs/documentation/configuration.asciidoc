@@ -2269,6 +2269,7 @@ for details.
         *** `key`             optional client key for tls connections
         *** `ca_file`         ca file to verify tls server
         *** `verify`          set to 0 to disable any tls verification
+        *** `proxy`           optional proxy for http backends (ex.: http://proxyhost:port)
      ** `configtool`
         *** `core_type`       Give the config parser a hint about
                               your config. Can be 'naemon', 'nagios', 'icinga'
