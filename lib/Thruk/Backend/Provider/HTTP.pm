@@ -169,7 +169,7 @@ sub reconnect {
         } else {
             # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
             ## no critic
-            $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
+            $ENV{'HTTPS_PROXY'} = $self->{'proxy'};
             ## use critic
             # env proxy breaks the ssl proxy above
             #$self->{'ua'}->env_proxy();
