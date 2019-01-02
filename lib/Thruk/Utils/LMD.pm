@@ -377,6 +377,12 @@ sub _write_lmd_config {
         $site_config .= "tlsKey         = '".$peer->{'config'}->{'options'}->{'key'}."'\n"     if $peer->{'config'}->{'options'}->{'key'};
         $site_config .= "tlsCA          = '".$peer->{'config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'config'}->{'options'}->{'ca_file'};
         $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'config'}->{'options'}->{'verify'} && $peer->{'config'}->{'options'}->{'verify'} == 0);
+        $site_config .= "proxy          = '".$peer->{'config'}->{'options'}->{'proxy'}."'\n"   if $peer->{'config'}->{'options'}->{'proxy'};
+        if($peer->{'config'}->{'lmd_options'}) {
+            for my $key (sort keys %{$peer->{'config'}->{'lmd_options'}}) {
+                $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'config'}->{'lmd_options'}->{$key});
+            }
+        }
         $site_config .= "\n";
     }
 
