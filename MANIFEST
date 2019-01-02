@@ -1914,6 +1914,15 @@ t/scenarios/backend_nagios4/omd/playbook.yml
 t/scenarios/backend_nagios4/omd/test.cfg
 t/scenarios/backend_nagios4/thruk.conf
 t/scenarios/backend_nagios4/thruk_local.conf
+t/scenarios/backend_shinken/docker-compose.yml
+t/scenarios/backend_shinken/lmd.ini
+t/scenarios/backend_shinken/Makefile
+t/scenarios/backend_shinken/omd/Dockerfile
+t/scenarios/backend_shinken/omd/example.cfg
+t/scenarios/backend_shinken/omd/playbook.yml
+t/scenarios/backend_shinken/t/300-controller_tac.t
+t/scenarios/backend_shinken/thruk.conf
+t/scenarios/backend_shinken/thruk_local.conf
 t/scenarios/backend_tls_livestatus/client.key
 t/scenarios/backend_tls_livestatus/client.pem
 t/scenarios/backend_tls_livestatus/docker-compose.yml

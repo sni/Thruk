@@ -1,0 +1,8 @@
+site:
+    build: omd/
+    ports:
+        - "60080:80"
+        - "60443:443"
+        - "60557:6557"
+    environment:
+        - ANSIBLE_VERBOSITY=-v

@@ -1,0 +1,12 @@
+---
+- hosts: all
+  tasks:
+  - shell: omd config demo set APACHE_MODE own
+  - shell: omd config demo set CORE shinken
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - copy:
+      src: /root/example.cfg
+      dest: /omd/sites/demo/etc/nagios/conf.d/example.cfg
+      owner: demo
+      group: demo
+ 
