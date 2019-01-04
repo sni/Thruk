@@ -1,0 +1,22 @@
+---
+- hosts: all
+  tasks:
+  - shell: "sudo su - demo -c 'set_admin_password omd'"
+  - shell: "omd config demo set TMPFS off"
+  - copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+  - copy:
+      src: "/scenario/objects.cfg"
+      dest: "/omd/sites/demo/etc/naemon/conf.d/objects.cfg"
+      owner: "demo"
+      group: "demo"
+  - shell: sed -e "s/###SITE###/{{ lookup('env','PREFIX') }}/g" -i /omd/sites/demo/etc/naemon/conf.d/objects.cfg -i /omd/sites/demo/etc/thruk/thruk_local.conf
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo

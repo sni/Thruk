@@ -1,0 +1,12 @@
+== Overview
+
+this scenario tests federation with lmd or http. The topology looks like:
+
+  thruk
+  ├── tier1a
+  │   ├── tier2a
+  │   │    ├── tier3a
+  │   │    └── tier3b
+  │   └── tier2b
+  ├── tier1b
+  └── tier1c

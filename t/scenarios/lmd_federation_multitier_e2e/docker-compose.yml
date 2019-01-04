@@ -1,0 +1,65 @@
+version: '2'
+
+services:
+  tier1a:
+    build: tier1a/
+    ports:
+        - "60080:80"
+        - "60443:443"
+    environment:
+        - PREFIX=tier1a
+    volumes:
+        - .:/scenario:ro
+
+  tier1b:
+    build: tier1b/
+    ports:
+        - "60081:80"
+        - "60444:443"
+    environment:
+        - PREFIX=tier1b
+    volumes:
+        - .:/scenario:ro
+
+  tier1c:
+    build: tier1c/
+    ports:
+        - "60082:80"
+        - "60445:443"
+    environment:
+        - PREFIX=tier1c
+    volumes:
+        - .:/scenario:ro
+
+  tier2a:
+    build: tier2a/
+    environment:
+        - PREFIX=tier2a
+    volumes:
+        - .:/scenario:ro
+  tier2b:
+    build: tier2b/
+    environment:
+        - PREFIX=tier2b
+    volumes:
+        - .:/scenario:ro
+  tier2c:
+    build: tier2c/
+    environment:
+        - PREFIX=tier2c
+    volumes:
+        - .:/scenario:ro
+
+
+  tier3a:
+    build: tier3a/
+    environment:
+        - PREFIX=tier3a
+    volumes:
+        - .:/scenario:ro
+  tier3b:
+    build: tier3b/
+    environment:
+        - PREFIX=tier3b
+    volumes:
+        - .:/scenario:ro
