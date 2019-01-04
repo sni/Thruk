@@ -372,7 +372,11 @@ sub _redirect_or_success {
     if(bulk_send($c, $c->stash->{'commands2send'})) {
         $c->log->debug("bulk sending commands succeeded");
     } else {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Sending Commands failed' );
+        if($c->stash->{'last_command_error'}) {
+            Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$c->stash->{'last_command_error'});
+        } else {
+            Thruk::Utils::set_message($c, 'fail_message', "sending command failed");
+        }
         $wait = 0;
     }
 
