@@ -84,7 +84,7 @@ sub index {
     $c->{'panorama_etc'} = $c->config->{'etc_path'}.'/panorama';
     Thruk::Utils::IO::mkdir_r($c->{'panorama_etc'});
 
-    # REMOVE AFTER: 01.01.2019
+    # REMOVE AFTER: 01.01.2021
     for my $oldfile (glob($c->{'panorama_var'}.'/*.tab')) {
         move($oldfile, $c->{'panorama_etc'}) or confess("cannot move dashboard $oldfile to ".$c->{'panorama_etc'}.": ".$!);
     }
