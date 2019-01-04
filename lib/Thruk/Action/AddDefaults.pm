@@ -22,6 +22,7 @@ use Data::Dumper qw/Dumper/;
 use Cpanel::JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
 use POSIX ();
+use Storable qw/dclone/;
 use Thruk::Utils::Filter ();
 
 our @stash_config_keys = qw/
@@ -1337,15 +1338,17 @@ sub check_federation_peers {
         if(!$Thruk::Backend::Pool::peers->{$key}) {
             my $parent = $Thruk::Backend::Pool::peers->{$row->{'parent'}};
             next unless $parent;
-            my $peer = Thruk::Backend::Peer->new({
+            my $subpeerconfig = {
                 name => $row->{'name'},
                 id   => $key,
-                type => "livestatus",
+                type => $parent->{'config'}->{'type'},
                 section => $row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name(),
-                options => {
-                    peer => $row->{'addr'},
-                },
-            }, $c->config, {});
+                options => dclone($parent->{'config'}->{'options'}),
+            };
+            delete $subpeerconfig->{'options'}->{'name'};
+            delete $subpeerconfig->{'options'}->{'peer'};
+            $subpeerconfig->{'options'}->{'peer'} = $row->{'addr'};
+            my $peer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
             $peer->{'lmd_fake_backend'} = 1;
             $Thruk::Backend::Pool::peers->{$peer->{'key'}} = $peer;
             push @{$Thruk::Backend::Pool::peer_order}, $peer->{'key'};
