@@ -1343,7 +1343,7 @@ sub check_federation_peers {
                 id   => $key,
                 type => $parent->{'config'}->{'type'},
                 section => $row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name(),
-                options => dclone($parent->{'config'}->{'options'}),
+                options => $parent->{'config'}->{'type'} eq 'http' ? dclone($parent->{'config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
             delete $subpeerconfig->{'options'}->{'peer'};
