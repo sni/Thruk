@@ -92,7 +92,7 @@ sub cmd {
     $c->stats->profile(begin => "_cmd_rest($url)");
     my $sub_c = $c->sub_request('/r/v1/'.$url, uc($opt->{'method'}), $postdata, 1);
     $c->stats->profile(end => "_cmd_rest($url)");
-    return({output => $sub_c->res->body, rc => ($sub_c->res->code == 200 ? 0 : 1) });
+    return({output => $sub_c->res->body, rc => ($sub_c->res->code == 200 ? 0 : 1), all_stdout => 1 });
 }
 
 ##############################################
