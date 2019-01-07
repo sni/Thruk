@@ -10,7 +10,7 @@ The bp command provides all business process related cli commands.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] bp [commit|all|<nr>]
+  Usage: thruk [globaloptions] bp [commit|all|<nr>] [--worker=<nr>]
 
 =head1 OPTIONS
 
@@ -33,12 +33,19 @@ The bp command provides all business process related cli commands.
 
     recalculate/update specific business process
 
+=item B<--worker>
+
+    use this number of worker processes to calculate all processes.
+
+    Defaults to 'auto' which trys to find a suitable number automatically.
+
 =back
 
 =cut
 
 use warnings;
 use strict;
+use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval sleep/;
 use Thruk::Utils;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
@@ -54,11 +61,23 @@ use Thruk::Utils::Log qw/_error _info _debug _trace/;
 =cut
 sub cmd {
     my($c, $action, $commandoptions, $data, $src, $global_options) = @_;
-    $c->stats->profile(begin => "_cmd_bp($action)");
-
     if(!$c->config->{'use_feature_bp'}) {
         return("ERROR - business process addon is disabled\n", 1);
     }
+
+    $c->stats->profile(begin => "_cmd_bp($action)");
+    # parse options
+    my $opt = {
+      'worker' => 'auto',
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    Getopt::Long::Configure('pass_through');
+    Getopt::Long::GetOptionsFromArray($commandoptions,
+       "w|worker=i" => \$opt->{'worker'},
+    ) or do {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+    };
 
     eval {
         require Thruk::BP::Utils;
@@ -144,9 +163,16 @@ sub cmd {
             $worker_num = 5;
         }
     }
+    if($opt->{'worker'} ne 'auto') {
+        $worker_num = $opt->{'worker'};
+    }
+    if($worker_num <= 0) {
+        $worker_num = 1;
+    }
     _debug("calculating business process with ".$worker_num." workers");
     my $chunks = Thruk::Utils::array_chunk($bps, $worker_num);
 
+    my $rc = 0;
     for my $chunk (@{$chunks}) {
         my $child_pid;
         if($worker_num > 1) {
@@ -157,13 +183,21 @@ sub cmd {
             if($worker_num > 1) {
                 Thruk::Utils::External::_do_child_stuff();
             }
+            my $local_rc = 0;
             for my $bp (@{$chunk}) {
                 $last_bp = $bp;
-                _debug("[$$] updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
-                $bp->update_status($c);
+                _debug("[$$] updating bp '".$bp->{'name'}."'") if $Thruk::Utils::CLI::verbose >= 1;
+                eval {
+                    $bp->update_status($c);
+                };
+                if($@) {
+                    _error("[$$] bp '".$bp->{'name'}."' failed: $@");
+                    $local_rc = 1;
+                    $rc = 1;
+                }
                 _debug("[$$] OK") if $Thruk::Utils::CLI::verbose >= 1;
             }
-            exit if $worker_num > 1;
+            exit($local_rc) if $worker_num > 1;
         } else {
             _debug("worker start with pid: ".$child_pid);
             push @child_pids, $child_pid;
@@ -174,12 +208,12 @@ sub cmd {
     if($worker_num > 1) {
         while(1) {
             my $pid = wait();
-            my $rc  = $?;
             last if $pid == -1;
-            if($rc != 0) {
-                _error("worker ".$pid." exited with rc: ".$rc) if $rc != 0;
+            if($? != 0) {
+                $rc = $?>>8;
+                _error("worker ".$pid." exited with rc: ".$rc);
             } else {
-                _debug("worker ".$pid." exited with rc: ".$rc);
+                _debug("worker ".$pid." exited ok");
             }
             @child_pids = grep(!/^$pid$/mx, @child_pids);
             Time::HiRes::sleep(0.1);
@@ -188,10 +222,12 @@ sub cmd {
     alarm(0);
     _debug("all worker finished");
     my $elapsed = tv_interval($t0);
-    my $output = sprintf("OK - %d business processes updated in %.2fs\n", $num_bp, $elapsed);
-
     $c->stats->profile(end => "_cmd_bp($action)");
-    return($output, 0);
+
+    if($rc == 0) {
+        return(sprintf("OK - %d business processes updated in %.2fs\n", $num_bp, $elapsed), 0);
+    }
+    return(sprintf("FAILED - calculating business processes failed, please consult the log files or run manually with options '--worker=0', exit code: %d\n", $rc), $rc);
 }
 
 ##############################################
