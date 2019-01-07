@@ -653,6 +653,7 @@ sub _do_child_stuff {
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
     my $fallback_log = '/dev/null';
+    $fallback_log    = $c->config->{'log4perl_logfile_in_use'} if ($c && $c->config->{'log4perl_logfile_in_use'});
     $fallback_log    = $ENV{'OMD_ROOT'}.'/var/log/thruk.log' if $ENV{'OMD_ROOT'};
     open(STDOUT, '>>', $fallback_log);
     open(STDERR, '>>', $fallback_log);

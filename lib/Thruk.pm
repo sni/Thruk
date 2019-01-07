@@ -785,6 +785,7 @@ sub init_logging {
     require Log::Log4perl;
     my($log4perl_conf, $logger);
 
+    delete $self->config->{'log4perl_logfile_in_use'};
     if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' && $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
         if(defined $self->config->{'log4perl_conf'} && ! -s $self->config->{'log4perl_conf'} ) {
             die("\n\n*****\nfailed to load log4perl config: ".$self->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
