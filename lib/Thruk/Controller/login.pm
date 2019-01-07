@@ -201,6 +201,19 @@ sub index {
 
     $c->res->code(401);
 
+    if($keywords =~ m|/thruk/r/|mx || $c->want_json_response()) {
+        # respond with json error for the rest api
+        my $details = $c->stash->{'thruk_message_details'} || "no or invalid credentials used.";
+        $details =~ s/^.*~~//mx;
+        return $c->render(json => {
+            failed      => Cpanel::JSON::XS::true,
+            message     => $c->stash->{'thruk_message'} || "login required",
+            details     => $details,
+            description => "no or invalid credentials used.",
+            code        => 401,
+        });
+    }
+
     return 1;
 }
 

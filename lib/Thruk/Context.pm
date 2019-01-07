@@ -449,6 +449,28 @@ sub _url_encode {
     return(uri_escape(uri_unescape($str)));
 }
 
+
+=head2 want_json_response
+
+$c->want_json_response()
+
+returns true if request indicates a json response.
+
+=cut
+sub want_json_response {
+    my($c) = @_;
+    if($c->req->header('accept') && $c->req->header('accept') =~ m/application\/json/mx) {
+        return 1;
+    }
+    if($c->req->header('X-Thruk-Auth-Key')) {
+        return 1;
+    }
+    if($c->req->path_info =~ m%^/thruk/r/%mx) {
+        return 1;
+    }
+    return;
+}
+
 1;
 __END__
 
