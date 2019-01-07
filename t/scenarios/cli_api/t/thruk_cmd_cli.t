@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 138;
+plan tests => 139;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -84,8 +84,8 @@ TestUtils::test_command({
 # errors on external commands
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk r -d "comment_data=test" -d "triggered_by=test" /hosts/localhost/cmd/schedule_host_downtime',
-    errlike => ['/"error"/', '/parse ulong argument trigger_id/', '/No digits found in ulong/'],
-    unlike  => ['/successfully submitted/', '/COMMAND/', '/SCHEDULE_HOST_DOWNTIME/'],
+    like    => ['/"error"/', '/parse ulong argument trigger_id/', '/No digits found in ulong/', '/COMMAND/', '/SCHEDULE_HOST_DOWNTIME/'],
+    unlike  => ['/successfully submitted/'],
     exit    => 1,
 });
 
