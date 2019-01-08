@@ -29,20 +29,32 @@ sub index {
         $site = $1;
         $url  = $2;
     }
-    if(!$url) {
+    if(!$url || !$site) {
         return $c->detach('/error/index/25');
     }
-    if(!$c->config->{'graph_proxy_enabled'} || !$site) {
+    if(!$c->config->{'graph_proxy_enabled'}) {
         return $c->redirect_to($url);
     }
 
     my $peer = $c->{'db'}->get_peer_by_key($site);
-    if(!$peer || $peer->{'type'} ne 'http') {
-        return $c->redirect_to($url);
+    if(!$peer) {
+        die("no such peer: ".$site);
+    }
+    if($peer->{'type'} ne 'http') {
+        die("peer has type: ".$peer->{'type'});
+        #return $c->redirect_to($url);
     }
 
     my $session_id  = $c->req->cookies->{'thruk_auth'} || $peer->{'class'}->propagate_session_file($c);
     my $request_url = Thruk::Utils::absolute_url($peer->{'addr'}, $url);
+
+    # federated peers forward to the next hop
+    if($peer->{'federation'} && $peer->{'federation'}->{'type'} && $peer->{'federation'}->{'type'} eq 'http') {
+        $request_url = $peer->{'addr'};
+        $request_url =~ s|/thruk/?$||gmx;
+        $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
+    }
+
     if($c->req->{'env'}->{'QUERY_STRING'}) {
         $request_url = $request_url.'?'.$c->req->{'env'}->{'QUERY_STRING'};
     }

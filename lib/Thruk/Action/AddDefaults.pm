@@ -1349,7 +1349,13 @@ sub check_federation_peers {
             delete $subpeerconfig->{'options'}->{'peer'};
             $subpeerconfig->{'options'}->{'peer'} = $row->{'addr'};
             my $peer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
-            $peer->{'lmd_fake_backend'} = 1;
+            $peer->{'federation'} = {
+                parent_key  => $parent->{'key'},
+                key         => $row->{'federation_key'},
+                name        => $row->{'federation_name'},
+                addr        => $row->{'federation_addr'},
+                type        => $row->{'federation_type'},
+            };
             $Thruk::Backend::Pool::peers->{$peer->{'key'}} = $peer;
             push @{$Thruk::Backend::Pool::peer_order}, $peer->{'key'};
             $parent->{'disabled'} = HIDDEN_LMD_PARENT;
@@ -1360,7 +1366,7 @@ sub check_federation_peers {
     my $new_order = [];
     for my $key (@{$Thruk::Backend::Pool::peer_order}) {
         my $peer = $Thruk::Backend::Pool::peers->{$key};
-        if(!$peer->{'lmd_fake_backend'}) {
+        if(!$peer->{'federation'}) {
             push @{$new_order}, $key;
             next;
         }

@@ -803,6 +803,10 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 |addr                              | address of the remote site
 |bytes_received                    | total bytes received from this site
 |bytes_send                        | total bytes send to this site
+|federation_addr                   | contains the real address if using federation
+|federation_key                    | contains the real peer key if using federation
+|federation_name                   | contains the real name if using federation
+|federation_type                   | contains the real backend type if using federation
 |idling                            | flag if the connection is in idle mode
 |key                               | primary id of this site
 |last_error                        | last error message
@@ -1039,6 +1043,10 @@ lists configured backends
 |Attribute                         | Description
 |addr                              | address for this connection
 |connected                         | flag wether sites is connected (1) or not (0)
+|federation_addr                   | contains the real address if using federation
+|federation_key                    | contains the real peer key if using federation
+|federation_name                   | contains the real name if using federation
+|federation_type                   | contains the real backend type if using federation
 |id                                | id for this backend
 |last_error                        | error message if backend is not connected
 |name                              | name of the backend
