@@ -785,9 +785,9 @@ sub _bulk_send_backend {
             $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
         } else {
             $c->audit_log($logstr);
-            $c->stash->{'last_command_lines'} = [] unless $c->stash->{'last_command_lines'};
-            push @{$c->stash->{'last_command_lines'}}, sprintf("%s%s", $cmd, ($c->stash->{'extra_log_comment'}->{$cmd} || ''));
         }
+        $c->stash->{'last_command_lines'} = [] unless $c->stash->{'last_command_lines'};
+        push @{$c->stash->{'last_command_lines'}}, sprintf("%s%s", $cmd, ($c->stash->{'extra_log_comment'}->{$cmd} || ''));
     }
     if(!$testmode) {
         eval {
