@@ -10,6 +10,7 @@ services:
         - PREFIX=tier1a
     volumes:
         - .:/scenario:ro
+        - ../../../:/thruk:ro
 
   tier1b:
     build: tier1b/
