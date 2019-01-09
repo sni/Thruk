@@ -584,6 +584,7 @@ sub _check_exit_reason {
     my($sig) = @_;
     my $reason = longmess();
     my $now    = time();
+
     ## no critic
     if($reason =~ m|Thruk::Utils::CLI::_from_local|mx && -t 0) {
     ## use critic
@@ -591,28 +592,39 @@ sub _check_exit_reason {
         print STDERR "\nbailing out\n";
         return;
     }
-    # if we are in run_app, this means we are currently processing a request
-    if((defined $Thruk::Request::c && $now - $Thruk::Request::c->stash->{'time_begin'}->[0] > 10)
-       || $reason =~ m|Plack::Util::run_app|gmx) {
-        local $| = 1;
-        my $c = $Thruk::Request::c;
-        my $url = $c->req->url;
-        printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
-        printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
-        printf(STDERR "ERROR: timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
-        printf(STDERR "ERROR: Address:    %s\n", $c->req->address) if $c->req->address;
-        printf(STDERR "ERROR: Parameters: %s\n", _dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
-        if($c->stash->{errorDetails}) {
-            for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
-                printf(STDERR "ERROR: %s\n", $row);
-            }
-        }
-        printf(STDERR "ERROR: Stacktrace: \n%s\n", $reason);
-        # send sigusr1 to lmd to create a backtrace
-        if($c->config->{'use_lmd_core'}) {
-            Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);
+
+    if(!defined $Thruk::Request::c || $reason !~ m|Plack::Util::run_app|mx) {
+        # not processing any request right now -> simply exit
+        return;
+    }
+
+    my $request_runtime = $now - $Thruk::Request::c->stash->{'time_begin'}->[0];
+    if($request_runtime < 10) {
+        # probably a simple webserver restart, no worries yet
+        return;
+    }
+
+    # print stacktrace, possible timeout
+    local $| = 1;
+    my $c = $Thruk::Request::c;
+    my $url = $c->req->url;
+    printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
+    printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
+    printf(STDERR "ERROR: timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
+    printf(STDERR "ERROR: Address:    %s\n", $c->req->address) if $c->req->address;
+    printf(STDERR "ERROR: Parameters: %s\n", _dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    if($c->stash->{errorDetails}) {
+        for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
+            printf(STDERR "ERROR: %s\n", $row);
         }
     }
+    printf(STDERR "ERROR: Stacktrace: \n%s\n", $reason);
+
+    # send sigusr1 to lmd to create a backtrace as well
+    if($c->config->{'use_lmd_core'}) {
+        Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);
+    }
+
     return;
 }
 
