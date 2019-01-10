@@ -888,8 +888,9 @@ sub _get_logs_start_end {
     my($start, $end);
     my $prefix = $options{'collection'} || $self->{'peer_config'}->{'peer_key'};
     $prefix    =~ s/^logs_//gmx;
+    my($where) = $self->_get_filter($options{'filter'});
     my $dbh  = $self->_dbh();
-    my @data = @{$dbh->selectall_arrayref('SELECT MIN(time) as mi, MAX(time) as ma FROM `'.$prefix.'_log` LIMIT 1', { Slice => {} })};
+    my @data = @{$dbh->selectall_arrayref('SELECT MIN(time) as mi, MAX(time) as ma FROM `'.$prefix.'_log` '.$where.' LIMIT 1', { Slice => {} })};
     $start   = $data[0]->{'mi'} if defined $data[0];
     $end     = $data[0]->{'ma'} if defined $data[0];
     return([$start, $end]);
@@ -1797,23 +1798,27 @@ sub _import_peer_logfiles {
     }
 
     my $log_count = 0;
-    $c->stats->profile(begin => "get livestatus timestamp");
     my($start, $end);
     if($forcestart) {
         $start = $forcestart;
     }
     elsif(scalar @{$filter} == 0) {
         # fetching logs without any filter is a terrible bad idea
+        $c->stats->profile(begin => "get livestatus timestamp no filter");
         ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'});
+        $c->stats->profile(end => "get livestatus timestamp no filter");
     } else {
+        $c->stats->profile(begin => "get livestatus timestamp");
         ($start, $end) = @{$peer->{'class'}->get_logs_start_end(filter => $filter, nocache => 1)};
+        $c->stats->profile(end => "get livestatus timestamp");
+        if(defined $mend && $start < $mend) {
+            $start = $mend;
+        }
     }
     if(!$start) {
         die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
     }
-    $c->stats->profile(end => "get livestatus timestamp");
 
-    $start = $forcestart if $forcestart;
     print "importing ", scalar localtime $start, "\n" if $verbose > 1;
     print "until latest entry in logfile: ", scalar localtime $end, "\n" if($end && $verbose > 1);
     my $time = $start;
@@ -2009,6 +2014,7 @@ sub _insert_logs {
     my @values;
     #&timing_breakpoint('_insert_logs');
     for my $l (@{$logs}) {
+        next unless $l->{'message'};
         if($mode == MODE_UPDATE) {
             next if defined $duplicate_lookup->{$l->{'message'}};
         }
