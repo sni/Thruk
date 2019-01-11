@@ -422,7 +422,7 @@ sub _rest_get_config_check {
         push @{$check}, {
             'peer_key' => $peer_key,
             'output'   => $stash->{'original_output'},
-            'failed'   => $rc ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
+            'failed'   => $rc == 0 ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
         };
     }
     return($check);
@@ -481,7 +481,7 @@ sub _rest_get_config_reload {
         push @{$reloads}, {
             'peer_key' => $peer_key,
             'output'   => $stash->{'original_output'},
-            'failed'   => $rc ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
+            'failed'   => $rc == 0 ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
         };
     }
     return($reloads);
