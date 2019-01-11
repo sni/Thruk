@@ -163,10 +163,13 @@ sub perl {
                 exit(1);
             }
 
-            $rc = -1 unless defined $rc;
             open(my $fh, '>>', $dir."/rc");
-            print $fh $rc;
+            # invert rc to match exit code style
+            print $fh ($rc ? 0 : 1);
             Thruk::Utils::IO::close($fh, $dir."/rc");
+            open($fh, '>>', $dir."/perl_res");
+            print $fh (ref $rc ne '' ? "" : $rc);
+            Thruk::Utils::IO::close($fh, $dir."/perl_res");
             CORE::close(STDERR);
             CORE::close(STDOUT);
         };
@@ -291,6 +294,7 @@ sub read_job {
     my $start = -e $job_dir.'/start'    ? (stat($job_dir.'/start'))[9] : 0;
     my $end   = -e $job_dir.'/rc'       ? (stat($job_dir.'/rc'))[9]    : 0;
     my $rc    = -e $job_dir.'/rc'       ? read_file($job_dir.'/rc')  : '';
+    my $res   = -e $job_dir.'/perl_res' ? read_file($job_dir.'/perl_res')  : '';
     my $out   = -e $job_dir.'/stdout'   ? read_file($job_dir.'/stdout')  : '';
     my $err   = -e $job_dir.'/stderr'   ? read_file($job_dir.'/stderr')  : '';
     my $host  = -e $job_dir.'/hostname' ? read_file($job_dir.'/hostname')  : '';
@@ -313,6 +317,7 @@ sub read_job {
         'host_name'  => $hostname // "",
         'cmd'        => $cmd,
         'rc'         => $rc // '',
+        'perl_res'   => $res // '',
         'stdout'     => $out // '',
         'stderr'     => $err // '',
         'is_running' => 0+$is_running,
@@ -494,11 +499,17 @@ sub get_result {
     $rc = read_file($dir."/rc") if -f $dir."/rc";
     chomp($rc);
 
+    my $perl_res;
+    if(-f $dir."/perl_res") {
+        $perl_res = read_file($dir."/perl_res");
+        chomp($perl_res);
+    }
+
     my $profile;
     $profile = read_file($dir."/profile.log") if -f $dir."/profile.log";
     chomp($profile) if defined $profile;
 
-    return($out,$err,$time,$dir,$stash,$rc,$profile, $start[9], $end[9]);
+    return($out,$err,$time,$dir,$stash,$rc,$profile,$start[9],$end[9],$perl_res);
 }
 
 ##############################################
@@ -561,7 +572,7 @@ sub job_page {
             }
         }
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
-        if(defined $err and $err ne '') {
+        if((defined $err && $err ne '') && (!defined $rc || $rc != 0)) {
             $c->error($err);
             $c->log->error($err);
             return $c->detach('/error/index/23');

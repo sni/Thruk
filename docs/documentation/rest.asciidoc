@@ -1249,6 +1249,7 @@ lists thruk jobs.
 |is_running                        | flag whether the job is still running
 |message                           | current status text
 |percent                           | percent of completion
+|perl_res                          | contains the perl result in case this was a perl job
 |pid                               | process id
 |rc                                | return code
 |remaining                         | remaining seconds for the job to complete
