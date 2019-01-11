@@ -168,7 +168,9 @@ sub perl {
             print $fh ($rc ? 0 : 1);
             Thruk::Utils::IO::close($fh, $dir."/rc");
             open($fh, '>>', $dir."/perl_res");
-            print $fh (ref $rc ne '' ? "" : $rc);
+            if(defined $rc && ref $rc eq '') {
+                print $fh $rc;
+            }
             Thruk::Utils::IO::close($fh, $dir."/perl_res");
             CORE::close(STDERR);
             CORE::close(STDOUT);
