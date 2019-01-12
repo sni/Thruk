@@ -126,6 +126,17 @@ sub new {
     $self->{'roles'}         = [];
     $self->{'alias'}         = undef;
 
+    if($c->req->header('X-Thruk-Proxy') && $c->req->cookies->{'thruk_auth'}) {
+        my $sdir       = $c->config->{'var_path'}.'/sessions';
+        my $sessionid  = $c->req->cookies->{'thruk_auth'};
+        my $sessionfile = $sdir.'/'.$sessionid;
+        if(-e $sessionfile) {
+            my $session = read_file($sessionfile);
+            my(undef, undef, undef, $roles) = split(/~~~/mx, $session);
+            push @{$self->{'roles'}}, split(/,/mx,$roles);
+        }
+    }
+
     # add roles from cgi_conf
     for my $role (@{$possible_roles}) {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {

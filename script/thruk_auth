@@ -115,7 +115,7 @@ sub process {
                 print STDERR "thruk_auth: script login successful" if $verbose;
                 my $sessionfile = $spath.'/'.$session;
                 chomp(my $cont = read_file($sessionfile));
-                my($basicauth, $ip, $user) = split($session_split, $cont, 3);
+                my($basicauth, $ip, $user,$roles) = split($session_split, $cont, 4);
                 unlink($sessionfile);
                 return "/loginok/".$user."/".$path."\n";
             } else {
@@ -148,7 +148,7 @@ sub process {
         }
 
         chomp(my $cont = read_file($sessionfile));
-        my($basicauth, $ip, $user) = split($session_split, $cont, 3);
+        my($basicauth, $ip, $user, $roles) = split($session_split, $cont, 4);
 
         # fill sessioncache from mtime initially, so we don't have to revalidate new sessions immediately
         if(!$sessioncache->{$auth}) {

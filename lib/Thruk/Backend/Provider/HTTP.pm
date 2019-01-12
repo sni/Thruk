@@ -766,7 +766,7 @@ propagate local session to remote site
 sub propagate_session_file {
     my($self, $c) = @_;
     my $session_id = $c->req->cookies->{'thruk_auth'};
-    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id], undef, $c->stash->{'remote_user'});
+    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id, undef, $c->user->{'roles'}], undef, $c->stash->{'remote_user'});
     $session_id = $r->[0] if $r && ref($r) eq 'ARRAY';
     return $session_id;
 }
