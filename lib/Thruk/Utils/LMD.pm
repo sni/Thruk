@@ -15,6 +15,7 @@ use warnings;
 use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep/;
 use File::Copy qw/copy/;
+use Carp qw/confess/;
 use Thruk::Utils::External;
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -164,6 +165,7 @@ sub check_initial_start {
 
     #&timing_breakpoint("lmd check_initial_start");
 
+    local $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
     if($background) {
         ## no critic
         $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
@@ -171,7 +173,6 @@ sub check_initial_start {
         ## use critic
         my $pid = fork();
         if(!$pid) {
-            $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
             Thruk::Utils::External::_do_child_stuff();
             ## no critic
             $SIG{CHLD} = 'DEFAULT';
@@ -357,6 +358,8 @@ sub _write_lmd_config {
     if($lmd_version && Thruk::Utils::version_compare($lmd_version, '1.1.6')) {
         $supports_section = 1;
     }
+
+    confess("got no peers") if scalar @{$Thruk::Backend::Pool::peer_order} == 0;
 
     for my $key (@{$Thruk::Backend::Pool::peer_order}) {
         my $peer = $Thruk::Backend::Pool::peers->{$key};
