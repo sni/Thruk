@@ -465,11 +465,11 @@ sub test_page {
         }
         my $errors = 0;
         for my $test_url (keys %{$links_to_check}) {
+            if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             next if $test_url =~ m/\/pnp4nagios\//mxo;
             next if $test_url =~ m/\/pnp\//mxo;
             next if $test_url =~ m/\/grafana\//mxo;
             next if $test_url =~ m|/thruk/themes/.*?/images/logos/|mxo;
-            if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             my $request = _request($test_url, undef, undef, $opts->{'agent'});
 
             if($request->is_redirect) {
