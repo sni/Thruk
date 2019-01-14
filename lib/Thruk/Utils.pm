@@ -1375,6 +1375,34 @@ sub proxifiy_url {
 
 ########################################
 
+=head2 get_remote_thruk_url
+
+  get_remote_thruk_url($peer_key)
+
+return url for remote thruk installation
+
+=cut
+sub get_remote_thruk_url {
+    my($c, $id) = @_;
+    my $peer = $c->{'db'}->get_peer_by_key($id);
+    my $url = "";
+    if($peer->{'fed_info'}) {
+        $url = $peer->{'fed_info'}->{'addr'}->[scalar @{$peer->{'fed_info'}->{'addr'}}-1];
+    }
+    if($peer->{'type'} eq 'http') {
+        $url = $peer->{'addr'};
+    }
+    if($url) {
+        $url =~ s|^https?://[^/]*/|/|gmx;
+        $url =~ s|thruk/?$||gmx;
+        $url =~ s|/$||gmx;
+        $url = $url.'/thruk/';
+    }
+    return($url || "");
+}
+
+########################################
+
 =head2 get_pnp_url
 
   get_pnp_url($c, $object)
@@ -1382,7 +1410,6 @@ sub proxifiy_url {
 return pnp url for object (host/service)
 
 =cut
-
 sub get_pnp_url {
     my($c, $obj, $force) = @_;
 
@@ -1605,7 +1632,7 @@ sub get_perf_image {
 
 =cut
 sub absolute_url {
-    my($baseurl, $link) = @_;
+    my($baseurl, $link, $force) = @_;
 
     return($link) if $link =~ m/^https?:/mx;
 
@@ -1627,7 +1654,10 @@ sub absolute_url {
         while($newloc =~ s|/[^\/]+/\.\./|/|gmxo) {}
         $link = $newloc;
     }
-    return($link) if $link    =~ m%^(/||[^/]*/|/[^/]*/)\Q$product_prefix\E/%mx;
+
+    if(!$force && $link =~ m%^(/||[^/]*/|/[^/]*/)\Q$product_prefix\E/%mx) {
+        return($link);
+    }
 
     # split original baseurl in host, path and file
     if($baseurl =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
@@ -1666,20 +1696,25 @@ sub absolute_url {
 
 =head2 get_fake_session
 
-  get_fake_session($c, [$sessionid])
+  get_fake_session($c, [$sessionid], [$roles])
 
 create and return fake session id for current user
 
 =cut
 
 sub get_fake_session {
-    my($c, $sessionid, $username) = @_;
+    my($c, $sessionid, $username, $roles) = @_;
     my $sdir        = $c->config->{'var_path'}.'/sessions';
     $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
     $username       = $c->stash->{'remote_user'} unless $username;
     my $sessionfile = $sdir.'/'.$sessionid;
     Thruk::Utils::IO::mkdir_r($sdir);
-    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$username);
+    my $sessiondata = "none~~~127.0.0.1~~~".$username;
+    if($roles && ref $roles eq 'ARRAY') {
+        die("unsupported username") if $username =~ m/~~~/mx;
+        $sessiondata = $sessiondata.'~~~'.join(',', @{$roles});
+    }
+    Thruk::Utils::IO::write($sessionfile, $sessiondata);
     push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;

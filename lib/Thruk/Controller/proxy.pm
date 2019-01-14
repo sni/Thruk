@@ -24,6 +24,11 @@ use LWP::UserAgent;
 sub index {
     my($c, $path_info) = @_;
 
+    # workaround for centos7 apache segfaulting on too long requests urls
+    if($c->req->header('X-Thruk-Passthrough')) {
+        $path_info = $c->req->header('X-Thruk-Passthrough');
+    }
+
     my($site, $url);
     if($path_info =~ m%^.*/thruk/cgi-bin/proxy.cgi/([^/]+)(/.*)$%mx) {
         $site = $1;
@@ -36,23 +41,27 @@ sub index {
         return $c->redirect_to($url);
     }
 
-    my $peer = $c->{'db'}->get_peer_by_key($site);
+    my $peer = $c->db->get_peer_by_key($site);
     if(!$peer) {
-        die("no such peer: ".$site);
+        # might be a not yet be populated federated backend
+        Thruk::Action::AddDefaults::add_defaults($c);
+        $peer = $c->db->get_peer_by_key($site);
+        die("no such peer: ".$site) unless $peer;
     }
     if($peer->{'type'} ne 'http') {
         die("peer has type: ".$peer->{'type'});
-        #return $c->redirect_to($url);
     }
 
     my $session_id  = $c->req->cookies->{'thruk_auth'} || $peer->{'class'}->propagate_session_file($c);
-    my $request_url = Thruk::Utils::absolute_url($peer->{'addr'}, $url);
+    my $request_url = Thruk::Utils::absolute_url($peer->{'addr'}, $url, 1);
 
     # federated peers forward to the next hop
-    if($peer->{'federation'} && $peer->{'federation'}->{'type'} && $peer->{'federation'}->{'type'} eq 'http') {
+    my $passthrough;
+    if($peer->{'federation'} && scalar @{$peer->{'fed_info'}->{'type'}} >= 2 && $peer->{'fed_info'}->{'type'}->[1] eq 'http') {
         $request_url = $peer->{'addr'};
         $request_url =~ s|/thruk/?$||gmx;
-        $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
+        $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'};
+        $passthrough = '/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
     }
 
     if($c->req->{'env'}->{'QUERY_STRING'}) {
@@ -64,10 +73,23 @@ sub index {
     for my $h (qw/host via x-forwarded-for referer/) {
         $req->header($h, undef);
     }
+    if($passthrough) {
+        $req->header('X-Thruk-Passthrough', $passthrough);
+    }
     my $ua = LWP::UserAgent->new;
     $ua->max_redirect(0);
+    $ua->ssl_opts('verify_hostname' => 0 ) if($request_url =~ m/^(http|https):\/\/localhost/mx || $request_url =~ m/^(http|https):\/\/127\./mx);
+    if(!$c->config->{'ssl_verify_hostnames'}) {
+        eval {
+            # required for new IO::Socket::SSL versions
+            require IO::Socket::SSL;
+            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+        };
+        $ua->ssl_opts('verify_hostname' => 0 );
+    }
 
-    $req->header('cookie', 'thruk_auth='.$session_id);
+    $req->header('X-Thruk-Proxy', 1);
+    _add_cookie($req, 'thruk_auth', $session_id);
     $c->stats->profile(begin => "req: ".$request_url);
     my $res = $ua->request($req);
     $c->stats->profile(end => "req: ".$request_url);
@@ -77,26 +99,37 @@ sub index {
     if($res->header('location') && $res->header('location') =~ m%\Q/cgi-bin/login.cgi?\E%mx) {
         # propagate session and try again
         $session_id = $peer->{'class'}->propagate_session_file($c);
-        $req->header('cookie', 'thruk_auth='.$session_id);
+        _add_cookie($req, 'thruk_auth', $session_id);
         $res = $ua->request($req);
     }
 
-    _cleanup_response($c, $site, $url, $res);
+    # in case we don't have a cookie yet, set the last session_id, so it can be reused
+    if(!$c->req->cookies->{'thruk_auth'}) {
+        $c->res->cookies->{'thruk_auth'} = {value => $session_id, path => $c->stash->{'cookie_path'} };
+    }
+
+    _cleanup_response($c, $peer, $url, $res);
     $c->res->status($res->code);
     $c->res->headers($res->headers);
     $c->res->body($res->content);
     $c->{'rendered'} = 1;
+    $c->stash->{'inject_stats'} = 0;
     return;
 }
 
 ##########################################################
 sub _cleanup_response {
-    my($c, $site, $url, $res) = @_;
+    my($c, $peer, $url, $res) = @_;
+
+    if($c->req->header('X-Thruk-Passthrough')) {
+        return;
+    }
 
     my $replace_prefix;
-    if($url =~ m%^(.*/(pnp|pnp4nagios|grafana)/)%mx) {
+    if($url =~ m%^(.*/(pnp|pnp4nagios|grafana|thruk)/)%mx) {
         $replace_prefix = $1;
     }
+    my $site         = $peer->{'key'};
     my $url_prefix   = $c->stash->{'url_prefix'};
     my $proxy_prefix = $url_prefix.'cgi-bin/proxy.cgi/'.$site;
 
@@ -104,14 +137,40 @@ sub _cleanup_response {
     if($res->header('location')) {
         my $loc = $res->header('location');
         $loc =~ s%^https?://[^/]+/%/%mx;
+        if($loc !~ m/^\//mx) {
+            my $newloc = $url;
+            $newloc =~ s/[^\/]+$//gmx;
+            $newloc = $newloc.$loc;
+            $loc = $newloc;
+        }
         $res->header('location', $proxy_prefix.$loc);
     }
 
-    if($res->header('content-type') =~ m/^(text\/html|application\/json)/mxi) {
+    # replace path in cookies
+    if($res->header("set-cookie")) {
+        my $newcookie = $res->header("set-cookie");
+        $newcookie =~ s%path=(.*?)(\s|$|;)%path=$proxy_prefix$1;%gmx;
+        $res->header("set-cookie", $newcookie);
+    }
+
+    if($res->header('content-type') && $res->header('content-type') =~ m/^(text\/html|application\/json)/mxi) {
         my $body = $res->decoded_content || $res->content;
         if($replace_prefix) {
-            # make thruk links work
-            $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
+            # make thruk links work, but only if we are not proxying thruk itself
+            if($url !~ m|/thruk/|mx) {
+                $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
+            } else {
+                # if its thruk itself, insert a message at the top
+                if($body =~ m/site_panel_container/mx) {
+                    my $header = "";
+                    $c->stash->{'proxy_peer'} = $peer;
+                    Thruk::Views::ToolkitRenderer::render($c, "_proxy_header.tt", $c->stash, \$header);
+                    $body =~ s/<\/body>/$header<\/body>/gmx;
+                }
+                # fix cookie path
+                $body =~ s%^var\s+cookie_path\s*=\s+'([^']+)';%var cookie_path = '$proxy_prefix$1';%gmx;
+            }
+
             # send other links to our proxy
             $body =~ s%("|')$replace_prefix%$1$proxy_prefix$replace_prefix%gmx;
 
@@ -130,6 +189,19 @@ sub _cleanup_response {
     return;
 }
 
+##########################################################
+sub _add_cookie {
+    my($req, $name, $val) = @_;
+    my $cookies = $req->header('cookie');
+    if(!$cookies) {
+        $req->header('cookie', $name.'='.$val.';');
+        return;
+    }
+    $cookies =~ s%$name=.*?(;\s*|$)%%gmx;
+    $cookies = $cookies.'; '.$name.'='.$val.';';
+    $req->header('cookie', $cookies);
+    return;
+}
 ##########################################################
 
 =head1 AUTHOR

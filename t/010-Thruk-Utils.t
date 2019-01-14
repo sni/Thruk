@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 89;
+    plan tests => 91;
 
     use lib('t');
     require TestUtils;
@@ -327,4 +327,15 @@ ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '+60m'");
 $ts     = time() - 3600;
 $parsed = Thruk::Utils::_parse_date($c, "-60m");
 ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '-60m'");
+
+#########################
+my $absolute_urls = [
+    [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/thruk/cgi-bin/extinfo.cgi', 'https://127.0.0.1:60443/demo/thruk/cgi-bin/extinfo.cgi'],
+    [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/pnp4nagios/index.php/popup', 'https://127.0.0.1:60443/demo/pnp4nagios/index.php/popup' ],
+];
+for my $urls (@{$absolute_urls}) {
+  my $got = Thruk::Utils::absolute_url($urls->[0], $urls->[1],1);
+  is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
+}
+
 #########################

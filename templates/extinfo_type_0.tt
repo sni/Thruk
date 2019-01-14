@@ -46,10 +46,16 @@
                     <td class='dataVar' nowrap>Backend Name:</td>
                     [% FOREACH pd IN tmpbackends %]
                     <td class='dataVal' width="180" title="id: [% pd %]">
+                      [% remote_thruk_url = get_remote_thruk_url(c, pd); IF remote_thruk_url %]
+                      <a href="proxy.cgi/[% pd %][% remote_thruk_url %]" target="_blank">
+                      [% END %]
                       [% IF backend_detail.$pd.name %]
                         [% backend_detail.$pd.name %]
                       [% ELSE %]
                       unknown
+                      [% END %]
+                      [% IF remote_thruk_url %]
+                      </a>
                       [% END %]
                     </td>
                     [% END %]
@@ -66,7 +72,7 @@
                     <td class='dataVar' nowrap>Program Version:</td>
                     [% FOREACH pd IN tmpbackends %]
                       [% IF backend_detail.$pd.running %]
-                        <td class='dataVal'>[% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.program_version %][% ELSE %][% pi_detail.$pd.program_version %][% END %]</td>
+                        <td class='dataVal'>[% pi_detail.$pd.program_version %]</td>
                       [% ELSE %]
                         <td class='dataVal'>&nbsp;</td>
                       [% END %]
@@ -253,7 +259,13 @@
                     <td class='dataVar' nowrap>Data Source:</td>
                     [% FOREACH pd IN tmpbackends %]
                     <td class='dataVal dataSource'>
-                      [% backend_detail.$pd.addr.replace('/thruk/cgi-bin/remote.cgi', '') %]
+                      [% IF backend_detail.$pd.exists('fed_info') %]
+                      <span title="[% FOREACH addr IN backend_detail.$pd.fed_info.addr %][% addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') %]&#013;[% END %]">
+                      [% END %]
+                      [% backend_detail.$pd.addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') %]
+                      [% IF backend_detail.$pd.exists('fed_info') %]
+                      </span>
+                      [% END %]
                     </td>
                     [% END %]
                   </tr>
@@ -262,9 +274,7 @@
                     [% FOREACH pd IN tmpbackends %]
                     <td class='dataVal dataValBackendVersion'>
                       [% IF backend_detail.$pd.running %]
-                        [% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]<br>([% END %]
                         [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
-                        [% IF real_pi_detail.exists(pd) %])[% END %]
                       [% ELSE %]
                         [% IF backend_detail.$pd.last_error != "OK" %]
                           [% escape_html(backend_detail.$pd.last_error) %]

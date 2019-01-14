@@ -823,6 +823,7 @@ sub _set_possible_backends {
             'last_error'  => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
             'section'     => $peer->{'section'} || 'Default',
         };
+        $backend_detail{$back}->{'fed_info'} = $peer->{'fed_info'} if $peer->{'fed_info'};
         if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
             $backend_detail{$back}->{'running'} = 1;
         }
@@ -1052,7 +1053,6 @@ sub set_processinfo {
     my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo, $selected);
     $c->stash->{'pi'}            = $overall_processinfo;
     $c->stash->{'pi_detail'}     = $processinfo;
-    $c->stash->{'real_pi_detail'} = $cached_data->{'real_processinfo'} || {};
     $c->stash->{'has_proc_info'} = 1;
 
     # set last programm restart
@@ -1348,16 +1348,17 @@ sub check_federation_peers {
             delete $subpeerconfig->{'options'}->{'name'};
             delete $subpeerconfig->{'options'}->{'peer'};
             $subpeerconfig->{'options'}->{'peer'} = $row->{'addr'};
-            my $peer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
-            $peer->{'federation'} = {
-                parent_key  => $parent->{'key'},
-                key         => $row->{'federation_key'},
-                name        => $row->{'federation_name'},
-                addr        => $row->{'federation_addr'},
-                type        => $row->{'federation_type'},
+            $subpeerconfig->{'options'}->{'remote_name'} = $row->{'name'};
+            my $subpeer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
+            $subpeer->{'federation'} = $parent->{'key'};
+            $subpeer->{'fed_info'} = {
+                key        => [$parent->{'key'}, @{Thruk::Utils::list($row->{'federation_key'})}],
+                name       => [$parent->{'name'}, @{Thruk::Utils::list($row->{'federation_name'})}],
+                addr       => [$parent->{'addr'}, @{Thruk::Utils::list($row->{'federation_addr'})}],
+                type       => [$parent->{'type'}, @{Thruk::Utils::list($row->{'federation_type'})}],
             };
-            $Thruk::Backend::Pool::peers->{$peer->{'key'}} = $peer;
-            push @{$Thruk::Backend::Pool::peer_order}, $peer->{'key'};
+            $Thruk::Backend::Pool::peers->{$subpeer->{'key'}} = $subpeer;
+            push @{$Thruk::Backend::Pool::peer_order}, $subpeer->{'key'};
             $parent->{'disabled'} = HIDDEN_LMD_PARENT;
             $changed++;
         }

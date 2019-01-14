@@ -118,6 +118,7 @@ our %config = ('name'                   => 'Thruk',
                                           'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
                                           'command_disabled'    => \&Thruk::Utils::command_disabled,
                                           'proxifiy_url'        => \&Thruk::Utils::proxifiy_url,
+                                          'get_remote_thruk_url'=> \&Thruk::Utils::get_remote_thruk_url,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

@@ -1183,17 +1183,17 @@ sub _rest_get_sites {
         chomp($error);
         my $peer = $c->{'db'}->get_peer_by_key($key);
         push @{$data}, {
-            addr       => $addr,
-            id         => $key,
-            name       => $c->stash->{'backend_detail'}->{$key}->{'name'},
-            section    => $c->stash->{'backend_detail'}->{$key}->{'section'},
-            type       => $c->stash->{'backend_detail'}->{$key}->{'type'},
-            last_error => $error ne 'OK' ? $error : '',
-            connected  => $error ? 0 : 1,
-            federation_key   => $peer->{'federation'}->{'key'},
-            federation_name  => $peer->{'federation'}->{'name'},
-            federation_addr  => $peer->{'federation'}->{'addr'},
-            federation_type  => $peer->{'federation'}->{'type'},
+            addr             => $addr,
+            id               => $key,
+            name             => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            section          => $c->stash->{'backend_detail'}->{$key}->{'section'},
+            type             => $c->stash->{'backend_detail'}->{$key}->{'type'},
+            last_error       => $error ne 'OK' ? $error : '',
+            connected        => $error ? 0 : 1,
+            federation_key   => $peer->{'fed_info'}->{'key'}  || [ $peer->{'key'} ],
+            federation_name  => $peer->{'fed_info'}->{'name'} || [ $peer->{'name'} ],
+            federation_addr  => $peer->{'fed_info'}->{'addr'} || [ $peer->{'addr'} ],
+            federation_type  => $peer->{'fed_info'}->{'type'} || [ $peer->{'type'} ],
         };
     }
     return($data);

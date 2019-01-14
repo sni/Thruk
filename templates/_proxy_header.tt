@@ -1,0 +1,3 @@
+﻿<div style="position: absolute; top: 7px; left: 50%; right: 50%; width: 200px; height: 20px; border: 0; z-index: 101; transform: translate(-50%, -50%); background-color: #ccc; text-align: center; border-radius: 4px; font-weight: bold;" class="proxy_header">
+  <span style="position: relative; top: 2px;">[% proxy_peer.name %]</span>
+</div>

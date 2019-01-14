@@ -2270,6 +2270,7 @@ templates/_parts_downtimes.tt
 templates/_perfdata_human.tt
 templates/_pnp_graph.tt
 templates/_progressbar.tt
+templates/_proxy_header.tt
 templates/_service_command_box.tt
 templates/_service_command_box_full.tt
 templates/_service_status_details_box.tt
