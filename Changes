@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - rename graph_proxy option into http_backend_reverse_proxy
           - fix offset calculation in rest api
           - Config Tool:
             - add authorization tab to contacts and contactgroups

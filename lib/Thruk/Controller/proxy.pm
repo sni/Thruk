@@ -37,7 +37,7 @@ sub index {
     if(!$url || !$site) {
         return $c->detach('/error/index/25');
     }
-    if(!$c->config->{'graph_proxy_enabled'}) {
+    if(!$c->config->{'http_backend_reverse_proxy'}) {
         return $c->redirect_to($url);
     }
 

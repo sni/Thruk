@@ -1231,14 +1231,18 @@ graph_replace = s/[^\w\-]/_/gmx
 .....
 
 
-=== graph_proxy_enabled
-The graph_proxy will proxy requests for pnp or grafana action_urls via the
+=== http_backend_reverse_proxy
+The http_backend_reverse_proxy will proxy requests for pnp or grafana action_urls via the
 http backend if possible. This only works for http backends and if cookie auth is enabled.
-Set to 0 to disable.
+Can be used to proxy thruk nodes (experimental)
+
+Possible options:
+  - `0` disabled
+  - `1` enabled
 
 ex.:
 
-  graph_proxy_enabled = 1
+  http_backend_reverse_proxy = 1
 
 
 

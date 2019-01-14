@@ -1357,7 +1357,7 @@ sub proxifiy_url {
     if($url =~ m/^https?:/mx) {
         return($url);
     }
-    if(!$c->config->{'graph_proxy_enabled'}) {
+    if(!$c->config->{'http_backend_reverse_proxy'}) {
         return($url);
     }
     my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
