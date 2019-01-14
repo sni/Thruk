@@ -38,6 +38,7 @@ services:
         - PREFIX=tier2a
     volumes:
         - .:/scenario:ro
+        - ../../../:/thruk:ro
   tier2b:
     build: tier2b/
     environment:

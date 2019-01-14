@@ -3,6 +3,8 @@
   tasks:
   - shell: "sudo su - demo -c 'set_admin_password omd'"
   - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set MYSQL on"
+  - shell: "omd config demo set THRUK_LOGCACHE on"
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
@@ -20,3 +22,6 @@
       mode: 0600
       owner: demo
       group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 218;
+    plan tests => 406;
 }
 
 
@@ -58,6 +58,29 @@ for my $hst (sort keys %{$ids}) {
 }
 
 ###############################################################################
+TestUtils::test_command({
+    cmd     => './script/thruk selfcheck lmd',
+    like => ['/lmd running with pid/',
+             '/8\/8 backends online/',
+            ],
+    exit    => 0,
+});
+
+###############################################################################
+# test role propagation
+for my $name (qw/tier1a tier2a/) {
+    my $id = $ids->{$name};
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/proxy.cgi/'.$id.'/demo/thruk/cgi-bin/user.cgi',
+        'like'   => [
+                    'Effective Roles',
+                    'authorized_for_admin',
+                    'User Profile',
+                ],
+    );
+}
+
+###############################################################################
 # make sure all proxies work
 {
     my $like = ["Service Status Details For All Host"];
@@ -74,22 +97,67 @@ for my $hst (sort keys %{$ids}) {
     @matches = grep(!/\/popup/mx, @matches);
     @matches = grep(!/-solo\//, @matches);
     is(scalar @matches, 8, 'got all proxy links');
-    #for my $url (sort @matches) {
-    #    $url =~ s|'||gmx;
-    #    my $test = TestUtils::test_page(
-    #        'url'    => $url,
-    #    );
-    #}
+    for my $url (sort @matches) {
+        $url =~ s|'||gmx;
+        TestUtils::test_page(
+            'waitfor'        => '(grafana\-app|\/pnp4nagios\/index\.php\/image)',
+            'url'            => $url,
+            'skip_html_lint' => 1
+        );
+        TestUtils::test_page(
+            'url'            => $url,
+            'unlike'         => ['/does not exist/'],
+            'skip_html_lint' => 1
+        );
+    }
 }
 
 ###############################################################################
-TestUtils::test_command({
-    cmd     => './script/thruk selfcheck lmd',
-    like => ['/lmd running with pid/',
-             '/8\/8 backends online/',
-            ],
-    exit    => 0,
-});
-
-###############################################################################
-#
+# add logcache test
+for my $name (qw/tier2a tier3a/) {
+    my $id = $ids->{"tier2a"};
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/proxy.cgi/'.$id.'/demo/thruk/cgi-bin/showlog.cgi?pattern='.$name.'&backend='.$ids->{$name},
+        'waitfor'=> 'EXTERNAL\ COMMAND:',
+    );
+    my $unlike = [ 'internal server error', 'HASH', 'ARRAY' ];
+    if($name eq 'tier2a') {
+        push @{$unlike}, qw/;tier2b; ;tier3a; ;tier3b; ;tier1a;/;
+    }
+    if($name eq 'tier3a') {
+        push @{$unlike}, qw/;tier2b; ;tier3b; ;tier1a;/;
+    }
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/proxy.cgi/'.$id.'/demo/thruk/cgi-bin/showlog.cgi?pattern='.$name.'&backend='.$ids->{$name},
+        'like'   => [
+                    'Event Log',
+                    'EXTERNAL COMMAND: SCHEDULE_FORCED_SVC_CHECK;'.$name,
+                ],
+        'unlike' => $unlike,
+    );
+}
+for my $name (qw/tier1a tier2a tier3a/) {
+    my $id = $ids->{"tier1a"};
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/proxy.cgi/'.$id.'/demo/thruk/cgi-bin/showlog.cgi?pattern='.$name.'&backend='.$ids->{$name},
+        'waitfor'=> 'EXTERNAL\ COMMAND:',
+    );
+    my $unlike = [ 'internal server error', 'HASH', 'ARRAY' ];
+    if($name eq 'tier1a') {
+        push @{$unlike}, qw/;tier1b; ;tier2a; ;tier2b; ;tier2c; ;tier3a; ;tier3b;/;
+    }
+    if($name eq 'tier2a') {
+        push @{$unlike}, qw/;tier2b; ;tier3a; ;tier3b; ;tier1a;/;
+    }
+    if($name eq 'tier3a') {
+        push @{$unlike}, qw/;tier2b; ;tier3b; ;tier1a;/;
+    }
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/proxy.cgi/'.$id.'/demo/thruk/cgi-bin/showlog.cgi?pattern='.$name.'&backend='.$ids->{$name},
+        'like'   => [
+                    'Event Log',
+                    'EXTERNAL COMMAND: SCHEDULE_FORCED_SVC_CHECK;'.$name,
+                ],
+        'unlike' => $unlike,
+    );
+}

@@ -3,6 +3,8 @@
   tasks:
   - shell: "sudo su - demo -c 'set_admin_password omd'"
   - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set MYSQL on"
+  - shell: "omd config demo set THRUK_LOGCACHE on"
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
