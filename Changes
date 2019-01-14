@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - fix offset calculation in rest api
           - Config Tool:
             - add authorization tab to contacts and contactgroups
 

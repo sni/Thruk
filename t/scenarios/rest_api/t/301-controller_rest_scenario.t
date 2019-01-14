@@ -1,11 +1,12 @@
 use strict;
 use warnings;
 use Test::More;
+use Cpanel::JSON::XS;
 
-die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 75;
+    plan tests => 100;
 
     use lib('t');
     require TestUtils;
@@ -62,3 +63,29 @@ for my $test (@{$pages}) {
     my $page = TestUtils::test_page(%{$test});
     #BAIL_OUT("failed") unless Test::More->builder->is_passing;
 }
+
+################################################################################
+# test offset
+{
+    my $page = TestUtils::test_page(
+        url => '/thruk/r/services?columns=host_name,description',
+    );
+    my $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
+    is(scalar @{$tstdata}, 9, "number of services");
+
+    $page = TestUtils::test_page(
+        url => '/thruk/r/services?columns=host_name,description&offset=1',
+    );
+    my $data = Cpanel::JSON::XS::decode_json($page->{'content'});
+    is(scalar @{$data}, 8, "number of services");
+    is($data->[0]->{'host_name'}, $tstdata->[1]->{'host_name'}, "got correct index");
+    is($data->[0]->{'description'}, $tstdata->[1]->{'description'}, "got correct index");
+
+    $page = TestUtils::test_page(
+        url => '/thruk/r/services?columns=host_name,description&offset=1&limit=2',
+    );
+    $data = Cpanel::JSON::XS::decode_json($page->{'content'});
+    is(scalar @{$data}, 2, "number of services");
+    is($data->[0]->{'host_name'}, $tstdata->[1]->{'host_name'}, "got correct index");
+    is($data->[0]->{'description'}, $tstdata->[1]->{'description'}, "got correct index");
+};

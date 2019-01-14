@@ -210,7 +210,8 @@ ex.: sort by name ascending and status descending:
 
 All pages offer limits and offset through the `limit` and `offset` parameter.
 
-For example show 10 hosts starting at offset 100:
+The offset starts a 0, so offset=1 strips of the first item and starts the result with the second one.
+For example show 10 hosts starting with the item 101:
 
 ------
   %> thruk r /hosts?limit=10&offset=100

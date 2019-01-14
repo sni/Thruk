@@ -654,6 +654,9 @@ sub _livestatus_options {
     my $options = {};
     if($c->req->parameters->{'limit'}) {
         $options->{'options'}->{'limit'} = $c->req->parameters->{'limit'};
+        if($c->req->parameters->{'offset'}) {
+            $options->{'options'}->{'limit'} += $c->req->parameters->{'offset'};
+        }
     }
 
     # try to reduce the number of requested columns
