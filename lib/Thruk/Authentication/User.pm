@@ -126,17 +126,6 @@ sub new {
     $self->{'roles'}         = [];
     $self->{'alias'}         = undef;
 
-    if($c->req->header('X-Thruk-Proxy') && $c->req->cookies->{'thruk_auth'}) {
-        my $sdir       = $c->config->{'var_path'}.'/sessions';
-        my $sessionid  = $c->req->cookies->{'thruk_auth'};
-        my $sessionfile = $sdir.'/'.$sessionid;
-        if(-e $sessionfile) {
-            my $session = read_file($sessionfile);
-            my(undef, undef, undef, $roles) = split(/~~~/mx, $session);
-            push @{$self->{'roles'}}, split(/,/mx,$roles);
-        }
-    }
-
     # add roles from cgi_conf
     for my $role (@{$possible_roles}) {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
@@ -144,8 +133,23 @@ sub new {
             push @{$self->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
         }
     }
-    $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
     $self->{'roles_from_cgi_cfg'} = Thruk::Utils::array2hash($self->{'roles'});
+
+    $self->{'roles_from_session'} = {};
+    if($c->req->header('X-Thruk-Proxy') && $c->req->cookies->{'thruk_auth'}) {
+        my $sdir       = $c->config->{'var_path'}.'/sessions';
+        my $sessionid  = $c->req->cookies->{'thruk_auth'};
+        my $sessionfile = $sdir.'/'.$sessionid;
+        if(-e $sessionfile) {
+            my $session = read_file($sessionfile);
+            my(undef, undef, undef, $sessionroles) = split(/~~~/mx, $session);
+            my @roles = split(/,/mx,$sessionroles);
+            push @{$self->{'roles'}}, @roles;
+            $self->{'roles_from_session'} = Thruk::Utils::array2hash(\@roles);
+        }
+    }
+
+    $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
 
     # Is this user an admin?
     if($username eq '(cron)' || $username eq '(cli)' || $self->check_user_roles('admin')) {
