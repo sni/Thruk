@@ -25,7 +25,7 @@ Business Process
 =cut
 
 my @extra_json_keys = qw/id/;
-my @stateful_keys   = qw/status status_text last_check last_state_change time/;
+my @stateful_keys   = qw/status status_text last_check last_state_change time affected_peers/;
 my @saved_keys      = qw/name template rankDir state_type filter/;
 
 ##########################################################
@@ -150,6 +150,9 @@ sub update_status {
     $c->stats->profile(begin => "update_status");
     my $t0 = [gettimeofday];
 
+    # set backends to default list, bp result should be deterministic
+    $c->{'db'}->enable_default_backends();
+
     $type = 0 unless defined $type;
     my $last_state = $self->{'status'};
 
@@ -157,6 +160,13 @@ sub update_status {
     my($livedata);
     if($type == 0) {
         $livedata = $self->bulk_fetch_live_data($c);
+        my $previous_affected = $self->{'affected_peers'};
+        $self->{'affected_peers'} = $self->_extract_affected_backends($livedata);
+        my $failed = $self->_list_failed_backends($c, $previous_affected, $c->stash->{'failed_backends'});
+        if(scalar @{$failed} > 0 && ($self->{'last_check'} > (time() - 180))) {
+            $c->log->warn("not updating business process '".$self->{'name'}."' because the backends ".join(",", @{$failed})." are available. Waiting 3 minutes to recover, last successful update: ".(scalar localtime $self->{'last_check'}));
+            return;
+        }
         for my $n (@{$self->{'nodes'}}) {
             my $r = $n->update_status($c, $self, $livedata);
             push @{$results}, $n->{'id'} if $r;
@@ -916,7 +926,37 @@ sub FROM_JSON {
 }
 
 ##########################################################
+# return list of affected backends from given livestatus data
+sub _extract_affected_backends {
+    my($self, $livedata) = @_;
+    my $peers = {};
+    for my $hst (values %{$livedata->{'hosts'}}) {
+        $peers->{$hst->{'peer_key'}} = 1;
+    }
+    for my $hst_name (keys %{$livedata->{'services'}}) {
+        for my $svc (values %{$livedata->{'services'}->{$hst_name}}) {
+            $peers->{$svc->{'peer_key'}} = 1;
+        }
+    }
+    return([sort keys %{$peers}]);
+}
 
+##########################################################
+# returns true if there are no failed backends and false if there are any
+sub _list_failed_backends {
+    my($self, $c, $previous_affected, $failed_backends) = @_;
+    my $failed = [];
+    return $failed unless $previous_affected;
+    $failed_backends = {} unless $failed_backends;
+    for my $key (@{$previous_affected}) {
+        next unless $failed_backends->{$key};
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        push @{$failed}, ($peer ? $peer->{'name'} : $key);
+    }
+    return $failed;
+}
+
+##########################################################
 
 =head1 AUTHOR
 

@@ -144,8 +144,8 @@ sub cmd {
     };
     alarm($timeout);
 
-    # enable all backends for now till configuration is possible for each BP
-    $c->{'db'}->enable_backends();
+    # set backends to default list, bp result should be deterministic
+    $c->{'db'}->enable_default_backends();
 
     undef $id if $id eq 'all';
     my $t0     = [gettimeofday];
