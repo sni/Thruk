@@ -864,7 +864,7 @@ function bp_update_status(evt, node) {
     if(n.id == "node1") {
         status_text = bp_status.replace(/\|.*$/g, '');
     }
-    status_text = status_text.replace(/\n+/g, '<br>').replace(/\\+n/g, '<br>').replace(/<br><br>/g, '<br>');
+    status_text = status_text.replace(/\n+/g, '<br>').replace(/\\+n/g, '<br>');
     jQuery('#bp_status_plugin_output').html(status_text);
 
     if(jQuery('#bp_status_plugin_output').overflown()) {

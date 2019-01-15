@@ -192,7 +192,7 @@
                             <td class='dataVar' valign='top'> Status Information: </td>
                             <td class='dataVal detail_plugin_output'>
                               [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
-                              [% IF escape_html_tags %][% escape_html(service.plugin_output) %][% ELSE %][% service.plugin_output %][% END %]
+                              [% IF escape_html_tags %][% nl2br(escape_html(service.plugin_output)) %][% ELSE %][% nl2br(service.plugin_output) %][% END %]
                               [% IF service.long_plugin_output %]
                               <br>[% IF escape_html_tags %][% nl2br(escape_html(service.long_plugin_output)) %][% ELSE %][% nl2br(service.long_plugin_output) %][% END %]
                               [% END %]

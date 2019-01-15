@@ -139,6 +139,8 @@ sub add_recursive_output_filter {
     };
     &{$recurse}($args->{'bp'}, $args->{'node'}, $indent);
 
+    $text =~ s/\n\s*\n/\n/gmx;
+    $text =~ s/\n+/\n/gmx;
     $args->{'extra'}->{'long_output'} = $text;
 
     return;
