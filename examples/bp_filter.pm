@@ -112,6 +112,12 @@ sub add_recursive_output_filter {
     my $text    = '';
     my $indent  = 0;
     my $parents = {};
+    my $clean_status = sub {
+        my($text) = @_;
+        chomp($text);
+        $text =~ s/\|.*$//gmx;
+        return((split(/\n|\\+n/mx, $text, 2))[0]);
+    };
     my $recurse;
     $recurse = sub {
         my($bp, $node, $indent) = @_;
@@ -123,7 +129,7 @@ sub add_recursive_output_filter {
                     $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}."] deep recursion...\n";
                     next;
                 }
-                $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}.'] '.($n->{'status_text'} || $n->{'short_desc'})."\n";
+                $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}.'] '.(&{$clean_status}($n->{'status_text'} || $n->{'short_desc'}))."\n";
                 &{$recurse}($bp, $n, $indent+1);
             }
         }
@@ -131,7 +137,7 @@ sub add_recursive_output_filter {
             my $link_bp    = Thruk::BP::Utils::load_bp_data($c, $node->{'bp_ref'});
             if($link_bp->[0]) {
                 my $first_node = $link_bp->[0]->{'nodes'}->[0];
-                $text .= (chr(8194) x ($indent*4)).'- ['.$first_node->{'label'}.'] '.($first_node->{'status_text'} || $first_node->{'short_desc'})."\n";
+                $text .= (chr(8194) x ($indent*4)).'- ['.$first_node->{'label'}.'] '.(&{$clean_status}($first_node->{'status_text'} || $first_node->{'short_desc'}))."\n";
                 &{$recurse}($link_bp->[0], $first_node, $indent+1);
             }
         }
