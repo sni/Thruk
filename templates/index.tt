@@ -95,7 +95,7 @@
         return;
       }
       var newurl = e.newURL;
-      newurl     = newurl.replace(/^.*#/, '');
+      newurl     = newurl.replace(/^.*?#/, '');
       window.frames[1].location.replace(newurl);
       skipHashChange = 0;
     };
