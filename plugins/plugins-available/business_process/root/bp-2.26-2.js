@@ -1317,9 +1317,7 @@ function bp_redraw(evt) {
 }
 
 function bp_remove_search_prefix(search) {
-    console.log(search);
     search = search.replace(/^(w|b):/, "");
-    console.log(search);
     return(search);
 }
 
