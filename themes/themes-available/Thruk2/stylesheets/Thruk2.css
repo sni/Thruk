@@ -1425,6 +1425,9 @@ td.dateTimeBreak{
 TABLE.optBox{
     top:100px !important;
 }
+TABLE.optBox.bp {
+    top:90px !important;
+}
 DIV.bp_zoom_container{
     background-color:#ffffff;
 }
