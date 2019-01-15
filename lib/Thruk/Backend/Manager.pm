@@ -311,7 +311,7 @@ sub disable_backends {
 
   enable_backends(<keys>, [<exclusive>])
 
-enables all backends
+enables all backends. list is additive unless exclusive is used.
 
 =cut
 
@@ -341,6 +341,22 @@ sub enable_backends {
             $peer->{'enabled'} = 1;
         }
     }
+    return;
+}
+
+##########################################################
+
+=head2 enable_default_backends
+
+  enable_default_backends()
+
+enables all default backends
+
+=cut
+
+sub enable_default_backends {
+    my($self) = @_;
+    $self->enable_backends($self->get_default_backends(), 1);
     return;
 }
 
