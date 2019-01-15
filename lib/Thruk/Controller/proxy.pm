@@ -41,11 +41,11 @@ sub index {
         return $c->redirect_to($url);
     }
 
-    my $peer = $c->db->get_peer_by_key($site);
+    my $peer = $c->{'db'}->get_peer_by_key($site);
     if(!$peer) {
         # might be a not yet be populated federated backend
         Thruk::Action::AddDefaults::add_defaults($c);
-        $peer = $c->db->get_peer_by_key($site);
+        $peer = $c->{'db'}->get_peer_by_key($site);
         die("no such peer: ".$site) unless $peer;
     }
     if($peer->{'type'} ne 'http') {

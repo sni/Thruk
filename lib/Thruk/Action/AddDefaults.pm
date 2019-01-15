@@ -1381,8 +1381,8 @@ sub check_federation_peers {
     }
     if($changed) {
         $Thruk::Backend::Pool::peer_order = $new_order;
-        $c->db->{'initialized'} = 0;
-        $c->db->init();
+        $c->{'db'}->{'initialized'} = 0;
+        $c->{'db'}->init();
         # fetch missing processinfo
         $processinfo = $c->{'db'}->get_processinfo();
         for my $key (keys %{$processinfo}) {
