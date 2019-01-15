@@ -469,7 +469,11 @@ sub join_labels {
         return($labels[0].' and '.$labels[1]);
     }
     my $last = pop @labels;
-    return(join(', ', @labels).' and '.$last);
+    my $label = join(', ', @labels).' and '.$last;
+    if(length($label) > 150) {
+        $label = substr($label,0,147).'...';
+    }
+    return($label);
 }
 
 ##########################################################
