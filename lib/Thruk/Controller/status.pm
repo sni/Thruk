@@ -182,12 +182,12 @@ sub _process_raw_request {
                     $data = ["you are not authorized for configuration information"];
                 } else {
                     my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/] );
-                    $data = Thruk::Utils::array_uniq($contacts);
+                    $data = Thruk::Utils::array_uniq_obj($contacts);
                 }
             }
             elsif($type eq 'host' or $type eq 'hosts') {
                 $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/] );
-                $data = Thruk::Utils::array_uniq($data);
+                $data = Thruk::Utils::array_uniq_obj($data);
             }
             elsif($type eq 'hostgroup' or $type eq 'hostgroups') {
                 $data = [];

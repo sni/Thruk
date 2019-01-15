@@ -1287,10 +1287,41 @@ return uniq elements of array
 =cut
 
 sub array_uniq {
-    my $array = shift;
+    my($array) = @_;
 
     my %seen = ();
     my @unique = grep { ! $seen{ $_ }++ } @{$array};
+
+    return \@unique;
+}
+
+
+########################################
+
+=head2 array_uniq_obj
+
+  array_uniq_obj($array_of_hashes)
+
+return uniq elements of array, examining all hash keys except peer_key
+
+=cut
+
+sub array_uniq_obj {
+    my($array) = @_;
+
+    my @unique;
+    my %seen;
+    for my $el (@{$array}) {
+        my $values = [];
+        for my $key (sort keys %{$el}) {
+            next if $key =~ /^peer_(key|addr|name)$/mx;
+            push @{$values}, ($el->{$key} // "");
+        }
+        my $ident = join(";", @{$values});
+        next if $seen{$ident};
+        $seen{$ident} = 1;
+        push @unique, $el;
+    }
 
     return \@unique;
 }
