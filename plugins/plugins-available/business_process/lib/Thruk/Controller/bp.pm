@@ -296,6 +296,7 @@ sub index {
         $label = Thruk::BP::Utils::make_uniq_label($c, $label);
         my $bp = Thruk::BP::Components::BP->new($c, $file, {
             'name'  => $label,
+            "filter" => ["add_recursive_output_filter"],
             'nodes' => [{
                 'id'       => 'node1',
                 'label'    => $label,
