@@ -333,8 +333,12 @@ sub index {
         # try to find this bp on any system
         my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $bp->{'name'} } ] );
         $c->stash->{'bp_backend'} = '';
-        if(scalar @{$hosts} > 0) {
-            $c->stash->{'bp_backend'} = $hosts->[0]->{'peer_key'};
+        for my $hst (@{$hosts}) {
+            my $vars = Thruk::Utils::get_custom_vars($c, $hst);
+            if($vars->{'THRUK_BP_ID'} && $vars->{'THRUK_BP_ID'} == $id) {
+                $c->stash->{'bp_backend'} = $hst->{'peer_key'};
+                last;
+            }
         }
 
         $c->stash->{'bp_custom_functions'} = Thruk::BP::Utils::get_custom_functions($c);

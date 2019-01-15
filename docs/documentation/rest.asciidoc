@@ -1116,6 +1116,7 @@ lists business processes.
 |===========================================
 |Attribute                         | Description
 |affected_peers                    | list of backend ids used for the last calculation
+|bp_backend                        | id of backend which hosts the business process
 |filter                            | list of enabled filters
 |id                                | primary id
 |last_check                        | timestamp of last check result submited

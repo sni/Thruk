@@ -152,6 +152,18 @@ sub cmd {
     my $bps    = Thruk::BP::Utils::load_bp_data($c, $id);
     my $num_bp = scalar @{$bps};
 
+    # update bp
+    my $hosts = {};
+    for my $hst (@{$c->{'db'}->get_hosts( filter => [ { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ], columns => [qw/name custom_variable_names custom_variable_values/] )}) {
+        my $vars = Thruk::Utils::get_custom_vars($c, $hst);
+        $hosts->{$hst->{'name'}}->{$vars->{'THRUK_BP_ID'}} = $hst->{'peer_key'};
+    }
+    for my $bp (@{$bps}) {
+        if($hosts->{$bp->{'name'}}->{$bp->{'id'}}) {
+            $bp->{'bp_backend'} = $hosts->{$bp->{'name'}}->{$bp->{'id'}};
+        }
+    }
+
     my $worker_num = int($c->config->{'Thruk::Plugin::BP'}->{'worker'} || 0);
     if($worker_num == 0) {
         # try to autmatically find a suitable number of workers
