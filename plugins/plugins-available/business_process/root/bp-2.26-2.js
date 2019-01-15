@@ -860,11 +860,11 @@ function bp_update_status(evt, node) {
     jQuery('#bp_status_status').html('<div class="statusField status'+statusName+'">  '+statusName+'  </div>');
     jQuery('#bp_status_label').html(n.label);
 
-    var status_text = n.status_text.replace(/\|.*$/, '');
+    var status_text = n.status_text.replace(/\|.*$/g, '');
     if(n.id == "node1") {
-        status_text = bp_status.replace(/\|.*$/, '');
+        status_text = bp_status.replace(/\|.*$/g, '');
     }
-    status_text = status_text.replace(/\n/, '<br>');
+    status_text = status_text.replace(/\n+/g, '<br>').replace(/\\+n/g, '<br>').replace(/<br><br>/g, '<br>');
     jQuery('#bp_status_plugin_output').html(status_text);
 
     if(jQuery('#bp_status_plugin_output').overflown()) {
