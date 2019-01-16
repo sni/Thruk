@@ -38,11 +38,6 @@
       dest: /omd/sites/demo/var/thruk/downtimes/
       owner: demo
       group: demo
-  - copy:
-      src: /root/1.tbp
-      dest: /omd/sites/demo/etc/thruk/bp/
-      owner: demo
-      group: demo
   - name: add example business process
     copy:
       src: /root/1.tbp
