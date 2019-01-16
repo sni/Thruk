@@ -272,8 +272,9 @@ sub do_on_peer {
         };
         if($@) {
             $last_error = $@;
-            $last_error =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
-            $last_error =~ s/thread\s+\d+//gmx;
+            $last_error =~ s/^(.*?)\n.*$/$1/sgmx;
+            $last_error =~ s/\s+at\s+.*?\s+line\s+\d+\s*//gmx;
+            $last_error =~ s/thread\s+\d+\.?//gmx;
             $last_error =~ s/^ERROR:\ //gmx;
             $last_error = "ERROR: ".$last_error;
             $errors++;

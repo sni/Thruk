@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 use Data::Dumper qw/Dumper/;
-use Carp qw/carp croak confess/;
+use Carp qw/carp confess/;
 use Digest::MD5 qw(md5_hex);
 use Cpanel::JSON::XS ();
 use Storable qw/dclone/;
@@ -187,12 +187,12 @@ sub new {
             $self->{$opt_key} = $options{$opt_key};
         }
         else {
-            croak("unknown option: $opt_key");
+            confess("unknown option: $opt_key");
         }
     }
 
     if($self->{'verbose'} && !defined $self->{'logger'}) {
-        croak('please specify a logger object when using verbose mode');
+        confess('please specify a logger object when using verbose mode');
     }
 
     # setting a general timeout?
@@ -305,7 +305,7 @@ sub selectall_arrayref {
 
         if(!defined $result) {
             return unless $self->{'errors_are_fatal'};
-            croak("got undef result for: $statement");
+            confess("got undef result for: $statement");
         }
     }
 
@@ -386,7 +386,7 @@ sub selectall_hashref {
 
     $opt->{'slice'} = 1;
 
-    croak('key is required for selectall_hashref') if !defined $key_field;
+    confess('key is required for selectall_hashref') if !defined $key_field;
 
     my $result = $self->selectall_arrayref($statement, $opt);
 
@@ -397,7 +397,7 @@ sub selectall_hashref {
         }
         elsif(!defined $row->{$key_field}) {
             my %possible_keys = keys %{$row};
-            croak("key $key_field not found in result set, possible keys are: ".join(', ', sort keys %possible_keys));
+            confess("key $key_field not found in result set, possible keys are: ".join(', ', sort keys %possible_keys));
         } else {
             $indexed{$row->{$key_field}} = $row;
         }
@@ -586,7 +586,7 @@ sub selectscalar_value {
  errors_are_fatal()
  errors_are_fatal($value)
 
-Enable or disable fatal errors. When enabled the module will croak on any error.
+Enable or disable fatal errors. When enabled the module will confess on any error.
 
 returns the current setting if called without new value
 
@@ -847,7 +847,7 @@ sub _send {
         }
         $self->{'logger'}->error($status.' - '.$Monitoring::Livestatus::ErrorMessage." in query:\n".$statement) if $self->{'verbose'};
         if($self->{'errors_are_fatal'}) {
-            croak('ERROR '.$status.' - '.$Monitoring::Livestatus::ErrorMessage." in query:\n".$statement."\n");
+            confess('ERROR '.$status.' - '.$Monitoring::Livestatus::ErrorMessage." in query:\n".$statement."\n");
         }
         return;
     }
@@ -881,7 +881,7 @@ sub _send {
             my $message = 'ERROR '.$@." in text: '".$body."'\" for statement: '$statement'\n";
             $self->{'logger'}->error($message) if $self->{'verbose'};
             if($self->{'errors_are_fatal'}) {
-                croak($message);
+                confess($message);
             }
             return({ keys => [], result => []});
         }
@@ -890,7 +890,7 @@ sub _send {
         my $message = "ERROR undef result for text: '".$body."'\" for statement: '$statement'\n";
         $self->{'logger'}->error($message) if $self->{'verbose'};
         if($self->{'errors_are_fatal'}) {
-            croak($message);
+            confess($message);
         }
         return({ keys => [], result => []});
     }
@@ -1132,12 +1132,12 @@ sub _send_socket {
             return $sock if $ENV{'THRUK_SELECT'};
             return(&_read_socket_do($self, $sock, $statement));
         }
-        croak($@) if $self->{'errors_are_fatal'};
+        confess($@) if $self->{'errors_are_fatal'};
     }
 
     $status = $sock unless $status;
     return $sock if $ENV{'THRUK_SELECT'};
-    croak($msg) if($status >= 400 and $self->{'errors_are_fatal'});
+    confess($msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
     return($status, $msg, $recv);
 }
@@ -1226,7 +1226,7 @@ sub _socket_error {
 
     if($self->{'retries_on_connection_error'} <= 0) {
         if($self->{'errors_are_fatal'}) {
-            croak($message);
+            confess($message);
         }
         else {
             carp($message);
@@ -1400,7 +1400,7 @@ Errorhandling can be done like this:
     $ml->errors_are_fatal(0);
     my $hosts = $ml->selectall_arrayref("GET hosts");
     if($Monitoring::Livestatus::ErrorCode) {
-        croak($Monitoring::Livestatus::ErrorMessage);
+        confess($Monitoring::Livestatus::ErrorMessage);
     }
 
 =cut
@@ -1495,7 +1495,7 @@ sub _get_peer {
     }
 
     # check if we got a peer
-    croak('please specify a peer');
+    confess('please specify a peer');
 }
 
 
