@@ -116,7 +116,7 @@ sub add_recursive_output_filter {
         my($text) = @_;
         chomp($text);
         $text =~ s/\|.*$//gmx;
-        return((split(/\n|\\+n/mx, $text, 2))[0]);
+        return((split(/\n|\\+n/mx, $text, 2))[0] // "");
     };
     my $recurse;
     $recurse = sub {
@@ -129,7 +129,7 @@ sub add_recursive_output_filter {
                     $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}."] deep recursion...\n";
                     next;
                 }
-                $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}.'] '.(&{$clean_status}($n->{'status_text'} || $n->{'short_desc'}))."\n";
+                $text .= (chr(8194) x ($indent*4)).'- ['.($n->{'label'} // "").'] '.(&{$clean_status}($n->{'status_text'} || $n->{'short_desc'}))."\n";
                 &{$recurse}($bp, $n, $indent+1);
             }
         }
