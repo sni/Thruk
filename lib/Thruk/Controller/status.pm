@@ -191,7 +191,8 @@ sub _process_raw_request {
             }
             elsif($type eq 'hostgroup' or $type eq 'hostgroups') {
                 $data = [];
-                my $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ] );
+                my $groupsfilter = defined $filter ? { groups => { '>=' => $filter } } : [];
+                my $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $groupsfilter ] );
                 my $alias      = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ], columns => [qw/name alias/] );
                 $alias = Thruk::Utils::array2hash($alias, "name");
                 @{$hostgroups} = grep {/$filter/mx} @{$hostgroups} if $filter;
@@ -201,7 +202,8 @@ sub _process_raw_request {
             }
             elsif($type eq 'servicegroup' or $type eq 'servicegroups') {
                 $data = [];
-                my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), name => { '~~' => $filter } ] );
+                my $groupsfilter = defined $filter ? { groups => { '>=' => $filter } } : [];
+                my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $groupsfilter ] );
                 my $alias      = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ) ], columns => [qw/name alias/] );
                 $alias = Thruk::Utils::array2hash($alias, "name");
                 @{$servicegroups} = grep {/$filter/mx} @{$servicegroups} if $filter;
