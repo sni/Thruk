@@ -122,6 +122,8 @@ sub index {
         $c->stash->{editmode} = 1;
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
+            my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
+            return $c->redirect_to($proxyurl) if $proxyurl;
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
             return _bp_start_page($c);
         }
@@ -321,6 +323,8 @@ sub index {
         $c->stash->{editmode} = 0 unless $allowed_for_edit;
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
+            my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
+            return $c->redirect_to($proxyurl) if $proxyurl;
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
             return _bp_start_page($c);
         }

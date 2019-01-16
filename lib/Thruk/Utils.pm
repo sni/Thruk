@@ -1392,6 +1392,7 @@ sub proxifiy_url {
         return($url);
     }
     my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
+    return($url) unless $peer;
     if($peer->{'type'} ne 'http') {
         return($url);
     }
@@ -1402,6 +1403,27 @@ sub proxifiy_url {
     $url =~ s%(\s+rel=)('|")%$1$2$proxy_prefix%gmx;
 
     return($proxy_prefix.$url);
+}
+
+########################################
+
+=head2 proxifiy_me
+
+  returns proxy url if possible
+
+returns url with optional proxy prepended
+
+=cut
+sub proxifiy_me {
+    my($c, $peer_id) = @_;
+    my $thruk_url = get_remote_thruk_url($c, $peer_id);
+    return unless $thruk_url;
+    my $url = $c->req->url;
+    $url    =~ s|^https?://[^/]+/|/|mx;
+    $url    =~ s|^.*?/thruk/|$thruk_url|mx;
+    my $proxy_url = proxifiy_url($c, {peer_key => $peer_id}, $url);
+    return $proxy_url if $url ne $proxy_url;
+    return;
 }
 
 ########################################
