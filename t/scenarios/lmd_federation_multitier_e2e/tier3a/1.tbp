@@ -1,0 +1,32 @@
+{
+   "filter" : [
+      "add_recursive_output_filter"
+   ],
+   "name" : "tier3a bp",
+   "nodes" : [
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "create_obj" : 1,
+         "depends" : [
+            "node2"
+         ],
+         "filter" : [],
+         "function" : "worst()",
+         "id" : "node1",
+         "label" : "tier3a bp"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status('tier3a', '.*', '~')",
+         "id" : "node2",
+         "label" : "tier3a"
+      }
+   ],
+   "rankDir" : "TB",
+   "state_type" : "both",
+   "template" : ""
+}
