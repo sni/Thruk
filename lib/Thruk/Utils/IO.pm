@@ -529,9 +529,10 @@ sub cmd {
         }
         $rc = $?;
         while(defined <$rdr>) {
-            push @lines, $_;
-            print $print_prefix.$_ if defined $print_prefix;
+            push @lines, ($_ // '');
+            print $print_prefix.($_ // '') if defined $print_prefix;
         }
+        @lines = grep defined, @lines;
         $output = join('', @lines) // '';
         # restore original array
         unshift @{$cmd}, $prog;
