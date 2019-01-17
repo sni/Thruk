@@ -26,7 +26,7 @@ Helper for the business process addon
 
 =head2 load_bp_data
 
-    load_bp_data($c, [$num], [$editmode], [$drafts])
+    load_bp_data($c, [$num], [$editmode], [$drafts], [$backend_id])
 
 editmode:
     - 0/undef:    no edit mode
@@ -40,7 +40,7 @@ load all or specific business process
 
 =cut
 sub load_bp_data {
-    my($c, $num, $editmode, $drafts) = @_;
+    my($c, $num, $editmode, $drafts, $backend_id) = @_;
 
     # make sure our folders exist
     my $base_folder = bp_base_folder($c);
@@ -79,6 +79,11 @@ sub load_bp_data {
         next if(!$is_admin && !$allowed->{$nr});
         my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
         if($bp) {
+            if($backend_id) {
+                if(!$bp->{'bp_backend'} || $bp->{'bp_backend'} ne $backend_id) {
+                    next;
+                }
+            }
             push @{$bps}, $bp;
             $numbers->{$bp->{'id'}} = 1;
         }

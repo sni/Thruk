@@ -37,7 +37,7 @@ return new business process
 =cut
 
 sub new {
-    my ( $class, $c, $file, $bpdata, $editmode ) = @_;
+    my($class, $c, $file, $bpdata, $editmode) = @_;
 
     my $self = {
         'id'                => undef,
@@ -93,13 +93,43 @@ sub new {
 
     $self->load_runtime_data();
 
+    # add default filter
+    $self->{'default_filter'} = Thruk::Utils::list($c->config->{'Thruk::Plugin::BP'}->{'default_filter'});
+
     $self->save() if $self->{'need_save'};
 
     for my $n (@{$self->{'nodes'}}) {
         $n->update_parents($self);
     }
 
+    confess("status_text cannot be empty") unless defined $self->{'status_text'};
+
     return $self;
+}
+
+##########################################################
+
+=head2 fullid
+
+return id and optional peer key
+
+=cut
+sub fullid {
+    my($self) = @_;
+    return($self->{'bp_backend'}.':'.$self->{'id'}) if $self->{'bp_backend'};
+    return($self->{'id'});
+}
+
+##########################################################
+
+=head2 filter
+
+return list of filters + default filter
+
+=cut
+sub filter {
+    my($self) = @_;
+    return(Thruk::Utils::array_uniq([@{$self->{'default_filter'}}, @{$self->{'filter'}}]));
 }
 
 ##########################################################
@@ -234,6 +264,7 @@ set status for this business process
 =cut
 sub set_status {
     my($self, $state, $text) = @_;
+    confess("status text cannot be empty") unless defined $text;
 
     my $last_state = $self->{'status'};
 
@@ -313,6 +344,7 @@ sub get_json_nodes {
           acknowledged              => $n->{'acknowledged'}."",
           scheduled_downtime_depth  => $n->{'scheduled_downtime_depth'}."",
           bp_ref                    => $n->{'bp_ref'},
+          bp_ref_peer               => $n->{'bp_ref_peer'},
           depends                   => $n->{'depends'},
           func                      => $n->{'function'},
           func_args                 => $n->{'function_args'},
@@ -570,11 +602,11 @@ sub bulk_fetch_live_data {
 
     # check if have filters in place which requires fetching all hosts / services for group filters
     my $has_filters = 0;
-    if($self->{'filter'} && scalar @{$self->{'filter'}} > 0) {
+    if(scalar @{$self->filter()} > 0) {
         $has_filters = 1;
     } else {
         for my $n (@{$self->{'nodes'}}) {
-            if($n->{'filter'} && scalar @{$n->{'filter'}} > 0) {
+            if(scalar @{$n->filter()} > 0) {
                 $has_filters = 1;
                 last;
             }

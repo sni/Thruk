@@ -120,11 +120,14 @@ sub index {
     # read / write actions
     if($id and $allowed_for_edit and ($action ne 'details' and $action ne 'refresh')) {
         $c->stash->{editmode} = 1;
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
-        if(scalar @{$bps} != 1) {
+        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode}, undef, $bp_backend_id);
+        if(scalar @{$bps} == 0) {
             my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
-            return $c->redirect_to($proxyurl) if $proxyurl;
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
+            if($proxyurl) {
+                $proxyurl =~ s/bp=[^:]*:/bp=/gmx;
+                return $c->redirect_to($proxyurl);
+            }
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process or no permissions', code => 404 });
             return _bp_start_page($c);
         }
         my $bp = $bps->[0];
@@ -298,7 +301,6 @@ sub index {
         $label = Thruk::BP::Utils::make_uniq_label($c, $label);
         my $bp = Thruk::BP::Components::BP->new($c, $file, {
             'name'  => $label,
-            "filter" => ["add_recursive_output_filter"],
             'nodes' => [{
                 'id'       => 'node1',
                 'label'    => $label,
@@ -321,11 +323,14 @@ sub index {
     if($id) {
         $c->stash->{editmode} = $c->req->parameters->{'edit'} || 0;
         $c->stash->{editmode} = 0 unless $allowed_for_edit;
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
-        if(scalar @{$bps} != 1) {
+        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode}, undef, $bp_backend_id);
+        if(scalar @{$bps} == 0) {
             my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
-            return $c->redirect_to($proxyurl) if $proxyurl;
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
+            if($proxyurl) {
+                $proxyurl =~ s/bp=[^:]*:/bp=/gmx;
+                return $c->redirect_to($proxyurl);
+            }
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process or no permissions', code => 404 });
             return _bp_start_page($c);
         }
         my $bp = $bps->[0];
@@ -448,10 +453,58 @@ sub _bp_start_page {
         return $c->render(json => $json);
     }
 
+    # add remote business processes
+    $c->stash->{'has_remote_bps'} = 0;
+    if(scalar @{$c->{'db'}->get_http_peers()} > 0) {
+        $bps = _add_remote_bps($c, $bps);
+    }
 
     Thruk::Utils::ssi_include($c);
 
     return 1;
+}
+
+##########################################################
+sub _add_remote_bps {
+    my($c, $bps) = @_;
+
+    my $site_names = {};
+    for my $p (@{$c->{'db'}->get_peers(1)}) {
+        $site_names->{$p->{'key'}} = $p->{'name'};
+    }
+
+    my $uniq = {};
+    for my $bp (@{$bps}) {
+        $uniq->{$bp->fullid()} = 1;
+        $bp->{'site'} = '';
+        next unless $bp->{'bp_backend'};
+        $bp->{'site'} = $site_names->{$bp->{'bp_backend'}};
+    }
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ] );
+    for my $svc (@{$services}) {
+        my $vars = Thruk::Utils::get_custom_vars($c, $svc);
+        next unless $vars->{'THRUK_NODE_ID'} eq 'node1';
+        my $fullid = $svc->{'peer_key'}.':'.$vars->{'THRUK_BP_ID'};
+        # skip the ones we have already
+        next if $uniq->{$fullid};
+        my $remote_bp = {
+            name                => $svc->{'description'},
+            bp_backend          => $svc->{'peer_key'},
+            status              => $svc->{'state'},
+            last_check          => $svc->{'last_check'},
+            last_state_change   => $svc->{'last_state_change'},
+            status_text         => $svc->{'plugin_output'} // '',
+            fullid              => $fullid,
+            draft               => 0,
+            site                => $site_names->{$svc->{'peer_key'}} // '',
+        };
+        $remote_bp->{'status_text'} =~ s|\\n|\n|gmx;
+        $uniq->{$fullid} = 1;
+        $c->stash->{'has_remote_bps'} = 1;
+        push @{$bps}, $remote_bp;
+    }
+    @{$bps} = sort { $a->{'name'} cmp $b->{'name'} } @{$bps};
+    return($bps);
 }
 
 ##########################################################

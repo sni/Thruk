@@ -2669,6 +2669,7 @@ Configuration Example:
     refresh_interval       = 1
     #favorite_custom_function = echo ; echo_function
     #worker                = 5
+    #default_filter        = add_recursive_output_filter
   </Component>
 
 
@@ -2719,6 +2720,9 @@ so you don't have to select custom first. Syntax is <name>;<function>
 Set the number of parallel business process calculations. Setting it
 to 1 disables parallelization. Setting it to 0 trys to autodetect a
 suitable value.
+
+=== default_filter
+Add global filter to all business processes, can be set multiple times.
 
 == Component Thruk::Plugin::Mobile
 

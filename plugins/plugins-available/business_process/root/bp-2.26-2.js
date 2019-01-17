@@ -962,8 +962,12 @@ function bp_update_status(evt, node) {
     jQuery("#"+n.id+" .bp_node_bp_ref_icon").css('visibility', 'hidden');
     jQuery("#"+n.id+" .bp_node_link_icon").css('visibility', 'hidden');
     if(n.bp_ref) {
-        jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", "bp.cgi?action=details&bp="+n.bp_ref).css('visibility', '');
-        jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+n.bp_ref+"'><img src='"+url_prefix+"themes/"+theme+"/images/chart_organisation.png' border='0' alt='Show Business Process' title='Show Business Process' width='16' height='16'><\/a>");
+        var bp_id = n.bp_ref;
+        if(n.bp_ref_peer) {
+            bp_id = n.bp_ref_peer+":"+n.bp_ref;
+        }
+        jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", "bp.cgi?action=details&bp="+bp_id).css('visibility', '');
+        jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+bp_id+"'><img src='"+url_prefix+"themes/"+theme+"/images/chart_organisation.png' border='0' alt='Show Business Process' title='Show Business Process' width='16' height='16'><\/a>");
     } else if(link) {
         var href = jQuery('.bp_status_extinfo_link').find('A').attr("href");
         jQuery("#"+n.id+" .bp_node_link_icon").attr("href", href).css('visibility', '');

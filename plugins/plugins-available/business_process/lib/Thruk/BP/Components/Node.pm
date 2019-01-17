@@ -19,7 +19,7 @@ Business Process Node
 =cut
 
 my @stateful_keys   = qw/status status_text last_check last_state_change short_desc
-                       scheduled_downtime_depth acknowledged bp_ref/;
+                       scheduled_downtime_depth acknowledged bp_ref bp_ref_peer/;
 
 ##########################################################
 
@@ -54,7 +54,8 @@ sub new {
         'acknowledged'              => 0,
         'testmode'                  => 0,
         'bp_ref'                    => undef,
-        'filter'                    => $data->{'filter'}        || [],
+        'bp_ref_peer'               => undef,
+        'filter'                    => $data->{'filter'}      || [],
 
         'status'                    => $data->{'status'} // 4,
         'status_text'               => $data->{'status_text'} || '',
@@ -275,12 +276,12 @@ sub update_status {
             node     => $self,
             livedata => $livedata,
         };
-        if(scalar @{$bp->{'filter'}} > 0 || scalar @{$self->{'filter'}} > 0) {
+        if(scalar @{$bp->filter()} > 0 || scalar @{$self->{'filter'}} > 0) {
             my $need_update = delete $bp->{'need_update'};
             $filter_args = Thruk::BP::Functions::_dclone($filter_args);
             $bp->{'need_update'} = $need_update;
             $filter_args->{'bp'}->{'need_update'} = $need_update;
-            for my $f (sort @{$bp->{'filter'}}) {
+            for my $f (sort @{$bp->filter()}) {
                 $filter_args->{'scope'} = 'global';
                 Thruk::BP::Functions::_filter($c, $f, $filter_args);
             }
@@ -303,7 +304,7 @@ sub update_status {
         $filter_args->{'status_text'}   = $status_text;
         $filter_args->{'short_desc'}    = $short_desc;
         $filter_args->{'extra'}         = $extra;
-        for my $f (sort @{$bp->{'filter'}}) {
+        for my $f (sort @{$bp->filter()}) {
             $filter_args->{'scope'} = 'global';
             Thruk::BP::Functions::_filter($c, $f, $filter_args);
         }
@@ -361,10 +362,12 @@ sub set_status {
 
     # update some extra attributes
     my %custom_vars;
-    $self->{'bp_ref'} = undef;
+    $self->{'bp_ref'}      = undef;
+    $self->{'bp_ref_peer'} = undef;
     if($extra && $extra->{'host_custom_variable_names'} && $extra->{'host_custom_variable_values'}) {
         @custom_vars{@{$extra->{'host_custom_variable_names'}}} = @{$extra->{'host_custom_variable_values'}};
-        $self->{'bp_ref'} = $custom_vars{'THRUK_BP_ID'};
+        $self->{'bp_ref'}      = $custom_vars{'THRUK_BP_ID'};
+        $self->{'bp_ref_peer'} = $extra->{'peer_key'};
     }
     for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged testmode/) {
         $self->{$key} = $extra->{$key} if defined $extra->{$key};
