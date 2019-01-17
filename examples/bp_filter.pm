@@ -109,45 +109,55 @@ sub add_recursive_output_filter {
     # this is a input filter only
     return unless $args->{'type'} eq 'output';
 
-    my $text    = '';
-    my $indent  = 0;
-    my $parents = {};
-    my $clean_status = sub {
-        my($text) = @_;
-        chomp($text);
-        $text =~ s/\|.*$//gmx;
-        return((split(/\n|\\+n/mx, $text, 2))[0] // "");
-    };
-    my $recurse;
-    $recurse = sub {
-        my($bp, $node, $indent) = @_;
-        $parents->{$bp->{id}.'-'.$node->{'id'}} = 1;
-        return if $indent > 20;
-        for my $n (@{$node->depends($bp)}) {
-            if($n->{'status'} != 0) {
-                if(defined $parents->{$bp->{id}.'-'.$n->{'id'}}) {
-                    $text .= (chr(8194) x ($indent*4)).'- ['.$n->{'label'}."] deep recursion...\n";
-                    next;
-                }
-                $text .= (chr(8194) x ($indent*4)).'- ['.($n->{'label'} // "").'] '.(&{$clean_status}($n->{'status_text'} || $n->{'short_desc'}))."\n";
-                &{$recurse}($bp, $n, $indent+1);
-            }
-        }
-        if($node->{'bp_ref'} && $node->{'status'} != 0) {
-            my $link_bp    = Thruk::BP::Utils::load_bp_data($c, $node->{'bp_ref'});
-            if($link_bp->[0]) {
-                my $first_node = $link_bp->[0]->{'nodes'}->[0];
-                $text .= (chr(8194) x ($indent*4)).'- ['.$first_node->{'label'}.'] '.(&{$clean_status}($first_node->{'status_text'} || $first_node->{'short_desc'}))."\n";
-                &{$recurse}($link_bp->[0], $first_node, $indent+1);
-            }
-        }
-        delete $parents->{$bp->{id}.'-'.$node->{'id'}};
-    };
-    &{$recurse}($args->{'bp'}, $args->{'node'}, $indent);
-
-    $text =~ s/\n\s*\n/\n/gmx;
-    $text =~ s/\n+/\n/gmx;
+    my $text = _add_recursive_output_filter_recurse($c, "", $args->{'bp'}, $args->{'node'}, 0, {});
+    $text    =~ s/\n\s*\n/\n/gmx;
+    $text    =~ s/\n+/\n/gmx;
     $args->{'extra'}->{'long_output'} = $text;
-
     return;
+}
+sub _add_recursive_output_filter_clean_status {
+    my($text, $keeplongoutput) = @_;
+    chomp($text);
+    $text =~ s/\|.*$//gmx;
+    return($text // "") if $keeplongoutput;
+    return((split(/\n|\\+n/mx, $text, 2))[0] // "");
+}
+sub _add_recursive_output_filter_indent {
+    my($indent, $text) = @_;
+    my $prefix = (chr(8194) x ($indent*3));
+    my @lines = split(/\n|\\+n/mx, $text);
+    return($prefix.join("\n".$prefix, @lines));
+}
+sub _add_recursive_output_filter_recurse {
+    my($c, $text, $bp, $node, $indent, $parents) = @_;
+    $parents->{$bp->{id}.'-'.$node->{'id'}} = 1;
+    return $text if $indent > 20;
+    for my $n (@{$node->depends($bp)}) {
+        if($n->{'status'} != 0) {
+            if(defined $parents->{$bp->{id}.'-'.$n->{'id'}}) {
+                $text .= _add_recursive_output_filter_indent($indent, '- ['.$n->{'label'}."] deep recursion...")."\n";
+                next;
+            }
+            $text .= _add_recursive_output_filter_indent($indent, '- ['.($n->{'label'} // "").'] '._add_recursive_output_filter_clean_status($n->{'status_text'} || $n->{'short_desc'}))."\n";
+            $text  = _add_recursive_output_filter_recurse($c, $text, $bp, $n, $indent+1, $parents);
+        }
+    }
+    # recurse into other business process
+    if($node->{'bp_ref'} && $node->{'status'} != 0) {
+        my $link_bp = Thruk::BP::Utils::load_bp_data($c, $node->{'bp_ref'}, undef, undef, $node->{'bp_ref_peer'});
+        if($link_bp->[0]) {
+            my $first_node = $link_bp->[0]->{'nodes'}->[0];
+            $text .= _add_recursive_output_filter_indent($indent, '- ['.$first_node->{'label'}.'] '._add_recursive_output_filter_clean_status($first_node->{'status_text'} || $first_node->{'short_desc'}))."\n";
+            $text  = _add_recursive_output_filter_recurse($c, $text, $link_bp->[0], $first_node, $indent+1, $parents);
+        } else {
+            my @lines = split(/\n|\\+n/mx, _add_recursive_output_filter_clean_status($node->{'status_text'} || $node->{'short_desc'}, 1));
+            my $firstline = shift @lines;
+            $text .= _add_recursive_output_filter_indent($indent, '- ['.$node->{'label'}.'] '.$firstline)."\n";
+            for my $line (@lines) {
+                $text .= _add_recursive_output_filter_indent($indent+1, $line)."\n";
+            }
+        }
+    }
+    delete $parents->{$bp->{id}.'-'.$node->{'id'}};
+    return $text;
 }
