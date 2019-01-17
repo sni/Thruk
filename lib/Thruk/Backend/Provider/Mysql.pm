@@ -1186,7 +1186,7 @@ sub _check_lock {
     my $skip          = 0;
     my $cache_version = 1;
     eval {
-        $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE') unless $c->config->{'logcache_pxc_strict_mode'};
+        $dbh->do('LOCK TABLES `'.$prefix.'_status` READ') unless $c->config->{'logcache_pxc_strict_mode'};
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
@@ -1199,13 +1199,12 @@ sub _check_lock {
             $cache_version = $versions[0];
         }
     };
+    $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
     if($@) {
         print "$@\n" if $verbose;
-        $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
         return;
     }
     if($skip) {
-        $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
         return;
     }
 
