@@ -24,6 +24,9 @@
       mode: 0600
       owner: demo
       group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
   - copy:
       src: "/root/1.tbp"
       dest: "/omd/sites/demo/etc/thruk/bp/1.tbp"
