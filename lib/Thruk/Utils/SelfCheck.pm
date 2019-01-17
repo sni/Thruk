@@ -306,7 +306,8 @@ sub _lmd_checks  {
 
     my $details = "LMD:\n";
     if($c->config->{'lmd_core_bin'} && $c->config->{'lmd_core_bin'} ne 'lmd') {
-        if(! -x $c->config->{'lmd_core_bin'}) {
+        my $lmd_core_bin = glob($c->config->{'lmd_core_bin'});
+        if(! -x $lmd_core_bin) {
             chomp(my $err = $!);
             $details .= sprintf("  - lmd binary %s not executable: %s\n", $c->config->{'lmd_core_bin'}, $err);
             return({sub => 'lmd', rc => 2, msg => "LMD CRITICAL", details => $details });
