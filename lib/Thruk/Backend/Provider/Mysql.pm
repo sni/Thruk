@@ -1051,8 +1051,9 @@ sub _import_logs {
 
         # backends maybe down, we still want to continue updates
         eval {
+            my $count;
             if($mode eq 'update' or $mode eq 'import') {
-                $log_count += $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+                $count = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
             }
             elsif($mode eq 'clean') {
                 my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
@@ -1064,13 +1065,14 @@ sub _import_logs {
                 $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
             }
             elsif($mode eq 'authupdate') {
-                $log_count += $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
+                $count = $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
             }
             elsif($mode eq 'optimize') {
-                $log_count += $peer->logcache->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
+                $count = $peer->logcache->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
             } else {
                 die("unknown mode: ".$mode."\n");
             }
+            $log_count += $count if($count && $count > 0);
         };
         if($@) {
             print "ERROR: ", $@,"\n" if $verbose;
@@ -1824,7 +1826,7 @@ sub _import_peer_logfiles {
     my $time = $start;
     $end = time() unless $end;
 
-    # add import filter?
+    # add import filter again, even if it should have been filtered in the logs query already, but it seems like not all backends handle them correctly
     my $import_filter = [];
     for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_exclude'})}) {
         push @{$import_filter}, { message => { '!~~' => $f } }
@@ -1899,6 +1901,15 @@ sub _import_logcache_from_file {
     my $auto_increments = _get_autoincrements($dbh, $prefix);
     my $foreign_key_stash = {};
 
+    # add import filter
+    my $import_filter;
+    if(scalar @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})} > 0) {
+        my $f = join('|', @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})});
+        ## no critic
+        $import_filter = qr/($f)/i;
+        ## use critic
+    }
+
     for my $f (@{$files}) {
         print $f if $verbose > 1;
         my $duplicate_lookup  = {};
@@ -1927,6 +1938,8 @@ sub _import_logcache_from_file {
                 }
                 next if defined $duplicate_lookup->{$original_line};
             }
+
+            next if $import_filter && $original_line =~ $import_filter;
 
             $log_count++;
             $l->{'state_type'} = '';
@@ -2011,6 +2024,15 @@ sub _insert_logs {
     my $auto_increments = _get_autoincrements($dbh, $prefix);
     my $foreign_key_stash = {};
 
+    # add import filter
+    my $import_filter;
+    if(scalar @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})} > 0) {
+        my $f = join('|', @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})});
+        ## no critic
+        $import_filter = qr/($f)/i;
+        ## use critic
+    }
+
     my @values;
     #&timing_breakpoint('_insert_logs');
     for my $l (@{$logs}) {
@@ -2018,6 +2040,9 @@ sub _insert_logs {
         if($mode == MODE_UPDATE) {
             next if defined $duplicate_lookup->{$l->{'message'}};
         }
+
+        next if $import_filter && $l->{'message'} =~ $import_filter;
+
         $log_count++;
         print '.' if $log_count%1000 == 0 and $verbose > 1;
 
