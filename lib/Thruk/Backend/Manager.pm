@@ -205,6 +205,25 @@ sub get_peer_by_name {
 
 ##########################################################
 
+=head2 get_http_peers
+
+  get_http_peers()
+
+returns all configured peers which have a http connection type
+
+=cut
+
+sub get_http_peers {
+    my($self) = @_;
+    my $http_peers = [];
+    for my $peer (@{$self->get_peers()}) {
+        push @{$http_peers}, $peer if $peer->{'type'} eq 'http';
+    }
+    return $http_peers;
+}
+
+##########################################################
+
 =head2 peer_key
 
   peer_key()
