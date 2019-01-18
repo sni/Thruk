@@ -1665,6 +1665,7 @@ var TP = {
 
     /* play a wave file*/
     playWave: function(url, endedCallback) {
+        if(url == null || url == "null") { return; }
         console.log("playing sound: "+url);
         var el = Ext.DomHelper.insertFirst(document.body, '<audio src="'+url+'" />' , true);
         el.dom.addEventListener('ended', function() {
@@ -1692,6 +1693,9 @@ var TP = {
             if(tab.xdata[order[x]+'_sound'] != "") { enabled++; }
         }
         if(enabled == 0) { return; }
+
+        // see if this dashboard is only loaded to recalculate its status
+        if(tab.hidden) { return; }
 
         if(TP.alertTotals == undefined) { TP.alertTotals = {}; }
         var totals = {recovery: 0, warning: 0, critical: 0, unknown: 0, down: 0, unreachable: 0};
