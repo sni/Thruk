@@ -1151,3 +1151,4 @@ Sends the STOP_OBSESSING_OVER_SVC_CHECKS command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
+
