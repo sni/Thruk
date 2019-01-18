@@ -1037,6 +1037,10 @@ sub set_processinfo {
     if($fetch) {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
         $processinfo = $c->{'db'}->get_processinfo();
+        if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0) {
+            # may happen when no backends are selected or the current selected backends comes from a federation http
+            $processinfo = {};
+        }
         if(ref $processinfo eq 'HASH') {
             if($ENV{'THRUK_USE_LMD'}) {
                 ($processinfo, $cached_data) = check_federation_peers($c, $processinfo, $cached_data);
