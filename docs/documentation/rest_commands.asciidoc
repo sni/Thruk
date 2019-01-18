@@ -17,12 +17,12 @@ the comprehensive list of all available external commands.
 
 In case the command was successful, a simple json message is returned:
 
-```
+------
     %> thruk r -d "comment_data=test" /hosts/localhost/cmd/schedule_host_downtime
     {
       "message" : "Command successfully submitted"
     }
-```
+------
 
 However, due to the way external commands are implemented throughout the various
 cores, this message does not neccessarily mean the command was successful. Only
@@ -31,14 +31,14 @@ the submission was successful.
 If the core supports it (which is currently only Naemon >= 1.0.9) you will get
 a error response if something did not work like this:
 
-```
+------
     %> thruk r -d "comment_data=test" -d "triggered_by=xxx" /hosts/localhost/cmd/schedule_host_downtime
     {
       "code" : 400,
       "error" : "400: Couldn't parse ulong argument trigger_id (argument 4): No digits found in ulong 'xxx'\n",
       "message" : "sending command failed"
     }
-```
+------
 
 
 == Arguments and default values
@@ -59,9 +59,9 @@ Some of the arguments have default values:
 
 Timestamps, like start_date and end_date can be relative to get more reusable commands.
 
-```
+------
     %> thruk r -d "end_time=+60m" -d "comment_data='downtime comment'" '/services/<host>/<svc>/cmd/schedule_svc_downtime'
-```
+------
 
 This will create a 1hour downtime. Other suffixes are:
 
@@ -1151,4 +1151,3 @@ Sends the STOP_OBSESSING_OVER_SVC_CHECKS command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
-
