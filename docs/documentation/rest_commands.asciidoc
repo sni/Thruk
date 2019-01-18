@@ -41,6 +41,38 @@ a error response if something did not work like this:
 ```
 
 
+== Arguments and default values
+
+Each command can have required and optional arguments which are listed along with
+the command itself.
+
+Some of the arguments have default values:
+
+  - `comment_author`: defaults to the current user and cannot be changed usually
+  - `fixed`:          defaults to 1
+  - `duration`:       defaults to 0
+  - `triggered_by`:   defaults to 0
+  - `start_time`:     defaults to now
+  - `end_time`:       defaults to now + downtime_duration from the thruk.conf
+
+=== Relative timestamps
+
+Timestamps, like start_date and end_date can be relative to get more reusable commands.
+
+```
+    %> thruk r -d "end_time=+60m" -d "comment_data='downtime comment'" '/services/<host>/<svc>/cmd/schedule_svc_downtime'
+```
+
+This will create a 1hour downtime. Other suffixes are:
+
+  - `y`: years
+  - `w`: weeks
+  - `d`: days
+  - `h`: hours
+  - `m`: minutes
+
+
+
 == Example Usage
 
 All examples can be found on the link:rest_examples.html#sending_commands[REST API Examples page].
