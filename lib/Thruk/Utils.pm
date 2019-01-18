@@ -1416,6 +1416,7 @@ returns url with optional proxy prepended
 =cut
 sub proxifiy_me {
     my($c, $peer_id) = @_;
+    return unless $peer_id;
     my $thruk_url = get_remote_thruk_url($c, $peer_id);
     return unless $thruk_url;
     my $url = $c->req->url;
