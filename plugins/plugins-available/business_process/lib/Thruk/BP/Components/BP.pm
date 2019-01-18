@@ -606,7 +606,7 @@ sub bulk_fetch_live_data {
         $has_filters = 1;
     } else {
         for my $n (@{$self->{'nodes'}}) {
-            if(scalar @{$n->filter()} > 0) {
+            if(scalar @{$n->{'filter'}} > 0) {
                 $has_filters = 1;
                 last;
             }
