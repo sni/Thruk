@@ -8,6 +8,8 @@ next:
             - add authorization tab to contacts and contactgroups
           - Business Process:
             - delay calculation during core reloads
+            - add support for http federation
+            - add drill down output as default filter
 
 2.26-2   Tue Dec 18 17:33:08 CET 2018
           - display external commands errors if possible
