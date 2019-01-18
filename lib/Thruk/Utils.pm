@@ -2940,7 +2940,7 @@ sub _parse_date {
     }
 
     # relative time?
-    if($string =~ m/^(\-|\+)(\d+\w)+$/mx) {
+    if($string =~ m/^(\-|\+)(\d+\w)$/mx) {
         my $direction = $1;
         my $val = expand_duration($2);
         if($direction eq '-') {
