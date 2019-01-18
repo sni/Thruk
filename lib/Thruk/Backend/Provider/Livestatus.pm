@@ -45,7 +45,7 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
     in_check_period in_notification_period
 /];
 $Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
-    contacts contact_groups
+    contacts contact_groups long_plugin_output
 /];
 
 $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
@@ -74,7 +74,7 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
     in_check_period in_notification_period host_parents
 /];
 $Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
-    contacts contact_groups
+    contacts contact_groups long_plugin_output
 /];
 
 $Thruk::Backend::Provider::Livestatus::default_contact_columns = [qw/
