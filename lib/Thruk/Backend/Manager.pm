@@ -1481,19 +1481,27 @@ sub _do_on_peers {
                 ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
             };
             if($@) {
-                my $err = $@;
-                if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|mx) {
+                my $err  = $@;
+                my $code = 500;
+                if($err =~ m|^(\d+):\s*(.*)$|smx) {
+                    $code = $1;
+                    $err  = $2;
+                }
+                if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|smx) {
                     $err = $1;
                 }
-                elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
+                elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|smx) {
                     $err = $1;
                 }
-                if(!$c->stash->{'lmd_ok'}) {
+                elsif($err =~ m|(dial\s.*?connect:\s+connection\ refused)|smx) {
+                    $err = $1;
+                }
+                if(!$c->stash->{'lmd_ok'} && $code != 502) {
                     $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err;
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
                     Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
                 }
-                die("internal lmd error - ".($c->stash->{'lmd_error'} || $@));
+                die("internal lmd error - ".($c->stash->{'lmd_error'} || $err));
             }
         }
     } else {

@@ -1137,7 +1137,7 @@ sub _send_socket {
 
     $status = $sock unless $status;
     return $sock if $ENV{'THRUK_SELECT'};
-    confess($msg) if($status >= 400 and $self->{'errors_are_fatal'});
+    confess($status.": ".$msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
     return($status, $msg, $recv);
 }
@@ -1428,6 +1428,7 @@ sub _get_error {
         '498' => 'header is not exactly 16byte long',
         '499' => 'not a valid header (no content-length)',
         '500' => 'socket error',
+        '502' => 'backend connection proxy error',
     };
 
     confess('non existant error code: '.$code) if !defined $codes->{$code};
