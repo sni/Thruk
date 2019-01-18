@@ -98,6 +98,13 @@ sub _rest_get_external_command {
         if($arg eq 'start_time' || $arg eq 'end_time') {
             $val = Thruk::Utils::parse_date( $c, $val);
         }
+        if($arg eq 'performance_data') {
+            # simply amend performance_data to the plugin_output
+            if($val ne "") {
+                $cmd_args[(scalar @cmd_args)-1] .= '|'.$val;
+            }
+            next;
+        }
         push @cmd_args, $val;
     }
 
