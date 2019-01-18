@@ -1684,6 +1684,7 @@ var TP = {
     checkSoundAlerts: function(tab) {
         var order = ['unreachable', 'down', 'critical', 'warning', 'unknown', 'recovery'];
         var tab_id = tab.id;
+        if(tab_id == 0) { return; }
 
         /* check if any sound is enabled */
         var enabled = 0;
