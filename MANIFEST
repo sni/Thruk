@@ -2011,6 +2011,8 @@ t/scenarios/lmd_federation_e2e/t/100-lmd_federation.t
 t/scenarios/lmd_federation_e2e/thruk.conf
 t/scenarios/lmd_federation_e2e/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/docker-compose.yml
+t/scenarios/lmd_federation_multitier_e2e/krb5/Dockerfile
+t/scenarios/lmd_federation_multitier_e2e/krb5/playbook.yml
 t/scenarios/lmd_federation_multitier_e2e/lmd.ini
 t/scenarios/lmd_federation_multitier_e2e/Makefile
 t/scenarios/lmd_federation_multitier_e2e/objects.cfg

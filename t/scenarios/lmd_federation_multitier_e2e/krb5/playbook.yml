@@ -1,0 +1,11 @@
+---
+- hosts: all
+  tasks:
+  - apt:
+      name:
+        - krb5-user
+        - krb5-admin-server
+        - krb5-kdc
+        - ntpdate
+      state: present
+  #- shell: "sudo apt-get install krb5-user krb5-admin-server krb5-kdc ntpdate"

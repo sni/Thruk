@@ -1,5 +1,8 @@
 version: '2'
 
+networks:
+  test.local:
+
 services:
   tier1a:
     build: tier1a/
@@ -11,6 +14,10 @@ services:
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
+    networks:
+      test.local:
+        aliases:
+          - tier1a.test.local
 
   tier1b:
     build: tier1b/
@@ -21,6 +28,10 @@ services:
         - PREFIX=tier1b
     volumes:
         - .:/scenario:ro
+    networks:
+      test.local:
+        aliases:
+          - tier1b.test.local
 
   tier1c:
     build: tier1c/
@@ -31,6 +42,10 @@ services:
         - PREFIX=tier1c
     volumes:
         - .:/scenario:ro
+    networks:
+      test.local:
+        aliases:
+          - tier1c.test.local
 
   tier2a:
     build: tier2a/
@@ -39,18 +54,30 @@ services:
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
+    networks:
+      test.local:
+        aliases:
+          - tier2a.test.local
   tier2b:
     build: tier2b/
     environment:
         - PREFIX=tier2b
     volumes:
         - .:/scenario:ro
+    networks:
+      test.local:
+        aliases:
+          - tier2b.test.local
   tier2c:
     build: tier2c/
     environment:
         - PREFIX=tier2c
     volumes:
         - .:/scenario:ro
+    networks:
+      test.local:
+        aliases:
+          - tier2c.test.local
 
 
   tier3a:
@@ -60,6 +87,10 @@ services:
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
+    networks:
+      test.local:
+        aliases:
+          - tier3a.test.local
   tier3b:
     build: tier3b/
     environment:
@@ -67,3 +98,14 @@ services:
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
+    networks:
+      test.local:
+        aliases:
+          - tier3b.test.local
+
+  krb5:
+    build: krb5/
+    networks:
+      test.local:
+        aliases:
+          - krb5.test.local
