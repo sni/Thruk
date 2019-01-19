@@ -452,13 +452,13 @@ sub _parse_custom_functions {
 
 =head2 join_labels
 
-    join_labels($nodes)
+    join_labels($nodes, [$state])
 
 return string with joined labels
 
 =cut
 sub join_labels {
-    my($nodes) = @_;
+    my($nodes, $state) = @_;
     my @labels;
     for my $n (@{$nodes}) {
         push @labels, $n->{'label'};
@@ -470,15 +470,23 @@ sub join_labels {
     if($num == 1) {
         return($labels[0]);
     }
+    my $long = "";
+    if($state) {
+        for my $n (@{$nodes}) {
+            my $firstline = "[".$n->{'label'}."] ".Thruk::BP::Utils::state2text($state);
+            $firstline   .= " - ".(split(/\n/mx, $n->{'status_text'}))[0] if $n->{'status_text'};
+            $long .= "\n-".$firstline;
+        }
+    }
     if($num == 2) {
-        return($labels[0].' and '.$labels[1]);
+        return($labels[0].' and '.$labels[1].$long);
     }
     my $last = pop @labels;
     my $label = join(', ', @labels).' and '.$last;
     if(length($label) > 150) {
         $label = substr($label,0,147).'...';
     }
-    return($label);
+    return($label.$long);
 }
 
 ##########################################################

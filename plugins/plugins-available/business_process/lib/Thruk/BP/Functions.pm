@@ -59,7 +59,7 @@ sub status {
                    || ($op eq '!=' && $sname ne $description)) {
                     my $s = $livedata->{'services'}->{$hostname}->{$sname};
                     next if($bp->{'state_type'} eq 'hard' and $s->{'state_type'} != 1);
-                    push @{$depends}, { label => $sname, status => $s->{'state'} };
+                    push @{$depends}, { label => $sname, status => $s->{'state'}, status_text => $s->{'plugin_output'} };
                 }
             }
 
@@ -245,7 +245,7 @@ sub worst {
     my @sorted = reverse sort keys %{$states};
     my $state = $sorted[0];
     $state = 0 if $state == -1;
-    return($state, 'worst of', Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}));
+    return($state, 'worst of', Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state));
 }
 
 ##########################################################
@@ -266,7 +266,7 @@ sub best {
     my @sorted = sort keys %{$states};
     my $state = $sorted[0];
     $state = 0 if $state == -1;
-    return($state, 'best of', Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}));
+    return($state, 'best of', Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state));
 }
 
 ##########################################################
