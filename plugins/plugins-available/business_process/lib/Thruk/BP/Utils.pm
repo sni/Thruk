@@ -467,16 +467,16 @@ sub join_labels {
     if($num == 0) {
         return('');
     }
-    if($num == 1) {
-        return($labels[0]);
-    }
     my $long = "";
     if($state) {
         for my $n (@{$nodes}) {
             my $firstline = "[".$n->{'label'}."] ".Thruk::BP::Utils::state2text($state);
             $firstline   .= " - ".(split(/\n/mx, $n->{'status_text'}))[0] if $n->{'status_text'};
-            $long .= "\n-".$firstline;
+            $long .= "\n- ".$firstline;
         }
+    }
+    if($num == 1) {
+        return($labels[0].$long);
     }
     if($num == 2) {
         return($labels[0].' and '.$labels[1].$long);

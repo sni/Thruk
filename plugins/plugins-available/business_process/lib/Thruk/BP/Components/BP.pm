@@ -664,7 +664,7 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_hosts(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
+        my $data   = $c->{'db'}->get_hosts(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
         $hostdata  = Thruk::Utils::array2hash($data, 'name');
     }
     if(scalar keys %{$servicefilter} > 0) {
@@ -701,7 +701,7 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
+        my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
         $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
     }
     if(!$expand_groups) {

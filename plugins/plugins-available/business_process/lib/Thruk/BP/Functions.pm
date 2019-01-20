@@ -97,7 +97,7 @@ sub status {
     }
 
     if($data && defined $data->{'state'}) {
-        return($data->{'state'}, $data->{'plugin_output'}, undef, $data);
+        return($data->{'state'}, $data->{'plugin_output'}."\n".$data->{'long_plugin_output'}, undef, $data);
     }
     if($description) {
         return(3, 'no such service');
