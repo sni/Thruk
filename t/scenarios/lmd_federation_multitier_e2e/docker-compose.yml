@@ -18,6 +18,8 @@ services:
       test.local:
         aliases:
           - tier1a.test.local
+    hostname: tier1a
+    domainname: test.local
 
   tier1b:
     build: tier1b/
@@ -32,6 +34,8 @@ services:
       test.local:
         aliases:
           - tier1b.test.local
+    hostname: tier1b
+    domainname: test.local
 
   tier1c:
     build: tier1c/
@@ -46,6 +50,26 @@ services:
       test.local:
         aliases:
           - tier1c.test.local
+    hostname: tier1c
+    domainname: test.local
+
+  tier1d:
+    build: tier1d/
+    ports:
+        - "60083:80"
+        - "60446:443"
+    environment:
+        - PREFIX=tier1d
+    volumes:
+        - .:/scenario:ro
+        - ../../../:/thruk:ro
+    networks:
+      test.local:
+        aliases:
+          - tier1d.test.local
+    hostname: tier1d
+    domainname: test.local
+
 
   tier2a:
     build: tier2a/
@@ -58,6 +82,9 @@ services:
       test.local:
         aliases:
           - tier2a.test.local
+    hostname: tier2a
+    domainname: test.local
+
   tier2b:
     build: tier2b/
     environment:
@@ -68,6 +95,9 @@ services:
       test.local:
         aliases:
           - tier2b.test.local
+    hostname: tier2b
+    domainname: test.local
+
   tier2c:
     build: tier2c/
     environment:
@@ -78,7 +108,21 @@ services:
       test.local:
         aliases:
           - tier2c.test.local
+    hostname: tier2c
+    domainname: test.local
 
+  tier2d:
+    build: tier2d/
+    environment:
+        - PREFIX=tier2d
+    volumes:
+        - .:/scenario:ro
+    networks:
+      test.local:
+        aliases:
+          - tier2d.test.local
+    hostname: tier2d
+    domainname: test.local
 
   tier3a:
     build: tier3a/
@@ -91,6 +135,9 @@ services:
       test.local:
         aliases:
           - tier3a.test.local
+    hostname: tier3a
+    domainname: test.local
+
   tier3b:
     build: tier3b/
     environment:
@@ -102,10 +149,16 @@ services:
       test.local:
         aliases:
           - tier3b.test.local
+    hostname: tier3b
+    domainname: test.local
 
-  krb5:
-    build: krb5/
-    networks:
-      test.local:
-        aliases:
-          - krb5.test.local
+#  krb5:
+#    build: krb5/
+#    volumes:
+#        - /dev/urandom:/dev/random:ro
+#    networks:
+#      test.local:
+#        aliases:
+#          - krb5.test.local
+#    hostname: krb5
+#    domainname: test.local

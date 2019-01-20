@@ -9,7 +9,7 @@
          "contacts" : [],
          "create_obj" : 1,
          "depends" : [
-            "node2"
+            "node3"
          ],
          "filter" : [],
          "function" : "worst()",
@@ -23,7 +23,18 @@
          "filter" : [],
          "function" : "status('tier3a', '.*', '~')",
          "id" : "node2",
-         "label" : "tier3a"
+         "label" : "tier3a svc"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [
+            "node2"
+         ],
+         "filter" : [],
+         "function" : "worst()",
+         "id" : "node3",
+         "label" : "tier3a middle"
       }
    ],
    "rankDir" : "TB",

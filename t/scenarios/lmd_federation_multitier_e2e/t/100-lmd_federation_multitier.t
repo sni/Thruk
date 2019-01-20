@@ -21,7 +21,7 @@ $ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
 TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
     'like'   => [
-                '"total":8', '"disabled":0', '"up":8', ,'"down":0',
+                '"total":10', '"disabled":0', '"up":10', ,'"down":0',
             ],
 );
 
@@ -37,7 +37,7 @@ my $test = TestUtils::test_page(
 );
 my $procinfo = Cpanel::JSON::XS::decode_json($test->{'content'});
 my $ids      = {map { $_->{'peer_name'} => $_->{'peer_key'} } values %{$procinfo}};
-is(scalar keys %{$ids}, 8, 'got backend ids') || die("all backends required");
+is(scalar keys %{$ids}, 10, 'got backend ids') || die("all backends required");
 ok(defined $ids->{'tier1a'}, 'got backend ids II');
 
 ###############################################################################
@@ -61,7 +61,7 @@ for my $hst (sort keys %{$ids}) {
 TestUtils::test_command({
     cmd     => './script/thruk selfcheck lmd',
     like => ['/lmd running with pid/',
-             '/8\/8 backends online/',
+             '/10\/10 backends online/',
             ],
     exit    => 0,
 });
@@ -96,7 +96,7 @@ for my $name (qw/tier1a tier2a/) {
     @matches = grep(/(srv|service|)=Load/mx, @matches);
     @matches = grep(!/\/popup/mx, @matches);
     @matches = grep(!/-solo\//, @matches);
-    is(scalar @matches, 8, 'got all proxy links');
+    is(scalar @matches, 10, 'got all proxy links');
     for my $url (sort @matches) {
         $url =~ s|'||gmx;
         TestUtils::test_page(

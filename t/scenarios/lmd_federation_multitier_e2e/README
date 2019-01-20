@@ -10,3 +10,6 @@ this scenario tests federation with lmd or http. The topology looks like:
   │   └── tier2b
   ├── tier1b
   └── tier1c
+  └── tier1d            # basic auth enabled thruk instance
+
+  krb5                  # kerberos authentication server, not yet implemented

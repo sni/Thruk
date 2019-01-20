@@ -9,9 +9,7 @@
          "contacts" : [],
          "create_obj" : 1,
          "depends" : [
-            "node2",
-            "node3",
-            "node4"
+            "node5"
          ],
          "filter" : [],
          "function" : "worst()",
@@ -25,16 +23,16 @@
          "filter" : [],
          "function" : "status('tier2a bp', 'tier2a bp', '=')",
          "id" : "node2",
-         "label" : "tier2a"
+         "label" : "tier2a link"
       },
       {
          "contactgroups" : [],
          "contacts" : [],
          "depends" : [],
          "filter" : [],
-         "function" : "status('tier2b', '.*', '~')",
+         "function" : "status('tier2b', '.*', '=')",
          "id" : "node3",
-         "label" : "tier2b"
+         "label" : "tier2b link"
       },
       {
          "contactgroups" : [],
@@ -43,7 +41,20 @@
          "filter" : [],
          "function" : "status('tier1a', '.*', '~')",
          "id" : "node4",
-         "label" : "tier1a"
+         "label" : "tier1a link"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [
+            "node4",
+            "node2",
+            "node3"
+         ],
+         "filter" : [],
+         "function" : "worst()",
+         "id" : "node5",
+         "label" : "tier 1a middle"
       }
    ],
    "rankDir" : "TB",

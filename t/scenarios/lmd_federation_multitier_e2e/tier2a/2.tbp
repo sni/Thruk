@@ -1,48 +1,47 @@
 {
    "filter" : [],
-   "name" : "tier2a bp",
+   "name" : "tier2a bp2",
    "nodes" : [
       {
          "contactgroups" : [],
          "contacts" : [],
          "create_obj" : 1,
          "depends" : [
-            "node5",
-            "node6"
+            "node5"
          ],
          "filter" : [
             "add_recursive_output_filter"
          ],
          "function" : "worst()",
          "id" : "node1",
-         "label" : "tier2a bp"
+         "label" : "tier2a bp2"
       },
       {
          "contactgroups" : [],
          "contacts" : [],
          "depends" : [],
          "filter" : [],
-         "function" : "status('tier3a bp', 'tier3a bp', '=')",
+         "function" : "fixed('OK', '')",
          "id" : "node2",
-         "label" : "tier3a link"
+         "label" : "dummy2"
       },
       {
          "contactgroups" : [],
          "contacts" : [],
          "depends" : [],
          "filter" : [],
-         "function" : "status('tier3b bp', 'tier3b bp', '=')",
+         "function" : "fixed('WARNING', 'dummy warning')",
          "id" : "node3",
-         "label" : "tier3b link"
+         "label" : "dummy3"
       },
       {
          "contactgroups" : [],
          "contacts" : [],
          "depends" : [],
          "filter" : [],
-         "function" : "status('tier2a', '.*', '=')",
+         "function" : "fixed('OK', '')",
          "id" : "node4",
-         "label" : "tier2a link"
+         "label" : "dummy1"
       },
       {
          "contactgroups" : [],
@@ -55,16 +54,7 @@
          "filter" : [],
          "function" : "worst()",
          "id" : "node5",
-         "label" : "tier 2a middle"
-      },
-      {
-         "contactgroups" : [],
-         "contacts" : [],
-         "depends" : [],
-         "filter" : [],
-         "function" : "status('tier2a bp2', 'tier2a bp2', '=')",
-         "id" : "node6",
-         "label" : "bp2 link"
+         "label" : "bp2 middle"
       }
    ],
    "rankDir" : "TB",
