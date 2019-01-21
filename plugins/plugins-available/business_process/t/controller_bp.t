@@ -5,7 +5,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 47;
+    plan tests => 63;
 }
 
 BEGIN {
@@ -56,3 +56,19 @@ for my $url (@{$json_hash_pages}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
 }
+
+###########################################################
+# clean up
+my $page = TestUtils::test_page(
+    'url'          => "/thruk/r/thruk/bp?name=New%20Test%20Business%20Process&columns=id",
+    'content_type' => 'application/json;charset=UTF-8',
+);
+my $data = decode_json($page->{'content'});
+is(ref $data, 'ARRAY', "json result is an array");
+
+$page = TestUtils::test_page(
+    'url'          => "/thruk/r/thruk/bp/".$data->[0]->{'id'},
+    'method'       => "DELETE",
+    'content_type' => 'application/json;charset=UTF-8',
+    'like'         => ['business process sucessfully removed'],
+);
