@@ -199,6 +199,9 @@ quicktest:
 	    t/*rest_v1.t \
 	    t/9*.t
 
+authortest:
+	TEST_AUTHOR=1 $(MAKE) test
+
 timedtest:
 	for file in $(TEST_FILES); do \
 		printf "%-60s" $$file; \
