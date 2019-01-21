@@ -24,7 +24,7 @@ Business Process
 
 =cut
 
-my @extra_json_keys = qw/id/;
+my @extra_json_keys = qw/id draft/;
 my @stateful_keys   = qw/status status_text last_check last_state_change time affected_peers bp_backend/;
 my @saved_keys      = qw/name template rankDir state_type filter/;
 

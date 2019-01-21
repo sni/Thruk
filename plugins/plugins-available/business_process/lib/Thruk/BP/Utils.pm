@@ -96,6 +96,7 @@ sub load_bp_data {
             $nr =~ s|^.*/(\d+)\.tbp\.edit$|$1|mx;
             next if $numbers->{$nr};
             next if(!$is_admin && !$allowed->{$nr});
+            next if $num && $num != $nr;
             $file  = $base_folder.'/'.$nr.'.tbp';
             my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1);
             if($bp) {

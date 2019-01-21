@@ -23,7 +23,7 @@ sub _rest_get_thruk_bp {
     my($c) = @_;
     require Thruk::BP::Utils;
 
-    my $bps = Thruk::BP::Utils::load_bp_data($c);
+    my $bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, 1);
     my $data = [];
     for my $bp (@{$bps}) {
         push @{$data}, $bp->TO_JSON();
@@ -40,7 +40,7 @@ sub _rest_get_thruk_bp_by_id {
     my($c, undef, $nr) = @_;
     require Thruk::BP::Utils;
 
-    my $bps = Thruk::BP::Utils::load_bp_data($c, $nr);
+    my $bps = Thruk::BP::Utils::load_bp_data($c, $nr, undef, 1);
     if($bps->[0]) {
         return($bps->[0]->TO_JSON());
     }
@@ -71,7 +71,7 @@ sub _rest_get_thruk_bp_new {
         return({ 'message' => 'reload command failed', code => 500 });
     }
 
-    $bps = Thruk::BP::Utils::load_bp_data($c, $newid);
+    $bps = Thruk::BP::Utils::load_bp_data($c, $newid, undef, 1);
     if(!$bps->[0]) {
         return({ 'message' => 'creating business process failed', code => 500 });
     }
@@ -90,7 +90,7 @@ sub _rest_get_thruk_bp_by_id_crud {
     my($c, undef, $nr) = @_;
     require Thruk::BP::Utils;
 
-    my $bps = Thruk::BP::Utils::load_bp_data($c, $nr);
+    my $bps = Thruk::BP::Utils::load_bp_data($c, $nr, undef, 1);
     if(!$bps->[0]) {
         return({ 'message' => 'no such business process', code => 404 });
     }
