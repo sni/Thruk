@@ -15,6 +15,7 @@
                 <a href='status.cgi?host=[% host | uri %]'>View Status Detail For This Host</a><br>
                 <a href='history.cgi?host=[% host | uri %]'>View Alert History For This Host</a><br>
                 <a href='notifications.cgi?host=[% host | uri %]'>View Notifications For This Host</a><br>
+                <a href='extinfo.cgi?type=1&amp;host=[% host | uri %]'>View Information For This Host</a><br>
               </td>
             </tr>
           </table>

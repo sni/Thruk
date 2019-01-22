@@ -15,6 +15,7 @@
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host | uri %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]'>View Alert Histogram For This Service</a><br>[% END %]
                 <a href='history.cgi?host=[% host | uri %]&amp;service=[% service | uri %]'>View Alert History For This Service</a><br>
                 <a href='notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]'>View Notifications For This Service</a><br>
+                <a href='extinfo.cgi?type=2&amp;host=[% host | uri %]&service=[% service %]'>View Information For This Service</a><br>
               </td>
             </tr>
           </table>
