@@ -1469,6 +1469,9 @@ sub _do_on_peers {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
         };
         my $err = $@;
+        if($err && $err =~ m|^502:|mx) {
+            $c->stash->{'lmd_ok'} = 1;
+        }
         if($err && !$c->stash->{'lmd_ok'}) {
             # catch command errors
             if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
@@ -1519,7 +1522,7 @@ sub _do_on_peers {
         }
         # failed to open socket /tmp/live.sock: No such file or directory
         elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
-            confess($1);
+            die($1);
         }
         # failed to connect at .../Class/Lite.pm line 245.
         elsif($err =~ m|(failed\s+to\s+connect)\s+at\s+|mx) {
@@ -1531,7 +1534,7 @@ sub _do_on_peers {
         elsif($err =~ m|^(DBI\s+.*?)\s+at\s+|mx) {
             die($1);
         }
-        elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|mx) {
+        elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|smx) {
             die($1);
         }
         elsif($err) {

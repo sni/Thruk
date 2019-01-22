@@ -343,10 +343,12 @@ sub _dispatcher {
             }
         };
         if($@) {
+            $c->log->error("***************************");
             $c->error($@);
             $c->log->error("Error in: ".$path_info);
-            $c->log->error(longmess($@));
+            $c->log->error($@);
             Thruk::Controller::error::index($c, 13);
+            $c->log->error("***************************");
         }
     }
     unless($c->{'rendered'}) {

@@ -226,7 +226,6 @@ sub index {
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500) {
-            $c->log->error("***************************");
             $c->log->error($errors->{$arg1}->{'mess'});
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
