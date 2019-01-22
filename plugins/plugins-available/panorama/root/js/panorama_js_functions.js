@@ -227,6 +227,11 @@ var TP = {
                 var tab = tabpan.getActiveTab();
                 tab.adjustTabHeaderOffset();
             }
+
+            if(TP.initialized) {
+                // remove ?maps= from url
+                TP.cleanPanoramUrl();
+            }
         }
 
         /* set initial timestamp */
@@ -2171,6 +2176,15 @@ var TP = {
         }
 
         TP.broadcasts = broadcast_list;
+    },
+    cleanPanoramUrl: function() {
+        var newUrl = window.location.href;
+        if (history.replaceState) {
+            newUrl = newUrl.replace(/\?.*$/g, '');
+            try {
+                history.replaceState({}, "", newUrl);
+            } catch(err) { debug(err) }
+        }
     }
 }
 TP.log('[global] starting');

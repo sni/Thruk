@@ -72,6 +72,10 @@ Ext.define('TP.Pantab', {
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             if(This.mapEl)    { This.mapEl.destroy();    }
             if(This.map)      { This.map.destroy();      }
+            if(TP.initialized) {
+                // remove ?maps= from url
+                TP.cleanPanoramUrl();
+            }
             tabpan.saveState();
         },
         beforeactivate: function( This, eOpts ) {
@@ -996,13 +1000,20 @@ Ext.define('TP.Pantab', {
                 }, {
                     text:       'Open Tab Mode',
                     icon:       url_prefix+'plugins/panorama/images/application_put.png',
-                    href:       'panorama.cgi#'+nr,
+                    href:       'panorama.cgi?'+Ext.Object.toQueryString({maps: tab.xdata.title}),
                     tooltip:    'open this dashboard in tab mode',
                     hidden:     !one_tab_only
                 }, {
                     text:       'Direct Link',
                     icon:       url_prefix+'plugins/panorama/images/application_put.png',
                     href:       'panorama.cgi?'+Ext.Object.toQueryString({map: tab.xdata.title}),
+                    hrefTarget: '_blank',
+                    tooltip:    'open this dashboard only (new window)',
+                    hidden:    !!one_tab_only
+                }, {
+                    text:       'Direct Link (with tabs)',
+                    icon:       url_prefix+'plugins/panorama/images/application_put.png',
+                    href:       'panorama.cgi?'+Ext.Object.toQueryString({maps: tab.xdata.title}),
                     hrefTarget: '_blank',
                     tooltip:    'open this dashboard only (new window)',
                     hidden:    !!one_tab_only

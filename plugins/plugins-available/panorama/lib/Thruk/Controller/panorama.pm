@@ -276,6 +276,16 @@ sub _js {
         $open_tabs = [$dashboard->{'nr'}];
         $c->stash->{one_tab_only} = $dashboard->{'nr'};
         $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
+    } elsif(defined $c->req->parameters->{'maps'}) {
+        $open_tabs = [];
+        for my $name (@{Thruk::Utils::list($c->req->parameters->{'maps'})}) {
+            my $dashboard = _get_dashboard_by_name($c, $name);
+            if($dashboard) {
+                push @{$open_tabs}, $dashboard->{'nr'};
+            }
+        }
+        $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $open_tabs;
+        $data->{'panorama'}->{dashboards}->{'tabpan'}->{'activeTab'} = scalar @{$open_tabs} > 0 ? 'tabpan-tab_'.$open_tabs->[0] : "";
     } elsif($c->cookie('thruk_panorama_tabs')) {
         $open_tabs = [split(/\s*:\s*/mx, $c->cookie('thruk_panorama_tabs')->value)];
         $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $open_tabs;
