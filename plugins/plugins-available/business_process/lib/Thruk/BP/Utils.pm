@@ -263,6 +263,7 @@ sub save_bp_objects {
     } else {
         # discard file
         unlink($filename);
+        $msg = "no reload required";
     }
 
     return($rc, $msg);
