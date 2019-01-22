@@ -475,7 +475,7 @@ sub _add_remote_bps {
 
     my $uniq = {};
     for my $bp (@{$bps}) {
-        $uniq->{$bp->fullid()} = 1;
+        $uniq->{$bp->{'id'}.':'.$bp->{'name'}} = 1;
         $bp->{'site'} = '';
         next unless $bp->{'bp_backend'};
         $bp->{'site'} = $site_names->{$bp->{'bp_backend'}};
@@ -484,7 +484,7 @@ sub _add_remote_bps {
     for my $svc (@{$services}) {
         my $vars = Thruk::Utils::get_custom_vars($c, $svc);
         next unless $vars->{'THRUK_NODE_ID'} eq 'node1';
-        my $fullid = $svc->{'peer_key'}.':'.$vars->{'THRUK_BP_ID'};
+        my $fullid = $vars->{'THRUK_BP_ID'}.':'.$svc->{'description'};
         # skip the ones we have already
         next if $uniq->{$fullid};
         my $remote_bp = {
