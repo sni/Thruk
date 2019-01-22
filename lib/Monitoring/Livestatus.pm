@@ -1137,6 +1137,7 @@ sub _send_socket {
 
     $status = $sock unless $status;
     return $sock if $ENV{'THRUK_SELECT'};
+    $msg =~ s/^$status:\s+//gmx;
     confess($status.": ".$msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
     return($status, $msg, $recv);
