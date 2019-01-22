@@ -45,6 +45,23 @@ sub check_proc {
         return;
     }
 
+    # only start it once
+    my $startlock = $lmd_dir.'startup';
+    my($fh, $lock);
+    eval {
+        ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock, 'ex');
+    };
+    if($@) {
+        $c->log->error("failed to get lmd startup lock: ". $@);
+        return;
+    }
+
+    # now that we have the lock, check pid again, it might have been restarted meanwhile
+    if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
+        Thruk::Utils::IO::file_unlock($startlock, $fh, $lock) if $fh;
+        return;
+    }
+
     _write_lmd_config($config);
 
     $c->log->error("lmd not running, starting up...") if $log_missing;
@@ -58,7 +75,24 @@ sub check_proc {
 
     $c->log->debug("start cmd: ". $cmd);
     my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
-    $c->log->error(sprintf('starting lmd failed with rc %d: %s', $rc, $output)) if $rc != 0;
+    if($rc != 0) {
+        $c->log->error(sprintf('starting lmd failed with rc %d: %s', $rc, $output));
+    } else {
+        # wait up to 5 seconds for pid file
+        my $pid;
+        my $retries = 0;
+        while(!$pid) {
+            $pid = check_pid($lmd_dir.'/pid');
+            if($pid || $retries >= 5) {
+                last;
+            }
+            $retries++;
+            sleep(1);
+        }
+        $c->log->debug(sprintf('lmd started with pid %d', $pid));
+    }
+
+    Thruk::Utils::IO::file_unlock($startlock, $fh, $lock) if $fh;
 
     #&timing_breakpoint('check_proc');
     return;
@@ -198,7 +232,7 @@ sub check_initial_start {
 
   check_pid($file)
 
-check if pidfile exists and contains a valid pid
+check if pidfile exists and contains a valid pid, returns zero or the actual pid
 
 =cut
 sub check_pid {
@@ -207,13 +241,13 @@ sub check_pid {
     my $pid = read_file($file);
     if($pid =~ m/^(\d+)\s*$/mx) {
         $pid = $1;
-        if(! -d '/proc') {
+        if(! -d '/proc/.') {
             # check pid with kill when no proc filesystem exists
             if(kill(0, $pid)) {
                 return($pid);
             }
         }
-        elsif(-d '/proc/'.$pid) {
+        elsif(-r '/proc/'.$pid.'/cmdline') {
             my $cmd = read_file('/proc/'.$pid.'/cmdline');
             if($cmd =~ m/lmd/mxi) {
                 return $pid;
