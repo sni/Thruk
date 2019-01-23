@@ -158,6 +158,7 @@ Optional arguments:
   * start_time
   * end_time
   * fixed
+  * triggered_by
   * duration
   * comment_author
 
@@ -176,6 +177,7 @@ Optional arguments:
   * start_time
   * end_time
   * fixed
+  * triggered_by
   * duration
   * comment_author
 
@@ -648,6 +650,7 @@ Optional arguments:
   * start_time
   * end_time
   * fixed
+  * triggered_by
   * duration
   * comment_author
 
@@ -666,6 +669,7 @@ Optional arguments:
   * start_time
   * end_time
   * fixed
+  * triggered_by
   * duration
   * comment_author
 

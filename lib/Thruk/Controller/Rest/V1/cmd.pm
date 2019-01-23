@@ -812,6 +812,7 @@ __DATA__
 #   * start_time
 #   * end_time
 #   * fixed
+#   * triggered_by
 #   * duration
 #   * comment_author
 #
@@ -829,6 +830,7 @@ __DATA__
 #   * start_time
 #   * end_time
 #   * fixed
+#   * triggered_by
 #   * duration
 #   * comment_author
 #
@@ -902,6 +904,7 @@ __DATA__
 #   * start_time
 #   * end_time
 #   * fixed
+#   * triggered_by
 #   * duration
 #   * comment_author
 #
@@ -919,6 +922,7 @@ __DATA__
 #   * start_time
 #   * end_time
 #   * fixed
+#   * triggered_by
 #   * duration
 #   * comment_author
 #
@@ -1137,8 +1141,8 @@ __DATA__
   "enable_hostgroup_host_notifications":{"args":[],"name":"enable_hostgroup_host_notifications","nr":"65","required":[]},
   "enable_hostgroup_svc_checks":{"args":[],"name":"enable_hostgroup_svc_checks","nr":"67","required":[]},
   "enable_hostgroup_svc_notifications":{"args":[],"name":"enable_hostgroup_svc_notifications","nr":"63","required":[]},
-  "schedule_hostgroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_host_downtime","nr":"85","required":["comment_data"]},
-  "schedule_hostgroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_hostgroup_svc_downtime","nr":"85","required":["comment_data"]}
+  "schedule_hostgroup_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_hostgroup_host_downtime","nr":"85","required":["comment_data"]},
+  "schedule_hostgroup_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_hostgroup_svc_downtime","nr":"85","required":["comment_data"]}
 },
 "hosts":{
   "acknowledge_host_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_host_problem","nr":"33","required":["comment_data"]},
@@ -1188,8 +1192,8 @@ __DATA__
   "enable_servicegroup_host_notifications":{"args":[],"name":"enable_servicegroup_host_notifications","nr":"111","required":[]},
   "enable_servicegroup_svc_checks":{"args":[],"name":"enable_servicegroup_svc_checks","nr":"113","required":[]},
   "enable_servicegroup_svc_notifications":{"args":[],"name":"enable_servicegroup_svc_notifications","nr":"109","required":[]},
-  "schedule_servicegroup_host_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_host_downtime","nr":"122","required":["comment_data"]},
-  "schedule_servicegroup_svc_downtime":{"args":["start_time","end_time","fixed","duration","comment_author","comment_data"],"name":"schedule_servicegroup_svc_downtime","nr":"122","required":["comment_data"]}
+  "schedule_servicegroup_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_servicegroup_host_downtime","nr":"122","required":["comment_data"]},
+  "schedule_servicegroup_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_servicegroup_svc_downtime","nr":"122","required":["comment_data"]}
 },
 "services":{
   "acknowledge_svc_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_svc_problem","nr":"34","required":["comment_data"]},
