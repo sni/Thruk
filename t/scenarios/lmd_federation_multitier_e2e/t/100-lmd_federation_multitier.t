@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 528;
+    plan tests => 572;
 }
 
 
@@ -99,6 +99,8 @@ for my $name (qw/tier1a tier2a/) {
     is(scalar @matches, 10, 'got all proxy links');
     for my $url (sort @matches) {
         $url =~ s|'||gmx;
+        next if $url =~ m/tier1d/mx; # does not work with basic auth
+        next if $url =~ m/tier2d/mx; # does not work with basic auth
         TestUtils::test_page(
             'waitfor'        => '(grafana\-app|\/pnp4nagios\/index\.php\/image)',
             'url'            => $url,

@@ -30,4 +30,4 @@
       dest: "/omd/sites/demo/etc/thruk/bp/1.tbp"
       owner: "demo"
       group: "demo"
-  - shell: sudo su - demo -c "omd start core; omd stop core; thruk bp commit"
+  - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"

@@ -26,8 +26,10 @@
   - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
   - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
   - copy:
-      src: "/root/*.tbp"
+      src: "{{ item }}"
       dest: "/omd/sites/demo/etc/thruk/bp/"
       owner: "demo"
       group: "demo"
-  - shell: sudo su - demo -c "omd start core; omd stop core; thruk bp commit"
+    with_fileglob:
+    - /root/*.tbp
+  - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"
