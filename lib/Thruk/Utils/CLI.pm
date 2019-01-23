@@ -20,6 +20,7 @@ use Cpanel::JSON::XS qw/encode_json decode_json/;
 use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
 use Time::HiRes qw/gettimeofday tv_interval/;
+use HTTP::Request 6.12 ();
 use Module::Load qw/load/;
 use Thruk::Utils qw//;
 use Thruk::Utils::IO qw//;
@@ -506,7 +507,6 @@ sub _internal_request {
     our $app;
     if(!$app) {
         require Thruk;
-        require HTTP::Request;
         require Plack::Test;
         $app = Plack::Test->create(Thruk->startup);
     }

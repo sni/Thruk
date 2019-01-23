@@ -20,7 +20,7 @@ use Test::More;
 use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
 use File::Slurp qw/read_file/;
-use HTTP::Request::Common qw/GET POST/;
+use HTTP::Request::Common 6.12 qw/GET POST/;
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/tempfile/;

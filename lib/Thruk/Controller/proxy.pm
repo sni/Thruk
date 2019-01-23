@@ -17,8 +17,8 @@ Thruk Controller
 
 =cut
 
-use HTTP::Request;
-use LWP::UserAgent;
+use HTTP::Request 6.12 ();
+use LWP::UserAgent ();
 
 ##########################################################
 sub index {
