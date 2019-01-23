@@ -740,7 +740,7 @@ sub bulk_send {
     my $rc = 1;
     for my $backends (keys %{$commands}) {
         # remove duplicate commands
-        my $commands2send     = Thruk::Utils::array_uniq($commands->{$backends});
+        my $commands2send = Thruk::Utils::array_uniq($commands->{$backends});
 
         # bulk send only 100 at a time
         while(@{$commands2send}) {
@@ -795,7 +795,7 @@ sub _bulk_send_backend {
         };
         my $err = $@;
         if($err) {
-            $err =~ s/(\ at\ .*?\.pm\ line\ \d+\.)//gmx;
+            $err =~ s/(\ at\ .*?\.pm\ line\ \d+).*$//gsmx;
             $c->stash->{'last_command_error'} = $err;
             Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
             return;
