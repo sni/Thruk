@@ -998,24 +998,24 @@ Ext.define('TP.Pantab', {
                     handler: function() { BigScreen.exit(); },
                     hidden:  !BigScreen.element
                 }, {
-                    text:       'Open Tab Mode',
+                    text:       'Open In Tabs Mode',
                     icon:       url_prefix+'plugins/panorama/images/application_put.png',
                     href:       'panorama.cgi?'+Ext.Object.toQueryString({maps: tab.xdata.title}),
-                    tooltip:    'open this dashboard in tab mode',
+                    tooltip:    'open this dashboard with tabs header toolbar.',
                     hidden:     !one_tab_only
                 }, {
-                    text:       'Direct Link',
+                    text:       'Direct Link (no tabs mode)',
                     icon:       url_prefix+'plugins/panorama/images/application_put.png',
                     href:       'panorama.cgi?'+Ext.Object.toQueryString({map: tab.xdata.title}),
                     hrefTarget: '_blank',
-                    tooltip:    'open this dashboard only (new window)',
+                    tooltip:    'open this dashboard in a new window without the tabs header toolbar.',
                     hidden:    !!one_tab_only
                 }, {
-                    text:       'Direct Link (with tabs)',
+                    text:       'Direct Link (with tabs mode)',
                     icon:       url_prefix+'plugins/panorama/images/application_put.png',
                     href:       'panorama.cgi?'+Ext.Object.toQueryString({maps: tab.xdata.title}),
                     hrefTarget: '_blank',
-                    tooltip:    'open this dashboard only (new window)',
+                    tooltip:    'open this dashboard in a new window keeping the tabs header toolbar.',
                     hidden:    !!one_tab_only
                 }, {
                     text:   'Debug Information',
