@@ -881,7 +881,7 @@ sub _external_request {
         confess("unknown post data: ".Dumper($post));
     }
     my $req;
-    if($post) {
+    if($post || ($method && $method ne 'GET')) {
         $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
         $method = 'POST' unless $method;
         my $request = POST($url, {});
