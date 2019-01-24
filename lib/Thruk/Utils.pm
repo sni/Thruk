@@ -1605,6 +1605,15 @@ sub get_perf_image {
 
     $c->stash->{'last_graph_type'} = 'pnp';
     if($grafanaurl) {
+        # simply redirect?
+        if($grafanaurl =~ m|/thruk/cgi\-bin/proxy\.cgi/([^/]+)/|mx) {
+            my $proxyurl = Thruk::Utils::proxifiy_me($c, $1);
+            if($proxyurl) {
+                $c->{'rendered'} = 1;
+                return $c->redirect_to($proxyurl);
+            }
+        }
+
         if(!$options->{'show_title'}) {
             $grafanaurl .= '&disablePanelTitle';
             $grafanaurl .= '&reduce=1';
@@ -1623,6 +1632,13 @@ sub get_perf_image {
             $options->{'height'} = $options->{'height'} * 2;
         }
         $grafanaurl .= '&legend=false' if $options->{'height'} < 200;
+        if($ENV{'OMD_ROOT'}) {
+            # go local first if available
+            my $site = $ENV{'OMD_SITE'};
+            if($grafanaurl =~ m%^/$site(/grafana/.*)$%mx) {
+                $grafanaurl = $c->config->{'omd_local_site_url'}.$1;
+            }
+        }
         if($grafanaurl !~ m|^https?:|mx) {
             my $uri = Thruk::Utils::Filter::full_uri($c, 1);
             $uri    =~ s|(https?://[^/]+?)/.*$|$1|gmx;
@@ -1653,12 +1669,6 @@ sub get_perf_image {
     CORE::close($fh);
     my $cmd = $exporter.' "'.$options->{'host'}.'" "'.$options->{'service'}.'" "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$options->{'source'}.'"';
     if($grafanaurl) {
-        if($ENV{'OMD_ROOT'}) {
-            my $site = $ENV{'OMD_SITE'};
-            if($grafanaurl =~ m|^https?://localhost/$site(/grafana/.*)$|mx) {
-                $grafanaurl = $c->config->{'omd_local_site_url'}.$1;
-            }
-        }
         $cmd = $exporter.' "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
     Thruk::Utils::IO::cmd($c, $cmd);

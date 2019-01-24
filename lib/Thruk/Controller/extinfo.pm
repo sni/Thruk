@@ -790,6 +790,7 @@ sub _process_grafana_page {
         show_title  => !$c->req->parameters->{'disablePanelTitle'},
         show_legend => $c->req->parameters->{'legend'} // 1,
     }));
+    return 1 if $c->{'rendered'};
     $c->{'rendered'} = 1;
     if($format eq 'png') {
         $c->res->headers->content_type('image/png');
