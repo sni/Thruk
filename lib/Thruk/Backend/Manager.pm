@@ -2824,6 +2824,32 @@ sub _set_result_defaults {
 
 ########################################
 
+=head2 rpc
+
+  rpc($backend, $function, $args)
+
+returns remote call result
+
+=cut
+
+sub rpc {
+    my($self, $backend, $function, $args) = @_;
+    my $c = $Thruk::Request::c;
+    if(ref $backend eq '') {
+        $backend = $self->get_peer_by_key($backend);
+    }
+    if(!$backend) {
+        die("no such backend");
+    }
+    if($backend->{'type'} ne 'http') {
+        die("only supported for http backends");
+    }
+    $c->log->debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
+    return($backend->{'class'}->rpc($c, $function, $args));
+}
+
+########################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2009-present, <sven@nierlein.org>

@@ -22,6 +22,7 @@ sub get_subs {
         if($_ =~ /^\s*sub\s+([\w\d_\_]+)/mx) {
             next if $1 =~ m/^_/mx; # skip private subs
             next if $1 eq 'propagate_session_file'; # not required
+            next if $1 eq 'rpc';                    # only available on http
             push @subs, $1;
         }
     }

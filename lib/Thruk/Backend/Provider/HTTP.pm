@@ -773,6 +773,23 @@ sub propagate_session_file {
 
 ##########################################################
 
+=head2 rpc
+
+  rpc($c, "function name", $args);
+
+run remote call
+
+=cut
+sub rpc {
+    my($self, $c, $function, $args) = @_;
+    if(ref $args ne 'ARRAY') { confess("arguments must be an array"); }
+    $args = Thruk::Utils::encode_arg_refs($args);
+    my @res = @{$self->_req($function, $args, undef, $c->stash->{'remote_user'})};
+    return($res[0]);
+}
+
+##########################################################
+
 =head2 _req
 
   _req($sub, $options)

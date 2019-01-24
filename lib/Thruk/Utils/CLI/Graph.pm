@@ -91,6 +91,7 @@ sub cmd {
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
+    return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) unless $opt->{'host'};
 
     my $start  = ($opt->{'start'} || $now-86400);
     my $end    = ($opt->{'end'}   || $now);
@@ -126,6 +127,7 @@ sub cmd {
             width   => $width,
             height  => $height,
             source  => $opt->{'source'},
+            follow  => 1,
     });
     if(!$img) {
         _debug("could not export any image, check if the host/service has a valid graph url.");

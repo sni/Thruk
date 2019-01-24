@@ -288,17 +288,7 @@ sub run_cluster {
     }
 
     # replace $c in args with placeholder
-    if($args && ref $args eq 'ARRAY') {
-        for(my $x = 0; $x <= scalar @{$args}; $x++) {
-            # reverse function is in Thruk::Utils::CLI
-            if(ref $args->[$x] eq 'Thruk::Context') {
-                $args->[$x] = 'Thruk::Context';
-            }
-            if(ref $args->[$x] eq 'Thruk::Utils::Cluster') {
-                $args->[$x] = 'Thruk::Utils::Cluster';
-            }
-        }
-    }
+    $args = Thruk::Utils::encode_arg_refs($args);
 
     # run function on each cluster node
     my $res = [];

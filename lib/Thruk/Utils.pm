@@ -1564,6 +1564,7 @@ sub get_graph_url {
     format         => $format,
     show_title     => $showtitle,
     show_legend    => $showlegend,
+    follow         => 0/1,  # flag wether we simply redirect proxy requests or fetch them
   })
 
 return raw pnp/grafana image if possible.
@@ -1580,6 +1581,8 @@ sub get_perf_image {
     $options->{'show_legend'} = 1      unless defined $options->{'show_legend'};
     $options->{'end'}         = time() unless defined $options->{'end'};
     $options->{'start'}       = $options->{'end'} - 86400 unless defined $options->{'start'};
+
+    if($options->{'service'} && $options->{'service'} eq '_HOST_') { $options->{'service'} = ""; }
 
     my $custvars;
     if($options->{'service'}) {
@@ -1607,8 +1610,12 @@ sub get_perf_image {
     if($grafanaurl) {
         # simply redirect?
         if($grafanaurl =~ m|/thruk/cgi\-bin/proxy\.cgi/([^/]+)/|mx) {
-            my $proxyurl = Thruk::Utils::proxifiy_me($c, $1);
+            my $peer_id  = $1;
+            my $proxyurl = Thruk::Utils::proxifiy_me($c, $peer_id);
             if($proxyurl) {
+                if($options->{'follow'}) {
+                    return($c->{'db'}->rpc($peer_id, "Thruk::Utils::get_perf_image", [$c, $options]));
+                }
                 $c->{'rendered'} = 1;
                 return $c->redirect_to($proxyurl);
             }
@@ -1646,6 +1653,19 @@ sub get_perf_image {
             $grafanaurl = $uri.$grafanaurl;
         }
     } else {
+        # simply redirect?
+        if($pnpurl =~ m|/thruk/cgi\-bin/proxy\.cgi/([^/]+)/|mx) {
+            my $peer_id  = $1;
+            my $proxyurl = Thruk::Utils::proxifiy_me($c, $peer_id);
+            if($proxyurl) {
+                if($options->{'follow'}) {
+                    if($options->{'service'} && $options->{'service'} eq '_HOST_') { $options->{'service'} = ""; }
+                    return($c->{'db'}->rpc($peer_id, "Thruk::Utils::get_perf_image", [$c, $options]));
+                }
+                $c->{'rendered'} = 1;
+                return $c->redirect_to($proxyurl);
+            }
+        }
         $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} || '0') unless defined $options->{'source'};
     }
 
@@ -1682,6 +1702,59 @@ sub get_perf_image {
         return $imgdata;
     }
     return "";
+}
+
+##############################################
+
+=head2 encode_arg_refs
+
+  encode_arg_refs($args)
+
+returns array with replaced args, ex. replace $c with placeholder
+
+=cut
+sub encode_arg_refs {
+    my($args) = @_;
+    if(!$args || ref $args ne 'ARRAY') {
+        return($args);
+    }
+    for(my $x = 0; $x <= scalar @{$args}; $x++) {
+        # reverse function is in Thruk::Utils::CLI
+        if(ref $args->[$x] eq 'Thruk::Context') {
+            $args->[$x] = 'Thruk::Context';
+        }
+        if(ref $args->[$x] eq 'Thruk::Utils::Cluster') {
+            $args->[$x] = 'Thruk::Utils::Cluster';
+        }
+    }
+    return($args);
+}
+
+##############################################
+
+=head2 unencode_arg_refs
+
+  unencode_arg_refs($c, $args)
+
+returns array with replaced args, ex. replace placeholder with $c
+
+=cut
+sub unencode_arg_refs {
+    my($c, $args) = @_;
+    if(!$args || ref $args ne 'ARRAY') {
+        return($args);
+    }
+    for(my $x = 0; $x <= scalar @{$args}; $x++) {
+        if(!ref $args->[$x] && $args->[$x]) {
+            if($args->[$x] eq 'Thruk::Context') {
+                $args->[$x] = $c;
+            }
+            if($args->[$x] eq 'Thruk::Utils::Cluster') {
+                $args->[$x] = $c->cluster;
+            }
+        }
+    }
+    return($args);
 }
 
 ##############################################

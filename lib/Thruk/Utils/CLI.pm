@@ -1011,18 +1011,7 @@ sub _cmd_raw {
     elsif($function =~ /::/mx) {
         local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
         require Thruk::Utils::Cluster;
-        if($opt->{'args'} && ref $opt->{'args'} eq 'ARRAY') {
-            for(my $x = 0; $x <= scalar @{$opt->{'args'}}; $x++) {
-                if(!ref $opt->{'args'}->[$x] && $opt->{'args'}->[$x]) {
-                    if($opt->{'args'}->[$x] eq 'Thruk::Context') {
-                        $opt->{'args'}->[$x] = $c;
-                    }
-                    if($opt->{'args'}->[$x] eq 'Thruk::Utils::Cluster') {
-                        $opt->{'args'}->[$x] = $c->cluster;
-                    }
-                }
-            }
-        }
+        $opt->{'args'}   = Thruk::Utils::unencode_arg_refs($c, $opt->{'args'});
         my $pkg_name     = $function;
         $pkg_name        =~ s%::[^:]+$%%mx;
         my $function_ref = \&{$function};
