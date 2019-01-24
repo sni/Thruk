@@ -108,6 +108,7 @@ sub report_html {
     $report .= "<table style='border: 1px solid black; width: 800px;'>";
     $self->{'total_time'} = _row_elapsed($result->[0]);
     $self->{'total_time'} =~ s/s$//gmx if $self->{'total_time'};
+    $self->{'total_time'} =~ s/^~//gmx if $self->{'total_time'};
     for my $r (@{$result}) {
         $report .= $self->_format_html_row($r);
     }
@@ -161,6 +162,7 @@ sub _format_html_row {
     if($self->{'total_time'}) {
         if($elapsed && $row->{'level'} > 1) {
             $elapsed =~ s/s$//gmx;
+            $elapsed =~ s/^~//gmx;
             my $perc = $elapsed / $self->{'total_time'};
             $output .= "<td style='text-align:right; position: relative;' width=50>";
             $output .= "<div style='width: ".sprintf("%.0f", 100*$perc)."%; height: 16px; position: absolute; top:0; right:0; background-color: #b9b9b9;'></div>";
