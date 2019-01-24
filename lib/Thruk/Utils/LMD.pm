@@ -64,7 +64,7 @@ sub check_proc {
 
     _write_lmd_config($config);
 
-    $c->log->error("lmd not running, starting up...") if $log_missing;
+    $c->log->info("lmd not running, starting up...") if $log_missing;
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -pidfile '.$lmd_dir.'/pid'
               .' -config '.$lmd_dir.'/lmd.ini';

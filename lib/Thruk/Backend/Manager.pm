@@ -1477,7 +1477,7 @@ sub _do_on_peers {
             if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
                 die($err);
             }
-            Thruk::Utils::LMD::check_proc($c->config, $c, 1);
+            Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
             sleep(1);
             # then retry again
             eval {
