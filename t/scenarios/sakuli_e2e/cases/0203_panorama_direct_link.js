@@ -22,7 +22,7 @@ var $case = function() {
 
     mouseRightClickXY(200,100);
     click(_span("Display"));
-    click(_span("Direct Link"));
+    click(_span("Direct Link (no tabs mode)"));
 
     _wait(3000, _assert(_popup("Test Background")));
     _popup("Test Background")._assertExists(_span("World Clock"));
