@@ -27,17 +27,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(services?)/([^/]
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(system|core|)/cmd/([^/]+)%mx,                              \&_rest_get_external_command);
 sub _rest_get_external_command {
     my($c, undef, $type, @args) = @_;
-    our $cmd_data;
-    if(!$cmd_data) {
-        my $data = "";
-        while(<DATA>) {
-            my $line = $_;
-            next if $line =~ m/^\s*\#/mx;
-            next if $line =~ m/^\s*$/mx;
-            $data .= $line;
-        }
-        $cmd_data = decode_json($data);
-    }
+    my $cmd_data = get_rest_external_command_data();
     my($cmd, $cmd_name, $name, $description, @cmd_args);
     my $required_fields = {};
     $type =~ s/s$//gmx;
@@ -81,12 +71,18 @@ sub _rest_get_external_command {
         my $val = $c->req->parameters->{$arg};
         # set some defaults
         if(!defined $val) {
-            if($arg eq 'comment_author') { $val = $c->stash->{'remote_user'}; }
-            if($arg eq 'fixed')          { $val = 1; }
-            if($arg eq 'duration')       { $val = 0; }
-            if($arg eq 'triggered_by')   { $val = 0; }
-            if($arg eq 'start_time')     { $val = time(); }
-            if($arg eq 'end_time')       { $val = time() + $c->config->{'downtime_duration'}; }
+            if($arg eq 'comment_author')     { $val = $c->stash->{'remote_user'}; }
+            if($arg eq 'fixed')              { $val = 1; }
+            if($arg eq 'duration')           { $val = 0; }
+            if($arg eq 'plugin_state')       { $val = 0; }
+            if($arg eq 'options')            { $val = 0; }
+            if($arg eq 'triggered_by')       { $val = 0; }
+            if($arg eq 'start_time')         { $val = time(); }
+            if($arg eq 'end_time')           { $val = time() + $c->config->{'downtime_duration'}; }
+            if($arg eq 'sticky_ack')         { $val = 1; }
+            if($arg eq 'send_notification')  { $val = $c->config->{'cmd_defaults'}->{'send_notification'} // 1; }
+            if($arg eq 'sticky_ack')         { $val = $c->config->{'cmd_defaults'}->{'sticky_ack'} // 1; }
+            if($arg eq 'persistent_comment') { $val = $c->config->{'cmd_defaults'}->{'persistent_comment'} // 1; }
         }
         # still not defined?
         if(!defined $val) {
@@ -95,7 +91,7 @@ sub _rest_get_external_command {
             }
             $val = "";
         }
-        if($arg eq 'start_time' || $arg eq 'end_time') {
+        if($arg eq 'start_time' || $arg eq 'end_time' || $arg eq 'notification_time') {
             $val = Thruk::Utils::parse_date( $c, $val);
         }
         if($arg eq 'performance_data') {
@@ -150,6 +146,29 @@ sub _rest_get_external_command {
     return({ 'message' => 'Command successfully submitted', commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
 }
 
+##########################################################
+
+=head2 get_rest_external_command_data
+
+  get_rest_external_command_data()
+
+return list of available commands grouped by type
+
+=cut
+sub get_rest_external_command_data {
+    our $cmd_data;
+    if(!$cmd_data) {
+        my $data = "";
+        while(<DATA>) {
+            my $line = $_;
+            next if $line =~ m/^\s*\#/mx;
+            next if $line =~ m/^\s*$/mx;
+            $data .= $line;
+        }
+        $cmd_data = decode_json($data);
+    }
+    return($cmd_data);
+}
 ##########################################################
 
 =head1 AUTHOR
@@ -971,13 +990,6 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/disable_event_handlers.html for details.
 
-# REST PATH: POST /system/cmd/disable_failure_prediction
-# Sends the DISABLE_FAILURE_PREDICTION command.
-#
-# This command does not require any arguments.
-#
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_failure_prediction.html for details.
-
 # REST PATH: POST /system/cmd/disable_flap_detection
 # Sends the DISABLE_FLAP_DETECTION command.
 #
@@ -1005,13 +1017,6 @@ __DATA__
 # This command does not require any arguments.
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/enable_event_handlers.html for details.
-
-# REST PATH: POST /system/cmd/enable_failure_prediction
-# Sends the ENABLE_FAILURE_PREDICTION command.
-#
-# This command does not require any arguments.
-#
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_failure_prediction.html for details.
 
 # REST PATH: POST /system/cmd/enable_flap_detection
 # Sends the ENABLE_FLAP_DETECTION command.
@@ -1227,12 +1232,10 @@ __DATA__
   "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","nr":"4","required":["comment_id"]},
   "del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime","nr":"79","required":["downtime_id"]},
   "disable_event_handlers":{"args":[],"name":"disable_event_handlers","nr":"42","required":[]},
-  "disable_failure_prediction":{"args":[],"name":"disable_failure_prediction","nr":"81","required":[]},
   "disable_flap_detection":{"args":[],"name":"disable_flap_detection","nr":"62","required":[]},
   "disable_notifications":{"args":[],"name":"disable_notifications","nr":"11","required":[]},
   "disable_performance_data":{"args":[],"name":"disable_performance_data","nr":"83","required":[]},
   "enable_event_handlers":{"args":[],"name":"enable_event_handlers","nr":"41","required":[]},
-  "enable_failure_prediction":{"args":[],"name":"enable_failure_prediction","nr":"80","required":[]},
   "enable_flap_detection":{"args":[],"name":"enable_flap_detection","nr":"61","required":[]},
   "enable_notifications":{"args":[],"name":"enable_notifications","nr":"12","required":[]},
   "enable_performance_data":{"args":[],"name":"enable_performance_data","nr":"82","required":[]},

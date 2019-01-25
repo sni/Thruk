@@ -972,14 +972,6 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/disable_event_handlers.html for details.
 
-=== POST /system/cmd/disable_failure_prediction
-
-Sends the DISABLE_FAILURE_PREDICTION command.
-
-This command does not require any arguments.
-
-See http://www.naemon.org/documentation/developer/externalcommands/disable_failure_prediction.html for details.
-
 === POST /system/cmd/disable_flap_detection
 
 Sends the DISABLE_FLAP_DETECTION command.
@@ -1011,14 +1003,6 @@ Sends the ENABLE_EVENT_HANDLERS command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/enable_event_handlers.html for details.
-
-=== POST /system/cmd/enable_failure_prediction
-
-Sends the ENABLE_FAILURE_PREDICTION command.
-
-This command does not require any arguments.
-
-See http://www.naemon.org/documentation/developer/externalcommands/enable_failure_prediction.html for details.
 
 === POST /system/cmd/enable_flap_detection
 
