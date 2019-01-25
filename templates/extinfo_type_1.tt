@@ -245,6 +245,7 @@
                             <td class='dataVar'>Next Scheduled Active Check:&nbsp;&nbsp;</td>
                             <td class='dataVal'>
                               [% IF host.next_check %][% date_format(c, host.next_check) %][% ELSE %]N/A[% END %]
+                              [% IF host.check_type == 0; d = duration(host.check_interval * pi_detail.$peer_key.interval_length, 5) %]<span class="check_interval" title="this host will be checked every [% d %]."> (&infin;[% d %])</span>[% END %]
                               [% IF host.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20">[% END %]
                             </td>
                           </tr>

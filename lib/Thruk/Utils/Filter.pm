@@ -93,6 +93,8 @@ format: 0d 0h 29m 43s
         1    => 0d 0h 0m 15s  (default)
         2    =>   0min 14sec
         3    =>       0m 04s
+        4    =>          15m (trimmed)
+        5    =>        15min (trimmed)
 
 =cut
 sub duration {
@@ -138,6 +140,22 @@ sub duration {
     }
     elsif($options == 3) {
         return(CORE::sprintf("%s%dm %02ds", $minus, $minutes, $seconds));
+    }
+    elsif($options == 4) {
+        my @res;
+        if($days    > 0) { push @res, $days."d"; }
+        if($hours   > 0) { push @res, $hours."h"; }
+        if($minutes > 0) { push @res, $minutes."m"; }
+        if($seconds > 0) { push @res, $seconds."s"; }
+        return($minus.join(" ", @res));
+    }
+    elsif($options == 5) {
+        my @res;
+        if($days    > 0) { push @res, $days."days"; }
+        if($hours   > 0) { push @res, $hours."hours"; }
+        if($minutes > 0) { push @res, $minutes."min"; }
+        if($seconds > 0) { push @res, $seconds."sec"; }
+        return($minus.join(" ", @res));
     }
     confess("unknown options in duration(): ".$options);
 }
