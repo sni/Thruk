@@ -104,6 +104,7 @@ services:
         - PREFIX=tier2c
     volumes:
         - .:/scenario:ro
+        - ../../../:/thruk:ro
     networks:
       test.local:
         aliases:
