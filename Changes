@@ -12,6 +12,7 @@ next:
             - add drill down output as default filter
           - Panorama:
             - add direct link with tabs
+            - add theme selector to grafana images
 
 2.26-2   Tue Dec 18 17:33:08 CET 2018
           - display external commands errors if possible

@@ -111,9 +111,6 @@ if (system.args.length < 3) {
                     retries++;
                     // wait up to 20 seconds
                     if(checkGrafanaLoaded() || retries > 400) {
-                        page.evaluate(function() {
-                            document.querySelector('DIV.main-view').style.background = 'white';
-                        });
                         debug('page render');
                         page.render(output, {format: options.format, quality: 100});
                         debug('page render done');

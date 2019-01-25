@@ -50,6 +50,8 @@ Ext.define('TP.PanletGrafana', {
     height: 240,
     width:  420,
     hideSettingsForm: ['backends'],
+    bodyStyle: "background: transparent;",
+    style:    { position: 'absolute', zIndex: 50, background: 'transparent' },
     initComponent: function() {
         this.callParent();
         var panel             = this;
@@ -144,8 +146,12 @@ Ext.define('TP.PanletGrafana', {
             if(this.xdata.showlegend != undefined && !this.xdata.showlegend) {
                 url = url + '&legend=0';
             }
+            if(this.xdata.background != undefined) {
+                url = url + '&theme='+this.xdata.background;
+            }
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
+            this.adjustBodyStyle();
         };
 
         /* panel content should be in an image */
@@ -187,8 +193,13 @@ Ext.define('TP.PanletGrafana', {
         });
         this.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
             this.refreshHandler();
+            this.adjustBodyStyle();
         });
         this.gearHandler = this.grafanaGearHandler;
+    },
+    adjustBodyStyle: function() {
+        var panel = this;
+        panel.setBodyStyle("background: transparent;");
     },
     setGearItems: function() {
         var panel = this;
@@ -242,13 +253,23 @@ Ext.define('TP.PanletGrafana', {
         this.addGearItems({
             fieldLabel: 'Show Title',
             xtype:      'checkbox',
-            name:       'showtitle',
-            boxLabel:   '(requires histou 0.3.10 or newer)'
+            name:       'showtitle'
         });
         this.addGearItems({
             fieldLabel: 'Show Legend',
             xtype:      'checkbox',
             name:       'showlegend'
+        });
+        this.addGearItems({
+            xtype:          'combobox',
+            fieldLabel:     'Background',
+            name:           'background',
+            store:        [['light','light theme']
+                          ,['dark','dark theme']
+                          ,['transparent-light','transparent']
+                          // looks ugly, because fonts will be half transparent and removed
+                          //,['transparent-dark','transparent dark']
+            ]
         });
     },
     gearInitCallback: function(panel) {

@@ -23,6 +23,9 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils::IO ();
 use Digest::MD5 qw(md5_hex);
 use POSIX ();
+use MIME::Base64 ();
+use URI::Escape ();
+
 use Module::Load qw/load/;
 
 ##############################################
@@ -1625,8 +1628,18 @@ sub get_perf_image {
             $grafanaurl .= '&disablePanelTitle';
             $grafanaurl .= '&reduce=1';
         }
-        if(!$options->{'show_legend'}) {
+        if(!$options->{'show_legend'} || $options->{'height'} < 200) {
             $grafanaurl .= '&legend=false';
+        }
+        if($options->{'theme'}) {
+            $grafanaurl =~ s/\&theme=light//gmx;
+            if($options->{'theme'} =~ m/^transparent\-(.*)$/mx) {
+                $grafanaurl .= '&theme='.$1;
+                # inject some css into histou to make the background transparent
+                $grafanaurl .= '&customCSSFile='.URI::Escape::uri_escape('data:text/css;base64,'.MIME::Base64::encode_base64('.panel-container,.main-view,body,html {background:transparent !important;background-color:transparent !important;}'));
+            } else {
+                $grafanaurl .= '&theme='.$options->{'theme'};
+            }
         }
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
@@ -1638,7 +1651,6 @@ sub get_perf_image {
             $options->{'width'}  = $options->{'width'} * 1.3;
             $options->{'height'} = $options->{'height'} * 2;
         }
-        $grafanaurl .= '&legend=false' if $options->{'height'} < 200;
         if($ENV{'OMD_ROOT'}) {
             # go local first if available
             my $site = $ENV{'OMD_SITE'};
