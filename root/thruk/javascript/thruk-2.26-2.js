@@ -743,7 +743,7 @@ function reloadPage() {
     }
 
     /* set reload mark in side frame */
-    if(window.parent.frames) {
+    if(window.parent.frames && top.frames && top.frames['side']) {
         try {
             top.frames['side'].is_reloading = newUrl;
         }
