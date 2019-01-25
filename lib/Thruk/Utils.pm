@@ -2240,9 +2240,9 @@ sub get_cron_time_entry {
         $weeks = 3 if $t eq '3rd';
         $weeks = 4 if $t eq '4th';
         $weeks = 1 if $t eq 'Last';
-        my $daycheck = '[ $(date +"\%m") -ne $(date -d "-'.(7*$weeks).'days" +"\%m") ] && ';
+        my $daycheck = '[ $(date +"%m") -ne $(date -d "-'.(7*$weeks).'days" +"%m") ] && ';
         if($t eq 'Last') {
-            $daycheck = '[ $(date +"\%m") -ne $(date -d "'.(7*$weeks).'days" +"\%m") ] && ';
+            $daycheck = '[ $(date +"%m") -ne $(date -d "'.(7*$weeks).'days" +"%m") ] && ';
         }
         my $day;
         $day = 1 if $d eq 'Monday';
