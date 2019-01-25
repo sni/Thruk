@@ -132,23 +132,33 @@ Ext.define('TP.PanletGrafana', {
             if(!imgPanel || !imgPanel.el) { // not yet initialized
                 return;
             }
-            var size     = imgPanel.getSize();
+            var size = imgPanel.getSize();
             if(size.width <= 1) { return; }
             var url      = this.xdata.graph + '&source='+this.xdata.source;
             var now      = new Date();
             url = url + '&from='  + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&to='    + Math.round(now.getTime()/1000);
-            url = url + '&width=' + size.width;
-            url = url + '&height='+ (size.height+30);
+            if(this.heightFixed == undefined) {
+                this.heightFixed = size.height;
+            }
+            this.heightOverflow = 0;
             if(this.xdata.showtitle != undefined && !this.xdata.showtitle) {
                 url = url + '&disablePanelTitle=1';
+                this.heightOverflow += 20;
             }
             if(this.xdata.showlegend != undefined && !this.xdata.showlegend) {
                 url = url + '&legend=0';
+                this.heightOverflow += 10;
             }
             if(this.xdata.background != undefined) {
                 url = url + '&theme='+this.xdata.background;
             }
+            var global = Ext.getCmp(this.panel_id);
+            if(!global.xdata.autohideheader || this.xdata.showborder) {
+                this.heightOverflow = this.heightOverflow / 5;
+            }
+            url = url + '&width=' + size.width;
+            url = url + '&height='+ (this.heightFixed+this.heightOverflow);
             if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
             this.adjustBodyStyle();
@@ -165,10 +175,7 @@ Ext.define('TP.PanletGrafana', {
                             var refresh = panel.getTool('refresh') || panel.getTool('broken');
                             refresh.setType('refresh');
                             panel.imgMask.hide();
-
-                            var imgPanel = panel.items.getAt(0);
-                            var size = panel.getSize();
-                            imgPanel.el.dom.style.height=size.height+"px";
+                            panel.adjustBodyStyle();
                         },
                         error: function (evt, ele, opts) {
                             var panel = me.up('panel');
@@ -192,6 +199,13 @@ Ext.define('TP.PanletGrafana', {
             }
         });
         this.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
+            var imgPanel = this.items.getAt(0);
+            if(!imgPanel || !imgPanel.el) { // not yet initialized
+                return;
+            }
+            var size = imgPanel.getSize();
+            if(size.width <= 1) { return; }
+            this.heightFixed = size.height;
             this.refreshHandler();
             this.adjustBodyStyle();
         });
@@ -200,6 +214,10 @@ Ext.define('TP.PanletGrafana', {
     adjustBodyStyle: function() {
         var panel = this;
         panel.setBodyStyle("background: transparent;");
+        if(panel.heightFixed != undefined && panel.heightOverflow) {
+            var imgPanel = panel.items.getAt(0);
+            imgPanel.el.dom.style.height=(panel.heightFixed+panel.heightOverflow)+"px";
+        }
     },
     setGearItems: function() {
         var panel = this;

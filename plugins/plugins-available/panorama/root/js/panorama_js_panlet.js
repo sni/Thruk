@@ -316,6 +316,9 @@ Ext.define('TP.Panlet', {
                 this.getHeader().getEl().dom.style.top = this.autohideHeaderOffset+'px';
             }
         }
+        if(this.adjustBodyStyle) {
+            this.adjustBodyStyle();
+        }
     },
     hideHeader: function(global) {
         if(global == undefined) { global = Ext.getCmp(this.panel_id); }
@@ -329,6 +332,9 @@ Ext.define('TP.Panlet', {
                     this.getEl().shadow.el.addCls('hidden');
                 }
             }
+        }
+        if(this.adjustBodyStyle) {
+            this.adjustBodyStyle();
         }
     },
     applyBorderAndBackground: function() {
