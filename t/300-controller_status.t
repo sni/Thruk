@@ -5,7 +5,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1152;
+    plan tests => 1359;
 }
 
 BEGIN {
@@ -198,7 +198,6 @@ $pages = [
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json',
     '/thruk/cgi-bin/status.cgi?host=all&format=json&column=name&column=state&limit=5',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json&column=name',
-    '/thruk/cgi-bin/status.cgi?format=search',
 ];
 
 for my $url (@{$pages}) {
@@ -209,4 +208,52 @@ for my $url (@{$pages}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array");
     ok(scalar @{$data} > 0, "json result has content");
+}
+
+# raw searches
+$pages = [
+# host search
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=host',
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=host&query='.$host,
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=host&query='.substr($host, 0, 2),
+    '/thruk/cgi-bin/status.cgi?format=search&type=host',
+    '/thruk/cgi-bin/status.cgi?format=search&type=host&query='.$host,
+    '/thruk/cgi-bin/status.cgi?format=search&type=host&query='.substr($host, 0, 2),
+# servicegroups search
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=servicegroup',
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=servicegroup&query='.$servicegroup,
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=servicegroup&query='.substr($servicegroup, 0, 2),
+    '/thruk/cgi-bin/status.cgi?format=search&type=servicegroup',
+    '/thruk/cgi-bin/status.cgi?format=search&type=servicegroup&query='.$servicegroup,
+    '/thruk/cgi-bin/status.cgi?format=search&type=servicegroup&query='.substr($servicegroup, 0, 2),
+# hostgroups search
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=hostgroup',
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=hostgroup&query='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?format=search&hash=1&type=hostgroup&query='.substr($hostgroup, 0, 2),
+    '/thruk/cgi-bin/status.cgi?format=search&type=hostgroup',
+    '/thruk/cgi-bin/status.cgi?format=search&type=hostgroup&query='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?format=search&type=hostgroup&query='.substr($hostgroup, 0, 2),
+];
+
+for my $url (@{$pages}) {
+    my $page = TestUtils::test_page(
+        'url'          => $url,
+        'content_type' => 'application/json;charset=UTF-8',
+    );
+    $url =~ m/type=(\w+)/gmx;
+    my $type = $1;
+    ok($type, "got query type: ".$type);
+    $type =~ s/s*$/s/gmx;
+    my $data = decode_json($page->{'content'});
+    if($url =~ m/hash=1/mx) {
+        is(ref $data, 'HASH', "json result is an hash");
+        ok($data->{'total'} > 0, "json result has data");
+        is(ref $data->{'data'}, 'ARRAY', "json result data is an array");
+        ok(scalar @{$data->{'data'}} > 0, "json result data has data");
+    } else {
+        is(ref $data, 'ARRAY', "json result is an array");
+        is(ref $data->[0], 'HASH', "json result data is an array");
+        is($data->[0]->{'name'}, $type, "json result data got type");
+        ok(scalar @{$data->[0]->{'data'}} > 0, "json result data has data");
+    }
 }
