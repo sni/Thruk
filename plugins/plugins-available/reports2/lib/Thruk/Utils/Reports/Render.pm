@@ -531,6 +531,7 @@ sub get_pnp_image {
         resize_grafana => 1,
         show_title     => 0,
         show_legend    => 0,
+        follow         => 1,
     });
     return "" unless $imgdata;
     return 'data:image/png;base64,'.encode_base64($imgdata, '');
