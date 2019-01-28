@@ -76,7 +76,7 @@ url_prefix     = '/thruk';
 thruk_debug_js = 1;
 thruk_onerror  = function() {};
 ", 'set window object') or BAIL_OUT("failed to create window object");
-my @jsfiles = glob('plugins/plugins-available/panorama/root/extjs-*/ext-all-debug.js');
+my @jsfiles = glob('root/thruk/vendor/extjs-*/ext-all-debug.js');
 ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load extjs");
 

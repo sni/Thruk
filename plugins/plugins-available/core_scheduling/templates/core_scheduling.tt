@@ -1,7 +1,7 @@
 ﻿[% PROCESS _header.tt
-    js           => [ "plugins/reports2/flot-d7c58b5/jquery.flot.js",
-                      "plugins/reports2/flot-d7c58b5/jquery.flot.time.js",
-                      "plugins/reports2/flot-d7c58b5/jquery.flot.stack.js",
+    js           => [ "vendor/flot-d7c58b5/jquery.flot.js",
+                      "vendor/flot-d7c58b5/jquery.flot.time.js",
+                      "vendor/flot-d7c58b5/jquery.flot.stack.js",
                     ],
     css          => [ "plugins/core_scheduling/core_scheduling.css" ],
 %]

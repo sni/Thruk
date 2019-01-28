@@ -20,8 +20,6 @@ my @jsfiles = glob('root/thruk/javascript/thruk-*.js
                     ');
 for my $file (@jsfiles) {
     ok(1, "checking ".$file);
-    next if $file =~ m/bigscreen/mxi;
-    next if $file =~ m/OpenLayers/mxi;
     next if $file =~ m/all_in_one/mxi;
     TestUtils::verify_js($file);
 }
@@ -38,7 +36,7 @@ my $config = Thruk::Config::get_config();
 my $files = ['root/thruk/startup.html', 'plugins/plugins-available/mobile/templates/mobile.tt'];
 for my $file (@{$files}) {
     my $content = read_file($file);
-    my @jquery = grep/^jquery-\d+.*\.js$/, @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}};
+    my @jquery = grep/jquery-\d+.*\.js$/, @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}};
     is(scalar @jquery, 1, 'found jquery in config');
     like($content, qr/$jquery[0]/, 'found jquery in '.$file);
 }

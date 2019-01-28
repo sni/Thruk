@@ -39,7 +39,7 @@ my $version = $Thruk::Config::VERSION.'-'.$branch;
 # check if update is required
 my $newest = 0;
 for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}) {
-    my @s   = stat('root/thruk/javascript/'.$file);
+    my @s   = stat('root/thruk/'.$file) or die($file.": ".$@);
     $newest = $s[9] if $newest < $s[9];
 }
 my $js_required = 1;

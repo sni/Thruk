@@ -1,4 +1,4 @@
-﻿<img src="[% url_prefix %]javascript/jquery-ui/css/smoothness/images/ui-icons_222222_256x240.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
+﻿<img src="[% url_prefix %]vendor/jquery-ui/css/smoothness/images/ui-icons_222222_256x240.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 
 <!-- context menu -->
 <ul id="bp_menu" style="display: none; position: absolute;">

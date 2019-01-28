@@ -26,8 +26,8 @@
   <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/all_in_one_noframes-[% version %]-[% filebranch %].css' />
   [%+ END %]
 [% END %]
-<link rel='stylesheet' type='text/css' href='[% url_prefix %]javascript/cal/jscal2.css' />
-[% IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]javascript/jquery-ui/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css' />[% END %]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/cal/jscal2.css' />
+[% IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jquery-ui/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css' />[% END %]
 [% IF css.list.size > 0 %][% FOREACH cs = css.list %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix _ cs %]' />
 [% END %][% END %]
