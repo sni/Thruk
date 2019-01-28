@@ -551,7 +551,7 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
     }
     var cfg = panel.xdata.general;
     var options = {
-        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id))
+        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id), panel)
     };
     var base = "status.cgi";
     if(cfg.hostgroup) {
