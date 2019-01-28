@@ -18,3 +18,5 @@ Thruk::Utils::Menu::insert_item('Reports', {
 # enable business process features if this plugin is loaded
 $app->config->{'use_feature_bp'} = 1;
 
+# this plugin creates cronjobs with with function
+$app->register_cron_entries("Thruk::BP::Utils::update_cron_file");

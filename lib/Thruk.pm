@@ -843,6 +843,23 @@ sub init_logging {
 }
 
 ###################################################
+
+=head2 register_cron_entries
+
+    register_cron_entries($function_name)
+
+register callback to update cron jobs
+
+=cut
+
+sub register_cron_entries {
+    my($self, $function) = @_;
+    $self->{'_cron_callbacks'} = {} unless defined $self->{'_cron_callbacks'};
+    $self->{'_cron_callbacks'}->{$function} = 1;
+    return;
+}
+
+###################################################
 sub _setup_development_signals {
     # SizeMe and other devel internals
     if($ENV{'SIZEME'}) {

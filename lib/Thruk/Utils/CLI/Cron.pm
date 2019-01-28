@@ -33,6 +33,7 @@ The cron command installs/uninstalls cronjobs
 
 use warnings;
 use strict;
+use Module::Load qw/load/;
 
 ##############################################
 # no backends required for this command
@@ -80,14 +81,17 @@ sub _install {
 
     require Thruk::Utils::RecurringDowntimes;
     Thruk::Utils::RecurringDowntimes::update_cron_file($c);
-    if($c->config->{'use_feature_reports'}) {
-        require Thruk::Utils::Reports;
-        Thruk::Utils::Reports::update_cron_file($c);
+
+    if($c->app->{'_cron_callbacks'}) {
+        for my $function (sort keys %{$c->app->{'_cron_callbacks'}}) {
+            my $pkg_name     = $function;
+            $pkg_name        =~ s%::[^:]+$%%mx;
+            my $function_ref = \&{$function};
+            load $pkg_name;
+            &{$function_ref}($c);
+        }
     }
-    if($c->config->{'use_feature_bp'}) {
-        require Thruk::BP::Utils;
-        Thruk::BP::Utils::update_cron_file($c);
-    }
+
     $c->stats->profile(end => "_cmd_installcron()");
     return "updated cron entries\n";
 }
