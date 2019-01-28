@@ -220,25 +220,32 @@ sub index {
         $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
     }
 
-    if($c->config->{'thruk_debug'}) {
-        $c->stash->{errorDetails} .= join('<br>', @{$c->error});
-    }
+    my $errorDetails = join('<br>', @{$c->error});
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500) {
             $c->log->error("***************************");
-            $c->log->error(sprintf("error on page: %s\n", $c->req->url)) if defined $c->req->url;
+            $c->log->error(sprintf("page: %s\n", $c->req->url)) if defined $c->req->url;
+            $c->log->error(sprintf("user: %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
             $c->log->error($errors->{$arg1}->{'mess'});
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
                 }
             }
-            $c->log->error(sprintf("User: %s\n", $c->stash->{'remote_user'}));
+            if($errorDetails) {
+                for my $row (split(/\n|<br>/mx, $errorDetails)) {
+                    $c->log->error($row);
+                }
+            }
             $c->log->error("***************************");
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
         }
+    }
+
+    if($c->config->{'thruk_debug'}) {
+        $c->stash->{errorDetails} .= $errorDetails;
     }
 
     if($arg1 == 13 and $c->config->{'show_error_reports'}) {
