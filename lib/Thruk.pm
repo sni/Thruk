@@ -343,12 +343,10 @@ sub _dispatcher {
             }
         };
         if($@) {
-            $c->log->error("***************************");
-            $c->error($@);
-            $c->log->error("Error in: ".$path_info);
-            $c->log->error($@);
+            my $err = $@;
+            $c->log->error("Error path_info: ".$path_info) unless $c->req->url;
+            $c->error($err);
             Thruk::Controller::error::index($c, 13);
-            $c->log->error("***************************");
         }
     }
     unless($c->{'rendered'}) {
@@ -816,13 +814,17 @@ sub init_logging {
         $logger = Log::Log4perl::get_logger("thruk.log");
         $self->{'_log_type'} = 'file';
     } else {
-        my $log_conf = q(
+        my $format = '[%d{ABSOLUTE}][%p] %m{chomp}%n';
+        if($ENV{'TEST_AUTHOR'} || $self->config->{'thruk_author'}) {
+            $format = '[%d{ABSOLUTE}][%p][%F:%L] %m{chomp}%n';
+        }
+        my $log_conf = "
         log4perl.logger                    = DEBUG, Screen
         log4perl.appender.Screen           = Log::Log4perl::Appender::Screen
         log4perl.appender.Screen.Threshold = DEBUG
         log4perl.appender.Screen.layout    = Log::Log4perl::Layout::PatternLayout
-        log4perl.appender.Screen.layout.ConversionPattern = [%d{ABSOLUTE}][%p] %m{chomp}%n
-        );
+        log4perl.appender.Screen.layout.ConversionPattern = $format
+        ";
         $log_conf =~ s/Threshold\s*=\s*\w+$/Threshold = ERROR/gmx if $ENV{'THRUK_QUIET'};
         Log::Log4perl::init(\$log_conf);
         $logger = Log::Log4perl->get_logger("thruk.screen");

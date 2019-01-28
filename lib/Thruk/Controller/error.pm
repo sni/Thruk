@@ -226,14 +226,16 @@ sub index {
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500) {
+            $c->log->error("***************************");
+            $c->log->error(sprintf("error on page: %s\n", $c->req->url)) if defined $c->req->url;
             $c->log->error($errors->{$arg1}->{'mess'});
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
                 }
             }
-            $c->log->error(sprintf("on page: %s\n", $c->req->url)) if defined $c->req->url;
             $c->log->error(sprintf("User: %s\n", $c->stash->{'remote_user'}));
+            $c->log->error("***************************");
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
         }
