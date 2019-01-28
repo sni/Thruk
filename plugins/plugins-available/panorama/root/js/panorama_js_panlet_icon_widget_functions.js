@@ -511,7 +511,7 @@ TP.getMenuArgs = function(panel, target, args) {
     var tab      = Ext.getCmp(panel.panel_id);
     args.panel   = panel;
     args.target  = target;
-    args.backend = TP.getActiveBackendsPanel(tab);
+    args.backend = TP.getActiveBackendsPanel(tab, panel);
     args.host    = null;
     args.service = null;
     if(panel && panel.xdata && panel.xdata.general) {
