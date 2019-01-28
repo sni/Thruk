@@ -733,7 +733,7 @@ sub fix_and_sort_logs {
         return($file) unless $rpttimeperiod;
         $c->stats->profile(begin => "avail.pm fix timeperiod transitions timestamps");
         for my $l (@{$logs}) {
-            if($l->{'type'} eq 'TIMEPERIOD TRANSITION') {
+            if($l->{'type'} && $l->{'type'} eq 'TIMEPERIOD TRANSITION') {
                 $l->{'time'} = POSIX::floor(($l->{'time'}+30)/120) * 120;
             }
         }

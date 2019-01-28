@@ -1112,6 +1112,7 @@ sub normal_mktime {
         $hour = 0;
     }
 
+    confess("undefined value") unless defined $sec;
     ($day, $hour, $min, $sec) = Normalize_DHMS($day, $hour, $min, $sec);
     my $timestamp = Mktime($year,$mon,$day, $hour,$min,$sec);
     $timestamp += $add_time;
