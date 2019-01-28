@@ -1039,6 +1039,7 @@ function toggleSitePanel() {
         // immediately reload if there were changes
         if(additionalParams['reload_nav']) {
             window.clearTimeout(backendSelTimer);
+            removeParams['backends'] = true;
             backendSelTimer  = window.setTimeout('reloadPage()', 50);
         }
     }
@@ -1056,6 +1057,7 @@ function toggleBackend(backend, state, skip_update) {
     jQuery('INPUT.button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
     jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
     cookieSave('thruk_conf', backend);
+    removeParams['backends'] = true;
     reloadPage();
     return;
   }
@@ -1091,6 +1093,9 @@ function toggleBackend(backend, state, skip_update) {
   /* save current selected backends in session cookie */
   cookieSave('thruk_backends', toQueryString(current_backend_states));
   window.clearTimeout(backendSelTimer);
+  // remove &backends=... from url, they would overwrite cookie settings
+  removeParams['backends'] = true;
+
   var delay = 2500;
   if(show_sitepanel == 'panel')     { delay =  3500; }
   if(show_sitepanel == 'collapsed') { delay = 10000; }
