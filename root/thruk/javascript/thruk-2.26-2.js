@@ -5509,80 +5509,114 @@ Y8,            d8""""""""8b   88
   `"Y8888Y"' d8'          `8b 88888888888
 *******************************************************************************/
 
-var last_cal_hidden = undefined;
-var last_cal_id     = undefined;
-function show_cal(id, defaultDate) {
-  // make calendar toggle
-  var now = new Date;
-  if(last_cal_hidden != undefined && (now.getTime() - last_cal_hidden) < 150 && (last_cal_id == undefined || last_cal_id == id )) {
-    return;
-  }
-
-  last_cal_id   = id;
-  var dateObj   = new Date();
-  var times     = new Array(0,0,0);
-
-  var parseDate = function(id) {
-    var date_val  = document.getElementById(id).value;
-    var date_time = date_val.split(" ");
-    if(date_time.length == 2) {
-      var dates     = date_time[0].split('-');
-      var times     = date_time[1].split(':');
-      if(times[2] == undefined) {
-          times = new Array(0,0,0);
-      }
-      var dateObj = new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]);
+function show_cal(id1, defaultDate, showRange) {
+    if(document.getElementById(id1).picker) {
+        document.getElementById(id1).click();
+        return;
     }
-    return([dateObj, times]);
-  }
-
-  var tmp = parseDate(id);
-  if(!tmp[0]) {
-    if(defaultDate == undefined) {
-        defaultDate = Calendar.printDate(new Date, '%Y-%m-%d %H:%M:%S');
-    }
-    document.getElementById(id).value = defaultDate;
-    tmp = parseDate(id);
-  }
-  dateObj = tmp[0];
-  times   = tmp[1];
-
-  var setDate = function() {
-    var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
-    document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-    document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-    // change end_date as well if new start date is past end date
-    if(id == "start_time") {
-        var end_date = document.getElementById("end_time");
-        if(end_date) {
-            var tmp = parseDate("end_time");
-            if(newDateObj.getTime() > tmp[0].getTime()) {
-                var endDate = new Date(newDateObj.getTime() + (downtime_duration * 1000));
-                end_date.value = Calendar.printDate(endDate, '%Y-%m-%d %H:%M:%S');
+    var id2;
+    if(id1 == "start_date") { id2 = "end_date"; }
+    if(id1 == "start_time") { id2 = "end_time"; }
+    if(id1 == "start")      { id2 = "end"; }
+    if(id1 == "end")        { id2 = "end";      id1 = "start"; }
+    if(id1 == "end_date")   { id2 = "end_date"; id1 = "start_date"; }
+    if(id1 == "end_time")   { id2 = "end_time"; id1 = "start_time"; }
+    var parseDate = function(date_val) {
+        var date_time = date_val.split(" ");
+        if(date_time.length == 1) { date_time[1] = "0:0:0"; }
+        if(date_time.length == 2) {
+            var dates     = date_time[0].split('-');
+            if(dates[2] == undefined) {
+                return;
             }
+            var times     = date_time[1].split(':');
+            if(times[1] == undefined) {
+                times = new Array(0,0,0);
+            }
+            if(times[2] == undefined) {
+                times[2] = 0;
+            }
+            return(new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]));
+        }
+        return;
+    }
+
+    var date1 = parseDate(document.getElementById(id1).value);
+    if(!date1) {
+        if(defaultDate != undefined) {
+            date1 = parseDate(defaultDate);
+        } else {
+            date1 = new Date();
+        }
+        document.getElementById(id1).value = date1.strftime("%Y-%m-%d %H:%M:%S");
+    }
+    var date2;
+    if(id2) {
+        date2 = parseDate(document.getElementById(id2).value);
+        if(!date2) {
+            if(defaultDate == undefined) {
+                date2 = parseDate(defaultDate);
+            } else {
+                date2 = new Date();
+            }
+            document.getElementById(id2).value = date2.strftime("%Y-%m-%d %H:%M:%S");
         }
     }
-    var now = new Date; last_cal_hidden = now.getTime();
-    jQuery('.DynarchCalendar-topCont').remove();
-  }
 
-  var cal = Calendar.setup({
-      time: Calendar.printDate(dateObj, '%H%M'),
-      date: Calendar.dateToInt(dateObj),
-      showTime: true,
-      fdow: 1,
-      weekNumbers: true,
-      onSelect: setDate,
-      onBlur:   setDate,
-      onTimeChange: function(c, time) {
-        time = time - time%5;
-        c.setTime(time, true);
-      }
-  });
-  cal.selection.set(Calendar.dateToInt(dateObj));
-  var pos    = ajax_search.get_coordinates(jQuery('#'+id)[0]);
-  cal.popup(id, "Br/ / /T/r");
-  jQuery('.DynarchCalendar-topCont').css('top', (pos[1]+20)+"px");
+
+    var options = {
+        "singleDatePicker": id2 == undefined,
+        "minYear": date1.strftime("%Y") - 5,
+        "showDropdowns": true,
+        "showWeekNumbers": true,
+        "timePicker": true,
+        "timePicker24Hour": true,
+        "startDate": moment(date1),
+        "opens": "center",
+        "autoApply": true,
+        "linkedCalendars": false,
+        "autoUpdateInput": false,
+        "alwaysShowCalendars": true,
+        "locale": {
+            "format": "DD-MM-YYYY",
+            "firstDay": 1
+        }
+    };
+    if(id2) {
+        options.endDate = moment(date2);
+    }
+    if(showRange) {
+        var today = parseDate((new Date).strftime("%Y-%m-%d"));
+        options.ranges = {
+            'Today': [moment(today), moment(today).add(1, 'days')],
+            'Yesterday': [moment(today).subtract(1, 'days'), moment(today)],
+            'Last 7 Days': [moment(today).subtract(7, 'days'), moment(today).add(1, 'days')],
+            'Last 30 Days': [moment(today).subtract(30, 'days'), moment(today).add(1, 'days')],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        };
+    }
+
+    var fix = function(ev, picker, id) {
+        picker.container.css("min-width", "300px");
+        document.getElementById(id).picker = picker;
+    };
+    var apply = function(start, end, label) {
+        document.getElementById(id1).value = start.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
+        if(id2) {
+            document.getElementById(id2).value = end.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
+        }
+    };
+
+    jQuery('#'+id1).on('showCalendar.daterangepicker', function(ev,picker) { fix(ev,picker,id1) });
+    jQuery('#'+id1).daterangepicker(options, apply);
+    if(id2) {
+        jQuery('#'+id2).on('showCalendar.daterangepicker', function(ev,picker) { fix(ev,picker,id2) });
+        jQuery('#'+id2).daterangepicker(options, apply);
+    }
+
+    // show calendar
+    jQuery('#'+id1).click();
 }
 
 /*******************************************************************************

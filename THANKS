@@ -89,6 +89,10 @@ dagre.js
   - https://github.com/cpettitt/dagre
   - MIT License
 
+daterangepicker.js
+  - https://github.com/dangrossman/daterangepicker
+  - MIT License
+
 ext.js
   - https://www.sencha.com/products/extjs/
   - GPL 3.0
@@ -123,9 +127,6 @@ jquery.mobile.router.js
 jquery-ui.js
   - http://jqueryui.com/
   - MIT License
-
-jscal2.js
-  - http://www.dynarch.com/jscal/
 
 jstree.js
   - http://www.jstree.com/

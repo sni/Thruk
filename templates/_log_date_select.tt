@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 <div class='navBoxTitle'>Log File Navigation</div>
-<input type="text" value="[% IF format_date(start, '%S') == "00" %][% format_date(start, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(start, '%Y-%m-%d %H:%M:%S') %][% END %]" id="start" name="start" size="20" class="date_input"> <a href="#" onclick="show_cal('start')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+<input type="text" value="[% IF format_date(start, '%S') == "00" %][% format_date(start, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(start, '%Y-%m-%d %H:%M:%S') %][% END %]" id="start" name="start" size="20" class="date_input"> <a href="#" onclick="show_cal('start', undefined, true)"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
 <br>to<br>
-<input type="text" value="[% IF format_date(end, '%S') == "00" %][% format_date(end, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(end, '%Y-%m-%d %H:%M:%S') %][% END %]" id="end" name="end" size="20" class="date_input"> <a href="#" onclick="show_cal('end')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+<input type="text" value="[% IF format_date(end, '%S') == "00" %][% format_date(end, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(end, '%Y-%m-%d %H:%M:%S') %][% END %]" id="end" name="end" size="20" class="date_input"> <a href="#" onclick="show_cal('end', undefined, true)"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
 <br>

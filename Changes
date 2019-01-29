@@ -16,6 +16,7 @@ next:
           - internals:
             - move libraries to vendor folder
             - update jquery to 3.3.1
+            - replace jscal2 with daterangepicker
 
 2.26-2   Tue Dec 18 17:33:08 CET 2018
           - display external commands errors if possible
