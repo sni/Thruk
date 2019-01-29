@@ -731,7 +731,7 @@ var TP = {
         if(!timedef || !timedef.match)     { return 3600; }
 
         var res  = timedef.match(/^(\d+)(\w{1})/);
-        if(res && res.length == 1) {
+        if(!res || res.length <= 2) {
             return 3600;
         }
         var nr    = res[1];

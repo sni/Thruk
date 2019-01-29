@@ -99,7 +99,11 @@ Ext.define('TP.Pantab', {
             /* close start page */
             var startPage = Ext.getCmp('tabpan-tab_0');
             if(startPage && startPage.id != This.id) {
-                startPage.destroy();
+                try {
+                    startPage.destroy();
+                } catch(err) {
+                    TP.logError(This.id, "startPageCloseException", err);
+                }
             }
             // close map controls from previous tab
             if(TP.initial_active_tab && TP.initial_active_tab != This.id) {

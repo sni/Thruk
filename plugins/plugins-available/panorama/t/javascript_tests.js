@@ -133,3 +133,26 @@ function test_get_group_status_unknown_incl_downtime() {
     }
     return 1;
 }
+
+function test_timeframe2seconds() {
+    var val;
+    val = TP.timeframe2seconds('24h');
+    if(val != 86400) {
+        throw Error("timeframe2seconds expected 86400: got "+val);
+    }
+    val = TP.timeframe2seconds('12345');
+    if(val != 12345) {
+        throw Error("timeframe2seconds expected 12345: got "+val);
+    }
+    val = TP.timeframe2seconds('3m');
+    if(val != 180) {
+        throw Error("timeframe2seconds expected 180: got "+val);
+    }
+
+    // not parsed, fallback to 1hour
+    val = TP.timeframe2seconds('3abc');
+    if(val != 3600) {
+        throw Error("timeframe2seconds expected 3600: got "+val);
+    }
+    return 1;
+}
