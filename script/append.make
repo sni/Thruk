@@ -17,12 +17,7 @@ dailydist: cleandist
 	$(MAKE) dist
 	$(MAKE) resetdaily
 	mv thruk-*.tar.gz thruk-$(DAILYTARBALL).tar.gz
-	rm -f plugins/plugins-available/panorama/root/cache/all_in_one-$(DAILYVERSIONFILES)_panorama.js \
-		root/thruk/cache/all_in_one-$(DAILYVERSIONFILES).js \
-		themes/themes-available/Thruk/stylesheets/cache/all_in_one-$(DAILYVERSIONFILES).css \
-		themes/themes-available/Thruk/stylesheets/cache/all_in_one_noframes-$(DAILYVERSIONFILES).css \
-		themes/themes-available/Thruk2/stylesheets/cache/all_in_one-$(DAILYVERSIONFILES).css \
-		themes/themes-available/Thruk2/stylesheets/cache/all_in_one_noframes-$(DAILYVERSIONFILES).css
+	rm -f root/thruk/cache/*-$(DAILYVERSIONFILES).*
 	ls -la *.gz
 
 releasedist: cleandist dist

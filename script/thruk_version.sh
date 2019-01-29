@@ -87,19 +87,19 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
     git mv plugins/plugins-available/business_process/root/bp-${VERSION}-${BRANCH}.js plugins/plugins-available/business_process/root/bp-$fileversion.js
     git mv plugins/plugins-available/panorama/root/panorama-${VERSION}-${BRANCH}.css plugins/plugins-available/panorama/root/panorama-$fileversion.css
     git mv root/thruk/javascript/thruk-${VERSION}-${BRANCH}.js root/thruk/javascript/thruk-$fileversion.js
-    if [ -e root/thruk/cache/all_in_one-${VERSION}-${BRANCH}.js ]; then
-        mv root/thruk/cache/all_in_one-${VERSION}-${BRANCH}.js root/thruk/cache/all_in_one-$fileversion.js
+    if [ -e root/thruk/cache/thruk-${VERSION}-${BRANCH}.js ]; then
+        mv root/thruk/cache/thruk-${VERSION}-${BRANCH}.js root/thruk/cache/thruk-$fileversion.js
     fi
     for theme in Thruk Thruk2; do
-        if [ -e themes/themes-available/${theme}/stylesheets/cache/all_in_one-${VERSION}-${BRANCH}.css ]; then
-            mv themes/themes-available/${theme}/stylesheets/cache/all_in_one-${VERSION}-${BRANCH}.css themes/themes-available/${theme}/stylesheets/cache/all_in_one-$fileversion.css
+        if [ -e root/thruk/cache/${theme}-${VERSION}-${BRANCH}.css ]; then
+            mv root/thruk/cache/${theme}-${VERSION}-${BRANCH}.css root/thruk/cache/${theme}-${fileversion}.css
         fi
-        if [ -e themes/themes-available/${theme}/stylesheets/cache/all_in_one_noframes-${VERSION}-${BRANCH}.css ]; then
-            mv themes/themes-available/${theme}/stylesheets/cache/all_in_one_noframes-${VERSION}-${BRANCH}.css themes/themes-available/${theme}/stylesheets/cache/all_in_one_noframes-$fileversion.css
+        if [ -e root/thruk/cache/${theme}-noframes-${VERSION}-${BRANCH}.css ]; then
+            mv root/thruk/cache/${theme}-noframes-${VERSION}-${BRANCH}.css root/thruk/cache/${theme}-noframes-${fileversion}.css
         fi
     done
-    if [ -e plugins/plugins-available/panorama/root/cache/all_in_one-${VERSION}-${BRANCH}_panorama.js ]; then
-        mv plugins/plugins-available/panorama/root/cache/all_in_one-${VERSION}-${BRANCH}_panorama.js plugins/plugins-available/panorama/root/cache/all_in_one-${fileversion}_panorama.js
+    if [ -e root/thruk/cache/thruk-panorama-${VERSION}-${BRANCH}.js ]; then
+        mv root/thruk/cache/thruk-panorama-${VERSION}-${BRANCH}.js root/thruk/cache/thruk-panorama-${fileversion}.js
     fi
     git add \
         docs/manpages/nagexp.3 \
