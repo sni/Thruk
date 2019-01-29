@@ -439,7 +439,7 @@ sub test_page {
         # check for failed javascript lists
         verify_html_js($content) unless $opts->{'skip_js_check'};
         # remove script tags without a src
-        $content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
+        $content =~ s/<script(?!([^>]*src=[^>]*))[^>]*>.+?<\/script>//gsmxio;
         my @matches1 = $content =~ m/<(?:[^>]+)\s+(src|href)='(.+?)'/gio;
         my @matches2 = $content =~ m/<(?:[^>]+)\s+(src|href)="(.+?)"/gio;
         my $links_to_check;
