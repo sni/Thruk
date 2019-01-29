@@ -666,12 +666,12 @@ Ext.define('TP.Pantab', {
                 attribution =  { "attribution": "&copy; "+url+"<br>Data &copy; OpenStreetMap <a href='http://www.openstreetmap.org/copyright/en' target='_blank'>contributors<a>" };
             }
             tab.mapEl.lastWMSProvider = xdata.wms_provider;
-            OpenLayers.ImgPath               = url_prefix +'plugins/panorama/openlayer/images/';
+            OpenLayers.ImgPath               = url_prefix +'vendor/openlayer/images/';
             OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
             var controlsBody = Ext.getBody();
             var controlsDiv  = controlsBody.createChild('<div style="position: absolute; z-index: 100001; top: 50px; left: 3px; display: none;">');
             var zoomDiv      = controlsDiv.createChild('<div style="position: absolute; z-index: 100001; top: 0; left: 0;">');
-            var map   = new OpenLayers.Map('map', { controls: [], theme: url_prefix+'plugins/panorama/openlayer/theme/default/style.css' });
+            var map   = new OpenLayers.Map('map', { controls: [], theme: url_prefix+'vendor/openlayer/theme/default/style.css' });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
