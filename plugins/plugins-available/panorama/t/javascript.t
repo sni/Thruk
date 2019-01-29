@@ -84,15 +84,16 @@ js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load extjs");
 # read 3rd party js files
 my $config = Thruk::config();
 for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_panorama'}}) {
-    if($file =~ m/^plugins\//mx) {
-        $file =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
+    my $testfile = $file;
+    if($testfile =~ m/^plugins\//mx) {
+        $testfile =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
     } else {
-        $file = 'root/thruk/'.$file;
+        $testfile = 'root/thruk/'.$testfile;
     }
-    next if $file =~ m|OpenLayers|mx;
-    next if $file =~ m|jquery|mxi;
-    ok($file, $file);
-    js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
+    next if $testfile =~ m|OpenLayers|mx;
+    next if $testfile =~ m|jquery|mxi;
+    ok($testfile, $testfile);
+    js_eval_ok($testfile) or BAIL_OUT("failed to load ".$testfile);
 }
 
 #################################################
