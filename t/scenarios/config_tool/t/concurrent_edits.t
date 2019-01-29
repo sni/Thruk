@@ -7,6 +7,7 @@ plan tests => 270;
 
 BEGIN {
     $ENV{'THRUK_TEST_CONF_NO_LOG'} = 1;
+    $ENV{'THRUK_AUTHOR'} = 1;
     use lib('t');
     require TestUtils;
     import TestUtils;
