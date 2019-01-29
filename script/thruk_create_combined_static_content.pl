@@ -16,15 +16,11 @@ use lib 'lib';
 use lib 'plugins/plugins-available/panorama/lib';
 use Thruk::Config;
 
-my($dos2unix, $yuicompr);
+my($dos2unix);
 for my $p (reverse split/:/, $ENV{'PATH'}) {
     $dos2unix = $p.'/dos2unix'       if -x $p.'/dos2unix';
     $dos2unix = $p.'/fromdos'        if -x $p.'/fromdos';
-    $yuicompr = $p.'/yui-compressor' if -x $p.'/yui-compressor';
-    $yuicompr = $p.'/yuicompressor'  if -x $p.'/yuicompressor';
 }
-
-my $skip_compress = defined $ENV{THRUK_SKIP_COMPRESS} ? $ENV{THRUK_SKIP_COMPRESS} : 0;
 
 #################################################
 # directly use config, otherwise user would be switched when called as root from the Makefile.PL
@@ -34,6 +30,7 @@ die('no config') unless $config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_java
 die('no config') unless $Thruk::Config::VERSION;
 die('no config') unless $branch;
 my $version = $Thruk::Config::VERSION.'-'.$branch;
+my @themes  = qw/Thruk Thruk2/;
 
 #################################################
 # check if update is required
@@ -51,12 +48,14 @@ if(-e 'root/thruk/cache/thruk-'.$version.'.js') {
 }
 
 $newest = 0;
-for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}) {
-    my @s   = stat('themes/themes-available/Thruk/stylesheets/'.$file);
-    $newest = $s[9] if $newest < $s[9];
+for my $theme (@themes) {
+    for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}->{$theme}}) {
+        my @s   = stat('themes/themes-available/'.$theme.'/stylesheets/'.$file);
+        $newest = $s[9] if $newest < $s[9];
+    }
 }
 my $css_required = 0;
-for my $theme (qw/Thruk Thruk2/) {
+for my $theme (@themes) {
     if(!-e 'root/thruk/cache/'.$theme.'-noframes-'.$version.'.css') {
         $css_required = 1;
     } else {
@@ -93,32 +92,26 @@ if(-e $all_in_one_panorama) {
     }
 }
 
-if(!$js_required and !$css_required and !$skip_compress and !$panorama_required and (!$ARGV[0] or $ARGV[0] ne '-f')) {
+if(!$js_required && !$css_required && !$panorama_required && (!$ARGV[0] or $ARGV[0] ne '-f')) {
     print STDERR "no update necessary\n";
     exit;
 }
 
 #################################################
-# required tools available?
-unless($skip_compress) {
-    if(!$yuicompr) {
-        warn("E: yuicompressor not installed, won't compress javascript and stylesheets!") ;
-        $skip_compress = 1;
-    }
-}
-
-#################################################
 my $cmds = [
     'cd root/thruk/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > cache/thruk-'.$version.'.js',
-    'cd themes/themes-available/Thruk/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).'  > ../../../../root/thruk/cache/Thruk-noframes-'.$version.'.css',
-    'cd themes/themes-available/Thruk/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).'    > ../../../../root/thruk/cache/Thruk-'.$version.'.css',
-    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes2'}}).' > ../../../../root/thruk/cache/Thruk2-noframes-'.$version.'.css',
-    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames2'}}).'   > ../../../../root/thruk/cache/Thruk2-'.$version.'.css',
     'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
-    'sed -e "s/\((\'\?\"\?\)\.\.\/\(images\|fonts\)\//\1..\/themes\/Thruk2\/\2\//g" '
-       .'-e "s/\((\'\?\"\?\)\.\.\/\.\.\/\.\.\/images\//\1..\/images\//g"'
-       .' -i root/thruk/cache/Thruk*.css',
 ];
+for my $theme (@themes) {
+    push @{$cmds},
+        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-noframes-'.$version.'.css';
+    push @{$cmds},
+        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-'.$version.'.css';
+    push @{$cmds},
+        'sed -e "s/\((\'\?\"\?\)\.\.\/\(images\|fonts\)\//\1..\/themes\/'.$theme.'\/\2\//g"'
+          .' -e "s/\((\'\?\"\?\)\.\.\/\.\.\/\.\.\/images\//\1..\/images\//g"'
+          .' -i root/thruk/cache/'.$theme.'-*.css',
+}
 if($dos2unix) {
     push @{$cmds}, 'cd root/thruk/cache && '.$dos2unix.' thruk-'.$version.'.js';
     push @{$cmds}, $dos2unix.' '.$all_in_one_panorama;
@@ -127,43 +120,5 @@ for my $cmd (@{$cmds}) {
     print `$cmd`;
     exit 1 if $? != 0;
 }
-
-if($skip_compress) {
-    print STDERR "skipping compression\n";
-    exit;
-}
-
-#################################################
-# try to minify css
-my $files = [
-    'root/thruk/cache/Thruk-noframes-'.$version.'.css',
-    'root/thruk/cache/Thruk-'.$version.'.css',
-    'root/thruk/cache/Thruk2-noframes-'.$version.'.css',
-    'root/thruk/cache/Thruk2-'.$version.'.css',
-];
-for my $file (@{$files}) {
-    my $cmd = $yuicompr.' -o compressed.css '.$file.' && mv compressed.css '.$file;
-    print `$cmd`;
-    if($? != 0) {
-        print STDERR "yui-compressor failed, make sure yui-compressor is installed to create compressed files.\n";
-        last;
-    }
-}
-unlink('tmp.css');
-
-#################################################
-# try to minify js
-my $jsfiles = [
-    'root/thruk/cache/thruk-'.$version.'.js',
-];
-for my $file (@{$jsfiles}) {
-    my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;
-    print `$cmd`;
-    if($? != 0) {
-        print STDERR "yui-compressor failed, make sure yui-compressor is installed to create compressed files.\n";
-        last;
-    }
-}
-unlink('compressed.js');
 
 exit 0;

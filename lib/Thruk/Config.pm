@@ -193,24 +193,28 @@ our %config = ('name'                   => 'Thruk',
                                               'vendor/jquery-fieldselection.js',
                                               'vendor/strftime-min.js',
                                           ],
-                                          'all_in_one_css_frames' => [
-                                               'thruk_global.css',
-                                               'Thruk.css',
-                                          ],
-                                          'all_in_one_css_noframes' => [
-                                              'thruk_global.css',
-                                              'thruk_noframes.css',
-                                              'Thruk.css',
-                                          ],
-                                          'all_in_one_css_frames2' => [
-                                               'thruk_global.css',
-                                               'Thruk2.css',
-                                          ],
-                                          'all_in_one_css_noframes2' => [
-                                              'thruk_global.css',
-                                              'thruk_noframes.css',
-                                              'Thruk2.css',
-                                          ],
+                                          'all_in_one_css_frames' => {
+                                                'Thruk' => [
+                                                   'thruk_global.css',
+                                                   'Thruk.css',
+                                                ],
+                                                'Thruk2' => [
+                                                    'thruk_global.css',
+                                                    'Thruk2.css',
+                                                ],
+                                          },
+                                          'all_in_one_css_noframes' => {
+                                                'Thruk' => [
+                                                    'thruk_global.css',
+                                                    'thruk_noframes.css',
+                                                    'Thruk.css',
+                                                ],
+                                                'Thruk2' => [
+                                                    'thruk_global.css',
+                                                    'thruk_noframes.css',
+                                                    'Thruk2.css',
+                                                ],
+                                          },
                                           'jquery_ui' => '1.12.1',
                                           'all_in_one_javascript_panorama' => [
                                               'vendor/jquery-1.12.4.min.js',
