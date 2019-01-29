@@ -464,7 +464,7 @@ sub test_page {
             $links_to_check->{$match} = 1;
         }
         my $errors = 0;
-        for my $test_url (keys %{$links_to_check}) {
+        for my $test_url (sort keys %{$links_to_check}) {
             if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             next if $test_url =~ m/\/pnp4nagios\//mxo;
             next if $test_url =~ m/\/pnp\//mxo;
