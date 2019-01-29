@@ -187,10 +187,10 @@ store cache to disk
 sub _store {
     my($self) = @_;
     nstore($self->{'_data'}, $self->{'_cachefile'}.'.'.$$) or die("saving tmp cache file ".$self->{'_cachefile'}.'.'.$$." failed: $!");
+    my @stat = stat($self->{'_cachefile'}.'.'.$$) or die("cannot stat ".$self->{'_cachefile'}.'.'.$$.": ".$!);
+    $self->{'_stat'} = \@stat;
     move($self->{'_cachefile'}.'.'.$$, $self->{'_cachefile'});
     Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
-    my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-    $self->{'_stat'} = \@stat;
     return;
 }
 
