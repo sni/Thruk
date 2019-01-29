@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/mobile/mobile-[% version %]-[% filebranch %].css' />
     <link rel="stylesheet" href="[% url_prefix %]vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.css" />
-    <script src="[% url_prefix %]vendor/jquery-1.12.4.min.js"></script>
+    <script src="[% url_prefix %]vendor/jquery-3.3.1.min.js"></script>
     <script type="application/x-javascript">
       var url_prefix             = '[% url_prefix %]';
       var cookie_path            = '[% cookie_path %]';

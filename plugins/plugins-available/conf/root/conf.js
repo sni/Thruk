@@ -437,7 +437,7 @@ function init_plugin_help_accordion(id) {
         heightStyle: 'content',
         fillSpace:   true,
         activate:    function(event, ui) {
-            if(ui.newHeader.size() == 0) {
+            if(!ui.newHeader || ui.newHeader.length == 0) {
                 // accordion is closing
                 return;
             }

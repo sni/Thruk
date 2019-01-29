@@ -78,7 +78,7 @@ function split_table(table, max_height) {
         }
         return true;
     });
-    var num_trs = cloned.find('TABLE.paged_table > TBODY > TR').size();
+    var num_trs = cloned.find('TABLE.paged_table > TBODY > TR').length;
     var lastrow = num_trs - num_removed;
 
     // find rows on the cloned table and remove all from the page above
