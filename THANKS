@@ -89,11 +89,6 @@ dagre.js
   - https://github.com/cpettitt/dagre
   - MIT License
 
-excanvas.js
-  - http://excanvas.sourceforge.net/
-  - https://github.com/arv/ExplorerCanvas
-  - Apache License 2.0
-
 ext.js
   - https://www.sencha.com/products/extjs/
   - GPL 3.0
