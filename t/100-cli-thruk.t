@@ -39,7 +39,7 @@ TestUtils::test_command({
     like => ['/Tactical Monitoring Overview/',
              '/Network Outages/',
              '/Monitoring Features/',
-             '/(vendor\/overlib\.js|all_in_one-[\d\-\.]+\.js)/',
+             '/(vendor\/overlib\.js|thruk-[\d\-\.]+\.js)/',
             ],
 });
 

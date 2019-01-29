@@ -405,7 +405,6 @@ plugins/plugins-available/panorama/lib/Thruk/Utils/Panorama/Scripted.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/PanoramaCpuStats.pm
 plugins/plugins-available/panorama/preview.png
 plugins/plugins-available/panorama/README
-plugins/plugins-available/panorama/root/all_in_one-2.26-2_panorama.js
 plugins/plugins-available/panorama/root/images/accept.png
 plugins/plugins-available/panorama/root/images/add.png
 plugins/plugins-available/panorama/root/images/application_put.png
@@ -656,11 +655,17 @@ README.md
 root/favicon.ico
 root/index.html
 root/robots.txt
+root/thruk/cache/all_in_one-2.26-2.js
+root/thruk/cache/Thruk-2.26-2.css
+root/thruk/cache/thruk-2.26-2.js
+root/thruk/cache/Thruk-noframes-2.26-2.css
+root/thruk/cache/thruk-panorama-2.26-2.js
+root/thruk/cache/Thruk2-2.26-2.css
+root/thruk/cache/Thruk2-noframes-2.26-2.css
 root/thruk/images/pbar-ani.gif
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/all_in_one-2.26-2.js
 root/thruk/javascript/thruk-2.26-2.js
 root/thruk/media/critical.wav
 root/thruk/media/ok.wav
@@ -1789,6 +1794,7 @@ t/300-controller_rest_v1.t
 t/300-controller_Root.t
 t/300-controller_showlog.t
 t/300-controller_status.t
+t/300-controller_statusmap.t
 t/300-controller_summary.t
 t/300-controller_tac.t
 t/300-controller_test.t
@@ -3217,8 +3223,6 @@ themes/themes-available/Thruk/images/waiting.gif
 themes/themes-available/Thruk/images/wand.png
 themes/themes-available/Thruk/images/warning.png
 themes/themes-available/Thruk/images/yellow.gif
-themes/themes-available/Thruk/stylesheets/all_in_one-2.26-2.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-2.26-2.css
 themes/themes-available/Thruk/stylesheets/Thruk.css
 themes/themes-available/Thruk/stylesheets/thruk_global.css
 themes/themes-available/Thruk/stylesheets/thruk_noframes.css
@@ -3386,8 +3390,6 @@ themes/themes-available/Thruk2/images/waiting.gif
 themes/themes-available/Thruk2/images/wand.png
 themes/themes-available/Thruk2/images/warning.png
 themes/themes-available/Thruk2/images/yellow.gif
-themes/themes-available/Thruk2/stylesheets/all_in_one-2.26-2.css
-themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-2.26-2.css
 themes/themes-available/Thruk2/stylesheets/Thruk2.css
 themes/themes-available/Thruk2/stylesheets/thruk_global.css
 themes/themes-available/Thruk2/stylesheets/thruk_noframes.css

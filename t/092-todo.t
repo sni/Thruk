@@ -17,19 +17,9 @@ for my $cmd (@{$cmds}) {
     chomp($line);
 
     # skip those
-    if(   $line =~ m|/dojo/dojo\.js|mx
-       or $line =~ m|readme\.txt|mx
-       or $line =~ m|/excanvas.js|mx
-       or $line =~ m|jquery\.mobile\-.*.js|mx
-       or $line =~ m|extjs\-.*\.js|mx
-       or $line =~ m|extjs\-.*\.css|mx
-       or $line =~ m|/javascript/jstree/|mx
-       or $line =~ m|/conf/root/jstree/|mx
-       or $line =~ m|jquery\.flot\.|mx
-       or $line =~ m|root/./tests/|mx
-       or $line =~ m|/geoext2|mx
+    if(   $line =~ m|/vendor/|mx
+       or $line =~ m|/cache/|mx
        or $line =~ m|/panorama_js_box_reorder.js|mx
-       or $line =~ m|/all_in_one|mx
        or $line =~ m|/092\-todo\.t|mx
     ) {
       next;

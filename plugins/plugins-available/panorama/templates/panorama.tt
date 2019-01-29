@@ -27,7 +27,7 @@
       [% END %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/js/panorama_js_track_timers.js"></script>
     [% ELSE %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
+      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]cache/thruk-panorama-[% version %]-[% filebranch %].js"></script>
     [% END %]
 </head>
 <body onunload="TP.unload()">

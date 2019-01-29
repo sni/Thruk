@@ -43,8 +43,8 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}
     $newest = $s[9] if $newest < $s[9];
 }
 my $js_required = 1;
-if(-e 'root/thruk/javascript/all_in_one-'.$version.'.js') {
-    my @s = stat('root/thruk/javascript/all_in_one-'.$version.'.js');
+if(-e 'root/thruk/cache/thruk-'.$version.'.js') {
+    my @s = stat('root/thruk/cache/thruk-'.$version.'.js');
     if($s[9] >= $newest) {
         $js_required = 0;
     }
@@ -57,10 +57,10 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}
 }
 my $css_required = 0;
 for my $theme (qw/Thruk Thruk2/) {
-    if(!-e 'themes/themes-available/'.$theme.'/stylesheets/all_in_one_noframes-'.$version.'.css') {
+    if(!-e 'root/thruk/cache/'.$theme.'-noframes-'.$version.'.css') {
         $css_required = 1;
     } else {
-        my @s = stat('themes/themes-available/'.$theme.'/stylesheets/all_in_one_noframes-'.$version.'.css');
+        my @s = stat('root/thruk/cache/'.$theme.'-noframes-'.$version.'.css');
         if($s[9] < $newest) {
             $css_required = 1;
         }
@@ -85,7 +85,7 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_p
     $newest = $s[9] if (@s && $newest < $s[9]);
 }
 my $panorama_required   = 1;
-my $all_in_one_panorama = 'plugins/plugins-available/panorama/root/all_in_one-'.$version.'_panorama.js';
+my $all_in_one_panorama = 'root/thruk/cache/thruk-panorama-'.$version.'.js';
 if(-e $all_in_one_panorama) {
     my @s = stat($all_in_one_panorama);
     if($s[9] >= $newest) {
@@ -109,15 +109,18 @@ unless($skip_compress) {
 
 #################################################
 my $cmds = [
-    'cd root/thruk/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > javascript/all_in_one-'.$version.'.js',
-    'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$version.'.css',
-    'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$version.'.css',
-    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes2'}}).' > all_in_one_noframes-'.$version.'.css',
-    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames2'}}).' > all_in_one-'.$version.'.css',
+    'cd root/thruk/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > cache/thruk-'.$version.'.js',
+    'cd themes/themes-available/Thruk/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).'  > ../../../../root/thruk/cache/Thruk-noframes-'.$version.'.css',
+    'cd themes/themes-available/Thruk/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).'    > ../../../../root/thruk/cache/Thruk-'.$version.'.css',
+    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes2'}}).' > ../../../../root/thruk/cache/Thruk2-noframes-'.$version.'.css',
+    'cd themes/themes-available/Thruk2/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames2'}}).'   > ../../../../root/thruk/cache/Thruk2-'.$version.'.css',
     'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
+    'sed -e "s/\((\'\?\"\?\)\.\.\/\(images\|fonts\)\//\1..\/themes\/Thruk2\/\2\//g" '
+       .'-e "s/\((\'\?\"\?\)\.\.\/\.\.\/\.\.\/images\//\1..\/images\//g"'
+       .' -i root/thruk/cache/Thruk*.css',
 ];
 if($dos2unix) {
-    push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'.js';
+    push @{$cmds}, 'cd root/thruk/cache && '.$dos2unix.' thruk-'.$version.'.js';
     push @{$cmds}, $dos2unix.' '.$all_in_one_panorama;
 }
 for my $cmd (@{$cmds}) {
@@ -133,10 +136,10 @@ if($skip_compress) {
 #################################################
 # try to minify css
 my $files = [
-    'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.'.css',
-    'themes/themes-available/Thruk/stylesheets/all_in_one-'.$version.'.css',
-    'themes/themes-available/Thruk2/stylesheets/all_in_one_noframes-'.$version.'.css',
-    'themes/themes-available/Thruk2/stylesheets/all_in_one-'.$version.'.css',
+    'root/thruk/cache/Thruk-noframes-'.$version.'.css',
+    'root/thruk/cache/Thruk-'.$version.'.css',
+    'root/thruk/cache/Thruk2-noframes-'.$version.'.css',
+    'root/thruk/cache/Thruk2-'.$version.'.css',
 ];
 for my $file (@{$files}) {
     my $cmd = $yuicompr.' -o compressed.css '.$file.' && mv compressed.css '.$file;
@@ -151,7 +154,7 @@ unlink('tmp.css');
 #################################################
 # try to minify js
 my $jsfiles = [
-    'root/thruk/javascript/all_in_one-'.$version.'.js',
+    'root/thruk/cache/thruk-'.$version.'.js',
 ];
 for my $file (@{$jsfiles}) {
     my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;
