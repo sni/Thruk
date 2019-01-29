@@ -53,4 +53,5 @@ License
 
 Licensed under the [GPLv2](LICENSE) License.
 
-Vendor specific libraries below ./root/thruk/vendor/ may have different licenes.
+Vendor specific libraries below ./root/thruk/vendor/ may have different
+licenes. See THANKS file for details.

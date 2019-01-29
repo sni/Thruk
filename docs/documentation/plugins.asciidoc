@@ -537,8 +537,8 @@ Now if you want a more stylish plugin you can add some Thruk-common css and make
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 		[% PROCESS _common_css.tt  %]
 		[% PROCESS _header.tt
-			css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
-			js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
+			css=["plugins/conf/conf.css"]
+			js=["plugins/conf/conf.js"]
 		%]
 	</head>
 	<body>

@@ -1005,8 +1005,6 @@ sub _list {
 my $errors_js = 0;
 sub verify_js {
     my($file) = @_;
-    return if $file =~ m/jit-yc.js/gmx;
-    return if $file =~ m/jquery.mobile.router/gmx;
     my $content = read_file($file);
     my $matches = _replace_with_marker($content);
     return unless $matches;

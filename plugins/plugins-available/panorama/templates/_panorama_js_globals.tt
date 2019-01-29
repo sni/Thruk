@@ -51,8 +51,8 @@ var omd_site                 = '[% omd_site %]';
 var grafana_default_panelId  = [% c.config.grafana_default_panelId %];
 var enable_shinken_features  = [% enable_shinken_features %];
 var has_jquery_ui            = false;
-var jquery_ui_css            = '[% url_prefix %]vendor/jquery-ui/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css';
-var jquery_ui_url            = '[% url_prefix %]vendor/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js';
+var jquery_ui_css            = '[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css';
+var jquery_ui_url            = '[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/js/jquery-ui-[% jquery_ui %].custom.min.js';
 
 [%+ PROCESS _header_initial_states.tt +%]
 var contactgroupsHash = {};

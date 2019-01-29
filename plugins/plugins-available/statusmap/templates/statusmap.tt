@@ -1,7 +1,7 @@
 ﻿[% PROCESS _header.tt
-        js           => [ "vendor/jit-yc.js", "plugins/statusmap/statusmap.js" ]
+        js           => [ "vendor/jit-yc-2.0.1.js", "plugins/statusmap/statusmap.js" ]
         css          => "plugins/statusmap/Treemap.css",
-        extra_header => "<!--[if IE]><script language='javascript' type='text/javascript' src='" _ url_prefix _ "vendor/excanvas.js'></script><![endif]-->"
+        extra_header => "<!--[if IE]><script language='javascript' type='text/javascript' src='" _ url_prefix _ "vendor/excanvas-f45234e.js'></script><![endif]-->"
 %]
 
 <form method="get" action="statusmap.cgi">

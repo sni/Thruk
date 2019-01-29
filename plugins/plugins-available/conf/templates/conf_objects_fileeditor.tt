@@ -1,5 +1,5 @@
 ﻿[% WRAPPER _conf_frame.tt %]
-<script src="[% url_prefix %]vendor/linedtextarea/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
+<script src="[% url_prefix %]vendor/linedtextarea-e619e09/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
 <form action="conf.cgi" method="POST" id="saveform">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="action" value="savefile">

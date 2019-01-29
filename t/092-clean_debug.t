@@ -21,15 +21,8 @@ for my $cmd (keys %{$cmds}) {
     chomp($line);
     $line =~ s|//|/|gmx;
 
-    if(   $line =~ m|/dojo/dojo\.js|mx
-       or $line =~ m|readme\.txt|mx
-       or $line =~ m|Unicode/Encoding\.pm|mx
-       or $line =~ m|/excanvas.js|mx
-       or $line =~ m|jquery\.mobile\-.*.js|mx
-       or $line =~ m|092\-clean_debug\.t|mx
-    ) {
-      next;
-    }
+    next if $line =~ m|092\-clean_debug\.t|mx;
+
     if($opt->{'skip_comments'}) {
         if($line =~ m|^[a-zA-Z\./\-]+:\d+:\s*\#|mx) { next; }
     }

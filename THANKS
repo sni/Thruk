@@ -1,60 +1,61 @@
 THANKS
 ======
 
-Thanks to all contributing people
+Thanks to all people helped creating Thruk.
 
 CODE / PATCHES / TESTING
 ========================
-Sven Nierlein
-Robert Bohne
-Danijel Tasov
-Jörg Linge
-Chris Buben
-Alex Peeters
-Vincent Besançon
-Jelle Smet
-Matthias Flacke
-Jean Gabes
-Nicolas Chancereul
-Erwan Seite
-Sigma Informatique
-Nicolas Dupeux
-Justin Burnham
-Franky Van Liedekerke
-Pierre Mavro
-Mark Wilkinson
-Jason Lempka
-Oliver Falk
-Thibault Cohen
-Davide Cecchetto (dcec)
-Dene Tariko
-Olivier Li-Kiang-Cheong (lkco)
-Andrew Widdersheim (awiddersheim)
-Jean Prat (saez0pub)
-Feraudet Cyril
-Mathieu Parent (sathieu)
-Guy Antony Halse (ghalse)
-Jens Hyllegaard
-Alexandre Anriot (aanriot)
-marcantoinedupre
-Mark Meyer (ofosos)
-Mikael Nordin (mickenordin)
 
+  - Sven Nierlein
+  - Robert Bohne
+  - Danijel Tasov
+  - Jörg Linge
+  - Chris Buben
+  - Alex Peeters
+  - Vincent Besançon
+  - Jelle Smet
+  - Matthias Flacke
+  - Jean Gabes
+  - Nicolas Chancereul
+  - Erwan Seite
+  - Sigma Informatique
+  - Nicolas Dupeux
+  - Justin Burnham
+  - Franky Van Liedekerke
+  - Pierre Mavro
+  - Mark Wilkinson
+  - Jason Lempka
+  - Oliver Falk
+  - Thibault Cohen
+  - Davide Cecchetto (dcec)
+  - Dene Tariko
+  - Olivier Li-Kiang-Cheong (lkco)
+  - Andrew Widdersheim (awiddersheim)
+  - Jean Prat (saez0pub)
+  - Feraudet Cyril
+  - Mathieu Parent (sathieu)
+  - Guy Antony Halse (ghalse)
+  - Jens Hyllegaard
+  - Alexandre Anriot (aanriot)
+  - marcantoinedupre
+  - Mark Meyer (ofosos)
+  - Mikael Nordin (mickenordin)
 
 
 STYLES:
 =======
+
 Nagios Neat Style:
-http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Nagios-Neat/details
+  - http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Nagios-Neat/details
 
 Vautour Style:
-http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Vautour-Style/details
+  - http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Vautour-Style/details
 
 Exfoliation Style:
-http://lancet.mit.edu/mwall/projects/nagios/
+  - http://lancet.mit.edu/mwall/projects/nagios/
 
 Nuvola Style:
-http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Nuvola-Style/details
+  - http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Nuvola-Style/details
 
 
 
@@ -62,77 +63,98 @@ MEDIA:
 ======
 
 Silk Icon Set:
-http://www.famfamfam.com/lab/icons/silk/
+  - http://www.famfamfam.com/lab/icons/silk/
 
 Glyphish Icons
-http://glyphish.com/
+  - http://glyphish.com/
 
 Find Icons
-http://findicons.com/
+  - http://findicons.com/
 
 Alarm Sound
-http://www.freeaudioclips.com
+  - http://www.freeaudioclips.com
 
 Config Plugin File/Folder Icons based on
-http://www.veryicon.com/icons/file-type/longhorn-objects/
+  - http://www.veryicon.com/icons/file-type/longhorn-objects/
 
 
-JAVASCRIPT:
-===========
-Overlib Library:
-http://www.bosrup.com/web/overlib/
+3rd party vendor libraries:
+===========================
 
-DHTML Calendar:
-http://www.dynarch.com/projects/calendar/
+bigscreen.js
+  - https://github.com/bdougherty/BigScreen
+  - MIT License
 
-TheJit InfoVis Toolkit
-http://thejit.org
+dagre.js
+  - https://github.com/cpettitt/dagre
+  - MIT License
 
-Jquery
-http://jquery.com/
+excanvas.js
+  - http://excanvas.sourceforge.net/
+  - https://github.com/arv/ExplorerCanvas
+  - Apache License 2.0
 
-Jquery UI
-http://jqueryui.com/
+ext.js
+  - https://www.sencha.com/products/extjs/
+  - GPL 3.0
 
-Jquery Fieldselection
-http://plugins.jquery.com/project/fieldselection
+flot.js
+  - http://www.flotcharts.org
+  - https://github.com/flot/flot/
+  - MIT License
 
-Jquery Mobile
-http://jquerymobile.com
+geoext2.js
+  - https://github.com/geoext/geoext2
+  - BSD license.
 
-Jquery Mobile Router
-https://github.com/azicchetti/jquerymobile-router
+jit-yc.js
+  - http://thejit.org
+  - https://github.com/philogb/jit
+  - https://philogb.github.io/jit/
+  - MIT License
 
-ExplorerCanvas
-http://excanvas.sourceforge.net/
+jqm.js
+  - http://jquerymobile.com
+  - MIT License
 
-JS Date Time Format Library
-http://blog.stevenlevithan.com/archives/date-time-format
+jquery.js
+  - http://jquery.com/
+  - MIT License
 
-JS Tree
-http://www.jstree.com/
+jquery.mobile.router.js
+  - https://github.com/azicchetti/jquerymobile-router
+  - MIT License
 
-JQuery linedtextarea
-http://alan.blog-city.com/jquerylinedtextarea.htm
-https://github.com/aw20/JQueryLinedText
+jquery-ui.js
+  - http://jqueryui.com/
+  - MIT License
 
-JS strftime
-http://hacks.bluesmoon.info/strftime
+jscal2.js
+  - http://www.dynarch.com/jscal/
 
-JS Flot Graphs
-http://www.flotcharts.org
+jstree.js
+  - http://www.jstree.com/
+  - https://github.com/vakata/jstree/
+  - MIT License
 
-JS dagre
-https://github.com/cpettitt/dagre
+linedtextarea
+  - http://alan.blog-city.com/jquerylinedtextarea.htm
+  - https://github.com/aw20/JQueryLinedText
+  - MIT License
 
-JS sprintf
-https://github.com/kvz/phpjs/blob/master/functions/strings/sprintf.js
+openlayer.js
+  - http://openlayers.org/
+  - https://github.com/openlayers/openlayers/
+  - BSD licence
 
-JS BigScreen
-https://github.com/bdougherty/BigScreen
+overlib.js:
+  - https://github.com/overlib/overlib
+  - Artistic License 1.0
 
-JS GeoExt 2
-http://geoext.github.io
+sprintf.js
+  - https://github.com/kvz/locutus/blob/master/src/php/strings/sprintf.js
+  - MIT License
 
-JS Overlayers 3
-http://openlayers.org/
+strftime.js
+  - http://hacks.bluesmoon.info/strftime
+  - BSD licence

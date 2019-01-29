@@ -1,5 +1,5 @@
 ﻿[% PROCESS _header.tt overlib=1
-                      css=["plugins/conf/conf.css","vendor/linedtextarea/jquery-linedtextarea.css", "vendor/jstree-3.0.9/themes/default/style.min.css"]
+                      css=["plugins/conf/conf.css","vendor/linedtextarea-e619e09/jquery-linedtextarea.css", "vendor/jstree-3.0.9/themes/default/style.min.css"]
                       js=["plugins/conf/conf.js", "vendor/jstree-3.0.9/jstree.min.js"]
 %]
 [% PROCESS _message.tt %]
