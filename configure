@@ -89,7 +89,7 @@ $options->{'htmlurl'}    = '/'.$options->{'htmlurl'};
 $options->{'compress'}   = $options->{'nocompress'} ? 'disabled' : 'enabled';
 $options->{'thruk-libs'} = '' if $options->{'nolibs'};
 
-open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
+open(my $fh, '>', 'script/Makefile.options') or die("cannot write to: script/Makefile.options:".$!);
 print $fh <<EOT;
 ### THRUK
 PREFIX           = $options->{'prefix'}

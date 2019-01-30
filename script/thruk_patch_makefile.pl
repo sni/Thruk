@@ -40,8 +40,8 @@ close($fh);
 open($fh, '>', 'Makefile') or die("cannot open Makefile for writing");
 print $fh $new_makefile;
 close($fh);
-`cat script/append.make.options >> Makefile` if -e 'script/append.make.options';
-`cat script/append.make >> Makefile`;
+`cat script/Makefile.options >> Makefile` if -e 'script/Makefile.options';
+`cat script/Makefile.thruk   >> Makefile`;
 print "patched Makefile\n";
 
 exit;

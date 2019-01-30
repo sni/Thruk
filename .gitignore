@@ -52,7 +52,7 @@ bp/*.tbp.edit
 bp/*.tbp-*
 bp/*.pm
 root/tests/
-script/append.make.options
+script/Makefile.options
 .rps_results
 rpsresults.html
 t/docker/Dockerfile

@@ -74,7 +74,7 @@ test_hook.sh
 bp/\d+\.tbp
 ^panorama/\d+\.tab
 root/tests/
-script/append.make.options
+script/Makefile.options
 ^bp/.*\.pm
 t/testurls.txt
 .rps_results
