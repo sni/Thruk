@@ -17,7 +17,6 @@ dailydist: cleandist
 	$(MAKE) dist
 	$(MAKE) resetdaily
 	mv thruk-*.tar.gz thruk-$(DAILYTARBALL).tar.gz
-	rm -f root/thruk/cache/*-$(DAILYVERSIONFILES).*
 	ls -la *.gz
 
 releasedist: cleandist dist
@@ -38,6 +37,7 @@ cleandist:
 resetdaily:
 	git reset --hard HEAD
 	git checkout .
+	rm -f root/thruk/cache/*
 	yes n | perl Makefile.PL || yes n | perl Makefile.PL
 
 versionprecheck:
