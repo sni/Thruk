@@ -410,8 +410,7 @@
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>[%#
             #%]<input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, undefined, {striped: false})"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
-            <a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="#" onclick="show_cal('[% paneprefix %][% prefix %]_[% loop.index %]_value')">
-            <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+            <img id="[% paneprefix %][% prefix %]_[% loop.index %]_cal" src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" [% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] class="cal_icon cal_popup for_[% paneprefix %][% prefix %]_[% loop.index %]_value">
             [% IF enable_shinken_features %]
             <select name="[% paneprefix %][% prefix %]_value_sel" id="[% paneprefix %][% prefix %]_[% loop.index %]_value_sel" style="[% IF s.type == 'priority' %]visibility: visible;[% ELSE %]display: none; visibility: hidden;[% END %]">
               [% FOREACH prio IN priorities.keys.sort.reverse %]

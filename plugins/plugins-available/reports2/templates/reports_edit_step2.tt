@@ -42,11 +42,11 @@
         <table>
           <tr>
             <td>Start</td>
-            <td><input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" size="20" class="date_input"> <a href="javascript:show_cal('t1')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+            <td><input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" size="20" class="date_input cal_popup_range"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t1"></td>
           </tr>
           <tr>
             <td>End</td>
-            <td><input type="text" value="[% IF format_date(t2, '%S') == "00" %][% format_date(t2, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t2, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t2" name="t2" size="20" class="date_input"> <a href="javascript:show_cal('t2')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+            <td><input type="text" value="[% IF format_date(t2, '%S') == "00" %][% format_date(t2, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t2, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t2" name="t2" size="20" class="date_input cal_popup_range"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t2"></td>
           </tr>
         </table>
         </div>

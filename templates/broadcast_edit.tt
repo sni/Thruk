@@ -38,12 +38,11 @@
     <td class="dataEven" align="center"><b>Hide Before</b></td>
     <td class="dataOdd" align="left">
       <input type="text"
-             class="deletable"
+             class="cal_popup_clear"
              value="[% IF broadcast.hide_before %][% format_date(broadcast.hide_before_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
              id="hide_before"
              name="hide_before"
              onkeyup="if(this.value != '') { verify_time(this.id) }"
-             onclick="show_cal('hide_before', '[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]'); return false;"
       >
       </td>
   </tr>
@@ -51,12 +50,11 @@
     <td class="dataEven" align="center"><b>Expire After</b></td>
     <td class="dataOdd" align="left">
       <input type="text"
-             class="deletable"
+             class="cal_popup_clear"
              value="[% IF broadcast.expires %][% format_date(broadcast.expires_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
              id="expires"
              name="expires"
              onkeyup="if(this.value != '') { verify_time(this.id) }"
-             onclick="show_cal('expires', '[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]'); return false;"
       >
       </td>
   </tr>

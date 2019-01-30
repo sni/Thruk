@@ -1550,3 +1550,7 @@ SPAN.btn_sitesplus {
   color: #FFFFFF;
   font-size: 9px;
 }
+
+.daterangepicker .todayHighlight {
+  border: 2px solid rgb(255, 122, 122) !important;
+}

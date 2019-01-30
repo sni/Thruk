@@ -35,7 +35,7 @@
 <tr><td class='optBoxItem'>Persistent Comment:</td><td><b><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_comments %] checked[% END %][% IF force_persistent_ack %] disabled[% END %]></b></td></tr>
 [% IF has_expire_acks %]
 <tr><td class='optBoxItem'>Use Expire Time:</td><td><b><input type='checkbox' name='use_expire' onchange="if(this.checked == true) {showElement('expire_row')} else { hideElement('expire_row')};"[% IF c.config.cmd_defaults.use_expire %] checked[% END %]></b></td></tr>
-<tr id="expire_row"[% IF !c.config.cmd_defaults.use_expire %] style="display:none"[% END %]><td class='optBoxItem'>Expire Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]'> <a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
+<tr id="expire_row"[% IF !c.config.cmd_defaults.use_expire %] style="display:none"[% END %]><td class='optBoxItem'>Expire Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]' class="cal_popup"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_popup for_end_time"></b></td></tr>
 [% END %]
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.config.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
