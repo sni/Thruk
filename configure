@@ -21,7 +21,6 @@ my $options = {
   'httpd-conf'      => '',
   'logrotatedir'    => '',
   'bashcompldir'    => '',
-  'nocompress'      => 0,
   'quiet'           => 0,
 };
 Getopt::Long::Configure('no_ignore_case');
@@ -60,6 +59,10 @@ Getopt::Long::GetOptions (
 if($options->{'help'}) {
     require Pod::Usage;
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+}
+
+if($options->{'nocompress'}) {
+    warn("*** deprecated: --without-compress is deprecated and no longer required.");
 }
 
 $options->{'initdir'}         = $options->{'initdir'} || $options->{'prefix'}.'/etc/init.d';
@@ -164,7 +167,6 @@ print <<EOT;
   thruk-group        = $options->{'thruk-group'}
   thruk-libs         = $options->{'thruk-libs'}
   checkresultdir     = $options->{'checkresultdir'}
-  css/js compression = $options->{'compress'}
 
 now run
   make
@@ -224,7 +226,6 @@ __END__
     --with-thruk-user            sets user name to run thruk [thruk]
     --with-thruk-group           sets group name to run thruk [thruk]
     --with-checkresultdir        sets path to Naemon/Nagios/Icinga/Shinken checkresult directory [PREFIX/var/cache/naemon/checkresults]
-    --without-compress           skip compression of css and javascript files which requires yui-compressor
     --without-thruk-libs         skip building the required perl modules. Make sure you add dependencies accordingly
 
 =cut
