@@ -5,11 +5,14 @@ use inc::Module::Install;
 name 'thruk';
 all_from 'lib/Thruk.pm';
 
-license 'gpl3';
+license 'perl';
 resources(
     'homepage',   => 'http://www.thruk.org',
     'bugtracker'  => 'http://github.com/sni/Thruk/issues',
     'repository', => 'http://github.com/sni/Thruk',
+    'license'     => 'http://dev.perl.org/licenses/',
+    'IRC'         => 'irc://irc.freenode.org/#thruk',
+    'MailingList' => 'https://groups.google.com/d/forum/thruk',
 );
 
 requires 'parent'                                 => 0;     # required by Thruk

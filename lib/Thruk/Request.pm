@@ -99,14 +99,4 @@ Returns urldecoded utf8 uri as string.
 
 L<Plack::Request>, L<Plack::Request::WithEncoding>
 
-=head1 LICENSE
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=head1 AUTHOR
-
-Sven Nierlein, E<lt>sven@nierlein.orgE<gt>
-moznion E<lt>moznion@gmail.comE<gt>
-
 =cut

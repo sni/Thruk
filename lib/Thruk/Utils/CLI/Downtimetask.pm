@@ -261,15 +261,6 @@ Runs the downtime task for file '1'
 
   %> thruk command downtimetask 1
 
-=head1 AUTHOR
-
-Sven Nierlein, 2009-present, <sven@nierlein.org>
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
 =cut
 
 ##############################################

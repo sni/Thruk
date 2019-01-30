@@ -51,7 +51,19 @@ Main Features / Advantages
 License
 -------
 
-Licensed under the [GPLv2](LICENSE) License.
+Thruk is Copyright (c) 2009-2019 by Sven Nierlein and others.
+This is free software; you can redistribute it and/or modify it under the
+same terms as the Perl5 programming language system
+itself: under the terms of either:
+
+a) the "Artistic License 1.0" as published by The Perl Foundation
+   http://dev.perl.org/licenses/artistic.html
+
+b) the GNU General Public License as published by the Free Software Foundation;
+   either version 1 http://www.gnu.org/licenses/gpl-1.0.html
+   or (at your option) any later version
+
+`SPDX-License-Identifier: Artistic-1.0-Perl OR GPL-1.0-or-later`
 
 Vendor specific libraries below ./root/thruk/vendor/ may have different
 licenes. See THANKS file for details.

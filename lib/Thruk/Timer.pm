@@ -88,14 +88,3 @@ C<Thruk::Timer> provides a simple timing function.
 sets breakpoint with message
 
 =cut
-
-=head1 AUTHOR
-
-Sven Nierlein, 2009-present, <sven@nierlein.org>
-
-=head1 LICENSE
-
-This library is free software. You can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut

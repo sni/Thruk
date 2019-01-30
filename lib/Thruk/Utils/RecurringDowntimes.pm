@@ -505,15 +505,4 @@ sub _get_downtime_cmd {
 
 ##########################################################
 
-=head1 AUTHOR
-
-Sven Nierlein, 2009-present, <sven@nierlein.org>
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
-
 1;

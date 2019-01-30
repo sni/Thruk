@@ -167,15 +167,6 @@ Other reports are available via the url export of normal thruk pages
 
   See 'thruk url help' for more examples.
 
-=head1 AUTHOR
-
-Sven Nierlein, 2009-present, <sven@nierlein.org>
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
 =cut
 
 ##############################################

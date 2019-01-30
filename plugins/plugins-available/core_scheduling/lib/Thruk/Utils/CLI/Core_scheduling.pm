@@ -99,17 +99,6 @@ Reschedule all hosts and services of the hostgroup linux
 
   %> thruk core_scheduling fix hg:linux
 
-=head1 AUTHOR
-
-Sven Nierlein, 2009-present, <sven@nierlein.org>
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
 =cut
-
-##############################################
 
 1;
