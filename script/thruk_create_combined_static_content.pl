@@ -96,6 +96,7 @@ if(!$js_required && !$css_required && !$panorama_required && (!$ARGV[0] or $ARGV
     print STDERR "no update necessary\n";
     exit;
 }
+mkdir('root/thruk/cache');
 
 #################################################
 my $cmds = [
