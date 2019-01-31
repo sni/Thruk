@@ -184,7 +184,7 @@ TestUtils::test_page(
 {
     local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
-        'url'          => '/thruk/r/hosts?columns=name&q=***state = 0***',
+        'url'          => '/thruk/r/hosts?columns=name&q=***state >= 0***',
         'content_type' => 'application/json;charset=UTF-8',
         'method'       => 'GET',
         'like'         => ['name'],
@@ -196,7 +196,7 @@ TestUtils::test_page(
 {
     local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
-        'url'          => '/thruk/r/hosts?columns=name&state=0',
+        'url'          => '/thruk/r/hosts?columns=name&state[gte]=0',
         'content_type' => 'application/json;charset=UTF-8',
         'method'       => 'GET',
         'like'         => ['name'],
