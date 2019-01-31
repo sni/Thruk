@@ -1915,6 +1915,7 @@ t/scenarios/backend_shinken/Makefile
 t/scenarios/backend_shinken/omd/Dockerfile
 t/scenarios/backend_shinken/omd/example.cfg
 t/scenarios/backend_shinken/omd/playbook.yml
+t/scenarios/backend_shinken/t/100-backend_shinken.t
 t/scenarios/backend_shinken/t/300-controller_tac.t
 t/scenarios/backend_shinken/thruk.conf
 t/scenarios/backend_shinken/thruk_local.conf
