@@ -1,6 +1,7 @@
 package Thruk::Request;
 use strict;
 use warnings;
+use Plack 1.0046;
 use parent qw/Plack::Request/;
 use Encode qw/find_encoding/;
 use Hash::MultiValue;

@@ -17,7 +17,7 @@ resources(
 
 requires 'parent'                                 => 0;     # required by Thruk
 requires 'Module::Load'                           => 0;     # required by Thruk
-requires 'Plack'                                  => 1;     # required by Thruk
+requires 'Plack'                                  => 1.0046;# required by Thruk
 requires 'Plack::Util'                            => 0;     # required by Thruk
 requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'Cpanel::JSON::XS'                       => 0;     # required by Thruk::View::JSON
