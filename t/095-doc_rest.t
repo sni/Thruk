@@ -6,7 +6,7 @@ BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'local tests only'  if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 8;
+    plan tests => 12;
 }
 
 $ENV{'TEST_MODE'} = 1;
@@ -30,6 +30,8 @@ for my $cmd (@{$cmds}) {
     } else {
         ok(1, "no errors");
     }
+    close($ph);
+    is($?, 0, "cmd exited with 0") or die("cmd failed: ".$cmd);
 }
 
 unlink('docs/documentation/rest.asciidoc.tst');

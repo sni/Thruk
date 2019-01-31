@@ -16,7 +16,8 @@ $c->stash->{'is_admin'} = 1;
 $c->config->{'cluster_enabled'} = 1; # fake cluster
 $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
-$c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
+my $res = $c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
+die("request failed: ".Dumper($res)) unless(ref $res eq 'HASH' && $res->{'message'} && $res->{'message'} =~ m/objects\ successfully/mx);
 # get sample host and service
 my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' => 'host_name,description' })->[0] || die("need at least one service");
 my $host_name = $test_svc->{'host_name'};
