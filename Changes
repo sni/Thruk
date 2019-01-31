@@ -10,6 +10,7 @@ next:
             - delay calculation during core reloads
             - add support for http federation
             - add drill down output as default filter
+            - fix zooming in chrome
           - Panorama:
             - add direct link with tabs
             - add theme selector to grafana images

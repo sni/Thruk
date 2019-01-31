@@ -1122,14 +1122,25 @@ function bp_zoom(zoom) {
     zoom = Math.floor((zoom * 20) + 0.05) / 20;
     if(zoom < 0.1) { zoom = 0.1 }
     last_zoom = zoom;
-    jQuery('#zoom'+bp_id).css('zoom', zoom)
-                           .css('-moz-transform', 'scale('+zoom+')')
-                           .css('-moz-transform-origin', '0 0')
-                           .css('-o-transform', 'scale('+zoom+')')
-                           .css('-o-transform-origin', '0 0')
-                           .css('-webkit-transform', 'scale('+zoom+')')
-                           .css('-webkit-transform-origin', '0 0');
 
+    // determine the zoom attribute, otherwise chrome uses two and doubles the zoom factor
+    var jqBody = jQuery("body");
+    if(Boolean(jqBody.css("-webkit-transform"))) {
+        jQuery('#zoom'+bp_id)
+                .css('-webkit-transform', 'scale('+zoom+')')
+                .css('-webkit-transform-origin', '0 0');
+    } else if(Boolean(jqBody.css("-moz-transform"))) {
+        jQuery('#zoom'+bp_id)
+                .css('-moz-transform', 'scale('+zoom+')')
+                .css('-moz-transform-origin', '0 0');
+    } else if(Boolean(jqBody.css("-o-transform"))) {
+        jQuery('#zoom'+bp_id)
+                .css('-o-transform', 'scale('+zoom+')')
+                .css('-o-transform-origin', '0 0');
+    } else if(Boolean(jqBody.css("zoom"))) {
+        jQuery('#zoom'+bp_id)
+                .css('zoom', zoom);
+    }
 
     // center align inner container
     var zcontainer = document.getElementById('zoom'+bp_id);
