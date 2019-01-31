@@ -1,26 +1,77 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: generic
 services:
   - docker
+  - mysql
+addons:
+  apt:
+    packages:
+    - debhelper
+    - lsb-release
+    - chrpath
+    - rsync
+    - perl
+    - perl-doc
+    - libperl-dev
+    - cpanminus
+    - phantomjs
+    - tofrodos
+    - apache2
+    - apache2-utils
+    - libgd2-xpm-dev
+    - libmysqlclient-dev
+    - libpng12-dev
+    - libjpeg8-dev
+    - zlib1g-dev
+    - libmodule-install-perl
+    - libcpanel-json-xs-perl
+    - libfcgi-perl
+    - libnet-http-perl
+    - libsocket-perl
+    - libio-socket-ip-perl
+    - libgd-gd2-perl
+    - libtemplate-perl
+    - libdate-calc-perl
+    - libfile-slurp-perl
+    - libdate-manip-perl
+    - libdatetime-timezone-perl
+    - libdatetime-perl
+    - libexcel-template-perl
+    - libio-string-perl
+    - liblog-log4perl-perl
+    - libmime-lite-perl
+    - libclass-inspector-perl
+    - libdbi-perl
+    - libdbd-mysql-perl
+    - libtest-simple-perl
+    - libhtml-lint-perl
+    - libfile-bom-perl
+    - libtest-cmd-perl
+    - libtest-pod-perl
+    - libperl-critic-perl
+    - libtest-perl-critic-perl
+    - libtest-pod-coverage-perl
+    - libdevel-cycle-perl
+    - libpadwalker-perl
+    - libmodule-build-tiny-perl
+    - libsub-uplevel-perl
+    - libextutils-helpers-perl
+    - libextutils-config-perl
+    - libextutils-installpaths-perl
+    - libtest-requires-perl
+    - libhttp-message-perl
 before_install:
-  - sudo rm -f /etc/profile.d/perlbrew.sh /opt/jdk_switcher/jdk_switcher.sh
-  - sudo apt-get update
   - sudo sh -c "echo 'deb http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main' >> /etc/apt/sources.list"
   - wget -q "http://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | sudo apt-key add -
   - sudo apt-get update
-  - sudo apt-get -y install make build-essential rsync perl-doc tofrodos libcurl4-openssl-dev apache2 apache2-utils libcairo2-dev libperl-dev libgd2-xpm-dev cpanminus yui-compressor wget
-  - sudo apt-get -y install libfile-bom-perl libhtml-lint-perl libtest-simple-perl libtest-cmd-perl libtest-pod-perl libmodule-install-perl libgd-gd2-perl libdevel-cycle-perl
-  - sudo apt-get -y install libtest-pod-coverage-perl libperl-critic-perl libtest-perl-critic-perl libtemplate-perl libdate-calc-perl liblog-log4perl-perl libconfig-general-perl
-  - sudo apt-get -y install libmime-lite-perl phantomjs
-  - sudo apt-get -y install poppler-utils
-  - sudo apt-get -y install libmysqlclient-dev
   - sudo apt-get -y install naemon-core naemon-livestatus
   - sudo /etc/init.d/naemon restart
+  - sudo chmod 660 /var/cache/naemon/live
+  - sudo gpasswd -a $(id -un) naemon
   - cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
   # newer version are broken when using symlinks
   - cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz
-  - cpanm -n Perl::Critic::Policy::Dynamic::NoIndirect Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData List::Compare Devel::Gladiator PadWalker Perl::Critic::Policy::Modules::ProhibitPOSIXimport
   - sed -i '/Test::JavaScript/d' ./Makefile.PL
   - cpanm -q -f --installdeps --notest --no-man-pages .
   - git config --global user.email "travis@localhost"
@@ -36,8 +87,6 @@ install:
   - ./configure     || exit 1
   - make            || exit 1
   - cp t/travis/thruk_local.conf .
-  - sudo chmod 660 /var/cache/naemon/live
-  - sudo gpasswd -a $(id -un) naemon
   - touch .author
 
 script:
