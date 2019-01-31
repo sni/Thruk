@@ -1808,7 +1808,6 @@ t/610-scenario-report_mails_e2e.t
 t/610-scenario-rest_api.t
 t/610-scenario-sakuli_e2e.t
 t/700-naemon.t
-t/800-firefox-js.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js

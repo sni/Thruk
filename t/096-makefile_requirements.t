@@ -101,6 +101,7 @@ for my $mod (sort keys %{$reqs}) {
         next if $pmod eq 'LWP::Protocol::https';
         next if $pmod eq 'LWP::Protocol::connect';
         next if $pmod eq 'Test::Simple';
+        next if $pmod eq 'PadWalker'; # used by Devel::Cycle
         fail("$pmod not used at all");
       }
     }

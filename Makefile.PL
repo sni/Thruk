@@ -88,10 +88,10 @@ feature     ('author_test',
   'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs'          => 0,
   'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
   'Perl::Critic::Policy::Modules::ProhibitPOSIXimport'                      => 0,
-  'WWW::Mechanize::Firefox'                                                 => 0,
   'Test::JavaScript'                                                        => 0,
   'Test::Vars'                                                              => 0,
   'Devel::Cycle'                                                            => 0,
+  'PadWalker'                                                               => 0, # required from Devel::Cycle for code closures
   'Devel::Gladiator'                                                        => 0,
 );
 };
