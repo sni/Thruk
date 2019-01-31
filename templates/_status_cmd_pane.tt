@@ -91,11 +91,11 @@
     </tr>
     <tr id="row_start">
       <td class="statusOdd" width=90>Start:</td>
-      <td class="statusOdd"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom" class="cal_popup for_start_time"> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id, 'end_time')" class="cal_popup_range"></td>
+      <td class="statusOdd"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom" class="cal_popup for_start_time"> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id, 'end_time')" class="cal_popup"></td>
     </tr>
     <tr id="row_end">
       <td class="statusOdd" width=90>End:</td>
-      <td class="statusOdd"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom" class="cal_popup for_end_time"> <input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:00') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id, 'start_time')" class="cal_popup_range"></td>
+      <td class="statusOdd"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom" class="cal_popup for_end_time"> <input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:00') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id, 'start_time')" class="cal_popup"></td>
     </tr>
     <tr id="row_downtime_options">
       <td class="statusOdd" valign="top" width=90>Options:</td>
