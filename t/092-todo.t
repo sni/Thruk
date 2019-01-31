@@ -19,6 +19,7 @@ for my $cmd (@{$cmds}) {
     # skip those
     if(   $line =~ m|/vendor/|mx
        or $line =~ m|/cache/|mx
+       or $line =~ m|/themes/Exfoliation/|mx
        or $line =~ m|/panorama_js_box_reorder.js|mx
        or $line =~ m|/092\-todo\.t|mx
     ) {
