@@ -30,7 +30,7 @@ Group:         Applications/Monitoring
 BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
-BuildRequires: libthruk >= 2.20
+BuildRequires: libthruk >= 2.26
 Requires:      thruk-base = %{version}-%{release}
 Requires:      thruk-plugin-reporting = %{version}-%{release}
 %if 0%{?suse_version} < 1315
@@ -56,7 +56,7 @@ large installations.
 %package base
 Summary:     Thruk Gui Base Files
 Group:       Applications/System
-Requires:    libthruk >= 2.20
+Requires:    libthruk >= 2.26
 Requires(preun): libthruk
 Requires(post): libthruk
 Requires:    perl logrotate gd wget
