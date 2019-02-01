@@ -494,7 +494,7 @@ sub _add_remote_bps {
             last_check          => $svc->{'last_check'},
             last_state_change   => $svc->{'last_state_change'},
             status_text         => $svc->{'plugin_output'} // '',
-            fullid              => $fullid,
+            fullid              => $svc->{'peer_key'}.':'.$vars->{'THRUK_BP_ID'},
             draft               => 0,
             site                => $site_names->{$svc->{'peer_key'}} // '',
         };
