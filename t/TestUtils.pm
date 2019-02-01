@@ -222,7 +222,8 @@ sub get_test_hostgroup_cli {
     skip_doctype    => skip doctype check, even if its an html page
     skip_js_check   => skip js comma check
     sleep           => sleep this amount of seconds after the request
-    waitfor         => wait till regex occurs (max 300sec)
+    waitfor         => wait till regex occurs (max 300sec or waitmax)
+    waitmax         => wait this amount of seconds
     agent           => user agent for requests
     callback        => content callback
   }
@@ -230,7 +231,8 @@ sub get_test_hostgroup_cli {
 =cut
 sub test_page {
     my(%opts) = @_;
-    my $return = {};
+    my $return  = {};
+    my $waitmax = $opts{'waitmax'} // 300;
 
     my $start = time();
     my $opts = _set_test_page_defaults(\%opts);
@@ -275,7 +277,7 @@ sub test_page {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
-        while($now < $start + 300) {
+        while($now < $start + $waitmax) {
             # text that shouldn't appear
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
@@ -298,7 +300,7 @@ sub test_page {
         }
 
         if(!$found) {
-            fail("content did not occur within 300 seconds");
+            fail("content did not occur within $waitmax seconds") or diag($opts->{'url'});
         } else {
             # text that should appear
             if(defined $opts->{'like'}) {
