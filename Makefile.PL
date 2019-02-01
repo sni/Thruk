@@ -91,7 +91,6 @@ feature     ('author_test',
   'Test::JavaScript'                                                        => 0,
   'Test::Vars'                                                              => 0,
   'Devel::Cycle'                                                            => 0,
-  'PadWalker'                                                               => 0, # required from Devel::Cycle for code closures
   'Devel::Gladiator'                                                        => 0,
 );
 };

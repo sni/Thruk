@@ -1117,6 +1117,17 @@ sub _dump_params {
 
 L<Thruk::Controller::Root>, L<Plack>
 
+=head1 AUTHOR
+
+Sven Nierlein, 2009-present, <sven@nierlein.org>
+
+=head1 LICENSE
+
+Thruk is Copyright (c) 2009-2019 by Sven Nierlein and others.
+This is free software; you can redistribute it and/or modify it under the
+same terms as the Perl5 programming language system
+itself.
+
 =cut
 
 1;
