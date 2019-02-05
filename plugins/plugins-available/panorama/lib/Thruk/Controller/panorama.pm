@@ -2146,17 +2146,18 @@ sub _task_grafana_graphs {
 
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
-    my $search = $c->req->parameters->{'query'};
+    my $search = $c->req->parameters->{'query'} || $c->req->parameters->{'query2'};
     my $graphs = [];
     my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     for my $hst (@{$data}) {
         my $url = Thruk::Utils::get_histou_url($c, $hst, 1);
         if($url ne '') {
-            my $text = $hst->{'name'}.';';
-            next if($search and $text !~ m/$search/mxi);
+            my $text   = $hst->{'name'}.';';
+            my $exturl = 'extinfo.cgi?type=grafana&host='.$hst->{'name'};
+            next if($search && $text !~ m/$search/mxi && $exturl ne $search);
             push @{$graphs}, {
                 text       => $text,
-                url        => 'extinfo.cgi?type=grafana&host='.$hst->{'name'},
+                url        => $exturl,
                 source_url => $url,
             };
         }
@@ -2166,11 +2167,12 @@ sub _task_grafana_graphs {
     for my $svc (@{$data}) {
         my $url = Thruk::Utils::get_histou_url($c, $svc, 1);
         if($url ne '') {
-            my $text = $svc->{'host_name'}.';'.$svc->{'description'};
-            next if($search and $text !~ m/$search/mxi);
+            my $text   = $svc->{'host_name'}.';'.$svc->{'description'};
+            my $exturl = 'extinfo.cgi?type=grafana&host='.$svc->{'host_name'}.'&service='.$svc->{'description'};
+            next if($search && $text !~ m/$search/mxi && $exturl ne $search);
             push @{$graphs}, {
                 text       => $text,
-                url        => 'extinfo.cgi?type=grafana&host='.$svc->{'host_name'}.'&service='.$svc->{'description'},
+                url        => $exturl,
                 source_url => $url,
             };
         }

@@ -35,6 +35,7 @@ TP.grafanaStore = Ext.create('Ext.data.Store', {
         beforeload: function(store, operation, eOpts) {
             if(store.panel) {
                 store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
+                store.proxy.extraParams['query2']   = store.panel.xdata.graph;
             } else {
                 store.proxy.extraParams = {};
             }
