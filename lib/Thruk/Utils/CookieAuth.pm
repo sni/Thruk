@@ -63,6 +63,7 @@ sub external_authentication {
     my $ua       = get_user_agent($config);
     # unset proxy which eventually has been set from https backends
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
+    local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
@@ -126,31 +127,43 @@ sub external_authentication {
 
     verify_basic_auth($config, $basic_auth)
 
-verify authentication by sending request with basic auth header
+verify authentication by sending request with basic auth header.
+
+returns  1 if authentication was successfull
+returns -1 on timeout error
+returns  0 if unsuccessful
 
 =cut
 sub verify_basic_auth {
     my($config, $basic_auth, $login, $timeout) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
 
+    # unset proxy which eventually has been set from https backends
+    local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
+    local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
+
     my $ua = get_user_agent($config);
     $ua->timeout($timeout) if $timeout;
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
+    printf(STDERR "thruk_auth: basic auth request for %s to %s\n", $login, $authurl) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
     my $res = $ua->post($authurl);
     if($res->code == 302 && $authurl =~ m|^http:|mx) {
         (my $authurl_https = $authurl) =~ s|^http:|https:|gmx;
         if($res->{'_headers'}->{'location'} eq $authurl_https) {
+            printf(STDERR "thruk_auth: basic auth redirects to %s\n", $authurl_https) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
             $config->{'cookie_auth_restricted_url'} = $authurl_https;
             return(verify_basic_auth($config, $basic_auth, $login));
         }
     }
+    printf(STDERR "thruk_auth: basic auth code: %d\n", $res->code) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 2);
     if($res->code == 200 and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
         if($1 eq Thruk::Authentication::User::transform_username($config, $login)) {
             return 1;
         }
     }
+    printf(STDERR "thruk_auth: basic auth result: %s\n", $res->decoded_content) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 3);
     if($res->code == 500 and $res->decoded_content =~ m/\Qtimeout during auth check\E/mx) {
         return -1;
     }
