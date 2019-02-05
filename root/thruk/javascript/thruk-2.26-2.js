@@ -6170,7 +6170,7 @@ var ajax_search = {
         if(ajax_search.list) {
             /* only use the last list element for search */
             var regex  = new RegExp(ajax_search.list, 'g');
-            var range  = jQuery(input).getSelection();
+            var range  = getTextSelection();
             var before = pattern.substr(0, range.start);
             var after  = pattern.substr(range.start);
             var rever  = reverse(before);
@@ -6467,7 +6467,7 @@ var ajax_search = {
         if(ajax_search.list) {
             var pattern = input.value;
             var regex   = new RegExp(ajax_search.list, 'g');
-            var range   = jQuery(input).getSelection();
+            var range   = getTextSelection();
             var before  = pattern.substr(0, range.start);
             var after   = pattern.substr(range.start);
             var rever   = reverse(before);
