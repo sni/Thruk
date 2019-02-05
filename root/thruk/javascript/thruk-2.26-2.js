@@ -6761,12 +6761,12 @@ function set_png_img(start, end, id, source) {
 
     jQuery('#pnpwaitimg').css('display', 'block');
 
-    jQuery('#pnpimg').load(function() {
+    jQuery('#pnpimg').one("load", function() {
       jQuery('#pnpimg').css('display' , 'block');
       jQuery('#pnperr').css('display' , 'none');
       jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
     })
-    .error(function(err) {
+    .one("error", function(err) {
       jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'inherit'});
       jQuery('#pnpimg').css('display' , 'none');
       jQuery('#pnperr').css('display' , 'block');
@@ -6830,10 +6830,10 @@ function set_histou_img(start, end, id, source) {
 
     jQuery('#pnpwaitimg').css('display', 'block');
 
-    jQuery('#histou_iframe').load(function() {
+    jQuery('#histou_iframe').one("load", function() {
       jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
     })
-    .error(function(err) {
+    .one("error", function(err) {
       jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'inherit'});
     });
 
