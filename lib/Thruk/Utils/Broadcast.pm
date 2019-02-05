@@ -167,7 +167,7 @@ sub is_authorized_for_broadcast {
         # allowed for specific contacts
         if(scalar @{$contacts}) {
             my $contacts = Thruk::Utils::array2hash($contacts);
-            if($contacts->{$c->stash->{'remote_user'}}) {
+            if($c->stash->{'remote_user'} && $contacts->{$c->stash->{'remote_user'}}) {
                 $allowed = 1;
             }
         }
