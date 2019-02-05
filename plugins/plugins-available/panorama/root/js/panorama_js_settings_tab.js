@@ -981,6 +981,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         if(!d_form.isValid()) { return false; }
                         var values = d_form.getFieldValues();
                         var locked = values.locked;
+                        if(locked == undefined) { locked = true; } // might be if a user simply changes it user settings
                         if(values['map_choose'] == 'geomap') {
                             tab.xdata.map = {
                                 lon:  values.maplon,
@@ -1011,7 +1012,11 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         delete values['refresh_txt'];
                         delete values['map_choose'];
 
-                        values['state_order'] = values['state_order'].split(',');
+                        if(values['state_order']) {
+                            values['state_order'] = values['state_order'].split(',');
+                        } else {
+                            values['state_order'] = default_state_order;
+                        }
 
                         Ext.apply(tab.xdata, values);
 
