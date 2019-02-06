@@ -136,9 +136,9 @@ Ext.define('TP.PanletGrafana', {
             var size = imgPanel.getSize();
             if(size.width <= 1) { return; }
             var url      = this.xdata.graph + '&source='+this.xdata.source;
-            var now      = new Date();
-            url = url + '&from='  + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
-            url = url + '&to='    + Math.round(now.getTime()/1000);
+            var serverTime = Math.round(TP.serverTime());
+            url = url + '&from='  + (serverTime - TP.timeframe2seconds(this.xdata.time));
+            url = url + '&to='    + serverTime;
             if(this.heightFixed == undefined) {
                 this.heightFixed = size.height;
             }

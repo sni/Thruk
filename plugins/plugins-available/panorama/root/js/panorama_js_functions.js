@@ -960,6 +960,12 @@ var TP = {
         var date   = TP.date_format(time, 'H:i');
         label.update(date);
     },
+    /* returns current server time in unix seconds */
+    serverTime: function() {
+        var client = new Date();
+        var time   = Math.floor((client.getTime() - delta_time) / 1000);
+        return(time);
+    },
     /* stop tab rotation interval */
     stopRotatingTabs: function() {
         var tabpan = Ext.getCmp('tabpan');

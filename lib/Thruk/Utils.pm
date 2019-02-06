@@ -1583,8 +1583,16 @@ sub get_perf_image {
     $options->{'service'}     = ''     unless defined $options->{'service'};
     $options->{'show_title'}  = 1      unless defined $options->{'show_title'};
     $options->{'show_legend'} = 1      unless defined $options->{'show_legend'};
-    $options->{'end'}         = time() unless defined $options->{'end'};
-    $options->{'start'}       = $options->{'end'} - 86400 unless defined $options->{'start'};
+    if(defined $options->{'end'}) {
+        $options->{'end'} = Thruk::Utils::_parse_date($c, $options->{'end'});
+    } else {
+        $options->{'end'} = time();
+    }
+    if(defined $options->{'start'}) {
+        $options->{'start'} = Thruk::Utils::_parse_date($c, $options->{'start'});
+    } else {
+        $options->{'start'} = $options->{'end'} - 86400;
+    }
 
     if($options->{'service'} && $options->{'service'} eq '_HOST_') { $options->{'service'} = ""; }
 
