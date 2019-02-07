@@ -5610,7 +5610,7 @@ function show_cal(ev) {
         "autoUpdateInput": false,
         "alwaysShowCalendars": true,
         "locale": {
-            "format": "DD-MM-YYYY",
+            "format": "YYYY-MM-DD hh:mm:ss",
             "firstDay": 1
         }
     };
