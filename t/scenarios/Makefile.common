@@ -27,9 +27,8 @@ server:
 
 prepare:
 	docker-compose build
-	# try up twice, it fails occacionally with bind errors (bind: address already in use)
-	docker-compose up --remove-orphans -d || ( echo "*** startup failed retrying in 5 seconds... ***" && sleep 5 && docker-compose up --remove-orphans -d )
-	docker-compose ps
+	docker-compose up --remove-orphans -d
+	docker ps
 	$(MAKE) extra_prepare
 
 clean:
