@@ -65,6 +65,7 @@ $test_broadcast =<<EOT;
 EOT
 Thruk::Utils::IO::write($test_file, $test_broadcast);
 
+$c->{'app'}->init_logging();
 $c->{'app'}->{'_log'}->level('FATAL'); # turn off logging
 TestUtils::test_page( 'url' => '/thruk/cgi-bin/tac.cgi', like => ["Tactical Monitoring Overview"] );
 
