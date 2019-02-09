@@ -144,11 +144,18 @@ sub index {
             my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
             if($rc != 0) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command failed\n".$msg });
+            } else {
+                # check if new objects really exits
+                my $services = $c->{'db'}->get_services( filter => [ { 'host_name' => $bp->{'name'} } ], columns => [qw/description/] );
+                if(!$services || scalar @{$services} == 0) {
+                    Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command succeeded, but services are missing" });
+                } else {
+                    Thruk::BP::Utils::update_cron_file($c); # check cronjob
+                    Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' }) unless $rc != 0;
+                    my $bps = Thruk::BP::Utils::load_bp_data($c, $id); # load new process, otherwise we would update in edit mode
+                    $bps->[0]->update_status($c);
+                }
             }
-            Thruk::BP::Utils::update_cron_file($c); # check cronjob
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' }) unless $rc != 0;
-            my $bps = Thruk::BP::Utils::load_bp_data($c, $id); # load new process, otherwise we would update in edit mode
-            $bps->[0]->update_status($c);
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
         }
         elsif($action eq 'revert') {
