@@ -17,6 +17,8 @@ This module allows you to authenticate the users.
 use strict;
 use warnings;
 use File::Slurp qw/read_file/;
+use Carp qw/confess/;
+use Thruk::Utils;
 
 our $possible_roles = [
     'authorized_for_admin',
@@ -48,83 +50,12 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    my $env    = $c->env;
-    my $apikey = $c->req->header('X-Thruk-Auth-Key');
+    confess("no username") unless defined $username;
 
-    # authenticated by ssl
-    if(defined $username) {
-    }
-
-    # authenticate by secret.key from http header
-    elsif($apikey) {
-        my $apipath = $c->config->{'var_path'}."/api_keys";
-        my $secret_file = $c->config->{'var_path'}.'/secret.key';
-        $c->config->{'secret_key'}  = read_file($secret_file) if -s $secret_file;
-        chomp($c->config->{'secret_key'});
-        if($apikey !~ m/^[a-zA-Z0-9]+$/mx) {
-            $c->error("wrong authentication key");
-            return;
-        }
-        elsif($c->config->{'api_keys_enabled'} && -e $apipath.'/'.$apikey) {
-            my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$apikey);
-            my $addr = $c->req->address;
-            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
-            Thruk::Utils::IO::json_lock_patch($apipath.'/'.$apikey, { last_used => time(), last_from => $addr }, 1);
-            $username = $data->{'user'};
-
-            my $userdata = Thruk::Utils::get_user_data($c, $username);
-            if($userdata->{'login'}->{'locked'}) {
-                $c->error("account is locked, please contact an administrator");
-                return;
-            }
-        }
-        elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
-            $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
-            if(!$username) {
-                $c->error("authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header");
-                return;
-            }
-        } else {
-            $c->error("wrong authentication key");
-            return;
-        }
-    }
-
-    elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
-        and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
-            $username = $env->{'SSL_CLIENT_S_DN_CN'};
-    }
-    # from cli
-    elsif(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
-        $username = $c->stash->{'remote_user'};
-    }
-    # basic authentication
-    elsif(defined $env->{'REMOTE_USER'} and $env->{'REMOTE_USER'} ne '' ) {
-        $username = $env->{'REMOTE_USER'};
-    }
-    elsif(defined $ENV{'REMOTE_USER'}and $ENV{'REMOTE_USER'} ne '' ) {
-        $username = $ENV{'REMOTE_USER'};
-    }
-
-    # default_user_name?
-    elsif(defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
-        $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
-    }
-
-    elsif(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-        $username = $c->config->{'default_cli_user_name'};
-    }
-
-    if(!defined $username || $username eq '') {
-        return;
-    }
-
-    # transform username upper/lower case?
-    $username = transform_username($c->config, $username, $c);
-
-    $self->{'username'}      = $username;
-    $self->{'roles'}         = [];
-    $self->{'alias'}         = undef;
+    $self->{'username'} = $username;
+    $self->{'roles'}    = [];
+    $self->{'groups'}   = [];
+    $self->{'alias'}    = undef;
 
     # add roles from cgi_conf
     for my $role (@{$possible_roles}) {
@@ -152,11 +83,151 @@ sub new {
     $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
 
     # Is this user an admin?
-    if($username eq '(cron)' || $username eq '(cli)' || $self->check_user_roles('admin')) {
+    if($username =~ m%^\(.*\)$%mx || $self->check_user_roles('admin')) {
         $self->grant('admin');
     }
 
+    # ex.: user settings from var/users/<name>
+    $self->{settings} = Thruk::Utils::get_user_data($c, $username);
+
     return $self;
+}
+
+########################################
+
+=head2 set_dynamic_attributes
+
+  set_dynamic_attributes($c)
+
+sets attributes based on livestatus data
+
+=cut
+sub set_dynamic_attributes {
+    my($self, $c, $skip_db_access) = @_;
+    $c->stats->profile(begin => "User::set_dynamic_attributes");
+
+    my $username = $self->{'username'};
+    confess("no username") unless defined $username;
+
+    # system users do not have any dynamic attributes
+    if($self->{'username'} =~ m%^\(.*\)$%mx) {
+        return $self;
+    }
+
+    my $data;
+    if($skip_db_access) {
+        $c->log->debug("using cached user data") if Thruk->verbose;
+        $data = $c->cache->get->{'users'}->{$username} || {};
+    } else {
+        $c->log->debug("fetching user data from livestatus") if Thruk->verbose;
+        $data = $self->get_dynamic_roles($c);
+    }
+
+    $self->{'alias'}               = $data->{'alias'} // $self->{'alias'};
+    $self->{'email'}               = $data->{'email'} // $self->{'email'};
+    $self->{'roles_from_groups'}   = $data->{'roles_by_group'};
+    $self->{'groups'}              = $data->{'contactgroups'} || [];
+    $self->{'can_submit_commands'} = $data->{'can_submit_commands'};
+    $self->{'timestamp'}           = $data->{'timestamp'};
+
+    for my $role (@{$data->{'roles'}}) {
+        push @{$self->{'roles'}}, $role;
+    }
+
+    if($self->check_user_roles('admin')) {
+        $self->grant('admin');
+    }
+
+    $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
+
+    if(!$skip_db_access) {
+        $c->cache->set('users', $username, $data);
+    }
+
+    $c->stats->profile(end => "User::set_dynamic_attributes");
+    return $self;
+}
+
+########################################
+
+=head2 get_dynamic_roles
+
+  get_dynamic_roles($c)
+
+gets the authorized_for_read_only role and group based roles
+
+=cut
+sub get_dynamic_roles {
+    my($self, $c) = @_;
+
+    # is the contact allowed to send commands?
+    my($can_submit_commands,$alias,$data,$email);
+    confess("no db") unless $c->{'db'};
+    $data = $c->{'db'}->get_can_submit_commands($self->{'username'});
+    if(defined $data) {
+        for my $dat (@{$data}) {
+            $alias = $dat->{'alias'} if defined $dat->{'alias'};
+            $email = $dat->{'email'} if defined $dat->{'email'};
+            if(defined $dat->{'can_submit_commands'} && (!defined $can_submit_commands || $dat->{'can_submit_commands'} == 0)) {
+                $can_submit_commands = $dat->{'can_submit_commands'};
+            }
+        }
+    }
+
+    if(!defined $can_submit_commands) {
+        $can_submit_commands = $c->config->{'can_submit_commands'} || 0;
+    }
+
+    # set initial roles from user
+    my $roles = [];
+    for my $r (@{$self->{'roles'}}) {
+        push @{$roles}, $r;
+    }
+
+    my $groups = [sort keys %{$c->{'db'}->get_contactgroups_by_contact($self->{'username'})}];
+
+    # add roles from groups in cgi.cfg
+    my $roles_by_group = {};
+    for my $key (@{$possible_roles}) {
+        my $role = $key;
+        $role =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
+        if(defined $c->config->{'cgi_cfg'}->{$role}) {
+            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
+            for my $contactgroup (keys %contactgroups) {
+                if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
+                    $roles_by_group->{$key} = [] unless defined $roles_by_group->{$key};
+                    push @{$roles_by_group->{$key}}, $contactgroup;
+                    push @{$roles}, $key;
+                }
+            }
+        }
+    }
+
+    # override can_submit_commands from cgi.cfg
+    if(grep /authorized_for_all_host_commands/mx, @{$roles}) {
+        $can_submit_commands = 1;
+    }
+    elsif(grep /authorized_for_all_service_commands/mx, @{$roles}) {
+        $can_submit_commands = 1;
+    }
+    elsif(grep /authorized_for_system_commands/mx, @{$roles}) {
+        $can_submit_commands = 1;
+    }
+
+    $c->log->debug("can_submit_commands: $can_submit_commands");
+    if($can_submit_commands != 1) {
+        push @{$roles}, 'authorized_for_read_only';
+    }
+
+    return({
+        roles               => Thruk::Utils::array_uniq($roles),
+        can_submit_commands => $can_submit_commands,
+        alias               => $alias,
+        roles_by_group      => $roles_by_group,
+        email               => $email,
+        contactgroups       => $groups,
+        timestamp           => time(),
+    });
 }
 
 =head2 get
@@ -170,6 +241,22 @@ get user attribute
 sub get {
     my($self, $attr) = @_;
     return($self->{$attr});
+}
+
+=head2 is_locked
+
+  is_locked()
+
+returns true if user is locked
+
+=cut
+
+sub is_locked {
+    my($self) = @_;
+    if($self->{'settings'}->{'login'} && $self->{'settings'}->{'login'}->{'locked'}) {
+        return(1);
+    }
+    return(0);
 }
 
 =head2 check_user_roles

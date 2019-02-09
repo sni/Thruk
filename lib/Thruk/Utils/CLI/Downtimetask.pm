@@ -48,14 +48,13 @@ sub cmd {
 
     my $files = [split(/\|/mx, shift @{$commandoptions})];
 
-    my $total_retries = 5;
+    my $total_retries = 12;
     my $retries;
 
-    # do auth stuff
     for($retries = 0; $retries < $total_retries; $retries++) {
         sleep(10) if $retries > 0;
         eval {
-            Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+            Thruk::Action::AddDefaults::set_processinfo($c);
         };
         last unless $@;
     }

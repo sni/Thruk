@@ -158,8 +158,8 @@ sub is_authorized_for_broadcast {
     return 1 if ($c->user && $c->user->check_user_roles('admin'));
 
     my $groups = {};
-    if($c->stash->{'remote_user'}) {
-        $groups = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'};
+    if($c->user_exists) {
+        $groups = Thruk::Utils::array2hash($c->user->{'groups'});
     }
 
     if(scalar @{$contacts} > 0 || scalar @{$contactgroups} > 0) {

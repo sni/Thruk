@@ -75,7 +75,7 @@ sub index {
         }
     }
 
-    $c->stash->{'profile_user'} = Thruk::Utils::set_dynamic_roles($c, $c->stash->{'remote_user'});
+    $c->stash->{'profile_user'} = $c->user;
 
     $c->stash->{api_keys} = Thruk::Utils::APIKeys::get_keys($c, $c->stash->{'remote_user'});
 

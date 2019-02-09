@@ -292,7 +292,6 @@ sub is_authorized_for_dashboard {
             return ACCESS_OWNER;
         }
         # access from contactgroups
-        my $contactgroups = [keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}];
         my $access = ACCESS_NONE;
         $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
         for my $group (@{$dashboard->{'tab'}->{'xdata'}->{'groups'}}) {
@@ -302,7 +301,7 @@ sub is_authorized_for_dashboard {
                 $access = $lvl if $lvl > $access;
                 next;
             }
-            for my $test (@{$contactgroups}) {
+            for my $test (@{$c->user->{'groups'}}) {
                 if($name eq $test) {
                     $access = $lvl if $lvl > $access;
                 }

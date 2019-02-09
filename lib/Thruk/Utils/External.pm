@@ -646,12 +646,9 @@ sub _do_child_stuff {
 
     # make remote user available
     if($c) {
-        confess('no remote_user') unless defined $c->stash->{'remote_user'};
+        confess('no remote_user') unless $c->user_exists;
         $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
-        my $groups = [];
-        my $cache = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
-        $groups = [sort keys %{$cache->{'contactgroups'}}] if($cache && $cache->{'contactgroups'});
-        $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
+        $ENV{REMOTE_USER_GROUPS} = join(';', @{$c->user->{'groups'}});
     }
 
     $|=1; # autoflush

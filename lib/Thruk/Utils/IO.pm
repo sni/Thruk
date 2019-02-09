@@ -494,9 +494,8 @@ sub cmd {
     local $SIG{TERM} = 'DEFAULT';
     local $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c;
     my $groups = [];
-    if($c && $c->stash->{'remote_user'}) {
-        my $cache = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
-        $groups = [sort keys %{$cache->{'contactgroups'}}] if($cache && $cache->{'contactgroups'});
+    if($c && $c->user_exists) {
+        $groups = $c->user->{'groups'};
     }
     local $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
     local $ENV{REMOTE_USER_EMAIL} = $c->user->{'email'} if $c && $c->user;

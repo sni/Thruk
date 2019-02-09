@@ -469,148 +469,6 @@ sub get_start_end_for_timeperiod_from_param {
 
 ########################################
 
-=head2 get_dynamic_roles
-
-  get_dynamic_roles($c, $user)
-
-gets the authorized_for_read_only role and group based roles
-
-=cut
-sub get_dynamic_roles {
-    my($c, $username, $user) = @_;
-
-    if($user) {
-    } elsif($username) {
-        $user = Thruk::Authentication::User->new($c, $username);
-    } else {
-        $user = $c->user;
-    }
-    confess("no user") unless $user;
-
-    # is the contact allowed to send commands?
-    my($can_submit_commands,$alias,$data,$email);
-    my $cached_data = defined $username ? $c->cache->get->{'users'}->{$username} : {};
-    if(defined $cached_data->{'can_submit_commands'}) {
-        # got cached data
-        $data = $cached_data->{'can_submit_commands'};
-    }
-    else {
-        confess("no db") unless $c->{'db'};
-        $data = $c->{'db'}->get_can_submit_commands($username);
-        $cached_data->{'can_submit_commands'} = $data;
-        $c->cache->set('users', $username, $cached_data) if defined $username;
-    }
-
-    if(defined $data) {
-        for my $dat (@{$data}) {
-            $alias = $dat->{'alias'} if defined $dat->{'alias'};
-            $email = $dat->{'email'} if defined $dat->{'email'};
-            if(defined $dat->{'can_submit_commands'} && (!defined $can_submit_commands || $dat->{'can_submit_commands'} == 0)) {
-                $can_submit_commands = $dat->{'can_submit_commands'};
-            }
-        }
-    }
-
-    if(!defined $can_submit_commands) {
-        $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;
-    }
-
-    # set initial roles from user
-    my $roles = [];
-    for my $r (@{$user->{'roles'}}) {
-        push @{$roles}, $r;
-    }
-
-    my $groups = $cached_data->{'contactgroups'};
-
-    # add roles from groups in cgi.cfg
-    my $roles_by_group = {};
-    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
-        my $role = $key;
-        $role =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
-        if(defined $c->config->{'cgi_cfg'}->{$role}) {
-            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
-            for my $contactgroup (keys %contactgroups) {
-                if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
-                    $roles_by_group->{$key} = [] unless defined $roles_by_group->{$key};
-                    push @{$roles_by_group->{$key}}, $contactgroup;
-                    push @{$roles}, $key;
-                }
-            }
-        }
-    }
-
-    # override can_submit_commands from cgi.cfg
-    if(grep /authorized_for_all_host_commands/mx, @{$roles}) {
-        $can_submit_commands = 1;
-    }
-    elsif(grep /authorized_for_all_service_commands/mx, @{$roles}) {
-        $can_submit_commands = 1;
-    }
-    elsif(grep /authorized_for_system_commands/mx, @{$roles}) {
-        $can_submit_commands = 1;
-    }
-
-    $c->log->debug("can_submit_commands: $can_submit_commands");
-    if($can_submit_commands != 1) {
-        push @{$roles}, 'authorized_for_read_only';
-    }
-
-    # roles could be duplicated
-    $roles = array_uniq($roles);
-
-    return($user, $roles, $can_submit_commands, $alias, $roles_by_group, $email, $groups);
-}
-
-########################################
-
-=head2 set_dynamic_roles
-
-  set_dynamic_roles($c, [$username], [$user])
-
-sets the authorized_for_read_only role and group based roles
-
-=cut
-sub set_dynamic_roles {
-    my($c, $username, $user) = @_;
-    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
-
-    if($user) {
-    } elsif($username) {
-        $user = Thruk::Authentication::User->new($c, $username);
-    } else {
-        $user = $c->user;
-    }
-    confess("no user") unless $user;
-
-    $username = $user->{'username'};
-    return unless defined $username;
-
-    my(undef, $roles, $can_submit_commands, $alias, $roles_by_group, $email, $groups) = get_dynamic_roles($c, $username, $user);
-
-    $user->{'alias'} = $alias // $user->{'alias'};
-    $user->{'email'} = $email // $user->{'email'};
-    $user->{'roles_from_groups'} = $roles_by_group;
-    $user->{'groups'} = $groups || {};
-    $user->{'can_submit_commands'} = $can_submit_commands;
-
-    for my $role (@{$roles}) {
-        push @{$user->{'roles'}}, $role;
-    }
-
-    if($user->check_user_roles('admin')) {
-        $user->grant('admin');
-    }
-
-    $user->{'roles'} = array_uniq($user->{'roles'});
-
-    $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
-    return($user);
-}
-
-
-########################################
-
 =head2 set_message
 
   set_message($c, $style, $text, [ $details ])
@@ -1145,24 +1003,20 @@ returns user data
 sub get_user_data {
     my($c, $username) = @_;
 
-    if(defined $username) {
-        confess("username not allowed") if check_for_nasty_filename($username);
-    } else {
-        return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
+    if(!defined $username) {
         $username = $c->stash->{'remote_user'};
     }
-
     if(!defined $username || $username eq '?') {
         return {};
     }
+    confess("username not allowed") if check_for_nasty_filename($username);
 
+    my $user_data = {};
     my $file = $c->config->{'var_path'}."/users/".$username;
     if(-s $file) {
-        $c->stash->{'user_data_cached'} = read_data_file($file);
-    } else {
-        $c->stash->{'user_data_cached'} = {};
+        $user_data = read_data_file($file);
     }
-    return $c->stash->{'user_data_cached'};
+    return $user_data;
 }
 
 
@@ -1198,14 +1052,11 @@ sub store_user_data {
     for my $dir ($c->config->{'var_path'}, $c->config->{'var_path'}."/users") {
         if(! -d $dir) {
             Thruk::Utils::IO::mkdir($dir) or do {
-                Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: mkdir '.$dir.': '.$! );
+                Thruk::Utils::set_message( $c, 'fail_message', 'saving data failed: mkdir '.$dir.': '.$! );
                 return;
             };
         }
     }
-
-    # update cached data
-    $c->stash->{'user_data_cached'} = $data;
 
     my $file = $c->config->{'var_path'}."/users/".$username;
     my $rc;
@@ -2287,13 +2138,8 @@ set and authenticate a user
 
 sub set_user {
     my($c, $username) = @_;
-    $c->stash->{'remote_user'} = $username;
-    $c->authenticate({});
-    confess("no user") unless $c->user;
-    $c->stash->{'remote_user'}= $c->user->get('username');
-    if($username ne '(cli)' && $username ne '(cron)') {
-        set_dynamic_roles($c, undef, $c->user);
-    }
+    $c->authenticate(0, $username);
+    confess("no user") unless $c->user_exists;
     return;
 }
 
@@ -3284,6 +3130,7 @@ returns true if nasty characters have been found and the filename is NOT safe fo
 =cut
 sub check_for_nasty_filename {
     my($name) = @_;
+    confess("no name") unless defined $name;
     if($name =~ m/(\.\.|\/)/mx) {
         return(1);
     }

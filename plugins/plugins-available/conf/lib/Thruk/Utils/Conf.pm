@@ -39,13 +39,13 @@ sub set_object_model {
     my ( $c, $no_recursion ) = @_;
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
-    Thruk::Action::AddDefaults::set_processinfo($c, undef, 2, $cached_data, 1);
+    Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::ADD_CACHED_DEFAULTS
     $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
 
     # if this is no obj config yet, try updating process info which updates
     # configuration information from http backends
     if(!$c->stash->{has_obj_conf}) {
-        Thruk::Action::AddDefaults::set_processinfo($c, undef, undef, undef, 1);
+        Thruk::Action::AddDefaults::set_processinfo($c);
         $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
     }
 

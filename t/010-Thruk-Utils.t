@@ -121,10 +121,10 @@ SKIP: {
     skip 'external tests', 16 if Thruk->config->{'no_external_job_forks'};
 
     my($res, $c) = ctx_request('/thruk/side.html');
-    my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
+    my $contactgroups = $c->{'db'}->get_contactgroups_by_contact('thrukadmin');
     is(ref $contactgroups, 'HASH', 'get_contactgroups_by_contact(thrukadmin)');
 
-    $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'nonexistant');
+    $contactgroups = $c->{'db'}->get_contactgroups_by_contact('nonexistant');
     is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(nonexistant)');
 
     #########################

@@ -95,9 +95,6 @@ sub begin {
     $c->stash->{'c'} = $c;
     weaken($c->stash->{'c'});
 
-    # user data
-    $c->stash->{'user_data'} = { bookmarks => {} };
-
     # frame options
     my $use_frames = $c->config->{'use_frames'};
     my $show_nav_button = 1;
@@ -214,24 +211,14 @@ sub begin {
 
     ###############################
     # Authentication
-    $c->log->debug("checking auth") if Thruk->verbose;
-    if($c->req->path_info =~ m~cgi-bin/remote\.cgi~mx) {
-        $c->log->debug("remote.cgi does not use authentication") if Thruk->debug;
-    }
-    elsif($c->req->path_info =~ m~cgi-bin/login\.cgi~mx) {
-        $c->log->debug("login.cgi does not use authentication");
-    } else {
-        unless($c->user_exists) {
-            $c->log->debug("user not authenticated yet") if Thruk->verbose;
-            unless ($c->authenticate()) {
-                # return 403 forbidden or kick out the user in other way
-                $c->log->debug("user is not authenticated") if Thruk->verbose;
+    if(!$c->user_exists) {
+        if($c->req->path_info =~ m~cgi-bin/(remote|login)\.cgi~mx) {
+            $c->log->debug($1.".cgi does not require authentication") if Thruk->debug;
+        } else {
+            if(!$c->authenticate(1)) {
+                $c->log->debug("user authenticated failed") if Thruk->verbose;
                 return $c->detach('/error/index/10');
             }
-        }
-        if($c->user_exists) {
-            $c->log->debug("user authenticated as: ".$c->user->get('username')) if Thruk->verbose;
-            $c->stash->{'remote_user'}= $c->user->get('username');
         }
     }
 
@@ -283,8 +270,8 @@ sub begin {
         }
     }
 
+    # ex.: global bookmarks from var/global_user_data
     $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
-    $c->stash->{user_data}        = Thruk::Utils::get_user_data($c);
 
     $c->stats->profile(end => "Root begin");
     return 1;
@@ -433,7 +420,10 @@ sub add_defaults {
 
     ###############################
     # timezone settings
-    my $user_tz = $c->stash->{user_data}->{'tz'} || $c->config->{'default_user_timezone'} || "Server Setting";
+    my $user_tz = $c->config->{'default_user_timezone'} || "Server Setting";
+    if($c->user && $c->user->{'settings'}->{'tz'}) {
+        $user_tz = $c->user->{'settings'}->{'tz'};
+    }
     my $timezone;
     if($user_tz ne 'Server Setting') {
         if($user_tz eq 'Local Browser') {
@@ -521,10 +511,6 @@ sub add_defaults {
 
     ###############################
     # read cached data
-    my $cached_user_data = {};
-    if(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
-        $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
-    }
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
@@ -547,7 +533,7 @@ sub add_defaults {
             $c->{'db'}->reset_failed_backends($c);
 
             eval {
-                $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
+                $last_program_restart = set_processinfo($c, $safe, $cached_data);
             };
             last unless $@;
             $c->log->debug("retry $x, data source error: $@") if Thruk->debug;
@@ -565,21 +551,26 @@ sub add_defaults {
         $c->stash->{'last_program_restart'} = $last_program_restart;
 
         ###############################
-        # read cached data again, groups could have changed
-        $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
-
-        ###############################
         # disable backends by groups
         if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
-            $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_user_data);
+            $disabled_backends = _disable_backends_by_group($c, $disabled_backends);
         }
         _set_possible_backends($c, $disabled_backends);
         $c->stats->profile(end => "AddDefaults::get_proc_info");
     }
 
     ###############################
-    # set some more roles
-    Thruk::Utils::set_dynamic_roles($c, undef, $c->user) if $c->user_exists;
+    if($c->user) {
+        if(   !$c->stash->{'last_program_restart'}
+           || !$c->user->{'timestamp'}
+           || $c->stash->{'last_program_restart'} > $c->user->{'timestamp'}
+           || ($ENV{THRUK_SRC} && $ENV{THRUK_SRC} eq 'CLI')
+           || ($c->user->{'timestamp'} < (time() - 600))
+        ) {
+            # refresh dynamic roles and groups
+            $c->user->set_dynamic_attributes($c);
+        }
+    }
 
     ###############################
     die_when_no_backends($c);
@@ -646,10 +637,9 @@ sub add_defaults {
 
     ###############################
     # user / group specific config?
-    $c->stash->{'contactgroups'} = $c->stash->{'remote_user'} ? [sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}] : [];
-    if(!$no_config_adjustments && $c->stash->{'remote_user'}) {
+    if(!$no_config_adjustments && $c->user_exists) {
         $c->stash->{'config_adjustments'} = {};
-        for my $group (@{$c->stash->{'contactgroups'}}) {
+        for my $group (@{$c->user->{'groups'}}) {
             if(defined $c->config->{'Group'}->{$group}) {
                 # move components one level up
                 if($c->config->{'Group'}->{$group}->{'Component'}) {
@@ -886,6 +876,7 @@ sub update_site_panel_hashes {
        if($c->stash->{'sitepanel'} eq 'list')      { $show_sitepanel = 'list'; }
     elsif($c->stash->{'sitepanel'} eq 'compact')   { $show_sitepanel = 'panel'; }
     elsif($c->stash->{'sitepanel'} eq 'collapsed') { $show_sitepanel = 'collapsed'; }
+    elsif($c->stash->{'sitepanel'} eq 'tree')      { $show_sitepanel = 'tree'; }
     elsif($c->stash->{'sitepanel'} eq 'off')       { $show_sitepanel = 'off'; }
     elsif($c->stash->{'sitepanel'} eq 'auto') {
         if($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
@@ -959,9 +950,9 @@ sub _calculate_section_totals {
 
 ########################################
 sub _disable_backends_by_group {
-    my ($c,$disabled_backends, $cached_user_data) = @_;
+    my ($c,$disabled_backends) = @_;
 
-    my $contactgroups = $cached_user_data->{'contactgroups'};
+    my $contactgroups = Thruk::Utils::array2hash($c->user->{'groups'});
     for my $peer (@{$c->{'db'}->get_peers()}) {
         if(defined $peer->{'groups'}) {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
@@ -1003,13 +994,13 @@ sub _any_backend_enabled {
 
 =head2 set_processinfo
 
-  set_processinfo($c, [$cached_user_data, $safe, $cached_data,$skip_cache_update])
+  set_processinfo($c, [$safe, $cached_data])
 
 set process info into stash
 
 =cut
 sub set_processinfo {
-    my($c, $cached_user_data, $safe, $cached_data, $skip_cache_update) = @_;
+    my($c, $safe, $cached_data) = @_;
     my $last_program_restart = 0;
     $safe = Thruk::ADD_DEFAULTS unless defined $safe;
 
@@ -1065,26 +1056,6 @@ sub set_processinfo {
             next if !defined $processinfo->{$backend}->{'program_start'};
             $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
             $c->{'db'}->{'last_program_starts'}->{$backend} = $processinfo->{$backend}->{'program_start'};
-        }
-    }
-
-    # check if we have to build / clean our per user cache
-    if(   !defined $cached_user_data
-       || !defined $cached_user_data->{'prev_last_program_restart'}
-       || $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
-       || $cached_user_data->{'prev_last_program_restart'} < time() - 600 # update at least every 10 minutes
-       || ($ENV{THRUK_SRC} && $ENV{THRUK_SRC} eq 'CLI')
-      ) {
-        if(defined $c->stash->{'remote_user'} && !$skip_cache_update) {
-            my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
-
-            $cached_user_data = {
-                'prev_last_program_restart' => time(),
-                'contactgroups'             => $contactgroups,
-            };
-            $c->stash->{'contactgroups'} = [sort keys %{$contactgroups}];
-            $c->cache->set('users', $c->stash->{'remote_user'}, $cached_user_data);
-            $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
         }
     }
 
@@ -1250,22 +1221,6 @@ sub die_when_no_backends {
         $c->log->error("got no result from any backend, please check backend connection and logfiles");
         return $c->detach('/error/index/9');
     }
-    return;
-}
-
-########################################
-
-=head2 delayed_proc_info_update
-
-    run process info update after the main page has been served
-
-=cut
-sub delayed_proc_info_update {
-    my($c) = @_;
-    my $disabled_backends = $c->{'db'}->disable_hidden_backends();
-    _set_possible_backends($c, $disabled_backends);
-    my $cached_data = $c->cache->get->{'global'} || {};
-    set_processinfo($c, undef, undef, $cached_data, 1);
     return;
 }
 

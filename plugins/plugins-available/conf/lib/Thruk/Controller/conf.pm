@@ -664,11 +664,7 @@ sub _process_users_page {
             $c->stash->{'contact'}        = $contacts->[0];
         }
 
-        $c->stash->{'profile_user'} = Thruk::Utils::set_dynamic_roles($c, $name);
-
-        my $userdata = Thruk::Utils::get_user_data($c, $name);
-        $c->stash->{'account_is_locked'} = $userdata->{'login'}->{'locked'} ? 1 : 0;
-        $c->stash->{'userdata'} = $userdata;
+        $c->stash->{'profile_user'} = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
     }
 
     $c->stash->{'subtitle'} = "User Configuration";

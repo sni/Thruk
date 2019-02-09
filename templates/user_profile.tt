@@ -30,7 +30,7 @@
     </tr>
     <tr>
       <td class='dataVar'>Contactgroups</td>
-      <td class='dataVal' style="white-space: normal;">[% IF profile_user.groups.size > 0; profile_user.groups.keys.sort.join('<br>'); ELSE %]&lt;none&gt;[% END %]</td>
+      <td class='dataVal' style="white-space: normal;">[% IF profile_user.groups.size > 0; profile_user.groups.join('<br>'); ELSE %]&lt;none&gt;[% END %]</td>
     </tr>
     <tr>
       <td class='dataVar'>Effective Roles</td>

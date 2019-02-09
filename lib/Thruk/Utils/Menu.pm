@@ -263,10 +263,9 @@ sub has_group {
     my $c = $Thruk::Request::c;
     if(defined $tmp) { $group = $tmp; }  # keep backwards compatible with the old call has_group($c, $group)
 
-    my $user  = $c->stash->{'remote_user'};
-    if($user) {
-        my $contactgroups = $c->cache->get->{'users'}->{$user};
-        if($contactgroups and $contactgroups->{'contactgroups'}->{$group}) {
+    if($c->user_exists) {
+        my $contactgroups = Thruk::Utils::array2hash($c->user->{'groups'});
+        if($contactgroups->{$group}) {
             return 1;
         }
     }

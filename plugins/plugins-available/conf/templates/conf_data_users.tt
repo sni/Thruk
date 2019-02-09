@@ -68,7 +68,7 @@
       <td class='dataVal'><input type="password" name="data.password2" value="" size=15 autocomplete="off"></td>
     </tr>
     [% END %]
-    [% IF account_is_locked %]
+    [% IF profile_user.is_locked %]
     <tr>
       <td class='dataVar' align="left" style="color: red;">Account is Locked</td>
       <td class='dataVal'><input type="submit" name="send" value="unlock account"></td>
@@ -79,12 +79,12 @@
       <td class='dataVal'><input type="submit" name="send" value="lock account"></td>
     </tr>
     [% END %]
-    [% IF userdata.exists('login') && userdata.login.exists('last_failed') %]
+    [% IF profile_user.settings.exists('login') && profile_user.settings.login.exists('last_failed') %]
     <tr>
       <td class='dataVar' align="left" style="color: red;">Failed Logins</td>
       <td class='dataVal'>
-        There had been [% userdata.login.failed %] failed login attempts.<br>
-        (Date: [% date_format(c, userdata.login.last_failed.time) %] - IP: [% userdata.login.last_failed.ip %][% IF userdata.login.last_failed.defined('forwarded_for') %] ([% userdata.login.last_failed.forwarded_for %][% END %])
+        There had been [% profile_user.settings.login.failed %] failed login attempts.<br>
+        (Date: [% date_format(c, profile_user.settings.login.last_failed.time) %] - IP: [% profile_user.settings.login.last_failed.ip %][% IF profile_user.settings.login.last_failed.defined('forwarded_for') %] ([% profile_user.settings.login.last_failed.forwarded_for %][% END %])
       </td>
     </tr>
     [% END %]
@@ -120,15 +120,15 @@
       <tr>
         <td class='dataVar' align="left">Groups</td>
         <td class='dataVal'>
-          [% IF profile_user.groups.keys.size == 0 %]
+          [% IF profile_user.groups.size == 0 %]
             this contact has no groups.
           [% ELSE %]
             [% IF backends_with_obj_config.keys.size > 0 %]
-              [% FOREACH group = profile_user.groups.keys.sort %]
+              [% FOREACH group = profile_user.groups %]
                 <a href="conf.cgi?sub=objects&amp;type=contactgroup&amp;data.name=[% group %]">[% group %]</a>[% UNLESS loop.last %], [% END %]
               [% END %]
             [% ELSE %]
-              [% profile_user.groups.keys.sort.join(', ') %]
+              [% profile_user.groups.join(', ') %]
             [% END %]
           [% END %]
         </td>

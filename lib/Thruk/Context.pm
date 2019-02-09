@@ -8,12 +8,14 @@ use Scalar::Util qw/weaken/;
 use Time::HiRes qw/gettimeofday/;
 use Module::Load qw/load/;
 use URI::Escape qw/uri_escape uri_unescape/;
+use File::Slurp qw/read_file/;
 
 use Thruk::Authentication::User;
 use Thruk::Controller::error;
 use Thruk::Request;
 use Thruk::Request::Cookie;
 use Thruk::Stats;
+use Thruk::Utils::IO;
 
 =head1 NAME
 
@@ -219,12 +221,101 @@ sub render_gd {
 
 =head2 authenticate
 
-authenticate a user
+authenticate current request user
 
 =cut
 sub authenticate {
-    $_[0]->{'user'} = Thruk::Authentication::User->new($_[0]);
-    return($_[0]->{'user'});
+    my($c, $skip_db_access, $username) = @_;
+    $c->log->debug("checking authenticaton") if Thruk->verbose;
+    delete $c->stash->{'remote_user'};
+    delete $c->{'user'};
+    $username = request_username($c) unless defined $username;
+    return unless $username;
+    my $user = Thruk::Authentication::User->new($c, $username);
+    return unless $user;
+    if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
+        $c->error("account is locked, please contact an administrator");
+        return;
+    }
+    $c->{'user'} = $user;
+    $c->stash->{'remote_user'} = $user->{'username'};
+    $c->stash->{'user_data'}   = $user->{'settings'};
+    $user->set_dynamic_attributes($c, $skip_db_access);
+    if(Thruk->verbose) {
+        $c->log->debug("authenticated as ".$user->{'username'});
+    }
+    return($user);
+}
+
+=head2 request_username
+
+return username from env
+
+=cut
+sub request_username {
+    my($c) = @_;
+
+    my $env    = $c->env;
+    my $apikey = $c->req->header('X-Thruk-Auth-Key');
+    my $username;
+
+    # authenticate by secret.key from http header
+    if($apikey) {
+        my $apipath = $c->config->{'var_path'}."/api_keys";
+        my $secret_file = $c->config->{'var_path'}.'/secret.key';
+        $c->config->{'secret_key'} = read_file($secret_file) if -s $secret_file;
+        chomp($c->config->{'secret_key'});
+        if($apikey !~ m/^[a-zA-Z0-9]+$/mx) {
+            $c->error("wrong authentication key");
+            return;
+        }
+        elsif($c->config->{'api_keys_enabled'} && -e $apipath.'/'.$apikey) {
+            my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$apikey);
+            my $addr = $c->req->address;
+            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
+            Thruk::Utils::IO::json_lock_patch($apipath.'/'.$apikey, { last_used => time(), last_from => $addr }, 1);
+            $username = $data->{'user'};
+        }
+        elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
+            $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+            if(!$username) {
+                $c->error("authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header");
+                return;
+            }
+        } else {
+            $c->error("wrong authentication key");
+            return;
+        }
+    }
+    elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
+        $username = $env->{'SSL_CLIENT_S_DN_CN'};
+        confess("username $username is reserved.") if $username =~ m%^\(.*\)$%mx;
+    }
+    # basic authentication
+    elsif(defined $env->{'REMOTE_USER'} and $env->{'REMOTE_USER'} ne '' ) {
+        $username = $env->{'REMOTE_USER'};
+        confess("username $username is reserved.") if $username =~ m%^\(.*\)$%mx;
+    }
+    elsif(defined $ENV{'REMOTE_USER'}and $ENV{'REMOTE_USER'} ne '' ) {
+        $username = $ENV{'REMOTE_USER'};
+    }
+
+    # default_user_name?
+    elsif(defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
+        $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
+    }
+
+    elsif(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+        $username = $c->config->{'default_cli_user_name'};
+    }
+
+    if(!defined $username || $username eq '') {
+        return;
+    }
+
+    # transform username upper/lower case?
+    $username = Thruk::Authentication::User::transform_username($c->config, $username, $c);
+    return($username);
 }
 
 =head2 user_exists
@@ -233,7 +324,8 @@ return if a user exists
 
 =cut
 sub user_exists {
-    return(1) if $_[0]->{'user'};
+    my($c) = @_;
+    return(1) if defined $c->{'user'};
     return(0);
 }
 
@@ -424,7 +516,8 @@ sub sub_request {
     };
     $env->{'plack.request.body_parameters'} = [%{$postdata}] if $postdata;
     my $sub_c = Thruk::Context->new($c->app, $env);
-    $sub_c->{'user'}  = $c->user;
+    $sub_c->{'user'} = $c->user;
+    $sub_c->stash->{'remote_user'} = $c->stash->{'remote_user'};
 
     Thruk::Action::AddDefaults::begin($sub_c);
     my $path_info = $sub_c->req->path_info;

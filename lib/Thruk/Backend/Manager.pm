@@ -588,23 +588,13 @@ returns a list of contactgroups by contact
 =cut
 
 sub get_contactgroups_by_contact {
-    my( $self, $c, $username, $reload ) = @_;
-
-    my $cached_data = {};
-    $cached_data    = $c->cache->get->{'users'}->{$username} if defined $username;
-    if( !$reload && defined $cached_data->{'contactgroups'} ) {
-        return $cached_data->{'contactgroups'};
-    }
-
+    my($self, $username) = @_;
+    confess("no user") if(!defined $username || ref $username ne "");
     my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ], undef, $self->get_default_backends());
     my $contactgroups = {};
     for my $group (@{$data}) {
         $contactgroups->{$group->{'name'}} = 1;
     }
-
-    $cached_data->{'contactgroups'} = $contactgroups;
-    $c->cache->set('users', $username, $cached_data);
-    $c->stash->{'contactgroups'} = $data if($c->stash->{'remote_user'} && $username eq $c->stash->{'remote_user'});
     return $contactgroups;
 }
 
@@ -1518,6 +1508,7 @@ sub _do_on_peers {
     if(!defined $result && $num_selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
+        $c->log->debug($err);
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
             die($1);
         }
