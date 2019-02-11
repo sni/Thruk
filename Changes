@@ -16,6 +16,7 @@ next:
           - Panorama:
             - add direct link with tabs
             - add theme selector to grafana images
+            - add color selector to grafana images
           - internals:
             - move libraries to vendor folder
             - update jquery to 3.3.1

@@ -154,6 +154,12 @@ Ext.define('TP.PanletGrafana', {
             if(this.xdata.background != undefined) {
                 url = url + '&theme='+this.xdata.background;
             }
+            if(this.xdata.font_color != undefined) {
+                url = url + '&font_color='+encodeURIComponent(this.xdata.font_color);
+            }
+            if(this.xdata.background_color != undefined) {
+                url = url + '&background_color='+encodeURIComponent(this.xdata.background_color);
+            }
             var global = Ext.getCmp(this.panel_id);
             if(!global.xdata.autohideheader || this.xdata.showborder) {
                 this.heightOverflow = this.heightOverflow / 5;
@@ -283,12 +289,17 @@ Ext.define('TP.PanletGrafana', {
             xtype:          'combobox',
             fieldLabel:     'Background',
             name:           'background',
-            store:        [['light','light theme']
-                          ,['dark','dark theme']
-                          ,['transparent-light','transparent']
-                          // looks ugly, because fonts will be half transparent and removed
-                          //,['transparent-dark','transparent dark']
-            ]
+            store:        [['light','light theme'],['dark','dark theme']]
+        });
+        this.addGearItems({
+            xtype:          'colorcbo',
+            fieldLabel:     'Background Color',
+            name:           'background_color'
+        });
+        this.addGearItems({
+            xtype:          'colorcbo',
+            fieldLabel:     'Font Color',
+            name:           'font_color'
         });
     },
     gearInitCallback: function(panel) {

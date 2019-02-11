@@ -1274,7 +1274,7 @@ sub proxifiy_me {
     return unless $peer_id;
     my $thruk_url = get_remote_thruk_url($c, $peer_id);
     return unless $thruk_url;
-    my $url = $c->req->url;
+    my $url = $c->req->uri;
     $url    =~ s|^https?://[^/]+/|/|mx;
     $url    =~ s|^.*?/thruk/|$thruk_url|mx;
     my $proxy_url = proxifiy_url($c, {peer_key => $peer_id}, $url);
@@ -1420,6 +1420,9 @@ sub get_graph_url {
     show_title     => $showtitle,
     show_legend    => $showlegend,
     follow         => 0/1,  # flag wether we simply redirect proxy requests or fetch them
+    theme          => light/dark,
+    font_color     => #12345,
+    bg_color       => #12345,
   })
 
 return raw pnp/grafana image if possible.
@@ -1492,14 +1495,21 @@ sub get_perf_image {
             $grafanaurl .= '&legend=false';
         }
         if($options->{'theme'}) {
-            $grafanaurl =~ s/\&theme=light//gmx;
-            if($options->{'theme'} =~ m/^transparent\-(.*)$/mx) {
-                $grafanaurl .= '&theme='.$1;
-                # inject some css into histou to make the background transparent
-                $grafanaurl .= '&customCSSFile='.URI::Escape::uri_escape('data:text/css;base64,'.MIME::Base64::encode_base64('.panel-container,.main-view,body,html {background:transparent !important;background-color:transparent !important;}'));
-            } else {
-                $grafanaurl .= '&theme='.$options->{'theme'};
-            }
+            $grafanaurl =~ s/\&theme=light//gmx; # removed hardcoded url from *-perf template
+            $grafanaurl .= '&theme='.$options->{'theme'};
+        }
+        my $css = "";
+        if($options->{'bg_color'} && $options->{'bg_color'} =~ m/^(transparent|\#\w+)$/mx) {
+            my $color = $1;
+            $css .= '.panel-container,.main-view,body,html {background:'.$color.' !important;background-color:'.$color.' !important;}';
+        }
+        if($options->{'font_color'} && $options->{'font_color'} =~ m/^(\#\w+)$/mx) {
+            my $color = $1;
+            $css .= 'A,DIV.flot-text,.graph-legend-content,body,html {color:'.$color.' !important;}';
+        }
+        if($css) {
+            # inject custom css into histou
+            $grafanaurl .= '&customCSSFile='.URI::Escape::uri_escape('data:text/css;base64,'.MIME::Base64::encode_base64($css));
         }
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
