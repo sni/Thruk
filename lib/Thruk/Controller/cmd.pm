@@ -611,7 +611,7 @@ sub _do_send_command {
     };
     if($@) {
         if($@ =~ m/error\ \-\ (.*?)\ at\ /gmx) {
-            push @{$c->stash->{'form_errors'}}, $1;
+            push @{$c->stash->{'form_errors'}}, { message => $1 };
         } else {
             $c->log->error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
         }
@@ -663,7 +663,10 @@ sub _do_send_command {
         }
         if( scalar @errors > 0 ) {
             delete $c->req->parameters->{'cmd_mod'};
-            $c->stash->{'form_errors'} = \@errors;
+            $c->stash->{'form_errors'} = [];
+            for my $err (@errors) {
+                push @{$c->stash->{'form_errors'}}, { message => $err };
+            }
             return;
         }
     }
