@@ -645,8 +645,7 @@ sub _do_child_stuff {
     $ENV{'THRUK_JOB_DIR'}            = $dir; # make job id available
 
     # make remote user available
-    if($c) {
-        confess('no remote_user') unless $c->user_exists;
+    if($c && $c->user_exists) {
         $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
         $ENV{REMOTE_USER_GROUPS} = join(';', @{$c->user->{'groups'}});
     }
