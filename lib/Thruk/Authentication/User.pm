@@ -181,6 +181,7 @@ sub get_dynamic_roles {
     # add roles from groups in cgi.cfg
     my $roles  = [];
     my $groups = [sort keys %{$c->{'db'}->get_contactgroups_by_contact($self->{'username'})}];
+    my $groups_hash = Thruk::Utils::array2hash($groups);
     my $roles_by_group = {};
     for my $key (@{$possible_roles}) {
         my $role = $key;
@@ -188,7 +189,7 @@ sub get_dynamic_roles {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
             my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
             for my $contactgroup (keys %contactgroups) {
-                if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
+                if(defined $groups_hash->{$contactgroup} or $contactgroup eq '*' ) {
                     $roles_by_group->{$key} = [] unless defined $roles_by_group->{$key};
                     push @{$roles_by_group->{$key}}, $contactgroup;
                     push @{$roles}, $key;
