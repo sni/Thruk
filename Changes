@@ -12,6 +12,7 @@ next:
             - add drill down output as default filter
             - fix zooming in chrome
             - disable automatic calculation by setting refresh_interval to zero
+            - add read_only mode
           - Panorama:
             - add direct link with tabs
             - add theme selector to grafana images

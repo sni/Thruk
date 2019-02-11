@@ -2670,6 +2670,7 @@ Configuration Example:
     #favorite_custom_function = echo ; echo_function
     #worker                = 5
     #default_filter        = add_recursive_output_filter
+    read_only              = 0
   </Component>
 
 
@@ -2708,7 +2709,9 @@ stage is set to 'post'.
 
 === refresh_interval
 Refresh interval defines how often business processes
-will be recalculated and refreshed. (in minutes)
+will be recalculated and refreshed. (in minutes).
+
+Automatic bp calculations will be disabled if set to zero.
 
 
 === favorite_custom_function
@@ -2721,8 +2724,14 @@ Set the number of parallel business process calculations. Setting it
 to 1 disables parallelization. Setting it to 0 trys to autodetect a
 suitable value.
 
+Automatic bp calculations will be disabled if set to zero.
+
 === default_filter
 Add global filter to all business processes, can be set multiple times.
+
+=== read_only
+Make all bp related pages readonly.
+
 
 == Component Thruk::Plugin::Mobile
 

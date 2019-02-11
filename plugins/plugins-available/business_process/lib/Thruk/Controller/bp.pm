@@ -55,6 +55,7 @@ sub index {
     $c->stash->{testmodes}             = {};
     $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
     $c->stash->{'objects_save_file'}      = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'}      || '';
+    $c->stash->{'read_only'}           = $c->config->{'Thruk::Plugin::BP'}->{'read_only'} // 0;
     my $format = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_format'} || 'nagios';
     if($format ne 'icinga2') { $format = 'nagios'; }
     $c->stash->{'objects_save_format'}  = $format;
@@ -75,6 +76,7 @@ sub index {
     }
     $c->stash->{allowed_for_edit} = $allowed_for_edit;
     $c->stash->{allowed_for_edit} = 0 if $c->req->parameters->{'readonly'};
+    $c->stash->{allowed_for_edit} = 0 if $c->stash->{'read_only'};
     $c->stash->{no_menu}          = $c->req->parameters->{'no_menu'} ? 1 : 0;
 
     $c->stash->{fav_custom_fun} = $c->config->{'Thruk::Plugin::BP'}->{'favorite_custom_function'} ? [split(/\s*;\s*/mx, $c->config->{'Thruk::Plugin::BP'}->{'favorite_custom_function'})] : [];
@@ -344,7 +346,9 @@ sub index {
         $c->stash->{'bp'} = $bp;
 
         if($c->req->parameters->{'update'}) {
-            $bp->update_status($c);
+            if(!$c->stash->{'read_only'}) {
+                $bp->update_status($c);
+            }
         }
         # try to find this bp on any system
         my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $bp->{'name'} } ] );
