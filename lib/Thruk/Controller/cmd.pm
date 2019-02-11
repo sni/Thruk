@@ -663,10 +663,7 @@ sub _do_send_command {
         }
         if( scalar @errors > 0 ) {
             delete $c->req->parameters->{'cmd_mod'};
-            $c->stash->{'form_errors'} = [];
-            for my $err (@errors) {
-                push @{$c->stash->{'form_errors'}}, { message => $err };
-            }
+            $c->stash->{'form_errors'} = \@errors;
             return;
         }
     }
