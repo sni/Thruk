@@ -178,15 +178,9 @@ sub get_dynamic_roles {
         $can_submit_commands = $c->config->{'can_submit_commands'} || 0;
     }
 
-    # set initial roles from user
-    my $roles = [];
-    for my $r (@{$self->{'roles'}}) {
-        push @{$roles}, $r;
-    }
-
-    my $groups = [sort keys %{$c->{'db'}->get_contactgroups_by_contact($self->{'username'})}];
-
     # add roles from groups in cgi.cfg
+    my $roles  = [];
+    my $groups = [sort keys %{$c->{'db'}->get_contactgroups_by_contact($self->{'username'})}];
     my $roles_by_group = {};
     for my $key (@{$possible_roles}) {
         my $role = $key;
