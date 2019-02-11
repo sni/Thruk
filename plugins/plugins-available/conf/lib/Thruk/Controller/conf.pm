@@ -989,7 +989,7 @@ sub _process_objects_page {
                     }
                     @{$new_data->{$key2}} = sort keys %{$users};
                 }
-                _store_changes($c, $file, $new_data, $defaults);
+                _store_changes($c, $file, $new_data, $defaults, undef, 1);
             }
 
             if(defined $c->req->parameters->{'save_and_reload'}) {
@@ -1525,7 +1525,7 @@ sub _get_htpasswd {
 ##########################################################
 # store changes to a file
 sub _store_changes {
-    my ( $c, $file, $data, $defaults, $update_in_conf ) = @_;
+    my ( $c, $file, $data, $defaults, $update_in_conf, $ignore_no_changes_made) = @_;
     return unless Thruk::Utils::check_csrf($c);
     my $old_md5 = $c->req->parameters->{'md5'};
     if(!defined $old_md5 || $old_md5 eq '') {
@@ -1540,6 +1540,9 @@ sub _store_changes {
     $c->log->debug("saving config changes to ".$file);
     my $res = Thruk::Utils::Conf::update_conf($file, $data, $old_md5, $defaults, $update_in_conf);
     if(defined $res) {
+        if($res eq "no changes made." && $ignore_no_changes_made) {
+            return;
+        }
         Thruk::Utils::set_message( $c, 'fail_message', $res );
         return;
     } else {
