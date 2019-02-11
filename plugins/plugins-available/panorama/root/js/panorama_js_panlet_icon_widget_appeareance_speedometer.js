@@ -227,6 +227,11 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
         }
         panel.chart.series.getAt(0).value = value;
         if(panel.chart.series.getAt(0).setValue)   { panel.chart.series.getAt(0).setValue(value); }
+        if(xdata.appearance.speedocolor_axis_color) {
+            panel.chart.axes.getAt(0).labelArray.forEach(function (el) {
+                el.setAttributes({ stroke: xdata.appearance.speedocolor_axis_color, fill: xdata.appearance.speedocolor_axis_color }, true);
+            });
+        }
         if(panel.chart.series.getAt(0).drawSeries) { panel.chart.series.getAt(0).drawSeries();    }
     },
 
@@ -323,6 +328,13 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
                 width:       55,
                 name:       'speedomargin',
                 unit:       'px'
+            },
+            { xtype: 'label', text: 'Color:', style: 'margin-left: 8px; margin-right: 2px;' },
+            {
+                xtype:          'colorcbo',
+                name:           'speedocolor_axis_color',
+                value:           panel.xdata.appearance.speedocolor_axis_color,
+                width:           80
             },
             { xtype: 'label', text: 'Thresholds:', style: 'margin-left: 8px; margin-right: 2px;' },
             {
