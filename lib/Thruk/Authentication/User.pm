@@ -56,6 +56,7 @@ sub new {
     $self->{'roles'}    = [];
     $self->{'groups'}   = [];
     $self->{'alias'}    = undef;
+    $self->{'roles_from_groups'} = {};
 
     # add roles from cgi_conf
     for my $role (@{$possible_roles}) {

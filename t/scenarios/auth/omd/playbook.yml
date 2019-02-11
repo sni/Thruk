@@ -1,0 +1,41 @@
+---
+- hosts: all
+  tasks:
+  - shell: "sudo su - demo -c 'set_admin_password omd'"
+  - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set APACHE_MODE own"
+  - yum:
+      name:
+      - perl-Test-Harness
+      state: present
+  - copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+  - copy:
+      src: "/root/objects.cfg"
+      dest: "/omd/sites/demo/etc/naemon/conf.d/objects.cfg"
+      owner: "demo"
+      group: "demo"
+  - copy:
+      src: "/root/cgi.cfg"
+      dest: "/omd/sites/demo/etc/thruk/cgi.cfg"
+      owner: "demo"
+      group: "demo"
+  - copy:
+      src: "/root/menu_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/menu_local.conf"
+      owner: "demo"
+      group: "demo"
+  - shell: sudo su - demo -c "htpasswd -b etc/htpasswd admin admin"
+  - shell: sudo su - demo -c "htpasswd -b etc/htpasswd test test"
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

@@ -453,7 +453,7 @@ sub test_page {
             next if $match =~ m/^ssh/mxo;
             next if $match =~ m/^mailto:/mxo;
             next if $match =~ m/^(\#|'|")/mxo;
-            next if $match =~ m/^\/thruk\/cgi\-bin/mxo;
+            next if $match =~ m/\/thruk\/cgi\-bin/mxo;
             next if $match =~ m/^\w+\.cgi/mxo;
             next if $match =~ m/^javascript:/mxo;
             next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
