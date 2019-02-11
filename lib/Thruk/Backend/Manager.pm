@@ -722,7 +722,7 @@ sub expand_command {
     if(defined $command) {
         $expanded = $command->{'line'};
     } else {
-        my $commands = $self->get_commands( filter => [ { 'name' => $name } ] );
+        my $commands = $self->get_commands( filter => [ { 'name' => $name } ], backend => [$obj->{'peer_key'}] );
         $expanded = $commands->[0]->{'line'};
     }
 
