@@ -11,6 +11,7 @@ next:
             - add support for http federation
             - add drill down output as default filter
             - fix zooming in chrome
+            - disable automatic calculation by setting refresh_interval to zero
           - Panorama:
             - add direct link with tabs
             - add theme selector to grafana images

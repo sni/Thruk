@@ -351,6 +351,12 @@ sub update_cron_file {
         push @{$cron_entries}, ['*/'.$rate.' * * * *', $cmd] if $rate != 1;
     }
 
+    # disable calculations by setting refresh_interval or workers to zero
+    if(defined $c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} && $c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} == 0
+      || defined $c->config->{'Thruk::Plugin::BP'}->{'worker'} && $c->config->{'Thruk::Plugin::BP'}->{'worker'} == 0) {
+          $cron_entries = [];
+    }
+
     Thruk::Utils::update_cron_file($c, 'business process', $cron_entries);
     return 1;
 }
