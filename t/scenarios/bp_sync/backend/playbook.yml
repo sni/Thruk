@@ -1,0 +1,30 @@
+---
+- hosts: all
+  tasks:
+  - shell: "sudo su - demo -c 'set_admin_password omd'"
+  - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set LIVESTATUS_TCP on"
+  - copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
+  - name: copy naemon example.cfg
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.tbp
+      dest: /omd/sites/demo/etc/thruk/bp/
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "thruk bp commit"
+  - name: wait for ssh config to become available
+    wait_for:
+      path: /mnt/shared/.ssh
+  - shell: sudo su - demo -c "cp -rp /mnt/shared/.ssh ."

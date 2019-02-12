@@ -1,0 +1,34 @@
+---
+- hosts: all
+  tasks:
+  - shell: "/usr/sbin/sshd-keygen"
+  - shell: "/usr/sbin/sshd"
+  - shell: "chown demo: /mnt/shared/"
+  - shell: sudo su - demo -c "mkdir .ssh && chmod 700 .ssh && ssh-keygen -t rsa -f .ssh/id_rsa -N '' && cp .ssh/id_rsa.pub .ssh/authorized_keys && chmod 600 .ssh/authorized_keys && cp -rp .ssh /mnt/shared/"
+  - name: Copy commit ref to file
+    copy:
+      content: "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null\n  LogLevel QUIET\n"
+      dest: /omd/sites/demo/.ssh/config
+      owner: demo
+      group: demo
+      mode: 0600
+  - shell: "cp -p /omd/sites/demo/.ssh/config /mnt/shared/.ssh"
+  - shell: "chown -R demo: /mnt/shared/"
+  - shell: "echo 'demo' | passwd --stdin demo"
+  - shell: "sudo su - demo -c 'set_admin_password omd'"
+  - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set APACHE_MODE own"
+  - copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

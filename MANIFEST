@@ -1797,6 +1797,7 @@ t/610-scenario-backend_icinga2.t
 t/610-scenario-backend_naemon.t
 t/610-scenario-backend_shinken.t
 t/610-scenario-backend_tls_livestatus.t
+t/610-scenario-bp_sync.t
 t/610-scenario-cli_api.t
 t/610-scenario-cluster_e2e.t
 t/610-scenario-config_tool.t
@@ -1944,6 +1945,17 @@ t/scenarios/backend_tls_livestatus/omd/xinetd.conf
 t/scenarios/backend_tls_livestatus/t/300-controller_tac.t
 t/scenarios/backend_tls_livestatus/thruk.conf
 t/scenarios/backend_tls_livestatus/thruk_local.conf
+t/scenarios/bp_sync/backend/1.tbp
+t/scenarios/bp_sync/backend/Dockerfile
+t/scenarios/bp_sync/backend/playbook.yml
+t/scenarios/bp_sync/backend/thruk_local.conf
+t/scenarios/bp_sync/docker-compose.yml
+t/scenarios/bp_sync/frontend/Dockerfile
+t/scenarios/bp_sync/frontend/playbook.yml
+t/scenarios/bp_sync/frontend/thruk_local.conf
+t/scenarios/bp_sync/Makefile
+t/scenarios/bp_sync/README
+t/scenarios/bp_sync/t/100-bp-sync.t
 t/scenarios/cli_api/docker-compose.yml
 t/scenarios/cli_api/Makefile
 t/scenarios/cli_api/omd/1.rpt

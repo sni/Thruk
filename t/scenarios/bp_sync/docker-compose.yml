@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  frontend:
+    build: frontend/
+    ports:
+        - 60080:80
+        - 60443:443
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ../../../:/thruk:ro
+        - shared:/mnt/shared
+
+  backend:
+    build: backend/
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ../../../:/thruk:ro
+        - shared:/mnt/shared
+
+volumes:
+  shared:
