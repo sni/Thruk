@@ -63,6 +63,8 @@ sub index {
     my $id = $c->req->parameters->{'bp'} || '';
     if($id =~ m/^([^:]+):(\d+)$/mx) { $bp_backend_id = $1; $id = $2; }
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
+    # backend id is only relevant if there are multiple backends
+    if(scalar @{$c->{'db'}->get_peers} <= 1) { $bp_backend_id = undef; }
     my $nodeid = $c->req->parameters->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
