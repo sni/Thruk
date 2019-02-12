@@ -234,6 +234,15 @@ sub cmd {
     alarm(0);
     _debug("all worker finished");
     my $elapsed = tv_interval($t0);
+
+    # run post hook
+    if($c->config->{'Thruk::Plugin::BP'}->{'post_refresh_cmd'}) {
+        my($rc, $out) = Thruk::Utils::IO::cmd($c, $c->config->{'Thruk::Plugin::BP'}->{'post_refresh_cmd'});
+        if($rc != 0) {
+            _error("bp post hook exited with rc: ".$rc.': '.$out);
+        }
+    }
+
     $c->stats->profile(end => "_cmd_bp($action)");
 
     if($rc == 0) {

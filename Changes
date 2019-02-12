@@ -13,6 +13,7 @@ next:
             - fix zooming in chrome
             - disable automatic calculation by setting refresh_interval to zero
             - add read_only mode
+            - add `post_refresh_cmd` hook
           - Panorama:
             - add direct link with tabs
             - add theme selector to grafana images

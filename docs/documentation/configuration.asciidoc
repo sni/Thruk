@@ -2666,6 +2666,7 @@ Configuration Example:
     objects_reload_cmd     = /etc/init.d/naemon reload
     #pre_save_cmd          =
     #post_save_cmd         =
+    #post_refresh_cmd      =
     refresh_interval       = 1
     #favorite_custom_function = echo ; echo_function
     #worker                = 5
@@ -2706,6 +2707,10 @@ Along with the default environment variables set, there are two extra variables 
 Run this hook command after saving a business process.
 The same environment variables will be used as in the pre_save_cmd, except
 stage is set to 'post'.
+
+=== post_refresh_cmd
+Run this hook command after refreshing business processes is completed. Ex.:
+after every cron run of `thruk bp all`.
 
 === refresh_interval
 Refresh interval defines how often business processes
