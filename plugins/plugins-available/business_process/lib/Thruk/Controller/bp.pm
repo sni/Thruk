@@ -340,7 +340,7 @@ sub index {
                 return $c->redirect_to($proxyurl);
             }
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process or no permissions', code => 404 });
-            return _bp_start_page($c);
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
         }
         my $bp = $bps->[0];
         $c->stash->{'bp'} = $bp;
