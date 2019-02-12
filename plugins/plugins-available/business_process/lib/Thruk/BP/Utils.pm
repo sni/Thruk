@@ -232,9 +232,22 @@ sub save_bp_objects {
             my $peer_key = $Thruk::Backend::Pool::peer_order->[0];
             $result_backend = $c->{'db'}->get_peer_by_key($peer_key)->peer_name;
         }
+
         # and reload
         my $time = time();
         my $pkey;
+        if($result_backend) {
+            my $peer = $c->{'db'}->get_peer_by_key($result_backend);
+            if($peer) {
+                $pkey = $peer->peer_key();
+                if(!$c->stash->{'has_proc_info'} || !$c->stash->{'backend_detail'}->{$pkey}) {
+                    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+                }
+                if(!defined $c->stash->{'backend_detail'}->{$pkey} || !$c->stash->{'backend_detail'}->{$pkey}->{'running'}) {
+                    return(0, "reload skipped, backend offline");
+                }
+            }
+        }
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         my $reloaded = 0;
         if($cmd) {
@@ -243,9 +256,7 @@ sub save_bp_objects {
         }
         elsif($result_backend) {
             # restart by livestatus
-            my $peer = $c->{'db'}->get_peer_by_key($result_backend);
-            die("no backend found by name ".$result_backend) unless $peer;
-            $pkey = $peer->peer_key();
+            die("no backend found by name ".$result_backend) unless $pkey;
             my $options = {
                 'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
                 'backend' => [ $pkey ],
