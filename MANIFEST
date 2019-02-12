@@ -1790,6 +1790,7 @@ t/300-controller_trends.t
 t/300-controller_user.t
 t/400-recurring_downtime.t
 t/600-scenarios.t
+t/610-scenario-auth.t
 t/610-scenario-backend_http.t
 t/610-scenario-backend_icinga.t
 t/610-scenario-backend_icinga2.t
