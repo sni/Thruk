@@ -1820,6 +1820,7 @@ t/610-scenario-logfile_cache_icinga2_ido.t
 t/610-scenario-report_mails_e2e.t
 t/610-scenario-rest_api.t
 t/610-scenario-sakuli_e2e.t
+t/610-scenario-site_menu_multi_tier.t
 t/700-naemon.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
@@ -2276,6 +2277,7 @@ t/scenarios/site_menu_multi_tier/omd/playbook.yml
 t/scenarios/site_menu_multi_tier/omd/test.cfg
 t/scenarios/site_menu_multi_tier/thruk.conf
 t/scenarios/site_menu_multi_tier/thruk_local.conf
+t/scenarios/site_menu_multi_tier/thruk_local.d/sites.conf
 t/test_request
 t/TestUtils.pm
 t/timed_test.sh
