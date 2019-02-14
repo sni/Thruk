@@ -1054,8 +1054,6 @@ sub _replace_with_marker {
     # insecure for loops which do not work in IE8
     @matches = $_[0]  =~ s/(for\s*\(.*\s+in\s+.*\))/JS_ERROR_MARKER2:$1/gmxi;
     @matches = grep {!/^\s*$/} @matches;
-    # for(var key in... is ok
-    @matches = grep {!/var\s+key/} @matches;
     $errors    += scalar @matches;
 
     # jQuery().attr('checked', true) must be .prop now
@@ -1082,7 +1080,7 @@ sub _check_marker {
             fail('found trailing comma in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
-        if($line =~ m/JS_ERROR_MARKER2:/mx and $line !~ m/var\s+key/) {
+        if($line =~ m/JS_ERROR_MARKER2:/mx and $line !~ m/var\s+(peer_key|key|section)/) {
             my $orig = $line;
             $orig =~ s/JS_ERROR_MARKER2://gmx;
             fail('found insecure for loop in '.($file || 'content').' line: '.$x);

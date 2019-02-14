@@ -1117,7 +1117,7 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
                 data: {
                     action:   'site_panel_bookmarks',
                     reorder:  '1',
-                    order:     order,
+                    order:     order
                 }
             });
         }
@@ -1149,7 +1149,7 @@ function create_site_panel_popup_tree_data(d, current, tree) {
             'children': create_site_panel_popup_tree_data(d.sub[sectionname], key, tree),
             'peers': d.sub[sectionname].peers,
             'icon': icon,
-            'selected': selected,
+            'selected': selected
         });
         if(tree) {
             var node  = tree.getNodeByKey(key);
@@ -1220,7 +1220,7 @@ function site_panel_bookmark_save() {
             save:     '1',
             name:      name,
             backends:  backends,
-            sections:  sections,
+            sections:  sections
         },
         success: function(data) {
             jQuery("#site_panel_bookmark_new_save").removeClass("ui-waiting-button").attr('disabled', false).val("save");
