@@ -858,6 +858,7 @@ sub update_site_panel_hashes {
             version          => '',
             data_src_version => '',
             program_start    => '',
+            section          => $backend_detail->{$back}->{'section'},
         };
         if($peer->{'last_online'}) {
             $initial_backends->{$back}->{'last_online'} = time() - $peer->{'last_online'};
@@ -879,8 +880,9 @@ sub update_site_panel_hashes {
     elsif($c->stash->{'sitepanel'} eq 'tree')      { $show_sitepanel = 'tree'; }
     elsif($c->stash->{'sitepanel'} eq 'off')       { $show_sitepanel = 'off'; }
     elsif($c->stash->{'sitepanel'} eq 'auto') {
-        if($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
-        elsif($c->{'db'}->{'sections'}->{'sub'} || scalar @{$backends} >= 10) { $show_sitepanel = 'panel'; }
+        if($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 100)   { $show_sitepanel = 'tree'; }
+        elsif($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
+        elsif($c->{'db'}->{'sections'}->{'sub'} || scalar @{$backends} >= 10)  { $show_sitepanel = 'panel'; }
         elsif(scalar @{$backends} == 1) { $show_sitepanel = 'off'; }
         else { $show_sitepanel = 'list'; }
     }

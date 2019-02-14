@@ -1554,3 +1554,46 @@ SPAN.btn_sitesplus {
 .daterangepicker .todayHighlight {
   border: 2px solid rgb(255, 122, 122) !important;
 }
+
+.site_panel_bookmark_placeholder {
+  display: inline-block;
+  border: 1px dashed grey;
+  background-color: #CCCCCC;
+  height: 10px;
+  width: 40px;
+}
+
+.site_panel_bookmark_small_btn {
+	width: 20px;
+	text-align: center;
+	margin: 0;
+	padding: 0;
+}
+.site_panel_bookmark_small_btn.active {
+  background: #ea0000;
+  color: #fff;
+  font-weight: bold;
+}
+
+#site_panel_sections ul.fancytree-container, #site_panel_sections ul.fancytree-treefocus {
+  font-family: inherit;
+  background-color: inherit;
+  border: 0;
+  border-color: inherit;
+  outline: 0;
+}
+
+#site_panel_sections span.fancytree-selected span.fancytree-title {
+  background-color: inherit;
+  border-color: inherit;
+  border: 0;
+}
+
+#site_panel_sections .fancytree-plain span.fancytree-title {
+  border: 0;
+}
+
+#site_panel_sections span.fancytree-focused span.fancytree-title {
+  background-color: #eff9fe;
+  border-color: #70c0e7;
+}

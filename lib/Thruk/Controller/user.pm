@@ -25,28 +25,8 @@ sub index {
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     $c->stash->{'page'}            = 'conf';
-    $c->stash->{has_jquery_ui}     = 1;
-    $c->stash->{'no_auto_reload'}  = 1;
     $c->stash->{'title'}           = 'User Profile';
     $c->stash->{'infoBoxTitle'}    = 'User Profile';
-
-    $c->stash->{'timezones'}       = Thruk::Utils::get_timezone_data($c, 1);
-    my $found = 0;
-    for my $tz (@{$c->stash->{'timezones'}}) {
-        if($tz->{'text'} eq $c->stash->{'user_tz'}) {
-            $found = 1;
-            last;
-        }
-    }
-    if(!$found) {
-        unshift @{$c->stash->{'timezones'}}, {
-            text   => $c->stash->{'user_tz'},
-            abbr   => '',
-            offset => 0,
-        };
-    }
-
-    Thruk::Utils::ssi_include($c, 'user');
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
@@ -73,12 +53,72 @@ sub index {
             }
             return $c->redirect_to('user.cgi');
         }
+        if($action eq 'site_panel_bookmarks') {
+            if($c->req->parameters->{'save'}) {
+                my $data = Thruk::Utils::get_user_data($c);
+                $data->{'site_panel_bookmarks'} = [] unless $data->{'site_panel_bookmarks'};
+                push @{$data->{'site_panel_bookmarks'}}, {
+                    name     => $c->req->parameters->{'name'},
+                    backends => Thruk::Utils::list($c->req->parameters->{'backends[]'} || []),
+                    sections => Thruk::Utils::list($c->req->parameters->{'sections[]'} || []),
+                };
+                Thruk::Utils::store_user_data($c, $data);
+            }
+            if($c->req->parameters->{'reorder'}) {
+                my $data = Thruk::Utils::get_user_data($c);
+                my $neworder = Thruk::Utils::list($c->req->parameters->{'order[]'});
+                my $bookmarks = [];
+                for my $index (@{$neworder}) {
+                    push @{$bookmarks}, $data->{'site_panel_bookmarks'}->[$index];
+                }
+                $data->{'site_panel_bookmarks'} = $bookmarks;
+                Thruk::Utils::store_user_data($c, $data);
+            }
+            if($c->req->parameters->{'remove'}) {
+                my $data = Thruk::Utils::get_user_data($c);
+                splice @{$data->{'site_panel_bookmarks'}}, $c->req->parameters->{'index'}, 1;
+                Thruk::Utils::store_user_data($c, $data);
+            }
+            return $c->redirect_to('user.cgi');
+        }
     }
 
+    return(user_page($c));
+}
+
+##########################################################
+
+=head2 user_page
+
+    print user index page
+
+=cut
+sub user_page {
+    my($c) = @_;
+
+    $c->stash->{has_jquery_ui}     = 1;
+    $c->stash->{'no_auto_reload'}  = 1;
+    $c->stash->{'timezones'}       = Thruk::Utils::get_timezone_data($c, 1);
+
+    my $found = 0;
+    for my $tz (@{$c->stash->{'timezones'}}) {
+        if($tz->{'text'} eq $c->stash->{'user_tz'}) {
+            $found = 1;
+            last;
+        }
+    }
+    if(!$found) {
+        unshift @{$c->stash->{'timezones'}}, {
+            text   => $c->stash->{'user_tz'},
+            abbr   => '',
+            offset => 0,
+        };
+    }
+
+    Thruk::Utils::ssi_include($c, 'user');
+
     $c->stash->{'profile_user'} = $c->user;
-
     $c->stash->{api_keys} = Thruk::Utils::APIKeys::get_keys($c, $c->stash->{'remote_user'});
-
     $c->stash->{template} = 'user_profile.tt';
 
     return 1;

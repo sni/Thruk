@@ -16,7 +16,6 @@ var additionalParams = new Object();
 var removeParams     = new Object();
 var scrollToPos      = 0;
 var refreshTimer;
-var backendSelTimer;
 var lastRowSelected;
 var lastRowHighlighted;
 var verifyTimer;
@@ -522,6 +521,7 @@ function readCookie(name,c,C,i){
 }
 
 /* page refresh rate */
+var remainingRefresh;
 function setRefreshRate(rate) {
   if(rate >= 0 && rate < 20) {
       // check lastUserInteraction date to not refresh while user is interacting with the page
@@ -530,6 +530,7 @@ function setRefreshRate(rate) {
           rate = 20;
       }
   }
+  remainingRefresh = rate;
   curRefreshVal = rate;
   var obj = document.getElementById('refresh_rate');
   if(refreshPage == 0) {
@@ -774,12 +775,15 @@ function window_location_replace(url) {
     window.location.replace(url);
 }
 
-function get_site_panel_backend_button(id, styles, onclick, section) {
+function get_site_panel_backend_button(id, styles, onclick, section, extraClass) {
     if(!initial_backends[id] || !initial_backends[id]['cls']) { return(""); }
     var cls = initial_backends[id]['cls'];
-    var title = initial_backends[id]['last_error'];
+    var title = initial_backends[id]['name']+": "+initial_backends[id]['last_error'];
+    if(section) {
+        title += "\nSection: "+section.replace(/_/g, "/");
+    }
     if(cls != "DIS") {
-        if(initial_backends[id]['last_online'] && initial_backends[id]['last_online'] > 30) {
+        if(initial_backends[id]['last_online']) {
             title += "\nLast Online: "+duration(initial_backends[id]['last_online'])+" ago";
             if(cls == "UP" && initial_backends[id]['last_error'] != "OK") {
                 cls = "WARN";
@@ -797,7 +801,8 @@ function get_site_panel_backend_button(id, styles, onclick, section) {
         btn += ' onClick="'+onclick+'">';
     }
 
-    return("<div class='backend' style='"+styles+"'>"+btn+"<\/div>");
+    if(!extraClass) { extraClass = ""; }
+    return("<div class='backend "+extraClass+"' style='"+styles+"'>"+btn+"<\/div>");
 }
 
 /* create sites header */
@@ -805,37 +810,26 @@ function dw(txt) {document.write(txt);}
 
 /* create sites popup */
 function create_site_panel_popup() {
-    var panel = ''
-        +'<div class="shadow"><div class="shadowcontent">'
-        +'<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">'
-        +'  <tr>'
-        +'    <th align="center">'
-        +'      <table border=0 cellpadding=0 cellspacing=0 width="100%" style="padding-bottom: 10px;">'
-        +'        <tr>';
-    if(backend_chooser != 'switch') {
-        panel += '      <td width="20"></td>';
-        panel += '      <td width="70"></td>';
-    }
-    panel += '          <td style="padding-right: 20px;">Choose your sites</td>';
-    if(backend_chooser != 'switch') {
-        panel += '      <td align="right" width="70" class="clickable" onclick="toggleAllSections(true);">enable all</td>';
-        panel += '      <td align="left" width="20"><input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();"></td>';
-    }
-    panel += '        </tr>';
-    panel += '      </table>';
-    panel += '    </th>';
-    panel += '  </tr>';
-    panel += '</table>';
-
+    panel = '';
     if(show_sitepanel == "panel") {
         panel += create_site_panel_popup_panel();
     }
     else if(show_sitepanel == "collapsed") {
         panel += create_site_panel_popup_collapsed();
     }
+    else if(show_sitepanel == "tree") {
+        panel += create_site_panel_popup_tree();
+    }
+    document.getElementById('site_panel_content').innerHTML = panel;
 
-    panel += '<\/div><\/div>';
-    document.getElementById('site_panel').innerHTML = panel;
+    if(show_sitepanel == "tree") {
+        create_site_panel_popup_tree_populate();
+    }
+
+    if(current_backend_states == undefined) {
+        current_backend_states = {};
+        for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
+    }
 }
 
 function create_site_panel_popup_panel() {
@@ -1001,7 +995,6 @@ function add_site_panel_popup_collapsed_peers(section, prefix) {
         panel += prefix.join(' -&gt; ');
         panel += '      </b></a>:';
         panel += '    </td></tr></table>';
-
         jQuery(section["peers"]).each(function(i, pd) {
             panel += get_site_panel_backend_button(pd, "", "toggleBackend('"+pd+"')", prefixCls);
         });
@@ -1018,10 +1011,278 @@ function add_site_panel_popup_collapsed_peers(section, prefix) {
     return(panel);
 }
 
+function create_site_panel_popup_tree() {
+    panel  = '<div class="site_panel_sections" style="overflow: auto; min-height: 200px; border-top: 1px dashed grey;">';
+    panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
+    panel += '  <tr>';
+    panel += '    <td valign="top" width=200>';
+    panel += '      <div id="site_panel_sections">';
+    panel += '      <\/div>';
+    panel += '    <\/td>';
+    panel += '    <td valign="top" style="border-left: 1px dashed grey;">';
+    panel += '      <div style="min-height: 200px; min-width: 890px; margin-left: 3px;">';
+    jQuery(keys(initial_backends).sort()).each(function(i, peer_key) {
+        var section = initial_backends[peer_key].section.replace(/\//g, '_');
+        panel += get_site_panel_backend_button(peer_key, "", "toggleBackend('"+peer_key+"')", section, "tree_peer_btn");
+    });
+    panel += '      <\/div>';
+    panel += '    <\/td>';
+    panel += '  </tr>';
+    panel += '  <tr>';
+    panel += '<\/div>';
+    return(panel);
+}
+
+function create_site_panel_popup_tree_populate() {
+    jQuery("DIV.tree_peer_btn").hide();
+    if(!has_jquery_ui) {
+        load_jquery_ui(create_site_panel_popup_tree_populate);
+        return;
+    }
+
+    create_site_panel_popup_tree_make_bookmarks_sortable();
+
+    var site_tree_data = create_site_panel_popup_tree_data(sites, "");
+
+    jQuery("#site_panel_sections").fancytree({
+        activeVisible: true, // Make sure, active nodes are visible (expanded).
+        aria: false, // Enable WAI-ARIA support.
+        autoActivate: false, // Automatically activate a node when it is focused (using keys).
+        autoCollapse: true, // Automatically collapse all siblings, when a node is expanded.
+        autoScroll: false, // Automatically scroll nodes into visible area.
+        clickFolderMode: 2, // 1:activate, 2:expand, 3:activate and expand, 4:activate (dblclick expands)
+        checkbox: true, // Show checkboxes.
+        debugLevel: 0, // 0:quiet, 1:normal, 2:debug
+        disabled: false, // Disable control
+        focusOnSelect: true,
+        generateIds: false, // Generate id attributes like <span id='fancytree-id-KEY'>
+        idPrefix: "ft_", // Used to generate node id´s like <span id='fancytree-id-<key>'>.
+        icons: true, // Display node icons.
+        keyboard: false, // Support keyboard navigation.
+        keyPathSeparator: "/", // Used by node.getKeyPath() and tree.loadKeyPath().
+        minExpandLevel: 1, // 1: root node is not collapsible
+        selectMode: 3, // 1:single, 2:multi, 3:multi-hier
+        tabbable: true, // Whole tree behaves as one single control
+        source: site_tree_data,
+        click: function(event, data){
+            resetRefresh();
+            data.node.setActive();
+            jQuery("DIV.tree_peer_btn").hide();
+            jQuery(data.node.data.peers).each(function(i, peer_key) {
+                jQuery("#button_"+peer_key).parent().show();
+            });
+        },
+        select: function(event, data){
+            var state = data.node.isSelected();
+            data.node.setActive();
+            var section = data.node.key.replace(/^\//, "");
+            var regex   = new RegExp("^"+section+"($|\/)");
+            for(var peer_key in initial_backends) {
+                var peer = initial_backends[peer_key];
+                if(peer.section.match(regex)) {
+                    toggleBackend(peer_key, state, true);
+                }
+            }
+            updateSitePanelCheckBox();
+            resetRefresh();
+        }
+    });
+}
+
+function create_site_panel_popup_tree_make_bookmarks_sortable() {
+    if(!has_jquery_ui) {
+        load_jquery_ui(create_site_panel_popup_tree_make_bookmarks_sortable);
+        return;
+    }
+
+    jQuery('#site_panel_bookmark_list').sortable({
+        items                : 'INPUT',
+        helper               : 'clone',
+        tolerance            : 'pointer',
+        cursor               : 'pointer',
+        cancel               : '', // would conflict with buttons otherwise
+        forcePlaceholderSize : false,
+        forceHelperSize      : false,
+        axis                 : 'x',
+        distance             : 5,
+        placeholder          : "site_panel_bookmark_placeholder",
+        update               : function(event, ui) {
+            var order = [];
+            jQuery("#site_panel_bookmark_list > INPUT").each(function(i, el) {
+                order.push(el.dataset["index"]);
+            });
+            jQuery.ajax({
+                url: url_prefix + 'cgi-bin/user.cgi',
+                type: 'POST',
+                data: {
+                    action:   'site_panel_bookmarks',
+                    reorder:  '1',
+                    order:     order,
+                }
+            });
+        }
+    });
+    return;
+}
+
+function create_site_panel_popup_tree_data(d, current, tree) {
+    var nodes = [];
+    jQuery(keys(d.sub).sort()).each(function(i, sectionname) {
+        var icon;
+        icon = "../images/folder_green.png";
+        if(d.sub[sectionname].down > 0) {
+            icon = "../images/folder_red.png";
+        } else if(d.sub[sectionname].up == 0) {
+            icon = "../images/folder_gray.png";
+        }
+        var selected;
+        if(d.sub[sectionname].disabled == 0) {
+            selected = true; // enabled
+        } else if(d.sub[sectionname].disabled == d.sub[sectionname].total) {
+            selected = false; // off
+        }
+        var key = current + '/' + sectionname;
+        nodes.push({
+            'key': key,
+            'title': sectionname,
+            'folder': true,
+            'children': create_site_panel_popup_tree_data(d.sub[sectionname], key, tree),
+            'peers': d.sub[sectionname].peers,
+            'icon': icon,
+            'selected': selected,
+        });
+        if(tree) {
+            var node  = tree.getNodeByKey(key);
+            node.icon = icon;
+            if(selected === true) {
+                node.setSelected(true, {noEvents: true});
+            }
+            if(selected === false) {
+                node.setSelected(false, {noEvents: true});
+            }
+            node.renderTitle();
+        }
+    });
+    return(nodes);
+}
+
+function site_panel_search() {
+    var val = jQuery("#site_panel_search").val();
+    jQuery("DIV.tree_peer_btn").hide();
+    if(val == "") {
+        return;
+    }
+    var searches = val.split(/\s+/);
+    for(var key in initial_backends) {
+        var site = initial_backends[key];
+        var name = site.section+'/'+site.name;
+        var show = true;
+        jQuery(searches).each(function(i, v) {
+            if(v == "") { return true; }
+            if(!name.match(v)) {
+                show = false;
+                return false;
+            }
+        });
+        if(show) {
+            jQuery("#button_"+key).parent().show();
+        }
+    }
+}
+
+function site_panel_bookmark_save() {
+    jQuery("#site_panel_bookmark_new_save").addClass("ui-waiting-button").attr('disabled', true).val("");
+    var name = jQuery("#site_panel_bookmark_new").val();
+
+    var sections = [];
+    var backends = [];
+    for(var key in current_backend_states) {
+        if(current_backend_states[key] != 2) {
+            backends.push(key);
+        }
+    }
+    var _gather_sections = function(site, sections, lvl) {
+        for(var key in site.sub) {
+            var newLvl = (lvl == "" ? key : lvl+'/'+key);
+            if(site.sub[key].disabled == 0) {
+                sections.push(newLvl);
+            } else {
+                _gather_sections(site.sub[key], sections, newLvl);
+            }
+        }
+    }
+    _gather_sections(sites, sections, "");
+    jQuery.ajax({
+        url: url_prefix + 'cgi-bin/user.cgi',
+        type: 'POST',
+        data: {
+            action:   'site_panel_bookmarks',
+            save:     '1',
+            name:      name,
+            backends:  backends,
+            sections:  sections,
+        },
+        success: function(data) {
+            jQuery("#site_panel_bookmark_new_save").removeClass("ui-waiting-button").attr('disabled', false).val("save");
+            create_site_panel_popup_tree_make_bookmarks_sortable();
+            jQuery("#site_panel_bookmark_new").val("").hide();
+            jQuery("#site_panel_bookmark_new_save").hide();
+            jQuery("#site_panel_bookmark_plus").show();
+            jQuery('#site_panel_bookmark_list_container').load(url_prefix + 'cgi-bin/user.cgi #site_panel_bookmark_list',
+                undefined,
+                function() {
+                    create_site_panel_popup_tree_make_bookmarks_sortable();
+                });
+        }
+    });
+}
+
+function setBackends(backends, sections, btn) {
+    // if delete button is pressed, remove this item
+    if(jQuery('#site_panel_bookmark_delete').hasClass("active")) {
+        jQuery.ajax({
+            url: url_prefix + 'cgi-bin/user.cgi',
+            type: 'POST',
+            data: {
+                action:   'site_panel_bookmarks',
+                remove:   '1',
+                index:     btn.dataset["index"]
+            },
+            success: function(data) {
+                jQuery(btn).remove();
+            }
+        });
+        return;
+    }
+
+    for(var key in initial_backends) {
+        toggleBackend(key, 0, true);
+    }
+    jQuery(backends).each(function(i, key) {
+        if(initial_backends[key] != undefined) {
+            toggleBackend(key, 1, true);
+        }
+    });
+    var sectionsEnabled = {};
+    jQuery(sections).each(function(i, key) {
+        for(var peer_key in initial_backends) {
+            var regex = new RegExp('^'+key.replace('/', '\/')+'(/|$)');
+            if(initial_backends[peer_key].section.match(regex)) {
+                sectionsEnabled[initial_backends[peer_key].section] = true;
+            }
+        }
+        sectionsEnabled[key] = true;
+    });
+    for(var section in sectionsEnabled) {
+        toggleSection(section.split('/'),1);
+    }
+    updateSitePanelCheckBox();
+}
+
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
-    if(!document.getElementById('site_panel').innerHTML) {
+    if(!document.getElementById('site_panel_content').innerHTML) {
         create_site_panel_popup();
     }
     var enabled = toggleElement('site_panel', undefined, true, 'DIV#site_panel DIV.shadowcontent', toggleSitePanel);
@@ -1042,9 +1303,8 @@ function toggleSitePanel() {
         div.style.width = '';
         // immediately reload if there were changes
         if(additionalParams['reload_nav']) {
-            window.clearTimeout(backendSelTimer);
             removeParams['backends'] = true;
-            backendSelTimer  = window.setTimeout('reloadPage()', 50);
+            window.setTimeout('reloadPage()', 50);
         }
     }
 
@@ -1096,14 +1356,13 @@ function toggleBackend(backend, state, skip_update) {
   additionalParams['reload_nav'] = 1;
   /* save current selected backends in session cookie */
   cookieSave('thruk_backends', toQueryString(current_backend_states));
-  window.clearTimeout(backendSelTimer);
   // remove &backends=... from url, they would overwrite cookie settings
   removeParams['backends'] = true;
 
-  var delay = 2500;
-  if(show_sitepanel == 'panel')     { delay =  3500; }
-  if(show_sitepanel == 'collapsed') { delay = 10000; }
-  backendSelTimer  = window.setTimeout('reloadPage()', delay);
+  var delay = 3;
+  if(show_sitepanel == 'collapsed') { delay = 10; }
+  if(show_sitepanel == 'tree')      { delay = 30; }
+  setRefreshRate(delay);
 
   if(skip_update == undefined || !skip_update) {
     updateSitePanelCheckBox();
@@ -1145,8 +1404,7 @@ function toggleSubSectionVisibility(subsection) {
 }
 
 /* toggle all backends for this section */
-function toggleSection(sections) {
-    var first_state = undefined;
+function toggleSection(sections, first_state) {
     var section = toClsNameList(sections);
     var regex   = new RegExp('section_'+section+'(_|\\\s|$)');
     jQuery('TABLE.site_panel INPUT[type=button]').each(function(i, b) {
@@ -1195,6 +1453,16 @@ function updateSitePanelCheckBox() {
         jQuery('#all_backends').prop('checked', false);
     } else {
         jQuery('#all_backends').prop('checked', true);
+    }
+
+    if(show_sitepanel == "tree") {
+        var tree;
+        try {
+            tree = jQuery("#site_panel_sections").fancytree("getTree");
+        } catch(e) {}
+        if(tree) {
+            create_site_panel_popup_tree_data(sites, "", tree);
+        }
     }
 }
 
