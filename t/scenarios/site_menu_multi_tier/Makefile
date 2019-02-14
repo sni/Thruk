@@ -1,5 +1,5 @@
 include ../Makefile.common
-EXPECTED_BACKENDS=10
+EXPECTED_BACKENDS=9
 
 extra_wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
