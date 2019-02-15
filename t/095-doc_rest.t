@@ -34,6 +34,8 @@ for my $cmd (@{$cmds}) {
     is($?, 0, "cmd exited with 0") or die("cmd failed: ".$cmd);
 }
 
-unlink('docs/documentation/rest.asciidoc.tst');
-unlink('docs/documentation/rest_commands.asciidoc.tst');
-unlink('cmd.pm.tst');
+END {
+    unlink('docs/documentation/rest.asciidoc.tst');
+    unlink('docs/documentation/rest_commands.asciidoc.tst');
+    unlink('cmd.pm.tst');
+};
