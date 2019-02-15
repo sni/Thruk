@@ -5,6 +5,8 @@ next:
           - add `tree` sitepanel for very large setups with many sites
           - fix offset calculation in rest api
           - fix page not found issue when using browser history back
+          - REST:
+            - add aggregation function support
           - Config Tool:
             - add authorization tab to contacts and contactgroups
           - Business Process:

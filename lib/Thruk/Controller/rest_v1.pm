@@ -42,6 +42,10 @@ my $op_translation_words      = {
     'lte'    => '<=',
 };
 
+use constant {
+    PRE_STATS    =>  1,
+    POST_STATS   =>  2,
+};
 
 ##########################################################
 sub index {
@@ -364,9 +368,12 @@ sub _post_processing {
     if(ref $data eq 'ARRAY') {
         if($c->req->method eq 'GET') {
             # Filtering
-            $data = _apply_filter($c, $data);
+            $data = _apply_filter($c, $data, PRE_STATS);
+            return($data) if _is_failed($data);
+
+            # calculate statistics
+            $data = _apply_stats($c, $data);
         }
-        return($data) if _is_failed($data);
 
         # Sorting
         $data = _apply_sort($c, $data);
@@ -403,7 +410,7 @@ sub _post_processing {
 
 ##########################################################
 sub _get_filter {
-    my($c) = @_;
+    my($c, $stage) = @_;
     my $filter = [];
 
     my $reserved = Thruk::Utils::array2hash($reserved_query_parameters);
@@ -416,6 +423,11 @@ sub _get_filter {
         if($key =~ m/^(.+)\[(.*?)\]$/mx) {
             $key = $1;
             $op  = lc($2);
+        }
+        if($stage == PRE_STATS) {
+            next if $key =~ m/\([^)]+\)$/mx;
+        } elsif($stage == POST_STATS) {
+            next if $key !~ m/\([^)]+\)$/mx;
         }
         $op = $op_translation_words->{$op} if $op_translation_words->{$op};
         for my $val (@vals) {
@@ -438,10 +450,10 @@ sub _append_lexical_filter {
 
 ##########################################################
 sub _apply_filter {
-    my($c, $data) = @_;
+    my($c, $data, $stage) = @_;
 
     my @filtered;
-    my $filter = _get_filter($c);
+    my $filter = _get_filter($c, $stage);
     my $nr     = 1;
     my $missed = {};
     for my $d (@{$data}) {
@@ -461,12 +473,112 @@ sub _apply_filter {
     if(scalar @{$missing_keys} > 0) {
         return({
             'message'     => 'possible typo in filter',
-            'description' => "no datarow has a attribute named: ".join(", ", @{$missing_keys}),
+            'description' => "no datarow has attribute(s) named: ".join(", ", @{$missing_keys}),
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
         });
     }
     return \@filtered;
+}
+
+##########################################################
+sub _apply_stats {
+    my($c, $data) = @_;
+    return($data) unless $c->req->parameters->{'columns'};
+
+    my $new_columns   = [];
+    my $stats_columns = [];
+    my $group_columns = [];
+    for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
+        for my $col (split(/\s*,\s*/mx, $col)) {
+            if($col =~ m/^(.*)\(([^\)]+)\)$/mx) {
+                push @{$stats_columns}, { op => $1, col => $2 };
+                push @{$new_columns}, $col;
+            } else {
+                push @{$group_columns}, $col;
+            }
+        }
+    }
+    return($data) unless scalar @{$stats_columns} > 0;
+    unshift @{$new_columns}, ':KEY' if scalar @{$group_columns} > 0;
+    $c->req->parameters->{'columns'} = $new_columns;
+
+    my $result = {};
+    my $num_stats = scalar @{$stats_columns};
+    for my $d (@{$data}) {
+        my $key = "";
+        for my $col (@{$group_columns}) {
+            $key .= ';'.($d->{$col} // '');
+        }
+        my $entry = $result->{$key};
+        if(!$entry) {
+            $entry = {
+                count   => 0,
+                columns => [],
+            };
+            for my $col (@{$stats_columns}) {
+                if($col->{'op'} eq 'sum') {
+                    push @{$entry->{'columns'}}, 0;
+                } else {
+                    push @{$entry->{'columns'}}, undef;
+                }
+            }
+            $result->{$key} = $entry;
+        }
+        $entry->{'count'}++;
+        for(my $x = 0; $x < $num_stats; $x++) {
+            my $col = $stats_columns->[$x];
+            my $val = $d->{$col->{'col'}};
+            if(!Thruk::Backend::Manager::looks_like_number($val)) {
+                next;
+            }
+            if($col->{'op'} eq 'sum' || $col->{'op'} eq 'avg') {
+                $entry->{'columns'}->[$x] += $val;
+            }
+            elsif($col->{'op'} eq 'min') {
+                if(!defined $entry->{'columns'}->[$x] || $entry->{'columns'}->[$x] > $val) {
+                    $entry->{'columns'}->[$x] = $val;
+                }
+            }
+            elsif($col->{'op'} eq 'max') {
+                if(!defined $entry->{'columns'}->[$x] || $entry->{'columns'}->[$x] < $val) {
+                    $entry->{'columns'}->[$x] = $val;
+                }
+            }
+        }
+    }
+    $data = [];
+    for my $key (sort keys %{$result}) {
+        my $result_row = $result->{$key};
+        my $row = {};
+        $key =~ s/^;//gmx;
+        $row->{':KEY'} = $key;
+        for(my $x = 0; $x < $num_stats; $x++) {
+            my $col = $stats_columns->[$x];
+            my $result_key = $col->{'op'}.'('.$col->{'col'}.')';
+            my $val;
+            if($col->{'op'} eq 'avg') {
+                if($result_row->{'count'} > 0 && defined $result_row->{'columns'}->[$x]) {
+                    $val = $result_row->{'columns'}->[$x] / $result_row->{'count'};
+                }
+            }
+            elsif($col->{'op'} eq 'count') {
+                $val = $result_row->{'count'};
+            }
+            else {
+                $val = $result_row->{'columns'}->[$x];
+            }
+            $row->{$result_key} = $val;
+        }
+        push @{$data}, $row;
+    }
+
+    $data = _apply_filter($c, $data, POST_STATS);
+
+    if(scalar @{$group_columns} == 0) {
+        $data = $data->[0];
+    }
+    return($data);
 }
 
 ##########################################################
@@ -487,6 +599,7 @@ sub get_request_columns {
     for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
         push @{$columns}, split(/\s*,\s*/mx, $col);
     }
+    $columns = Thruk::Utils::array_uniq($columns);
     return($columns);
 }
 
@@ -503,7 +616,7 @@ sub get_filter_columns {
     my($c) = @_;
 
     my $columns = {};
-    my $filter = _get_filter($c);
+    my $filter = _get_filter($c, PRE_STATS);
     _set_filter_keys($filter, $columns);
 
     return([sort keys %{$columns}]);
@@ -725,7 +838,7 @@ sub _livestatus_filter {
             confess("unsupported type: ".$ref_columns);
         }
     }
-    my $filter = _get_filter($c);
+    my $filter = _get_filter($c, PRE_STATS);
     _fixup_livestatus_filter($filter, $ref_columns);
     return $filter;
 }

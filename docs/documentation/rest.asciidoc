@@ -228,6 +228,32 @@ ex.: return name and state for all hosts:
 ------
 
 
+== Aggregation Functions
+
+Aggregation functions can be used to get statistical information.
+
+Available aggregaton functions are:
+
+  * `count`: total number of matches
+  * `avg`: calculated average for numerical columns
+  * `sum`: calculated sum for numerical columns
+  * `min`: calculated minimum value for numerical columns
+  * `max`: calculated maximum value for numerical columns
+
+ex.: return average latency over all hosts
+
+------
+  %> thruk r '/hosts?columns=avg(latency)'
+------
+
+The query can include group by columns without aggregations functions,
+
+ex.: list average execution time over all services grouped by state.
+
+------
+  %> thruk r '/services?columns=avg(execution_time),state&sort=avg(execution_time)'
+------
+
 == Backends / Sites
 
 If you have multiple sites connected to Thruk, you may want to talk only to
@@ -1446,4 +1472,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
