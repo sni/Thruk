@@ -374,7 +374,9 @@ sub _post_processing {
             # calculate statistics
             $data = _apply_stats($c, $data);
         }
+    }
 
+    if(ref $data eq 'ARRAY') {
         # Sorting
         $data = _apply_sort($c, $data);
         return($data) if _is_failed($data);

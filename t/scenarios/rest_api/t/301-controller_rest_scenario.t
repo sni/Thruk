@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 108;
+    plan tests => 117;
 
     use lib('t');
     require TestUtils;
@@ -99,4 +99,12 @@ for my $test (@{$pages}) {
     my $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
     ok(scalar @{$tstdata} > 0, "got result");
     ok(defined $tstdata->[0]->{':KEY'}, "got result");
+
+    $page = TestUtils::test_page(
+        url => '/thruk/r/hosts?columns=min(state),max(state),avg(state),count(state),sum(state)',
+    );
+    $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
+    is(scalar keys %{$tstdata}, 5, "got result");
+    is($tstdata->{'min(state)'}, 0, "got min state");
+    is($tstdata->{'count(state)'}, 2, "got count state");
 };
