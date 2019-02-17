@@ -437,7 +437,9 @@ sub _get_filter {
         }
     }
 
-    _append_lexical_filter($filter, $c->req->parameters->{'q'}) if $c->req->parameters->{'q'};
+    if($stage == PRE_STATS) {
+        _append_lexical_filter($filter, $c->req->parameters->{'q'}) if $c->req->parameters->{'q'};
+    }
 
     return $filter;
 }
