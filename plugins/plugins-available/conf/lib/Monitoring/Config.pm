@@ -1235,7 +1235,7 @@ sub clone_refs {
     if($incoming) {
         for my $type (keys %{$incoming}) {
             for my $name (keys %{$incoming->{$type}}) {
-                my $ref_id = $incoming->{$type}->{$name};
+                my $ref_id = $incoming->{$type}->{$name}->{'id'};
                 my $ref    = $self->get_object_by_id($ref_id);
                 if(!$test_mode && $ref->{'file'}->{'readonly'}) {
                     next;
@@ -1285,7 +1285,10 @@ sub gather_references {
         $incoming->{$type} = {};
         for my $id (keys %{$refs->{$type}}) {
             my $obj = $self->get_object_by_id($id);
-            $incoming->{$type}->{$obj->get_name()} = $id;
+            $incoming->{$type}->{$obj->get_name()} = {
+                id       => $id,
+                readonly => $obj->{'file'}->readonly(),
+            };
         }
     }
 

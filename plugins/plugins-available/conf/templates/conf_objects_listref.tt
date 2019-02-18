@@ -30,15 +30,16 @@
     <td class='dataVal'>
       <ul [% IF force_delete %]style="padding-left: 15px;"[% END %]>
       [% FOREACH name = incoming.$t.keys.sort %]
-        [% oid = incoming.$t.$name %]
+        [% inc_ref = incoming.$t.$name %]
         [% IF force_delete %]
           <li style="list-style: none;">
-            <input type="checkbox" name="ref" value="[% oid %]" checked>
+            <input type="checkbox" name="ref" value="[% inc_ref.id %]" [% IF inc_ref.readonly %]disabled[% ELSE %]checked[% END %]>
             <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% name %]</a>
-            <a href="conf.cgi?sub=objects&amp;data.id=[% oid %]"><img src="[% url_prefix %]themes/[% theme %]/images/link.png" style="vertical-align: middle;"></a>
+            <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]"><img src="[% url_prefix %]themes/[% theme %]/images/link.png" style="vertical-align: middle;"></a>
+            [% IF inc_ref.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
           </li>
         [% ELSE %]
-          <li><a href="conf.cgi?sub=objects&amp;data.id=[% oid %]">[% name %]</a></li>
+          <li><a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name %]</a></li>
         [% END %]
       [% END %]
       </ul>
@@ -51,9 +52,9 @@
     <td class='dataVal'>
       select
       <input type="checkbox" name="none" value="">
-      <a href="#" onclick="jQuery('input[name=ref]').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
+      <a href="#" onclick="jQuery('input[name=ref]').not(':disabled').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
       <input type="checkbox" name="all" value="" checked>
-      <a href="#" onclick="jQuery('input[name=ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">all</a>
+      <a href="#" onclick="jQuery('input[name=ref]').not(':disabled').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">all</a>
     </td>
   </tr>
   [% END %]
