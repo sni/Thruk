@@ -12,9 +12,9 @@ BEGIN {
 $ENV{'TEST_MODE'} = 1;
 my $cmds = [
     './script/thruk_update_docs_rest.pl',
-    'diff -bNuh docs/documentation/rest.asciidoc docs/documentation/rest.asciidoc.tst',
-    'diff -bNuh docs/documentation/rest_commands.asciidoc docs/documentation/rest_commands.asciidoc.tst',
-    'diff -bNuh lib/Thruk/Controller/Rest/V1/cmd.pm cmd.pm.tst',
+    'diff -Bbwu docs/documentation/rest.asciidoc docs/documentation/rest.asciidoc.tst',
+    'diff -Bbwu docs/documentation/rest_commands.asciidoc docs/documentation/rest_commands.asciidoc.tst',
+    'diff -Bbwu lib/Thruk/Controller/Rest/V1/cmd.pm cmd.pm.tst',
 ];
 for my $cmd (@{$cmds}) {
     open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
