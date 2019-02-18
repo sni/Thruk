@@ -4,6 +4,10 @@
   - shell: "sudo su - demo -c 'set_admin_password omd'"
   - shell: "omd config demo set TMPFS off"
   - shell: "omd config demo set LIVESTATUS_TCP on"
+  - shell: "omd config demo set NAGFLUX on"
+  - shell: "omd config demo set INFLUXDB on"
+  - shell: "omd config demo set PNP4NAGIOS off"
+  - shell: "omd config demo set INFLUXDB_HTTP_TCP_PORT :8086"
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
@@ -18,6 +22,7 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       owner: demo
       group: demo
+  - shell: sed -e "s/-pnp/-perf/g" -i /omd/sites/demo/etc/naemon/conf.d/example.cfg
   - copy:
       src: /root/1.tbp
       dest: /omd/sites/demo/etc/thruk/bp/
