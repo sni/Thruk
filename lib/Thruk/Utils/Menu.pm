@@ -353,30 +353,24 @@ sub _renew_navigation {
 
     $c->stash->{user_menu_items} = {};
     my $user_items;
-    my $userdata = $c->stash->{user_data};
-    if(defined $userdata and defined $userdata->{'bookmarks'}) {
-        for my $section (keys %{$userdata->{'bookmarks'}}) {
-            for my $item (@{$userdata->{'bookmarks'}->{$section}}) {
-                my $item = {
-                    name => $item->[0],
-                    href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
-                };
-                $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
-                push @{$user_items}, [ $section, $item ];
-            }
-        }
-    }
-
-    my $globaldata = $c->stash->{global_user_data};
-    if(defined $globaldata and defined $globaldata->{'bookmarks'}) {
-        for my $section (keys %{$globaldata->{'bookmarks'}}) {
-            for my $item (@{$globaldata->{'bookmarks'}->{$section}}) {
-                my $item = {
-                    name => $item->[0],
-                    href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
-                };
-                $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
-                push @{$user_items}, [ $section, $item ];
+    my $userdata   = $c->stash->{user_data}        || {};
+    my $globaldata = $c->stash->{global_user_data} || {};
+    for my $src ($userdata, $globaldata) {
+        if(defined $src and defined $src->{'bookmarks'}) {
+            for my $section (keys %{$src->{'bookmarks'}}) {
+                for my $item (@{$src->{'bookmarks'}->{$section}}) {
+                    my $href = $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1];
+                    if($item->[2]) {
+                        my $backends = Thruk::Utils::backends_hash_to_list($c, $item->[2]);
+                        $href = _uri_with($href, { backend => join(',', @{$backends}) });
+                    }
+                    my $item = {
+                        name => $item->[0],
+                        href => $href,
+                    };
+                    $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
+                    push @{$user_items}, [ $section, $item ];
+                }
             }
         }
     }

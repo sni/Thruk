@@ -4,6 +4,7 @@ next:
           - rename graph_proxy option into http_backend_reverse_proxy
           - add `tree` sitepanel for very large setups with many sites
           - add parents to selectable columns
+          - add option to store selected backends along with a bookmark
           - fix offset calculation in rest api
           - fix page not found issue when using browser history back
           - REST:

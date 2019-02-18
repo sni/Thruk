@@ -839,7 +839,11 @@ sub _set_possible_backends {
 
 =cut
 sub update_site_panel_hashes {
-    my($c) = @_;
+    my($c, $selected_backends) = @_;
+
+    if($selected_backends) {
+        _set_enabled_backends($c, $selected_backends);
+    }
 
     my $initial_backends = {};
     my $backends         = $c->stash->{'backends'};
@@ -1095,6 +1099,7 @@ sub _set_enabled_backends {
     $c->stash->{'param_backend'} = $backend || '';
     my $disabled_backends = {};
     my $num_backends      = @{$c->{'db'}->get_peers()};
+    $c->stash->{'num_backends'} = $num_backends;
 
     ###############################
     # by args

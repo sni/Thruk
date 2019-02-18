@@ -27,8 +27,13 @@
         <option value="Bookmarks" selected>Bookmarks</option>
       </select>
       with name <input type="text" size="15" value="" name="newname" id="newname">
+      <br>
+      options:
       [% IF c.check_user_roles('admin') %]
-      (public available <input type="checkbox" name="public" value=1>)<br>
+      public available <input type="checkbox" name="public" value=1> /
+      [% END %]
+      [% IF num_backends > 1 %]
+      include selected backends <input type="checkbox" name="save_backends" value=1>
       [% END %]
       <div align="center">
       <input type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())" style="width: 250px; margin-top: 6px;">

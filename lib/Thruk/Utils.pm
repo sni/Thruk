@@ -2826,8 +2826,17 @@ returns array of backend ids converted as list of hashes
 =cut
 sub backends_list_to_hash {
     my($c, $backends) = @_;
-    my $hashlist = [];
-    for my $back (@{list($backends)}) {
+    if(!defined $backends) {
+        confess("backends uninitialized") unless $c->{'db'};
+        ($backends) = $c->{'db'}->select_backends('get_status');
+    }
+    if(ref $backends eq 'HASH') {
+        # expand first
+        $backends = backends_hash_to_list($c, $backends);
+    }
+    $backends = list($backends);
+    my $backendslist = [];
+    for my $back (@{$backends}) {
         my $name;
         if(ref $back eq 'HASH') {
             my $key  = (keys %{$back})[0];
@@ -2836,9 +2845,34 @@ sub backends_list_to_hash {
         }
         my $backend = $c->{'db'}->get_peer_by_key($back);
         $name = $backend->{'name'} if $backend;
-        push @{$hashlist}, { $back => $name };
+        push @{$backendslist}, { $back => $name };
+    }
+    my $hashlist = {
+        backends => $backendslist,
+    };
+    if($c->{'db'}->{'sections_depth'} >= 1) {
+        # save completly enabled sections
+        Thruk::Action::AddDefaults::update_site_panel_hashes($c, $backends);
+        my $sections = _collect_enabled_sections($c->stash->{'sites'}, "/");
+        $hashlist->{'sections'} = $sections if scalar @{$sections} > 0;
     }
     return($hashlist);
+}
+
+########################################
+sub _collect_enabled_sections {
+    my($sites, $prefix) = @_;
+    my $sections = [];
+    if(defined $sites->{'disabled'} && $sites->{'disabled'} == 0) {
+        push @{$sections}, $prefix;
+    } elsif(defined $sites->{'sub'}) {
+        for my $sub (sort keys %{$sites->{'sub'}}) {
+            my $name = $prefix.'/'.$sub;
+            $name =~ s|^/+|/|gmx;
+            push @{$sections}, @{_collect_enabled_sections($sites->{'sub'}->{$sub}, $name)};
+        }
+    }
+    return([sort @{$sections}]);
 }
 
 ########################################
@@ -2853,6 +2887,26 @@ returns array of backends (inverts backends_list_to_hash function)
 sub backends_hash_to_list {
     my($c, $hashlist) = @_;
     my $backends = [];
+
+    # hash format
+    if(ref $hashlist eq 'HASH') {
+        $backends = backends_hash_to_list($c, $hashlist->{'backends'});
+        if($hashlist->{'sections'}) {
+            Thruk::Action::AddDefaults::update_site_panel_hashes($c) unless $c->stash->{'sites'};
+            for my $id (sort keys %{$c->stash->{'initial_backends'}}) {
+                for my $section (@{$hashlist->{'sections'}}) {
+                    if('/'.$c->stash->{'initial_backends'}->{$id} eq $section) {
+                        push @{$backends}, $id;
+                        last;
+                    }
+                }
+            }
+        }
+        $backends = Thruk::Utils::array_uniq($backends);
+        return($backends);
+    }
+
+    # array format
     for my $b (@{list($hashlist)}) {
         if(ref $b eq '') {
             confess("backends uninitialized") unless $c->{'db'};
