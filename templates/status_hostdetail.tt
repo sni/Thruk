@@ -83,7 +83,7 @@
           [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
           [% PROCESS _json_export.tt %]
-          [% columns=[ 'Site:0', 'Hostname', 'Displayname:0', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Extra Status Information:0' ] %]
+          [% columns=[ 'Site:0', 'Hostname', 'Displayname:0', 'IP', 'Parents:0', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Extra Status Information:0' ] %]
           [% PROCESS _excel_export.tt columns=columns with_custom_vars=1 %]
         </td>
       </tr>

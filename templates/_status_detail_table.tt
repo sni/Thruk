@@ -198,6 +198,7 @@
         <td class='[% serviceclass %] backend_[% peer_key %] peer_name' style="display: none;" align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='[% serviceclass %] host_address' style="display: none;" nowrap align="left">[% s.host_address %]</td>
+        <td class='[% serviceclass %] host_parents' style="display: none;" nowrap align="left">[% s.host_parents.join(', ') %]</td>
         <td class='[% serviceclass %] host_groups' style="display: none;" nowrap align="left">[% s.host_groups.join(', ') %]</td>
         <td class='[% serviceclass %] check_command' style="display: none;" nowrap align="left">[% s.check_command.replace("\!.*$", "") %]</td>
         <td class='[% serviceclass %] check_interval' style="display: none;" nowrap align="left">[% s.check_interval %]</td>

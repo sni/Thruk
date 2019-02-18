@@ -10,6 +10,7 @@
         [% ELSIF col == "Displayname"   %]<cell width='30'>Hostname</cell>
         [% ELSIF col == "IP"            %]<cell width='10'>IP</cell>
         [% ELSIF col == "Status"        %]<cell width='20'>Status</cell>
+        [% ELSIF col == "Parents"       %]<cell width='30'>Parents</cell>
         [% ELSIF col == "Acknowledged"  %]<cell width='14'>Acknowledged</cell>
         [% ELSIF col == "Downtime"      %]<cell width='12'>Downtime</cell>
         [% ELSIF col == "Notifications" %]<cell width='12'>Notifications</cell>
@@ -48,6 +49,7 @@
         [% ELSIF col == "Displayname"   %]<cell>[% escape_xml(h.display_name) %]</cell>
         [% ELSIF col == "IP"            %]<cell>[% escape_xml(h.address) %]</cell>
         [% ELSIF col == "Status"        %]<format bg_color='[% state_color %]'><cell>[% state %]</cell></format>
+        [% ELSIF col == "Parents"       %]<cell>[% escape_xml(h.parents.join(', ')) %]</cell>
         [% ELSIF col == "Acknowledged"  %]<cell>[% IF h.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Downtime"      %]<cell>[% IF h.scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Notifications" %]<cell>[% IF h.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>

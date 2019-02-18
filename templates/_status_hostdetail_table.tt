@@ -188,6 +188,7 @@
         <td class='[% class %] current_attempt' style="display: none;" align="center">[% current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number %][% IF h.current_notification_number && h.current_notification_number > 0 %] <span title="This host has sent out [% h.current_notification_number %] notifications">#[% h.current_notification_number %]</span>[% END %][% IF h.first_notification_delay && h.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(h) %][% IF first_remaining >= 0 %] <span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% END %]
         <td class='[% class %] address' style="display: none;" nowrap align="left">[% h.address %]</td>
+        <td class='[% class %] parents' style="display: none;" nowrap align="left">[% h.parents.join(', ') %]</td>
         <td class='[% class %] check_command' style="display: none;" nowrap align="left">[% h.check_command.replace("\!.*$", "") %]</td>
         <td class='[% class %] check_interval' style="display: none;" nowrap align="left">[% h.check_interval %]</td>
         <td class='[% class %] check_period' style="display: none;" nowrap align="left">[% h.check_period %]</td>
