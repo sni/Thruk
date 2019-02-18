@@ -296,7 +296,7 @@ sub _add_bp_matches {
                     link    => 'bp.cgi?action=details&bp='.$bp->{'id'}.'&node='.$n->{'id'},
                 });
             }
-             elsif($n->{$type} eq $name) {
+            elsif(defined $n->{$type} && $n->{$type} eq $name) {
                 $found_direct++;
                 _add_res($res, $peer_key, 'Business Process', {
                     name    => $bp->{'name'},
