@@ -784,6 +784,11 @@ sub single_search {
             }
         }
 
+        # lists support (not)-equal operator if the value is empty
+        if($value eq '' && ($op eq '=' || $op eq '!=')) {
+            $listop = $op;
+        }
+
         if( $op eq '!~~' or $op eq '~~' ) {
             $value = Thruk::Utils::convert_wildcards_to_regex($value);
             $errors++ unless Thruk::Utils::is_valid_regular_expression( $c, $value );
