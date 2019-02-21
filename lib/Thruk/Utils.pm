@@ -1181,6 +1181,30 @@ sub array_uniq_obj {
     return \@unique;
 }
 
+########################################
+
+=head2 array_uniq_list
+
+  array_uniq_list($array_of_lists)
+
+return uniq elements of array, examining all list members
+
+=cut
+
+sub array_uniq_list {
+    my($array) = @_;
+
+    my @unique;
+    my %seen;
+    for my $el (@{$array}) {
+        my $ident = join(";", @{$el});
+        next if $seen{$ident};
+        $seen{$ident} = 1;
+        push @unique, $el;
+    }
+
+    return \@unique;
+}
 
 ########################################
 
@@ -3199,6 +3223,52 @@ sub check_for_nasty_filename {
         return(1);
     }
     return;
+}
+
+##############################################
+
+=head2 merge_service_dependencies
+
+    merge_service_dependencies($service, [$list, $list, ...])
+
+merge parents, depends_exec and depends_notifiy lists into a single list
+
+=cut
+sub merge_service_dependencies {
+    my($service, @list) = @_;
+    my $depends = [];
+    for my $l (@list) {
+        next unless $l;
+        for my $el (@{$l}) {
+            if(ref $el eq 'ARRAY') {
+                push @{$depends}, @{$el};
+            } else {
+                push @{$depends}, [$service->{'host_name'}, $el];
+            }
+        }
+    }
+    $depends = array_uniq_list($depends);
+    return($depends);
+}
+
+##############################################
+
+=head2 merge_host_dependencies
+
+    merge_host_dependencies([$list, $list, ...])
+
+merge depends_exec and depends_notifiy into a single list
+
+=cut
+sub merge_host_dependencies {
+    my(@list) = @_;
+    my $depends = [];
+    for my $l (@list) {
+        next unless $l;
+        push @{$depends}, @{$l};
+    }
+    $depends = array_uniq($depends);
+    return($depends);
 }
 
 ##############################################

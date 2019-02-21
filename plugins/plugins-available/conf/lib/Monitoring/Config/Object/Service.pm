@@ -97,6 +97,10 @@ $Monitoring::Config::Object::Service::ShinkenSpecific = {
 $Monitoring::Config::Object::Service::IcingaSpecific = {
     'is_volatile'                  => { type => 'CHOOSE', values => ['0','1','2'], keys => [ '0', '1', '2' ], cat => 'Extended' },
 };
+# Naemon specific things
+$Monitoring::Config::Object::Service::NaemonSpecific = {
+    'parents'                      => { type => 'LIST', 'link' => 'service_description', cat => 'Extended' },
+};
 $Monitoring::Config::Object::Service::Restore = {};
 
 
@@ -117,6 +121,15 @@ sub BUILD {
     my $coretype = shift;
 
     if(!$Monitoring::Config::Object::Service::defaults_cleaned || $Monitoring::Config::Object::Service::defaults_cleaned ne $coretype) {
+        if($coretype eq 'any' or $coretype eq 'naemon') {
+            for my $key (keys %{$Monitoring::Config::Object::Service::NaemonSpecific}) {
+                $Monitoring::Config::Object::Service::Defaults->{$key} = $Monitoring::Config::Object::Service::NaemonSpecific->{$key};
+            }
+        } else {
+            for my $key (keys %{$Monitoring::Config::Object::Service::NaemonSpecific}) {
+                delete $Monitoring::Config::Object::Service::Defaults->{$key};
+            }
+        }
         if($coretype eq 'any' or $coretype eq 'shinken') {
             for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
                 $Monitoring::Config::Object::Service::Defaults->{$key} = $Monitoring::Config::Object::Service::ShinkenSpecific->{$key};

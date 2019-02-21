@@ -300,6 +300,34 @@ sub _process_json_page {
         return $c->render(json => $json);
     }
 
+    # service_description, same host service descriptions
+    if($type eq 'service_description') {
+        return unless Thruk::Utils::Conf::set_object_model($c);
+        $c->{'obj_db'}->read_rc_file();
+        my $descriptions = [];
+        my $objects;
+        my $ref = $c->req->parameters->{'ref'} ? $c->{'obj_db'}->get_object_by_id($c->req->parameters->{'ref'}) : undef;
+        if($ref) {
+            my $hosts = $c->{'obj_db'}->get_hosts_for_service($ref);
+            for my $id (values %{$hosts}) {
+                my $hst = $c->{'obj_db'}->get_object_by_id($id);
+                push @{$objects}, $hst if $hst;
+            }
+        } else {
+            $objects = $c->{'obj_db'}->get_objects_by_type('host');
+        }
+        for my $host (@{$objects}) {
+            my $services = $c->{'obj_db'}->get_services_for_host($host);
+            for my $svc (keys %{$services->{'group'}}, keys %{$services->{'host'}}) {
+                push @{$descriptions}, $svc;
+            }
+        }
+        my $json = [{ 'name' => $type.'s',
+                      'data' => [ sort @{Thruk::Utils::array_uniq($descriptions)} ],
+                   }];
+        return $c->render(json => $json);
+    }
+
     # objects attributes
     if($type eq 'attribute') {
         my $for  = $c->req->parameters->{'obj'};

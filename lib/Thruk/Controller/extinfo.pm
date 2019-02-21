@@ -429,6 +429,10 @@ sub _process_host_page {
 
     $c->stash->{'host'} = $host;
 
+    $host->{'depends'}        = Thruk::Utils::merge_host_dependencies($host->{'depends_exec'}, $host->{'depends_notify'});
+    $host->{'depends_exec'}   = Thruk::Utils::merge_host_dependencies($host->{'parents'}, $host->{'depends_exec'});
+    $host->{'depends_notify'} = Thruk::Utils::merge_host_dependencies($host->{'parents'}, $host->{'depends_notify'});
+
     # comments
     my $cmt_sorttype   = $c->req->parameters->{'sorttype_cmt'}   || 2;
     my $cmt_sortoption = $c->req->parameters->{'sortoption_cmt'} || 3;
@@ -537,7 +541,13 @@ sub _process_service_page {
 
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename } ], extra_columns => [qw/long_plugin_output contacts/] );
+    my $services = $c->{'db'}->get_services(
+            filter        => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
+                               { 'host_name' => $hostname },
+                               { 'description' => $servicename },
+                             ],
+            extra_columns => [qw/long_plugin_output contacts/],
+    );
 
     return $c->detach('/error/index/15') unless defined $services;
 
@@ -553,6 +563,8 @@ sub _process_service_page {
             }
         }
     }
+    $service->{'depends_exec'}   = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_exec'});
+    $service->{'depends_notify'} = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_notify'});
 
     return $c->detach('/error/index/15') unless defined $service;
 

@@ -55,6 +55,12 @@
             [% FOREACH parent IN host.parents.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent | uri %]'>[% parent %]</a>[% END %]
           </div><br>
           [% END %]
+          [% IF host.depends.size > 0 %]
+          <div class='data'>Depends:</div>
+          <div class='dataTitle'>
+            [% FOREACH depend IN host.depends.sort %][% IF !loop.first() %], [% END %]<a href='extinfo.cgi?type=1&host=[% depend | uri %]'>[% depend %]</a>[% END %]
+          </div><br>
+          [% END %]
           [% IF host.groups.size > 0 %]
           <div class='data'>Member of</div>
           <div class='dataTitle'>
@@ -247,6 +253,9 @@
                               [% IF host.next_check %][% date_format(c, host.next_check) %][% ELSE %]N/A[% END %]
                               [% IF host.check_type == 0; d = duration(host.check_interval * pi_detail.$peer_key.interval_length, 5) %]<span class="check_interval" title="this host will be checked every [% d %]."> (&infin;[% d %])</span>[% END %]
                               [% IF host.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20">[% END %]
+                              [% IF host.depends_exec.size > 0 %]
+                                (dependency: [% FOREACH depend IN host.depends_exec %][% IF !loop.first() %], [% END %]<a href='extinfo.cgi?type=1&host=[% depend | uri %]'>[% depend %]</a>[% END %])
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
@@ -267,6 +276,9 @@
                                 [% IF first_remaining >= 0 %]
                                   &nbsp;<span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
                                 [% END %]
+                              [% END %]
+                              [% IF host.depends_notify.size > 0 %]
+                                (dependency: [% FOREACH depend IN host.depends_notify %][% IF !loop.first() %], [% END %]<a href='extinfo.cgi?type=1&host=[% depend | uri %]'>[% depend %]</a>[% END %])
                               [% END %]
                             </td>
                           </tr>

@@ -393,6 +393,9 @@ sub get_hosts {
             my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
             $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
         }
+        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+            push @{$options{'columns'}},  qw/depends_exec depends_notify/;
+        }
     }
 
     # get result
@@ -556,6 +559,9 @@ sub get_services {
         if($options{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem poller_tag
                                              got_business_rule parent_dependencies/;
+        }
+        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+            push @{$options{'columns'}},  qw/depends_exec depends_notify parents/;
         }
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};

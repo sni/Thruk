@@ -97,7 +97,7 @@ sub new {
         'needs_commit'       => 0,
         'last_changed'       => 0,
         'needs_index_update' => 0,
-        'coretype'           => 'nagios',
+        'coretype'           => 'auto',
         'cache'              => {},
         'remotepeer'         => undef,
     };
@@ -1514,7 +1514,7 @@ sub is_host_in_hostgroup {
 # INTERNAL SUBS
 ##########################################################
 sub _set_config {
-    my $self  = shift;
+    my($self)  = @_;
 
     if($self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_file'}          = [];
@@ -1622,7 +1622,7 @@ sub _update_core_conf {
 
 ##########################################################
 sub _set_coretype {
-    my $self = shift;
+    my($self) = @_;
 
     # fixed value from config
     if(defined $self->{'config'}->{'core_type'} and $self->{'config'}->{'core_type'} ne 'auto') {
@@ -1636,9 +1636,19 @@ sub _set_coretype {
         return;
     }
 
-    if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'naemon_user'}) {
-        $self->{'coretype'} = 'naemon';
-        return;
+    if(defined $self->{'_corefile'}) {
+        if($self->{'_corefile'}->{'conf'}->{'naemon_user'}) {
+            $self->{'coretype'} = 'naemon';
+            return;
+        }
+        if($self->{'_corefile'}->{'conf'}->{'command_file'} && $self->{'_corefile'}->{'conf'}->{'command_file'} =~ m|/naemon\.cmd|gmx) {
+            $self->{'coretype'} = 'naemon';
+            return;
+        }
+        if($self->{'_corefile'}->{'conf'}->{'query_socket'} && $self->{'_corefile'}->{'conf'}->{'query_socket'} =~ m|/naemon\.qh|gmx) {
+            $self->{'coretype'} = 'naemon';
+            return;
+        }
     }
 
     # get core from init script link (omd)
@@ -1647,6 +1657,11 @@ sub _set_coretype {
             $self->{'coretype'} = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
             return;
         }
+    }
+
+    if($self->{'coretype'} eq 'auto') {
+        # fallback to naemon
+        $self->{'coretype'} = 'naemon';
     }
 
     return;
