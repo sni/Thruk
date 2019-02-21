@@ -14,10 +14,15 @@
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
       <tr>
-        <td align="left" valign="top" width="50%">
-        [% PROCESS _infobox.tt %]
+        <td align="left" valign="top" width="20%">
+        [% PROCESS _infobox.tt has_proc_info=0 %]
         </td>
-        <td align="right" valign="top" width="50%">
+        <td valign="bottom">
+          [% IF action != "tree" %]
+          <div align="center" class='dataTitle' style="padding-top: 4px; padding-bottom: 4px;">[% subtitle %]</div>
+          [% END %]
+        </td>
+        <td align="right" valign="top" width="20%">
             <table border="0" class="optBox">
               <tr>
                 <td align="left" class='reportSelectSubTitle'>Configuration Type:</td>
@@ -43,24 +48,18 @@
                     [% END %]
                   </select>
                   </form>
+                  <div style="position: relative; top: 5px;">
+                  [% IF last_changed || needs_commit || show_save_reload %]
+                    [% link = 'conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes&amp;token=' _ get_user_token(c); button(link, 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(this, \'' _ show_save_reload _ '\')') %]
+                  [% END %]
+                  </div>
                 </td>
               </tr>
-              [% IF last_changed || needs_commit || show_save_reload %]
-                <tr>
-                  <td>
-                    [% link = 'conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes&amp;token=' _ get_user_token(c); button(link, 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(this, \'' _ show_save_reload _ '\')') %]
-                  </td>
-                </tr>
-              [% END %]
             </table>
           [% PROCESS _help.tt topic = "conf" %]
         </td>
       </tr>
     </table>
-
-    [% IF action != "tree" %]
-    <div align="center" class='dataTitle' style="padding-top: 4px; padding-bottom: 4px;">[% subtitle %]</div>
-    [% END %]
     [% content %]
 
 [% IF action != "editor" && action != "tree" %]

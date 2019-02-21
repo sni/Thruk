@@ -2,9 +2,9 @@
 <input type="hidden" id="[% id %]_orig_inp1" value="[% inp1 %]">
 <input type="hidden" id="[% id %]_orig_inp2" value="[% inp2 %]">
 
-<div id="[% id %]_dialog" title="Command Wizzard" style="display: none;">
+<div id="[% id %]_dialog" title="Command Wizzard" style="display: none; padding: 0;">
 <table><tr><td class="filter">
-  <table style="width:100%;">
+  <table style="width:738px;">
     <tr>
       <td class="attrName" width="10%"><b>Choose Command</b></td>
       <td>
@@ -25,7 +25,7 @@
     [% IF conf_config.show_plugin_syntax_helper %]
     <tr>
       <td class="attrName" colspan=2>
-        <div id="[% id %]_help_accordion" style="width: 600px;">
+        <div id="[% id %]_help_accordion" style="width: 730px;">
             <h3><a href="#">Plugin Help</a></h3>
             <div style="max-width:1000px;">
                 <span id="[% id %]_plugin_help" style="text-align: left;"></span>

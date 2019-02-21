@@ -9,7 +9,7 @@ body.config TABLE.conftoolobj TEXTAREA {
   width: 100%;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_1 {
-  width: 370px;
+  width: 420px;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_2 {
   width: 450px;
@@ -25,7 +25,7 @@ BODY.bare_tree {
 
 /* input fields with wizards */
 TD.conf_row INPUT[type=text].wizard {
-  width: 370px !important;
+  width: 420px !important;
 }
 
 TABLE.command_line_wzd {
