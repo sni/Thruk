@@ -6362,6 +6362,10 @@ var ajax_search = {
         catch(err) {
             // doesnt matter
         }
+
+        window.clearTimeout(ajax_search.timer);
+        window.clearTimeout(ajax_search.hideTimer);
+
         var panel = document.getElementById(ajax_search.result_pan);
         if(!panel) { return; }
         /* delay hiding a little moment, otherwise the click
@@ -6378,7 +6382,6 @@ var ajax_search = {
             }
         }
         else if(ajax_search.cur_select == -1) {
-            window.clearTimeout(ajax_search.hideTimer);
             ajax_search.hideTimer = window.setTimeout("if(ajax_search.dont_hide==false){fade('"+ajax_search.result_pan+"', 300)}", 150);
         }
     },
@@ -6438,9 +6441,9 @@ var ajax_search = {
         if(ajax_search.list) {
             /* only use the last list element for search */
             var regex  = new RegExp(ajax_search.list, 'g');
-            var range  = getTextSelection();
-            var before = pattern.substr(0, range.start);
-            var after  = pattern.substr(range.start);
+            var range  = getCaret(input);
+            var before = pattern.substr(0, range);
+            var after  = pattern.substr(range);
             var rever  = reverse(before);
             var index  = rever.search(regex);
             if(index != -1) {
@@ -6735,9 +6738,9 @@ var ajax_search = {
         if(ajax_search.list) {
             var pattern = input.value;
             var regex   = new RegExp(ajax_search.list, 'g');
-            var range   = getTextSelection();
-            var before  = pattern.substr(0, range.start);
-            var after   = pattern.substr(range.start);
+            var range   = getCaret(input);
+            var before  = pattern.substr(0, range);
+            var after   = pattern.substr(range);
             var rever   = reverse(before);
             var index   = rever.search(regex);
             if(index != -1) {
@@ -7280,8 +7283,8 @@ function init_tool_list_wizard(id, type) {
         autoOpen:    false,
         width:       'auto',
         maxWidth:    1024,
-        position:    'top',
-        close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
+        modal:       true,
+        position:    { my: "center", at: "center", of: window }
     });
 
     // initialize selected members
@@ -7342,6 +7345,8 @@ function init_tool_list_wizard(id, type) {
         }
     });
 
+    ajax_search.hide_results(undefined, true);
+
     // button has to be initialized only once
     if(init_tool_list_wizard_initialized[id] != undefined) {
         // reset filter
@@ -7369,7 +7374,6 @@ function init_tool_list_wizard(id, type) {
             }
         }
         jQuery('#'+input_id).val(newval);
-        ajax_search.hide_results(undefined, 1);
         $d.dialog('close');
         return false;
     });
