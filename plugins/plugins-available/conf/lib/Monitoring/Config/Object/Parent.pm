@@ -288,6 +288,21 @@ sub get_primary_name {
         return $self->{'name'} if defined $self->{'name'};
     }
 
+    # just combine all attributes from all keys
+    if($self->{'primary_name_all_keys'}) {
+        my $values = [];
+        for my $key ($self->{'primary_key'}->[0], @{$self->{'primary_key'}->[1]}) {
+            next unless defined $conf->{$key};
+            my $val = $conf->{$key};
+            if(ref $val eq 'ARRAY') {
+                push @{$values}, join('~', @{$conf->{$key}});
+            } else {
+                push @{$values}, $conf->{$key}
+            }
+        }
+        return(join("<>", @{$values}));
+    }
+
     # multiple primary keys
     if(ref $self->{'primary_key'}->[1] eq '') {
         my @keys;
@@ -300,6 +315,10 @@ sub get_primary_name {
 
     # secondary keys
     my $primary = $self->{'name'} || $conf->{$self->{'primary_key'}->[0]};
+
+    if(ref $primary eq 'ARRAY') {
+        $primary = join(",", @{$primary});
+    }
 
     return $primary unless $full;
     my $secondary = [];

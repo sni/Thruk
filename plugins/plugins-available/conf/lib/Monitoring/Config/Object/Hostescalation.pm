@@ -37,6 +37,9 @@ $Monitoring::Config::Object::Hostescalation::Defaults = {
     'hostgroups'             => { type => 'ALIAS', 'name' => 'hostgroup_name' },
 };
 
+$Monitoring::Config::Object::Hostescalation::primary_keys = [ 'host_name', [ 'hostgroup_name' ] ];
+$Monitoring::Config::Object::Hostescalation::Defaults::standard_keys = [ 'host_name', 'contact_groups', 'first_notification', 'last_notification', 'escalation_period', 'escalation_options' ];
+
 ##########################################################
 
 =head1 METHODS
@@ -50,9 +53,11 @@ sub BUILD {
     my $class = shift || __PACKAGE__;
     my $self = {
         'type'              => 'hostescalation',
-        'primary_key'       => [ 'host_name', [ 'hostgroup_name' ] ],
+        'primary_key'       => $Monitoring::Config::Object::Hostescalation::primary_keys,
         'default'           => $Monitoring::Config::Object::Hostescalation::Defaults,
+        'standard'          => $Monitoring::Config::Object::Hostescalation::Defaults::standard_keys,
         'can_have_no_name'  => 1,
+        'primary_name_all_keys' => 1,
     };
     bless $self, $class;
     return $self;

@@ -2153,7 +2153,8 @@ sub _check_references {
             # host are allowed to have a register 0
             return if ($link eq 'host' and defined $templates_by_name->{$link}->{$val});
 
-
+            # service parents cannot be checked right now
+            return if $link eq 'service_description';
 
             # shinken defines this command by itself
             return if ($self->{'coretype'} eq 'shinken' and $val eq 'bp_rule');

@@ -7,6 +7,8 @@
   <th class='data[% IF type == 'servicegroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=servicegroup">Servicegroups</a></th>
   <th class='data[% IF type == 'contact'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contact">Contacts</a></th>
   <th class='data[% IF type == 'contactgroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroups</a></th>
+  <th class='data[% IF type == 'hostdependency' || type == 'servicedependency' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=hostdependency" id="depsopen">Dependencies</a></th>
+  <th class='data[% IF type == 'hostescalation' || type == 'serviceescalation' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=hostescalation" id="escopen">Escalations</a></th>
   [% IF coretype == 'shinken' %]
   <th class='data[% IF type == 'notificationway' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=notificationway">Notificationways</a></th>
   <th class='data[% IF type == 'discoveryrule'   %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=discoveryrule">Discoveryrules</a></th>

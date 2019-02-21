@@ -205,6 +205,29 @@ function init_conf_tool_buttons() {
         return false;
     });
 
+    jQuery("#depsopen").on("click", function(ev) {
+        var menu = [{
+            'text': "Hostdepenendency",
+            'href': "conf.cgi?sub=objects&amp;type=hostdependency"
+        },{
+            'text': "Servicedepenendency",
+            'href': "conf.cgi?sub=objects&amp;type=servicedependency"
+        }];
+        show_action_menu(ev.target.parentNode, menu,null, null, null, null, "b-r");
+        return false;
+    });
+    jQuery("#escopen").on("click", function(ev) {
+        var menu = [{
+            'text': "Hostescalation",
+            'href': "conf.cgi?sub=objects&amp;type=hostescalation"
+        },{
+            'text': "Serviceescalation",
+            'href': "conf.cgi?sub=objects&amp;type=serviceescalation"
+        }];
+        show_action_menu(ev.target.parentNode, menu,null, null, null, null, "b-r");
+        return false;
+    });
+
     jQuery('TD.attrValue').button();
     return;
 }
