@@ -966,6 +966,13 @@ sub single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
+        elsif ( $filter->{'type'} eq 'dependency' ) {
+            push @hostfilter,          { depends_exec => { $listop => $value } };
+            push @hosttotalsfilter,    { depends_exec => { $listop => $value } };
+            push @servicefilter,       { depends_exec => { $listop => $value } };
+            push @servicetotalsfilter, { depends_exec => { $listop => $value } };
+            $c->stash->{'has_service_filter'} = 1;
+        }
         elsif ( $filter->{'type'} eq 'plugin output' ) {
             my $cop = '-or';
             if($op eq '!=' or $op eq '!~~') { $cop = '-and' }

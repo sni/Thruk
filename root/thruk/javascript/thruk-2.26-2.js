@@ -5213,7 +5213,7 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
 }
 
 function getFilterTypeOptions() {
-    var important = new Array(/* when changed, update _status_filter.tt too! */
+    var important = new Array(/* when changed, update _status_filter.tt && panorama_js_form_filter.js too! */
         'Search',
         'Host',
         'Service',
@@ -5227,6 +5227,7 @@ function getFilterTypeOptions() {
         'Contact',
         'Current Attempt',
         'Custom Variable',
+        'Dependency',
         'Downtime Duration',
         'Duration',
         'Event Handler',

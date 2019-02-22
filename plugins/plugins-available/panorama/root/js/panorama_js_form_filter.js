@@ -293,6 +293,7 @@ Ext.define('TP.formFilterSelect', {
             'contact':             ['~','!~','=','!='],
             'current attempt':     ['=','!=','<=','>='],
             'custom variable':     ['~','!~','=','!='],
+            'dependency':          ['~','!~','=','!='],
             'downtime duration':   ['=','!=','<=','>='],
             'duration':            ['=','!=','<=','>='],
             'event handler':       ['~','!~','=','!='],

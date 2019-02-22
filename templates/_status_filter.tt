@@ -388,6 +388,7 @@
               <option value="contact"[% IF s.type == 'contact' %] selected[% END %]>Contact</option>
               <option value="current attempt"[% IF s.type == 'current attempt' %] selected[% END %]>Current Attempt</option>
               <option value="custom variable"[% IF s.type == 'custom variable' %] selected[% END %]>Custom Variable</option>
+              <option value="dependency"[% IF s.type == 'dependency' %] selected[% END %]>Dependency</option>
               <option value="downtime duration"[% IF s.type == 'downtime duration' %] selected[% END %]>Downtime Duration</option>
               <option value="duration"[% IF s.type == 'duration' %] selected[% END %]>Duration</option>
               <option value="event handler"[% IF s.type == 'event handler' %] selected[% END %]>Event Handler</option>
