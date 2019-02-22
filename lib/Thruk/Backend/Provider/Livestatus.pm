@@ -253,8 +253,7 @@ sub get_processinfo {
     }
 
     $data->{$key}->{'data_source_version'} = "Livestatus ".($data->{$key}->{'data_source_version'} || 'unknown');
-    $self->{'naemon_optimizations'} = 0 unless defined $self->{'naemon_optimizations'};
-    $self->{'naemon_optimizations'} = 1 if $data->{$key}->{'data_source_version'} =~ m/\-naemon$/mx;
+    $self->{'naemon_optimizations'} = $data->{$key}->{'data_source_version'} =~ m/([\d\.]+).*?\-naemon$/mx ? _normalize_version_number($1) : 0;
 
     # naemon checks external commands on arrival
     if(defined $data->{$key}->{'program_start'} && $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'}) {
@@ -393,7 +392,8 @@ sub get_hosts {
             my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
             $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
         }
-        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        # only available since > 1.0.9
+        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'} > 1000009) {
             push @{$options{'columns'}},  qw/depends_exec depends_notify/;
         }
     }
@@ -560,7 +560,8 @@ sub get_services {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem poller_tag
                                              got_business_rule parent_dependencies/;
         }
-        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        # only available since > 1.0.9
+        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'} > 1000009) {
             push @{$options{'columns'}},  qw/depends_exec depends_notify parents/;
         }
         if(defined $options{'extra_columns'}) {
@@ -1676,6 +1677,20 @@ sub _fetchlogs_external_command {
     unlink($filename);
 
     return($logs, undef, scalar @{$logs});
+}
+
+##########################################################
+sub _normalize_version_number {
+    my($version) = @_;
+    my $num   = 0;
+    my $power = 6;
+    for my $part (split/\./mx, $version) {
+        if($part =~ /(\d+)/mx) {
+            $num += $1 * 10**$power;
+        }
+        $power -= 3;
+    }
+    return(int($num));
 }
 
 ##########################################################
