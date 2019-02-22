@@ -12,6 +12,7 @@ next:
             - add aggregation function support
           - Config Tool:
             - add authorization tab to contacts and contactgroups
+            - add support for dependencies and escalations
           - Business Process:
             - delay calculation during core reloads
             - add support for http federation
