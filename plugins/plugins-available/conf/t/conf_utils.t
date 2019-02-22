@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 712;
+    plan tests => 713;
 }
 
 BEGIN {
