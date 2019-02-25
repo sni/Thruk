@@ -10,7 +10,7 @@
 [% IF readonly %]
 <div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
 [% ELSE %]
-<input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
+<button class="conf_save_button" onclick="return save_plugins(this);">Save Changes</button><br>
 Don't forget to restart Thruk after changing plugins.
 [% END %]
 <table><tr><td valign="top">
@@ -70,7 +70,7 @@ Don't forget to restart Thruk after changing plugins.
 </td></tr></table>
 <br>
 [% IF !readonly %]
-<input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
+<button class="conf_save_button" onclick="return save_plugins(this);">Save Changes</button><br>
 Don't forget to restart Thruk after changing plugins.
 [% END %]
 </form>

@@ -647,6 +647,44 @@ function conf_validate_object_form(f) {
     return true;
 }
 
+function save_plugins(btn) {
+    jQuery(btn).button({
+        icons: {primary: 'ui-waiting-button'},
+        disabled: true
+    });
+    window.setTimeout(function() {
+        jQuery(btn).button({
+            icons: {primary: 'ui-error-button'},
+            disabled: false
+        });
+    }, 30000);
+
+    jQuery.ajax({
+        url:   'conf.cgi?'+jQuery(btn).parents("FORM").serialize(),
+        data:  {},
+        type: 'POST',
+        success: function(data) {
+            // thruk will be restarted 1 second after this request, so wait at least 1 second till redirect to the plugins page again
+            window.setTimeout(function() {
+                jQuery(btn).button({
+                    icons:   {primary: 'ui-ok-button'},
+                    label:   'saved...',
+                    disabled: false
+                }).addClass('done');
+                window_location_replace('conf.cgi?sub=plugins&reload_nav=1');
+            }, 1300);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            jQuery(btn).button({
+                icons:   {primary: 'ui-error-button'},
+                label:   'failed',
+                disabled: false
+            });
+        }
+    });
+    return false;
+}
+
 /* if form id is set, append own form value to remote form and submit merged */
 function save_reload_apply(btn, formid, name) {
     if(!name) { name = "save_and_reload"; }
@@ -685,7 +723,7 @@ function conf_tool_cleanup(btn, link, hide) {
         jQuery(btn).button({
             icons: {primary: 'ui-waiting-button'},
             disabled: true
-        })
+        });
         var fix_buttons = jQuery('BUTTON.conf_cleanup_button_fix');
         if(fix_buttons.length > 0) {
             continue_cb = function() {
@@ -750,7 +788,7 @@ function conf_tool_cleanup(btn, link, hide) {
                 icons:   {primary: 'ui-error-button'},
                 label:   'failed',
                 disabled: false
-            })
+            });
             jQuery(btn).removeClass('conf_cleanup_button_fix');
         }
     });

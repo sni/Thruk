@@ -767,6 +767,12 @@ function reloadPage() {
     window.setTimeout("window_location_replace('"+newUrl+"')", 100);
 }
 
+function reloadNav() {
+    if(parent.frames[0] != null) {
+        parent.frames[0].location.reload();
+    }
+}
+
 /* wrapper for window.location which results in
  * Uncaught TypeError: Illegal invocation
  * otherwise. (At least in chrome)
