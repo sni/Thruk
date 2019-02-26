@@ -219,7 +219,7 @@ function bodyOnLoad(refresh) {
             stopRefresh();
         } else {
             setRefreshRate(refresh);
-            jQuery(document).bind("mousemove click keyup", updateLastUserInteraction);
+            jQuery(window).bind("mousemove click keyup", updateLastUserInteraction);
         }
     }
 
