@@ -398,7 +398,7 @@ sub generate_report {
     my($c, $nr) = @_;
     $Thruk::Utils::PDF::attachment     = '';
     $Thruk::Utils::PDF::ctype          = 'html2pdf';
-    $c->stash->{'tmp_files_to_delete'} = [];
+    $c->stash->{'report_tmp_files_to_delete'} = [];
 
     Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $report_file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
@@ -613,7 +613,7 @@ sub generate_report {
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 95, 'clean up') if $ENV{'THRUK_JOB_DIR'};
 
     # clean up tmp files
-    for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
+    for my $file (@{$c->stash->{'report_tmp_files_to_delete'}}) {
         unlink($file);
     }
 

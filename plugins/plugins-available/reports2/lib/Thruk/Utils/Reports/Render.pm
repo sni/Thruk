@@ -284,6 +284,7 @@ sub get_url {
 
     # create fake session
     my $sessionid = Thruk::Utils::get_fake_session($c);
+    push @{$c->stash->{'report_tmp_files_to_delete'}}, $c->stash->{'fake_session_file'};
 
     # directly convert external urls
     if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'}) {

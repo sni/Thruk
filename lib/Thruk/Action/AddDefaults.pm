@@ -395,6 +395,26 @@ sub end {
         $c->stash->{'no_auto_reload'} = 1;
     }
 
+    # set session id for all requests
+    if(defined $ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS') && $c->stash->{'remote_user'}) {
+        if(!$c->req->cookies->{'thruk_auth'}) {
+            my $session_id = Thruk::Utils::get_fake_session($c, undef, $c->stash->{'remote_user'}, undef, $c->req->address);
+            $c->res->cookies->{'thruk_auth'} = {value => $session_id, path => $c->stash->{'cookie_path'} };
+        } else {
+            my $session_id  = $c->req->cookies->{'thruk_auth'};
+            if(!Thruk::Utils::check_for_nasty_filename($session_id)) {
+                my $sdir = $c->config->{'var_path'}.'/sessions';
+                my $sessionfile = $sdir.'/'.$session_id;
+                if(!-e $sessionfile) {
+                    Thruk::Utils::get_fake_session($c, $session_id, $c->stash->{'remote_user'}, undef, $c->req->address);
+                } else {
+                    my $now = time();
+                    utime($now, $now, $sessionfile);
+                }
+            }
+        }
+    }
+
     $c->stats->profile(end => "Root end");
     return 1;
 }

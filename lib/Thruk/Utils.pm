@@ -1746,19 +1746,19 @@ create and return fake session id for current user
 =cut
 
 sub get_fake_session {
-    my($c, $sessionid, $username, $roles) = @_;
+    my($c, $sessionid, $username, $roles, $ip) = @_;
     my $sdir        = $c->config->{'var_path'}.'/sessions';
     $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
     $username       = $c->stash->{'remote_user'} unless $username;
     my $sessionfile = $sdir.'/'.$sessionid;
     Thruk::Utils::IO::mkdir_r($sdir);
-    my $sessiondata = "none~~~127.0.0.1~~~".$username;
+    $ip = '127.0.0.1' unless $ip;
+    my $sessiondata = "none~~~".$ip."~~~".$username;
     if($roles && ref $roles eq 'ARRAY') {
         die("unsupported username") if $username =~ m/~~~/mx;
         $sessiondata = $sessiondata.'~~~'.join(',', @{$roles});
     }
     Thruk::Utils::IO::write($sessionfile, $sessiondata);
-    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;
     return($sessionid);
