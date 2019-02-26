@@ -430,7 +430,7 @@ sub _process_host_page {
     $c->stash->{'host'} = $host;
 
     $host->{'depends'}        = Thruk::Utils::merge_host_dependencies($host->{'depends_exec'}, $host->{'depends_notify'});
-    $host->{'depends_exec'}   = Thruk::Utils::merge_host_dependencies($host->{'parents'}, $host->{'depends_exec'});
+    $host->{'depends_exec'}   = Thruk::Utils::merge_host_dependencies($host->{'depends_exec'});
     $host->{'depends_notify'} = Thruk::Utils::merge_host_dependencies($host->{'parents'}, $host->{'depends_notify'});
 
     # comments
@@ -563,7 +563,7 @@ sub _process_service_page {
             }
         }
     }
-    $service->{'depends_exec'}   = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_exec'});
+    $service->{'depends_exec'}   = Thruk::Utils::merge_service_dependencies($service, $service->{'depends_exec'});
     $service->{'depends_notify'} = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_notify'});
 
     return $c->detach('/error/index/15') unless defined $service;
