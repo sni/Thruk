@@ -509,6 +509,8 @@ sub cmd {
         return(0, "cmd started in background");
     }
 
+    require Thruk::Utils;
+
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
@@ -533,6 +535,7 @@ sub cmd {
         }
         @lines = grep defined, @lines;
         $output = join('', @lines) // '';
+        $output = Thruk::Utils::decode_any($output);
         # restore original array
         unshift @{$cmd}, $prog;
     } else {
@@ -549,6 +552,7 @@ sub cmd {
         }
 
         $output = `$cmd`;
+        $output = Thruk::Utils::decode_any($output);
         $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
         $rc = 0 if($rc == -1 && $SIG{CHLD} eq 'IGNORE');
