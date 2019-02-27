@@ -230,21 +230,39 @@ menu.
 .action_menus/js_form_menu.js
 .....
 {% raw %}
-function js_form_menu(cfg) {
-    return({
-      "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
-      "title": "javascript advanced menu",
-      "menu":[{
+function js_menu(d) {
+  return({
+    "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+    "title": "form menu",
+    "menu":[
+      {
         "icon":"/thruk/themes/{{theme}}/images/page_white_key.png",
-        "html":"<b>test</b><input type='text' id='menu_input'><input type='button' value='ok' onclick='test_form_handler()'>"
-      }]
-    });
+        "html":"<b>test</b><input type='text'><button onclick='test_form_handler(this)'>ok</button>"
+      }
+    ]
+  });
 }
 
-function test_form_handler() {
-  thruk_message(0, "user input: "+jQuery('#menu_input').val());
-}
+function test_form_handler(btn) {
+  // prevent clicking twice and give user some response by adding a loading gif to the button
+  jQuery(btn).attr('disabled', true).html("<img src='"+url_prefix+"themes/"+theme+"/images/loading-icon.gif'>");
 
+  // send user input as server action
+  var input = jQuery(btn).prev().val();
+  jQuery.post("status.cgi?serveraction=1",{
+    link:    'server://NameOfServerAction/'+encodeURIComponent(input),
+    host:    action_menu_options.host,
+    service: action_menu_options.service,
+    backend: action_menu_options.backend,
+    token:   user_token
+  }, function(response) {
+    // show repsonse
+    thruk_message(response.rc, response.msg);
+
+    // close menu again
+    action_menu_close();
+  });
+}
 {% endraw %}
 .....
 
