@@ -237,15 +237,19 @@ function js_menu(d) {
     "menu":[
       {
         "icon":"/thruk/themes/{{theme}}/images/page_white_key.png",
-        "html":"<b>test</b><input type='text'><button onclick='test_form_handler(this)'>ok</button>"
+        "html":"<b>test</b>"
+              +"<input type='text'>"
+              +"<button onclick='test_form_handler(this)'>ok</button>"
       }
     ]
   });
 }
 
 function test_form_handler(btn) {
-  // prevent clicking twice and give user some response by adding a loading gif to the button
-  jQuery(btn).attr('disabled', true).html("<img src='"+url_prefix+"themes/"+theme+"/images/loading-icon.gif'>");
+  // prevent clicking twice
+  // and give user some response by adding a loading gif to the button
+  jQuery(btn).attr('disabled', true)
+             .html("<img src='"+url_prefix+"themes/"+theme+"/images/loading-icon.gif'>");
 
   // send user input as server action
   var input = jQuery(btn).prev().val();
@@ -285,7 +289,9 @@ function js_menu(d) {
 
 function js_menu_items(d) {
   // fetch host attributes
-  return(jQuery.get("../r/sites/"+d.backend+"/hosts/"+d.host).then(function(data, textStatus, jqXHR) {
+  return(
+    jQuery.get("../r/sites/"+d.backend+"/hosts/"+d.host)
+    .then(function(data, textStatus, jqXHR) {
     var result = [];
     host_data = data[0];
     if(!host_data) {
@@ -327,17 +333,19 @@ function js_menu_items(d) {
         'label': 'disable active checks',
         'disabled': !host_data.active_checks_enabled,
         'action': function() {
-          jQuery.post("../r/sites/"+d.backend+"/hosts/"+d.host+'/cmd/disable_host_check').then(function(data, textStatus, jqXHR) {
-            thruk_message(0, "active checks disabled");
-          });
+          jQuery.post("../r/sites/"+d.backend+"/hosts/"+d.host+'/cmd/disable_host_check')
+                .then(function(data, textStatus, jqXHR) {
+                  thruk_message(0, "active checks disabled");
+                });
         }
       }, {
         'label':   'enable active checks',
         'disabled': host_data.active_checks_enabled,
         'action': function() {
-          jQuery.post("../r/sites/"+d.backend+"/hosts/"+d.host+'/cmd/enable_host_check').then(function(data, textStatus, jqXHR) {
-            thruk_message(0, "active checks enabled");
-          });
+          jQuery.post("../r/sites/"+d.backend+"/hosts/"+d.host+'/cmd/enable_host_check')
+                .then(function(data, textStatus, jqXHR) {
+                  thruk_message(0, "active checks enabled");
+                });
         }
       }]
     });
