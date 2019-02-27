@@ -3352,6 +3352,7 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
 }
 
 /* renders the action menu when openend */
+var action_menu_options = {};
 function show_action_menu(icon, items, nr, backend, host, service, orientation) {
     resetRefresh();
 
@@ -3388,6 +3389,13 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     var menu = document.createElement('ul');
     s2.appendChild(menu);
     menu.className = 'action_menu';
+
+    // make arguments available
+    action_menu_options = {
+        host:    host,
+        service: service,
+        backend: backend
+    };
 
     if(typeof(items) === "function") {
         menu.appendChild(actionGetMenuItem({icon: url_prefix+'themes/'+theme+'/images/waiting.gif', label: 'loading...'}, id, backend, host, service));
@@ -3710,6 +3718,15 @@ function replace_macros(input, macros) {
 /* remove active class from action menu icons */
 function reset_action_menu_icons() {
     jQuery('IMG.action_icon').removeClass('active');
+}
+
+/* close all action menus */
+function action_menu_close() {
+    reset_action_menu_icons();
+    jQuery('.action_menu').hide();
+    try {
+        Ext.getCmp("iconActionMenu").close();
+    } catch(e) {}
 }
 
 /*******************************************************************************
