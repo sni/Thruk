@@ -13,6 +13,7 @@ Status Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp qw/confess/;
+use URI::Escape qw/uri_unescape/;
 
 ##############################################
 
@@ -2063,10 +2064,10 @@ sub serveraction {
 
     $c->log->debug('running server action: '.$action.' for user '.$c->stash->{'remote_user'});
 
-    my @args = split(/\//mx, $action);
+    my @args = map { Thruk::Utils::decode_any(uri_unescape($_)) } (split(/\//mx, $action));
     $action = shift @args;
     if(!defined $c->config->{'action_menu_actions'}->{$action}) {
-        return(1, 'customaction '.$action.' is not defined');
+        return(1, 'custom action '.$action.' is not defined');
     }
     my @cmdline = split(/\s+/mx, $c->config->{'action_menu_actions'}->{$action});
     my $cmd = shift @cmdline;
