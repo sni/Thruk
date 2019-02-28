@@ -28,7 +28,7 @@ my $pages = [{
         waitfor => 'rta_unit',
     }, {
         url     => 'GET /hosts/<name>',
-        like    => ['"rta_unit" : "ms",', '"rta" : "0.0', ''],
+        like    => ['"rta_unit" : "ms",', '"rta" : "\d+\.\d+', ''],
     }, {
 # verify configuration from config tool
         url     => 'GET /hosts/<name>/config',
