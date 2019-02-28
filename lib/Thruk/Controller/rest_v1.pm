@@ -1254,7 +1254,7 @@ sub _rest_get_thruk_sessions {
     }
 
     my $data = [];
-    for my $session (glob($c->config->{'var_path'}."/sessions/*")) {
+    for my $session (sort glob($c->config->{'var_path'}."/sessions/*")) {
         my $file = $session;
         $file   =~ s%^.*/%%gmx;
         next if $id && $id ne $file;

@@ -1838,6 +1838,7 @@ sub retrieve_session {
     $data->{id}     = $sessionid if $sessionid;
     $data->{file}   = $sessionfile;
     $data->{active} = $stat[9];
+    $data->{roles}  = [] unless $data->{roles};
     return($data);
 }
 
