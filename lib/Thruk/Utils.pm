@@ -1822,7 +1822,9 @@ sub retrieve_session {
         $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
     };
     if(!$data) {
-        my($auth,$ip,$username,$roles) = split(/~~~/mx, scalar read_file($sessionfile));
+        my $raw = scalar read_file($sessionfile);
+        chomp($raw);
+        my($auth,$ip,$username,$roles) = split(/~~~/mx, $raw, 4);
         return unless defined $username;
         my @roles = defined $roles ? split(/,/mx,$roles) : ();
         $data = {
