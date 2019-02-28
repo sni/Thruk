@@ -244,9 +244,9 @@ sub authenticate {
         $c->error("account is locked, please contact an administrator");
         return;
     }
-    if(!$sessiondata) {
+    if(!$sessiondata && $username !~ m/^\(.*\)$/mx) {
         # set session id for all requests
-        if(defined $ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS') && $c->stash->{'remote_user'}) {
+        if(defined $ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
             if($sessionid && !Thruk::Utils::check_for_nasty_filename($sessionid)) {
                 my $sdir = $c->config->{'var_path'}.'/sessions';
                 my $sessionfile = $sdir.'/'.$sessionid;
