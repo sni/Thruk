@@ -1258,14 +1258,11 @@ sub _rest_get_thruk_sessions {
         my $file = $session;
         $file   =~ s%^.*/%%gmx;
         next if $id && $id ne $file;
-        my($auth,$ip,$username) = split(/~~~/mx, scalar read_file($session));
-        next unless $is_admin || $username eq $c->stash->{'remote_user'};
-        push @{$data}, {
-            id      => $file,
-            active  => (stat($session))[9],
-            address => $ip,
-            user    => $username,
-        };
+        my $session_data = Thruk::Utils::retrieve_session($c->config->{'var_path'}.'/sessions/'.$file);
+        next unless $session_data;
+        next unless $is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'};
+        delete $session_data->{'hash'};
+        push @{$data}, $session_data;
     }
     if($id) {
         if(!$data->[0]) {

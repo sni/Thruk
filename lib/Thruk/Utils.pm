@@ -1746,22 +1746,97 @@ create and return fake session id for current user
 =cut
 
 sub get_fake_session {
-    my($c, $sessionid, $username, $roles, $ip) = @_;
-    my $sdir        = $c->config->{'var_path'}.'/sessions';
-    $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
-    $username       = $c->stash->{'remote_user'} unless $username;
-    my $sessionfile = $sdir.'/'.$sessionid;
-    Thruk::Utils::IO::mkdir_r($sdir);
-    $ip = '127.0.0.1' unless $ip;
-    my $sessiondata = "none~~~".$ip."~~~".$username;
+    my($c, $id, $username, $roles, $ip) = @_;
+    my $sessiondata = {
+        hash     => 'none',
+        address  => $ip,
+        username => ($username // $c->stash->{'remote_user'}),
+        fake     => 1,
+    };
     if($roles && ref $roles eq 'ARRAY') {
-        die("unsupported username") if $username =~ m/~~~/mx;
-        $sessiondata = $sessiondata.'~~~'.join(',', @{$roles});
+        $sessiondata->{'roles'} = $roles;
     }
-    Thruk::Utils::IO::write($sessionfile, $sessiondata);
+    my($sessionid, $sessionfile) = store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;
     return($sessionid);
+}
+
+##############################################
+
+=head2 store_session
+
+  store_session($config, $sessionid, $data)
+
+store session data
+
+=cut
+
+sub store_session {
+    my($config, $sessionid, $data) = @_;
+    $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
+    chomp($sessionid);
+    my $sdir        = $config->{'var_path'}.'/sessions';
+    my $sessionfile = $sdir.'/'.$sessionid;
+    Thruk::Utils::IO::mkdir_r($sdir);
+    Thruk::Utils::IO::json_lock_store($sessionfile, $data);
+    return($sessionid, $sessionfile) if wantarray;
+    return($sessionid);
+}
+
+##############################################
+
+=head2 retrieve_session
+
+  retrieve_session($sessionfile)
+  retrieve_session($c, $sessionid)
+
+returns session data as hash
+
+    {
+        id       => session id,
+        file     => session data file name,
+        username => login name,
+        active   => timestamp of last activity
+        address  => remote address of user (optional)
+        hash     => login hash from basic auth (optional)
+        roles    => extra session roles (optional)
+    }
+
+=cut
+
+sub retrieve_session {
+    my($c, $id) = @_;
+    my($sessionfile, $sessionid);
+    if(ref $c eq '') {
+        $sessionfile = $c;
+    } else {
+        $sessionid = $id;
+        my $sdir     = $c->config->{'var_path'}.'/sessions';
+        $sessionfile = $sdir.'/'.$sessionid;
+    }
+    my $data;
+    return unless -e $sessionfile;
+    my @stat = stat(_);
+    eval {
+        $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
+    };
+    if(!$data) {
+        my($auth,$ip,$username,$roles) = split(/~~~/mx, scalar read_file($sessionfile));
+        return unless defined $username;
+        my @roles = defined $roles ? split(/,/mx,$roles) : ();
+        $data = {
+            address  => $ip,
+            username => $username,
+            hash     => $auth,
+            roles    => \@roles,
+        };
+    }
+    return unless defined $data;
+    $data->{id}     = $sessionid if $sessionid;
+    $data->{file}   = $sessionfile;
+    $data->{active} = $stat[9];
+    return($data);
 }
 
 ########################################

@@ -54,7 +54,6 @@ my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
 my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
 my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
-my $session_split       = qr/~~~/mx;
 my $last_cache_clean    = 0;
 
 ##########################################################
@@ -110,14 +109,13 @@ sub process {
         # direct access with basic auth
         if($extra->[1]) {
             print STDERR "thruk_auth: script bypass cookie auth for $path" if $verbose;
-            my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
-            if($session && $session ne '-1') {
+            my $sessionid = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
+            if($sessionid && $sessionid ne '-1') {
                 print STDERR "thruk_auth: script login successful" if $verbose;
-                my $sessionfile = $spath.'/'.$session;
-                chomp(my $cont = read_file($sessionfile));
-                my($basicauth, $ip, $user,$roles) = split($session_split, $cont, 4);
+                my $sessionfile = $spath.'/'.$sessionid;
+                my $session = Thruk::Utils::retrieve_session($sessionfile);
                 unlink($sessionfile);
-                return "/loginok/".$user."/".$path."\n";
+                return "/loginok/".$session->{'username'}."/".$path."\n";
             } else {
                 print STDERR "thruk_auth: script login failed" if $verbose;
             }
@@ -147,8 +145,9 @@ sub process {
             return $loginurl."?expired&".$path."\n";
         }
 
-        chomp(my $cont = read_file($sessionfile));
-        my($basicauth, $ip, $user, $roles) = split($session_split, $cont, 4);
+        my $session = Thruk::Utils::retrieve_session($sessionfile);
+        my $basicauth = $session->{'hash'};
+        my $user      = $session->{'username'};
 
         # fill sessioncache from mtime initially, so we don't have to revalidate new sessions immediately
         if(!$sessioncache->{$auth}) {

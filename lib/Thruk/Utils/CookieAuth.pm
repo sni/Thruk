@@ -16,7 +16,6 @@ use strict;
 use Data::Dumper;
 use Thruk::UserAgent;
 use Thruk::Authentication::User;
-use Digest::MD5 qw(md5_hex);
 use Thruk::Utils;
 use Thruk::Utils::IO;
 use Encode qw/encode_utf8/;
@@ -96,15 +95,14 @@ sub external_authentication {
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
                 if(ref $login eq 'HASH') { $login = $1; }
                 if($1 eq Thruk::Authentication::User::transform_username($config, $login)) {
-                    my $sessionid = md5_hex(rand(1000).time());
-                    chomp($sessionid);
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
                     $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
-                    my $sessionfile = $sdir.'/'.$sessionid;
-                    open(my $fh, '>', $sessionfile) or die('failed to open session file: '.$sessionfile.' '.$!);
-                    print $fh join('~~~', $hash, $address, $login), "\n";
-                    Thruk::Utils::IO::close($fh, $sessionfile);
+                    my $sessionid = Thruk::Utils::store_session($config, undef, {
+                        hash     => $hash,
+                        address  => $address,
+                        username => $login,
+                    });
                     return $sessionid;
                 }
             } else {

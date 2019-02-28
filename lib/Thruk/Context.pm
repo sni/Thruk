@@ -229,13 +229,41 @@ sub authenticate {
     $c->log->debug("checking authenticaton") if Thruk->verbose;
     delete $c->stash->{'remote_user'};
     delete $c->{'user'};
+    delete $c->{'session'};
     $username = request_username($c) unless defined $username;
     return unless $username;
-    my $user = Thruk::Authentication::User->new($c, $username);
+    my $sessionid = $c->req->cookies->{'thruk_auth'};
+    my $sessiondata;
+    if($sessionid) {
+        $sessiondata = Thruk::Utils::retrieve_session($c, $sessionid);
+        $sessiondata = undef if(!$sessiondata || $sessiondata->{'username'} ne $username);
+    }
+    my $user = Thruk::Authentication::User->new($c, $username, $sessiondata);
     return unless $user;
     if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
         $c->error("account is locked, please contact an administrator");
         return;
+    }
+    if(!$sessiondata) {
+        # set session id for all requests
+        if(defined $ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS') && $c->stash->{'remote_user'}) {
+            if($sessionid && !Thruk::Utils::check_for_nasty_filename($sessionid)) {
+                my $sdir = $c->config->{'var_path'}.'/sessions';
+                my $sessionfile = $sdir.'/'.$sessionid;
+                if(!-e $sessionfile) {
+                    Thruk::Utils::get_fake_session($c, $sessionid, $username, undef, $c->req->address);
+                }
+            } else {
+                $sessionid = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
+                $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'} };
+            }
+            $sessiondata = Thruk::Utils::retrieve_session($c, $sessionid);
+        }
+    }
+    if($sessiondata) {
+        my $now = time();
+        utime($now, $now, $sessiondata->{'file'});
+        $c->{'session'} = $sessiondata;
     }
     $c->{'user'} = $user;
     $c->stash->{'remote_user'} = $user->{'username'};

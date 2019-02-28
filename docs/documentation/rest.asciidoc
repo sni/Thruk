@@ -1441,8 +1441,9 @@ lists thruk sessions.
 |Attribute                         | Description
 |active                            | timestamp when session was last time used
 |address                           | remote address of user
-|id                                | session id
-|user                              | username
+|file                              | file name the session data file
+|roles                             | extra session roles
+|username                          | username of this session
 |===========================================
 
 
@@ -1472,3 +1473,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+
