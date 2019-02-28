@@ -72,7 +72,7 @@ sub format_date {
     my($timestamp, $format) = @_;
     confess("no format") unless defined $format;
     my $date = POSIX::strftime($format, localtime($timestamp));
-    return decode("utf-8", $date);
+    return $date;
 }
 
 
