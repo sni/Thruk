@@ -1105,6 +1105,7 @@ TP.iconShowEditDialog = function(panel) {
                     delete panel.xdata.label;
                     delete panel.xdata.link;
                     delete panel.xdata.popup;
+                    delete panel.xdata.groups;
                     var xdata = TP.get_icon_form_xdata(settingsWindow);
                     TP.log('['+this.id+'] icon config updated: '+Ext.JSON.encode(xdata));
                     for(var key in xdata) { panel.xdata[key] = xdata[key]; }
