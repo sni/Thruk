@@ -191,7 +191,7 @@ sub _update_docs {
     my($c, $output_file) = @_;
 
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
-    Thruk::Utils::get_fake_session($c);
+    Thruk::Utils::get_fake_session($c, undef, undef, ["authorized_for_read_only"]);
     `mkdir -p bp;            cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
     `mkdir -p panorama;      cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
     `mkdir -p var/broadcast; cp t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;

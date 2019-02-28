@@ -1441,6 +1441,7 @@ lists thruk sessions.
 |Attribute                         | Description
 |active                            | timestamp when session was last time used
 |address                           | remote address of user
+|fake                              | flag whether this is a fake session or not
 |file                              | file name the session data file
 |roles                             | extra session roles
 |username                          | username of this session
