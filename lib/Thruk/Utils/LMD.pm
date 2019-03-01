@@ -68,8 +68,8 @@ sub check_proc {
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -pidfile '.$lmd_dir.'/pid'
               .' -config '.$lmd_dir.'/lmd.ini';
-    if($config->{'lmd_core_config'}) {
-        $cmd .= ' -config '.$config->{'lmd_core_config'};
+    for my $cfg (@{Thruk::Utils::array_uniq(Thruk::Utils::list($config->{'lmd_core_config'}))}) {
+        $cmd .= ' -config '.$cfg;
     }
     $cmd .= ' >/dev/null 2>&1 &';
 
@@ -89,7 +89,11 @@ sub check_proc {
             $retries++;
             sleep(1);
         }
-        $c->log->debug(sprintf('lmd started with pid %d', $pid));
+        if($pid) {
+            $c->log->debug(sprintf('lmd started with pid %d', $pid));
+        } else {
+            $c->log->warn(sprintf('lmd failed to start, you may find details in the lmd.log file.'));
+        }
     }
 
     Thruk::Utils::IO::file_unlock($startlock, $fh, $lock) if $fh;
