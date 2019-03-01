@@ -7,13 +7,13 @@
     <tr>
       <td class="attrName"><b>Choose Plugin</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion(); update_command_preview('[% id %]');" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:false, autosubmit:false})"[% END %] style="width:650px" onkeyup="update_command_preview('[% id %]')">
+        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion(); update_command_preview('[% id %]');" onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:false, autosubmit:false})" style="width:650px" onkeyup="update_command_preview('[% id %]')">
       </td>
     </tr>
     <tr>
       <td class="attrName"><b>Plugin Arguments</b></td>
       <td>
-        <textarea id="[% id %]_inp_args" style="width:650px; height: 150px;"[% IF use_ajax_search %]onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})"[% END %] onkeyup="update_command_preview('[% id %]')" onchange="update_command_preview('[% id %]')"></textarea>
+        <textarea id="[% id %]_inp_args" style="width:650px; height: 150px;" onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})" onkeyup="update_command_preview('[% id %]')" onchange="update_command_preview('[% id %]')"></textarea>
       </td>
     </tr>
     <tr>

@@ -47,16 +47,11 @@
           <li>
           <div id="search_box">
             <form action="[% url_prefix %]cgi-bin/status.cgi" method="get" target="[% link.target %]">
-            [% IF use_new_search%]
             <input type='hidden' name='hidesearch' value='2' />
             <input type='hidden' name='s0_op' value='~' />
             <input type='hidden' name='s0_type' value='search' />
             <input type='hidden' name='add_default_service_filter' value='1' />
             <input type='text' name='s0_value' id="s0_value" class="NavBarSearchItem" />
-            [% ELSE %]
-            <input id="search" name="host" type="text" />
-            <input type="hidden" name="navbarsearch" id="NavBarSearchItem" value="1" />
-            [% END %]
             <input src="[% url_prefix %]themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
             </form>
           </div>

@@ -2,7 +2,6 @@
 <!--
   jQuery.noConflict();
   [% PROCESS _header_initial_states.tt %]
-  var ajax_search_enabled = '[% use_ajax_search %]';
   var backend_chooser     = '[% backend_chooser %]';
   [% IF refresh_rate +%]
   var refresh_rate        = [% refresh_rate %];

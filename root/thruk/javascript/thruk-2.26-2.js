@@ -5328,9 +5328,7 @@ function add_new_filter(search_prefix, table) {
   newInputPre.setAttribute('id',   pane_prefix + search_prefix + nr + '_val_pre');
   newInputPre.style.display    = "none";
   newInputPre.style.visibility = "hidden";
-  if(ajax_search_enabled) {
-    newInputPre.onclick = function() { ajax_search.init(this, 'custom variable') };
-  }
+  newInputPre.onclick = function() { ajax_search.init(this, 'custom variable') };
   newCell0.appendChild(newInputPre);
 
   newCell0.appendChild(opselect);
@@ -5340,9 +5338,7 @@ function add_new_filter(search_prefix, table) {
   newInput.value     = '';
   newInput.setAttribute('name', pane_prefix + search_prefix + 'value');
   newInput.setAttribute('id',   pane_prefix + search_prefix + nr + '_value');
-  if(ajax_search_enabled) {
-    newInput.onclick = ajax_search.init;
-  }
+  newInput.onclick = ajax_search.init;
   newCell0.appendChild(newInput);
 
   if(enable_shinken_features) {
@@ -5507,7 +5503,7 @@ function replaceIdAndNames(elems, new_prefix) {
         elem.setAttribute('name', new_name);
     }
 
-    if(ajax_search_enabled && elem.tagName == 'INPUT' && elem.type == 'text') {
+    if(elem.tagName == 'INPUT' && elem.type == 'text') {
       elem.onclick = ajax_search.init;
     }
   };
@@ -5991,6 +5987,7 @@ var ajax_search = {
     timer           : false,
     striped         : false,
     autosubmit      : undefined,
+    limit           : 500,
     list            : false,
     templates       : 'no',
     hideempty       : false,
@@ -6017,6 +6014,7 @@ var ajax_search = {
      *   url:               url to fetch data
      *   striped:           true/false, everything after " - " is trimmed
      *   autosubmit:        true/false, submit form on select
+     *   limit:             int, limit number of results
      *   list:              true/false, string is split by , and suggested by last chunk
      *   templates:         no/templates/both, suggest templates
      *   data:              search base data
@@ -6058,6 +6056,9 @@ var ajax_search = {
         }
         if(options.autosubmit != undefined) {
             ajax_search.autosubmit = options.autosubmit;
+        }
+        if(options.limit != undefined) {
+            ajax_search.limit = options.limit;
         }
         if(options.list != undefined) {
             ajax_search.list = options.list;
@@ -6214,6 +6215,9 @@ var ajax_search = {
             ajax_search.dont_hide = true;
             input.blur();   // blur & focus the element, otherwise the first
             input.focus();  // click would result in the browser autocomplete
+            if(input.value == "all") {
+                jQuery(input).select();
+            }
             ajax_search.dont_hide = false;
         }
 
@@ -6296,6 +6300,7 @@ var ajax_search = {
         ajax_search.initialized   = now;
         ajax_search.initialized_t = type;
         ajax_search.initialized_a = undefined;
+        ajax_search.initialized_q = undefined;
         if(append_value_of) {
             ajax_search.initialized_a = appended_value;
         }
@@ -6315,35 +6320,7 @@ var ajax_search = {
             ajax_search.base = options.data;
             ajax_search.suggest();
         } else {
-             ajax_search.updating=true;
-             ajax_search.error=false;
-
-            // show searching results
-            ajax_search.base = {};
-            ajax_search.suggest();
-
-             // fill data store
-            jQuery.ajax({
-                url: search_url,
-                type: 'POST',
-                success: function(data) {
-                    ajax_search.updating=false;
-                    ajax_search.base = data;
-                    if(ajax_search.autoopen == true || panel.style.visibility == 'visible') {
-                        ajax_search.suggest();
-                    }
-                    ajax_search.autoopen = true;
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    ajax_search.error=errorThrown;
-                    if(ajax_search.error == undefined || ajax_search.error == "") {
-                        ajax_search.error = "server unavailable";
-                    }
-                    ajax_search.updating=false;
-                    ajax_search.show_results([]);
-                    ajax_search.initialized = false;
-                }
-            });
+            ajax_search.refresh_data();
         }
 
         if(!iPhone) {
@@ -6352,6 +6329,44 @@ var ajax_search = {
         }
 
         return false;
+    },
+
+    refresh_data: function() {
+        ajax_search.updating = true;
+        ajax_search.error    = false;
+
+        // show searching results
+        var input = document.getElementById(ajax_search.input_field);
+        ajax_search.base = {};
+        ajax_search.suggest();
+        ajax_search.initialized_q = input.value;
+
+        // fill data store
+        jQuery.ajax({
+            url: search_url,
+            data: {
+                limit: ajax_search.limit,
+                query: ajax_search.initialized_q != "all" ? ajax_search.initialized_q : undefined
+            },
+            type: 'POST',
+            success: function(data) {
+                ajax_search.updating=false;
+                ajax_search.base = data;
+                if(ajax_search.autoopen == true || panel.style.visibility == 'visible') {
+                    ajax_search.suggest();
+                }
+                ajax_search.autoopen = true;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                ajax_search.error=errorThrown;
+                if(ajax_search.error == undefined || ajax_search.error == "") {
+                    ajax_search.error = "server unavailable";
+                }
+                ajax_search.updating=false;
+                ajax_search.show_results([]);
+                ajax_search.initialized = false;
+            }
+        });
     },
 
     /* hide the search results */
@@ -6448,7 +6463,6 @@ var ajax_search = {
 
     /* search some hosts to suggest */
     suggest_do: function() {
-        var input;
         var input = document.getElementById(ajax_search.input_field);
         if(!input) { return; }
         if(ajax_search.base == undefined || ajax_search.base.length == 0) { return; }
@@ -6459,6 +6473,7 @@ var ajax_search = {
         }
 
         pattern = input.value;
+        if(pattern == "all") { pattern = ""; }
         if(ajax_search.search_for_cb) {
             pattern = ajax_search.search_for_cb(pattern)
         }
@@ -6486,7 +6501,7 @@ var ajax_search = {
             }
         }
         if(pattern.length >= 1 || ajax_search.search_type != 'all') {
-
+            var needs_refresh = false;
             prefix = pattern.substr(0,3);
             if(prefix == 'ho:' || prefix == 'hg:' || prefix == 'se:' || prefix == 'sg:') {
                 pattern = pattern.substr(3);
@@ -6564,11 +6579,19 @@ var ajax_search = {
                       }
                   });
                 }
+                if(ajax_search.initialized_q.length > input.value.length || (search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != input.value)) {
+                    // refresh data
+                    needs_refresh = true;
+                }
                 if(sub_results.length > 0) {
                     sub_results.sort(sort_by('sorter', false));
                     results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
                 }
             });
+
+            if(needs_refresh) {
+                ajax_search.refresh_data();
+            }
 
             ajax_search.cur_results = results;
             ajax_search.cur_pattern = pattern;

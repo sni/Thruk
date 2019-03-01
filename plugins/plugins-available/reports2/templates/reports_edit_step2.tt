@@ -26,9 +26,9 @@
           <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
         </select>
       [% ELSIF type == 'hosts' OR type == 'hostgroups' OR type == 'servicegroups' %]
-        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, '[% type %]', { url: 'status.cgi?format=search&amp;type=[% type %]', autosubmit:false, backend_select:'report_backends', list: '[ ,]', onselect:reports_update_affected_sla_objects })"[% END %] onchange="reports_update_affected_sla_objects(this)">
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type %]', { url: 'status.cgi?format=search&amp;type=[% type %]', autosubmit:false, backend_select:'report_backends', list: '[ ,]', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
       [% ELSIF type == 'services' %]
-        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'params.host', backend_select:'report_backends', list: '[ ,]', onselect:reports_update_affected_sla_objects })"[% END %] onchange="reports_update_affected_sla_objects(this)">
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'params.host', backend_select:'report_backends', list: '[ ,]', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
       [% ELSIF type == 'affected_sla_objects' %]
         <span class="wait" id="reports_waiting" style="display: none;"><img class="notclickable" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="getting expected objects" title="getting expected objects" border="0" height="11" width="11"></span>
         <span class="value" id="reports_expected_objects">&nbsp;</span>
@@ -225,7 +225,7 @@
           <option value="hostcustom"[%      IF value == 'hostcustom'      %] selected[% END %]>Customvariable</option>
         </select>
         [% cust_value = ""; cust_key = key _ '_cust'; IF r.params.exists(cust_key) %][% cust_value = r.params.$cust_key %][% END %]
-        <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '[ ,]' })"[% END %] style="width: 150px; [% IF value != 'hostcustom' %]display: none;[% END %]">
+        <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value %]" onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '[ ,]' })" style="width: 150px; [% IF value != 'hostcustom' %]display: none;[% END %]">
       [% ELSIF type == 'serviceformat' %]
         <select name="params.[% key %]" onchange="var el = document.getElementById('params.[% key %]_cust'); if(this.value == 'servicecustom') { el.style.display = ''; } else { el.style.display = 'none'; }">
           <option value="servicedescription"[% IF value == 'description'        %] selected[% END %]>Description</option>
@@ -233,7 +233,7 @@
           <option value="servicecustom"[%      IF value == 'servicecustom'      %] selected[% END %]>Customvariable</option>
         </select>
         [% cust_value = ""; cust_key = key _ '_cust'; IF r.params.exists(cust_key) %][% cust_value = r.params.$cust_key %][% END %]
-        <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '[ ,]' })"[% END %] style="width: 150px; [% IF value != 'servicecustom' %]display: none;[% END %]">
+        <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value %]" onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '[ ,]' })" style="width: 150px; [% IF value != 'servicecustom' %]display: none;[% END %]">
       [% ELSE %]
       [% PROCESS $temp block = 'edit_types' %]
       [% PROCESS custom_reports_edit_step2.tt %]

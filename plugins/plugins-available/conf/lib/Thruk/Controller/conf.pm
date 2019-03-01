@@ -571,16 +571,6 @@ sub _process_thruk_page {
                         show_custom_vars
                     /],
         ],
-        [ 'Search', [qw/
-                        use_new_search
-                        use_ajax_search
-                        ajax_search_hosts
-                        ajax_search_hostgroups
-                        ajax_search_services
-                        ajax_search_servicegroups
-                        ajax_search_timeperiods
-                    /],
-        ],
         [ 'Paging', [qw/
                         use_pager
                         paging_steps

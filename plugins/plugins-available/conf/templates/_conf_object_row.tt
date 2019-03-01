@@ -11,7 +11,7 @@
     [% IF key == 'command_line' %][% has_wizard = 1 %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
     [% IF key == 'address'      %][% has_wizard = 1 %]<button class="conf_button ip_wzd_button" id="[% key %]_btn[% nr %]">&nbsp;</button>[% END %]
     [% END %]
-    <input type="text" class="obj_[% key %][% IF has_wizard %] wizard[% END %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value | html %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:false, autosubmit:false})"[% END %]>
+    <input type="text" class="obj_[% key %][% IF has_wizard %] wizard[% END %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value | html %][% END %]" [% IF defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:false, autosubmit:false})"[% END %]>
     [% wzd_btn %]
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') && defaults.$key.link == 'icon' %]
@@ -32,7 +32,7 @@
   [% END %]
   [% IF cmd.size == 0 %][% cmd = ['',''] %][% END %]
   [% IF edit %]
-    <input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:false, autosubmit:false})"[% END %] placeholder="command name">
+    <input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:false, autosubmit:false})"[% END %] placeholder="command name">
     [% PROCESS _conf_wizard_command.tt id="id_" _ key _ "_wzd" _ nr inp1="id_" _ key _ "_1" inp2="id_" _ key _ "_2" %]<br>
     <input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; escape_html(cmd.join('!')) %]" placeholder="command arguments">
   [% ELSE %]
@@ -110,7 +110,7 @@
       %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ key _ ",1" %]
       [% END %]
     [% END %]
-    <input type="text" class="obj_[% key %] obj_[% type %]_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'[% url %]', striped:false, autosubmit:false, list:'[ ,!\+]'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'wand.png',cls:'wzd' }][% END %]})"[% END %]>
+    <input type="text" class="obj_[% key %] obj_[% type %]_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'[% url %]', striped:false, autosubmit:false, list:'[ ,!\+]'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'wand.png',cls:'wzd' }][% END %]})"[% END %]>
     [% wzd_btn %]
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]

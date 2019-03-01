@@ -369,7 +369,7 @@ sub get_hosts {
 
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(!$self->{'optimized'} && defined $options{'pager'}) {
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
         ($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
         if(defined $size) {
             # then set the limit for the real query
@@ -545,7 +545,7 @@ sub get_services {
 
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(!$self->{'optimized'} && defined $options{'pager'}) {
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
         ($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
         if(defined $size) {
             # then set the limit for the real query
@@ -783,7 +783,7 @@ sub get_logs {
     }
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'}) {
+    if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'} && !defined $options{'options'}->{'limit'}) {
         ($size, $limit) = $self->_get_query_size('log', \%options, 'time', 'time');
         if(defined $size) {
             # then set the limit for the real query

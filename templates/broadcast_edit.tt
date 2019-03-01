@@ -120,10 +120,8 @@ then use later like: {{variable}} and {{another}}</pre>
              id="contacts"
              style="width: 97%;"
              value="[% broadcast.contacts.join(', ') %]"
-             [% IF use_ajax_search %]
-               onfocus="this.click()"
-               onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
-             [% END %]
+             onfocus="this.click()"
+             onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
       >
     </td>
   </tr>
@@ -136,10 +134,9 @@ then use later like: {{variable}} and {{another}}</pre>
              id="contactgroups"
              style="width: 97%;"
              value="[% broadcast.contactgroups.join(', ') %]"
-             [% IF use_ajax_search %]
-               onfocus="this.click()"
-               onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
-             [% END %]>
+             onfocus="this.click()"
+             onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+      >
     </td>
   </tr>
   <tr>

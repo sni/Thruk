@@ -121,7 +121,7 @@
 %]
 <tr>
   <th align="right">Host</th>
-  <td align="left"><input type="text" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"[% END %]></td>
+  <td align="left"><input type="text" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"></td>
 </tr>
 <tr>
   <th align="right">Service</th>
@@ -132,7 +132,7 @@
       <option value="=">=</option>
       <option value="!=">!=</option>
     </select>
-    <input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })"[% END %]>
+    <input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description" onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })">
   </td>
 </tr>
 [% END %]
@@ -155,7 +155,7 @@
 </tr>
 <tr>
   <th align="right">Group</th>
-  <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp;', autosubmit:false })"[% END %]></td>
+  <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup" onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp;', autosubmit:false })"></td>
 </tr>
 <tr>
   <th align="right" nowrap>Hosts Warning</th>
@@ -392,13 +392,13 @@
     <tr class="firstnode supports_link">
       <th align="right" valign="top">Host Template</th>
       <td align="left">
-        <input type="text" value="" id="bp_host_template" name="bp_host_template" placeholder="host template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'host template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+        <input type="text" value="" id="bp_host_template" name="bp_host_template" placeholder="host template" class="bp_create" onfocus="this.click()" onclick="ajax_search.init(this, 'host template', { url: 'bp.cgi?action=templates', autosubmit:false })">
       </td>
     </tr>
     <tr class="supports_link">
       <th align="right" valign="top">Service Template</th>
       <td align="left">
-        <input type="text" value="" id="bp_template" name="bp_template" placeholder="service template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+        <input type="text" value="" id="bp_template" name="bp_template" placeholder="service template" class="bp_create" onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })">
         [% IF objects_save_format == "nagios" %]
         [% IF use_feature_configtool %]<br><div style="padding-top: 2px;"><a href="conf.cgi?sub=objects&amp;action=editor&amp;file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a></div>[% END %]
         [% END %]
@@ -408,28 +408,28 @@
     <tr class="supports_link">
       <th align="right" valign="top">Contact Groups</th>
       <td align="left">
-        <input type="text" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '[ ,]' })"[% END %]>
+        <input type="text" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '[ ,]' })">
         <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contact groups" onclick="bpRemoveAttribute('contactgroups'); return false;">
       </td>
     </tr>
     <tr class="supports_link">
       <th align="right" valign="top">Contacts</th>
       <td align="left">
-        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: false })"[% END %]>
+        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: false })">
         <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contacts" onclick="bpRemoveAttribute('contacts'); return false;">
       </td>
     </tr>
     <tr class="supports_link">
       <th align="right" valign="top" nowrap>Eventhandler</th>
       <td align="left">
-        <input type="text" id="bp_event_handler" name="bp_event_handler" placeholder="eventhandler command"  class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'command', { url: 'status.cgi?format=search&amp;type=command', autosubmit:false })"[% END %]>
+        <input type="text" id="bp_event_handler" name="bp_event_handler" placeholder="eventhandler command"  class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'command', { url: 'status.cgi?format=search&amp;type=command', autosubmit:false })">
         <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove eventhandler" onclick="bpRemoveAttribute('event_handler'); return false;">
       </td>
     </tr>
     <tr class="supports_link">
       <th align="right" valign="top" nowrap>Notification Period</th>
       <td align="left">
-        <input type="text" id="bp_notification_period" name="bp_notification_period" placeholder="notification period"  class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'timeperiod', { url: 'status.cgi?format=search&amp;type=timeperiod', autosubmit:false })"[% END %]>
+        <input type="text" id="bp_notification_period" name="bp_notification_period" placeholder="notification period"  class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'timeperiod', { url: 'status.cgi?format=search&amp;type=timeperiod', autosubmit:false })">
         <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove notification period" onclick="bpRemoveAttribute('notification_period'); return false;">
       </td>
     </tr>

@@ -104,15 +104,15 @@
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Contacts:</td>
-              <td><input type='text' name='contact' id='contact' value='[% IF contact != "all"; contact; END %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, striped:false })"[% END %]></td>
+              <td><input type='text' name='contact' id='contact' value='[% IF contact != "all"; contact; END %]' onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, striped:false })"></td>
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Host:</td>
-              <td><input type='text' name='host' id='host' value='[% IF host != "all"; host; END %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %]></td>
+              <td><input type='text' name='host' id='host' value='[% IF host != "all"; host; END %]' onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"></td>
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Service:</td>
-              <td><input type='text' name='service' id='service' value='[% service %]'[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"[% END %]></td>
+              <td><input type='text' name='service' id='service' value='[% service %]' onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"></td>
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Older Entries First:</td>

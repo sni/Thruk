@@ -1726,6 +1726,10 @@ sub select_backends {
             $arg{'enable_shinken_features'} = $c->stash->{'enable_shinken_features'};
         }
 
+        if(exists $arg{'limit'}) {
+            $arg{'options'}->{'limit'} = delete $arg{'limit'};
+        }
+
         @{$arg} = %arg;
     }
 

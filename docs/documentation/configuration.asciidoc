@@ -691,17 +691,6 @@ ex.:
 
 == Search Settings
 
-=== use_new_search
-
-Use the old or the classic search from the navigation. The new search
-supports regular expressions and searches in many attributes. For
-example: plugin_output, groups, names, descriptions
-
-ex.:
-
-  use_new_search = 1
-
-
 === maximum_search_boxes
 {% include new_since.ad version="2.24" %}
 maximum number of allowed search boxes
@@ -721,68 +710,6 @@ with "test_". You can use regular expressions. The Default is not set.
 ex.:
 
   default_service_filter = !^test_
-
-
-=== use_ajax_search
-
-Enables the ajax search field. There will be suggestions while typing
-into the search field.
-
-ex.:
-
-  use_ajax_search = 1
-
-
-=== ajax_search_hosts
-
-Enables the suggestion of hosts in the ajax search field.
-Depending on the number of hosts, this can make the search slow.
-
-ex.:
-
-  ajax_search_hosts = 1
-
-
-=== ajax_search_hostgroups
-
-Enables the suggestion of hostgroups in the ajax search field.
-
-ex.:
-
-  ajax_search_hostgroups = 1
-
-
-=== ajax_search_services
-
-Enables the suggestion of services in the ajax search field.
-Depending on the number of services, this can make the search slow.
-
-ex.:
-
-  ajax_search_services = 1
-
-
-=== ajax_search_servicegroups
-
-Enables the suggestion of servicegroups in the ajax search field.
-
-ex.:
-
-  ajax_search_servicegroups = 1
-
-
-=== ajax_search_timeperiods
-
-Enables the suggestion of timeperiods in the ajax search field.
-Timeperiods will only displayed when filtering by check- or
-notification period.
-
-ex.:
-
-  ajax_search_timeperiods = 1
-
-
-
 
 
 == Paging Settings

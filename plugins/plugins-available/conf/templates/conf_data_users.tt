@@ -14,7 +14,7 @@
     <tr>
       <td class='dataVar' align="left">Username</td>
       <td class='dataVal'>
-        <input type="text" name="data.username" id="data.username" value="[% user_name %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'contact', {url:'conf.cgi?action=cgi_contacts'})"[% END %] size=40>
+        <input type="text" name="data.username" id="data.username" value="[% user_name %]" onclick="ajax_search.init(this, 'contact', {url:'conf.cgi?action=cgi_contacts'})" size=40>
       </td>
     </tr>
     <tr>
