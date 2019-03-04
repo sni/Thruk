@@ -17,6 +17,7 @@ if($0 =~ m/scenario\-(.*)\.t$/mx) {
     $filter = 't/scenarios/'.$1;
 }
 
+use_ok("Thruk::Utils");
 use_ok("Thruk::Utils::IO");
 
 my $verbose = $ENV{'HARNESS_IS_VERBOSE'} ? 1 : undef;
