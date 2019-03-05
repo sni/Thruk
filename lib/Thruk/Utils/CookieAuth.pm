@@ -13,12 +13,13 @@ to logout again.
 
 use warnings;
 use strict;
-use Data::Dumper;
 use Thruk::UserAgent;
 use Thruk::Authentication::User;
 use Thruk::Utils;
 use Thruk::Utils::IO;
+use Data::Dumper;
 use Encode qw/encode_utf8/;
+use Digest::MD5 qw(md5_hex);
 
 ##############################################
 BEGIN {
@@ -98,7 +99,7 @@ sub external_authentication {
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
                     $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
-                    my $sessionid = Thruk::Utils::store_session($config, undef, {
+                    my $sessionid = store_session($config, undef, {
                         hash     => $hash,
                         address  => $address,
                         username => $login,
@@ -242,6 +243,86 @@ sub get_netloc {
         return($host);
     }
     return('localhost:80');
+}
+
+##############################################
+
+=head2 store_session
+
+  store_session($config, $sessionid, $data)
+
+store session data
+
+=cut
+
+sub store_session {
+    my($config, $sessionid, $data) = @_;
+    $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
+    chomp($sessionid);
+    my $sdir        = $config->{'var_path'}.'/sessions';
+    my $sessionfile = $sdir.'/'.$sessionid;
+    Thruk::Utils::IO::mkdir_r($sdir);
+    Thruk::Utils::IO::json_lock_store($sessionfile, $data);
+    return($sessionid, $sessionfile) if wantarray;
+    return($sessionid);
+}
+
+##############################################
+
+=head2 retrieve_session
+
+  retrieve_session($sessionfile)
+  retrieve_session($c, $sessionid)
+
+returns session data as hash
+
+    {
+        id       => session id,
+        file     => session data file name,
+        username => login name,
+        active   => timestamp of last activity
+        address  => remote address of user (optional)
+        hash     => login hash from basic auth (optional)
+        roles    => extra session roles (optional)
+    }
+
+=cut
+
+sub retrieve_session {
+    my($c, $id) = @_;
+    my($sessionfile, $sessionid);
+    if(ref $c eq '') {
+        $sessionfile = $c;
+    } else {
+        $sessionid = $id;
+        my $sdir     = $c->config->{'var_path'}.'/sessions';
+        $sessionfile = $sdir.'/'.$sessionid;
+    }
+    my $data;
+    return unless -e $sessionfile;
+    my @stat = stat(_);
+    eval {
+        $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
+    };
+    if(!$data) {
+        my $raw = scalar read_file($sessionfile);
+        chomp($raw);
+        my($auth,$ip,$username,$roles) = split(/~~~/mx, $raw, 4);
+        return unless defined $username;
+        my @roles = defined $roles ? split(/,/mx,$roles) : ();
+        $data = {
+            address  => $ip,
+            username => $username,
+            hash     => $auth,
+            roles    => \@roles,
+        };
+    }
+    return unless defined $data;
+    $data->{id}     = $sessionid if $sessionid;
+    $data->{file}   = $sessionfile;
+    $data->{active} = $stat[9];
+    $data->{roles}  = [] unless $data->{roles};
+    return($data);
 }
 
 ##############################################

@@ -26,6 +26,7 @@ use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
+use Thruk::Utils::CookieAuth ();
 
 our $VERSION = 1;
 our $rest_paths = [];
@@ -1258,7 +1259,7 @@ sub _rest_get_thruk_sessions {
         my $file = $session;
         $file   =~ s%^.*/%%gmx;
         next if $id && $id ne $file;
-        my $session_data = Thruk::Utils::retrieve_session($c->config->{'var_path'}.'/sessions/'.$file);
+        my $session_data = Thruk::Utils::CookieAuth::retrieve_session($c->config->{'var_path'}.'/sessions/'.$file);
         next unless $session_data;
         next unless $is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'};
         delete $session_data->{'hash'};

@@ -113,7 +113,7 @@ sub process {
             if($sessionid && $sessionid ne '-1') {
                 print STDERR "thruk_auth: script login successful" if $verbose;
                 my $sessionfile = $spath.'/'.$sessionid;
-                my $session = Thruk::Utils::retrieve_session($sessionfile);
+                my $session = Thruk::Utils::CookieAuth::retrieve_session($sessionfile);
                 unlink($sessionfile);
                 return "/loginok/".$session->{'username'}."/".$path."\n";
             } else {
@@ -145,7 +145,7 @@ sub process {
             return $loginurl."?expired&".$path."\n";
         }
 
-        my $session = Thruk::Utils::retrieve_session($sessionfile);
+        my $session = Thruk::Utils::CookieAuth::retrieve_session($sessionfile);
         my $basicauth = $session->{'hash'};
         my $user      = $session->{'username'};
 

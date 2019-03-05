@@ -16,6 +16,7 @@ use Thruk::Request;
 use Thruk::Request::Cookie;
 use Thruk::Stats;
 use Thruk::Utils::IO;
+use Thruk::Utils::CookieAuth;
 
 =head1 NAME
 
@@ -235,7 +236,7 @@ sub authenticate {
     my $sessionid = $c->req->cookies->{'thruk_auth'};
     my $sessiondata;
     if($sessionid) {
-        $sessiondata = Thruk::Utils::retrieve_session($c, $sessionid);
+        $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $sessionid);
         $sessiondata = undef if(!$sessiondata || $sessiondata->{'username'} ne $username);
     }
     my $user = Thruk::Authentication::User->new($c, $username, $sessiondata);
@@ -257,7 +258,7 @@ sub authenticate {
                 $sessionid = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
                 $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'} };
             }
-            $sessiondata = Thruk::Utils::retrieve_session($c, $sessionid);
+            $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $sessionid);
         }
     }
     if($sessiondata) {

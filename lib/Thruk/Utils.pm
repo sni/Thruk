@@ -12,6 +12,8 @@ Utilities Collection for Thruk
 
 use strict;
 use warnings;
+use Thruk::Utils::IO ();
+use Thruk::Utils::CookieAuth ();
 use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
@@ -20,7 +22,6 @@ use Encode qw/encode encode_utf8 decode is_utf8/;
 use File::Copy qw/move copy/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Thruk::Utils::IO ();
 use Digest::MD5 qw(md5_hex);
 use POSIX ();
 use MIME::Base64 ();
@@ -1756,90 +1757,10 @@ sub get_fake_session {
     if($roles && ref $roles eq 'ARRAY') {
         $sessiondata->{'roles'} = $roles;
     }
-    my($sessionid, $sessionfile) = store_session($c->config, $id, $sessiondata);
+    my($sessionid, $sessionfile) = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;
     return($sessionid);
-}
-
-##############################################
-
-=head2 store_session
-
-  store_session($config, $sessionid, $data)
-
-store session data
-
-=cut
-
-sub store_session {
-    my($config, $sessionid, $data) = @_;
-    $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
-    chomp($sessionid);
-    my $sdir        = $config->{'var_path'}.'/sessions';
-    my $sessionfile = $sdir.'/'.$sessionid;
-    Thruk::Utils::IO::mkdir_r($sdir);
-    Thruk::Utils::IO::json_lock_store($sessionfile, $data);
-    return($sessionid, $sessionfile) if wantarray;
-    return($sessionid);
-}
-
-##############################################
-
-=head2 retrieve_session
-
-  retrieve_session($sessionfile)
-  retrieve_session($c, $sessionid)
-
-returns session data as hash
-
-    {
-        id       => session id,
-        file     => session data file name,
-        username => login name,
-        active   => timestamp of last activity
-        address  => remote address of user (optional)
-        hash     => login hash from basic auth (optional)
-        roles    => extra session roles (optional)
-    }
-
-=cut
-
-sub retrieve_session {
-    my($c, $id) = @_;
-    my($sessionfile, $sessionid);
-    if(ref $c eq '') {
-        $sessionfile = $c;
-    } else {
-        $sessionid = $id;
-        my $sdir     = $c->config->{'var_path'}.'/sessions';
-        $sessionfile = $sdir.'/'.$sessionid;
-    }
-    my $data;
-    return unless -e $sessionfile;
-    my @stat = stat(_);
-    eval {
-        $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
-    };
-    if(!$data) {
-        my $raw = scalar read_file($sessionfile);
-        chomp($raw);
-        my($auth,$ip,$username,$roles) = split(/~~~/mx, $raw, 4);
-        return unless defined $username;
-        my @roles = defined $roles ? split(/,/mx,$roles) : ();
-        $data = {
-            address  => $ip,
-            username => $username,
-            hash     => $auth,
-            roles    => \@roles,
-        };
-    }
-    return unless defined $data;
-    $data->{id}     = $sessionid if $sessionid;
-    $data->{file}   = $sessionfile;
-    $data->{active} = $stat[9];
-    $data->{roles}  = [] unless $data->{roles};
-    return($data);
 }
 
 ########################################
