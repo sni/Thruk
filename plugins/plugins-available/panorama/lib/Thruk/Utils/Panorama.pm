@@ -2,6 +2,7 @@ package Thruk::Utils::Panorama;
 
 use strict;
 use warnings;
+use Thruk::Utils;
 use Thruk::Utils::Panorama::Scripted;
 use Cpanel::JSON::XS;
 

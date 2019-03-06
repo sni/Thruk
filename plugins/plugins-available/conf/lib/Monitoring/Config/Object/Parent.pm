@@ -7,6 +7,7 @@ use Digest::MD5 qw(md5_hex);
 use Storable qw(dclone);
 use Scalar::Util qw/weaken/;
 use Monitoring::Config::Help;
+use Monitoring::Config::Object;
 
 =head1 NAME
 

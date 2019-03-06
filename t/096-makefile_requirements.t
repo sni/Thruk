@@ -32,8 +32,10 @@ my $all_used = {};
 my $files    = _get_files(glob('lib plugins/plugins-available/*/lib scripts t'));
 my $packages = _get_packages($files);
 for my $file (@{$files}) {
-  my $modules = _get_modules($file);
+  my $subs    = _get_modules_from_subs($file);
+  my $modules = _get_imported_modules($file);
   for my $mod (@{$modules}) {
+    delete $subs->{$mod};
     next if _is_core_module($mod);
     $all_used->{$mod} = 1;
     next if $mod eq 'IO::Socket::SSL'; # optional
@@ -64,6 +66,18 @@ for my $file (@{$files}) {
     else {
       next if $mod =~ m/^Devel/mx;
       fail("$mod required by $file missing");
+    }
+  }
+
+  # too many false positives otherwise...
+  if($file =~ m/script/mx && $file !~ m/^t\//mx && $file !~ m/\/lib\//mx) {
+    for my $mod (sort keys %{$subs}) {
+      next if $file =~ m%/Thruk/Controller/%mx;
+      #next if $mod eq 'Thruk::Action::AddDefaults' && $file =~ m%/Thruk/Controller/%mx;
+      #next if $mod eq 'Thruk::Utils::Auth'         && $file =~ m%/Thruk/Controller/%mx;
+      next if $mod eq 'Thruk::Controller::rest_v1' && $file =~ m%/Controller/Rest/V1/%mx;
+      next if $mod eq 'Thruk::Utils::CLI'          && $file =~ m%/Thruk/Utils/CLI/%mx;
+      fail("missing use/require for $mod in $file");
     }
   }
 
@@ -155,10 +169,9 @@ sub _get_packages {
 }
 
 #################################################
-sub _get_modules {
-  my $file     = shift;
+sub _get_imported_modules {
+  my($file)    = @_;
   my $modules  = {};
-  my $packages = {};
   my $content  = read_file($file);
   # remove pod
   $content =~ s|^=.*?^=cut||sgmx;
@@ -177,7 +190,7 @@ sub _get_modules {
       $modules->{$1} = 1;
     }
     if($line =~ m/(^|\s+)require\s+([^\s]+)/) {
-      my $mod = $1;
+      my $mod = $2;
       $mod =~ s|['"]*||gmx;
       next if $mod =~ /^\$/mx;
       $modules->{$mod} = 1;
@@ -191,15 +204,42 @@ sub _get_modules {
     next if $key =~ m/^\s*$/;
     next if $key =~ m/^\s*\$/;
     $all_used->{$key} = 1;
-    next if $key =~ m/^Thruk/;
     next if $key =~ m/^lib\(/;
     next if $key eq 'base';
     next if $key eq 'strict';
     next if $key eq 'warnings';
     next if $key eq 'utf8';
+    next if $key eq 'UNIVERSAL';
+    next if $key eq 'Thruk::Utils::Reports::CustomRender'; # optionally implemented
+    next if $key eq 'Thruk::Utils::XS'; # optionally
+    next if $key eq 'authentication)'; # false positive
     push @mods, $key;
   }
   return \@mods;
+}
+
+#################################################
+sub _get_modules_from_subs {
+  my($file)    = @_;
+  my $modules  = {};
+  my $content  = read_file($file);
+  # remove pod
+  $content =~ s|^=.*?^=cut||sgmx;
+  my $package;
+  for my $line (split/\n+/mx, $content) {
+    next if $line =~ m|^\s*\#|mx;
+    if($line =~ m/^\s*package\s*([\w:]+)(;|\s|$)/mx) {
+      $package = $1;
+    }
+    if($line =~ m/(^|\s|\()(\w+::[\w:]+)\(/mx) {
+      my $mod = $2;
+      $mod =~ s/::[^:]+$//gmx;
+      next if $package && $package eq $mod;
+      next if $mod eq 'CORE';
+      $modules->{$mod} = 1;
+    }
+  }
+  return($modules)
 }
 
 #################################################
@@ -263,5 +303,6 @@ sub _clean {
   $key =~ s/"$//;
   $key =~ s/^qw\///;
   $key =~ s/\/$//;
+  $key =~ s/;$//;
   return $key;
 }
