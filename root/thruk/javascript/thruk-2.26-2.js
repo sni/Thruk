@@ -6579,7 +6579,7 @@ var ajax_search = {
                       }
                   });
                 }
-                if(ajax_search.initialized_q.length > input.value.length || (search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != input.value)) {
+                if(ajax_search.initialized_q && (ajax_search.initialized_q.length > input.value.length || (search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != input.value))) {
                     // refresh data
                     needs_refresh = true;
                 }
