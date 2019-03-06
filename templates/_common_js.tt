@@ -61,7 +61,7 @@
   [% IF use_frames && use_dynamic_titles %]
   if(window.parent.frames && !String(window.parent.location.href).match(/\/panorama\.cgi/)) {
     try {
-      window.parent.document.title = '[% title_prefix %][% title %]';
+      window.parent.document.title = '[% escape_quotes(title_prefix) %][% escape_quotes(title) %]';
     } catch(e) { debug(e) }
   }
   [% END %]

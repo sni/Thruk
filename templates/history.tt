@@ -60,7 +60,7 @@
             [% IF service != '' and host != 'all' %]
             Service '[% service %]' On Host '[% host %]'
             [% ELSIF host != 'all' %]
-            Host '[% host %]'
+            Host '[% host | html %]'
             [% ELSE %]
             All Hosts and Services
             [% END %]
