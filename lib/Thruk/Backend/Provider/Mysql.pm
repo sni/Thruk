@@ -804,8 +804,8 @@ sub _get_subfilter {
             }
             if($k eq '-and') {
                 my $list = $self->_get_subfilter($v);
-                @{$list} = grep(!/^$/mx, @{$list});
                 if(ref $list) {
+                    @{$list} = grep(!/^$/mx, @{$list});
                     for my $l (@{$list}) {
                         if(ref $l eq 'ARRAY') {
                             $l = '('.join(' AND ', @{$l}).')';
