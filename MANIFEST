@@ -1801,6 +1801,7 @@ t/610-scenario-sakuli_e2e.t
 t/610-scenario-site_menu_multi_tier_e2e.t
 t/610-scenario-skipfish_pentest_e2e.t
 t/700-naemon.t
+t/800-plugins.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js
