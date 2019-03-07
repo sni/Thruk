@@ -15,7 +15,6 @@ use strict;
 use Carp;
 use Class::Inspector;
 use File::Slurp;
-use Data::Dumper;
 use Thruk::Utils;
 use Thruk::Utils::CLI;
 use Thruk::Utils::IO;
