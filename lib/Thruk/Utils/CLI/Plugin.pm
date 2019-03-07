@@ -220,6 +220,9 @@ sub _do_plugin_install {
             return("no plugin name '$name' found\n", 1);
         }
         my $url = $plugin->{'tarball'};
+        if(!$url) {
+            return("no download url available for plugin: ".$name."\n", 1);
+        }
         _debug("fetching ".$url);
         my @res = Thruk::Utils::CLI::request_url($c, $url);
         if($res[0] != 200) {
