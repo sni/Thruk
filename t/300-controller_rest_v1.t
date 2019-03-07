@@ -119,7 +119,7 @@ TestUtils::test_page(
     'content_type' => 'application/json;charset=UTF-8',
     'method'       => 'PUT',
     'post'         => {},
-    'like'         => ['report template had errors or does not exist'],
+    'like'         => ['invalid report template'],
     'fail'         => 1,
 );
 
