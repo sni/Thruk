@@ -260,6 +260,7 @@ sub store_session {
     $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
     chomp($sessionid);
     my $sdir        = $config->{'var_path'}.'/sessions';
+    die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9]+$/mx;
     my $sessionfile = $sdir.'/'.$sessionid;
     Thruk::Utils::IO::mkdir_r($sdir);
     Thruk::Utils::IO::json_lock_store($sessionfile, $data);
