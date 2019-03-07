@@ -1077,7 +1077,8 @@ sub single_search {
         }
         else {
             if($filter->{'type'} ne '') {
-                confess( "unknown filter: " . $filter->{'type'} );
+                $errors++;
+                Thruk::Utils::set_message($c, 'fail_message', "unknown filter: ".$filter->{'type'});
             }
         }
     }
