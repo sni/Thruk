@@ -20,6 +20,7 @@ use Thruk::Utils::IO;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
 use Digest::MD5 qw(md5_hex);
+use File::Slurp qw/read_file/;
 
 ##############################################
 BEGIN {
