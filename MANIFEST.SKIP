@@ -94,3 +94,4 @@ plugins/plugins-enabled/editor
 t/scenarios/sakuli_e2e/_run/
 t/scenarios/*/panorama/
 action_menus/*.js
+t/scenarios/skipfish_pentest_e2e/results/\d+

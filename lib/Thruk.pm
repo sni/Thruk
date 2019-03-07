@@ -958,7 +958,7 @@ sub _set_content_length {
     {
         $h->push('Content-Length' => $content_length);
     }
-    $h->push('Cache-Control', 'no-store, must-revalidate');
+    $h->push('Cache-Control', 'no-store');
     $h->push('Expires', '0');
     return($content_length);
 }

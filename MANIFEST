@@ -1799,6 +1799,7 @@ t/610-scenario-report_mails_e2e.t
 t/610-scenario-rest_api.t
 t/610-scenario-sakuli_e2e.t
 t/610-scenario-site_menu_multi_tier_e2e.t
+t/610-scenario-skipfish_pentest_e2e.t
 t/700-naemon.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
@@ -2255,6 +2256,18 @@ t/scenarios/site_menu_multi_tier_e2e/omd/playbook.yml
 t/scenarios/site_menu_multi_tier_e2e/omd/test.cfg
 t/scenarios/site_menu_multi_tier_e2e/thruk.conf
 t/scenarios/site_menu_multi_tier_e2e/thruk_local.conf
+t/scenarios/skipfish_pentest_e2e/docker-compose.yml
+t/scenarios/skipfish_pentest_e2e/Makefile
+t/scenarios/skipfish_pentest_e2e/omd/1.rpt
+t/scenarios/skipfish_pentest_e2e/omd/1.tab
+t/scenarios/skipfish_pentest_e2e/omd/1.tbp
+t/scenarios/skipfish_pentest_e2e/omd/1.tsk
+t/scenarios/skipfish_pentest_e2e/omd/Dockerfile
+t/scenarios/skipfish_pentest_e2e/omd/playbook.yml
+t/scenarios/skipfish_pentest_e2e/omd/test.cfg
+t/scenarios/skipfish_pentest_e2e/t/test.sh
+t/scenarios/skipfish_pentest_e2e/thruk.conf
+t/scenarios/skipfish_pentest_e2e/thruk_local.conf
 t/test_request
 t/TestUtils.pm
 t/timed_test.sh
