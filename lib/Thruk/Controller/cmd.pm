@@ -397,8 +397,8 @@ sub _redirect_or_success {
     my $seperator  = ';';
     # skip hosts and services containing spaces
     # livestatus supports semicolon since version 1.1.11 i3
-    if(   $c->stash->{'lasthost'}    =~ m/\s+/gmx
-       or $c->stash->{'lastservice'} =~ m/\s+/gmx) {
+    if(   (defined $c->stash->{'lasthost'}    && $c->stash->{'lasthost'}    =~ m/\s+/gmx)
+       || (defined $c->stash->{'lastservice'} && $c->stash->{'lastservice'} =~ m/\s+/gmx)) {
        $has_spaces = 1;
     }
 
