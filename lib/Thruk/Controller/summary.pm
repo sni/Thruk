@@ -416,6 +416,7 @@ sub _get_filter {
 
     # hard or soft?
     my $statetypes = $c->req->parameters->{'statetypes'} || 3;
+    if(!Thruk::Backend::Manager::looks_like_number($statetypes)) { $statetypes = 3; }
     if($statetypes == AE_SOFT) {
         $c->stash->{statetypefilter} = "Soft";
         push @servicefilter, { state_type => { '=' => 'SOFT' }};
@@ -434,6 +435,7 @@ sub _get_filter {
     push @hostfilter,    { type => 'HOST ALERT'};
     push @servicefilter, { type => 'SERVICE ALERT'};
     my $alerttypes = $c->req->parameters->{'alerttypes'} || 3;
+    if(!Thruk::Backend::Manager::looks_like_number($alerttypes)) { $alerttypes = 3; }
     if($alerttypes == AE_HOST_ALERT) {
         $c->stash->{alerttypefilter} = "Host";
     }
@@ -483,7 +485,7 @@ sub _get_filter {
 sub _get_host_statustype_filter {
     my ( $number ) = @_;
 
-    $number = 7 if !defined $number || $number <= 0 || $number > 7;
+    $number = 7 if !defined $number || !Thruk::Backend::Manager::looks_like_number($number) || $number <= 0 || $number > 7;
     my $hoststatusfiltername = 'All';
     my @hoststatusfilter;
     if($number and $number != 7) {
@@ -512,7 +514,7 @@ sub _get_host_statustype_filter {
 sub _get_service_statustype_filter {
     my ( $number ) = @_;
 
-    $number = 120 if !defined $number || $number <= 0 || $number > 120;
+    $number = 120 if !defined $number || !Thruk::Backend::Manager::looks_like_number($number) || $number <= 0 || $number > 120;
     my $servicestatusfiltername = 'All';
     my @servicestatusfilter;
     if($number and $number != 120) {

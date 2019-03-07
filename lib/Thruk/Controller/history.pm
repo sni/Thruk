@@ -97,15 +97,15 @@ sub index {
 
     # normal alerts
     my @prop_filter;
-    if($statetype == 0) {
+    if($statetype eq "0") {
         push @prop_filter, { -and => [{ type => 'SERVICE ALERT'} , $typefilter ]};
         push @prop_filter, { -and => [{ type => 'HOST ALERT'} , $typefilter ]};
     }
-    elsif($statetype == 1) {
+    elsif($statetype eq "1") {
         push @prop_filter, { -and => [{ type => 'SERVICE ALERT' }, { state_type => { '=' => 'SOFT' }} , $typefilter ]};
         push @prop_filter, { -and => [{ type => 'HOST ALERT' }, { state_type => { '=' => 'SOFT' }} , $typefilter ]};
     }
-    if($statetype == 2) {
+    if($statetype eq "2") {
         push @prop_filter, { -and => [{ type => 'SERVICE ALERT' }, { state_type=> { '=' => 'HARD' }} , $typefilter ]};
         push @prop_filter, { -and => [{ type => 'HOST ALERT' }, { state_type => { '=' => 'HARD' }} , $typefilter ]};
     }
