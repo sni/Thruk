@@ -564,7 +564,6 @@ sub _cond_compining {
     my $combining = shift;
     my $value = shift;
     my $combining_count = shift || 0;
-    $combining_count++;
     my @statement = ();
 
     if ($combining && substr($combining,0,1) eq '-'){
@@ -580,6 +579,7 @@ sub _cond_compining {
             $child_combining_count,
         );
     }
+    $combining_count++ if scalar @statement > 0;
     return ( $combining_count, @statement );
 }
 
