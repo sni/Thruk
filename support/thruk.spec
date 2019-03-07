@@ -403,8 +403,6 @@ exit 0
 %{_datadir}/%{name}/plugins/plugins-available/conf
 %config %{_sysconfdir}/%{name}/plugins/plugins-enabled/conf
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/conf
-%{_datadir}/%{name}/plugins/plugins-available/dashboard
-%config %{_sysconfdir}/%{name}/plugins/plugins-available/dashboard
 %{_datadir}/%{name}/plugins/plugins-available/minemap
 %config %{_sysconfdir}/%{name}/plugins/plugins-enabled/minemap
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/minemap

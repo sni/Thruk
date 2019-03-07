@@ -15,8 +15,6 @@
 /usr/share/thruk/plugins/plugins-available/conf
 /etc/thruk/plugins/plugins-available/conf
 /etc/thruk/plugins/plugins-enabled/conf
-/usr/share/thruk/plugins/plugins-available/dashboard
-/etc/thruk/plugins/plugins-available/dashboard
 /usr/share/thruk/plugins/plugins-available/minemap
 /etc/thruk/plugins/plugins-available/minemap
 /etc/thruk/plugins/plugins-enabled/minemap
