@@ -73,9 +73,7 @@ sub index {
         my $template = $c->req->parameters->{'template'};
         my $sub;
         if($template) {
-            eval {
-                $sub = Thruk::Utils::get_template_variable($c, 'reports/'.$template, 'affected_sla_objects', { block => 'edit' }, 1);
-            };
+            $sub = Thruk::Utils::get_template_variable($c, 'reports/'.$template, 'affected_sla_objects', { block => 'edit' }, 1);
         }
         $sub = 'Thruk::Utils::Avail::calculate_availability' unless $sub;
         if($backends and ($c->req->parameters->{'backends_toggle'} or $c->req->parameters->{'report_backends_toggle'})) {

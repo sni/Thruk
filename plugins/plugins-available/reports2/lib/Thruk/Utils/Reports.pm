@@ -347,14 +347,10 @@ sub report_save {
     my $report        = _get_new_report($c, $data);
     $report->{'var'}  = $old_report->{'var'}  if defined $old_report->{'var'};
     $report->{'user'} = $old_report->{'user'} if defined $old_report->{'user'};
-    my $fields;
-    eval {
-        $fields       = _get_required_fields($c, $report);
-    };
-    if($@) {
-        Thruk::Utils::set_message( $c, 'fail_message', 'report template had errors or does not exist', $@);
-        $c->log->debug($@);
-        $report->{'var'}->{'opt_errors'} = ['report template had errors or does not exist'];
+    my $fields = _get_required_fields($c, $report);
+    if(!$fields) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'invalid report template');
+        $report->{'var'}->{'opt_errors'} = ['invalid report template'];
         return;
     }
     _verify_fields($c, $fields, $report);
@@ -1372,9 +1368,9 @@ sub _get_report_cmd {
 ##########################################################
 sub _get_required_fields {
     my($c, $report) = @_;
-    confess("no template in ".Dumper($report)) unless $report->{'template'};
-    my $fields = Thruk::Utils::get_template_variable($c, 'reports/'.$report->{'template'}, 'required_fields', { block => 'edit' });
-    confess("no fields? -> ".Dumper($report)) unless(defined $fields and ref $fields eq 'ARRAY');
+    return unless $report->{'template'};
+    my $fields = Thruk::Utils::get_template_variable($c, 'reports/'.$report->{'template'}, 'required_fields', { block => 'edit' }, 1);
+    return unless(defined $fields and ref $fields eq 'ARRAY');
     return $fields;
 }
 
