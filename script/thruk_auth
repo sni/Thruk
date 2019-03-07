@@ -52,6 +52,7 @@ $loginurl               = "/redirect/".$loginurl;
 $loginurl               =~ s|//|/|gmx;
 my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
 my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
+# if changed, adjust AddDefaults.pm as well
 my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $last_cache_clean    = 0;

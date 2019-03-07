@@ -44,10 +44,11 @@ sub index {
         confess("undefined c in error/index");
     }
 
+    $c->{'errored'} = 1;
+
     Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
 
-    $c->{'errored'}           = 1;
     $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
 
     ###############################
@@ -225,8 +226,9 @@ sub index {
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500) {
             $c->log->error("***************************");
-            $c->log->error(sprintf("page: %s\n", $c->req->url)) if defined $c->req->url;
-            $c->log->error(sprintf("user: %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+            $c->log->error(sprintf("page:   %s\n", $c->req->url)) if defined $c->req->url;
+            $c->log->error(sprintf("params: %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+            $c->log->error(sprintf("user:   %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
             $c->log->error($errors->{$arg1}->{'mess'});
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {

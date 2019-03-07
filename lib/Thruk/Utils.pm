@@ -3270,6 +3270,27 @@ sub merge_host_dependencies {
     return($depends);
 }
 
+###################################################
+
+=head2 dump_params
+
+    dump_params($c->req->parameters)
+
+returns stringified parameters
+
+=cut
+sub dump_params {
+    my($params) = @_;
+    delete $params->{'credential'};
+    delete $params->{'options'}->{'credential'} if $params->{'options'};
+    local $Data::Dumper::Indent = 0;
+    my $dump = Dumper($params);
+    $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
+    $dump    =~ s%"credential":"[^"]+",?%%gmx;
+    $dump    = substr($dump, 0, 247).'...' if length($dump) > 250;
+    return($dump);
+}
+
 ##############################################
 
 1;

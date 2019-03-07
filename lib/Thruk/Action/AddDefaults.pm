@@ -23,6 +23,7 @@ use Cpanel::JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
 use POSIX ();
 use Storable qw/dclone/;
+use URI::Escape qw/uri_escape/;
 use Thruk::Utils::Filter ();
 
 our @stash_config_keys = qw/
@@ -208,7 +209,9 @@ sub begin {
     ###############################
     # Authentication
     if(!$c->user_exists) {
-        if($c->req->path_info =~ m~cgi-bin/(remote|login)\.cgi~mx) {
+        my $product_prefix = $c->config->{'product_prefix'};
+        # if changed, adjust thruk_auth as well
+        if($c->req->path_info =~ m#/$product_prefix/(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
             $c->log->debug($1.".cgi does not require authentication") if Thruk->debug;
         } else {
             if(!$c->authenticate(1)) {
@@ -464,6 +467,8 @@ sub add_defaults {
         || !defined $c->{'db'}->{'backends'}
         || ref $c->{'db'}->{'backends'} ne 'ARRAY'
         || scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+
+        return 1 if $c->{'errored'};
 
         my $product_prefix = $c->config->{'product_prefix'};
 

@@ -612,7 +612,7 @@ sub _check_exit_reason {
     printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
     printf(STDERR "ERROR: timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
     printf(STDERR "ERROR: Address:    %s\n", $c->req->address) if $c->req->address;
-    printf(STDERR "ERROR: Parameters: %s\n", _dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    printf(STDERR "ERROR: Parameters: %s\n", Thruk::Utils::dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
     if($c->stash->{errorDetails}) {
         for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
             printf(STDERR "ERROR: %s\n", $row);
@@ -1099,18 +1099,7 @@ sub _detect_timezone {
     $self->log->debug(sprintf("server timezone: %s (from date +%%Z)", $tz)) if Thruk->verbose;
     return $tz;
 }
-###################################################
-sub _dump_params {
-    my($params) = @_;
-    delete $params->{'credential'};
-    delete $params->{'options'}->{'credential'} if $params->{'options'};
-    local $Data::Dumper::Indent = 0;
-    my $dump = Dumper($params);
-    $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
-    $dump    =~ s%"credential":"[^"]+",?%%gmx;
-    $dump    = substr($dump, 0, 250) if length($dump) > 250;
-    return($dump);
-}
+
 ###################################################
 
 =head1 SEE ALSO
