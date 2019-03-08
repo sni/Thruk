@@ -109,7 +109,7 @@ sub cmd {
     # use cached version?
     Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/graphs/');
     my $cache_file = $opt->{'host'}.'_'.($opt->{'service'} || '_HOST_');
-    $cache_file =~ s|[^\a-zA-A_-]|.|gmx;
+    $cache_file =~ s|[^a-zA-Z_\-]|_|gmx;
     $cache_file = $cache_file.'-'.$start.'-'.$end.'-'.($opt->{'source'}||'').'-'.$width.'-'.$height.'.'.$format;
     $cache_file = $c->config->{'tmp_path'}.'/graphs/'.$cache_file;
     if(-e $cache_file) {
