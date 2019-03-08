@@ -135,6 +135,10 @@ sub as_text {
         my $value;
         my $type = defined $self->{'default'}->{$key} ? $self->{'default'}->{$key}->{'type'} : '';
         if($type eq 'LIST' || $type eq 'ENUM') {
+            if(ref $self->{'conf'}->{$key} eq '') {
+                my $list_join_string = $cfg->{'list_join_string'};
+                $self->{'conf'}->{$key} = [split(/$list_join_string/mx, $self->{'conf'}->{$key})];
+            }
             $value = join($cfg->{'list_join_string'}, @{$self->{'conf'}->{$key}});
         } else {
             $value = $self->{'conf'}->{$key} // '';
