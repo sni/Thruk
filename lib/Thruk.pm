@@ -245,11 +245,12 @@ sub _build_app {
         elsif($plugin_dir =~ m|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm|gmx) {
             my $plugin_class = $1;
             $plugin_class =~ s|/|::|gmx;
+            my $err;
             eval {
-                load $plugin_class;
-                $plugin_class->add_routes($self, $self->{'routes'});
+                $err = _load_plugin_class($self, $plugin_class);
+                $plugin_class->add_routes($self, $self->{'routes'}) unless $err;
             };
-            my $err = $@;
+            $err = $@ if $@;
             $self->log->error("disabled broken plugin $plugin_class: ".$err) if $err;
         } else {
             die("unknown plugin folder format: $plugin_dir");
@@ -386,7 +387,8 @@ sub find_route_match {
         my $route = $self->{'routes'}->{$path_info};
         if(ref $route eq '') {
             my($class) = $route =~ m|^(.*)::.*?$|mx;
-            load $class;
+            my $err = _load_plugin_class($self, $class);
+            die("loading plugin for ".$path_info." failed: ".$err) if $err;
             $self->{'routes_code'}->{$path_info} = \&{$route};
         }
         return($self->{'routes_code'}->{$path_info}, $self->{'routes'}->{$path_info});
@@ -396,7 +398,8 @@ sub find_route_match {
             my $function = $self->{'routes_code'}->{$r->[1]} || $r->[1];
             if(ref $function eq '') {
                 my($class) = $function =~ m|^(.*)::.*?$|mx;
-                load $class;
+                my $err = _load_plugin_class($self, $class);
+                die("loading plugin for ".$path_info." failed: ".$err) if $err;
                 $self->{'routes_code'}->{$r->[1]} = \&{$function};
                 $function = $self->{'routes_code'}->{$r->[1]};
             }
@@ -1098,6 +1101,25 @@ sub _detect_timezone {
     chomp(my $tz = `date +%Z`);
     $self->log->debug(sprintf("server timezone: %s (from date +%%Z)", $tz)) if Thruk->verbose;
     return $tz;
+}
+
+###################################################
+sub _load_plugin_class {
+    my($self, $class) = @_;
+    eval {
+        load($class);
+    };
+    if($@) {
+        my $err = $@;
+        $self->log->error($err);
+        if($self->{'_load_errors'}->{$class} && $self->{'_load_errors'}->{$class} ne $err) {
+            $err .= '*** original error was: '.$self->{'_load_errors'}->{$class}."\n";
+        } else {
+            $self->{'_load_errors'}->{$class} = $err;
+        }
+        return($err);
+    }
+    return;
 }
 
 ###################################################
