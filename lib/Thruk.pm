@@ -1105,18 +1105,22 @@ sub _detect_timezone {
 
 ###################################################
 sub _load_plugin_class {
-    my($self, $class) = @_;
+    my($self, $class, $no_recurse) = @_;
     eval {
         load($class);
     };
     if($@) {
         my $err = $@;
-        $self->log->error($err);
-        if($self->{'_load_errors'}->{$class} && $self->{'_load_errors'}->{$class} ne $err) {
-            $err .= '*** original error was: '.$self->{'_load_errors'}->{$class}."\n";
-        } else {
-            $self->{'_load_errors'}->{$class} = $err;
+        # try again clean
+        if($err =~ m/Attempt\s+to\s+reload.*aborted/mx && !$no_recurse) {
+            for my $key (sort keys %INC) {
+                delete $INC{$key} unless defined $INC{$key};
+            }
+            # suppress redefined warnings
+            local $SIG{__WARN__} = sub { };
+            return(_load_plugin_class($self, $class, 1));
         }
+        $self->log->error($err);
         return($err);
     }
     return;
