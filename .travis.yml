@@ -74,6 +74,8 @@ before_install:
   - cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz
   - sed -i '/Test::JavaScript/d' ./Makefile.PL
   - cpanm -q -f --installdeps --notest --no-man-pages .
+  # required for plugins test
+  - cpanm -q -f --notest --no-man-pages Spreadsheet/ParseExcel.pm
   - git config --global user.email "travis@localhost"
   - git config --global user.name "Travis Testuser"
   - echo "export PERL5LIB=\$PERL5LIB:$HOME/perl5/lib/perl5" > ~/.thruk
