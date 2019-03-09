@@ -261,12 +261,23 @@ sub file_lock {
         confess("unknown mode: ".$mode);
     }
 
-    sysopen(my $fh, $file, O_RDWR|O_CREAT) or die("cannot open file ".$file.": ".$!);
-    if($mode eq 'ex') {
-        flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
-    }
-    elsif($mode eq 'sh') {
-        flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
+    my $fh;
+    my $retrys = 5;
+    while($retrys > 0) {
+        eval {
+            sysopen($fh, $file, O_RDWR|O_CREAT) or confess("cannot open file ".$file.": ".$!);
+            if($mode eq 'ex') {
+                flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
+            }
+            elsif($mode eq 'sh') {
+                flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
+            }
+        };
+        if(!$@ && $fh) {
+            last;
+        }
+        $retrys--;
+        sleep(0.5);
     }
 
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
