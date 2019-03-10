@@ -21,7 +21,6 @@ my $plugins = [
     { name => 'omd' },
     { name => 'pansnaps' },
     { name => 'status-dashboard' },
-    { name => 'woshsh' },
 ];
 my $filter = $ARGV[0];
 
