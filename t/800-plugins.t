@@ -21,11 +21,13 @@ my $plugins = [
     { name => 'omd' },
     { name => 'pansnaps' },
     { name => 'status-dashboard' },
+    { name => 'woshsh',          travis => 0 }, # somehow broken on travis
 ];
 my $filter = $ARGV[0];
 
 for my $p (@{$plugins}) {
-    next if $filter and $p->{'name'} ne $filter;
+    next if($filter && $p->{'name'} ne $filter);
+    next if(defined $p->{'travis'} && $ENV{'TEST_TRAVIS'} && !$p->{'travis'});
     TestUtils::test_command({
         cmd     => $BIN.' plugin install '.$p->{'name'},
         like    => ['/Installed/',
