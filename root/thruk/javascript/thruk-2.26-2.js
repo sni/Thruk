@@ -1133,6 +1133,45 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
 
 function create_site_panel_popup_tree_data(d, current, tree) {
     var nodes = [];
+    if(current == "" && d.peers != undefined && d.peers.length > 0) {
+        jQuery(d.peers).each(function(i, peer_key) {
+            var icon;
+            var peer = initial_backends[peer_key];
+            icon = "../images/folder_green.png";
+            if(current_backend_states[peer_key] == 1) {
+                icon = "../images/folder_red.png";
+            } else if(current_backend_states[peer_key] == 2) {
+                icon = "../images/folder_gray.png";
+            }
+            var selected;
+            if(d.disabled == 0) {
+                selected = true; // enabled
+            } else if(d.disabled == d.total) {
+                selected = false; // off
+            }
+            var key = '/Default';
+            nodes.push({
+                'key': key,
+                'title': "Default",
+                'folder': false,
+                'children': [],
+                'peers': [peer_key],
+                'icon': icon,
+                'selected': selected
+            });
+            if(tree) {
+                var node  = tree.getNodeByKey(key);
+                node.icon = icon;
+                if(selected === true) {
+                    node.setSelected(true, {noEvents: true});
+                }
+                if(selected === false) {
+                    node.setSelected(false, {noEvents: true});
+                }
+                node.renderTitle();
+            }
+        });
+    }
     jQuery(keys(d.sub).sort()).each(function(i, sectionname) {
         var icon;
         icon = "../images/folder_green.png";
