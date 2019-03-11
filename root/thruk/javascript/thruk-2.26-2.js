@@ -1093,6 +1093,9 @@ function create_site_panel_popup_tree_populate() {
             resetRefresh();
         }
     });
+
+    // activate first section
+    jQuery(".fancytree-icon").first().click();
 }
 
 function create_site_panel_popup_tree_make_bookmarks_sortable() {
