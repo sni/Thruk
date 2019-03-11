@@ -8,6 +8,7 @@ features plus adds additional enhancements for large installations, increased
 usability and many usefull addons.
 
 ![Thruk Startpage](https://thruk.org/images/galleries/01_main-thumb.png "Thruk Startpage")
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsni%2FThruk.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsni%2FThruk?ref=badge_shield)
 [See more screenshots...](https://thruk.org/screenshots/)
 
 Documentation
@@ -67,3 +68,6 @@ b) the GNU General Public License as published by the Free Software Foundation;
 
 Vendor specific libraries below ./root/thruk/vendor/ may have different
 licenes. See THANKS file for details.
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsni%2FThruk.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsni%2FThruk?ref=badge_large)
