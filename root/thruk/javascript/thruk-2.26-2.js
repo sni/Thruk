@@ -1027,7 +1027,7 @@ function create_site_panel_popup_tree() {
     panel += '    <\/td>';
     panel += '    <td valign="top" style="border-left: 1px dashed grey;">';
     panel += '      <div style="min-height: 200px; min-width: 890px; margin-left: 3px;">';
-    jQuery(keys(initial_backends).sort()).each(function(i, peer_key) {
+    jQuery(backend_keys).each(function(i, peer_key) {
         var section = initial_backends[peer_key].section.replace(/\//g, '_');
         panel += get_site_panel_backend_button(peer_key, "", "toggleBackend('"+peer_key+"')", section, "tree_peer_btn");
     });
