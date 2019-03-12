@@ -58,6 +58,7 @@
         [% ELSIF col == "Active Checks" %]<cell>[% IF h.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Flapping"      %]<cell>[% IF h.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Last Check"    %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell type='date_time'>[% IF h.has_been_checked == 0 %][% ELSE %][% format_date(h.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell></format>
+        [% ELSIF col == "Duration"                 %]<cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>
         [% ELSIF col == "Status Information"       %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% escape_xml(h.plugin_output) %][% END %]</cell>
         [% ELSIF col == "Extra Status Information" %]<cell>[% IF h.has_been_checked == 1 %][% escape_xml(h.long_plugin_output) %][% END %]</cell>
         [% ELSE %]
