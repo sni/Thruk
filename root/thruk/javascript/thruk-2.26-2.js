@@ -5380,7 +5380,7 @@ function add_new_filter(search_prefix, table) {
   newInput.value     = '';
   newInput.setAttribute('name', pane_prefix + search_prefix + 'value');
   newInput.setAttribute('id',   pane_prefix + search_prefix + nr + '_value');
-  newInput.onclick = ajax_search.init;
+  newInput.onclick = function() { ajax_search.init(this, undefined, {striped: false}); };
   newCell0.appendChild(newInput);
 
   if(enable_shinken_features) {
@@ -5657,10 +5657,15 @@ function verify_op(event) {
 
   // do we have to display the datepicker?
   var calElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'cal');
+  var inpElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');
   if(selValue == 'next check' || selValue == 'last check' ) {
     showElement(calElem);
+    inpElem.onclick = show_cal;
   } else {
     hideElement(calElem);
+    jQuery(inpElem).off(); // remove all previous events
+    inpElem.picker = false;
+    inpElem.onclick = function() { ajax_search.init(this, undefined, {striped: false}); };
   }
 
   var input  = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');

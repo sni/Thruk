@@ -48,7 +48,7 @@ sub parse_date {
         if(defined $timestamp) {
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
         } else {
-            $c->log->error("error parsing data: '".$string."'");
+            $c->log->debug("error parsing data: '".$string."'");
             return $c->detach('/error/index/19');
         }
     };
