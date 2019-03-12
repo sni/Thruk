@@ -3,7 +3,7 @@
 <form action="conf.cgi" method="POST" id="saveform">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="action" value="savefile">
-<input type="hidden" name="file" value="[% file_link %]">
+<input type="hidden" name="file" value="[% file_link | html %]">
 <input type="hidden" name="content" value="" id='filecontent'>
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
 [% IF show_object && back == "edit" %]
@@ -11,7 +11,7 @@
 [% END %]
 <input type="hidden" name="line" value="" id="fileline">
 [% IF c.req.parameters.exists('backlink') %]
-<input type="hidden" name="backlink" value="[% c.req.parameters.backlink %]">
+<input type="hidden" name="backlink" value="[% c.req.parameters.backlink | html %]">
 [% END %]
 [% file_locked = ""; PROCESS _conf_ondemand_file_edit.tt file=file form="saveform" %]
 [% readonly = 0;
@@ -21,7 +21,7 @@
 <div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
 <table border="0" class='data conftoolobj' style="width: 100%;">
   <tr>
-    <th class='data' width="5%" align="left"><a href='[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+    <th class='data' width="5%" align="left"><a href='[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink | html %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
     <th class='data' width="90%">
         <span  style="font-size: larger;">[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>
         [% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]

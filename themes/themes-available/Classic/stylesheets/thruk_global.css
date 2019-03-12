@@ -1498,10 +1498,11 @@ input[type=text], input[type=password] {
   border-collapse: collapse;
 }
 
-.thruk_dev_panel PRE {
+.thruk_dev_panel DIV.profiles {
   height: 600px;
   overflow-y: auto;
   min-width: 700px;
+  white-space: pre;
 }
 
 .thruk_dev_panel_bar {

@@ -17,7 +17,7 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Scheduled Downtime ID:</td><td><b><input type='text' name='down_id' value='[% c.request.parameters.down_id %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Scheduled Downtime ID:</td><td><b><input type='text' name='down_id' value="[% c.request.parameters.down_id | html %]"></b></td></tr>
 
 [% END %]
 [% END %]

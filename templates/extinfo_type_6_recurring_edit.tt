@@ -18,7 +18,7 @@
 <form action="extinfo.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="recurring" value="save">
-<input type="hidden" name="nr" value="[% rd.file %]">
+<input type="hidden" name="nr" value="[% rd.file | html %]">
 <input type="hidden" name="type" value="6">
 <table border="1" class='data recurring_downtimes'>
   <tr>
@@ -50,7 +50,7 @@
       <input type="checkbox" id="ext_backends_toggle" name="ext_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('d_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('ext_backends_toggle'); toggleDisabled('d_backends');" class="clickable"> Select Backends:</span><br>
       <select name="d_backends" id="d_backends" multiple style="min-width: 180px;"[% IF !can_edit || !backends_selected %] disabled[% END %]>
         [% FOREACH b = backends %]
-        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        <option value="[% b | html %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
       </select>
       [% END %]
@@ -60,32 +60,32 @@
   <tr id="input_host">
     <td class="dataEven" align="center"><b>Host</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="host" name="host" value="[% rd.host.list.join(', ') %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="host" name="host" value="[% rd.host.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_service">
     <td class="dataEven" align="center"><b>Service</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="service" name="service" value="[% rd.service.list.join(', ') %]" onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends' })"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="service" name="service" value="[% rd.service.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends' })"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_hostgroup">
     <td class="dataEven" align="center"><b>Hostgroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') %]" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_servicegroup">
     <td class="dataEven" align="center"><b>Servicegroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') %]" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
 
   <tr>
     <td class="dataEven" align="center"><b>Comment</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="comment" value="[% rd.comment %]"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" name="comment" value="[% rd.comment | html %]"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr>
@@ -112,7 +112,7 @@
   <tr>
     <td class="dataEven" align="center"><b>Duration<br>(in minutes)</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="duration" value="[% rd.duration %]"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" name="duration" value="[% rd.duration | html %]"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr>
@@ -127,7 +127,7 @@
   <tr>
     <td class="dataEven" align="center"><b>If Flexible, Range<br>(in minutes)</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="flex_range" value="[% rd.flex_range %]"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" name="flex_range" value="[% rd.flex_range | html %]"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_host_options">

@@ -8,8 +8,8 @@
     [% IF type %]
     <tr>
       <td class='dataVar' colspan=10 style="padding-top: 5px; text-align: center;">
-        <input type="hidden" name="type" value="[% type %]">
-        <input type="text" name="data.name" id="data.name" value="[% IF show_secondary_select %][% data_name %][% END %]" onclick="ajax_search.init(this, '[% type %]', {url:'conf.cgi?action=json&amp;long=1&amp;type=[% type %]', templates:'both', add_prefix:true})">
+        <input type="hidden" name="type" value="[% type | html %]">
+        <input type="text" name="data.name" id="data.name" value="[% IF show_secondary_select %][% data_name | html %][% END %]" onclick="ajax_search.init(this, '[% type %]', {url:'conf.cgi?action=json&amp;long=1&amp;type=[% type %]', templates:'both', add_prefix:true})">
         <br>select [% type %] to change.
       </td>
     </tr>

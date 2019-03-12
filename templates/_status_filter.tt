@@ -3,10 +3,10 @@
 <form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this));">
 [%# make sure IE can submit form by pressing enter #%]
 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
-<input type="hidden" name="nav" value="[% nav %]">
-[% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
-<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
-<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
+<input type="hidden" name="nav" value="[% nav | html %]">
+[% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
+<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch | html %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop | html %]">
 <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
 [% END %]
 <table id="[% paneprefix %]all_filter_table" class="filter_container" style="display:none;" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
@@ -26,10 +26,10 @@
             Display Filters:
            </div>
            [% END %]
-           <input type="hidden" name="[% paneprefix %][% prefix %]_hoststatustypes" value="[% search.hoststatustypes %]">
-           <input type="hidden" name="[% paneprefix %][% prefix %]_servicestatustypes" value="[% search.servicestatustypes %]">
-           <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops %]">
-           <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_hoststatustypes" value="[% search.hoststatustypes | html %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_servicestatustypes" value="[% search.servicestatustypes | html %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops | html %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops | html %]">
           </td>
           <td align="left" class='filterTitle filterDisplayTitle' nowrap>
            [% IF loop.first && show_substyle_selector == 1 %]
@@ -59,7 +59,7 @@
               <optgroup label="[% groupname %]">
                 [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
                 [% opt = additional_views.$groupname.options.$optname %]
-                <option value="[% opt.value %]"[% IF style == opt.value %] selected[% END %]>[% opt.name %]</option>
+                <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name %]</option>
                 [% END %]
               </optgroup>
               [% END %]
@@ -401,7 +401,7 @@
               <option value="parent"[% IF s.type == 'parent' %] selected[% END %]>Parent</option>
               <option value="plugin output"[% IF s.type == 'plugin output' %] selected[% END %]>Plugin Output</option>
             </select>[%# we don't want whitespaces here in final html but keep the nice source layout
-            #%]<input type="text" name="[% paneprefix %][% prefix %]_val_pre" class="filter_pre_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_val_pre" value="[% s.val_pre %]" onclick="ajax_search.init(this, 'custom variable')" style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">[%#
+            #%]<input type="text" name="[% paneprefix %][% prefix %]_val_pre" class="filter_pre_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_val_pre" value="[% s.val_pre | html %]" onclick="ajax_search.init(this, 'custom variable')" style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">[%#
             #%]<select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to" class="filter_op_select">
               <option value="~"[% IF  s.op == '~'  %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
@@ -410,12 +410,12 @@
               <option value="<="[% IF s.op == '<=' %] selected[% END %]>&lt;=</option>
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>[%#
-            #%]<input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]" onclick="ajax_search.init(this, undefined, {striped: false})" style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
+            #%]<input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value | html %]" onclick="ajax_search.init(this, undefined, {striped: false})" style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
             <img id="[% paneprefix %][% prefix %]_[% loop.index %]_cal" src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" [% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] class="cal_icon cal_popup for_[% paneprefix %][% prefix %]_[% loop.index %]_value">
             [% IF enable_shinken_features %]
             <select name="[% paneprefix %][% prefix %]_value_sel" id="[% paneprefix %][% prefix %]_[% loop.index %]_value_sel" style="[% IF s.type == 'priority' %]visibility: visible;[% ELSE %]display: none; visibility: hidden;[% END %]">
               [% FOREACH prio IN priorities.keys.sort.reverse %]
-              <option value="[% prio %]"[% IF s.value == prio %] selected[% END %]>[% priorities.$prio %]</option>
+              <option value="[% prio | html %]"[% IF s.value == prio %] selected[% END %]>[% priorities.$prio %]</option>
               [% END %]
             </select>
             [% END %]

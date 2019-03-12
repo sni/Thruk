@@ -41,13 +41,13 @@
           <div class='data'>
             <form action="extinfo.cgi" method="GET">
               <input type="hidden" name="type" value="1">
-              <input type="hidden" name="host" value="[% service.host_name %]">
-              <input type="hidden" name="description" value="[% service.description %]">
+              <input type="hidden" name="host" value="[% service.host_name | html %]">
+              <input type="hidden" name="description" value="[% service.description | html %]">
               This service is ambiguous:
               <select name="backend">
                 [% FOREACH b IN matching_backends %]
                 [% SET name = pi_detail.$b.peer_name %]
-                <option value="[% b %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
+                <option value="[% b | html %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
                 [% END %]
               </select>
               <input type="submit" name="go" value="go">

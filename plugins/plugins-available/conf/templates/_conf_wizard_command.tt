@@ -1,6 +1,6 @@
 ﻿<button class="conf_button cmd_wzd_button" id="[% id %]_btn">&nbsp;</button>
-<input type="hidden" id="[% id %]_orig_inp1" value="[% inp1 %]">
-<input type="hidden" id="[% id %]_orig_inp2" value="[% inp2 %]">
+<input type="hidden" id="[% id %]_orig_inp1" value="[% inp1 | html %]">
+<input type="hidden" id="[% id %]_orig_inp2" value="[% inp2 | html %]">
 
 <div id="[% id %]_dialog" title="Command Wizzard" style="display: none; padding: 0;">
 <table><tr><td class="filter">

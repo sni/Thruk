@@ -43,7 +43,7 @@
   </tr>
   <tr>
     <th>Look ahead seconds</th>
-    <td><input type="text" id="look_ahead" value="[% look_ahead %]" onchange="updateGraphDelayed()">s</td>
+    <td><input type="text" id="look_ahead" value="[% look_ahead | html %]" onchange="updateGraphDelayed()">s</td>
   </tr>
   <tr>
     <th>Look back seconds</th>

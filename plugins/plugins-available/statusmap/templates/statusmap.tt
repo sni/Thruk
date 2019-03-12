@@ -45,7 +45,7 @@
               <option value="hostgroup"[% IF groupby == 'hostgroup' %] selected[% END %]>Hostgroup</option>
               <option value="servicegroup"[% IF groupby == 'servicegroup' %] selected[% END %]>Servicegroup</option>
               [% FOREACH custvar IN c.config.show_custom_vars %]
-              <option value="cust:[% custvar %]"[% IF groupby == 'cust:' _ custvar %] selected[% END %]>[% custvar %]</option>
+              <option value="cust:[% custvar | html %]"[% IF groupby == 'cust:' _ custvar %] selected[% END %]>[% custvar %]</option>
               [% END %]
             </select>
           </td>
@@ -54,7 +54,7 @@
           <td colspan=2 align="left" valign="bottom" class='optBoxItem'>
           </td>
           <td align="right" class='optBoxItem'>
-            <input type='hidden' name='hidetop' id='hidetop' value='[% hidetop %]'>
+            <input type='hidden' name='hidetop' id='hidetop' value="[% hidetop | html %]">
             <input type='submit' value='Update'>
           </td>
         </tr>

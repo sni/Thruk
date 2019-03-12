@@ -56,7 +56,7 @@
       <td><input type="button" class="bp_type_btn" value="Worst" onclick="bp_select_type('worst')"></td>
       <td><input type="button" class="bp_type_btn" value="&lt;=" onclick="bp_select_type('not_more')"></td>
       <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_type('fixed')"></td>
-      <td>[% IF fav_custom_fun.size > 1 %]<input type="button" class="bp_type_btn" value="[% fav_custom_fun.0 %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% fav_custom_fun.1 %]'})">[% END %]</td>
+      <td>[% IF fav_custom_fun.size > 1 %]<input type="button" class="bp_type_btn" value="[% fav_custom_fun.0 | html %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% fav_custom_fun.1 %]'})">[% END %]</td>
     </tr>
   </table>
 </div>
@@ -99,7 +99,7 @@
         <td><input type="checkbox" class="bp_type_box" id="bp_check_worst" value="Worst" onclick="bp_select_type('worst')"/><label for="bp_check_worst" class="bp_type_box_label">Worst</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_not_more" value="Not_More" onclick="bp_select_type('not_more')"/><label for="bp_check_not_more" class="bp_type_box_label">&lt;=</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_fixed" value="Fixed" onclick="bp_select_type('fixed')"/><label for="bp_check_fixed" class="bp_type_box_label">Dummy</label></td>
-        <td>[% IF fav_custom_fun.size > 1 %]<input type="checkbox" class="bp_type_box" id="bp_check_cust_fav" value="[% fav_custom_fun.0 %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% fav_custom_fun.1 %]'})"/><label for="bp_check_cust_fav" class="bp_type_box_label">[% fav_custom_fun.0 %]</label>[% END %]</td>
+        <td>[% IF fav_custom_fun.size > 1 %]<input type="checkbox" class="bp_type_box" id="bp_check_cust_fav" value="[% fav_custom_fun.0 | html %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% fav_custom_fun.1 %]'})"/><label for="bp_check_cust_fav" class="bp_type_box_label">[% fav_custom_fun.0 %]</label>[% END %]</td>
       </tr>
     </table>
   </div>

@@ -67,7 +67,7 @@
     </div>
     <div id="div_send_day_[% nr %]" style="display: none"></div>
     <div id="div_send_cust_[% nr %]" style="display: none">
-      <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); cr.cust; END %]" style="width: 300px;" placeholder="minute hour dom month dow   (cron syntax)"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); escape_html(cr.cust); END %]" style="width: 300px;" placeholder="minute hour dom month dow   (cron syntax)"[% IF !can_edit %] disabled[% END %]>
     </div>
   </td>
   <td id="hour_select_[% nr %]">

@@ -31,10 +31,10 @@
               <tr>
                 <td>
                   <form method='post' action='cmd.cgi'>
-                    <input type="hidden" name="referer" value="[% referer %]">
+                    <input type="hidden" name="referer" value="[% referer | html %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
                     <table cellspacing="0" cellpadding="0" border="0" class="optBoxInnerTable">
-                      <tr><td><input type='hidden' name='cmd_typ' value='[% cmd_typ %]'><input type='hidden' name='cmd_mod' value='2'></td></tr>
+                      <tr><td><input type='hidden' name='cmd_typ' value="[% cmd_typ | html %]"><input type='hidden' name='cmd_mod' value='2'></td></tr>
                       [% content %]
                       <tr>
                         <td class='optBoxItem' colspan="2">&nbsp;</td>
@@ -45,12 +45,12 @@
                         <td class='optBoxItem'>
                           <select name="backend" size="5" multiple>
                             [% FOREACH b IN backends %]
-                              <option value="[% b %]"[% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %] selected[% END %]>[% backend_detail.$b.name %]</option>
+                              <option value="[% b | html %]"[% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %] selected[% END %]>[% backend_detail.$b.name %]</option>
                             [% END %]
                           </select>
                           [% FOREACH b IN backends %]
                             [% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %]
-                            <input type="hidden" name="backend.orig" value="[% b %]">
+                            <input type="hidden" name="backend.orig" value="[% b | html %]">
                             [% END %]
                           [% END %]
                         </td>
@@ -63,7 +63,7 @@
                         <td class='optBoxItem'></td>
                         <td class='optBoxItem'>
                           [% IF backends.size == 1 %]
-                          <input type="hidden" name="backend" value="[% backends.0 %]">
+                          <input type="hidden" name="backend" value="[% backends.0 | html %]">
                           [% END %]
                           <input type='submit' name='btnSubmit' value='Commit'> <input type='reset' value='Reset'>
                         </td>

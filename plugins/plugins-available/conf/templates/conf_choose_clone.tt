@@ -6,7 +6,7 @@
   [% NEXT IF !c.request.parameters.defined(par) %]
   [% NEXT IF par == "token" %]
   [% FOR value IN c.request.parameters.$par.list %]
-    <input type="hidden" name="[% par %]" value="[% value %]">
+    <input type="hidden" name="[% par %]" value="[% value | html %]">
   [% END %]
 [% END %]
 <input type="hidden" name="clone_ref" value="-1">
@@ -27,7 +27,7 @@
       <ul>
       [% FOREACH id = clonables.$t.keys %]
         <li>
-          <input type="checkbox" name="clone_ref" value="[% id %]" [% IF clonables.$t.$id.readonly %]disabled[% ELSE %]checked[% END %]>
+          <input type="checkbox" name="clone_ref" value="[% id | html %]" [% IF clonables.$t.$id.readonly %]disabled[% ELSE %]checked[% END %]>
           <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% clonables.$t.$id.name %]</a>
         </li>
       [% END %]

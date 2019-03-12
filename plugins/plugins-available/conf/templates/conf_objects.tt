@@ -20,15 +20,15 @@
 <form action="conf.cgi" method="POST" onsubmit="return conf_validate_object_form(this);" id="obj_edit_[% object.get_id() %]">
 <input type="submit" name="send" value="save" style="display:none">
 <input type="hidden" name="sub" value="objects">
-<input type="hidden" name="type" value="[% type %]">
+<input type="hidden" name="type" value="[% type | html %]">
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
 <input type="hidden" name="action" value="store">
-<input type="hidden" name="cloned" value="[% cloned %]">
+<input type="hidden" name="cloned" value="[% cloned | html %]">
 <input type="hidden" name="clone_ref" value="">
 [% FOR value IN clone_ref.list %]
-<input type="hidden" name="clone_ref" value="[% value %]">
+<input type="hidden" name="clone_ref" value="[% value | html %]">
 [% END %]
-<input type="hidden" name="referer" value="[% referer %]">
+<input type="hidden" name="referer" value="[% referer | html %]">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj' style="table-layout: fixed;"[% IF bare %] width="100%"[% END %]>
     <tr>
@@ -64,7 +64,7 @@
                   [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span style="color: #EB6900"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
                 [% ELSE %]
                   <span style="[% IF subcat != 'config' %]display:none;[% END %]" class="sub_1">
-                  save to: <input type="text" class="deletable" placeholder="enter filename" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', { striped:false, autosubmit:false, templates:false, data:data, emptymsg:'file will be created'})">
+                  save to: <input type="text" class="deletable" placeholder="enter filename" name="data.file" id="fileselect" value="[% new_file | html %]" onclick="ajax_search.init(this, 'file', { striped:false, autosubmit:false, templates:false, data:data, emptymsg:'file will be created'})">
                   </span>
                 [% END %]
               </span>

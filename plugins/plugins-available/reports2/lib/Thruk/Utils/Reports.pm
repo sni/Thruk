@@ -1134,6 +1134,10 @@ sub _report_save {
     delete $report->{'long_error'};
     delete $report->{'failed'};
 
+    if($report->{'template'} !~ m/^[0-9a-zA-Z]+[\w]*\.tt$/mx) {
+        return;
+    }
+
     # save backends as hash with name
     $report->{'backends'} = Thruk::Utils::backends_list_to_hash($c, ($report->{'backends_hash'} || $report->{'backends'}));
     delete $report->{'backends_hash'};

@@ -19,7 +19,7 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value="[% c.request.parameters.host | html %]"></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Notification Delay (minutes from now):</td><td><b><input type='text' name='not_dly' value='0'></b></td></tr>
 
 [% END %]

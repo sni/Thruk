@@ -74,7 +74,7 @@
             <div id="bm[% nr %]">
               <div onClick="removeBookmark([% nr %]); return false;" class="clickable">
                 <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;" alt="delete">
-                <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarks">
+                <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarks">
                 [% section %]: [% link.0 %]<br>
               </div>
               <pre style="width:530px;" class="mightOverflow">[% link.1 | html %]</pre>
@@ -96,7 +96,7 @@
             <div id="bmp[% nr %]">
               <div onClick="removeBookmark('p'+[% nr %]); return false;" class="clickable">
                 <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;" alt="delete">
-                <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarksp">
+                <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarksp">
                 [% section %]: [% link.0 %]<br>
               </div>
               <pre style="width:530px;" class="mightOverflow">[% link.1 | html %]</pre>

@@ -22,12 +22,12 @@
 
 <form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(remove_empty_form_params(this))">
 <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:none;" alt="show">
-<input type="hidden" name="style" value="[% style %]">
-<input type="hidden" name="nav" value="[% nav %]">
-[% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
-<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
-<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
-<input type="hidden" name="title" id="title" value="[% custom_title %]">
+<input type="hidden" name="style" value="[% style | html %]">
+<input type="hidden" name="nav" value="[% nav | html %]">
+[% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
+<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch | html %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop | html %]">
+<input type="hidden" name="title" id="title" value="[% custom_title | html %]">
 
 [% UNLESS minimal %]
 <table border="0" width="100%" cellpadding=0 cellspacing=0>

@@ -87,7 +87,7 @@
                 <option value='12'[% IF format_date(date.now, '%m') == "12" %] selected[% END %]>December</option>
               </select>
               <input type='text' size='2' maxlength='2' name='sday' value='1'>
-              <input type='text' size='4' maxlength='4' name='syear' value='[% format_date(date.now, '%Y') %]'>
+              <input type='text' size='4' maxlength='4' name='syear' value="[% format_date(date.now, '%Y') %]">
               <input type='hidden' name='shour' value='0'>
               <input type='hidden' name='smin' value='0'>
               <input type='hidden' name='ssec' value='0'>
@@ -110,8 +110,8 @@
                 <option value='11'[% IF format_date(date.now, '%m') == "11" %] selected[% END %]>November</option>
                 <option value='12'[% IF format_date(date.now, '%m') == "12" %] selected[% END %]>December</option>
               </select>
-              <input type='text' size='2' maxlength='2' name='eday' value='[% format_date(date.now, '%d') %]'>
-              <input type='text' size='4' maxlength='4' name='eyear' value='[% format_date(date.now, '%Y') %]'>
+              <input type='text' size='2' maxlength='2' name='eday' value="[% format_date(date.now, '%d') %]">
+              <input type='text' size='4' maxlength='4' name='eyear' value="[% format_date(date.now, '%Y') %]">
               <input type='hidden' name='ehour' value='24'>
               <input type='hidden' name='emin' value='0'>
               <input type='hidden' name='esec' value='0'>
@@ -128,7 +128,7 @@
               <select name='hostgroup'>
                 <option value='all'>** ALL HOSTGROUPS **</option>
                 [% FOREACH group = hostgroups %]
-                <option value="[% group %]">[% group %]</option>
+                <option value="[% group | html %]">[% group %]</option>
                 [% END %]
               </select>
             </td>
@@ -139,7 +139,7 @@
               <select name='servicegroup'>
                 <option value='all'>** ALL SERVICEGROUPS **</option>
                 [% FOREACH group = servicegroups %]
-                <option value="[% group %]">[% group %]</option>
+                <option value="[% group | html %]">[% group %]</option>
                 [% END %]
               </select>
             </td>
@@ -150,7 +150,7 @@
               <select name='host'>
                 <option value='all'>** ALL HOSTS **</option>
                 [% FOREACH host = hosts %]
-                <option value="[% host %]">[% host %]</option>
+                <option value="[% host | html %]">[% host %]</option>
                 [% END %]
               </select>
             </td>

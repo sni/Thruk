@@ -11,7 +11,7 @@
 [% IF statetype  != '' %][% link = link _ '&amp;' _ 'statetype='  _ statetype  %][% END %]
 
     <form method="get" action="history.cgi" id="date_form">
-    <input type="hidden" name="entries" value="[% entries_per_page %]">
+    <input type="hidden" name="entries" value="[% entries_per_page | html %]">
     <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -44,11 +44,11 @@
                   </tr>
                   <tr>
                     <td align="left" class='filterName'>Search Pattern:</td>
-                    <td align="left" class='filterValue'><input type="text" name="pattern" value="[% pattern%]" size=30></td>
+                    <td align="left" class='filterValue'><input type="text" name="pattern" value="[% pattern | html %]" size=30></td>
                   </tr>
                   <tr>
                     <td align="left" class='filterName'>Exclude Pattern:</td>
-                    <td align="left" class='filterValue'><input type="text" name="exclude_pattern" value="[% exclude_pattern%]" size=30></td>
+                    <td align="left" class='filterValue'><input type="text" name="exclude_pattern" value="[% exclude_pattern | html %]" size=30></td>
                   </tr>
                 </table>
               </td>
@@ -90,8 +90,8 @@
         </td>
 
         <td align="right" valign="top" width="33%">
-              [% IF host    %]<input type='hidden' name='host'    value='[% host    %]'>[% END %]
-              [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
+              [% IF host    %]<input type='hidden' name='host'    value="[% host | html    %]">[% END %]
+              [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
             <table border="0" class='optBox'>
               <tr>
                 <td align="left" class='optBoxItem'>State type options:</td>

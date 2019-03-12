@@ -31,15 +31,15 @@
   </tr>
   <tr class="firstrow">
     <td class="dataEven" align="center"><b>Subject</b></td>
-    <td class="dataOdd" align="left"><input type="text" name="subject" value="[% subject %]"></td>
+    <td class="dataOdd" align="left"><input type="text" name="subject" value="[% subject | html %]"></td>
   </tr>
   <tr>
     <td class="dataEven" align="center" valign="top"><b>To</b></td>
-    <td class="dataOdd" align="left"><input type="text" name="to" value="[% r.to %]"></td>
+    <td class="dataOdd" align="left"><input type="text" name="to" value="[% r.to | html %]"></td>
   </tr>
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Cc</b></td>
-    <td class="dataOdd" align="left"><input type="text" name="cc" value="[% r.cc %]"></td>
+    <td class="dataOdd" align="left"><input type="text" name="cc" value="[% r.cc | html %]"></td>
   </tr>
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Description</b></td>

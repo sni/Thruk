@@ -1,6 +1,6 @@
 ﻿[% IF audiofile %]
 <object type="audio/x-wav" height="0" width="0" data="[% audiofile %]">
-  <param name="filename" value="[% audiofile %]">
+  <param name="filename" value="[% audiofile | html %]">
   <param name="autostart" value="true">
   <param name="playcount" value="1">
 </object>

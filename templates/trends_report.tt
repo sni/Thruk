@@ -112,16 +112,16 @@
     </td>
     <td align="right" valign="bottom" width="33%">
       <form method="get" action="trends.cgi">
-        <input type='hidden' name='t1' value='[% start %]'>
-        <input type='hidden' name='t2' value='[% end %]'>
-        <input type='hidden' name='host' value='[% host %]'>
-        [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
-        <input type='hidden' name='assumeinitialstates' value='[% assumeinitialstates %]'>
-        <input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
-        <input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
-        <input type='hidden' name='includesoftstates' value='[% includesoftstates %]'>
-        <input type='hidden' name='rpttimeperiod' value='[% rpttimeperiod %]'>
-        [% IF nomap %]<input type='hidden' name='nomap' value='[% nomap %]'>[% END %]
+        <input type='hidden' name='t1' value="[% start | html %]">
+        <input type='hidden' name='t2' value="[% end | html %]">
+        <input type='hidden' name='host' value="[% host | html %]">
+        [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
+        <input type='hidden' name='assumeinitialstates' value="[% assumeinitialstates | html %]">
+        <input type='hidden' name='assumestateretention' value="[% assumestateretention | html %]">
+        <input type='hidden' name='assumestatesduringnotrunning' value="[% assumestatesduringnotrunning | html %]">
+        <input type='hidden' name='includesoftstates' value="[% includesoftstates | html %]">
+        <input type='hidden' name='rpttimeperiod' value="[% rpttimeperiod | html %]">
+        [% IF nomap %]<input type='hidden' name='nomap' value="[% nomap | html %]">[% END %]
         <table border="0" class='optBox'>
           <tr>
             [% IF service %]
@@ -134,7 +134,7 @@
           <tr>
             <td class='optBoxItem' valign="top" align="left">
               [% IF service %]
-              <input type='hidden' name='initialassumedhoststate' value='[% initialassumedhoststate %]'>
+              <input type='hidden' name='initialassumedhoststate' value="[% initialassumedhoststate | html %]">
               <select name='initialassumedservicestate'>
                 <option value="0"[% IF  initialassumedservicestate ==  0 %] selected[% END %]>Unspecified</option>
                 <option value="-1"[% IF initialassumedservicestate == -1 %] selected[% END %]>Current State</option>
@@ -144,7 +144,7 @@
                 <option value="9"[% IF  initialassumedservicestate ==  9 %] selected[% END %]>Service Critical</option>
               </select>
               [% ELSE %]
-              <input type='hidden' name='initialassumedservicestate' value='[% initialassumedservicestate %]'>
+              <input type='hidden' name='initialassumedservicestate' value="[% initialassumedservicestate | html %]">
               <select name='initialassumedhoststate'>
                 <option value="0"[% IF  initialassumedhoststate ==  0 %] selected[% END %]>Unspecified</option>
                 <option value="-1"[% IF initialassumedhoststate == -1 %] selected[% END %]>Current State</option>
@@ -155,7 +155,7 @@
               [% END %]
             </td>
             <td class='optBoxItem' valign="top" align="left">
-              <input type='text' name='backtrack' size='2' maxlength='2' value='[% backtrack %]'>
+              <input type='text' name='backtrack' size='2' maxlength='2' value="[% backtrack | html %]">
             </td>
           </tr>
           <tr>
@@ -171,7 +171,7 @@
             </td>
             <td class='optBoxItem' valign="top" align="left">
               <select name='zoom'>
-                <option value="[% zoom %]" selected>[% zoom %]</option>
+                <option value="[% zoom | html %]" selected>[% zoom %]</option>
                 <option value="+2">+2</option>
                 <option value="+3">+3</option>
                 <option value="+4">+4</option>

@@ -24,7 +24,7 @@
                 <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:sub;">
                 <select name="theme" id="pref_theme" class="pref_pane_short_inp">
                   [% FOR t = themes %]
-                  <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
+                  <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
                   [% END %]
                 </select>
                 <input type="button" name="submit" value="change" onClick="prefSubmit(full_uri, '[% theme %]')">

@@ -28,7 +28,7 @@
     [% END %]
   [% END %]
 
-  <input type="hidden" name="page" value="[% current_page %]">
+  <input type="hidden" name="page" value="[% current_page | html %]">
   [% IF pager_previous_page %]
     <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_first.png" name="first" alt="first" value="1" class="pager_input_img"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" name="previous" alt="previous" value="1" class="pager_input_img">&nbsp;
   [% END %]
@@ -74,12 +74,12 @@
         [% IF step == "all" %]
           <option value="all"[%  IF entries_per_page == "all" %] selected[% END %]>all on one page</option>
         [% ELSE %]
-          <option value="[% step %]"[% IF entries_per_page == step %] selected[% END %]>[% step %] per page</option>
+          <option value="[% step | html %]"[% IF entries_per_page == step %] selected[% END %]>[% step %] per page</option>
         [% END %]
       [% END %]
     </select>
   [% END %]
-  <input type="hidden" name="total_pages" value="[% pages %]">
+  <input type="hidden" name="total_pages" value="[% pages | html %]">
   </form>
 [% END %]
 [% END %]

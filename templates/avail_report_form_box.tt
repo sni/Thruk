@@ -1,17 +1,17 @@
 ﻿<form method="GET" action="avail.cgi">
-[% IF host %]<input type='hidden' name='host' value='[% host %]'>[% END %]
-[% IF hostgroup %]<input type='hidden' name='hostgroup' value='[% hostgroup %]'>[% END %]
-[% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
-[% IF servicegroup %]<input type='hidden' name='servicegroup' value='[% servicegroup %]'>[% END %]
-<input type='hidden' name='t1' value='[% start %]'>
-<input type='hidden' name='t2' value='[% end %]'>
-[% IF show_log_entries %]<input type='hidden' name='show_log_entries' value='[% show_log_entries %]'>[% END %]
-[% IF full_log_entries %]<input type='hidden' name='full_log_entries' value='[% full_log_entries %]'>[% END %]
-<input type='hidden' name='assumeinitialstates' value='[% assumeinitialstates %]'>
-<input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
-<input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
-<input type='hidden' name='includesoftstates' value='[% includesoftstates %]'>
-[% IF report_type %]<input type='hidden' name='report_type' value='[% report_type %]'>[% END %]
+[% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
+[% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
+[% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
+[% IF servicegroup %]<input type='hidden' name='servicegroup' value="[% servicegroup | html %]">[% END %]
+<input type='hidden' name='t1' value="[% start | html %]">
+<input type='hidden' name='t2' value="[% end | html %]">
+[% IF show_log_entries %]<input type='hidden' name='show_log_entries' value="[% show_log_entries | html %]">[% END %]
+[% IF full_log_entries %]<input type='hidden' name='full_log_entries' value="[% full_log_entries | html %]">[% END %]
+<input type='hidden' name='assumeinitialstates' value="[% assumeinitialstates | html %]">
+<input type='hidden' name='assumestateretention' value="[% assumestateretention | html %]">
+<input type='hidden' name='assumestatesduringnotrunning' value="[% assumestatesduringnotrunning | html %]">
+<input type='hidden' name='includesoftstates' value="[% includesoftstates | html %]">
+[% IF report_type %]<input type='hidden' name='report_type' value="[% report_type | html %]">[% END %]
 <table border="0" class='optBox'>
   <tr>
     [% UNLESS service %]
@@ -54,7 +54,7 @@
       </select>
     </td>
     <td valign="top" align="left" class='optBoxItem'>
-      <input type='text' size='2' maxlength='2' name='backtrack' value='[% backtrack %]'>
+      <input type='text' size='2' maxlength='2' name='backtrack' value="[% backtrack | html %]">
     </td>
   </tr>
   <tr>

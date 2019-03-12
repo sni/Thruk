@@ -30,7 +30,7 @@
             [% FOREACH col = table_columns.$paneprefix %]
             <tr>
               <td valign="top" align="right" class='filterName clickable col_[% col.field %]' id="[% paneprefix %]_col_[% col.field %]n" width="90%">[% col.title %]</td>
-              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field %]" title="[% IF col.defined('orig'); col.orig; ELSE; col.title; END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
+              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; col.title; END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
             </tr>
             [% END %]
             </tbody>

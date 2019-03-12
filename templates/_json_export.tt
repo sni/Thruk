@@ -1,1 +1,1 @@
-﻿<a href='[% clean_referer(uri_with(c, 'view_mode' => 'json')) %]' target='_blank'><button class="thruk_btn small secondary json_export" title="Export to JSON"></button></a>&nbsp;
+﻿<a href="[% clean_referer(uri_with(c, 'view_mode' => 'json')) %]" target="_blank"><button class="thruk_btn small secondary json_export" title="Export to JSON"></button></a>&nbsp;

@@ -15,18 +15,18 @@
       <td style="padding-right: 15px;">
         [% IF profile.size > 1 %]
         <div class="controls">
-          <button class="previous" style="visibility: hidden;" onclick="show_list(-1, 'PRE.profiles');"></button>
-          <button class="next"[% IF profile.size == 1 %] style="visibility: hidden;"[% END %] onclick="show_list(1, 'PRE.profiles');"></button>
+          <button class="previous" style="visibility: hidden;" onclick="show_list(-1, 'DIV.profiles');"></button>
+          <button class="next"[% IF profile.size == 1 %] style="visibility: hidden;"[% END %] onclick="show_list(1, 'DIV.profiles');"></button>
         </div>
         [% END %]
         [% FOREACH p = profile %]
           [% IF p.list.size > 1 %]
-          <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p.0 %]</pre>
-          <pre style="display: none;">
+          <div class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p.0 %]</div>
+          <div style="display: none;">
            [% p.1 %]
-          </pre>
+          </div>
           [% ELSE %]
-          <pre class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</pre>
+          <div class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</div>
           [% END %]
         [% END %]
       </td>
@@ -55,10 +55,10 @@
 </div>
 <script type="text/javascript">
   jQuery(document).ready(function() {
-    // pre requires absolute px height, but we just want 90% of the screen
+    // DIV requires absolute px height, but we just want 90% of the screen
     var height = jQuery(window).height() * 0.8;
     if(height <  600) { height =  600; }
     if(height > 1000) { height = 1000; }
-    jQuery("PRE.profiles").css("height", height+"px");
+    jQuery("DIV.profiles").css("height", height+"px");
   });
 </script>

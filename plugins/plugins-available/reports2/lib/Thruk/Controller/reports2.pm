@@ -188,6 +188,10 @@ sub report_edit {
             }
         }
         $r->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        if($r->{'template'} !~ m/^[0-9a-zA-Z]+[\w]*\.tt$/mx) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'invalid template' });
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+        }
         if($c->req->parameters->{'params.url'}) {
             my $uri = $c->req->parameters->{'params.url'};
             if(!$r->{'params'}->{'url'}) {

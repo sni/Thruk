@@ -18,10 +18,10 @@
     <div align="center">
       <form method="get" action="avail.cgi" id="avail_form">
         <input type='hidden' name='show_log_entries' value=''>
-        [% IF host %]<input type='hidden' name='host' value='[% host %]'>[% END %]
-        [% IF hostgroup %]<input type='hidden' name='hostgroup' value='[% hostgroup %]'>[% END %]
-        [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
-        [% IF servicegroup %]<input type='hidden' name='servicegroup' value='[% servicegroup %]'>[% END %]
+        [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
+        [% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
+        [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
+        [% IF servicegroup %]<input type='hidden' name='servicegroup' value="[% servicegroup | html %]">[% END %]
         <table border="0" cellpadding="5">
           <tr>
             <td valign="top" class='reportSelectSubTitle' align="right">Report Period:</td>
@@ -53,8 +53,8 @@
                 <option value='11'[% IF format_date(yesterday, '%m') == "11" %] selected[% END %]>November</option>
                 <option value='12'[% IF format_date(yesterday, '%m') == "12" %] selected[% END %]>December</option>
               </select>
-              <input type='text' size='2' maxlength='2' name='sday' value='[% format_date(yesterday, '%d') %]'>
-              <input type='text' size='4' maxlength='4' name='syear' value='[% format_date(yesterday, '%Y') %]'>
+              <input type='text' size='2' maxlength='2' name='sday' value="[% format_date(yesterday, '%d') %]">
+              <input type='text' size='4' maxlength='4' name='syear' value="[% format_date(yesterday, '%Y') %]">
               <input type='hidden' name='shour' value='0'>
               <input type='hidden' name='smin' value='0'>
               <input type='hidden' name='ssec' value='0'>
@@ -77,8 +77,8 @@
                 <option value='11'[% IF format_date(date.now, '%m') == "11" %] selected[% END %]>November</option>
                 <option value='12'[% IF format_date(date.now, '%m') == "12" %] selected[% END %]>December</option>
               </select>
-              <input type='text' size='2' maxlength='2' name='eday' value='[% format_date(date.now, '%d') %]'>
-              <input type='text' size='4' maxlength='4' name='eyear' value='[% format_date(date.now, '%Y') %]'>
+              <input type='text' size='2' maxlength='2' name='eday' value="[% format_date(date.now, '%d') %]">
+              <input type='text' size='4' maxlength='4' name='eyear' value="[% format_date(date.now, '%Y') %]">
               <input type='hidden' name='ehour' value='24'>
               <input type='hidden' name='emin' value='0'>
               <input type='hidden' name='esec' value='0'>
@@ -90,7 +90,7 @@
               <select name='rpttimeperiod'>
                 <option value="">None</option>
                 [% FOREACH t = timeperiods %]
-                <option value="[% t.name %]">[% t.name %]</option>
+                <option value="[% t.name | html %]">[% t.name %]</option>
                 [% END %]
               </select>
             </td>

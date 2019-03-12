@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
 <form action="conf.cgi" method="POST" onsubmit="multi_select_all(this)">
-<input type="hidden" name="sub" value="[% sub %]">
+<input type="hidden" name="sub" value="[% sub | html %]">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
@@ -28,15 +28,15 @@
             <input type="radio" name="data.[% key %]" value="0"[% IF d.1 == 0 %] checked[% END %]> No
             <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes
           [% ELSIF d.0 == 'STRING' %]
-            <input type="text" name="data.[% key %]" value="[% escape_js(d.1) %]" size=65>
+            <input type="text" name="data.[% key %]" value="[% d.1 | html %]" size=65>
           [% ELSIF d.0 == 'INT' %]
-            <input type="text" name="data.[% key %]" value="[% d.1 %]" size=65>
+            <input type="text" name="data.[% key %]" value="[% d.1 | html %]" size=65>
           [% ELSIF d.0 == 'ARRAY' %]
-            <input type="text" name="data.[% key %]" value="[% d.1.join(', ') %]" size=65>
+            <input type="text" name="data.[% key %]" value="[% d.1.join(', ') | html %]" size=65>
           [% ELSIF d.0 == 'LIST' %]
             <select name="data.[% key %]">
                 [% FOREACH opt = d.2 %]
-                    <option value="[% opt.key %]"[% IF opt.key == d.1 %] selected[% END %]>[% opt.value %]</option>
+                    <option value="[% opt.key | html %]"[% IF opt.key == d.1 %] selected[% END %]>[% opt.value %]</option>
                 [% END %]
             </select>
           [% ELSIF d.0 == 'MULTI_LIST' %]
@@ -55,7 +55,7 @@
                       [% END %]
                       [% FOREACH opt = d.2 %]
                         [% NEXT IF test.exists(opt.key) %]
-                        <option value="[% opt.key %]">[% opt.value %]</option>
+                        <option value="[% opt.key | html %]">[% opt.value %]</option>
                       [% END %]
                   </select>
                 </td>
@@ -68,9 +68,9 @@
                   <select id="data.[% key %]" name="data.[% key %]" size=6 multiple style="width:250px;" ondblclick="data_select_move('data.[% key %]', 'avail.[% key %]')">
                       [% FOREACH opt = d.1 %]
                         [% IF d.2.exists(opt) %]
-                          <option value="[% opt %]">[% d.2.$opt %]</option>
+                          <option value="[% opt | html %]">[% d.2.$opt %]</option>
                         [% ELSE %]
-                          <option value="[% opt %]">[% opt %]</option>
+                          <option value="[% opt | html %]">[% opt %]</option>
                         [% END %]
                       [% END %]
                   </select>

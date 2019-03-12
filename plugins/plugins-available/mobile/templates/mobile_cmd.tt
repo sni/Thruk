@@ -43,8 +43,8 @@
             [% hours   = 0 %]
             <select name="expire_time" id="[% type %]_expire_time">
               [% WHILE hours < 24 %]
-                <option value="[% hours %]:00"[% IF hours == (hour + 1) && minute >= 30 %] selected[% END %]>[% hours %]:00</option>
-                <option value="[% hours %]:30"[% IF hours == hour && minute <= 30 %] selected[% END %]>[% hours %]:30</option>
+                <option value="[% hours | html %]:00"[% IF hours == (hour + 1) && minute >= 30 %] selected[% END %]>[% hours %]:00</option>
+                <option value="[% hours | html %]:30"[% IF hours == hour && minute <= 30 %] selected[% END %]>[% hours %]:30</option>
                 [% hours = hours + 1 %]
               [% END %]
             </select>

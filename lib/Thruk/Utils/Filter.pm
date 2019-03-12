@@ -405,11 +405,10 @@ sub uri_with {
     $uri = $uri->as_string;
     unless($keep_absolute) {
         $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
-        $uri = &escape_ampersand($uri);
         # make relative url
         $uri =~ s|^/[^?]+/||mx;
     }
-    return $uri;
+    return(&escape_html($uri));
 }
 
 

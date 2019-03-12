@@ -14,7 +14,7 @@
     <tr>
       <td class='dataVar' align="left">Username</td>
       <td class='dataVal'>
-        <input type="text" name="data.username" id="data.username" value="[% user_name %]" onclick="ajax_search.init(this, 'contact', {url:'conf.cgi?action=cgi_contacts'})" size=40>
+        <input type="text" name="data.username" id="data.username" value="[% user_name | html %]" onclick="ajax_search.init(this, 'contact', {url:'conf.cgi?action=cgi_contacts'})" size=40>
       </td>
     </tr>
     <tr>
@@ -35,7 +35,7 @@
 <input type="hidden" name="sub" value="users">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
-<input type="hidden" name="data.username" value="[% user_name %]">
+<input type="hidden" name="data.username" value="[% user_name | html %]">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolusers'>
     <tr>

@@ -17,7 +17,7 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Comment ID:</td><td><b><input type='text' name='com_id' value='[% c.request.parameters.com_id %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Comment ID:</td><td><b><input type='text' name='com_id' value="[% c.request.parameters.com_id | html %]"></b></td></tr>
 
 [% END %]
 [% END %]

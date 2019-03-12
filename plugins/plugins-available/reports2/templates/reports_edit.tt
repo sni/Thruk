@@ -33,7 +33,7 @@
   </tr>
   <tr class="firstrow">
     <td class="dataEven" align="center"><b>Name</b><span class="required">*</span></td>
-    <td class="dataOdd" align="left" colspan=2><input type="text" name="name" value="[% r.name %]"></td>
+    <td class="dataOdd" align="left" colspan=2><input type="text" name="name" value="[% r.name | html %]"></td>
   </tr>
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Description</b></td>
@@ -59,7 +59,7 @@
       <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('report_backends'); reports_update_affected_sla_objects(this);" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleElement('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span><br>
       <select id="report_backends" name="report_backends" multiple style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]" onchange="reports_update_affected_sla_objects(this)">
         [% FOREACH b = backends %]
-        <option value="[% b %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        <option value="[% b | html %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
       </select>
     </td>
@@ -83,11 +83,11 @@
   </tr>
   <tr>
     <td class="dataEven" align="center"><b>To</b></td>
-    <td class="dataOdd" align="left" colspan=2><input type="text" name="to" value="[% r.to %]"></td>
+    <td class="dataOdd" align="left" colspan=2><input type="text" name="to" value="[% r.to | html %]"></td>
   </tr>
   <tr>
     <td class="dataEven" align="center"><b>Cc</b></td>
-    <td class="dataOdd" align="left" colspan=2><input type="text" name="cc" value="[% r.cc %]"></td>
+    <td class="dataOdd" align="left" colspan=2><input type="text" name="cc" value="[% r.cc | html %]"></td>
   </tr>
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
@@ -122,7 +122,7 @@
     <td class="dataOdd" align="left" colspan=2>
       <select name="template" style="min-width: 180px;" onchange="update_reports_type('[% r.nr %]', this.value)">
         [% FOREACH file = templates.keys.sort %]
-        <option value="[% file %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
+        <option value="[% file | html %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
         [% END %]
       </select>
     </td>

@@ -45,7 +45,7 @@
       <td class='dataVal'>
         <select name="timezone" style="float: left; margin-right: 15px;">
           [% FOR tz = timezones %]
-          <option value="[% tz.text %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text %]</option>
+          <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text %]</option>
           [% END %]
         </select>
         <div>

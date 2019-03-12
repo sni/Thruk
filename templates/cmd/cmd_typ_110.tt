@@ -20,7 +20,7 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value='[% c.request.parameters.servicegroup %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value="[% c.request.parameters.servicegroup | html %]"></b></td></tr>
 <tr><td class='optBoxItem'>Disable For Hosts Too:</td><td><b><input type='checkbox' name='ahas'[% IF c.config.cmd_defaults.ahas %] checked[% END %]></b></td></tr>
 
 [% END %]

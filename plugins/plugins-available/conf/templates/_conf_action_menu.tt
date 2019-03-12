@@ -20,12 +20,12 @@
                 [% IF type == 'host' && !object.is_template() %]
                 <tr class='data'>
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/server_edit.png' border="0" alt='Show services for this host' title='Show services for this host' width="16" height="16"></td>
-                  <td class='command'><a href='conf.cgi?sub=objects&amp;action=listservices&amp;data.id=[% object.get_id() %]'>Show services for this host</a></td>
+                  <td class='command'><a href="conf.cgi?sub=objects&amp;action=listservices&amp;data.id=[% object.get_id() %]">Show services for this host</a></td>
                 </tr>
                 [% END %]
                 <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show references' title='Show references' width="16" height="16"></td>
-                <td class='command'><a href='conf.cgi?sub=objects&amp;action=listref&amp;data.id=[% object.get_id() %]'>Show references</a></td>
+                <td class='command'><a href="conf.cgi?sub=objects&amp;action=listref&amp;data.id=[% object.get_id() %]">Show references</a></td>
                 </tr>
               <tr class='data'>
                 <td colspan=2><hr></td>
@@ -36,9 +36,9 @@
                   <form action='conf.cgi' method='POST'>
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='clone'>
-                    <input type='hidden' name='data.id' value='[% object.get_id() %]'>
+                    <input type='hidden' name='data.id' value="[% object.get_id() %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
-                    <a href='conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]' onClick="jQuery(this).closest('FORM').submit(); return false;">Clone this [% type %]</a>
+                    <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Clone this [% type %]</a>
                   </form>
                 </td>
               </tr>
@@ -49,9 +49,9 @@
                   <form action='conf.cgi' method='POST'>
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='enable'>
-                    <input type='hidden' name='data.id' value='[% object.get_id() %]'>
+                    <input type='hidden' name='data.id' value="[% object.get_id() %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
-                    <a href='conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]' onClick="jQuery(this).closest('FORM').submit(); return false;">Enable this [% type %]</a>
+                    <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Enable this [% type %]</a>
                   </form>
                 </td>
               </tr>
@@ -62,9 +62,9 @@
                   <form action='conf.cgi' method='POST'>
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='disable'>
-                    <input type='hidden' name='data.id' value='[% object.get_id() %]'>
+                    <input type='hidden' name='data.id' value="[% object.get_id() %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
-                    <a href='conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]' onClick="jQuery(this).closest('FORM').submit(); return false;">Disable this [% type %] temporarily</a>
+                    <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Disable this [% type %] temporarily</a>
                   </form>
                 </td>
               </tr>
@@ -75,9 +75,9 @@
                   <form action='conf.cgi' method='POST'>
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='delete'>
-                    <input type='hidden' name='data.id' value='[% object.get_id() %]'>
+                    <input type='hidden' name='data.id' value="[% object.get_id() %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
-                    <a href='conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]' onClick="jQuery(this).closest('FORM').submit(); return false;">Delete this [% type %]</a>
+                    <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Delete this [% type %]</a>
                   </form>
                 </td>
               </tr>
@@ -87,15 +87,15 @@
                   <form action='conf.cgi' method='POST'>
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='revert'>
-                    <input type='hidden' name='data.id' value='[% object.get_id() %]'>
+                    <input type='hidden' name='data.id' value="[% object.get_id() %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
-                    <a href='conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]' onClick="jQuery(this).closest('FORM').submit(); return false;">Revert this [% type %]</a>
+                    <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Revert this [% type %]</a>
                   </form>
                 </td>
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt='Move this [% type %]' title='Move this [% type %]' width="16" height="16"></td>
-                <td class='command'><a href='conf.cgi?sub=objects&amp;action=move&amp;data.id=[% object.get_id() %]'>Move [% type %] to file</a></td>
+                <td class='command'><a href="conf.cgi?sub=objects&amp;action=move&amp;data.id=[% object.get_id() %]">Move [% type %] to file</a></td>
               </tr>
               [% IF type == 'contact' %]
               <tr class='data'>

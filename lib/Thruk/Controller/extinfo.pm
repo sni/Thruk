@@ -40,7 +40,7 @@ sub index {
     if( $type eq 'grafana' ) {
         return(_process_grafana_page($c));
     }
-    elsif( $type == 0 ) {
+    elsif(!Thruk::Backend::Manager::looks_like_number($type) || $type == 0 ) {
         $infoBoxTitle = 'Process Information';
         return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
         _process_process_info_page($c);
@@ -81,6 +81,8 @@ sub index {
     elsif( $type == 8 ) {
         $infoBoxTitle = 'Servicegroup Information';
         _process_servicegroup_cmd_page($c);
+    } else {
+        return $c->detach('/error/index/25');
     }
 
     $c->stash->{infoBoxTitle} = $infoBoxTitle;
@@ -147,7 +149,7 @@ sub _process_comments_page {
     my $svc_sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
     my $svc_sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
     my $svc_order      = "ASC";
-    $svc_order = "DESC" if $svc_sorttype == 2;
+    $svc_order = "DESC" if $svc_sorttype eq "2";
     $svc_sortoption = 1 if !defined _get_comment_sort_option($svc_sortoption);
     $c->stash->{'svc_orderby'}    = _get_comment_sort_option($svc_sortoption)->[1];
     $c->stash->{'svc_orderdir'}   = $svc_order;
@@ -157,7 +159,7 @@ sub _process_comments_page {
     my $hst_sorttype   = $c->req->parameters->{'sorttype_hst'}   || 1;
     my $hst_sortoption = $c->req->parameters->{'sortoption_hst'} || 1;
     my $hst_order      = "ASC";
-    $hst_order = "DESC" if $hst_sorttype == 2;
+    $hst_order = "DESC" if $hst_sorttype eq "2";
     $hst_sortoption = 1 if !defined _get_comment_sort_option($hst_sortoption);
     $c->stash->{'hst_orderby'}    = _get_comment_sort_option($hst_sortoption)->[1];
     $c->stash->{'hst_orderdir'}   = $hst_order;

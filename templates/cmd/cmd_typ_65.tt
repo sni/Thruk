@@ -17,7 +17,7 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value='[% c.request.parameters.hostgroup %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value="[% c.request.parameters.hostgroup | html %]"></b></td></tr>
 
 [% END %]
 [% END %]
