@@ -5802,7 +5802,6 @@ function remove_empty_form_params(form) {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
     }
   }
-//return false;
   return(true);
 }
 

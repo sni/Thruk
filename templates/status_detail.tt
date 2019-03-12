@@ -110,7 +110,7 @@
           [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
           [% PROCESS _json_export.tt %]
-          [% columns=[ 'Site:0', 'Hostname', 'Hostdisplayname:0', 'IP', 'Host Parents:0', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Displayname:0', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information', 'Extra Status Information' ] %]
+          [% columns=[ 'Site:0', 'Hostname', 'Hostdisplayname:0', 'IP', 'Host Alias:0', 'Host Parents:0', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Displayname:0', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information', 'Extra Status Information' ] %]
           [% PROCESS _excel_export.tt columns=columns with_custom_vars=1 %]
         </td>
       </tr>

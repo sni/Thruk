@@ -2199,6 +2199,7 @@ sub get_host_columns {
     }
     push @{$columns}, (
         { title => "Address",              "field" => "address",              "checked" => 0 },
+        { title => "Alias",                "field" => "alias",                "checked" => 0 },
         { title => "Parents",              "field" => "parents",              "checked" => 0 },
         { title => "Check Command",        "field" => "check_command",        "checked" => 0 },
         { title => "Check Interval",       "field" => "check_interval",       "checked" => 0 },
@@ -2274,6 +2275,7 @@ sub get_service_columns {
     }
     push @{$columns}, (
         { title => "Host Address",         "field" => "host_address",         "checked" => 0 },
+        { title => "Host Alias",           "field" => "host_alias",           "checked" => 0 },
         { title => "Host Parents",         "field" => "host_parents",         "checked" => 0 },
         { title => "Host Groups",          "field" => "host_groups",          "checked" => 0 },
         { title => "Check Command",        "field" => "check_command",        "checked" => 0 },
