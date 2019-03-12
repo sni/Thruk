@@ -62,7 +62,13 @@ window.addEventListener('load', function(evt) {
 /* do initial things */
 function init_page() {
     jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
-        jQuery(this).prev('input').val('').focus();
+        var This = this;
+        jQuery(This).prev('input').val('').focus();
+        if(jQuery(This).prev('input').attr('class').match("autosubmit")) {
+            window.setTimeout(function() {
+                jQuery(This).parents("FORM").submit();
+            }, 200);
+        }
     }));
 
     // init some buttons
@@ -816,6 +822,11 @@ function dw(txt) {document.write(txt);}
 
 /* create sites popup */
 function create_site_panel_popup() {
+    if(current_backend_states == undefined) {
+        current_backend_states = {};
+        for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
+    }
+
     panel = '';
     if(show_sitepanel == "panel") {
         panel += create_site_panel_popup_panel();
@@ -830,11 +841,6 @@ function create_site_panel_popup() {
 
     if(show_sitepanel == "tree") {
         create_site_panel_popup_tree_populate();
-    }
-
-    if(current_backend_states == undefined) {
-        current_backend_states = {};
-        for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
     }
 }
 
@@ -1136,50 +1142,15 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
 
 function create_site_panel_popup_tree_data(d, current, tree) {
     var nodes = [];
-    if(current == "" && d.peers != undefined && d.peers.length > 0) {
-        jQuery(d.peers).each(function(i, peer_key) {
-            var icon;
-            var peer = initial_backends[peer_key];
-            icon = "../images/folder_green.png";
-            if(current_backend_states[peer_key] == 1) {
-                icon = "../images/folder_red.png";
-            } else if(current_backend_states[peer_key] == 2) {
-                icon = "../images/folder_gray.png";
-            }
-            var selected;
-            if(d.disabled == 0) {
-                selected = true; // enabled
-            } else if(d.disabled == d.total) {
-                selected = false; // off
-            }
-            var key = '/Default';
-            nodes.push({
-                'key': key,
-                'title': "Default",
-                'folder': false,
-                'children': [],
-                'peers': [peer_key],
-                'icon': icon,
-                'selected': selected
-            });
-            if(tree) {
-                var node  = tree.getNodeByKey(key);
-                node.icon = icon;
-                if(selected === true) {
-                    node.setSelected(true, {noEvents: true});
-                }
-                if(selected === false) {
-                    node.setSelected(false, {noEvents: true});
-                }
-                node.renderTitle();
-            }
-        });
-    }
     jQuery(keys(d.sub).sort()).each(function(i, sectionname) {
         var icon;
         icon = "../images/folder_green.png";
-        if(d.sub[sectionname].down > 0) {
+        if(d.sub[sectionname].down > 0 && d.sub[sectionname].disabled > 0) {
+            icon = "../images/folder_red_mixed.png";
+        } else if(d.sub[sectionname].down > 0) {
             icon = "../images/folder_red.png";
+        } else if(d.sub[sectionname].up > 0 && d.sub[sectionname].disabled > 0) {
+            icon = "../images/folder_green_mixed.png";
         } else if(d.sub[sectionname].up == 0) {
             icon = "../images/folder_gray.png";
         }
@@ -1204,13 +1175,52 @@ function create_site_panel_popup_tree_data(d, current, tree) {
             node.icon = icon;
             if(selected === true) {
                 node.setSelected(true, {noEvents: true});
-            }
-            if(selected === false) {
+            } else if(selected === false) {
                 node.setSelected(false, {noEvents: true});
             }
             node.renderTitle();
         }
     });
+    if(current == "" && d.peers != undefined && d.peers.length > 0) {
+        jQuery(d.peers).each(function(i, peer_key) {
+            var icon;
+            var peer = initial_backends[peer_key];
+            if(!peer) { return true; }
+            icon = "../images/folder_green.png";
+            if(current_backend_states[peer_key] == 1) {
+                icon = "../images/folder_red.png";
+            } else if(current_backend_states[peer_key] == 2) {
+                icon = "../images/folder_gray.png";
+            }
+            var selected;
+            if(d.disabled == 0) {
+                selected = true; // enabled
+            } else if(d.disabled == d.total) {
+                selected = false; // off
+            }
+            var key = '/'+peer_key;
+            nodes.push({
+                'key': key,
+                'title': peer["name"],
+                'folder': false,
+                'children': [],
+                'peers': [peer_key],
+                'icon': icon,
+                'selected': selected
+            });
+            if(tree) {
+                var node  = tree.getNodeByKey(key);
+                node.icon = icon;
+                if(selected === true) {
+                    node.setSelected(true, {noEvents: true});
+                }
+                if(selected === false) {
+                    node.setSelected(false, {noEvents: true});
+                }
+                node.renderTitle();
+            }
+        });
+    }
     return(nodes);
 }
 
