@@ -1472,6 +1472,11 @@ BUTTON.small, INPUT.small {
   text-overflow: ellipsis;
 }
 
+input[type=text], input[type=password] {
+  margin-right: 3px;
+  border-width: 1px;
+}
+
 #table_search_input {
   width: 100px;
   height: 19px;
