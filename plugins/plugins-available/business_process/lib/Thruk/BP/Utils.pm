@@ -85,6 +85,7 @@ sub load_bp_data {
                 }
             }
             push @{$bps}, $bp;
+            $bp->{'remote'} = 0;
             $numbers->{$bp->{'id'}} = 1;
         }
     }
@@ -100,6 +101,7 @@ sub load_bp_data {
             $file  = $base_folder.'/'.$nr.'.tbp';
             my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1);
             if($bp) {
+                $bp->{'remote'} = 0;
                 push @{$bps}, $bp;
                 $numbers->{$bp->{'id'}} = 1;
             }

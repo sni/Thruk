@@ -329,12 +329,10 @@ div.navsectionlinks {
 }
 
 .pager_direct_link {
-  vertical-align:top;
   font-weight: normal;
   color: #000000;
 }
 .pager_direct_link_current {
-  vertical-align:top;
   font-weight: bold;
   color: #FF6600;
 }

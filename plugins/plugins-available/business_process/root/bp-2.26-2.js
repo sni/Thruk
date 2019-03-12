@@ -11,6 +11,9 @@ function init_bp_buttons() {
         icons: {primary: 'ui-save-button'}
     });
 
+    jQuery('.radioset INPUT[type=radio]').button({icon:false});
+    jQuery('.radioset').controlgroup({});
+
     if (document.layers) {
       document.captureEvents(Event.MOUSEDOWN);
     }

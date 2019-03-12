@@ -437,16 +437,22 @@ sub index {
 sub _bp_start_page {
     my($c) = @_;
 
+    Thruk::Utils::Status::set_default_stash($c);
     $c->stash->{template}  = 'bp.tt';
     $c->stash->{editmode}  = 0;
+
+    my $type = $c->req->parameters->{'type'} // 'local';
+    $c->stash->{'type'} = $type;
 
     # load business processes
     my $drafts_too = $c->stash->{allowed_for_edit} ? 1 : 0;
     if($c->req->parameters->{'no_drafts'}) {
         $drafts_too = 0;
     }
-    my $bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
-    $c->stash->{'bps'} = $bps;
+    my $bps = [];
+    if($type eq 'local' || $type eq 'all') {
+        $bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
+    }
 
     if($c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'json') {
         my $json;
@@ -469,8 +475,31 @@ sub _bp_start_page {
     # add remote business processes
     $c->stash->{'has_remote_bps'} = 0;
     if(scalar @{$c->{'db'}->get_http_peers()} > 0) {
-        $bps = _add_remote_bps($c, $bps);
+        $c->stash->{'has_remote_bps'} = 1;
+        if($type eq 'remote' || $type eq 'all') {
+            $bps = _add_remote_bps($c, $bps);
+        }
     }
+
+    if($c->req->parameters->{'format'} && $c->req->parameters->{'format'} eq 'search') {
+        my $data = [];
+        for my $bp (@{$bps}) {
+            push @{$data}, $bp->{'name'};
+        }
+        return $c->render(json => [{ data =>  $data, name => "bps"}]);
+    }
+
+    my $filter = $c->req->parameters->{'filter'} // '';
+    if($filter) {
+        my $new_bps = [];
+        for my $bp (@{$bps}) {
+            push @{$new_bps}, $bp if $bp->{'name'} =~ m/$filter/mxi;
+        }
+        $bps = $new_bps;
+    }
+    $c->stash->{'filter'} = $filter;
+
+    Thruk::Backend::Manager::page_data($c, $bps);
 
     Thruk::Utils::ssi_include($c);
 
@@ -510,10 +539,10 @@ sub _add_remote_bps {
             fullid              => $svc->{'peer_key'}.':'.$vars->{'THRUK_BP_ID'},
             draft               => 0,
             site                => $site_names->{$svc->{'peer_key'}} // '',
+            remote              => 1,
         };
         $remote_bp->{'status_text'} =~ s|\\n|\n|gmx;
         $uniq->{$fullid} = 1;
-        $c->stash->{'has_remote_bps'} = 1;
         push @{$bps}, $remote_bp;
     }
     @{$bps} = sort { $a->{'name'} cmp $b->{'name'} } @{$bps};

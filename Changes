@@ -23,6 +23,7 @@ next:
             - disable automatic calculation by setting refresh_interval to zero
             - add read_only mode
             - add `post_refresh_cmd` hook
+            - use paging when having many business processes
           - Panorama:
             - add direct link with tabs
             - add theme selector to grafana images

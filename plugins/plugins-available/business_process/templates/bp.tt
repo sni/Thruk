@@ -1,28 +1,58 @@
-﻿[% WRAPPER _bp_frame.tt subtitle="Business Process Overview" %]
+﻿[% subtitle="Business Process Overview" %]
+[% IF filter; subtitle="Business Processes matching: '" _ filter _ "'"; END %]
+[% WRAPPER _bp_frame.tt subtitle=subtitle %]
 [% USE date %]
 
-<div style="margin-left: 10px; display: table;">
-  <div style="text-align: left; float: left;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</div>
-  [% IF allowed_for_edit %]
-  <div style="text-align: right; margin-bottom: 3px;"><a href="bp.cgi?action=new" class="bp_button bp_edit_button" style="width: 230px;">create new business process</a></div>
-[% END %]
-<div id="bp_table">
+<div align="center">[% PROCESS _pager.tt %]</div>
+
+<table border="0" width="100%" cellpadding=0 cellspacing=0>
+  <tr>
+    <td valign="bottom" align="left" width="33%" nowrap class="filter_button_cell">
+      <form action="bp.cgi" method="GET">
+        <input type="hidden" name="type" value="[% type | html %]">
+        <input type="text" style="margin-bottom: 4px;" id="filter" placeholder="filter" class="deletable autosubmit" name="filter" value="[% filter | html%]" onfocus="this.click()" onclick="ajax_search.init(this, 'bp', { url: 'bp.cgi?format=search&amp;type=[% type | html %]', autosubmit:true })">
+      </form>
+    </td>
+    <td valign="bottom" align="center" width="50%">
+      [% IF has_remote_bps %]
+      <div class="radioset" style="margin-bottom: 3px;">
+        <input type="radio" id="view1" name="radio" onclick="window.location='[% uri_with(c, 'type' => 'local') %]'"[%  IF type == 'local'  %] checked[% END %]><label for="view1">Local</label>
+        <input type="radio" id="view2" name="radio" onclick="window.location='[% uri_with(c, 'type' => 'remote') %]'"[% IF type == 'remote' %] checked[% END %]><label for="view2">Remote</label>
+        <input type="radio" id="view3" name="radio" onclick="window.location='[% uri_with(c, 'type' => 'all') %]'"[%    IF type == 'all'    %] checked[% END %]><label for="view3">All</label>
+      </div>
+      [% END %]
+    </td>
+    <td valign="bottom" align="center" width="50%">
+      [% IF allowed_for_edit %]
+      <div style="text-align: right; margin-bottom: 3px; margin-right: 10px;"><a href="bp.cgi?action=new" class="bp_button bp_edit_button" style="width: 230px;">create new business process</a></div>
+      [% END %]
+    </td>
+    <td valign="bottom" align="right" width="10%" nowrap>
+      [% PROCESS _add_bookmark.tt %]
+      [% PROCESS _show_link.tt %]
+      [% PROCESS _json_export.tt %]
+      [% columns=[ 'Site:0', 'Hostname', 'Hostdisplayname:0', 'IP', 'Host Alias:0', 'Host Parents:0', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Displayname:0', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information', 'Extra Status Information' ] %]
+      [% PROCESS _excel_export.tt columns=columns with_custom_vars=1 %]
+    </td>
+  </tr>
+</table>
+
 <table border="1" class='status hoverable' id="statusTable" width="100%">
   <tr>
     <th class="status" nowrap width="200">Name</th>
     <th class="status" nowrap width="0">&nbsp;</th>
-    [% IF has_remote_bps %]
+    [% IF type != "local" %]
     <th class="status" nowrap width="30">Site</th>
     [% END %]
     <th class="status" nowrap width="100">Status</th>
     <th class="status" nowrap width="100">Last Check</th>
     <th class="status" nowrap width="100">Duration</th>
-    <th class="status" nowrap width="400">Status Information</th>
+    <th class="status" nowrap>Status Information</th>
     [% IF allowed_for_edit %]
     <th class="status" nowrap width="0">&nbsp;</th>
     [% END %]
   </tr>
-  [% FOREACH bp IN bps %]
+  [% FOREACH bp IN data %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   [% statusClass = 'statusUNKNOWN' %]
@@ -47,7 +77,7 @@
       <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Graph' title='Show Graph' width="16" height="16"></a>
     [% END %]
     </td>
-    [% IF has_remote_bps %]
+    [% IF type != "local" %]
     <td class="status [% rowclass %]" align="center" nowrap>[% bp.site %]</td>
     [% END %]
     <td class="status [% statusClass %]" align="center">[% statusText %]</td>
@@ -78,7 +108,10 @@
   </tr>
   [% END %]
 </table>
-</div>
-</div>
+
+<div align="center" style="margin-top: 10px;">[% PROCESS _pager.tt %]</div>
+
+<br>
+<div class='itemTotalsTitle'>[% IF !has_error && data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Business Processes Displayed</div>
 
 [% END %]
