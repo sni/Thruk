@@ -923,10 +923,12 @@ sub single_search {
             } else {
                 $date = Thruk::Utils::parse_date( $c, $value );
             }
-            if(defined $date) {
-                push @hostfilter,    { next_check => { $dateop => $date } };
-                push @servicefilter, { next_check => { $dateop => $date } };
+            if(!defined $date) {
+                $dateop = '=';
+                $date   = '-1';
             }
+            push @hostfilter,    { next_check => { $dateop => $date } };
+            push @servicefilter, { next_check => { $dateop => $date } };
         }
         elsif ( $filter->{'type'} eq 'number of services' ) {
             push @hostfilter,    { num_services => { $op => $value } };
@@ -956,10 +958,12 @@ sub single_search {
             } else {
                 $date = Thruk::Utils::parse_date( $c, $value );
             }
-            if(defined $date) {
-                push @hostfilter,    { last_check => { $dateop => $date } };
-                push @servicefilter, { last_check => { $dateop => $date } };
+            if(!defined $date) {
+                $dateop = '=';
+                $date   = '-1';
             }
+            push @hostfilter,    { last_check => { $dateop => $date } };
+            push @servicefilter, { last_check => { $dateop => $date } };
         }
         elsif ( $filter->{'type'} eq 'parent' ) {
             push @hostfilter,          { parents      => { $listop => $value } };
