@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 572;
+    plan tests => 595;
 }
 
 
@@ -167,7 +167,7 @@ for my $name (qw/tier1a tier2a tier3a/) {
 ###############################################################################
 # federated business processes
 TestUtils::test_page(
-    'url'  => '/thruk/cgi-bin/bp.cgi',
+    'url'  => '/thruk/cgi-bin/bp.cgi?type=all',
     'like' => ['tier1a bp', 'tier2a bp', 'tier3a bp', 'tier3b bp'],
 );
 for my $name (qw/tier1a tier2a tier3a tier3b/) {
@@ -193,3 +193,15 @@ for my $hst (qw/tier3a tier3b/) {
         );
     }
 }
+
+###############################################################################
+# federated config tool
+TestUtils::test_page(
+    'url'  => '/thruk/cgi-bin/conf.cgi',
+    'like' => ['tier1a'],
+);
+TestUtils::test_page(
+    'url'    => '/thruk/cgi-bin/conf.cgi?sub=objects&action=browser',
+    'like'   => ['commands.cfg'],
+    'follow' => 1,
+);

@@ -11,9 +11,17 @@ use Scalar::Util qw/weaken/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 use constant {
+    REACHABLE        => 0,
+    UNREACHABLE      => 1,
+    HIDDEN_USER      => 2,
+    HIDDEN_PARAM     => 3,
+    DISABLED_AUTH    => 4,
+
     DISABLED_CONF    => 5,
     HIDDEN_CONF      => 6,
     UP_CONF          => 7,
+
+    HIDDEN_LMD_PARENT => 8,
 };
 
 =head1 NAME
@@ -973,6 +981,7 @@ sub _get_peer_keys_without_configtool {
     my @fetch;
     #&timing_breakpoint('_get_peer_keys_without_configtool');
     for my $peer (@peers) {
+        next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
         for my $addr (@{$peer->peer_list()}) {
             if($addr =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
                 if(!$c->stash->{'failed_backends'}->{$peer->{'key'}}) {
