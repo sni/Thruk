@@ -1407,7 +1407,7 @@ TABLE.pref_pane TH {
 }
 
 SPAN.deleteicon SPAN {
-    top: 5px;
+    top: 3px;
     opacity: 0.4;
 }
 div.logEntries,TABLE.conftoolobj,TABLE.conftool,TABLE.conftoolusers{
@@ -1576,4 +1576,11 @@ select#quick_command {
 
 SPAN.ui-applist-button {
   background-image: url("../images/application_view_list_btn.png") !important;
+}
+
+input[type=text], input[type=password] {
+  margin-right: 3px;
+  border-width: 1px;
+  height: 17px;
+  border-width: 1px;
 }
