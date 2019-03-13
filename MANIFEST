@@ -1713,6 +1713,7 @@ t/011-Thruk-Backend.t
 t/012-Thruk-Utils-utf8.t
 t/020-Log-Log4perl.t
 t/021-Log-Log4perl-Forks.t
+t/083-xss.t
 t/084-script_header.t
 t/085-json_xs.t
 t/086-Test-Vars.t
