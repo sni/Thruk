@@ -304,7 +304,6 @@ sub full_uri {
     } else {
         $uri =~ s|(https?://[^/]+)/thruk/|$url_prefix|gmx;
     }
-    $uri = &escape_ampersand($uri);
     return $uri;
 }
 
