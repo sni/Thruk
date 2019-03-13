@@ -4,6 +4,7 @@ use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
 my $cmds = [
   "grep -nr 'TODO' lib/. templates/. plugins/plugins-available/. root/. t/",
 ];
@@ -15,6 +16,7 @@ for my $cmd (@{$cmds}) {
   while(<$ph>) {
     my $line = $_;
     chomp($line);
+    next if($filter && $line !~ m%$filter%mx);
 
     # skip those
     if(   $line =~ m|/vendor/|mx

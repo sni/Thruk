@@ -5,6 +5,7 @@ use File::Slurp qw/read_file/;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {
     check_templates($dir.'/');
@@ -38,12 +39,15 @@ sub check_templates {
 
 sub check_file {
     my($file) = @_;
+    return if($filter && $file !~ m%$filter%mx);
     my $content = read_file($file);
     my $nr = 0;
+    my $failed = 0;
     for my $line (split/\n/mx, $content) {
         $nr++;
         if($line =~ m/value='[^']*\[%/mx) {
             fail(sprintf("%s:%d uses single quotes in value='' but html filter only escapes double quotes", $file, $nr));
+            $failed++;
             diag($line);
         }
         elsif($line =~ m/value="([^"]*\[%[^"]*)"/mx) {
@@ -71,8 +75,12 @@ sub check_file {
                             |fav_counter
                         )/mx) {
                 fail(sprintf("%s:%d uses value without html filter in: %s", $file, $nr, $match));
+                $failed++;
                 diag($line);
             }
         }
+    }
+    if(!$failed) {
+        ok(1, $file." seems to be ok");
     }
 }

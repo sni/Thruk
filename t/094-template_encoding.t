@@ -7,6 +7,7 @@ eval "use File::BOM";
 plan skip_all => 'File::BOM required' if $@;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {
     check_templates($dir.'/');
@@ -40,7 +41,8 @@ sub check_templates {
 }
 
 sub check_file {
-    my $file = shift;
+    my($file) = @_;
+    return if($filter && $file !~ m%$filter%mx);
     my $type;
     eval {
         File::BOM::open_bom(my $fh, $file, 'bytes') or die($!);

@@ -5,6 +5,7 @@ use POSIX qw/mktime/;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
 my @dirs = glob("./lib/ ./templates/ ./root/ ./script ./plugins/plugins-available/ t/");
 for my $dir (@dirs) {
     check_remove_afters($dir.'/');
@@ -22,6 +23,7 @@ sub check_remove_afters {
     while(<$ph>) {
         my $line = $_;
         chomp($line);
+        next if($filter && $line !~ m%$filter%mx);
         next if $line =~ m/088\-remove_after\.t/;
         if($line =~ m/REMOVE\s*AFTER:\s*([\d]+)\.([\d]+)\.([\d]+)/mxi) {
             my($day,$month,$year) = ($1,$2,$3);

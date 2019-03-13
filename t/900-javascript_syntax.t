@@ -12,6 +12,7 @@ BEGIN {
 }
 
 #################################################
+my $filter = $ARGV[0];
 my @jsfiles = glob('root/thruk/javascript/thruk-*.js
                     plugins/plugins-available/*/root/*.js
                     plugins/plugins-available/panorama/templates/panorama_js.tt
@@ -19,12 +20,14 @@ my @jsfiles = glob('root/thruk/javascript/thruk-*.js
                     plugins/plugins-available/panorama/root/js/*.js
                     ');
 for my $file (@jsfiles) {
+    next if($filter && $file !~ m%$filter%mx);
     ok(1, "checking ".$file);
     TestUtils::verify_js($file);
 }
 
 my @tplfiles = split(/\n/, `find templates plugins/plugins-available/*/templates/. themes/themes-available/*/templates -name \*.tt`);
 for my $file (@tplfiles) {
+    next if($filter && $file !~ m%$filter%mx);
     ok(1, "checking ".$file);
     TestUtils::verify_tt($file);
 }
@@ -34,6 +37,7 @@ my $config = Thruk::Config::get_config();
 
 my $files = ['root/thruk/startup.html', 'plugins/plugins-available/mobile/templates/mobile.tt'];
 for my $file (@{$files}) {
+    next if($filter && $file !~ m%$filter%mx);
     my $content = read_file($file);
     my @jquery = grep/jquery-\d+.*\.js$/, @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}};
     is(scalar @jquery, 1, 'found jquery in config');
