@@ -120,6 +120,7 @@ sub process_broadcast {
         $broadcast->{'hide_before_ts'} = $hide_before_ts;
     }
 
+    $broadcast->{'text'}        = $broadcast->{'text'}          // '';
     $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
     $broadcast->{'authoremail'} = $broadcast->{'authoremail'}   // 'none';
     $broadcast->{'expires'}     = $broadcast->{'expires'}       // '';

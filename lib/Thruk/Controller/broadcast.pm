@@ -49,7 +49,7 @@ sub index {
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
         if($action eq 'edit' || $action eq 'clone') {
-            my $id        = $c->req->parameters->{'id'};
+            my $id = $c->req->parameters->{'id'} // '';
             my $broadcast;
             if($id eq 'new') {
                 $broadcast = Thruk::Utils::Broadcast::get_default_broadcast($c);
