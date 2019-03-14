@@ -65,6 +65,7 @@ sub check_file {
                             |monthday
                             |r\.nr
                             |\.id
+                            |full_uri\(
                             |short_uri\(
                             |uri_with\(
                             |date\.now
