@@ -34,12 +34,12 @@
         [% IF force_delete %]
           <li style="list-style: none;">
             <input type="checkbox" name="ref" value="[% inc_ref.id %]" [% IF inc_ref.readonly %]disabled[% ELSE %]checked[% END %]>
-            <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% name %]</a>
+            <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% name | html %]</a>
             <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]"><img src="[% url_prefix %]themes/[% theme %]/images/link.png" style="vertical-align: middle;"></a>
             [% IF inc_ref.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
           </li>
         [% ELSE %]
-          <li><a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name %]</a></li>
+          <li><a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name | html %]</a></li>
         [% END %]
       [% END %]
       </ul>
@@ -72,11 +72,11 @@
   </tr>
   [% FOREACH t = outgoing.keys.sort %]
   <tr>
-    <td class='dataVar'>[% t | ucfirst %]</td>
+    <td class='dataVar'>[% t | ucfirst | html %]</td>
     <td class='dataVal'>
       <ul>
       [% FOREACH name = outgoing.$t.keys.sort %]
-        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a></li>
+        <li><a href="conf.cgi?sub=objects&amp;type=[% t | uri %]&amp;data.name=[% name | uri %]">[% name | html %]</a></li>
       [% END %]
       </ul>
     </td>
@@ -120,11 +120,11 @@
   [% END %]
   [% FOREACH t = other_refs.keys.sort %]
   <tr>
-    <td class='dataVar'>[% t %]</td>
+    <td class='dataVar'>[% t | html %]</td>
     <td class='dataVal'>
       <ul>
       [% FOREACH r = other_refs.$t %]
-        <li><a href="[% r.link %]" target="_blank">[% r.name %] ([% r.details %])</a></li>
+        <li><a href="[% r.link %]" target="_blank">[% r.name | html %] ([% r.details | html %])</a></li>
       [% END %]
       </ul>
     </td>

@@ -29,19 +29,19 @@
     [% FOREACH section = navigation %]
     [% cookie_section_name = section.name.replace(' ', '_') | lower %]
     <div class="navsection">
-      <div class="navsectiontitle clickable">[% section.name %]</div>
+      <div class="navsectiontitle clickable">[% section.name | html %]</div>
       <div class="navsectionlinks"[% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
       [%+ FOREACH link = section.links %]
         <ul class="navsectionlinks">
           [%+ IF link.href %]
-          <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>[% IF link.defined("html") %][% link.html %][% END %]
+          <li><a href="[% escape_html(link.href) %]" target="[% link.target %]">[% link.name | html %]</a>[% IF link.defined("html") %][% link.html %][% END %]
             [% IF link.links.size > 0 %]
             <ul>
             [% FOREACH sublink = link.links %]
               [% IF sublink.defined("href") && sublink.href %]
-                <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>[% IF sublink.defined("html") %][% sublink.html %][% END %]
+                <li><a href="[% escape_html(sublink.href) %]" target="[% sublink.target %]">[% sublink.name | html %]</a>[% IF sublink.defined("html") %][% sublink.html %][% END %]
                 [% FOREACH addlink = sublink.links %]
-                  (<a href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
+                  (<a href="[% escape_html(addlink.href) %]" target="[% addlink.target %]">[% addlink.name | html %]</a>)
                 [% END %]
                 </li>
               [%+ ELSIF sublink.defined("html") %]
@@ -56,7 +56,7 @@
           <div class="navbarsearch">
             <form method="get" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]">
               <fieldset>
-                <legend>[% link.name %]</legend>
+                <legend>[% link.name | html %]</legend>
                 <input type='hidden' name='s0_op' value='~' id="s0_to" />
                 <input type='hidden' name='s0_type' value='search' />
                 <input type='hidden' name='add_default_service_filter' value='1' />

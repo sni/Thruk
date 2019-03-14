@@ -27,7 +27,7 @@
     [% END %]
     <td class='[% class %]'>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact | html %]</a>[% END %]</td>
   </tr>
   [% END %]
 </table>

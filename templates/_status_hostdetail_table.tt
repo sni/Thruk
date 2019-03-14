@@ -29,8 +29,8 @@
             <tbody>
             [% FOREACH col = table_columns.$paneprefix %]
             <tr>
-              <td valign="top" align="right" class='filterName clickable col_[% col.field %]' id="[% paneprefix %]_col_[% col.field %]n" width="90%">[% col.title %]</td>
-              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; col.title; END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
+              <td valign="top" align="right" class="filterName clickable col_[% col.field | html %]" id="[% paneprefix %]_col_[% col.field | html %]n" width="90%">[% col.title | html %]</td>
+              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; escape_html(col.title); END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field | html %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
             </tr>
             [% END %]
             </tbody>
@@ -61,7 +61,7 @@
           <th class='status col_plugin_output' nowrap>Status Information&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by status information (ascending)' title='Sort by status information (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by status information (descending)' title='Sort by status information (descending)'></a></th>
           [% FOREACH col = default_columns.$paneprefix %]
             [% IF loop.index >= start_with %]
-            <th class='status col_[% col.field %]' style="display: none;" nowrap>[% col.title %]&nbsp;<a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 1, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% col.title %] (ascending)' title='Sort by [% col.title %] (ascending)'></a><a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 2, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% col.title %] (descending)' title='Sort by [% col.title %] (descending)'></a></th>
+            <th class="status col_[% col.field | html %]" style="display: none;" nowrap>[% col.title | html %]&nbsp;<a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 1, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt="Sort by [% col.title | html %] (ascending)" title="Sort by [% col.title | html %] (ascending)"></a><a href='#' onclick="sort_by_columns({'[% "sorttype" _ sortprefix %]': 2, '[% "sortoption" _ sortprefix %]': [% loop.index + 10 %]});"><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt="Sort by [% col.title | html %] (descending)" title="Sort by [% col.title | html %] (descending)"></a></th>
             [% END %]
           [% END %]
         </tr>
@@ -113,7 +113,7 @@
                 <td align="left">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td align="left" valign="middle" class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key %]' title='[% h.address %] - [% h.alias %]'>[% h.display_name %]</a>&nbsp;</td>
+                      <td align="left" valign="middle" class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key %]" title="[% h.address | html %] - [% h.alias | html %]">[% h.display_name | html %]</a>&nbsp;</td>
                     </tr>
                   </table>
                 </td>
@@ -187,20 +187,20 @@
         [% IF h.state_type == 1 && h.current_attempt == 1 && h.state != 0 %][% current_attempt = h.max_check_attempts %][% END %]
         <td class='[% class %] current_attempt' style="display: none;" align="center">[% current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number %][% IF h.current_notification_number && h.current_notification_number > 0 %] <span title="This host has sent out [% h.current_notification_number %] notifications">#[% h.current_notification_number %]</span>[% END %][% IF h.first_notification_delay && h.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(h) %][% IF first_remaining >= 0 %] <span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% END %]
-        <td class='[% class %] address' style="display: none;" nowrap align="left">[% h.address %]</td>
+        <td class='[% class %] address' style="display: none;" nowrap align="left">[% h.address | html %]</td>
         <td class='[% class %] alias' style="display: none;" nowrap align="left">[% h.alias | html %]</td>
-        <td class='[% class %] parents' style="display: none;" nowrap align="left">[% h.parents.join(', ') %]</td>
-        <td class='[% class %] check_command' style="display: none;" nowrap align="left">[% h.check_command.replace("\!.*$", "") %]</td>
-        <td class='[% class %] check_interval' style="display: none;" nowrap align="left">[% h.check_interval %]</td>
-        <td class='[% class %] check_period' style="display: none;" nowrap align="left">[% h.check_period %]</td>
-        <td class='[% class %] contacts mightOverflow' style="display: none;" nowrap align="left">[% h.contacts.join(', ') %]</td>
+        <td class='[% class %] parents' style="display: none;" nowrap align="left">[% h.parents.join(', ') | html %]</td>
+        <td class='[% class %] check_command' style="display: none;" nowrap align="left">[% h.check_command.replace("\!.*$", "") | html %]</td>
+        <td class='[% class %] check_interval' style="display: none;" nowrap align="left">[% h.check_interval | html %]</td>
+        <td class='[% class %] check_period' style="display: none;" nowrap align="left">[% h.check_period | html %]</td>
+        <td class='[% class %] contacts mightOverflow' style="display: none;" nowrap align="left">[% h.contacts.join(', ') | html %]</td>
         <td class='[% class %] comments' style="display: none;" nowrap align="left">
         [% IF comments_by_host.defined(h.name) %]
             [% host_name = h.name; FOREACH com = comments_by_host.$host_name %]
             [% IF com.defined("start_time") %]
             Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
             [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
-            [% IF com.entry_type == 1 %]Comment[% ELSIF com.entry_type == 4 %]Acknowledgement[% END %]: [% com.author %]: [% com.comment %]<br>
+            [% IF com.entry_type == 1 %]Comment[% ELSIF com.entry_type == 4 %]Acknowledgement[% END %]: [% com.author | html %]: [% com.comment | html %]<br>
             [% END %]
             [% END %]
         [% END %]
@@ -221,7 +221,7 @@
              cust_vars = get_custom_vars(c, h);
              IF cust_vars.exists(field); val = cust_vars.$field; END;
           %]
-          <td class='[% class %] [% col.field %]' style="display: none;" nowrap align="left">[% val %]</td>
+          <td class="[% class %] [% col.field | html %]" style="display: none;" nowrap align="left">[% val %]</td>
           [% END %]
         [% END %]
         [% END %]

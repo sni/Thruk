@@ -110,23 +110,23 @@
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='Show Status' title='Show Status' width="16" height="16" style="vertical-align: top;"></td>
-                <td class='command'><a href='status.cgi?host=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Status</a> <a href='bp.cgi?action=list_objects&amp;bp=[% bp.id %]'>(including all referenced objects)</a></td>
+                <td class='command'><a href="status.cgi?host=[% bp.name | uri %]&amp;backend=[% bp_backend | uri %]">Show Status</a> <a href='bp.cgi?action=list_objects&amp;bp=[% bp.id %]'>(including all referenced objects)</a></td>
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='Show Trends' title='Show Trends' width="16" height="16" style="vertical-align: top;"></td>
-                <td class='command'><a href='trends.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend %]'>Show Trends</a></td>
+                <td class='command'><a href="trends.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend | uri %]">Show Trends</a></td>
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/page_white_text.png' border="0" alt='View Availability Report' title='View Availability Report' width="16" height="16" style="vertical-align: top;"></td>
-                <td class='command'><a href='avail.cgi?show_log_entries=&service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend %]'>View Availability Report</a></td>
+                <td class='command'><a href="avail.cgi?show_log_entries=&service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend | uri %]">View Availability Report</a></td>
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View Notifications' title='View Notifications' width="16" height="16" style="vertical-align: top;"></td>
-                <td class='command'><a href='notifications.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend %]'>View Notifications</a></td>
+                <td class='command'><a href="notifications.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend | uri %]">View Notifications</a></td>
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></td>
-                <td class='command'><a href='showlog.cgi?host=[% bp.name | uri %]&amp;service=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Logfiles</a></td>
+                <td class='command'><a href="showlog.cgi?host=[% bp.name | uri %]&amp;service=[% bp.name | uri %]&amp;backend=[% bp_backend | uri %]">Show Logfiles</a></td>
               </tr>
               [% END %]
               [% IF !testmode %]
@@ -271,7 +271,7 @@
 
 <script type="text/javascript">
 <!--
-  var bp_backend = '[% bp_backend %]';
+  var bp_backend = '[% bp_backend | uri %]';
   jQuery(document).ready(function() {
     bp_render('container[% bp.id %]', nodes, edges);
   });

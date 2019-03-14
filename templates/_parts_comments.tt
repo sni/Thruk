@@ -1,4 +1,4 @@
-﻿<table border=0 cellpadding=3 cellspacing=0 class='[% type %]comments' width='100%'>
+﻿<table border=0 cellpadding=3 cellspacing=0 class="[% type | html %]comments" width='100%'>
 <tr>
   <th>Entry Time</th>
   <th>Author</th>

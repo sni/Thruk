@@ -45,7 +45,7 @@
           <tr>
             <td style="width: 50px;" class="data dataSubmit sub_1">
               [% IF referer %]
-              <button class="conf_back_button conf_button" onclick="window.location='[% referer %]'; return false;">back</button>
+              <button class="conf_back_button conf_button" onclick="window.location='[% escape_js(referer) %]'; return false;">back</button>
               [% END %]
             </td>
             <td class='dataVar dataUserVar'>
@@ -54,7 +54,7 @@
                 [%+ object.get_long_name('&nbsp;') %]
                 [% IF object.disabled %]<span style="color: #EB6900"> (disabled)</span>[% END %]
               [% ELSE %]
-                new [% type %]
+                new [% type | html %]
               [% END %]
               <span style="[% IF subcat != 'config' && subcat != 'comp' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1 sub_3">
                 <br>
@@ -115,14 +115,14 @@
           </tr>
           <tr>
             <td class='dataVar' style="text-align: left; white-space: nowrap;">
-              <a href="conf.cgi?sub=objects&amp;type=[% type %]&amp;data.id=[% obj_id %]&amp;data.name=[% key | uri %]">
+              <a href="conf.cgi?sub=objects&amp;type=[% type | uri %]&amp;data.id=[% obj_id %]&amp;data.name=[% key | uri %]">
                 [% IF objs.size > 0 && objs.0.file.readonly %]
                 <img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' alt='View Template' title='View Template' width="16" height="16" style="vertical-align: middle">
                 [% ELSE %]
                 <img src='[% url_prefix %]themes/[% theme %]/images/edit.png' alt='Edit Template' title='Edit Template' width="16" height="16" style="vertical-align: middle">
                 [% END %]
               </a>
-              &nbsp;[% key %]
+              &nbsp;[% key | html %]
             </td>
             <td class='dataVal' colspan=2>
               [% IF objs.size > 0 %]
@@ -165,10 +165,10 @@
           </tr>
           [% FOR auth = role_keys %]
           <tr>
-            <td class='dataVar' align="left">[% auth %]</td>
+            <td class='dataVar' align="left">[% auth | html %]</td>
             <td class='dataVal'>
-              <input type="radio" name="authdata.[% auth %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
-              <input type="radio" name="authdata.[% auth %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
+              <input type="radio" name="authdata.[% auth | html %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
+              <input type="radio" name="authdata.[% auth | html %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
             </td>
           </tr>
           [% END %]

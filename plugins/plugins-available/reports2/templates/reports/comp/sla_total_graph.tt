@@ -56,7 +56,7 @@ jQuery(document).ready(function() {
     [%+ END +%]
 
     var max_entries_per_page = 32;
-    render_total_sla_graph([% nr %], "[% loc("Availability") %]", graph_data, [% param.sla %], [% param.graph_min_sla %], "[% type %]", label, max_entries_per_page);
+    render_total_sla_graph([% nr %], "[% loc("Availability") %]", graph_data, [% param.sla %], [% param.graph_min_sla %], "[% type | html %]", label, max_entries_per_page);
 });
 -->
 </script>

@@ -81,7 +81,7 @@
 
 
 [% FOREACH section = navigation +%]
-[%+ menu_name = section.name _ '_menu' | lower | remove('\s+') %]
+[%+ menu_name = escape_html(section.name) _ '_menu' | lower | remove('\s+') %]
 [%+ menu_name %] = new dTree('[% menu_name %]');
 
 [% IF section.icon %]
@@ -100,23 +100,23 @@
   [% END %]
 [% END %]
 
-[%+ menu_name %].header('&nbsp;&nbsp;<a thref="#">[% section.name %]<\/a>','[% icon %]',32,'[% url_prefix %]themes/Nuvola/side/title.gif','#AFB1C3',true)
+[%+ menu_name %].header('&nbsp;&nbsp;<a thref="#">[% section.name | html %]<\/a>','[% icon %]',32,'[% url_prefix %]themes/Nuvola/side/title.gif','#AFB1C3',true)
 [%+ menu_name %].add(0,-1);
   [%+ index = 0 %]
   [% FOREACH link = section.links +%]
       [% index = index + 1 %]
       [% IF link.href %]
         [% PROCESS set_icons l=link %]
-        [%+ menu_name %].add([% index %],0,'[% link.name %]','[% link.href %]','','[% link.target %]', '[% icon %]', '[% icon_open %]');
+        [%+ menu_name %].add([% index %],0,'[% escape_js(link.name) %]','[% escape_js(link.href) %]','','[% link.target %]', '[% icon %]', '[% icon_open %]');
         [%+ parent_index = index %]
         [% FOREACH sublink = link.links +%]
           [% PROCESS set_icons l=sublink %]
           [% index = index + 1 %]
           [% tmp = "" %]
           [% FOREACH addlink = sublink.links %]
-            [% tmp = tmp _ '(<a href="' _ addlink.href _ '" target="' _ addlink.target _ '">' _ addlink.name _ '</a>)' %]
+            [% tmp = tmp _ '(<a href="' _ escape_js(addlink.href) _ '" target="' _ addlink.target _ '">' _ escape_html(addlink.name) _ '</a>)' %]
           [% END %]
-          [%+ menu_name %].add([% index %],[% parent_index %],'[% sublink.name %]','[% sublink.href %]','','[% sublink.target %]','[% icon %]', undefined, undefined, undefined, '[% tmp %]');
+          [%+ menu_name %].add([% index %],[% parent_index %],'[% escape_js(sublink.name) %]','[% escape_js(sublink.href) %]','','[% sublink.target %]','[% icon %]', undefined, undefined, undefined, '[% tmp %]');
         [% END %]
       [% ELSIF link.search +%]
         [%+ menu_name %].add([% index %],0,"<nobr><form style='padding: 0px; margin:0px; display:inline;' method='get' action='[% url_prefix %]cgi-bin/status.cgi' target='[% link.target %]'><input type='hidden' name='hidesearch' value='2' /><input type='hidden' name='s0_op' value='~' /><input type='hidden' name='s0_type' value='search' /><input type='hidden' name='add_default_service_filter' value='1' /><input type='text' name='s0_value' id='s0_value' class='NavBarSearchItem deletable' size=10 style='font-size:10'><\/form><\/nobr>",'','','','[% url_prefix %]themes/Nuvola/side/icons/search.gif');

@@ -1,36 +1,36 @@
 ﻿<!-- Extinfo Page -->
-<div id="[% type %]" data-role="page">
+<div id="[% type | html %]" data-role="page">
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>
-    <h1 class="[% type %]_name"></h1>
+    <h1 class="[% type | html %]_name"></h1>
     <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
   </div>
   <div data-role="content">
     <form action="cmd.cgi" method="POST" data-ajax=false onsubmit="jQuery.mobile.loading('show', {text: 'running check', textVisible: true}); return true;">
-      <input type="hidden" name="referer" value="" class="[% type %]_referer">
+      <input type="hidden" name="referer" value="" class="[% type | html %]_referer">
       <input type="hidden" name="quick_command" value="1">
-      <input type="hidden" name="selected_[% type %]s" class="selected_[% type %]s" value="">
+      <input type="hidden" name="selected_[% type | html %]s" class="selected_[% type | html %]s" value="">
       <input type="hidden" name="force_check" value="1">
       <button type="submit" data-icon="refresh">Reschedule Now</button>
     </form>
-    <a href="#" class="[% type %]_ack_form"><button>Acknowledge</button></a>
-    <div class="[% type %]_acknowledged"><span id="[% type %]_ack"></span></div>
+    <a href="#" class="[% type | html %]_ack_form"><button>Acknowledge</button></a>
+    <div class="[% type | html %]_acknowledged"><span id="[% type | html %]_ack"></span></div>
     <table>
-      <tr class="[% type %]_downtime"><th colspan=2 id="[% type %]_downtime"></th></tr>
-      <tr><th>Status</th><td><span id="[% type %]_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
-      <tr><th>Duration</th><td id="[% type %]_duration"></td></tr>
-      <tr><th>Attempt</th><td id="[% type %]_attempt"></td></tr>
-      <tr><th>Last Check Time</th><td id="[% type %]_last_check"></td></tr>
-      <tr><th>Next Check Time</th><td id="[% type %]_next_check"></td></tr>
-      <tr><th>Check Type</th><td id="[% type %]_check_type"></td></tr>
-      <tr><th>Execution Time</th><td id="[% type %]_exec_time"></td></tr>
-      <tr><th>Notifications Sent</th><td id="[% type %]_current_notification_number"></td></tr>
-      <tr><th colspan=2 class="[% type %]_pnp_url">Performance Graph</th></tr>
-      <tr><td colspan=2 class="[% type %]_pnp_url"><a href="" id="[% type %]_pnp_lnk" rel="external"><img src="" id="[% type %]_pnp_img" width="100%" height="60%" alt="performance graph"></a></td></tr>
+      <tr class="[% type | html %]_downtime"><th colspan=2 id="[% type | html %]_downtime"></th></tr>
+      <tr><th>Status</th><td><span id="[% type | html %]_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
+      <tr><th>Duration</th><td id="[% type | html %]_duration"></td></tr>
+      <tr><th>Attempt</th><td id="[% type | html %]_attempt"></td></tr>
+      <tr><th>Last Check Time</th><td id="[% type | html %]_last_check"></td></tr>
+      <tr><th>Next Check Time</th><td id="[% type | html %]_next_check"></td></tr>
+      <tr><th>Check Type</th><td id="[% type | html %]_check_type"></td></tr>
+      <tr><th>Execution Time</th><td id="[% type | html %]_exec_time"></td></tr>
+      <tr><th>Notifications Sent</th><td id="[% type | html %]_current_notification_number"></td></tr>
+      <tr><th colspan=2 class="[% type | html %]_pnp_url">Performance Graph</th></tr>
+      <tr><td colspan=2 class="[% type | html %]_pnp_url"><a href="" id="[% type | html %]_pnp_lnk" rel="external"><img src="" id="[% type | html %]_pnp_img" width="100%" height="60%" alt="performance graph"></a></td></tr>
       <tr><th colspan=2>Output</th></tr>
-      <tr><td colspan=2 id="[% type %]_plugin_output"></td></tr>
+      <tr><td colspan=2 id="[% type | html %]_plugin_output"></td></tr>
     </table>
-    <a href="#alerts" class="[% type %]_alerts"><button>Alerts</button></a>
-    <a href="#notifications" class="[% type %]_notifications"><button>Notifications</button></a>
+    <a href="#alerts" class="[% type | html %]_alerts"><button>Alerts</button></a>
+    <a href="#notifications" class="[% type | html %]_notifications"><button>Notifications</button></a>
   </div>
 </div>

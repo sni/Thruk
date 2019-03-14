@@ -9,20 +9,20 @@
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
-                <a href='avail.cgi?host=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]&amp;rpttimeperiod=[% rpttimeperiod %]'>View Availability Report For All Hosts</a><br>
-                [% IF use_feature_trends %]<a href='trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]&amp;rpttimeperiod=[% rpttimeperiod %]'>View Trends For This Host</a><br>[% END %]
-                [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=yes'>View Alert Histogram For This Host</a><br>[% END %]
-                <a href='status.cgi?host=[% host | uri %]'>View Status Detail For This Host</a><br>
-                <a href='history.cgi?host=[% host | uri %]'>View Alert History For This Host</a><br>
-                <a href='notifications.cgi?host=[% host | uri %]'>View Notifications For This Host</a><br>
-                <a href='extinfo.cgi?type=1&amp;host=[% host | uri %]'>View Information For This Host</a><br>
+                <a href="avail.cgi?host=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For All Hosts</a><br>
+                [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Trends For This Host</a><br>[% END %]
+                [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=yes">View Alert Histogram For This Host</a><br>[% END %]
+                <a href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a><br>
+                <a href="history.cgi?host=[% host | uri %]">View Alert History For This Host</a><br>
+                <a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a><br>
+                <a href="extinfo.cgi?type=1&amp;host=[% host | uri %]">View Information For This Host</a><br>
               </td>
             </tr>
           </table>
         </td>
         <td align="center" valign="top" width="33%">
           <div align="center" class='dataTitle'>
-            Host '[% host %]'
+            Host '[% host | html %]'
           </div><br>
 
           <img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='Availability Report' title='Availability Report' width="20" height="20"><br clear="all">
@@ -45,7 +45,7 @@
     <div align="center" class='dataTitle'>Host State Breakdowns:</div>
     [% IF use_feature_trends %]
     <p align='center'>
-      <a href='trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]&amp;rpttimeperiod=[% rpttimeperiod %]'><img src='trends.cgi?createimage&amp;smallimage&amp;host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]&amp;rpttimeperiod=[% rpttimeperiod %]' border="1" alt='Host State Trends' title='Host State Trends' width='500' height='20'></a><br>
+      <a href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]"><img src="trends.cgi?createimage&amp;smallimage&amp;host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]" border="1" alt='Host State Trends' title='Host State Trends' width='500' height='20'></a><br>
     </p>
     [% END %]
     <div align="center">

@@ -25,8 +25,8 @@
       jQuery(data.rows).each(function(i, row) {
           jQuery(row.panels).each(function(j, panel) {
             var title = panel.title;
-            title = title.replace('[% hst %] ', '');
-            title = title.replace('[% svc %] ', '');
+            title = title.replace('[% escape_js(hst) %] ', '');
+            title = title.replace('[% escape_js(svc) %] ', '');
             jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+title+'<\/option>');
             has_graphs = true;
           });

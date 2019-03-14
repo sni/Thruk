@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='downtime[% IF names %] hoverable[% END %]' style="min-width: 900px;" id="[% type %]_downtimes_table">
+  <table border="0" class='downtime[% IF names %] hoverable[% END %]' style="min-width: 900px;" id="[% type | html %]_downtimes_table">
     <tr class='downtime'>
       [% IF names %]
       <th class='downtime'>Host Name&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
@@ -23,9 +23,9 @@
     [% SET class = 'downtimeEven'  IF loop.odd %]
     <tr align='left' class='[% class %][% IF names %] clickable[% END %]' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% d.id %]_[% d.peer_key %]">
       [% IF names %]
-      <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
+      <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
       [% IF type == 'service' %]
-      <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]'>[% d.service_description %]</a></td>
+      <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
       [% END %]
       [% END %]
       <td align='center' class='[% class %]'>[% date_format(c, d.entry_time) %]</td>
@@ -51,7 +51,7 @@
     [% END %]
     [% IF downtimes.size == 0 %]
     <tr class='downtimeOdd'>
-      <td class='downtimeOdd' colspan="12">There are no [% type %] downtimes</td>
+      <td class='downtimeOdd' colspan="12">There are no [% type | html %] downtimes</td>
     </tr>
     [% END %]
   </table>

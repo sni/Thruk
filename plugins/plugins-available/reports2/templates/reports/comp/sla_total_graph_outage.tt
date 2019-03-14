@@ -38,7 +38,7 @@ jQuery(document).ready(function() {
             [% IF loop.last %]
             label[[% x %]] += "<span class='graph_svc_hst_legend'>[% hst %]<\/span>";
             [% END %]
-            label[[% x %]] += "<span class='graph_svc_legend'> - [% svc %]<\/span>";
+            label[[% x %]] += "<span class='graph_svc_legend'> - [% svc | html %]<\/span>";
             [% IF values.$x.0 == -1 %][%# no data at all... #%]
             label[[% x %]] += "<span class='graph_percent_legend'>n/a<\/span>";
             [% ELSE %]
@@ -53,7 +53,7 @@ jQuery(document).ready(function() {
 
     var graph_data = [% encode_json_obj(values) %];
     var max_entries_per_page = 32;
-    render_total_sla_graph([% nr %], "[% loc("Availability") %]", graph_data, [% param.sla %], [% param.graph_min_sla %], "[% type %]", label, max_entries_per_page);
+    render_total_sla_graph([% nr %], "[% loc("Availability") %]", graph_data, [% param.sla %], [% param.graph_min_sla %], "[% type | html %]", label, max_entries_per_page);
 });
 -->
 </script>

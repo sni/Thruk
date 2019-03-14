@@ -1,4 +1,4 @@
-﻿<table border=0 cellpadding=3 cellspacing=0 class='[% type %]downtimes' width='100%'>
+﻿<table border=0 cellpadding=3 cellspacing=0 class="[% type | html %]downtimes" width='100%'>
   <tr>
     <th>Start Time</th>
     <th>End Time</th>

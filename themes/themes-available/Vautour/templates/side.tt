@@ -28,18 +28,18 @@
 
 
     [% FOREACH section = navigation %]
-      [% cookie_section_name = section.name.replace(' ', '_') | lower %]
+      [% cookie_section_name = section.name.replace(' ', '_') | html | lower %]
       <div>
-      <div class="navsectiontitle clickable"><h2>[% section.name %]</h2></div>
+      <div class="navsectiontitle clickable"><h2>[% section.name | html %]</h2></div>
       <div class="navsectionlinks"[% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
       <ul>
       [% FOREACH link = section.links %]
         [%+ IF link.href %]
-          <li class="menuli_style1"><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a></li>
+          <li class="menuli_style1"><a href="[% escape_html(link.href) %]" target="[% link.target %]">[% link.name | html %]</a></li>
           [%+ FOREACH sublink = link.links %]
-            <li class="menuli_style2"><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>
+            <li class="menuli_style2"><a href="[% escape_html(sublink.href) %]" target="[% sublink.target %]">[% sublink.name | html %]</a>
             [%+ FOREACH addlink = sublink.links %]
-              (<a class="addlink" href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
+              (<a class="addlink" href="[% escape_html(addlink.href) %]" target="[% addlink.target %]">[% addlink.name | html %]</a>)
             [% END %]
             </li>
           [% END %]

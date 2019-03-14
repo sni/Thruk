@@ -6,7 +6,7 @@
 <form action='status.cgi' method="GET" id="bookmark_form">
 <input type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 [% END %]
-<input type="hidden" name="referer" value="[% clean_referer(short_uri(c)) %]">
+<input type="hidden" name="referer" value="[% short_uri(c) %]">
 
 
 
@@ -20,7 +20,7 @@
   </tr>
   <tr class="sub_2">
     <td colspan=3 align="center" style="padding: 10px;">
-      Url <input type="text" size="60" value="[% clean_referer(uri(c)) | html %]" name="bookmark">
+      Url <input type="text" size="60" value="[% full_uri(c) %]" name="bookmark">
       <br>
       in category
       <select name="section" id="bookmark_sections">
@@ -49,7 +49,7 @@
         [% IF user_data.exists('bookmarks') %]
           [% FOREACH section = user_data.bookmarks.keys.sort %]
               [% FOREACH link = user_data.bookmarks.$section %]
-                bookmarks["bm[% nr %]"] = "[% section %]::[% link.0 %]";
+                bookmarks["bm[% nr %]"] = "[% section | html %]::[% link.0 | html %]";
               [% nr = nr + 1 %]
               [% END %]
           [% END %]
@@ -58,7 +58,7 @@
           [% IF global_user_data.exists('bookmarks') %]
             [% FOREACH section = global_user_data.bookmarks.keys.sort %]
                 [% FOREACH link = global_user_data.bookmarks.$section %]
-                  bookmarks["bmp[% nr %]"] = "[% section %]::[% link.0 %]";
+                  bookmarks["bmp[% nr %]"] = "[% section | html %]::[% link.0 | html %]";
                 [% nr = nr + 1 %]
                 [% END %]
             [% END %]
@@ -75,7 +75,7 @@
               <div onClick="removeBookmark([% nr %]); return false;" class="clickable">
                 <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;" alt="delete">
                 <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarks">
-                [% section %]: [% link.0 %]<br>
+                [% section | html %]: [% link.0 | html %]<br>
               </div>
               <pre style="width:530px;" class="mightOverflow">[% link.1 | html %]</pre>
             </div>
@@ -97,7 +97,7 @@
               <div onClick="removeBookmark('p'+[% nr %]); return false;" class="clickable">
                 <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;" alt="delete">
                 <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarksp">
-                [% section %]: [% link.0 %]<br>
+                [% section | html %]: [% link.0 | html %]<br>
               </div>
               <pre style="width:530px;" class="mightOverflow">[% link.1 | html %]</pre>
             </div>

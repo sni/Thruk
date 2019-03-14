@@ -87,13 +87,13 @@
     <td class='[% class %]'>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>[% d.address %]</td>
-    <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts&amp;jump=[% parent | uri %]#[% parent | uri %]">[% parent %]</a>[% END %]</td>
-    <td class='[% class %]'>[% FOREACH contact = d.contacts.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact %]</a>[% END %]</td>
-    <td class='[% class %]'>[% FOREACH contact_group = d.contact_groups.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contactgroups&amp;jump=[% contact_group | uri %]#[% contact_group | uri %]">[% contact_group %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts&amp;jump=[% parent | uri %]#[% parent | uri %]">[% parent | html %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH contact = d.contacts.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact | html %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH contact_group = d.contact_groups.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contactgroups&amp;jump=[% contact_group | uri %]#[% contact_group | uri %]">[% contact_group | html %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.max_check_attempts %]</td>
     <td class='[% class %]'>[% duration(d.check_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
     <td class='[% class %]'>[% duration(d.retry_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
-    <td class='[% class %]'><a href="config.cgi?type=commands&amp;jump=[% d.check_command | strip_command_args | uri %]#[% d.check_command | strip_command_args | uri %]">[% d.check_command %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=commands&amp;jump=[% d.check_command | strip_command_args | uri %]#[% d.check_command | strip_command_args | uri %]">[% d.check_command | html %]</a></td>
     <td class='[% class %]'>[% d.check_period %]</td>
     <td class='[% class %]'>[% IF d.obsess_over_host %]Yes[% ELSE %]No[% END %]</td>
     <td class='[% class %]'>[% IF d.active_checks_enabled %]Yes[% ELSE %]No[% END %]</td>
@@ -108,7 +108,7 @@
 <!--
     <td class='[% class %]'></td>
 -->
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.notification_period | uri %]#[% d.notification_period | uri %]">[% d.notification_period %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.notification_period | uri %]#[% d.notification_period | uri %]">[% d.notification_period | html %]</a></td>
 <!--
     <td class='[% class %]'></td>
 -->

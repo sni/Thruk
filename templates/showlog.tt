@@ -57,7 +57,7 @@
         [% IF host %]
           <br><br><br><br>
           <div align="center" class='statusTitle'>
-            Log File Entries for [% host %][% IF service %] - [% service %][% END %]
+            Log File Entries for [% host | html %][% IF service %] - [% service | html %][% END %]
           </div>
         [% END %]
       </td>

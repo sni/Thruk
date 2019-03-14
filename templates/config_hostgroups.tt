@@ -31,7 +31,7 @@
     [% END %]
     <td class='[% class %]'>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% FOREACH host = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts&amp;jump=[% host | uri %]#[% host | uri %]">[% host %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH host = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts&amp;jump=[% host | uri %]#[% host | uri %]">[% host | uri %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.notes %]</td>
     <td class='[% class %]'>[% d.notes_url %]</td>
     <td class='[% class %]'>[% d.action_url %]</td>

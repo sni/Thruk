@@ -34,17 +34,17 @@
               All Contacts
               [% SET link = "contact=all" %]
             [% ELSIF contact != '' %]
-              Contact '[% contact %]'
+              Contact '[% contact | html %]'
               [% SET link = "contact=" _ contact %]
             [% ELSIF host != '' and service != '' %]
               [% SET link = "host=" _ host _ "&amp;service=" _ service %]
-              Service '[% service %]' On Host '[% host %]'
+              Service '[% service | html %]' On Host '[% host | html %]'
             [% ELSIF host == 'all'  %]
               [% SET link = "host=" _ host %]
               All Hosts and Services
             [% ELSIF host != ''  %]
               [% SET link = "host=" _ host %]
-              Host '[% host %]'
+              Host '[% host | html %]'
             [% END %]
             [% SET link = link _ "&amp;type=" _ type %]
           </div><br>
@@ -155,18 +155,18 @@
         [% SET class = 'notificationsEven' IF loop.odd %]
         [% PROCESS _notifications_log_line.tt %]
         <tr align='left' class='[% class %]'>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% n.host_name | uri %]&amp;backend=[% n.peer_key %]'>[% n.host_name %]</a></td>
+          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% n.host_name | uri %]&amp;backend=[% n.peer_key %]">[% n.host_name | html %]</a></td>
           <td class='[% class %]'>
             [% IF n.service_description %]
-            <a href='extinfo.cgi?type=2&amp;host=[% n.host_name | uri %]&amp;service=[% n.service_description | uri %]&amp;backend=[% n.peer_key %]'>[% n.service_description %]</a>
+            <a href="extinfo.cgi?type=2&amp;host=[% n.host_name | uri %]&amp;service=[% n.service_description | uri %]&amp;backend=[% n.peer_key %]">[% n.service_description | html %]</a>
             [% ELSE %]
             N/A
             [% END %]
           </td>
           <td align='center' class='[% statusclass %]'>[% level %]</td>
           <td align='center' class='[% class %]' nowrap>[% date_format(c, n.time) %]</td>
-          <td class='[% class %]'><a href='config.cgi?type=contacts#[% n.contact_name %]'>[% n.contact_name %]</a></td>
-          <td align='center' class='[% class %]'><a href='config.cgi?type=commands#[% n.command_name %]'>[% n.command_name %]</a></td>
+          <td class='[% class %]'><a href="config.cgi?type=contacts#[% n.contact_name | uri %]">[% n.contact_name | html %]</a></td>
+          <td align='center' class='[% class %]'><a href="config.cgi?type=commands#[% n.command_name | uri %]">[% n.command_name | html %]</a></td>
           <td class='[% class %] left' style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(n.plugin_output) %][% ELSE %][% n.plugin_output %][% END %]</td>
         </tr>
         [% END %]

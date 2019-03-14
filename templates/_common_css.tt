@@ -29,7 +29,7 @@
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/daterangepicker-3.0.3/daterangepicker.css' />
 [% IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css' />[% END %]
 [% IF css.list.size > 0 %][% FOREACH cs = css.list %]
-<link rel='stylesheet' type='text/css' href='[% url_prefix _ cs %]' />
+<link rel='stylesheet' type='text/css' href='[% url_prefix %][% cs %]' />
 [% END %][% END %]
 [% IF show_sitepanel == 'tree' %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jstree-3.3.7/themes/default/style.min.css' />

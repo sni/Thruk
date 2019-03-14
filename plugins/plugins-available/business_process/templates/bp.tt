@@ -66,9 +66,9 @@
   [% END %]
   <tr class="[%+ IF loop.first +%] firstrow[% END %]">
     [% IF bp.draft %]
-    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><b>[% bp.name %] <span style="color: #eb6900; padding-left: 10px;">(DRAFT)</span></b></a></td>
+    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><b>[% bp.name | html %] <span style="color: #eb6900; padding-left: 10px;">(DRAFT)</span></b></a></td>
     [% ELSE %]
-    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><b>[% bp.name %]</b></a></td>
+    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><b>[% bp.name | html %]</b></a></td>
     [% END %]
     <td class="status [% rowclass %]" align="right" nowrap>
     [% IF !bp.draft %]
@@ -85,7 +85,7 @@
     <td class="status [% rowclass %]" align="left" nowrap>[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
     [% output = bp.status_text.split("\n") %]
     <td class="status [% rowclass %] mightOverflow plugin_output" align="left"[% IF output.size > 1 %]
-      [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% bp.name %]',WIDTH,600,[% c.config.info_popup_options %]))" abbr='[% escape_html(nl2br(bp.status_text)) %]'
+      [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(bp.name) %]',WIDTH,600,[% c.config.info_popup_options %]))" abbr="[% escape_html(nl2br(bp.status_text)) %]"
       [% END %]>
       [% IF bp.draft %]
       [% ELSE %]

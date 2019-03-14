@@ -20,11 +20,11 @@
                 <a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a><br>
                 <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
                 [% ELSIF hostgroup != '' %]
-                <a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail'>View Service Status Detail For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview'>View Status Overview For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=all&amp;style=hostdetail">View Host Status Detail For All Host Groups</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail">View Service Status Detail For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid">View Status Grid For This Host Group</a><br>
                 [% ELSE %]
                 <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
                 <a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a><br>
@@ -51,7 +51,7 @@
           <div align="center" class='statusTitle'>
             [% IF custom_title != '' %][% custom_title %]
             [% ELSIF hostgroup == 'all' %]Host Status Details For All Host Groups
-            [% ELSIF hostgroup != '' %]Host Status Details For Host Group '[% hostgroup %]'
+            [% ELSIF hostgroup != '' %]Host Status Details For Host Group '[% hostgroup | html %]'
             [% ELSE %]Host Status Details
             [% END %]
           </div>

@@ -16,11 +16,11 @@
         <td class='[% class %]'>#[% loop.index() + 1 %]</td>
         [% IF d.service_description %]
         <td class='[% class %]'>Service</td>
-        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
-        <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]'>[% d.service_description %]</a></td>
+        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
+        <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
         [% ELSE %]
         <td class='[% class %]'>Host</td>
-        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
+        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
         <td class='[% class %]'>N/A</td>
         [% END %]
         <td class='[% class %]'>[% d.alerts %]</td>

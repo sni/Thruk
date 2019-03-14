@@ -28,13 +28,13 @@ Don't forget to restart Thruk after changing plugins.
     [% END %]
     [% first_enabled = 0 %]
     <tr style="height:160px;">
-      <td class='dataVar' align="left">[% name %]</td>
-      <td class='dataVal'><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir %]" alt="[% name %]"></td>
+      <td class='dataVar' align="left">[% name | html %]</td>
+      <td class='dataVal'><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
       <td class='dataVal plugin_description'>[% plugin.description %][% IF plugin.url %]<br><br><a href="[% plugin.url %]">view plugin page</a>[% END %]</td>
       <td class='dataVal'>
         <div class="radioset" style="width: 135px;">
-            <input type="radio" class="radio_on" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir %]_on">On</label>
-            <input type="radio" class="radio_off" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
+            <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
+            <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
         </div>
       </td>
     </tr>
@@ -55,13 +55,13 @@ Don't forget to restart Thruk after changing plugins.
     [% END %]
     [% first_disabled = 0 %]
     <tr style="height:160px;">
-      <td class='dataVar' align="left">[% name %]</td>
-      <td class='dataVal'><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir %]" alt="[% name %]"></td>
+      <td class='dataVar' align="left">[% name | html %]</td>
+      <td class='dataVal'><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
       <td class='dataVal plugin_description'>[% plugin.description %]</td>
       <td class='dataVal'>
         <div class="radioset" style="width: 135px;">
-            <input type="radio" class="radio_on" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir %]_on">On</label>
-            <input type="radio" class="radio_off" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir %]_off">Off</label>
+            <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
+            <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
         </div>
       </td>
     </tr>

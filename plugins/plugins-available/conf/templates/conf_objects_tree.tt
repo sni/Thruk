@@ -5,7 +5,7 @@
   [% folder = dir.dirs.$d %]
     <ul>
       <li>
-        <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;dir=[% dir.path %][% d %]" target="content_frame">[% d %]</a>
+        <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;dir=[% dir.path | uri %][% d | uri%]" target="content_frame">[% d | html%]</a>
         [% INCLUDE dir_block dir = folder %]
       </li>
     </ul>
@@ -13,7 +13,7 @@
   [% FOREACH f = dir.files.keys.sort %]
     <ul>
       <li class="file_node">
-        <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;dir=[% dir.path %][% f %]" target="content_frame">[% f %]</a>
+        <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;dir=[% dir.path | uri %][% f | uri %]" target="content_frame">[% f | html %]</a>
       </li>
     </ul>
   [% END %]
@@ -64,7 +64,7 @@
                 [% FOREACH tname = childs.keys.sort %]
                   [% t = childs.$tname %]
                   <li>
-                    <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=[% type %]&amp;template=[% tname %]" target="content_frame">[% tname %]</a>
+                    <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=[% type | uri %]&amp;template=[% tname | uri %]" target="content_frame">[% tname | uri %]</a>
                     [% IF t.exists('child_templates') %][% INCLUDE child childs=t.child_templates %][% END %]
                   </li>
                 [% END %]

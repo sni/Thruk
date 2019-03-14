@@ -45,7 +45,7 @@
       <td class='dataVal'>
         <select name="timezone" style="float: left; margin-right: 15px;">
           [% FOR tz = timezones %]
-          <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text %]</option>
+          <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text | html %]</option>
           [% END %]
         </select>
         <div>
@@ -88,12 +88,12 @@
           </tr>
           [% FOREACH key = api_keys %]
           <tr>
-            <td>[% key.key %]</td>
-            <td>[% IF key.exists('comment') %][% key.comment %][% END %]</td>
+            <td>[% key.key | html %]</td>
+            <td>[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
             <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %][% ELSE %]never[% END %]</td>
-            <td>[% IF key.exists('last_from') %][% key.last_from %][% END %]</td>
+            <td>[% IF key.exists('last_from') %][% key.last_from | html %][% END %]</td>
             <td>
-              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?key=[% key.key %]&amp;action=remove_key'; return false;" title='Remove API Key'>
+              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?key=[% key.key | html %]&amp;action=remove_key'; return false;" title='Remove API Key'>
             </td>
           </tr>
           [% END %]

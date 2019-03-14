@@ -90,7 +90,7 @@
               <select name='rpttimeperiod'>
                 <option value="">None</option>
                 [% FOREACH t = timeperiods %]
-                <option value="[% t.name | html %]">[% t.name %]</option>
+                <option value="[% t.name | html %]">[% t.name | html %]</option>
                 [% END %]
               </select>
             </td>

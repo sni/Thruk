@@ -6,7 +6,7 @@
     [% meta = column.split(':'); column = meta.0 %]
     [% IF meta.size == 1; meta.1 = 1; END %]
     <tr class="sortable_row">
-      <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column %]</td>
+      <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
     </tr>
     [% END %]
@@ -15,7 +15,7 @@
         [% counter = counter + 1 %]
         [% IF !v.match('\*'); %]
         <tr class="sortable_row">
-          <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v %]</td>
+          <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
           <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
         </tr>
         [% END %]

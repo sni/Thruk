@@ -13,19 +13,19 @@
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
-                <a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>View Information For This Host</a><br>
-                <a href='status.cgi?host=[% service.host_name | uri %]'>View Status Detail For This Host</a><br>
-                <a href='history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert History For This Service</a> (<a href='showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>Logs</a>)<br>
-                [% IF show_impacts_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]'>View Impacts For This Problem</a><br>[% END %]
-                [% IF show_rootproblems_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]'>View Root Problem For This Impact</a><br>[% END %]
-                [% IF use_feature_trends %]<a href='trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Trends For This Service</a><br>[% END %]
-                [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert Histogram For This Service</a><br>[% END %]
-                <a href='avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries'>View Availability Report For This Service</a><br>
-                <a href='notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Notifications For This Service</a>
+                <a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">View Information For This Host</a><br>
+                <a href="status.cgi?host=[% service.host_name | uri %]">View Status Detail For This Host</a><br>
+                <a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Logs</a>)<br>
+                [% IF show_impacts_link %]<a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]">View Impacts For This Problem</a><br>[% END %]
+                [% IF show_rootproblems_link %]<a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]">View Root Problem For This Impact</a><br>[% END %]
+                [% IF use_feature_trends %]<a href="trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Trends For This Service</a><br>[% END %]
+                [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Alert Histogram For This Service</a><br>[% END %]
+                <a href="avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries">View Availability Report For This Service</a><br>
+                <a href="notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Notifications For This Service</a>
                 [% IF c.check_user_roles('authorized_for_configuration_information') %]
-                <br><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a>
+                <br><a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">View Configuration For This Service</a>
                 [% END %]
-                <br><a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]'>View All '[% IF service.description.length > 7; service.description.substr(0, 7) %]...[% ELSE; service.description; END %]' Services</a> (<a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap'>As Performance Map</a>)
+                <br><a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]">View All '[% IF service.description.length > 7; service.description.substr(0, 7) | html %]...[% ELSE; service.description | html; END %]' Services</a> (<a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap">As Performance Map</a>)
                 <br>
               </td>
             </tr>
@@ -33,10 +33,10 @@
         </td>
         <td align="center" width="33%" class="ext_head_attributes">
           <div class='data'>Service</div>
-          <div class='dataTitle'>[% IF use_service_description %][% service.description %][% ELSE %][% service.display_name%][% END %]</div>
+          <div class='dataTitle'>[% IF use_service_description %][% service.description | html %][% ELSE %][% service.display_name | html %][% END %]</div>
           <div class='data'>On Host</div>
           <div class='dataTitle'>[% service.host_alias %]</div>
-          <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>[% service.host_display_name %]</a>)</div><br>
+          <div class='dataTitle'>(<a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">[% service.host_display_name | html %]</a>)</div><br>
           [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">
@@ -57,18 +57,18 @@
           [% IF service.depends_exec.size > 0 %]
           <div class='data'>Parents:</div>
           <div class='dataTitle'>
-            [% FOREACH parent IN service.depends_exec.sort %][% IF !loop.first() %], [% END %]<a href='extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]'>[% IF parent.0 != service.host_name %][% parent.0 %] - [% END %][% parent.1 %]</a>[% END %]
+            [% FOREACH parent IN service.depends_exec.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
           </div><br>
           [% END %]
           [% IF service.groups.size > 0 %]
           <div class='data'> Member of </div>
-          <div class='dataTitle'>[% FOREACH group IN service.groups.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?servicegroup=[% group | uri %]&amp;style=overview'>[% group %]</a>[% END %]
+          <div class='dataTitle'>[% FOREACH group IN service.groups.sort %][% IF !loop.first() %], [% END %]<a href="status.cgi?servicegroup=[% group | uri %]&amp;style=overview">[% group | html %]</a>[% END %]
           </div><br>
           [% END %]
           <div class='data'>[% service.host_address %]</div>
           [% IF service.icon_image_expanded %]
-          <img src='[% logo_path_prefix %][% service.icon_image_expanded %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
-          [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt %] )</i></font>[% END %]
+          <img src='[% logo_path_prefix %][% service.icon_image_expanded %]' border="0" alt="[% service.icon_image_alt | html %]" title="[% service.icon_image_alt | html %]"><br clear="all">
+          [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt | html %] )</i></font>[% END %]
           [% END %]
           [% IF service.notes_expanded %]<p>[% service.notes_expanded %]</p>[% END %]
         </td>
@@ -79,7 +79,7 @@
             <td align='right'>
               [% prio = service.criticity %]
               <div class='dataTitle'>Priority [% prio %]/5
-                <img class="crit_icon" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio %]">
+                <img class="crit_icon" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
               </div>
             </td>
           </tr>
@@ -118,7 +118,7 @@
               <td align='left'>
                 [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
                 [% IF menu.defined('err') && menu.err %]
-                  <img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(menu.err) %]" alt="json error" width=16 height=16>
+                  <img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% menu.err | html %]" alt="json error" width=16 height=16>
                 [% ELSE %]
                   <script type="text/javascript">
                   [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
@@ -127,9 +127,9 @@
                     [% menu.data %]
                     [% action_menus_inserted.item(menu.data) = 1 %]
                     [% END %]
-                    print_action_menu([% menu.function %], '[% service.peer_key %]', '[% service.host_name %]', '[% service.description %]', 'b-l', true);
+                    print_action_menu([% menu.function %], '[% service.peer_key %]', '[% escape_js(service.host_name) %]', '[% escape_js(service.description) %]', 'b-l', true);
                   [% ELSE %]
-                    print_action_menu([% menu.data %], '[% service.peer_key %]', '[% service.host_name %]', '[% service.description %]', 'b-l', true);
+                    print_action_menu([% menu.data %], '[% service.peer_key %]', '[% escape_js(service.host_name) %]', '[% escape_js(service.description) %]', 'b-l', true);
                   [% END %]
                   </script>
                 [% END %]
@@ -142,9 +142,9 @@
               <td align='right'>
                 <table>
                   [% FOREACH cust = custom_vars %]
-                  <tr class="cust_var cust_var_[% cust.0 | uri | lc %]">
+                  <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
                     <td style="padding-right: 7px;" valign="top">
-                      <a href="status.cgi?style=detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 %]</i></font></a><br clear="all">
+                      <a href="status.cgi?style=detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 | html %]</i></font></a><br clear="all">
                     </td>
                     <td>
                       <font size="-1">[% cust.1 %]</font>
@@ -251,7 +251,7 @@
                               [% IF service.check_type == 0; d = duration(service.check_interval * pi_detail.$peer_key.interval_length, 5) %]<span class="check_interval" title="this service will be checked every [% d %]."> (&infin;[% d %])</span>[% END %]
                               [% IF service.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]
                               [% IF service.depends_exec.size > 0 %]
-                              (dependency: [% FOREACH parent IN service.depends_exec %][% IF !loop.first() %], [% END %]<a href='extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]'>[% IF parent.0 != service.host_name %][% parent.0 %] - [% END %][% parent.1 %]</a>[% END %])
+                              (dependency: [% FOREACH parent IN service.depends_exec %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
                               [% END %]
                             </td>
                           </tr>
@@ -275,7 +275,7 @@
                                 [% END %]
                               [% END %]
                               [% IF service.depends_notify.size > 0 %]
-                              (dependency: [% FOREACH parent IN service.depends_notify %][% IF !loop.first() %], [% END %]<a href='extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]'>[% IF parent.0 != service.host_name %][% parent.0 %] - [% END %][% parent.1 %]</a>[% END %])
+                              (dependency: [% FOREACH parent IN service.depends_notify %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
                               [% END %]
                             </td>
                           </tr>
@@ -479,12 +479,12 @@
               <tr>
                 [% UNLESS command_disabled(c, '3') %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new comment</a></td>
+                <td class='comment'><a href="cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Add a new comment</a></td>
                 [% END %]
                 [% IF comments %]
                 [% UNLESS command_disabled(c, '21') %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all comments</a></td>
+                <td class='comment'><a href="cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Delete all comments</a></td>
                 [% END %]
                 [% END %]
               </tr>
@@ -509,9 +509,9 @@
                 [% UNLESS command_disabled(c, '56') %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'>
-                  <a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a>
+                  <a href="cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Add a new downtime</a>
                   [% IF use_feature_recurring_downtime %]
-                    | <a href='extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add recurring downtime</a>
+                    | <a href="extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Add recurring downtime</a>
                   [% END %]
                 </td>
                 [% END %]
@@ -522,7 +522,7 @@
                 [% END %]
                 [% END %]
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]' class='comment'>List recent downtimes</a></td>
+                <td class='comment'><a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]" class='comment'>List recent downtimes</a></td>
               </tr>
             </table>
             [% END %]
@@ -552,9 +552,9 @@
               <tr>
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
                 [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-                <td valign="middle"><a href='conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Configure This Service</a></td>
+                <td valign="middle"><a href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Configure This Service</a></td>
                 [% ELSE %]
-                <td valign="middle"><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a></td>
+                <td valign="middle"><a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">View Configuration For This Service</a></td>
                 [% END %]
               </tr>
             </table>

@@ -39,7 +39,7 @@
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolusers'>
     <tr>
-      <td colspan=2 class='dataVar dataUserVar'>Edit: [% user_name %]</td>
+      <td colspan=2 class='dataVar dataUserVar'>Edit: [% user_name | html %]</td>
     </tr>
     <tr>
       <td class='dataVar' align="left">Contact Exists</td>
@@ -47,9 +47,9 @@
         [% IF has_contact %]Yes[% ELSE %]No[% END %]
         [% IF backends_with_obj_config.keys.size > 0 %]
           [% IF has_contact %]
-            - <input type="button" name="edit" value="edit in config tool" onclick="window.location='conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% user_name %]'">
+            - <input type="button" name="edit" value="edit in config tool" onclick="window.location='conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% user_name | html %]'">
           [% ELSE %]
-            - <a href="conf.cgi?sub=objects&amp;action=new&amp;type=contact&amp;obj.contact_name=[% user_name %]">create</a>
+            - <a href="conf.cgi?sub=objects&amp;action=new&amp;type=contact&amp;obj.contact_name=[% user_name | uri %]">create</a>
           [% END %]
         [% END %]
       </td>
@@ -94,10 +94,10 @@
     </tr>
     [% FOR auth = role_keys %]
     <tr>
-      <td class='dataVar' align="left">[% auth %]</td>
+      <td class='dataVar' align="left">[% auth | html %]</td>
       <td class='dataVal'>
-        <input type="radio" name="data.[% auth %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
-        <input type="radio" name="data.[% auth %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
+        <input type="radio" name="data.[% auth | html %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
+        <input type="radio" name="data.[% auth | html %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
       </td>
     </tr>
     [% END %]
@@ -125,7 +125,7 @@
           [% ELSE %]
             [% IF backends_with_obj_config.keys.size > 0 %]
               [% FOREACH group = profile_user.groups %]
-                <a href="conf.cgi?sub=objects&amp;type=contactgroup&amp;data.name=[% group %]">[% group %]</a>[% UNLESS loop.last %], [% END %]
+                <a href="conf.cgi?sub=objects&amp;type=contactgroup&amp;data.name=[% group | uri %]">[% group | html %]</a>[% UNLESS loop.last %], [% END %]
               [% END %]
             [% ELSE %]
               [% profile_user.groups.join(', ') %]
@@ -136,7 +136,7 @@
       [% IF has_contact %]
       <tr>
         <td class='dataVar' align="left">E-Mail</td>
-        <td class='dataVal'><a href="mailto:[% contact.email %]">[% contact.email %]</a></td>
+        <td class='dataVal'><a href="mailto:[% contact.email | uri %]">[% contact.email | html %]</a></td>
       </tr>
       <tr>
         <td class='dataVar' align="left" nowrap>Host Notification Period</td>

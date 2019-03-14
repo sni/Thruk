@@ -70,7 +70,7 @@
                         [% IF d.2.exists(opt) %]
                           <option value="[% opt | html %]">[% d.2.$opt %]</option>
                         [% ELSE %]
-                          <option value="[% opt | html %]">[% opt %]</option>
+                          <option value="[% opt | html %]">[% opt | html %]</option>
                         [% END %]
                       [% END %]
                   </select>

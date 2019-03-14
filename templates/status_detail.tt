@@ -15,29 +15,29 @@
             <tr>
               <td class='linkBox'>
                 [% IF hostgroup %]
-                <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview'>View Status Overview For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=all&amp;style=detail">View Service Status Detail For All Host Groups</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail">View Host Status Detail For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a><br>
+                <a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid">View Status Grid For This Host Group</a><br>
                 [% ELSIF servicegroup %]
-                <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=overview'>View Status Overview For This Service Group</a><br>
-                <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=summary'>View Status Summary For This Service Group</a><br>
-                <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=grid'>View Service Status Grid For This Service Group</a><br>
-                <a href='status.cgi?servicegroup=all&amp;style=detail'>View Service Status Detail For All Service Groups</a><br>
+                <a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=overview">View Status Overview For This Service Group</a><br>
+                <a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=summary">View Status Summary For This Service Group</a><br>
+                <a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=grid">View Service Status Grid For This Service Group</a><br>
+                <a href="status.cgi?servicegroup=all&amp;style=detail">View Service Status Detail For All Service Groups</a><br>
                 [% ELSIF host == 'all' %]
-                <a href='history.cgi?host=all'>View History For all hosts</a><br>
-                <a href='notifications.cgi?host=all'>View Notifications For All Hosts</a><br>
-                <a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Hosts</a>
+                <a href="history.cgi?host=all">View History For all hosts</a><br>
+                <a href="notifications.cgi?host=all">View Notifications For All Hosts</a><br>
+                <a href="status.cgi?hostgroup=all&amp;style=hostdetail">View Host Status Detail For All Hosts</a>
                 [% ELSIF host != '' %]
-                <a href='history.cgi?host=[% host | uri %]'>View History For This Host</a><br>
-                <a href='notifications.cgi?host=[% host | uri %]'>View Notifications For This Host</a><br>
-                <a href='status.cgi?host=all'>View Service Status Detail For All Hosts</a>
+                <a href="history.cgi?host=[% host | uri %]">View History For This Host</a><br>
+                <a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a><br>
+                <a href="status.cgi?host=all">View Service Status Detail For All Hosts</a>
                 [% ELSE %]
-                <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
-                <a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a><br>
-                <a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a><br>
-                <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
+                <a href="status.cgi?hostgroup=all&amp;style=detail">View Service Status Detail For All Host Groups</a><br>
+                <a href="status.cgi?hostgroup=all&amp;style=overview">View Status Overview For All Host Groups</a><br>
+                <a href="status.cgi?hostgroup=all&amp;style=summary">View Status Summary For All Host Groups</a><br>
+                <a href="status.cgi?hostgroup=all&amp;style=grid">View Status Grid For All Host Groups</a><br>
                 [% END %]
               </td>
             </tr>
@@ -60,10 +60,10 @@
         <td valign="top" align="center" width="33%" nowrap>
           <div align="center" class='statusTitle'>
             [% IF custom_title != '' %][% custom_title %]
-            [% ELSIF hostgroup != '' %]Service Status Details For Host Group '[% hostgroup %]'
-            [% ELSIF servicegroup %] Service Status Details For Service Group '[% servicegroup %]'
+            [% ELSIF hostgroup != '' %]Service Status Details For Host Group '[% hostgroup | html %]'
+            [% ELSIF servicegroup %] Service Status Details For Service Group '[% servicegroup | html %]'
             [% ELSIF host == 'all' %]Service Status Details For All Host
-            [% ELSIF host != '' %]Service Status Details For Host '[% host %]'
+            [% ELSIF host != '' %]Service Status Details For Host '[% host | html %]'
             [% ELSE %]Service Status Details
             [% END %]
           </div>
@@ -75,9 +75,9 @@
           [% IF custom_vars.size > 0 %]
             <table>
               [% FOREACH cust = custom_vars %]
-              <tr class="cust_var cust_var_[% cust.0 | uri | lc %]">
+              <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
                 <td style="padding-right: 7px;" valign="top">
-                  <a href="status.cgi?style=detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 %]</i></font></a><br clear="all">
+                  <a href="status.cgi?style=detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 | html %]</i></font></a><br clear="all">
                 </td>
                 <td>
                   <font size="-1">[% cust.1 %]</font>

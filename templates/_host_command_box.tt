@@ -14,7 +14,7 @@
               [% IF use_feature_statusmap %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map' width="20" height="20"></td>
-                <td class='command'><a href='statusmap.cgi?host=[% host.name | uri %]'>Locate host on map</a></td>
+                <td class='command'><a href="statusmap.cgi?host=[% host.name | uri %]">Locate host on map</a></td>
               </tr>
               [% END %]
 
@@ -22,17 +22,17 @@
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check' width="20" height="20"></td>
                 <td class='command'>
-                  <a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Re-schedule next check of this host</a>
+                  <a href="cmd.cgi?cmd_typ=96&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Re-schedule next check of this host</a>
                   <form action='cmd.cgi' method='POST' style="display: inline;">
                     <input type='hidden' name='cmd_typ' value='96'>
                     <input type='hidden' name='cmd_mod' value='2'>
                     <input type='hidden' name='start_time' value="[% date.now %]">
                     <input type='hidden' name='host' value="[% host.name | html %]">
                     <input type='hidden' name='force_check' value='1'>
-                    <input type='hidden' name='backend' value="[% host.peer_key | html %]">
+                    <input type='hidden' name='backend' value="[% host.peer_key %]">
                     <input type='hidden' name='referer' value="[% short_uri(c, {referer => 'undef'}) %]">
                     <input type="hidden" name="token" value="[% get_user_token(c) %]">
-                    (<a href='cmd.cgi?cmd_typ=96&amp;start_time=[% date.now %]&amp;host=[% host.name | uri %]&amp;force_check=1&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]' onClick="jQuery(this).closest('FORM').submit(); return false;">Now</a>)
+                    (<a href="cmd.cgi?cmd_typ=96&amp;start_time=[% date.now %]&amp;host=[% host.name | uri %]&amp;force_check=1&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Now</a>)
                   </form>
                 </td>
               </tr>
@@ -41,7 +41,7 @@
               [% UNLESS command_disabled(c, 87) %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Host' title='Submit Passive Check Result For This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=87&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Submit passive check result for this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=87&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Submit passive check result for this host</a></td>
               </tr>
               [% END %]
               [% END %]
@@ -50,10 +50,10 @@
               <tr class='command'>
                   [% IF host.acknowledged %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=51&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Remove problem acknowledgement</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=51&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Remove problem acknowledgement</a></td>
                   [% ELSE %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/ack.gif' border="0" alt='Acknowledge This Host Problem' title='Acknowledge This Host Problem' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=33&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Acknowledge this host problem</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=33&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Acknowledge this host problem</a></td>
                   [% END %]
               </tr>
               [% END %]
@@ -61,40 +61,40 @@
               [% UNLESS command_disabled(c, 159) %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=159&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Send custom host notification</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=159&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Send custom host notification</a></td>
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, 10) %]
               [% IF host.state >= 1 %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Delay Next Host Notification' title='Delay Next Host Notification' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=10&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Delay next host notification</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=10&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Delay next host notification</a></td>
               </tr>
               [% END %]
               [% END %]
               [% UNLESS command_disabled(c, '55') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For This Host' title='Schedule Downtime For This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule downtime for this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Schedule downtime for this host</a></td>
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, '86') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services On This Host' title='Schedule Downtime For All Services On This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=86&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule downtime for all services on this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=86&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Schedule downtime for all services on this host</a></td>
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, '17') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule a check of all services on this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=17&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Schedule a check of all services on this host</a></td>
               </tr>
               [% END %]
               [% IF host.modified_attributes_list.size > 0 %]
               [% UNLESS command_disabled(c, '154') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Reset Modified Attributes Of This Host' title='Reset Modified Attributes Of This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=154&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Reset Modified Attributes</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=154&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Reset Modified Attributes</a></td>
               </tr>
               [% END %]
               [% END %]
@@ -102,7 +102,7 @@
               [% UNLESS command_disabled(c, '201') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=201&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Launch event handler</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=201&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Launch event handler</a></td>
               </tr>
               [% END %]
               [% END %]
@@ -130,10 +130,10 @@
               <tr class='command'>
                 [% IF host.checks_enabled %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=48&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable active checks of this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=48&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Disable active checks of this host</a></td>
                 [% ELSE %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=47&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable active checks of this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=47&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Enable active checks of this host</a></td>
                 [% END %]
               </tr>
               [% END %]
@@ -141,12 +141,12 @@
               [% IF host.accept_passive_checks %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Host' title='Stop Accepting Passive Checks For This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=93&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Stop accepting passive checks for this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=93&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Stop accepting passive checks for this host</a></td>
               </tr>
               [% ELSE %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Host' title='Start Accepting Passive Checks For This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=92&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Start accepting passive checks for this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=92&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Start accepting passive checks for this host</a></td>
               </tr>
               [% END %]
               [% END %]
@@ -154,10 +154,10 @@
               <tr class='command'>
                 [% IF host.obsess_over_host %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over This Host' title='Stop Obsessing Over This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=102&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Stop obsessing over this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=102&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Stop obsessing over this host</a></td>
                 [% ELSE %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over This Host' title='Start Obsessing Over This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=101&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Start obsessing over this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=101&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Start obsessing over this host</a></td>
                 [% END %]
               </tr>
               [% END %]
@@ -165,45 +165,45 @@
               <tr class='command'>
                 [% IF host.notifications_enabled %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For This Host' title='Disable Notifications For This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=25&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable notifications for this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=25&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Disable notifications for this host</a></td>
                 [% ELSE %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications For This Host' title='Enable Notifications For This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=24&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable notifications for this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=24&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Enable notifications for this host</a></td>
                 [% END %]
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, '29') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For All Services On This Host' title='Disable Notifications For All Services On This Host' width="20" height="20"></td>
-                <td class='command' nowrap><a href='cmd.cgi?cmd_typ=29&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable notifications for all services on this host</a></td>
+                <td class='command' nowrap><a href="cmd.cgi?cmd_typ=29&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Disable notifications for all services on this host</a></td>
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, '28') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications For All Services On This Host' title='Enable Notifications For All Services On This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=28&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable notifications for all services on this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=28&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Enable notifications for all services on this host</a></td>
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, '16') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Checks Of All Services On This Host' title='Disable Checks Of All Services On This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=16&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable checks of all services on this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=16&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Disable checks of all services on this host</a></td>
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, '15') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Checks Of All Services On This Host' title='Enable Checks Of All Services On This Host' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=15&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable checks of all services on this host</a></td>
+                <td class='command'><a href="cmd.cgi?cmd_typ=15&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Enable checks of all services on this host</a></td>
               </tr>
               [% END %]
               [% UNLESS command_disabled(c, '43') || command_disabled(c, '54') %]
               <tr class='command'>
                 [% IF host.event_handler_enabled %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=44&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable event handler for this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=44&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Disable event handler for this host</a></td>
                 [% ELSE %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handler For This Host' title='Enable Event Handler For This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=43&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable event handler for this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=43&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Enable event handler for this host</a></td>
                 [% END %]
               </tr>
               [% END %]
@@ -211,10 +211,10 @@
               <tr class='command'>
                 [% IF host.flap_detection_enabled %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection For This Host' title='Disable Flap Detection For This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=58&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable flap detection for this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=58&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Disable flap detection for this host</a></td>
                 [% ELSE %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection For This Host' title='Enable Flap Detection For This Host' width="20" height="20"></td>
-                  <td class='command'><a href='cmd.cgi?cmd_typ=57&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable flap detection for this host</a></td>
+                  <td class='command'><a href="cmd.cgi?cmd_typ=57&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Enable flap detection for this host</a></td>
                 [% END %]
               </tr>
               [% END %]

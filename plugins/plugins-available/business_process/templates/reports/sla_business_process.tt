@@ -26,7 +26,7 @@
 [% END %]
 [% IF block == 'edit_types' %]
   [% IF type == 'business process' %]
-    <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type %]', { url: 'bp.cgi?view_mode=json&format=search', autosubmit:false })">
+    <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'bp.cgi?view_mode=json&format=search', autosubmit:false })">
     [% key = '' %]
   [% END %]
 [% END %]

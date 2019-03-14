@@ -19,8 +19,8 @@
       [% FOREACH pd IN backends %]
         [% SET name  = 'unknown' %]
         [% SET name  = backend_detail.$pd.name IF backend_detail.$pd.name %]
-        <input type="checkbox" name="[% pd %]" id="[% 'backend_' _ pd %]" class="backend_checkbox" />
-        <label for="[% 'backend_' _ pd %]" id="[% 'b_lab_' _ pd %]">[% name %]</label>
+        <input type="checkbox" name="[% pd | html %]" id="[% 'backend_' _ escape_html(pd) %]" class="backend_checkbox" />
+        <label for="[% 'backend_' _ escape_html(pd) %]" id="[% 'b_lab_' _ escape_html(pd) %]">[% name | html %]</label>
       [% END %]
       </fieldset>
     </div>

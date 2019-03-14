@@ -37,7 +37,7 @@
     </td>
     <td valign="top" align="center" width="33%" nowrap>
       <div align="center" class='statusTitle'>
-        [% IF custom_title != '' %][% custom_title %]
+        [% IF custom_title != '' %][% custom_title | html %]
         [% ELSE %]Host &amp; Service Details
         [% END %]
       </div>

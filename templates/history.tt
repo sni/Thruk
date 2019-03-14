@@ -20,13 +20,13 @@
             <tr>
               <td class='linkBox'>
                 [% IF service != '' and host != 'all' %]
-                <a href='notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]'>View Notifications For This Service</a><br>
-                [% IF use_feature_trends %]<a href='trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]'>View Trends For This Service</a><br>[% END %]
-                <a href='history.cgi?host=[% host | uri %]'>View History For This Host</a>
+                <a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a><br>
+                [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Trends For This Service</a><br>[% END %]
+                <a href="history.cgi?host=[% host | uri %]">View History For This Host</a>
                 [% ELSIF host != 'all' %]
-                <a href='status.cgi?host=[% host | uri %]'>View Status Detail For This Host</a><br>
-                <a href='notifications.cgi?host=[% host | uri %]'>View Notifications For This Host</a><br>
-                [% IF use_feature_trends %]<a href='trends.cgi?host=[% host | uri %]'>View Trends For This Host</a>[% END %]
+                <a href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a><br>
+                <a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a><br>
+                [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]">View Trends For This Host</a>[% END %]
                 [% ELSE %]
                 <a href='status.cgi?host=all'>View Status Detail For All Hosts</a><br>
                 <a href='notifications.cgi?host=all'>View Notifications For All Hosts</a><br>
@@ -58,7 +58,7 @@
         <td align="center" valign="top" width="33%">
           <div align="center" class='dataTitle'>
             [% IF service != '' and host != 'all' %]
-            Service '[% service %]' On Host '[% host %]'
+            Service '[% service | html %]' On Host '[% host | html %]'
             [% ELSIF host != 'all' %]
             Host '[% host | html %]'
             [% ELSE %]

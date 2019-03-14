@@ -15,7 +15,7 @@
                     [% FOREACH t = incoming.keys.sort %]
                       [% FOREACH name = incoming.$t.keys.sort %]
                         [% inc_ref = incoming.$t.$name %]
-                        <li><a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name %]</a><span class="obj_ref">([% t %])</span></li>
+                        <li><a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name | html %]</a><span class="obj_ref">([% t | html %])</span></li>
                       [% END %]
                     [% END %]
                     </ul>
@@ -37,7 +37,7 @@
                     [% FOREACH t = outgoing.keys.sort %]
                       [% FOREACH name = outgoing.$t.keys.sort %]
                         [% oid = outgoing.$t.$name %]
-                        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a><span class="obj_ref">([% t %])</span></li>
+                        <li><a href="conf.cgi?sub=objects&amp;type=[% t | uri %]&amp;data.name=[% name | uri %]">[% name | html %]</a><span class="obj_ref">([% t | html %])</span></li>
                       [% END %]
                     [% END %]
                     </ul>

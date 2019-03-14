@@ -9,7 +9,7 @@
   <script type="text/javascript" src="[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/js/jquery-ui-[% jquery_ui %].custom.min.js"></script>
 [% END +%]
 [% FOREACH j = js.list %]
-<script type="text/javascript" src="[% url_prefix _ j %]"></script>
+<script type="text/javascript" src="[% url_prefix %][% j %]"></script>
 [% END %]
 [% IF show_sitepanel == 'tree' %]
 <script type="text/javascript" src="[% url_prefix %]vendor/jstree-3.3.7/jstree.min.js"></script>

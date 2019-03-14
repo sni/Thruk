@@ -23,15 +23,15 @@
         [% SET status = 'UNKNOWN'  IF d.state == 3 %]
         [% SET status = 'CRITICAL' IF d.state == 2 %]
         <td class='[% class %]'>Service Alert</td>
-        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
-        <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]'>[% d.service_description %]</a></td>
+        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
+        <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
         <td class='service[% status %]'>[% status %]</td>
         [% ELSE %]
         [% SET status = 'UP'          IF d.state == 0 %]
         [% SET status = 'DOWN'        IF d.state == 1 %]
         [% SET status = 'UNREACHABLE' IF d.state == 2 %]
         <td class='[% class %]'>Host Alert</td>
-        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
+        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
         <td class='[% class %]'>N/A</td>
         <td class='host[% status %]'>[% status %]</td>
         [% END %]

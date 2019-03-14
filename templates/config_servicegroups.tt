@@ -34,7 +34,7 @@
     <td class='[% class %]'>
       [% FOREACH service = d.members %]
         [% IF !loop.first() %] , [% END %]
-        <a href="config.cgi?type=hosts&amp;jump=[% service.0 | uri %]#[% service.0 | uri %]">[% service.0 %]</a> / <a href="config.cgi?type=services&amp;jump=[% service.0 | uri %]_[% service.1 %]#[% service.0 | uri %]_[% service.1 %]">[% service.1 %]</a>
+        <a href="config.cgi?type=hosts&amp;jump=[% service.0 | uri %]#[% service.0 | uri %]">[% service.0 | html %]</a> / <a href="config.cgi?type=services&amp;jump=[% service.0 | uri %]_[% service.1 | uri %]#[% service.0 | uri %]_[% service.1 | uri %]">[% service.1 | html %]</a>
       [% END %]
     </td>
     <td class='[% class %]'>[% d.notes %]</td>

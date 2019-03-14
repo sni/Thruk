@@ -60,7 +60,7 @@
       [% cur_page  = cur_page + 1 %]
     [% END %]
     [% IF lastpage < pages - 1 %]...[% END %]
-    [% IF lastpage != pages %]<a class="pager_direct_link" href="[% uri_with(c, page => pages, next => 'undef', previous => 'undef') %]">[% pages %]</a>[% END %]
+    [% IF lastpage != pages %]<a class="pager_direct_link" href="[% uri_with(c, page => pages, next => 'undef', previous => 'undef') %]">[% pages | html %]</a>[% END %]
   [% END %]
 
   [% IF pager_next_page AND pages > 1 %]
@@ -74,7 +74,7 @@
         [% IF step == "all" %]
           <option value="all"[%  IF entries_per_page == "all" %] selected[% END %]>all on one page</option>
         [% ELSE %]
-          <option value="[% step | html %]"[% IF entries_per_page == step %] selected[% END %]>[% step %] per page</option>
+          <option value="[% step | html %]"[% IF entries_per_page == step %] selected[% END %]>[% step | html %] per page</option>
         [% END %]
       [% END %]
     </select>

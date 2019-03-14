@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='downtime' style="min-width: 700px;" id="recurring_downtimes_table_[% type %]">
+  <table border="0" class='downtime' style="min-width: 700px;" id="recurring_downtimes_table_[% type | html %]">
     <tr class='downtime'>
       <th class='downtime'>Type</th>
       <th class='downtime' colspan=2>Name</th>
@@ -19,31 +19,31 @@
       <td class='[% class %]'[% IF d.target != 'service' %] colspan=2[% END %]>
         [% IF d.target == 'host' %]
             [% FOREACH hst = d.host %]
-                <a href='extinfo.cgi?type=1&amp;host=[% hst | uri %]'>[% hst %]</a>[% UNLESS loop.last %], [% END %]
+                <a href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
             [% END %]
         [% ELSIF d.target == 'service' %]
             [% FOREACH hst = d.host %]
-                <a href='extinfo.cgi?type=1&amp;host=[% hst | uri %]'>[% hst %]</a>[% UNLESS loop.last %], [% END %]
+                <a href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
             [% END %]
             </td><td class='[% class %]'>
             [% IF d.host.size == 1 %]
                 [% hst = d.host.0 %]
                 [% FOREACH svc = d.service %]
-                    <a href='extinfo.cgi?type=2&amp;host=[% hst | uri %]&amp;service=[% svc | uri %]'>[% svc %]</a>[% UNLESS loop.last %], [% END %]
+                    <a href="extinfo.cgi?type=2&amp;host=[% hst | uri %]&amp;service=[% svc | uri %]">[% svc | html %]</a>[% UNLESS loop.last %], [% END %]
                 [% END %]
             [% ELSE %]
                 [% FOREACH svc = d.service %]
-                    <a href='status.cgi?hidesearch=0&amp;hidetop=&amp;style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc %]</a>
+                    <a href='status.cgi?hidesearch=0&amp;hidetop=&amp;style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc | html %]</a>
                     [% UNLESS loop.last %], [% END %]
                 [% END %]
             [% END %]
         [% ELSIF d.target == 'hostgroup' %]
             [% FOREACH grp = d.hostgroup %]
-                <a href='status.cgi?hostgroup=[% grp | uri %]&amp;style=overview'>[% grp %]</a>[% UNLESS loop.last %], [% END %]
+                <a href="status.cgi?hostgroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
             [% END %]
         [% ELSIF d.target == 'servicegroup' %]
             [% FOREACH grp = d.servicegroup %]
-                <a href='status.cgi?servicegroup=[% grp | uri %]&amp;style=overview'>[% grp %]</a>[% UNLESS loop.last %], [% END %]
+                <a href="status.cgi?servicegroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
             [% END %]
         [% END %]
       </td>
@@ -51,7 +51,7 @@
       <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
       <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
       <td class='[% class %]' align='left'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-      <td class='[% class %]' align='center'><a href='extinfo.cgi?type=6&amp;nr=[% d.file %]&amp;recurring=edit'><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
+      <td class='[% class %]' align='center'><a href="extinfo.cgi?type=6&amp;nr=[% d.file | uri %]&amp;recurring=edit"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
     </tr>
     [% IF d.exists('error') %]
     <tr class='[% class %]'>

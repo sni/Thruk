@@ -62,24 +62,24 @@
         [% SET class = 'statusEven' IF num % 2 == 0 %]
         <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
           <td class='[% class %]'>Host</td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
+          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">[% host.name | html %]</a></td>
           <td class='[% class %]'></td>
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]'>
             [% PROCESS _status_host_attributes hostprefix="" host=host host_comment_count=host.comment_count with_status=0 %]
           </td>
           <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]'>[% host.affected_hosts %]</a></td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]'>[% host.affected_services %]</a></td>
+          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]">[% host.affected_hosts %]</a></td>
+          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]">[% host.affected_services %]</a></td>
           <td class='[% class %]'>
-            <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+            <a href="status.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
-            <a href='statusmap.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
+            <a href="statusmap.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
             [% END %]
-            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
-            [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
-            <a href='history.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-            <a href='notifications.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
+            [% IF use_feature_statuswrl %]<a href="statuswrl.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
+            [% IF use_feature_trends %]<a href="trends.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
+            <a href="history.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+            <a href="notifications.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% END %]
@@ -114,24 +114,24 @@
         [% SET class = 'statusEven' IF num % 2 == 0 %]
         <tr class='[% class %]'[% IF loop.first %] id="dfl_r0"[% END %]>
           <td class='[% class %]'>Service</td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.host_name %]</a></td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>
+          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]">[% srv.host_name | html %]</a></td>
+          <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]&amp;backend=[% srv.peer_key %]">[% srv.description | html %]</a></td>
           <td class='[% s_status %]'>[% s_status_text %]</td>
           <td class='[% class %]'>
             [% PROCESS _status_service_attributes service=srv service_comment_count=srv.comment_count %]
           </td>
           <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_hosts %]</a> </td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_services %]</a></td>
+          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]">[% srv.affected_hosts %]</a> </td>
+          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]">[% srv.affected_services %]</a></td>
           <td class='[% class %]'>
-            <a href='status.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+            <a href="status.cgi?host=[% srv.host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
-            <a href='statusmap.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
+            <a href="statusmap.cgi?host=[% srv.host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
             [% END %]
-            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
-            [% IF use_feature_trends %]<a href='trends.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
-            <a href='history.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-            <a href='notifications.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
+            [% IF use_feature_statuswrl %]<a href="statuswrl.cgi?host=[% srv.host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
+            [% IF use_feature_trends %]<a href="trends.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
+            <a href="history.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+            <a href="notifications.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% END %]

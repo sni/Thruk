@@ -86,7 +86,7 @@ sub get_test_servicegroup {
     ok( $request->is_success, 'get_test_servicegroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
-    if($page =~ m/extinfo\.cgi\?type=8&amp;servicegroup=(.*?)'>(.*?)<\/a>/mxo) {
+    if($page =~ m/extinfo\.cgi\?type=8&amp;servicegroup=(.*?)">(.*?)<\/a>/mxo) {
         $group = $1;
     }
     isnt($group, undef, "got a servicegroup from config.cgi") or bail_out_req('got no test servicegroup, cannot test.', $request);
@@ -99,7 +99,7 @@ sub get_test_hostgroup {
     ok( $request->is_success, 'get_test_hostgroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
-    if($page =~ m/'extinfo\.cgi\?type=5&amp;hostgroup=(.*?)'>(.*?)<\/a>/mxo) {
+    if($page =~ m/"extinfo\.cgi\?type=5&amp;hostgroup=(.*?)">(.*?)<\/a>/mxo) {
         $group = $1;
     }
     isnt($group, undef, "got a hostgroup from config.cgi") or bail_out_req('got no test hostgroup, cannot test.', $request);

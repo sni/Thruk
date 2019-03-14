@@ -6,7 +6,7 @@
   [% NEXT IF !c.request.parameters.defined(par) %]
   [% NEXT IF par == "token" %]
   [% FOR value IN c.request.parameters.$par.list %]
-    <input type="hidden" name="[% par %]" value="[% value | html %]">
+    <input type="hidden" name="[% par | html %]" value="[% value | html %]">
   [% END %]
 [% END %]
 <input type="hidden" name="clone_ref" value="-1">

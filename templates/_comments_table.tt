@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='comment[% IF names %] hoverable[% END %]' style="min-width: 700px;" id="[% type %]_comments_table">
+  <table border="0" class='comment[% IF names %] hoverable[% END %]' style="min-width: 700px;" id="[% type | html %]_comments_table">
     <tr class='comment'>
       [% IF names %]
       <th class='comment'>Host Name&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
@@ -21,9 +21,9 @@
     [% SET class = 'commentEven' IF loop.odd %]
     <tr align='left' class='[% class %][% IF names %] clickable[% END %]' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% com.id %]_[% com.peer_key %]">
       [% IF names %]
-      <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]'>[% com.host_name %]</a></td>
+      <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]">[% com.host_name | html %]</a></td>
       [% IF type == 'service' %]
-      <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]'>[% com.service_description %]</a></td>
+      <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]">[% com.service_description | html %]</a></td>
       [% END %]
       [% END %]
       <td align='center' class='[% class %]'>[% date_format(c, com.entry_time) %]</td>
@@ -47,7 +47,7 @@
     [% END %]
     [% IF comments.size == 0 %]
     <tr class='commentOdd'>
-      <td class='commentOdd' colspan="10">There are no [% type %] comments</td>
+      <td class='commentOdd' colspan="10">There are no [% type | html %] comments</td>
     </tr>
     [% END %]
   </table>

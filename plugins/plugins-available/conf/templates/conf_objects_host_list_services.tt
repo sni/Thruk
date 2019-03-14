@@ -32,10 +32,10 @@
       [% FOREACH svc_name = services.group.keys.sort %]
         [% ref = services.group.$svc_name %]
         [% svc = ref.svc %]
-        <li><a href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() %]</a>
+        <li><a href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() | html %]</a>
           (
           [% FOREACH group = ref.groups %]
-          <a href="conf.cgi?sub=objects&amp;type=hostgroup&amp;data.name=[% group %]">[% group %]</a>
+          <a href="conf.cgi?sub=objects&amp;type=hostgroup&amp;data.name=[% group | uri %]">[% group | html %]</a>
           [% IF ! loop.last %], [% END %]
           [% END %]
           )

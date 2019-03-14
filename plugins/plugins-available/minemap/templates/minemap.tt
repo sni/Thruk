@@ -29,7 +29,7 @@
             [% ELSIF hostgroup != '' %]Mine Map For Host Group '[% hostgroup %]'
             [% ELSIF servicegroup %]Mine Map For Service Group '[% servicegroup %]'
             [% ELSIF host == 'all' %]Mine Map For All Host
-            [% ELSIF host != '' %]Mine Map For Host '[% host %]'
+            [% ELSIF host != '' %]Mine Map For Host '[% host | uri %]'
             [% ELSE %]
             Mine Map
             [% END %]
@@ -51,7 +51,7 @@
   [% FOREACH svc = services.keys.sort %]
   [% SET class = 'statusEven' IF loop.even %]
   [% SET class = 'statusOdd'  IF loop.odd %]
-  <td class='[% class %] minemap_head' title="[% svc %]" style="height:[% head_height %]px;"><div class="vertical"><a href='[% uri_with(c, service => svc, style => 'detail').replace("minemap.cgi", "status.cgi") %]&amp;complex='>[% svc %]</a></div></td>
+  <td class='[% class %] minemap_head' title="[% svc | html %]" style="height:[% head_height %]px;"><div class="vertical"><a href='[% uri_with(c, service => svc, style => 'detail').replace("minemap.cgi", "status.cgi") %]&amp;complex='>[% svc | html %]</a></div></td>
   [% END %]
 </tr>
 [% FOREACH hstname = hostnames.keys.sort %]
@@ -70,7 +70,7 @@
   <td class='[% hostclass %]' style="height: 18px;">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr>
-        <th align="left" class='[% hostclass %]' title='[% hst.host_address %]' style="height: 18px;"><a href='[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex='>[% hst.host_name %]</a></th>
+        <th align="left" class='[% hostclass %]' title="[% hst.host_address | html %]" style="height: 18px;"><a href="[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex=">[% hst.host_name | html %]</a></th>
         <td align="right" class='[% hostclass %]' style="height: 18px;">
           [% PROCESS _status_host_attributes hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=15 %]
         </td>
@@ -110,7 +110,7 @@
         [% SET program_start = pi_detail.$peer_key.program_start %]
 
 [% info = BLOCK %]
-  <a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]'>View Full Service Details</a>
+  <a href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]">View Full Service Details</a>
   <table border=0 class="extdetails">
   <tr><th class="dataVar">Status:</th><td class="dataVal"><div class="[% serviceclass %]">[% state %]</div>&nbsp;&nbsp;(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td></tr>
   [% IF s.state != 0 %]
@@ -157,7 +157,7 @@
   <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
   [% END %]
 [% END %]
-        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(info.replace("\n", "")) %]'>[% content %]</td>
+        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(s.host_name) %] - [% escape_js(s.description) %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr="[% escape_html(info.replace("\n", "")) %]">[% content %]</td>
     [% ELSE %]
     <td class='[% svcbg %]' align="center">-</td>
     [% END %]

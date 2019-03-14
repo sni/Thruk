@@ -54,7 +54,7 @@ document.write('<\/table>');
   document.write('<div id="third_graph_pane" style="position: relative; border-color:#C4C2C2; border-style:ridge; border-width:2px; border-collapse: separate; border-spacing:2px; width:825px; margin-right:275px;">');
   document.write('<div class="commentTitle">Performance Graph<\/div>');
   document.write('<\/br><\/br>');
-  document.write('<iframe name="graph" id="graph" src="[% escape_quotes(graph_url) %]" width="800" height="500" frameborder="0" style="overflow-x: hidden; overflow-y: scroll;"><\/iframe>');
+  document.write('<iframe name="graph" id="graph" src="[% graph_url | html %]" width="800" height="500" frameborder="0" style="overflow-x: hidden; overflow-y: scroll;"><\/iframe>');
   document.write('<\/div>');
 }
 </script>

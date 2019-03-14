@@ -8,7 +8,7 @@
   [% default = f.values.0.2 %]
   [% value   = default %]
   [% IF r.params.exists(key) %][% value = r.params.$key %][% END %]
-  <tr class="report_options report_type_[% type %]">
+  <tr class="report_options report_type_[% type | html %]">
     <td class="dataEven" align="center" valign="top"><b>[% name %]</b>[% IF f.values.0.size > 4 && f.values.0.4 == 1 %]<span class="required">*</span>[% END %][% IF f.values.0.size > 3 && f.values.0.3 != '' %]<br><font size='-2'>[% f.values.0.3 %]</font>[% END %]</td>
     <td class="dataOdd" align="left" colspan=2>
       [% IF type == 'int' %]
@@ -17,16 +17,16 @@
         <input type="hidden" name="optional.[% key %]" value="1">[% checked = 0 %]
         <input type="checkbox" name="enabled.[% key %]" value="1" onchange="var el = document.getElementsByName('params.[% key %]')[0]; if(this.checked) { el.disabled = false; } else { el.disabled = true;  }"[% IF value != -1; checked = 1; %]checked[% END %]>
         [% IF value == -1 || value == "" %][% value = default %][% END %]
-        <input type="text" name="params.[% key %]" value="[% IF default == value %][% f.values.0.5 %][% ELSE %][% value | html %][% END %]" class="with_checkbox"[% IF ! checked %] disabled[% END %]>
+        <input type="text" name="params.[% key %]" value="[% IF default == value %][% f.values.0.5 | html %][% ELSE %][% value | html %][% END %]" class="with_checkbox"[% IF ! checked %] disabled[% END %]>
       [% ELSIF type == 'textarea' %]
-        <textarea name="params.[% key %]" wrap="hard" cols=74>[% value %]</textarea>
+        <textarea name="params.[% key %]" wrap="hard" cols=74>[% value | html %]</textarea>
       [% ELSIF type == 'yes_no' %]
         <select name="params.[% key %]">
           <option value="yes"[% IF value == 'yes' %] selected[% END %]>Yes</option>
           <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
         </select>
       [% ELSIF type == 'hosts' OR type == 'hostgroups' OR type == 'servicegroups' %]
-        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type %]', { url: 'status.cgi?format=search&amp;type=[% type %]', autosubmit:false, backend_select:'report_backends', list: '[ ,]', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'status.cgi?format=search&amp;type=[% type | html %]', autosubmit:false, backend_select:'report_backends', list: '[ ,]', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
       [% ELSIF type == 'services' %]
         <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'params.host', backend_select:'report_backends', list: '[ ,]', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
       [% ELSIF type == 'affected_sla_objects' %]
@@ -60,7 +60,7 @@
         <select name="params.[% key %]">
           <option value="">None</option>
           [% FOREACH t = timeperiods %]
-          <option value="[% t.name | html %]"[% IF value == t.name %] selected[% END %]>[% t.name %]</option>
+          <option value="[% t.name | html %]"[% IF value == t.name %] selected[% END %]>[% t.name | html %]</option>
           [% END %]
         </select>
       [% ELSIF type == 'option' %]
@@ -204,7 +204,7 @@
       [% ELSIF type == 'themes' %]
         <select name='params.[% key %]'>
           [% FOR t = themes %]
-          <option value="[% t | html %]"[% IF t == value %] selected[% END %]>[% t %]</option>
+          <option value="[% t | html %]"[% IF t == value %] selected[% END %]>[% t | html %]</option>
           [% END %]
         </select>
       [% ELSIF type == 'language' %]

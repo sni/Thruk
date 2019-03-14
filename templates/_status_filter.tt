@@ -56,10 +56,10 @@
                 [% END %]
               </optgroup>
               [% FOREACH groupname = additional_views.keys.sort %]
-              <optgroup label="[% groupname %]">
+              <optgroup label="[% groupname | html %]">
                 [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
                 [% opt = additional_views.$groupname.options.$optname %]
-                <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name %]</option>
+                <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name | html %]</option>
                 [% END %]
               </optgroup>
               [% END %]

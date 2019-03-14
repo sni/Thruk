@@ -260,9 +260,9 @@
                     [% FOREACH pd IN tmpbackends %]
                     <td class='dataVal dataSource'>
                       [% IF backend_detail.$pd.exists('fed_info') %]
-                      <span title="[% FOREACH addr IN backend_detail.$pd.fed_info.addr %][% addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') %]&#013;[% END %]">
+                      <span title="[% FOREACH addr IN backend_detail.$pd.fed_info.addr %][% addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') | html %]&#013;[% END %]">
                       [% END %]
-                      [% backend_detail.$pd.addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') %]
+                      [% backend_detail.$pd.addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') | html %]
                       [% IF backend_detail.$pd.exists('fed_info') %]
                       </span>
                       [% END %]

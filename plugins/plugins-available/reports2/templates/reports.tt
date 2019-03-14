@@ -64,10 +64,10 @@
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
-    <td class="status [% rowclass %]" align="left">[% r.name %]</td>
-    <td class="status [% rowclass %]" align="left" style="overflow: hidden;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
+    <td class="status [% rowclass %]" align="left">[% r.name | html %]</td>
+    <td class="status [% rowclass %]" align="left" style="overflow: hidden;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
-    <td class="status [% rowclass %] usercol">[% r.user %]</td>
+    <td class="status [% rowclass %] usercol">[% r.user | html %]</td>
     <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %]" nowrap>[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
     <td class="status [% rowclass %]">

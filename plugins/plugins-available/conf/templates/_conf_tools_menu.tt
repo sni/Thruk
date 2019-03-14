@@ -14,10 +14,10 @@
               [% FOREACH name = tools_by_category.$category.keys.sort %]
               [% t = tools.$name %]
               <tr class='data'>
-                <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt='[% t.link %]' title='[% t.link %]' width="16" height="16"></td>
+                <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt="[% t.link | html %]" title="[% t.link | html %]" width="16" height="16"></td>
                 <td class='command'>
                     [% IF name == tool %]<b>[% END %]
-                    <a href='conf.cgi?sub=objects&amp;tools=[% name %]'>[% t.link %]</a>
+                    <a href="conf.cgi?sub=objects&amp;tools=[% name | uri %]">[% t.link | html %]</a>
                     [% IF name == tool %]</b>[% END %]
                 </td>
               </tr>
@@ -41,7 +41,7 @@
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
               <tr class='data'>
                 <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/folder_brick.png' border="0" alt='reset ignores' title='reset ignores' width="16" height="16"></td>
-                <td class='command'><a href='conf.cgi?sub=objects&amp;tools=reset_ignores&amp;oldtool=[% tool %]'>Reset Ignores</a></td>
+                <td class='command'><a href="conf.cgi?sub=objects&amp;tools=reset_ignores&amp;oldtool=[% tool | uri %]">Reset Ignores</a></td>
               </tr>
             </table>
           </td>
