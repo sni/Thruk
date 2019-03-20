@@ -65,22 +65,24 @@ AutoReqProv: no
 #sles and opensuse
 %if %{defined suse_version}
 %if 0%{?suse_version} >= 1315
+BuildRequires: apache2
 Requires:    apache2 apache2-mod_fcgid cronie
 %endif
 %if 0%{?suse_version} < 1315
+BuildRequires: apache2
 Requires:    apache2 apache2-mod_fcgid cron
 %endif
 %endif
 
 # >=rhel7 and fedora
 %if 0%{?el7}%{?fedora}
-BuildRequires: perl(ExtUtils::Install)
+BuildRequires: perl(ExtUtils::Install) httpd
 Requires: httpd mod_fcgid cronie
 %endif
 
 # rhel6 requirements
 %if 0%{?el6}
-BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl(ExtUtils::MakeMaker) httpd
 Requires: httpd mod_fcgid cronie
 %endif
 
