@@ -4,8 +4,8 @@ services:
   omd:
     build: omd/
     ports:
-        - "60080:80"
-        - "60557:6557"
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60557:6557"
     environment:
         - TZ=Europe/Berlin
     volumes:

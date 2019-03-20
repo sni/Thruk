@@ -7,8 +7,8 @@ services:
   tier1a:
     build: tier1a/
     ports:
-        - "60080:80"
-        - "60443:443"
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60443:443"
     environment:
         - PREFIX=tier1a
     volumes:
@@ -24,8 +24,8 @@ services:
   tier1b:
     build: tier1b/
     ports:
-        - "60081:80"
-        - "60444:443"
+        - "127.0.0.3:60081:80"
+        - "127.0.0.3:60444:443"
     environment:
         - PREFIX=tier1b
     volumes:
@@ -40,8 +40,8 @@ services:
   tier1c:
     build: tier1c/
     ports:
-        - "60082:80"
-        - "60445:443"
+        - "127.0.0.3:60082:80"
+        - "127.0.0.3:60445:443"
     environment:
         - PREFIX=tier1c
     volumes:
@@ -56,8 +56,8 @@ services:
   tier1d:
     build: tier1d/
     ports:
-        - "60083:80"
-        - "60446:443"
+        - "127.0.0.3:60083:80"
+        - "127.0.0.3:60446:443"
     environment:
         - PREFIX=tier1d
     volumes:

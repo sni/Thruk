@@ -4,9 +4,9 @@ services:
   omd:
     build: omd/
     ports:
-        - "60080:80"
-        - "60443:443"
-        - "60557:6557"
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60443:443"
+        - "127.0.0.3:60557:6557"
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
@@ -22,5 +22,5 @@ services:
         MYSQL_USER: thruk
         MYSQL_PASSWORD: thruk
      ports:
-        - "63306:3306"
+        - "127.0.0.3:63306:3306"
 

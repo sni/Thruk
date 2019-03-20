@@ -4,7 +4,7 @@ services:
   omd:
     build: omd/
     ports:
-        - 60080:80
+        - "127.0.0.3:60080:80"
     environment:
         - TZ=Europe/Berlin
     volumes:
@@ -17,7 +17,7 @@ services:
         - JVM_HEAP_XMX=512
         - TZ=Europe/Berlin
     ports:
-        - 5901:5901
+        - "127.0.0.3:5901:5901"
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - ./:/thruk:ro
