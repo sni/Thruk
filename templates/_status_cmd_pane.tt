@@ -68,6 +68,12 @@
             <option value="11" [% IF c.config.cmd_quick_status.default == "disable notifications" %] selected[% END%]>Disable Notifications</option>
             [% need_spacer = 1 %]
           [% END %]
+          [% IF c.config.cmd_quick_status.eventhandler %]
+            [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
+            <option value="15" [% IF c.config.cmd_quick_status.default == "enable eventhandler" %] selected[% END%]>Enable Eventhandler</option>
+            <option value="16" [% IF c.config.cmd_quick_status.default == "disable eventhandler" %] selected[% END%]>Disable Eventhandler</option>
+            [% need_spacer = 1 %]
+          [% END %]
           [% IF c.config.cmd_quick_status.submit_result %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
             <option value="12" [% IF c.config.cmd_quick_status.default == "submit passive check result" %] selected[% END%]>Submit Passive Check Result</option>

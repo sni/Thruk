@@ -1686,6 +1686,7 @@ ex.:
     acknowledgement        = 0  # Add/remove acknowledgements
     active_checks          = 0  # Enable/disable active checks
     notifications          = 0  # Enable/disable notifications
+    eventhandler           = 1  # Enable/disable eventhandler
     submit_result          = 0  # Submit passive check result
     reset_attributes       = 0  # Reset modified attributes
   </cmd_quick_status>

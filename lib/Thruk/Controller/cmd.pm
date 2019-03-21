@@ -80,6 +80,8 @@ sub index {
         12 => 87,    # submit passive check result
         13 => 2,     # delete single comment
         14 => 154,   # reset modified attributes
+        15 => 43,    # enable eventhandler
+        16 => 44,    # disable eventhandler
     };
     my $service_quick_commands = {
         1  => 7,     # reschedule service check
@@ -96,6 +98,8 @@ sub index {
         12 => 30,    # submit passive check result
         13 => 4,     # delete single comment
         14 => 155,   # reset modified attributes
+        15 => 45,    # enable eventhandler
+        16 => 46,    # disable eventhandler
     };
 
     # did we receive a quick command from the status page?

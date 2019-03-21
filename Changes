@@ -7,6 +7,7 @@ next:
           - add option to store selected backends along with a bookmark
           - add support for dependencies (naemon only)
           - add host alias to exportable columns
+          - add eventhandler quick commands
           - fix offset calculation in rest api
           - fix page not found issue when using browser history back
           - fix cross site scripting issues

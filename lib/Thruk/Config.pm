@@ -489,6 +489,7 @@ sub set_default_config {
                     acknowledgement        => 1,
                     active_checks          => 1,
                     notifications          => 1,
+                    eventhandler           => 1,
                     submit_result          => 1,
                     reset_attributes       => 1,
         },
