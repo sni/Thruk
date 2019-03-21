@@ -468,7 +468,9 @@ sub _process_details_page {
     for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
         if(!defined $sortoptions->{$x+10}) {
             my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
-            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+            my $field = $col->{'field'};
+            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
+            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
         }
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
@@ -604,7 +606,9 @@ sub _process_hostdetails_page {
     for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
         if(!defined $sortoptions->{$x+10}) {
             my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
-            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+            my $field = $col->{'field'};
+            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
+            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
         }
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
