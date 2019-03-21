@@ -1,12 +1,6 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]
-uri:[% uri(c) %]<br>
-full_uri:[% full_uri(c) %]<br>
-full_uri2:[% full_uri(c,1) %]<br>
-short_uri:[% short_uri(c,{}) %]<br>
-uri_with:[% uri_with(c,{}) %]<br>
-uri_with2:[% uri_with(c,{},1) %]<br>
 [% SET empty = 0 %]
 [% SET empty = 1 UNLESS host_stats %]
     <table border="0" align="left" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
