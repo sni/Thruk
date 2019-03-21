@@ -42,7 +42,15 @@ sub _update_cmds {
                         $c->config->{'plugin_path'}."/plugins-enabled/*/templates/cmd/*.tt",
                     )))];
 
-    my $cmds = {};
+    # add some hard coded extra commands
+    my $cmds = {
+        'hosts' => {
+            'del_active_host_downtimes'    => {"args" => [], "name" => "del_active_host_downtimes", "nr" => "c5", "required" => [], "docs" => "Removes all currently active downtimes for this host."},
+        },
+        'services' => {
+            'del_active_service_downtimes' => {"args" => [], "name" => "del_active_service_downtimes", "nr" => "c5", "required" => [], "docs" => "Removes all currently active downtimes for this service."},
+        }
+    };
     for my $file (@{$input_files}) {
         next if $file =~ m/cmd_typ_c\d+/gmx;
         my $nr;
@@ -147,7 +155,11 @@ sub _update_cmds {
             elsif($category =~ m/^(system)$/mx) {
                 $content .= "# REST PATH: POST /$category/cmd/$name\n";
             }
-            $content .= "# Sends the ".uc($name)." command.\n#\n";
+            if($cmd->{'docs'}) {
+                $content .= "# ".join("\n# ", split/\n/mx, $cmd->{'docs'})."\n#\n";
+            } else {
+                $content .= "# Sends the ".uc($name)." command.\n#\n";
+            }
             if(scalar @{$cmd->{'args'}} > 0) {
                 my $optional = [];
                 my $required = Thruk::Utils::array2hash($cmd->{'required'});

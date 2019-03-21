@@ -241,6 +241,14 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_host_modattr.html for details.
 
+=== POST /hosts/<name>/cmd/del_active_host_downtimes
+
+Removes all currently active downtimes for this host.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/del_active_host_downtimes.html for details.
+
 === POST /hosts/<name>/cmd/del_all_host_comments
 
 Sends the DEL_ALL_HOST_COMMENTS command.
@@ -732,6 +740,14 @@ Sends the CHANGE_SVC_MODATTR command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_svc_modattr.html for details.
+
+=== POST /services/<host>/<service>/cmd/del_active_service_downtimes
+
+Removes all currently active downtimes for this service.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/del_active_service_downtimes.html for details.
 
 === POST /services/<host>/<service>/cmd/del_all_svc_comments
 

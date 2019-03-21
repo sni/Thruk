@@ -138,12 +138,35 @@ sub _rest_get_external_command {
     for my $b (@{$backends}) {
         $commands->{$b} = dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
     }
+
+    # handle custom commands
+    if($cmd->{'name'} eq 'del_active_host_downtimes' || $cmd->{'name'} eq 'del_active_service_downtimes') {
+        $commands = {};
+        my $options = {};
+        $options->{backend}  = $backends if defined $backends;
+        if($cmd->{'name'} eq 'del_active_host_downtimes') {
+            $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $name, service_description => undef ];
+        } else {
+            $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $name, service_description => $description ];
+        }
+        push @{$options->{'filter'}}, start_time => { '<=' => time() };
+        my $data = $c->{'db'}->get_downtimes(%{$options});
+        for my $d (@{$data}) {
+            $commands->{$d->{'peer_key'}} = [] unless defined $commands->{$d->{'peer_key'}};
+            if($d->{'service_description'}) {
+                push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_SVC_DOWNTIME;%d", time(), $d->{'id'});
+            } else {
+                push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_HOST_DOWNTIME;%d", time(), $d->{'id'});
+            }
+        }
+    }
+
     Thruk::Controller::cmd::add_remove_comments_commands_from_disabled_commands($c, $commands, $cmd->{'nr'}, $name, $description);
     Thruk::Controller::cmd::bulk_send($c, $commands);
     if($c->stash->{'last_command_error'}) {
         return({ 'message' => 'sending command failed', 'error' => $c->stash->{'last_command_error'}, code => 400, commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
     }
-    return({ 'message' => 'Command successfully submitted', commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
+    return({ 'message' => 'Command successfully submitted', commands => join("\n", @{$c->stash->{'last_command_lines'} // []}) });
 }
 
 ##########################################################
@@ -227,6 +250,13 @@ __DATA__
 # This command does not require any arguments.
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/change_host_modattr.html for details.
+
+# REST PATH: POST /hosts/<name>/cmd/del_active_host_downtimes
+# Removes all currently active downtimes for this host.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/del_active_host_downtimes.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/del_all_host_comments
 # Sends the DEL_ALL_HOST_COMMENTS command.
@@ -580,6 +610,13 @@ __DATA__
 # This command does not require any arguments.
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/change_svc_modattr.html for details.
+
+# REST PATH: POST /services/<host>/<service>/cmd/del_active_service_downtimes
+# Removes all currently active downtimes for this service.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/del_active_service_downtimes.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/del_all_svc_comments
 # Sends the DEL_ALL_SVC_COMMENTS command.
@@ -1143,6 +1180,7 @@ __DATA__
   "acknowledge_host_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_host_problem_expire","nr":"33","required":["comment_data"]},
   "add_host_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_host_comment","nr":"1","required":["comment_data"]},
   "change_host_modattr":{"args":[],"name":"change_host_modattr","nr":"154","required":[]},
+  "del_active_host_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this host.","name":"del_active_host_downtimes","nr":"c5","required":[]},
   "del_all_host_comments":{"args":[],"name":"del_all_host_comments","nr":"20","required":[]},
   "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","nr":"10","required":["notification_time"]},
   "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","nr":"27","required":[]},
@@ -1194,6 +1232,7 @@ __DATA__
   "acknowledge_svc_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_svc_problem_expire","nr":"34","required":["comment_data"]},
   "add_svc_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_svc_comment","nr":"3","required":["comment_data"]},
   "change_svc_modattr":{"args":[],"name":"change_svc_modattr","nr":"155","required":[]},
+  "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","nr":"c5","required":[]},
   "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","nr":"21","required":[]},
   "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","nr":"9","required":["notification_time"]},
   "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","nr":"40","required":[]},

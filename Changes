@@ -13,6 +13,7 @@ next:
           - fix cross site scripting issues
           - REST:
             - add aggregation function support
+            - add cmd to remove all active downtimes for host or service
           - Config Tool:
             - add authorization tab to contacts and contactgroups
             - add support for dependencies and escalations
