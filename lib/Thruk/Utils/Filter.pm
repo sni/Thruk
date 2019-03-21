@@ -266,15 +266,17 @@ sub last_check {
 
   uri($c)
 
-returns a correct uri
+returns html escaped current absolute uri without any filter
+
+ex.: /thruk/cgi-bin/status.cgi?params...
 
 =cut
 sub uri {
-    my $c = shift;
+    my($c) = @_;
     carp("no c") unless defined $c;
     my $uri = $c->req->url();
     $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri    = &escape_ampersand($uri);
+    $uri    = &escape_html($uri);
     return $uri;
 }
 
@@ -285,9 +287,13 @@ sub uri {
 
   full_uri($c, $return_full_url)
 
-returns uri to current page.
+returns html escaped uri to current page with default filters.
 
-    $return_full_url   -> return http://host/thruk/... instead of /thruk/...
+ex.:
+    /thruk/cgi-bin/status.cgi?params...
+
+    with return_full_url:
+    http://hostname/thruk/cgi-bin/status.cgi?params
 
 =cut
 sub full_uri {
@@ -310,28 +316,13 @@ sub full_uri {
 
 ########################################
 
-=head2 as_url_arg
-
-  as_url_arg($str)
-
-returns encoded string for use in url args
-
-=cut
-sub as_url_arg {
-    my($str) = @_;
-    $str =~ s/&amp;/&/gmx;
-    $str = uri_escape($str);
-    return $str;
-}
-
-
-########################################
-
 =head2 short_uri
 
   short_uri($c, $filter)
 
-returns a correct uri but only the url part
+returns a html escaped correct uri but only the url part
+
+ex.: status.cgi?params...
 
 =cut
 sub short_uri {
@@ -352,32 +343,17 @@ sub short_uri {
 
 ########################################
 
-=head2 clean_referer
-
-  clean_referer($url)
-
-returns a url with referer removed
-
-=cut
-sub clean_referer {
-    my $uri = shift;
-    for my $key (qw/referer bookmark scrollTo reload_nav autoShow _/) {
-        $uri =~ s/&amp;$key=[^&]+//gmx;
-        $uri =~ s/\?$key=[^&]+/?/gmx;
-    }
-    $uri =~ s/\.cgi\?\&amp;/.cgi?/gmx;
-    return $uri;
-}
-
-
-
-########################################
-
 =head2 uri_with
 
   uri_with($c, $data, $keep_absolute)
 
 returns a relative uri to current page
+
+ex.:
+    status.cgi?params...
+
+    with keep_absolute:
+    http://hostname/thruk/cgi-bin/status.cgi?params
 
 =cut
 sub uri_with {
@@ -408,6 +384,23 @@ sub uri_with {
         $uri =~ s|^/[^?]+/||mx;
     }
     return(&escape_html($uri));
+}
+
+
+########################################
+
+=head2 as_url_arg
+
+  as_url_arg($str)
+
+returns encoded string for use in url args
+
+=cut
+sub as_url_arg {
+    my($str) = @_;
+    $str =~ s/&amp;/&/gmx;
+    $str = uri_escape($str);
+    return $str;
 }
 
 
@@ -624,6 +617,7 @@ sub escape_js {
     $text =~ s/&amp;quot;/&quot;/gmx;
     $text =~ s/&amp;gt;/>/gmx;
     $text =~ s/&amp;lt;/</gmx;
+    $text =~ s/'/&#39;/gmx;
     return $text;
 }
 
