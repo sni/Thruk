@@ -22,7 +22,7 @@ TestUtils::test_command({
     like => ['/SERVICE ALERT:/', '/HOST ALERT:/'],
     env  => {
       IDO_DB_USER          => "icinga",
-      IDO_DB_HOST          => "127.0.0.1",
+      IDO_DB_HOST          => "127.0.0.3",
       IDO_DB_PORT          => "60432",
       IDO_DB_PW            => "icinga",
       IDO_DB_NAME          => "icinga",
@@ -35,7 +35,7 @@ TestUtils::test_command({
     like => ['/^\[/'],
     env  => {
       IDO_DB_USER          => "icinga",
-      IDO_DB_HOST          => "127.0.0.1",
+      IDO_DB_HOST          => "127.0.0.3",
       IDO_DB_PORT          => "60432",
       IDO_DB_PW            => "icinga",
       IDO_DB_NAME          => "icinga",
