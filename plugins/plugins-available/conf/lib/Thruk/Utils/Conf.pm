@@ -503,6 +503,13 @@ sub get_cgi_user_list {
         }
     }
 
+    # add users from profiles
+    my @profiles = glob($c->config->{'var_path'}."/users/*");
+    for my $profile (@profiles) {
+        $profile =~ s/^.*\///gmx;
+        $all_contacts->{$profile} = $profile unless defined $all_contacts->{$profile};
+    }
+
     # add special users
     $all_contacts->{'*'} = '*';
 

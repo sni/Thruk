@@ -995,7 +995,7 @@ sub _initialassumedhoststate_to_state {
 
   get_user_data($c, [$username])
 
-returns user data
+returns user profile data
 
 =cut
 
@@ -1025,7 +1025,7 @@ sub get_user_data {
 
   store_user_data($c, $data, [$username])
 
-store user data for section
+store user profile data
 
 =cut
 

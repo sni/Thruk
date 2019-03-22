@@ -388,11 +388,17 @@ sub json_retrieve {
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
     sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
 
+    my $content;
     eval {
-        $data = $json->decode(scalar <$fh>);
+        $content = scalar <$fh>;
+        $data    = $json->decode($content);
     };
     my $err = $@;
     if($err && !$data) {
+        if($content && $content =~ m/^\$VAR/mx) {
+            warn("cannot read old datafile format, use .../support/convert_old_datafile.pl '$file' to migrate this file.");
+            return;
+        }
         confess("error while reading $file: ".$@);
     }
     return $data;

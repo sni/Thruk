@@ -600,8 +600,16 @@ sub _process_users_page {
     my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
     $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
-    # save changes to user
     my $user = $c->req->parameters->{'data.username'} || '';
+    my($name, $alias, $profile_file);
+    if($user ne '') {
+        ($name, $alias) = split(/\ \-\ /mx,$user, 2);
+        $profile_file = $c->config->{'var_path'}."/users/".$name;
+        $c->stash->{'profile_file'} = $profile_file;
+        $c->stash->{'profile_file_exists'} = -e $profile_file ? 1 : 0;
+    }
+
+    # save changes to user
     if($user ne '' and defined $file and $c->stash->{action} eq 'store') {
         my($name, $alias) = split(/\ \-\ /mx,$user, 2);
         return unless Thruk::Utils::check_csrf($c);
@@ -625,6 +633,13 @@ sub _process_users_page {
                 $userdata->{'login'}->{'locked'} = 1;
             }
             Thruk::Utils::store_user_data($c, $userdata, $name);
+        }
+        if($send eq 'remove user profile data') {
+            if(!Thruk::Utils::check_for_nasty_filename($name)) {
+                unlink($profile_file);
+                Thruk::Utils::set_message( $c, 'success_message', 'profile removed successfully' );
+            }
+            return $c->redirect_to($redirect);
         }
 
         # save changes to cgi.cfg
@@ -655,7 +670,6 @@ sub _process_users_page {
 
     if($c->stash->{action} eq 'change' and $user ne '') {
         my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
-        my($name, $alias)         = split(/\ \-\ /mx,$user, 2);
         $c->stash->{'show_user'}  = 1;
         $c->stash->{'user_name'}  = $name;
         $c->stash->{'md5'}        = $md5;
