@@ -952,6 +952,14 @@ sub _get_affected_backends {
         $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => $required_fields->{'host'}],
                                       columns => [qw/name/] );
     }
+    elsif(defined $required_fields->{'contact'}) {
+        $data = $c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' ), name => $required_fields->{'contact'}],
+                                      columns => [qw/name/] );
+    }
+    elsif(defined $required_fields->{'contactgroup'}) {
+        $data = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ), name => $required_fields->{'contactgroup'}],
+                                      columns => [qw/name/] );
+    }
 
     # return original list unless we have some data
     return($backends) unless $data;

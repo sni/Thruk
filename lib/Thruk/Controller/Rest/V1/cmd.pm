@@ -1193,6 +1193,117 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
 
+# REST PATH: POST /contacts/<name>/cmd/change_contact_host_notification_timeperiod
+# Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_host_notification_timeperiod.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/change_contact_modattr
+# This command changes the modified attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
+#
+# Required arguments:
+#
+#   * value
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modattr.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/change_contact_modhattr
+# This command changes the modified host attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
+#
+# Required arguments:
+#
+#   * value
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modhattr.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/change_contact_modsattr
+# This command changes the modified service attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
+#
+# Required arguments:
+#
+#   * value
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modsattr.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/change_contact_svc_notification_timeperiod
+# Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_svc_notification_timeperiod.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/change_custom_contact_var
+# Changes the value of a custom contact variable.
+#
+# Required arguments:
+#
+#   * name
+#   * value
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_custom_contact_var.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/disable_contact_host_notifications
+# Disables host notifications for a particular contact.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/disable_contact_host_notifications.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/disable_contact_svc_notifications
+# Disables service notifications for a particular contact.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/disable_contact_svc_notifications.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/enable_contact_host_notifications
+# Enables host notifications for a particular contact.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/enable_contact_host_notifications.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/enable_contact_svc_notifications
+# Disables service notifications for a particular contact.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/enable_contact_svc_notifications.html for details.
+
+# REST PATH: POST /contactgroups/<name>/cmd/disable_contactgroup_host_notifications
+# Disables host notifications for all contacts in a particular contactgroup.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/disable_contactgroup_host_notifications.html for details.
+
+# REST PATH: POST /contactgroups/<name>/cmd/disable_contactgroup_svc_notifications
+# Disables service notifications for all contacts in a particular contactgroup.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/disable_contactgroup_svc_notifications.html for details.
+
+# REST PATH: POST /contactgroups/<name>/cmd/enable_contactgroup_host_notifications
+# Enables host notifications for all contacts in a particular contactgroup.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/enable_contactgroup_host_notifications.html for details.
+
+# REST PATH: POST /contactgroups/<name>/cmd/enable_contactgroup_svc_notifications
+# Enables service notifications for all contacts in a particular contactgroup.
+#
+# This command does not require any arguments.
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/enable_contactgroup_svc_notifications.html for details.
+
 # REST PATH: POST /system/cmd/change_global_host_event_handler
 # Changes the global host event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.
 #
@@ -1492,33 +1603,35 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
 
-{"contactgroups":{"disable_contactgroup_host_notifications":{"args":[],"docs":"Disables host notifications for all contacts in a particular contactgroup.","name":"disable_contactgroup_host_notifications","required":[]},
-  "disable_contactgroup_svc_notifications":{"args":[],"docs":"Disables service notifications for all contacts in a particular contactgroup.","name":"disable_contactgroup_svc_notifications","required":[]},
-  "enable_contactgroup_host_notifications":{"args":[],"docs":"Enables host notifications for all contacts in a particular contactgroup.","name":"enable_contactgroup_host_notifications","required":[]},
-  "enable_contactgroup_svc_notifications":{"args":[],"docs":"Enables service notifications for all contacts in a particular contactgroup.","name":"enable_contactgroup_svc_notifications","required":[]}
+{"contactgroups":{
+  "disable_contactgroup_host_notifications":{"args":[],"docs":"Disables host notifications for all contacts in a particular contactgroup.","name":"disable_contactgroup_host_notifications","nr":-1,"required":[]},
+  "disable_contactgroup_svc_notifications":{"args":[],"docs":"Disables service notifications for all contacts in a particular contactgroup.","name":"disable_contactgroup_svc_notifications","nr":-1,"required":[]},
+  "enable_contactgroup_host_notifications":{"args":[],"docs":"Enables host notifications for all contacts in a particular contactgroup.","name":"enable_contactgroup_host_notifications","nr":-1,"required":[]},
+  "enable_contactgroup_svc_notifications":{"args":[],"docs":"Enables service notifications for all contacts in a particular contactgroup.","name":"enable_contactgroup_svc_notifications","nr":-1,"required":[]}
 },
-  "contacts":{"change_contact_host_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_contact_host_notification_timeperiod","required":["timeperiod"]},
-  "change_contact_modattr":{"args":["value"],"docs":"This command changes the modified attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.","name":"change_contact_modattr","required":["value"]},
-  "change_contact_modhattr":{"args":["value"],"docs":"This command changes the modified host attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.","name":"change_contact_modhattr","required":["value"]},
-  "change_contact_modsattr":{"args":["value"],"docs":"This command changes the modified service attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.","name":"change_contact_modsattr","required":["value"]},
-  "change_contact_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_contact_svc_notification_timeperiod","required":["timeperiod"]},
-  "change_custom_contact_var":{"args":["name","value"],"docs":"Changes the value of a custom contact variable.","name":"change_custom_contact_var","required":["name","value"]},
-  "disable_contact_host_notifications":{"args":[],"docs":"Disables host notifications for a particular contact.","name":"disable_contact_host_notifications","required":[]},
-  "disable_contact_svc_notifications":{"args":[],"docs":"Disables service notifications for a particular contact.","name":"disable_contact_svc_notifications","required":[]},
-  "enable_contact_host_notifications":{"args":[],"docs":"Enables host notifications for a particular contact.","name":"enable_contact_host_notifications","required":[]},
-  "enable_contact_svc_notifications":{"args":[],"docs":"Disables service notifications for a particular contact.","name":"enable_contact_svc_notifications","required":[]}
+"contacts":{
+  "change_contact_host_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_contact_host_notification_timeperiod","nr":-1,"required":["timeperiod"]},
+  "change_contact_modattr":{"args":["value"],"docs":"This command changes the modified attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.","name":"change_contact_modattr","nr":-1,"required":["value"]},
+  "change_contact_modhattr":{"args":["value"],"docs":"This command changes the modified host attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.","name":"change_contact_modhattr","nr":-1,"required":["value"]},
+  "change_contact_modsattr":{"args":["value"],"docs":"This command changes the modified service attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.","name":"change_contact_modsattr","nr":-1,"required":["value"]},
+  "change_contact_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_contact_svc_notification_timeperiod","nr":-1,"required":["timeperiod"]},
+  "change_custom_contact_var":{"args":["name","value"],"docs":"Changes the value of a custom contact variable.","name":"change_custom_contact_var","nr":-1,"required":["name","value"]},
+  "disable_contact_host_notifications":{"args":[],"docs":"Disables host notifications for a particular contact.","name":"disable_contact_host_notifications","nr":-1,"required":[]},
+  "disable_contact_svc_notifications":{"args":[],"docs":"Disables service notifications for a particular contact.","name":"disable_contact_svc_notifications","nr":-1,"required":[]},
+  "enable_contact_host_notifications":{"args":[],"docs":"Enables host notifications for a particular contact.","name":"enable_contact_host_notifications","nr":-1,"required":[]},
+  "enable_contact_svc_notifications":{"args":[],"docs":"Disables service notifications for a particular contact.","name":"enable_contact_svc_notifications","nr":-1,"required":[]}
 },
 "hostgroups":{
   "disable_hostgroup_host_checks":{"args":[],"name":"disable_hostgroup_host_checks","nr":"68","required":[]},
   "disable_hostgroup_host_notifications":{"args":[],"name":"disable_hostgroup_host_notifications","nr":"66","required":[]},
-  "disable_hostgroup_passive_host_checks":{"args":[],"docs":"Disables passive checks for all hosts in a particular hostgroup.","name":"disable_hostgroup_passive_host_checks","required":[]},
-  "disable_hostgroup_passive_svc_checks":{"args":[],"docs":"Disables passive checks for all services associated with hosts in a particular hostgroup.","name":"disable_hostgroup_passive_svc_checks","required":[]},
+  "disable_hostgroup_passive_host_checks":{"args":[],"docs":"Disables passive checks for all hosts in a particular hostgroup.","name":"disable_hostgroup_passive_host_checks","nr":-1,"required":[]},
+  "disable_hostgroup_passive_svc_checks":{"args":[],"docs":"Disables passive checks for all services associated with hosts in a particular hostgroup.","name":"disable_hostgroup_passive_svc_checks","nr":-1,"required":[]},
   "disable_hostgroup_svc_checks":{"args":[],"name":"disable_hostgroup_svc_checks","nr":"68","required":[]},
   "disable_hostgroup_svc_notifications":{"args":[],"name":"disable_hostgroup_svc_notifications","nr":"64","required":[]},
   "enable_hostgroup_host_checks":{"args":[],"name":"enable_hostgroup_host_checks","nr":"67","required":[]},
   "enable_hostgroup_host_notifications":{"args":[],"name":"enable_hostgroup_host_notifications","nr":"65","required":[]},
-  "enable_hostgroup_passive_host_checks":{"args":[],"docs":"Enables passive checks for all hosts in a particular hostgroup.","name":"enable_hostgroup_passive_host_checks","required":[]},
-  "enable_hostgroup_passive_svc_checks":{"args":[],"docs":"Enables passive checks for all services associated with hosts in a particular hostgroup.","name":"enable_hostgroup_passive_svc_checks","required":[]},
+  "enable_hostgroup_passive_host_checks":{"args":[],"docs":"Enables passive checks for all hosts in a particular hostgroup.","name":"enable_hostgroup_passive_host_checks","nr":-1,"required":[]},
+  "enable_hostgroup_passive_svc_checks":{"args":[],"docs":"Enables passive checks for all services associated with hosts in a particular hostgroup.","name":"enable_hostgroup_passive_svc_checks","nr":-1,"required":[]},
   "enable_hostgroup_svc_checks":{"args":[],"name":"enable_hostgroup_svc_checks","nr":"67","required":[]},
   "enable_hostgroup_svc_notifications":{"args":[],"name":"enable_hostgroup_svc_notifications","nr":"63","required":[]},
   "schedule_hostgroup_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_hostgroup_host_downtime","nr":"85","required":["comment_data"]},
@@ -1528,16 +1641,16 @@ __DATA__
   "acknowledge_host_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_host_problem","nr":"33","required":["comment_data"]},
   "acknowledge_host_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_host_problem_expire","nr":"33","required":["comment_data"]},
   "add_host_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_host_comment","nr":"1","required":["comment_data"]},
-  "change_custom_host_var":{"args":["name","value"],"docs":"Changes the value of a custom host variable.","name":"change_custom_host_var","required":["name","value"]},
-  "change_host_check_command":{"args":["checkcommand"],"docs":"Changes the check command for a particular host to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new host check command. The command must have been configured in Naemon before it was last (re)started.","name":"change_host_check_command","required":["checkcommand"]},
-  "change_host_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the valid check period for the specified host.","name":"change_host_check_timeperiod","required":["timeperiod"]},
-  "change_host_event_handler":{"args":["eventhandler"],"docs":"Changes the event handler command for a particular host to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_host_event_handler","required":["eventhandler"]},
+  "change_custom_host_var":{"args":["name","value"],"docs":"Changes the value of a custom host variable.","name":"change_custom_host_var","nr":-1,"required":["name","value"]},
+  "change_host_check_command":{"args":["checkcommand"],"docs":"Changes the check command for a particular host to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new host check command. The command must have been configured in Naemon before it was last (re)started.","name":"change_host_check_command","nr":-1,"required":["checkcommand"]},
+  "change_host_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the valid check period for the specified host.","name":"change_host_check_timeperiod","nr":-1,"required":["timeperiod"]},
+  "change_host_event_handler":{"args":["eventhandler"],"docs":"Changes the event handler command for a particular host to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_host_event_handler","nr":-1,"required":["eventhandler"]},
   "change_host_modattr":{"args":[],"name":"change_host_modattr","nr":"154","required":[]},
-  "change_host_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the host notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_host_notification_timeperiod","required":["timeperiod"]},
-  "change_max_host_check_attempts":{"args":["interval"],"docs":"Changes the maximum number of check attempts (retries) for a particular host.","name":"change_max_host_check_attempts","required":["interval"]},
-  "change_normal_host_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular host.","name":"change_normal_host_check_interval","required":["interval"]},
-  "change_retry_host_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular host.","name":"change_retry_host_check_interval","required":["interval"]},
-  "del_active_host_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this host.","name":"del_active_host_downtimes","required":[]},
+  "change_host_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the host notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_host_notification_timeperiod","nr":-1,"required":["timeperiod"]},
+  "change_max_host_check_attempts":{"args":["interval"],"docs":"Changes the maximum number of check attempts (retries) for a particular host.","name":"change_max_host_check_attempts","nr":-1,"required":["interval"]},
+  "change_normal_host_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular host.","name":"change_normal_host_check_interval","nr":-1,"required":["interval"]},
+  "change_retry_host_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular host.","name":"change_retry_host_check_interval","nr":-1,"required":["interval"]},
+  "del_active_host_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this host.","name":"del_active_host_downtimes","nr":-1,"required":[]},
   "del_all_host_comments":{"args":[],"name":"del_all_host_comments","nr":"20","required":[]},
   "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","nr":"10","required":["notification_time"]},
   "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","nr":"27","required":[]},
@@ -1569,21 +1682,21 @@ __DATA__
   "schedule_host_svc_checks":{"args":["start_time"],"name":"schedule_host_svc_checks","nr":"17","required":[]},
   "schedule_host_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_host_svc_downtime","nr":"86","required":["comment_data"]},
   "send_custom_host_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_host_notification","nr":"159","required":["comment_data"]},
-  "set_host_notification_number":{"args":["number"],"docs":"Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state.","name":"set_host_notification_number","required":["number"]},
+  "set_host_notification_number":{"args":["number"],"docs":"Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state.","name":"set_host_notification_number","nr":-1,"required":["number"]},
   "start_obsessing_over_host":{"args":[],"name":"start_obsessing_over_host","nr":"101","required":[]},
   "stop_obsessing_over_host":{"args":[],"name":"stop_obsessing_over_host","nr":"102","required":[]}
 },
 "servicegroups":{
   "disable_servicegroup_host_checks":{"args":[],"name":"disable_servicegroup_host_checks","nr":"114","required":[]},
   "disable_servicegroup_host_notifications":{"args":[],"name":"disable_servicegroup_host_notifications","nr":"112","required":[]},
-  "disable_servicegroup_passive_host_checks":{"args":[],"docs":"Disables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.","name":"disable_servicegroup_passive_host_checks","required":[]},
-  "disable_servicegroup_passive_svc_checks":{"args":[],"docs":"Disables the acceptance and processing of passive checks for all services in a particular servicegroup.","name":"disable_servicegroup_passive_svc_checks","required":[]},
+  "disable_servicegroup_passive_host_checks":{"args":[],"docs":"Disables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.","name":"disable_servicegroup_passive_host_checks","nr":-1,"required":[]},
+  "disable_servicegroup_passive_svc_checks":{"args":[],"docs":"Disables the acceptance and processing of passive checks for all services in a particular servicegroup.","name":"disable_servicegroup_passive_svc_checks","nr":-1,"required":[]},
   "disable_servicegroup_svc_checks":{"args":[],"name":"disable_servicegroup_svc_checks","nr":"114","required":[]},
   "disable_servicegroup_svc_notifications":{"args":[],"name":"disable_servicegroup_svc_notifications","nr":"110","required":[]},
   "enable_servicegroup_host_checks":{"args":[],"name":"enable_servicegroup_host_checks","nr":"113","required":[]},
   "enable_servicegroup_host_notifications":{"args":[],"name":"enable_servicegroup_host_notifications","nr":"111","required":[]},
-  "enable_servicegroup_passive_host_checks":{"args":[],"docs":"Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.","name":"enable_servicegroup_passive_host_checks","required":[]},
-  "enable_servicegroup_passive_svc_checks":{"args":[],"docs":"Enables the acceptance and processing of passive checks for all services in a particular servicegroup.","name":"enable_servicegroup_passive_svc_checks","required":[]},
+  "enable_servicegroup_passive_host_checks":{"args":[],"docs":"Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.","name":"enable_servicegroup_passive_host_checks","nr":-1,"required":[]},
+  "enable_servicegroup_passive_svc_checks":{"args":[],"docs":"Enables the acceptance and processing of passive checks for all services in a particular servicegroup.","name":"enable_servicegroup_passive_svc_checks","nr":-1,"required":[]},
   "enable_servicegroup_svc_checks":{"args":[],"name":"enable_servicegroup_svc_checks","nr":"113","required":[]},
   "enable_servicegroup_svc_notifications":{"args":[],"name":"enable_servicegroup_svc_notifications","nr":"109","required":[]},
   "schedule_servicegroup_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_servicegroup_host_downtime","nr":"122","required":["comment_data"]},
@@ -1593,16 +1706,16 @@ __DATA__
   "acknowledge_svc_problem":{"args":["sticky_ack","send_notification","persistent_comment","comment_author","comment_data"],"name":"acknowledge_svc_problem","nr":"34","required":["comment_data"]},
   "acknowledge_svc_problem_expire":{"args":["sticky_ack","send_notification","persistent_comment","end_time","comment_author","comment_data"],"name":"acknowledge_svc_problem_expire","nr":"34","required":["comment_data"]},
   "add_svc_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_svc_comment","nr":"3","required":["comment_data"]},
-  "change_custom_svc_var":{"args":["name","value"],"docs":"Changes the value of a custom service variable.","name":"change_custom_svc_var","required":["name","value"]},
-  "change_max_svc_check_attempts":{"args":["attempts"],"docs":"Changes the maximum number of check attempts (retries) for a particular service.","name":"change_max_svc_check_attempts","required":["attempts"]},
-  "change_normal_svc_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular service","name":"change_normal_svc_check_interval","required":["interval"]},
-  "change_retry_svc_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular service.","name":"change_retry_svc_check_interval","required":["interval"]},
-  "change_svc_check_command":{"args":["checkcommand"],"docs":"Changes the check command for a particular service to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_command","required":["checkcommand"]},
-  "change_svc_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_timeperiod","required":["timeperiod"]},
-  "change_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_event_handler","required":["eventhandler"]},
+  "change_custom_svc_var":{"args":["name","value"],"docs":"Changes the value of a custom service variable.","name":"change_custom_svc_var","nr":-1,"required":["name","value"]},
+  "change_max_svc_check_attempts":{"args":["attempts"],"docs":"Changes the maximum number of check attempts (retries) for a particular service.","name":"change_max_svc_check_attempts","nr":-1,"required":["attempts"]},
+  "change_normal_svc_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular service","name":"change_normal_svc_check_interval","nr":-1,"required":["interval"]},
+  "change_retry_svc_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular service.","name":"change_retry_svc_check_interval","nr":-1,"required":["interval"]},
+  "change_svc_check_command":{"args":["checkcommand"],"docs":"Changes the check command for a particular service to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_command","nr":-1,"required":["checkcommand"]},
+  "change_svc_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_timeperiod","nr":-1,"required":["timeperiod"]},
+  "change_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_event_handler","nr":-1,"required":["eventhandler"]},
   "change_svc_modattr":{"args":[],"name":"change_svc_modattr","nr":"155","required":[]},
-  "change_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_notification_timeperiod","required":["timeperiod"]},
-  "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","required":[]},
+  "change_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_notification_timeperiod","nr":-1,"required":["timeperiod"]},
+  "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","nr":-1,"required":[]},
   "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","nr":"21","required":[]},
   "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","nr":"9","required":["notification_time"]},
   "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","nr":"40","required":[]},
@@ -1621,38 +1734,38 @@ __DATA__
   "schedule_svc_check":{"args":["start_time"],"name":"schedule_svc_check","nr":"7","required":[]},
   "schedule_svc_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_svc_downtime","nr":"56","required":["comment_data"]},
   "send_custom_svc_notification":{"args":["options","comment_author","comment_data"],"name":"send_custom_svc_notification","nr":"160","required":["comment_data"]},
-  "set_svc_notification_number":{"args":["number"],"docs":"Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state.","name":"set_svc_notification_number","required":["number"]},
+  "set_svc_notification_number":{"args":["number"],"docs":"Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state.","name":"set_svc_notification_number","nr":-1,"required":["number"]},
   "start_obsessing_over_svc":{"args":[],"name":"start_obsessing_over_svc","nr":"99","required":[]},
   "stop_obsessing_over_svc":{"args":[],"name":"stop_obsessing_over_svc","nr":"100","required":[]}
 },
 "system":{
-  "change_global_host_event_handler":{"args":["eventhandler"],"docs":"Changes the global host event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_host_event_handler","required":["eventhandler"]},
-  "change_global_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the global service event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_svc_event_handler","required":["eventhandler"]},
-  "del_downtime_by_host_name":{"args":["hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_host_name","required":[]},
-  "del_downtime_by_hostgroup_name":{"args":["hostgroup_name","hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_hostgroup_name","required":[]},
-  "del_downtime_by_start_time_comment":{"args":["start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_start_time_comment","required":[]},
+  "change_global_host_event_handler":{"args":["eventhandler"],"docs":"Changes the global host event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_host_event_handler","nr":-1,"required":["eventhandler"]},
+  "change_global_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the global service event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_svc_event_handler","nr":-1,"required":["eventhandler"]},
+  "del_downtime_by_host_name":{"args":["hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_host_name","nr":-1,"required":[]},
+  "del_downtime_by_hostgroup_name":{"args":["hostgroup_name","hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_hostgroup_name","nr":-1,"required":[]},
+  "del_downtime_by_start_time_comment":{"args":["start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_start_time_comment","nr":-1,"required":[]},
   "del_host_comment":{"args":["comment_id"],"name":"del_host_comment","nr":"2","required":["comment_id"]},
   "del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime","nr":"78","required":["downtime_id"]},
   "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","nr":"4","required":["comment_id"]},
   "del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime","nr":"79","required":["downtime_id"]},
   "disable_event_handlers":{"args":[],"name":"disable_event_handlers","nr":"42","required":[]},
   "disable_flap_detection":{"args":[],"name":"disable_flap_detection","nr":"62","required":[]},
-  "disable_host_freshness_checks":{"args":[],"docs":"Disables freshness checks of all hosts on a program-wide basis.","name":"disable_host_freshness_checks","required":[]},
+  "disable_host_freshness_checks":{"args":[],"docs":"Disables freshness checks of all hosts on a program-wide basis.","name":"disable_host_freshness_checks","nr":-1,"required":[]},
   "disable_notifications":{"args":[],"name":"disable_notifications","nr":"11","required":[]},
   "disable_performance_data":{"args":[],"name":"disable_performance_data","nr":"83","required":[]},
-  "disable_service_freshness_checks":{"args":[],"docs":"Disables freshness checks of all services on a program-wide basis.","name":"disable_service_freshness_checks","required":[]},
+  "disable_service_freshness_checks":{"args":[],"docs":"Disables freshness checks of all services on a program-wide basis.","name":"disable_service_freshness_checks","nr":-1,"required":[]},
   "enable_event_handlers":{"args":[],"name":"enable_event_handlers","nr":"41","required":[]},
   "enable_flap_detection":{"args":[],"name":"enable_flap_detection","nr":"61","required":[]},
-  "enable_host_freshness_checks":{"args":[],"docs":"Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.","name":"enable_host_freshness_checks","required":[]},
+  "enable_host_freshness_checks":{"args":[],"docs":"Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.","name":"enable_host_freshness_checks","nr":-1,"required":[]},
   "enable_notifications":{"args":[],"name":"enable_notifications","nr":"12","required":[]},
   "enable_performance_data":{"args":[],"name":"enable_performance_data","nr":"82","required":[]},
-  "enable_service_freshness_checks":{"args":[],"docs":"Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.","name":"enable_service_freshness_checks","required":[]},
-  "read_state_information":{"args":[],"docs":"Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care.","name":"read_state_information","required":[]},
+  "enable_service_freshness_checks":{"args":[],"docs":"Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.","name":"enable_service_freshness_checks","nr":-1,"required":[]},
+  "read_state_information":{"args":[],"docs":"Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care.","name":"read_state_information","nr":-1,"required":[]},
   "restart_process":{"args":[],"name":"restart_process","nr":"13","required":[]},
-  "restart_program":{"args":[],"docs":"Restarts the Naemon process.","name":"restart_program","required":[]},
-  "save_state_information":{"args":[],"docs":"Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention","name":"save_state_information","required":[]},
+  "restart_program":{"args":[],"docs":"Restarts the Naemon process.","name":"restart_program","nr":-1,"required":[]},
+  "save_state_information":{"args":[],"docs":"Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention","name":"save_state_information","nr":-1,"required":[]},
   "shutdown_process":{"args":[],"name":"shutdown_process","nr":"14","required":[]},
-  "shutdown_program":{"args":[],"docs":"Shuts down the Naemon process.","name":"shutdown_program","required":[]},
+  "shutdown_program":{"args":[],"docs":"Shuts down the Naemon process.","name":"shutdown_program","nr":-1,"required":[]},
   "start_accepting_passive_host_checks":{"args":[],"name":"start_accepting_passive_host_checks","nr":"90","required":[]},
   "start_accepting_passive_svc_checks":{"args":[],"name":"start_accepting_passive_svc_checks","nr":"37","required":[]},
   "start_executing_host_checks":{"args":[],"name":"start_executing_host_checks","nr":"88","required":[]},

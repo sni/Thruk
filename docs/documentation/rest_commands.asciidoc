@@ -81,6 +81,131 @@ All examples can be found on the link:rest_examples.html#sending_commands[REST A
 
 See examples and detailed description for all available rest api command urls:
 
+=== POST /contactgroups/<name>/cmd/disable_contactgroup_host_notifications
+
+Disables host notifications for all contacts in a particular contactgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_contactgroup_host_notifications.html for details.
+
+=== POST /contactgroups/<name>/cmd/disable_contactgroup_svc_notifications
+
+Disables service notifications for all contacts in a particular contactgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_contactgroup_svc_notifications.html for details.
+
+=== POST /contactgroups/<name>/cmd/enable_contactgroup_host_notifications
+
+Enables host notifications for all contacts in a particular contactgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_contactgroup_host_notifications.html for details.
+
+=== POST /contactgroups/<name>/cmd/enable_contactgroup_svc_notifications
+
+Enables service notifications for all contacts in a particular contactgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_contactgroup_svc_notifications.html for details.
+
+=== POST /contacts/<name>/cmd/change_contact_host_notification_timeperiod
+
+Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * timeperiod
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_contact_host_notification_timeperiod.html for details.
+
+=== POST /contacts/<name>/cmd/change_contact_modattr
+
+This command changes the modified attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
+
+Required arguments:
+
+  * value
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modattr.html for details.
+
+=== POST /contacts/<name>/cmd/change_contact_modhattr
+
+This command changes the modified host attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
+
+Required arguments:
+
+  * value
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modhattr.html for details.
+
+=== POST /contacts/<name>/cmd/change_contact_modsattr
+
+This command changes the modified service attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
+
+Required arguments:
+
+  * value
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modsattr.html for details.
+
+=== POST /contacts/<name>/cmd/change_contact_svc_notification_timeperiod
+
+Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * timeperiod
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_contact_svc_notification_timeperiod.html for details.
+
+=== POST /contacts/<name>/cmd/change_custom_contact_var
+
+Changes the value of a custom contact variable.
+
+Required arguments:
+
+  * name
+  * value
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_custom_contact_var.html for details.
+
+=== POST /contacts/<name>/cmd/disable_contact_host_notifications
+
+Disables host notifications for a particular contact.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_contact_host_notifications.html for details.
+
+=== POST /contacts/<name>/cmd/disable_contact_svc_notifications
+
+Disables service notifications for a particular contact.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_contact_svc_notifications.html for details.
+
+=== POST /contacts/<name>/cmd/enable_contact_host_notifications
+
+Enables host notifications for a particular contact.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_contact_host_notifications.html for details.
+
+=== POST /contacts/<name>/cmd/enable_contact_svc_notifications
+
+Disables service notifications for a particular contact.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_contact_svc_notifications.html for details.
+
 === POST /hostgroups/<name>/cmd/disable_hostgroup_host_checks
 
 Sends the DISABLE_HOSTGROUP_HOST_CHECKS command.

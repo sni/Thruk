@@ -558,6 +558,16 @@ Saves stashed configuration changes to disk.
 lists livestatus contactgroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
 
+=== POST /contactgroups/<name>/cmd/...
+
+external commands are documented in detail on a separate commands page.
+list of supported commands:
+
+ - link:rest_commands.html#post-contactgroups-name-cmd-disable_contactgroup_host_notifications[disable_contactgroup_host_notifications]
+ - link:rest_commands.html#post-contactgroups-name-cmd-disable_contactgroup_svc_notifications[disable_contactgroup_svc_notifications]
+ - link:rest_commands.html#post-contactgroups-name-cmd-enable_contactgroup_host_notifications[enable_contactgroup_host_notifications]
+ - link:rest_commands.html#post-contactgroups-name-cmd-enable_contactgroup_svc_notifications[enable_contactgroup_svc_notifications]
+
 === GET /contactgroups/<name>/config
 
 Returns configuration for given contactgroup.
@@ -579,6 +589,22 @@ Deletes given contactgroup from configuration.
 
 lists livestatus contacts.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+
+=== POST /contacts/<name>/cmd/...
+
+external commands are documented in detail on a separate commands page.
+list of supported commands:
+
+ - link:rest_commands.html#post-contacts-name-cmd-change_contact_host_notification_timeperiod[change_contact_host_notification_timeperiod]
+ - link:rest_commands.html#post-contacts-name-cmd-change_contact_modattr[change_contact_modattr]
+ - link:rest_commands.html#post-contacts-name-cmd-change_contact_modhattr[change_contact_modhattr]
+ - link:rest_commands.html#post-contacts-name-cmd-change_contact_modsattr[change_contact_modsattr]
+ - link:rest_commands.html#post-contacts-name-cmd-change_contact_svc_notification_timeperiod[change_contact_svc_notification_timeperiod]
+ - link:rest_commands.html#post-contacts-name-cmd-change_custom_contact_var[change_custom_contact_var]
+ - link:rest_commands.html#post-contacts-name-cmd-disable_contact_host_notifications[disable_contact_host_notifications]
+ - link:rest_commands.html#post-contacts-name-cmd-disable_contact_svc_notifications[disable_contact_svc_notifications]
+ - link:rest_commands.html#post-contacts-name-cmd-enable_contact_host_notifications[enable_contact_host_notifications]
+ - link:rest_commands.html#post-contacts-name-cmd-enable_contact_svc_notifications[enable_contact_svc_notifications]
 
 === GET /contacts/<name>/config
 

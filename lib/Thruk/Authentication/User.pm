@@ -287,6 +287,8 @@ sub check_user_roles {
  check_permissions('service', $servicename, $hostname)
  check_permissions('hostgroup', $hostgroupname)
  check_permissions('servicegroup', $servicegroupname)
+ check_permissions(contact', $contactname)
+ check_permissions(contactgroup', $contactgroupname)
 
  for example:
  $c->check_permissions('service', $service, $host)
@@ -295,6 +297,8 @@ sub check_user_roles {
 
 sub check_permissions {
     my($self, $c, $type, $value, $value2, $value3) = @_;
+
+    return 1 if $c->check_user_roles('authorized_for_admin');
 
     $type   = '' unless defined $type;
     $value  = '' unless defined $value;
@@ -327,6 +331,16 @@ sub check_permissions {
             $count = 1;
         }
     }
+    elsif($type eq 'contact') {
+        if($value eq $c->user->{'username'}) {
+            $count = 1;
+        }
+    }
+    elsif($type eq 'contactgroup') {
+        # admin privileges are checked already, so if we reach this point, the user is no admin
+        # so simply deny access to contactgroups
+        $count = 0;
+    }
     else {
         $c->error("unknown auth role check: ".$type);
         return 0;
@@ -348,6 +362,8 @@ sub check_permissions {
  check_cmd_permissions('service', $servicename, $hostname)
  check_cmd_permissions('hostgroup', $hostgroupname)
  check_cmd_permissions('servicegroup', $servicegroupname)
+ check_cmd_permissions('contact', $contactname)
+ check_cmd_permissions('contactgroup', $contactgroupname)
 
  for example:
  $c->check_cmd_permissions('service', $service, $host)
@@ -362,6 +378,7 @@ sub check_cmd_permissions {
     $value2 = '' unless defined $value2;
 
     return 0 if $c->check_user_roles('authorized_for_read_only');
+    return 1 if $c->check_user_roles('authorized_for_admin');
 
     if($type eq 'system') {
         return 1 if $c->check_user_roles('authorized_for_system_commands');
@@ -381,6 +398,12 @@ sub check_cmd_permissions {
     elsif($type eq 'servicegroup') {
         return 1 if $c->check_user_roles('authorized_for_all_service_commands');
         return 1 if $c->check_permissions('servicegroup', $value, 1);
+    }
+    elsif($type eq 'contact') {
+        return 1 if $c->check_permissions('contact', $value, 1);
+    }
+    elsif($type eq 'contactgroup') {
+        return 1 if $c->check_permissions('contactgroup', $value, 1);
     }
     else {
         $c->error("unknown cmd auth role check: ".$type);

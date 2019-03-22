@@ -119,6 +119,7 @@ sub _update_cmds {
             $cmds->{$category}->{$cmd}->{'name'}     = lc $cmd;
             $cmds->{$category}->{$cmd}->{'args'}     = [] unless $cmds->{$category}->{$cmd}->{'args'};
             $cmds->{$category}->{$cmd}->{'required'} = [] unless $cmds->{$category}->{$cmd}->{'required'};
+            $cmds->{$category}->{$cmd}->{'nr'}       = -1 unless defined $cmds->{$category}->{$cmd}->{'nr'};
             $cmds->{$category}->{lc $cmd} = delete $cmds->{$category}->{$cmd};
         }
     }
@@ -214,10 +215,10 @@ sub _update_cmds {
         }
     }
 
-    for my $category (qw/hosts services hostgroups servicegroups system/) {
+    for my $category (qw/hosts services hostgroups servicegroups contacts contactgroups system/) {
         for my $name (sort keys %{$cmds->{$category}}) {
             my $cmd = $cmds->{$category}->{$name};
-            if($category =~ m/^(hosts|hostgroups|servicegroups)$/mx) {
+            if($category =~ m/^(hosts|hostgroups|servicegroups|contacts|contactgroups)$/mx) {
                 $content .= "# REST PATH: POST /$category/<name>/cmd/$name\n";
             }
             elsif($category =~ m/^(services)$/mx) {
@@ -258,7 +259,7 @@ sub _update_cmds {
 
     my $cmd_dump = Cpanel::JSON::XS->new->utf8->canonical->encode($cmds);
     $cmd_dump    =~ s/\},/},\n  /gmx;
-    $cmd_dump    =~ s/\ *"(hostgroups|hosts|services|servicegroups|system)":\{/"$1":{\n  /gmx;
+    $cmd_dump    =~ s/\ *"(hostgroups|hosts|services|servicegroups|system|contacts|contactgroups)":\{/"$1":{\n  /gmx;
     $cmd_dump    =~ s/\}$/\n}/gmx;
     $cmd_dump    =~ s/\}\},$/}\n},/gmx;
     $content .= $cmd_dump;
