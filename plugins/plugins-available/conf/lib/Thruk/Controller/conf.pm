@@ -684,6 +684,7 @@ sub _process_users_page {
         }
 
         $c->stash->{'has_htpasswd_entry'} = 0;
+        $c->stash->{'htpasswd_file'}      = $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'} // '';
         if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
             my $htpasswd = Thruk::Utils::Conf::read_htpasswd($c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'});
             $c->stash->{'has_htpasswd_entry'} = 1 if defined $htpasswd->{$name};

@@ -65,7 +65,9 @@
     </tr>
     <tr>
       <td class='dataVar' align="left">Verify Password</td>
-      <td class='dataVal'><input type="password" name="data.password2" value="" size=15 autocomplete="off"></td>
+      <td class='dataVal'><input type="password" name="data.password2" value="" size=15 autocomplete="off"><br>
+        <i>([% htpasswd_file %])</i>
+      </td>
     </tr>
     [% END %]
     [% IF profile_user.is_locked %]
