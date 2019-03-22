@@ -44,13 +44,84 @@ sub _update_cmds {
 
     # add some hard coded extra commands
     my $cmds = {
+        'contacts' => {
+            'ENABLE_CONTACT_HOST_NOTIFICATIONS'           => {"docs" => "Enables host notifications for a particular contact."},
+            'ENABLE_CONTACT_SVC_NOTIFICATIONS'            => {"docs" => "Disables service notifications for a particular contact."},
+            'DISABLE_CONTACT_SVC_NOTIFICATIONS'           => {"docs" => "Disables service notifications for a particular contact."},
+            'DISABLE_CONTACT_HOST_NOTIFICATIONS'          => {"docs" => "Disables host notifications for a particular contact."},
+            'CHANGE_CUSTOM_CONTACT_VAR'                   => {"args" => ["name", "value"], "required" => ["name", "value"], "docs" => "Changes the value of a custom contact variable."},
+            'CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD'  => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the service notification timeperiod for a particular contact to what is specified by the \'notification_timeperiod\' option. The \'notification_timeperiod\' option should be the short name of the timeperiod that is to be used as the contact\'s service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD' => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the host notification timeperiod for a particular contact to what is specified by the \'notification_timeperiod\' option. The \'notification_timeperiod\' option should be the short name of the timeperiod that is to be used as the contact\'s host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_CONTACT_MODSATTR'                     => {"args" => ["value"], "required" => ["value"], "docs" => "This command changes the modified service attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon."},
+            'CHANGE_CONTACT_MODHATTR'                     => {"args" => ["value"], "required" => ["value"], "docs" => "This command changes the modified host attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon."},
+            'CHANGE_CONTACT_MODATTR'                      => {"args" => ["value"], "required" => ["value"], "docs" => "This command changes the modified attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon."},
+        },
+        'contactgroups' => {
+            'ENABLE_CONTACTGROUP_HOST_NOTIFICATIONS'      => {"docs" => "Enables host notifications for all contacts in a particular contactgroup."},
+            'ENABLE_CONTACTGROUP_SVC_NOTIFICATIONS'       => {"docs" => "Enables service notifications for all contacts in a particular contactgroup."},
+            'DISABLE_CONTACTGROUP_SVC_NOTIFICATIONS'      => {"docs" => "Disables service notifications for all contacts in a particular contactgroup."},
+            'DISABLE_CONTACTGROUP_HOST_NOTIFICATIONS'     => {"docs" => "Disables host notifications for all contacts in a particular contactgroup."},
+        },
         'hosts' => {
-            'del_active_host_downtimes'    => {"args" => [], "name" => "del_active_host_downtimes", "nr" => "c5", "required" => [], "docs" => "Removes all currently active downtimes for this host."},
+            'DEL_ACTIVE_HOST_DOWNTIMES'                   => {"docs" => "Removes all currently active downtimes for this host."},
+            'SET_HOST_NOTIFICATION_NUMBER'                => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state."},
+            'CHANGE_RETRY_HOST_CHECK_INTERVAL'            => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the retry check interval for a particular host."},
+            'CHANGE_NORMAL_HOST_CHECK_INTERVAL'           => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the normal (regularly scheduled) check interval for a particular host."},
+            'CHANGE_MAX_HOST_CHECK_ATTEMPTS'              => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the maximum number of check attempts (retries) for a particular host."},
+            'CHANGE_HOST_NOTIFICATION_TIMEPERIOD'         => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the host notification timeperiod to what is specified by the \'notification_timeperiod\' option. The \'notification_timeperiod\' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_HOST_EVENT_HANDLER'                   => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the event handler command for a particular host to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_HOST_CHECK_TIMEPERIOD'                => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the valid check period for the specified host."},
+            'CHANGE_HOST_CHECK_COMMAND'                   => {"args" => ["checkcommand"], "required" => ["checkcommand"], "docs" => "Changes the check command for a particular host to be that specified by the \'check_command\' option. The \'check_command\' option specifies the short name of the command that should be used as the new host check command. The command must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_CUSTOM_HOST_VAR'                      => {"args" => ["name", "value"], "required" => ["name", "value"], "docs" => "Changes the value of a custom host variable."},
+        },
+        'hostgroups' => {
+            'ENABLE_HOSTGROUP_PASSIVE_SVC_CHECKS'         => {"docs" => "Enables passive checks for all services associated with hosts in a particular hostgroup."},
+            'ENABLE_HOSTGROUP_PASSIVE_HOST_CHECKS'        => {"docs" => "Enables passive checks for all hosts in a particular hostgroup."},
+            'DISABLE_HOSTGROUP_PASSIVE_SVC_CHECKS'        => {"docs" => "Disables passive checks for all services associated with hosts in a particular hostgroup."},
+            'DISABLE_HOSTGROUP_PASSIVE_HOST_CHECKS'       => {"docs" => "Disables passive checks for all hosts in a particular hostgroup."},
         },
         'services' => {
-            'del_active_service_downtimes' => {"args" => [], "name" => "del_active_service_downtimes", "nr" => "c5", "required" => [], "docs" => "Removes all currently active downtimes for this service."},
+            'DEL_ACTIVE_SERVICE_DOWNTIMES'                => {"docs" => "Removes all currently active downtimes for this service."},
+            'SET_SVC_NOTIFICATION_NUMBER'                 => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state."},
+            'CHANGE_SVC_NOTIFICATION_TIMEPERIOD'          => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the service notification timeperiod to what is specified by the \'notification_timeperiod\' option. The \'notification_timeperiod\' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_SVC_EVENT_HANDLER'                    => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the event handler command for a particular service to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_SVC_CHECK_TIMEPERIOD'                 => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the check timeperiod for a particular service to what is specified by the \'check_timeperiod\' option. The \'check_timeperiod\' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_SVC_CHECK_COMMAND'                    => {"args" => ["checkcommand"], "required" => ["checkcommand"], "docs" => "Changes the check command for a particular service to be that specified by the \'check_command\' option. The \'check_command\' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_RETRY_SVC_CHECK_INTERVAL'             => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the retry check interval for a particular service."},
+            'CHANGE_NORMAL_SVC_CHECK_INTERVAL'            => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the normal (regularly scheduled) check interval for a particular service"},
+            'CHANGE_MAX_SVC_CHECK_ATTEMPTS'               => {"args" => ["attempts"], "required" => ["attempts"], "docs" => "Changes the maximum number of check attempts (retries) for a particular service."},
+            'CHANGE_CUSTOM_SVC_VAR'                       => {"args" => ["name", "value"], "required" => ["name", "value"], "docs" => "Changes the value of a custom service variable."},
+        },
+        'servicegroups' => {
+            'ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS'      => {"docs" => "Enables the acceptance and processing of passive checks for all services in a particular servicegroup."},
+            'ENABLE_SERViCEGROUP_PASSIVE_HOST_CHECKS'     => {"docs" => "Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
+            'DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS'     => {"docs" => "Disables the acceptance and processing of passive checks for all services in a particular servicegroup."},
+            'DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS'    => {"docs" => "Disables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
+        },
+        'system' => {
+            'READ_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care."},
+            'RESTART_PROGRAM'                             => {"docs" => "Restarts the Naemon process."},
+            'SAVE_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention"},
+            'SHUTDOWN_PROGRAM'                            => {"docs" => "Shuts down the Naemon process."},
+            'ENABLE_SERVICE_FRESHNESS_CHECKS'             => {"docs" => "Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness."},
+            'ENABLE_HOST_FRESHNESS_CHECKS'                => {"docs" => "Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness."},
+            'DISABLE_SERVICE_FRESHNESS_CHECKS'            => {"docs" => "Disables freshness checks of all services on a program-wide basis."},
+            'DISABLE_HOST_FRESHNESS_CHECKS'               => {"docs" => "Disables freshness checks of all hosts on a program-wide basis."},
+            'DEL_DOWNTIME_BY_START_TIME_COMMENT'          => {"args" => ["start_time", "comment"], "required" => [], "docs" => "This command deletes all downtimes matching the specified filters."},
+            'DEL_DOWNTIME_BY_HOST_NAME'                   => {"args" => ["hostname", "service_desc", "start_time", "comment"], "required" => [], "docs" => "This command deletes all downtimes matching the specified filters."},
+            'DEL_DOWNTIME_BY_HOSTGROUP_NAME'              => {"args" => ["hostgroup_name", "hostname", "service_desc", "start_time", "comment"], "required" => [], "docs" => "This command deletes all downtimes matching the specified filters."},
+            'CHANGE_GLOBAL_SVC_EVENT_HANDLER'             => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global service event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_GLOBAL_HOST_EVENT_HANDLER'            => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global host event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started."},
         }
     };
+    for my $category (sort keys %{$cmds}) {
+        for my $cmd (sort keys %{$cmds->{$category}}) {
+            $cmds->{$category}->{$cmd}->{'name'}     = lc $cmd;
+            $cmds->{$category}->{$cmd}->{'args'}     = [] unless $cmds->{$category}->{$cmd}->{'args'};
+            $cmds->{$category}->{$cmd}->{'required'} = [] unless $cmds->{$category}->{$cmd}->{'required'};
+            $cmds->{$category}->{lc $cmd} = delete $cmds->{$category}->{$cmd};
+        }
+    }
     for my $file (@{$input_files}) {
         next if $file =~ m/cmd_typ_c\d+/gmx;
         my $nr;

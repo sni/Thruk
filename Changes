@@ -14,6 +14,7 @@ next:
           - REST:
             - add aggregation function support
             - add cmd to remove all active downtimes for host or service
+            - add more external commands
           - Config Tool:
             - add authorization tab to contacts and contactgroups
             - add support for dependencies and escalations

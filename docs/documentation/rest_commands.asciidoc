@@ -97,6 +97,22 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_host_notifications.html for details.
 
+=== POST /hostgroups/<name>/cmd/disable_hostgroup_passive_host_checks
+
+Disables passive checks for all hosts in a particular hostgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_passive_host_checks.html for details.
+
+=== POST /hostgroups/<name>/cmd/disable_hostgroup_passive_svc_checks
+
+Disables passive checks for all services associated with hosts in a particular hostgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_passive_svc_checks.html for details.
+
 === POST /hostgroups/<name>/cmd/disable_hostgroup_svc_checks
 
 Sends the DISABLE_HOSTGROUP_SVC_CHECKS command.
@@ -128,6 +144,22 @@ Sends the ENABLE_HOSTGROUP_HOST_NOTIFICATIONS command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_host_notifications.html for details.
+
+=== POST /hostgroups/<name>/cmd/enable_hostgroup_passive_host_checks
+
+Enables passive checks for all hosts in a particular hostgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_passive_host_checks.html for details.
+
+=== POST /hostgroups/<name>/cmd/enable_hostgroup_passive_svc_checks
+
+Enables passive checks for all services associated with hosts in a particular hostgroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_passive_svc_checks.html for details.
 
 === POST /hostgroups/<name>/cmd/enable_hostgroup_svc_checks
 
@@ -233,6 +265,47 @@ Optional arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/add_host_comment.html for details.
 
+=== POST /hosts/<name>/cmd/change_custom_host_var
+
+Changes the value of a custom host variable.
+
+Required arguments:
+
+  * name
+  * value
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_custom_host_var.html for details.
+
+=== POST /hosts/<name>/cmd/change_host_check_command
+
+Changes the check command for a particular host to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new host check command. The command must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * checkcommand
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_command.html for details.
+
+=== POST /hosts/<name>/cmd/change_host_check_timeperiod
+
+Changes the valid check period for the specified host.
+
+Required arguments:
+
+  * timeperiod
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_timeperiod.html for details.
+
+=== POST /hosts/<name>/cmd/change_host_event_handler
+
+Changes the event handler command for a particular host to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * eventhandler
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_host_event_handler.html for details.
+
 === POST /hosts/<name>/cmd/change_host_modattr
 
 Sends the CHANGE_HOST_MODATTR command.
@@ -240,6 +313,46 @@ Sends the CHANGE_HOST_MODATTR command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_host_modattr.html for details.
+
+=== POST /hosts/<name>/cmd/change_host_notification_timeperiod
+
+Changes the host notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * timeperiod
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_host_notification_timeperiod.html for details.
+
+=== POST /hosts/<name>/cmd/change_max_host_check_attempts
+
+Changes the maximum number of check attempts (retries) for a particular host.
+
+Required arguments:
+
+  * interval
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_max_host_check_attempts.html for details.
+
+=== POST /hosts/<name>/cmd/change_normal_host_check_interval
+
+Changes the normal (regularly scheduled) check interval for a particular host.
+
+Required arguments:
+
+  * interval
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_normal_host_check_interval.html for details.
+
+=== POST /hosts/<name>/cmd/change_retry_host_check_interval
+
+Changes the retry check interval for a particular host.
+
+Required arguments:
+
+  * interval
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_retry_host_check_interval.html for details.
 
 === POST /hosts/<name>/cmd/del_active_host_downtimes
 
@@ -565,6 +678,16 @@ Optional arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/send_custom_host_notification.html for details.
 
+=== POST /hosts/<name>/cmd/set_host_notification_number
+
+Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state.
+
+Required arguments:
+
+  * number
+
+See http://www.naemon.org/documentation/developer/externalcommands/set_host_notification_number.html for details.
+
 === POST /hosts/<name>/cmd/start_obsessing_over_host
 
 Sends the START_OBSESSING_OVER_HOST command.
@@ -597,6 +720,22 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_host_notifications.html for details.
 
+=== POST /servicegroups/<name>/cmd/disable_servicegroup_passive_host_checks
+
+Disables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_passive_host_checks.html for details.
+
+=== POST /servicegroups/<name>/cmd/disable_servicegroup_passive_svc_checks
+
+Disables the acceptance and processing of passive checks for all services in a particular servicegroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_passive_svc_checks.html for details.
+
 === POST /servicegroups/<name>/cmd/disable_servicegroup_svc_checks
 
 Sends the DISABLE_SERVICEGROUP_SVC_CHECKS command.
@@ -628,6 +767,22 @@ Sends the ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_host_notifications.html for details.
+
+=== POST /servicegroups/<name>/cmd/enable_servicegroup_passive_host_checks
+
+Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_passive_host_checks.html for details.
+
+=== POST /servicegroups/<name>/cmd/enable_servicegroup_passive_svc_checks
+
+Enables the acceptance and processing of passive checks for all services in a particular servicegroup.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_passive_svc_checks.html for details.
 
 === POST /servicegroups/<name>/cmd/enable_servicegroup_svc_checks
 
@@ -733,6 +888,77 @@ Optional arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/add_svc_comment.html for details.
 
+=== POST /services/<host>/<service>/cmd/change_custom_svc_var
+
+Changes the value of a custom service variable.
+
+Required arguments:
+
+  * name
+  * value
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_custom_svc_var.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_max_svc_check_attempts
+
+Changes the maximum number of check attempts (retries) for a particular service.
+
+Required arguments:
+
+  * attempts
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_max_svc_check_attempts.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_normal_svc_check_interval
+
+Changes the normal (regularly scheduled) check interval for a particular service
+
+Required arguments:
+
+  * interval
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_normal_svc_check_interval.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_retry_svc_check_interval
+
+Changes the retry check interval for a particular service.
+
+Required arguments:
+
+  * interval
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_retry_svc_check_interval.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_svc_check_command
+
+Changes the check command for a particular service to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * checkcommand
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_command.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_svc_check_timeperiod
+
+Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * timeperiod
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_timeperiod.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_svc_event_handler
+
+Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * eventhandler
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_svc_event_handler.html for details.
+
 === POST /services/<host>/<service>/cmd/change_svc_modattr
 
 Sends the CHANGE_SVC_MODATTR command.
@@ -740,6 +966,16 @@ Sends the CHANGE_SVC_MODATTR command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_svc_modattr.html for details.
+
+=== POST /services/<host>/<service>/cmd/change_svc_notification_timeperiod
+
+Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * timeperiod
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_svc_notification_timeperiod.html for details.
 
 === POST /services/<host>/<service>/cmd/del_active_service_downtimes
 
@@ -924,6 +1160,16 @@ Optional arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/send_custom_svc_notification.html for details.
 
+=== POST /services/<host>/<service>/cmd/set_svc_notification_number
+
+Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state.
+
+Required arguments:
+
+  * number
+
+See http://www.naemon.org/documentation/developer/externalcommands/set_svc_notification_number.html for details.
+
 === POST /services/<host>/<service>/cmd/start_obsessing_over_svc
 
 Sends the START_OBSESSING_OVER_SVC command.
@@ -939,6 +1185,64 @@ Sends the STOP_OBSESSING_OVER_SVC command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc.html for details.
+
+=== POST /system/cmd/change_global_host_event_handler
+
+Changes the global host event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * eventhandler
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_global_host_event_handler.html for details.
+
+=== POST /system/cmd/change_global_svc_event_handler
+
+Changes the global service event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.
+
+Required arguments:
+
+  * eventhandler
+
+See http://www.naemon.org/documentation/developer/externalcommands/change_global_svc_event_handler.html for details.
+
+=== POST /system/cmd/del_downtime_by_host_name
+
+This command deletes all downtimes matching the specified filters.
+
+Optional arguments:
+
+  * hostname
+  * service_desc
+  * start_time
+  * comment
+
+See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_host_name.html for details.
+
+=== POST /system/cmd/del_downtime_by_hostgroup_name
+
+This command deletes all downtimes matching the specified filters.
+
+Optional arguments:
+
+  * hostgroup_name
+  * hostname
+  * service_desc
+  * start_time
+  * comment
+
+See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_hostgroup_name.html for details.
+
+=== POST /system/cmd/del_downtime_by_start_time_comment
+
+This command deletes all downtimes matching the specified filters.
+
+Optional arguments:
+
+  * start_time
+  * comment
+
+See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_start_time_comment.html for details.
 
 === POST /system/cmd/del_host_comment
 
@@ -996,6 +1300,14 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/disable_flap_detection.html for details.
 
+=== POST /system/cmd/disable_host_freshness_checks
+
+Disables freshness checks of all hosts on a program-wide basis.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_host_freshness_checks.html for details.
+
 === POST /system/cmd/disable_notifications
 
 Sends the DISABLE_NOTIFICATIONS command.
@@ -1011,6 +1323,14 @@ Sends the DISABLE_PERFORMANCE_DATA command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/disable_performance_data.html for details.
+
+=== POST /system/cmd/disable_service_freshness_checks
+
+Disables freshness checks of all services on a program-wide basis.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/disable_service_freshness_checks.html for details.
 
 === POST /system/cmd/enable_event_handlers
 
@@ -1028,6 +1348,14 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/enable_flap_detection.html for details.
 
+=== POST /system/cmd/enable_host_freshness_checks
+
+Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_host_freshness_checks.html for details.
+
 === POST /system/cmd/enable_notifications
 
 Sends the ENABLE_NOTIFICATIONS command.
@@ -1044,6 +1372,22 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/enable_performance_data.html for details.
 
+=== POST /system/cmd/enable_service_freshness_checks
+
+Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/enable_service_freshness_checks.html for details.
+
+=== POST /system/cmd/read_state_information
+
+Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/read_state_information.html for details.
+
 === POST /system/cmd/restart_process
 
 Sends the RESTART_PROCESS command.
@@ -1052,6 +1396,22 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/restart_process.html for details.
 
+=== POST /system/cmd/restart_program
+
+Restarts the Naemon process.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/restart_program.html for details.
+
+=== POST /system/cmd/save_state_information
+
+Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/save_state_information.html for details.
+
 === POST /system/cmd/shutdown_process
 
 Sends the SHUTDOWN_PROCESS command.
@@ -1059,6 +1419,14 @@ Sends the SHUTDOWN_PROCESS command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/shutdown_process.html for details.
+
+=== POST /system/cmd/shutdown_program
+
+Shuts down the Naemon process.
+
+This command does not require any arguments.
+
+See http://www.naemon.org/documentation/developer/externalcommands/shutdown_program.html for details.
 
 === POST /system/cmd/start_accepting_passive_host_checks
 
