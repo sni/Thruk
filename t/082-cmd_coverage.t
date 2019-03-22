@@ -24,6 +24,9 @@ my $cmd_data = Thruk::Controller::Rest::V1::cmd::get_rest_external_command_data(
 for my $cmd (sort keys %{$commands}) {
     my $found = 0;
     next if $cmd eq 'PROCESS_FILE'; # would not work over livestatus
+    next if $cmd =~ m/CHANGE_CONTACT_MOD\w*ATTR/mx; # not implemented in core
+    next if $cmd =~ m/CHANGE_.*_TIMEPERIOD/mx; # segfaults
+    next if $cmd =~ m/DEL_DOWNTIME_BY_HOSTGROUP_NAME/mx; # segfaults
     for my $t (keys %{$cmd_data}) {
         if($cmd_data->{$t}->{lc $cmd}) {
             $found = 1;

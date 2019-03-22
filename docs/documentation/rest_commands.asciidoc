@@ -113,56 +113,6 @@ This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/enable_contactgroup_svc_notifications.html for details.
 
-=== POST /contacts/<name>/cmd/change_contact_host_notification_timeperiod
-
-Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * timeperiod
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_contact_host_notification_timeperiod.html for details.
-
-=== POST /contacts/<name>/cmd/change_contact_modattr
-
-This command changes the modified attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
-
-Required arguments:
-
-  * value
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modattr.html for details.
-
-=== POST /contacts/<name>/cmd/change_contact_modhattr
-
-This command changes the modified host attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
-
-Required arguments:
-
-  * value
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modhattr.html for details.
-
-=== POST /contacts/<name>/cmd/change_contact_modsattr
-
-This command changes the modified service attributes value for the specified contact. Modified attributes values are used by Naemon to determine which object properties should be retained across program restarts. Thus, modifying the value of the attributes can affect data retention. This is an advanced option and should only be used by people who are intimately familiar with the data retention logic in Naemon.
-
-Required arguments:
-
-  * value
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_contact_modsattr.html for details.
-
-=== POST /contacts/<name>/cmd/change_contact_svc_notification_timeperiod
-
-Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * timeperiod
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_contact_svc_notification_timeperiod.html for details.
-
 === POST /contacts/<name>/cmd/change_custom_contact_var
 
 Changes the value of a custom contact variable.
@@ -411,16 +361,6 @@ Required arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_command.html for details.
 
-=== POST /hosts/<name>/cmd/change_host_check_timeperiod
-
-Changes the valid check period for the specified host.
-
-Required arguments:
-
-  * timeperiod
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_timeperiod.html for details.
-
 === POST /hosts/<name>/cmd/change_host_event_handler
 
 Changes the event handler command for a particular host to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.
@@ -438,16 +378,6 @@ Sends the CHANGE_HOST_MODATTR command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_host_modattr.html for details.
-
-=== POST /hosts/<name>/cmd/change_host_notification_timeperiod
-
-Changes the host notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * timeperiod
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_host_notification_timeperiod.html for details.
 
 === POST /hosts/<name>/cmd/change_max_host_check_attempts
 
@@ -1064,16 +994,6 @@ Required arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_command.html for details.
 
-=== POST /services/<host>/<service>/cmd/change_svc_check_timeperiod
-
-Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * timeperiod
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_timeperiod.html for details.
-
 === POST /services/<host>/<service>/cmd/change_svc_event_handler
 
 Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.
@@ -1091,16 +1011,6 @@ Sends the CHANGE_SVC_MODATTR command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_svc_modattr.html for details.
-
-=== POST /services/<host>/<service>/cmd/change_svc_notification_timeperiod
-
-Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * timeperiod
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_svc_notification_timeperiod.html for details.
 
 === POST /services/<host>/<service>/cmd/del_active_service_downtimes
 
@@ -1343,20 +1253,6 @@ Optional arguments:
   * comment
 
 See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_host_name.html for details.
-
-=== POST /system/cmd/del_downtime_by_hostgroup_name
-
-This command deletes all downtimes matching the specified filters.
-
-Optional arguments:
-
-  * hostgroup_name
-  * hostname
-  * service_desc
-  * start_time
-  * comment
-
-See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_hostgroup_name.html for details.
 
 === POST /system/cmd/del_downtime_by_start_time_comment
 
