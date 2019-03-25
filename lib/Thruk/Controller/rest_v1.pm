@@ -127,6 +127,16 @@ sub index {
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
          };
+    } elsif($path_info =~ m/\.cgi$/mx) {
+        my $uri = $c->env->{'thruk.request.url'};
+        $uri =~ s/^.*?\/r\//\/cgi-bin\//gmx;
+        my $sub_c = $c->sub_request($uri, undef, undef, 1);
+        $c->res->status($sub_c->res->code);
+        $c->res->headers($sub_c->res->headers);
+        $c->res->body($sub_c->res->content);
+        $c->{'rendered'} = 1;
+        $c->stash->{'inject_stats'} = 0;
+        return;
     } else {
         $data = _process_rest_request($c, $path_info);
     }
