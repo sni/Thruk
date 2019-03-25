@@ -1,0 +1,56 @@
+version: '2'
+
+networks:
+  test.local:
+
+services:
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60443:443"
+    volumes:
+        - .:/scenario:ro
+        - ../../../:/thruk:ro
+    networks:
+      test.local:
+        aliases:
+          - omd.test.local
+    hostname: omd
+    domainname: test.local
+
+  remote:
+    build: remote/
+    volumes:
+        - .:/scenario:ro
+        - ../../../:/thruk:ro
+    networks:
+      test.local:
+        aliases:
+          - remote.test.local
+    hostname: remote
+    domainname: test.local
+
+  krb5:
+    build: krb5/
+    volumes:
+        - /dev/urandom:/dev/random:ro
+    networks:
+      test.local:
+        aliases:
+          - krb5.test.local
+    hostname: krb5
+    domainname: test.local
+
+  vnc:
+    build: vnc/
+    ports:
+        - "127.0.0.3:5901:5901"
+        - "127.0.0.3:6901:6901"
+    networks:
+      test.local:
+        aliases:
+          - vnc.test.local
+    hostname: vnc
+    domainname: test.local
+

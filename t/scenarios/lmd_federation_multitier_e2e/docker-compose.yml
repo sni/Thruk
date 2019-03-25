@@ -152,14 +152,3 @@ services:
           - tier3b.test.local
     hostname: tier3b
     domainname: test.local
-
-#  krb5:
-#    build: krb5/
-#    volumes:
-#        - /dev/urandom:/dev/random:ro
-#    networks:
-#      test.local:
-#        aliases:
-#          - krb5.test.local
-#    hostname: krb5
-#    domainname: test.local

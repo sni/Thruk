@@ -10,6 +10,8 @@
       state: present
   - shell: "kdb5_util create -s -P krbmasterpw"
   - shell: "service krb5-kdc start"
-  - shell: "service krb5-admin-server start"
   - shell: "echo '*/admin *' > /etc/krb5kdc/kadm5.acl"
-  - shell: "kadmin.local -q \"addprinc -pw pw testuser\""
+  - shell: "kadmin.local -q \"addprinc -pw omd omdadmin\""
+  - shell: "kadmin.local -q \"addprinc -pw omd HTTP/omd.test.local\""
+  - shell: "kadmin.local -q \"addprinc -pw omd HTTP/omd2.test.local\""
+  - shell: "service krb5-admin-server start"

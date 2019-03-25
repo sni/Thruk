@@ -1,0 +1,90 @@
+---
+- hosts: all
+  tasks:
+  - yum:
+      name:
+        - mod_auth_kerb
+        - krb5-workstation
+      state: present
+  - shell: "sudo su - demo -c 'set_admin_password omd'"
+  - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set THRUK_COOKIE_AUTH off"
+  - shell: "omd config demo set GRAFANA on"
+  - shell: "omd config demo set INFLUXDB on"
+  - shell: "omd config demo set MOD_GEARMAN on"
+  - shell: "omd config demo set NAGFLUX on"
+  - shell: "omd config demo set PNP4NAGIOS gearman"
+  - lineinfile:
+      path: /omd/sites/demo/etc/mod-gearman/server.cfg
+      regexp: '^perfdata='
+      line: 'perfdata=nagflux'
+  - lineinfile:
+      path: /omd/sites/demo/etc/nagflux/config.gcfg
+      regexp: '^\s*Queue\s*='
+      line: '        Queue = "nagflux"'
+  - replace:
+      dest=/omd/sites/demo/etc/nagflux/config.gcfg
+      regexp='(ModGearman "example".*)Enabled = \w'
+      replace='\1        Enabled = true'
+  - lineinfile:
+      path: /omd/sites/demo/etc/nagflux/config.gcfg
+      regexp: '^\s*Queue\s*='
+      line: '        Enabled = true'
+  - copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - shell: sed -e "s/localhost/local-pnp/g" -i /omd/sites/demo/etc/naemon/conf.d/example.cfg
+  - copy:
+      src: /root/naemon_grafana_example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/naemon_grafana_example.cfg
+      owner: demo
+      group: demo
+  - copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+  - name: create api key folder
+    file:
+      path: /omd/sites/demo/var/thruk/api_keys
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - shell: "echo '{ \"user\" : \"omdadmin\" }' > /omd/sites/demo/var/thruk/api_keys/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; chown demo: /omd/sites/demo/var/thruk/api_keys/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
+  - name: create krb folder
+    file:
+      path: /omd/sites/demo/etc/krb
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - copy:
+      src: /root/krb5.conf
+      dest: /omd/sites/demo/etc/krb/krb5.conf
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/apache_auth_krb5.conf
+      dest: /omd/sites/demo/etc/apache/conf.d/auth.conf
+      owner: demo
+      group: demo
+  - name: wait for kerberos to become available
+    wait_for:
+      host: krb5.test.local
+      port: 88
+  - name: wait for kerberos admin server to become available
+    wait_for:
+      host: krb5.test.local
+      port: 749
+  - lineinfile:
+      path: /omd/sites/demo/.profile
+      regexp: '^export KRB5_CONFIG'
+      line: 'export KRB5_CONFIG=/omd/sites/demo/etc/krb/krb5.conf'
+  - shell: "sudo su - demo -c 'yes omd | kinit -f HTTP/omd.test.local'"
+  - shell: "sudo su - demo -c 'echo -e \"addent -password -p HTTP/omd.test.local -k 1 -e aes256-cts\nomd\nwkt etc/krb/omd.keytab\" | ktutil'"

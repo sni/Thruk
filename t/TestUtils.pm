@@ -891,9 +891,12 @@ sub _external_request {
         $request->header('Content-Type' => 'application/json;charset=UTF-8');
         $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
+        $request->header('X-Thruk-Auth-Key' => $ENV{'THRUK_TEST_AUTH_KEY'}) if $ENV{'THRUK_TEST_AUTH_KEY'};
         $req = $ua->request($request);
     } else {
-        $req = $ua->get($url);
+        my $request = GET($url);
+        $request->header('X-Thruk-Auth-Key' => $ENV{'THRUK_TEST_AUTH_KEY'}) if $ENV{'THRUK_TEST_AUTH_KEY'};
+        $req = $ua->request($request);
     }
 
     $req = _check_startup_redirect($req, $start_to);
