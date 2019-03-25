@@ -329,6 +329,15 @@ sub request_username {
         $username = $ENV{'REMOTE_USER'};
     }
 
+    elsif($c->req->cookies->{'thruk_auth'}) {
+        # verify ip address
+        my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $c->req->cookies->{'thruk_auth'});
+        my $ip = $c->env->{'HTTP_X_FORWARDED_FOR'} || $c->req->address;
+        if($sessiondata && $ip && $sessiondata->{'address'} && $ip eq $sessiondata->{'address'}) {
+            $username = $sessiondata->{'username'};
+        }
+    }
+
     # default_user_name?
     elsif(defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
         $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
