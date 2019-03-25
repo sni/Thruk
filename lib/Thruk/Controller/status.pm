@@ -1066,7 +1066,9 @@ sub _process_combined_page {
     for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'svc_'}}; $x++) {
         if(!defined $sortoptions->{$x+10}) {
             my $col = $c->stash->{'default_columns'}->{'svc_'}->[$x];
-            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+            my $field = $col->{'field'};
+            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
+            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
         }
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
@@ -1105,7 +1107,9 @@ sub _process_combined_page {
     for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'hst_'}}; $x++) {
         if(!defined $sortoptions->{$x+10}) {
             my $col = $c->stash->{'default_columns'}->{'hst_'}->[$x];
-            $sortoptions->{$x+10} = [[$col->{'field'}], lc($col->{"title"}) ];
+            my $field = $col->{'field'};
+            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
+            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
         }
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
