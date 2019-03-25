@@ -1303,6 +1303,7 @@ sub _rest_get_sites {
             name             => $c->stash->{'backend_detail'}->{$key}->{'name'},
             section          => $c->stash->{'backend_detail'}->{$key}->{'section'},
             type             => $c->stash->{'backend_detail'}->{$key}->{'type'},
+            status           => ($error ne 'OK' && $error ne '') ? 1 : 0,
             last_error       => $error ne 'OK' ? $error : '',
             connected        => $error ? 0 : 1,
             federation_key   => $peer->{'fed_info'}->{'key'}  || [ $peer->{'key'} ],

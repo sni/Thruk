@@ -1123,6 +1123,7 @@ lists configured backends
 |last_error                        | error message if backend is not connected
 |name                              | name of the backend
 |section                           | section name
+|status                            | 0 if the site is online, 1 if the site is down
 |type                              | type of the backend
 |===========================================
 
