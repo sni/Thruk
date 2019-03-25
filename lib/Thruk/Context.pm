@@ -333,7 +333,7 @@ sub request_username {
         # verify ip address
         my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $c->req->cookies->{'thruk_auth'});
         my $ip = $c->env->{'HTTP_X_FORWARDED_FOR'} || $c->req->address;
-        if($sessiondata && $ip && $sessiondata->{'address'} && $ip eq $sessiondata->{'address'}) {
+        if($sessiondata && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
             $username = $sessiondata->{'username'};
         }
     }
