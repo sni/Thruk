@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use Digest::MD5 qw(md5_hex);
 
-plan tests => 270;
+plan tests => 294;
 
 BEGIN {
     $ENV{'THRUK_TEST_CONF_NO_LOG'} = 1;
@@ -81,6 +81,12 @@ TestUtils::test_page(
 # change user
 Thruk->config->{'cgi_cfg'}->{'default_user_name'} = $other_user;
 TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/login.cgi?logout',
+    'code'    => 401,
+    'follow'  => 1,
+    'like'    => [ 'logout successful' ],
+);
+TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type=host&data.name=localhost',
     'like'    => [ $other_user, 'Host:\s+localhost', '127\.0\.0\.1', 'linux40\.png', 'obj_retention.test.'.$other_user_id.'.dat' ],
 );
@@ -124,6 +130,12 @@ TestUtils::test_page(
 ###########################################################
 # change back user to default
 Thruk->config->{'cgi_cfg'}->{'default_user_name'} = $default_user;
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/login.cgi?logout',
+    'code'    => 401,
+    'follow'  => 1,
+    'like'    => [ 'logout successful' ],
+);
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type=host&data.name=localhost',
     'like'    => [ $default_user, 'Host:\s+localhost', '127\.0\.0\.2', 'linux\.png', 'obj_retention.test.'.$default_user_id.'.dat' ],
