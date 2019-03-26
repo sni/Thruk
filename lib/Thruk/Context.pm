@@ -332,18 +332,17 @@ sub request_username {
     elsif($c->req->cookies->{'thruk_auth'}) {
         # verify ip address
         my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $c->req->cookies->{'thruk_auth'});
-        my $ip = $c->env->{'HTTP_X_FORWARDED_FOR'} || $c->req->address;
         if($sessiondata && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
             $username = $sessiondata->{'username'};
         }
     }
 
     # default_user_name?
-    elsif(defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
+    if(!defined $username && defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
         $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
     }
 
-    elsif(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+    elsif(!defined $username && defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI') {
         $username = $c->config->{'default_cli_user_name'};
     }
 
