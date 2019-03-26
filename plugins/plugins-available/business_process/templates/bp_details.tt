@@ -97,12 +97,10 @@
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='List All Business Processes' title='List All Business Processes' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='bp.cgi'>List All Business Processes</a></td>
               </tr>
-              [% IF !read_only %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Status' title='Refresh Status' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='#' onclick="current_node='node1'; bp_refresh('[% bp.id %]', current_node); return false;">Refresh Status</a></td>
               </tr>
-              [% END %]
               [% IF bp_backend %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/shape_handles.png' border="0" alt='Enable Fullscreen Mode' title='Enable Fullscreen Mode' width="16" height="16" style="vertical-align: top;"></td>
