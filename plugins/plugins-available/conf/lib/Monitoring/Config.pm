@@ -2578,7 +2578,7 @@ sub read_rc_file {
     my($self, $file) = @_;
     my @rcfiles  = glob($file || '~/.naglintrc /etc/thruk/naglint.conf '.(defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/etc/thruk/naglint.conf' : ''));
     for my $f (@rcfiles) {
-        if(defined $f || -r $f) {
+        if(defined $f && -r $f) {
             $file = $f;
             last;
         }
