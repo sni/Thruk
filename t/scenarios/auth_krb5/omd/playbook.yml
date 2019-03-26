@@ -5,11 +5,11 @@
       name:
         - mod_auth_kerb
         - krb5-workstation
+        - perl-Test-Harness
       state: present
   - shell: "sudo su - demo -c 'set_admin_password omd'"
   - shell: "omd config demo set APACHE_MODE own"
   - shell: "omd config demo set TMPFS off"
-  - shell: "omd config demo set THRUK_COOKIE_AUTH off"
   - shell: "omd config demo set GRAFANA on"
   - shell: "omd config demo set INFLUXDB on"
   - shell: "omd config demo set MOD_GEARMAN on"
@@ -55,6 +55,15 @@
       group: demo
       mode: 0770
   - shell: "echo '{ \"user\" : \"omdadmin\" }' > /omd/sites/demo/var/thruk/api_keys/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; chown demo: /omd/sites/demo/var/thruk/api_keys/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  - name: create api key folder
+    file:
+      path: /omd/sites/demo/var/thruk/sessions
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - shell: "echo '{\"address\":\"172.19.0.1\",\"fake\":1,\"hash\":\"none\",\"username\":\"omdadmin\"}' > /omd/sites/demo/var/thruk/sessions/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb; chown demo: /omd/sites/demo/var/thruk/sessions/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  - shell: sudo su - demo -c "perl -i -p0e 's/<LocationMatch.*<\/LocationMatch>//sgmx' etc/thruk/apache_cookie_auth.conf"
   - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
   - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
   - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
@@ -75,6 +84,13 @@
       dest: /omd/sites/demo/etc/apache/conf.d/auth.conf
       owner: demo
       group: demo
+  - name: insert/update HTML surrounded by custom markers after <body> line
+    blockinfile:
+      path: /omd/sites/demo/etc/apache/conf.d/thruk_cookie_auth.conf
+      insertafter: "# make cookie accessible by the url"
+      content: |
+        RewriteCond %{HTTP_COOKIE}           thruk_auth=.+ [OR] # cookie authorization only validates existing cookies / keys
+        RewriteCond %{HTTP:X-Thruk-Auth-User} ^.+$
   - name: wait for kerberos to become available
     wait_for:
       host: krb5.test.local

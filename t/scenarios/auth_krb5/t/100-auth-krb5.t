@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 102;
+plan tests => 106;
 
 $ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
 ###############################################################################
@@ -55,14 +55,11 @@ for my $site (qw/local remote/) {
 ###############################################################################
 # test graph export
 #for my $site (qw/local remote/) {
-#  for my $hst (qw/pnp grafana/) {
-#    TestUtils::test_page(
-#      'url'    => '/thruk/r/extinfo.cgi?type=grafana&host='.$site.'-'.$hst.'&service=Load',
-#      'like'   => ['PNG'],
-#    );
-#  }
-#}
-
-###############################################################################
-# test thruk grafana api
-###############################################################################
+for my $site (qw/local/) {
+  for my $hst (qw/pnp grafana/) {
+    TestUtils::test_page(
+      'url'     => '/thruk/r/extinfo.cgi?type=grafana&host='.$site.'-'.$hst.'&service=Load',
+      'waitfor' => 'PNG',
+    );
+  }
+}

@@ -11,6 +11,7 @@ services:
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/test:ro
     networks:
       test.local:
         aliases:
