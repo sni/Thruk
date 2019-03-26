@@ -7,6 +7,7 @@
         - krb5-workstation
       state: present
   - shell: "sudo su - demo -c 'set_admin_password omd'"
+  - shell: "omd config demo set APACHE_MODE own"
   - shell: "omd config demo set TMPFS off"
   - shell: "omd config demo set THRUK_COOKIE_AUTH off"
   - shell: "omd config demo set GRAFANA on"
