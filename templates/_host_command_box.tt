@@ -196,7 +196,7 @@
                 <td class='command'><a href="cmd.cgi?cmd_typ=15&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Enable checks of all services on this host</a></td>
               </tr>
               [% END %]
-              [% UNLESS command_disabled(c, '43') || command_disabled(c, '54') %]
+              [% UNLESS command_disabled(c, '43') || command_disabled(c, '44') %]
               <tr class='command'>
                 [% IF host.event_handler_enabled %]
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host' width="20" height="20"></td>
