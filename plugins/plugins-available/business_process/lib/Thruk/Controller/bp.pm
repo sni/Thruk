@@ -348,7 +348,7 @@ sub index {
         $c->stash->{'bp'} = $bp;
 
         if($c->req->parameters->{'update'}) {
-            if(!$c->stash->{'read_only'}) {
+            if($c->check_cmd_permissions('host', $bp->{'name'})) {
                 $bp->update_status($c);
             }
         }
