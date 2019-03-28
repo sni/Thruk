@@ -520,6 +520,22 @@ sub _apply_stats {
 
     my $result = {};
     my $num_stats = scalar @{$stats_columns};
+    # initialize result
+    if(scalar @{$group_columns} == 0) {
+        my $key = "";
+        my $entry = {
+            count   => 0,
+            columns => [],
+        };
+        for my $col (@{$stats_columns}) {
+            if($col->{'op'} eq 'sum') {
+                push @{$entry->{'columns'}}, 0;
+            } else {
+                push @{$entry->{'columns'}}, undef;
+            }
+        }
+        $result->{$key} = $entry;
+    }
     for my $d (@{$data}) {
         my $key = "";
         for my $col (@{$group_columns}) {

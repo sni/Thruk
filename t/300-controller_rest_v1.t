@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 390;
+    plan tests => 399;
 }
 
 BEGIN {
@@ -224,6 +224,18 @@ TestUtils::test_page(
         'content_type' => 'application/json;charset=UTF-8',
         'method'       => 'GET',
         'like'         => ['"state"'],
+    );
+};
+
+################################################################################
+# test count(*) with no matches
+{
+    local $ENV{'NO_POST_TOKEN'} = 1;
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?state=-1&columns=count(*)',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['count\(\*\)', '0'],
     );
 };
 
