@@ -260,23 +260,29 @@ If you have multiple sites connected to Thruk, you may want to talk only to
 specific sites. There are multiple methods to set the backends for your
 request. You can combine multiple sites with commas.
 
-Use a path prefix `/sites/<sitename,...>`:
+* Use a path prefix `/sites/<sitename,...>`:
 
 ------
   %> thruk r /sites/test,prod/hosts
 ------
 
-Use the `backends` option with the cli client:
+* Use the `backends` option with the cli client:
 
 ------
   %> thruk r -b test,prod /hosts
 ------
 
-Set the `backends` url parameter:
+* Set the `backends` url parameter:
 
 ------
   %> thruk r /hosts?backends=test,prod
 ------
+
+[TIP]
+.All Sites
+=======
+Thruk uses all backends unless they are configured as `hidden=yes`. In that case you can force selecting all backends with the `/sites/ALL/` prefix.
+=======
 
 
 == Error Handling
@@ -1532,4 +1538,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
