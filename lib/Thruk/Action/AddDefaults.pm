@@ -215,7 +215,7 @@ sub begin {
             $c->log->debug($1.".cgi does not require authentication") if Thruk->debug;
         } else {
             if(!$c->authenticate(1)) {
-                $c->log->debug("user authenticated failed") if Thruk->verbose;
+                $c->log->debug("user authentication failed") if Thruk->verbose;
                 return $c->detach('/error/index/10');
             }
         }
