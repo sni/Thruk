@@ -2104,10 +2104,10 @@ sub _task_pnp_graphs {
     my $graphs = [];
     my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     for my $hst (@{$data}) {
+        my $text = $hst->{'name'}.';_HOST_';
+        next if($search and $text !~ m/$search/mxi);
         my $url = Thruk::Utils::get_pnp_url($c, $hst, 1);
         if($url ne '') {
-            my $text = $hst->{'name'}.';_HOST_';
-            next if($search and $text !~ m/$search/mxi);
             push @{$graphs}, {
                 text => $text,
                 url  => $url.'/image?host='.$hst->{'name'}.'&srv=_HOST_',
@@ -2117,10 +2117,10 @@ sub _task_pnp_graphs {
 
     $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
     for my $svc (@{$data}) {
+        my $text = $svc->{'host_name'}.';'.$svc->{'description'};
+        next if($search and $text !~ m/$search/mxi);
         my $url = Thruk::Utils::get_pnp_url($c, $svc, 1);
         if($url ne '') {
-            my $text = $svc->{'host_name'}.';'.$svc->{'description'};
-            next if($search and $text !~ m/$search/mxi);
             push @{$graphs}, {
                 text => $text,
                 url  => $url.'/image?host='.$svc->{'host_name'}.'&srv='.$svc->{'description'},
