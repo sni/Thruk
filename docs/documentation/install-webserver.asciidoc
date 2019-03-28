@@ -214,13 +214,13 @@ use this apache example configuration:
 </VirtualHost>
 -------
 
-=== LDAP / AD authentication. 
+=== LDAP / AD authentication.
 
-Use the following snipped sample if you want to authenticate users against LDAP or Active Directory. This works as well with the newer 2.x cookie based authentication. 
+Use the following snipped sample if you want to authenticate users against LDAP or Active Directory. This works as well with the newer 2.x cookie based authentication.
 
-In this sample, Apache will lookup the legacy htpasswd file first and then the ldap server for a matching user. This is useful if you want to maintan the legacy thrukadmin as a full-access admin or as a fallback if ldap is not accessible anymore. 
+In this sample, Apache will lookup the legacy htpasswd file first and then the ldap server for a matching user. This is useful if you want to maintan the legacy thrukadmin as a full-access admin or as a fallback if ldap is not accessible anymore.
 
-Make sure your backend's contact definitions exists, matches with the ldap username and is assigned to a host/service/whatever - otherwise the user will not see anything. 
+Make sure your backend's contact definitions exists, matches with the ldap username and is assigned to a host/service/whatever - otherwise the user will not see anything.
 
 
 /etc/apache2/conf-available/thruk.conf
@@ -245,6 +245,11 @@ Make sure your backend's contact definitions exists, matches with the ldap usern
   </Location>
    #...
 -------
+
+
+=== Kerberos authentication
+
+See link:https://labs.consol.de/omd/howtos/kerberos/[thruk in omd].
 
 
 == Lighthttpd

@@ -3,7 +3,7 @@ ENV REFRESHED_AT 2019-03-25
 
 USER 0
 RUN apt-get -y update && apt-get -y dist-upgrade && apt-get clean
-RUN apt-get -y update && apt-get -y install krb5-user xvfb && apt-get clean
+RUN apt-get -y update && apt-get -y install krb5-user xvfb curl && apt-get clean
 COPY krb5.conf /etc/krb5.conf
 COPY user.js /tmp/user.js
 COPY kinit.sh /headless/kinit.sh

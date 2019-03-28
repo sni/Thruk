@@ -31,7 +31,7 @@ my $test = TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/extinfo.cgi?type=0&view_mode=json',
     'like'   => [
                 'peer_addr',
-                'https://127.0.0.1:60443/demo/thruk/',
+                'https://127.0.0.3:60443/demo/thruk/',
                 'data_source_version',
             ],
 );

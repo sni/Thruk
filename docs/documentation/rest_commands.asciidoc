@@ -55,6 +55,7 @@ Some of the arguments have default values:
   - `start_time`:     defaults to now
   - `end_time`:       defaults to now + downtime_duration from the thruk.conf
 
+
 === Relative timestamps
 
 Timestamps, like start_date and end_date can be relative to get more reusable commands.
@@ -70,7 +71,6 @@ This will create a 1hour downtime. Other suffixes are:
   - `d`: days
   - `h`: hours
   - `m`: minutes
-
 
 
 == Example Usage

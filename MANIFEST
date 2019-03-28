@@ -1894,6 +1894,8 @@ t/scenarios/auth_krb5/remote/krb5.conf
 t/scenarios/auth_krb5/remote/naemon_grafana_example.cfg
 t/scenarios/auth_krb5/remote/playbook.yml
 t/scenarios/auth_krb5/t/100-auth-krb5.t
+t/scenarios/auth_krb5/t/local/auth.t
+t/scenarios/auth_krb5/t/local_test.sh
 t/scenarios/auth_krb5/vnc/Dockerfile
 t/scenarios/auth_krb5/vnc/kinit.sh
 t/scenarios/auth_krb5/vnc/krb5.conf

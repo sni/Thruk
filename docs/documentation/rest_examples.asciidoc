@@ -49,6 +49,8 @@ neccessary. You can use relative arguments for the start- and end-time. For
 example `now` will be replaced with the current timestamp while `+60m` will
 be 60 minutes in the future.
 
+Read more about link:rest_commands.html#relative-timestamps[relative timestamps].
+
 `start_time` is optional and will be set to the current timestamp.
 
 `end_time` is optional as well and will be set to the default `downtime_duration`.

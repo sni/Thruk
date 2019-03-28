@@ -2,7 +2,19 @@ package Thruk::Controller::conf;
 
 use strict;
 use warnings;
-use Module::Load qw/load/;
+use Monitoring::Config;
+use Socket qw/inet_ntoa/;
+use File::Copy;
+use Cpanel::JSON::XS;
+use Storable qw/dclone/;
+use Data::Dumper qw/Dumper/;
+use File::Slurp qw/read_file/;
+use Encode qw/decode_utf8 encode_utf8/;
+use Digest::MD5 qw/md5_hex/;
+use Thruk::Utils::References;
+use Thruk::Utils::Conf;
+use Thruk::Utils::Conf::Defaults;
+use Thruk::Utils::Plugin;
 use Thruk::Authentication::User;
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -29,24 +41,6 @@ sub index {
     # Safe Defaults required for changing backends
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
     #&timing_breakpoint('index start');
-
-    if(!$c->config->{'conf_modules_loaded'}) {
-        load Thruk::Utils::References;
-        load Thruk::Utils::Conf;
-        load Thruk::Utils::Conf::Defaults;
-        load Monitoring::Config;
-        load Socket, qw/inet_ntoa/;
-        load File::Copy;
-        load Cpanel::JSON::XS;
-        load Storable, qw/dclone/;
-        load Data::Dumper, qw/Dumper/;
-        load File::Slurp, qw/read_file/;
-        load Encode, qw(decode_utf8 encode_utf8);
-        load Digest::MD5, qw(md5_hex);
-        load Thruk::Utils::Plugin;
-        $c->config->{'conf_modules_loaded'} = 1;
-    }
-    #&timing_breakpoint('index modules loaded');
 
     my $subcat = $c->req->parameters->{'sub'}    || '';
     my $action = $c->req->parameters->{'action'} || 'show';
