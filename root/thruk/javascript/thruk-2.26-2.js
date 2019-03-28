@@ -6682,13 +6682,19 @@ var ajax_search = {
         var x = 0;
         var results_per_type = Math.ceil(ajax_search.max_results / results.length);
         ajax_search.res   = new Array();
-        var has_more = 0;
+        var limit_hit = false;
+        var has_more  = false;
         jQuery.each(results, function(index, type) {
             var cur_count = 0;
             var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
             if(type.results.length == 1) { name = name.substring(0, name.length -1); }
             name = name.replace(/ss$/, 's');
-            resultHTML += '<li><b><i>' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
+            if(type.results.length >= ajax_search.limit) {
+                resultHTML += '<li><b><i>over ' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
+                limit_hit = true;
+            } else {
+                resultHTML += '<li><b><i>' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
+            }
             jQuery.each(type.results, function(index, data) {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display || data.name || "";
@@ -6731,11 +6737,11 @@ var ajax_search = {
                     x++;
                     cur_count++;
                 } else {
-                    has_more = 1;
+                    has_more = true;
                 }
             });
         });
-        if(has_more == 1) {
+        if(has_more) {
             var id = "suggest_item_"+x
             var classname = "item";
             if(selected != -1 && selected == x) {
@@ -6743,6 +6749,9 @@ var ajax_search = {
             }
             resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="more" onmousedown="ajax_search.set_result(this.rev); return false;"><b>more...<\/b><\/a><\/li>';
             x++;
+        }
+        else if(ajax_search.show_all && limit_hit) {
+            resultHTML += '<li><b><span style="color: #EB6900;">too many results, be more specific<\/span><\/b><\/li>';
         }
         ajax_search.result_size = x;
         if(results.length == 0) {
