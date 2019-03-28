@@ -39,7 +39,15 @@ sub _decode_parameters {
     my @flatten  = $stuff->flatten;
     my @decoded;
     while(my($k, $v) = splice(@flatten, 0, 2)) {
-        push @decoded, $encoding->decode($k), $encoding->decode($v);
+        my $v_decoded;
+        if (ref $v eq 'ARRAY') {
+            foreach (@{$v}) {
+                push @{$v_decoded}, $encoding->decode($_);
+            }
+        } else {
+                $v_decoded = $encoding->decode($v);
+        }
+        push @decoded, $encoding->decode($k), $v_decoded;
     }
     return Hash::MultiValue->new(@decoded);
 }
