@@ -16,7 +16,7 @@ use Cwd qw/abs_path/;
 
 use 5.008000;
 
-our $VERSION = '2.26';
+our $VERSION = '2.28';
 
 ###################################################
 # create connection pool

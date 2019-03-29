@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.28     Fri Mar 29 17:27:48 CET 2019
           - rename graph_proxy option into http_backend_reverse_proxy
           - add `tree` sitepanel for very large setups with many sites
           - add parents to selectable columns
