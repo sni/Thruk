@@ -972,6 +972,12 @@ sub outages {
         $l->{'start'}    = $start if $start > $l->{'start'};
         $l->{'real_end'} = $end   if $end   < $l->{'real_end'};
         $l->{'duration'} = $l->{'real_end'} - $l->{'start'};
+        if($l->{'real_end'} == $l->{'end'}) {
+            $l->{'end'} = ""; # not yet ended
+        } else {
+            $l->{'end'} = $l->{'real_end'};
+        }
+        delete $l->{'real_end'};
         if($l->{'duration'} > 0) {
             push @{$outages}, $l;
         }

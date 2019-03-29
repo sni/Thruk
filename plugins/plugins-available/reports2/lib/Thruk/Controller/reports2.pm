@@ -142,6 +142,9 @@ sub index {
         elsif($action eq 'download_debug') {
             return report_download_debug($c, $report_nr);
         }
+        elsif($action eq 'download_json') {
+            return report_download_json($c, $report_nr);
+        }
         elsif($action eq 'list') {
             $c->stash->{'filtered'} = 1;
         }
@@ -380,7 +383,7 @@ sub report_profile {
 =head2 report_download_debug
 
 =cut
-sub report_download_debug{
+sub report_download_debug {
     my($c, $report_nr) = @_;
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
@@ -401,6 +404,35 @@ sub report_download_debug{
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+}
+
+##########################################################
+
+=head2 report_download_json
+
+=cut
+sub report_download_json {
+    my($c, $report_nr) = @_;
+
+    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    if(!$report) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    }
+    if(!$report->{'var'}->{'json_file'}) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no json data for this report', code => 404 });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    }
+
+    my $name = $report->{'var'}->{'json_file'};
+    $name =~ s|^.*/||gmx;
+    $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
+    $c->res->headers->content_type('text/json');
+    open(my $fh, '<', $report->{'var'}->{'json_file'});
+    binmode $fh;
+    $c->res->body($fh);
+    $c->{'rendered'} = 1;
+    return 1;
 }
 
 ##########################################################

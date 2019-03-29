@@ -33,6 +33,8 @@ next:
             - add color selector to grafana images
             - add axis color option to speedometer
             - fix saving permissions when list is empty
+          - Reporting:
+            - add switch to attach raw json data
           - internals:
             - move libraries to vendor folder
             - update jquery to 3.3.1

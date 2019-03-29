@@ -314,6 +314,15 @@ sub report_send {
         );
     }
 
+    if($report->{'var'}->{'json_file'} && -e $report->{'var'}->{'json_file'}) {
+        $msg->attach(Type    => 'text/json',
+                 Path        => $report->{'var'}->{'json_file'},
+                 Filename    => encode_utf8(Thruk::Utils::basename($report->{'var'}->{'json_file'})),
+                 Disposition => 'attachment',
+                 Encoding    => 'base64',
+        );
+    }
+
     if($ENV{'THRUK_MAIL_TEST'}) {
         $msg->send_by_testfile($ENV{'THRUK_MAIL_TEST'});
         return 1;
@@ -465,6 +474,10 @@ sub generate_report {
         unlink($options->{'var'}->{'debug_file'});
         undef($options->{'var'}->{'debug_file'});
     }
+    if($options->{'var'}->{'json_file'}) {
+        unlink($options->{'var'}->{'json_file'});
+        undef($options->{'var'}->{'json_file'});
+    }
 
     # empty logfile
     my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
@@ -609,6 +622,15 @@ sub generate_report {
             my $error = "Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n";
             return(_report_die($c, $nr, $error, $logfile));
         }
+    }
+
+    if($c->req->parameters->{'attach_json'}) {
+        my $json_attachment = $c->config->{'var_path'}.'/reports/'.$nr.'.json';
+        my $json = {};
+        $json->{'outages'}      = $c->stash->{'last_outages'} if $c->stash->{'last_outages'};
+        $json->{'availability'} = $c->stash->{'last_availability'} if $c->stash->{'last_availability'};
+        Thruk::Utils::IO::json_lock_store($json_attachment, $json, 0);
+        Thruk::Utils::IO::json_lock_patch($report_file, { var => { json_file => $json_attachment } }, 1);
     }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 95, 'clean up') if $ENV{'THRUK_JOB_DIR'};
@@ -1267,6 +1289,10 @@ sub _read_report_file {
     }
     if($report->{'var'}->{'debug_file'} && !-e $report->{'var'}->{'debug_file'}) {
         delete $report->{'var'}->{'debug_file'};
+        $needs_save = 1;
+    }
+    if($report->{'var'}->{'json_file'} && !-e $report->{'var'}->{'json_file'}) {
+        delete $report->{'var'}->{'json_file'};
         $needs_save = 1;
     }
 

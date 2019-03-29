@@ -3289,4 +3289,20 @@ sub dump_params {
 
 ##############################################
 
+=head2 basename
+
+    basename($path)
+
+returns basename for given path
+
+=cut
+sub basename {
+    my($path) = @_;
+    my $basename = $path;
+    $basename    =~ s%^.*/%%gmx;
+    return($basename);
+}
+
+##############################################
+
 1;

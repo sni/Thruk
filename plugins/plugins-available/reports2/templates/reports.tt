@@ -139,6 +139,9 @@
         [% END %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=email" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/email_attach.png' border="0" alt='Send Report by Mail' title='Send Report by Mail' width=16 height=16></a>
+        [% IF r.var.exists("json_file") %]
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_json" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='Download JSON raw data' title='Download JSON raw data' width=16 height=16></a>
+        [% END %]
       [% END %]
     </td>
   </tr>
