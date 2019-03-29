@@ -3116,17 +3116,9 @@ sub get_timezone_data {
     } else {
         load "DateTime";
         load "DateTime::TimeZone";
-        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+        my $dt = DateTime->now;
         for my $name (DateTime::TimeZone->all_names) {
-            my $dt = DateTime->new(
-                year      => $year+1900,
-                month     => $mon+1,
-                day       => $mday,
-                hour      => $hour,
-                minute    => $min,
-                second    => $sec,
-                time_zone => $name,
-            );
+            $dt->set_time_zone($name);
             push @{$timezones}, {
                 text   => $name,
                 abbr   => $dt->time_zone()->short_name_for_datetime($dt),
