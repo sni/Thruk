@@ -551,7 +551,7 @@ sub generate_report {
     my $orig_stat_ttl = $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'};
     $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = 0;
 
-    # prepage stage, functions here could still change stash
+    # prepare stage, functions here could still change stash
     eval {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 5, 'preparing') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'prepare';
@@ -1298,7 +1298,6 @@ sub _read_report_file {
         if(!$report->{'long_error'} && $report->{'error'} =~ m/\n/mx) {
             ($report->{'error'}, $report->{'long_error'}) = split(/\n/mx, $report->{'error'}, 2);
         }
-        $needs_save = 1 if $report->{'error'};
     }
 
     # preset values from data
