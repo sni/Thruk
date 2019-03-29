@@ -15,6 +15,7 @@ my $src   = "https://raw.githubusercontent.com/naemon/naemon-core/master/src/nae
 my $cache = "/var/tmp/naemon_commands.c";
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+plan skip_all => 'Internet required. Unset $ENV{TEST_SKIP_INTERNET} to run this test.' if $ENV{TEST_SKIP_INTERNET};
 eval "use LWP::Protocol::https";
 if($@) {
     plan skip_all => 'missing module: LWP::Protocol::https';
