@@ -75,7 +75,7 @@ This will create a 1hour downtime. Other suffixes are:
 
 == Example Usage
 
-All examples can be found on the link:rest_examples.html#sending_commands[REST API Examples page].
+All examples can be found on the link:rest_examples.html#sending-commands[REST API Examples page].
 
 == Endpoints
 

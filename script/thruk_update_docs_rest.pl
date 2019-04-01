@@ -310,8 +310,9 @@ sub _update_docs {
             my $name = $cmd;
             $name =~ s%.*/cmd/%%gmx;
             my $link = $cmd;
+            $link =~ s%[/<>]+%%gmx;
             $link =~ s%[^a-z_]+%-%gmx;
-            push @{$doc}, " - link:rest_commands.html#post".$link."[".$name."]";
+            push @{$doc}, " - link:rest_commands.html#post-".$link."[".$name."]";
         }
         $docs->{$url.'/...'}->{'POST'} = $doc;
         $paths->{$url.'/...'}->{'POST'} = 1;

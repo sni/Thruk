@@ -493,7 +493,7 @@ ex.:
 Disable the possibility for a user to change his password.
 Only works with htpasswd passwords. To make this work
 you have to set a `htpasswd` entry in the
-link:configuration.html#component-thruk-plugin-configtool[Config Tool] section.
+link:configuration.html#component-thrukpluginconfigtool[Config Tool] section.
 
 ex.:
 
