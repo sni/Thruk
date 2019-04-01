@@ -565,8 +565,10 @@ sub _process_service_page {
             }
         }
     }
-    $service->{'depends_exec'}   = Thruk::Utils::merge_service_dependencies($service, $service->{'depends_exec'});
-    $service->{'depends_notify'} = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_notify'});
+    $service->{'depends'}         = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_exec'}, $service->{'depends_notify'});
+    $service->{'depends_exec'}    = Thruk::Utils::merge_service_dependencies($service, $service->{'depends_exec'});
+    $service->{'depends_notify'}  = Thruk::Utils::merge_service_dependencies($service, $service->{'depends_notify'});
+    $service->{'depends_parents'} = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'});
 
     return $c->detach('/error/index/15') unless defined $service;
 

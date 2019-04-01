@@ -56,7 +56,7 @@
           </div><br>
           [% END %]
           [% IF host.depends.size > 0 %]
-          <div class='data'>Depends:</div>
+          <div class='data'>Depends On:</div>
           <div class='dataTitle'>
             [% FOREACH depend IN host.depends.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=1&host=[% depend | uri %]">[% depend | html %]</a>[% END %]
           </div><br>

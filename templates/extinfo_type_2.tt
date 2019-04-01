@@ -54,10 +54,10 @@
             </form>
           </div>
           [% END %]
-          [% IF service.depends_exec.size > 0 %]
-          <div class='data'>Parents:</div>
+          [% IF service.depends.size > 0 %]
+          <div class='data'>Depends On:</div>
           <div class='dataTitle'>
-            [% FOREACH parent IN service.depends_notify.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
+            [% FOREACH parent IN service.depends.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
           </div><br>
           [% END %]
           [% IF service.groups.size > 0 %]
@@ -273,6 +273,9 @@
                                 [% IF first_remaining >= 0 %]
                                   &nbsp;<span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
                                 [% END %]
+                              [% END %]
+                              [% IF service.depends_parents.size > 0 %]
+                              (parents: [% FOREACH parent IN service.depends_parents %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
                               [% END %]
                               [% IF service.depends_notify.size > 0 %]
                               (dependency: [% FOREACH parent IN service.depends_notify %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
