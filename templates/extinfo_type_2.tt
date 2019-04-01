@@ -57,7 +57,7 @@
           [% IF service.depends_exec.size > 0 %]
           <div class='data'>Parents:</div>
           <div class='dataTitle'>
-            [% FOREACH parent IN service.depends_exec.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
+            [% FOREACH parent IN service.depends_notify.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
           </div><br>
           [% END %]
           [% IF service.groups.size > 0 %]

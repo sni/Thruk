@@ -3236,7 +3236,7 @@ sub merge_service_dependencies {
         next unless $l;
         for my $el (@{$l}) {
             if(ref $el eq 'ARRAY') {
-                push @{$depends}, @{$el};
+                push @{$depends}, $el;
             } else {
                 push @{$depends}, [$service->{'host_name'}, $el];
             }
