@@ -403,7 +403,7 @@ sub _process_host_page {
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output contacts/] );
 
-    return $c->detach('/error/index/5') if(!defined $hosts || $hosts->[0]);
+    return $c->detach('/error/index/5') if(!defined $hosts || !defined $hosts->[0]);
 
     # we only got one host
     $host = $hosts->[0];
