@@ -225,7 +225,7 @@ function bodyOnLoad(refresh) {
             stopRefresh();
         } else {
             setRefreshRate(refresh);
-            jQuery(window).bind("mousemove click keyup", updateLastUserInteraction);
+            jQuery(window).bind("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
         }
     }
 
@@ -1417,10 +1417,14 @@ function toggleBackend(backend, state, skip_update) {
   // remove &backends=... from url, they would overwrite cookie settings
   removeParams['backends'] = true;
 
-  var delay = 3;
+  var delay = 2;
   if(show_sitepanel == 'collapsed') { delay = 10; }
   if(show_sitepanel == 'tree')      { delay = 30; }
-  setRefreshRate(delay);
+  if(show_sitepanel == 'list') {
+    window.setTimeout(reloadPage, delay*1000);
+  } else {
+    setRefreshRate(delay);
+  }
 
   if(skip_update == undefined || !skip_update) {
     updateSitePanelCheckBox();
