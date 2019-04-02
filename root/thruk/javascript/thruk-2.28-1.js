@@ -6330,6 +6330,11 @@ var ajax_search = {
                 search_url = search_url + "&type=custom value&var=" + varField.value;
             }
         }
+        if(ajax_search.search_type == 'hosts')         { ajax_search.search_type = 'host'; }
+        if(ajax_search.search_type == 'hostgroups')    { ajax_search.search_type = 'hostgroup'; }
+        if(ajax_search.search_type == 'services')      { ajax_search.search_type = 'service'; }
+        if(ajax_search.search_type == 'servicegroups') { ajax_search.search_type = 'servicegroup'; }
+        if(ajax_search.search_type == 'contacts')      { ajax_search.search_type = 'contact'; }
         if(ajax_search.search_type == 'none') {
             removeEvent( input, 'keyup', ajax_search.suggest );
             return true;
@@ -6396,17 +6401,16 @@ var ajax_search = {
         ajax_search.error    = false;
 
         // show searching results
-        var input = document.getElementById(ajax_search.input_field);
         ajax_search.base = {};
         ajax_search.suggest();
-        ajax_search.initialized_q = input.value;
+        ajax_search.initialized_q = ajax_search.get_current_input_search_pattern();
 
         // fill data store
         jQuery.ajax({
             url: search_url,
             data: {
                 limit: ajax_search.limit,
-                query: ajax_search.initialized_q != "all" ? ajax_search.initialized_q : undefined
+                query: ajax_search.initialized_q
             },
             type: 'POST',
             success: function(data) {
@@ -6427,6 +6431,39 @@ var ajax_search = {
                 ajax_search.initialized = false;
             }
         });
+    },
+
+    get_current_input_search_pattern: function() {
+        var input = document.getElementById(ajax_search.input_field);
+        var pattern = input.value;
+        if(pattern == "all") { pattern = ""; }
+        if(ajax_search.search_for_cb) {
+            pattern = ajax_search.search_for_cb(pattern)
+        }
+        if(ajax_search.list) {
+            /* only use the last list element for search */
+            var regex  = new RegExp(ajax_search.list, 'g');
+            var range  = getCaret(input);
+            var before = pattern.substr(0, range);
+            var after  = pattern.substr(range);
+            var rever  = reverse(before);
+            var index  = rever.search(regex);
+            if(index != -1) {
+                var index2  = after.search(regex);
+                if(index2 != -1) {
+                    pattern = reverse(rever.substr(0, index)) + after.substr(0, index2);
+                } else {
+                    pattern = reverse(rever.substr(0, index)) + after;
+                }
+            } else {
+                // possible on the first elem, then we search for the first delimiter after the cursor
+                var index  = pattern.search(regex);
+                if(index != -1) {
+                    pattern = pattern.substr(0, index);
+                }
+            }
+        }
+        return(pattern);
     },
 
     /* hide the search results */
@@ -6532,43 +6569,16 @@ var ajax_search = {
             ajax_search.base = [{ name: 'prioritys', data: ["1","2","3","4","5"] }];
         }
 
-        pattern = input.value;
-        if(pattern == "all") { pattern = ""; }
-        if(ajax_search.search_for_cb) {
-            pattern = ajax_search.search_for_cb(pattern)
-        }
-        if(ajax_search.list) {
-            /* only use the last list element for search */
-            var regex  = new RegExp(ajax_search.list, 'g');
-            var range  = getCaret(input);
-            var before = pattern.substr(0, range);
-            var after  = pattern.substr(range);
-            var rever  = reverse(before);
-            var index  = rever.search(regex);
-            if(index != -1) {
-                var index2  = after.search(regex);
-                if(index2 != -1) {
-                    pattern = reverse(rever.substr(0, index)) + after.substr(0, index2);
-                } else {
-                    pattern = reverse(rever.substr(0, index)) + after;
-                }
-            } else {
-                // possible on the first elem, then we search for the first delimiter after the cursor
-                var index  = pattern.search(regex);
-                if(index != -1) {
-                    pattern = pattern.substr(0, index);
-                }
-            }
-        }
-        if(pattern.length >= 1 || ajax_search.search_type != 'all') {
+        var search_pattern = ajax_search.get_current_input_search_pattern();
+        if(search_pattern.length >= 1 || ajax_search.search_type != 'all') {
             var needs_refresh = false;
-            prefix = pattern.substr(0,3);
+            prefix = search_pattern.substr(0,3);
             if(prefix == 'ho:' || prefix == 'hg:' || prefix == 'se:' || prefix == 'sg:') {
-                pattern = pattern.substr(3);
+                search_pattern = search_pattern.substr(3);
             }
 
             // remove empty strings from pattern array
-            pattern = get_trimmed_pattern(pattern);
+            var pattern = get_trimmed_pattern(search_pattern);
             var results = new Array();
             jQuery.each(ajax_search.base, function(index, search_type) {
                 var sub_results = new Array();
@@ -6639,7 +6649,7 @@ var ajax_search = {
                       }
                   });
                 }
-                if(ajax_search.initialized_q && (ajax_search.initialized_q.length > input.value.length || (search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != input.value))) {
+                if(ajax_search.initialized_q && (!ajax_search.initialized_q.match(search_pattern) || ajax_search.initialized_q.length > search_pattern.length || (search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != search_pattern))) {
                     // refresh data
                     needs_refresh = true;
                 }
@@ -7444,12 +7454,16 @@ function init_tool_list_wizard(id, type) {
             var options = [];
             var size = result.length;
             for(var x=0; x<size;x++) {
-                if(strip) {
-                    result[x] = result[x].replace(/^(.*)\ \-\ .*/, '$1');
+                var name  = result[x];
+                if(result[x] && result[x]['name']) {
+                    name = result[x]['name'];
                 }
-                if(!selected_members_h[result[x]]) {
-                    available_members.push(result[x]);
-                    options.push(new Option(result[x], result[x]));
+                if(strip) {
+                    name = name.replace(/^(.*)\ \-\ .*$/, '$1');
+                }
+                if(!selected_members_h[name]) {
+                    available_members.push(name);
+                    options.push(new Option(name, name));
                 }
             }
             set_select_options(id+"available_members", options, true);

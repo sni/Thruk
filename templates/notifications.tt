@@ -112,7 +112,7 @@
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Service:</td>
-              <td><input type='text' name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"></td>
+              <td><input type='text' name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"></td>
             </tr>
             <tr>
               <td align="left" class='optBoxItem'>Older Entries First:</td>

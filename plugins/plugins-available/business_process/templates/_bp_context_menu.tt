@@ -408,14 +408,14 @@
     <tr class="supports_link">
       <th align="right" valign="top">Contact Groups</th>
       <td align="left">
-        <input type="text" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '[ ,]' })">
+        <input type="text" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '\\s*,\\s*' })">
         <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contact groups" onclick="bpRemoveAttribute('contactgroups'); return false;">
       </td>
     </tr>
     <tr class="supports_link">
       <th align="right" valign="top">Contacts</th>
       <td align="left">
-        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: false })">
+        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '\\s*,\\s*', striped: false })">
         <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contacts" onclick="bpRemoveAttribute('contacts'); return false;">
       </td>
     </tr>
