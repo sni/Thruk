@@ -121,7 +121,7 @@
 %]
 <tr>
   <th align="right">Host</th>
-  <td align="left"><input type="text" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"></td>
+  <td align="left"><input type="text" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"></td>
 </tr>
 <tr>
   <th align="right">Service</th>
@@ -132,7 +132,7 @@
       <option value="=">=</option>
       <option value="!=">!=</option>
     </select>
-    <input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description" onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })">
+    <input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })">
   </td>
 </tr>
 [% END %]
