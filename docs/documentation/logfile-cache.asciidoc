@@ -200,5 +200,6 @@ if using OMD, change the path to
 thruk_local.conf
 -------
 logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga ./share/thruk/support/icinga2_ido_fetchlogs.sh mysql
+-------
 
 For postgres database replace the literal 'mysql' with 'postgres' in the command above.
