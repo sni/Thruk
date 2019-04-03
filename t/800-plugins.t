@@ -54,7 +54,7 @@ for my $p (@{$plugins}) {
     for my $testfile (glob("plugins/plugins-available/".$p->{'name'}."/t/*.t"), @{$extra_tests}) {
         TestUtils::test_command({
             cmd     => sprintf("%s %s plugins/plugins-available/%s", $^X, $testfile, $p->{'name'}),
-            like    => ['/ok/'],
+            like    => ['/ok|\#\ SKIP/'],
             unlike  => ['/not ok/'],
             exit    => 0,
           });
