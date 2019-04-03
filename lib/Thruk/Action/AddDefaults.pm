@@ -272,6 +272,13 @@ sub begin {
     # ex.: global bookmarks from var/global_user_data
     $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
 
+    # do some sanity checks
+    if($c->req->parameters->{'referer'}) {
+        if($c->req->parameters->{'referer'} =~ m/^(\w+:\/\/|\/\/)/mx) {
+            return $c->error("unsupported referer");
+        }
+    }
+
     $c->stats->profile(end => "Root begin");
     return 1;
 }
