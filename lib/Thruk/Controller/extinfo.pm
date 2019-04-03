@@ -850,7 +850,7 @@ sub _apache_status {
     $ua->max_redirect(0);
     # pass through authentication
     my $cookie = $c->cookie('thruk_auth');
-    $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value) if $cookie;
+    $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value.'; HttpOnly') if $cookie;
     $ua->default_header('Authorization' => $c->req->header('authorization')) if $c->req->header('authorization');
     my $res = $ua->get($url);
     if($res->code == 200) {

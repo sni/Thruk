@@ -130,8 +130,9 @@ sub index {
             elsif($success) {
                 $c->stash->{'remote_user'} = $login;
                 $c->cookie('thruk_auth' => $success, {
-                    path    => $cookie_path,
-                    domain  => $cookie_domain,
+                    path     => $cookie_path,
+                    domain   => $cookie_domain,
+                    httponly => 1,
                 });
 
                 # clean failed logins
@@ -222,9 +223,10 @@ sub _invalidate_current_session {
     my($c, $cookie_path, $sdir) = @_;
     my $cookie = $c->cookie('thruk_auth');
     $c->cookie('thruk_auth' => '', {
-        expires => 0,
-        path    => $cookie_path,
-        domain  => _get_cookie_domain($c),
+        expires  => 0,
+        path     => $cookie_path,
+        domain   => _get_cookie_domain($c),
+        httponly => 1,
     });
     if(defined $cookie and defined $cookie->value) {
         my $sessionid = $cookie->value;

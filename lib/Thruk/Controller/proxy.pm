@@ -105,7 +105,7 @@ sub index {
 
     # in case we don't have a cookie yet, set the last session_id, so it can be reused
     if(!$c->req->cookies->{'thruk_auth'}) {
-        $c->res->cookies->{'thruk_auth'} = {value => $session_id, path => $c->stash->{'cookie_path'} };
+        $c->res->cookies->{'thruk_auth'} = {value => $session_id, path => $c->stash->{'cookie_path'}, 'httponly' => 1 };
     }
 
     _cleanup_response($c, $peer, $url, $res);
@@ -194,7 +194,7 @@ sub _add_cookie {
     my($req, $name, $val) = @_;
     my $cookies = $req->header('cookie');
     if(!$cookies) {
-        $req->header('cookie', $name.'='.$val.';');
+        $req->header('cookie', $name.'='.$val.'; HttpOnly');
         return;
     }
     $cookies =~ s%$name=.*?(;\s*|$)%%gmx;

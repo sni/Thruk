@@ -427,7 +427,15 @@ sub cache {
 
 =head2 cookie
 
-$c->cookie()
+$c->cookie($name, [$value], [$options])
+
+retrieves a cookie_path
+
+sets a cookie if value is defined
+
+options are available as descrbed here: L<Plack::Response/cookies>
+
+basically: domain, expires, path, httponly, secure, max-age
 
 =cut
 sub cookie {
