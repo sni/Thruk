@@ -52,6 +52,10 @@ my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/th
 for my $dir (@dirs) {
     check_templates($dir.'/');
 }
+@dirs = glob("./lib ./plugins/plugins-available/*/lib");
+for my $dir (@dirs) {
+    check_libs($dir.'/');
+}
 done_testing();
 
 sub check_templates {
@@ -74,12 +78,12 @@ sub check_templates {
         check_templates($folder);
     }
     for my $file (sort @files) {
-        check_file($file);
+        check_templates_file($file);
     }
     return;
 }
 
-sub check_file {
+sub check_templates_file {
     my($file) = @_;
     return if($filter && $file !~ m%$filter%mx);
     return if($file =~ m%templates/excel%mx);
@@ -181,6 +185,51 @@ sub check_file {
             $failed++;
         }
     }
+
+    if(!$failed) {
+        ok(1, $file." seems to be ok");
+    }
+}
+
+sub check_libs {
+    my($dir) = @_;
+    my(@files, @folders);
+    opendir(my $dh, $dir) || die $!;
+    while(my $file = readdir $dh) {
+        next if $file eq '.';
+        next if $file eq '..';
+        if($file =~ m/\.p(l|m)$/mx) {
+            push @files, $dir.$file;
+        }
+        elsif(-d $dir.$file) {
+            push @folders, $dir.$file.'/';
+        }
+    }
+    closedir $dh;
+
+    for my $folder (sort @folders) {
+        check_libs($folder);
+    }
+    for my $file (sort @files) {
+        check_libs_file($file);
+    }
+    return;
+}
+
+sub check_libs_file {
+    my($file) = @_;
+    my $content = read_file($file);
+    my $failed = 0;
+
+    # do not put json encoded structures into stash, instead use json_encode() from within the template
+    while($content =~ m%(\$c->stash[^\n]*encode[^\n]*)%gms) {
+        my $match = substr($content, $-[0], $+[0]-$-[0]);
+        my $linenr = 1 + substr($content,0,$-[0]) =~ y/\n//;
+        next if $match =~ m/Thruk::Utils::Filter::json_encode/gmx;
+        fail(sprintf("%s:%d puts encoded structure into stash, better use encoding function from within the template or Thruk::Utils::Filter::json_encode directly: %s", $file, $linenr, $match));
+        $failed++;
+    }
+
     if(!$failed) {
         ok(1, $file." seems to be ok");
     }
