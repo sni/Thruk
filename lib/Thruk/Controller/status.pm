@@ -454,7 +454,7 @@ sub _process_details_page {
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 1;
     my $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     my $sortoptions = {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
@@ -477,7 +477,7 @@ sub _process_details_page {
 
     # reverse order for duration
     my $backend_order = $order;
-    if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+    if($sortoption eq "6") { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state, $keep_state_order);
     if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
@@ -594,7 +594,7 @@ sub _process_hostdetails_page {
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 1;
     my $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     my $sortoptions = {
         '1' => [ 'name', 'host name' ],
         '4' => [ [ 'last_check',              'name' ], 'last check time' ],
@@ -615,7 +615,7 @@ sub _process_hostdetails_page {
 
     # reverse order for duration
     my $backend_order = $order;
-    if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+    if($sortoption eq "6") { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state);
     if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
@@ -1052,7 +1052,7 @@ sub _process_combined_page {
     my $sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
     my $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     my $sortoptions = {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
@@ -1088,14 +1088,14 @@ sub _process_combined_page {
                                                         extra_columns => $extra_columns,
                                                       );
     $c->stash->{'services'} = $services;
-    if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
+    if( $sortoption eq "6" and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
 
 
     # hosts
     $sorttype   = $c->req->parameters->{'sorttype_hst'}   || 1;
     $sortoption = $c->req->parameters->{'sortoption_hst'} || 7;
     $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     $sortoptions = {
         '1' => [ 'name', 'host name' ],
         '4' => [ [ 'last_check',              'name' ], 'last check time' ],
@@ -1324,6 +1324,7 @@ sub _process_bookmarks {
         for my $bookmark (@{Thruk::Utils::list($bookmarks)}) {
             next unless defined $bookmark;
             my($section, $name) = split(/::/mx, $bookmark ,2);
+            next unless defined $name;
             $keep->{$section}->{$name} = 1;
         }
 

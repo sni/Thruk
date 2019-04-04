@@ -299,6 +299,7 @@ sub retrieve_session {
         $sessionid = $id;
         my $sdir     = $c->config->{'var_path'}.'/sessions';
         $sessionfile = $sdir.'/'.$sessionid;
+        return if $id !~ m/^[a-zA-Z0-9]*$/mx;
     }
     my $data;
     return unless -e $sessionfile;

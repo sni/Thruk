@@ -162,7 +162,7 @@ sub begin {
         $key =~ s/\ /_/gmx;
         $menu_states->{$key} = $val;
     }
-    if( defined $c->cookie('thruk_side') ) {
+    if($c->cookie('thruk_side') ) {
         for my $state (@{$c->cookies('thruk_side')->{'value'}}) {
             my($k,$v) = split(/=/mx,$state,2);
             $k = lc $k;

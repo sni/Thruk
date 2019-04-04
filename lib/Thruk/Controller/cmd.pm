@@ -235,7 +235,11 @@ sub index {
             else {
                 return $c->detach('/error/index/7');
             }
-            my( $host, $service, $backend ) = split /;/mx, $servicedata;
+            my($host, $service, $backend)   = split /;/mx, $servicedata;
+            if(!defined $service) {
+                $c->error("invalid data, no host or service received");
+                return $c->detach('/error/index/100');
+            }
             my @backends                    = split /\|/mx, $backend;
             $c->stash->{'lasthost'}         = $host;
             $c->stash->{'lastservice'}      = $service;
@@ -260,7 +264,7 @@ sub index {
                     if($c->stash->{'thruk_message'}) {
                         Thruk::Utils::append_message( $c, "\ncommand for $service on host $host failed" );
                     } else {
-                        Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
+                        Thruk::Utils::set_message( $c, 'fail_message', sprintf("command for %s on host %s failed", $service, $host));
                     }
                     Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for $service on host $host failed");

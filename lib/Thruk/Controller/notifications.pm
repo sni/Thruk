@@ -158,7 +158,7 @@ sub index {
 sub _get_log_prop_filter {
     my ( $number ) = @_;
 
-    $number = 0 if !defined $number || $number <= 0 || $number > 32767;
+    $number = 0 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 32767;
     my @prop_filter;
     if($number > 0) {
         my @bits = reverse split(/\ */mx, unpack("B*", pack("N", int($number))));

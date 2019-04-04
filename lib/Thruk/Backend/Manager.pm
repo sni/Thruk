@@ -2057,6 +2057,7 @@ sub _page_data {
     return $data unless $view_mode eq 'html';
     my $entries = $c->req->parameters->{'entries'} || $default_result_size;
     return $data unless defined $entries;
+    return $data unless $entries =~ m/^(\d+|all)$/mx;
     $c->stash->{'entries_per_page'} = $entries;
 
     # we dont use paging at all?
