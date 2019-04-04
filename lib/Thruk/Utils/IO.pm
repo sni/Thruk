@@ -18,6 +18,7 @@ use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
 use Cpanel::JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
+use IO::Select ();
 use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
 use Time::HiRes qw/sleep/;
@@ -535,21 +536,31 @@ sub cmd {
         $c->log->debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
+        my $sel = IO::Select->new;
+        $sel->add($rdr);
         if($stdin) {
             print $wtr $stdin,"\n";
-            CORE::close($wtr);
         }
+        CORE::close($wtr);
 
-        while(POSIX::waitpid($pid, WNOHANG) == 0) {
-            my @line = <$rdr>;
-            push @lines, @line;
-            print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
+        while(my @ready = $sel->can_read) {
+            foreach my $fh (@ready) {
+                my $line;
+                my $len = sysread $fh, $line, 8192;
+                if(!defined $len){
+                    die "Error from child: $!\n";
+                } elsif ($len == 0){
+                    $sel->remove($fh);
+                    next;
+                } else {
+                    push @lines, $line;
+                    print $print_prefix, $line if defined $print_prefix;
+                }
+            }
         }
+        # reap process
+        POSIX::waitpid($pid, 0);
         $rc = $?;
-        while(defined <$rdr>) {
-            push @lines, ($_ // '');
-            print $print_prefix.($_ // '') if defined $print_prefix;
-        }
         @lines = grep defined, @lines;
         $output = join('', @lines) // '';
         $output = Thruk::Utils::decode_any($output);
