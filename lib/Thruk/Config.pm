@@ -1238,7 +1238,10 @@ sub _parse_rows {
             }
         }
         if(substr($v,0,1) eq '"') {
-            $v =~ s|^"([^"]*)"$|$1|gmxo;
+            $v =~ s|^"(.*)"$|$1|gmxo;
+        }
+        elsif(substr($v,0,1) eq "'") {
+            $v =~ s|^'(.*)'$|$1|gmxo;
         }
         if(!defined $conf->{$k}) {
             $conf->{$k} = $v;
