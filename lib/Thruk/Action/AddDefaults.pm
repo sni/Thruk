@@ -170,9 +170,7 @@ sub begin {
             $menu_states->{$k} = $v;
         }
     }
-
-    $c->stash->{'menu_states'}      = $menu_states;
-    $c->stash->{'menu_states_json'} = encode_json($menu_states);
+    $c->stash->{'menu_states'} = $menu_states;
 
     my $target = $c->req->parameters->{'target'};
     if( !$c->stash->{'use_frames'} && defined $target && $target eq '_parent' ) {

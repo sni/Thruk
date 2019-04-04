@@ -583,9 +583,9 @@ sub json_encode {
     # do not use utf8 here, results in double encoding because object should be utf8 already
     # for example business processes having utf8 characters in the plugin output
     if(scalar @_ > 1) {
-        return Cpanel::JSON::XS->new->encode([@_]);
+        return _escape_tags_js(Cpanel::JSON::XS->new->encode([@_]));
     }
-    return Cpanel::JSON::XS->new->encode($_[0]);
+    return _escape_tags_js(Cpanel::JSON::XS->new->encode($_[0]));
 }
 
 ########################################
@@ -598,8 +598,23 @@ returns json encoded object
 
 =cut
 sub encode_json_obj {
-    return decode_utf8(Cpanel::JSON::XS::encode_json($_[0])) if $_[1];
-    return Cpanel::JSON::XS::encode_json($_[0]);
+    return decode_utf8(_escape_tags_js(Cpanel::JSON::XS::encode_json($_[0]))) if $_[1];
+    return _escape_tags_js(Cpanel::JSON::XS::encode_json($_[0]));
+}
+
+########################################
+
+=head2 _escape_tags_js
+
+  _escape_tags_js($text)
+
+used to escape html tags so it can be used as javascript string
+
+=cut
+sub _escape_tags_js {
+    my($str) = @_;
+    $str =~ s%</(\w+)%<\\/$1%gmx;
+    return $str;
 }
 
 ########################################
@@ -618,7 +633,7 @@ sub escape_js {
     $text =~ s/&amp;gt;/>/gmx;
     $text =~ s/&amp;lt;/</gmx;
     $text =~ s/'/&#39;/gmx;
-    return $text;
+    return _escape_tags_js($text);
 }
 
 

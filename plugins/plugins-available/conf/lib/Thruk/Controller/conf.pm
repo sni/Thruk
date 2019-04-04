@@ -1834,9 +1834,8 @@ sub _set_files_stash {
         }
     }
 
-    # no encoding here, filenames are encoded already
-    $c->stash->{'filenames_json'} = Cpanel::JSON::XS->new->encode([{ name => 'files', data => [ sort @filenames ]}]);
-    $c->stash->{'files_json'}     = Cpanel::JSON::XS->new->encode($files_tree);
+    $c->stash->{'filenames_json'} = Thruk::Utils::Filter::json_encode([{ name => 'files', data => [ sort @filenames ]}]);
+    $c->stash->{'files_json'}     = Thruk::Utils::Filter::json_encode($files_tree);
     $c->stash->{'files_tree'}     = $files_tree;
 
     return $files_root;

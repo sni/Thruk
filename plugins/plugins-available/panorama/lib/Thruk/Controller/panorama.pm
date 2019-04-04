@@ -326,15 +326,15 @@ sub _js {
         $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'}) if $data->{'panorama'}->{dashboards}->{'tabpan'};
     }
 
-    $c->stash->{dashboards}        = decode_utf8(encode_json($data->{'panorama'}->{'dashboards'} || {}));
-    $c->stash->{default_dashboard} = encode_json([]);
+    $c->stash->{dashboards}        = decode_utf8(Thruk::Utils::Filter::json_encode($data->{'panorama'}->{'dashboards'} || {}));
+    $c->stash->{default_dashboard} = Thruk::Utils::Filter::json_encode([]);
     if($c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'}) {
         my $default_dashboard = $c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'};
         if(ref $c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'} eq 'ARRAY') {
             $default_dashboard = join(',', @{$default_dashboard});
         }
         my @defaults = split(/\s*,+\s*/mx, $default_dashboard);
-        $c->stash->{default_dashboard} = encode_json(\@defaults);
+        $c->stash->{default_dashboard} = Thruk::Utils::Filter::json_encode(\@defaults);
     }
 
     my $action_menu_actions = [];
@@ -669,14 +669,14 @@ sub _task_upload {
     my $location = $c->req->parameters->{'location'};
     if(!$type || !$location || !$c->req->uploads->{$type}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'missing properties in fileupload.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'missing properties in fileupload.', success => Cpanel::JSON::XS::false });
         return;
     }
     $location =~ s|/$||gmx;
 
     if($c->config->{'demo_mode'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'fileupload is disabled in demo mode.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'fileupload is disabled in demo mode.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -685,13 +685,13 @@ sub _task_upload {
 
     if(!-w $folder.'/.') {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload must use existing and writable folder.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload must use existing and writable folder.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -699,14 +699,14 @@ sub _task_upload {
     $filename =~ s|^/||gmx;
     if($filename !~ m/^[a-z0-9_\- ]+\.(jpeg|jpg|gif|png|svg)$/mxi) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload contains invalid characters (a-z0-9_- ) in filename.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload contains invalid characters (a-z0-9_- ) in filename.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     my $newlocation = $folder.'/'.$filename;
     if(-s $newlocation && !$c->stash->{'is_admin'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Only administrator may overwrite existing files.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Only administrator may overwrite existing files.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -715,12 +715,12 @@ sub _task_upload {
     };
     if($@) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => $@, success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => $@, success => Cpanel::JSON::XS::false });
         return;
     }
 
     # must be text/html result, otherwise extjs form result handler dies
-    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => Cpanel::JSON::XS::true, filename => $filename });
+    $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Upload successfull', success => Cpanel::JSON::XS::true, filename => $filename });
     return;
 }
 
@@ -732,14 +732,14 @@ sub _task_uploadecho {
 
     if(!$c->req->uploads->{'file'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'missing file in fileupload.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     my $upload = $c->req->uploads->{'file'};
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -747,7 +747,7 @@ sub _task_uploadecho {
     unlink($upload->{'tempname'});
 
     # must be text/html result, otherwise extjs form result handler dies
-    $c->stash->{text} = encode_json({ 'msg' => 'Upload successfull', success => Cpanel::JSON::XS::true, content => $content });
+    $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Upload successfull', success => Cpanel::JSON::XS::true, content => $content });
     return;
 }
 
@@ -821,7 +821,7 @@ sub _task_save_dashboard {
     $c->stash->{'template'} = 'passthrough.tt';
     my $text = "";
     $text   .= "# Thruk Panorama Dashboard Export: ".$d->{'tab'}->{'xdata'}->{'title'}."\n";
-    $text   .= decode_utf8(encode_json($data));
+    $text   .= decode_utf8(Thruk::Utils::Filter::json_encode($data));
     $text   .= "\n# End Export\n";
     $c->stash->{text} = $text;
     $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$d->{'tab'}->{'xdata'}->{'title'}.'.dashboard"' );
@@ -836,14 +836,14 @@ sub _task_load_dashboard {
 
     if(!$c->req->uploads->{'file'}) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'missing file in fileupload.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'missing file in fileupload.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     my $upload = $c->req->uploads->{'file'};
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'File exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'File exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -857,7 +857,7 @@ sub _task_load_dashboard {
     };
     if($@) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = encode_json({ 'msg' => 'This is not a valid dashboard', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'This is not a valid dashboard', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -878,7 +878,7 @@ sub _task_load_dashboard {
             };
             if($@) {
                 $c->log->error('Usercontent upload for '.$file.' failed: '.$@);
-                $c->stash->{text} = encode_json({ 'msg' => 'Usercontent upload for '.$file.' failed.', success => Cpanel::JSON::XS::false });
+                $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Usercontent upload for '.$file.' failed.', success => Cpanel::JSON::XS::false });
                 return;
             }
         }
@@ -890,7 +890,7 @@ sub _task_load_dashboard {
     my $newid = $data->{'id'};
 
     # must be text/html result, otherwise extjs form result handler dies
-    $c->stash->{text} = encode_json({ 'msg' => 'Import successfull', success => Cpanel::JSON::XS::true, newid => $newid });
+    $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Import successfull', success => Cpanel::JSON::XS::true, newid => $newid });
     return;
 }
 
