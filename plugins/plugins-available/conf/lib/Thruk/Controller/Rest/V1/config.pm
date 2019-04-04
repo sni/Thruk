@@ -520,7 +520,10 @@ sub _set_object_model {
     $c->stash->{'param_backend'} = $peer_key;
     Thruk::Utils::Conf::set_object_model($c);
     delete $c->req->parameters->{'refreshdata'};
-    return 1 if $c->{'obj_db'};
+    if($c->{'obj_db'}) {
+        die("failed to initialize objects of peer ".$peer_key) if($c->{'obj_db'}->{'errors'} && scalar @{$c->{'obj_db'}->{'errors'}} > 0);
+        return 1;
+    }
     return;
 }
 ##########################################################
