@@ -321,7 +321,7 @@ sub _dispatcher {
 
     ###############################################
     # route cgi request
-    unless($c->{'errored'}) {
+    if(!$c->{'errored'} && !$c->{'rendered'}) {
         my $path_info = $c->req->path_info;
         eval {
             my $rc;

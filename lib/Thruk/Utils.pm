@@ -470,7 +470,14 @@ sub get_start_end_for_timeperiod_from_param {
 
 =head2 set_message
 
-  set_message($c, $style, $text, [ $details ])
+  set_message($c, $style, $text, [ $details ], [$code], [$escape])
+  set_message($c, {
+      'style'   => 'class', # usually fail_message or success_message
+      'msg'     => 'text',
+      'details' => 'more details',
+      'code'    => 'http response code',
+      'escape'  => 'flag wether html should be escaped, default is true',
+    })
 
 set a message in an cookie for later display
 
@@ -478,18 +485,25 @@ set a message in an cookie for later display
 sub set_message {
     my $c   = shift;
     my $dat = shift;
-    my($style, $message, $details, $code);
+    my($style, $message, $details, $code, $escape);
 
     if(ref $dat eq 'HASH') {
         $style   = $dat->{'style'};
         $message = $dat->{'msg'};
         $details = $dat->{'details'};
         $code    = $dat->{'code'};
+        $escape  = $dat->{'escape'};
     } else {
         $style   = $dat;
         $message = shift;
         $details = shift;
         $code    = shift;
+        $escape  = shift;
+    }
+    $escape = $escape // 1;
+    if($escape) {
+        $message = Thruk::Utils::Filter::escape_html($message);
+        $details = Thruk::Utils::Filter::escape_html($details);
     }
 
     $c->cookie('thruk_message' => $style.'~~'.$message, { path  => $c->stash->{'cookie_path'} });

@@ -43,6 +43,7 @@ sub index {
     elsif(!Thruk::Backend::Manager::looks_like_number($type) || $type == 0 ) {
         $infoBoxTitle = 'Process Information';
         return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
+        $c->stash->{template} = 'extinfo_type_0.tt';
         _process_process_info_page($c);
     }
     elsif( $type == 1 ) {

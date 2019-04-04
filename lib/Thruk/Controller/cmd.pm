@@ -54,6 +54,10 @@ sub index {
     Thruk::Utils::ssi_include($c);
 
     $c->stash->{'cmd_typ'} = $c->req->parameters->{'cmd_typ'} || '';
+    if(defined $c->stash->{'cmd_typ'} && $c->stash->{'cmd_typ'} !~ m/^[a-z0-9]+$/mx) {
+        $c->error('unknown cmd_typ');
+        return $c->detach('/error/index/100');
+    }
 
     # check if authorization is enabled
     if( $c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0 ) {

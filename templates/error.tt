@@ -60,7 +60,7 @@
 [% END %]
   </div>
   [% IF thruk_debug %]
-  <pre style="margin-top: 50px;">[% stacktrace %]</pre>
+  <pre style="margin-top: 50px;">[% stacktrace | html %]</pre>
   [% END %]
   [% END %]
 [% IF make_test_mode || thruk_debug %]

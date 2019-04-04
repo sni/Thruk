@@ -231,7 +231,7 @@ sub commit {
         $c->log->debug("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('pre save hook out: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre_obj_save_cmd hook!\n".$out );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "Save canceled by pre_obj_save_cmd hook!\n".$out, escape => 0 });
             return;
         }
         $c->log->debug('pre save hook out: '.$out);
@@ -308,7 +308,7 @@ sub commit {
         $c->log->debug("post save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('post save hook out: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', "post_obj_save_cmd hook failed!\n".$out );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "post_obj_save_cmd hook failed!\n".$out, escape => 0 });
             return;
         }
         $c->log->debug('post save hook out: '.$out);
