@@ -85,6 +85,11 @@ sub index {
             'mess' => '',
             'dscr' => '',
         },
+        '100'  => {
+            'mess' => 'bad request',
+            'dscr' => 'It appears as you send a bad request.',
+            'code' => 400, # bad request
+        },
         '0'  => {
             'mess' => 'unknown error: '.$arg1,
             'dscr' => 'this is a internal error',

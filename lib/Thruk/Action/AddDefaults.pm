@@ -275,7 +275,8 @@ sub begin {
     # do some sanity checks
     if($c->req->parameters->{'referer'}) {
         if($c->req->parameters->{'referer'} =~ m/^(\w+:\/\/|\/\/)/mx) {
-            return $c->error("unsupported referer");
+            $c->error("unsupported referer");
+            return $c->detach('/error/index/100');
         }
     }
 
