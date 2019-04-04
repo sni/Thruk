@@ -109,11 +109,11 @@ sub external_authentication {
                 }
             } else {
                 $login = '(unknown)' if ref $login eq 'HASH';
-                print STDERR 'authorization failed for user ', $login,' got rc ', $res->code;
+                print STDERR 'authorization failed for user ', $login,' got rc ', $res->code, "\n";
                 return 0;
             }
         } else {
-            print STDERR 'auth: realm does not match, got ', $realm;
+            print STDERR 'auth: realm does not match, got ', $realm, "\n";
         }
     } else {
         print STDERR 'auth: expected code 401, got ', $res->code, "\n", Dumper($res);

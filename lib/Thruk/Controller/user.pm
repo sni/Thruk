@@ -47,6 +47,7 @@ sub index {
         }
         if($action eq 'save') {
             my $data = Thruk::Utils::get_user_data($c);
+            return unless Thruk::Utils::check_csrf($c);
             $data->{'tz'} = $c->req->parameters->{'timezone'};
             if(Thruk::Utils::store_user_data($c, $data)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Settings saved' );

@@ -18,6 +18,7 @@
 
 <form action="user.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
 <input type="hidden" name="action" value="save">
   <div align="center">
   <div style="width: 600px; position: relative;">

@@ -2809,21 +2809,27 @@ ensure valid cross site request forgery token
 =cut
 sub check_csrf {
     my($c) = @_;
-    return 1 if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI');
+    return 1 if($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI');
     return unless is_post($c);
+    my $req_addr = $c->env->{'HTTP_X_FORWARDED_FOR'} || $c->req->address;
     for my $addr (@{$c->config->{'csrf_allowed_hosts'}}) {
-        return 1 if $c->req->address eq $addr;
+        return 1 if $req_addr eq $addr;
         if(CORE::index( $addr, '*' ) >= 0) {
             # convert wildcards into real regexp
             my $search = $addr;
             $search =~ s/\.\*/*/gmx;
             $search =~ s/\*/.*/gmx;
-            return 1 if $c->req->address =~ m/$search/mx;
+            return 1 if $req_addr =~ m/$search/mx;
         }
     }
     my $post_token  = $c->req->parameters->{'token'};
     my $valid_token = Thruk::Utils::Filter::get_user_token($c);
-    if($valid_token and $post_token and $valid_token eq $post_token) {
+    if($valid_token && $post_token && $valid_token eq $post_token) {
+        # remove token, it should not be reused
+        my $store   = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
+        my $tokens  = $store->get('token');
+        delete $tokens->{$c->stash->{'remote_user'}};
+        $store->set('token', $tokens);
         return(1);
     }
     $c->log->error("possible csrf, no or invalid token: ".Dumper($c->req));

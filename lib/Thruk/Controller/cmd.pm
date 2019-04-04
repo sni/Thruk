@@ -54,7 +54,7 @@ sub index {
     Thruk::Utils::ssi_include($c);
 
     $c->stash->{'cmd_typ'} = $c->req->parameters->{'cmd_typ'} || '';
-    if(defined $c->stash->{'cmd_typ'} && $c->stash->{'cmd_typ'} !~ m/^[a-z0-9]+$/mx) {
+    if($c->stash->{'cmd_typ'} && $c->stash->{'cmd_typ'} !~ m/^[a-z0-9]+$/mx) {
         $c->error('unknown cmd_typ');
         return $c->detach('/error/index/100');
     }
@@ -365,6 +365,7 @@ sub _check_for_commands {
         my $referer = $c->req->parameters->{'referer'} || $c->req->header('referer') || '';
         $referer =~ s/&amp;/&/gmx;
         $referer =~ s/&/&amp;/gmx;
+        $referer =~ s%^\w+://[^/]+/%/%gmx;
         $c->stash->{referer} = $referer;
     }
 
