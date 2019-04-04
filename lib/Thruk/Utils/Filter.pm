@@ -756,6 +756,7 @@ sub get_message {
         if(defined $cookie and $cookie->value) {
             my($style,$message) = split(/~~/mx, $cookie->value, 2);
             return '' unless $message;
+            $message = &escape_html($message);
             my @msg = split(/\n/mx, $message);
             if(scalar @msg > 1) {
                 $has_details = 2;
