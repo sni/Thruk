@@ -35,7 +35,7 @@ sub get_keys {
     my $folder = $c->config->{'var_path'}.'/api_keys';
     for my $file (glob($folder.'/*')) {
         my $data = _read_key($c, $file);
-        push @{$keys}, $data if $data->{'user'} eq $user;
+        push @{$keys}, $data if($data && $data->{'user'} eq $user);
     }
     return($keys);
 }
@@ -60,8 +60,7 @@ sub get_key_by_private_key {
     my $publickey = $digest->hexdigest();
     my $folder = $c->config->{'var_path'}.'/api_keys';
     my $file   = $folder.'/'.$publickey;
-    my $data   = _read_key($c, $file);
-    return($data);
+    return(_read_key($c, $file));
 }
 
 ##############################################
@@ -128,6 +127,7 @@ sub remove_key {
 ##############################################
 sub _read_key {
     my($c, $file) = @_;
+    return unless -r $file;
     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     my $key = $file;
     $key =~ s%^.*/%%gmx;
