@@ -266,7 +266,7 @@ sub test_page {
     }
 
     if(!defined $opts->{'fail_message_ok'}) {
-        if($request->content =~ m/<span\ class="fail_message">([^<]+)<\/span>/mxo) {
+        if($request->content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
             fail('Request '.$opts->{'url'}.' had error message: '.$1);
         }
     }

@@ -254,12 +254,12 @@ sub is_valid_regular_expression {
     local $SIG{__DIE__} = '';
     eval { "test" =~ m/$expression/mx; };
     if($@) {
-        my $error_message = "invalid regular expression: ".$@;
+        my $error_message = "invalid regular expression: ".Thruk::Utils::Filter::escape_html($@);
         $error_message =~ s/\s+at\s+.*$//gmx;
         $error_message =~ s/in\s+regex\;/in regex<br \/>/gmx;
         $error_message =~ s/HERE\s+in\s+m\//HERE in <br \/>/gmx;
         $error_message =~ s/\/$//gmx;
-        set_message($c, 'fail_message', $error_message);
+        set_message($c, { style => 'fail_message', msg => $error_message, escape => 0});
         return;
     }
     return 1;
