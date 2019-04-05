@@ -105,8 +105,12 @@ return cron entry as string
 
 =cut
 sub format_cronentry {
-    my($c, $cr) = @_;
+    my($c, $entry) = @_;
     my $cron;
+    my $cr = {};
+    for my $key (keys %{$entry}) {
+        $cr->{$key} = Thruk::Utils::Filter::escape_html($entry->{$key});
+    }
     if($cr->{'type'} eq 'month') {
         my $app = 'th';
         if($cr->{'day'} == 1) { $app = 'st'; }

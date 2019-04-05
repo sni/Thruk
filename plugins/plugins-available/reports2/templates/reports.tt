@@ -161,6 +161,19 @@
     </td>
   </tr>
   [% END %]
+  [% IF r.exists("var") && r.var.exists("opt_errors") %]
+  <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
+    <td class="status [% rowclass %]"></td>
+    <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
+      Error(s) in report options:
+      <ul>
+      [% FOREACH e = r.var.opt_errors %]
+      <li>[% e | html %]
+      [% END %]
+      </ul>
+    </td>
+  </tr>
+  [% END %]
   [% END %]
   [% IF reports.size == 0 %]
   <tr class="firstrow">

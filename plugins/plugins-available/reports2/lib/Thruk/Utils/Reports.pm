@@ -874,6 +874,7 @@ sub update_cron_file {
         next unless scalar @{$r->{'send_types'}} > 0;
         for my $st (@{$r->{'send_types'}}) {
             my $time = Thruk::Utils::get_cron_time_entry($st);
+            next unless defined $time;
             $combined_entries->{$time} = [] unless $combined_entries->{$time};
             push @{$combined_entries->{$time}}, $r->{'nr'};
         }

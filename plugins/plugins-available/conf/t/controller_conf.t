@@ -205,8 +205,9 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
     my $testname = $data->[0]->{'data'}->[0];
 
     TestUtils::test_page(
-        'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
-        'like'    => [ 'Config Tool', $type, "\Q$testname\E"],
+        'url'             => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
+        'like'            => [ 'Config Tool', $type, "\Q$testname\E"],
+        'fail_message_ok' => $data->[0]->{'data'}->[0] eq 'none' 1 : undef,
     );
 
     # new object

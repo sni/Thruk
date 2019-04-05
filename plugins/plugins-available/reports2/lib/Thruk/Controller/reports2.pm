@@ -270,7 +270,7 @@ sub report_save {
     if($report = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
         if(Thruk::Utils::Reports::update_cron_file($c)) {
             if(defined $report->{'var'}->{'opt_errors'}) {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "Error in Report Options:<br>".join("<br>", @{$report->{'var'}->{'opt_errors'}}) });
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg   => "Error in Report Options" });
             } else {
                 Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
             }

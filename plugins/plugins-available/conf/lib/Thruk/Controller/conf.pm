@@ -87,7 +87,7 @@ sub index {
        || ref($c->config->{'Thruk::Plugin::ConfigTool'}) ne 'HASH'
        || scalar keys %{$c->config->{'Thruk::Plugin::ConfigTool'}} == 0
     ) {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'documentation.html#_component_thruk_plugin_configtool">config tool setup instructions</a>.' );
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'documentation.html#_component_thruk_plugin_configtool">config tool setup instructions</a>.', escape => 0 } );
     }
 
     if(exists $c->req->parameters->{'edit'} and defined $c->req->parameters->{'host'}) {
@@ -1690,7 +1690,7 @@ sub _get_context_object {
             $obj = $objs->[0];
         }
         elsif(!defined $obj) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'No such object. <a href="conf.cgi?sub=objects&action=new&amp;type='.$c->stash->{'type'}.'&amp;data.name='.$c->stash->{'data_name'}.'">Create it.</a>' );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'No such object. <a href="conf.cgi?sub=objects&action=new&amp;type='.Thruk::Utils::Filter::escape_html($c->stash->{'type'}).'&amp;data.name='.Thruk::Utils::Filter::escape_html($c->stash->{'data_name'}).'">Create it.</a>', escape => 0 } );
         }
     }
 
