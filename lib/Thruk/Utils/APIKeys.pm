@@ -24,7 +24,7 @@ use constant DIGEST => 'SHA-256';
 
 =head2 get_keys
 
-  get_keys($c, $username)
+    get_keys($c, $username)
 
 returns list of api keys
 
@@ -34,7 +34,10 @@ sub get_keys {
     my $keys = [];
     my $folder = $c->config->{'var_path'}.'/api_keys';
     for my $file (glob($folder.'/*')) {
-        my $data = read_key($c, $file);
+        if($file !~ m/^[a-zA-Z0-9]+$/mx) {
+            next;
+        }
+        my $data = read_key($c->config, $file);
         push @{$keys}, $data if($data && $data->{'user'} eq $user);
     }
     return($keys);
@@ -44,30 +47,32 @@ sub get_keys {
 
 =head2 get_key_by_private_key
 
-  get_key_by_private_key($c, $privatekey)
+    get_key_by_private_key($config, $privatekey)
 
 returns key for given private key
 
 =cut
 sub get_key_by_private_key {
-    my($c, $privatekey) = @_;
+    my($config, $privatekey) = @_;
     if($privatekey !~ m/^[a-zA-Z0-9]+$/mx) {
-        $c->error("wrong authentication key");
         return;
+    }
+    if(length($privatekey) < 64) {
+        _upgrade_key($config, $privatekey);
     }
     my $digest = Digest->new(DIGEST);
     $digest->add($privatekey);
     my $hashedkey = $digest->hexdigest();
-    my $folder = $c->config->{'var_path'}.'/api_keys';
+    my $folder = $config->{'var_path'}.'/api_keys';
     my $file   = $folder.'/'.$hashedkey;
-    return(read_key($c, $file));
+    return(read_key($config, $file));
 }
 
 ##############################################
 
 =head2 create_key
 
-  create_key($c, $username, [$comment])
+    create_key($c, $username, [$comment])
 
 create new api key for user
 
@@ -105,7 +110,7 @@ sub create_key {
 
 =head2 remove_key
 
-  remove_key($c, $username, $key)
+    remove_key($c, $username, $key)
 
 remove given key
 
@@ -128,29 +133,46 @@ sub remove_key {
 
 =head2 read_key
 
-  read_key($c, $file)
+    read_key($c, $file)
 
 return key for given file
 
 =cut
 sub read_key {
-    my($c, $file) = @_;
+    my($config, $file) = @_;
     return unless -r $file;
     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     my $key = $file;
     $key =~ s%^.*/%%gmx;
     if(length($key) < 64) {
-      # upgrade key
-      my $digest = Digest->new(DIGEST);
-      $digest->add($key);
-      my $hashedkey = $digest->hexdigest();
-      my $folder = $c->config->{'var_path'}.'/api_keys';
-      move($folder.'/'.$key, $folder.'/'.$hashedkey);
-      $key = $hashedkey;
+        my($newkey, $newfile) = _upgrade_key($config, $key);
+        if($newkey) {
+            $key  = $newkey;
+            $file = $newfile;
+        }
     }
     $data->{'hashed_key'} = $key;
     $data->{'file'}       = $file;
     return($data);
+}
+
+##############################################
+# migrate key from old md5hex to current format
+# REMOVE AFTER: 01.06.2020
+sub _upgrade_key {
+    my($config, $key) = @_;
+    my $folder = $config->{'var_path'}.'/api_keys';
+
+    return if length($key) >= 64;
+    return unless -e $folder.'/'.$key;
+
+    my $digest = Digest->new(DIGEST);
+    $digest->add($key);
+    my $hashedkey = $digest->hexdigest();
+    my $newfile = $folder.'/'.$hashedkey;
+    move($folder.'/'.$key, $newfile);
+    $key  = $hashedkey;
+    return($hashedkey, $newfile);
 }
 
 ##############################################

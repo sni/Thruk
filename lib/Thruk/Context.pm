@@ -306,7 +306,7 @@ sub request_username {
             }
         }
         elsif($c->config->{'api_keys_enabled'}) {
-            my $data = Thruk::Utils::APIKeys::get_key_by_private_key($c, $apikey);
+            my $data = Thruk::Utils::APIKeys::get_key_by_private_key($c->config, $apikey);
             if(!$data) {
                 $c->error("wrong authentication key");
                 return;

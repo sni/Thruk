@@ -29,6 +29,7 @@ use File::Slurp;
 use Time::HiRes qw( gettimeofday tv_interval );
 use Thruk::Config;
 use Thruk::Utils::CookieAuth;
+use Thruk::Utils::APIKeys;
 
 $|          = 1;
 my $verbose = 0;
@@ -41,7 +42,6 @@ $guest = $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'} if $ENV{'THRUK_COOKIE_AUTH_GUEST_U
 my $config              = Thruk::Config::get_config();
 my $spath               = $config->{'var_path'}."/sessions";
 my $secret_file         = $config->{'var_path'}.'/secret.key';
-my $apipath             = $config->{'var_path'}."/api_keys";
 my $urlprefix           = $config->{'url_prefix'};
 my $loginurl            = $config->{'cookie_auth_login_url'}       || $urlprefix."cgi-bin/login.cgi";
 my $sessiontimeout      = $config->{'cookie_auth_session_timeout'} || 86400;
@@ -100,9 +100,11 @@ sub process {
                 my $user = $extra->[3];
                 return "/loginok/".$user."/".$path."\n";
             }
-            if($config->{'api_keys_enabled'} && -e $apipath.'/'.$extra->[2]) {
-                my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$extra->[2]);
-                return "/loginok/".$data->{'user'}."/".$path."\n";
+            if($config->{'api_keys_enabled'}) {
+                my $data = Thruk::Utils::APIKeys::get_key_by_private_key($config, $extra->[2]);
+                if($data) {
+                    return "/loginok/".$data->{'user'}."/".$path."\n";
+                }
             }
             return $loginurl."?invalid&".$path."\n";
         }

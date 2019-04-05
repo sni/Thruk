@@ -35,7 +35,7 @@ sub _rest_get_thruk_api_keys {
     for my $file (glob($folder.'/*')) {
         my $hashed_key = Thruk::Utils::basename($file);
         next if($key && $hashed_key ne $key);
-        my $data = Thruk::Utils::APIKeys::read_key($c, $file);
+        my $data = Thruk::Utils::APIKeys::read_key($c->config, $file);
         if($data && ($is_admin || $data->{'user'} eq $user)) {
             push @{$keys}, $data;
         }
