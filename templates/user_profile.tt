@@ -20,7 +20,17 @@
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
 <input type="hidden" name="action" value="save">
-  <div align="center">
+  <div align="center" style="position: relative;">
+  [% IF new_private_key %]
+  <div id="new_key_alert" class="alert closable floating" style="position: absolute; left: 0; right: 0; margin-left: auto; margin-right: auto; z-index: 100; top: -30px; width: 600px;">
+    <a href="#" onclick="fade('new_key_alert', 500);return false;" style="position: absolute; right: 2px; top: 2px;"><img src='[% url_prefix %]themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button" style="margin-right: 4px;"></a>
+    <b>New API Key Created</b><hr>
+    Store this key to a safe place, it won't be show again.<br><br>
+    <b>[% new_private_key %]</b>
+    <br><br>
+    <a href="#" onclick="fade('new_key_alert', 500);return false;">dismiss</a>
+  </div>
+  [% END %]
   <div style="width: 600px; position: relative;">
   <button class="thruk_button thruk_button_save" style="position: absolute; right: 0; top: -30px;">Save changes</button>
   <table border="0" class='data conftooluserprofile' style="width:600px;">
@@ -31,7 +41,9 @@
     </tr>
     <tr>
       <td class='dataVar'>Contactgroups</td>
-      <td class='dataVal' style="white-space: normal;">[% IF profile_user.groups.size > 0; profile_user.groups.join('<br>'); ELSE %]&lt;none&gt;[% END %]</td>
+      <td class='dataVal' style="white-space: normal;">
+        [% IF profile_user.groups.size > 0; profile_user.groups.sort.join(', '); ELSE %]&lt;none&gt;[% END %]
+      </td>
     </tr>
     <tr>
       <td class='dataVar'>Effective Roles</td>
@@ -81,20 +93,20 @@
       <td class='dataVal' colspan="2">
         <table style="width: 100%;">
           <tr>
-            <th>Key</th>
             <th>Comment</th>
+            <th>Created At</th>
             <th>Last Used</th>
             <th>From</th>
             <th></th>
           </tr>
           [% FOREACH key = api_keys %]
           <tr>
-            <td>[% key.key | html %]</td>
             <td>[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
+            <td>[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
             <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %][% ELSE %]never[% END %]</td>
             <td>[% IF key.exists('last_from') %][% key.last_from | html %][% END %]</td>
             <td>
-              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?key=[% key.key | html %]&amp;action=remove_key'; return false;" title='Remove API Key'>
+              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?key=[% key.public_key | html %]&amp;action=remove_key'; return false;" title='Remove API Key'>
             </td>
           </tr>
           [% END %]

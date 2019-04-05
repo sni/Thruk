@@ -27,6 +27,7 @@ sub index {
     $c->stash->{'page'}            = 'conf';
     $c->stash->{'title'}           = 'User Profile';
     $c->stash->{'infoBoxTitle'}    = 'User Profile';
+    $c->stash->{'new_private_key'} = '';
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
@@ -36,9 +37,10 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'API keys are disabled' );
                 return $c->redirect_to('user.cgi');
             }
-            Thruk::Utils::APIKeys::create_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'comment'});
+            my($private_key, undef) = Thruk::Utils::APIKeys::create_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'comment'});
             Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
-            return $c->redirect_to('user.cgi');
+            $c->stash->{'new_private_key'} = $private_key;
+            return(user_page($c));
         }
         if($action eq 'remove_key') {
             Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'key'});

@@ -516,6 +516,7 @@ div.thruk_message table {
   color: #b94a48;
   background-color: #f2dede;
   border-color: #eed3d7;
+  position: relative;
 }
 
 .smallalert {
@@ -525,6 +526,10 @@ div.thruk_message table {
 }
 
 .alerttext {
+  color: #b94a48;
+}
+
+DIV.alert HR {
   color: #b94a48;
 }
 

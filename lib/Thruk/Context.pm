@@ -17,6 +17,7 @@ use Thruk::Request::Cookie;
 use Thruk::Stats;
 use Thruk::Utils::IO;
 use Thruk::Utils::CookieAuth;
+use Thruk::Utils::APIKeys;
 
 =head1 NAME
 
@@ -290,7 +291,6 @@ sub request_username {
 
     # authenticate by secret.key from http header
     if($apikey) {
-        my $apipath = $c->config->{'var_path'}."/api_keys";
         my $secret_file = $c->config->{'var_path'}.'/secret.key';
         $c->config->{'secret_key'} = read_file($secret_file) if -s $secret_file;
         chomp($c->config->{'secret_key'});
@@ -298,19 +298,23 @@ sub request_username {
             $c->error("wrong authentication key");
             return;
         }
-        elsif($c->config->{'api_keys_enabled'} && -e $apipath.'/'.$apikey) {
-            my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$apikey);
-            my $addr = $c->req->address;
-            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
-            Thruk::Utils::IO::json_lock_patch($apipath.'/'.$apikey, { last_used => time(), last_from => $addr }, 1);
-            $username = $data->{'user'};
-        }
         elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
             $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
             if(!$username) {
                 $c->error("authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header");
                 return;
             }
+        }
+        elsif($c->config->{'api_keys_enabled'}) {
+            my $data = Thruk::Utils::APIKeys::get_key_by_private_key($c, $apikey);
+            if(!$data) {
+                $c->error("wrong authentication key");
+                return;
+            }
+            my $addr = $c->req->address;
+            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
+            Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time(), last_from => $addr }, 1);
+            $username = $data->{'user'};
         } else {
             $c->error("wrong authentication key");
             return;

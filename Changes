@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - api keys: change to sha256 and double hashing
           - fix page reload when changing backends
           - security:
             - validate referer
