@@ -27,9 +27,11 @@
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
 <table border="1" class='data reports'>
   <tr>
-    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
-    <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
-    <th class='data' style="width:125px;"></th>
+    <th class='data sticky-header' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class="data sticky-header" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
+    <th class='data sticky-header' style="width:125px;">
+      <button class="report_save_button report_button" style="width: 160px; z-index: 10;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
+    </th>
   </tr>
   <tr class="firstrow">
     <td class="dataEven" align="center"><b>Name</b><span class="required">*</span></td>
@@ -108,11 +110,10 @@
         </table>
     </td>
   </tr>
-</table>
-<br>
-
-<table border="1" class='data reports'>
   <tr>
+    <td colspan="3" style="padding-top: 20px;"></td>
+  </tr>
+  <tr id="report_type">
     <th class='data' style="width:125px;"></th>
     <th class="data" nowrap>Report Type</th>
     <th class='data' style="width:125px;"></th>

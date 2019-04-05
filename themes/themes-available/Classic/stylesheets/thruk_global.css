@@ -1601,3 +1601,10 @@ SPAN.btn_sitesplus {
   background-color: #c6ecff;
   border-color: #70c0e7;
 }
+
+th.sticky-header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}

@@ -61,11 +61,15 @@ function update_reports_type_step2() {
         return;
     }
 
+    // replace settings
     jQuery('TR.report_options').remove();
     tmpDiv.find('TR.report_options').insertAfter('#new_reports_options')
-    // scroll to bottom
-    window.scroll(0, jQuery(document).height());
+
+    // scroll to report settings
     jQuery('TR.report_options TD').effect('highlight', {}, 1000);
+    jQuery([document.documentElement, document.body]).animate({
+        scrollTop: $("#report_type").offset().top
+    }, 1000);
 }
 
 /* show hide specific types of reports */
