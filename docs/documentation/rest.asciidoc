@@ -1196,6 +1196,40 @@ hash of basic information about this thruk instance
 |===========================================
 
 
+=== GET /thruk/api_keys
+
+lists broadcasts
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|comment                           | comment of this api key
+|created                           | unixtimestamp of when the key was created
+|file                              | path to stored file
+|hashed_key                        | hashed private key
+|last_from                         | ip address of last usage
+|last_used                         | unixtimestamp of last usage
+|user                              | username of key owner
+|===========================================
+
+
+=== POST /thruk/api_keys
+
+create new api key.
+
+Optional arguments:
+
+  * comment
+  * username (requires admin privileges)
+
+=== GET /thruk/api_keys/<id>
+
+alias for /thruk/api_keys?hashed_key=<id>
+
+=== DELETE /thruk/api_keys/<id>
+
+remove key for given id.
+
 === GET /thruk/bp
 
 lists business processes.

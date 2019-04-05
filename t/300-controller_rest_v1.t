@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 399;
+    plan tests => 407;
 }
 
 BEGIN {
@@ -51,6 +51,7 @@ my $list_pages = [
     '/thruk/reports',
     '/thruk/broadcasts',
     '/thruk/sessions',
+    '/thruk/api_keys',
 ];
 
 my $hash_pages = [

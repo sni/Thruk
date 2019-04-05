@@ -34,7 +34,7 @@ sub get_keys {
     my $keys = [];
     my $folder = $c->config->{'var_path'}.'/api_keys';
     for my $file (glob($folder.'/*')) {
-        my $data = _read_key($c, $file);
+        my $data = read_key($c, $file);
         push @{$keys}, $data if($data && $data->{'user'} eq $user);
     }
     return($keys);
@@ -57,10 +57,10 @@ sub get_key_by_private_key {
     }
     my $digest = Digest->new(DIGEST);
     $digest->add($privatekey);
-    my $publickey = $digest->hexdigest();
+    my $hashedkey = $digest->hexdigest();
     my $folder = $c->config->{'var_path'}.'/api_keys';
-    my $file   = $folder.'/'.$publickey;
-    return(_read_key($c, $file));
+    my $file   = $folder.'/'.$hashedkey;
+    return(read_key($c, $file));
 }
 
 ##############################################
@@ -71,7 +71,7 @@ sub get_key_by_private_key {
 
 create new api key for user
 
-returns private and public key
+returns private and hashed key
 
 =cut
 sub create_key {
@@ -86,9 +86,9 @@ sub create_key {
     if(length($privatekey) < 64) { die("creating key failed.") }
     $digest->reset();
     $digest->add($privatekey);
-    my $publickey = $digest->hexdigest();
+    my $hashedkey = $digest->hexdigest();
     my $folder = $c->config->{'var_path'}.'/api_keys';
-    my $file   = $folder.'/'.$publickey;
+    my $file   = $folder.'/'.$hashedkey;
     Thruk::Utils::IO::mkdir_r($folder);
     my $data = {
         user    => $username,
@@ -98,7 +98,7 @@ sub create_key {
     die("hash collision") if -e $file;
     Thruk::Utils::IO::json_lock_store($file, $data , 1);
 
-    return($privatekey, $publickey);
+    return($privatekey, $hashedkey);
 }
 
 ##############################################
@@ -116,7 +116,7 @@ sub remove_key {
     my $folder = $c->config->{'var_path'}.'/api_keys';
     my $keys = get_keys($c, $username);
     for my $k (@{$keys}) {
-        if($k->{'public_key'} eq $key) {
+        if($k->{'hashed_key'} eq $key) {
             unlink($folder.'/'.$key);
         }
     }
@@ -125,7 +125,15 @@ sub remove_key {
 }
 
 ##############################################
-sub _read_key {
+
+=head2 read_key
+
+  read_key($c, $file)
+
+return key for given file
+
+=cut
+sub read_key {
     my($c, $file) = @_;
     return unless -r $file;
     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
@@ -135,12 +143,12 @@ sub _read_key {
       # upgrade key
       my $digest = Digest->new(DIGEST);
       $digest->add($key);
-      my $publickey = $digest->hexdigest();
+      my $hashedkey = $digest->hexdigest();
       my $folder = $c->config->{'var_path'}.'/api_keys';
-      move($folder.'/'.$key, $folder.'/'.$publickey);
-      $key = $publickey;
+      move($folder.'/'.$key, $folder.'/'.$hashedkey);
+      $key = $hashedkey;
     }
-    $data->{'public_key'} = $key;
+    $data->{'hashed_key'} = $key;
     $data->{'file'}       = $file;
     return($data);
 }

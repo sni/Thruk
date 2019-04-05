@@ -3,11 +3,12 @@
 use warnings;
 use strict;
 use File::Slurp qw/read_file/;
-use Cpanel::JSON::XS qw/encode_json/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Data::Dumper;
 
 use Thruk::Utils::CLI;
 use Thruk::Controller::rest_v1;
+use Thruk::Utils::IO;
 
 ################################################################################
 my $c = Thruk::Utils::CLI->new()->get_c();
@@ -286,6 +287,9 @@ sub _update_docs {
     `mkdir -p var/broadcast; cp t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
     `mkdir -p var/downtimes; cp t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
     `mkdir -p var/reports;   cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
+    my $api_key = decode_json(`thruk r -d "comment=test" -d "username=restapidocs" /thruk/api_keys`);
+    # fake usage
+    Thruk::Utils::IO::json_lock_patch('var/api_keys/'.$api_key->{'hashed_key'}, { last_used => time(), last_from => "127.0.0.1" }, 1);
 
     my $content    = read_file($output_file);
     my $attributes = _parse_attribute_docs($content);
@@ -369,6 +373,7 @@ sub _update_docs {
     unlink('var/downtimes/9999.tsk');
     unlink('var/reports/9999.rpt');
     unlink($c->stash->{'fake_session_file'});
+    unlink('var/api_keys/'.$api_key->{'hashed_key'});
 }
 
 ################################################################################

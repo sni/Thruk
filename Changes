@@ -6,6 +6,8 @@ next:
           - security:
             - validate referer
             - make auth cookie httponly
+          - REST:
+            - manage api keys via rest api
 
 2.28     Fri Mar 29 17:27:48 CET 2019
           - rename graph_proxy option into http_backend_reverse_proxy
