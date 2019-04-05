@@ -29,6 +29,7 @@ use File::Slurp;
 use Time::HiRes qw( gettimeofday tv_interval );
 use Thruk::Config;
 use Thruk::Utils::CookieAuth;
+use Thruk::Utils::IO;
 use Thruk::Utils::APIKeys;
 
 $|          = 1;
@@ -103,6 +104,7 @@ sub process {
             if($config->{'api_keys_enabled'}) {
                 my $data = Thruk::Utils::APIKeys::get_key_by_private_key($config, $extra->[2]);
                 if($data) {
+                    Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time() }, 1);
                     return "/loginok/".$data->{'user'}."/".$path."\n";
                 }
             }
