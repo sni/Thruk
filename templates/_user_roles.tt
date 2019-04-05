@@ -2,8 +2,14 @@
   none
 [% ELSE %]
 <table cellpadding=0 cellspacing=0>
-  [% FOREACH r = profile_user.roles.list.sort %]
+  [% IF profile_user.roles.list.size == 0 %]
   <tr>
+    <td style="vertical-align: top;">&lt;none&gt;</td>
+  </tr>
+  [% END %]
+  [% has_admin = 0 %]
+  [% FOREACH r = profile_user.roles.list.sort %]
+  <tr[% IF has_admin == 1 %] style="display: none;" class="hidden_roles"[% END %]>
     <td style="vertical-align: top;">[% r %]</td>
     <td style="padding-left: 8px;">
       [% IF profile_user.roles_from_groups.exists(r) %](from group: [% profile_user.roles_from_groups.$r.join(', ') %])
@@ -15,6 +21,14 @@
       [% END %]
     </td>
   </tr>
+  [% IF ! has_admin && r == "authorized_for_admin" %]
+    [% has_admin = 1 %]
+    <tr class="show_roles">
+      <td style="vertical-align: top;" colspan="2">
+        <a href="" onclick="jQuery('.hidden_roles').show(); jQuery('.show_roles').hide(); return false;">expand... <img src="[% url_prefix %]themes/[% theme %]/images/down.png" alt="show error report" style="vertical-align: middle"></a>
+      </td>
+    </tr>
+  [% END %]
   [% END %]
 </table>
 [% END %]
