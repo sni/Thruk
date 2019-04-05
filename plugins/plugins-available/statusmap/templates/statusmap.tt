@@ -91,8 +91,8 @@
 
 var nodename = '[% nodename %]';
 var json     = [% json_encode(json) %];
-var groupby  = '[% encode_js(groupby) %]';
-var detail   = [% encode_js(detail) %];
+var groupby  = '[% escape_js(groupby) %]';
+var detail   = [% escape_js(detail) %];
 
 function init(){
     //init data
