@@ -265,10 +265,10 @@ sub test_page {
         ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request);
     }
 
-    if(!defined $opts->{'fail_message_ok'}) {
-        if($request->content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
-            fail('Request '.$opts->{'url'}.' had error message: '.$1);
-        }
+    if($request->content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
+        my $msg = $1;
+        fail('Request '.$opts->{'url'}.' had error message: '.$msg) unless $opts->{'fail_message_ok'};
+        fail('Request '.$opts->{'url'}.' error message contains escaped html: '.$msg) if $msg =~ m/&lt;.*&gt;/mx;
     }
 
     # wait for something?

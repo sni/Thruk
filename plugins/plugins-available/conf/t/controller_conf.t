@@ -134,8 +134,8 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=browser',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=move&type=host&data.name='.$host,
     { url => '/thruk/cgi-bin/conf.cgi', post => { 'sub' => 'objects', 'action' => 'clone', 'type' => 'host', 'data.name' => $host }},
-    '/thruk/cgi-bin/conf.cgi?sub=objects&action=listservices&data.name='.$host,
-    '/thruk/cgi-bin/conf.cgi?sub=objects&action=listref&data.name='.$host,
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=listservices&type=host&data.name='.$host,
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=listref&type=host&data.name='.$host,
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=start',
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=DuplicateTemplateAttributes',
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=ObjectReferences',
@@ -207,7 +207,7 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
     TestUtils::test_page(
         'url'             => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
         'like'            => [ 'Config Tool', $type, "\Q$testname\E"],
-        'fail_message_ok' => $data->[0]->{'data'}->[0] eq 'none' 1 : undef,
+        'fail_message_ok' => $data->[0]->{'data'}->[0] eq 'none' ? 1 : undef,
     );
 
     # new object
@@ -256,9 +256,10 @@ for my $url (@{$other_json}) {
 
 
 # create new host
+my $testhost = "test-host-".rand();
 my $r = TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/conf.cgi',
-    'post'    => { 'sub' => 'objects', 'type' => 'host', 'data.id' => 'new', 'action' => 'store', 'data.file', => '/test.cfg', 'obj.host_name' => 'test', 'obj.alias' => 'test', 'obj.address' => 'test', 'obj.use' => 'generic-host', 'conf_comment' => '' },
+    'post'    => { 'sub' => 'objects', 'type' => 'host', 'data.id' => 'new', 'action' => 'store', 'data.file', => '/test.cfg', 'obj.host_name' => $testhost, 'obj.alias' => 'test', 'obj.address' => 'test', 'obj.use' => 'generic-host', 'conf_comment' => '' },
     'like'    => [ 'Host:\s+test'],
     'follow'  => 1,
 );
