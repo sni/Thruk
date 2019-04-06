@@ -357,6 +357,11 @@ plugins/plugins-available/mobile/root/img/startup.png
 plugins/plugins-available/mobile/root/img/thruk.png
 plugins/plugins-available/mobile/root/mobile-2.28-1.css
 plugins/plugins-available/mobile/root/mobile-2.28-1.js
+plugins/plugins-available/mobile/root/vendor/jqm-1.4.5/images/ajax-loader.gif
+plugins/plugins-available/mobile/root/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.css
+plugins/plugins-available/mobile/root/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.js
+plugins/plugins-available/mobile/root/vendor/jquery-2.1.4.min.js
+plugins/plugins-available/mobile/root/vendor/jquery.mobile.router.min-443d352.js
 plugins/plugins-available/mobile/routes
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
@@ -1565,9 +1570,6 @@ root/thruk/vendor/geoext2-2.0.2/src/GeoExt/data/LayerStore.js
 root/thruk/vendor/geoext2-2.0.2/src/GeoExt/panel/Map.js
 root/thruk/vendor/geoext2-2.0.2/src/GeoExt/Version.js
 root/thruk/vendor/jit-yc-2.0.1.js
-root/thruk/vendor/jqm-1.4.5/images/ajax-loader.gif
-root/thruk/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.css
-root/thruk/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.js
 root/thruk/vendor/jquery-3.3.1.min.js
 root/thruk/vendor/jquery-ui-1.12.1/css/smoothness/images/ui-bg_glass_55_fbf9ee_1x400.png
 root/thruk/vendor/jquery-ui-1.12.1/css/smoothness/images/ui-bg_glass_65_ffffff_1x400.png
@@ -1582,7 +1584,6 @@ root/thruk/vendor/jquery-ui-1.12.1/css/smoothness/images/ui-icons_888888_256x240
 root/thruk/vendor/jquery-ui-1.12.1/css/smoothness/images/ui-icons_cd0a0a_256x240.png
 root/thruk/vendor/jquery-ui-1.12.1/css/smoothness/jquery-ui-1.12.1.custom.min.css
 root/thruk/vendor/jquery-ui-1.12.1/js/jquery-ui-1.12.1.custom.min.js
-root/thruk/vendor/jquery.mobile.router.min-443d352.js
 root/thruk/vendor/jstree-3.3.7/jstree.min.js
 root/thruk/vendor/jstree-3.3.7/themes/default-dark/32px.png
 root/thruk/vendor/jstree-3.3.7/themes/default-dark/40px.png

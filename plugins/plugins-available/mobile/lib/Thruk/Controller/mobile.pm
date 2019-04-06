@@ -25,6 +25,8 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
+    $c->stash->{'inject_stats'} = 0;
+
     if(defined $c->req->parameters->{'data'}) {
         my $type   = $c->req->parameters->{'data'};
         my $status = $c->req->parameters->{'status'} || 0;
