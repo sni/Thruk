@@ -25,12 +25,15 @@ BEGIN {
 my $testport;
 BEGIN {
     my $start = 50000;
+    my $socket;
     for my $x (0..99) {
         $testport = $start + $x;
-        my $socket = IO::Socket::INET->new(Listen    => 5,
-                                           LocalAddr => '127.0.0.1',
-                                           LocalPort => $testport,
-                                           Proto     => 'tcp');
+        eval {
+            $socket = IO::Socket::INET->new(Listen    => 5,
+                                            LocalAddr => '127.0.0.1',
+                                            LocalPort => $testport,
+                                            Proto     => 'tcp');
+        };
         last if($socket);
     }
     BAIL_OUT('got no testport') unless $testport;
@@ -261,4 +264,3 @@ sub bail_out_with_kill {
     stop_clean_all();
     BAIL_OUT($msg.' (in '.$0.')');
 }
-
