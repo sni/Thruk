@@ -41,7 +41,6 @@ $guest = $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'} if $ENV{'THRUK_COOKIE_AUTH_GUEST_U
 
 ##########################################################
 my $config              = Thruk::Config::get_config();
-my $spath               = $config->{'var_path'}."/sessions";
 my $secret_file         = $config->{'var_path'}.'/secret.key';
 my $urlprefix           = $config->{'url_prefix'};
 my $loginurl            = $config->{'cookie_auth_login_url'}       || $urlprefix."cgi-bin/login.cgi";
@@ -117,9 +116,8 @@ sub process {
             my $sessionid = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
             if($sessionid && $sessionid ne '-1') {
                 print STDERR "thruk_auth: script login successful" if $verbose;
-                my $sessionfile = $spath.'/'.$sessionid;
-                my $session = Thruk::Utils::CookieAuth::retrieve_session($sessionfile);
-                unlink($sessionfile);
+                my $session = Thruk::Utils::CookieAuth::retrieve_session(config => $config, id => $sessionid);
+                unlink($session->{'file'});
                 return "/loginok/".$session->{'username'}."/".$path."\n";
             } else {
                 print STDERR "thruk_auth: script login failed" if $verbose;
@@ -142,21 +140,21 @@ sub process {
         }
 
         # does our sessionfile exist?
-        my $sessionfile = $spath.'/'.$auth;
-        if(!-f $sessionfile) {
+        print STDERR "thruk_auth: id => ".$auth."\n" if $verbose;
+        my $session = Thruk::Utils::CookieAuth::retrieve_session(config => $config, id => $auth);
+        if(!$session) {
             print STDERR "thruk_auth: session expired: ".($sessioncache->{$auth}->{'login'} || '?') if $verbose;
             delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
             return "/loginok/".$guest."/".$path."\n" if $guest;
             return $loginurl."?expired&".$path."\n";
         }
 
-        my $session = Thruk::Utils::CookieAuth::retrieve_session($sessionfile);
         my $basicauth = $session->{'hash'};
         my $user      = $session->{'username'};
 
         # fill sessioncache from mtime initially, so we don't have to revalidate new sessions immediately
         if(!$sessioncache->{$auth}) {
-            my @stat = stat($sessionfile);
+            my @stat = stat($session->{'file'});
             $sessioncache->{$auth} = {
                     'login' => $user,
                     'time'  => $stat[9],
@@ -166,7 +164,7 @@ sub process {
         # session timeout reached?
         if($sessioncachetimeout > 0 and defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
             print STDERR "thruk_auth: session timeout: ".$sessioncache->{$auth}->{'login'} if $verbose;
-            unlink($sessionfile);
+            unlink($session->{'file'});
             delete $sessioncache->{$auth};
             return "/loginok/".$guest."/".$path."\n" if $guest;
             return $loginurl."?expired&".$path."\n";
@@ -177,7 +175,7 @@ sub process {
             # no validation enabled
             print STDERR "thruk_auth: session ok (not revalidated)" if $verbose;
             # uptime mtime of sessionfile
-            utime($now, $now, $sessionfile);
+            utime($now, $now, $session->{'file'});
         }
         else {
             # revalidate session data
@@ -191,18 +189,18 @@ sub process {
             if($rc == -1 or $@) {
                 print STDERR "thruk_auth: technical problem during login for ".$user if $verbose;
                 print STDERR "thruk_auth: ".$@ if $@;
-                unlink($sessionfile);
+                unlink($session->{'file'});
                 delete $sessioncache->{$auth};
                 return $loginurl."?problem&".$path."\n";
             }
             if($rc == 0) {
                 print STDERR "thruk_auth: basic auth verify failed for ".$user if $verbose;
-                unlink($sessionfile);
+                unlink($session->{'file'});
                 delete $sessioncache->{$auth};
                 return $loginurl."?invalid&".$path."\n";
             }
             # update mtime of sessionfile
-            utime($now, $now, $sessionfile);
+            utime($now, $now, $session->{'file'});
         }
 
         # clean old session cache every hour

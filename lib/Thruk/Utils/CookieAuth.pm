@@ -19,8 +19,10 @@ use Thruk::Utils;
 use Thruk::Utils::IO;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
-use Digest::MD5 qw(md5_hex);
+use Digest ();
 use File::Slurp qw/read_file/;
+use Carp qw/confess/;
+use File::Copy qw/move/;
 
 ##############################################
 BEGIN {
@@ -36,6 +38,13 @@ BEGIN {
         };
     }
 }
+
+my $supported_digests = {
+    "1"  => 'SHA-256',
+};
+my $default_digest        = 1;
+my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;
+my $session_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
 
 ##############################################
 
@@ -100,7 +109,7 @@ sub external_authentication {
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
                     $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
-                    my $sessionid = store_session($config, undef, {
+                    my($sessionid, undef) = store_session($config, undef, {
                         hash     => $hash,
                         address  => $address,
                         username => $login,
@@ -258,28 +267,39 @@ store session data
 
 sub store_session {
     my($config, $sessionid, $data) = @_;
-    $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
-    chomp($sessionid);
-    my $sdir        = $config->{'var_path'}.'/sessions';
-    die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9]+$/mx;
-    my $sessionfile = $sdir.'/'.$sessionid;
+
+    # store session key hashed
+    my $type = $supported_digests->{$default_digest};
+    my $digest = Digest->new($type);
+    if(!$sessionid) {
+        $digest->add(rand(1000000));
+        $digest->add(time());
+        $sessionid = $digest->hexdigest()."_".$default_digest;
+        if(length($sessionid) != 66) { die("creating session id failed.") }
+        $digest->reset();
+    }
+    $digest->add($sessionid);
+    my $hashed_key = $digest->hexdigest();
+
+    my $sdir = $config->{'var_path'}.'/sessions';
+    die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9_]+$/mx;
+    my $sessionfile = $sdir.'/'.$hashed_key.'.'.$type;
     Thruk::Utils::IO::mkdir_r($sdir);
     Thruk::Utils::IO::json_lock_store($sessionfile, $data);
-    return($sessionid, $sessionfile) if wantarray;
-    return($sessionid);
+    return($sessionid, $sessionfile);
 }
 
 ##############################################
 
 =head2 retrieve_session
 
-  retrieve_session($sessionfile)
-  retrieve_session($c, $sessionid)
+  retrieve_session(file => $sessionfile, config => $config)
+  retrieve_session(id   => $sessionid,   config => $config)
 
 returns session data as hash
 
     {
-        id       => session id,
+        id       => session id (if known),
         file     => session data file name,
         username => login name,
         active   => timestamp of last activity
@@ -291,22 +311,65 @@ returns session data as hash
 =cut
 
 sub retrieve_session {
-    my($c, $id) = @_;
+    my(%args) = @_;
     my($sessionfile, $sessionid);
-    if(ref $c eq '') {
-        $sessionfile = $c;
+    my $config = $args{'config'} or confess("missing config");
+    my($type, $hashed_key);
+    if($args{'file'}) {
+        $sessionfile = Thruk::Utils::basename($args{'file'});
+        # REMOVE AFTER: 01.01.2020
+        if($sessionfile =~ $hashed_key_file_regex) {
+            $hashed_key = $1;
+            $type       = substr($2, 1) if $2;
+        } else {
+            return;
+        }
+        if(!$type && length($hashed_key) < 64) {
+            my($new_hashed_key, $newfile) = _upgrade_session_file($config, $hashed_key);
+            if($newfile) {
+                $sessionfile = Thruk::Utils::basename($newfile);
+                $type        = $supported_digests->{$default_digest};
+                $hashed_key  = $new_hashed_key;
+            }
+        }
     } else {
-        $sessionid = $id;
-        my $sdir     = $c->config->{'var_path'}.'/sessions';
-        $sessionfile = $sdir.'/'.$sessionid;
-        return if $id !~ m/^[a-zA-Z0-9]*$/mx;
+        my $nr;
+        $sessionid = $args{'id'};
+        if($sessionid =~ $session_key_regex) {
+            $nr = substr($2, 1) if $2;
+        } else {
+            return;
+        }
+        if(!$nr) {
+            # REMOVE AFTER: 01.01.2020
+            if(length($sessionid) < 64) {
+                _upgrade_session_file($config, $sessionid);
+                $nr = $default_digest;
+            }
+            # /REMOVE AFTER
+            else {
+                return;
+            }
+        }
+        $type = $supported_digests->{$nr};
     }
+    return unless $type;
+
+    if(!$hashed_key) {
+        my $digest = Digest->new($type);
+        $digest->add($sessionid);
+        $hashed_key = $digest->hexdigest();
+    }
+    my $sdir = $config->{'var_path'}.'/sessions';
+    $sessionfile = $sdir.'/'.$hashed_key.'.'.$type;
+
     my $data;
     return unless -e $sessionfile;
     my @stat = stat(_);
     eval {
         $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
     };
+    # REMOVE AFTER: 01.01.2020
     if(!$data) {
         my $raw = scalar read_file($sessionfile);
         chomp($raw);
@@ -321,13 +384,28 @@ sub retrieve_session {
         };
     }
     return unless defined $data;
-    $data->{id}     = $sessionid if $sessionid;
-    $data->{file}   = $sessionfile;
-    $data->{active} = $stat[9];
-    $data->{roles}  = [] unless $data->{roles};
+    $data->{file}       = $sessionfile;
+    $data->{hashed_key} = $hashed_key;
+    $data->{digest}     = $type;
+    $data->{active}     = $stat[9];
+    $data->{roles}      = [] unless $data->{roles};
     return($data);
 }
 
 ##############################################
+# migrate session from old md5hex to current format
+# REMOVE AFTER: 01.01.2020
+sub _upgrade_session_file {
+    my($config, $sessionid) = @_;
+    my $folder = $config->{'var_path'}.'/sessions';
+    return unless -e $folder.'/'.$sessionid;
+    my $type   = $supported_digests->{$default_digest};
+    my $digest = Digest->new($type);
+    $digest->add($sessionid);
+    my $hashed_key = $digest->hexdigest();
+    my $newfile = $folder.'/'.$hashed_key.'.'.$type;
+    move($folder.'/'.$sessionid, $newfile);
+    return($hashed_key, $newfile);
+}
 
 1;

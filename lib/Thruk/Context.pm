@@ -237,7 +237,7 @@ sub authenticate {
     my $sessionid = $c->req->cookies->{'thruk_auth'};
     my $sessiondata;
     if($sessionid) {
-        $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $sessionid);
+        $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid);
         $sessiondata = undef if(!$sessiondata || $sessiondata->{'username'} ne $username);
     }
     my $user = Thruk::Authentication::User->new($c, $username, $sessiondata);
@@ -259,7 +259,7 @@ sub authenticate {
                 $sessionid = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
                 $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
             }
-            $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $sessionid);
+            $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid);
         }
     }
     if($sessiondata) {
@@ -335,7 +335,7 @@ sub request_username {
 
     elsif($c->req->cookies->{'thruk_auth'}) {
         # verify ip address
-        my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $c->req->cookies->{'thruk_auth'});
+        my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $c->req->cookies->{'thruk_auth'});
         if($sessiondata && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
             $username = $sessiondata->{'username'};
         }

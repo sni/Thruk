@@ -1281,13 +1281,10 @@ sub _rest_get_thruk_sessions {
     }
 
     my $data = [];
-    for my $session (sort glob($c->config->{'var_path'}."/sessions/*")) {
-        my $file = $session;
-        $file   =~ s%^.*/%%gmx;
-        next if $id && $id ne $file;
-        my $session_data = Thruk::Utils::CookieAuth::retrieve_session($c->config->{'var_path'}.'/sessions/'.$file);
+    for my $file (sort glob($c->config->{'var_path'}."/sessions/*")) {
+        my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, file => $file);
         next unless $session_data;
-        next unless $is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'};
+        next unless($is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'});
         delete $session_data->{'hash'};
         push @{$data}, $session_data;
     }
