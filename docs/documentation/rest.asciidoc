@@ -1205,6 +1205,7 @@ lists broadcasts
 |Attribute                         | Description
 |comment                           | comment of this api key
 |created                           | unixtimestamp of when the key was created
+|digest                            | used hash algorithm
 |file                              | path to stored file
 |hashed_key                        | hashed private key
 |last_from                         | ip address of last usage

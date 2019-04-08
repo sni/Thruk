@@ -37,13 +37,15 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'API keys are disabled' );
                 return $c->redirect_to('user.cgi');
             }
-            my($private_key, undef) = Thruk::Utils::APIKeys::create_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'comment'});
-            Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
-            $c->stash->{'new_private_key'} = $private_key;
+            my($private_key, undef, undef) = Thruk::Utils::APIKeys::create_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'comment'});
+            if($private_key) {
+                Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
+                $c->stash->{'new_private_key'} = $private_key;
+            }
             return(user_page($c));
         }
         if($action eq 'remove_key') {
-            Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'key'});
+            Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'file'});
             Thruk::Utils::set_message( $c, 'success_message', 'API key removed' );
             return $c->redirect_to('user.cgi');
         }

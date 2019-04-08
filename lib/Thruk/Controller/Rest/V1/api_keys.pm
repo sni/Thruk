@@ -34,7 +34,7 @@ sub _rest_get_thruk_api_keys {
     my $folder = $c->config->{'var_path'}.'/api_keys';
     for my $file (glob($folder.'/*')) {
         my $hashed_key = Thruk::Utils::basename($file);
-        next if($key && $hashed_key ne $key);
+        next if($key && $hashed_key !~ m/^$key\..*$/mx);
         my $data = Thruk::Utils::APIKeys::read_key($c->config, $file);
         if($data && ($is_admin || $data->{'user'} eq $user)) {
             push @{$keys}, $data;
@@ -92,10 +92,11 @@ sub _rest_get_thruk_api_key_new {
     if($c->req->parameters->{'username'} && $c->check_user_roles('admin')) {
         $username = $c->req->parameters->{'username'};
     }
-    my($private_key, $hashed_key) = Thruk::Utils::APIKeys::create_key($c, $username, ($c->req->parameters->{'comment'} // ''));
+    my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key($c, $username, ($c->req->parameters->{'comment'} // ''));
     if($private_key) {
         return({
             'message'     => 'successfully created api key',
+            'file'        => $filename,
             'hashed_key'  => $hashed_key,
             'private_key' => $private_key,
         });

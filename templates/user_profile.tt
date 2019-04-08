@@ -106,7 +106,7 @@
             <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %][% ELSE %]never[% END %]</td>
             <td>[% IF key.exists('last_from') %][% key.last_from | html %][% END %]</td>
             <td>
-              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?key=[% key.public_key | html %]&amp;action=remove_key'; return false;" title='Remove API Key'>
+              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key'; return false;" title='Remove API Key'>
             </td>
           </tr>
           [% END %]

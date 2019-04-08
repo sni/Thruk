@@ -118,6 +118,7 @@ our %config = ('name'                   => 'Thruk',
                                           'command_disabled'    => \&Thruk::Utils::command_disabled,
                                           'proxifiy_url'        => \&Thruk::Utils::proxifiy_url,
                                           'get_remote_thruk_url'=> \&Thruk::Utils::get_remote_thruk_url,
+                                          'basename'            => \&Thruk::Utils::basename,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
