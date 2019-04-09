@@ -7,6 +7,6 @@ test:
 	done
 	$(THRUK) -l
 	$(THRUK) cache clean
-	docker-compose exec --user root omd bash -ci /root/test.sh
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd bash -ci /root/test.sh
 
 test_verbose: test

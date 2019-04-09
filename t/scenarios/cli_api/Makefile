@@ -1,7 +1,7 @@
 include ../Makefile.common
 
 test:
-	docker-compose exec -T --user root omd sudo -iu demo /test/t/test.sh 0
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/test.sh 0
 
 test_verbose:
-	docker-compose exec -T --user root omd sudo -iu demo /test/t/test.sh 1
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/test.sh 1

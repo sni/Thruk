@@ -17,7 +17,7 @@ extra_clean:
 	-docker volume rm clustere2e_shared_var
 
 extra_test:
-	docker-compose exec -T --user root thruk sudo -iu demo /test/t/local_test.sh 0
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk sudo -iu demo /test/t/local_test.sh 0
 
 extra_test_verbose:
-	docker-compose exec -T --user root thruk sudo -iu demo /test/t/local_test.sh 1
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk sudo -iu demo /test/t/local_test.sh 1

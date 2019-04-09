@@ -4,6 +4,12 @@ export TEST_AUTHOR=1
 THRUK=cd ../../.. && ./script/thruk
 STARTUPWAIT=300
 EXPECTED_BACKENDS=1
+INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
+ifdef INTERACTIVE
+  DOCKER_COMPOSE_TTY=""
+else
+  DOCKER_COMPOSE_TTY="-T"
+endif
 
 wait_start:
 	$(THRUK) cache clean

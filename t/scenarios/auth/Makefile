@@ -15,7 +15,7 @@ server:
 	@echo -e "\n\n*** no server implemented, access via https://$(shell hostname):60443/demo/\n"
 
 extra_test:
-	docker-compose exec -T --user root site sudo -iu demo /test/t/local_test.sh 0
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root site sudo -iu demo /test/t/local_test.sh 0
 
 extra_test_verbose:
-	docker-compose exec -T --user root site sudo -iu demo /test/t/local_test.sh 1
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root site sudo -iu demo /test/t/local_test.sh 1
