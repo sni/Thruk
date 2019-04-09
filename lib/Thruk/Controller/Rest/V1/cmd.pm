@@ -67,6 +67,7 @@ sub _rest_get_external_command {
     }
 
     my $required = Thruk::Utils::array2hash($cmd->{'required'});
+    my $args = {};
     for my $arg (@{$cmd->{'args'}}) {
         my $val = $c->req->parameters->{$arg};
         # set some defaults
@@ -92,7 +93,10 @@ sub _rest_get_external_command {
             $val = "";
         }
         if($arg eq 'start_time' || $arg eq 'end_time' || $arg eq 'notification_time') {
-            $val = Thruk::Utils::parse_date( $c, $val);
+            $val = Thruk::Utils::parse_date($c, $val);
+        }
+        if($arg eq 'duration') {
+            $val = Thruk::Utils::expand_duration($val);
         }
         if($arg eq 'performance_data') {
             # simply amend performance_data to the plugin_output
@@ -101,12 +105,24 @@ sub _rest_get_external_command {
             }
             next;
         }
+        $args->{$arg} = $val;
         push @cmd_args, $val;
     }
 
     # add missing value for reseting modified attributes
     if($cmd->{'name'} eq 'change_host_modattr' || $cmd->{'name'} eq 'change_svc_modattr') {
         push @cmd_args, 0;
+    }
+
+    # check maximum downtime length
+    if($c->config->{downtime_max_duration} && $cmd->{'name'} =~ m/schedule.*downtime/mx) {
+        my $max_duration = Thruk::Utils::expand_duration($c->config->{downtime_max_duration});
+        if(($args->{'end_time'} - $args->{'start_time'}) > $max_duration) {
+            return({ 'message' => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration), code => 400 });
+        }
+        if($args->{'duration'} > $max_duration) {
+            return({ 'message' => 'Downtime duration exceeds maximum allowed duration: '.Thruk::Utils::Filter::duration($max_duration), code => 400 });
+        }
     }
 
     my $cmd_line = "COMMAND [".time()."] ".uc($cmd->{'name'});

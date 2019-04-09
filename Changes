@@ -9,6 +9,7 @@ next:
             - make auth cookie httponly
           - REST:
             - manage api keys via rest api
+            - use downtime_max_duration if set
           - mobile:
             - fix compatibility issue with jquery 3.x
 
