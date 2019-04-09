@@ -6463,6 +6463,8 @@ var ajax_search = {
                 }
             }
         }
+        pattern = pattern.replace(/\s+$/g, "");
+        pattern = pattern.replace(/^\s+/g, "");
         return(pattern);
     },
 
@@ -6649,8 +6651,16 @@ var ajax_search = {
                       }
                   });
                 }
-                if(ajax_search.initialized_q && (!ajax_search.initialized_q.match(search_pattern) || ajax_search.initialized_q.length > search_pattern.length || (search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != search_pattern))) {
-                    // refresh data
+                if(ajax_search.initialized_q && !search_pattern.match(ajax_search.initialized_q)) {
+                    // filter does not match our data base
+                    needs_refresh = true;
+                }
+                if(ajax_search.initialized_q && ajax_search.initialized_q.length > search_pattern.length) {
+                    // data base is more precise than our filter
+                    needs_refresh = true;
+                }
+                if(search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != search_pattern) {
+                    // maximum results number hit
                     needs_refresh = true;
                 }
                 if(sub_results.length > 0) {
