@@ -550,6 +550,7 @@ sub _process_details_page {
     $c->stash->{'orderdir'} = $order;
 
     if($c->config->{'show_custom_vars'}
+       and $c->stash->{'data'}
        and defined $c->stash->{'host_stats'}
        and ref($c->stash->{'host_stats'}) eq 'HASH'
        and defined $c->stash->{'host_stats'}->{'up'}

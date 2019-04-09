@@ -165,7 +165,7 @@ sub begin {
     if($c->cookie('thruk_side') ) {
         for my $state (@{$c->cookies('thruk_side')->{'value'}}) {
             my($k,$v) = split(/=/mx,$state,2);
-            $k = lc $k;
+            $k = lc($k // '');
             $k =~ s/\ /_/gmx;
             $menu_states->{$k} = $v;
         }
