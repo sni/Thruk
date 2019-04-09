@@ -110,7 +110,7 @@
         [% SET program_start = pi_detail.$peer_key.program_start %]
 
 [% info = BLOCK %]
-  <a href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]">View Full Service Details</a>
+  <a href="extinfo.cgi?type=2&host=[% s.host_name | uri %]&service=[% s.description | uri %]">View Full Service Details</a>
   <table border=0 class="extdetails">
   <tr><th class="dataVar">Status:</th><td class="dataVal"><div class="[% serviceclass %]">[% state %]</div>&nbsp;&nbsp;(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td></tr>
   [% IF s.state != 0 %]
@@ -123,9 +123,9 @@
   <tr><th class="dataVar" nowrap valign="top">Plugin Output:<br></th><td class="dataVal">
   [% IF s.has_been_checked == 0 %]service has not been checked yet[% END %]
   [% IF escape_html_tags %]
-      [% escape_html(s.plugin_output) %]<br>
+      [% nl2br(escape_html(s.plugin_output)) %]<br>
   [% ELSE %]
-    [% s.plugin_output %]<br>
+    [% nl2br(s.plugin_output) %]<br>
   [% END %]
   [% on_demand_long_plugin_output = 0 %]
   [% IF s.defined("has_long_plugin_output") %]
@@ -137,7 +137,7 @@
       [% END %]
   [% ELSE %]
     [% IF escape_html_tags %]
-        [% escape_html(nl2br(s.long_plugin_output)) %]
+        [% nl2br(escape_html(s.long_plugin_output)) %]
     [% ELSE %]
       [% nl2br(s.long_plugin_output) %]
     [% END %]
@@ -157,7 +157,7 @@
   <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
   [% END %]
 [% END %]
-        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(s.host_name) %] - [% escape_js(s.description) %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr="[% escape_html(info.replace("\n", "")) %]">[% content %]</td>
+        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(s.host_name) %] - [% escape_js(s.description) %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr="[% escape_quotes(escape_html(info)) %]">[% content %]</td>
     [% ELSE %]
     <td class='[% svcbg %]' align="center">-</td>
     [% END %]
