@@ -432,8 +432,11 @@ sub test_page {
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
             is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
             $lint->clear_errors();
-            if($return->{'content'} =~ m/\&amp;amp/mx) {
-                fail("page contains double html escaped amps");
+            my $html_only_content = $return->{'content'};
+            $html_only_content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
+            my $matches = get_matches_with_meta($html_only_content, qr/^(.*\&amp;amp.*)$/mx);
+            for my $m (@{$matches}) {
+                fail(sprintf("page contains double html escaped amps in line %d: %s", $m->{'line'}, $m->{'match'}));
             }
         }
     }
@@ -1107,6 +1110,21 @@ sub _check_marker {
 sub _caller_info {
     my @caller = caller(1);
     return(sprintf("%s() in %s:%i", $caller[0], $caller[1], $caller[2]));
+}
+
+#################################################
+sub get_matches_with_meta {
+    my($string, $regex) = @_;
+    my @matches;
+    while($string =~ /$regex/g) {
+        my $match = substr($string, $-[0], $+[0]-$-[0]);
+        my $linenr = 1 + substr($string,0,$-[0]) =~ y/\n//;
+        push @matches, {
+            match => $match,
+            line  => $linenr,
+        };
+    }
+    return(\@matches);
 }
 
 #################################################
