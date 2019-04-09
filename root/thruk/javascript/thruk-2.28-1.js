@@ -6047,7 +6047,7 @@ var ajax_search = {
     timer           : false,
     striped         : false,
     autosubmit      : undefined,
-    limit           : 500,
+    limit           : 2000,
     list            : false,
     templates       : 'no',
     hideempty       : false,
