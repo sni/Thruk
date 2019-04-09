@@ -432,6 +432,9 @@ sub test_page {
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
             is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
             $lint->clear_errors();
+            if($return->{'content'} =~ m/\&amp;amp/mx) {
+                fail("page contains double html escaped amps");
+            }
         }
     }
 
