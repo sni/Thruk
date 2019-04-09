@@ -95,7 +95,7 @@
                 </tr>
                 [% FOR hostname IN g.hosts.keys.sort %]
                 [% SET h = g.hosts.$hostname %]
-                [% host_name = h.name | uri %]
+                [% host_name = h.name %]
                 [% SET hostclass = 'statusEven' IF loop.odd  %]
                 [% SET hostclass = 'statusOdd'  IF loop.even %]
                 [% IF h.state == 1 %]
