@@ -175,9 +175,12 @@
               [% plugin_output      = escape_html(plugin_output) %]
             [% END %]
             <td align="left" class='[% serviceclass %] plugin_output mightOverflow'
-            [% IF long_plugin_output and show_long_plugin_output != 'off' %]
-              [% IF show_long_plugin_output == 'popup' %]
-                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr='[% escape_html(plugin_output) %]<br>[% IF on_demand_long_plugin_output %][% escape_html("<span class='long_plugin_output'></span>") %][% ELSE %][% escape_html(nl2br(long_plugin_output)) %][% END %]'
+            [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
+              [% IF on_demand_long_plugin_output %]
+                [% info_popup_event_type %]="return(show_plugin_output_popup(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], [WIDTH,600,[% c.config.info_popup_options %]]));"
+              [% ELSE %]
+                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% s.host_display_name | uri %] - [% s.display_name | uri %]',WIDTH,600,[% c.config.info_popup_options %]));"
+                abbr="[% escape_html(plugin_output) %]<br>[% escape_html(nl2br(long_plugin_output)) %]"
               [% END %]
             [% END %]
             >

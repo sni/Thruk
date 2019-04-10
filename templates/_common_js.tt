@@ -41,6 +41,7 @@
   var downtime_duration   = [% downtime_duration %];
   var has_debug_options   = [% has_debug_options %];
   var maximum_search_boxes = [% c.config.maximum_search_boxes %];
+  var escape_html_tags    = [% IF escape_html_tags %]true[% ELSE %]false[% END %];
   [% PROCESS _common_js_bugs.tt %]
 
   [% IF disable_backspace %]

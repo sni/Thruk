@@ -2765,7 +2765,34 @@ function generic_downtimes_popup(title, url) {
     jQuery('#comments_downtimes_popup').load(url);
 }
 
-function fetch_long_plugin_output(td, host, service, backend, escape_html) {
+function show_plugin_output_popup(target, host, service, backend, escape_html, overlib_options) {
+    var caption = host;
+    if(service != '') {
+        caption += " - "+service;
+    }
+    overlib.apply(null, ["<div class='plugin_output'><\/div><div class='long_plugin_output'><\/div>",CAPTION, caption].concat(overlib_options));
+    jQuery('#overDiv .plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
+
+    var url = url_prefix+'r/sites/'+backend+'/services/'+host+"/"+service+"?columns=plugin_output,long_plugin_output"
+    jQuery.get(url, {}, function(data, status, req) {
+        jQuery('#overDiv .plugin_output').html("");
+        if(!data || !data[0]) {
+            jQuery('#overDiv .plugin_output').html("failed to fetch details: "+status);
+            return;
+        }
+        if(escape_html) {
+            var text = jQuery("<div>").text(data[0]["plugin_output"]).html().replace(/\\n/g, "<br>");
+            jQuery('#overDiv .plugin_output').html(text);
+            var text = jQuery("<div>").text(data[0]["long_plugin_output"]).html().replace(/\\n/g, "<br>");
+            jQuery('#overDiv .long_plugin_output').html(text);
+        } else {
+            jQuery('#overDiv .plugin_output').html(data[0]["plugin_output"].replace(/\\n/g, "<br>"));
+            jQuery('#overDiv .long_plugin_output').html(data[0]["long_plugin_output"].replace(/\\n/g, "<br>"));
+        }
+    });
+}
+
+function fetch_long_plugin_output(target, host, service, backend, escape_html) {
     jQuery('.long_plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
     var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1&host='+host+"&service="+service+"&backend="+backend;
     if(escape_html) {
