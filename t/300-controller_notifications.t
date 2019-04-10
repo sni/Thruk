@@ -38,11 +38,11 @@ my $pages = [
     { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=256',               like => 'Contact Notifications' },
     { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=4096',              like => 'Contact Notifications' },
     {
-      url => '/thruk/cgi-bin/notifications.cgi?start=2010-03-02+00%3A00%3A00&end=2010-03-03+00%3A00%3A00',
+      url => '/thruk/cgi-bin/notifications.cgi?start=-1d&end=now',
       like => 'All Hosts and Services'
     },
     {
-      url => '/thruk/cgi-bin/notifications.cgi?start=2010-03-02+00%3A00%3A00&end=2010-03-03+00%3A00%3A00&oldestfirst=on',
+      url => '/thruk/cgi-bin/notifications.cgi?start=-1d&end=now&oldestfirst=on',
       like => 'All Hosts and Services'
     },
 ];
