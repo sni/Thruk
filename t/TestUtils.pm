@@ -436,6 +436,7 @@ sub test_page {
             $html_only_content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
             my $matches = get_matches_with_meta($html_only_content, qr/^(.*\&amp;amp.*)$/mx);
             for my $m (@{$matches}) {
+                next if $m->{'match'} =~ m/abbr=/mx;
                 fail(sprintf("page contains double html escaped amps in line %d: %s", $m->{'line'}, $m->{'match'}));
             }
         }
