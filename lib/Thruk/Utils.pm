@@ -2797,7 +2797,7 @@ make sure this is a post request
 sub is_post {
     my($c) = @_;
     return(1) if $c->req->method eq 'POST';
-    $c->log->error("insecure request, post method required: ".Dumper($c->req));
+    $c->error("insecure request, post method required");
     $c->detach('/error/index/24');
     return;
 }
@@ -2836,7 +2836,7 @@ sub check_csrf {
         $store->set('token', $tokens);
         return(1);
     }
-    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->req));
+    $c->error("possible csrf, no or invalid token");
     $c->detach('/error/index/24');
     return;
 }

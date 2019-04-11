@@ -202,9 +202,10 @@ sub index {
             'code' => 500, # internal server error
         },
         '24'  => {
-            'mess' => 'Security Alert',
-            'dscr' => 'This request is not allowed, details can be found in the thruk.log.',
-            'code' => 403, # forbidden
+            'mess'    => 'Security Alert',
+            'dscr'    => 'This request is not allowed, details can be found in the thruk.log.',
+            'code'    => 403, # forbidden
+            'log_req' => 1,
         },
         '25'  => {
             'mess' => 'This page does not exist...',
@@ -229,11 +230,12 @@ sub index {
     my $errorDetails = join('<br>', @{$c->error});
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
-        if($code >= 500) {
+        if($code >= 500 || $errors->{$arg1}->{'log_req'}) {
             $c->log->error("***************************");
-            $c->log->error(sprintf("page:   %s\n", $c->req->url)) if defined $c->req->url;
-            $c->log->error(sprintf("params: %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
-            $c->log->error(sprintf("user:   %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+            $c->log->error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
+            $c->log->error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+            $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+            $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
             $c->log->error($errors->{$arg1}->{'mess'});
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
