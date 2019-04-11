@@ -492,8 +492,11 @@ sub _bp_start_page {
     my $filter = $c->req->parameters->{'filter'} // '';
     if($filter) {
         my $new_bps = [];
+        ## no critic
+        my $regex = qr/$filter/i;
+        ## use critic
         for my $bp (@{$bps}) {
-            push @{$new_bps}, $bp if $bp->{'name'} =~ m/$filter/mxi;
+            push @{$new_bps}, $bp if $bp->{'name'} =~ $regex;
         }
         $bps = $new_bps;
     }

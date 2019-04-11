@@ -12,6 +12,8 @@ next:
             - use downtime_max_duration if set
           - mobile:
             - fix compatibility issue with jquery 3.x
+          - Business Process:
+            - fix filtering containing spaces
 
 2.28     Fri Mar 29 17:27:48 CET 2019
           - rename graph_proxy option into http_backend_reverse_proxy
