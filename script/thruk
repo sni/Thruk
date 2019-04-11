@@ -62,6 +62,14 @@ Getopt::Long::GetOptions (
 };
 @{$options->{'commandoptions'}} = @ARGV;
 if($options->{'help'}) {
+    if($options->{'commandoptions'} && $options->{'commandoptions'}->[0]) {
+        require Thruk::Utils::CLI;
+        my $module = ucfirst($options->{'commandoptions'}->[0]);
+        eval("require Thruk::Utils::CLI::".$module);
+        my $out = Thruk::Utils::CLI::get_submodule_help($module);
+        print STDERR $out->{'output'};
+        exit($out->{'rc'});
+    }
     require Pod::Usage;
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
     exit(3);
