@@ -270,6 +270,9 @@ sub begin {
     # ex.: global bookmarks from var/global_user_data
     $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
 
+    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
+
     # do some sanity checks
     if($c->req->parameters->{'referer'}) {
         if($c->req->parameters->{'referer'} =~ m/^(\w+:\/\/|\/\/)/mx) {
@@ -459,8 +462,6 @@ sub add_defaults {
     $c->stash->{'user_tz'} = $user_tz;
 
     ###############################
-    $c->stash->{'escape_html_tags'}      = exists $c->config->{'cgi_cfg'}->{'escape_html_tags'}  ? $c->config->{'cgi_cfg'}->{'escape_html_tags'}  : 1;
-    $c->stash->{'show_context_help'}     = exists $c->config->{'cgi_cfg'}->{'show_context_help'} ? $c->config->{'cgi_cfg'}->{'show_context_help'} : 0;
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
