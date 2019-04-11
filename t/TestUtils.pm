@@ -35,6 +35,7 @@ our @EXPORT_OK = qw(request ctx_request);
 
 my $use_html_lint;
 my $lint;
+my $test_token = "";
 
 use Thruk;
 use Thruk::Config;
@@ -111,15 +112,31 @@ sub get_test_user {
     our $remote_user_cache;
     return $remote_user_cache if $remote_user_cache;
     my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
-    ok( $request->is_success, 'get_test_user() needs a proper config page' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_test_user() needs a proper status page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $user;
     if($page =~ m/Logged\ in\ as\ <i>(.*?)<\/i>/mxo) {
         $user = $1;
     }
-    isnt($user, undef, "got a user from config.cgi") or bail_out_req('got no test user, cannot test.', $request);
+    isnt($user, undef, "got a user from status.cgi") or bail_out_req('got no test user, cannot test.', $request);
     $remote_user_cache = $user;
     return($user);
+}
+
+#########################
+sub get_current_user_token {
+    our $remote_user_token;
+    return $remote_user_token if $remote_user_token;
+    my $request = _request('/thruk/cgi-bin/user.cgi');
+    ok( $request->is_success, 'get_current_user_token() needs a proper user profile page' ) or diag(Dumper($request));
+    my $page = $request->content;
+    my $token;
+    if($page =~ m/name="CSRFtoken"\s+value="([^"]+)"/mxo) {
+        $token = $1;
+    }
+    isnt($token, undef, "got a token from user.cgi") or bail_out_req('got no token, cannot test.', $request);
+    $remote_user_token = $token;
+    return($token);
 }
 
 #########################
@@ -841,7 +858,7 @@ sub _request {
     if($post) {
         $method = 'POST' unless $method;
         $method = uc($method);
-        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $post->{'CSRFtoken'} = $test_token unless $ENV{'NO_POST_TOKEN'};
         $request = POST($url, {});
         $request->method(uc($method));
         $request->header('Content-Type' => 'application/json; charset=utf-8');
@@ -891,7 +908,7 @@ sub _external_request {
     }
     my $req;
     if($post || ($method && $method ne 'GET')) {
-        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $post->{'CSRFtoken'} = $test_token unless $ENV{'NO_POST_TOKEN'};
         $method = 'POST' unless $method;
         my $request = POST($url, {});
         $request->method(uc($method));
@@ -982,27 +999,10 @@ sub bail_out_req {
 }
 
 #########################
-my $test_token_set = 0;
 sub set_test_user_token {
-    my($remove) = @_;
-    require Thruk::Config;
-    require Thruk::Utils::Cache;
-    my $config = Thruk::Config::get_config();
-    my $store  = Thruk::Utils::Cache->new($config->{'var_path'}.'/token');
-    my $tokens = $store->get('token');
-    if($remove) {
-        delete $tokens->{get_test_user()};
-    } else {
-        $tokens->{get_test_user()} = { token => 'test', time => time() };
-    }
-    $store->set('token', $tokens);
+    return if $test_token;
+    $test_token = TestUtils::get_current_user_token();
     return;
-}
-END {
-    # remove test token again
-    if($test_token_set) {
-        set_test_user_token(1);
-    }
 }
 
 #########################

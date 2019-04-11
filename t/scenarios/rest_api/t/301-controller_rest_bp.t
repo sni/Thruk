@@ -7,14 +7,14 @@ use Cpanel::JSON::XS qw/decode_json/;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 49;
+    plan tests => 51;
 
     use lib('t');
     require TestUtils;
     import TestUtils;
-    $ENV{'NO_POST_TOKEN'} = 1; # disable adding "token" to each POST request
 }
 
+TestUtils::set_test_user_token();
 use_ok 'Thruk::Controller::rest_v1';
 my($host,$service) = ('localhost', 'Users');
 my $original_bp;

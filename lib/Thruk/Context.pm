@@ -239,6 +239,7 @@ sub authenticate {
     if($sessionid) {
         $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid);
         $sessiondata = undef if(!$sessiondata || $sessiondata->{'username'} ne $username);
+        $sessiondata->{'private_key'} = $sessionid if $sessiondata;
     }
     my $user = Thruk::Authentication::User->new($c, $username, $sessiondata);
     return unless $user;
@@ -246,25 +247,16 @@ sub authenticate {
         $c->error("account is locked, please contact an administrator");
         return;
     }
+    # set session id for all requests
     if(!$sessiondata && $username !~ m/^\(.*\)$/mx) {
-        # set session id for all requests
         if(defined $ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
-            if($sessionid && !Thruk::Utils::check_for_nasty_filename($sessionid)) {
-                my $sdir = $c->config->{'var_path'}.'/sessions';
-                my $sessionfile = $sdir.'/'.$sessionid;
-                if(!-e $sessionfile) {
-                    Thruk::Utils::get_fake_session($c, $sessionid, $username, undef, $c->req->address);
-                }
-            } else {
-                $sessionid = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
-                $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
-            }
-            $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid);
+            ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
+            $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
         }
     }
     if($sessiondata) {
         my $now = time();
-        utime($now, $now, $sessiondata->{'file'});
+        utime($now, $now, $sessiondata->{'file'}) if $sessiondata->{'file'};
         $c->{'session'} = $sessiondata;
     }
     $c->{'user'} = $user;
@@ -336,7 +328,7 @@ sub request_username {
     elsif($c->req->cookies->{'thruk_auth'}) {
         # verify ip address
         my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $c->req->cookies->{'thruk_auth'});
-        if($sessiondata && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
+        if($sessiondata && $sessiondata->{'address'} && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
             $username = $sessiondata->{'username'};
         }
     }

@@ -7,7 +7,7 @@
 [%# make sure IE can submit form by pressing enter #%]
 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="action" value="save">
-<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 Note: some options are not accessible here for security reasons.
 [% IF readonly %]
 <br><div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
@@ -98,7 +98,7 @@ Note: some options are not accessible here for security reasons.
                 auth:         auth,
                 proxy:        proxy,
                 remote_name:  remote_name,
-                token:        user_token
+                CSRFtoken:    CSRFtoken
         },
         type: 'POST',
         cache: false,

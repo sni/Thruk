@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 407;
+    plan tests => 409;
 }
 
 BEGIN {
@@ -16,6 +16,7 @@ BEGIN {
 }
 BEGIN { use_ok 'Thruk::Controller::rest_v1' }
 
+TestUtils::set_test_user_token();
 my($host,$service) = TestUtils::get_test_service();
 
 my $list_pages = [

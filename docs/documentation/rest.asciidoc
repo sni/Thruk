@@ -1429,6 +1429,7 @@ lists recurring downtimes.
 |childoptions                      | flag used for the downtime command
 |comment                           | comment used for the downtime command
 |duration                          | duration in minutes
+|error                             | contains the error message if something got wrong with this downtime
 |file                              | file number
 |fixed                             | flag whether this should create a fixed downtime
 |flex_range                        | range in minutes for flexible downtimes

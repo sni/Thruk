@@ -389,9 +389,8 @@ sub _fetch_keys {
     return if($url eq '/lmd/sites' && !$ENV{'THRUK_USE_LMD'});
     return if $doc =~ m/see\ /mxi;
 
-    my $keys = [];
+    my $keys = {};
     $c->{'rendered'} = 0;
-    $c->req->parameters->{'limit'} = 1;
     delete $c->req->parameters->{'sort'};
     print STDERR "fetching keys for ".$url."\n";
     my $tst_url = $url;
@@ -407,21 +406,28 @@ sub _fetch_keys {
     Thruk::Action::AddDefaults::_set_enabled_backends($c);
     my $data = Thruk::Controller::rest_v1::_process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {
-        for my $k (sort keys %{$data->[0]}) {
-            next if $k =~ m/^tabpan/mx;
-            push @{$keys}, [$k, ""];
+        # combine keys from all results
+        for my $d (@{$data}) {
+            for my $k (sort keys %{$d}) {
+                next if $k =~ m/^tabpan/mx;
+                $keys->{$k} = 1;
+            }
         }
     }
     elsif($data && ref($data) eq 'HASH' && !$data->{'code'}) {
         for my $k (sort keys %{$data}) {
-            push @{$keys}, [$k, ""];
+            $keys->{$k} = 1;
         }
     }
     else {
         print STDERR "ERROR: got no usable data in url ".$tst_url."\n".Dumper($data);
         return;
     }
-    return $keys;
+    my $list = [];
+    for my $k (sort keys %{$keys}) {
+        push @{$list}, [$k, ""];
+    }
+    return $list;
 }
 
 ################################################################################

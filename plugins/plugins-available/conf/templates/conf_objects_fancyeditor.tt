@@ -7,7 +7,7 @@
 <input type="hidden" name="action" value="savefile">
 <input type="hidden" name="file" value="[% file_link | html %]">
 <input type="hidden" name="content" value="[% file_content | html %]" id='filecontent'>
-<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 [% IF show_object && back == "edit" %]
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
 [% END %]

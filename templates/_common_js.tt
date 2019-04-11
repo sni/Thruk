@@ -28,7 +28,7 @@
   var jquery_ui_css       = '[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css';
   var thruk_debug_js      = [% IF thruk_debug %]1[% ELSE %]0[% END %];
   var minimal             = [% IF minimal %]true[% ELSE %]false[% END %];
-  var user_token          = '[% get_user_token(c) %]';
+  var CSRFtoken           = '[% get_user_token(c) %]';
   var remote_user         = '[% remote_user %]';
   var omd_site            = '[% omd_site %]';
   var referer             = '[% escape_js(uri_with(c, '_' => 'undef' )) %]';

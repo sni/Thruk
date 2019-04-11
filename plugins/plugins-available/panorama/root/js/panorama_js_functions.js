@@ -2165,9 +2165,9 @@ var TP = {
                     url: 'broadcast.cgi',
                     method: 'POST',
                     params: {
-                        action:  'dismiss',
-                        panorama: 1,
-                        token:    user_token
+                        action:   'dismiss',
+                        panorama:  1,
+                        CSRFtoken: CSRFtoken
                     }
                 });
                 delete TP.broadcasts[id];

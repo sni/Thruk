@@ -107,6 +107,11 @@ sub thruk_index_html {
         return(thruk_main_html($c));
     }
 
+    # if index page is requested, this usually means this is a user $session and no script, unset fake flag to enable csrf protection
+    if($c->{'session'} && $c->{'session'}->{'fake'} && $c->{'session'}->{'file'}) {
+        Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { fake => undef });
+    }
+
     $c->stash->{'title'}           = $c->config->{'name'};
     $c->stash->{'main'}            = '';
     $c->stash->{'target'}          = '';

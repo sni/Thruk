@@ -265,7 +265,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
             link:      link,
             dashboard: panel_id,
             icon:      id,
-            token:     user_token
+            CSRFtoken: CSRFtoken
         };
         Ext.Ajax.request({
             url:    url_prefix+'cgi-bin/panorama.cgi?task=serveraction',
@@ -311,11 +311,11 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
             Ext.Ajax.request({
                 url:    url_prefix+'cgi-bin/status.cgi?replacemacros=1',
                 params:  {
-                    host:    panel.xdata.general.host,
-                    service: panel.xdata.general.service,
-                    backend: TP.getActiveBackendsPanel(tab, panel),
-                    data:    link,
-                    token:   user_token
+                    host:      panel.xdata.general.host,
+                    service:   panel.xdata.general.service,
+                    backend:   TP.getActiveBackendsPanel(tab, panel),
+                    data:      link,
+                    CSRFtoken: CSRFtoken
                 },
                 method: 'POST',
                 callback: function(options, success, response) {

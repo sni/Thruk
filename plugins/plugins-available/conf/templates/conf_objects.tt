@@ -29,7 +29,7 @@
 <input type="hidden" name="clone_ref" value="[% value | html %]">
 [% END %]
 <input type="hidden" name="referer" value="[% referer | html %]">
-<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj' style="table-layout: fixed;"[% IF bare %] width="100%"[% END %]>
     <tr>
       <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>

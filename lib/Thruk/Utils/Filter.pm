@@ -1090,30 +1090,14 @@ returns user token which can be used to validate requests
 =cut
 sub get_user_token {
     my($c) = @_;
-    return $c->stash->{'user_token'} if $c->stash->{'user_token'};
-    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
-        return("");
+    return("") unless $c->{'session'};
+
+    my $sessiondata = $c->{'session'};
+    if(!$sessiondata->{'csrf_token'}) {
+        # session but no token yet
+        (undef, undef,$sessiondata) = Thruk::Utils::CookieAuth::store_session($c->config, $sessiondata->{'private_key'}, $sessiondata);
     }
-    my $store   = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
-    my $tokens  = $store->get('token');
-    my $minage  = time() - 7200;
-    my $changed = 0;
-    for my $usr (keys %{$tokens}) {
-        if($tokens->{$usr}->{'time'} < $minage) {
-            delete $tokens->{$usr};
-            $changed++;
-        }
-    }
-    if(!defined $tokens->{$c->stash->{'remote_user'}}) {
-        $tokens->{$c->stash->{'remote_user'}} = {
-            'token' => md5_hex($c->stash->{'remote_user'}.time().rand()),
-            'time'  => time(),
-        };
-        $changed++;
-    }
-    $store->set('token', $tokens) if $changed;
-    $c->stash->{'user_token'} = $tokens->{$c->stash->{'remote_user'}}->{'token'};
-    return $c->stash->{'user_token'};
+    return $sessiondata->{'csrf_token'};
 }
 
 ########################################

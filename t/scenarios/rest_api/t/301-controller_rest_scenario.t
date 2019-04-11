@@ -6,16 +6,15 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 142;
+    plan tests => 144;
 
     use lib('t');
     require TestUtils;
     import TestUtils;
-    $ENV{'NO_POST_TOKEN'} = 1; # disable adding "token" to each POST request
 }
 
 use_ok 'Thruk::Controller::rest_v1';
-
+TestUtils::set_test_user_token();
 my($host,$service) = ('localhost', 'Users');
 
 my $pages = [{

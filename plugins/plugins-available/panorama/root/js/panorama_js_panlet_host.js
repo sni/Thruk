@@ -366,7 +366,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
                     sticky_ack:         cmd_sticky_ack,
                     send_notification:  cmd_send_notification,
                     persistent:         cmd_persistent,
-                    token:              user_token
+                    CSRFtoken:          CSRFtoken
                 });
                 panel.menusnr = panel.menusnr + 1;
                 return true;

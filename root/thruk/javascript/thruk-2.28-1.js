@@ -3168,10 +3168,10 @@ function setDefaultColumns(type, pane_prefix, value) {
     }
 
     var data = {
-        action:  'set_default_columns',
-        type:    type,
-        value:   value,
-        token:   user_token
+        action:   'set_default_columns',
+        type:      type,
+        value:     value,
+        CSRFtoken: CSRFtoken
     };
     jQuery.ajax({
         url: "status.cgi",
@@ -3249,8 +3249,8 @@ function broadcast_dismiss() {
     jQuery.ajax({
         url: url_prefix + 'cgi-bin/broadcast.cgi',
         data: {
-            action: 'dismiss',
-            token:  user_token
+            action:   'dismiss',
+            CSRFtoken: CSRFtoken
         },
         type: 'POST',
         success: function(data) {},
@@ -3410,11 +3410,11 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
         jQuery.ajax({
             url: url_prefix + 'cgi-bin/status.cgi?replacemacros=1',
             data: {
-                host:     host,
-                service:  service,
-                backend:  backend,
-                dataJson: JSON.stringify(toReplace),
-                token:    user_token
+                host:      host,
+                service:   service,
+                backend:   backend,
+                dataJson:  JSON.stringify(toReplace),
+                CSRFtoken: CSRFtoken
             },
             type: 'POST',
             success: function(data) {
@@ -3665,11 +3665,11 @@ function check_server_action(id, link, backend, host, service, server_action_url
             server_action_url = url_prefix + 'cgi-bin/status.cgi?serveraction=1';
         }
         var data = {
-            host:    host,
-            service: service,
-            backend: backend,
-            link:    link.href,
-            token:   user_token
+            host:      host,
+            service:   service,
+            backend:   backend,
+            link:      link.href,
+            CSRFtoken: CSRFtoken
         };
         if(extra_param) {
             for(var key in extra_param) {
@@ -3752,11 +3752,11 @@ function check_server_action(id, link, backend, host, service, server_action_url
             jQuery.ajax({
                 url: url_prefix + 'cgi-bin/status.cgi?replacemacros=1',
                 data: {
-                    host:    host,
-                    service: service,
-                    backend: backend,
-                    data:    href,
-                    token:   user_token
+                    host:      host,
+                    service:   service,
+                    backend:   backend,
+                    data:      href,
+                    CSRFtoken: CSRFtoken
                 },
                 type: 'POST',
                 success: function(data) {

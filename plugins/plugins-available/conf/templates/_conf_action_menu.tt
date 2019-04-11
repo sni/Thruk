@@ -37,7 +37,7 @@
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='clone'>
                     <input type='hidden' name='data.id' value="[% object.get_id() %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Clone this [% type | html %]</a>
                   </form>
                 </td>
@@ -50,7 +50,7 @@
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='enable'>
                     <input type='hidden' name='data.id' value="[% object.get_id() %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Enable this [% type | html %]</a>
                   </form>
                 </td>
@@ -63,7 +63,7 @@
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='disable'>
                     <input type='hidden' name='data.id' value="[% object.get_id() %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Disable this [% type | html %] temporarily</a>
                   </form>
                 </td>
@@ -76,7 +76,7 @@
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='delete'>
                     <input type='hidden' name='data.id' value="[% object.get_id() %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Delete this [% type | html %]</a>
                   </form>
                 </td>
@@ -88,7 +88,7 @@
                     <input type='hidden' name='sub' value='objects'>
                     <input type='hidden' name='action' value='revert'>
                     <input type='hidden' name='data.id' value="[% object.get_id() %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Revert this [% type | html %]</a>
                   </form>
                 </td>

@@ -202,8 +202,8 @@ sub index {
             'code' => 500, # internal server error
         },
         '24'  => {
-            'mess'    => 'Security Alert',
-            'dscr'    => 'This request is not allowed, details can be found in the thruk.log.',
+            'mess'    => 'CSFR Security Alert',
+            'dscr'    => 'Using this formular requires a POST with a valid CSFR token or an API key.',
             'code'    => 403, # forbidden
             'log_req' => 1,
         },

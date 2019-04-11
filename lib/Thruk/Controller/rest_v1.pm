@@ -31,7 +31,7 @@ use Thruk::Utils::CookieAuth ();
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters = [qw/limit offset sort columns backend backends q/];
+my $reserved_query_parameters = [qw/limit offset sort columns backend backends q CSRFtoken/];
 my $op_translation_words      = {
     'eq'     => '=',
     'ne'     => '!=',
@@ -328,6 +328,16 @@ sub _fetch {
                 push @{$protos}, $proto;
                 next;
             }
+            if($request_method ne 'GET' && !Thruk::Utils::check_csrf($c, 1)) {
+                # make csrf protection mandatory for anything other than GET requests
+                return({
+                    'message'     => 'invalid or no csfr token',
+                    'code'        => 403,
+                    'failed'      => Cpanel::JSON::XS::true,
+                });
+            }
+            delete $c->req->parameters->{'CSRFtoken'};
+            delete $c->req->body_parameters->{'CSRFtoken'};
             @matches = map { uri_unescape($_) } @matches;
             $c->stats->profile(comment => $path);
             my $sub_name = Thruk->verbose ? Thruk::Utils::code2name($function) : '';
@@ -1286,6 +1296,8 @@ sub _rest_get_thruk_sessions {
         next unless $session_data;
         next unless($is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'});
         delete $session_data->{'hash'};
+        delete $session_data->{'private_key'};
+        delete $session_data->{'csrf_token'};
         push @{$data}, $session_data;
     }
     if($id) {
@@ -1483,7 +1495,6 @@ sub _rest_get_livestatus_services_commandline {
             'service_description' => $svc->{'description'},
             'peer_key'            => $svc->{'peer_key'},
         };
-        push @{$data}, $command;
     }
     return($data);
 }

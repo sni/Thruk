@@ -109,10 +109,10 @@ sub external_authentication {
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
                     $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
-                    my($sessionid, undef) = store_session($config, undef, {
-                        hash     => $hash,
-                        address  => $address,
-                        username => $login,
+                    my($sessionid) = store_session($config, undef, {
+                        hash       => $hash,
+                        address    => $address,
+                        username   => $login,
                     });
                     return $sessionid;
                 }
@@ -215,6 +215,7 @@ sub clean_session_files {
         $cookie_auth_session_timeout = 365 * 86400;
     }
     my $timeout = time() - $cookie_auth_session_timeout;
+    my $fake_session_timeout = time() - 600;
     Thruk::Utils::IO::mkdir($sdir);
     opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
@@ -222,8 +223,18 @@ sub clean_session_files {
         my $file = $sdir.'/'.$entry;
         my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
-        if($mtime && $mtime < $timeout) {
-            unlink($file);
+        if($mtime) {
+            if($mtime < $timeout) {
+                unlink($file);
+            }
+            elsif($mtime < $fake_session_timeout) {
+                eval {
+                    my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+                    if($data && $data->{'fake'}) {
+                        unlink($file);
+                    }
+                };
+            }
         }
     }
     return;
@@ -281,12 +292,18 @@ sub store_session {
     $digest->add($sessionid);
     my $hashed_key = $digest->hexdigest();
 
+    $data->{'csrf_token'} = _generate_csrf_token([$sessionid]) unless $data->{'csrf_token'};
+    delete $data->{'private_key'};
+
+    confess("no username") unless $data->{'username'};
+
     my $sdir = $config->{'var_path'}.'/sessions';
     die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9_]+$/mx;
     my $sessionfile = $sdir.'/'.$hashed_key.'.'.$type;
     Thruk::Utils::IO::mkdir_r($sdir);
     Thruk::Utils::IO::json_lock_store($sessionfile, $data);
-    return($sessionid, $sessionfile);
+    $data->{'private_key'} = $sessionid;
+    return($sessionid, $sessionfile, $data);
 }
 
 ##############################################
@@ -384,12 +401,28 @@ sub retrieve_session {
         };
     }
     return unless defined $data;
-    $data->{file}       = $sessionfile;
-    $data->{hashed_key} = $hashed_key;
-    $data->{digest}     = $type;
-    $data->{active}     = $stat[9];
-    $data->{roles}      = [] unless $data->{roles};
+    $data->{file}        = $sessionfile;
+    $data->{hashed_key}  = $hashed_key;
+    $data->{digest}      = $type;
+    $data->{active}      = $stat[9];
+    $data->{roles}       = [] unless $data->{roles};
+    $data->{private_key} = $sessionid if $sessionid;
     return($data);
+}
+
+##############################################
+sub _generate_csrf_token {
+    my($salt) = @_;
+    my $type = $supported_digests->{$default_digest};
+    my $digest = Digest->new($type);
+    $digest->add(time());
+    $digest->add(rand(10000));
+    if($salt) {
+        for my $s (@{$salt}) {
+            $digest->add($s);
+        }
+    }
+    return($digest->hexdigest());
 }
 
 ##############################################

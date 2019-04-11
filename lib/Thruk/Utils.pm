@@ -1756,9 +1756,9 @@ sub absolute_url {
 
 =head2 get_fake_session
 
-  get_fake_session($c, [$sessionid], [$roles])
+  get_fake_session($c, [$sessionid], [$roles], [$address])
 
-create and return fake session id for current user
+create and return fake session id along with session data for current user
 
 =cut
 
@@ -1773,10 +1773,10 @@ sub get_fake_session {
     if($roles && ref $roles eq 'ARRAY') {
         $sessiondata->{'roles'} = $roles;
     }
-    my($sessionid, $sessionfile) = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
+    my($sessionid, $sessionfile,$newsessiondata) = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;
-    return($sessionid);
+    return($sessionid, $newsessiondata);
 }
 
 ########################################
@@ -2115,6 +2115,30 @@ sub update_cron_file {
         }
     }
     return 1;
+}
+
+##########################################################
+
+=head2 update_cron_file_maintainance
+
+    update_cron_file_maintainance($c)
+
+update maintainance cronjobs
+
+=cut
+sub update_cron_file_maintainance {
+    my($c) = @_;
+    my $cron_entries = [[
+         '20,50 * * * *',
+         sprintf("cd %s && %s '%s maintainance' >/dev/null 2>>%s/cron.log",
+                                $c->config->{'project_root'},
+                                $c->config->{'thruk_shell'},
+                                $c->config->{'thruk_bin'},
+                                $c->config->{'var_path'},
+                ),
+    ]];
+    Thruk::Utils::update_cron_file($c, 'general', $cron_entries);
+    return;
 }
 
 ##############################################
@@ -2812,9 +2836,14 @@ ensure valid cross site request forgery token
 
 =cut
 sub check_csrf {
-    my($c) = @_;
+    my($c, $skip_request_method) = @_;
+
+    # script generated sessions are ok, we only want to protect browsers here
     return 1 if($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI');
-    return unless is_post($c);
+    return 1 if $c->req->header('X-Thruk-Auth-Key');
+    return 1 if($c->{'session'} && $c->{'session'}->{'fake'});
+
+    return unless($skip_request_method || is_post($c));
     my $req_addr = $c->env->{'HTTP_X_FORWARDED_FOR'} || $c->req->address;
     for my $addr (@{$c->config->{'csrf_allowed_hosts'}}) {
         return 1 if $req_addr eq $addr;
@@ -2826,14 +2855,9 @@ sub check_csrf {
             return 1 if $req_addr =~ m/$search/mx;
         }
     }
-    my $post_token  = $c->req->parameters->{'token'};
+    my $post_token  = $c->req->parameters->{'CSRFtoken'} // $c->req->parameters->{'token'};
     my $valid_token = Thruk::Utils::Filter::get_user_token($c);
     if($valid_token && $post_token && $valid_token eq $post_token) {
-        # remove token, it should not be reused
-        my $store   = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
-        my $tokens  = $store->get('token');
-        delete $tokens->{$c->stash->{'remote_user'}};
-        $store->set('token', $tokens);
         return(1);
     }
     $c->error("possible csrf, no or invalid token");

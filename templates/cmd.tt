@@ -32,7 +32,7 @@
                 <td>
                   <form method='post' action='cmd.cgi'>
                     <input type="hidden" name="referer" value="[% referer | html %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <table cellspacing="0" cellpadding="0" border="0" class="optBoxInnerTable">
                       <tr><td><input type='hidden' name='cmd_typ' value="[% cmd_typ | html %]"><input type='hidden' name='cmd_mod' value='2'></td></tr>
                       [% content %]

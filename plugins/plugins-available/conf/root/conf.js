@@ -192,10 +192,10 @@ function init_conf_tool_buttons() {
         jQuery.ajax({
             url: 'conf.cgi',
             data: {
-                action: 'json',
-                type:   'dig',
-                host:   host,
-                token:  user_token
+                action:   'json',
+                type:     'dig',
+                host:      host,
+                CSRFtoken: CSRFtoken
             },
             type: 'POST',
             success: function(data) {
@@ -319,10 +319,10 @@ function update_command_line(id) {
         url: 'conf.cgi',
         type: 'POST',
         data: {
-            action: 'json',
-            type:   'commanddetails',
-            command: cmd_name,
-            token:   user_token
+            action:   'json',
+            type:     'commanddetails',
+            command:   cmd_name,
+            CSRFtoken: CSRFtoken
         },
         success: function(data) {
             updateCommandLine(id, data[0].cmd_line, args);
@@ -515,10 +515,10 @@ function load_plugin_help(id, plugin) {
     jQuery.ajax({
         url: 'conf.cgi',
         data: {
-            action: 'json',
-            type:   'pluginhelp',
-            plugin:  plugin,
-            token:   user_token
+            action:   'json',
+            type:     'pluginhelp',
+            plugin:    plugin,
+            CSRFtoken: CSRFtoken
         },
         type: 'POST',
         success: function(data) {
@@ -555,13 +555,13 @@ function check_plugin_exec(id) {
     jQuery.ajax({
         url: 'conf.cgi',
         data: {
-            action: 'json',
-            type:   'pluginpreview',
-            command: command,
-            host:    host,
-            service: service,
-            args:    args,
-            token:   user_token
+            action:   'json',
+            type:     'pluginpreview',
+            command:   command,
+            host:      host,
+            service:   service,
+            args:      args,
+            CSRFtoken: CSRFtoken
         },
         type: 'POST',
         success: function(data) {
