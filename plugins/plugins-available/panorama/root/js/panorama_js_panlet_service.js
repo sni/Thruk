@@ -32,8 +32,9 @@ Ext.define('TP.PanletService', {
             this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
         }
 
-        /* should be closeable all the time because they can be openend even on readonly dashboards */
+        /* should be closeable/moveable all the time because they can be openend even on readonly dashboards */
         this.closable  = true;
+        this.draggable = true;
     },
     setGearItems: function() {
         var panel = this;
