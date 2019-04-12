@@ -451,22 +451,20 @@ sub _bp_start_page {
     if($c->req->parameters->{'no_drafts'}) {
         $drafts_too = 0;
     }
-    my $bps = [];
-    if($type eq 'local' || $type eq 'all') {
-        $bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
-    }
+    my $local_bps = [];
+    $local_bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
 
     if($c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'json') {
         my $json;
         if($c->req->parameters->{'format'} and $c->req->parameters->{'format'} eq 'search') {
             my $data = [];
-            for my $bp (@{$bps}) {
+            for my $bp (@{$local_bps}) {
                 push @{$data}, $bp->{'name'};
             }
             $json = [ { 'name' => "business processs", 'data' => $data } ];
         } else {
             my $data = {};
-            for my $bp (@{$bps}) {
+            for my $bp (@{$local_bps}) {
                 $data->{$bp->{'id'}} = $bp->TO_JSON();
             }
             $json = $data;
@@ -474,12 +472,17 @@ sub _bp_start_page {
         return $c->render(json => $json);
     }
 
+    my $bps = [];
+    if($type eq 'local' || $type eq 'all') {
+        $bps = $local_bps;
+    }
+
     # add remote business processes
     $c->stash->{'has_remote_bps'} = 0;
     if(scalar @{$c->{'db'}->get_http_peers()} > 0) {
         $c->stash->{'has_remote_bps'} = 1;
         if($type eq 'remote' || $type eq 'all') {
-            $bps = _add_remote_bps($c, $bps);
+            $bps = _add_remote_bps($c, $bps, $local_bps);
         }
     }
 
@@ -513,7 +516,7 @@ sub _bp_start_page {
 
 ##########################################################
 sub _add_remote_bps {
-    my($c, $bps) = @_;
+    my($c, $bps, $local_bps) = @_;
 
     my $site_names = {};
     for my $p (@{$c->{'db'}->get_peers(1)}) {
@@ -521,7 +524,7 @@ sub _add_remote_bps {
     }
 
     my $uniq = {};
-    for my $bp (@{$bps}) {
+    for my $bp (@{$local_bps}) {
         $uniq->{$bp->{'id'}.':'.$bp->{'name'}} = 1;
         $bp->{'site'} = '';
         next unless $bp->{'bp_backend'};
