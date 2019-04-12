@@ -487,6 +487,11 @@ Ext.define('TP.Pantab', {
         if(!Ext.isArray(This.xdata.state_order)) {
             This.xdata.state_order = This.xdata.state_order.split(',');
         }
+
+        // convert old binary autohideheader
+        if(This.xdata.autohideheader === true)  { This.xdata.autohideheader = 1; }
+        if(This.xdata.autohideheader === false) { This.xdata.autohideheader = 0; }
+
         xdata.locked = This.locked;
         This.setLock(xdata.locked);
         This.setTitle(xdata.title);
@@ -569,7 +574,7 @@ Ext.define('TP.Pantab', {
                     delay = delay + Math.round(interval*1000);
                 }
                 if(p.header) {
-                    if(this.xdata.autohideheader) { p.header.hide() } else { p.header.show() }
+                    if(this.xdata.autohideheader === 1) { p.header.hide() }
                 }
             }
         }

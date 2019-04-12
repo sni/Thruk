@@ -749,11 +749,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             border:      0
         }, {
             /* auto hide panlet header */
-            xtype:      'checkbox',
-            fieldLabel: 'Hide Panlet Header',
-            name:       'autohideheader',
-            boxLabel:   ' (widget header will be displayed on mouse over)'
-        }, {
+            fieldLabel:    'Show Panlet Header',
+            xtype:         'combobox',
+            name:          'autohideheader',
+            value:          tab.xdata.autohideheader,
+            triggerAction: 'all',
+            selectOnTab:    true,
+            lazyRender:     true,
+            editable:       false,
+            store:        [[0, 'Always'], [1, 'Mouseover'], [2, 'Never']]
+        } , {
             fieldLabel:  'State Type',
             xtype:       'fieldcontainer',
             defaultType: 'radiofield',

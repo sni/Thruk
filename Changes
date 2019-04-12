@@ -15,6 +15,8 @@ next:
             - fix compatibility issue with jquery 3.x
           - Business Process:
             - fix filtering containing spaces
+          - Panorama:
+            - add option to always hide widget border
 
 2.28     Fri Mar 29 17:27:48 CET 2019
           - rename graph_proxy option into http_backend_reverse_proxy

@@ -463,7 +463,8 @@ DIV.autohideheader .x-grid-with-row-lines .x-grid-cell {
     border-width: 0;
 }
 DIV.autohideheader.autohideheaderover .x-grid-with-row-lines .x-grid-cell {
-    border-width: inherit;
+    /* breaks host/service list widget on mouseover */
+    /*border-width: inherit; */
 }
 
 DIV.autohideheader .x-grid-header-ct, DIV.autohideheader .x-toolbar {

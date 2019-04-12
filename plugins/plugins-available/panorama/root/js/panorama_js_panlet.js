@@ -127,6 +127,7 @@ Ext.define('TP.Panlet', {
     },
     dd_overriden: false,
     getState: function() {
+        if(!this.el) { return; }
         var state = this.callParent(arguments);
         state.title = this.title;
         state.xdata = this.xdata;
@@ -243,7 +244,9 @@ Ext.define('TP.Panlet', {
             var div    = This.getEl();
             var global = Ext.getCmp(This.panel_id);
             div.on("mouseout", function()  { This.hideHeader(global); });
-            div.on("mouseover", function() { This.showHeader(global); });
+            if(global.xdata.autohideheader === 1 || !this.locked) {
+                div.on("mouseover", function() { This.showHeader(global); });
+            }
         },
         afterrender: function(This, eOpts) {
             Ext.fly('iconContainer').appendChild(Ext.get(This.id));
@@ -252,6 +255,11 @@ Ext.define('TP.Panlet', {
             this.startTimeouts();
             this.syncShadowTimeout();
             this.applyBorderAndBackground();
+            if(this.xdata.showborder == false) {
+                window.setTimeout(function() {
+                    This.hideHeader();
+                }, 500);
+            }
         },
         beforestatesave: function( This, state, eOpts ) {
             if(This.locked) {
@@ -293,7 +301,7 @@ Ext.define('TP.Panlet', {
     },
     showHeader: function(global) {
         if(global == undefined) { global = Ext.getCmp(this.panel_id); }
-        if(global.xdata.autohideheader || this.xdata.showborder == false) {
+        if(global.xdata.autohideheader === 1 || this.xdata.showborder == false) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
                 // not yet rendered
@@ -322,7 +330,7 @@ Ext.define('TP.Panlet', {
     },
     hideHeader: function(global) {
         if(global == undefined) { global = Ext.getCmp(this.panel_id); }
-        if((global.xdata.autohideheader || this.xdata.showborder == false) && this.gearitem == undefined) {
+        if((global.xdata.autohideheader === 1 || this.xdata.showborder == false) && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
             style.opacity  = '';
@@ -338,7 +346,10 @@ Ext.define('TP.Panlet', {
         }
     },
     applyBorderAndBackground: function() {
-        this.overCls = 'autohideheaderover';
+        var global = Ext.getCmp(this.panel_id);
+        if(global.xdata.autohideheader === 1) {
+            this.overCls = 'autohideheaderover';
+        }
         if(this.xdata.showborder == false && this.gearitem == undefined) {
             this.cls     = 'autohideheader';
             this.bodyCls = 'autohideheader';
@@ -379,13 +390,13 @@ Ext.define('TP.Panlet', {
         }
         if(!this.header) { return; }
         var global = Ext.getCmp(this.panel_id);
-        if(global.xdata.autohideheader || this.xdata.showborder == false) {
+        if(global.xdata.autohideheader === 1 || this.xdata.showborder == false) {
             this.header.hide();
         }
-        if(this.xdata.showborder == true && global.xdata.autohideheader == false) {
+        if(this.xdata.showborder == true && global.xdata.autohideheader === 0) {
             this.header.show();
         }
-        if(this.xdata.showborder == true && global.xdata.autohideheader == true) {
+        if(this.xdata.showborder == true && global.xdata.autohideheader === 1) {
             var panel = this;
             window.setTimeout(Ext.bind(function() {
                 if(panel.header) { panel.header.hide(); }
@@ -448,7 +459,7 @@ Ext.define('TP.PanletGearItem', {
             var panel = this.up('window');
             var tab   = Ext.getCmp(panel.panel_id);
             // settings panel is somehow hidden below header
-            if(tab.xdata.autohideheader || panel.xdata.showborder == false) {
+            if(tab.xdata.autohideheader === 1 || panel.xdata.showborder == false) {
                 This.body.dom.style.marginTop = '17px';
             } else {
                 This.body.dom.style.marginTop = '';
