@@ -858,7 +858,7 @@ sub _request {
     if($post) {
         $method = 'POST' unless $method;
         $method = uc($method);
-        $post->{'CSRFtoken'} = $test_token unless $ENV{'NO_POST_TOKEN'};
+        $post->{'CSRFtoken'} = $test_token if $test_token;
         $request = POST($url, {});
         $request->method(uc($method));
         $request->header('Content-Type' => 'application/json; charset=utf-8');
@@ -908,7 +908,7 @@ sub _external_request {
     }
     my $req;
     if($post || ($method && $method ne 'GET')) {
-        $post->{'CSRFtoken'} = $test_token unless $ENV{'NO_POST_TOKEN'};
+        $post->{'CSRFtoken'} = $test_token if $test_token;
         $method = 'POST' unless $method;
         my $request = POST($url, {});
         $request->method(uc($method));

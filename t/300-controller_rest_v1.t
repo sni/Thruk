@@ -148,7 +148,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/logs?q=***host_name = "test" AND time > 1 AND time < 10***',
         'content_type' => 'application/json;charset=UTF-8',
@@ -160,7 +159,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter II
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/logs?q=***host_name = "test" AND (time > 1 AND time < 10)***',
         'content_type' => 'application/json;charset=UTF-8',
@@ -172,7 +170,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter when the filtered item is not in the columns list
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&state[ne]=5',
         'content_type' => 'application/json;charset=UTF-8',
@@ -184,7 +181,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter when the filtered item is not in the columns list II
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&q=***state >= 0***',
         'content_type' => 'application/json;charset=UTF-8',
@@ -196,7 +192,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter when the filtered item is not in the columns list III
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&state[gte]=0',
         'content_type' => 'application/json;charset=UTF-8',
@@ -208,7 +203,6 @@ TestUtils::test_page(
 ################################################################################
 # test sorting empty result set
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?q=***(groups>="does not exist")***&sort=_UNKNOWN_CUSTOM_VAR',
         'content_type' => 'application/json;charset=UTF-8',
@@ -220,7 +214,6 @@ TestUtils::test_page(
 ################################################################################
 # test columns when no column given
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?q=***(name != "does not exist")***',
         'content_type' => 'application/json;charset=UTF-8',
@@ -232,7 +225,6 @@ TestUtils::test_page(
 ################################################################################
 # test count(*) with no matches
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?state=-1&columns=count(*)',
         'content_type' => 'application/json;charset=UTF-8',
