@@ -22,12 +22,10 @@ BEGIN {
 }
 
 ###########################################################
-my $testport;
-BEGIN {
-    my $start = 50000;
+my $testport = 50000;
+{
     my $socket;
     for my $x (0..99) {
-        $testport = $start + $x;
         eval {
             $socket = IO::Socket::INET->new(Listen    => 5,
                                             LocalAddr => '127.0.0.1',
@@ -35,13 +33,15 @@ BEGIN {
                                             Proto     => 'tcp');
         };
         last if($socket);
+        diag("port $testport is in use, trying next one");
+        $testport++;
     }
-    BAIL_OUT('got no testport') unless $testport;
+    BAIL_OUT('failed to get free port') unless $socket;
 }
 
 ###########################################################
 my($http_dir, $local_dir, $input_dir,$test_name);
-BEGIN {
+{
     if($ENV{THRUK_LEAK_CHECK}) {
         $input_dir = 'core.d';
         $test_name = 'testname';
@@ -86,7 +86,7 @@ BEGIN {
 
 ###########################################################
 # start test server
-my $cmd     = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
+my $cmd = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
 ok($cmd, $cmd);
 $SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
 my $httppid = fork();
