@@ -273,6 +273,10 @@ sub begin {
     $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
     $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
 
+    # set some pager defaults
+    $c->stash->{'entries_per_page'} = 0;
+    $c->stash->{'data'}             = [];
+
     # do some sanity checks
     if($c->req->parameters->{'referer'}) {
         if($c->req->parameters->{'referer'} =~ m/^(\w+:\/\/|\/\/)/mx) {

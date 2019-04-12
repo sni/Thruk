@@ -120,7 +120,8 @@ sub index {
         $c->stash->{nodename} = $1;
     }
     else {
-        confess("unknown groupby option: ".$c->stash->{groupby});
+        $c->error("unknown groupby option");
+        return $c->detach('/error/index/100');
     }
 
     # does our root id exist?

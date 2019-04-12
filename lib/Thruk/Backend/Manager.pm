@@ -1717,7 +1717,7 @@ sub select_backends {
         my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
         if($view_mode ne 'html') {
             delete $arg{'pager'};
-            delete $c->stash->{'use_pager'};
+            $c->stash->{'use_pager'} = 0;
         }
 
         if(   $function eq 'get_hosts'
