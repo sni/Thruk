@@ -108,10 +108,5 @@ Ext.define('TP.PanletBP', {
             store:           { fields: ['name', 'id'], data: [] },
             emptyText:      'select business process to display'
         });
-        this.addGearItems({
-            fieldLabel: 'Show Border',
-            xtype:      'checkbox',
-            name:       'showborder'
-        });
     }
 });
