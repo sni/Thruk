@@ -41,6 +41,8 @@ sub index {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
+    $c->stash->{'inject_stats'} = $c->req->parameters->{'minimal'} ? 0 : 1;
+
     $c->stash->{title}                 = 'Business Process';
     $c->stash->{page}                  = 'status';
     $c->stash->{template}              = 'bp.tt';
