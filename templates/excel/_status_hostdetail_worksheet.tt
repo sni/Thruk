@@ -21,7 +21,7 @@
         [% ELSIF col == "Duration"      %]<cell width='15'>Duration</cell>
         [% ELSIF col == "Status Information"       %]<cell width='80'>Status Information</cell>
         [% ELSIF col == "Extra Status Information" %]<cell width='80'>Extra Status Information</cell>
-        [% ELSE %]<cell width='30'>[% col %]</cell>
+        [% ELSE %]<cell width='30'>[% escape_xml(col) %]</cell>
         [% END %]
         [% END %]
       </format>
