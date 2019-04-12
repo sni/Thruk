@@ -70,6 +70,7 @@ return date from timestamp in given format
 sub format_date {
     my($timestamp, $format) = @_;
     confess("no format") unless defined $format;
+    confess("no timestamp") unless defined $timestamp;
     my $date = POSIX::strftime($format, localtime($timestamp));
     return $date;
 }

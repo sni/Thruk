@@ -230,12 +230,15 @@ sub get_search_from_param {
 
     if( defined $c->req->parameters->{ $prefix . '_type' } ) {
         if( ref $c->req->parameters->{ $prefix . '_type' } eq 'ARRAY' ) {
-            for ( my $x = 0; $x < scalar @{ $c->req->parameters->{ $prefix . '_type' } }; $x++ ) {
+            for my $param ($prefix.'_val_pre', $prefix.'_value', $prefix.'_op') {
+                $c->req->parameters->{$param} = Thruk::Utils::list($c->req->parameters->{$param});
+            }
+            for(my $x = 0; $x < scalar @{$c->req->parameters->{$prefix . '_type'}}; $x++) {
                 my $text_filter = {
-                    val_pre => _is_defined($c->req->parameters->{ $prefix . '_val_pre' }->[$x], ''),
-                    type    => _is_defined($c->req->parameters->{ $prefix . '_type' }->[$x],    ''),
-                    value   => _is_defined($c->req->parameters->{ $prefix . '_value' }->[$x],   ''),
-                    op      => _is_defined($c->req->parameters->{ $prefix . '_op' }->[$x],      ''),
+                    val_pre => $c->req->parameters->{$prefix.'_val_pre'}->[$x] // '',
+                    type    => $c->req->parameters->{$prefix.'_type'}->[$x]    // '',
+                    value   => $c->req->parameters->{$prefix.'_value'}->[$x]   // '',
+                    op      => $c->req->parameters->{$prefix.'_op'}->[$x]      // '',
                 };
                 if($text_filter->{'type'} eq 'business impact' and defined $c->req->parameters->{ $prefix . '_value_sel' }->[$x]) {
                     $text_filter->{'value'} = $c->req->parameters->{ $prefix . '_value_sel' }->[$x];
@@ -246,10 +249,10 @@ sub get_search_from_param {
         }
         else {
             my $text_filter = {
-                val_pre => _is_defined($c->req->parameters->{ $prefix . '_val_pre' }, ''),
-                type    => _is_defined($c->req->parameters->{ $prefix . '_type' },    ''),
-                value   => _is_defined($c->req->parameters->{ $prefix . '_value' },   ''),
-                op      => _is_defined($c->req->parameters->{ $prefix . '_op' },      ''),
+                val_pre => $c->req->parameters->{$prefix.'_val_pre'} // '',
+                type    => $c->req->parameters->{$prefix.'_type'}    // '',
+                value   => $c->req->parameters->{$prefix.'_value'}   // '',
+                op      => $c->req->parameters->{$prefix.'_op'}      // '',
             };
             if(defined $c->req->parameters->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
                 $text_filter->{'value'} = $c->req->parameters->{ $prefix . '_value_sel'};
@@ -2146,13 +2149,6 @@ sub set_default_filter {
             'op'      => $default_service_filter_op,
     };
     return($default_service_text_filter);
-}
-
-##############################################
-sub _is_defined {
-    my($a, $b) = @_;
-    return $a if defined $a;
-    return $b;
 }
 
 ##############################################
