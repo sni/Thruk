@@ -1930,7 +1930,7 @@ possible conversions are
 =cut
 sub expand_duration {
     my($value) = @_;
-    if($value =~ m/^(\d+)(y|w|d|h|m|s)/gmx) {
+    if($value =~ m/^(\-?\d+)(y|w|d|h|m|s)/gmx) {
         if($2 eq 'y') { return $1 * 86400*365; }# year
         if($2 eq 'w') { return $1 * 86400*7; }  # weeks
         if($2 eq 'd') { return $1 * 86400; }    # days

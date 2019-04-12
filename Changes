@@ -10,6 +10,7 @@ next:
           - REST:
             - manage api keys via rest api
             - use downtime_max_duration if set
+            - support relative timestamps in numeric filter
           - mobile:
             - fix compatibility issue with jquery 3.x
           - Business Process:

@@ -144,6 +144,14 @@ Curl requires you to set the `globoff` option:
   %> curl -gk 'https://user:pass@localhost/thruk/r/hosts?name[regex]=^t'
 ------
 
+ex.: numeric filter using the operators `<`, `>`, `>=` or `<=` will be expanded
+like described in link:rest_commands.html#relative-timestamps[relative timestamps].
+
+list session which had been active within the last 10minutes
+
+------
+  %> thruk r '/thruk/sessions?columns=username,max(active)&active[gte]=-10m'
+------
 
 Possible operators with their alias:
 
