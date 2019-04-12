@@ -908,6 +908,7 @@ sub _external_request {
     }
     my $req;
     if($post || ($method && $method ne 'GET')) {
+        $post = {} unless defined $post;
         $post->{'CSRFtoken'} = $test_token if $test_token;
         $method = 'POST' unless $method;
         my $request = POST($url, {});
