@@ -9,7 +9,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-BEGIN { use_ok 'Thruk::Utils::CLI::Rest' }
+use_ok 'Thruk::Utils::CLI::Rest';
 
 ################################################################################
 my $test_result = [{data => {
