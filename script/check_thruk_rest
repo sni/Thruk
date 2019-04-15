@@ -72,11 +72,11 @@ __END__
 
 =head1 NAME
 
-check_thruk - Monitoring Plugin to check things from the Thruk REST API
+check_thruk_rest - Monitoring Plugin to check things from the Thruk REST API
 
 =head1 SYNOPSIS
 
-  Usage: check_thruk [globaloptions] [pluginoptions] <rest url>
+  Usage: check_thruk_rest [globaloptions] [pluginoptions] <rest url>
 
   Globaloptions:
     -h, --help                    Show this help message and exit
@@ -95,7 +95,7 @@ check_thruk - Monitoring Plugin to check things from the Thruk REST API
 
 =head1 DESCRIPTION
 
-The check_thruk plugin fetches data from the Thruk REST API and may apply thresholds.
+The check_thruk_rest plugin fetches data from the Thruk REST API and may apply thresholds.
 
 =head1 OPTIONS
 
@@ -168,20 +168,20 @@ thruk returns 0 on success and >= 1 otherwise
 =head1 EXAMPLES
 
     - notifiy if more than 80 hosts are down
-      check_thruk -w:down:80 -c:down:100 /hosts/totals
+      check_thruk_rest -w:down:80 -c:down:100 /hosts/totals
 
     - advanced monitoring plugin:
       thruk [globaloptions] rest -o "outputtemplate" [-w attribute:value] [-c attribute:value] <url>
 
     - multiple queries, options are used for the following query. Notify if more than 20 hosts are down or more than 50 services issues are unhandled.
-      check_thruk \
+      check_thruk_rest \
         --critical=down_and_unhandled:20
         "/hosts/totals"
         --critical=critical_and_unhandled:50
         "/services/totals"
 
     - multiple queries with output template.
-      check_thruk \
+      check_thruk_rest \
         -o "{status} - There are {down} of {1:total} hosts down and {critical+unknown} or {2:total} services have issues."
         --warning=total:20:100
         "/hosts/totals"
@@ -189,7 +189,7 @@ thruk returns 0 on success and >= 1 otherwise
         "/services/totals"
 
     - show active session using renamed aggregation functions
-      check_thruk \
+      check_thruk_rest \
         -o '{STATUS} - There are {sessions} active sessions.' \
         --warning=sessions:20 \
         --critical=sessions:30 \

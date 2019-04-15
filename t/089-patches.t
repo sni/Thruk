@@ -30,7 +30,7 @@ my $precmds = {
   'support/0032-naemon-httpd.patch'       => 'cp support/apache_fcgid.conf thruk.conf',
   'support/0035-naemon-cgicfg.patch'      => 'cd .. && cp cgi.cfg cgi.cfg.testbak && git checkout cgi.cfg; cp cgi.cfg tmppatches/ && mv cgi.cfg.testbak cgi.cfg',
   'support/0036-naemon-htpasswd.patch'    => 'cp support/htpasswd .',
-  'support/0003-thruk-check.patch'        => 'cp script/check_thruk .',
+  'support/0003-thruk-check.patch'        => 'cp script/check_thruk_rest .',
 };
 
 my @patches = glob('support/*.patch');
