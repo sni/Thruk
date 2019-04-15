@@ -68,7 +68,7 @@ TestUtils::test_page(
 );
 
 SKIP: {
-    skip 'external tests', 50 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    skip 'external tests', 52 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
     my $c = TestUtils::get_c();
     delete $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
