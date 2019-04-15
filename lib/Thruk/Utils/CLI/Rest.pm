@@ -125,6 +125,11 @@ sub _parse_args {
             $opt->{'url'} = $s->[0];
         }
 
+        if($opt->{'postdata'} && scalar @{$opt->{'postdata'}} > 0 && !$opt->{'method'}) {
+            $opt->{'method'} = 'POST';
+        }
+        $opt->{'method'} = 'GET' unless $opt->{'method'};
+
         my $postdata = {};
         for my $d (@{$opt->{'postdata'}}) {
             if(ref $d eq '' && $d =~ m/^\{.*\}$/mx) {
@@ -152,11 +157,6 @@ sub _parse_args {
             }
         }
         $opt->{'postdata'} = $postdata if $opt->{'postdata'};
-
-        if($opt->{'postdata'} && scalar keys %{$opt->{'postdata'}} > 0 && !$opt->{'method'}) {
-            $opt->{'method'} = 'POST';
-        }
-        $opt->{'method'} = 'GET' unless $opt->{'method'};
 
         push @commands, $opt;
     }
