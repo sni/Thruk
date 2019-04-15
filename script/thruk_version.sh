@@ -56,11 +56,11 @@ fileversion="$newversion-$rpmrelease"
 sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$date',/" -i lib/Thruk/Config.pm
 sed -i support/thruk.spec -e 's/^Release:.*$/Release: '$rpmrelease'/'
 sed -r "s/branch\s*= '.*';/branch       = '$branch';/" \
-    -i lib/Thruk/Config.pm   \
-    -i script/thruk          \
-    -i script/check_thruk    \
-    -i script/naglint        \
-    -i script/nagexp         \
+    -i lib/Thruk/Config.pm     \
+    -i script/thruk            \
+    -i script/check_thruk_rest \
+    -i script/naglint          \
+    -i script/nagexp           \
     -i script/nagimp
 # replace unreleased with unstable, otherwise dch thinks there was no release yet and replaces the last entry
 sed -e 's/UNRELEASED/unstable/g' -i debian/changelog
@@ -69,12 +69,12 @@ sed -e 's/unstable/UNRELEASED/g' -i debian/changelog
 if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
     sed -r "s/^Version:\s*.*/Version:       $newversion/" -i support/thruk.spec
     sed -r "s/'${VERSION}'/'$newversion'/" \
-                -i lib/Thruk.pm          \
-                -i lib/Thruk/Config.pm   \
-                -i script/thruk          \
-                -i script/check_thruk    \
-                -i script/naglint        \
-                -i script/nagexp         \
+                -i lib/Thruk.pm            \
+                -i lib/Thruk/Config.pm     \
+                -i script/thruk            \
+                -i script/check_thruk_rest \
+                -i script/naglint          \
+                -i script/nagexp           \
                 -i script/nagimp
     sed -r "s/\-${VERSION}-${BRANCH}(\.|_)/-$fileversion\1/" \
                 -i MANIFEST                 \
@@ -117,7 +117,7 @@ git add                     \
     docs/manpages/thruk.3   \
     root/thruk/startup.html \
     script/thruk            \
-    script/check_thruk      \
+    script/check_thruk_rest \
     dist.ini                \
     lib/Thruk/Config.pm     \
     script/naglint          \
