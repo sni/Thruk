@@ -52,7 +52,7 @@ Getopt::Long::GetOptions (
 };
 @{$options->{'commandoptions'}} = @ARGV;
 unshift(@{$options->{'commandoptions'}}, "rest");
-if($options->{'help'}) {
+if($options->{'help'} || scalar @{$options->{'commandoptions'}} == 1) {
     require Pod::Usage;
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
     exit(3);

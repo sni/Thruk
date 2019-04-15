@@ -172,7 +172,7 @@ sub _apply_theshold {
     my($attr,$val1, $val2) = split(/:/mx, $data->{$threshold}, 3);
     my $value = $data->{'data'}->{$attr};
     if(!defined $value) {
-        _set_rc($data, 3);
+        _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold=key:value\n");
         return;
     }
     if(defined $val2) {
@@ -199,9 +199,12 @@ sub _apply_theshold {
 
 ##############################################
 sub _set_rc {
-    my($data, $rc) = @_;
+    my($data, $rc, $msg) = @_;
     if(!defined $data->{'rc'} || $data->{'rc'} < $rc) {
         $data->{'rc'} = $rc;
+    }
+    if($msg) {
+        $data->{'output'} = $msg;
     }
     return;
 }
@@ -214,6 +217,8 @@ sub _create_output {
     # if there are output formats, use them
     my $format;
     for my $r (@{$result}) {
+        return($r->{'result'}, $r->{'rc'}) if $r->{'rc'} > 0;
+
         $format = $r->{'output'} if $r->{'output'};
 
         # apply thresholds
@@ -221,6 +226,7 @@ sub _create_output {
         _apply_theshold('critical', $r);
 
         $rc = $r->{'rc'} if $r->{'rc'} > $rc;
+        return($r->{'output'}, 3) if $r->{'rc'} == 3;
     }
 
     # if there is no format, simply concatenate the output

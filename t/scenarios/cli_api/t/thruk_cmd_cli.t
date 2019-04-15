@@ -86,7 +86,7 @@ TestUtils::test_command({
     cmd     => '/usr/bin/env thruk r -d "comment_data=test" -d "triggered_by=test" /hosts/localhost/cmd/schedule_host_downtime',
     like    => ['/"error"/', '/parse ulong argument trigger_id/', '/No digits found in ulong/', '/COMMAND/', '/SCHEDULE_HOST_DOWNTIME/'],
     unlike  => ['/successfully submitted/'],
-    exit    => 1,
+    exit    => 3,
 });
 
 ###########################################################
