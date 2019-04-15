@@ -58,6 +58,7 @@ sed -i support/thruk.spec -e 's/^Release:.*$/Release: '$rpmrelease'/'
 sed -r "s/branch\s*= '.*';/branch       = '$branch';/" \
     -i lib/Thruk/Config.pm   \
     -i script/thruk          \
+    -i script/check_thruk    \
     -i script/naglint        \
     -i script/nagexp         \
     -i script/nagimp
@@ -71,6 +72,7 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
                 -i lib/Thruk.pm          \
                 -i lib/Thruk/Config.pm   \
                 -i script/thruk          \
+                -i script/check_thruk    \
                 -i script/naglint        \
                 -i script/nagexp         \
                 -i script/nagimp
@@ -115,6 +117,7 @@ git add                     \
     docs/manpages/thruk.3   \
     root/thruk/startup.html \
     script/thruk            \
+    script/check_thruk      \
     dist.ini                \
     lib/Thruk/Config.pm     \
     script/naglint          \

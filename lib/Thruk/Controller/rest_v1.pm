@@ -46,6 +46,9 @@ my $op_translation_words      = {
 use constant {
     PRE_STATS    =>  1,
     POST_STATS   =>  2,
+
+    NAME         =>  1,
+    RAW          =>  2,
 };
 
 ##########################################################
@@ -215,7 +218,7 @@ sub _format_csv_output {
 
     my $output;
     if(ref $data eq 'ARRAY') {
-        my $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        my $columns = $hash_columns || get_request_columns($c, NAME) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         $output = "";
         for my $d (@{$data}) {
             my $x = 0;
@@ -267,7 +270,7 @@ sub _format_xls_output {
 
     my $columns = [];
     if(ref $data eq 'ARRAY') {
-        $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        $columns = $hash_columns || get_request_columns($c, NAME) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         for my $row (@{$data}) {
             for my $key (keys %{$row}) {
                 $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
@@ -523,7 +526,7 @@ sub _apply_stats {
     my $group_columns = [];
     for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
         for my $col (split(/\s*,\s*/mx, $col)) {
-            if($col =~ m/^(.*)\(([^\)]+)\)$/mx) {
+            if($col =~ m/^(.*)\(([^\)]+)\):?([^:]*)$/mx) {
                 push @{$stats_columns}, { op => $1, col => $2 };
                 push @{$new_columns}, $col;
             } else {
@@ -633,13 +636,13 @@ sub _apply_stats {
 
 =head2 get_request_columns
 
-    get_request_columns($c)
+    get_request_columns($c, $type)
 
 returns list of requested columns or undef
 
 =cut
 sub get_request_columns {
-    my($c) = @_;
+    my($c, $type) = @_;
 
     return unless $c->req->parameters->{'columns'};
 
@@ -648,6 +651,11 @@ sub get_request_columns {
         push @{$columns}, split(/\s*,\s*/mx, $col);
     }
     $columns = Thruk::Utils::array_uniq($columns);
+    if($type == NAME) {
+        for(@{$columns}) {
+            $_ =~ s/^[^:]+:.*?$//gmx;
+        }
+    }
     return($columns);
 }
 
@@ -716,7 +724,7 @@ sub column_required {
     }
 
     # from ?columns=...
-    my $req_col = get_request_columns($c);
+    my $req_col = get_request_columns($c, NAME);
     if(defined $req_col && scalar @{$req_col} >= 0 && grep(/^$col$/mx, @{$req_col})) {
         return 1;
     }
@@ -741,13 +749,22 @@ sub _apply_columns {
     my($c, $data) = @_;
 
     return $data unless $c->req->parameters->{'columns'};
-    my $columns = get_request_columns($c);
+    my $columns = [];
+    for my $c (@{get_request_columns($c, RAW)}) {
+        my $name = $c;
+        my $alias = $c;
+        if($c =~ m/^(.+):(.*?)$/gmx) {
+            $name  = $1;
+            $alias = $2;
+        }
+        push @{$columns}, [$name, $alias];
+    }
 
     my $res = [];
     for my $d (@{$data}) {
         my $row = {};
         for my $c (@{$columns}) {
-            $row->{$c} = $d->{$c};
+            $row->{$c->[1]} = $d->{$c->[0]};
         }
         push @{$res}, $row;
     }
@@ -822,7 +839,7 @@ sub _livestatus_options {
 
     # try to reduce the number of requested columns
     if($type) {
-        my $columns = get_request_columns($c) || [];
+        my $columns = get_request_columns($c, NAME) || [];
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
             $columns = Thruk::Utils::array_uniq($columns);
@@ -963,7 +980,7 @@ sub _expand_perfdata_and_custom_vars {
     my $allowed_list = Thruk::Utils::list($c->config->{'show_custom_vars'});
 
     # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
-    my $columns = get_request_columns($c) || [];
+    my $columns = get_request_columns($c, NAME) || [];
     push @{$columns}, @{get_filter_columns($c)};
     if($columns && scalar @{$columns} > 0) {
         my $ref_columns;

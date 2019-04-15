@@ -4,7 +4,7 @@ use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Test skipped, $ENV{NO_PATCH_TEST} was set' if $ENV{NO_PATCH_TEST};
-plan tests => 24;
+plan tests => 28;
 
 alarm(120);
 
@@ -30,6 +30,7 @@ my $precmds = {
   'support/0032-naemon-httpd.patch'       => 'cp support/apache_fcgid.conf thruk.conf',
   'support/0035-naemon-cgicfg.patch'      => 'cd .. && cp cgi.cfg cgi.cfg.testbak && git checkout cgi.cfg; cp cgi.cfg tmppatches/ && mv cgi.cfg.testbak cgi.cfg',
   'support/0036-naemon-htpasswd.patch'    => 'cp support/htpasswd .',
+  'support/0003-thruk-check.patch'        => 'cp script/check_thruk .',
 };
 
 my @patches = glob('support/*.patch');

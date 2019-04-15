@@ -236,6 +236,12 @@ ex.: return name and state for all hosts:
 ------
 
 
+Rename columns by appending `:name` like this:
+------
+  %> thruk r /hosts?columns=name:host_name,state:status
+------
+
+
 == Aggregation Functions
 
 Aggregation functions can be used to get statistical information.
@@ -261,6 +267,12 @@ ex.: list average execution time over all services grouped by state.
 ------
   %> thruk r '/services?columns=avg(execution_time),state&sort=avg(execution_time)'
 ------
+
+Rename columns by appending `:name`
+------
+  %> thruk r '/thruk/sessions?columns=count(*):sessions'
+------
+
 
 == Backends / Sites
 
@@ -1584,4 +1596,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

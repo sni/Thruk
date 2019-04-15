@@ -1,0 +1,203 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5:/usr/lib64/thruk/perl5;
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 25
+
+###################################################
+use strict;
+use warnings;
+use Getopt::Long qw//;
+
+our $VERSION = '2.28';
+my $branch       = '';
+
+my $options = {
+    'verbose'        => 1,
+    'backends'       => [],
+    'commandoptions' => [],
+    'local'          => 1,
+    'mode'           => 'monitoring-plugin',
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+Getopt::Long::Configure('pass_through');
+Getopt::Long::GetOptions (
+   "h|help"             => \$options->{'help'},
+   "v|verbose"          => sub { $options->{'verbose'}++ },
+   "V|version"          => \$options->{'version'},
+   "b|backend=s"        =>  $options->{'backends'},
+) or do {
+    print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
+    exit 3;
+};
+@{$options->{'commandoptions'}} = @ARGV;
+unshift(@{$options->{'commandoptions'}}, "rest");
+if($options->{'help'}) {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+    exit(3);
+}
+if($options->{'version'}) {
+    require Thruk::Config;
+    $branch = Thruk::Config::get_git_name() unless $branch ne '';
+    print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
+}
+
+require Thruk::Utils::CLI;
+my $cli = Thruk::Utils::CLI->new($options);
+exit $cli->_run();
+
+1;
+__END__
+
+=head1 NAME
+
+check_thruk - Monitoring Plugin to check things from the Thruk REST API
+
+=head1 SYNOPSIS
+
+  Usage: check_thruk [globaloptions] [pluginoptions] <rest url>
+
+  Globaloptions:
+    -h, --help                    Show this help message and exit
+    -v, --verbose                 Print verbose output
+    -V, --version                 Print version
+    -b, --backend=<backend>       Comma seperated list of backends/sites
+                                  which should be used for querys.
+    -o, --output=<template>       Define output text template. Format see below.
+
+  Plugin options:
+    -w, --warning=<threshold>     Apply warning threshold. Format see below.
+    -c, --critical=<threshold>    Apply critical threshold. Format see below.
+    <rest url>                    Rest url to query. When used multiple times, plugin options
+                                  are reset for each url. See example.
+
+
+=head1 DESCRIPTION
+
+The check_thruk plugin fetches data from the Thruk REST API and may apply thresholds.
+
+=head1 OPTIONS
+
+script has the following arguments
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-v> , B<--verbose>
+
+    print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
+
+=item B<-b> I<backend>, B<--backend>=I<backend>
+
+    specify backend(s), otherwise the default backends will be
+    used. Specify the key of the backend. Use <-l> to get a list
+    of backends.
+
+    All default backends (backends without the 'hidden' flag) will be used unless
+    backend(s) are specified with this option.
+
+    Use 'ALL' to use all backends, regardless of the hidden flag.
+
+
+=item B<-w> I<threshold>, B<--warning>=I<threshold>
+
+    Apply warning threshold.
+    Format is: <attribute>:<value> or <attribute>:<threshold> using
+    the threshold range syntax from
+    https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+
+=item B<-c> I<threshold>, B<--critical>=I<threshold>
+
+    Apply critical threshold. Format is the same as for warnings.
+
+=item B<-o> I<outputtemplate>, B<--output>=I<outputtemplate>
+
+    Use this template when creating the final text output of this pluging.
+    The template may contain macros/variables in curly brackets.
+
+    A macro can be either a reference to the fetched data.
+        - {attribute name}
+
+    Prefix with the number of the query when using multiple queries. Number
+    starts at 1.
+        - {nr:attribute name}
+
+    Simple calculation:
+        - {attribute name + another attribute}
+
+    Special macros:
+        - {STATUS} contains the text status
+
+    Use printf format strings like this:
+        - {var%format}, ex.: {execution_time:%02f}
+
+=back
+
+=head1 RETURN VALUE
+
+thruk returns 0 on success and >= 1 otherwise
+
+=head1 EXAMPLES
+
+    - notifiy if more than 80 hosts are down
+      check_thruk -w:down:80 -c:down:100 /hosts/totals
+
+    - advanced monitoring plugin:
+      thruk [globaloptions] rest -o "outputtemplate" [-w attribute:value] [-c attribute:value] <url>
+
+    - multiple queries, options are used for the following query. Notify if more than 20 hosts are down or more than 50 services issues are unhandled.
+      check_thruk \
+        --critical=down_and_unhandled:20
+        "/hosts/totals"
+        --critical=critical_and_unhandled:50
+        "/services/totals"
+
+    - multiple queries with output template.
+      check_thruk \
+        -o "{status} - There are {down} of {1:total} hosts down and {critical+unknown} or {2:total} services have issues."
+        --warning=total:20:100
+        "/hosts/totals"
+        --warning=total:20:100
+        "/services/totals"
+
+    - show active session using renamed aggregation functions
+      check_thruk \
+        -o '{STATUS} - There are {sessions} active sessions.' \
+        --warning=sessions:20 \
+        --critical=sessions:30 \
+        '/thruk/sessions?columns=count(*):sessions&active[gte]=-10m'
+
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-2019, <sven@nierlein.org>
+
+=cut

@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - session cookies: change to sha256 and double hashing
           - api keys: change to sha256 and double hashing
+          - add check_thruk monitoring plugin to check things from the rest api
           - fix page reload when changing backends
           - security:
             - validate referer
@@ -11,6 +12,7 @@ next:
             - manage api keys via rest api
             - use downtime_max_duration if set
             - support relative timestamps in numeric filter
+            - support renaming columns by appending :name to column
           - mobile:
             - fix compatibility issue with jquery 3.x
           - Business Process:

@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 409;
+    plan tests => 425;
 }
 
 BEGIN {
@@ -230,6 +230,28 @@ TestUtils::test_page(
         'content_type' => 'application/json;charset=UTF-8',
         'method'       => 'GET',
         'like'         => ['count\(\*\)', '0'],
+    );
+};
+
+################################################################################
+# test aggregation with renamed labels
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/thruk/sessions?columns=count(*):renamed_label&active=-99',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['"renamed_label" : 0'],
+    );
+};
+
+################################################################################
+# normal query with renamed labels
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name:renamed_label&limit=1',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['"renamed_label"'],
     );
 };
 

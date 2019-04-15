@@ -1646,6 +1646,7 @@ root/thruk/vendor/openlayer-2.13.1/theme/default/style.mobile.css
 root/thruk/vendor/overlib-4.21.js
 root/thruk/vendor/sprintf-ef8258f.js
 root/thruk/vendor/strftime-min-1.3.js
+script/check_thruk
 script/disable_debug_timer.sh
 script/enable_debug_timer.sh
 script/generate_timeperiod_transitions.pl
@@ -1680,6 +1681,7 @@ ssi/README
 ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
+support/0003-thruk-check.patch
 support/0003-thruk-scripts.patch
 support/0004-thruk_data_scripts.patch
 support/0005-thruk_auth.patch
@@ -1759,6 +1761,7 @@ t/105-thruk-utils-ssi.t
 t/106-thruk_context.t
 t/107-thruk_utils_avail.t
 t/108-thruk_utils_status.t
+t/109-thruk-rest-utils.t
 t/110-thruk_authentication_user.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t

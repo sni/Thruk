@@ -123,6 +123,7 @@ local_install: local_patches
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
+	cp -p script/check_thruk       ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_fastcgi.pl  ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk.psgi        ${DESTDIR}${DATADIR}/script/
 	cp -p script/grafana_export.sh ${DESTDIR}${DATADIR}/script/
@@ -178,6 +179,7 @@ local_install: local_patches
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0004-thruk_data_scripts.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0005-thruk_auth.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0007-fcgish.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0003-thruk-check.patch
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
