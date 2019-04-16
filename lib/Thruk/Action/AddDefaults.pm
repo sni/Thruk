@@ -203,6 +203,8 @@ sub begin {
     ###############################
     # parse cgi.cfg
     Thruk::Utils::read_cgi_cfg($c);
+    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
 
     ###############################
     # Authentication
@@ -269,9 +271,6 @@ sub begin {
 
     # ex.: global bookmarks from var/global_user_data
     $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
-
-    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
-    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
 
     # set some pager defaults
     $c->stash->{'entries_per_page'} = 0;

@@ -293,6 +293,7 @@ sub _dispatcher {
         delete $env->{'HTTP_CONNECTION'};
     }
     my $c = Thruk::Context->new($thruk, $env);
+    $c->{'stage'} = 'pre';
     my $enable_profiles = 0;
     if($c->req->cookies->{'thruk_profiling'}) {
         $enable_profiles = $c->req->cookies->{'thruk_profiling'};
@@ -321,7 +322,8 @@ sub _dispatcher {
 
     ###############################################
     # route cgi request
-    if(!$c->{'errored'} && !$c->{'rendered'}) {
+    $c->{'stage'} = 'main';
+    if(!$c->{'errored'} && !$c->{'rendered'} && !$c->{'detached'}) {
         my $path_info = $c->req->path_info;
         eval {
             my $rc;
@@ -350,6 +352,7 @@ sub _dispatcher {
             Thruk::Controller::error::index($c, 13);
         }
     }
+    $c->{'stage'} = 'post';
     unless($c->{'rendered'}) {
         Thruk::Action::AddDefaults::end($c);
         if(!$c->stash->{'template'}) {

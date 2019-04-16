@@ -182,7 +182,8 @@ sub detach {
     if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
         Thruk::Controller::error::index($c, $1);
         $c->{'detached'} = 1;
-        die("prevent further page processing");
+        die("prevent further page processing") if($c->{'stage'} && $c->{'stage'} eq 'main');
+        return;
     }
     confess("detach: ".$url." at ".$c->req->url);
 }

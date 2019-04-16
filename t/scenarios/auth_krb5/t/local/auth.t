@@ -46,7 +46,7 @@ for my $site (qw/local/) {
         like => ['/login.cgi\?expired/'],
     });
     TestUtils::test_command({
-        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: abcd" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
+        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: wrong" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/wrong authentication key/'],
     });
 };
