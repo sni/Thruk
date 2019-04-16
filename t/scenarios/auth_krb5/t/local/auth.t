@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 56;
+plan tests => 60;
 
 ###########################################################
 # test thruks script path
@@ -65,6 +65,11 @@ for my $site (qw/local/) {
         cmd   => '/bin/bash -c "kinit -f omdadmin"',
         like  => ['/Password for omdadmin/'],
         stdin => 'omd',
+    });
+    # Grafana might take a bit to start
+    TestUtils::test_command({
+        cmd     => '/bin/bash -c "curl -s --negotiate -u : \'http://omd.test.local/demo/grafana/\'"',
+        waitfor => '"login":"omdadmin"',
     });
     TestUtils::test_command({
         cmd  => '/bin/bash -c "curl -s --negotiate -u : \'http://omd.test.local/demo/grafana/\'"',
