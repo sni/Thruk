@@ -734,13 +734,13 @@ sub uniqnumber {
 
 =head2 get_message
 
-  get_message($c)
+  get_message($c, [$unescaped])
 
 get a message from an cookie, display and delete it
 
 =cut
 sub get_message {
-    my($c) = @_;
+    my($c, $unescaped) = @_;
 
     my $has_details = 0;
 
@@ -768,12 +768,13 @@ sub get_message {
     }
     # message from stash
     elsif(defined $c->stash->{'thruk_message'}) {
-        my($style,$message) = split/~~/mx, $c->stash->{'thruk_message'};
         delete $c->res->{'cookies'}->{'thruk_message'};
         if(defined $c->stash->{'thruk_message_details'}) {
             $has_details = 1;
         }
-        return($style, $message, $has_details);
+        return($c->stash->{'thruk_message_style'}, $c->stash->{'thruk_message_raw'}, $has_details) if $unescaped;
+        my(undef, $thruk_message) = split/~~/mx, $c->stash->{'thruk_message'};
+        return($c->stash->{'thruk_message_style'}, $thruk_message, $has_details);
     }
 
     return '';

@@ -506,14 +506,20 @@ sub set_message {
         $escape  = shift;
     }
     $escape = $escape // 1;
+    my($escaped_message, $escaped_details);
     if($escape) {
-        $message = Thruk::Utils::Filter::escape_html($message);
-        $details = Thruk::Utils::Filter::escape_html($details);
+        $escaped_message = Thruk::Utils::Filter::escape_html($message);
+        $escaped_details = Thruk::Utils::Filter::escape_html($details);
     }
 
+    # cookie does not get escaped, it will be escaped upon read
     $c->cookie('thruk_message' => $style.'~~'.$message, { path  => $c->stash->{'cookie_path'} });
-    $c->stash->{'thruk_message'}         = $style.'~~'.$message;
-    $c->stash->{'thruk_message_details'} = $details;
+    # use escaped data if possible, but store original data as well
+    $c->stash->{'thruk_message'}         = $style.'~~'.($escaped_message // $message);
+    $c->stash->{'thruk_message_details'} = $escaped_details // $details;
+    $c->stash->{'thruk_message_style'}       = $style;
+    $c->stash->{'thruk_message_raw'}         = $message;
+    $c->stash->{'thruk_message_details_raw'} = $details;
     $c->res->code($code) if defined $code;
 
     return 1;

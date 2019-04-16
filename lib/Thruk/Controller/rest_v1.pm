@@ -176,7 +176,7 @@ sub _process_rest_request {
     if(ref $data eq 'HASH') {
         $c->res->code($data->{'code'}) if $data->{'code'};
         if($data->{'code'} && $data->{'code'} ne 200) {
-            my($style, $message) = Thruk::Utils::Filter::get_message($c);
+            my($style, $message) = Thruk::Utils::Filter::get_message($c, 1);
             if($message && $style eq 'fail_message') {
                 $data->{'description'} .= $message;
             }
