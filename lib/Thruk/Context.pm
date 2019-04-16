@@ -181,7 +181,8 @@ sub detach {
     # itself throws an error, just bail out in that case
     if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
         Thruk::Controller::error::index($c, $1);
-        return;
+        $c->{'detached'} = 1;
+        die("prevent further page processing");
     }
     confess("detach: ".$url." at ".$c->req->url);
 }
@@ -596,10 +597,13 @@ sub want_json_response {
     if($c->req->header('accept') && $c->req->header('accept') =~ m/application\/json/mx) {
         return 1;
     }
-    if($c->req->header('X-Thruk-Auth-Key')) {
+    if($c->req->path_info =~ m%^/thruk/r/%mx) {
         return 1;
     }
-    if($c->req->path_info =~ m%^/thruk/r/%mx) {
+    if($c->req->parameters->{'view_mode'} && $c->req->parameters->{'view_mode'} eq 'json') {
+        return 1;
+    }
+    if($c->req->parameters->{'json'}) {
         return 1;
     }
     return;

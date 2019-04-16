@@ -343,7 +343,7 @@ sub _dispatcher {
                 }
             }
         };
-        if($@) {
+        if($@ && !$c->{'detached'}) { # prevent overriding previously detached errors
             my $err = $@;
             $c->log->error("Error path_info: ".$path_info) unless $c->req->url;
             $c->error($err);

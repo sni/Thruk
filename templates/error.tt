@@ -1,19 +1,4 @@
 ﻿[% auto_reload_fn = '' %]
-[% IF c.request.parameters.exists('json') %]
-[% IF die_on_errors %][% throw(errorMessage) %][% END %]
-{
-  [% IF errorMessage %]
-    errorMessage: '[% escape_quotes(errorMessage) %]',
-    errorDescription: '[% escape_quotes(errorDescription) %]'
-  [% ELSE %]
-    errorMessage: 'internal server error',
-    errorDescription: 'internal server error occured, please look at your logfiles'
-  [% END %]
-  [% IF errorDetails %]
-  , errorDetails: '[% escape_quotes(errorDetails) %]'
-  [% END %]
-}
-[% ELSE %]
 [% IF die_on_errors %][% throw(errorMessage) %][% END %]
 [% PROCESS _header.tt %]
 
@@ -28,7 +13,7 @@
   </table><br>
   [% IF errorMessage %]
   <div class='errorMessage'>[% errorMessage %]</div>
-  <div class='errorDescription'>[% errorDescription %]</div>
+  <div class='errorDescription'>[% errorDescription | nl2br %]</div>
   [% ELSE %]
   [% hide_output = c.log.error('on page: ' _ c.request.method _ ' ' _ c.request.uri) %]
   <div class='errorMessage'>internal server error</div>
@@ -40,7 +25,7 @@
   <br>
   <div class='errorDescription' style="text-align: left">
   Details:<br>
-  [% errorDetails | nl2br %]
+  [% errorDetails | html | nl2br %]
   </div><br>
   [% END %]
 
@@ -76,4 +61,3 @@
 </pre></div></div>
 [% END %]
 [% PROCESS _footer.tt %]
-[% END %]

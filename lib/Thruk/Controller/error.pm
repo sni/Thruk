@@ -227,7 +227,7 @@ sub index {
         $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
     }
 
-    my $errorDetails = join('<br>', @{$c->error});
+    my $errorDetails = join("\n", @{$c->error});
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500 || $errors->{$arg1}->{'log_req'}) {
@@ -236,7 +236,7 @@ sub index {
             $c->log->error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
             $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
             $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
-            $c->log->error($errors->{$arg1}->{'mess'});
+            $c->log->error($errors->{$arg1}->{'mess'}) if $errors->{$arg1}->{'mess'};
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
@@ -307,8 +307,6 @@ sub index {
             cluck($c->stash->{errorMessage});
         }
     }
-
-    $c->stash->{errorDetails} = Thruk::Utils::Filter::escape_html($c->stash->{errorDetails}) if $c->stash->{errorDetails};
 
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
