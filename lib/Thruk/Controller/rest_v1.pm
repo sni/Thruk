@@ -871,7 +871,7 @@ sub _livestatus_options {
             }
         }
 
-        if(!$c->req->parameters->{'columns'}) {
+        if(!$options->{'columns'}) {
             if($type eq 'hosts') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_host_columns;
             }

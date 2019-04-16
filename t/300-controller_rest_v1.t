@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 425;
+    plan tests => 432;
 }
 
 BEGIN {
@@ -252,6 +252,18 @@ TestUtils::test_page(
         'content_type' => 'application/json;charset=UTF-8',
         'method'       => 'GET',
         'like'         => ['"renamed_label"'],
+    );
+};
+
+################################################################################
+# normal query with unknown columns
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name,contacts,UNKNOWN',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['"contacts"', '"UNKNOWN"'],
+        'unlike'       => ['"contacts" : null,'],
     );
 };
 
