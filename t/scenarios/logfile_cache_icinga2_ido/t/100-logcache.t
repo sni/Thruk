@@ -17,19 +17,24 @@ BEGIN { use_ok 'Thruk::Controller::notifications' }
 ###########################################################
 # import logs
 TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/showlog.cgi?logcache_update=1',
+    'like'    => [],
+    'follow'  => 1,
+    'waitfor' => 'SERVICE\ ALERT',
+);
+TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/showlog.cgi',
     'follow'  => 1,
     'like'    => [],
 );
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/showlog.cgi',
-    'like'    => [],
-    'waitfor' => 'SERVICE\ ALERT',
+    'like'    => ["Event Log", "SERVICE ALERT:", "Matching Log Entries Displayed"],
 );
 
 TestUtils::test_page(
-    'url'     => '/thruk/cgi-bin/showlog.cgi',
-    'like'    => ["Event Log", "SERVICE ALERT:", "Matching Log Entries Displayed"],
+    'url'     => '/thruk/cgi-bin/extinfo.cgi?type=4',
+    'like'    => ['Logcache Statistics', 'icinga2'],
 );
 
 ###########################################################

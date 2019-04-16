@@ -15,11 +15,16 @@ BEGIN { use_ok 'Thruk::Controller::notifications' }
 
 # import logs
 TestUtils::test_page(
-    'url'    => '/thruk/cgi-bin/showlog.cgi',
-    'follow' => 1,
-    'like'   => [],
+    'url'     => '/thruk/cgi-bin/showlog.cgi?logcache_update=1',
+    'like'    => [],
+    'follow'  => 1,
+    'waitfor' => 'LOG\ VERSION',
 );
-
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/showlog.cgi',
+    'follow'  => 1,
+    'like'    => [],
+);
 TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/showlog.cgi',
     'like'   => ["Event Log", "LOG VERSION: 2.0", "Local time is"],
