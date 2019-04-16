@@ -893,6 +893,37 @@ sub logcache_stats {
 
 ########################################
 
+=head2 get_logs
+
+  get_logs(@args)
+
+retrieve logfiles
+
+=cut
+
+sub get_logs {
+    my($self, @args) = @_;
+    my $c = $Thruk::Request::c;
+    my $data;
+    eval {
+        $data = $self->_do_on_peers( 'get_logs', \@args);
+    };
+    my $err = $@;
+    if($err && !$data && $err =~ m/Table.*doesn't\s*exist/mx) {
+        $err =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
+        $c->stash->{errorMessage}     = "Logfilecache Unavailable";
+        $c->stash->{errorDescription} = "logcache tables do not exist, please setup logcache update first.\n"
+                                       ."See <b><a href='https://thruk.org/documentation/logfile-cache.html'>the documentation</a></b> for details or try to <b><a href='".Thruk::Utils::Filter::uri_with($c, {logcache_update => 1})."'>run import manually</a></b>.\n"
+                                       .$err;
+        return($c->detach('/error/index/99'));
+    } elsif($err) {
+        die($err);
+    }
+    return($data);
+}
+
+########################################
+
 =head2 renew_logcache
 
   renew_logcache($c, [$noforks])
@@ -905,7 +936,7 @@ sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
     return unless defined $c->config->{'logcache'};
-    return if !$c->config->{'logcache_delta_updates'};
+    return if !$c->config->{'logcache_delta_updates'} && !$c->req->parameters->{'logcache_update'};
     my $rc;
     eval {
         $rc = $self->_renew_logcache($c, $noforks);
