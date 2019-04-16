@@ -283,8 +283,8 @@ sub _replace_output {
     my($var, $result, $macros) = @_;
     my $format;
     if($var =~ m/^(.*)(%[^%]+?)$/gmx) {
+        $format = $2; # overwriting $var first breaks on <= perl 5.16
         $var    = $1;
-        $format = $2;
     }
 
     my @vars = split(/([\s\-\+\/\*\(\)]+)/mx, $var);
