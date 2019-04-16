@@ -25,7 +25,7 @@ wait_start_failed:
 	-echo "ERROR: startup failed"
 	-test -e thruk.conf && $(THRUK) -l
 	-docker ps
-	-docker-compose logs --tail=20 --no-color -t | sort
+	-docker-compose logs --tail=30 --no-color -t | sort
 	$(MAKE) wait_start_failed_extra
 
 wait_start_failed_extra:
@@ -52,7 +52,7 @@ failed_test:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: test failed"
 	-docker ps
-	-docker-compose logs --tail=20 --no-color -t | sort
+	-docker-compose logs --tail=30 --no-color -t | sort
 	-$(MAKE) extra_failed_test
 	exit 1
 
