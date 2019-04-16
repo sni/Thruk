@@ -182,7 +182,7 @@ thruk returns 0 on success and >= 1 otherwise
 
     - multiple queries with output template.
       check_thruk_rest \
-        -o "{status} - There are {down} of {1:total} hosts down and {critical+unknown} or {2:total} services have issues."
+        -o "{STATUS} - There are {down} of {1:total} hosts down and {critical+unknown} or {2:total} services have issues."
         --warning=total:20:100
         "/hosts/totals"
         --warning=total:20:100
