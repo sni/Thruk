@@ -8,6 +8,7 @@ features plus adds additional enhancements for large installations, increased
 usability and many usefull addons.
 
 ![Thruk Startpage](https://thruk.org/images/galleries/01_main-thumb.png "Thruk Startpage")
+![Thruk Panorama](https://thruk.org/images/galleries/geomaps-thumb.png "Thruk Panorama")
 [See more screenshots...](https://thruk.org/screenshots/)
 
 Documentation
