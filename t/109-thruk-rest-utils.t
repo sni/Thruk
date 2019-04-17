@@ -26,7 +26,8 @@ my $test_result = [{data => {
 ];
 
 ################################################################################
-$test_result = Thruk::Utils::CLI::Rest::_calculate_totals($test_result);
+my $totals = Thruk::Utils::CLI::Rest::_calculate_data_totals($test_result, {});
+unshift(@{$test_result}, $totals);
 
 ################################################################################
 # simple text
