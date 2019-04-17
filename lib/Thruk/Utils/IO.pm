@@ -292,7 +292,7 @@ sub file_lock {
 
 =head2 file_unlock
 
-  file_unlock($file, $fh)
+  file_unlock($file, $fh, $lock_fh)
 
 unlocks file lock previously with file_lock exclusivly. Returns nothing.
 

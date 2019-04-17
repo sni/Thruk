@@ -353,6 +353,10 @@ sub _update_docs {
                     if(!$desc && $doc->[0] eq 'peer_key') {
                         $desc = "backend id when having multiple sites connected";
                     }
+                    if($url eq '/thruk/stats') {
+                        my $help = Thruk::Utils::IO::json_lock_retrieve($c->{'config'}->{'var_path'}.'/thruk.stats.help');
+                        $desc = $help->{$doc->[0]};
+                    }
                     printf(STDERR "WARNING: no documentation on url %s for attribute %s\n", $url, $doc->[0]) unless $desc;
                     $content .= sprintf("|%-33s | %s\n", $doc->[0], $desc);
                 }

@@ -443,6 +443,19 @@ sub cluster {
     return($cluster);
 }
 
+###################################################
+
+=head2 metrics
+
+return metrics object
+
+=cut
+sub metrics {
+    return($_[0]->{'_metrics'}) if $_[0]->{'_metrics'};
+    require Thruk::Metrics;
+    $_[0]->{'_metrics'} = Thruk::Metrics->new(file => $_[0]->{'config'}->{'var_path'}.'/thruk.stats');
+    return($_[0]->{'_metrics'});
+}
 
 ###################################################
 
@@ -1041,6 +1054,9 @@ sub _after_dispatch {
                     ));
     }
     $c->log->debug($c->stats->report()) if Thruk->debug;
+
+    # save metrics to disk
+    $c->app->{_metrics}->store() if $c->app->{_metrics};
 
     # restore user specific settings
     Thruk::Config::finalize($c);

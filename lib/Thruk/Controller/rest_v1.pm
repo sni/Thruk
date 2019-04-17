@@ -1315,9 +1315,21 @@ sub _rest_get_thruk_sessions {
     }
 
     my $data = [];
+    my $total_number = 0;
+    my $total_5min   = 0;
+    my $min5 = time() - (5*60);
+    my $uniq = {};
+    my $uniq5min = {};
     for my $file (sort glob($c->config->{'var_path'}."/sessions/*")) {
+        $total_number++;
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, file => $file);
         next unless $session_data;
+        if($session_data->{'active'} > $min5) {
+            $total_5min++;
+            $uniq->{$session_data->{'username'}} = 1;
+        }
+        $uniq->{$session_data->{'username'}} = 1;
+
         next unless($is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'});
         delete $session_data->{'hash'};
         delete $session_data->{'private_key'};
@@ -1330,6 +1342,10 @@ sub _rest_get_thruk_sessions {
         }
         $data = $data->[0];
     }
+    $c->metrics->set('sessions_total', $total_number, "total number of thruk sessions");
+    $c->metrics->set('sessions_uniq_user_total', scalar keys %{$uniq}, "total number of uniq users");
+    $c->metrics->set('sessions_active_5min_total', $total_5min, "total number of active thruk sessions (active during the last 5 minutes)");
+    $c->metrics->set('sessions_uniq_user_5min_total', scalar keys %{$uniq5min}, "total number of uniq users active during the last 5 minutes");
     return($data);
 }
 
@@ -1338,6 +1354,25 @@ sub _rest_get_thruk_sessions {
 # get thruk sessions status for given id.
 # alias for /thruk/sessions?id=<id>
 register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk_sessions);
+
+##########################################################
+# REST PATH: GET /thruk/stats
+# lists thruk statistics.
+register_rest_path_v1('GET', qr%^/thruk/stats$%mx, \&_rest_get_thruk_stats);
+sub _rest_get_thruk_stats {
+    my($c, undef) = @_;
+
+    # gather some metrics
+    &_rest_get_thruk_sessions($c);
+
+    my $data = $c->metrics->get_all();
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk/metrics
+# alias for /thruk/stats
+register_rest_path_v1('GET', qr%^/thruk/metrics$%mx, \&_rest_get_thruk_stats);
 
 ##########################################################
 # REST PATH: GET /sites

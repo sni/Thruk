@@ -1413,6 +1413,10 @@ lists thruk jobs.
 get thruk job status for given id.
 alias for /thruk/jobs?id=<id>
 
+=== GET /thruk/metrics
+
+alias for /thruk/stats
+
 === GET /thruk/panorama
 
 lists all panorama dashboards.
@@ -1575,6 +1579,24 @@ lists thruk sessions.
 get thruk sessions status for given id.
 alias for /thruk/sessions?id=<id>
 
+=== GET /thruk/stats
+
+lists thruk statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|business_process_duration_seconds | business process calculation duration in seconds
+|business_process_last_update      | timestamp of last business process calculation
+|business_process_total            | total number of business processes
+|business_process_worker_total     | total number of worker processes used to calculate business processes
+|sessions_active_5min_total        | total number of active thruk sessions (active during the last 5 minutes)
+|sessions_total                    | total number of thruk sessions
+|sessions_uniq_user_5min_total     | total number of uniq users active during the last 5 minutes
+|sessions_uniq_user_total          | total number of uniq users
+|===========================================
+
+
 === GET /timeperiods
 
 lists livestatus timeperiods.
@@ -1596,3 +1618,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+

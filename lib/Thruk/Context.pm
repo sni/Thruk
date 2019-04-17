@@ -167,6 +167,14 @@ sub cluster {
     return($_[0]->app->cluster);
 }
 
+=head2 metrics
+
+return metrics object
+
+=cut
+sub metrics {
+    return($_[0]->app->metrics());
+}
 
 =head2 detach
 

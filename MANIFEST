@@ -94,6 +94,7 @@ lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/test.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Controller/user.pm
+lib/Thruk/Metrics.pm
 lib/Thruk/Pool/Simple.pm
 lib/Thruk/Request.pm
 lib/Thruk/Request/Cookie.pm
