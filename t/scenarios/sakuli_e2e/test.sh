@@ -6,11 +6,6 @@ DATE=$(date +%F_%H.%M)
 CASEDIR="$(pwd)/_run/$DATE"
 SAKULI_TEST_DIR="/cases/$DATE/"
 
-COMPOSEFLAGS=""
-if [ ! -t 0 ]; then
-  COMPOSEFLAGS="-T"
-fi
-
 # apply patch to sahi
 docker cp $(docker-compose ps -q sakuli):headless/sakuli/sahi/htdocs/spr/concat.js .
 patch -p4 < ./0001-sahi_add_color_to_highlight.js.patch >/dev/null 2>&1
@@ -23,9 +18,9 @@ for dir in $(ls -1tr _run/ | head -n -20); do
 done
 
 # check window manager which tends to break all the time
-if [ $(docker-compose exec $COMPOSEFLAGS --user root sakuli bash -ci "wmctrl -m" | grep -c "PID:") -ne 1 ]; then
+if [ $(docker-compose exec --user root sakuli bash -ci "wmctrl -m" | grep -c "PID:") -ne 1 ]; then
   echo "ERROR: sakuli window manager failed to start:"
-  docker-compose exec $COMPOSEFLAGS --user root sakuli bash -ci "wmctrl -m"
+  docker-compose exec --user root sakuli bash -ci "wmctrl -m"
   exit 1
 fi
 
@@ -100,18 +95,18 @@ find $CASEDIR -type d -exec chmod 777 {} \;
 find $CASEDIR -type f -exec chmod 666 {} \;
 
 # clean dashboards, user data and old errors from omd
-docker-compose exec $COMPOSEFLAGS --user root omd bash -ci ">/omd/sites/demo/var/log/thruk.log"
-docker-compose exec $COMPOSEFLAGS --user root omd bash -ci "rm -rf /omd/sites/demo/var/thruk/users/* /omd/sites/demo/var/thruk/panorama/* /omd/sites/demo/etc/thruk/panorama/* /omd/sites/demo/etc/thruk/bp/* /omd/sites/demo/var/thruk/bp/* /omd/sites/demo/var/thruk/reports/*"
+docker-compose exec --user root omd bash -ci ">/omd/sites/demo/var/log/thruk.log"
+docker-compose exec --user root omd bash -ci "rm -rf /omd/sites/demo/var/thruk/users/* /omd/sites/demo/var/thruk/panorama/* /omd/sites/demo/etc/thruk/panorama/* /omd/sites/demo/etc/thruk/bp/* /omd/sites/demo/var/thruk/bp/* /omd/sites/demo/var/thruk/reports/*"
 
-docker-compose exec $COMPOSEFLAGS sakuli bash -ci "sakuli run $SAKULI_TEST_DIR $*"
+docker-compose exec sakuli bash -ci "sakuli run $SAKULI_TEST_DIR $*"
 res=$?
 echo "SAKULI_RETURN_VAL: $res"
 
 # give result files to local user
-docker-compose exec $COMPOSEFLAGS --user root sakuli chown $(id -u) -R $SAKULI_TEST_DIR
+docker-compose exec --user root sakuli chown $(id -u) -R $SAKULI_TEST_DIR
 
 # check for thruk errors
-docker-compose exec $COMPOSEFLAGS --user root omd bash -ci "grep ERROR /omd/sites/demo/var/log/thruk.log"
+docker-compose exec --user root omd bash -ci "grep ERROR /omd/sites/demo/var/log/thruk.log"
 if [ $? -eq 0 ]; then
     # rc 0 means ERRORs found
     exit 1

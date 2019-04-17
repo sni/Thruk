@@ -23,7 +23,7 @@ test_chrome: wait_start
 	./failsafe.sh -browser chrome
 
 shell_sakuli:
-	docker-compose exec $(DOCKER_COMPOSE_TTY) sakuli /bin/bash
+	docker-compose exec sakuli /bin/bash
 
 shell_omd:
-	docker-compose exec $(DOCKER_COMPOSE_TTY) omd /bin/bash
+	docker-compose exec omd /bin/bash
