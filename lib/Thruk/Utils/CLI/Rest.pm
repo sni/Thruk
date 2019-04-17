@@ -54,9 +54,13 @@ sub cmd {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 
-    my $result       = _fetch_results($c, $opts);
-    my($output, $rc) = _create_output($c, $result);
+    my $result = _fetch_results($c, $opts);
+    # return here for simple requests
+    if(scalar @{$result} == 1 && !$result->[0]->{'output'} && !$result->[0]->{'warning'} && !$result->[0]->{'critical'}) {
+        return({output => $result->[0]->{'result'}, rc => $result->[0]->{'rc'}, all_stdout => 1});
+    }
 
+    my($output, $rc) = _create_output($c, $result);
     return({output => $output, rc => $rc, all_stdout => 1 });
 }
 
@@ -113,13 +117,15 @@ sub _parse_args {
         my $opt = {
         'method'   => undef,
         'postdata' => [],
+        'warning'  => [],
+        'critical' => [],
         };
         Getopt::Long::GetOptionsFromArray($s,
         "m|method=s"   => \$opt->{'method'},
         "d|data=s"     =>  $opt->{'postdata'},
         "o|output=s"   => \$opt->{'output'},
-        "w|warning=s"  => \$opt->{'warning'},
-        "c|critical=s" => \$opt->{'critical'},
+        "w|warning=s"  =>  $opt->{'warning'},
+        "c|critical=s" =>  $opt->{'critical'},
         );
         if(scalar @{$s} == 1) {
             $opt->{'url'} = $s->[0];
@@ -165,34 +171,40 @@ sub _parse_args {
 }
 
 ##############################################
-sub _apply_theshold {
-    my($threshold, $data) = @_;
-    return unless defined $data->{$threshold};
+sub _apply_threshold {
+    my($threshold, $data, $totals) = @_;
+    return unless scalar @{$data->{$threshold}} > 0;
     $data->{'data'} = decode_json($data->{'result'}) unless $data->{'data'};
-    my($attr,$val1, $val2) = split(/:/mx, $data->{$threshold}, 3);
-    my $value = $data->{'data'}->{$attr};
-    if(!defined $value) {
-        _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold=key:value\n");
-        return;
-    }
-    if(defined $val2) {
-        eval {
-            require Monitoring::Plugin::Range;
-        };
-        if($@) {
-            die("Monitoring::Plugin module is required when using threshold ranges");
+
+    for my $t (@{$data->{$threshold}}) {
+        my($attr,$val1, $val2) = split(/:/mx, $t, 3);
+        my $value = $data->{'data'}->{$attr} // 0;
+        if(!exists $data->{'data'}->{$attr}) {
+            _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold=key:value\n");
+            return;
         }
-        my $r = Monitoring::Plugin::Range->parse_range_string($val1.":".$val2);
-        if($r->check_range($value)) {
+        if(defined $val2) {
+            eval {
+                require Monitoring::Plugin::Range;
+            };
+            if($@) {
+                die("Monitoring::Plugin module is required when using threshold ranges");
+            }
+            my $r = Monitoring::Plugin::Range->parse_range_string($val1.":".$val2);
+            if($r->check_range($value)) {
+                if($threshold eq 'warning')  { _set_rc($data, 1); }
+                if($threshold eq 'critical') { _set_rc($data, 2); }
+            }
+            # save range object
+            $totals->{'range'}->{$attr}->{$threshold} = $r;
+            next;
+        }
+        # single value check
+        if($value < 0 || $value > $val1) {
             if($threshold eq 'warning')  { _set_rc($data, 1); }
             if($threshold eq 'critical') { _set_rc($data, 2); }
         }
-        return;
-    }
-    # single value check
-    if($value < 0 || $value > $val1) {
-        if($threshold eq 'warning')  { _set_rc($data, 1); }
-        if($threshold eq 'critical') { _set_rc($data, 2); }
+        $totals->{$threshold}->{$attr} = $val1;
     }
     return;
 }
@@ -215,33 +227,42 @@ sub _create_output {
     my($output, $rc) = ("", 0);
 
     # if there are output formats, use them
-    my $format;
+    my $totals = {};
     for my $r (@{$result}) {
+        # directly return fetch errors
         return($r->{'result'}, $r->{'rc'}) if $r->{'rc'} > 0;
 
-        $format = $r->{'output'} if $r->{'output'};
+        # output template supplied?
+        if($r->{'output'}) {
+            if($totals->{'output'}) {
+                _set_rc(3, "multiple -o/--output parameter are not supported.");
+                return;
+            }
+            $totals->{'output'} = $r->{'output'};
+        }
 
         # apply thresholds
-        _apply_theshold('warning', $r);
-        _apply_theshold('critical', $r);
+        _apply_threshold('warning', $r, $totals);
+        _apply_threshold('critical', $r, $totals);
 
         $rc = $r->{'rc'} if $r->{'rc'} > $rc;
         return($r->{'output'}, 3) if $r->{'rc'} == 3;
     }
 
     # if there is no format, simply concatenate the output
-    if(!$format) {
+    if(!$totals->{'output'}) {
         for my $r (@{$result}) {
             $output .= $r->{'result'};
         }
         return($output, $rc);
     }
 
-    $result = _calculate_totals($result);
+    $totals = _calculate_data_totals($result, $totals);
+    unshift(@{$result}, $totals);
     my $macros = {
         STATUS => $c->config->{'nagios'}->{'service_state_by_number'}->{$rc} // 'UNKNOWN',
     };
-    $output = $format;
+    $output = $totals->{'output'};
     $output =~ s/\{([^\}]+)\}/&_replace_output($1, $result, $macros)/gemx;
 
     chomp($output);
@@ -254,16 +275,35 @@ sub _create_output {
 sub _append_performance_data {
     my($result) = @_;
     my @perf_data;
-    for my $key (sort keys %{$result->[0]->{'data'}}) {
-        push @perf_data, sprintf("'%s'=%s;;;;", $key, $result->[0]->{'data'}->{$key});
+    my $totals = $result->[0];
+    for my $key (sort keys %{$totals->{'data'}}) {
+        my($min,$max,$warn,$crit) = ("", "", "", "");
+        if($totals->{'range'}->{$key}->{'warning'}) {
+            $warn = $totals->{'range'}->{$key}->{'warning'};
+        } elsif($totals->{'warning'}->{$key}) {
+            $warn = $totals->{'warning'}->{$key};
+        }
+        if($totals->{'range'}->{$key}->{'critical'}) {
+            $crit = $totals->{'range'}->{$key}->{'critical'};
+        } elsif($totals->{'critical'}->{$key}) {
+            $crit = $totals->{'critical'}->{$key};
+        }
+        push @perf_data, sprintf("'%s'=%s;%s;%s;%s;%s",
+                $key,
+                $totals->{'data'}->{$key} // 'U',
+                $warn,
+                $crit,
+                $min,
+                $max,
+        );
     }
     return("|".join(" ", @perf_data));
 }
 
 ##############################################
-sub _calculate_totals {
-    my($result) = @_;
-    my $totals = { data => {}};
+sub _calculate_data_totals {
+    my($result, $totals) = @_;
+    $totals->{data} = {};
     for my $r (@{$result}) {
         $r->{'data'} = decode_json($r->{'result'}) unless $r->{'data'};
         for my $key (sort keys %{$r->{'data'}}) {
@@ -274,8 +314,7 @@ sub _calculate_totals {
             }
         }
     }
-    unshift(@{$result}, $totals);
-    return($result);
+    return($totals);
 }
 
 ##############################################

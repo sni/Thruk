@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 40;
+plan tests => 44;
 
 ###########################################################
 # test thruks script path
@@ -59,5 +59,10 @@ TestUtils::test_command({
         cmd     => "/thruk/script/check_thruk_rest -o '{STATUS} - {up}/{total} hosts are available' -w 1:1 /hosts/totals",
         like    => ['/unknown variable/'],
         exit    => 3,
+    });
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest -o '{STATUS} - There are {sessions} active sessions.' --warning=sessions:20 --critical=sessions:30:100 --warning=active:10 --critical=active:10:50 '/thruk/sessions?columns=count(*):sessions,max(active):active&active[gte]=10m'",
+        like    => ["/CRITICAL - There are 0 active sessions.|'active'=U;10;10:50;; 'sessions'=0;20;30:100;;/"],
+        exit    => 2,
     });
 };
