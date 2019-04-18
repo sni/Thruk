@@ -56,7 +56,7 @@ sub cmd {
 
     my $result = _fetch_results($c, $opts);
     # return here for simple requests
-    if(scalar @{$result} == 1 && !$result->[0]->{'output'} && !$result->[0]->{'warning'} && !$result->[0]->{'critical'}) {
+    if(scalar @{$result} == 1 && !$result->[0]->{'output'} && !$result->[0]->{'warning'} && !$result->[0]->{'critical'} && !$result->[0]->{'rename'}) {
         return({output => $result->[0]->{'result'}, rc => $result->[0]->{'rc'}, all_stdout => 1});
     }
 
@@ -120,6 +120,7 @@ sub _parse_args {
             'warning'   => [],
             'critical'  => [],
             'perfunit'  => [],
+            'rename'    => [],
         };
         Getopt::Long::GetOptionsFromArray($s,
             "m|method=s"    => \$opt->{'method'},
@@ -128,6 +129,7 @@ sub _parse_args {
             "w|warning=s"   =>  $opt->{'warning'},
             "c|critical=s"  =>  $opt->{'critical'},
               "perfunit=s"  =>  $opt->{'perfunit'},
+              "rename=s"    =>  $opt->{'rename'},
         );
         if(scalar @{$s} == 1) {
             $opt->{'url'} = $s->[0];
@@ -233,6 +235,14 @@ sub _create_output {
     for my $r (@{$result}) {
         # directly return fetch errors
         return($r->{'result'}, $r->{'rc'}) if $r->{'rc'} > 0;
+
+        if($r->{rename} && scalar @{$r->{rename}} > 0) {
+            $r->{'data'} = decode_json($r->{'result'}) unless $r->{'data'};
+            for my $d (@{$r->{rename}}) {
+                my($old,$new) = split(/:/mx,$d, 2);
+                $r->{'data'}->{$new} = delete $r->{'data'}->{$old};
+            }
+        }
 
         # output template supplied?
         if($r->{'output'}) {

@@ -90,6 +90,7 @@ check_thruk_rest - Monitoring Plugin to check things from the Thruk REST API
   Plugin options:
     -w, --warning=<threshold>     Apply warning threshold. Format see below.
     -c, --critical=<threshold>    Apply critical threshold. Format see below.
+        --rename=<label:newname>  Rename/relable attributes.
     <rest url>                    Rest url to query. When used multiple times, plugin options
                                   are reset for each url. See example.
 
@@ -138,6 +139,10 @@ script has the following arguments
 =item B<-c> I<threshold>, B<--critical>=I<threshold>
 
     Apply critical threshold. Format is the same as for warnings.
+
+=item B<--rename>=I<label:newlabel>
+
+    Rename a label.
 
 =item B<-o> I<outputtemplate>, B<--output>=I<outputtemplate>
 
@@ -212,7 +217,13 @@ thruk returns 0 on success and >= 1 otherwise
       check_thruk_rest \
         -o "{STATUS} - maximum rta is {rta%d}ms" \
         --perfunit=rta:ms
-        "/hosts?columns=max(rta):rta&rta[gt]=0" \
+        "/hosts?columns=max(rta):rta&rta[gt]=0"
+
+    - rename label:
+      check_thruk_rest \
+        -o "{STATUS} - got {total_hosts%d} hosts" \
+        --rename=total:total_hosts
+        "/hosts/stats"
 
 =head1 AUTHOR
 
