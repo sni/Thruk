@@ -1429,11 +1429,17 @@ register_rest_path_v1('GET', qr%^/thruk/stats$%mx, \&_rest_get_thruk_stats, ['au
 sub _rest_get_thruk_stats {
     my($c, undef) = @_;
 
-    # gather session metrics
-    &_rest_get_thruk_sessions($c);
+    my $cache = $c->cache->get("global");
+    if(!$cache->{'last_metrics_update'} || $cache->{'last_metrics_update'} < time() -30) {
+        $cache->{'last_metrics_update'} = time();
+        $c->cache->set("global", $cache);
 
-    # gather user metrics
-    &_rest_get_thruk_users($c);
+        # gather session metrics
+        &_rest_get_thruk_sessions($c);
+
+        # gather user metrics
+        &_rest_get_thruk_users($c);
+    }
 
     my $data = $c->metrics->get_all();
     return($data);
