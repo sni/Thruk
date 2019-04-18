@@ -590,6 +590,9 @@ returns a list of contactgroups by contact
 sub get_contactgroups_by_contact {
     my($self, $username) = @_;
     confess("no user") if(!defined $username || ref $username ne "");
+    if($self->{'get_contactgroups_by_contact_cache'}) {
+        return($self->{'get_contactgroups_by_contact_cache'}->{$username} // {});
+    }
     my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ], undef, $self->get_default_backends());
     my $contactgroups = {};
     for my $group (@{$data}) {
@@ -2848,6 +2851,69 @@ sub _set_result_defaults {
         }
     }
     return $data;
+}
+
+########################################
+
+=head2 fill_get_can_submit_commands_cache
+
+  fill_get_can_submit_commands_cache($c)
+
+fills cached used by get_can_submit_commands
+
+=cut
+
+sub fill_get_can_submit_commands_cache {
+    my($self) = @_;
+    my $data = $self->get_contacts(columns => [qw/name email alias can_submit_commands/]);
+    my $hashed = {};
+    for my $d (@{$data}) {
+        $hashed->{$d->{'name'}} = [] unless defined $hashed->{$d->{'name'}};
+        push @{$hashed->{$d->{'name'}}}, $d;
+    }
+    $self->{'get_can_submit_commands_cache'} = $hashed;
+    return;
+}
+
+########################################
+
+=head2 get_can_submit_commands
+
+  get_can_submit_commands
+
+wrapper around get_can_submit_commands
+
+=cut
+
+sub get_can_submit_commands {
+    my($self, @args) = @_;
+    if($self->{'get_can_submit_commands_cache'} && scalar @args == 1) {
+        return($self->{'get_can_submit_commands_cache'}->{$args[0]} // []);
+    }
+    return $self->_do_on_peers('get_can_submit_commands', \@args );
+}
+
+########################################
+
+=head2 fill_get_contactgroups_by_contact_cache
+
+  fill_get_contactgroups_by_contact_cache($c)
+
+fills cached used by get_contactgroups_by_contact
+
+=cut
+
+sub fill_get_contactgroups_by_contact_cache {
+    my($self) = @_;
+    my $contactgroups = $self->get_contactgroups(columns => [qw/name members/]);
+    my $groups = {};
+    for my $group (@{$contactgroups}) {
+        for my $member (@{$group->{'members'}}) {
+            $groups->{$member}->{$group->{'name'}} = 1;
+        }
+    }
+    $self->{'get_contactgroups_by_contact_cache'} = $groups;
+    return;
 }
 
 ########################################

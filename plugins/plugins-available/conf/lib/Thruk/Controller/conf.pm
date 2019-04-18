@@ -439,7 +439,15 @@ sub _process_cgi_page {
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
     # get list of cgi users
-    my $cgi_contacts = Thruk::Utils::Conf::get_cgi_user_list($c);
+    my $tmp = Thruk::Utils::Conf::get_cgi_user_list($c);
+    my $cgi_contacts = {};
+    for my $u (values %{$tmp}) {
+        if($u->{'alias'}) {
+            $cgi_contacts->{$u->{'name'}} = $u->{'name'}.' - '.$u->{'alias'};
+        } else {
+            $cgi_contacts->{$u->{'name'}} = $u->{'name'};
+        }
+    }
 
     for my $key (keys %{$data}) {
         next unless $key =~ m/^authorized_for_/mx;

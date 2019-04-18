@@ -1356,14 +1356,84 @@ sub _rest_get_thruk_sessions {
 register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk_sessions);
 
 ##########################################################
+# REST PATH: GET /thruk/users
+# lists thruk user profiles.
+register_rest_path_v1('GET', qr%^/thruk/users?$%mx, \&_rest_get_thruk_users);
+sub _rest_get_thruk_users {
+    my($c, undef, $id) = @_;
+    my $is_admin = 0;
+    if($c->check_user_roles('admin')) {
+        $is_admin = 1;
+    }
+
+    if(!defined $id) {
+        # prefill contacts / groups cache
+        $c->{'db'}->fill_get_can_submit_commands_cache();
+        $c->{'db'}->fill_get_contactgroups_by_contact_cache();
+    }
+
+    my $total_number = 0;
+    my $total_locked = 0;
+    my $users = Thruk::Utils::Conf::get_cgi_user_list($c);
+    delete $users->{'*'};
+    $users = [sort keys %{$users}];
+    my $data = [];
+    for my $name (@{$users}) {
+        next unless($is_admin || $name eq $c->stash->{"remote_user"});
+        next if(defined $id && $id ne $name);
+        my $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
+        my $userdata = {
+            'id' => $name,
+        };
+        if($profile->{'settings'}) {
+            $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::true;
+            for my $key (qw/tz/) {
+                $userdata->{$key} = $profile->{'settings'}->{$key};
+            }
+            $userdata->{'locked'} = $profile->{'settings'}->{'login'}->{'locked'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false;
+        } else {
+            $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::false;
+            $userdata->{'locked'}            = Cpanel::JSON::XS::false;
+        }
+        if($profile) {
+            for my $key (qw/groups roles email alias can_submit_commands/) {
+                $userdata->{$key} = $profile->{$key};
+            }
+        }
+        $total_locked++ if $userdata->{'locked'} == Cpanel::JSON::XS::true;
+        push @{$data}, $userdata;
+    }
+    if($id) {
+        if(!$data->[0]) {
+            return({ 'message' => 'no such user', code => 404 });
+        }
+        $data = $data->[0];
+    }
+
+    $c->metrics->set('users_total', $total_number, "total number of thruk users");
+    $c->metrics->set('users_locked_total', $total_locked, "total number of locked thruk users");
+
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk/users/<id>
+# get thruk profile for given user.
+# alias for /thruk/users?id=<id>
+register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)$%mx, \&_rest_get_thruk_users);
+
+##########################################################
 # REST PATH: GET /thruk/stats
 # lists thruk statistics.
-register_rest_path_v1('GET', qr%^/thruk/stats$%mx, \&_rest_get_thruk_stats);
+register_rest_path_v1('GET', qr%^/thruk/stats$%mx, \&_rest_get_thruk_stats, ['authorized_for_system_information']);
 sub _rest_get_thruk_stats {
     my($c, undef) = @_;
 
-    # gather some metrics
+    # gather session metrics
     &_rest_get_thruk_sessions($c);
+
+    # gather user metrics
+    &_rest_get_thruk_users($c);
 
     my $data = $c->metrics->get_all();
     return($data);
@@ -1372,7 +1442,7 @@ sub _rest_get_thruk_stats {
 ##########################################################
 # REST PATH: GET /thruk/metrics
 # alias for /thruk/stats
-register_rest_path_v1('GET', qr%^/thruk/metrics$%mx, \&_rest_get_thruk_stats);
+register_rest_path_v1('GET', qr%^/thruk/metrics$%mx, \&_rest_get_thruk_stats, ['authorized_for_system_information']);
 
 ##########################################################
 # REST PATH: GET /sites

@@ -1594,8 +1594,34 @@ lists thruk statistics.
 |sessions_total                    | total number of thruk sessions
 |sessions_uniq_user_5min_total     | total number of uniq users active during the last 5 minutes
 |sessions_uniq_user_total          | total number of uniq users
+|users_locked_total                | total number of locked thruk users
+|users_total                       | total number of thruk users
 |===========================================
 
+
+=== GET /thruk/users
+
+lists thruk user profiles.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|alias                             | alias name
+|can_submit_commands               | flag wether this account is allowed to submit commands
+|email                             | email address
+|groups                            | list of contactgroups
+|has_thruk_profile                 | flag wether this account has a thruk profile or not
+|id                                | username
+|locked                            | flag wether account is locked or not
+|roles                             | list of roles for this user
+|tz                                | users selected timezone
+|===========================================
+
+
+=== GET /thruk/users/<id>
+
+get thruk profile for given user.
+alias for /thruk/users?id=<id>
 
 === GET /timeperiods
 

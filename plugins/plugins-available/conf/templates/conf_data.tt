@@ -55,7 +55,7 @@
                       [% END %]
                       [% FOREACH opt = d.2 %]
                         [% NEXT IF test.exists(opt.key) %]
-                        <option value="[% opt.key | html %]">[% opt.value %]</option>
+                        <option value="[% opt.key | html %]">[% opt.value | html %]</option>
                       [% END %]
                   </select>
                 </td>

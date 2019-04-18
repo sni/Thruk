@@ -470,21 +470,21 @@ get list of cgi users from cgi.cfg, htpasswd and contacts table
 =cut
 
 sub get_cgi_user_list {
-    my ( $c ) = @_;
+    my($c) = @_;
 
     # get users from core contacts
     my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
                                              remove_duplicates => 1);
     my $all_contacts = {};
     for my $contact (@{$contacts}) {
-        $all_contacts->{$contact->{'name'}} = $contact->{'name'}." - ".$contact->{'alias'};
+        $all_contacts->{$contact->{'name'}} = { name => $contact->{'name'}, alias => $contact->{'alias'}};
     }
 
     # add users from htpasswd
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
         my $htpasswd = read_htpasswd($c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'});
         for my $user (keys %{$htpasswd}) {
-            $all_contacts->{$user} = $user unless defined $all_contacts->{$user};
+            $all_contacts->{$user} = { name => $user } unless defined $all_contacts->{$user};
         }
     }
 
@@ -499,7 +499,7 @@ sub get_cgi_user_list {
             push @{$extra_user}, @{$data->{$key}->[1]};
         }
         for my $user (@{$extra_user}) {
-            $all_contacts->{$user} = $user unless defined $all_contacts->{$user};
+            $all_contacts->{$user} = { name => $user } unless defined $all_contacts->{$user};
         }
     }
 
@@ -507,11 +507,11 @@ sub get_cgi_user_list {
     my @profiles = glob($c->config->{'var_path'}."/users/*");
     for my $profile (@profiles) {
         $profile =~ s/^.*\///gmx;
-        $all_contacts->{$profile} = $profile unless defined $all_contacts->{$profile};
+        $all_contacts->{$profile} = { name => $profile } unless defined $all_contacts->{$profile};
     }
 
     # add special users
-    $all_contacts->{'*'} = '*';
+    $all_contacts->{'*'} = { name => '*' };
 
     return $all_contacts;
 }
