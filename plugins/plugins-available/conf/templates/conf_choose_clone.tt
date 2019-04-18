@@ -4,7 +4,7 @@
 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 [% FOREACH par = c.request.parameters.keys %]
   [% NEXT IF !c.request.parameters.defined(par) %]
-  [% NEXT IF par == "token" %]
+  [% NEXT IF par == "CSRFtoken" %]
   [% FOR value IN c.request.parameters.$par.list %]
     <input type="hidden" name="[% par | html %]" value="[% value | html %]">
   [% END %]
