@@ -35,7 +35,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 =cut
 sub cmd {
-    my($c, $action, $commandoptions) = @_;
+    my($c, undef, $commandoptions) = @_;
 
     # split args by url, then parse leading options. In case there is only one
     # url, all options belong to this url.
