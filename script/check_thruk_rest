@@ -85,6 +85,7 @@ check_thruk_rest - Monitoring Plugin to check things from the Thruk REST API
     -b, --backend=<backend>       Comma seperated list of backends/sites
                                   which should be used for querys.
     -o, --output=<template>       Define output text template. Format see below.
+        --perfunit=<label>:<unit> Set performance data unit for given label.
 
   Plugin options:
     -w, --warning=<threshold>     Apply warning threshold. Format see below.
@@ -159,6 +160,18 @@ script has the following arguments
     Use printf format strings like this:
         - {var%format}, ex.: {execution_time:%02f}
 
+=item B<--perfunit>=I<label:unit>
+
+    Sets a unit used in performance data for given label.
+    You can use regular expressions which will be automatically
+    encapsulated by ^...$.
+
+    Simple unit, append 's' to performance label 'time'
+        --perfunit=time:s
+
+    Regular expression, set all units to 'c'
+        --perfunit=".*:c"
+
 =back
 
 =head1 RETURN VALUE
@@ -195,6 +208,11 @@ thruk returns 0 on success and >= 1 otherwise
         --critical=sessions:30 \
         '/thruk/sessions?columns=count(*):sessions&active[gte]=-10m'
 
+    - set performance data units
+      check_thruk_rest \
+        -o "{STATUS} - maximum rta is {rta%d}ms" \
+        --perfunit=rta:ms
+        "/hosts?columns=max(rta):rta&rta[gt]=0" \
 
 =head1 AUTHOR
 

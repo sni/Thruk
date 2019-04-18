@@ -115,17 +115,19 @@ sub _parse_args {
     Getopt::Long::Configure('pass_through');
     for my $s (@{$split_args}) {
         my $opt = {
-        'method'   => undef,
-        'postdata' => [],
-        'warning'  => [],
-        'critical' => [],
+            'method'    => undef,
+            'postdata'  => [],
+            'warning'   => [],
+            'critical'  => [],
+            'perfunit'  => [],
         };
         Getopt::Long::GetOptionsFromArray($s,
-        "m|method=s"   => \$opt->{'method'},
-        "d|data=s"     =>  $opt->{'postdata'},
-        "o|output=s"   => \$opt->{'output'},
-        "w|warning=s"  =>  $opt->{'warning'},
-        "c|critical=s" =>  $opt->{'critical'},
+            "m|method=s"    => \$opt->{'method'},
+            "d|data=s"      =>  $opt->{'postdata'},
+            "o|output=s"    => \$opt->{'output'},
+            "w|warning=s"   =>  $opt->{'warning'},
+            "c|critical=s"  =>  $opt->{'critical'},
+              "perfunit=s"  =>  $opt->{'perfunit'},
         );
         if(scalar @{$s} == 1) {
             $opt->{'url'} = $s->[0];
@@ -288,9 +290,23 @@ sub _append_performance_data {
         } elsif($totals->{'critical'}->{$key}) {
             $crit = $totals->{'critical'}->{$key};
         }
-        push @perf_data, sprintf("'%s'=%s;%s;%s;%s;%s",
+        my $unit = "";
+        for my $p (sort keys %{$totals->{perfunits}}) {
+            if($p eq $key) {
+                $unit = $totals->{perfunits}->{$p};
+                last;
+            }
+            ## no critic
+            if($key =~ m/^$p$/) {
+            ## use critic
+                $unit = $totals->{perfunits}->{$p};
+                last;
+            }
+        }
+        push @perf_data, sprintf("'%s'=%s%s;%s;%s;%s;%s",
                 $key,
                 $totals->{'data'}->{$key} // 'U',
+                $unit,
                 $warn,
                 $crit,
                 $min,
@@ -304,6 +320,7 @@ sub _append_performance_data {
 sub _calculate_data_totals {
     my($result, $totals) = @_;
     $totals->{data} = {};
+    my $perfunits   = [];
     for my $r (@{$result}) {
         $r->{'data'} = decode_json($r->{'result'}) unless $r->{'data'};
         for my $key (sort keys %{$r->{'data'}}) {
@@ -313,6 +330,12 @@ sub _calculate_data_totals {
                 $totals->{'data'}->{$key} += $r->{'data'}->{$key};
             }
         }
+        push @{$perfunits}, @{$r->{'perfunit'}} if $r->{'perfunit'};
+    }
+    $totals->{perfunits} = {};
+    for my $p (@{$perfunits}) {
+        my($label, $unit) = split(/:/mx, $p, 2);
+        $totals->{perfunits}->{$label} = $unit;
     }
     return($totals);
 }
