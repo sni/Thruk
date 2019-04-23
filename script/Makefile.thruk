@@ -144,7 +144,8 @@ local_install: local_patches
 	${SED} -e 's+/usr/bin/env perl+/usr/bin/perl+g' \
 		-i ${DESTDIR}${BINDIR}/nagexp \
 		-i ${DESTDIR}${DATADIR}/script/thruk_fastcgi.pl \
-		-i ${DESTDIR}${DATADIR}/script/thruk.psgi
+		-i ${DESTDIR}${DATADIR}/script/thruk.psgi \
+		-i ${DESTDIR}${DATADIR}/thruk_auth
 	############################################################################
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3
