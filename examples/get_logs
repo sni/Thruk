@@ -10,7 +10,7 @@ BASEDIR=$(dirname $0)/..
 if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
   export PERL5LIB="$PERL5LIB:$BASEDIR/lib";
   if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
-  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$BASEDIR/"; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
 
 # omd
 elif [ "$OMD_ROOT" != "" ]; then
@@ -20,8 +20,8 @@ elif [ "$OMD_ROOT" != "" ]; then
 # pkg installation
 else
   export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
-  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
-  if [ -z $REMOTEURL ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
+  if [ "$REMOTEURL" = "" ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
 fi
 
 eval 'exec perl -x $0 ${1+"$@"} ;'
