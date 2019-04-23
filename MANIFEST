@@ -1682,12 +1682,9 @@ ssi/README
 ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
-support/0003-thruk-check.patch
-support/0003-thruk-scripts.patch
-support/0004-thruk_data_scripts.patch
-support/0005-thruk_auth.patch
-support/0006-logrotate.patch
-support/0007-fcgish.patch
+support/0003-thruk_data_scripts.patch
+support/0004-fcgish.patch
+support/0005-logrotate.patch
 support/apache_fcgid.conf
 support/convert_old_datafile.pl
 support/fcgid_env.sh

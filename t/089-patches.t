@@ -4,7 +4,7 @@ use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Test skipped, $ENV{NO_PATCH_TEST} was set' if $ENV{NO_PATCH_TEST};
-plan tests => 28;
+plan tests => 16;
 
 alarm(120);
 
@@ -22,15 +22,8 @@ is($?, 0, 'rsync ok: '.$rsync);
 chdir('tmppatches') or die("chdir failed: $!");
 
 my $precmds = {
-  'support/0003-thruk-scripts.patch'      => 'cp script/thruk script/naglint .',
-  'support/0004-thruk_data_scripts.patch' => 'cp script/thruk_auth .',
-  'support/0006-logrotate.patch'          => 'cp support/thruk.logrotate thruk-base',
-  'support/0007-fcgish.patch'             => 'cp support/fcgid_env.sh .',
-  'support/0031-naemon-init.patch'        => 'cp support/thruk.init thruk',
-  'support/0032-naemon-httpd.patch'       => 'cp support/apache_fcgid.conf thruk.conf',
-  'support/0035-naemon-cgicfg.patch'      => 'cd .. && cp cgi.cfg cgi.cfg.testbak && git checkout cgi.cfg; cp cgi.cfg tmppatches/ && mv cgi.cfg.testbak cgi.cfg',
-  'support/0036-naemon-htpasswd.patch'    => 'cp support/htpasswd .',
-  'support/0003-thruk-check.patch'        => 'cp script/check_thruk_rest .',
+  'support/0004-fcgish.patch'             => 'cp support/fcgid_env.sh .',
+  'support/0005-logrotate.patch'          => 'cp support/thruk.logrotate thruk-base',
 };
 
 my @patches = glob('support/*.patch');
