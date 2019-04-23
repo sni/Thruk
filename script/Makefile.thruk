@@ -144,8 +144,7 @@ local_install: local_patches
 	${SED} -e 's+/usr/bin/env perl+/usr/bin/perl+g' \
 		-i ${DESTDIR}${BINDIR}/nagexp \
 		-i ${DESTDIR}${DATADIR}/script/thruk_fastcgi.pl \
-		-i ${DESTDIR}${DATADIR}/script/thruk.psgi \
-		-i ${DESTDIR}${DATADIR}/thruk_auth
+		-i ${DESTDIR}${DATADIR}/script/thruk.psgi
 	############################################################################
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3
@@ -193,7 +192,8 @@ local_install: local_patches
 	       -e 's+@THRUKLIBS@+${THRUKLIBS}+g' \
 	       -e 's+@HTMLURL@+${HTMLURL}+g' \
 	       -i ${DESTDIR}${DATADIR}/script/* \
-		   -i ${DESTDIR}${BINDIR}/*
+	       -i ${DESTDIR}${DATADIR}/thruk_auth \
+	       -i ${DESTDIR}${BINDIR}/*
 
 quicktest:
 	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \
