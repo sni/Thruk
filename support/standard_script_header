@@ -17,7 +17,7 @@ elif [ "$OMD_ROOT" != "" ]; then
 
 # pkg installation
 else
-  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@DATADIR@/plugins/plugins-available/conf/lib:@THRUKLIBS@;
   if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
   if [ -z $REMOTEURL ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
 fi
