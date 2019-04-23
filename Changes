@@ -19,6 +19,7 @@ next:
             - fix filtering containing spaces
           - Panorama:
             - add option to always hide widget border
+            - increase max zoom level for default geo map
           - Logcache:
             - disable delta updates by default
 

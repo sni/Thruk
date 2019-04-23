@@ -2451,8 +2451,11 @@ Find more wms provider here: http://wiki.openstreetmap.org/wiki/WMS#OSM_WMS_Serv
 
   <Component Thruk::Plugin::Panorama>
     ...
-    wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}"]
+    wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}", {"properties": "..."}]
   </Component>
+
+Properties can be set according to: http://dev.openlayers.org/docs/files/OpenLayers/Layer-js.html
+Some common properties are: `attribution` or `numZoomLevels`.
 
 === extra_fonts
 Comma separated list of additional fonts which will be listed in the text label
