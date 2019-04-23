@@ -781,6 +781,14 @@ sub get_logs {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
+    # replace auth filter with real filter
+    if(defined $options{'filter'}) {
+        for my $f (@{$options{'filter'}}) {
+            if(ref $f eq 'HASH' && $f->{'auth_filter'}) {
+                $f = $f->{'auth_filter'}->{'filter'};
+            }
+        }
+    }
     # try to reduce the amount of transfered data
     my($size, $limit);
     if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'} && !defined $options{'options'}->{'limit'}) {

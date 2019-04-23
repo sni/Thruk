@@ -516,6 +516,14 @@ sub get_logs {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
+    # replace auth filter with real filter
+    if(defined $options{'filter'}) {
+        for my $f (@{$options{'filter'}}) {
+            if(ref $f eq 'HASH' && $f->{'auth_filter'}) {
+                $f = $f->{'auth_filter'}->{'filter'};
+            }
+        }
+    }
 
     # just because we don't cache, doesn't mean our remote site is not allowed to cache
     delete $options{'nocache'};

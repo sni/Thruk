@@ -128,15 +128,20 @@ sub get_auth_filter {
     # logfile authorization
     elsif($type eq 'log') {
         my @filter;
+        my $log_filter = { filter => undef };
 
         if(    $c->check_user_roles('authorized_for_all_services')
            and $c->check_user_roles('authorized_for_all_hosts')
            and $c->check_user_roles('authorized_for_system_information')) {
+            return({ auth_filter => $log_filter}) if $c->config->{'logcache'};
             return;
         }
 
+        $log_filter->{'username'} = $c->user->get('username');
+
         # service log entries
         if($c->check_user_roles('authorized_for_all_services')) {
+            $log_filter->{'authorized_for_all_services'} = 1;
             # allowed for all services related log entries
             push @filter, { 'service_description' => { '!=' => undef } };
         }
@@ -149,6 +154,7 @@ sub get_auth_filter {
 
         # host log entries
         if($c->check_user_roles('authorized_for_all_hosts')) {
+            $log_filter->{'authorized_for_all_hosts'} = 1;
             # allowed for all host related log entries
             push @filter, { '-and' => [ 'service_description' => undef,
                                         'host_name'           => { '!=' => undef } ],
@@ -156,6 +162,7 @@ sub get_auth_filter {
         }
         else {
             if(Thruk->config->{'use_strict_host_authorization'}) {
+                $log_filter->{'strict'} = 1;
                 # only allowed for the host itself, not the services
                 push @filter, { -and => [ 'current_host_contacts' => { '>=' => $c->user->get('username') }, { 'service_description' => undef }]};
             } else {
@@ -166,12 +173,15 @@ sub get_auth_filter {
 
         # other log entries
         if($c->check_user_roles('authorized_for_system_information')) {
+            $log_filter->{'authorized_for_system_information'} = 1;
             # everything not related to a specific host or service
             push @filter, { '-and' => [ 'service_description' => undef, 'host_name' => undef ]};
         }
 
         # combine all filter by OR
-        return('-or' => \@filter);
+        $log_filter->{'filter'} = {'-or' => \@filter};
+        return({ auth_filter => $log_filter}) if $c->config->{'logcache'};
+        return($log_filter->{'filter'});
     }
     elsif($type eq 'contact') {
         if($c->check_user_roles('authorized_for_configuration_information')) {

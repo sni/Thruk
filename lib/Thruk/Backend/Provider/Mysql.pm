@@ -381,7 +381,7 @@ sub get_logs {
         $sorted  = 1;
     }
 
-    my($where,$contact,$system,$strict) = $self->_get_filter($options{'filter'});
+    my($where,$auth_data) = $self->_get_filter($options{'filter'});
 
     my $prefix = $options{'collection'};
     $prefix    =~ s/^logs_//gmx;
@@ -428,7 +428,8 @@ sub get_logs {
 
     # querys with authorization
     my $data;
-    if($contact) {
+    if($auth_data->{'username'}) {
+        my($contact,$strict,$authorized_for_all_services,$authorized_for_all_hosts,$authorized_for_system_information) = ($auth_data->{'username'},$auth_data->{'strict'},$auth_data->{'authorized_for_all_services'},$auth_data->{'authorized_for_all_hosts'},$auth_data->{'authorized_for_system_information'});
         my $sth = $dbh->prepare($sql);
         $sth->execute;
 
@@ -437,17 +438,22 @@ sub get_logs {
 
         while(my $r = $sth->fetchrow_hashref()) {
             if($r->{'service_description'}) {
-                if($strict) {
+                if($authorized_for_all_services) {
+                }
+                elsif($strict) {
                     next if(!defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 } else {
                     next if(!defined $hosts_lookup->{$r->{'host_name'}} && !defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 }
             }
             elsif($r->{'host_name'}) {
-                next if !defined $hosts_lookup->{$r->{'host_name'}};
+                if($authorized_for_all_hosts) {
+                } else {
+                    next if !defined $hosts_lookup->{$r->{'host_name'}};
+                }
             }
             else {
-                next if !$system;
+                next if !$authorized_for_system_information;
             }
             if($fh) {
                 print $fh encode_utf8($r->{'message'}),"\n";
@@ -647,36 +653,20 @@ return Mysql filter
 =cut
 sub _get_filter {
     my($self, $inp) = @_;
+    my $auth_data = {};
+    if($inp && ref $inp eq 'ARRAY') {
+        for my $f (@{$inp}) {
+            if(ref $f eq 'HASH' && $f->{'auth_filter'}) {
+                $auth_data = $f->{'auth_filter'};
+                $f = undef;
+            }
+        }
+    }
     my $filter = $self->_get_subfilter($inp);
     if($filter and ref $filter) {
         $filter = '('.join(' AND ', @{$filter}).')';
     }
     $filter = " WHERE ".$filter if $filter;
-
-    # authentication filter hack
-    # hosts, services and system_information
-    # ((current_service_contacts IN ('test_contact') AND service_description != '') OR current_host_contacts IN ('test_contact') OR (service_description = '' AND host_name = ''))
-    my($contact,$system,$strict);
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ current_host_contacts\ IN\ \('(.*?)'\)\ OR\ \(service_description\ =\ ''\ AND\ host_name\ =\ ''\)\)//mx) {
-        $contact = $1;
-        $system  = 1;
-    }
-    # hosts, services and system_information and strict host auth on
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ \(current_host_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ =\ ''\)\ OR\ \(service_description\ =\ ''\ AND\ host_name\ =\ ''\)\)//mx) {
-        $contact = $1;
-        $system  = 1;
-        $strict  = 1;
-    }
-    # hosts and services and strict host auth on
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ \(current_host_contacts\ IN\ \('.*?'\)\ AND\ service_description\ =\ ''\)\)//mx) {
-        $contact = $1;
-        $strict  = 1;
-    }
-    # hosts and services
-    # ((current_service_contacts IN ('test_contact') AND service_description != '') OR current_host_contacts IN ('test_contact'))
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ current_host_contacts\ IN\ \('.*?'\)\)//mx) {
-        $contact = $1;
-    }
 
     # message filter have to go into a having clause
     $filter =~ s/WHERE\ \(\((.*)\)\ AND\ \)/WHERE ($1)/gmx;
@@ -702,7 +692,7 @@ sub _get_filter {
     $filter =~ s/AND\s+AND/AND/gmx;
     $filter = '' if $filter eq ' WHERE ';
 
-    return($filter, $contact, $system, $strict);
+    return($filter, $auth_data);
 }
 
 ##########################################################
@@ -718,6 +708,9 @@ sub _get_subfilter {
     my($self, $inp, $f) = @_;
     return '' unless defined $inp;
     if(ref $inp eq 'ARRAY') {
+        # remove undefs
+        @{$inp} = grep defined, @{$inp};
+
         # empty lists
         return '' if scalar @{$inp} == 0;
 
