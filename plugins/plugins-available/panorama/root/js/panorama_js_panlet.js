@@ -60,10 +60,8 @@ Ext.define('TP.Panlet', {
 
 
         this.gearHandler = TP.panletGearHandler;
-        if(this.locked) {
-            this.tools = [];
-        } else {
-            this.tools = [];
+        this.tools = this.extra_tools || [];
+        if(!this.locked) {
             if(this.has_search_button != undefined) {
                 var This = this;
                 this.tools.push({
@@ -482,7 +480,8 @@ Ext.define('TP.PanletGearItem', {
             items: [{
                 fieldLabel: 'Title',
                 xtype:      'textfield',
-                name:       'title'
+                name:       'title',
+                id:         'title_textfield'
             }, {
                 xtype:      'tp_slider',
                 fieldLabel: 'Refresh Rate',

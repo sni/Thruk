@@ -833,14 +833,15 @@ function bp_menu_save() {
 }
 
 /* returns true if element overflows */
-jQuery.fn.overflown=function(){var e=this[0];return e.scrollHeight>e.clientHeight||e.scrollWidth>e.clientWidth;}
+jQuery.fn.overflown=function(){
+    var e=this[0];
+    if(e == undefined) { return; }
+    return e.scrollHeight>e.clientHeight || e.scrollWidth>e.clientWidth;
+}
 
 /* set status data */
 function bp_update_status(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
-    if(minimal) {
-        return false;
-    }
     if(node == null) {
         return false;
     }
@@ -936,47 +937,90 @@ function bp_update_status(evt, node) {
         }
         if(op != "=") {
             var filter = service.replace(/^(w|b):/, '');
-            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op="+encodeURIComponent(op)+"&dfl_s0_value="+filter+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
+            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op="+encodeURIComponent(op)+"&dfl_s0_value="+filter+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
         } else {
-            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
+            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
         }
     }
 
     // host specific things...
     else if(host) {
-        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>";
+        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>";
     }
     // hostgroup link
     else if(n.hostgroup) {
-        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>";
+        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>";
     }
 
     // servicegroup link
     else if(n.servicegroup) {
-        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>";
+        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>";
     }
 
     jQuery('.bp_status_extinfo_link').css('display', 'none');
     if(link) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html(link);
+        jQuery('.bp_status_extinfo_link').html(link);
+        if(!minimal) {
+            jQuery('.bp_status_extinfo_link').css('display', '');
+        }
     }
 
     jQuery('.bp_ref_link').css('display', 'none');
     jQuery("#"+n.id+" .bp_node_bp_ref_icon").css('visibility', 'hidden');
     jQuery("#"+n.id+" .bp_node_link_icon").css('visibility', 'hidden');
+    var target = "";
+    if(minimal) { target = "_blank"; }
     if(n.bp_ref) {
         var bp_id = n.bp_ref;
         if(n.bp_ref_peer) {
             bp_id = n.bp_ref_peer+":"+n.bp_ref;
         }
-        jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", "bp.cgi?action=details&bp="+bp_id).css('visibility', '');
+        var href = "bp.cgi?action=details&bp="+bp_id;
+        if(minimal)    { href += "&minimal=1"; }
+        if(bp_no_menu) { href += "&no_menu=1"; }
+        if(bp_iframed) { href += "&iframed=1"; }
+        jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", href).css('visibility', '');
         jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+bp_id+"'><img src='"+url_prefix+"themes/"+theme+"/images/chart_organisation.png' border='0' alt='Show Business Process' title='Show Business Process' width='16' height='16'><\/a>");
+        jQuery('.bp_node_details_link').attr({"href": href, "target": ""});
     } else if(link) {
         var href = jQuery('.bp_status_extinfo_link').find('A').attr("href");
-        jQuery("#"+n.id+" .bp_node_link_icon").attr("href", href).css('visibility', '');
+        jQuery("#"+n.id+" .bp_node_link_icon").attr({"href": href, "target": target}).css('visibility', '');
+        jQuery('.bp_node_details_link').attr({"href": href, "target": target});
+    } else {
+        jQuery('.bp_node_details_link').attr({"href": '#', "target": ""});
     }
 
     return false;
+}
+
+// panorama dashboard registers callbacks to set loading mask
+function bp_details_link_clicked(evt, link) {
+    if(link.target == "_blank") { return; }
+    if(window.frameElement && window.frameElement.id && window.parent.frames[window.frameElement.id].loadingCallback) {
+        window.parent.frames[window.frameElement.id].loadingCallback({ old_bp_id: bp_id, old_bp_name: bp_name, link: link.href });
+    }
+}
+
+// panorama dashboard registers callbacks to update iframe title
+function bp_loaded() {
+    if(window.frameElement && window.frameElement.id && window.parent.frames[window.frameElement.id]) {
+        if(window.parent.frames[window.frameElement.id].loadedCallback) {
+            window.parent.frames[window.frameElement.id].loadedCallback({ bp_id: bp_id, bp_name: bp_name });
+        }
+        if(window.parent.frames[window.frameElement.id].origID == undefined) {
+            window.parent.frames[window.frameElement.id].origID = bp_id;
+        }
+        if(window.parent.frames[window.frameElement.id].origID != bp_id) {
+            var href = "bp.cgi?action=details&bp="+window.parent.frames[window.frameElement.id].origID;
+            if(minimal)    { href += "&minimal=1"; }
+            if(bp_no_menu) { href += "&no_menu=1"; }
+            if(bp_iframed) { href += "&iframed=1"; }
+            jQuery(".bp_back_link").show();
+            jQuery(".bp_back_link a").attr('href', href);
+        } else {
+            jQuery(".bp_back_link").hide();
+        }
+    }
 }
 
 /* toggle display of long plugin output */

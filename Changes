@@ -17,6 +17,7 @@ next:
             - fix compatibility issue with jquery 3.x
           - Business Process:
             - fix filtering containing spaces
+            - allow drill down when integrated in panorama dashboards
           - Panorama:
             - add option to always hide widget border
             - increase max zoom level for default geo map
