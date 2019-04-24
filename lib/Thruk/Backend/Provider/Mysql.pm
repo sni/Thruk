@@ -724,6 +724,10 @@ sub _get_subfilter {
             if(exists $inp->[$x+1] and ref $inp->[$x] eq '' and ref $inp->[$x+1] eq 'HASH') {
                 my $key = $inp->[$x];
                 my $val = $inp->[$x+1];
+                if(!defined $key) {
+                    $x=$x+1;
+                    next;
+                }
                 push @{$filter}, $self->_get_subfilter({$key => $val});
                 $x=$x+2;
                 next;

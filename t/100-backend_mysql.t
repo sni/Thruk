@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 67;
+use Test::More tests => 68;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');
@@ -236,13 +236,22 @@ test_filter(
 
 #####################################################################
 test_filter(
-    'undef filter',
+    'undef list filter',
     [undef, [
         { 'time' => { '>=' => 1524053699 } },
         { 'time' => { '<' => 1524140099 } }
       ]
     ],
     " WHERE (time >= 1524053699 AND time < 1524140099)",
+);
+
+#####################################################################
+test_filter(
+    'undef hash filter',
+    [undef,
+     { 'time' => { '>=' => 1524053699 } },
+    ],
+    " WHERE time >= 1524053699",
 );
 
 #####################################################################
