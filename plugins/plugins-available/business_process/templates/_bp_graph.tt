@@ -4,7 +4,7 @@
   <a href="#" onclick="bp_zoom_reset()" class="bp_container_zoom equal" style="z-index: 5;" id='zoom_val_[% bp.id %]'>=</a>
   <a href="#" onclick="bp_zoom_rel(-0.05)" class="bp_container_zoom minus" style="z-index: 5;">-</a>
 </div>
-<div class="bp_back_link" style="display: none; z-index: 5; position: absolute; top: 3px; left: 3px;"">
+<div class="bp_back_link" style="display: none; z-index: 5; position: absolute; top: 3px; left: 3px;">
   <a href="" onclick="return(bp_details_link_clicked(event, this))"><span class="ui-icon ui-icon-home" style="transform: scale(1.2);">&nbsp;</span></a>
 </div>
 <div style="position: relative; height: 100%; width: 100%; overflow: auto; z-index: 1;">
