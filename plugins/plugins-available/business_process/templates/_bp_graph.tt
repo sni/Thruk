@@ -1,6 +1,7 @@
 ﻿[% USE date %]
 <div style="position: absolute; height: 1px; width: 100%;">
   <a href="#" onclick="bp_zoom_rel(0.05)" class="bp_container_zoom plus" style="z-index: 5;">+</a>
+  <a href="#" onclick="bp_zoom_reset()" class="bp_container_zoom equal" style="z-index: 5;" id='zoom_val_[% bp.id %]'>=</a>
   <a href="#" onclick="bp_zoom_rel(-0.05)" class="bp_container_zoom minus" style="z-index: 5;">-</a>
 </div>
 <div class="bp_back_link" style="display: none; z-index: 5; position: absolute; top: 3px; left: 3px;"">
@@ -21,7 +22,7 @@
     [% END %]
     [% IF n.defined('short_desc') %][% short_desc = n.short_desc %][% END %]
     [% IF n.testmode %][% short_desc = 'testmode' %][% END %]
-    [% IF no_menu && (n.create_obj || n.exists('bp_ref') || n.host || n.hostgroup || n.servicegroup) %]
+    [% IF no_menu && (n.create_obj || n.defined('bp_ref') || n.host || n.hostgroup || n.servicegroup) %]
     <a href="" target="" class="bp_node_details_link" onclick="return(bp_details_link_clicked(event, this))">
     [% END %]
     <div id='[% n.id %]'

@@ -181,8 +181,11 @@ TR.expanded #bp_status_plugin_output {
     font-weight: bold;
     z-index: 50;
 }
-TABLE.minimal .bp_container_zoom {
+DIV.bp_zoom_container .bp_container_zoom {
     display: none;
+}
+DIV.bp_zoom_container:hover .bp_container_zoom {
+    display: inherit;
 }
 .bp_container_zoom:hover {
     background: #DDDDDD;
@@ -190,8 +193,14 @@ TABLE.minimal .bp_container_zoom {
 .bp_container_zoom.plus {
     top:  3px;
 }
+.bp_container_zoom.equal {
+    top: 18px;
+    width: 30px;
+    text-align: right;
+    border: 0;
+}
 .bp_container_zoom.minus {
-    top: 17px;
+    top: 32px;
 }
 
 .bp_container {
@@ -218,6 +227,7 @@ TABLE.minimal DIV.bp_zoom_container {
 
 .bp_node {
     border: 1px solid black;
+    color:#ffffff;
     position: absolute;
     text-align: center;
     height: 40px;
@@ -228,6 +238,10 @@ TABLE.minimal DIV.bp_zoom_container {
 
     -webkit-box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
     box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
+}
+
+.bp_node A {
+    color:#ffffff;
 }
 
 DIV.bp_node.statusOK.testmode {

@@ -1197,6 +1197,8 @@ function bp_zoom(zoom) {
         zcontainer.style.left = offset+'px';
         zcontainer.style.position = 'absolute';
     }
+
+    jQuery('#zoom_val_'+bp_id).text(Math.round(zoom*100)+"%");
 }
 
 /* draw connector between two nodes */
