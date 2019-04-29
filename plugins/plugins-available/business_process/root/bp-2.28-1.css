@@ -177,7 +177,7 @@ TR.expanded #bp_status_plugin_output {
     width: 11px;
     height: 11px;
     display: block;
-    line-height: 13px;
+    line-height: 11px;
     font-weight: bold;
     z-index: 50;
 }
@@ -191,16 +191,16 @@ DIV.bp_zoom_container:hover .bp_container_zoom {
     background: #DDDDDD;
 }
 .bp_container_zoom.plus {
-    top:  3px;
+    top:  18px;
 }
 .bp_container_zoom.equal {
-    top: 18px;
+    top: 33px;
     width: 30px;
     text-align: right;
     border: 0;
 }
 .bp_container_zoom.minus {
-    top: 32px;
+    top: 47px;
 }
 
 .bp_container {
