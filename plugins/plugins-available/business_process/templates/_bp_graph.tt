@@ -22,15 +22,21 @@
     [% END %]
     [% IF n.defined('short_desc') %][% short_desc = n.short_desc %][% END %]
     [% IF n.testmode %][% short_desc = 'testmode' %][% END %]
+    [% has_details_link = 0 %]
     [% IF no_menu && (n.create_obj || n.defined('bp_ref') || n.host || n.hostgroup || n.servicegroup) %]
-    <a href="" target="" class="bp_node_details_link" onclick="return(bp_details_link_clicked(event, this))">
+      [% has_details_link = 1 %]
     [% END %]
     <div id='[% n.id %]'
-         class='bp_node [% UNLESS no_menu %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %][% IF highlight_node == n.id %] bp_node_active[% END %]'
+         class='bp_node [% IF !no_menu || has_details_link %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %][% IF highlight_node == n.id %] bp_node_active[% END %]'
          [% UNLESS no_menu %]onmousedown="bp_context_menu_open(event, this)"[% END %]
          onmouseover="bp_mouse_over_node(event, this);"
          onmouseout="bp_mouse_out_node(event, this);"
          [% IF editmode %] ondblclick="bp_show_edit_node('current');return false;"[% END %]
+         [% IF has_details_link %]
+         onclick="return(bp_details_link_click(event, this))"
+         data-href=""
+         data-target=""
+         [% END %]
     >
         <div class="bp_label" [% IF n.label.length > 20 %]style="font-size: 9px; line-height: 8px;"[% END %]><span class="bp_label">[% n.label | html %]</span></div>
         <div class="bp_sublabel" title="[% nl2br(escape_html(short_desc)).replace('<br>', '&#013;') %]">[% short_desc | html %]</div>
@@ -56,9 +62,6 @@
         </div>
         [% END %]
     </div>
-    [% IF no_menu && n.create_obj %]
-    </a>
-    [% END +%]
     [%+ END %]
   </div>
 </div>

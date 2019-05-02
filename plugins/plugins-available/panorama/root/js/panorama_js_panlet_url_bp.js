@@ -1,7 +1,7 @@
 Ext.define('TP.PanletBP', {
     extend: 'TP.PanletUrl',
 
-    title: 'Business Process',
+    title: '',
     height: 300,
     width:  600,
     hideSettingsForm: ['url', 'backends', 'selector', 'keepcss'],
@@ -56,6 +56,9 @@ Ext.define('TP.PanletBP', {
 
         panel.gearInitCallback = function(This) {
             panel.updateGraphs();
+            // title is set automatically
+            Ext.getCmp("title_textfield").hide();
+            panel.current_bp = undefined;
         };
 
         panel.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
@@ -137,12 +140,7 @@ Ext.define('TP.PanletBP', {
             valueField:     'id',
             displayField:   'name',
             store:           { fields: ['name', 'id'], data: [] },
-            emptyText:      'select business process to display',
-            listeners: {
-                select: function(combo, records, eOpts) {
-                    Ext.getCmp("title_textfield").setValue(records[0].data["name"]);
-                }
-            }
+            emptyText:      'select business process to display'
         });
     }
 });

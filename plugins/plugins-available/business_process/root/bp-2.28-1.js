@@ -932,7 +932,8 @@ function bp_update_status(evt, node) {
         var op = "=";
         if(n.func == "status" && n.func_args && n.func_args.length >= 3 && n.func_args[2]) {
             op = n.func_args[2];
-        } else if(looks_like_regex(service)) {
+        }
+        if(op == "=" && looks_like_regex(service)) {
             op = "~";
         }
         if(op != "=") {
@@ -981,16 +982,28 @@ function bp_update_status(evt, node) {
         if(bp_iframed) { href += "&iframed=1"; }
         jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", href).css('visibility', '');
         jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+bp_id+"'><img src='"+url_prefix+"themes/"+theme+"/images/chart_organisation.png' border='0' alt='Show Business Process' title='Show Business Process' width='16' height='16'><\/a>");
-        jQuery('.bp_node_details_link').attr({"href": href, "target": ""});
+        jQuery("#"+n.id).addClass("clickable").data({"href": href, "target": ""});
     } else if(link) {
         var href = jQuery('.bp_status_extinfo_link').find('A').attr("href");
         jQuery("#"+n.id+" .bp_node_link_icon").attr({"href": href, "target": target}).css('visibility', '');
-        jQuery('.bp_node_details_link').attr({"href": href, "target": target});
+        jQuery("#"+n.id).addClass("clickable").data({"href": href, "target": target});
     } else {
-        jQuery('.bp_node_details_link').attr({"href": '#', "target": ""});
+        jQuery("#"+n.id).removeClass("clickable").data({"href": "", "target": ""});
     }
 
     return false;
+}
+
+// called when node is clicked
+function bp_details_link_click(evt, el) {
+    var d = jQuery(el).data();
+    var link = document.createElement('a');
+    link.href = d.href;
+    link.target = d.target;
+    document.body.appendChild(link);
+    bp_details_link_clicked(evt, link);
+    link.click();
+    console.log(link);
 }
 
 // panorama dashboard registers callbacks to set loading mask
