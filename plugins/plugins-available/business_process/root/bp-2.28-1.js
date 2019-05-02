@@ -319,8 +319,8 @@ function bp_fill_select_form(data, form) {
     if(data.select) {
         for(var key in data.select) {
             var d = data.select[key];
-            jQuery('#'+form).find('SELECT[name='+key+'] option[text="'+d+'"]').attr("selected","selected");
-            jQuery('#'+form).find('SELECT[name='+key+'] option[value="'+d+'"]').attr("selected","selected");
+            jQuery('#'+form).find('SELECT[name='+key+'] option[text="'+d+'"]').prop("selected",true);
+            jQuery('#'+form).find('SELECT[name='+key+'] option[value="'+d+'"]').prop("selected",true);
         }
     }
 }
@@ -816,7 +816,7 @@ function bp_initialize_children_tab(node) {
 /* save node */
 function bp_edit_node_submit(formId) {
     // add selected nodes
-    jQuery('#'+formId).find('#bp_'+bp_id+'_selected_nodes OPTION').attr('selected',true);
+    jQuery('#'+formId).find('#bp_'+bp_id+'_selected_nodes OPTION').prop('selected',true);
     var data = jQuery('#'+formId).serializeArray();
     var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
     bp_post_and_refresh('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, current_edit_node);

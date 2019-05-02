@@ -1072,6 +1072,11 @@ sub _replace_with_marker {
     @matches = grep {!/^\s*$/} @matches;
     $errors    += scalar @matches;
 
+    # jQuery().attr('selected', true) must be .prop now
+    @matches = $_[0]  =~ s/(\.attr\s*\(.*selected)/JS_ERROR_MARKER4:$1/gmxi;
+    @matches = grep {!/^\s*$/} @matches;
+    $errors    += scalar @matches;
+
     $errors_js += $errors;
     return $errors;
 }
@@ -1102,6 +1107,13 @@ sub _check_marker {
             $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
             $orig =~ s/JS_ERROR_MARKER3://gmx;
             fail('found jQuery.attr(checked) instead of .prop() in '.($file || 'content').' line: '.$x);
+            diag($orig);
+        }
+        if($line =~ m/JS_ERROR_MARKER4:/mx) {
+            my $orig = $line;
+            $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
+            $orig =~ s/JS_ERROR_MARKER4://gmx;
+            fail('found jQuery.attr(selected) instead of .prop() in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
     }

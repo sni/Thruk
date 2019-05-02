@@ -80,7 +80,7 @@ jQuery('TH.data').each(function(i, col) {
     }
 });
 add_options(column_select, columns);
-jQuery("#columns_sel option").attr('selected',true);
+jQuery("#columns_sel option").prop('selected',true);
 
 // Set the default "show" mode to that specified by W3C DOM
 // compliant browsers
