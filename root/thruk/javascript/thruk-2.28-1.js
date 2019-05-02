@@ -1076,6 +1076,7 @@ function create_site_panel_popup_tree_populate() {
         selectMode: 3, // 1:single, 2:multi, 3:multi-hier
         tabbable: true, // Whole tree behaves as one single control
         source: site_tree_data,
+        // clicking the image or name -> expand tree
         click: function(event, data){
             resetRefresh();
             data.node.setActive();
@@ -1084,6 +1085,7 @@ function create_site_panel_popup_tree_populate() {
                 jQuery("#button_"+peer_key).parent().show();
             });
         },
+        // clicking the checkbox -> select/deselect all nodes
         select: function(event, data){
             var state = data.node.isSelected();
             data.node.setActive();
@@ -1094,6 +1096,10 @@ function create_site_panel_popup_tree_populate() {
                 if(peer.section.match(regex)) {
                     toggleBackend(peer_key, state, true);
                 }
+            }
+            if(data.node.folder == false) {
+                // root elements
+                toggleBackend(data.node.key.replace(/^\//, ""), state, true);
             }
             updateSitePanelCheckBox();
             resetRefresh();
@@ -1187,16 +1193,12 @@ function create_site_panel_popup_tree_data(d, current, tree) {
             var peer = initial_backends[peer_key];
             if(!peer) { return true; }
             icon = "../images/folder_green.png";
+            var selected = true; // checkbox enabled
             if(current_backend_states[peer_key] == 1) {
                 icon = "../images/folder_red.png";
             } else if(current_backend_states[peer_key] == 2) {
                 icon = "../images/folder_gray.png";
-            }
-            var selected;
-            if(d.disabled == 0) {
-                selected = true; // enabled
-            } else if(d.disabled == d.total) {
-                selected = false; // off
+                selected = false; // checkbox off
             }
             var key = '/'+peer_key;
             nodes.push({
