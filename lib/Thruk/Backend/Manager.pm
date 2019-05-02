@@ -1596,6 +1596,7 @@ sub _do_on_peers {
             }
             if($res && $res->{'configtool'}) {
                 my $peer = $self->get_peer_by_key($key);
+                next if $peer->{'configtool'}->{'disable'};
                 # do not overwrite local configuration with remote configtool settings
                 # only use remote if the local one is empty
                 next if(scalar keys %{$peer->{'configtool'}} != 0 && !$peer->{'configtool'}->{'remote'});

@@ -518,9 +518,11 @@ sub _set_object_model {
     my($c, $peer_key) = @_;
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
+    delete $c->{'obj_db'};
     Thruk::Utils::Conf::set_object_model($c);
     delete $c->req->parameters->{'refreshdata'};
     if($c->{'obj_db'}) {
+        return if $c->stash->{'param_backend'} ne $peer_key; # make sure we did not fallback on some default backend
         die("failed to initialize objects of peer ".$peer_key) if($c->{'obj_db'}->{'errors'} && scalar @{$c->{'obj_db'}->{'errors'}} > 0);
         return 1;
     }

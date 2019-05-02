@@ -932,7 +932,11 @@ sub _process_backends_page {
 sub _process_objects_page {
     my( $c ) = @_;
 
-    return unless Thruk::Utils::Conf::set_object_model($c);
+    if(!Thruk::Utils::Conf::set_object_model($c)) {
+        $c->stash->{errorMessage}       = "config tool unavailable";
+        $c->stash->{errorDescription}   = $c->stash->{set_object_model_err} || '';
+        return $c->detach('/error/index/99');
+    }
 
     _check_external_reload($c);
 

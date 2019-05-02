@@ -2231,6 +2231,7 @@ for details.
                               (only needed when not using 'core_conf')
 
         *** `git_base_dir`    Override global 'git_base_dir' value.
+        *** `disable`         Set to `1` to disable config tool for this backend (ex.: when detected automatically for http backends)
 
 ex.:
 

@@ -46,6 +46,7 @@ put objects model into stash
 sub set_object_model {
     my ( $c, $no_recursion ) = @_;
     delete $c->stash->{set_object_model_err};
+    delete $c->{'obj_db'};
     my $cached_data = $c->cache->get->{'global'} || {};
     Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::ADD_CACHED_DEFAULTS
     $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
@@ -66,12 +67,18 @@ sub set_object_model {
     delete $c->req->parameters->{'refreshdata'};
 
     $c->stats->profile(begin => "_update_objects_config()");
-    my $model         = $c->app->obj_db_model;
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
     Thruk::Utils::Conf::get_default_peer_config($peer_conftool->{'configtool'});
     $c->stash->{'peer_conftool'} = $peer_conftool->{'configtool'};
 
+    if($peer_conftool->{'configtool'}->{'disable'}) {
+        delete $c->{'obj_db'};
+        $c->stash->{set_object_model_err} = "configtool is disabled for this backend";
+        return;
+    }
+
     # already parsed?
+    my $model = $c->app->obj_db_model;
     my $jobid = $model->currently_parsing($c->stash->{'param_backend'});
     if(    Thruk::Utils::Conf::get_model_retention($c, $c->stash->{'param_backend'})
        and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model)
@@ -922,7 +929,10 @@ sub get_backends_with_obj_config {
     for my $peer (@peers) {
         my $min_key_size = 0;
         if(defined $peer->{'configtool'}->{remote} and $peer->{'configtool'}->{remote} == 1) { $min_key_size = 1; }
-        if(scalar keys %{$peer->{'configtool'}} > $min_key_size) {
+        if($peer->{'configtool'}->{'disable'}) {
+            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = DISABLED_CONF;
+        }
+        elsif(scalar keys %{$peer->{'configtool'}} > $min_key_size) {
             $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = HIDDEN_CONF;
         } else {
             $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = DISABLED_CONF;
@@ -933,6 +943,7 @@ sub get_backends_with_obj_config {
     for my $peer (@peers) {
         next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
+            next if $peer->{'configtool'}->{'disable'};
             $firstpeer = $peer->{'key'} unless defined $firstpeer;
             $backends->{$peer->{'key'}} = $peer->{'configtool'};
         }
@@ -942,6 +953,7 @@ sub get_backends_with_obj_config {
     if(!defined $firstpeer) {
         for my $peer (@peers) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
+                next if $peer->{'configtool'}->{'disable'};
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;
                 $backends->{$peer->{'key'}} = $peer->{'configtool'};
             }
@@ -964,6 +976,9 @@ sub get_backends_with_obj_config {
         }
     }
     $c->stash->{'param_backend'} = $param_backend unless $c->stash->{'param_backend'};
+    if($c->stash->{'param_backend'} && $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} == DISABLED_CONF) {
+        $c->stash->{'param_backend'} = '';
+    }
 
     if($c->stash->{'param_backend'} eq '' and defined $firstpeer) {
         $c->stash->{'param_backend'} = $firstpeer;

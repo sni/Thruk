@@ -1377,6 +1377,7 @@ function toggleBackend(backend, state, skip_update) {
 
   if(backend_chooser == 'switch') {
     jQuery('INPUT.button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
+    jQuery('INPUT.button_peerDOWN').removeClass('button_peerDOWN').addClass('button_peerDIS');
     jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
     cookieSave('thruk_conf', backend);
     removeParams['backends'] = true;
