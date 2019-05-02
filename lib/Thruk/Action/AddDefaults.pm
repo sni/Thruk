@@ -1169,9 +1169,12 @@ sub _set_enabled_backends {
     elsif($num_backends > 1 and defined $backend) {
         $c->log->debug('_set_enabled_backends() by param') if Thruk->debug;
         if($backend eq 'ALL') {
+            my @keys;
             for my $peer (@{$c->{'db'}->get_peers()}) {
                 $disabled_backends->{$peer->{'key'}} = 0;
+                push @keys, $peer->{'key'};
             }
+            $c->stash->{'param_backend'} = join(",", @keys);
         } else {
             # reset
             for my $peer (@{$c->{'db'}->get_peers()}) {
