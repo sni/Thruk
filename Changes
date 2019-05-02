@@ -26,7 +26,7 @@ next:
           - Logcache:
             - disable delta updates by default
           - internals:
-            - update jquery to 3.4.0
+            - update jquery to 3.4.1
 
 2.28     Fri Mar 29 17:27:48 CET 2019
           - rename graph_proxy option into http_backend_reverse_proxy
