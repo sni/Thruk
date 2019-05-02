@@ -1340,6 +1340,10 @@ sub check_federation_peers {
                 addr       => [$parent->{'addr'}, @{Thruk::Utils::list($row->{'federation_addr'})}],
                 type       => [$parent->{'type'}, @{Thruk::Utils::list($row->{'federation_type'})}],
             };
+            # inherit disabled configtool from parent
+            if($parent->{'config'}->{'configtool'}->{'disable'}) {
+                $subpeer->{'config'}->{'configtool'}->{'disable'} = 1;
+            }
             $Thruk::Backend::Pool::peers->{$subpeer->{'key'}} = $subpeer;
             push @{$Thruk::Backend::Pool::peer_order}, $subpeer->{'key'};
             $parent->{'disabled'} = HIDDEN_LMD_PARENT;
