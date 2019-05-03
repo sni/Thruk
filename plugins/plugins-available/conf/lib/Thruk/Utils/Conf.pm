@@ -42,11 +42,12 @@ Helper Functios for the Config Tool
 
 put objects model into stash
 
+returns 1 on success, 0 if you have to wait and it redirects or -1 on errors
+
 =cut
 sub set_object_model {
     my ( $c, $no_recursion ) = @_;
     delete $c->stash->{set_object_model_err};
-    delete $c->{'obj_db'};
     my $cached_data = $c->cache->get->{'global'} || {};
     Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::ADD_CACHED_DEFAULTS
     $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
@@ -59,8 +60,9 @@ sub set_object_model {
     }
 
     if(!$c->stash->{has_obj_conf}) {
+        delete $c->{'obj_db'};
         $c->stash->{set_object_model_err} = "backend has no configtool section";
-        return;
+        return -1;
     }
 
     my $refresh = $c->req->parameters->{'refreshdata'} || 0;
@@ -74,7 +76,7 @@ sub set_object_model {
     if($peer_conftool->{'configtool'}->{'disable'}) {
         delete $c->{'obj_db'};
         $c->stash->{set_object_model_err} = "configtool is disabled for this backend";
-        return;
+        return -1;
     }
 
     # already parsed?
