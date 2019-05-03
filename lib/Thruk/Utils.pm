@@ -1351,6 +1351,7 @@ sub get_remote_thruk_url {
     }
     if($url) {
         $url =~ s|^https?://[^/]*/|/|gmx;
+        $url =~ s|cgi-bin\/remote\.cgi$||gmx;
         $url =~ s|thruk/?$||gmx;
         $url =~ s|/$||gmx;
         $url = $url.'/thruk/';
