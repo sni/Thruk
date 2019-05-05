@@ -7,7 +7,9 @@ this scenario tests federation with lmd or http. The topology looks like:
   │   ├── tier2a
   │   │    ├── tier3a
   │   │    └── tier3b
-  │   └── tier2b
+  │   ├── tier2b
+  │   └── tier2c
   ├── tier1b
-  └── tier1c
+  ├── tier1c
   └── tier1d            # basic auth enabled thruk instance
+      └── tier2d

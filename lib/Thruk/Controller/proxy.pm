@@ -59,6 +59,7 @@ sub index {
     my $passthrough;
     if($peer->{'federation'} && scalar @{$peer->{'fed_info'}->{'type'}} >= 2 && $peer->{'fed_info'}->{'type'}->[1] eq 'http') {
         $request_url = $peer->{'addr'};
+        $request_url =~ s|/cgi\-bin/remote\.cgi$||gmx;
         $request_url =~ s|/thruk/?$||gmx;
         $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'};
         $passthrough = '/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
