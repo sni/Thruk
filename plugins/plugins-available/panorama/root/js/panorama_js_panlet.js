@@ -345,7 +345,7 @@ Ext.define('TP.Panlet', {
     },
     applyBorderAndBackground: function() {
         var global = Ext.getCmp(this.panel_id);
-        if(global.xdata.autohideheader === 1) {
+        if(global.xdata.autohideheader === 1 || (!global.locked && global.xdata.autohideheader === 2)) {
             this.overCls = 'autohideheaderover';
         }
         if(this.xdata.showborder == false && this.gearitem == undefined) {
