@@ -326,7 +326,7 @@ sub _js {
         $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'}) if $data->{'panorama'}->{dashboards}->{'tabpan'};
     }
 
-    $c->stash->{dashboards}        = decode_utf8(Thruk::Utils::Filter::json_encode($data->{'panorama'}->{'dashboards'} || {}));
+    $c->stash->{dashboards}        = Thruk::Utils::Filter::json_encode($data->{'panorama'}->{'dashboards'} || {});
     $c->stash->{default_dashboard} = Thruk::Utils::Filter::json_encode([]);
     if($c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'}) {
         my $default_dashboard = $c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'};
@@ -821,7 +821,7 @@ sub _task_save_dashboard {
     $c->stash->{'template'} = 'passthrough.tt';
     my $text = "";
     $text   .= "# Thruk Panorama Dashboard Export: ".$d->{'tab'}->{'xdata'}->{'title'}."\n";
-    $text   .= decode_utf8(Thruk::Utils::Filter::json_encode($data));
+    $text   .= Thruk::Utils::Filter::json_encode($data);
     $text   .= "\n# End Export\n";
     $c->stash->{text} = $text;
     $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$d->{'tab'}->{'xdata'}->{'title'}.'.dashboard"' );
