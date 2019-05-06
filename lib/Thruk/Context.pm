@@ -508,6 +508,9 @@ regardless of the deployment path.
 sub translate_request_path {
     my($path_info, $config, $env) = @_;
 
+    # strip off get parameter
+    $path_info =~ s/\?.*$//gmx;
+
     if($path_info =~ m%^/?$%mx && $env->{'SCRIPT_NAME'} && $env->{'SCRIPT_NAME'} =~ m%/thruk/cgi\-bin/remote\.cgi(/r/.*)$%mx) {
         $path_info = '/thruk'.$1;
     }
