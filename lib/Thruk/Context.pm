@@ -296,7 +296,7 @@ sub request_username {
         my $secret_file = $c->config->{'var_path'}.'/secret.key';
         $c->config->{'secret_key'} = read_file($secret_file) if -s $secret_file;
         chomp($c->config->{'secret_key'});
-        if($apikey !~ m/^[a-zA-Z0-9]+$/mx) {
+        if($apikey !~ m/^[a-zA-Z0-9_]+$/mx) {
             $c->error("wrong authentication key");
             return;
         }

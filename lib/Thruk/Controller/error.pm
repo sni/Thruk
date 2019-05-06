@@ -284,6 +284,12 @@ sub index {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
+    # do not cache errors
+    $c->res->code($code);
+    $c->res->headers->last_modified(time);
+    $c->res->headers->expires(time - 3600);
+    $c->res->headers->header(cache_control => "public, max-age=0");
+
     # return errer as json for rest api calls
     if($c->want_json_response()) {
         if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 2) {
@@ -314,12 +320,6 @@ sub index {
     # do not download errors
     $c->res->headers->header('Content-Disposition', '');
     $c->res->headers->content_type('');
-
-    # do not cache errors
-    $c->res->code($code);
-    $c->res->headers->last_modified(time);
-    $c->res->headers->expires(time - 3600);
-    $c->res->headers->header(cache_control => "public, max-age=0");
 
     $c->{'rendered'} = 0; # force rerendering
     return 1;
