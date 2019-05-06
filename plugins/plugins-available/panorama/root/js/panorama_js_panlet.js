@@ -52,9 +52,20 @@ Ext.define('TP.Panlet', {
             this.closable  = false;
             this.draggable = false;
         } else {
-            this.resizable = new Ext.Panel({   // make resize snap to grid
+            // make resize snap to grid
+            this.resizable = new Ext.panel.Panel({
                 widthIncrement:  TP.snap_x,
-                heightIncrement: TP.snap_y
+                heightIncrement: TP.snap_y,
+                listeners: {
+                    // add mask to prevent mouseinteraction with panel content which prevents resizing sometimes
+                    beforeresize: function() {
+                        panel.mask();
+                    },
+                    resize: function(This, width, height, e, eOpts) {
+                        if(!e.type || e.type != "mouseup") { return; }
+                        panel.unmask();
+                    }
+                }
             });
         }
 

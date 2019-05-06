@@ -80,7 +80,7 @@ Ext.define('TP.PanletBP', {
                         panel.saveState();
                     }
                 }
-                var iframeObj = panel.items.getAt(0).getEl();
+                var iframeObj = panel.iframe.getEl();
                 if(iframeObj && iframeObj.dom && panel.last_url != panel.xdata.url) {
                     iframeObj.dom.src = panel.xdata.url;
                     iframeObj.dom.loadingCallback = function(args) {
@@ -118,7 +118,7 @@ Ext.define('TP.PanletBP', {
             if(!panel.xdata.graph) {
                 newUrl = 'about:blank';
             }
-            var iframeObj = panel.items.getAt(0).getEl();
+            var iframeObj = panel.iframe.getEl();
             if(iframeObj && iframeObj.dom) {
                 if(newUrl != "about:blank") {
                     panel.body.mask('Loading...');
