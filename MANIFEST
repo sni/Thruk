@@ -1879,6 +1879,7 @@ t/scenarios/auth/omd/playbook.yml
 t/scenarios/auth/omd/thruk_local.conf
 t/scenarios/auth/t/100-auth.t
 t/scenarios/auth/t/local/010-auth_groups.t
+t/scenarios/auth/t/local/011-api_keys.t
 t/scenarios/auth/t/local_test.sh
 t/scenarios/auth_krb5/docker-compose.yml
 t/scenarios/auth_krb5/krb5/Dockerfile
