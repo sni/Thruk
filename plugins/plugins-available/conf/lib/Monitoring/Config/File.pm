@@ -195,14 +195,14 @@ sub update_objects_from_text {
         # old object finished
         if($first_char eq '}' || ($in_disabled_object && $line =~ m/^(;|\#)\s*}$/mxo)) {
             unless(defined $current_object) {
-                push @{$self->{'parse_errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 next;
             }
             $current_object->{'comments'}     = $comments;
             $current_object->{'inl_comments'} = $inl_comments;
             $current_object->{'line2'}        = $linenr;
             my $parse_errors = $current_object->parse();
-            if(scalar @{$parse_errors} > 0) { push @{$self->{'parse_errors'}}, @{$parse_errors} }
+            if(scalar @{$parse_errors} > 0 && !$in_disabled_object) { push @{$self->{'parse_errors'}}, @{$parse_errors} }
             $current_object->{'id'} = $current_object->_make_id();
             push @{$self->{'objects'}}, $current_object;
             undef $current_object;
@@ -218,7 +218,7 @@ sub update_objects_from_text {
             $in_disabled_object = $1 ? 1 : 0;
             $current_object = Monitoring::Config::Object->new(type => $2, file => $self, line => $linenr, 'coretype' => $self->{'coretype'}, disabled => $in_disabled_object);
             unless(defined $current_object) {
-                push @{$self->{'parse_errors'}}, "unknown object type '".$2."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "unknown object type '".$2."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 $in_unknown_object  = 1;
             }
             next;
@@ -250,19 +250,19 @@ sub update_objects_from_text {
                 }
                 if(defined $timedef) {
                     if(defined $current_object->{'conf'}->{$timedef} and $current_object->{'conf'}->{$timedef} ne $timeranges) {
-                        push @{$self->{'parse_errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                        push @{$self->{'parse_errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                     }
                     $current_object->{'conf'}->{$timedef} = $timeranges;
                     if(defined $inl_comments->{$key} and $key ne $timedef) {
                         $inl_comments->{$timedef} = delete $inl_comments->{$key};
                     }
                 } else {
-                    push @{$self->{'parse_errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                    push @{$self->{'parse_errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 }
             }
             else {
                 if(defined $current_object->{'conf'}->{$key} and $current_object->{'conf'}->{$key} ne $value and substr($key, 0, 1) ne '#') {
-                    push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                    push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 }
                 $current_object->{'conf'}->{$key} = $value;
 
@@ -283,11 +283,11 @@ sub update_objects_from_text {
                 } elsif($key =~ /^[a-z0-9_]+$/mx) {
                     # Ignore cfg_dir, cfg_file, ...
                 } else {
-                    push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                    push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 }
             # something totally unknown
             } else {
-                push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
             }
             next;
         }
@@ -296,7 +296,7 @@ sub update_objects_from_text {
     $self->{'lines'} = $linenr; # set line counter
 
     if(defined $current_object or $in_unknown_object) {
-        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$linenr;
+        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$linenr unless $in_disabled_object;
     }
 
     # add trailing comments to last object
