@@ -194,6 +194,7 @@ locks given file. Returns locked filehandle.
 
 sub file_lock {
     my($file, $mode) = @_;
+    confess("no file") unless $file;
 
     alarm(30);
     local $SIG{'ALRM'} = sub { confess("timeout while trying to flock(".$mode."): ".$file); };
