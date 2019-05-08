@@ -31,25 +31,14 @@ sub status {
 
     confess("no status data supplied") unless defined $livedata;
 
-    if($hostname and $description) {
+    if($hostname && $description) {
         $data = $livedata->{'services'}->{$hostname}->{$description};
-
-        # operator is new and optional
-        $op = "=" unless $op;
-
-        # description may contain regular expressions, return worst/best function in that case
-        if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
-            $op = "~";
-        }
         if($op ne '=') {
             my $function = 'worst';
             if($description =~ m/^(b|w):(.*)$/mx) {
                 if($1 eq 'b') { $function = 'best' }
                 $description = $2;
             }
-            $description = Thruk::Utils::convert_wildcards_to_regex($description);
-
-            if($op eq '!=') { $op = '!~'; }
 
             # create hash which can be used by internal calculation function
             my $depends = [];

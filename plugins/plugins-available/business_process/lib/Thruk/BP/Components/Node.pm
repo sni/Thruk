@@ -413,6 +413,7 @@ sub _set_function {
             $self->{'function'}      = $fname;
         }
     }
+    $self->{'function_args'} = [] unless defined $self->{'function_args'};
     if($self->{'function'} eq 'status') {
         $self->{'host'}                 = $self->{'function_args'}->[0] || '';
         $self->{'service'}              = $self->{'function_args'}->[1] || '';
@@ -423,6 +424,21 @@ sub _set_function {
         $self->{'max_check_attempts'}   = '';
         $self->{'event_handler'}        = '';
         $self->{'create_obj'} = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
+        # fix operator
+        if($self->{'service'}) {
+            my $op = $self->{'function_args'}->[2] // '=';
+            if($op eq '=' && Thruk::BP::Utils::looks_like_regex($self->{'service'})) {
+                $op = "~";
+            }
+            elsif($op eq '!=' && Thruk::BP::Utils::looks_like_regex($self->{'service'})) {
+                $op = "!~";
+            }
+            if($op eq "~" || $op eq '!~') {
+                $self->{'function_args'}->[1] = Thruk::Utils::convert_wildcards_to_regex($self->{'function_args'}->[1]);
+                $self->{'service'} = $self->{'function_args'}->[1];
+            }
+            $self->{'function_args'}->[2] = $op;
+        }
     }
     if($self->{'function'} eq 'groupstatus') {
         if($self->{'function_args'}->[0] eq 'hostgroup') {

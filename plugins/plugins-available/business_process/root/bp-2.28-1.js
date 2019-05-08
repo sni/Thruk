@@ -930,11 +930,8 @@ function bp_update_status(evt, node) {
     if(service) {
         // do we have a operator defined?
         var op = "=";
-        if(n.func == "status" && n.func_args && n.func_args.length >= 3 && n.func_args[2]) {
+        if(n.func == "status") {
             op = n.func_args[2];
-        }
-        if(op == "=" && looks_like_regex(service)) {
-            op = "~";
         }
         if(op != "=") {
             var filter = service.replace(/^(w|b):/, '');

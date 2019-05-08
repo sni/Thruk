@@ -672,12 +672,8 @@ sub bulk_fetch_live_data {
         for my $hostname (keys %{$servicefilter}) {
             for my $description (keys %{$servicefilter->{$hostname}}) {
                 my $op = $servicefilter->{$hostname}->{$description} || '=';
-                if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
-                    $op = '~';
-                }
                 if($op ne '=') {
                     $description =~ s/^(b|w)://gmx;
-                    $description = Thruk::Utils::convert_wildcards_to_regex($description);
                     my $full_op = {
                             '=' =>  '=',
                            '!=' => '!=',
