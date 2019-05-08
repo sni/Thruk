@@ -565,7 +565,6 @@ sub _bp_list_add_objects {
         if(lc $n->{'function'} eq 'status') {
             if($n->{'host'} and $n->{'service'}) {
                 my $service = $n->{'service'};
-                my $svc_op  = '=';
                 $service =~ s/^(b|w)://gmx;
                 my $svc_op  = $n->{'function_args'}->[2];
                 $params->{'svc_s'.$svc.'_type'}   = ['host', 'service'];
