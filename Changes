@@ -23,6 +23,7 @@ next:
             - increase max zoom level for default geo map
           - Config Tool:
             - add disable option to disable config tool for specific backends
+            - add global obj_readonly option
           - Logcache:
             - disable delta updates by default
           - internals:

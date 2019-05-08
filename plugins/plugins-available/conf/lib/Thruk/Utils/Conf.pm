@@ -70,7 +70,8 @@ sub set_object_model {
 
     $c->stats->profile(begin => "_update_objects_config()");
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
-    Thruk::Utils::Conf::get_default_peer_config($peer_conftool->{'configtool'});
+    get_default_peer_config($peer_conftool->{'configtool'});
+    append_global_peer_config($c, $peer_conftool->{'configtool'});
     $c->stash->{'peer_conftool'} = $peer_conftool->{'configtool'};
 
     if($peer_conftool->{'configtool'}->{'disable'}) {
@@ -828,6 +829,24 @@ sub get_default_peer_config {
     $config->{'obj_dir'}        = [] unless defined $config->{'obj_dir'};
     $config->{'obj_file'}       = [] unless defined $config->{'obj_file'};
     return $config;
+}
+
+##########################################################
+
+=head2 append_global_peer_config
+
+append/merge global config tool settings
+
+=cut
+sub append_global_peer_config {
+    my($c, $config) = @_;
+    $config->{'obj_readonly'} = Thruk::Utils::list($config->{'obj_readonly'});
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'}) {
+        push @{$config->{'obj_readonly'}},
+            @{Thruk::Utils::list($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'})};
+        $config->{'obj_readonly'} = Thruk::Utils::array_uniq($config->{'obj_readonly'});
+    }
+    return;
 }
 
 ##########################################################

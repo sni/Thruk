@@ -135,7 +135,7 @@ sub init {
     if(defined $remotepeer and lc($remotepeer->{'type'}) eq 'http') {
         $self->{'remotepeer'} = $remotepeer;
     }
-    $self->{'stats'}      = $stats if defined $stats;
+    $self->{'stats'} = $stats if defined $stats;
 
     # some keys might have been changed in the thruk_local.conf, so update them
     for my $key (qw/git_base_dir/) {
@@ -143,10 +143,8 @@ sub init {
     }
 
     # update readonly config
-    my $readonly_changed = 0;
     if($self->_array_diff($self->_list($self->{'config'}->{'obj_readonly'}), $self->_list($config->{'obj_readonly'}))) {
         $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
-        $readonly_changed = 1;
 
         # update all readonly file settings
         for my $file (@{$self->{'files'}}) {
@@ -2346,7 +2344,7 @@ sub _array_diff {
 sub _list {
     $_[1] = [] unless defined $_[1];
     if(ref $_[1] ne 'ARRAY') { $_[1] = [$_[1]]; }
-    return;
+    return $_[1];
 }
 
 ##########################################################

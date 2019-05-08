@@ -2315,6 +2315,7 @@ ex.:
     #edit_files               = some/extra/files/to.edit # deprecated
     extra_custom_var_host     = _WORKER
     extra_custom_var_service  = _SNMP_COMMUNITY, _OTHER_CUSTOM_VARIABLE
+    obj_readonly              = readonly files regular expression
   </Component>
 
 
@@ -2390,6 +2391,11 @@ lists.
 Extra custom variable attribute for services which will be available in the dropdown
 list when editing a service. Can be used multiple time and accepts comma separated
 lists.
+
+=== obj_readonly
+Use `obj_readonly` regular expressions which will be appended to the backend
+specific readonly patterns from the Component Backend peer configtool. Read
+details on the link:/documentation/configuration.html#peer[configtool section].
 
 
 
