@@ -1,7 +1,7 @@
-﻿<table width="100%" id="[% div_id | html %]" style="display: none;">
+﻿<table width="100%" id="[% div_id %]" style="display: none;">
   <tr>
     <td></td>
-    <td align="left" class="bp_type_desc">[% div_help | html %]</td>
+    <td align="left" class="bp_type_desc">[% div_help %]</td>
   </tr>
   <tr>
     <th align="right">Label</th>

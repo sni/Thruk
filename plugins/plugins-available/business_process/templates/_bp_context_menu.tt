@@ -237,7 +237,8 @@
 [% WRAPPER _bp_context_menu_frame.tt
     div_id='bp_select_not_more'
     function='not_more'
-    div_help='Ok if the number of good nodes is not higher than the threshold.'
+    div_help='Ok if the number of good nodes is lower than the threshold.<br>'
+           _ 'There must be <b>not more</b> than this number of nodes ok.'
 %]
 <tr>
   <th align="right">Warning</th>
@@ -253,7 +254,8 @@
 [% WRAPPER _bp_context_menu_frame.tt
     div_id='bp_select_at_least'
     function='at_least'
-    div_help='Ok if the number of good nodes is higher than the threshold.'
+    div_help='Ok if the number of good nodes is higher than the threshold.<br>'
+           _ 'There must be <b>at least</b> this number of nodes ok.'
 %]
 <tr>
   <th align="right">Warning</th>
