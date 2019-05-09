@@ -70,6 +70,9 @@ Ext.define('TP.PanletBP', {
             if(panel.xdata.graph) {
                 var bp_id  = panel.current_bp ? panel.current_bp : panel.xdata.graph;
                 var newUrl = 'bp.cgi?action=details&bp='+bp_id+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&_='+Ext.Date.now();
+                if(panel.xdata.background != undefined && panel.xdata.background != "") {
+                    newUrl = newUrl + '&htmlCls=transparent';
+                }
                 if(!panel.xdata.graph) {
                     newUrl = 'about:blank';
                 }
@@ -115,6 +118,9 @@ Ext.define('TP.PanletBP', {
             panel.last_url = '';
             var bp_id  = panel.current_bp ? panel.current_bp : panel.xdata.graph;
             var newUrl = 'bp.cgi?action=details&bp='+bp_id+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&update=1';
+            if(panel.xdata.background != undefined && panel.xdata.background != "") {
+                newUrl = newUrl + '&htmlCls=transparent';
+            }
             if(!panel.xdata.graph) {
                 newUrl = 'about:blank';
             }
@@ -132,6 +138,13 @@ Ext.define('TP.PanletBP', {
     setGearItems: function() {
         var panel = this;
         this.callParent();
+        this.addGearItems({
+            xtype:          'colorcbo',
+            fieldLabel:     'Background',
+            name:           'background',
+            mouseover:     function(color) { panel.applyBorderAndBackground(color); },
+            mouseout:      function(color) { panel.applyBorderAndBackground(); }
+        });
         this.addGearItems({
             xtype:          'combobox',
             fieldLabel:     'Graph',

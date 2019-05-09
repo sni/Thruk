@@ -376,6 +376,12 @@ BODY.iframed {
 BODY.iframed DIV.bp_zoom_container {
     border: 0;
 }
+HTML.transparent BODY {
+    background: transparent;
+}
+HTML.transparent DIV.bp_zoom_container {
+    background-color: transparent;
+}
 
 /* custom fields */
 #cust_help PRE {

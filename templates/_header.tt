@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
   "http://www.w3.org/TR/html4/strict.dtd">
-<html[% IF minimal %] class='minimal'[% END %]>
+<html class="[% IF minimal %]minimal[% END %][% IF extrahtmlclass +%] [%+ extrahtmlclass | html %][% END %]">
   <head>
     <title>[% title_prefix %][% escape_html(title) %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
@@ -14,7 +14,7 @@
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
 
-  <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %][% IF iframed %] iframed[% END %]' id='[% page %]'>
+  <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class="[% page %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% ssi_header %]
   <div style="display:none;" id="search-results"></div>

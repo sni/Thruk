@@ -406,6 +406,13 @@ sub end {
         $c->stash->{'no_auto_reload'} = 1;
     }
 
+    if($c->req->parameters->{'bodyCls'}) {
+        $c->stash->{'extrabodyclass'} .= " ".$c->req->parameters->{'bodyCls'};
+    }
+    if($c->req->parameters->{'htmlCls'}) {
+        $c->stash->{'extrahtmlclass'} .= " ".$c->req->parameters->{'htmlCls'};
+    }
+
     $c->stats->profile(end => "Root end");
     return 1;
 }

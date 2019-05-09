@@ -94,6 +94,7 @@
     var testmode    = [% testmode %];
     var bp_no_menu  = [% no_menu %];
     var bp_iframed  = [% iframed %];
+    var htmlCls     = "[% extrahtmlclass | html %]";
     var bp_backend  = '[% bp_backend %]';
     var testmodes   = [% json_encode(testmodes) %];
     var cust_func   = [% json_encode(bp_custom_functions) %];

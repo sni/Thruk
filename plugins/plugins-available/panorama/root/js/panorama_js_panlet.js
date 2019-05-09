@@ -354,14 +354,24 @@ Ext.define('TP.Panlet', {
             this.adjustBodyStyle();
         }
     },
-    applyBorderAndBackground: function() {
+    applyBorderAndBackground: function(backgroundColor) {
+        var panel = this;
         var global = Ext.getCmp(this.panel_id);
+        var panelCls = "";
+        if(backgroundColor == undefined) {
+            backgroundColor = panel.xdata.background;
+        }
+        if(backgroundColor == undefined || backgroundColor == "") {
+            backgroundColor = 'auto';
+        } else {
+            panelCls = "transparent";
+        }
         if(global.xdata.autohideheader === 1 || (!global.locked && global.xdata.autohideheader === 2)) {
             this.overCls = 'autohideheaderover';
         }
         if(this.xdata.showborder == false && this.gearitem == undefined) {
-            this.cls     = 'autohideheader';
-            this.bodyCls = 'autohideheader';
+            this.cls     = 'autohideheader'+panelCls;
+            this.bodyCls = 'autohideheader ';
             this.shadow  = false;
             if(this.rendered) {
                 this.addCls('autohideheader');
@@ -369,9 +379,9 @@ Ext.define('TP.Panlet', {
                 if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.addCls('hidden');
                 }
-                this.getEl().setStyle('background-color', 'transparent');
+                this.getEl().setStyle('background-color', backgroundColor == "auto" ? 'transparent' : backgroundColor);
                 if(this.chart && this.chart.getEl()) {
-                    this.chart.getEl().setStyle('background-color', 'transparent');
+                    this.chart.getEl().setStyle('background-color', backgroundColor == "auto" ? 'transparent' : backgroundColor);
                 }
                 if(this.autohideHeaderOffset != undefined) {
                     this.getEl().setStyle('overflow', 'visible');
@@ -379,7 +389,7 @@ Ext.define('TP.Panlet', {
                 }
             }
         } else {
-            this.cls     = '';
+            this.cls     = panelCls;
             this.bodyCls = '';
             this.shadow = 'sides';
             if(this.rendered) {
@@ -388,9 +398,9 @@ Ext.define('TP.Panlet', {
                 if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.removeCls('hidden');
                 }
-                this.getEl().setStyle('background-color', '');
+                this.getEl().setStyle('background-color', backgroundColor == "auto" ? '' : backgroundColor);
                 if(this.chart && this.chart.getEl()) {
-                    this.chart.getEl().setStyle('background-color', '#FFFFFF');
+                    this.chart.getEl().setStyle('background-color', backgroundColor == "auto" ? '#FFFFFF' : backgroundColor);
                 }
                 if(this.autohideHeaderOffset != undefined) {
                     this.getEl().setStyle('overflow', '');

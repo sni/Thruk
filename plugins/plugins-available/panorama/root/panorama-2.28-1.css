@@ -446,7 +446,7 @@ DIV.x-window-default.gearopen {
   background-color: #E8E8E8;
 }
 
-.x-window-body.autohideheader, .x-window-default.autohideheader {
+.x-window-body.autohideheader, .x-window-default.autohideheader, DIV.transparent .x-window-body {
   background-color: transparent;
   border-width: 0;
   box-shadow: none;

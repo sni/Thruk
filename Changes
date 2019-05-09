@@ -21,6 +21,7 @@ next:
           - Panorama:
             - add option to always hide widget border
             - increase max zoom level for default geo map
+            - add option to set bp panel background color
           - Config Tool:
             - add disable option to disable config tool for specific backends
             - add global obj_readonly option
