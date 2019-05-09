@@ -28,7 +28,7 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.28';
+our $VERSION = '2.30';
 
 my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
 my $branch       = '';
@@ -46,7 +46,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'March 29, 2019',
+              'released'               => 'May 09, 2019',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
