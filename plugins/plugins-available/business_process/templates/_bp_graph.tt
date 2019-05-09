@@ -61,6 +61,11 @@
             <img src="[% url_prefix %]themes/[% theme %]/images/link.png" alt="This node is linked to a host or service object" title="This node is linked to a host or service object" border="0" height="14" width="14">
         </div>
         [% END %]
+        [% IF editmode  %]
+        <div class="bp_node_add_icon">
+            <img src="[% url_prefix %]themes/[% theme %]/images/add.png" alt="add new node" title="add new node" class="clickable" border="0" height="14" width="14" onclick="bp_add_new_node()">
+        </div>
+        [% END %]
     </div>
     [%+ END %]
   </div>

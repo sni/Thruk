@@ -15,6 +15,10 @@ BUTTON.bp_button {
     z-index: 150;
 }
 
+#bp_menu INPUT[type=BUTTON] {
+    padding: 0;
+}
+
 TD.action_menu {
     padding-left: 10px;
     padding-right: 5px;
@@ -294,7 +298,7 @@ SPAN.bp_label {
     right: 0px;
     display: none;
 }
-.bp_node:hover .bp_node_bp_ref_icon, .bp_node:hover .bp_node_link_icon {
+.bp_node:hover .bp_node_bp_ref_icon, .bp_node:hover .bp_node_link_icon, .bp_node:hover .bp_node_add_icon {
     display: inherit;
 }
 
@@ -310,6 +314,15 @@ SPAN.bp_label {
     left: 1px;
 }
 
+.bp_node_add_icon {
+    position: fixed;
+    display: none;
+}
+.bp_node_add_icon IMG {
+    position: relative;
+    left: 54px;
+    top: 2px;
+}
 
 .bp_node:hover {
     box-shadow: 0 0 5px rgba(0, 150, 255, 1);
