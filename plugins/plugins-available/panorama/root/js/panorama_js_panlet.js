@@ -60,9 +60,14 @@ Ext.define('TP.Panlet', {
                     // add mask to prevent mouseinteraction with panel content which prevents resizing sometimes
                     beforeresize: function() {
                         panel.mask();
+                        document.onmouseup = function() {
+                            document.onmouseup = undefined;
+                            panel.unmask();
+                        }
                     },
                     resize: function(This, width, height, e, eOpts) {
                         if(!e.type || e.type != "mouseup") { return; }
+                        document.onmouseup = undefined;
                         panel.unmask();
                     }
                 }
