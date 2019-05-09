@@ -453,23 +453,27 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                 }
                 // add two rows of additional colors
                 var additionalColors = TP.getAllUsedColors();
-                if(additionalColors) {
-                    for(var x=0; x<16; x++) {
-                        if(additionalColors[x]) {
-                            this.colors.push(additionalColors[x].replace('#'));
-                        } else {
-                            this.colors.push("DDDDDD");
-                        }
+                for(var x=0; x<15; x++) {
+                    if(additionalColors[x]) {
+                        this.colors.push(additionalColors[x].replace('#'));
+                    } else {
+                        this.colors.push("DDDDDD");
                     }
-                    this.height = 127;
-                    this.maxHeight = 127;
                 }
+                this.height = 127;
+                this.maxHeight = 127;
+                // add transparent
+                this.colors.push("000001"); // must be 6 chars long, otherwise color picker chokes
                 this.callParent();
             },
             listeners: {
                 scope:this,
                 select: function(field, value, opts){
-                    me.setValue('#' + value);
+                    if(value == "000001") {
+                        me.setValue("transparent");
+                    } else {
+                        me.setValue('#' + value);
+                    }
                     me.inputEl.setStyle({backgroundColor:value});
                     me.picker.destroy();
                     me.picker = undefined;
@@ -477,8 +481,16 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                 afterrender: function(field,opts){
                     field.getEl().monitorMouseLeave(2500, field.hide, field);
                     Ext.Array.each(field.el.dom.getElementsByTagName('A'), function(item, index) {
-                        item.onmouseover=function() { if(me.mouseover) { me.mouseover(item.getElementsByTagName('SPAN')[0].style.backgroundColor); }},
+                        item.color = Ext.draw.Color.fromString(item.firstChild.style.backgroundColor).toString();
+                        if(item.color == "#000001") {
+                            item.color = "transparent";
+                        }
+                        item.onmouseover=function() { if(me.mouseover) { me.mouseover(item.color); }},
                         item.onmouseout=function()  { if(me.mouseout)  { me.mouseout(); } }
+                        // replace transparent background color
+                        if(item.color == "transparent") {
+                            item.firstChild.style.background = "url("+url_prefix+"plugins/panorama/images/transparent_picker.png)";
+                        }
                     });
                 }
             }
