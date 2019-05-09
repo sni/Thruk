@@ -425,6 +425,7 @@ sub index {
             for my $key (keys %{$params}) {
                 $c->req->parameters->{$key} = $params->{$key};
             }
+            local $c->config->{'maximum_search_boxes'} = 9999;
             require Thruk::Controller::status;
             return(Thruk::Controller::status::index($c));
         }

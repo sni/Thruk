@@ -336,7 +336,7 @@ sub do_filter {
 
         # complex filter search?
         push @{$searches}, Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s0', 1 );
-        for my $x (@{_get_search_ids($c->req->parameters, $prefix, $c->config->{'maximum_search_boxes'})}) {
+        for my $x (@{_get_search_ids($c, $c->req->parameters, $prefix, $c->config->{'maximum_search_boxes'})}) {
             next if $x == 0; # already added
             my $search = Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s' . $x );
             push @{$searches}, $search if defined $search;
@@ -2396,7 +2396,7 @@ sub set_comments_and_downtimes {
 
 ##############################################
 sub _get_search_ids {
-    my($params, $prefix, $maximum) = @_;
+    my($c, $params, $prefix, $maximum) = @_;
     my $ids = {};
     my $search = $prefix.'s';
     for my $key (grep /^$prefix/mx, keys %{$params}) {
@@ -2407,6 +2407,7 @@ sub _get_search_ids {
     my @list = sort { $a <=> $b } keys %{$ids};
     if($maximum > 0 && scalar @list > $maximum) {
         splice(@list,$maximum);
+        Thruk::Utils::set_message($c, 'fail_message', sprintf("maximum number of %d search boxes hit, consider raising config option: maximum_search_boxes", $maximum));
     }
     return(\@list);
 }
