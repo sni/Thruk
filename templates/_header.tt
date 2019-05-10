@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
   "http://www.w3.org/TR/html4/strict.dtd">
-<html class="[% IF minimal %]minimal[% END %][% IF extrahtmlclass +%] [%+ extrahtmlclass | html %][% END %]">
+<html[% IF extrahtmlclass %] class="[% extrahtmlclass | html %]"[% END %]>
   <head>
     <title>[% title_prefix %][% escape_html(title) %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
