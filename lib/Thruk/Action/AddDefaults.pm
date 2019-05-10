@@ -412,6 +412,9 @@ sub end {
     if($c->req->parameters->{'htmlCls'}) {
         $c->stash->{'extrahtmlclass'} .= " ".$c->req->parameters->{'htmlCls'};
     }
+    if($c->stash->{'minimal'}) {
+        $c->stash->{'extrahtmlclass'} .= " minimal";
+    }
 
     $c->stats->profile(end => "Root end");
     return 1;
