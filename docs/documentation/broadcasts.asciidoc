@@ -70,7 +70,7 @@ Full example with html and macros:
 ```
 {% raw %}
 <img src="../themes/{{theme}}/images/ack.gif" width=16 height=16>
-<b>Upcoming maintainance change</b>:<br>
+<b>Upcoming maintenance change</b>:<br>
 
 <pre style="font-family: inherit;">
 Thruk will be updated <font color="red">next wednesday</font>

@@ -1,18 +1,18 @@
-package Thruk::Utils::CLI::Maintainance;
+package Thruk::Utils::CLI::Maintenance;
 
 =head1 NAME
 
-Thruk::Utils::CLI::Maintainance - Maintainance CLI module
+Thruk::Utils::CLI::Maintenance - Maintenance CLI module
 
 =head1 DESCRIPTION
 
-The maintainance command performs regular maintainance jobs like
+The maintenance command performs regular maintenance jobs like
 
     - cleaning old session files
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] maintainance
+  Usage: thruk [globaloptions] maintenance
 
 =head1 OPTIONS
 
@@ -42,12 +42,12 @@ use Thruk::Utils::CookieAuth;
 =cut
 sub cmd {
     my($c, $action) = @_;
-    $c->stats->profile(begin => "_cmd_maintainance($action)");
+    $c->stats->profile(begin => "_cmd_maintenance($action)");
 
     Thruk::Utils::CookieAuth::clean_session_files($c->config);
 
-    $c->stats->profile(end => "_cmd_maintainance($action)");
-    return("maintainance complete\n", 0);
+    $c->stats->profile(end => "_cmd_maintenance($action)");
+    return("maintenance complete\n", 0);
 }
 
 ##############################################

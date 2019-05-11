@@ -2127,18 +2127,18 @@ sub update_cron_file {
 
 ##########################################################
 
-=head2 update_cron_file_maintainance
+=head2 update_cron_file_maintenance
 
-    update_cron_file_maintainance($c)
+    update_cron_file_maintenance($c)
 
-update maintainance cronjobs
+update maintenance cronjobs
 
 =cut
-sub update_cron_file_maintainance {
+sub update_cron_file_maintenance {
     my($c) = @_;
     my $cron_entries = [[
          '20,50 * * * *',
-         sprintf("cd %s && %s '%s maintainance' >/dev/null 2>>%s/cron.log",
+         sprintf("cd %s && %s '%s maintenance' >/dev/null 2>>%s/cron.log",
                                 $c->config->{'project_root'},
                                 $c->config->{'thruk_shell'},
                                 $c->config->{'thruk_bin'},
