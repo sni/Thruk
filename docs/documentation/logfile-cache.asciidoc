@@ -120,7 +120,7 @@ logfile cache:
 
 
 === Example Cronjobs
-Using the logfile cache needs some extra maintainance to work smoothly, the
+Using the logfile cache needs some extra maintenance to work smoothly, the
 following cronjobs should cover that. When not using OMD, you will have to
 adjust the paths.
 
