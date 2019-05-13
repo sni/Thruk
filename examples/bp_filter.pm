@@ -131,6 +131,11 @@ sub _add_recursive_output_filter_indent {
 }
 sub _add_recursive_output_filter_recurse {
     my($c, $text, $bp, $node, $indent, $parents) = @_;
+    # avoid circles
+    if($parents->{$bp->{id}.'-'.$node->{'id'}}) {
+        $text .= _add_recursive_output_filter_indent($indent, "- [CIRCULAR DEPENDENCY] ".$bp->{'name'})."\n";
+        return $text;
+    }
     $parents->{$bp->{id}.'-'.$node->{'id'}} = 1;
     return $text if $indent > 20;
     return $text if $node->{'status'} == 0;
