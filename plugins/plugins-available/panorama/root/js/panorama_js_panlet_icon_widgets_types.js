@@ -41,7 +41,7 @@ Ext.define('TP.HostStatusIcon', {
                                         +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
                                         +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
-        details.push([ 'Status Information', this.host.plugin_output]);
+        details.push([ 'Status Information', nl2br(this.host.plugin_output)]);
         details.push([ 'Last Check', this.host.last_check ? TP.date_format(this.host.last_check) : 'never']);
         details.push([ 'Next Check', this.host.next_check ? TP.date_format(this.host.next_check) : 'not planned']);
         details.push([ 'Last Notification', (this.host.last_notification == 0 ? 'N/A' : TP.date_format(this.host.last_notification)) + ' (notification '+this.host.current_notification_number+')']);
@@ -200,7 +200,7 @@ Ext.define('TP.ServiceStatusIcon', {
                                             +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
                                             +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
-        details.push([ 'Status Information', this.service.plugin_output]);
+        details.push([ 'Status Information', nl2br(this.service.plugin_output)]);
         details.push([ 'Last Check', this.service.last_check ? TP.date_format(this.service.last_check) : 'never']);
         details.push([ 'Next Check', this.service.next_check ? TP.date_format(this.service.next_check) : 'not planned']);
         details.push([ 'Last Notification', (this.service.last_notification == 0 ? 'N/A' : TP.date_format(this.service.last_notification)) + ' (notification '+this.service.current_notification_number+')']);

@@ -89,7 +89,7 @@ Ext.define('TP.IconLabel', {
 
     setIconLabelDynamicText: function(txt) {
         var panel = this;
-        var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
+        var allowed_functions = ['strftime', 'sprintf', 'if', 'availability', 'nl2br'];
         if(TP.availabilities == undefined) { TP.availabilities = {}; }
         if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
         var matches = txt.match(/(\{\{.*?\}\})/g);
@@ -342,3 +342,10 @@ Ext.define('TP.IconLabel', {
         panel.applyRotation(panel.xdata.layout.rotation);    /* add dbl click and context menu events */
     }
 });
+
+function nl2br(text) {
+    text = text.replace(/\n/g, "<br>");
+    text = text.replace(/\\n/g, "<br>");
+    return(text);
+}
+
