@@ -2006,6 +2006,12 @@ sub _remove_duplicates {
 
     $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
+    if($data && $data->[0] && ref($data->[0]) ne 'HASH') {
+        $data = Thruk::Utils::array_uniq($data);
+        $c->stats->profile( end => "Utils::remove_duplicates()" );
+        return($data);
+    }
+
     # calculate md5 sums
     my $uniq = {};
     for my $dat ( @{$data} ) {

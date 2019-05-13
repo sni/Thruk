@@ -183,15 +183,13 @@ sub _process_raw_request {
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             $data = ["you are not authorized for configuration information"];
         } else {
-            my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
-            $data = Thruk::Utils::array_uniq_obj($contacts);
+            $data = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit, remove_duplicates => 1 );
         }
         push @{$json}, { 'name' => "contacts", 'data' => $data };
     }
 
     if($type eq 'host' || $type eq 'hosts' || $type eq 'all') {
-        my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
-        $data = Thruk::Utils::array_uniq_obj($data);
+        my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit, remove_duplicates => 1 );
         push @{$json}, { 'name' => "hosts", 'data' => $data };
     }
 
@@ -210,7 +208,7 @@ sub _process_raw_request {
 
     if($type eq 'servicegroup' || $type eq 'servicegroups' || $type eq 'all') {
         my $data = [];
-        my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], limit => $limit);
+        my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )]);
         my $alias         = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ) ], columns => [qw/name alias/] );
         $alias = Thruk::Utils::array2hash($alias, "name");
         for my $group (@{$servicegroups}) {
@@ -232,12 +230,12 @@ sub _process_raw_request {
             }
             $additional_filter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
-        $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter, description => { '~~' => $filter } ], limit => $limit );
+        $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter, description => { '~~' => $filter } ], limit => $limit, remove_duplicates => 1 );
         push @{$json}, { 'name' => "services", 'data' => $data };
     }
 
     if($type eq 'timeperiod' or $type eq 'timeperiods') {
-        my $data = $c->{'db'}->get_timeperiod_names( filter => [ name => { '~~' => $filter } ], limit => $limit );
+        my $data = $c->{'db'}->get_timeperiod_names( filter => [ name => { '~~' => $filter } ], limit => $limit, remove_duplicates => 1 );
         push @{$json}, { 'name' => "timeperiods", 'data' => $data };
     }
 
@@ -246,12 +244,11 @@ sub _process_raw_request {
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             $data = ["you are not authorized for configuration information"];
         } else {
-            my $commands = $c->{'db'}->get_commands( filter => [ name => { '~~' => $filter } ], columns => ['name'], limit => $limit );
+            my $commands = $c->{'db'}->get_commands( filter => [ name => { '~~' => $filter } ], columns => ['name'], limit => $limit, remove_duplicates => 1 );
             $data = [];
             for my $d (@{$commands}) {
                 push @{$data}, $d->{'name'};
             }
-            $data = Thruk::Utils::array_uniq($data);
         }
         push @{$json}, { 'name' => "commands", 'data' => $data };
     }
@@ -313,11 +310,10 @@ sub _process_raw_request {
         if($c->req->parameters->{'wildcards'}) {
             push @{$data}, '*';
         }
-        my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], remove_duplicates => 1, sort => {ASC=> 'name'}, limit => $limit);
+        my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], remove_duplicates => 1, sort => {ASC=> 'name'}, limit => $limit, remove_duplicates => 1);
         for my $g (@{$groups}) {
             push @{$data}, $g->{'name'};
         }
-        $data = Thruk::Utils::array_uniq($data);
         push @{$json}, { 'name' => "contactgroups", 'data' => $data };
     }
 
@@ -331,6 +327,7 @@ sub _process_raw_request {
                                                                     ]],
                                                 columns => [qw/host_event_handler event_handler/],
                                                 limit => $limit,
+                                                remove_duplicates => 1,
                                             );
             my $eventhandler = {};
             for my $d (@{$data}) {
