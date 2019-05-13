@@ -6427,6 +6427,16 @@ var ajax_search = {
     },
 
     refresh_data: function() {
+        window.clearTimeout(ajax_search.refresh_timer);
+        ajax_search.updating = true;
+        var panel = document.getElementById(ajax_search.result_pan);
+        if(panel && panel.style.visibility == 'visible') {
+            ajax_search.show_results([]); // show loading icon
+        }
+        ajax_search.refresh_timer = window.setTimeout("ajax_search.refresh_data_do()", 300);
+    },
+    refresh_data_do: function() {
+        window.clearTimeout(ajax_search.refresh_timer);
         ajax_search.updating = true;
         ajax_search.error    = false;
 
@@ -6446,7 +6456,8 @@ var ajax_search = {
             success: function(data) {
                 ajax_search.updating=false;
                 ajax_search.base = data;
-                if(ajax_search.autoopen == true || panel.style.visibility == 'visible') {
+                var panel = document.getElementById(ajax_search.result_pan);
+                if(ajax_search.autoopen == true || (panel && panel.style.visibility == 'visible')) {
                     ajax_search.suggest();
                 }
                 ajax_search.autoopen = true;
@@ -6700,7 +6711,10 @@ var ajax_search = {
             });
 
             if(needs_refresh) {
+                ajax_search.updating = true;
+                ajax_search.show_results([]); // show loading icon
                 ajax_search.refresh_data();
+                return;
             }
 
             ajax_search.cur_results = results;
