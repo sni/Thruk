@@ -543,16 +543,27 @@ Ext.define('Ext.ux.SearchCombobox', {
         var handler = function() {
             searchStore.panel = me.panel;
             var type          = me.name;
-            searchStore.search_type = type;
             var proxy         = searchStore.getProxy();
             proxy.addParams   = Ext.Object.merge({}, me.storeExtraParams);
+            var doReload      = false;
             if(me.storeExtraParams) {
                 proxy.addParams = Ext.Object.merge({}, me.storeExtraParams);
             }
             if(type == 'service') {
                 proxy.addParams.host = this.up('form').getForm().getFieldValues().host;
+                if(searchStore.lastHost != proxy.addParams.host) {
+                    searchStore.lastHost = proxy.addParams.host;
+                    doReload = true;
+                }
             }
-            searchStore.load();
+            if(searchStore.search_type != type) {
+                searchStore.search_type = type;
+                doReload = true;
+            }
+            if(doReload) {
+                searchStore.removeAll();
+                searchStore.load();
+            }
         };
 
         /* makes it impossible to set own additional change handler otherwise */
