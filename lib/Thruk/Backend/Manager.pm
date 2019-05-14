@@ -3,7 +3,6 @@ package Thruk::Backend::Manager;
 use strict;
 use warnings;
 use Carp qw/confess croak/;
-use Digest::MD5 qw(md5_hex);
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
@@ -2006,48 +2005,17 @@ sub _remove_duplicates {
 
     $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
-    if($data && $data->[0] && ref($data->[0]) ne 'HASH') {
+    if($data && $data->[0] && ref($data->[0]) eq 'HASH') {
+        $data = Thruk::Utils::array_uniq_obj($data);
+    }
+    elsif($data && $data->[0] && ref($data->[0]) eq 'ARRAY') {
+        $data = Thruk::Utils::array_uniq_list($data);
+    } else {
         $data = Thruk::Utils::array_uniq($data);
-        $c->stats->profile( end => "Utils::remove_duplicates()" );
-        return($data);
-    }
-
-    # calculate md5 sums
-    my $uniq = {};
-    for my $dat ( @{$data} ) {
-        my $peer_key = delete $dat->{'peer_key'};
-        my $peer_name = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_name'};
-        my $str       = join( ';', grep(defined, sort values %{$dat}));
-        utf8::encode($str);
-        my $md5       = md5_hex($str);
-        if( !defined $uniq->{$md5} ) {
-            $dat->{'peer_key'}  = $peer_key;
-            $dat->{'peer_name'} = $peer_name;
-
-            $uniq->{$md5} = {
-                'data'      => $dat,
-                'peer_key'  => [$peer_key],
-                'peer_name' => [$peer_name],
-            };
-        }
-        else {
-            push @{ $uniq->{$md5}->{'peer_key'} },  $peer_key;
-            push @{ $uniq->{$md5}->{'peer_name'} }, $peer_name;
-        }
-    }
-
-    my $return = [];
-    for my $data ( values %{$uniq} ) {
-        $data->{'data'}->{'backend'} = {
-            'peer_key'  => $data->{'peer_key'},
-            'peer_name' => $data->{'peer_name'},
-        };
-        push @{$return}, $data->{'data'};
-
     }
 
     $c->stats->profile( end => "Utils::remove_duplicates()" );
-    return ($return);
+    return($data);
 }
 
 ########################################
