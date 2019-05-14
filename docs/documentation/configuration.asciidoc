@@ -413,6 +413,10 @@ multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
 links to the command page.
 If you only want to allow a few commands, use `command_enabled` instead.
 You may use ranges here.
+If you want to disable all commands, you can use `command_disabled = 0-999`
+or set the `authorized_for_read_only` role.
+
+See a list of available commands along with their ids on the link:commands.html[commands page];
 
 ex.:
 
@@ -424,8 +428,10 @@ ex.:
 === command_enabled
 Enable only specific commands. Overrides `command_disabled` setting by only
 allowing a few specific commands and disabling all others. The syntax is the
-same as in `command_disabled`. If you want to disable all commands, you have to
-use `command_disabled = 0-999` or set the `authorized_for_read_only` role.
+same as in `command_disabled`. When using `command_enabled` then all commands
+are disabled and only those from `command_enabled` can be used.
+
+See a list of available commands along with their ids on the link:commands.html[commands page];
 
 ex.:
 

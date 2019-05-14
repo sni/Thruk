@@ -24,9 +24,10 @@ my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' 
 my $host_name = $test_svc->{'host_name'};
 my $service_description = $test_svc->{'description'};
 
-_update_cmds($c);
+my $cmds = _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
 _update_docs($c, "docs/documentation/rest_commands.asciidoc");
+_update_cmds_list($c, "docs/documentation/commands.html", $cmds);
 unlink('var/cluster/nodes');
 $c->sub_request('/r/config/revert', 'POST', {});
 exit 0;
@@ -274,6 +275,8 @@ sub _update_cmds {
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
     print $fh $content;
     close($fh);
+
+    return($cmds);
 }
 
 ################################################################################
@@ -380,6 +383,35 @@ sub _update_docs {
     unlink('var/reports/9999.rpt');
     unlink($c->stash->{'fake_session_file'});
     unlink($api_key->{'file'});
+}
+
+################################################################################
+sub _update_cmds_list {
+    my($c, $file, $cmds) = @_;
+    my $content = read_file($file);
+    $content =~ s/^<\!\-\-DATA\-\->\n.*$/<!--DATA-->\n/gsmx;
+
+    $content .= "<tbody>\n";
+    for my $cat (qw/hosts services hostgroups servicegroups contacts contactgroups system/) {
+        for my $name (sort keys %{$cmds->{$cat}}) {
+            my $cmd = $cmds->{$cat}->{$name};
+            next if !$cmd->{'nr'};
+            next if $cmd->{'nr'} == -1;
+            $content .= "<tr>";
+            $content .= sprintf("<td>%s</td>", $cmd->{'nr'});
+            $content .= sprintf("<td>%s</td>", $cat);
+            $content .= sprintf("<td>%s</td>", $name);
+            $content .= sprintf("<td><a href=\"http://www.naemon.org/documentation/developer/externalcommands/%s.html\" target=\"_blank\">details</a></td>", $name);
+            $content .= "</tr>\n";
+        }
+    }
+    $content .= "</tbody>\n";
+    $content .= "</table>\n";
+
+    $file = $file.'.tst' if $ENV{'TEST_MODE'};
+    open(my $fh, '>', $file) or die("cannot write to ".$file.': '.$@);
+    print $fh $content;
+    close($fh);
 }
 
 ################################################################################
