@@ -416,7 +416,7 @@ You may use ranges here.
 If you want to disable all commands, you can use `command_disabled = 0-999`
 or set the `authorized_for_read_only` role.
 
-See a list of available commands along with their ids on the link:commands.html[commands page];
+See a list of available commands along with their ids on the link:commands.html[commands page].
 
 ex.:
 
@@ -431,7 +431,7 @@ allowing a few specific commands and disabling all others. The syntax is the
 same as in `command_disabled`. When using `command_enabled` then all commands
 are disabled and only those from `command_enabled` can be used.
 
-See a list of available commands along with their ids on the link:commands.html[commands page];
+See a list of available commands along with their ids on the link:commands.html[commands page].
 
 ex.:
 
