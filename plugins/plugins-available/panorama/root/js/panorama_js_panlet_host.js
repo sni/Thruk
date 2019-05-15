@@ -307,12 +307,12 @@ Ext.define('TP.PanletHost', {
 /* form for sending cmd */
 TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
     if(defaults == undefined) { defaults = {} }
-    fields.push({ xtype: 'hidden', name: 'json',    value: 1 });
-    fields.push({ xtype: 'hidden', name: 'host',    value: '' });
-    fields.push({ xtype: 'hidden', name: 'service', value: '' });
-    fields.push({ xtype: 'hidden', name: 'cmd_typ', value: cmd_typ });
-    fields.push({ xtype: 'hidden', name: 'cmd_mod', value: '2' });
-    fields.push({ xtype: 'hidden', name: 'token',   value: '' });
+    fields.push({ xtype: 'hidden', name: 'json',      value: 1 });
+    fields.push({ xtype: 'hidden', name: 'host',      value: '' });
+    fields.push({ xtype: 'hidden', name: 'service',   value: '' });
+    fields.push({ xtype: 'hidden', name: 'cmd_typ',   value: cmd_typ });
+    fields.push({ xtype: 'hidden', name: 'cmd_mod',   value: '2' });
+    fields.push({ xtype: 'hidden', name: 'CSRFtoken', value: '' });
     /* this is a Ext.menu.Menu */
     return {
         plain:      true,
