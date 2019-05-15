@@ -11,7 +11,8 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 link:http://docs.pnp4nagios.org/[PNP4Nagios] graphs can be easily integrated in Thruk which will make them appear
 in the service or host details as well as in the SLA reports.
 
-Integration is done by specifing an 'action_url' with the path to your pnp4nagios installation.
+Integration is done by specifing an 'action_url' with the path to your pnp4nagios installation. Further make sure
+`shown_inline_pnp=1` is set. Do not set any `graph_url`, this is only required for integrating other graphing addons.
 
 When using OMD, the integration of PNP4Nagios has been done for you already.
 
