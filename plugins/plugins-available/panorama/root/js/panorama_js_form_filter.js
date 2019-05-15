@@ -92,6 +92,11 @@ var searchStore = Ext.create('Ext.data.Store', {
             store.lastParam  = param;
             store.lastLoaded = now;
             return true;
+        },
+        load: function(store, operation, eOpts) {
+            if(store.curCombo) {
+                store.curCombo.expand();
+            }
         }
     },
     proxy: {

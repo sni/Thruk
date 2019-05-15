@@ -527,25 +527,34 @@ Ext.define('Ext.ux.SearchCombobox', {
     extend:        'Ext.form.field.ComboBox',
     alias:         'widget.searchCbo',
 
-    queryMode:      'remote',
     triggerAction:  'all',
     pageSize:       true,
     selectOnFocus:  true,
     selectOnTab:    true,
     typeAhead:      true,
     minChars:       0,
-    valueField:    'value',
-    displayField:  'text',
+    store:         [],
     initComponent: function() {
         var me = this;
         me.callParent();
 
-        var handler = function() {
+        var setStoreHandler = function() {
+            if(searchStore.curCombo != me) {
+                // unlink store from other comboboxes, this has weird side effects with expanding services to host aliases
+                if(searchStore.curCombo && searchStore.curCombo != me) {
+                    searchStore.removeAll();
+                    searchStore.curCombo.bindStore(null);
+                }
+                me.valueField   = 'value'; // those settings get reset when store changes
+                me.displayField = 'text';
+                me.queryMode    = 'remote';
+                me.bindStore(searchStore);
+                searchStore.curCombo = me;
+            }
             searchStore.panel = me.panel;
             var type          = me.name;
             var proxy         = searchStore.getProxy();
             proxy.addParams   = Ext.Object.merge({}, me.storeExtraParams);
-            var doReload      = false;
             if(me.storeExtraParams) {
                 proxy.addParams = Ext.Object.merge({}, me.storeExtraParams);
             }
@@ -553,23 +562,34 @@ Ext.define('Ext.ux.SearchCombobox', {
                 proxy.addParams.host = this.up('form').getForm().getFieldValues().host;
                 if(searchStore.lastHost != proxy.addParams.host) {
                     searchStore.lastHost = proxy.addParams.host;
-                    doReload = true;
                 }
             }
             if(searchStore.search_type != type) {
                 searchStore.search_type = type;
-                doReload = true;
-            }
-            if(doReload) {
                 searchStore.removeAll();
                 searchStore.load();
             }
         };
 
         /* makes it impossible to set own additional change handler otherwise */
-        me.addListener('change', handler);
-        me.addListener('expand', handler);
-        me.addListener('keyup',  handler);
+        me.addListener('focus', setStoreHandler);
+        me.addListener('expand', setStoreHandler);
+
+        var checkChangedHandler = function() {
+            var val = me.getValue();
+            // try to find a matching record for this value
+            // if picker gets closed by clicking somewhere in the page, the current value simply
+            // will be set and not expanded.
+            var num = searchStore.find("text", val);
+            if(num != -1) {
+                val = searchStore.getAt(num).get("value");
+            }
+            me.bindStore(null);
+            searchStore.curCombo = null;
+            me.setRawValue(val);
+        }
+
+        me.addListener('collapse',  checkChangedHandler);
     }
 });
 

@@ -339,7 +339,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
                             xtype:            'searchCbo',
                             panel:            {panel_id: tab.id},
-                            store:             searchStore,
                             storeExtraParams: { wildcards: 1 },
                             lazyRender:        true,
                             allowBlank:        false

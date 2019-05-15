@@ -1124,7 +1124,6 @@ var TP = {
             fieldLabel:     name,
             panel:          panel,
             xtype:          'searchCbo',
-            store:          searchStore,
             value:          value
         });
     },
