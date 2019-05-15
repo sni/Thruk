@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 <script type="text/javascript">
-  var graph_url = "[% escape_quotes(graph_url) %]";
+  var graph_url = "[% escape_js(graph_url) %]";
 
 if(/render/.test(graph_url)) {
 img_url = graph_url.replace('/render','');

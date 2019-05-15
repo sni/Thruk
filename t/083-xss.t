@@ -27,7 +27,7 @@ my $whitelist_vars = Thruk::Utils::array2hash([qw/
     host_health_pic service_health_pic health_perc service_perc
     a.t1 a.t2 nr id first_remaining
     s_status f d i j x key size head_height image_width state status image_height
-    div_id
+    div_id graph_url
 /]);
 my $whitelist_regex = [
     qr/^\w+\.(id|nr)$/,
