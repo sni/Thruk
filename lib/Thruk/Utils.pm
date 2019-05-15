@@ -1190,16 +1190,28 @@ sub array_uniq_obj {
 
     my @unique;
     my %seen;
+    my $x = 0;
     for my $el (@{$array}) {
         my $values = [];
         for my $key (sort keys %{$el}) {
-            next if $key =~ /^peer_(key|addr|name)$/mx;
+            if($key =~ /^peer_(key|addr|name)$/mx) {
+                $el->{$key} = list($el->{$key});
+                next;
+            }
             push @{$values}, ($el->{$key} // "");
         }
         my $ident = join(";", @{$values});
-        next if $seen{$ident};
-        $seen{$ident} = 1;
+        if(defined $seen{$ident}) {
+            # join peer_* information
+            for my $key (qw/peer_key peer_addr peer_name/) {
+                next unless $el->{$key};
+                push @{$unique[$seen{$ident}]->{$key}}, @{$el->{$key}};
+            }
+            next;
+        }
+        $seen{$ident} = $x;
         push @unique, $el;
+        $x++;
     }
 
     return \@unique;

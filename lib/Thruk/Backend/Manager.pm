@@ -1644,7 +1644,7 @@ sub _do_on_peers {
     # additional data processing, paging, sorting and limiting
     if(scalar keys %arg > 0) {
         if( $arg{'remove_duplicates'} ) {
-            $data = $self->_remove_duplicates($data);
+            $data = remove_duplicates($data);
             $totalsize = scalar @{$data} unless $ENV{'THRUK_USE_LMD'};
             $must_resort = 1;
         }
@@ -1990,18 +1990,17 @@ sub _get_result_parallel {
 
 ########################################
 
-=head2 _remove_duplicates
+=head2 remove_duplicates
 
-  _remove_duplicates($data)
+  remove_duplicates($data)
 
 removes duplicate entries from a array of hashes
 
 =cut
 
-sub _remove_duplicates {
-    my $self = shift;
-    my $data = shift;
-    my $c    = $Thruk::Request::c;
+sub remove_duplicates {
+    my($data) = @_;
+    my $c = $Thruk::Request::c;
 
     $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
@@ -2311,9 +2310,8 @@ sub _merge_hostgroup_answer {
 
     # set backends used
     for my $group ( values %{$groups} ) {
-        $group->{'backend'} = [];
-        @{ $group->{'backend'} }  = sort values %{ $group->{'backends_hash'} };
-        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
+        @{$group->{'peer_name'}} = sort values %{ $group->{'backends_hash'} };
+        @{$group->{'peer_key'}}  = sort keys %{ $group->{'backends_hash'} };
         delete $group->{'backends_hash'};
     }
     my @return = values %{$groups};
@@ -2354,9 +2352,8 @@ sub _merge_servicegroup_answer {
 
     # set backends used
     for my $group ( values %{$groups} ) {
-        $group->{'backend'} = [];
-        @{ $group->{'backend'} } = sort values %{ $group->{'backends_hash'} };
-        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
+        @{$group->{'peer_name'}} = sort values %{ $group->{'backends_hash'} };
+        @{$group->{'peer_key'}}  = sort keys %{ $group->{'backends_hash'} };
         delete $group->{'backends_hash'};
     }
 
