@@ -919,7 +919,6 @@ TP.iconShowEditDialog = function(panel) {
                     { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
                             xtype:            'searchCbo',
                             panel:             panel,
-                            store:             searchStore,
                             storeExtraParams: { wildcards: 1 },
                             lazyRender:        true,
                             allowBlank:        false
