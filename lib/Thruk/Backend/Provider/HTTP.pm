@@ -882,6 +882,10 @@ sub _req {
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
+    my $c = $Thruk::Request::c;
+    if(Thruk->debug && $c) {
+      $c->log->debug(Dumper($response));
+    }
     die(_format_response_error($response));
 }
 
