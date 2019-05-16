@@ -33,82 +33,6 @@ Ext.define('TP.formFilter', {
     }
 });
 
-Ext.define('SearchModel', {
-    extend: 'Ext.data.Model',
-    fields: [
-        {name: 'text', type: 'string'},
-        {name: 'value',  type: 'string'}
-    ]
-});
-var searchStore = Ext.create('Ext.data.Store', {
-    pageSize: 15,
-    model: 'SearchModel',
-    remoteSort: true,
-    remoteFilter: true,
-    listeners: {
-        beforeload: function(store, operation, eOpts) {
-            var now = new Date();
-            store.proxy.extraParams = Ext.Object.merge({format: 'search', hash: 1}, store.proxy.addParams);
-            store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
-            if(!searchStore.search_type) { return false; }
-            var type = searchStore.search_type.toLowerCase();
-            if(type == 'check period' || type == 'notification period') {
-                type = 'timeperiod';
-            }
-            if(type == 'parent') {
-                type = 'host';
-            }
-            if(  type == 'host'
-              || type == 'service'
-              || type == 'hostgroup'
-              || type == 'servicegroup'
-              || type == 'timeperiod'
-              || type == 'site'
-              || type == 'contactgroup'
-              || type == 'eventhandler'
-              || type == 'custom variable'
-              || type == 'custom value'
-            ) {
-                store.proxy.extraParams['type'] = type;
-                if(type == 'custom value') {
-                    store.proxy.extraParams['var'] = searchStore.pre_val;
-                }
-            } else {
-                store.removeAll();
-                debug("type: "+type+" not supported");
-                store.lastParam  = {};
-                store.lastLoaded = now;
-                return false;
-            }
-            // refresh every 120 seconds or if type changed
-            var param = {
-                type: type,
-                page: operation.page,
-                query: operation.params ? operation.params.query : ''
-            };
-            if(store.count() > 0 && Object.my_equals(store.lastParam, param) && store.lastLoaded.getTime() > now.getTime() - 120000) {
-                return false;
-            }
-            store.lastParam  = param;
-            store.lastLoaded = now;
-            return true;
-        },
-        load: function(store, operation, eOpts) {
-            if(store.curCombo) {
-                store.curCombo.expand();
-            }
-        }
-    },
-    proxy: {
-        type:   'ajax',
-        url:    'status.cgi',
-        method: 'POST',
-        reader: {
-            type: 'json',
-            root: 'data'
-        }
-    }
-});
 Ext.define('TP.formFilterSelect', {
     extend: 'Ext.panel.Panel',
 
@@ -144,41 +68,11 @@ Ext.define('TP.formFilterSelect', {
         }
     }, {
         name:           'val_pre',
-        xtype:          'combobox',
+        xtype:          'searchCbo',
         width:          100,
-        value:          [],
         tooltip:        'Name of the custom variable. e.x: VAR1 (without the underline)',
         emptyText:      'variable name',
-        queryMode:      'remote',
-        store:          searchStore,
-        triggerAction:  'all',
-        pageSize:       true,
-        selectOnFocus:  true,
-        typeAhead:      true,
-        minChars:       0,
-        listeners: {
-            'expand': function(field, eOpts) {
-                if(searchStore.search_type != 'custom variable') {
-                    searchStore.search_type = 'custom variable';
-                    searchStore.panel       = this.up().panel;
-                    searchStore.load();
-                }
-            },
-            'change': function(This, newValue, oldValue, eOpts) {
-                if(searchStore.search_type != 'custom variable') {
-                    searchStore.search_type = 'custom variable';
-                    searchStore.panel       = this.up().panel;
-                    searchStore.load();
-                }
-            },
-            'keyup': function() {
-                if(searchStore.search_type != 'custom variable') {
-                    searchStore.search_type = 'custom variable';
-                    searchStore.panel       = this.up().panel;
-                    searchStore.load();
-                }
-            }
-        }
+        search_type:    'custom variable'
     }, {
         name:           'op',
         xtype:          'combobox',
@@ -191,59 +85,8 @@ Ext.define('TP.formFilterSelect', {
         store:          ['~','!~','=','!=','<=','>=']
     }, {
         name:           'value',
-        xtype:          'combobox',
-        flex:           1,
-        queryMode:      'remote',
-        store:          searchStore,
-        triggerAction:  'all',
-        pageSize:       true,
-        selectOnFocus:  true,
-        typeAhead:      true,
-        minChars:       0,
-        displayField:   'text',
-        valueField:     'value',
-        listeners: {
-            'expand': function(field, eOpts) {
-                var search_type = this.up('panel').items.getAt(0).getValue().toLowerCase();
-                searchStore.pre_val = this.up('panel').items.getAt(1).getValue();
-                if(search_type == "custom variable") { search_type = "custom value"; }
-                if(searchStore.search_type != search_type) {
-                    searchStore.search_type = search_type;
-                    searchStore.panel       = this.up().panel;
-                    searchStore.load();
-                }
-            },
-            'change': function(This, newValue, oldValue, eOpts) {
-                var search_type = this.up('panel').items.getAt(0).getValue().toLowerCase();
-                searchStore.pre_val = this.up('panel').items.getAt(1).getValue();
-                if(search_type == "custom variable") { search_type = "custom value"; }
-                if(searchStore.search_type != search_type) {
-                    searchStore.search_type = search_type;
-                    searchStore.panel       = this.up().panel;
-                    searchStore.load();
-                }
-            },
-            'keyup': function() {
-                var search_type = this.up('panel').items.getAt(0).getValue().toLowerCase();
-                searchStore.pre_val = this.up('panel').items.getAt(1).getValue();
-                if(search_type == "custom variable") { search_type = "custom value"; }
-                if(searchStore.search_type != search_type) {
-                    searchStore.search_type = search_type;
-                    searchStore.panel       = this.up().panel;
-                    searchStore.load();
-                }
-            },
-            'select': function(combo, records, eOpts) {
-                /* if something has been selected from the dropdown, change operator to =, because its most likly not regexp */
-                var old = this.up('panel').items.getAt(2).getValue();
-                if(old == '~') {
-                    this.up('panel').items.getAt(2).setValue('=');
-                }
-                if(old == '!~') {
-                    this.up('panel').items.getAt(2).setValue('!=');
-                }
-            }
-        }
+        xtype:          'searchCbo',
+        flex:           1
     }, {
         xtype:          'datetimefield',
         name:           'value_date'

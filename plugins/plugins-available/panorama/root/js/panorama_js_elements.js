@@ -523,73 +523,179 @@ Ext.define('Ext.ux.NumberFieldUnit', {
     getSubmitValue: function()      { var value = Number(this.rawToValue(this.callParent())); return(value); }
 });
 
+Ext.define('Ext.ux.SearchModel', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'text', type: 'string'},
+        {name: 'value',  type: 'string'}
+    ]
+});
+
+Ext.define('Ext.ux.SearchStore', {
+    extend: 'Ext.data.Store',
+
+    pageSize: 15,
+    model: 'Ext.ux.SearchModel',
+    remoteSort: true,
+    remoteFilter: true,
+    listeners: {
+        beforeload: function(store, operation, eOpts) {
+            var now = new Date();
+            store.proxy.extraParams = Ext.Object.merge({format: 'search', hash: 1}, store.proxy.addParams);
+            store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
+            if(!store.search_type) { return false; }
+            var type = store.search_type.toLowerCase();
+            if(type == 'check period' || type == 'notification period') {
+                type = 'timeperiod';
+            }
+            if(type == 'parent') {
+                type = 'host';
+            }
+            if(  type == 'host'
+              || type == 'service'
+              || type == 'hostgroup'
+              || type == 'servicegroup'
+              || type == 'timeperiod'
+              || type == 'site'
+              || type == 'contactgroup'
+              || type == 'eventhandler'
+              || type == 'custom variable'
+              || type == 'custom value'
+            ) {
+                store.proxy.extraParams['type'] = type;
+                delete store.proxy.extraParams['var'];
+                if(type == 'custom value') {
+                    store.proxy.extraParams['var'] = store.pre_val;
+                }
+            } else {
+                store.removeAll();
+                debug("type: "+type+" not supported");
+                store.lastParam  = {};
+                store.lastLoaded = now;
+                return false;
+            }
+            // refresh every 120 seconds or if type changed
+            var param = {
+                type:    type,
+                page:    operation.page,
+                query:   operation.params ? operation.params.query : '',
+                pre_val: store.pre_val
+            };
+            if(store.count() > 0 && Object.my_equals(store.lastParam, param) && store.lastLoaded.getTime() > now.getTime() - 120000) {
+                return false;
+            }
+            store.lastParam  = param;
+            store.lastLoaded = now;
+            return true;
+        },
+        load: function(store, operation, eOpts) {
+            if(store.curCombo) {
+                store.curCombo.expand();
+            }
+        }
+    },
+    proxy: {
+        type:   'ajax',
+        url:    'status.cgi',
+        method: 'POST',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    }
+});
+
 Ext.define('Ext.ux.SearchCombobox', {
     extend:        'Ext.form.field.ComboBox',
     alias:         'widget.searchCbo',
 
     triggerAction:  'all',
-    pageSize:       true,
     selectOnFocus:  true,
     selectOnTab:    true,
     typeAhead:      true,
     minChars:       0,
-    store:         [],
+    pageSize:       15,
     initComponent: function() {
         var me = this;
+        me.valueField   = 'value';
+        me.displayField = 'text';
+        me.queryMode    = 'remote';
+        me.store        = Ext.create('Ext.ux.SearchStore');
         me.callParent();
 
-        var setStoreHandler = function() {
-            if(searchStore.curCombo != me) {
-                // unlink store from other comboboxes, this has weird side effects with expanding services to host aliases
-                if(searchStore.curCombo && searchStore.curCombo != me) {
-                    searchStore.removeAll();
-                    searchStore.curCombo.bindStore(null);
+        var setStoreParams = function() {
+            me.store.curCombo = me;
+            me.store.panel    = me.panel || me.up().panel || me.up('panel');
+            var type          = me.search_type || me.name;
+            var doReload      = false;
+            if(type == "value") {
+                // get type from type selector
+                var index = me.up().items.findIndex("name", "type");
+                if(index >= 0) {
+                    var typeInput = me.up().items.getAt(index);
+                    type = typeInput.getValue().toLowerCase()
                 }
-                me.valueField   = 'value'; // those settings get reset when store changes
-                me.displayField = 'text';
-                me.queryMode    = 'remote';
-                me.bindStore(searchStore);
-                searchStore.curCombo = me;
+                if(type == "custom variable") { type = "custom value"; }
+
+                index = me.up().items.findIndex("name", "val_pre");
+                if(index >= 0) {
+                    var pre_val = me.up().items.getAt(index).getValue();
+                    if(me.store.pre_val != pre_val) {
+                        me.store.pre_val = pre_val;
+                        doReload = true;
+                    }
+                }
             }
-            searchStore.panel = me.panel;
-            var type          = me.name;
-            var proxy         = searchStore.getProxy();
+            var proxy         = me.store.getProxy();
             proxy.addParams   = Ext.Object.merge({}, me.storeExtraParams);
             if(me.storeExtraParams) {
                 proxy.addParams = Ext.Object.merge({}, me.storeExtraParams);
             }
             if(type == 'service') {
                 proxy.addParams.host = this.up('form').getForm().getFieldValues().host;
-                if(searchStore.lastHost != proxy.addParams.host) {
-                    searchStore.lastHost = proxy.addParams.host;
+                if(me.store.lastHost != proxy.addParams.host) {
+                    me.store.lastHost = proxy.addParams.host;
                 }
             }
-            if(searchStore.search_type != type) {
-                searchStore.search_type = type;
-                searchStore.removeAll();
-                searchStore.load();
+            if(me.store.search_type != type) {
+                me.store.search_type = type;
+                doReload = true;
+            }
+            if(doReload) {
+                me.store.load();
             }
         };
+        me.addListener('focus', setStoreParams);
+        me.addListener('expand', setStoreParams);
 
-        /* makes it impossible to set own additional change handler otherwise */
-        me.addListener('focus', setStoreHandler);
-        me.addListener('expand', setStoreHandler);
-
-        var checkChangedHandler = function() {
+        // try to find a matching record for this value
+        // if picker gets closed by clicking somewhere in the page, the current value simply
+        // will be set and not expanded.
+        me.addListener('collapse',  function() {
             var val = me.getValue();
-            // try to find a matching record for this value
-            // if picker gets closed by clicking somewhere in the page, the current value simply
-            // will be set and not expanded.
-            var num = searchStore.find("text", val);
+            var num = me.store.find("text", val);
             if(num != -1) {
-                val = searchStore.getAt(num).get("value");
+                val = me.store.getAt(num).get("value");
             }
-            me.bindStore(null);
-            searchStore.curCombo = null;
             me.setRawValue(val);
-        }
+        });
 
-        me.addListener('collapse',  checkChangedHandler);
+        me.addListener('select',  function(combo, records, eOpts) {
+            // if something has been selected from the dropdown, change operator to =, because its most likly not regexp
+            var type = me.search_type || me.name;
+            if(type != "value") { return; }
+            var index = me.up().items.findIndex("name", "op");
+            if(index >= 0) {
+                var opField = me.up().items.getAt(index);
+                var old = opField.getValue();
+                if(old == '~') {
+                    opField.setValue('=');
+                }
+                if(old == '!~') {
+                    opField.setValue('!=');
+                }
+            }
+        });
     }
 });
 
