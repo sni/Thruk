@@ -1,5 +1,12 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+2.30-2   Tue May 14 11:56:16 CEST 2019
+          - fix quicksearch when using many backends
+          - Panorama:
+            - improve selecting hosts and services from drop downs
+            - fix shapecolor for acknowleged items
+            - fix sending commands from dashboards
+
 2.30     Thu May  9 11:51:28 CEST 2019
           - session cookies: change to sha256 and double hashing
           - api keys: change to sha256 and double hashing
