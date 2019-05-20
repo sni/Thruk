@@ -1620,7 +1620,7 @@ sub get_perf_image {
     }
 
     # create fake session
-    my $sessionid = get_fake_session($c);
+    my($sessionid) = get_fake_session($c);
     local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$options->{'format'};
 
     # call login hook, because it might transfer our sessions to remote graphers
