@@ -2146,14 +2146,23 @@ sub _task_grafana_graphs {
 
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
-    my $search = $c->req->parameters->{'query'} || $c->req->parameters->{'query2'};
+    my $search  = $c->req->parameters->{'query'};
+    my $search2 = $c->req->parameters->{'query2'}; # current selected graph should always be returned, otherwise text/alias replacement does not work on paging
     my $graphs = [];
+    my $current;
     my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     for my $hst (@{$data}) {
         my $url = Thruk::Utils::get_histou_url($c, $hst, 1);
         if($url ne '') {
             my $text   = $hst->{'name'}.';';
             my $exturl = 'extinfo.cgi?type=grafana&host='.$hst->{'name'};
+            if($search2 && $exturl eq $search2) {
+                $current = {
+                    text       => $text,
+                    url        => $exturl,
+                    source_url => $url,
+                };
+            }
             next if($search && $text !~ m/$search/mxi && $exturl ne $search);
             push @{$graphs}, {
                 text       => $text,
@@ -2169,6 +2178,13 @@ sub _task_grafana_graphs {
         if($url ne '') {
             my $text   = $svc->{'host_name'}.';'.$svc->{'description'};
             my $exturl = 'extinfo.cgi?type=grafana&host='.$svc->{'host_name'}.'&service='.$svc->{'description'};
+            if($search2 && $exturl eq $search2) {
+                $current = {
+                    text       => $text,
+                    url        => $exturl,
+                    source_url => $url,
+                };
+            }
             next if($search && $text !~ m/$search/mxi && $exturl ne $search);
             push @{$graphs}, {
                 text       => $text,
@@ -2179,6 +2195,9 @@ sub _task_grafana_graphs {
     }
     $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
     Thruk::Backend::Manager::page_data($c, $graphs);
+
+    # make sure current graph is always part of the result
+    push @{$c->stash->{'data'}}, $current if $current;
 
     my $json = {
         data        => $c->stash->{'data'},
