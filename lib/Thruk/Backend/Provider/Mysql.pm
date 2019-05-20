@@ -1405,6 +1405,11 @@ sub _update_logcache_optimize {
     print "$@\n" if($@ && $verbose);
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
+        # remove temp files from previously repair attempt if filesystem was full
+        if($ENV{'OMD_ROOT'}) {
+            my $root = $ENV{'OMD_ROOT'};
+            `rm -f $root/var/mysql/thruk_log_cache/*.TMD`;
+        }
         # repair / optimize tables
         print "optimizing / repairing tables\n" if $verbose > 1;
         for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
