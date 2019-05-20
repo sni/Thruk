@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    plan tests => 105;
+    plan tests => 114;
 
     use lib('t');
     require TestUtils;
@@ -22,7 +22,12 @@ BEGIN {
         'url'    => '/thruk/cgi-bin/user.cgi',
         'like'   => ['Logged in as.*omdadmin', 'authorized_for_admin', 'from cgi.cfg'],
     );
-
+    TestUtils::set_test_user_token();
+    TestUtils::test_page(
+        'url'    => '/thruk/r/services/test/Ping/cmd/schedule_forced_svc_check',
+        'post'   => {},
+        'like'   => ['Command successfully submitted'],
+    );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
         'like'   => ['logout successful'],
