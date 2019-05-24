@@ -6700,7 +6700,7 @@ var ajax_search = {
                     // data base is more precise than our filter
                     needs_refresh = true;
                 }
-                if(search_type.data.length >= ajax_search.limit && ajax_search.initialized_q != search_pattern) {
+                if(((search_type.total_none_uniq && search_type.total_none_uniq >= ajax_search.limit) || search_type.data.length >= ajax_search.limit) && ajax_search.initialized_q != search_pattern) {
                     // maximum results number hit
                     needs_refresh = true;
                 }
