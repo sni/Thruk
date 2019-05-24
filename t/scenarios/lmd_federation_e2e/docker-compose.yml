@@ -12,7 +12,6 @@ services:
         - TZ=Europe/Berlin
         - PREFIX=omd
     volumes:
-        - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
         - .:/scenario:ro
 #  slow:
@@ -26,6 +25,5 @@ services:
 #        - TZ=Europe/Berlin
 #        - PREFIX=slow
 #    volumes:
-#        - /etc/localtime:/etc/localtime:ro
 #        - ../../../:/thruk:ro
 #        - .:/scenario:ro

@@ -9,7 +9,6 @@ services:
     environment:
         - TZ=Europe/Berlin
     volumes:
-        - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
         - shared:/mnt/shared
 
@@ -18,7 +17,6 @@ services:
     environment:
         - TZ=Europe/Berlin
     volumes:
-        - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
         - shared:/mnt/shared
 

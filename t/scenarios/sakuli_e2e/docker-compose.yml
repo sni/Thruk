@@ -8,7 +8,6 @@ services:
     environment:
         - TZ=Europe/Berlin
     volumes:
-        - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
   sakuli:
     image: consol/sakuli-ubuntu-xfce:dev
@@ -19,7 +18,6 @@ services:
     ports:
         - "127.0.0.3:5901:5901"
     volumes:
-        - /etc/localtime:/etc/localtime:ro
         - ./:/thruk:ro
         - ./_run:/cases:rw
     command: --tail-log
