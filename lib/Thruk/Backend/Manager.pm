@@ -1646,7 +1646,6 @@ sub _do_on_peers {
         if( $arg{'remove_duplicates'} ) {
             $data = remove_duplicates($data);
             $totalsize = scalar @{$data} unless $ENV{'THRUK_USE_LMD'};
-            $must_resort = 1;
         }
 
         if(!$ENV{'THRUK_USE_LMD'} || $must_resort) {
