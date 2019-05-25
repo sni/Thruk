@@ -2,7 +2,6 @@ package Thruk::Controller::Rest::V1::cluster;
 
 use strict;
 use warnings;
-use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Controller::rest_v1;
 
 =head1 NAME
@@ -55,9 +54,7 @@ sub _rest_get_thruk_cluster_heartbeat {
     $c->cluster->load_statefile();
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
-        my $t1  = [gettimeofday];
         my $res = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
-        my $elapsed = tv_interval($t1);
         if(!$res) {
             next;
         }
@@ -65,12 +62,6 @@ sub _rest_get_thruk_cluster_heartbeat {
             $c->log->error(sprintf("cluster mixup, got answer from node %s but expected %s for url %s", $res->{'node_id'}, $n->{'node_id'}, $n->{'node_url'}));
             next;
         }
-        Thruk::Utils::IO::json_lock_patch($c->cluster->{'statefile'}, {
-            $n->{'node_id'} => {
-                last_contact  => time(),
-                response_time => $elapsed,
-            },
-        },1) if $n->{'node_id'} !~ m/^dummy/mx;
     }
     $c->cluster->check_stale_pids();
     return({ 'message' => 'heartbeat send' });

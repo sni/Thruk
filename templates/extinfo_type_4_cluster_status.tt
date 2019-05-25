@@ -43,7 +43,7 @@
                             <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
                           [% ELSIF n.last_contact == 0 %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" width="16" height="16" alt="starting">
-                          [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout && n.pids.keys.size > 0 %]
+                          [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout && n.pids > 0 %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
                           [% ELSE %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/error.png" width="16" height="16" alt="error">
@@ -69,7 +69,7 @@
                           [% END %]
                         </td>
                         <td class='dataVal' style="text-align: center;">
-                          [% n.pids.keys.size %]
+                          [% n.pids %]
                         </td>
                         [% END %]
                       </tr>

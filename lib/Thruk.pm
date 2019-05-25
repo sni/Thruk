@@ -304,7 +304,7 @@ sub _dispatcher {
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
-    $c->cluster->register($c) if $config->{'cluster_enabled'};
+    $c->cluster->refresh() if $config->{'cluster_enabled'};
 
     if(Thruk->verbose) {
         $c->log->debug($url);
