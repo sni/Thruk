@@ -263,7 +263,7 @@ function test_form_handler(btn) {
     host:    action_menu_options.host,
     service: action_menu_options.service,
     backend: action_menu_options.backend,
-    token:   user_token
+    token:   CSRFtoken
   }, function(response) {
     // show repsonse
     thruk_message(response.rc, response.msg);
