@@ -938,6 +938,8 @@ sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
     return unless defined $c->config->{'logcache'};
+    # set to import only to get faster initial results
+    local $c->config->{'logcache_delta_updates'} = 2 unless $c->config->{'logcache_delta_updates'};
     return if !$c->config->{'logcache_delta_updates'} && !$c->req->parameters->{'logcache_update'};
     my $rc;
     eval {
@@ -1003,47 +1005,48 @@ sub _renew_logcache {
             $check = 1;
         }
     }
+    return unless $check;
 
-    if($check) {
-        $c->stash->{'backends'} = $get_results_for;
-        my $stats = $self->logcache_stats($c);
-        my $backends2import = [];
-        for my $key (@{$get_results_for}) {
-            push @{$backends2import}, $key unless defined $stats->{$key};
-        }
+    $c->stash->{'backends'} = $get_results_for;
+    my $stats = $self->logcache_stats($c);
+    my $backends2import = [];
+    for my $key (@{$get_results_for}) {
+        push @{$backends2import}, $key unless defined $stats->{$key};
+    }
 
-        if($c->config->{'logcache_import_command'}) {
-            local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});
-            local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
-            if(scalar @{$backends2import} > 0) {
-                local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
-                local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
-                return Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
-                                                        message   => 'please stand by while your initial logfile cache will be created...',
-                                                        forward   => $c->req->url,
-                                                        nofork    => $noforks,
-                                                        });
-            } else {
-                local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
-                my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
-                if($rc != 0) {
-                    Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
-                }
-            }
+    if($c->config->{'logcache_import_command'}) {
+        local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});
+        local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
+        if(scalar @{$backends2import} > 0) {
+            local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
+            local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
+            return Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
+                                                    message   => 'please stand by while your initial logfile cache will be created...',
+                                                    forward   => $c->req->url,
+                                                    nofork    => $noforks,
+                                                    });
         } else {
-            my $type = '';
-            $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
-            if(scalar @{$backends2import} > 0) {
-                return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
-                                                        message   => 'please stand by while your initial logfile cache will be created...',
-                                                        forward   => $c->req->url,
-                                                        backends  => $backends2import,
-                                                        nofork    => $noforks,
-                                                        });
+            return if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
+            local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
+            my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
+            if($rc != 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
             }
-
-            $self->_do_on_peers( 'renew_logcache', \@args, 1);
         }
+    } else {
+        my $type = '';
+        $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+        if(scalar @{$backends2import} > 0) {
+            return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
+                                                    message   => 'please stand by while your initial logfile cache will be created...',
+                                                    forward   => $c->req->url,
+                                                    backends  => $backends2import,
+                                                    nofork    => $noforks,
+                                                    });
+        }
+
+        return if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
+        $self->_do_on_peers( 'renew_logcache', \@args, 1);
     }
     return;
 }
