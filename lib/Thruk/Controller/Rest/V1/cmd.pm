@@ -93,7 +93,11 @@ sub _rest_get_external_command {
             $val = "";
         }
         if($arg eq 'start_time' || $arg eq 'end_time' || $arg eq 'notification_time') {
+            my $orig = $val;
             $val = Thruk::Utils::parse_date($c, $val);
+            if(!defined $val) {
+                return({ 'message' => 'failed to parse time in '.$arg, 'description' => $orig.' is not a valid time definition', code => 400 });
+            }
         }
         if($arg eq 'duration') {
             $val = Thruk::Utils::expand_duration($val);
