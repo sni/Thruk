@@ -46,7 +46,7 @@ sub check_proc {
     }
 
     # only start it once
-    my $startlock = $lmd_dir.'startup';
+    my $startlock = $lmd_dir.'/startup';
     my($fh, $lock);
     eval {
         ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock, 'ex');
@@ -58,7 +58,10 @@ sub check_proc {
 
     # now that we have the lock, check pid again, it might have been restarted meanwhile
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
-        Thruk::Utils::IO::file_unlock($startlock, $fh, $lock) if $fh;
+        if($fh) {
+            Thruk::Utils::IO::file_unlock($startlock, $fh, $lock);
+            unlink($startlock);
+        }
         return;
     }
 
