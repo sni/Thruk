@@ -6478,6 +6478,7 @@ var ajax_search = {
         var input = document.getElementById(ajax_search.input_field);
         var pattern = input.value;
         if(pattern == "all") { pattern = ""; }
+        if(pattern == "*")   { pattern = ""; }
         if(ajax_search.search_for_cb) {
             pattern = ajax_search.search_for_cb(pattern)
         }
