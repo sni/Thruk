@@ -194,7 +194,7 @@ thruk returns 0 on success and >= 1 otherwise
 =head1 EXAMPLES
 
     - notifiy if more than 80 hosts are down
-      check_thruk_rest -w:down:80 -c:down:100 /hosts/totals
+      check_thruk_rest -w down:80 -c down:100 /hosts/totals
 
     - advanced monitoring plugin:
       thruk [globaloptions] rest -o "outputtemplate" [-w attribute:value] [-c attribute:value] <url>
