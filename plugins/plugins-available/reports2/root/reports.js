@@ -114,7 +114,7 @@ function reports_update_affected_sla_objects(input) {
     var form = jQuery(input).closest('FORM');
 
     // only useful if there is a affected objects output field
-    if(form.find('TR.report_type_affected_sla_objects SPAN.value').lenght == 0) {
+    if(form.find('TR.report_type_affected_sla_objects SPAN.value').length == 0) {
         return;
     }
 
