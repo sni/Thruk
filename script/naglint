@@ -36,7 +36,7 @@ use strict;
 use warnings;
 
 our $VERSION = '2.30';
-my $branch       = '2';
+my $branch       = '3';
 $branch      = Thruk::Config::get_git_name() unless $branch ne '';
 
 my $naglint = Thruk::naglint->new();
