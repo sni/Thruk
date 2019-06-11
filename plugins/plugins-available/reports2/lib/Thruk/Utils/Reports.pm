@@ -624,7 +624,7 @@ sub generate_report {
         }
     }
 
-    if($c->req->parameters->{'attach_json'}) {
+    if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
         my $json_attachment = $c->config->{'var_path'}.'/reports/'.$nr.'.json';
         my $json = {};
         $json->{'outages'}      = $c->stash->{'last_outages'} if $c->stash->{'last_outages'};

@@ -113,7 +113,7 @@ sub outages {
     my $only_host_services = $c->req->parameters->{'only_host_services'};
 
     my $outages = Thruk::Utils::Avail::outages($logs, $u, $start, $end, $host, $service, $only_host_services);
-    if($c->req->parameters->{'attach_json'}) {
+    if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
         if($service eq '') {
             $c->stash->{'last_outages'}->{'hosts'}->{$host} = $outages;
         } else {
@@ -428,7 +428,7 @@ sub get_availability_percents {
     confess("No host in parameters:\n".    Dumper($c->req->parameters)) unless defined $host;
 
     my $availability = Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service);
-    if($c->req->parameters->{'attach_json'}) {
+    if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
         if($service eq '') {
             $c->stash->{'last_availability'}->{'hosts'}->{$host} = $availability;
         } else {
