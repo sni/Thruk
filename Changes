@@ -1,5 +1,14 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+2.30-3   Tue Jun 11 15:39:40 CEST 2019
+          - fix quicksearch when using many backends
+          - reports:
+            - fix sending json attachment
+          - Config Tool:
+            - fix using asterix
+          - Panorama:
+            - fix grafana graph combobox
+
 2.30-2   Tue May 14 11:56:16 CEST 2019
           - fix quicksearch when using many backends
           - Panorama:
