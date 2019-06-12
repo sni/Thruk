@@ -317,7 +317,13 @@ sub _dispatcher {
     local $Thruk::Request::c = $c if $Thruk::Request::c;
           $Thruk::Request::c = $c;
 
-    Thruk::Action::AddDefaults::begin($c);
+    eval {
+        Thruk::Action::AddDefaults::begin($c);
+    };
+    if($@) {
+        $c->log->debug($@);
+        $c->{'errored'} = 1;
+    }
     #&timing_breakpoint("_dispatcher begin done");
 
     ###############################################

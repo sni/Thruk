@@ -190,10 +190,29 @@ sub detach {
     if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
         Thruk::Controller::error::index($c, $1);
         $c->{'detached'} = 1;
-        die("prevent further page processing") if($c->{'stage'} && $c->{'stage'} eq 'main');
-        return;
+        die("prevent further page processing");
     }
     confess("detach: ".$url." at ".$c->req->url);
+}
+
+=head2 detach_error
+
+detach_error to other controller
+
+=cut
+sub detach_error {
+    my($c, $data) = @_;
+    $c->stash->{'error_data'} = $data;
+    my($package, $filename, $line) = caller;
+    $c->stats->profile(comment => 'detach_eror from '.$package.':'.$line);
+    # errored flag is set in error controller to avoid recursion if error controller
+    # itself throws an error, just bail out in that case
+    if(!$c->{'errored'}) {
+        Thruk::Controller::error::index($c, 99);
+        $c->{'detached'} = 1;
+        die("prevent further page processing");
+    }
+    confess("detach_error at ".$c->req->url);
 }
 
 =head2 render
@@ -297,29 +316,25 @@ sub request_username {
         $c->config->{'secret_key'} = read_file($secret_file) if -s $secret_file;
         chomp($c->config->{'secret_key'});
         if($apikey !~ m/^[a-zA-Z0-9_]+$/mx) {
-            $c->error("wrong authentication key");
-            return;
+            return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
         elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
             $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
             if(!$username) {
-                $c->error("authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header");
-                return;
+                return $c->detach_error({msg => "authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header", code => 403, log => 1});
             }
         }
         elsif($c->config->{'api_keys_enabled'}) {
             my $data = Thruk::Utils::APIKeys::get_key_by_private_key($c->config, $apikey);
             if(!$data) {
-                $c->error("wrong authentication key");
-                return;
+                return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
             }
             my $addr = $c->req->address;
             $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
             Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time(), last_from => $addr }, 1);
             $username = $data->{'user'};
         } else {
-            $c->error("wrong authentication key");
-            return;
+            return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
     }
     elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
@@ -378,9 +393,10 @@ return/set errors
 
 =cut
 sub error {
-    my($c) = @_;
-    return($c->{'errors'}) unless $_[1];
-    push @{$c->{'errors'}}, $_[1];
+    my($c, $error) = @_;
+    return($c->{'errors'}) unless $error;
+    push @{$c->{'errors'}}, $error;
+    $c->log->debug($error);
     return;
 }
 

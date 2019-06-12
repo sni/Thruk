@@ -229,14 +229,23 @@ sub index {
 
     my $errorDetails = join("\n", @{$c->error});
 
+    # redirected from $c->detach_error()
+    my $log_req;
+    if($c->stash->{'error_data'}) {
+        $c->stash->{errorMessage}       = $c->stash->{'error_data'}->{'msg'};
+        $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
+        $code                           = $c->stash->{'error_data'}->{'code'}  // 500;
+        $log_req                        = $c->stash->{'error_data'}->{'log'} if defined $c->stash->{'error_data'}->{'log'};
+    }
+
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
-        if($code >= 500 || $errors->{$arg1}->{'log_req'}) {
+        if($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
             $c->log->error("***************************");
             $c->log->error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
             $c->log->error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
             $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
             $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
-            $c->log->error($errors->{$arg1}->{'mess'}) if $errors->{$arg1}->{'mess'};
+            $c->log->error($c->stash->{errorMessage}) if $c->stash->{errorMessage};
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
