@@ -101,3 +101,5 @@ extra_clean:
 extra_prepare:
 
 extra_test:
+
+extra_test_verbose:
