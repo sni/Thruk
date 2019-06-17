@@ -2635,12 +2635,12 @@ sub get_plugins {
     }
 
     my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
-    my $objects         = {};
+    my $objects     = {};
     for my $macro (keys %{$user_macros}) {
         my $dir = $user_macros->{$macro};
         $dir = $dir.'/.';
         next unless -d $dir;
-        if($dir =~ m|/plugins/|mx or $dir =~ m|/libexec/|mx) {
+        if($dir =~ m%/plugins/|/libexec/|/monitoring-plugins/%mx) {
             $self->_set_plugins_for_directory($c, $dir, $macro, $objects);
         }
     }
