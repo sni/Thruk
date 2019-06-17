@@ -34,7 +34,9 @@
                         <th class='data'>Response Time</th>
                         <th class='data'>Last Contact</th>
                         <th class='data'>Processes</th>
+                        <th class='data'>Version</th>
                       </tr>
+                      [% my_version = version _ "_" _ branch %]
                       [% FOREACH n = c.cluster.nodes %]
                       <tr id="row_node_[% loop.index %]">
                         <td class='dataVal'><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
@@ -50,7 +52,7 @@
                           [% END %]
                         </td>
                         [% IF n.last_error != "" %]
-                        <td class='dataVal' style="text-align: left;" colspan="3">
+                        <td class='dataVal' style="text-align: left;" colspan="4">
                           [% n.last_error %]
                         </td>
                         [% ELSE %]
@@ -70,6 +72,13 @@
                         </td>
                         <td class='dataVal' style="text-align: center;">
                           [% n.pids %]
+                        </td>
+                        <td class='dataVal' style="text-align: center;">
+                          [% n.version %][% IF n.branch %]-[% n.branch %][% END %]
+                          [% cmp_version = n.version _ "_" _ n.branch %]
+                          [% IF cmp_version != my_version %]
+                            <img src="[% url_prefix %]themes/[% theme %]/images/warning.png" width="16" height="16" alt="version mismatch" style="vertical-align: sub;">
+                          [% END %]
                         </td>
                         [% END %]
                       </tr>

@@ -109,6 +109,8 @@ sub load_statefile {
         $n->{'last_contact'}  =  0 unless $n->{'last_contact'};
         $n->{'last_error'}    = '' unless $n->{'last_error'};
         $n->{'response_time'} = '' unless defined $n->{'response_time'};
+        $n->{'version'}       = '' unless defined $n->{'version'};
+        $n->{'branch'}        = '' unless defined $n->{'branch'};
 
         # add node to store
         push @{$self->{'nodes'}}, $n;
@@ -328,13 +330,13 @@ sub run_cluster {
     for my $n (@nodeids) {
         next unless $self->{'nodes_by_id'}->{$n};
         next if($type eq 'others' && $self->is_it_me($n));
-        my $r;
         $c->log->debug(sprintf("%s trying on %s", $sub, $n));
         my $node = $self->{'nodes_by_id'}->{$n};
         my $http = Thruk::Backend::Provider::HTTP->new({ peer => $node->{'node_url'}, auth => $c->config->{'secret_key'} }, undef, undef, undef, undef, $c->config);
         my $t1   = [gettimeofday];
+        my $r;
         eval {
-            $r = $http->_req($sub, $args);
+            $r = $http->_req($sub, $args, undef, undef, 1);
         };
         my $elapsed = tv_interval($t1);
         if($@) {
@@ -351,6 +353,8 @@ sub run_cluster {
                         last_contact  => time(),
                         last_error    => '',
                         response_time => $elapsed,
+                        version       => $r->{'version'},
+                        branch        => $r->{'branch'},
                     };
                 } else {
                     $statefileupdate->{$n} = {
@@ -360,6 +364,7 @@ sub run_cluster {
                 }
             }
         }
+        $r = $r->{'output'} if $r;
         if(ref $r eq 'ARRAY' && scalar @{$r} == 1) {
             push @{$res}, $r->[0];
         } else {

@@ -807,7 +807,7 @@ returns result for given request
 
 =cut
 sub _req {
-    my($self, $sub, $args, $redirects, $auth) = @_;
+    my($self, $sub, $args, $redirects, $auth, $want_data) = @_;
     $redirects = 0 unless defined $redirects;
 
     # clean code refs
@@ -878,6 +878,7 @@ sub _req {
                 return $self->_wait_for_remote_job($1);
             }
 
+            return $data if $want_data;
             return $data->{'output'};
         }
         die("not an array ref, got ".ref($data->{'output'}));
