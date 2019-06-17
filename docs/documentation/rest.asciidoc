@@ -1351,6 +1351,7 @@ lists cluster nodes
 [options="header"]
 |===========================================
 |Attribute                         | Description
+|branch                            | Branch version of this node
 |hostname                          | host name of the cluster node
 |last_contact                      | timestamp of last successful contact
 |last_error                        | text of last error message
@@ -1359,6 +1360,7 @@ lists cluster nodes
 |node_url                          | url to access this node directly
 |pids                              | list of current process ids of this node
 |response_time                     | response time in seconds
+|version                           | version information of this node
 |===========================================
 
 
