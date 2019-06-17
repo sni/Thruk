@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - fix keyboard control of datepicker (#946)
           - internals:
             - update daterangepicker 3.0.5
 

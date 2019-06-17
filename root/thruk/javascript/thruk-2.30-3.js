@@ -6015,6 +6015,26 @@ function show_cal(ev) {
         };
     }
 
+    var _onKeyUp = function(ev) {
+        var picker = ev.data[0];
+        var date1 = _parseDate(document.getElementById(id1).value);
+        if(date1) {
+            var date = moment(date1);
+            picker.setEndDate(date);
+            if(!hasRange) {
+                picker.setStartDate(date);
+            }
+        }
+        if(hasRange) {
+            var date2 = _parseDate(document.getElementById(id2).value);
+            if(date2) {
+                var date = moment(date2);
+                picker.setStartDate(date);
+            }
+        }
+        picker.updateView();
+    };
+
     var _onShow = function(ev, picker, id) {
         picker.container.css("min-width", "300px");
         jQuery(".daterangepicker td.today").each(function() {
@@ -6022,6 +6042,10 @@ function show_cal(ev) {
                 jQuery(this).addClass("todayHighlight");
             }
         })
+        jQuery('#'+id1).off("keyup");
+        jQuery('#'+id2).off("keyup");
+        jQuery('#'+id1).on("keyup", [picker], _onKeyUp);
+        jQuery('#'+id2).on("keyup", [picker], _onKeyUp);
     };
     var apply = function(start, end, label) {
         if(hasRange) {
