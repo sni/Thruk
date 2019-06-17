@@ -67,7 +67,11 @@ extra_failed_test:
 	exit 1
 
 server:
+	test -f thruk_local.conf || exit 1
 	cd ../../.. && THRUK_PERFORMANCE_DEBUG=1 ./script/thruk_server.pl -r
+
+web:
+	@python -m webbrowser ${PLACK_TEST_EXTERNALSERVER_URI}thruk/
 
 prepare:
 	@echo "### $@: $$(date "+%FT%T.%N")"

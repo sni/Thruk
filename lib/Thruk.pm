@@ -132,6 +132,7 @@ sub _build_app {
     my($class) = @_;
     my $self = {};
     bless($self, $class);
+    $thruk = $self unless $thruk;
 
     #&timing_breakpoint('startup()');
 
@@ -278,7 +279,6 @@ sub _build_app {
 
     #&timing_breakpoint('start done');
 
-    $thruk = $self unless $thruk;
     return(\&{_dispatcher});
 }
 
@@ -486,10 +486,11 @@ sub obj_db_model {
 
 =cut
 sub log {
-    if($_[0]->{'_log'} && $_[0]->{'_log'} eq 'screen') {
-        $_[0]->init_logging(1);
+    my $app = ref($_[0]) ne "" ? $_[0] : $thruk;
+    if($app->{'_log'} && $app->{'_log'} eq 'screen') {
+        $app->init_logging(1);
     }
-    return($_[0]->{'_log'} ||= $_[0]->init_logging());
+    return($app->{'_log'} ||= $app->init_logging());
 }
 
 ###################################################
@@ -691,6 +692,7 @@ sub _remove_pid {
                 print $fh join("\n", @{$remaining}),"\n";
                 CORE::close($fh);
             }
+            undef $pidfile;
         }
     }
     return;
@@ -714,14 +716,24 @@ sub _remove_pid {
         CORE::alarm($_[0]);
     };
 };
-$SIG{INT}  = sub { _check_exit_reason("INT");  _remove_pid(); exit; };
-$SIG{TERM} = sub { _check_exit_reason("TERM"); _remove_pid(); exit; };
-$SIG{PIPE} = sub { _check_exit_reason("PIPE"); _remove_pid(); exit; };
-$SIG{ALRM} = sub { _check_exit_reason("ALRM"); _remove_pid(); exit; };
+$SIG{INT}  = sub { _check_exit_reason("INT");  _clean_exit(); };
+$SIG{TERM} = sub { _check_exit_reason("TERM"); _clean_exit(); };
+$SIG{PIPE} = sub { _check_exit_reason("PIPE"); _clean_exit(); };
+$SIG{ALRM} = sub { _check_exit_reason("ALRM"); _clean_exit(); };
 ## use critic
 END {
     _remove_pid();
     $cluster->unregister() if $cluster;
+}
+
+###################################################
+# exit and remove pid file
+sub _clean_exit {
+    _remove_pid();
+    $cluster->unregister() if $cluster;
+    undef $cluster;
+    undef $thruk;
+    exit;
 }
 
 ###################################################
