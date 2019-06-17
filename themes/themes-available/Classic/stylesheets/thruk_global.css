@@ -1564,6 +1564,10 @@ SPAN.btn_sitesplus {
   border: 2px solid rgb(255, 122, 122) !important;
 }
 
+.daterangepicker .drp-buttons .drp-selected {
+  display: none;
+}
+
 .site_panel_bookmark_placeholder {
   display: inline-block;
   border: 1px dashed grey;
