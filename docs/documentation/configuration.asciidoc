@@ -1535,7 +1535,8 @@ ex.:
 
 
 === cookie_auth_session_timeout
-Specifies the timeout for idle sessions.
+Specifies the timeout for idle sessions. Session will be removed if not used
+within this timeperiod.
 
 ex.:
 
