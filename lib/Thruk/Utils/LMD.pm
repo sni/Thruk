@@ -310,7 +310,7 @@ sub kill_if_not_responding {
 
     if(!$pid) {
         Thruk::Utils::External::_do_child_stuff($c, 0, 0);
-        alarm(3);
+        alarm(5);
         eval {
             $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites\n");
         };
