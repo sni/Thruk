@@ -22,16 +22,17 @@ Thruk Controller
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/cluster$%mx, \&_rest_get_thruk_cluster, ['authorized_for_system_information']);
 sub _rest_get_thruk_cluster {
     my($c) = @_;
+    $c->cluster->load_statefile();
     return($c->cluster->{'nodes'});
 }
 
 ##########################################################
 # REST PATH: GET /thruk/cluster/heartbeat
-# redirects to POST method
+# should not be used, use POST method instead
 # REST PATH: POST /thruk/cluster/heartbeat
 # send cluster heartbeat to all other nodes
-Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/cluster/heartbeat$%mx, \&_rest_get_thruk_cluster_heartbeat, ['authorized_for_system_commands']);
-Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/cluster/heartbeat$%mx, \&_rest_get_thruk_cluster_heartbeat, ['authorized_for_system_commands']);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/cluster/heartbeat$%mx, \&_rest_get_thruk_cluster_heartbeat, ['admin']);
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/cluster/heartbeat$%mx, \&_rest_get_thruk_cluster_heartbeat, ['admin']);
 sub _rest_get_thruk_cluster_heartbeat {
     my($c) = @_;
     return({ 'message' => 'cluster disabled', 'description' => 'this is a single node installation and not clustered', code => 501 }) unless $c->cluster->is_clustered();
@@ -52,19 +53,12 @@ sub _rest_get_thruk_cluster_heartbeat {
     }
     local $ENV{'THRUK_SKIP_CLUSTER'} = 0;
     $c->cluster->load_statefile();
+    my $nodes = {};
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
-        my $res = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
-        if(!$res) {
-            next;
-        }
-        if($res->{'node_id'} ne $n->{'node_id'}) {
-            $c->log->error(sprintf("cluster mixup, got answer from node %s but expected %s for url %s", $res->{'node_id'}, $n->{'node_id'}, $n->{'node_url'}));
-            next;
-        }
+        $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
     }
-    $c->cluster->check_stale_pids();
-    return({ 'message' => 'heartbeat send' });
+    return({ 'message' => 'heartbeat send', 'nodes' => $nodes });
 }
 
 ##########################################################
@@ -75,6 +69,7 @@ sub _rest_get_thruk_cluster_heartbeat {
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/cluster/([^/]+)$%mx, \&_rest_get_thruk_cluster_node_by_id, ['authorized_for_system_information']);
 sub _rest_get_thruk_cluster_node_by_id {
     my($c, $path_info, $node_id) = @_;
+    $c->cluster->load_statefile();
     ($node_id) = @{$c->cluster->expand_node_ids($node_id)};
     return($c->cluster->{'nodes_by_id'}->{$node_id}) if $node_id;
     return({ 'message' => 'no such cluster node', code => 404 });

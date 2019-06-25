@@ -38,21 +38,10 @@ sub new {
         nodes_by_url => {},
         nodes_by_id  => {},
         config       => $thruk->config,
-        statefile    => $thruk->config->{'var_path'}.'/cluster/nodes',
+        registerfile => $thruk->config->{'var_path'}.'/cluster/nodes',
         localstate   => $thruk->config->{'tmp_path'}.'/cluster/nodes',
     };
     bless $self, $class;
-
-    Thruk::Utils::IO::mkdir_r($thruk->config->{'var_path'}.'/cluster');
-    Thruk::Utils::IO::mkdir_r($thruk->config->{'tmp_path'}.'/cluster');
-
-    if(scalar @{$self->{'config'}->{'cluster_nodes'}} > 1) {
-        $self->{'cluster_nodes_map'} = {};
-        for my $url (@{$self->{'config'}->{'cluster_nodes'}}) {
-            $self->{'cluster_nodes_map'}->{$url} = $url;
-        }
-    }
-
     return $self;
 }
 
@@ -64,48 +53,66 @@ load statefile and fill node structures
 
 =cut
 sub load_statefile {
-    my($self, $nodes) = @_;
+    my($self) = @_;
     my $c = $Thruk::Utils::Cluster::context;
     $c->stats->profile(begin => "cluster::load_statefile") if $c;
+
+    Thruk::Utils::IO::mkdir_r($self->{'config'}->{'var_path'}.'/cluster');
+    Thruk::Utils::IO::mkdir_r($self->{'config'}->{'tmp_path'}.'/cluster');
+
+    my $nodes = {};
+    my $state = Thruk::Utils::IO::json_lock_retrieve($self->{'localstate'}) || {};
+    my $now   = time();
+
     $self->{'nodes'}        = [];
-    $self->{'nodes_by_id'}  = {};
     $self->{'nodes_by_url'} = {};
+    $self->{'nodes_by_id'}  = {};
 
-    if(!$nodes) {
-        $nodes = Thruk::Utils::IO::json_lock_retrieve($self->{'statefile'}) || {};
+    # dynamic clusters
+    if(scalar @{$self->{'config'}->{'cluster_nodes'}} == 1) {
+        # use registered urls from registerfile file
+        my $registered = Thruk::Utils::IO::json_lock_retrieve($self->{'registerfile'}) || {};
+        for my $key (sort keys %{$registered}) {
+            my $n = $state->{$key} || {};
+            $n->{'node_url'} = $registered->{$key}->{'node_url'};
+
+            # no contact in last x seconds, remove it completely from cluster
+            if($registered->{$key}->{'last_update'} < $now - $c->config->{'cluster_node_stale_timeout'}) {
+                Thruk::Utils::IO::json_lock_patch($self->{'registerfile'}, {
+                    $key => undef,
+                },1);
+                next:
+            }
+            $nodes->{$key} = $n;
+        }
     }
-
-    # remove unknown and dummy nodes first
-    for my $key (sort keys %{$nodes}) {
-        if(!defined $nodes->{$key}->{'node_url'} || $key =~ m/^dummy/mx) {
-            delete $nodes->{$key};
-            Thruk::Utils::IO::json_lock_patch($self->{'statefile'}, {
-                $key => undef,
-            },1);
+    # fixed size clusters
+    else {
+        my $x = 0;
+        for my $url (@{$self->{'config'}->{'cluster_nodes'}}) {
+            # get node from state file if possible
+            $url = $self->_replace_url_macros($url);
+            my $key = "node".$x;
+            for my $k (sort keys %{$state}) {
+                my $n = $state->{$k};
+                if($n && $n->{'node_url'} && $url eq $n->{'node_url'}) {
+                    $url = $n->{'node_url'};
+                    $key = $n->{'node_id'} || $k;
+                    last;
+                }
+            }
+            my $n = $state->{$key} || {};
+            $n->{'node_url'} = $url;
+            $nodes->{$key} = $n;
+            $x++;
         }
     }
 
-    # when using fixed nodes, verify all of them are available in $nodes
-    if(scalar @{$self->{'config'}->{'cluster_nodes'}} > 1 && scalar @{$self->{'config'}->{'cluster_nodes'}} != scalar keys %{$nodes}) {
-        # add dummy node(s)
-        for my $x (1..(scalar @{$self->{'config'}->{'cluster_nodes'}} - scalar keys %{$nodes})) {
-            $nodes->{"dummy".$x} = {
-                node_url => "",
-                node_id  => "dummy".$x,
-            };
-        }
-    }
-
-    my $now = time();
+    # set defaults
     for my $key (sort keys %{$nodes}) {
         my $n = $nodes->{$key};
-        $n->{'last_update'} =  0 unless $n->{'last_update'};
-        # no contact in last x seconds, remove it completely from cluster
-        if($n->{'last_update'} < $now - $c->config->{'cluster_node_stale_timeout'} && $key ne $Thruk::NODE_ID) {
-            $self->unregister($key);
-            next:
-        }
         # set some defaults
+        $n->{'node_id'}       = $key;
         $n->{'last_contact'}  =  0 unless $n->{'last_contact'};
         $n->{'last_error'}    = '' unless $n->{'last_error'};
         $n->{'response_time'} = '' unless defined $n->{'response_time'};
@@ -115,38 +122,19 @@ sub load_statefile {
         # add node to store
         push @{$self->{'nodes'}}, $n;
         $self->{'nodes_by_id'}->{$key} = $n;
-    }
-
-    # assign remaining cluster urls to nodes without url
-    if(scalar @{$self->{'config'}->{'cluster_nodes'}} > 1) {
-        for my $key (sort keys %{$nodes}) {
-            my $n = $nodes->{$key};
-            next if $n->{'node_url'};
-            # find first unused cluster_node url
-            my $next_url = "";
-            for my $url (sort keys %{$self->{'cluster_nodes_map'}}) {
-                my $found = 0;
-                for my $key (sort keys %{$nodes}) {
-                    if($nodes->{$key}->{'node_url'} eq $self->{'cluster_nodes_map'}->{$url}) {
-                        $found = 1;
-                        last;
-                    }
-                }
-                if(!$found) {
-                    $next_url = $url;
-                    last;
-                }
-            }
-            $self->{'cluster_nodes_map'}->{$next_url} = $self->_replace_url_macros($next_url);
-            $n->{'node_url'} = $self->{'cluster_nodes_map'}->{$next_url};
-        }
-    }
-
-    for my $key (sort keys %{$nodes}) {
-        my $n = $nodes->{$key};
         $self->{'nodes_by_url'}->{$n->{'node_url'}} = $n;
     }
 
+    $self->{'node'} = $self->{'nodes_by_id'}->{$Thruk::NODE_ID};
+    $self->{'node'}->{'hostname'}    = $Thruk::HOSTNAME;
+    $self->{'node'}->{'pids'}->{$$}  = $now;
+
+    $self->check_stale_pids();
+
+    # sort nodes by url
+    @{$self->{'nodes'}} = sort { $a->{'node_url'} cmp $b->{'node_url'} } @{$self->{'nodes'}};
+
+    Thruk::Utils::IO::json_lock_store($self->{'localstate'}, $self->{'nodes_by_id'}, 1);
     $c->stats->profile(end => "cluster::load_statefile") if $c;
     return $nodes;
 }
@@ -161,22 +149,18 @@ registers this cluster node in the cluster statefile
 sub register {
     my($self, $c) = @_;
     $Thruk::Utils::Cluster::context = $c;
-    my $now = time();
+
+    # in dynamic clustering, we need to register ourself so others know about us
+    if(scalar @{$self->{'config'}->{'cluster_nodes'}} == 1) {
+        Thruk::Utils::IO::json_lock_patch($self->{'registerfile'}, {
+            $Thruk::NODE_ID => {
+                node_url    => $self->_build_node_url() || '',
+                last_update => time(),
+            },
+        }, 1);
+    }
+
     $self->load_statefile();
-    my $old_url = $self->{'nodes_by_id'}->{$Thruk::NODE_ID}->{'node_url'} || '';
-    my $localstate = Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
-        pids => { $$ => $now },
-    },1);
-    $self->check_stale_pids($localstate);
-    Thruk::Utils::IO::json_lock_patch($self->{'statefile'}, {
-        $Thruk::NODE_ID => {
-            node_id      => $Thruk::NODE_ID,
-            node_url     => $self->_build_node_url() || $old_url || '',
-            hostname     => $Thruk::HOSTNAME,
-            last_update  => $now,
-            pids         => scalar keys %{$localstate->{'pids'}},
-        },
-    }, 1);
     return;
 }
 
@@ -188,25 +172,13 @@ removes ourself from the cluster statefile
 
 =cut
 sub unregister {
-    my($self, $nodeid) = @_;
-    return unless -s $self->{'statefile'};
-    $nodeid = $Thruk::NODE_ID unless $nodeid;
-    if($nodeid eq $Thruk::NODE_ID) {
-        my $localstate = Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, { pids => { $$ => undef }},1);
-        Thruk::Utils::IO::json_lock_patch($self->{'statefile'}, {
-            $Thruk::NODE_ID => {
-                last_update => time(),
-                pids        => scalar keys %{$localstate->{'pids'}},
-            },
-        }, 1);
-    } else {
-        # do not completely unregister a node if using fixed nodes
-        return if scalar @{$self->{'config'}->{'cluster_nodes'}} > 1;
-
-        Thruk::Utils::IO::json_lock_patch($self->{'statefile'}, {
-            $nodeid => undef,
-        },1);
-    }
+    my($self) = @_;
+    return unless -s $self->{'localstate'};
+    Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
+        $Thruk::NODE_ID => {
+            pids => { $$ => undef },
+        },
+    }, 1);
     return;
 }
 
@@ -219,18 +191,18 @@ refresh this cluster node in the cluster statefile
 =cut
 sub refresh {
     my($self) = @_;
-    my $localstate = Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
-        pids => { $$ => time() },
-    }, 1);
-    if(!$self->{'nodes_by_id'}->{$Thruk::NODE_ID}->{'last_update'} || $self->{'nodes_by_id'}->{$Thruk::NODE_ID}->{'last_update'} < time() - (5+int(rand(20)))) {
-        my $state = Thruk::Utils::IO::json_lock_patch($self->{'statefile'}, {
-            $Thruk::NODE_ID => {
-                last_update => time(),
-                pids        => scalar keys %{$localstate->{'pids'}},
-            },
-        }, 1);
-        $self->load_statefile($state);
+
+    my $now = time();
+    if($self->{'node'}->{'pids'}->{$$} && $self->{'node'}->{'pids'}->{$$} > $now - (5+int(rand(20)))) {
+        return;
     }
+
+    Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
+        $Thruk::NODE_ID => {
+            pids => { $$ => $now },
+        },
+    }, 1);
+    $self->{'node'}->{'pids'}->{$$}  = $now;
     return;
 }
 
@@ -286,7 +258,7 @@ sub run_cluster {
     return 0 if $ENV{'THRUK_SKIP_CLUSTER'};
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
 
-    my $c = $Thruk::Utils::Cluster::context;
+    my $c = $Thruk::Utils::Cluster::context || confess("uninitialized cluster");
 
     my $nodes = Thruk::Utils::list($type);
     if($type eq 'all' || $type eq 'others') {
@@ -341,27 +313,19 @@ sub run_cluster {
         my $elapsed = tv_interval($t1);
         if($@) {
             $c->log->error(sprintf("%s failed on %s: %s", $sub, $n, $@));
-            if($n !~ m/^dummy/mx) {
-                $statefileupdate->{$n} = {
-                    last_error => $@,
-                };
-            }
+            $statefileupdate->{$n} = {
+                last_error => $@,
+            };
         } else {
-            if($n !~ m/^dummy/mx) {
-                if($sub =~ m/Cluster::pong/mx) {
-                    $statefileupdate->{$n} = {
-                        last_contact  => time(),
-                        last_error    => '',
-                        response_time => $elapsed,
-                        version       => $r->{'version'},
-                        branch        => $r->{'branch'},
-                    };
-                } else {
-                    $statefileupdate->{$n} = {
-                        last_contact  => time(),
-                        last_error    => '',
-                    };
-                }
+            $statefileupdate->{$n} = {
+                last_contact  => time(),
+                last_error    => '',
+            };
+            if($sub =~ m/Cluster::pong/mx) {
+                $statefileupdate->{$n}->{'response_time'} = $elapsed;
+                $statefileupdate->{$n}->{'version'}       = $r->{'version'};
+                $statefileupdate->{$n}->{'branch'}        = $r->{'branch'};
+                $statefileupdate->{$n}->{'node_id'}       = $r->{'output'}->[0]->{'node_id'};
             }
         }
         $r = $r->{'output'} if $r;
@@ -373,7 +337,7 @@ sub run_cluster {
     }
 
     # bulk update statefile
-    Thruk::Utils::IO::json_lock_patch($c->cluster->{'statefile'}, $statefileupdate, 1);
+    Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, $statefileupdate, 1);
 
     return $res;
 }
@@ -407,19 +371,20 @@ return a ping request
 =cut
 sub pong {
     my($c, $node, $url) = @_;
-    if($node ne $Thruk::NODE_ID && $node =~ m/^dummy\d+$/mx) {
-        # update our url
-        if(!$c->cluster->{'nodes_by_id'}->{$Thruk::NODE_ID}->{'node_url'} || $c->cluster->{'nodes_by_id'}->{$Thruk::NODE_ID}->{'node_url'} ne $url) {
-            Thruk::Utils::IO::json_lock_patch($c->cluster->{'statefile'}, {
-                $Thruk::NODE_ID => {
-                    node_url => $url,
-                },
-            },1);
-        }
+    # update our url
+    if($c->cluster->{'node'}->{'node_url'} ne $url) {
+        Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
+            $Thruk::NODE_ID => {
+                node_url => $url,
+            },
+        },1);
+        $c->cluster->{'node'}->{'node_url'} = $url;
     }
     return({
-        time    => time(),
-        node_id => $node,
+        time     => time(),
+        node_id  => $Thruk::NODE_ID,
+        version  => $c->config->{'version'},
+        branch   => $c->config->{'branch'},
     });
 }
 
@@ -448,8 +413,8 @@ sub is_it_me {
 
 ##########################################################
 sub _build_node_url {
-    my($self, $hostname) = @_;
-    $hostname = $Thruk::HOSTNAME unless $hostname;
+    my($self) = @_;
+    my $hostname = $Thruk::HOSTNAME;
     my $url;
     if(scalar @{$self->{'config'}->{'cluster_nodes'}} == 1) {
         $url = $self->{'config'}->{'cluster_nodes'}->[0];
@@ -463,10 +428,8 @@ sub _build_node_url {
         }
         return "" unless $url;
     }
-    my $orig_url = $url;
     $url =~ s%\$hostname\$%$hostname%mxi;
     $url = $self->_replace_url_macros($url);
-    $self->{'cluster_nodes_map'}->{$orig_url} = $url;
     return($url);
 }
 
@@ -558,23 +521,21 @@ sub update_cron_file {
 
 =head2 check_stale_pids
 
-    check_stale_pids($self, $localstate)
+    check_stale_pids($self)
 
 check for stale pids
 
 =cut
 sub check_stale_pids {
-    my($self, $localstate) = @_;
-    my $node = $self->{'nodes_by_id'}->{$Thruk::NODE_ID};
+    my($self) = @_;
+    my $node = $self->{'node'};
     return unless $node;
     my $now = time();
     # check for stale pids
-    for my $pid (sort keys %{$localstate->{'pids'}}) {
-        next if $now - $localstate->{'pids'}->{$pid} < 60; # old check old pids
+    for my $pid (sort keys %{$node->{'pids'}}) {
+        next if $now - $node->{'pids'}->{$pid} < 120; # only check old pids
         if($pid != $$ && CORE::kill($pid, 0) != 1) {
-            Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
-                pids => { $pid => undef },
-            },1);
+            delete $self->{'node'}->{'pids'}->{$pid};
         }
     }
     return;

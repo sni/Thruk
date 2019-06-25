@@ -1,7 +1,7 @@
 Entry Point
 ===========
 
- - http://localhost:60080/demo/thruk/ (haproxy loadbalancer)
+ - http://127.0.0.3:60080/demo/thruk/ (haproxy loadbalancer)
  - Login is omdadmin / omd
 
 Setup

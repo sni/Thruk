@@ -785,6 +785,7 @@ sub _process_perf_info_page {
 # create the performance info cluster page
 sub _process_perf_info_cluster_page {
     my( $c ) = @_;
+    $c->cluster->load_statefile();
     $c->stash->{template} = 'extinfo_type_4_cluster_status.tt';
     return 1;
 }

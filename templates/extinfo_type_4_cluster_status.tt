@@ -33,7 +33,6 @@
                         <th class='data'>Status</th>
                         <th class='data'>Response Time</th>
                         <th class='data'>Last Contact</th>
-                        <th class='data'>Processes</th>
                         <th class='data'>Version</th>
                       </tr>
                       [% my_version = version _ "_" _ branch %]
@@ -45,7 +44,7 @@
                             <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
                           [% ELSIF n.last_contact == 0 %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" width="16" height="16" alt="starting">
-                          [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout && n.pids > 0 %]
+                          [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
                           [% ELSE %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/error.png" width="16" height="16" alt="error">
@@ -57,27 +56,36 @@
                         </td>
                         [% ELSE %]
                         <td class='dataVal' style="text-align: center;">
-                          [% IF n.response_time != ""; sprintf("%.3fs", n.response_time); END %]
-                        </td>
-                        <td class='dataVal' style="text-align: center;">
-                          [% IF n.last_contact > 0 %]
-                            [% IF date.now - n.last_contact < 120 %]
-                              [% date.now - n.last_contact %]s ago
-                            [% ELSE %]
-                              [% date_format(c, n.last_contact) %]
-                            [% END %]
+                          [% IF c.cluster.is_it_me(n) %]
+                           -
                           [% ELSE %]
-                          never
+                          [% IF n.response_time != ""; sprintf("%.3fs", n.response_time); END %]
                           [% END %]
                         </td>
                         <td class='dataVal' style="text-align: center;">
-                          [% n.pids %]
+                          [% IF c.cluster.is_it_me(n) %]
+                           -
+                          [% ELSE %]
+                            [% IF n.last_contact > 0 %]
+                              [% IF date.now - n.last_contact < 120 %]
+                                [% date.now - n.last_contact %]s ago
+                              [% ELSE %]
+                                [% date_format(c, n.last_contact) %]
+                              [% END %]
+                            [% ELSE %]
+                            never
+                            [% END %]
+                          [% END %]
                         </td>
                         <td class='dataVal' style="text-align: center;">
+                          [% IF c.cluster.is_it_me(n) %]
+                          [% version %][% IF branch %]-[% branch %][% END %]
+                          [% ELSE %]
                           [% n.version %][% IF n.branch %]-[% n.branch %][% END %]
                           [% cmp_version = n.version _ "_" _ n.branch %]
                           [% IF cmp_version != my_version %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/warning.png" width="16" height="16" alt="version mismatch" style="vertical-align: sub;">
+                          [% END %]
                           [% END %]
                         </td>
                         [% END %]
