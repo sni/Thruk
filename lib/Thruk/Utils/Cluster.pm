@@ -42,6 +42,10 @@ sub new {
         localstate   => $thruk->config->{'tmp_path'}.'/cluster/nodes',
     };
     bless $self, $class;
+
+    Thruk::Utils::IO::mkdir_r($self->{'config'}->{'var_path'}.'/cluster');
+    Thruk::Utils::IO::mkdir_r($self->{'config'}->{'tmp_path'}.'/cluster');
+
     return $self;
 }
 
@@ -56,9 +60,6 @@ sub load_statefile {
     my($self) = @_;
     my $c = $Thruk::Utils::Cluster::context;
     $c->stats->profile(begin => "cluster::load_statefile") if $c;
-
-    Thruk::Utils::IO::mkdir_r($self->{'config'}->{'var_path'}.'/cluster');
-    Thruk::Utils::IO::mkdir_r($self->{'config'}->{'tmp_path'}.'/cluster');
 
     my $nodes = {};
     my $state = Thruk::Utils::IO::json_lock_retrieve($self->{'localstate'}) || {};
