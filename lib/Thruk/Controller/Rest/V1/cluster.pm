@@ -51,6 +51,7 @@ sub _rest_get_thruk_cluster_heartbeat {
         }
         return;
     }
+    alarm(60);
     local $ENV{'THRUK_SKIP_CLUSTER'} = 0;
     $c->cluster->load_statefile();
     my $nodes = {};
@@ -58,6 +59,7 @@ sub _rest_get_thruk_cluster_heartbeat {
         next if $c->cluster->is_it_me($n);
         $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
     }
+    alarm(0);
     return({ 'message' => 'heartbeat send', 'nodes' => $nodes });
 }
 
