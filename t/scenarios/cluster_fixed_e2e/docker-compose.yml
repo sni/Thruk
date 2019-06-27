@@ -1,0 +1,99 @@
+version: "2.3"
+
+networks:
+  test.local:
+
+services:
+  lb:
+    image: 'dockercloud/haproxy:latest'
+    links:
+        - thruk1
+        - thruk2
+        - thruk3
+    environment:
+        - TZ=Europe/Berlin
+    ports:
+        - "127.0.0.3:60080:80"
+    #environment:
+    #    - EXTRA_GLOBAL_SETTINGS=log 127.0.0.1 local1 debug
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - test.local
+
+  omd:
+    build: omd/
+    environment:
+        - TZ=Europe/Berlin
+        - EXCLUDE_PORTS=22,443,4730,5666
+        - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi?lb_ping
+    volumes:
+        - shared_var:/mnt/var
+    networks:
+      test.local:
+        aliases:
+          - omd.test.local
+    hostname: omd
+    domainname: test.local
+
+  thruk1:
+    build: thruk/
+    ports:
+        - "80"
+    environment:
+        - TZ=Europe/Berlin
+        - EXCLUDE_PORTS=22,443,4730,5666
+        - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi?lb_ping
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro
+        - shared_var:/mnt/var
+        - shared_etc:/mnt/etc
+    networks:
+      test.local:
+        aliases:
+          - thruk1.test.local
+    hostname: thruk1
+    domainname: test.local
+
+  thruk2:
+    build: thruk/
+    ports:
+        - "80"
+    environment:
+        - TZ=Europe/Berlin
+        - EXCLUDE_PORTS=22,443,4730,5666
+        - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi?lb_ping
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro
+        - shared_var:/mnt/var
+        - shared_etc:/mnt/etc
+    networks:
+      test.local:
+        aliases:
+          - thruk2.test.local
+    hostname: thruk2
+    domainname: test.local
+
+  thruk3:
+    build: thruk/
+    ports:
+        - "80"
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro
+        - shared_var:/mnt/var
+        - shared_etc:/mnt/etc
+    networks:
+      test.local:
+        aliases:
+          - thruk3.test.local
+    hostname: thruk3
+    domainname: test.local
+
+volumes:
+  shared_etc:
+  shared_var:
