@@ -1355,7 +1355,6 @@ lists cluster nodes
 |hostname                          | host name of the cluster node
 |last_contact                      | timestamp of last successful contact
 |last_error                        | text of last error message
-|last_update                       | timestamp of last update
 |node_id                           | internal id for this node
 |node_url                          | url to access this node directly
 |pids                              | list of current process ids of this node
@@ -1372,7 +1371,7 @@ See `/thruk/cluster/` for the description of the attributes.
 
 === GET /thruk/cluster/heartbeat
 
-redirects to POST method
+should not be used, use POST method instead
 
 === POST /thruk/cluster/heartbeat
 
