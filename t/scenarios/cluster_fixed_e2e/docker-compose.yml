@@ -46,7 +46,8 @@ services:
         - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi?lb_ping
     volumes:
         - ../../../:/thruk:ro
-        - .:/test:ro
+        - ../cluster_fixed_e2e:/test:ro
+        - ../cluster_fixed_e2e/t:/test/t:ro
         - shared_var:/mnt/var
         - shared_etc:/mnt/etc
     networks:
@@ -66,7 +67,8 @@ services:
         - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi?lb_ping
     volumes:
         - ../../../:/thruk:ro
-        - .:/test:ro
+        - ../cluster_fixed_e2e:/test:ro
+        - ../cluster_fixed_e2e/t:/test/t:ro
         - shared_var:/mnt/var
         - shared_etc:/mnt/etc
     networks:
@@ -84,7 +86,8 @@ services:
         - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
-        - .:/test:ro
+        - ../cluster_fixed_e2e:/test:ro
+        - ../cluster_fixed_e2e/t:/test/t:ro
         - shared_var:/mnt/var
         - shared_etc:/mnt/etc
     networks:

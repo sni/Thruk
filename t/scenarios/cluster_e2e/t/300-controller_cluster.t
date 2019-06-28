@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    plan tests => 24;
+    plan tests => 28;
 
     use lib('t');
     require TestUtils;
@@ -12,11 +12,14 @@ BEGIN {
 
 TestUtils::set_test_user_token();
 
-TestUtils::test_page(
-    'url'     => '/thruk/r/thruk/cluster/heartbeat',
-    'post'    => {},
-    'waitfor' => 'heartbeat\ send',
-);
+# since the cluster is round-robin, this should trigger an update on each node
+for my $x (1..3) {
+    TestUtils::test_page(
+        'url'     => '/thruk/r/thruk/cluster/heartbeat',
+        'post'    => {},
+        'waitfor' => 'heartbeat\ send',
+    );
+}
 
 TestUtils::test_page(
     'url'     => '/thruk/r/thruk/cluster/heartbeat',
