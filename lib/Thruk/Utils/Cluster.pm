@@ -114,6 +114,7 @@ sub load_statefile {
         my $n = $nodes->{$key};
         # set some defaults
         $n->{'node_id'}       = $key;
+        $n->{'hostname'}      = '' unless defined $n->{'hostname'};
         $n->{'last_contact'}  =  0 unless $n->{'last_contact'};
         $n->{'last_error'}    = '' unless $n->{'last_error'};
         $n->{'response_time'} = '' unless defined $n->{'response_time'};
@@ -334,6 +335,7 @@ sub run_cluster {
                         response_time => $elapsed,
                         version       => $r->{'version'},
                         branch        => $r->{'branch'},
+                        hostname      => $r->{'output'}->[0]->{'hostname'},
                         node_id       => $n,
                     },
                 }, 1);
@@ -398,6 +400,7 @@ sub pong {
     return({
         time     => time(),
         node_id  => $Thruk::NODE_ID,
+        hostname => $Thruk::HOSTNAME,
         version  => $c->config->{'version'},
         branch   => $c->config->{'branch'},
     });
