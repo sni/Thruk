@@ -321,6 +321,12 @@ sub run_cluster {
             }, 1);
         } else {
             if($sub =~ m/Cluster::pong/mx) {
+                if($n ne $r->{'output'}->[0]->{'node_id'}) {
+                    my $new_id = $r->{'output'}->[0]->{'node_id'};
+                    $self->{'nodes_by_id'}->{$new_id} = delete $self->{'nodes_by_id'}->{$n};
+                    $n = $new_id;
+                    Thruk::Utils::IO::json_lock_store($self->{'localstate'}, $self->{'nodes_by_id'}, 1);
+                }
                 Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                     $n => {
                         last_contact  => time(),
@@ -328,7 +334,7 @@ sub run_cluster {
                         response_time => $elapsed,
                         version       => $r->{'version'},
                         branch        => $r->{'branch'},
-                        node_id       => $r->{'output'}->[0]->{'node_id'},
+                        node_id       => $n,
                     },
                 }, 1);
             } else {
