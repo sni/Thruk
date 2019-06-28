@@ -300,7 +300,6 @@ sub run_cluster {
 
     # run function on each cluster node
     my $res = [];
-    my $statefileupdate = {};
     for my $n (@nodeids) {
         next unless $self->{'nodes_by_id'}->{$n};
         next if($type eq 'others' && $self->is_it_me($n));
@@ -315,19 +314,30 @@ sub run_cluster {
         my $elapsed = tv_interval($t1);
         if($@) {
             $c->log->error(sprintf("%s failed on %s: %s", $sub, $n, $@));
-            $statefileupdate->{$n} = {
-                last_error => $@,
-            };
+            Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
+                $n => {
+                    last_error => $@,
+                },
+            }, 1);
         } else {
-            $statefileupdate->{$n} = {
-                last_contact  => time(),
-                last_error    => '',
-            };
             if($sub =~ m/Cluster::pong/mx) {
-                $statefileupdate->{$n}->{'response_time'} = $elapsed;
-                $statefileupdate->{$n}->{'version'}       = $r->{'version'};
-                $statefileupdate->{$n}->{'branch'}        = $r->{'branch'};
-                $statefileupdate->{$n}->{'node_id'}       = $r->{'output'}->[0]->{'node_id'};
+                Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
+                    $n => {
+                        last_contact  => time(),
+                        last_error    => '',
+                        response_time => $elapsed,
+                        version       => $r->{'version'},
+                        branch        => $r->{'branch'},
+                        node_id       => $r->{'output'}->[0]->{'node_id'},
+                    },
+                }, 1);
+            } else {
+                Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
+                    $n => {
+                        last_contact  => time(),
+                        last_error    => '',
+                    },
+                }, 1);
             }
         }
         $r = $r->{'output'} if $r;
@@ -337,9 +347,6 @@ sub run_cluster {
             push @{$res}, $r;
         }
     }
-
-    # bulk update statefile
-    Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, $statefileupdate, 1);
 
     return $res;
 }
@@ -374,7 +381,7 @@ return a ping request
 sub pong {
     my($c, $node, $url) = @_;
     # update our url
-    if($c->cluster->{'node'}->{'node_url'} ne $url) {
+    if($c->cluster->{'node'}->{'node_url'} && $c->cluster->{'node'}->{'node_url'} ne $url) {
         Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
             $Thruk::NODE_ID => {
                 node_url => $url,
