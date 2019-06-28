@@ -1357,6 +1357,7 @@ lists cluster nodes
 |last_error                        | text of last error message
 |node_id                           | internal id for this node
 |node_url                          | url to access this node directly
+|pids                              | list of current process ids of this node
 |response_time                     | response time in seconds
 |version                           | version information of this node
 |===========================================
