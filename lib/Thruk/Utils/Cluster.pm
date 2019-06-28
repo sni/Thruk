@@ -174,6 +174,7 @@ removes ourself from the cluster statefile
 =cut
 sub unregister {
     my($self) = @_;
+    return unless $Thruk::NODE_ID;
     return unless -s $self->{'localstate'};
     Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
         $Thruk::NODE_ID => {
