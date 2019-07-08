@@ -1169,7 +1169,7 @@ sub _create_tables_if_not_exist {
     my($dbh, $prefix, $verbose) = @_;
 
     # check if our tables exist
-    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'%"')};
+    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'\_%"')};
     if(scalar @tables == 0) {
         print "creating logcache tables\n" if $verbose > 1;
         _create_tables($dbh, $prefix);
