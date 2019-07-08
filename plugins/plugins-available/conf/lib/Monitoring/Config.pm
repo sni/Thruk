@@ -2367,7 +2367,7 @@ sub _remote_do {
         $c->log->error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
         my @text = split(/\n/mx, $msg);
-        Thruk::Utils::set_message( $c, 'fail_message', $text[0] );
+        Thruk::Utils::set_message( $c, 'fail_message', $sub." failed: ".$text[0] );
         return;
     } else {
         die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
@@ -2427,7 +2427,9 @@ sub remote_file_sync {
         };
     }
     my $remotefiles = $self->_remote_do($c, 'syncfiles', { files => $files });
-    return unless $remotefiles;
+    if(!$remotefiles) {
+        return $c->detach_error({msg => "syncing remote configuration files failed", code => 500, log => 1});
+    }
 
     my $localdir = $c->config->{'tmp_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
     $self->{'config'}->{'localdir'} = $localdir;
