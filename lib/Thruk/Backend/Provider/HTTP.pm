@@ -154,6 +154,7 @@ sub reconnect {
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->agent('Thruk');
+    $self->{'ua'}->max_redirect(0);
     $self->{'ua'}->ssl_opts(verify_hostname => $verify_hostname);
     if($self->{'proxy'}) {
         # http just works
@@ -175,7 +176,6 @@ sub reconnect {
             #$self->{'ua'}->env_proxy();
         }
     }
-    push @{ $self->{'ua'}->requests_redirectable }, 'POST';
     return($self->{'ua'});
 }
 
@@ -809,6 +809,7 @@ returns result for given request
 sub _req {
     my($self, $sub, $args, $redirects, $auth, $want_data) = @_;
     $redirects = 0 unless defined $redirects;
+    my $c = $Thruk::Request::c;
 
     # clean code refs
     _clean_code_refs($args);
@@ -883,7 +884,6 @@ sub _req {
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
-    my $c = $Thruk::Request::c;
     if(Thruk->debug && $c) {
       $c->log->debug(Dumper($response));
     }
@@ -901,7 +901,12 @@ return http response but ensure timeout on request.
 =cut
 
 sub _ua_post_with_timeout {
-    my($ua, $url, $data) = @_;
+    my($ua, $url, $data, $redirects) = @_;
+    my $c = $Thruk::Request::c;
+    $redirects = 0 unless $redirects;
+    if($redirects >= 7) {
+      die("too many redirects on url: ".$url);
+    }
     my $timeout_for_client = $ua->timeout();
     $ua->ssl_opts(timeout => $timeout_for_client, Timeout => $timeout_for_client);
 
@@ -910,6 +915,16 @@ sub _ua_post_with_timeout {
 
     if($res->is_error && $res->code == 408) { # HTTP::Status::HTTP_REQUEST_TIMEOUT
         die("hit ".$timeout_for_client."s timeout on ".$url);
+    }
+
+    # manually handle redirects so we can better handle special cases in OMD
+    if(my $location = $res->{'_headers'}->{'location'}) {
+        if($location =~ m|/login.cgi\?[^/]+?/omd/error.py.*?code=(\d+)$|mx && $c) {
+            $c->log->debug(Dumper($res));
+            $c->detach_error({msg => "remote backend returned an error: ".$1, code => 502, log => 1});
+            return;
+        }
+        return _ua_post_with_timeout($ua, $location, $data, $redirects+1);
     }
 
     return $res;
