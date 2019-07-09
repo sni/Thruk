@@ -2199,6 +2199,7 @@ for details.
      ** `section`       to group backends/sites by different sections, enter a
                         section.
      ** `state_host`    Set 'state_host' explicitly. See See <<check_local_states,check_local_states>> for details.
+     ** `logcache`      Set logcache connection for this specific backend. Set to `0` to disable logcache for this site.
      ** `options`
         *** `peer`            address of this connection.
         *** `resource_file`   resource_file for this peer (used for macro replacement)

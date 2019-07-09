@@ -154,7 +154,7 @@ sub _create_backend {
 sub _initialise_peer {
     my($self, $config, $thruk_config) = @_;
 
-    my $logcache       = $thruk_config->{'logcache'};
+    my $logcache       = $config->{'logcache'} // $thruk_config->{'logcache'};
     my $product_prefix = $thruk_config->{'product_prefix'};
 
     confess "missing name in peer configuration" unless defined $config->{'name'};
@@ -225,7 +225,7 @@ sub _initialise_peer {
     }
 
     # log cache?
-    if(defined $logcache and ($config->{'type'} eq 'livestatus' or $config->{'type'} eq 'http')) {
+    if($logcache && ($config->{'type'} eq 'livestatus' || $config->{'type'} eq 'http')) {
         if($logcache !~ m/^mysql/mxi) {
             die("no or unknown type in logcache connection: ".$logcache);
         } else {

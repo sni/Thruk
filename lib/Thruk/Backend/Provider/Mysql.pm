@@ -917,6 +917,7 @@ sub _log_stats {
     my @result;
     for my $key (@{$c->stash->{'backends'}}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
+        next unless $peer->{'logcache'};
         $peer->logcache->reconnect();
         my $dbh  = $peer->logcache->_dbh();
         my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');
@@ -1043,6 +1044,7 @@ sub _import_logs {
         my $prefix = $key;
         my $peer   = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'enabled'};
+        next unless $peer->{'logcache'};
         $c->stats->profile(begin => "$key");
         $backend_count++;
         $peer->logcache->reconnect();
