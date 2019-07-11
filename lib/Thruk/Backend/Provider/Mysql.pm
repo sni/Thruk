@@ -1082,6 +1082,11 @@ sub _import_logs {
             push @{$errors}, $@;
         }
 
+        # cleanup connection
+        eval {
+            $peer->logcache->_disconnect();
+        }
+
         $c->stats->profile(end => "$key");
     }
 
