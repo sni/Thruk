@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - fix keyboard control of datepicker (#946)
+          - Broadcasts:
+            - use authorized_for_broadcasts role everywhere
           - internals:
             - update daterangepicker 3.0.5
 
