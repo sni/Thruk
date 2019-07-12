@@ -2148,9 +2148,15 @@ sub _object_new {
 
     _set_files_stash($c, 1);
     $c->stash->{'new_file'} = '';
+    my $standard_keys;
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'default_keys_'.$c->stash->{'type'}}) {
+        $standard_keys = [split(/[\s,]+/mx, $c->config->{'Thruk::Plugin::ConfigTool'}->{'default_keys_'.$c->stash->{'type'}})];
+    }
     my $obj = Monitoring::Config::Object->new(type     => $c->stash->{'type'},
                                               name     => $c->stash->{'data_name'},
-                                              coretype => $c->{'obj_db'}->{'coretype'});
+                                              coretype => $c->{'obj_db'}->{'coretype'},
+                                              standard => $standard_keys,
+                                            );
 
     if(!defined $obj) {
         Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create object' );

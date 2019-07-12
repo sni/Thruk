@@ -2324,6 +2324,10 @@ ex.:
     extra_custom_var_host     = _WORKER
     extra_custom_var_service  = _SNMP_COMMUNITY, _OTHER_CUSTOM_VARIABLE
     obj_readonly              = readonly files regular expression
+    # default_keys_host       = host_name, use, alias, address, contact_groups
+    # default_keys_service    = service_description, use, host_name, check_command, contact_groups
+    # default_keys_contact    = contact_name, use, alias, email, can_submit_commands
+    # default_keys_...        = ... # set default keys for any type
   </Component>
 
 
@@ -2404,6 +2408,23 @@ lists.
 Use `obj_readonly` regular expressions which will be appended to the backend
 specific readonly patterns from the Component Backend peer configtool. Read
 details on the link:/documentation/configuration.html#peer[configtool section].
+
+=== default_keys_host
+
+Sets the default attributes when creating a new host. Can contain custom variables
+like `_VAR`.
+
+ex.:
+
+    default_keys_host       = host_name, use, alias, address, contact_groups, _WORKER
+
+=== default_keys_service
+
+see `default_keys_host`.
+
+=== default_keys_contact
+
+see `default_keys_host`.
 
 
 
