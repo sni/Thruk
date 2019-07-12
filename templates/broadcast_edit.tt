@@ -42,7 +42,8 @@
              value="[% IF broadcast.hide_before %][% format_date(broadcast.hide_before_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
              id="hide_before"
              name="hide_before"
-             onkeyup="if(this.value != '') { verify_time(this.id) }"
+             onkeyup="verify_time(this.id)"
+             onchange="verify_time(this.id)"
       >
       </td>
   </tr>
@@ -54,7 +55,8 @@
              value="[% IF broadcast.expires %][% format_date(broadcast.expires_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
              id="expires"
              name="expires"
-             onkeyup="if(this.value != '') { verify_time(this.id) }"
+             onkeyup="verify_time(this.id)"
+             onchange="verify_time(this.id)"
       >
       </td>
   </tr>

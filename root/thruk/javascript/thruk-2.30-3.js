@@ -1918,6 +1918,16 @@ function verify_time_do(id, duration_id) {
         duration = obj2.value;
     }
 
+    if(obj.value == "") {
+        var next = jQuery(obj).next();
+        if(next[0] && next[0].className == 'smallalert') {
+            jQuery(next).remove();
+        }
+        obj.style.background = "";
+        delete verification_errors[id];
+        return;
+    }
+
     jQuery.ajax({
         url: url_prefix + 'cgi-bin/status.cgi',
         type: 'POST',
