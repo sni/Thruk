@@ -6661,6 +6661,7 @@ var ajax_search = {
             jQuery.each(ajax_search.base, function(index, search_type) {
                 var sub_results = new Array();
                 var top_hits = 0;
+                var total_relevance = 0;
                 if(   (ajax_search.search_type == 'all' && search_type.name != 'timeperiods')
                    || (ajax_search.search_type == 'full')
                    || (ajax_search.templates == "templates" && search_type.name == ajax_search.initialized_t + " templates")
@@ -6724,6 +6725,7 @@ var ajax_search = {
                           result_obj.sorter = (result_obj.relevance) + result_obj.name;
                           sub_results.push(result_obj);
                           if(result_obj.relevance >= 100) { top_hits++; }
+                          total_relevance += result_obj.relevance;
                       }
                   });
                 }
@@ -6740,7 +6742,9 @@ var ajax_search = {
                     needs_refresh = true;
                 }
                 if(sub_results.length > 0) {
-                    sub_results.sort(sort_by('sorter', false));
+                    if(total_relevance > 0) {
+                        sub_results.sort(sort_by('sorter', false));
+                    }
                     results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
                 }
             });

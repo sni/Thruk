@@ -2411,6 +2411,7 @@ sub _get_search_ids {
     }
     return(\@list);
 }
+
 ##############################################
 
 =head2 parse_lexical_filter
@@ -2497,6 +2498,52 @@ sub parse_lexical_filter {
         }
     }
     return $filter;
+}
+
+##############################################
+
+=head2 get_custom_variable_names
+
+  get_custom_variable_names($c, $type, $exposed_only, $filter)
+
+returns list of available custom variables. $type can be 'host', 'service' or 'all'.
+
+=cut
+sub get_custom_variable_names {
+    my($c, $type, $exposed_only, $filter) = @_;
+
+    my $data = [];
+    my $vars = {};
+    # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
+    # this leads to: Sorry, Operator  for custom variable lists not implemented.
+    my($hosts, $services) = ([],[]);
+    if($type eq 'host' || $type eq 'all') {
+        $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
+    }
+    if($type eq 'service' || $type eq 'all') {
+        $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
+    }
+    for my $obj (@{$hosts}, @{$services}) {
+        next unless ref $obj->{custom_variable_names} eq 'ARRAY';
+        for my $key (@{$obj->{custom_variable_names}}) {
+            $vars->{$key} = 1;
+        }
+    }
+    @{$data} = sort keys %{$vars};
+    @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
+
+    # filter all of them which are not listed by show_custom_vars unless we have extended permissions
+    if($exposed_only || !$c->check_user_roles("authorized_for_configuration_information")) {
+        my $newlist = [];
+        my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
+        for my $varname (@{$data}) {
+            if(Thruk::Utils::check_custom_var_list($varname, $allowed)) {
+                push @{$newlist}, $varname;
+            }
+        }
+        $data = $newlist;
+    }
+    return($data);
 }
 
 ##############################################

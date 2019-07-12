@@ -598,6 +598,9 @@ function on_attr_select() {
     var newid = add_conf_attribute('attr_table', key,true);
     ajax_search.reset();
     if(!newid) { return false; }
+    if(key.substr(0,1) == '_') {
+        return;
+    }
     newid = "#"+(newid.replace(/"/g, ''));
     if(key == "customvariable") {
         newid = newid+"_key";

@@ -332,8 +332,17 @@ sub _process_json_page {
                 push @{$attr}, @extras;
             }
         }
+        $attr = [ sort @{Thruk::Utils::array_uniq($attr)} ];
+
+        # add existing custom variables from this type
+        my $vars = Thruk::Utils::Status::get_custom_variable_names($c, $for, 0);
+        for my $v (@{$vars}) {
+            $v =~ s/^_*/_/gmx;
+            push @{$attr}, $v;
+        }
+
         my $json = [{ 'name' => $type.'s',
-                      'data' => [ sort @{Thruk::Utils::array_uniq($attr)} ],
+                      'data' => $attr,
                    }];
         return $c->render(json => $json);
     }

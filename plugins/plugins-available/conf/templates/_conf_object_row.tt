@@ -20,7 +20,7 @@
       [% IF defaults.exists(key) && defaults.$key.exists('link') %]
         onfocus="this.click()"
         onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:false, autosubmit:false})"
-      [% ELSIF key == 'customvariable' %]
+      [% ELSIF key == 'customvariable' || key.substr(0, 1) == '_' %]
         onfocus="this.click()"
         onclick="ajax_search.init(this, 'custom value', {url:'status.cgi?format=search&type=custom%20value&var='+this.name.replace(/^obj\._/, ''), striped:false, autosubmit:false})"
       [% END %]
