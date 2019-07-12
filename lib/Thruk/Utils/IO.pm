@@ -265,6 +265,7 @@ sub file_lock {
 
     my $fh;
     my $retrys = 5;
+    my $err;
     while($retrys > 0) {
         eval {
             sysopen($fh, $file, O_RDWR|O_CREAT) or confess("cannot open file ".$file.": ".$!);
@@ -276,10 +277,16 @@ sub file_lock {
             }
         };
         if(!$@ && $fh) {
+            undef $err;
             last;
         }
+        $err = $@;
         $retrys--;
         sleep(0.5);
+    }
+
+    if($err) {
+        die("failed to lock $file: $err");
     }
 
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
