@@ -2174,6 +2174,7 @@ t/scenarios/rest_api/omd/1.tsk
 t/scenarios/rest_api/omd/Dockerfile
 t/scenarios/rest_api/omd/playbook.yml
 t/scenarios/rest_api/omd/test.cfg
+t/scenarios/rest_api/omd/testuser.cfg
 t/scenarios/rest_api/t/300-controller_rest_v1.t
 t/scenarios/rest_api/t/301-controller_rest_bp.t
 t/scenarios/rest_api/t/301-controller_rest_broadcast.t
@@ -2183,6 +2184,7 @@ t/scenarios/rest_api/t/301-controller_rest_reports.t
 t/scenarios/rest_api/t/301-controller_rest_scenario.t
 t/scenarios/rest_api/t/305-controller_rest_commands.t
 t/scenarios/rest_api/t/local/rest.t
+t/scenarios/rest_api/t/local/testuser.t
 t/scenarios/rest_api/t/local_test.sh
 t/scenarios/rest_api/thruk.conf
 t/scenarios/rest_api/thruk_local.conf

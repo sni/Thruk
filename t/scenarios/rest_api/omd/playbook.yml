@@ -21,6 +21,20 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
       owner: demo
       group: demo
+  - name: copy naemon testuser.cfg
+    copy:
+      src: /root/testuser.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/testuser.cfg
+      owner: demo
+      group: demo
+  - lineinfile:
+      path: /omd/sites/demo/etc/thruk/cgi.cfg
+      regexp: '^authorized_contactgroup_for_admin='
+      line: 'authorized_contactgroup_for_admin=testgroup'
+  - lineinfile:
+      path: /omd/sites/demo/etc/htpasswd
+      regexp: '^testuser:'
+      line: 'testuser:$apr1$rYJHrFjl$CXBAGzkW1.dklpbNZ2rKu/'
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:
       path: /omd/sites/demo/var/thruk/secret.key
