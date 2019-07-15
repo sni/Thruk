@@ -12,4 +12,4 @@ wait_start_failed_extra:
 	-curl -kv http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi
 
 server:
-	@echo -e "\n\n*** no server implemented, access via https://$(shell hostname):60443/demo/\n"
+	@echo -e "\n\n*** no server implemented, access via http://$(shell hostname):60080/demo/\n"
