@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 713;
+    plan tests => 715;
 }
 
 BEGIN {
@@ -416,3 +416,42 @@ for my $mergedir (qw/1/) {
     is($out, "", "diff successfull");
     unlink($filename);
 }
+
+###########################################################
+# parsing params from request
+{
+    my $objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/2' });
+    $objects->init();
+    my $tmp = $objects->get_objects_by_name('host', 'host_name');
+    $obj = $tmp->[0];
+    isa_ok( $obj, 'Monitoring::Config::Object::Host' );
+    my $params = {
+        "type" => "host",
+        "data.id" => "18c66",
+        "obj.host_name" => "A host with spaces",
+        "obj.alias" => "A host with spaces",
+        "obj.address" => "127.0.0.12",
+        "obj.parents" => "omd-devel",
+        "obj.use" => "generic-host",
+        "obj.check_command.1" => "check-host-alive",
+        "obj.check_command.2" => "test",
+        "obj.contact_groups" => "omd",
+        "objkey.9" => "_IRMC_ADDRESS",
+        "obj._IRMC_ADDRESS" => "https://localhost/test",
+        "objkey.10" => "_TEST",
+        "obj._TEST" => "_TESThost",
+    };
+    my $data = $obj->get_data_from_param($params);
+    my $expected = {
+          '_IRMC_ADDRESS' => 'https://localhost/test',
+          '_TEST' => '_TESThost',
+          'address' => '127.0.0.12',
+          'alias' => 'A host with spaces',
+          'check_command' => 'check-host-alive!test',
+          'contact_groups' => [ 'omd' ],
+          'host_name' => 'A host with spaces',
+          'parents' => [ 'omd-devel' ],
+          'use' => [ 'generic-host' ]
+    };
+    is_deeply($data, $expected, 'getting request params');
+};

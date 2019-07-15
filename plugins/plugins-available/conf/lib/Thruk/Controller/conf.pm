@@ -2158,8 +2158,14 @@ sub _object_new {
     _set_files_stash($c, 1);
     $c->stash->{'new_file'} = '';
     my $standard_keys;
+    my $default_values = {};
     if($c->config->{'Thruk::Plugin::ConfigTool'}->{'default_keys_'.$c->stash->{'type'}}) {
-        $standard_keys = [split(/[\s,]+/mx, $c->config->{'Thruk::Plugin::ConfigTool'}->{'default_keys_'.$c->stash->{'type'}})];
+        $standard_keys = [split(/\s+/mx, $c->config->{'Thruk::Plugin::ConfigTool'}->{'default_keys_'.$c->stash->{'type'}})];
+        for my $k (@{$standard_keys}) {
+            my $v;
+            ($k,$v) = split(/:/mx, $k, 2);
+            $default_values->{$k} = $v if defined $v;
+        }
     }
     my $obj = Monitoring::Config::Object->new(type     => $c->stash->{'type'},
                                               name     => $c->stash->{'data_name'},
@@ -2172,9 +2178,11 @@ sub _object_new {
         return;
     }
 
+    $obj->{'conf'} = { %{$obj->{'conf'}}, %{$obj->sanitize_values($default_values)} };
+
     # set initial config from cgi parameters
     my $initial_conf = $obj->get_data_from_param($c->req->parameters, $obj->{'conf'});
-    if($obj->has_object_changed($initial_conf)) {
+    if(scalar keys %{$initial_conf} > 0 && $obj->has_object_changed($initial_conf)) {
         $c->{'obj_db'}->update_object($obj, $initial_conf );
     }
 

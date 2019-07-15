@@ -2324,9 +2324,9 @@ ex.:
     extra_custom_var_host     = _WORKER
     extra_custom_var_service  = _SNMP_COMMUNITY, _OTHER_CUSTOM_VARIABLE
     obj_readonly              = readonly files regular expression
-    # default_keys_host       = host_name, use, alias, address, contact_groups
-    # default_keys_service    = service_description, use, host_name, check_command, contact_groups
-    # default_keys_contact    = contact_name, use, alias, email, can_submit_commands
+    # default_keys_host       = host_name use:generic-host alias address contact_groups:example
+    # default_keys_service    = service_description use host_name check_command contact_groups
+    # default_keys_contact    = contact_name use alias email can_submit_commands
     # default_keys_...        = ... # set default keys for any type
   </Component>
 
@@ -2411,12 +2411,12 @@ details on the link:/documentation/configuration.html#peer[configtool section].
 
 === default_keys_host
 
-Sets the default attributes when creating a new host. Can contain custom variables
-like `_VAR`.
+Space separated list of default attributes when creating a new host. Can contain custom variables
+like `_VAR`. Append default value separated by a `:`.
 
 ex.:
 
-    default_keys_host       = host_name, use, alias, address, contact_groups, _WORKER
+    default_keys_host       = host_name use:generic-host alias address contact_groups _WORKER:local
 
 === default_keys_service
 

@@ -1334,6 +1334,7 @@ return all references for this object
 sub get_references {
     my($self, $obj, $name) = @_;
     $name = $obj->get_name() unless defined $name;
+    $name = '' unless defined $name;
 
     my $type = $obj->get_type();
     my $list = {};

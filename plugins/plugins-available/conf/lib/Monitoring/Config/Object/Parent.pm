@@ -555,32 +555,39 @@ get data hash from post parameter
 
 =cut
 sub get_data_from_param {
-    my $self     = shift;
-    my $param    = shift;
-    my $data     = shift || {};
-    my $defaults = $self->{'default'};
+    my($self, $param, $data) = @_;
+    $data = {} unless $data;
 
-    my @param_keys;
     my $new_param = {};
     for my $key (sort keys %{$param}) {
         next unless $key =~ m/^obj\./mx;
         my $value = $param->{$key};
         $key =~ s/^obj\.//mx;
-        $key =~ s/\.\d+$//mx;
 
         # remove whitespace
         $key   =~ s/^\s*(.*?)\s*$/$1/gmxo;
         $value =~ s/^\s*(.*?)\s*$/$1/gmxo unless ref $value;
 
-        push @param_keys, $key;
         $new_param->{$key} = $value;
     }
 
-    my %seen = ();
-    my @uniq = sort( grep { !$seen{$_}++ } (@param_keys, keys %{$self->{'conf'}}) );
-    for my $key (@uniq) {
-        my $value = $new_param->{$key};
-        next unless defined $value;
+    return($self->sanitize_values($new_param));
+}
+
+##########################################################
+
+=head2 sanitize_values
+
+turn lists into lists etc...
+
+=cut
+sub sanitize_values {
+    my($self, $data) = @_;
+    my $defaults = $self->{'default'};
+
+    for my $key (sort keys %{$data}) {
+        $key =~ s/\.\d+$//mx;
+        my $value = $data->{$key};
 
         if($self->{'type'} eq 'timeperiod' and $value =~ m/\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}/gmx) {
             # add leading zeros to timestamps
@@ -630,22 +637,19 @@ sub get_data_from_param {
         }
         elsif( $defaults->{$key}->{'type'} eq 'COMMAND' ) {
             # when there are arguments, join them with a !
-            if($param->{'obj.'.$key.'.2'} !~ m/^\s*$/mx) {
-                $data->{$key} = $param->{'obj.'.$key.'.1'}.'!'.$param->{'obj.'.$key.'.2'};
+            if(defined $data->{$key.'.2'} && $data->{$key.'.2'} !~ m/^\s*$/mx) {
+                $data->{$key} = $data->{$key.'.1'}.'!'.$data->{$key.'.2'};
             }
             # just use the command else
-            else {
-                $data->{$key} = $param->{'obj.'.$key.'.1'};
+            elsif(defined $data->{$key.'.1'}) {
+                $data->{$key} = $data->{$key.'.1'};
             }
-            delete $param->{$key.'.2'};
-        }
-        else {
-            $data->{$key} = $value;
+            delete $data->{$key.'.2'};
+            delete $data->{$key.'.1'};
         }
     }
-    return $data;
+    return($data);
 }
-
 
 ##########################################################
 
@@ -655,8 +659,7 @@ check if there are any differences between this object and a reference object
 
 =cut
 sub has_object_changed {
-    my $self = shift;
-    my $data = shift;
+    my($self, $data) = @_;
 
     my %seen = ();
     my @uniq = sort( grep { !$seen{$_}++ } (keys %{$data}, keys %{$self->{'conf'}}) );
