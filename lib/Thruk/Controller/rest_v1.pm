@@ -102,6 +102,11 @@ sub index {
         Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
     }
 
+    # refresh dynamic roles and groups
+    if($c->user && (!$c->user->{'timestamp'} || $c->user->{'timestamp'} < (time() - 600))) {
+        $c->user->set_dynamic_attributes($c);
+    }
+
     my $data;
     if($c->config->{'rest_api_enabled'} == 0) {
         $data = {

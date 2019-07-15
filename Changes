@@ -6,6 +6,8 @@ next:
             - use authorized_for_broadcasts role everywhere
           - Config Tool:
             - set default attributes for new objects
+          - REST:
+            - fix fetching roles when contact has groups
           - internals:
             - update daterangepicker 3.0.5
 
