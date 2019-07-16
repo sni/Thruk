@@ -2412,7 +2412,8 @@ details on the link:/documentation/configuration.html#peer[configtool section].
 === default_keys_host
 
 Space separated list of default attributes when creating a new host. Can contain custom variables
-like `_VAR`. Append default value separated by a `:`.
+like `_VAR`. Append default value separated by a `:`. This obviously means you
+cannot use spaces or colons in attributes or default values.
 
 ex.:
 
