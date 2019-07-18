@@ -274,6 +274,12 @@ sub _process_raw_request {
                     @vars{@{$obj->{custom_variable_names}}} = @{$obj->{custom_variable_values}};
                     $uniq->{$vars{$varname}} = 1;
                 }
+                if($varname eq 'THRUK_ACTION_MENU' && $c->config->{'action_menu_items'}) {
+                    # add available action menus
+                    for my $key (keys %{$c->config->{'action_menu_items'}}) {
+                        $uniq->{$key} = 1;
+                    }
+                }
                 @{$data} = sort keys %{$uniq};
                 @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
             }
