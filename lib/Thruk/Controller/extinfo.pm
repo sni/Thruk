@@ -844,12 +844,15 @@ sub _set_backend_selector {
 # get apache status
 sub _apache_status {
     my($c, $name, $url) = @_;
+    local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
+    local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     require Thruk::UserAgent;
     my $ua = Thruk::UserAgent->new($c->config);
     $ua->timeout(10);
     $ua->agent("thruk");
     $ua->ssl_opts('verify_hostname' => 0 );
     $ua->max_redirect(0);
+    $ua->no_proxy('127.0.0.1', 'localhost');
     # pass through authentication
     my $cookie = $c->cookie('thruk_auth');
     $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value.'; HttpOnly') if $cookie;
