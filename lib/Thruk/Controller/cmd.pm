@@ -365,6 +365,16 @@ sub _check_for_commands {
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_' . $cmd_typ . '.tt';
 
+        # check if cmd exists
+        my $found = 0;
+        for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+            if(-e $path.'/'.$c->stash->{template}) {
+                $found = 1;
+                last;
+            }
+        }
+        return $c->detach('/error/index/7') unless $found;
+
         # set a valid referer
         my $referer = $c->req->parameters->{'referer'} || $c->req->header('referer') || '';
         $referer =~ s/&amp;/&/gmx;
