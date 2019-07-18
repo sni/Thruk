@@ -301,6 +301,8 @@ sub _dispatcher {
     }
     local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $enable_profiles;
     local $ENV{'THRUK_PERFORMANCE_STACKS'} = 1 if $enable_profiles > 1;
+    $c->stash->{'inject_stats'} = 0 if(!$ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0); # do not inject stats if we want to log only
+    local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $c->config->{'slow_page_log_threshold'} > 0;
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
@@ -1042,6 +1044,16 @@ sub _after_dispatch {
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
         $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx if ref $res->[2] eq 'ARRAY';
         Thruk::Template::Context::reset_profiles() if $tt_profiling;
+    }
+    # slow pages log
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0 && $elapsed > $c->config->{'slow_page_log_threshold'}) {
+        $c->log->warn("***************************");
+        $c->log->warn(sprintf("slow_page_log_threshold (%ds) hit, page took %.1fs to load.", $c->config->{'slow_page_log_threshold'}, $elapsed));
+        $c->log->warn(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
+        $c->log->warn(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+        $c->log->warn(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+        $c->log->warn(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
+        $c->log->warn($c->stats->report());
     }
 
     my $content_length = _set_content_length($res);

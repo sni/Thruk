@@ -541,6 +541,16 @@ ex.:
   log4perl_conf = ./log4perl.conf
 
 
+=== slow_page_log_threshold
+
+If a page takes longer to render than this amount of seonds, a
+profile will be logged. Set to 0 to disable logging completely.
+
+ex.:
+
+  slow_page_log_threshold = 30
+
+
 === plugin_path
 
 Path to your plugins directory. Can be used to specify different

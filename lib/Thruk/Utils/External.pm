@@ -671,6 +671,7 @@ sub _do_child_stuff {
     $c && $c->app->reset_logging();
 
     $c && $c->stats->enable(1);
+    $c->config->{'slow_page_log_threshold'} = 0 if $c;
 
     return;
 }
