@@ -117,7 +117,7 @@ sub external_authentication {
                     return $sessionid;
                 }
             } else {
-                $login = '(unknown)' if ref $login eq 'HASH';
+                $login = '(by basic auth hash)' if ref $login eq 'HASH';
                 print STDERR 'authorization failed for user ', $login,' got rc ', $res->code, "\n";
                 return 0;
             }
