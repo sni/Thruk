@@ -179,10 +179,6 @@ sub index {
             }
         }
     }
-    else {
-        # clean up
-        Thruk::Utils::CookieAuth::clean_session_files($c->config);
-    }
 
     Thruk::Utils::ssi_include($c, 'login');
 

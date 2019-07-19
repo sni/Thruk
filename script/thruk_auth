@@ -236,7 +236,5 @@ sub clean_session_cache {
     for my $key (keys %{$sessioncache}) {
         delete $sessioncache->{$key} if $sessioncache->{$key}->{'time'} < $clean_before;
     }
-    # cleanup old session files
-    Thruk::Utils::CookieAuth::clean_session_files($config);
     return;
 }
