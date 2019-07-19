@@ -1,0 +1,34 @@
+﻿[% USE date %]
+[% WRAPPER _conf_objects_frame.tt %]
+
+
+<table border="0" class='data conftoolobj' width="800">
+  <tr>
+    <th class='data' colspan="6">
+      [%+ object.get_long_name('&nbsp;') %]<br>
+      <span style="font-weight:normal; font-size:smaller;">[% object.file.display %] line [% object.line %]</b></span>
+    </th>
+  </tr>
+  <tr>
+    <td class='dataVar'>commit</td>
+    <td class='dataVar'>author</td>
+    <td class='dataVar'>date</td>
+    <td class='dataVar'>summary</td>
+    <td class='dataVar'>line</td>
+    <td class='dataVar'></td>
+  </tr>
+  [% FOREACH l = blame.lines %]
+  [% hash = l.hash %]
+  [% commit = blame.commits.$hash %]
+  <tr>
+    <td class='dataVal'><a href="conf.cgi?sub=objects&action=history&id=[% hash | html %]">[% hash.substr(0, 6) %]</a></td>
+    <td class='dataVal'><a href="mailto:[% commit.item('author-mail').replace('<', '').replace('>', '') %]">[% commit.author | html %]</a></td>
+    <td class='dataVal' style="text-align: right;">[% date_format(c, commit.item('author-time')) %]</td>
+    <td class='dataVal' title="[% commit.summary | html %]"><a href="conf.cgi?sub=objects&action=history&id=[% hash | html %]">[% commit.summary.substr(0, 30) | html %]</a></td>
+    <td class='dataVal'>[% l.sourceline %]</td>
+    <td class='dataVal'><pre style="margin: 0; padding: 0;">[%- l.line | html -%]</pre></td>
+  </tr>
+  [% END %]
+</table>
+
+[% END %]

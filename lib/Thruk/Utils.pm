@@ -3373,4 +3373,20 @@ sub basename {
 
 ##############################################
 
+=head2 dirname
+
+    dirname($path)
+
+returns dirname for given path
+
+=cut
+sub dirname {
+    my($path) = @_;
+    my $dirname = $path;
+    $dirname    =~ s%/[^/]*$%%gmx;
+    return($dirname);
+}
+
+##############################################
+
 1;

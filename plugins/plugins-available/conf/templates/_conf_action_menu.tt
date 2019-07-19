@@ -27,6 +27,12 @@
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show references' title='Show references' width="16" height="16"></td>
                 <td class='command'><a href="conf.cgi?sub=objects&amp;action=listref&amp;data.id=[% object.get_id() %]">Show references</a></td>
                 </tr>
+                [% IF has_history %]
+                <tr class='data'>
+                  <td><img src='[% url_prefix %]themes/[% theme %]/images/date_magnify.png' border="0" alt='History' title='History' width="16" height="16"></td>
+                  <td class='command'><a href='conf.cgi?sub=objects&amp;action=history&data.id=[% object.get_id() %]'>Git Blame</a></td>
+                </tr>
+                [% END %]
               <tr class='data'>
                 <td colspan=2><hr></td>
               </tr>

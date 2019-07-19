@@ -2325,11 +2325,15 @@ sub _file_history {
     return 1 unless $c->stash->{'has_history'};
 
     my $commit     = $c->req->parameters->{'id'};
+    my $obj_id     = $c->req->parameters->{'data.id'};
     my $files_root = $c->{'obj_db'}->get_files_root();
     my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
 
     $c->stash->{'template'} = 'conf_objects_filehistory.tt';
 
+    if($obj_id) {
+        return if _file_history_blame_obj($c, $obj_id);
+    }
     if($commit) {
         return if _file_history_commit($c, $commit, $dir);
     }
@@ -2351,8 +2355,6 @@ sub _file_history_commit {
         Thruk::Utils::set_message( $c, 'fail_message', 'Not a valid commit id!' );
         return;
     }
-
-    $c->stash->{'template'} = 'conf_objects_filehistory_commit.tt';
 
     my $data = _get_git_commit($c, $dir, $commit);
     if(!$data) {
@@ -2382,9 +2384,33 @@ sub _file_history_commit {
     $data->{'diff'} = Thruk::Utils::beautify_diff($data->{'diff'});
     $data->{'diff'} =~ s/^\s+//gmx;
 
-    $c->stash->{'dir'}    = $dir;
-    $c->stash->{'data'}  = $data;
-    $c->stash->{'links'}  = $diff_link_files;
+    $c->stash->{'dir'}      = $dir;
+    $c->stash->{'data'}     = $data;
+    $c->stash->{'links'}    = $diff_link_files;
+    $c->stash->{'template'} = 'conf_objects_filehistory_commit.tt';
+
+    return 1;
+}
+
+##########################################################
+sub _file_history_blame_obj {
+    my($c, $obj_id) = @_;
+
+    my $obj = $c->{'obj_db'}->get_object_by_id($c->stash->{'data_id'});
+    if(!$obj) {
+        Thruk::Utils::set_message($c, 'fail_message', 'no such object');
+        return;
+    }
+    if(!$obj->{'file'} || $obj->{'line'} <= 0) {
+        Thruk::Utils::set_message($c, 'fail_message', 'object has not yet been saved');
+        return;
+    }
+
+    my $blame = _get_git_blame($c, $obj->{'file'}->{'path'}, $obj->{'line'}, $obj->{'line2'});
+
+    $c->stash->{'object'}   = $obj;
+    $c->stash->{'blame'}    = $blame;
+    $c->stash->{'template'} = 'conf_objects_filehistory_blame.tt';
 
     return 1;
 }
@@ -2436,6 +2462,61 @@ sub _get_git_commit {
             'diff'         => $d[8],
     };
     return $data;
+}
+
+##########################################################
+sub _get_git_blame {
+    my($c, $path, $line_start, $line_end) = @_;
+    my $dir = Thruk::Utils::dirname($path);
+    my $cmd = "cd '".$dir."' && git blame -swp -L $line_start,$line_end '".$path."'";
+    my $output = `$cmd`;
+    my $blame = {lines => [], commits => {}};
+    my($state, $block, $commit) = (0, {}, {});
+    for my $line (split/\n/mx, $output) {
+        # new commit header starts
+        if($state == 0) {
+            my($hash, $sourceline, $resultline, $num_lines) = split(/\s+/mx, $line);
+            $commit = {
+                hash       => $hash,
+                sourceline => $sourceline,
+                resultline => $resultline,
+                num_lines  => $num_lines,
+            };
+            $state = 3;
+            # new commit hash, parse commit details
+            if(!$blame->{'commits'}->{$hash}) {
+                $state = 2;
+                $blame->{'commits'}->{$hash} = $commit;
+            }
+            next;
+        }
+
+        # commit details parser
+        if($state == 2) {
+            my($key, $value) = split(/\s+/mx, $line, 2);
+            $commit->{$key} = $value;
+            if($key eq 'filename') {
+                # commit header parsing done
+                $state = 3;
+            }
+            next;
+        }
+
+        # line parser
+        if($state == 3) {
+            chomp($line);
+            $block = {
+                line       => $line,
+                hash       => $commit->{'hash'},
+                sourceline => $commit->{'sourceline'},
+                resultline => $commit->{'resultline'},
+            };
+            push @{$blame->{'lines'}}, $block;
+            $state = 0;
+            next;
+        }
+    }
+    return $blame;
 }
 
 ##########################################################
