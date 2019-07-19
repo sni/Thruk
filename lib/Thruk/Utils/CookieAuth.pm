@@ -201,16 +201,16 @@ sub get_user_agent {
 
 =head2 clean_session_files
 
-    clean_session_files($url)
+    clean_session_files($c)
 
 clean up session files
 
 =cut
 sub clean_session_files {
-    my($config) = @_;
-    die("no config") unless $config;
-    my $sdir    = $config->{'var_path'}.'/sessions';
-    my $cookie_auth_session_timeout = $config->{'cookie_auth_session_timeout'};
+    my($c) = @_;
+    die("no config") unless $c;
+    my $sdir    = $c->config->{'var_path'}.'/sessions';
+    my $cookie_auth_session_timeout = $c->config->{'cookie_auth_session_timeout'};
     if($cookie_auth_session_timeout <= 0) {
         # clean old unused sessions after one year, even if they don't expire
         $cookie_auth_session_timeout = 365 * 86400;
@@ -218,6 +218,7 @@ sub clean_session_files {
     my $timeout = time() - $cookie_auth_session_timeout;
     my $fake_session_timeout = time() - 600;
     Thruk::Utils::IO::mkdir($sdir);
+    my $sessions_by_user = {};
     opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
         next if $entry eq '.' or $entry eq '..';
@@ -233,11 +234,32 @@ sub clean_session_files {
                     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
                     if($data && $data->{'fake'}) {
                         unlink($file);
+                    } else {
+                        $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
                     }
                 };
             }
         }
     }
+
+    # limit sessions to 500 per user
+    my $max_sessions_per_user = 500;
+    for my $user (sort keys %{$sessions_by_user}) {
+        my $user_sessions = $sessions_by_user->{$user};
+        my $num = scalar keys %{$user_sessions};
+        if($num > $max_sessions_per_user) {
+            $c->log->warn(sprintf("user %s has %d open sessions (max. %d) cleaning up.", $user, $num, $max_sessions_per_user));
+            for my $file (reverse sort { $user_sessions->{$b} <=> $user_sessions->{$a} } keys %{$user_sessions}) {
+                if($num > $max_sessions_per_user) {
+                    unlink($file);
+                    $num--;
+                } else {
+                    last;
+                }
+            }
+        }
+    }
+
     return;
 }
 

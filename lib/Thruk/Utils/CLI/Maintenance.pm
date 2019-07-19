@@ -44,7 +44,7 @@ sub cmd {
     my($c, $action) = @_;
     $c->stats->profile(begin => "_cmd_maintenance($action)");
 
-    Thruk::Utils::CookieAuth::clean_session_files($c->config);
+    Thruk::Utils::CookieAuth::clean_session_files($c);
 
     $c->stats->profile(end => "_cmd_maintenance($action)");
     return("maintenance complete\n", 0);
