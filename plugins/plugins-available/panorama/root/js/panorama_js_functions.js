@@ -1988,6 +1988,8 @@ var TP = {
     },
     fullReload: function() {
         TP.log('[global] full reload');
+        // save current dashboards to a cookie, otherwise we would display something else after the reload
+        Ext.getCmp('tabpan').getState();
         reloadPage();
     },
     log: function(str) {
@@ -2190,6 +2192,22 @@ var TP = {
                 history.replaceState({}, "", newUrl);
             } catch(err) { debug(err) }
         }
+    },
+    saveOpenTabsToCookie: function(tab, open_tabs) {
+        var activeTab = tab.getActiveTab();
+        if(!activeTab) {
+            debug("forced setting activeTab");
+            activeTab = tab.setActiveTab(open_tabs.length > 0 ? open_tabs[0] : 0);
+        }
+        cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^tabpan-tab_/, '') : 0);
+        var numbers = [];
+        for(var nr=0; nr<open_tabs.length; nr++) {
+            var num = open_tabs[nr].replace(/^tabpan-tab_/, '');
+            if(num > 0) {
+                numbers.push(num);
+            }
+        }
+        cookieSave('thruk_panorama_tabs', numbers.join(':'));
     }
 }
 TP.log('[global] starting');

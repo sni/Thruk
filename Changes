@@ -10,6 +10,8 @@ next:
             - add git blame page for config objects
           - REST:
             - fix fetching roles when contact has groups
+          - Panorama:
+            - fix changing open dashboards on reloads
           - internals:
             - update daterangepicker 3.0.5
 
