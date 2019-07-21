@@ -301,7 +301,7 @@ sub _dispatcher {
     }
     local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $enable_profiles;
     local $ENV{'THRUK_PERFORMANCE_STACKS'} = 1 if $enable_profiles > 1;
-    $c->stash->{'inject_stats'} = 0 if(!$ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0); # do not inject stats if we want to log only
+    local $ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'} = 1 if(!$ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0); # do not inject stats if we want to log only
     local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $c->config->{'slow_page_log_threshold'} > 0;
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
@@ -1036,7 +1036,7 @@ sub _after_dispatch {
     $c->stash->{'time_total'} = $elapsed;
 
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'}) {
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
         # inject stats into html page
         push @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
         push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
@@ -1061,7 +1061,7 @@ sub _after_dispatch {
     # last possible time to report/save profile
     Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
 
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'memory_begin'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
         $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
         $url     = $c->req->url unless $url;
         $url     =~ s|^https?://[^/]+/|/|mxo;
