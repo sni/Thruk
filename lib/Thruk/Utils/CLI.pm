@@ -734,7 +734,7 @@ sub _run_command_action {
             $skip_backends = ${"Thruk::Utils::CLI::".ucfirst($action)."::skip_backends"};
         }
         if(!defined $c->stash->{'defaults_added'} && !$skip_backends) {
-            Thruk::Action::AddDefaults::add_defaults($c, 1);
+            Thruk::Action::AddDefaults::add_defaults($c, 2);
 
             # set backends from options
             if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {

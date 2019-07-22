@@ -1147,6 +1147,7 @@ sub _set_enabled_backends {
                     } else {
                         # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
                         #die("got no peer for: ".$b)
+                        $c->log->warn(sprintf("no backend found for: %s", $b));
                     }
                 }
             }
@@ -1168,9 +1169,13 @@ sub _set_enabled_backends {
                 }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
-                next if(!$peer && $safe);
-                die("got no peer for: ".$b) unless defined $peer; # leads to hen/egg problem when using federation peers
-                $disabled_backends->{$peer->{'key'}} = 0;
+                if($peer) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                } else {
+                    # silently ignore, leads to hen/egg problem when using federation peers
+                    #die("got no peer for: ".$b);
+                    #$c->log->warn(sprintf("no backend found for: %s", $b));
+                }
             }
         }
     }

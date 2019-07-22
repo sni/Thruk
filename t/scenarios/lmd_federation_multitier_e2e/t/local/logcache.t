@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 13;
+plan tests => 14;
 
 ###########################################################
 # test thruks script path
@@ -24,5 +24,5 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd    => '/usr/bin/env thruk -b tier3a logcache update ',
-    like   => ['/OK\ \-\ imported/'],
+    like   => ['/OK\ \-\ imported/', '/items\ from\ 1\ site\ successfully/'],
 });
