@@ -918,6 +918,7 @@ sub _log_stats {
     for my $key (@{$c->stash->{'backends'}}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'logcache'};
+        next unless $peer->{'enabled'};
         $peer->logcache->reconnect();
         my $dbh  = $peer->logcache->_dbh();
         my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');
