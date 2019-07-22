@@ -1580,6 +1580,17 @@ sub _rest_get_livestatus_hostgroups {
 }
 
 ##########################################################
+# REST PATH: GET /hostgroups/<name>
+# lists hostgroups for given name.
+# alias for /hostgroups?name=<name>
+register_rest_path_v1('GET', qr%^/hostgroups?/([^/]+)$%mx, \&_rest_get_livestatus_hostgroups_by_name);
+sub _rest_get_livestatus_hostgroups_by_name {
+    my($c, undef, $hostgroup) = @_;
+    my $data = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), { "name" => $hostgroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /hostgroups/<name>/stats
 # hash of livestatus hostgroup statistics.
 # alias for /hosts/stats?groups[gte]=<name>
@@ -1669,6 +1680,17 @@ sub _rest_get_livestatus_servicegroups {
 }
 
 ##########################################################
+# REST PATH: GET /servicegroups/<name>
+# lists servicegroups for given name.
+# alias for /servicegroups?name=<name>
+register_rest_path_v1('GET', qr%^/servicegroups?/([^/]+)$%mx, \&_rest_get_livestatus_servicegroups_by_name);
+sub _rest_get_livestatus_servicegroups_by_name {
+    my($c, undef, $servicegroup) = @_;
+    my $data = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), { "name" => $servicegroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /servicegroups/<name>/stats
 # hash of livestatus servicegroup statistics.
 # alias for /services/stats?service_groups[gte]=<name>
@@ -1691,6 +1713,17 @@ sub _rest_get_livestatus_contacts {
 }
 
 ##########################################################
+# REST PATH: GET /contacts/<name>
+# lists contacts for given name.
+# alias for /contacts?name=<name>
+register_rest_path_v1('GET', qr%^/contacts?/([^/]+)$%mx, \&_rest_get_livestatus_contacts_by_name);
+sub _rest_get_livestatus_contacts_by_name {
+    my($c, undef, $contact) = @_;
+    my $data = $c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contacts'), { "name" => $contact }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /contactgroups
 # lists livestatus contactgroups.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
@@ -1698,6 +1731,17 @@ register_rest_path_v1('GET', qr%^/contactgroups?$%mx, \&_rest_get_livestatus_con
 sub _rest_get_livestatus_contactgroups {
     my($c) = @_;
     return($c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /contactgroups/<name>
+# lists contactgroups for given name.
+# alias for /contactgroups?name=<name>
+register_rest_path_v1('GET', qr%^/contactgroups?/([^/]+)$%mx, \&_rest_get_livestatus_contactgroups_by_name);
+sub _rest_get_livestatus_contactgroups_by_name {
+    my($c, undef, $contactgroup) = @_;
+    my $data = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), { "name" => $contactgroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
 }
 
 ##########################################################
@@ -1711,6 +1755,17 @@ sub _rest_get_livestatus_timeperiods {
 }
 
 ##########################################################
+# REST PATH: GET /timeperiods/<name>
+# lists timeperiods for given name.
+# alias for /timeperiods?name=<name>
+register_rest_path_v1('GET', qr%^/timeperiods?/([^/]+)$%mx, \&_rest_get_livestatus_timeperiods_by_name);
+sub _rest_get_livestatus_timeperiods_by_name {
+    my($c, undef, $timeperiod) = @_;
+    my $data = $c->{'db'}->get_timeperiods(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods'), { "name" => $timeperiod }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /commands
 # lists livestatus commands.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
@@ -1718,6 +1773,17 @@ register_rest_path_v1('GET', qr%^/commands?$%mx, \&_rest_get_livestatus_commands
 sub _rest_get_livestatus_commands {
     my($c) = @_;
     return($c->{'db'}->get_commands(filter => [_livestatus_filter($c)], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /commands/<name>
+# lists commands for given name.
+# alias for /commands?name=<name>
+register_rest_path_v1('GET', qr%^/commands?/([^/]+)$%mx, \&_rest_get_livestatus_commands_by_name);
+sub _rest_get_livestatus_commands_by_name {
+    my($c, undef, $command) = @_;
+    my $data = $c->{'db'}->get_commands(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'commands'), { "name" => $command }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
 }
 
 ##########################################################
@@ -1731,6 +1797,17 @@ sub _rest_get_livestatus_comments {
 }
 
 ##########################################################
+# REST PATH: GET /comments/<id>
+# lists comments for given id.
+# alias for /comments?id=<id>
+register_rest_path_v1('GET', qr%^/comments?/([^/]+)$%mx, \&_rest_get_livestatus_comments_by_id);
+sub _rest_get_livestatus_comments_by_id {
+    my($c, undef, $id) = @_;
+    my $data = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /downtimes
 # lists livestatus downtimes.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
@@ -1738,6 +1815,17 @@ register_rest_path_v1('GET', qr%^/downtimes?$%mx, \&_rest_get_livestatus_downtim
 sub _rest_get_livestatus_downtimes {
     my($c) = @_;
     return($c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /downtimes/<id>
+# lists downtimes for given id.
+# alias for /downtimes?id=<id>
+register_rest_path_v1('GET', qr%^/downtimes?/([^/]+)$%mx, \&_rest_get_livestatus_downtimes_by_id);
+sub _rest_get_livestatus_downtimes_by_id {
+    my($c, undef, $id) = @_;
+    my $data = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
 }
 
 ##########################################################

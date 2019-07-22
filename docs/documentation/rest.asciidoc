@@ -467,6 +467,11 @@ lists host / service check statistics.
 lists livestatus commands.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
 
+=== GET /commands/<name>
+
+lists commands for given name.
+alias for /commands?name=<name>
+
 === GET /commands/<name>/config
 
 Returns configuration for given command.
@@ -488,6 +493,11 @@ Deletes given command from configuration.
 
 lists livestatus comments.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
+
+=== GET /comments/<id>
+
+lists comments for given id.
+alias for /comments?id=<id>
 
 === POST /config/check
 
@@ -584,6 +594,11 @@ Saves stashed configuration changes to disk.
 lists livestatus contactgroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
 
+=== GET /contactgroups/<name>
+
+lists contactgroups for given name.
+alias for /contactgroups?name=<name>
+
 === POST /contactgroups/<name>/cmd/...
 
 external commands are documented in detail on a separate commands page.
@@ -615,6 +630,11 @@ Deletes given contactgroup from configuration.
 
 lists livestatus contacts.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+
+=== GET /contacts/<name>
+
+lists contacts for given name.
+alias for /contacts?name=<name>
 
 === POST /contacts/<name>/cmd/...
 
@@ -649,10 +669,20 @@ Deletes given contact from configuration.
 lists livestatus downtimes.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
 
+=== GET /downtimes/<id>
+
+lists downtimes for given id.
+alias for /downtimes?id=<id>
+
 === GET /hostgroups
 
 lists livestatus hostgroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
+
+=== GET /hostgroups/<name>
+
+lists hostgroups for given name.
+alias for /hostgroups?name=<name>
 
 === POST /hostgroups/<name>/cmd/...
 
@@ -934,6 +964,11 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#status for d
 
 lists livestatus servicegroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
+
+=== GET /servicegroups/<name>
+
+lists servicegroups for given name.
+alias for /servicegroups?name=<name>
 
 === POST /servicegroups/<name>/cmd/...
 
@@ -1628,6 +1663,11 @@ alias for /thruk/users?id=<id>
 
 lists livestatus timeperiods.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+
+=== GET /timeperiods/<name>
+
+lists timeperiods for given name.
+alias for /timeperiods?name=<name>
 
 === GET /timeperiods/<name>/config
 
