@@ -1,0 +1,159 @@
+﻿[% USE date %]
+
+<table border="1" cellspacing="0" cellpadding="0" class='data procInfoTable'>
+  <tr>
+    <td class='stateInfoTable1'>
+      <table border="0" class="search_hide_empty procInfo condensed">
+        <tr>
+          <td class='dataVar' nowrap colspan="5"></td>
+          <td class='dataVar' nowrap colspan="2">Checks Enabled</td>
+          <td class='dataVar' nowrap></td>
+          <td class='dataVar' nowrap colspan="2">Obsessing Over</td>
+          <td class='dataVar' nowrap>Flap</td>
+        </tr>
+        <tr>
+          <td class='dataVar' nowrap>Section</td>
+          <td class='dataVar' nowrap>Name</td>
+          <td class='dataVar' nowrap>Version</td>
+          <td class='dataVar' nowrap>Start Time</td>
+          <td class='dataVar' nowrap>Notifications</td>
+          <td class='dataVar' nowrap>Services</td>
+          <td class='dataVar' nowrap>Hosts</td>
+          <td class='dataVar' nowrap>Event Handlers</td>
+          <td class='dataVar' nowrap>Services</td>
+          <td class='dataVar' nowrap>Hosts</td>
+          <td class='dataVar' nowrap>Detection</td>
+          <td class='dataVar' nowrap>Perfdata</td>
+          <td class='dataVar' nowrap>Data Source</td>
+          <td class='dataVar' nowrap>Data Source Version</td>
+        </tr>
+
+
+        [% last_section = "" %]
+        [% FOREACH pd IN backends %]
+        <tr>
+          <td class='dataVal' style="text-align: left;">
+            <span [% IF last_section == backend_detail.$pd.section %]style="display: none;"[% END %]>
+            [% backend_detail.$pd.section %]/
+            </span>
+            [% last_section = backend_detail.$pd.section %]
+          </td>
+          <td class='dataVal' width="180" title="id: [% pd %]">
+            <b>
+            [% remote_thruk_url = get_remote_thruk_url(c, pd); IF remote_thruk_url %]
+            <a href="proxy.cgi/[% pd %][% remote_thruk_url %]" target="_blank">
+            [% END %]
+            [% IF backend_detail.$pd.name %]
+              [% backend_detail.$pd.name %]
+            [% ELSE %]
+            unknown
+            [% END %]
+            [% IF remote_thruk_url %]
+            </a>
+            [% END %]
+            </b>
+          </td>
+          <td class='dataVal'>[% IF backend_detail.$pd.running %][% pi_detail.$pd.program_version %][% ELSE %]&nbsp;[% END %]</td>
+          <td class='dataVal' nowrap>
+            [% down = 0 %]
+            [% IF backend_detail.$pd.running %]
+              [% date_format(c, pi_detail.$pd.program_start) %]
+            [% ELSIF backend_detail.$pd.disabled == 2 %]
+            <div class='peerDIS'>&nbsp;&nbsp;HIDDEN&nbsp;&nbsp;</div>
+            [% ELSE %]
+            <div class='peerDOWN'>&nbsp;&nbsp;DOWN&nbsp;&nbsp;</div>
+            [% down = 1 %]
+            [% END %]
+          </td>
+          [% IF down == 1 %]
+          <td class='dataVal' colspan="8" style="text-align: left;">
+            [% IF backend_detail.$pd.last_error != "OK" %]
+              [% escape_html(backend_detail.$pd.last_error) %]
+            [% END %]
+          </td>
+          [% ELSE %]
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.enable_notifications %]
+              <div class='notificationsENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+              [% ELSE %]
+              <div class='notificationsDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+              [% END %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.execute_service_checks && pi_detail.$pd.accept_passive_service_checks %]
+                <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+              [% ELSIF pi_detail.$pd.accept_passive_service_checks %]
+                <div class='checksDISABLED'>&nbsp;&nbsp;PASSIVE ONLY&nbsp;&nbsp;</div>
+              [% ELSIF pi_detail.$pd.execute_service_checks %]
+                <div class='checksDISABLED'>&nbsp;&nbsp;ACTIVE ONLY&nbsp;&nbsp;</div>
+              [% ELSE %]
+                <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+              [% END %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.execute_host_checks && pi_detail.$pd.accept_passive_host_checks %]
+              <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+              [% ELSIF pi_detail.$pd.accept_passive_host_checks %]
+              <div class='checksDISABLED'>&nbsp;&nbsp;PASSIVE ONLY&nbsp;&nbsp;</div>
+              [% ELSIF pi_detail.$pd.execute_host_checks %]
+              <div class='checksDISABLED'>&nbsp;&nbsp;ACTIVE ONLY&nbsp;&nbsp;</div>
+              [% ELSE %]
+              <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+              [% END %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.enable_event_handlers %]
+              <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+              [% ELSE %]
+              <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+              [% END %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.obsess_over_services %]Yes[% ELSE %]No[% END %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.obsess_over_hosts %]Yes[% ELSE %]No[% END %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.enable_flap_detection %]Yes[% ELSE %]No[% END %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF backend_detail.$pd.running %]
+              [% IF pi_detail.$pd.process_performance_data %]Yes[% ELSE %]No[% END %]
+            [% END %]
+          </td>
+          [% END %]
+          <td class='dataVal dataSource' style="white-space: nowrap;">
+            [% IF backend_detail.$pd.exists('fed_info') %]
+            <span title="[% FOREACH addr IN backend_detail.$pd.fed_info.addr %][% addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') | html %]&#013;[% END %]">
+            [% END %]
+            [% backend_detail.$pd.addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') | html %]
+            [% IF backend_detail.$pd.exists('fed_info') %]
+            </span>
+            [% END %]
+          </td>
+          <td class='dataVal dataValBackendVersion'>
+            [% IF backend_detail.$pd.running %]
+              [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
+            [% END %]
+          </td>
+        </tr>
+        [% END %]
+      </table>
+    </td>
+  </tr>
+</table>

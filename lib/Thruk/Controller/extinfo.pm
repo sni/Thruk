@@ -708,6 +708,26 @@ sub _process_process_info_page {
     my( $c ) = @_;
 
     return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
+
+    my $list_mode = $c->req->parameters->{'list'};
+    if(scalar @{$c->stash->{'backends'}} > 5) {
+        $list_mode = 'list' unless defined $list_mode;
+        my $backends = [];
+        for my $key (@{$c->stash->{'backends'}}) {
+            push @{$backends}, {
+                peer_key  => $key,
+                peer_name => $c->stash->{'backend_detail'}->{$key}->{'name'},
+                section   => $c->stash->{'backend_detail'}->{$key}->{'section'},
+            };
+        }
+        $backends = Thruk::Backend::Manager::_sort($c, $backends, { 'ASC' => [ 'section', 'peer_name' ] });
+        $c->stash->{'backends'} = [];
+        for my $p (@{$backends}) {
+            push @{$c->stash->{'backends'}}, $p->{'peer_key'};
+        }
+    }
+    $c->stash->{'list_mode'} = $list_mode // 'details';
+
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     if($view_mode eq 'json') {
         my $merged = {};

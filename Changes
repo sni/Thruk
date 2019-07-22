@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - show all host columns only once in service details
+          - add list view process info when connecting more than 5 sites
           - fix keyboard control of datepicker (#946)
           - Broadcasts:
             - use authorized_for_broadcasts role everywhere

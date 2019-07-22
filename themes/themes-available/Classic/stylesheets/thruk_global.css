@@ -1469,6 +1469,10 @@ BUTTON.small, INPUT.small {
   background-size: 16px 16px;
 }
 
+BUTTON.thruk_btn.small {
+  background-repeat: no-repeat;
+}
+
 .text_ellipsis {
   overflow: hidden;
   white-space: nowrap;
@@ -1616,4 +1620,12 @@ th.sticky-header {
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+TABLE.condensed DIV.checksENABLED, TABLE.condensed DIV.checksDISABLED,
+TABLE.condensed DIV.notificationsENABLED, TABLE.condensed DIV.notificationsDISABLED {
+  width: 60px;
+}
+TABLE.condensed TD.dataVar {
+  text-align: center;
 }

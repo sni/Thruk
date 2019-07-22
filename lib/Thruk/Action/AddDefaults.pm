@@ -1309,7 +1309,7 @@ sub check_federation_peers {
     return($processinfo, $cached_data) if $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
     my $all_sites_info;
     eval {
-        $all_sites_info = $c->{'db'}->get_sites(backend => ["ALL"]);
+        $all_sites_info = $c->{'db'}->get_sites(backend => ["ALL"], sort => {'ASC' => 'peer_name'});
     };
     if($@) {
         # may fail for older lmd releases which don't have parent or section information
