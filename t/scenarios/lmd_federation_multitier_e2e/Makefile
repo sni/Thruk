@@ -13,3 +13,9 @@ wait_start_failed_extra:
 
 extra_clean:
 	-killall lmd
+
+extra_test:
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root tier1a sudo -iu demo /test/t/local_test.sh 0
+
+extra_test_verbose:
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root tier1a sudo -iu demo /test/t/local_test.sh 1

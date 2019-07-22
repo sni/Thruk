@@ -2079,6 +2079,8 @@ t/scenarios/lmd_federation_multitier_e2e/Makefile
 t/scenarios/lmd_federation_multitier_e2e/objects.cfg
 t/scenarios/lmd_federation_multitier_e2e/README
 t/scenarios/lmd_federation_multitier_e2e/t/100-lmd_federation_multitier.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/logcache.t
+t/scenarios/lmd_federation_multitier_e2e/t/local_test.sh
 t/scenarios/lmd_federation_multitier_e2e/thruk.conf
 t/scenarios/lmd_federation_multitier_e2e/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier1a/1.tbp
