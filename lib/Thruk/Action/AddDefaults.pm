@@ -1168,7 +1168,8 @@ sub _set_enabled_backends {
                 }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
-                die("got no peer for: ".$b) unless defined $peer;
+                next if(!$peer && $safe);
+                die("got no peer for: ".$b) unless defined $peer; # leads to hen/egg problem when using federation peers
                 $disabled_backends->{$peer->{'key'}} = 0;
             }
         }
