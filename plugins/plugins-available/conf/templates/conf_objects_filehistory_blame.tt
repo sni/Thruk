@@ -4,8 +4,9 @@
 
 <table border="0" class='data conftoolobj' width="800">
   <tr>
-    <th class='data' colspan="6">
-      [%+ object.get_long_name('&nbsp;') %]<br>
+    <th class='data' width="5%" align="left" style="vertical-align: top;"><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+    <th class='data' colspan="5">
+      <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">[%+ object.get_long_name('&nbsp;') %]</a><br>
       <span style="font-weight:normal; font-size:smaller;">[% object.file.display %] line [% object.line %]</b></span>
     </th>
   </tr>
