@@ -1336,9 +1336,11 @@ sub _rest_get_thruk_sessions {
         $uniq->{$session_data->{'username'}} = 1;
 
         next unless($is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'});
-        delete $session_data->{'hash'};
-        delete $session_data->{'private_key'};
-        delete $session_data->{'csrf_token'};
+        if($id) {
+            next unless($session_data->{'hashed_key'} eq $id);
+        }
+        delete $session_data->{'hash'};       # basic auth token is never public
+        delete $session_data->{'csrf_token'}; # also not public
         push @{$data}, $session_data;
     }
     if($id) {
@@ -1346,6 +1348,7 @@ sub _rest_get_thruk_sessions {
             return({ 'message' => 'no such session', code => 404 });
         }
         $data = $data->[0];
+        return($data);
     }
     $c->metrics->set('sessions_total', $total_number, "total number of thruk sessions");
     $c->metrics->set('sessions_uniq_user_total', scalar keys %{$uniq}, "total number of uniq users");
