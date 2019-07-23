@@ -42,13 +42,14 @@ create new peer
 =cut
 
 sub new {
-    my($class, $config, $thruk_config, $existing_keys) = @_;
+    my($class, $peer_config, $thruk_config, $existing_keys) = @_;
     my $self = {
-        'config'        => $config,
+        'peer_config'   => $peer_config,
+        'thruk_config'  => $thruk_config,
         'existing_keys' => $existing_keys,
     };
     bless $self, $class;
-    $self->_initialise_peer($config, $thruk_config);
+    $self->_initialise_peer();
     return $self;
 }
 
@@ -96,7 +97,7 @@ sub peer_list {
         return($list);
     }
     elsif($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
-        return([$self->{'config'}->{'options'}->{'fallback_peer'}, $self->{'addr'}]);
+        return([$self->{'peer_config'}->{'options'}->{'fallback_peer'}, $self->{'addr'}]);
     }
     return([$self->{'addr'}]);
 }
@@ -112,11 +113,11 @@ return a new backend class
 =cut
 
 sub _create_backend {
-    my($self, $config, $peerconfig, $product_prefix, $thruk_config) = @_;
-
-    my $name    = $config->{'name'};
-    my $type    = lc $config->{'type'};
-    my $options = $config->{'options'};
+    my($self) = @_;
+    my $peer_config  = $self->{'peer_config'};
+    my $thruk_config = $self->{'thruk_config'};
+    my $name         = $peer_config->{'name'};
+    my $type         = lc $peer_config->{'type'};
     my $class;
 
     if($type eq 'livestatus') {
@@ -140,49 +141,50 @@ sub _create_backend {
         $Thruk::Backend::Manager::ProviderLoaded->{$type} = $class;
     }
 
-    $options->{'name'} = $name;
+    $peer_config->{'options'}->{'name'} = $name;
 
     # disable keepalive for now, it does not work and causes lots of problems
-    $options->{'keepalive'} = 0 if defined $options->{'keepalive'};
+    $peer_config->{'options'}->{'keepalive'} = 0 if defined $peer_config->{'options'}->{'keepalive'};
 
-    my $obj = $class->new($options, $peerconfig, $config, $product_prefix, $thruk_config);
+    my $obj = $class->new($peer_config, $thruk_config);
     return $obj;
 }
 
 
 ##########################################################
 sub _initialise_peer {
-    my($self, $config, $thruk_config) = @_;
+    my($self) = @_;
+    my $peer_config  = $self->{'peer_config'};
+    my $thruk_config = $self->{'thruk_config'};
 
-    my $logcache       = $config->{'logcache'} // $thruk_config->{'logcache'};
-    my $product_prefix = $thruk_config->{'product_prefix'};
+    my $logcache       = $peer_config->{'logcache'} // $thruk_config->{'logcache'};
 
-    confess "missing name in peer configuration" unless defined $config->{'name'};
-    confess "missing type in peer configuration" unless defined $config->{'type'};
+    confess "missing name in peer configuration" unless defined $peer_config->{'name'};
+    confess "missing type in peer configuration" unless defined $peer_config->{'type'};
 
     # parse list of peers for LMD
-    if($self->{'config'}->{'options'}->{'peer'} && ref $self->{'config'}->{'options'}->{'peer'} eq 'ARRAY') {
-        $self->{'peer_list'} = $self->{'config'}->{'options'}->{'peer'};
-        $self->{'config'}->{'options'}->{'peer'} = $self->{'config'}->{'options'}->{'peer'}->[0];
+    if($peer_config->{'options'}->{'peer'} && ref $peer_config->{'options'}->{'peer'} eq 'ARRAY') {
+        $self->{'peer_list'} = $peer_config->{'options'}->{'peer'};
+        $peer_config->{'options'}->{'peer'} = $peer_config->{'options'}->{'peer'}->[0];
     }
-    $self->{'name'}          = $config->{'name'};
-    $self->{'type'}          = $config->{'type'};
-    $self->{'hidden'}        = defined $config->{'hidden'} ? $config->{'hidden'} : 0;
-    $self->{'display'}       = defined $config->{'display'} ? $config->{'display'} : 1;
-    $self->{'groups'}        = $config->{'groups'};
-    $self->{'resource_file'} = $config->{'options'}->{'resource_file'};
-    $self->{'section'}       = $config->{'section'} || 'Default';
+    $self->{'name'}          = $peer_config->{'name'};
+    $self->{'type'}          = $peer_config->{'type'};
+    $self->{'hidden'}        = defined $peer_config->{'hidden'} ? $peer_config->{'hidden'} : 0;
+    $self->{'display'}       = defined $peer_config->{'display'} ? $peer_config->{'display'} : 1;
+    $self->{'groups'}        = $peer_config->{'groups'};
+    $self->{'resource_file'} = $peer_config->{'options'}->{'resource_file'};
+    $self->{'section'}       = $peer_config->{'section'} || 'Default';
     $self->{'enabled'}       = 1;
-    $config->{'configtool'}  = {} unless defined $config->{'configtool'};
-    $self->{'class'}         = $self->_create_backend($config, $self->{'config'}, $product_prefix, $thruk_config);
-    $self->{'configtool'}    = $config->{'configtool'};
+    $peer_config->{'configtool'}  = {} unless defined $peer_config->{'configtool'};
+    $self->{'class'}         = $self->_create_backend();
+    $self->{'configtool'}    = $peer_config->{'configtool'};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
-    $self->{'state_host'}    = $config->{'state_host'};
+    $self->{'state_host'}    = $peer_config->{'state_host'};
 
     # shorten backend id
     my $key = substr(md5_hex($self->{'class'}->peer_addr." ".$self->{'class'}->peer_name), 0, 5);
-    $key    = $config->{'id'} if defined $config->{'id'};
+    $key    = $peer_config->{'id'} if defined $peer_config->{'id'};
     $key    =~ s/[^a-zA-Z0-9]//gmx;
 
     # make sure id is uniq
@@ -202,7 +204,7 @@ sub _initialise_peer {
     # state hosts
     my $addr              = $self->{'addr'};
     $self->{'local'}      = 0;
-    $self->{'state_host'} = $config->{'state_host'};
+    $self->{'state_host'} = $peer_config->{'state_host'};
     if($addr) {
         if($self->{'type'} eq 'http') {
             $addr =~ s/^http(|s):\/\///mx;
@@ -225,7 +227,7 @@ sub _initialise_peer {
     }
 
     # log cache?
-    if($logcache && ($config->{'type'} eq 'livestatus' || $config->{'type'} eq 'http')) {
+    if($logcache && ($peer_config->{'type'} eq 'livestatus' || $peer_config->{'type'} eq 'http')) {
         if($logcache !~ m/^mysql/mxi) {
             die("no or unknown type in logcache connection: ".$logcache);
         } else {

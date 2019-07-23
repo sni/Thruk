@@ -25,7 +25,6 @@ create new manager
 =cut
 
 sub new {
-    #my( $class, $c )...
     my( $class ) = @_;
     my $self = {};
     bless $self, $class;

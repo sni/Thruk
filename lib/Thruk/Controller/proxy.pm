@@ -18,7 +18,7 @@ Thruk Controller
 =cut
 
 use HTTP::Request 6.12 ();
-use LWP::UserAgent ();
+use Thruk::UserAgent ();
 
 ##########################################################
 sub index {
@@ -77,7 +77,7 @@ sub index {
     if($passthrough) {
         $req->header('X-Thruk-Passthrough', $passthrough);
     }
-    my $ua = LWP::UserAgent->new;
+    my $ua = Thruk::UserAgent->new({ use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
     $ua->max_redirect(0);
     $ua->ssl_opts('verify_hostname' => 0 ) if($request_url =~ m/^(http|https):\/\/localhost/mx || $request_url =~ m/^(http|https):\/\/127\./mx);
     if(!$c->config->{'ssl_verify_hostnames'}) {
@@ -88,6 +88,9 @@ sub index {
         };
         $ua->ssl_opts('verify_hostname' => 0 );
     }
+    eval {
+        IO::Socket::SSL::set_ctx_defaults( SSL_ca_path => ($c->config->{ssl_ca_path} || "/etc/ssl/certs" ));
+    };
 
     $req->header('X-Thruk-Proxy', 1);
     _add_cookie($req, 'thruk_auth', $session_id);

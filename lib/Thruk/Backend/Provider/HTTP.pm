@@ -26,17 +26,17 @@ create new manager
 
 =cut
 sub new {
-    my($class, $options, $peerconfig, $config, $product_prefix, $thruk_config) = @_;
+    my($class, $peer_config, $thruk_config) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
+    my $options = $peer_config->{'options'};
+    die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     my $self = {
         'fast_query_timeout'   => 10,
         'timeout'              => 100,
         'logs_timeout'         => 300,
-        'config'               => $config,
-        'peerconfig'           => $peerconfig,
-        'product_prefix'       => $product_prefix,
+        'peer_config'          => $peer_config,
+        'thruk_config'         => $thruk_config,
         'key'                  => '',
         'name'                 => $options->{'name'},
         'addr'                 => $options->{'peer'},
@@ -45,7 +45,6 @@ sub new {
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
         'min_backend_version'  => 1.63,
-        'verify_hostname'      => $thruk_config->{'ssl_verify_hostnames'},
     };
     bless $self, $class;
 
@@ -124,8 +123,7 @@ recreate lwp object
 sub reconnect {
     my($self) = @_;
 
-    my $verify_hostname = 1;
-    $verify_hostname = $self->{'verify_hostname'} if defined $self->{'verify_hostname'};
+    my $verify_hostname = $self->{'thruk_config'}->{'verify_hostname'} // 1;
     if(!$self->{'modules_loaded'}) {
         if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
             if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $self->{'addr'} =~ m/^https:/mx) {
@@ -137,6 +135,9 @@ sub reconnect {
                 };
             }
         }
+        eval {
+          IO::Socket::SSL::set_ctx_defaults( SSL_ca_path => ($self->{'thruk_config'}->{ssl_ca_path} || "/etc/ssl/certs" ));
+        };
         load Thruk::UserAgent;
     }
 
@@ -145,7 +146,7 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} =~ s|cgi-bin$||mx;
     $self->{'addr'} =~ s|/$||mx;
-    my $pp = $self->{'product_prefix'} || 'thruk';
+    my $pp = $self->{'thruk_config'}->{'product_prefix'} || 'thruk';
     $self->{'addr'} =~ s|\Q$pp\E$||mx;
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
@@ -884,7 +885,7 @@ sub _req {
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
-    if(Thruk->debug && $c) {
+    if($c && Thruk->debug) {
       $c->log->debug(Dumper($response));
     }
     die(_format_response_error($response));

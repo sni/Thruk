@@ -24,11 +24,10 @@ create new manager
 =cut
 
 sub new {
-    #my( $class, $peer_config, $config, $log ) = @_;
-    my( $class, $peer_config, undef, undef ) = @_;
+    my($class, $peer_config) = @_;
     my $self = {
         'key'   => '',
-        'name'  => $peer_config->{'name'},
+        'name'  => $peer_config->{'options'}->{'name'},
         'addr'  => '',
     };
     bless $self, $class;

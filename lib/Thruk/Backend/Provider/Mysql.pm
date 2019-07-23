@@ -65,17 +65,18 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config ) = @_;
+    my($class, $peer_config) = @_;
 
-    die('need at least one peer. Minimal options are <options>peer = mysql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    my $options = $peer_config->{'options'};
+    die('need at least one peer. Minimal options are <options>peer = mysql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
-    $peer_config->{'name'} = 'mysql' unless defined $peer_config->{'name'};
-    if(!defined $peer_config->{'peer_key'}) {
-        my $key = md5_hex($peer_config->{'name'}.$peer_config->{'peer'});
-        $peer_config->{'peer_key'} = $key;
+    $options->{'name'} = 'mysql' unless defined $options->{'name'};
+    if(!defined $options->{'peer_key'}) {
+        my $key = md5_hex($options->{'name'}.$options->{'peer'});
+        $options->{'peer_key'} = $key;
     }
     my($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock);
-    if($peer_config->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
+    if($options->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
         $dbuser = $1;
         $dbpass = $2;
         $dbhost = $3;
@@ -98,8 +99,7 @@ sub new {
         'dbuser'      => $dbuser,
         'dbpass'      => $dbpass,
         'dbsock'      => $dbsock,
-        'config'      => $config,
-        'peer_config' => $peer_config,
+        'peer_config' => $options,
         'verbose'     => 0,
     };
     bless $self, $class;

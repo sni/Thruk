@@ -945,8 +945,9 @@ sub renew_logcache {
     eval {
         $rc = $self->_renew_logcache($c, $noforks);
     };
-    if($@) {
-        $c->log->error($@);
+    my $err = $@;
+    if($err) {
+        $c->log->error($err);
         $c->stash->{errorMessage}     = "Logfilecache Unavailable";
         $c->stash->{errorDescription} = $@;
         $c->stash->{errorDescription} =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;

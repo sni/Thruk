@@ -93,16 +93,16 @@ create new manager
 
 =cut
 sub new {
-    my($class, $options, $config, undef, undef, $thruk_config) = @_;
+    my($class, $peer_config, $thruk_config) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
+    my $options = $peer_config->{'options'};
+    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     my $self = {
         'live'                 => Monitoring::Livestatus::Class::Lite->new($options),
-        'config'               => $config,
         'naemon_optimizations' => 0,
         'lmd_optimizations'    => 0,
-        'fetch_command'        => $config->{'logcache_fetchlogs_command'} || $thruk_config->{'logcache_fetchlogs_command'},
+        'fetch_command'        => $peer_config->{'logcache_fetchlogs_command'} || $thruk_config->{'logcache_fetchlogs_command'},
     };
     bless $self, $class;
 
