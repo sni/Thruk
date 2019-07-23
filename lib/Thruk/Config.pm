@@ -995,7 +995,7 @@ sub _do_finalize_config {
 
     # make this setting available in env
     ## no critic
-    $ENV{'THRUK_CURL'} = $config->{'use_curl'} ? 1 : 0;
+    $ENV{'THRUK_CURL'} = $ENV{'THRUK_CURL'} || $config->{'use_curl'} || 0;
     ## use critic
 
     if($config->{'action_menu_apply'}) {

@@ -59,6 +59,7 @@ do a get request
 sub get {
     my($self, $url) = @_;
     my $cmd = $self->_get_cmd_line();
+    push @{$cmd}, $url;
     my $res = $self->_request($url, $cmd);
     return $res;
 }
@@ -78,6 +79,7 @@ sub post {
     for my $key (keys %{$data}) {
         push @{$cmd}, '-d', $key.'='.$data->{$key};
     }
+    push @{$cmd}, $url;
     my $res = $self->_request($url, $cmd);
     return $res;
 }
@@ -250,7 +252,7 @@ sub _get_cmd_line {
 sub _request {
     my($self, $url, $cmd) = @_;
     my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
-    if(!$rc || $output !~ m|^HTTP/|mx) {
+    if($rc != 0 || $output !~ m|^HTTP/|mx) {
         die($output);
     }
     my $r = HTTP::Response->parse($output);
