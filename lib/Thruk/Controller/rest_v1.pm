@@ -1407,23 +1407,24 @@ sub _rest_get_thruk_users {
     return($data);
 }
 
+##########################################################
 sub _get_userdata {
     my($c, $name) = @_;
     my $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
     my $userdata = {
-        'id' => $name,
+        'id'                => $name,
+        'tz'                => undef,
+        'has_thruk_profile' => Cpanel::JSON::XS::false,
+        'locked'            => Cpanel::JSON::XS::false,
     };
-    if($profile->{'settings'} && scalar keys %{$profile->{'settings'}} > 0) {
-        $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::true;
-        for my $key (qw/tz/) {
-            $userdata->{$key} = $profile->{'settings'}->{$key};
-        }
-        $userdata->{'locked'} = $profile->{'settings'}->{'login'}->{'locked'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false;
-    } else {
-        $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::false;
-        $userdata->{'locked'}            = Cpanel::JSON::XS::false;
-    }
     if($profile) {
+        if($profile->{'settings'} && scalar keys %{$profile->{'settings'}} > 0) {
+            $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::true;
+            for my $key (qw/tz/) {
+                $userdata->{$key} = $profile->{'settings'}->{$key};
+            }
+            $userdata->{'locked'} = $profile->{'settings'}->{'login'}->{'locked'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false;
+        }
         for my $key (qw/groups roles email alias can_submit_commands/) {
             $userdata->{$key} = $profile->{$key};
         }
