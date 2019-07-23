@@ -586,14 +586,14 @@ sub _run_commands {
     my($c, $opt, $src) = @_;
 
     if(defined $opt->{'auth'}) {
-        Thruk::Utils::set_user($c, $opt->{'auth'});
+        Thruk::Utils::set_user($c, $opt->{'auth'}, "cli");
     } elsif(defined $c->config->{'default_cli_user_name'}) {
-        Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'});
+        Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'}, "cli");
     } else {
         if($ENV{'THRUK_CRON'}) {
-            Thruk::Utils::set_user($c, '(cron)');
+            Thruk::Utils::set_user($c, '(cron)', "cli");
         } else {
-            Thruk::Utils::set_user($c, '(cli)');
+            Thruk::Utils::set_user($c, '(cli)', "cli");
         }
     }
 

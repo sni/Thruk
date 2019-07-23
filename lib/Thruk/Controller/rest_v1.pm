@@ -1389,25 +1389,7 @@ sub _rest_get_thruk_users {
     for my $name (@{$users}) {
         next unless($is_admin || $name eq $c->stash->{"remote_user"});
         next if(defined $id && $id ne $name);
-        my $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
-        my $userdata = {
-            'id' => $name,
-        };
-        if($profile->{'settings'}) {
-            $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::true;
-            for my $key (qw/tz/) {
-                $userdata->{$key} = $profile->{'settings'}->{$key};
-            }
-            $userdata->{'locked'} = $profile->{'settings'}->{'login'}->{'locked'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false;
-        } else {
-            $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::false;
-            $userdata->{'locked'}            = Cpanel::JSON::XS::false;
-        }
-        if($profile) {
-            for my $key (qw/groups roles email alias can_submit_commands/) {
-                $userdata->{$key} = $profile->{$key};
-            }
-        }
+        my $userdata = _get_userdata($c, $name);
         $total_locked++ if $userdata->{'locked'} == Cpanel::JSON::XS::true;
         push @{$data}, $userdata;
     }
@@ -1416,12 +1398,37 @@ sub _rest_get_thruk_users {
             return({ 'message' => 'no such user', code => 404 });
         }
         $data = $data->[0];
+        return($data);
     }
 
     $c->metrics->set('users_total', $total_number, "total number of thruk users");
     $c->metrics->set('users_locked_total', $total_locked, "total number of locked thruk users");
 
     return($data);
+}
+
+sub _get_userdata {
+    my($c, $name) = @_;
+    my $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
+    my $userdata = {
+        'id' => $name,
+    };
+    if($profile->{'settings'} && scalar keys %{$profile->{'settings'}} > 0) {
+        $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::true;
+        for my $key (qw/tz/) {
+            $userdata->{$key} = $profile->{'settings'}->{$key};
+        }
+        $userdata->{'locked'} = $profile->{'settings'}->{'login'}->{'locked'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false;
+    } else {
+        $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::false;
+        $userdata->{'locked'}            = Cpanel::JSON::XS::false;
+    }
+    if($profile) {
+        for my $key (qw/groups roles email alias can_submit_commands/) {
+            $userdata->{$key} = $profile->{$key};
+        }
+    }
+    return($userdata);
 }
 
 ##########################################################
@@ -1457,6 +1464,19 @@ sub _rest_get_thruk_stats {
 # REST PATH: GET /thruk/metrics
 # alias for /thruk/stats
 register_rest_path_v1('GET', qr%^/thruk/metrics$%mx, \&_rest_get_thruk_stats, ['authorized_for_system_information']);
+
+##########################################################
+# REST PATH: GET /thruk/whoami
+# show current profile information.
+# alias for /thruk/users?id=<id>
+register_rest_path_v1('GET', qr%^/thruk/whoami$%mx, \&_rest_get_thruk_whoami);
+sub _rest_get_thruk_whoami {
+    my($c) = @_;
+    my $profile = _get_userdata($c, $c->user->{'username'});
+    $profile->{'auth_src'}          = $c->user->{'auth_src'}          if $c->user->{'auth_src'};
+    $profile->{'original_username'} = $c->user->{'original_username'} if $c->user->{'original_username'};
+    return($profile);
+}
 
 ##########################################################
 # REST PATH: GET /sites

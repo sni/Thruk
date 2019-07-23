@@ -2230,9 +2230,11 @@ set and authenticate a user
 =cut
 
 sub set_user {
-    my($c, $username) = @_;
+    my($c, $username, $auth_src) = @_;
+    confess("no auth_src") unless $auth_src;
     $c->authenticate(0, $username);
     confess("no user") unless $c->user_exists;
+    $c->user->{'auth_src'} = $auth_src;
     return;
 }
 

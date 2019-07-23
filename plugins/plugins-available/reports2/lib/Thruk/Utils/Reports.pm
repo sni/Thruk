@@ -459,7 +459,7 @@ sub generate_report {
 
     $c->req->parameters->{'debug'} = 1 if $ENV{'THRUK_REPORT_DEBUG'};
 
-    Thruk::Utils::set_user($c, $options->{'user'});
+    Thruk::Utils::set_user($c, $options->{'user'}, "report");
     local $ENV{'REMOTE_USER'} = $options->{'user'};
     $c->stash->{'remote_user'} = $options->{'user'};
 
@@ -768,7 +768,7 @@ sub generate_report_background {
     $report = _read_report_file($c, $report_nr) unless $report;
 
     if(!defined $c->stash->{'remote_user'}) {
-        Thruk::Utils::set_user($c, $report->{'user'});
+        Thruk::Utils::set_user($c, $report->{'user'}, "report");
     }
 
     set_running($c, $report_nr, $$, time());

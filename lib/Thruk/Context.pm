@@ -261,7 +261,13 @@ sub authenticate {
     delete $c->stash->{'remote_user'};
     delete $c->{'user'};
     delete $c->{'session'};
-    $username = request_username($c) unless defined $username;
+    my($auth_src, $original_username);
+    if(defined $username) {
+        $auth_src          = "contex_switch";
+        $original_username = $username;
+    } else {
+        ($username, $auth_src, $original_username) = request_username($c)
+    }
     return unless $username;
     my $sessionid = $c->req->cookies->{'thruk_auth'};
     my $sessiondata;
@@ -291,6 +297,8 @@ sub authenticate {
     $c->{'user'} = $user;
     $c->stash->{'remote_user'} = $user->{'username'};
     $c->stash->{'user_data'}   = $user->{'settings'};
+    $c->{'user'}->{'auth_src'} = $auth_src;
+    $c->{'user'}->{'original_username'} = $original_username;
     $user->set_dynamic_attributes($c, $skip_db_access);
     if(Thruk->verbose) {
         $c->log->debug("authenticated as ".$user->{'username'});
@@ -300,7 +308,9 @@ sub authenticate {
 
 =head2 request_username
 
-return username from env
+get username from env
+
+returns $username, $src, $original_username
 
 =cut
 sub request_username {
@@ -309,6 +319,7 @@ sub request_username {
     my $env    = $c->env;
     my $apikey = $c->req->header('X-Thruk-Auth-Key');
     my $username;
+    my $auth_src;
 
     # authenticate by secret.key from http header
     if($apikey) {
@@ -323,6 +334,7 @@ sub request_username {
             if(!$username) {
                 return $c->detach_error({msg => "authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header", code => 403, log => 1});
             }
+            $auth_src = "secret_key";
         }
         elsif($c->config->{'api_keys_enabled'}) {
             my $data = Thruk::Utils::APIKeys::get_key_by_private_key($c->config, $apikey);
@@ -333,6 +345,7 @@ sub request_username {
             $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
             Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time(), last_from => $addr }, 1);
             $username = $data->{'user'};
+            $auth_src = "api_key";
         } else {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
@@ -340,14 +353,17 @@ sub request_username {
     elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
         $username = $env->{'SSL_CLIENT_S_DN_CN'};
         confess("username $username is reserved.") if $username =~ m%^\(.*\)$%mx;
+        $auth_src = "ssl_authentication";
     }
     # basic authentication
     elsif(defined $env->{'REMOTE_USER'} and $env->{'REMOTE_USER'} ne '' ) {
         $username = $env->{'REMOTE_USER'};
         confess("username $username is reserved.") if $username =~ m%^\(.*\)$%mx;
+        $auth_src = "basic auth";
     }
     elsif(defined $ENV{'REMOTE_USER'}and $ENV{'REMOTE_USER'} ne '' ) {
         $username = $ENV{'REMOTE_USER'};
+        $auth_src = "basic auth";
     }
 
     elsif($c->req->cookies->{'thruk_auth'}) {
@@ -356,15 +372,18 @@ sub request_username {
         if($sessiondata && $sessiondata->{'address'} && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
             $username = $sessiondata->{'username'};
         }
+        $auth_src = "cookie";
     }
 
     # default_user_name?
     if(!defined $username && defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
         $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
+        $auth_src = "default_user_name";
     }
 
     elsif(!defined $username && defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI') {
         $username = $c->config->{'default_cli_user_name'};
+        $auth_src = "cli";
     }
 
     if(!defined $username || $username eq '') {
@@ -372,8 +391,9 @@ sub request_username {
     }
 
     # transform username upper/lower case?
+    my $original_username = $username;
     $username = Thruk::Authentication::User::transform_username($c->config, $username, $c);
-    return($username);
+    return($username, $auth_src, $original_username);
 }
 
 =head2 user_exists

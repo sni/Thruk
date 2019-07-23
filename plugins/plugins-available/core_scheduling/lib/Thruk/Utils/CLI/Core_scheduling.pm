@@ -76,7 +76,7 @@ sub cmd {
                 return("filter must be either hg:<hostgroup> or sg:<servicegroup>\n", 1);
             }
         }
-        Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+        Thruk::Utils::set_user($c, '(cron)', "cli") unless $c->user_exists;
         Thruk::Controller::core_scheduling::reschedule_everything($c, $hostfilter, $servicefilter);
     }
     else {

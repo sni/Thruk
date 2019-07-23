@@ -1659,6 +1659,11 @@ lists thruk user profiles.
 get thruk profile for given user.
 alias for /thruk/users?id=<id>
 
+=== GET /thruk/whoami
+
+show current profile information.
+alias for /thruk/users?id=<id>
+
 === GET /timeperiods
 
 lists livestatus timeperiods.

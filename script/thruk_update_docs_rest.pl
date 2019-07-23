@@ -12,7 +12,7 @@ use Thruk::Utils::IO;
 
 ################################################################################
 my $c = Thruk::Utils::CLI->new()->get_c();
-Thruk::Utils::set_user($c, '(cli)');
+Thruk::Utils::set_user($c, '(cli)', "scripts");
 $c->stash->{'is_admin'} = 1;
 $c->config->{'cluster_enabled'} = 1; # fake cluster
 $c->app->cluster->register($c);
