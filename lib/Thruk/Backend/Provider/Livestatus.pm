@@ -93,12 +93,12 @@ create new manager
 
 =cut
 sub new {
-    my($class, $peer_config, $config, undef, undef, $thruk_config) = @_;
+    my($class, $options, $config, undef, undef, $thruk_config) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
     my $self = {
-        'live'                 => Monitoring::Livestatus::Class::Lite->new($peer_config),
+        'live'                 => Monitoring::Livestatus::Class::Lite->new($options),
         'config'               => $config,
         'naemon_optimizations' => 0,
         'lmd_optimizations'    => 0,
