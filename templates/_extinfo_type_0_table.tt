@@ -146,7 +146,7 @@
             </span>
             [% END %]
           </td>
-          <td class='dataVal dataValBackendVersion'>
+          <td class='dataVal dataValBackendVersion' style="white-space: nowrap;">
             [% IF backend_detail.$pd.running %]
               [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
             [% END %]
