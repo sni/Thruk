@@ -9,6 +9,7 @@ next:
           - Config Tool:
             - set default attributes for new objects
             - add git blame page for config objects
+            - support limited regex matching
           - REST:
             - fix fetching roles when contact has groups
           - Panorama:

@@ -3391,4 +3391,21 @@ sub dirname {
 
 ##############################################
 
+=head2 looks_like_regex
+
+    looks_like_regex($str)
+
+returns true if $string looks like a regular expression
+
+=cut
+sub looks_like_regex {
+    my($str) = @_;
+    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
+        return(1);
+    }
+    return;
+}
+
+##############################################
+
 1;

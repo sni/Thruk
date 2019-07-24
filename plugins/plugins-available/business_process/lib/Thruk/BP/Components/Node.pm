@@ -427,10 +427,10 @@ sub _set_function {
         # fix operator
         if($self->{'service'}) {
             my $op = $self->{'function_args'}->[2] // '=';
-            if($op eq '=' && Thruk::BP::Utils::looks_like_regex($self->{'service'})) {
+            if($op eq '=' && Thruk::Utils::looks_like_regex($self->{'service'})) {
                 $op = "~";
             }
-            elsif($op eq '!=' && Thruk::BP::Utils::looks_like_regex($self->{'service'})) {
+            elsif($op eq '!=' && Thruk::Utils::looks_like_regex($self->{'service'})) {
                 $op = "!~";
             }
             if($op eq "~" || $op eq '!~') {

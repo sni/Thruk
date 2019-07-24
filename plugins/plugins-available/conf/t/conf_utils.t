@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 715;
+    plan tests => 718;
 }
 
 BEGIN {
@@ -454,4 +454,15 @@ for my $mergedir (qw/1/) {
           'use' => [ 'generic-host' ]
     };
     is_deeply($data, $expected, 'getting request params');
+};
+
+###########################################################
+# using regex matching
+{
+    $objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/12' });
+    $objects->init();
+    $file = $objects->{'files'}->[0];
+    is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
+    my $ref_errors = $objects->_check_references();
+    is(scalar @{$ref_errors}, 0, "number of reference errors") or diag(Dumper($ref_errors));
 };

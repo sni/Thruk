@@ -2145,7 +2145,7 @@ sub _check_references {
                 }
             }
         }
-        elsif(!defined $objects_by_name->{$link}->{$val}) {
+        else {
             # 'null' is a special value used to cancel inheritance
             return if $val eq 'null';
 
@@ -2154,12 +2154,23 @@ sub _check_references {
             # host are allowed to have a register 0
             return if ($link eq 'host' and defined $templates_by_name->{$link}->{$val});
 
-            # service parents cannot be checked right now
-            return if $link eq 'service_description';
-
             # shinken defines this command by itself
             return if ($self->{'coretype'} eq 'shinken' and $val eq 'bp_rule');
             return if ($self->{'coretype'} eq 'shinken' and $link eq 'command' and $val eq '_internal_host_up');
+
+            if($link eq 'service_description') { $link = 'service'; }
+
+            if(defined $objects_by_name->{$link}->{$val}) {
+                return;
+            } elsif(Thruk::Utils::looks_like_regex($val)) {
+                # expand wildcards and regex
+                my $newval = Thruk::Utils::convert_wildcards_to_regex($val);
+                for my $tst (keys %{$objects_by_name->{$link}}) {
+                    ## no critic
+                    return if $tst =~ m/$newval/;
+                    ## use critic
+                }
+            }
 
             if($options{'hash'}) {
                 push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
