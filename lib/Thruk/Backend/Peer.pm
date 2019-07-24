@@ -256,10 +256,10 @@ sub logcache {
             Thruk::Backend::Provider::Mysql->import;
             $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
         }
-        $self->{'_logcache'} = Thruk::Backend::Provider::Mysql->new({
+        $self->{'_logcache'} = Thruk::Backend::Provider::Mysql->new({options => {
                                                 peer     => $self->{'logcache'},
                                                 peer_key => $self->{'key'},
-                                            });
+                                            }});
         $self->{'class'}->{'logcache'} = $self->{'_logcache'};
         return($self->{'_logcache'});
     }
