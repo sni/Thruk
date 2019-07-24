@@ -1488,6 +1488,15 @@ ex.:
   ssl_verify_hostnames = 1
 
 
+=== ssl_ca_path
+
+Sets path to your certificates.
+
+ex.:
+
+  ssl_ca_path = /etc/ssl/certs
+
+
 === use_shadow_naemon
 
 *shadownaemon is deprecated, use lmd instead*
