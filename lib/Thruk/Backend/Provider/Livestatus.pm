@@ -96,7 +96,7 @@ sub new {
     my($class, $peer_config, $thruk_config) = @_;
 
     my $options = $peer_config->{'options'};
-    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
+    confess("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     my $self = {
         'live'                 => Monitoring::Livestatus::Class::Lite->new($options),

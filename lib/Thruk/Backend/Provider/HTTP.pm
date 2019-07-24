@@ -3,6 +3,7 @@ package Thruk::Backend::Provider::HTTP;
 use strict;
 use warnings;
 use Data::Dumper;
+use Carp qw/confess/;
 use Module::Load qw/load/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
 use parent 'Thruk::Backend::Provider::Base';
@@ -29,7 +30,7 @@ sub new {
     my($class, $peer_config, $thruk_config) = @_;
 
     my $options = $peer_config->{'options'};
-    die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
+    confess("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     my $self = {
         'fast_query_timeout'   => 10,

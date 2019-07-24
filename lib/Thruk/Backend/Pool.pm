@@ -101,11 +101,11 @@ sub init_backend_thread_pool {
             Thruk::Utils::IO::mkdir_r($config->{'tmp_path'}.'/lmd') ;
         };
         die("could not create lmd ".$config->{'tmp_path'}.'/lmd'.': '.$@) if $@;
-        $lmd_peer = Thruk::Backend::Provider::Livestatus->new({
+        $lmd_peer = Thruk::Backend::Provider::Livestatus->new({options => {
                                                 peer      => $config->{'tmp_path'}.'/lmd/live.sock',
                                                 peer_key  => 'lmdpeer',
                                                 retries_on_connection_error => 0,
-                                            });
+                                            }});
         $lmd_peer->peer_key('lmdpeer');
         $lmd_peer->{'lmd_optimizations'} = 1;
     }
