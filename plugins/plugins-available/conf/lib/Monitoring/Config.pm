@@ -312,6 +312,7 @@ sub commit {
         $c->log->debug('post save hook out: '.$out);
     }
 
+    $self->_rebuild_index(); # also checks files again for errors
     return $rc;
 }
 
