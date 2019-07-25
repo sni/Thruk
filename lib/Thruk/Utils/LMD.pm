@@ -414,17 +414,17 @@ sub _write_lmd_config {
             $site_config .= "section = '".$peer->{'section'}."'\n";
         }
         if($peer->{'type'} eq 'http') {
-            $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
-            $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};
+            $site_config .= "auth = '".$peer->{'peer_config'}->{'options'}->{'auth'}."'\n";
+            $site_config .= "remote_name = '".$peer->{'peer_config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'peer_config'}->{'options'}->{'remote_name'};
         }
-        $site_config .= "tlsCertificate = '".$peer->{'config'}->{'options'}->{'cert'}."'\n"    if $peer->{'config'}->{'options'}->{'cert'};
-        $site_config .= "tlsKey         = '".$peer->{'config'}->{'options'}->{'key'}."'\n"     if $peer->{'config'}->{'options'}->{'key'};
-        $site_config .= "tlsCA          = '".$peer->{'config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'config'}->{'options'}->{'ca_file'};
-        $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'config'}->{'options'}->{'verify'} && $peer->{'config'}->{'options'}->{'verify'} == 0);
-        $site_config .= "proxy          = '".$peer->{'config'}->{'options'}->{'proxy'}."'\n"   if $peer->{'config'}->{'options'}->{'proxy'};
-        if($peer->{'config'}->{'lmd_options'}) {
-            for my $key (sort keys %{$peer->{'config'}->{'lmd_options'}}) {
-                $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'config'}->{'lmd_options'}->{$key});
+        $site_config .= "tlsCertificate = '".$peer->{'peer_config'}->{'options'}->{'cert'}."'\n"    if $peer->{'peer_config'}->{'options'}->{'cert'};
+        $site_config .= "tlsKey         = '".$peer->{'peer_config'}->{'options'}->{'key'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'key'};
+        $site_config .= "tlsCA          = '".$peer->{'peer_config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'peer_config'}->{'options'}->{'ca_file'};
+        $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'peer_config'}->{'options'}->{'verify'} && $peer->{'peer_config'}->{'options'}->{'verify'} == 0);
+        $site_config .= "proxy          = '".$peer->{'peer_config'}->{'options'}->{'proxy'}."'\n"   if $peer->{'peer_config'}->{'options'}->{'proxy'};
+        if($peer->{'peer_config'}->{'lmd_options'}) {
+            for my $key (sort keys %{$peer->{'peer_config'}->{'lmd_options'}}) {
+                $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'peer_config'}->{'lmd_options'}->{$key});
             }
         }
         $site_config .= "\n";
@@ -469,5 +469,7 @@ sub get_lmd_version {
 
     return;
 }
+
+##########################################################
 
 1;

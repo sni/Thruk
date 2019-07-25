@@ -1340,9 +1340,9 @@ sub check_federation_peers {
             my $subpeerconfig = {
                 name => $row->{'name'},
                 id   => $key,
-                type => $parent->{'config'}->{'type'},
+                type => $parent->{'peer_config'}->{'type'},
                 section => $row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name(),
-                options => $parent->{'config'}->{'type'} eq 'http' ? dclone($parent->{'config'}->{'options'}) : {},
+                options => $parent->{'peer_config'}->{'type'} eq 'http' ? dclone($parent->{'peer_config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
             delete $subpeerconfig->{'options'}->{'peer'};
@@ -1357,8 +1357,8 @@ sub check_federation_peers {
                 type       => [$parent->{'type'}, @{Thruk::Utils::list($row->{'federation_type'})}],
             };
             # inherit disabled configtool from parent
-            if($parent->{'config'}->{'configtool'}->{'disable'}) {
-                $subpeer->{'config'}->{'configtool'}->{'disable'} = 1;
+            if($parent->{'peer_config'}->{'configtool'}->{'disable'}) {
+                $subpeer->{'peer_config'}->{'configtool'}->{'disable'} = 1;
             }
             $Thruk::Backend::Pool::peers->{$subpeer->{'key'}} = $subpeer;
             push @{$Thruk::Backend::Pool::peer_order}, $subpeer->{'key'};
