@@ -104,6 +104,7 @@ sub set_dynamic_attributes {
 
     # system users do not have any dynamic attributes
     if($self->{'username'} =~ m%^\(.*\)$%mx) {
+        $self->{'can_submit_commands'} = 1;
         return $self;
     }
 
