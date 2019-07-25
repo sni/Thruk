@@ -1572,7 +1572,7 @@ sub _do_on_peers {
             # multiple backends and all fail
             # die with a small error for know, usually an empty result means that
             # none of our backends were reachable
-            die('undefined result');
+            die('undefined result, all backends down?');
             #local $Data::Dumper::Deepcopy = 1;
             #my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
             #for my $b (@{$get_results_for}) {
