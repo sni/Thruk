@@ -266,7 +266,7 @@ sub authenticate {
         $auth_src          = "contex_switch";
         $original_username = $username;
     } else {
-        ($username, $auth_src, $original_username,$readonly) = request_username($c)
+        ($username, $auth_src, $original_username, $readonly) = request_username($c)
     }
     return unless $username;
     my $sessionid = $c->req->cookies->{'thruk_auth'};
@@ -299,8 +299,8 @@ sub authenticate {
     $c->stash->{'user_data'}   = $user->{'settings'};
     $c->{'user'}->{'auth_src'} = $auth_src;
     $c->{'user'}->{'original_username'} = $original_username;
+    $c->{'user'}->{'readonly'} = $readonly ? 1 : 0;
     $user->set_dynamic_attributes($c, $skip_db_access);
-    $c->{'user'}->{'can_submit_commands'} = 0 if $readonly;
     if(Thruk->verbose) {
         $c->log->debug("authenticated as ".$user->{'username'});
     }

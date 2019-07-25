@@ -137,6 +137,8 @@ sub set_dynamic_attributes {
         $c->cache->set('users', $username, $data);
     }
 
+    $self->{'can_submit_commands'} = 0 if $self->{'readonly'};
+
     $c->stats->profile(end => "User::set_dynamic_attributes");
     return $self;
 }

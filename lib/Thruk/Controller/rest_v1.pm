@@ -129,6 +129,12 @@ sub index {
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
          };
+    } elsif($c->user->{'readonly'} && $c->req->method ne 'GET') {
+        $data = {
+            'message'     => 'only GET requests allowed for readonly api keys.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
     } elsif($c->config->{'demo_mode'} && $c->req->method ne 'GET') {
         $data = {
             'message'     => 'only GET requests allowed in demo_mode.',
