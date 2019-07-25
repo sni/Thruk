@@ -35,8 +35,8 @@ my $reserved_query_parameters = [qw/limit offset sort columns backend backends q
 my $op_translation_words      = {
     'eq'     => '=',
     'ne'     => '!=',
-    'regex'  => '~',
-    'nregex' => '!~',
+    'regex'  => '~~',
+    'nregex' => '!~~',
     'gt'     => '>',
     'gte'    => '>=',
     'lt'     => '<',
@@ -2009,7 +2009,26 @@ sub _compare {
         return 1 if lc($data) ne lc($val);
         return;
     }
-    elsif($op eq '~' || $op eq '~~') {
+    elsif($op eq '~') {
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                ## no critic
+                if($v =~ m/$val/) {
+                    $found = 1;
+                    last;
+                }
+                ## use critic
+            }
+            return $found;
+        } else {
+            ## no critic
+            return 1 if $data =~ m/$val/;
+            ## use critic
+        }
+        return;
+    }
+    elsif($op eq '~~') {
         if(ref $data eq 'ARRAY') {
             my $found;
             for my $v (@{$data}) {
@@ -2028,7 +2047,26 @@ sub _compare {
         }
         return;
     }
-    elsif($op eq '!~' || $op eq '!~~') {
+    elsif($op eq '!~') {
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                ## no critic
+                if($v =~ m/$val/) {
+                    $found = 1;
+                    last;
+                }
+                ## use critic
+            }
+            return !$found;
+        } else {
+            ## no critic
+            return 1 if $data !~ m/$val/;
+            ## use critic
+            return;
+        }
+    }
+    elsif($op eq '!~~') {
         if(ref $data eq 'ARRAY') {
             my $found;
             for my $v (@{$data}) {

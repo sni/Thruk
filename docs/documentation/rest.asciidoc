@@ -160,8 +160,10 @@ Possible operators with their alias:
 |Operator  |Alias    |Description
 | =        | eq      |Equal match
 | !=       | ne      |Not equal match
-| ~        | regex   |Regular expression match
-| !~       | nregex  |Not regular expression match
+| ~        |         |Regular expression match (case-sensitive)
+| !~       |         |Negated regular expression match (case-sensitive)
+| ~~       | regex   |Regular expression match (case-insensitive)
+| !~       | nregex  |Negated regular expression match (case-insensitive)
 | >        | gt      |Greater than numeric comparisson
 | <        | lt      |Lower than numeric comparisson
 | >=       | gte     |Greater or equal numeric comparisson. `contains` in list context
@@ -1265,6 +1267,7 @@ lists broadcasts
 |hashed_key                        | hashed private key
 |last_from                         | ip address of last usage
 |last_used                         | unixtimestamp of last usage
+|readonly                          | if set, this key is not allowed to send external commands
 |user                              | username of key owner
 |===========================================
 
