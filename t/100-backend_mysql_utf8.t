@@ -21,7 +21,7 @@ use_ok('Thruk::Utils');
 
 #####################################################################
 # create connection
-my $m = Thruk::Backend::Provider::Mysql->new({peer => $ENV{'TEST_MYSQL'}});
+my $m = Thruk::Backend::Provider::Mysql->new({options => {peer => $ENV{'TEST_MYSQL'}}});
 isa_ok($m, 'Thruk::Backend::Provider::Mysql');
 
 my($res, $c)    = ctx_request('/thruk/side.html');
