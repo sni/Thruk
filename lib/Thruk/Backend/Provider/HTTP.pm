@@ -136,9 +136,6 @@ sub reconnect {
                 };
             }
         }
-        eval {
-          IO::Socket::SSL::set_ctx_defaults( SSL_ca_path => ($self->{'thruk_config'}->{ssl_ca_path} || "/etc/ssl/certs" ));
-        };
         load Thruk::UserAgent;
     }
 
@@ -157,7 +154,10 @@ sub reconnect {
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->agent('Thruk');
     $self->{'ua'}->max_redirect(0);
-    $self->{'ua'}->ssl_opts(verify_hostname => $verify_hostname);
+    $self->{'ua'}->ssl_opts(
+      verify_hostname => $verify_hostname,
+      SSL_ca_path     => ($self->{'thruk_config'}->{ssl_ca_path} || "/etc/ssl/certs"),
+    );
     if($self->{'proxy'}) {
         # http just works
         $self->{'ua'}->proxy('http', $self->{'proxy'});

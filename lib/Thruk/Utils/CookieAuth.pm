@@ -25,20 +25,6 @@ use Carp qw/confess/;
 use File::Copy qw/move/;
 
 ##############################################
-BEGIN {
-    if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
-        ## no critic
-        $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
-        ## use critic
-        eval {
-            # required for new IO::Socket::SSL versions
-            require IO::Socket::SSL;
-            IO::Socket::SSL->import();
-            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-        };
-    }
-}
-
 my $supported_digests = {
     "1"  => 'SHA-256',
 };
@@ -69,13 +55,13 @@ sub external_authentication {
     my $sdir     = $config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
 
-    my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
-    my $ua       = get_user_agent($config);
+    my $netloc = Thruk::Utils::CookieAuth::get_netloc($authurl);
+    my $ua     = get_user_agent($config);
     # unset proxy which eventually has been set from https backends
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     # bypass ssl host verfication on localhost
-    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
+    $ua->ssl_opts('verify_hostname' => 0) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
     my $res      = $ua->post($authurl);
     $stats->profile(end   => "ext::auth: post1 ".$authurl) if $stats;
@@ -194,6 +180,7 @@ sub get_user_agent {
     $ua->timeout(30);
     $ua->agent("thruk_auth");
     $ua->no_proxy('127.0.0.1', 'localhost');
+    $ua->ssl_opts('SSL_ca_path' => $config->{ssl_ca_path} || "/etc/ssl/certs");
     return $ua;
 }
 

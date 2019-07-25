@@ -88,9 +88,7 @@ sub index {
         };
         $ua->ssl_opts('verify_hostname' => 0 );
     }
-    eval {
-        IO::Socket::SSL::set_ctx_defaults( SSL_ca_path => ($c->config->{ssl_ca_path} || "/etc/ssl/certs" ));
-    };
+    $ua->ssl_opts(SSL_ca_path => ($c->config->{ssl_ca_path} || "/etc/ssl/certs" ));
 
     $req->header('X-Thruk-Proxy', 1);
     _add_cookie($req, 'thruk_auth', $session_id);
