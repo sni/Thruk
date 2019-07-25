@@ -310,7 +310,7 @@ sub run_cluster {
                             options => {
                                 peer => $node->{'node_url'},
                                 auth => $c->config->{'secret_key'},
-                            }
+                            },
                         }, $c->config);
         my $t1   = [gettimeofday];
         my $r;
