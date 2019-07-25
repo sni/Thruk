@@ -378,6 +378,7 @@ sub check_cmd_permissions {
     $value2 = '' unless defined $value2;
 
     return 0 if $c->check_user_roles('authorized_for_read_only');
+    return 0 if !$self->{'can_submit_commands'};
     return 1 if $c->check_user_roles('authorized_for_admin');
 
     if($type eq 'system') {

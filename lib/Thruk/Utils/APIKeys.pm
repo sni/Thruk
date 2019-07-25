@@ -94,7 +94,7 @@ sub get_key_by_private_key {
 
 =head2 create_key
 
-    create_key($c, $username, [$comment])
+    create_key($c, $username, [$comment], [$readonly])
 
 create new api key for user
 
@@ -102,7 +102,7 @@ returns private, hashed key and filename
 
 =cut
 sub create_key {
-    my($c, $username, $comment) = @_;
+    my($c, $username, $comment, $readonly) = @_;
 
     my $type = $supported_digests->{$default_digest};
     my $digest = Digest->new($type);
@@ -122,7 +122,8 @@ sub create_key {
         user    => $username,
         created => time(),
     };
-    $data->{'comment'} = $comment // '';
+    $data->{'comment'}  = $comment // '';
+    $data->{'readonly'} = $readonly ? 1 : 0;
     die("hash collision") if -e $file;
     Thruk::Utils::IO::json_lock_store($file, $data , 1);
 
@@ -181,6 +182,7 @@ sub read_key {
     $data->{'hashed_key'} = $hashed_key;
     $data->{'file'}       = $file;
     $data->{'digest'}     = $type;
+    $data->{'readonly'}   = 0 unless $data->{'readonly'};
     return($data);
 }
 

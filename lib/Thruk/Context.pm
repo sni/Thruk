@@ -261,12 +261,12 @@ sub authenticate {
     delete $c->stash->{'remote_user'};
     delete $c->{'user'};
     delete $c->{'session'};
-    my($auth_src, $original_username);
+    my($auth_src, $original_username,$readonly);
     if(defined $username) {
         $auth_src          = "contex_switch";
         $original_username = $username;
     } else {
-        ($username, $auth_src, $original_username) = request_username($c)
+        ($username, $auth_src, $original_username,$readonly) = request_username($c)
     }
     return unless $username;
     my $sessionid = $c->req->cookies->{'thruk_auth'};
@@ -300,6 +300,7 @@ sub authenticate {
     $c->{'user'}->{'auth_src'} = $auth_src;
     $c->{'user'}->{'original_username'} = $original_username;
     $user->set_dynamic_attributes($c, $skip_db_access);
+    $c->{'user'}->{'can_submit_commands'} = 0 if $readonly;
     if(Thruk->verbose) {
         $c->log->debug("authenticated as ".$user->{'username'});
     }
@@ -310,7 +311,7 @@ sub authenticate {
 
 get username from env
 
-returns $username, $src, $original_username
+returns $username, $src, $original_username, $readonly
 
 =cut
 sub request_username {
@@ -320,12 +321,15 @@ sub request_username {
     my $apikey = $c->req->header('X-Thruk-Auth-Key');
     my $username;
     my $auth_src;
+    my $readonly = 0;
 
     # authenticate by secret.key from http header
     if($apikey) {
         my $secret_file = $c->config->{'var_path'}.'/secret.key';
         $c->config->{'secret_key'} = read_file($secret_file) if -s $secret_file;
         chomp($c->config->{'secret_key'});
+        $apikey =~ s/^\s+//mx;
+        $apikey =~ s/\s+$//mx;
         if($apikey !~ m/^[a-zA-Z0-9_]+$/mx) {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
@@ -345,6 +349,7 @@ sub request_username {
             $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
             Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time(), last_from => $addr }, 1);
             $username = $data->{'user'};
+            $readonly = $data->{'readonly'};
             $auth_src = "api_key";
         } else {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
@@ -393,7 +398,7 @@ sub request_username {
     # transform username upper/lower case?
     my $original_username = $username;
     $username = Thruk::Authentication::User::transform_username($c->config, $username, $c);
-    return($username, $auth_src, $original_username);
+    return($username, $auth_src, $original_username, $readonly);
 }
 
 =head2 user_exists

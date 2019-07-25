@@ -88,23 +88,31 @@
       </td>
     </tr>
     [% ELSE %]
+    <tr>
+      <td class='dataVar'></td>
+      <td class='dataVal'>
+        <input type="text" name="comment" value="" placeholder="comment" style="width: 207px;">
+        <label for="readonly" title="prohibit sending external commands with this api key.">Read-Only:</label> <input type="checkbox" id="readonly" name="readonly" value="1">
+        <input type="submit" name="send" value="Create New API Key">
+      </td>
+    </tr>
     [% IF api_keys.size > 0 %]
     <tr>
       <td class='dataVal' colspan="2">
         <table style="width: 100%;">
           <tr>
+            <th>Read-Only</th>
             <th>Comment</th>
             <th>Created At</th>
             <th>Last Used</th>
-            <th>From</th>
             <th></th>
           </tr>
           [% FOREACH key = api_keys %]
           <tr>
+            <td>[% IF key.exists('readonly') && key.readonly %]yes[% ELSE %]no[% END %]</td>
             <td>[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
             <td>[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
-            <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %][% ELSE %]never[% END %]</td>
-            <td>[% IF key.exists('last_from') %][% key.last_from | html %][% END %]</td>
+            <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
             <td>
               <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key'; return false;" title='Remove API Key'>
             </td>
@@ -114,13 +122,6 @@
       </td>
     </tr>
     [% END %]
-    <tr>
-      <td class='dataVar'></td>
-      <td class='dataVal'>
-        <input type="text" name="comment" value="" placeholder="comment" style="width: 307px;">
-        <input type="submit" name="send" value="Create New API Key">
-      </td>
-    </tr>
     [% END %]
 
     <tr><td colspan=2 class="conftoolheaderseperator"></td></tr>
