@@ -306,7 +306,12 @@ sub run_cluster {
         next if($type eq 'others' && $self->is_it_me($n));
         $c->log->debug(sprintf("%s trying on %s", $sub, $n));
         my $node = $self->{'nodes_by_id'}->{$n};
-        my $http = Thruk::Backend::Provider::HTTP->new({ peer => $node->{'node_url'}, auth => $c->config->{'secret_key'} }, undef, undef, undef, undef, $c->config);
+        my $http = Thruk::Backend::Provider::HTTP->new({
+                            options => {
+                                peer => $node->{'node_url'},
+                                auth => $c->config->{'secret_key'},
+                            }
+                        }, $c->config);
         my $t1   = [gettimeofday];
         my $r;
         eval {
