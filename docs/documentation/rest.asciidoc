@@ -1279,6 +1279,7 @@ create new api key.
 Optional arguments:
 
   * comment
+  * readonly
   * username (requires admin privileges)
 
 === GET /thruk/api_keys/<id>

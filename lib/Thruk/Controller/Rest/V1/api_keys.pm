@@ -83,6 +83,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE'], qr%^/thruk/api_key
 # Optional arguments:
 #
 #   * comment
+#   * readonly
 #   * username (requires admin privileges)
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/api_keys?$%mx, \&_rest_get_thruk_api_key_new);
 sub _rest_get_thruk_api_key_new {
@@ -92,7 +93,10 @@ sub _rest_get_thruk_api_key_new {
     if($c->req->parameters->{'username'} && $c->check_user_roles('admin')) {
         $username = $c->req->parameters->{'username'};
     }
-    my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key($c, $username, ($c->req->parameters->{'comment'} // ''));
+    my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key($c,
+                                                                                 $username,
+                                                                                ($c->req->parameters->{'comment'} // ''),
+                                                                                ($c->req->parameters->{'readonly'} ? 1 : 0));
     if($private_key) {
         return({
             'message'     => 'successfully created api key',
