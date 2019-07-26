@@ -37,7 +37,7 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'API keys are disabled' );
                 return $c->redirect_to('user.cgi');
             }
-            my($private_key, undef, undef) = Thruk::Utils::APIKeys::create_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'comment'}, $c->req->parameters->{'readonly'});
+            my($private_key, undef, undef) = Thruk::Utils::APIKeys::create_key_from_req_params($c);
             if($private_key) {
                 Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
                 $c->stash->{'new_private_key'} = $private_key;
@@ -123,7 +123,9 @@ sub user_page {
     Thruk::Utils::ssi_include($c, 'user');
 
     $c->stash->{'profile_user'} = $c->user;
-    $c->stash->{api_keys} = Thruk::Utils::APIKeys::get_keys($c, $c->stash->{'remote_user'});
+    $c->stash->{api_keys}    = Thruk::Utils::APIKeys::get_keys($c, $c->stash->{'remote_user'});
+    $c->stash->{system_keys} = $c->check_user_roles('admin') ? Thruk::Utils::APIKeys::get_system_keys($c) : [];
+    $c->stash->{'available_roles'} = $Thruk::Authentication::User::possible_roles;
     $c->stash->{template} = 'user_profile.tt';
 
     return 1;

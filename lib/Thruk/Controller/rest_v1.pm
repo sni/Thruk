@@ -317,8 +317,9 @@ sub _fetch {
             eval {
                 load $pkg_name;
             };
-            if($@) {
-                $c->log->error($@);
+            my $err = $@;
+            if($err) {
+                $c->log->error($err);
                 return({ 'message' => 'error loading '.$pkg_name.' rest submodule', code => 500, 'description' => $@ });
             }
 
@@ -1416,7 +1417,13 @@ sub _rest_get_thruk_users {
 ##########################################################
 sub _get_userdata {
     my($c, $name) = @_;
-    my $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
+    my $profile;
+    if($name) {
+        $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
+    } else {
+        $profile = $c->user;
+        $name    = $c->user->{'username'};
+    }
     my $userdata = {
         'id'                => $name,
         'tz'                => undef,
@@ -1479,7 +1486,7 @@ register_rest_path_v1('GET', qr%^/thruk/metrics$%mx, \&_rest_get_thruk_stats, ['
 register_rest_path_v1('GET', qr%^/thruk/whoami$%mx, \&_rest_get_thruk_whoami);
 sub _rest_get_thruk_whoami {
     my($c) = @_;
-    my $profile = _get_userdata($c, $c->user->{'username'});
+    my $profile = _get_userdata($c);
     $profile->{'auth_src'}          = $c->user->{'auth_src'}          if $c->user->{'auth_src'};
     $profile->{'original_username'} = $c->user->{'original_username'} if $c->user->{'original_username'};
     return($profile);

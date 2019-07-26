@@ -1255,7 +1255,7 @@ hash of basic information about this thruk instance
 
 === GET /thruk/api_keys
 
-lists broadcasts
+lists api keys
 
 [options="header"]
 |===========================================
@@ -1267,7 +1267,8 @@ lists broadcasts
 |hashed_key                        | hashed private key
 |last_from                         | ip address of last usage
 |last_used                         | unixtimestamp of last usage
-|readonly                          | if set, this key is not allowed to send external commands
+|roles                             | list of roles this key is limited too
+|system                            | flag wether this a global system key and not bound to a specific user
 |user                              | username of key owner
 |===========================================
 
@@ -1279,8 +1280,9 @@ create new api key.
 Optional arguments:
 
   * comment
-  * readonly
+  * system (flag to create system api key)
   * username (requires admin privileges)
+  * roles (restrict roles to given list)
 
 === GET /thruk/api_keys/<id>
 

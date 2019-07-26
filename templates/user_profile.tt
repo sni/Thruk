@@ -89,34 +89,64 @@
     </tr>
     [% ELSE %]
     <tr>
-      <td class='dataVar'></td>
+      <td class='dataVar'>New API Key</td>
       <td class='dataVal'>
-        <input type="text" name="comment" value="" placeholder="comment" style="width: 207px;">
-        <label for="readonly" title="prohibit sending external commands with this api key.">Read-Only:</label> <input type="checkbox" id="readonly" name="readonly" value="1">
+        <input type="text" name="comment" value="" placeholder="comment" style="width: 307px;">
         <input type="submit" name="send" value="Create New API Key">
       </td>
     </tr>
-    [% IF api_keys.size > 0 %]
+    <tr>
+      <td class='dataVar'></td>
+      <td>
+        <input type="checkbox" id="system" name="system" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
+        <b><label for="system" title="Enable to create a global shared api key, which is not bound to this user."[% IF !c.check_user_roles("admin") %] class="disabled" [% END %]>System Api Key</label></b><br>
+        <input type="checkbox" id="restrict" name="restrict" value="1" onchange="if(this.checked) { showElement('restricted_roles'); } else { hideElement('restricted_roles'); } ">
+        <b><label for="restrict" title="Enable to select roles. Otherwise this API key will get the same roles as the user itself.">Select Roles</label></b><br>
+        <div id="restricted_roles" style="display: none;">
+        [% FOREACH r = available_roles %]
+        <input type="checkbox" id="role.[% r | html %]" name="roles" value="[% r | html %]"[% IF !c.user.check_role_permissions(r) %] disabled[% END %][% IF c.check_user_roles(r) %] checked[% END %]>
+        <label for="role.[% r | html %]"[% IF !c.user.check_role_permissions(r) %] class="disabled"[% END %]>[% r | html %]</label><br>
+        [% END %]
+        </div>
+      </td>
+    </tr>
+    [% IF api_keys.size > 0 || system_keys.size > 0 %]
+    <tr>
+      <td class='dataVar' colspan="2"><hr></td>
+    </tr>
     <tr>
       <td class='dataVal' colspan="2">
         <table style="width: 100%;">
           <tr>
-            <th>Read-Only</th>
+            <th>System</th>
+            <th>Restricted to Roles</th>
             <th>Comment</th>
             <th>Created At</th>
             <th>Last Used</th>
             <th></th>
           </tr>
-          [% FOREACH key = api_keys %]
-          <tr>
-            <td>[% IF key.exists('readonly') && key.readonly %]yes[% ELSE %]no[% END %]</td>
+          [% BLOCK key_block %]
+          <tr class="api_keys">
+            <td>[% IF key.exists('system') && key.system %]<input type="checkbox" checked disabled>[% ELSE %]<input type="checkbox" disabled>[% END %]</td>
+            <td>[% IF key.exists('roles') %][% key.roles.join(',<br>') %][% ELSE %]no[% END %]</td>
             <td>[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
             <td>[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
             <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
             <td>
-              <input type="submit" name="send" value="remove" onClick="window.location='user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key'; return false;" title='Remove API Key'>
+              <input type="submit" name="send" value="remove" onClick="if(confirm('Really remove?')) { window.location='user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key'; }; return false;" title='Remove API Key'>
             </td>
           </tr>
+          [% END %]
+          [% FOREACH key = system_keys %]
+            [% PROCESS key_block %]
+          [% END %]
+          [% IF api_keys.size > 0 && system_keys.size > 0 %]
+          <tr>
+            <td colspan="5"><hr></td>
+          </tr>
+          [% END %]
+          [% FOREACH key = api_keys %]
+            [% PROCESS key_block %]
           [% END %]
         </table>
       </td>

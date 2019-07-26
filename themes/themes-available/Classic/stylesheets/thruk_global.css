@@ -1629,3 +1629,12 @@ TABLE.condensed DIV.notificationsENABLED, TABLE.condensed DIV.notificationsDISAB
 TABLE.condensed TD.dataVar {
   text-align: center;
 }
+
+LABEL.disabled {
+  filter: alpha(opacity=50);
+  opacity: 0.5;
+}
+
+TR.api_keys TD {
+  vertical-align: top;
+}

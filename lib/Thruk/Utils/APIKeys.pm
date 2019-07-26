@@ -47,7 +47,38 @@ sub get_keys {
             next;
         }
         my $data = read_key($c->config, $file);
-        push @{$keys}, $data if($data && $data->{'user'} eq $user);
+        if($data && $data->{'user'} && $data->{'user'} eq $user) {
+            push @{$keys}, $data;
+        }
+    }
+    return($keys);
+}
+
+##############################################
+
+=head2 get_system_keys
+
+    get_system_keys($c, [$filepattern])
+
+returns list of system api keys
+
+=cut
+sub get_system_keys {
+    my($c, $filepattern) = @_;
+    my $keys = [];
+    my $folder = $c->config->{'var_path'}.'/api_keys';
+    for my $file (glob($folder.'/*')) {
+        my $basename = Thruk::Utils::basename($file);
+        if($basename !~ $hashed_key_file_regex) {
+            next;
+        }
+        if($filepattern && $basename ne $filepattern) {
+            next;
+        }
+        my $data = read_key($c->config, $file);
+        if($data && $data->{'system'}) {
+            push @{$keys}, $data;
+        }
     }
     return($keys);
 }
@@ -94,7 +125,7 @@ sub get_key_by_private_key {
 
 =head2 create_key
 
-    create_key($c, $username, [$comment], [$readonly])
+    create_key($c, $username, [$comment], [$roles], [$system])
 
 create new api key for user
 
@@ -102,7 +133,7 @@ returns private, hashed key and filename
 
 =cut
 sub create_key {
-    my($c, $username, $comment, $readonly) = @_;
+    my($c, $username, $comment, $roles, $system) = @_;
 
     my $type = $supported_digests->{$default_digest};
     my $digest = Digest->new($type);
@@ -123,11 +154,61 @@ sub create_key {
         created => time(),
     };
     $data->{'comment'}  = $comment // '';
-    $data->{'readonly'} = $readonly ? 1 : 0;
+    if($system) {
+        delete $data->{'user'};
+        $data->{'system'} = 1;
+    }
+    if(defined $roles) {
+        $data->{'roles'} = $roles;
+    }
     die("hash collision") if -e $file;
     Thruk::Utils::IO::json_lock_store($file, $data , 1);
 
     return($privatekey, $hashed_key, $file);
+}
+
+##############################################
+
+=head2 create_key_from_req_params
+
+    create_key_from_req_params($c)
+
+create new api key for user from request parameters
+
+returns private, hashed key and filename on success or undef otherwise
+
+=cut
+sub create_key_from_req_params {
+    my($c) = @_;
+    my $username = $c->stash->{'remote_user'};
+    if($c->check_user_roles('admin')) {
+        if($c->req->parameters->{'username'}) {
+            $username = $c->req->parameters->{'username'};
+        }
+    } else {
+        # only allowed for admins
+        $c->req->parameters->{'system'} = 0;
+    }
+
+    # roles cannot exceed existing roles
+    if($c->req->parameters->{'roles'}) {
+        my $roles = [];
+        for my $role (@{Thruk::Utils::list($c->req->parameters->{'roles'})}) {
+            next unless $c->user->check_role_permissions($role);
+            push @{$roles}, $role;
+        }
+        $c->req->parameters->{'roles'} = $roles;
+    }
+
+    my($private_key, $hashed_key, $filename)
+        = create_key(
+            $c,
+            $username,
+           ($c->req->parameters->{'comment'} // ''),
+            $c->req->parameters->{'roles'},
+            $c->req->parameters->{'system'} ? 1 : 0,
+    );
+    return($private_key, $hashed_key, $filename);
 }
 
 ##############################################
@@ -146,6 +227,14 @@ sub remove_key {
     for my $k (@{$keys}) {
         if(Thruk::Utils::basename($k->{'file'}) eq $file) {
             unlink($k->{'file'});
+        }
+    }
+    if($c->check_user_roles('admin')) {
+        my $keys = get_system_keys($c, $file);
+        for my $k (@{$keys}) {
+            if(Thruk::Utils::basename($k->{'file'}) eq $file) {
+                unlink($k->{'file'});
+            }
         }
     }
 
@@ -182,7 +271,6 @@ sub read_key {
     $data->{'hashed_key'} = $hashed_key;
     $data->{'file'}       = $file;
     $data->{'digest'}     = $type;
-    $data->{'readonly'}   = 0 unless $data->{'readonly'};
     return($data);
 }
 

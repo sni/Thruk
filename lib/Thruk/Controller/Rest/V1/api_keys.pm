@@ -19,7 +19,7 @@ Thruk Controller
 
 ##########################################################
 # REST PATH: GET /thruk/api_keys
-# lists broadcasts
+# lists api keys
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/api_keys?$%mx, \&_rest_get_thruk_api_keys);
 sub _rest_get_thruk_api_keys {
     my($c, undef, $key) = @_;
@@ -36,7 +36,7 @@ sub _rest_get_thruk_api_keys {
         my $hashed_key = Thruk::Utils::basename($file);
         next if($key && $hashed_key !~ m/^$key\..*$/mx);
         my $data = Thruk::Utils::APIKeys::read_key($c->config, $file);
-        if($data && ($is_admin || $data->{'user'} eq $user)) {
+        if($data && ($is_admin || ($data->{'user'} && $data->{'user'} eq $user))) {
             push @{$keys}, $data;
         }
     }
@@ -83,20 +83,20 @@ Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE'], qr%^/thruk/api_key
 # Optional arguments:
 #
 #   * comment
-#   * readonly
+#   * system (flag to create system api key)
 #   * username (requires admin privileges)
+#   * roles (restrict roles to given list)
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/api_keys?$%mx, \&_rest_get_thruk_api_key_new);
 sub _rest_get_thruk_api_key_new {
     my($c) = @_;
-    require Thruk::Utils::APIKeys;
-    my $username = $c->stash->{'remote_user'};
-    if($c->req->parameters->{'username'} && $c->check_user_roles('admin')) {
-        $username = $c->req->parameters->{'username'};
+    if(!$c->config->{'api_keys_enabled'}) {
+        return({
+            'message' => 'api keys are disabled',
+            'code'    => 400,
+        });
     }
-    my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key($c,
-                                                                                 $username,
-                                                                                ($c->req->parameters->{'comment'} // ''),
-                                                                                ($c->req->parameters->{'readonly'} ? 1 : 0));
+    require Thruk::Utils::APIKeys;
+    my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key_from_req_params($c);
     if($private_key) {
         return({
             'message'     => 'successfully created api key',
