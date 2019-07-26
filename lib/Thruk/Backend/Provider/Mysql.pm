@@ -912,13 +912,12 @@ sub _log_stats {
 
     $c->stats->profile(begin => "Mysql::_log_stats");
 
-    Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
+    my($get_results_for, undef, undef) = $c->{'db'}->select_backends('get_logs');
     my $output = sprintf("%-20s %-15s %-13s %7s\n", 'Backend', 'Index Size', 'Data Size', 'Items');
     my @result;
-    for my $key (@{$c->stash->{'backends'}}) {
+    for my $key (@{$get_results_for}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'logcache'};
-        next unless $peer->{'enabled'};
         $peer->logcache->reconnect();
         my $dbh  = $peer->logcache->_dbh();
         my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');

@@ -1012,6 +1012,8 @@ sub _renew_logcache {
     my $stats = $self->logcache_stats($c);
     my $backends2import = [];
     for my $key (@{$get_results_for}) {
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        next unless($peer && $peer->{'logcache'});
         push @{$backends2import}, $key unless defined $stats->{$key};
     }
 
