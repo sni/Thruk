@@ -1492,7 +1492,7 @@ sub _task_show_logs {
         push @{$filter}, { message => { '!~~' => Thruk::Utils::clean_regex($exclude_pattern) }};
     }
     my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
-    return if $c->{'db'}->renew_logcache($c);
+    $c->{'db'}->renew_logcache($c);
     my $data = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
 
     my $json = {

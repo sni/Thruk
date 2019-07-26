@@ -930,17 +930,17 @@ sub get_logs {
 
   renew_logcache($c, [$noforks])
 
-update the logcache
+update the logcache, returns 1 on success or undef otherwise
 
 =cut
 
 sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
-    return unless defined $c->config->{'logcache'};
+    return 1 unless defined $c->config->{'logcache'};
     # set to import only to get faster initial results
     local $c->config->{'logcache_delta_updates'} = 2 unless $c->config->{'logcache_delta_updates'};
-    return if !$c->config->{'logcache_delta_updates'} && !$c->req->parameters->{'logcache_update'};
+    return 1 if !$c->config->{'logcache_delta_updates'} && !$c->req->parameters->{'logcache_update'};
     my $rc;
     eval {
         $rc = $self->_renew_logcache($c, $noforks);
@@ -1006,7 +1006,7 @@ sub _renew_logcache {
             $check = 1;
         }
     }
-    return unless $check;
+    return 1 unless $check;
 
     $c->stash->{'backends'} = $get_results_for;
     my $stats = $self->logcache_stats($c);
@@ -1021,13 +1021,14 @@ sub _renew_logcache {
         if(scalar @{$backends2import} > 0) {
             local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
             local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
-            return Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
-                                                    message   => 'please stand by while your initial logfile cache will be created...',
-                                                    forward   => $c->req->url,
-                                                    nofork    => $noforks,
-                                                    });
+            Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
+                                              message   => 'please stand by while your initial logfile cache will be created...',
+                                              forward   => $c->req->url,
+                                              nofork    => $noforks,
+                                            });
+            return 1;
         } else {
-            return if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
+            return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
             local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
             my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
             if($rc != 0) {
@@ -1038,18 +1039,19 @@ sub _renew_logcache {
         my $type = '';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         if(scalar @{$backends2import} > 0) {
-            return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
-                                                    message   => 'please stand by while your initial logfile cache will be created...',
-                                                    forward   => $c->req->url,
-                                                    backends  => $backends2import,
-                                                    nofork    => $noforks,
-                                                    });
+            Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
+                                               message   => 'please stand by while your initial logfile cache will be created...',
+                                               forward   => $c->req->url,
+                                               backends  => $backends2import,
+                                               nofork    => $noforks,
+                                            });
+            return 1;
         }
 
-        return if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
+        return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
         $self->_do_on_peers( 'renew_logcache', \@args, 1);
     }
-    return;
+    return 1;
 }
 
 ########################################

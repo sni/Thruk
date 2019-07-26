@@ -126,7 +126,7 @@ sub index {
         return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "showlog::updatecache");
-        return if $c->{'db'}->renew_logcache($c);
+        $c->{'db'}->renew_logcache($c);
         $c->stats->profile(end   => "showlog::updatecache");
 
         $c->stats->profile(begin => "showlog::fetch");
