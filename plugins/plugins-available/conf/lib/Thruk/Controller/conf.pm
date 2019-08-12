@@ -2431,7 +2431,7 @@ sub _get_git_logs {
             'author_name'  => $d[1],
             'author_email' => $d[2],
             'date'         => $d[3],
-            'message'      => $d[4],
+            'message'      => decode_utf8($d[4]),
             'next'         => '',
             'previous'     => '',
         };
@@ -2457,7 +2457,7 @@ sub _get_git_commit {
             'date'         => $d[3],
             'parent'       => $d[4],
             'tree'         => $d[5],
-            'message'      => $d[6],
+            'message'      => decode_utf8($d[6]),
             'body'         => $d[7],
             'diff'         => $d[8],
     };
