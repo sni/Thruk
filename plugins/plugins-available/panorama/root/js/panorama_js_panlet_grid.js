@@ -22,6 +22,7 @@ Ext.define('TP.GridLoader', {
             }
         }
     },
+    // called after panlet loader returns with new data
     callback: function(This, success, response, options) {
         var panel     = This.target;
         panel.loading = false;
@@ -125,6 +126,9 @@ Ext.define('TP.GridLoader', {
                         } else {
                             state.columns[x].hidden = true;
                         }
+                        state.columns[x].name = panel.grid.columns[x].text;
+                        state.columns[x].pos  = panel.grid.columns[x].getVisibleIndex();
+                        delete state.columns[x]["id"];
                     }
 
                     panel.saveState();
@@ -311,13 +315,40 @@ TP.applyColumns = function(columns, state) {
     if(!state || !state.columns) {
         return;
     }
+    var has_names = false;
     for(var x = 0; x < columns.length; x++) {
-        if(state.columns[x] && state.columns[x].width) {
-            columns[x].width = state.columns[x].width;
+        var state_column = undefined;
+        for(var y = 0; y < state.columns.length; y++) {
+            if(state.columns[y].name) {
+                has_names = true;
+            }
+            if(state.columns[y].name == columns[x].header) {
+                state_column = state.columns[y];
+                break;
+            }
         }
-        if(state.columns[x] && state.columns[x].hidden != undefined) {
-            columns[x].hidden = state.columns[x].hidden;
+        if(!has_names) {
+            state_column = state.columns[x];
         }
+        if(state_column == undefined) {
+            continue;
+        }
+        if(state_column.width) {
+            columns[x].width = state_column.width;
+        }
+        if(state_column.hidden != undefined) {
+            columns[x].hidden = state_column.hidden;
+        }
+        if(state_column.pos != undefined) {
+            columns[x].pos = state_column.pos;
+        }
+        if(columns[x].pos == undefined || columns[x].pos === false || columns[x].pos < 0) {
+            columns[x].pos = 9999;
+        }
+    }
+    // sort them in state order
+    if(has_names) {
+        columns = columns.sort(function(a,b) { return(a.pos > b.pos) });
     }
     return;
 };

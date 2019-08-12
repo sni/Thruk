@@ -1497,7 +1497,7 @@ sub _task_show_logs {
 
     my $json = {
         columns => [
-            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_log' },
+            { 'header' => 'Icon',    dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_log' },
             { 'header' => 'Time',    dataIndex => 'time', width => 60, renderer => 'TP.render_date' },
             { 'header' => 'Message', dataIndex => 'message', flex => 1 },
         ],
@@ -1535,7 +1535,7 @@ sub _task_site_status {
     my $json = {
         columns => [
             { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => Cpanel::JSON::XS::true },
-            { 'header' => '',                 dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_site' },
+            { 'header' => 'Icon',             dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_site' },
             { 'header' => 'Category',         dataIndex => 'category',                width => 60, hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Section',          dataIndex => 'section',                 width => 60, hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Site',             dataIndex => 'site',                    width => 60, flex => 1 },
