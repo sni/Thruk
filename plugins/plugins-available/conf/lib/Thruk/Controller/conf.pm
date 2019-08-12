@@ -2420,6 +2420,7 @@ sub _get_git_logs {
     my($c, $dir) = @_;
     my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%s')."\x1e'";
     my $out = `$cmd`;
+    $out = decode_utf8($out);
     my $logs = [];
     my $last;
     for my $line (split("\x1e", $out)) {
@@ -2448,6 +2449,7 @@ sub _get_git_commit {
     my($c, $dir, $commit) = @_;
     my $cmd = "cd '".$dir."' && git show --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%p', '%t', '%s', '%b')."\x1f' ".$commit;
     my $output = `$cmd`;
+    $output = decode_utf8($output);
     my @d = split(/\x1f/mx, $output);
     return if scalar @d < 4;
     my $data = {
@@ -2470,6 +2472,7 @@ sub _get_git_blame {
     my $dir = Thruk::Utils::dirname($path);
     my $cmd = "cd '".$dir."' && git blame -swp -L $line_start,$line_end '".$path."'";
     my $output = `$cmd`;
+    $output = decode_utf8($output);
     my $blame = {lines => [], commits => {}};
     my($state, $block, $commit) = (0, {}, {});
     for my $line (split/\n/mx, $output) {
