@@ -20,7 +20,7 @@
 # translated patterns
     'Hostgroup:'                            => 'Hostgruppe:',
     'Servicegroup:'                         => 'Servicegruppe:',
-    'Event Report'                          => 'Ereigniss Bericht',
+    'Event Report'                          => 'Ereignisbericht',
     'SLA Report'                            => 'SLA Bericht',
     'SLA Outage Report'                     => 'SLA Ausfall Bericht',
     'Business Process:'                     => 'Geschäftsprozess:',
