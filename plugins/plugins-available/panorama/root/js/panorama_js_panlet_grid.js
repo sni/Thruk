@@ -31,6 +31,13 @@ Ext.define('TP.GridLoader', {
 
         TP.log('['+panel.id+'] loaded');
 
+        // return early if dashboard is not visible (breaks column layout otherwise)
+        var tab = Ext.getCmp(panel.panel_id);
+        if(!tab.isActiveTab()) {
+            This.updateData(panel, data.data);
+            return;
+        }
+
         /* column state is not recognized, so set it here */
         if(panel.xdata && panel.xdata.gridstate) {
             TP.applyColumns(data.columns, panel.xdata.gridstate);
@@ -49,10 +56,7 @@ Ext.define('TP.GridLoader', {
 
         // replace data only if columns haven't changed (does not work in IE11, panel will be blank afterwards)
         if(!Ext.isIE && !columnsChanged && panel.gridStore) {
-            panel.gridStore.loadData(data.data);
-            if(panel.pagingToolbar) {
-                panel.pagingToolbar.onLoad();
-            }
+            This.updateData(panel, data.data);
             return;
         }
 
@@ -187,6 +191,12 @@ Ext.define('TP.GridLoader', {
 
         panel.loading = false;
         return;
+    },
+    updateData: function(panel, data) {
+        panel.gridStore.loadData(data);
+        if(panel.pagingToolbar) {
+            panel.pagingToolbar.onLoad();
+        }
     }
 });
 
