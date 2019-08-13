@@ -44,6 +44,7 @@ requires 'Storable'                               => 0;     # required by Thruk:
 requires 'threads'                                => 0;     # required by Thruk::Pool::Simple
 requires 'Thread::Queue'                          => 0;     # required by Thruk::Pool::Simple
 requires 'Time::HiRes'                            => 0;     # required by Thruk::Backend::Manager
+requires 'Crypt::Rijndael'                        => 0;     # required by Thruk::Utils::CookieAuth
 
 # reporting2 plugin
 feature     ('plugin_reports2',

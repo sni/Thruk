@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 91;
+    plan tests => 96;
 
     use lib('t');
     require TestUtils;
@@ -338,4 +338,20 @@ for my $urls (@{$absolute_urls}) {
   is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
 }
 
+#########################
+{
+    my($sessionid,$hashed_key,$type) = Thruk::Utils::CookieAuth::generate_sessionid();
+    my $data = {
+      'hash'     => 'test',
+      'username' => 'user',
+    };
+    my($sessionid2,$sessionfile,$data2) = Thruk::Utils::CookieAuth::store_session($c->config, $sessionid, $data);
+    is($sessionid2, $sessionid, "session id did not change");
+    isnt($sessionfile, undef, "got file");
+    like($data2->{'hash'}, '/^CBC,.+/', "basic auth hash is crypted");
+    my $session2 = Thruk::Utils::CookieAuth::retrieve_session(id => $sessionid, config => $c->config);
+    is($session2->{'file'}, $sessionfile, "got session file");
+    is($session2->{'hash'}, "test", "hash has been decrypted");
+    unlink($sessionfile);
+};
 #########################

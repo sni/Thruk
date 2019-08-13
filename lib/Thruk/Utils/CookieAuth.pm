@@ -23,6 +23,8 @@ use Digest ();
 use File::Slurp qw/read_file/;
 use Carp qw/confess/;
 use File::Copy qw/move/;
+use Crypt::Rijndael ();
+use MIME::Base64 ();
 
 ##############################################
 my $supported_digests = {
@@ -290,29 +292,37 @@ sub store_session {
     my($config, $sessionid, $data) = @_;
 
     # store session key hashed
-    my $type = $supported_digests->{$default_digest};
-    my $digest = Digest->new($type);
-    if(!$sessionid) {
-        $digest->add(rand(1000000));
-        $digest->add(time());
-        $sessionid = $digest->hexdigest()."_".$default_digest;
-        if(length($sessionid) != 66) { die("creating session id failed.") }
-        $digest->reset();
-    }
-    $digest->add($sessionid);
-    my $hashed_key = $digest->hexdigest();
+    my($hashed_key, $type);
+    ($sessionid,$hashed_key,$type) = generate_sessionid($sessionid);
 
     $data->{'csrf_token'} = _generate_csrf_token([$sessionid]) unless $data->{'csrf_token'};
     delete $data->{'private_key'};
+    my $hash_raw = delete $data->{'hash_raw'};
 
     confess("no username") unless $data->{'username'};
+
+    # store basic auth hash crypted with the private session id
+    if($data->{'hash'} && $data->{'hash'} ne 'none') {
+        if($hash_raw) {
+            # no need to recrypt every time
+            $data->{'hash'} = $hash_raw;
+        } else {
+            my $key = substr(_null_padding($sessionid,32,'e'),0,32);
+            my $cipher = Crypt::Rijndael->new($key, Crypt::Rijndael::MODE_CBC);
+            $data->{'hash'} = "CBC,".MIME::Base64::encode_base64($cipher->encrypt(_null_padding($data->{'hash'},32,'e')));
+        }
+    }
 
     my $sdir = $config->{'var_path'}.'/sessions';
     die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9_]+$/mx;
     my $sessionfile = $sdir.'/'.$hashed_key.'.'.$type;
     Thruk::Utils::IO::mkdir_r($sdir);
     Thruk::Utils::IO::json_lock_store($sessionfile, $data);
+
+    # restore some keys which should not be stored
     $data->{'private_key'} = $sessionid;
+    $data->{'hash_raw'} = $hash_raw if $hash_raw;
+
     return($sessionid, $sessionfile, $data);
 }
 
@@ -410,7 +420,16 @@ sub retrieve_session {
             roles    => \@roles,
         };
     }
+    # /REMOVE
     return unless defined $data;
+    if($sessionid && $data->{hash} && $data->{hash} =~ m/^CBC,(.*)$/mx) {
+        my $crypted = $1;
+        $data->{hash_raw} = $data->{hash};
+        # decrypt from private key
+        my $key = substr(_null_padding($sessionid,32,'e'),0,32);
+        my $cipher = Crypt::Rijndael->new($key, Crypt::Rijndael::MODE_CBC);
+        $data->{hash} = _null_padding($cipher->decrypt(MIME::Base64::decode_base64($crypted)), 32, 'd');
+    }
     $data->{file}        = $sessionfile;
     $data->{hashed_key}  = $hashed_key;
     $data->{digest}      = $type;
@@ -449,6 +468,46 @@ sub _upgrade_session_file {
     my $newfile = $folder.'/'.$hashed_key.'.'.$type;
     move($folder.'/'.$sessionid, $newfile);
     return($hashed_key, $newfile);
+}
+
+##############################################
+sub _null_padding {
+    my($block,$bs,$decrypt) = @_;
+    return unless length $block;
+    $block = length $block ? $block : '';
+    if ($decrypt eq 'd') {
+        $block=~ s/\0*$//mxs;
+        return $block;
+    }
+    return $block . pack("C*", (0) x ($bs - length($block) % $bs));
+}
+
+##############################################
+
+=head2 generate_sessionid
+
+  generate_sessionid([$sessionid])
+
+returns random sessionid along with the hashed key and the hash type
+
+    returns $sessionid, $hashed_key, $type
+
+=cut
+
+sub generate_sessionid {
+    my($sessionid) = @_;
+    my $type = $supported_digests->{$default_digest};
+    my $digest = Digest->new($type);
+    if(!$sessionid) {
+        $digest->add(rand(1000000));
+        $digest->add(time());
+        $sessionid = $digest->hexdigest()."_".$default_digest;
+        if(length($sessionid) != 66) { die("creating session id failed.") }
+        $digest->reset();
+    }
+    $digest->add($sessionid);
+    my $hashed_key = $digest->hexdigest();
+    return($sessionid, $hashed_key, $type);
 }
 
 1;

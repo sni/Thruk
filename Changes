@@ -4,6 +4,7 @@ next:
           - show all host columns only once in service details
           - add list view process info when connecting more than 5 sites
           - add option to limit api keys to certain roles
+          - improve storing session credentials
           - fix keyboard control of datepicker (#946)
           - Broadcasts:
             - use authorized_for_broadcasts role everywhere
