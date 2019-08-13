@@ -17,6 +17,7 @@ next:
           - Panorama:
             - improve saving column layout in grid panel (#811)
             - add custom variables to grid panel (#849)
+            - add alias names to label (#941)
             - fix changing open dashboards on reloads
           - internals:
             - update daterangepicker 3.0.5

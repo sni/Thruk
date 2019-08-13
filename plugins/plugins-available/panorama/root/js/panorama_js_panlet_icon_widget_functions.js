@@ -909,8 +909,8 @@ TP.evalInContext = function(js, context) {
 
 TP.getPanelMacros = function(panel) {
     var macros = { panel: panel };
-    if(panel.servicegroup) { macros.totals = panel.servicegroup; }
-    if(panel.hostgroup)    { macros.totals = panel.hostgroup; }
+    if(panel.servicegroup) { macros.totals = panel.servicegroup; macros['alias'] = panel.servicegroup.alias; macros['name'] = panel.servicegroup.name; }
+    if(panel.hostgroup)    { macros.totals = panel.hostgroup;    macros['alias'] = panel.hostgroup.alias;    macros['name'] = panel.hostgroup.name; }
     if(panel.results)      { macros.totals = panel.results; }
     if(panel.host)         { for(var key in panel.host)    { macros[key] = panel.host[key];    } macros['performance_data'] = panel.host['perf_data']; }
     if(panel.service)      { for(var key in panel.service) { macros[key] = panel.service[key]; } macros['performance_data'] = panel.service['perf_data']; }
