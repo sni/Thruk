@@ -40,15 +40,12 @@ use Thruk::Utils::CookieAuth;
 use Thruk::Utils::IO;
 use Thruk::Utils::APIKeys;
 
-$|          = 1;
-my $verbose = $config->{'cookie_auth_verbose'} // 0;
-$verbose    = $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} if $ENV{'THRUK_COOKIE_AUTH_VERBOSE'};
-
-my $guest;
-$guest = $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'} if $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'};
+$| = 1;
 
 ##########################################################
 my $config              = Thruk::Config::get_config();
+my $verbose             = $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} // $config->{'cookie_auth_verbose'} // 0;
+my $guest               = $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'} || undef;
 my $secret_file         = $config->{'var_path'}.'/secret.key';
 my $urlprefix           = $config->{'url_prefix'};
 my $loginurl            = $config->{'cookie_auth_login_url'}       || $urlprefix."cgi-bin/login.cgi";
