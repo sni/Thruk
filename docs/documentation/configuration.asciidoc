@@ -1619,6 +1619,18 @@ ex.:
   cookie_auth_disable_after_failed_logins = 3
 
 
+=== cookie_auth_verbose
+{% include new_since.ad version="2.32" %}
+Increase logging of cookie authentication related things. This usually
+gets printed to the apache error log.
+
+Default: 0
+
+ex.:
+
+  cookie_auth_verbose = 3
+
+
 
 == Command Settings
 

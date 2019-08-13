@@ -41,7 +41,7 @@ use Thruk::Utils::IO;
 use Thruk::Utils::APIKeys;
 
 $|          = 1;
-my $verbose = 0;
+my $verbose = $config->{'cookie_auth_verbose'} // 0;
 $verbose    = $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} if $ENV{'THRUK_COOKIE_AUTH_VERBOSE'};
 
 my $guest;
