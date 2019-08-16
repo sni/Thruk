@@ -286,6 +286,7 @@ sub index {
 
     $c->stash->{'title'}        = "Error"  unless defined $c->stash->{'title'} and $c->stash->{'title'} ne '';
     $c->stash->{'page'}         = "status" unless defined $c->stash->{'page'};
+    $c->stash->{'real_page'}    = 'error';
     $c->stash->{'infoBoxTitle'} = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
 
     $c->stash->{'navigation'}  = "";

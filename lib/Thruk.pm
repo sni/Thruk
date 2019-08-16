@@ -337,6 +337,7 @@ sub _dispatcher {
             my $rc;
             if(my($route, $routename) = $thruk->find_route_match($c, $path_info)) {
                 $c->stats->profile(begin => $routename);
+                $c->stash->{controller} = $routename;
                 $rc = &{$route}($c, $path_info);
                 $c->stats->profile(end => $routename);
             }

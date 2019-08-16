@@ -565,6 +565,11 @@ sub ssi_include {
     $c->stash->{ssi_footer}  = Thruk::Utils::read_ssi($c, 'common', 'footer');
     $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $page, 'footer');
 
+    $c->stash->{real_page} = "";
+    if($c->stash->{controller} =~ m/Thruk::Controller::([^:]*)::.*?$/gmx) {
+        $c->stash->{real_page} = $1;
+    }
+
     return 1;
 }
 

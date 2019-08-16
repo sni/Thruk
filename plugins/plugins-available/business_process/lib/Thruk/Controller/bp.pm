@@ -73,6 +73,8 @@ sub index {
     $c->stash->{show_top_pane} = 1;
     $c->stash->{hidetop} = 1 if $c->stash->{hidetop} eq '';
 
+    Thruk::Utils::ssi_include($c);
+
     # check roles
     my $allowed_for_edit = 0;
     if( $c->check_user_roles( "authorized_for_business_processes")) {

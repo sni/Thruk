@@ -14,7 +14,7 @@
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
 
-  <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class="[% page %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
+  <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class="[% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% ssi_header %]
   <div style="display:none;" id="search-results"></div>
