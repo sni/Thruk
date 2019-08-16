@@ -91,12 +91,11 @@ sub clean_old_dashboards {
 
     get_dashboard_list($c, $type)
 
-return list of dashboards. Type can be 'public', 'my' or 'all' where 'all' is
-only available for admins.
+return list of dashboards. Type can be 'public', 'my' or 'all'
 
 =cut
 sub get_dashboard_list {
-    my($c, $type) = @_;
+    my($c, $type, $full) = @_;
 
     # returns wrong list of public dashboards otherwise
     my $is_admin;
@@ -119,6 +118,10 @@ sub get_dashboard_list {
                 } else {
                     # my
                     next if $d->{'user'} ne $c->stash->{'remote_user'};
+                }
+                if($full) {
+                    push @{$dashboards}, $d;
+                    next;
                 }
                 my $groups_rw = [];
                 my $groups_ro = [];

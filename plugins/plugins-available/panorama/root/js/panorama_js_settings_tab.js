@@ -510,6 +510,12 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             fieldLabel: 'Title',
             listeners: { change: function(This, newValue, oldValue, eOpts) { document.title = newValue; } }
         }, {
+            /* tab description */
+            xtype:      'textarea',
+            name:       'description',
+            fieldLabel: 'Description',
+            height:      35
+        }, {
             /* global refresh rate */
             xtype:      'tp_slider',
             fieldLabel: 'Refresh Rate',

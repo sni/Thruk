@@ -1514,9 +1514,10 @@ var TP = {
     },
 
     /* let this element flicker and make it a little bit bigger */
-    flickerImg: function(dom_id) {
+    flickerImg: function(dom_id, callback) {
         var el     = Ext.get(dom_id);
         if(!el) { return; }
+
         el.animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
@@ -1526,7 +1527,9 @@ var TP = {
           .animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
-          .animate({ to: { opacity: 100 } })
+          .animate({ to: { opacity: 100 },
+                     callback: function() { if(callback) callback(); }
+                   });
     },
 
     /* toggle or set a dashboard option */

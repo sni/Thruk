@@ -28,6 +28,149 @@ Ext.define('TP.TabBar', {
             }
         },
         items:[{ xtype: 'tbfill' },{
+            xtype:      'textfield',
+            emptyText:  'search',
+            fieldStyle: 'background: #f0f0f0;',
+            height:      20,
+            padding:     '0 10 0 0',
+            enableKeyEvents: true,
+            listeners: {
+                focus:  function(This, e, eOpts) { This.onChanged(); },
+                keyup:  function(This, e, eOpts) { This.onChanged(); },
+                change: function(This, e, eOpts) { This.onChanged(); }
+            },
+            onChanged: function() {
+                var This = this;
+                This.menu = Ext.menu.Manager.get(This.menu);
+                This.menu.ownerButton = This;
+                var val  = This.getValue();
+                if(val == "") {
+                    This.menu.hide();
+                    return;
+                }
+                if(!This.menu.isVisible()) {
+                    This.menu.showBy(This);
+                }
+                TP.delayEvents(This, function() {
+                    This.updateMenu();
+                }, 300);
+            },
+            updateMenu: function() {
+                var This = this;
+                var menu = This.menu;
+                var val  = This.getValue();
+                if(This.lastSearch == val) { return; }
+                if(val == "") {
+                    This.menu.hide();
+                    return;
+                }
+                This.lastSearch = val;
+                menu.removeAll();
+                menu.plain = false;
+                menu.add({
+                    text:    'Loading...',
+                    icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
+                    disabled: true
+                });
+                Ext.Ajax.request({
+                    url:      "panorama.cgi",
+                    method:  'POST',
+                    params: { task: "search", value: val },
+                    callback: function(options, success, response) {
+                        if(!success) {
+                            if(response.status == 0) {
+                                TP.Msg.msg("fail_message~~search failed");
+                            } else {
+                                TP.Msg.msg("fail_message~~search failed: "+response.status+' - '+response.statusText);
+                            }
+                            return;
+                        }
+                        var data = TP.getResponse(undefined, response);
+                        menu.removeAll();
+                        menu.plain = true;
+                        if(data && data.data) {
+                            data = data.data;
+                            if(data.length == 0) {
+                                menu.add({
+                                    text:    'nothing found',
+                                    disabled: true
+                                });
+                            }
+                            for(var x = 0; x<data.length; x++) {
+                                if(x == 10) {
+                                    menu.add({
+                                        text: "<span class='searchhint'>showing first 10 of "+data.length+" results...<\/span>",
+                                        disabled: true
+                                    });
+                                    x = data.length+1;
+                                    break;
+                                }
+                                // trim the pre match text
+                                var pre = data[x].pre;
+                                if(pre.length > 12) {
+                                    pre = "..."+pre.substr(-12);
+                                }
+                                // trim the actual match if its too long
+                                var text = data[x].match;
+                                if(text.length > 25) {
+                                    var t1 = text.substr(-12);
+                                    var t2 = text.substr(0, 12);
+                                    text = t1+"..."+t2;
+                                }
+                                // trim the post match text
+                                var post = data[x].post;
+                                if(post.length > 12) {
+                                    post = post.substr(0, 12)+"...";
+                                }
+                                menu.add({
+                                    text: "<span class='searchname'>"+data[x].name+"<\/span><br>"
+                                         +"<span class='searchhint type'>"+data[x].type+":<\/span>"
+                                         +"<span class='searchhint'>"+pre+"<b>"+text+"<\/b>"+post+"<\/span>",
+                                    data: data[x]
+                                });
+                            }
+                        }
+                    }
+                });
+            },
+            menu: {
+                focusOnToFront: false,
+                showSeparator: false,
+                defaults: {
+                    handler: function(item, e) {
+                        var highlight = function() {
+                            if(item.data.highlight) {
+                                // highlight this icon
+                                var icon = Ext.getCmp(item.data.highlight);
+                                if(!icon)    { return; }
+                                if(!icon.el) { return; }
+                                icon.el.dom.style.boxShadow = "0 0 25px 25px #0083ee";
+                                TP.flickerImg(icon.el.id, function() {
+                                    icon.el.dom.style.boxShadow = "";
+                                });
+                            }
+                        }
+                        var tab = Ext.getCmp(item.data.id);
+                        if(tab && tab.rendered) {
+                            var tabpan = Ext.getCmp('tabpan');
+                            tabpan.setActiveTab(tab);
+                            // delay highlight a bit
+                            window.setTimeout(highlight, 500);
+                        } else {
+                            TP.add_pantab(item.data.id, undefined, undefined, function() {
+                                // delay highlight a bit
+                                window.setTimeout(highlight, 2000);
+                            });
+                        }
+                    }
+                },
+                items: [{
+                    text:    'Loading...',
+                    icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
+                    disabled: true
+                }]
+            }
+        },{
             id:       'debug_dom_elements',
             xtype:    'label',
             width:     70,

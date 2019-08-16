@@ -239,6 +239,9 @@ sub index {
         elsif($task eq 'load_dashboard') {
             return(_task_load_dashboard($c));
         }
+        elsif($task eq 'search') {
+            return(_task_search($c));
+        }
     }
 
     # find images for preloader
@@ -895,6 +898,72 @@ sub _task_load_dashboard {
 }
 
 ##########################################################
+sub _task_search {
+    my($c) = @_;
+
+    my $query = $c->req->parameters->{'value'} || '';
+    $query =~ s/^\s+//gmx;
+    $query =~ s/\s+$//gmx;
+    $query =~ s/\s+/.*/gmx;
+    my $data  = [];
+    my $json = { 'rc' => 0, 'data' => $data };
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json) unless $query;
+
+    my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all', 1);
+    for my $d (@{$dashboards}) {
+        my $found = _search_match($d->{'tab'}->{'xdata'}->{'title'}, $query, "title")
+                 || _search_match($d->{'tab'}->{'xdata'}->{'description'}, $query, "description");
+        # search in icons
+        if(!$found) {
+            for my $icon_id (sort keys %{$d}) {
+                my $icon = $d->{$icon_id};
+                next unless ref $icon eq 'HASH';
+                next unless $icon->{'xdata'};
+                $found = _search_match($icon->{'xdata'}->{'label'}->{'labeltext'}, $query, "iconlabel")
+                      || _search_match($icon->{'xdata'}->{'general'}->{'text'}, $query, "icontext")
+                      || _search_match($icon->{'xdata'}->{'general'}->{'host'}, $query, "host")
+                      || _search_match($icon->{'xdata'}->{'general'}->{'service'}, $query, "service")
+                      || _search_match($icon->{'xdata'}->{'general'}->{'hostgroup'}, $query, "hostgroup")
+                      || _search_match($icon->{'xdata'}->{'general'}->{'servicegroup'}, $query, "servicegroup");
+                if($found) {
+                    $found->{'highlight'} = $icon_id;
+                    last;
+                }
+            }
+        }
+        if($found) {
+            $found->{'id'}   = $d->{id};
+            $found->{'name'} = $d->{'tab'}->{'xdata'}->{'title'};
+            push @{$data}, $found;
+        }
+    }
+
+    return $c->render(json => $json);
+}
+
+##########################################################
+sub _search_match {
+    my($field, $query, $type, $return) = @_;
+    return unless defined $field;
+
+    # strip html and tags
+    $field =~ s/\{\{.*?\}\}//gmx;
+    $field =~ s/<.*?>//gmx;
+
+    ## no critic
+    if($field =~ m#(.*)($query)(.*)#si) {
+        my($pre,$match,$post) = ($1,$2,$3);
+        return({
+            type  => $type,
+            match => $match,
+            pre   => $pre,
+            post  => $post,
+            value => $field,
+        });
+    }
+    return;
+}
 
 ##########################################################
 sub _task_wms_provider {
