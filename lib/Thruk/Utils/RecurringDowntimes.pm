@@ -393,6 +393,8 @@ sub get_default_recurring_downtime {
             childoptions => 0,
             fixed        => 1,
             flex_range   => 720,
+            edited_by    => '',
+            created_by   => '',
     };
     push @{$default_rd->{'host'}},         $host         if $host;
     push @{$default_rd->{'servicegroup'}}, $servicegroup if $servicegroup;

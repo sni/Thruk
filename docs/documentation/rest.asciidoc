@@ -1494,7 +1494,9 @@ lists recurring downtimes.
 |backends                          | list of backends this downtime is used for
 |childoptions                      | flag used for the downtime command
 |comment                           | comment used for the downtime command
+|created_by                        | username who created this downtime
 |duration                          | duration in minutes
+|edited_by                         | username who last edited this downtime
 |error                             | contains the error message if something got wrong with this downtime
 |file                              | file number
 |fixed                             | flag whether this should create a fixed downtime

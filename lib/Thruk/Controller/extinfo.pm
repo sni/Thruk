@@ -279,6 +279,8 @@ sub _process_recurring_downtimes_page {
             'childoptions'  => $c->req->parameters->{'childoptions'}    || 0,
             'fixed'         => exists $c->req->parameters->{'fixed'} ? $c->req->parameters->{'fixed'} : 1,
             'flex_range'    => $c->req->parameters->{'flex_range'}      || 720,
+            'edited_by'     => $c->stash->{'remote_user'},
+            'created_by'    => $c->stash->{'remote_user'},
         };
         for my $t (qw/host hostgroup servicegroup/) {
             $rd->{$t} = [sort {lc $a cmp lc $b} @{$rd->{$t}}];
@@ -315,6 +317,8 @@ sub _process_recurring_downtimes_page {
                 my $old_rd = Thruk::Utils::read_data_file($old_file);
                 if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $old_rd) != 2) {
                     $failed = 1;
+                } else {
+                    $rd->{'created_by'} = $old_rd->{'created_by'};
                 }
             }
         }
