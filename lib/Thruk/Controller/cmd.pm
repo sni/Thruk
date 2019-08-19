@@ -41,7 +41,7 @@ sub index {
     for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup/) {
         $c->req->parameters->{$param} = '' unless defined $c->req->parameters->{$param};
     }
-    for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly/) {
+    for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly hostserviceoptions/) {
         $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
     }
     if(!defined $c->req->parameters->{'backend'}) {
