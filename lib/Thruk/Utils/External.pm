@@ -14,7 +14,6 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use Digest::MD5 qw(md5_hex);
 use Time::HiRes ();
 use File::Slurp qw/read_file/;
 use Storable qw/store retrieve/;
@@ -740,7 +739,7 @@ sub _do_parent_stuff {
 sub _init_external {
     my $c = shift;
 
-    my $id  = substr(md5_hex($$."-".Time::HiRes::time()), 0, 5);
+    my $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, 5);
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     for my $mdir ($c->config->{'var_path'}, $c->config->{'var_path'}."/jobs", $dir) {
         if(! -d $mdir) {

@@ -20,7 +20,6 @@ use Thruk::Utils::IO;
 use Thruk::Utils::Crypt;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
-use Digest ();
 use File::Slurp qw/read_file/;
 use Carp qw/confess/;
 use File::Copy qw/move/;

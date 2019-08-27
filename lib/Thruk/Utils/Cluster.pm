@@ -14,9 +14,9 @@ use strict;
 use warnings;
 use Thruk::Utils;
 use Thruk::Utils::IO;
+use Thruk::Utils::Crypt;
 use Thruk::Backend::Provider::HTTP;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Digest::MD5 qw(md5_hex);
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 
@@ -272,7 +272,7 @@ sub run_cluster {
         return 0 unless $ENV{'THRUK_CRON'};
         confess("no args supported") if $args;
         # check if cmd is already running
-        my $digest = md5_hex(sprintf("%s-%s-%s", POSIX::strftime("%Y-%m-%d %H:%M", localtime()), $sub, Dumper($args)));
+        my $digest = Thruk::Utils::Crypt::hexdigest(sprintf("%s-%s-%s", POSIX::strftime("%Y-%m-%d %H:%M", localtime()), $sub, Dumper($args)));
         my $jobs_path = $c->config->{'var_path'}.'/cluster/jobs';
         Thruk::Utils::IO::mkdir_r($jobs_path);
         Thruk::Utils::IO::write($jobs_path.'/'.$digest, $Thruk::NODE_ID."\n", undef, 1);

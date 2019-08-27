@@ -1904,7 +1904,7 @@ sub _check_files_changed {
 # returns:
 #   0 if file did not change
 #   1 if file is new / created
-#   2 if md5 sum changed
+#   2 if hexdigest sum changed
 sub _check_file_changed {
     my($self, $file) = @_;
 
@@ -1923,9 +1923,9 @@ sub _check_file_changed {
         if($file->{'inode'} ne $ino or $file->{'mtime'} ne $mtime) {
             $file->{'inode'} = $ino;
             $file->{'mtime'} = $mtime;
-            # get md5
+            # get hexdigest
             my $meta = $file->get_meta_data();
-            if($meta->{'md5'} ne $file->{'md5'}) {
+            if($meta->{'hex'} ne $file->{'hex'}) {
                 return 2;
             }
         }
@@ -2437,7 +2437,7 @@ sub remote_file_sync {
         next unless -f $f->{'path'};
         $files->{$f->{'display'}} = {
             'mtime'        => $f->{'mtime'},
-            'md5'          => $f->{'md5'},
+            'hex'          => $f->{'hex'},
         };
     }
     my $remotefiles = $self->_remote_do($c, 'syncfiles', { files => $files });

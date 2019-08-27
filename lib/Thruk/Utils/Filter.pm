@@ -17,7 +17,6 @@ use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
 use Cpanel::JSON::XS ();
 use Encode qw/decode_utf8/;
-use Digest::MD5 qw(md5_hex);
 use File::Slurp qw/read_file/;
 
 ##############################################

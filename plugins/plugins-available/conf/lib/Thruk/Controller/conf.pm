@@ -10,7 +10,6 @@ use Storable qw/dclone/;
 use Data::Dumper qw/Dumper/;
 use File::Slurp qw/read_file/;
 use Encode qw/decode_utf8 encode_utf8/;
-use Digest::MD5 qw/md5_hex/;
 use Thruk::Utils::References;
 use Thruk::Utils::Conf;
 use Thruk::Utils::Conf::Defaults;
@@ -445,7 +444,7 @@ sub _process_cgi_page {
         return $c->redirect_to('conf.cgi?sub=cgi');
     }
 
-    my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+    my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
     # get list of cgi users
     my $tmp = Thruk::Utils::Conf::get_cgi_user_list($c);
@@ -500,7 +499,7 @@ sub _process_cgi_page {
 
     $c->stash->{'keys'}     = $keys;
     $c->stash->{'data'}     = $data;
-    $c->stash->{'md5'}      = $md5;
+    $c->stash->{'hex'}      = $hex;
     $c->stash->{'subtitle'} = "CGI &amp; Access Configuration";
     $c->stash->{'template'} = 'conf_data.tt';
 
@@ -533,7 +532,7 @@ sub _process_thruk_page {
         }
     }
 
-    my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+    my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
     my $keys = [
         [ 'General', [qw/
@@ -594,7 +593,7 @@ sub _process_thruk_page {
 
     $c->stash->{'keys'}     = $keys;
     $c->stash->{'data'}     = $data;
-    $c->stash->{'md5'}      = $md5;
+    $c->stash->{'hex'}      = $hex;
     $c->stash->{'subtitle'} = "Thruk Configuration";
     $c->stash->{'template'} = 'conf_data.tt';
 
@@ -654,7 +653,7 @@ sub _process_users_page {
         }
 
         # save changes to cgi.cfg
-        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
         my $new_data              = {};
         for my $key (keys %{$c->req->parameters}) {
             next unless $key =~ m/data\.authorized_for_/mx;
@@ -680,10 +679,10 @@ sub _process_users_page {
     $c->stash->{'user_name'}  = '';
 
     if($c->stash->{action} eq 'change' and $user ne '') {
-        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
         $c->stash->{'show_user'}  = 1;
         $c->stash->{'user_name'}  = $name;
-        $c->stash->{'md5'}        = $md5;
+        $c->stash->{'hex'}        = $hex;
         $c->stash->{'roles'}      = {};
         my $roles = $Thruk::Authentication::User::possible_roles;
         $c->stash->{'role_keys'}  = $roles;
@@ -920,7 +919,7 @@ sub _process_backends_page {
     # set ids
     for my $b (@{$backends}) {
         $b->{'type'}        = 'livestatus' unless defined $b->{'type'};
-        $b->{'id'}          = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'id'};
+        $b->{'id'}          = substr(Thruk::Utils::Crypt::hexdigest(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'id'};
         $b->{'addr'}        = $b->{'options'}->{'peer'}  || '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
         $b->{'proxy'}       = $b->{'options'}->{'proxy'} || '';
@@ -963,7 +962,7 @@ sub _process_objects_page {
     if(defined $c->req->parameters->{'start_edit'}) {
         my $file = Thruk::Utils::Conf::start_file_edit($c, $c->req->parameters->{'start_edit'});
         if($file) {
-            return $c->render(json => {'ok' => 1, md5 => $file->{'md5'} });
+            return $c->render(json => {'ok' => 1, hex => $file->{'hex'} });
         }
         return $c->render(json => {'ok' => 0 });
     }
@@ -1020,7 +1019,7 @@ sub _process_objects_page {
             if($c->stash->{'conf_config'}->{'cgi.cfg'} && ($type eq 'contactgroup' || $type eq 'contact') && -w $file) {
                 my $name     = $obj->get_name();
                 my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
-                my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+                my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
                 my $new_data              = {};
                 for my $key (keys %{$c->req->parameters}) {
                     next unless $key =~ m/authdata\.authorized_for_/mx;
@@ -1172,9 +1171,9 @@ sub _process_objects_page {
         if($c->stash->{'conf_config'}->{'cgi.cfg'} && ($c->stash->{'type'} eq 'contactgroup' || $c->stash->{'type'} eq 'contact')) {
             my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
             my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
-            my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+            my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
             my $roles = $Thruk::Authentication::User::possible_roles;
-            $c->stash->{'md5'}       = $md5;
+            $c->stash->{'hex'}       = $hex;
             $c->stash->{'role_keys'} = $roles;
             for my $role (@{$roles}) {
                 $c->stash->{'roles'}->{$role} = 0;
@@ -1578,8 +1577,8 @@ sub _get_htpasswd {
 sub _store_changes {
     my ( $c, $file, $data, $defaults, $update_in_conf, $ignore_no_changes_made) = @_;
     return unless Thruk::Utils::check_csrf($c);
-    my $old_md5 = $c->req->parameters->{'md5'};
-    if(!defined $old_md5 || $old_md5 eq '') {
+    my $old_hex = $c->req->parameters->{'hex'};
+    if(!defined $old_hex || $old_hex eq '') {
         Thruk::Utils::set_message( $c, 'success_message', "no changes made." );
         return;
     }
@@ -1589,7 +1588,7 @@ sub _store_changes {
         return;
     }
     $c->log->debug("saving config changes to ".$file);
-    my $res = Thruk::Utils::Conf::update_conf($file, $data, $old_md5, $defaults, $update_in_conf);
+    my $res = Thruk::Utils::Conf::update_conf($file, $data, $old_hex, $defaults, $update_in_conf);
     if(defined $res) {
         if($res eq "no changes made." && $ignore_no_changes_made) {
             return;

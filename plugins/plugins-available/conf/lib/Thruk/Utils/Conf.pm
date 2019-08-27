@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use File::Slurp qw/read_file/;
-use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
@@ -179,22 +178,22 @@ sub read_objects {
 
 =head2 update_conf
 
-    update_conf($file, $data [, $md5] [, $defaults] [, $update_c]);
+    update_conf($file, $data [, $hexdigest] [, $defaults] [, $update_c]);
 
 update inline config
 
     $file       file to change
     $data       new data
-    $md5        md5 sum from the file when we read it. (use -1 to disable check)
+    $hexdigest  hexdigest sum from the file when we read it. (use -1 to disable check)
     $defaults   defaults for this file
     $update_c   update c so thruk does not need to be restarted
 
 =cut
 sub update_conf {
-    my($file, $data, $md5, $defaults, $update_c) = @_;
+    my($file, $data, $hexdigest, $defaults, $update_c) = @_;
 
-    my($old_content, $old_data, $old_md5) = read_conf($file, $defaults);
-    if($md5 ne '-1' and $md5 ne $old_md5) {
+    my($old_content, $old_data, $old_hexdigest) = read_conf($file, $defaults);
+    if($hexdigest ne '-1' and $hexdigest ne $old_hexdigest) {
         return("cannot update, file has been changed since reading it.");
     }
 
@@ -259,8 +258,8 @@ sub read_conf {
 
     return('', $data, '') unless -e $file;
 
-    my $content  = read_file($file);
-    my $md5      = md5_hex($content);
+    my $content   = read_file($file);
+    my $hexdigest = Thruk::Utils::Crypt::hexdigest($content);
     for my $line (split/\n/mx, $content) {
         next if $line eq '';
         next if substr($line, 0, 1) eq '#';
@@ -290,7 +289,7 @@ sub read_conf {
         }
     }
 
-    return($content, $data, $md5);
+    return($content, $data, $hexdigest);
 }
 
 
@@ -502,7 +501,7 @@ sub get_cgi_user_list {
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'}) {
         my $file                  = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
         my $defaults              = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
-        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
         my $extra_user = [];
         for my $key (keys %{$data}) {
             next unless $key =~ m/^authorized_for_/mx;
@@ -550,7 +549,7 @@ sub get_cgi_group_list {
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'}) {
         my $file                  = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
         my $defaults              = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
-        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
         my $extra_group = [];
         for my $key (keys %{$data}) {
             next unless $key =~ m/^authorized_contactgroup_for_/mx;
@@ -601,7 +600,7 @@ sub store_model_retention {
     $c->stats->profile(begin => "store_model_retention($backend)");
 
     my $model   = $c->app->obj_db_model;
-    my $user_id = md5_hex($c->stash->{'remote_user'} || '');
+    my $user_id = Thruk::Utils::Crypt::hexdigest($c->stash->{'remote_user'} || '');
 
     # store changes/stashed changes to local user, unchanged config can be stored in a generic file
     my $file      = $c->config->{'conf_retention_file'};
@@ -632,7 +631,7 @@ sub store_model_retention {
         store($data, $file);
         $c->config->{'conf_retention'}      = [stat($file)];
         $c->config->{'conf_retention_file'} = $file;
-        $c->config->{'conf_retention_md5'}  = $c->cluster->is_clustered() ? md5_hex(scalar read_file($file)) : '';
+        $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
         $c->log->debug('saved object retention data');
     };
@@ -658,7 +657,7 @@ sub get_model_retention {
     $c->stats->profile(begin => "get_model_retention($backend)");
 
     my $model   = $c->app->obj_db_model;
-    my $user_id = md5_hex($c->stash->{'remote_user'} || '');
+    my $user_id = Thruk::Utils::Crypt::hexdigest($c->stash->{'remote_user'} || '');
 
     # migrate files from tmp_path to var_path
     my $tmp_path = $c->config->{'tmp_path'};
@@ -691,14 +690,14 @@ sub get_model_retention {
     ) {
         return 1 unless $c->cluster->is_clustered();
         # cannot trust file timestamp in cluster mode since clocks might not be synchronous
-        my $md5 = md5_hex(scalar read_file($file));
-        if($c->config->{'conf_retention_md5'} eq $md5) {
+        my $hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($file));
+        if($c->config->{'conf_retention_hex'} eq $hex) {
             return 1;
         }
     }
     $c->config->{'conf_retention'}      = \@stat;
     $c->config->{'conf_retention_file'} = $file;
-    $c->config->{'conf_retention_md5'}  = $c->cluster->is_clustered() ? md5_hex(scalar read_file($file)) : '';
+    $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
 
     # try to retrieve retention data
     eval {

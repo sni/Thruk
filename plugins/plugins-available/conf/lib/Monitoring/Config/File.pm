@@ -5,7 +5,7 @@ use warnings;
 use Carp;
 use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object;
-use File::Slurp;
+use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8 decode);
 use Thruk::Utils;
 use Thruk::Utils::Conf;
@@ -41,7 +41,7 @@ sub new {
         'display'      => $remotepath || $file,
         'backup'       => '',
         'mtime'        => undef,
-        'md5'          => undef,
+        'hex'          => undef,
         'inode'        => 0,
         'parsed'       => 0,
         'changed'      => 0,
@@ -101,7 +101,7 @@ sub update_objects {
     my ( $self ) = @_;
 
     return unless $self->{'parsed'} == 0;
-    return unless defined $self->{'md5'};
+    return unless defined $self->{'hex'};
 
     my $text = Thruk::Utils::decode_any(scalar read_file($self->{'path'}));
     $self->update_objects_from_text($text);
@@ -390,7 +390,7 @@ sub get_meta_data {
     my $meta = {
         'mtime' => undef,
         'inode' => undef,
-        'md5'   => undef,
+        'hex'   => undef,
     };
     if($self->{'is_new_file'}) {
         return $meta;
@@ -400,12 +400,8 @@ sub get_meta_data {
         return $meta;
     }
 
-    # md5 hex
-    my $ctx = Digest::MD5->new;
-    open(my $fh, '<', $self->{'path'});
-    $ctx->addfile($fh);
-    $meta->{'md5'} = $ctx->hexdigest;
-    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
+    # hex digest
+    $meta->{'hex'} = Thruk::Utils::Crypt::hexdigest(scalar read_file($self->{'path'}));
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
@@ -508,7 +504,7 @@ sub diff {
 sub _update_meta_data {
     my ( $self ) = @_;
     my $meta = $self->get_meta_data();
-    $self->{'md5'}   = $meta->{'md5'};
+    $self->{'hex'}   = $meta->{'hex'};
     $self->{'mtime'} = $meta->{'mtime'};
     $self->{'inode'} = $meta->{'inode'};
     return $meta;

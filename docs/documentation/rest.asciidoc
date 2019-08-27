@@ -531,7 +531,7 @@ returns all config files
 |===========================================
 |Attribute                         | Description
 |content                           | raw file content
-|md5                               | md5 checksum
+|hex                               | hex sum for this file
 |mtime                             | unix timestamp of last modification
 |path                              | filesystem path
 |peer_key                          | backend id when having multiple sites connected

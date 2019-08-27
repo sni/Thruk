@@ -747,10 +747,9 @@ sub _create_secret_file {
         my $var_path   = $self->config->{'var_path'} or die("no var path!");
         my $secretfile = $var_path.'/secret.key';
         unless(-s $secretfile) {
-            load Digest::MD5, qw(md5_hex);
-            my $digest = md5_hex(rand(1000).time());
-            chomp($digest);
             open(my $fh, '>', $secretfile) or warn("cannot write to $secretfile: $!");
+            require Thruk::Utils::Crypt;
+            my $digest = Thruk::Utils::Crypt::random_uuid([time()]);
             if(defined $fh) {
                 print $fh $digest;
                 Thruk::Utils::IO::close($fh, $secretfile);
@@ -793,12 +792,12 @@ sub set_timezone {
 # create cluster files
 sub _setup_cluster {
     my($self) = @_;
-    load Digest::MD5, qw(md5_hex);
+    require Thruk::Utils::Crypt;
     chomp(my $hostname = `hostname`);
     $self->config->{'hostname'} = $hostname unless $self->config->{'hostname'};
     $Thruk::HOSTNAME            = $self->config->{'hostname'};
     $Thruk::NODE_ID_HUMAN       = $self->config->{'hostname'}."-".$self->{'config'}->{'home'}."-".abs_path($ENV{'THRUK_CONFIG'} || '.');
-    $Thruk::NODE_ID             = md5_hex($Thruk::NODE_ID_HUMAN);
+    $Thruk::NODE_ID             = Thruk::Utils::Crypt::hexdigest($Thruk::NODE_ID_HUMAN);
     return;
 }
 

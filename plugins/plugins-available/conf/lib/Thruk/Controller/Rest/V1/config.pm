@@ -38,7 +38,7 @@ sub _rest_get_config_files {
             my $f = {
                 peer_key => $peer_key,
                 path     => $file->{'display'},
-                md5      => $file->{'md5'},
+                hex      => $file->{'hex'},
                 mtime    => $file->{'mtime'},
                 readonly => $file->readonly(),
             };

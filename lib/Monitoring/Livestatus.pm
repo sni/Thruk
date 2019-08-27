@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use Data::Dumper qw/Dumper/;
 use Carp qw/carp confess/;
-use Digest::MD5 qw(md5_hex);
 use Cpanel::JSON::XS ();
 use Storable qw/dclone/;
 use IO::Select;
@@ -698,14 +697,9 @@ sub peer_name {
 
 returns a uniq key for this peer
 
-when using multiple backends, a list of all keys is returned in list context
-
 =cut
 sub peer_key {
     my($self) = @_;
-
-    if(!defined $self->{'key'}) { $self->{'key'} = md5_hex($self->peer_addr.' '.$self->peer_name); }
-
     return $self->{'key'};
 }
 

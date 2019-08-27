@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Carp;
 use Scalar::Util qw/weaken/;
-use Digest::MD5 qw(md5_hex);
 use Thruk::Backend::Provider::Livestatus;
 
 our $AUTOLOAD;
@@ -183,9 +182,12 @@ sub _initialise_peer {
     $self->{'state_host'}    = $peer_config->{'state_host'};
 
     # shorten backend id
-    my $key = substr(md5_hex($self->{'class'}->peer_addr." ".$self->{'class'}->peer_name), 0, 5);
-    $key    = $peer_config->{'id'} if defined $peer_config->{'id'};
-    $key    =~ s/[^a-zA-Z0-9]//gmx;
+    my $key = $peer_config->{'id'};
+    if(!defined $key) {
+        require Digest::MD5;
+        $key = substr(Digest::MD5::md5_hex($self->{'class'}->peer_addr." ".$self->{'class'}->peer_name), 0, 5);
+    }
+    $key =~ s/[^a-zA-Z0-9]//gmx;
 
     # make sure id is uniq
     my $x      = 0;

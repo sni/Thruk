@@ -4,7 +4,6 @@ use strict;
 use warnings;
 #use Thruk::Timer qw/timing_breakpoint/;
 use Data::Dumper qw/Dumper/;
-use Digest::MD5 qw/md5_hex/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
 use Thruk::Utils qw//;
@@ -72,8 +71,7 @@ sub new {
 
     $options->{'name'} = 'mysql' unless defined $options->{'name'};
     if(!defined $options->{'peer_key'}) {
-        my $key = md5_hex($options->{'name'}.$options->{'peer'});
-        $options->{'peer_key'} = $key;
+        confess('please provide peer_key');
     }
     my($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock);
     if($options->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {

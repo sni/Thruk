@@ -314,7 +314,7 @@ sub _import_config {
 
     if($index->{'cgi'}) {
         my $cgi_defaults          = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
-        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($tempdir.$index->{'cgi'}, $cgi_defaults);
+        my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($tempdir.$index->{'cgi'}, $cgi_defaults);
         my $newdata = {};
         for my $key (keys %{$data}) {
             $newdata->{$key} = $data->{$key}->[1];

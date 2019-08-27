@@ -28,7 +28,6 @@ use Encode qw(encode_utf8 decode_utf8 encode);
 use Storable qw/dclone/;
 use File::Temp qw/tempfile/;
 use Cwd ();
-use Digest::MD5 qw(md5_hex);
 use Time::HiRes qw/sleep/;
 use POSIX ();
 

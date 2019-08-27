@@ -2,7 +2,6 @@ package Thruk::BP::Utils;
 
 use strict;
 use warnings;
-use Digest::MD5 qw(md5_hex);
 use File::Temp qw/tempfile/;
 use File::Copy qw/move/;
 use File::Slurp qw/read_file/;
@@ -221,8 +220,8 @@ sub save_bp_objects {
 
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $new_hex = md5_hex(scalar read_file($filename));
-    my $old_hex = -f $file ? md5_hex(scalar read_file($file)) : '';
+    my $new_hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($filename));
+    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
 
     # check if something changed
     if($new_hex ne $old_hex) {

@@ -158,7 +158,7 @@
     [% IF has_auth_section %]
     <tr style="[% IF subcat != 'auth' %]display:none[% END %]" class="sub_4">
       <td class='dataVal' colspan=3 style="text-align: center;">
-        <input type="hidden" name="md5" value="[% md5 %]">
+        <input type="hidden" name="hex" value="[% hex %]">
         <table>
           <tr>
             <td colspan=2 class='dataVar dataUserVar'>Roles (cgi.cfg)</td>

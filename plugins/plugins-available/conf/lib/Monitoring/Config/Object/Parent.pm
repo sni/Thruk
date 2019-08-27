@@ -3,7 +3,6 @@ package Monitoring::Config::Object::Parent;
 use strict;
 use warnings;
 use Carp;
-use Digest::MD5 qw(md5_hex);
 use Storable qw(dclone);
 use Scalar::Util qw/weaken/;
 use Monitoring::Config::Help;
@@ -865,7 +864,7 @@ sub _make_id {
     my $self   = shift;
     my $length = shift || 5;
 
-    my $digest = substr(md5_hex($self->{'file'}->{'path'}.':'.$self->{'line'}), 0, $length);
+    my $digest = substr(Thruk::Utils::Crypt::hexdigest($self->{'file'}->{'path'}.':'.$self->{'line'}), 0, $length);
 
     return $digest;
 }

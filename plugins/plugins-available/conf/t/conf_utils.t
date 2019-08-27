@@ -128,7 +128,7 @@ $objects->init();
 isa_ok( $objects, 'Monitoring::Config' );
 is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files:\n".Dumper($objects));
 my $parsedfile = $objects->{'files'}->[0];
-is( $parsedfile->{'md5'}, '789b8aee75f4e6f991e18af683384bdb', 'files md5 sum' );
+is( $parsedfile->{'hex'}, '0ae051461b6c74992f731f47ade93a366a50775c6b83a1ebc23e6834f36ef858', 'files hexdigest sum' );
 like( $parsedfile->{'parse_errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );
 my $obj = $parsedfile->{'objects'}->[0];
 my $host = {
@@ -201,7 +201,7 @@ isa_ok( $obj, 'Monitoring::Config::Object::Host' );
 is( $obj->get_type(), 'host', 'got a type' );
 is( $obj->get_name(), 'host_name', 'got a name' );
 is( $obj->get_long_name(), 'host_name', 'got a long name' );
-is( $obj->get_id(), 'de894', 'got a id' );
+is( $obj->get_id(), 'e62c8', 'got a id' );
 my $templates = $obj->get_used_templates($objects);
 $expected     = [
           'template1',

@@ -3,7 +3,6 @@ package Thruk::Utils::Conf::Tools::CombineIdenticalServices;
 use strict;
 use warnings;
 use Storable qw/dclone/;
-use Digest::MD5 qw/md5_hex/;
 use Encode qw/encode_utf8/;
 use Thruk::Utils::Conf;
 
@@ -121,7 +120,7 @@ sub _make_hash {
             $string .= $attr.'='.join(',', @{$conf->{$attr}});
         }
     }
-    return(md5_hex(encode_utf8($string)));
+    return(Thruk::Utils::Crypt::hexdigest($string));
 }
 ##########################################################
 

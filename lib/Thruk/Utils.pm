@@ -22,7 +22,6 @@ use Encode qw/encode encode_utf8 decode is_utf8/;
 use File::Copy qw/move copy/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Digest::MD5 qw(md5_hex);
 use POSIX ();
 use MIME::Base64 ();
 use URI::Escape ();
@@ -2522,9 +2521,9 @@ sub backup_data_file {
         }
     }
 
-    my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
-    my $new_md5 = md5_hex(read_file($filename));
-    if($force || $new_md5 ne $old_md5) {
+    my $old_hash = $last_backup ? Thruk::Utils::Crypt::hexdigest(scalar read_file($last_backup)) : '';
+    my $new_hash = Thruk::Utils::Crypt::hexdigest(scalar read_file($filename));
+    if($force || $new_hash ne $old_hash) {
         copy($filename, $targetfile.'.'.$now.'.'.$mode);
 
         # cleanup old backups
