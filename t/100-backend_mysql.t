@@ -6,7 +6,7 @@ $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');
 
-my $m = Thruk::Backend::Provider::Mysql->new({options => {peer => 'mysql://test:test@host:3306/dbname'}});
+my $m = Thruk::Backend::Provider::Mysql->new({options => {peer => 'mysql://test:test@host:3306/dbname', peer_key => 'abcd'}});
 isa_ok($m, 'Thruk::Backend::Provider::Mysql');
 
 #####################################################################
@@ -62,7 +62,7 @@ while($x < scalar @{$connection_strings}) {
     my $con = $connection_strings->[$x];
     my $exp = $connection_strings->[$x+1];
     ok($con, $con);
-    my $m   = Thruk::Backend::Provider::Mysql->new({options => {peer => $con}});
+    my $m   = Thruk::Backend::Provider::Mysql->new({options => {peer => $con, peer_key => 'abcd'}});
     isa_ok($m, 'Thruk::Backend::Provider::Mysql');
     for my $key (sort keys %{$exp}) {
         is($m->{$key}, $exp->{$key}, $key.' config');
