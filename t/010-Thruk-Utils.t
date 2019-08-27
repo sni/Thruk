@@ -5,10 +5,11 @@ use strict;
 use utf8;
 use Test::More;
 use Encode qw/is_utf8/;
+use utf8;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 96;
+    plan tests => 171;
 
     use lib('t');
     require TestUtils;
@@ -20,6 +21,7 @@ use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
 use_ok('Thruk::Utils::CookieAuth');
+use_ok('Thruk::Utils::Crypt');
 
 #########################
 # sort
@@ -334,24 +336,46 @@ my $absolute_urls = [
     [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/pnp4nagios/index.php/popup', 'https://127.0.0.1:60443/demo/pnp4nagios/index.php/popup' ],
 ];
 for my $urls (@{$absolute_urls}) {
-  my $got = Thruk::Utils::absolute_url($urls->[0], $urls->[1],1);
-  is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
+    my $got = Thruk::Utils::absolute_url($urls->[0], $urls->[1],1);
+    is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
 }
 
 #########################
 {
-    my($sessionid,$hashed_key,$type) = Thruk::Utils::CookieAuth::generate_sessionid();
+    my $teststrings = ['', ' ', 'a', 'test', '$`+*öäü&', 'x' x 1000];
+    for my $s1 (@{$teststrings}) {
+        for my $s2 (@{$teststrings}) {
+            my $key       = $s1;
+            my $orig      = $s2;
+            my $data      = $s2;
+            my $crypted   = Thruk::Utils::Crypt::encrypt($key, $data);
+            like($crypted, '/^CBC,.+/', "data is crypted");
+            my $decrypted = Thruk::Utils::Crypt::decrypt($key, $crypted);
+            is($decrypted, $orig, "decrypted string is ok");
+        }
+    }
+};
+
+#########################
+{
+    my($sessionid,$hashed_key) = Thruk::Utils::CookieAuth::generate_sessionid();
     my $data = {
       'hash'     => 'test',
       'username' => 'user',
     };
     my($sessionid2,$sessionfile,$data2) = Thruk::Utils::CookieAuth::store_session($c->config, $sessionid, $data);
-    is($sessionid2, $sessionid, "session id did not change");
-    isnt($sessionfile, undef, "got file");
+    is($sessionid2, $sessionid, "session id did not change: ".$sessionid2);
+    isnt($sessionfile, undef, "got file: ".$sessionfile);
     like($data2->{'hash'}, '/^CBC,.+/', "basic auth hash is crypted");
     my $session2 = Thruk::Utils::CookieAuth::retrieve_session(id => $sessionid, config => $c->config);
     is($session2->{'file'}, $sessionfile, "got session file");
     is($session2->{'hash'}, "test", "hash has been decrypted");
+
+    # read session by file
+    my $session3 = Thruk::Utils::CookieAuth::retrieve_session(file => $sessionfile, config => $c->config);
+    is($session3->{'file'}, $sessionfile, "got session file");
+    like($session3->{'hash'}, '/^CBC,.+/', "basic auth hash is still crypted");
+
     unlink($sessionfile);
 };
 #########################

@@ -17,20 +17,15 @@ use Thruk::UserAgent;
 use Thruk::Authentication::User;
 use Thruk::Utils;
 use Thruk::Utils::IO;
+use Thruk::Utils::Crypt;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
 use Digest ();
 use File::Slurp qw/read_file/;
 use Carp qw/confess/;
 use File::Copy qw/move/;
-use Crypt::Rijndael ();
-use MIME::Base64 ();
 
 ##############################################
-my $supported_digests = {
-    "1"  => 'SHA-256',
-};
-my $default_digest        = 1;
 my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;
 my $session_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
 
@@ -292,10 +287,10 @@ sub store_session {
     my($config, $sessionid, $data) = @_;
 
     # store session key hashed
-    my($hashed_key, $type);
-    ($sessionid,$hashed_key,$type) = generate_sessionid($sessionid);
+    my($hashed_key, $digest_name);
+    ($sessionid,$hashed_key,$digest_name) = generate_sessionid($sessionid);
 
-    $data->{'csrf_token'} = _generate_csrf_token([$sessionid]) unless $data->{'csrf_token'};
+    $data->{'csrf_token'} = Thruk::Utils::Crypt::random_uuid([$sessionid]) unless $data->{'csrf_token'};
     delete $data->{'private_key'};
     my $hash_raw = delete $data->{'hash_raw'};
 
@@ -307,15 +302,13 @@ sub store_session {
             # no need to recrypt every time
             $data->{'hash'} = $hash_raw;
         } else {
-            my $key = substr(_null_padding($sessionid,32,'e'),0,32);
-            my $cipher = Crypt::Rijndael->new($key, Crypt::Rijndael::MODE_CBC);
-            $data->{'hash'} = "CBC,".MIME::Base64::encode_base64($cipher->encrypt(_null_padding($data->{'hash'},32,'e')));
+            $data->{'hash'} = Thruk::Utils::Crypt::encrypt($sessionid, $data->{'hash'});
         }
     }
 
     my $sdir = $config->{'var_path'}.'/sessions';
     die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9_]+$/mx;
-    my $sessionfile = $sdir.'/'.$hashed_key.'.'.$type;
+    my $sessionfile = $sdir.'/'.$hashed_key.'.'.$digest_name;
     Thruk::Utils::IO::mkdir_r($sdir);
     Thruk::Utils::IO::json_lock_store($sessionfile, $data);
 
@@ -351,54 +344,51 @@ sub retrieve_session {
     my(%args) = @_;
     my($sessionfile, $sessionid);
     my $config = $args{'config'} or confess("missing config");
-    my($type, $hashed_key);
+    my($digest_name, $hashed_key);
     if($args{'file'}) {
         $sessionfile = Thruk::Utils::basename($args{'file'});
         # REMOVE AFTER: 01.01.2020
         if($sessionfile =~ $hashed_key_file_regex) {
-            $hashed_key = $1;
-            $type       = substr($2, 1) if $2;
+            $hashed_key  = $1;
+            $digest_name = substr($2, 1) if $2;
         } else {
             return;
         }
-        if(!$type && length($hashed_key) < 64) {
-            my($new_hashed_key, $newfile) = _upgrade_session_file($config, $hashed_key);
+        if(!$digest_name && length($hashed_key) < 64) {
+            my($new_hashed_key, $newfile);
+            ($new_hashed_key, $newfile, undef, $digest_name) = _upgrade_session_file($config, $hashed_key);
             if($newfile) {
                 $sessionfile = Thruk::Utils::basename($newfile);
-                $type        = $supported_digests->{$default_digest};
                 $hashed_key  = $new_hashed_key;
             }
         }
     } else {
-        my $nr;
+        my $digest_nr;
         $sessionid = $args{'id'};
         if($sessionid =~ $session_key_regex) {
-            $nr = substr($2, 1) if $2;
+            $digest_nr = substr($2, 1) if $2;
         } else {
             return;
         }
-        if(!$nr) {
+        if(!$digest_nr) {
             # REMOVE AFTER: 01.01.2020
             if(length($sessionid) < 64) {
-                _upgrade_session_file($config, $sessionid);
-                $nr = $default_digest;
+                (undef, undef, $digest_nr) = _upgrade_session_file($config, $sessionid);
             }
             # /REMOVE AFTER
             else {
                 return;
             }
         }
-        $type = $supported_digests->{$nr};
+        $digest_name = Thruk::Utils::Crypt::digest_name($digest_nr);
     }
-    return unless $type;
+    return unless $digest_name;
 
     if(!$hashed_key) {
-        my $digest = Digest->new($type);
-        $digest->add($sessionid);
-        $hashed_key = $digest->hexdigest();
+        $hashed_key = Thruk::Utils::Crypt::hexdigest($sessionid, $digest_name);
     }
     my $sdir = $config->{'var_path'}.'/sessions';
-    $sessionfile = $sdir.'/'.$hashed_key.'.'.$type;
+    $sessionfile = $sdir.'/'.$hashed_key.'.'.$digest_name;
 
     my $data;
     return unless -e $sessionfile;
@@ -421,37 +411,21 @@ sub retrieve_session {
         };
     }
     # /REMOVE
+
     return unless defined $data;
-    if($sessionid && $data->{hash} && $data->{hash} =~ m/^CBC,(.*)$/mx) {
-        my $crypted = $1;
-        $data->{hash_raw} = $data->{hash};
-        # decrypt from private key
-        my $key = substr(_null_padding($sessionid,32,'e'),0,32);
-        my $cipher = Crypt::Rijndael->new($key, Crypt::Rijndael::MODE_CBC);
-        $data->{hash} = _null_padding($cipher->decrypt(MIME::Base64::decode_base64($crypted)), 32, 'd');
+
+    if($sessionid && $data->{hash}) {
+        # try to decrypt from private key (can be skipped for old sessions)
+        my $decrypted = Thruk::Utils::Crypt::decrypt($sessionid, $data->{'hash'});
+        $data->{'hash'} = $decrypted if $decrypted;
     }
     $data->{file}        = $sessionfile;
     $data->{hashed_key}  = $hashed_key;
-    $data->{digest}      = $type;
+    $data->{digest}      = $digest_name;
     $data->{active}      = $stat[9];
     $data->{roles}       = [] unless $data->{roles};
     $data->{private_key} = $sessionid if $sessionid;
     return($data);
-}
-
-##############################################
-sub _generate_csrf_token {
-    my($salt) = @_;
-    my $type = $supported_digests->{$default_digest};
-    my $digest = Digest->new($type);
-    $digest->add(time());
-    $digest->add(rand(10000));
-    if($salt) {
-        for my $s (@{$salt}) {
-            $digest->add($s);
-        }
-    }
-    return($digest->hexdigest());
 }
 
 ##############################################
@@ -461,25 +435,10 @@ sub _upgrade_session_file {
     my($config, $sessionid) = @_;
     my $folder = $config->{'var_path'}.'/sessions';
     return unless -e $folder.'/'.$sessionid;
-    my $type   = $supported_digests->{$default_digest};
-    my $digest = Digest->new($type);
-    $digest->add($sessionid);
-    my $hashed_key = $digest->hexdigest();
-    my $newfile = $folder.'/'.$hashed_key.'.'.$type;
+    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($sessionid);
+    my $newfile = $folder.'/'.$hashed_key.'.'.$digest_name;
     move($folder.'/'.$sessionid, $newfile);
-    return($hashed_key, $newfile);
-}
-
-##############################################
-sub _null_padding {
-    my($block,$bs,$decrypt) = @_;
-    return unless length $block;
-    $block = length $block ? $block : '';
-    if ($decrypt eq 'd') {
-        $block=~ s/\0*$//mxs;
-        return $block;
-    }
-    return $block . pack("C*", (0) x ($bs - length($block) % $bs));
+    return($hashed_key, $newfile, $digest_nr, $digest_name);
 }
 
 ##############################################
@@ -490,24 +449,15 @@ sub _null_padding {
 
 returns random sessionid along with the hashed key and the hash type
 
-    returns $sessionid, $hashed_key, $type
+  returns $sessionid, $hashed_key
 
 =cut
 
 sub generate_sessionid {
     my($sessionid) = @_;
-    my $type = $supported_digests->{$default_digest};
-    my $digest = Digest->new($type);
-    if(!$sessionid) {
-        $digest->add(rand(1000000));
-        $digest->add(time());
-        $sessionid = $digest->hexdigest()."_".$default_digest;
-        if(length($sessionid) != 66) { die("creating session id failed.") }
-        $digest->reset();
-    }
-    $digest->add($sessionid);
-    my $hashed_key = $digest->hexdigest();
-    return($sessionid, $hashed_key, $type);
+    $sessionid = Thruk::Utils::Crypt::random_uuid() unless $sessionid;
+    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($sessionid);
+    return($sessionid, $hashed_key, $digest_name);
 }
 
 1;
