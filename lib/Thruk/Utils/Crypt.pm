@@ -92,7 +92,9 @@ sub random_uuid {
             $digest->add($s);
         }
     }
-    return($digest->hexdigest().'_'.$default_digest);
+    my $uuid = $digest->hexdigest().'_'.$default_digest;
+    if(length($uuid) != 66) { die("creating uuid failed.") }
+    return($uuid);
 }
 
 ##############################################

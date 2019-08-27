@@ -12,14 +12,9 @@ API keys for Thruk
 
 use strict;
 use warnings;
-use Digest ();
 use File::Copy qw/move/;
 use Thruk::Utils::IO ();
 
-my $supported_digests = {
-    "1"  => 'SHA-256',
-};
-my $default_digest        = 1;
 my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;
 my $private_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
 
@@ -104,20 +99,16 @@ sub get_key_by_private_key {
         # REMOVE AFTER: 01.01.2020
         if(length($privatekey) < 64) {
             _upgrade_key($config, $privatekey);
-            $nr = $default_digest;
+            $nr = 1;
         }
         # /REMOVE AFTER
         else {
             return;
         }
     }
-    my $type = $supported_digests->{$nr};
-    return unless $type;
-    my $digest = Digest->new($type);
-    $digest->add($privatekey);
-    my $hashed_key = $digest->hexdigest();
+    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($privatekey, $nr);
     my $folder = $config->{'var_path'}.'/api_keys';
-    my $file   = $folder.'/'.$hashed_key.'.'.$type;
+    my $file   = $folder.'/'.$hashed_key.'.'.$digest_name;
     return(read_key($config, $file));
 }
 
@@ -135,19 +126,10 @@ returns private, hashed key and filename
 sub create_key {
     my($c, $username, $comment, $roles, $system) = @_;
 
-    my $type = $supported_digests->{$default_digest};
-    my $digest = Digest->new($type);
-    $digest->add($username);
-    $digest->add($comment);
-    $digest->add(rand(10000));
-    $digest->add(time());
-    my $privatekey = $digest->hexdigest()."_".$default_digest;
-    if(length($privatekey) != 66) { die("creating key failed.") }
-    $digest->reset();
-    $digest->add($privatekey);
-    my $hashed_key = $digest->hexdigest();
+    my $privatekey = Thruk::Utils::Crypt::random_uuid([$username, $comment, time()]);
+    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($privatekey);
     my $folder = $c->config->{'var_path'}.'/api_keys';
-    my $file   = $folder.'/'.$hashed_key.'.'.$type;
+    my $file   = $folder.'/'.$hashed_key.'.'.$digest_name;
     Thruk::Utils::IO::mkdir_r($folder);
     my $data = {
         user    => $username,
@@ -259,14 +241,16 @@ sub read_key {
     if($hashed_key =~ m%\.([^\.]+)$%gmx) {
         $type = $1;
     }
+    # REMOVE AFTER: 01.01.2020
     if(!$type && length($hashed_key) < 64) {
-        my($newkey, $newfile) = _upgrade_key($config, $hashed_key);
+        my($newkey, $newfile, $digest_name) = _upgrade_key($config, $hashed_key);
         if($newkey) {
             $hashed_key = $newkey;
             $file       = $newfile;
-            $type       = $supported_digests->{$default_digest};
+            $type       = $digest_name;
         }
     }
+    # /REMOVE AFTER
     $hashed_key =~ s%\.([^\.]+)$%%gmx;
     $data->{'hashed_key'} = $hashed_key;
     $data->{'file'}       = $file;
@@ -281,13 +265,10 @@ sub _upgrade_key {
     my($config, $key) = @_;
     my $folder = $config->{'var_path'}.'/api_keys';
     return unless -e $folder.'/'.$key;
-    my $type   = $supported_digests->{$default_digest};
-    my $digest = Digest->new($type);
-    $digest->add($key);
-    my $hashed_key = $digest->hexdigest();
-    my $newfile = $folder.'/'.$hashed_key.'.'.$type;
+    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($key);
+    my $newfile = $folder.'/'.$hashed_key.'.'.$digest_name;
     move($folder.'/'.$key, $newfile);
-    return($hashed_key, $newfile);
+    return($hashed_key, $newfile, $digest_name);
 }
 
 ##############################################
