@@ -391,14 +391,13 @@ sub json_retrieve {
     my $json = Cpanel::JSON::XS->new->utf8;
     $json->relaxed();
 
-    local $/ = undef;
-    my $data;
-
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
     sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
 
+    my $data;
     my $content;
     eval {
+        local $/ = undef;
         $content = scalar <$fh>;
         $data    = $json->decode($content);
     };
