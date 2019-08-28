@@ -9,7 +9,7 @@ use utf8;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 171;
+    plan tests => 176;
 
     use lib('t');
     require TestUtils;
@@ -378,4 +378,23 @@ for my $urls (@{$absolute_urls}) {
 
     unlink($sessionfile);
 };
+#########################
+# REMOVE AFTER: 01.01.2020
+{
+    # test upgrading existing sessions
+    my $hash        = 'b21kYWRtaW46b21k';
+    my $sessionid   = '8e87a0aff175849ba1335f6383b85050';
+    my $sessiondir  = $c->config->{'var_path'}.'/sessions';
+    my $sessionfile = $sessiondir.'/'.$sessionid;
+    open(my $fh, '>', $sessionfile) or die("cannot write $sessionfile: $!");
+    print $fh $hash."~~~127.0.0.1~~~omdadmin\n";
+    close($fh);
+    my $session = Thruk::Utils::CookieAuth::retrieve_session(id => $sessionid, config => $c->config);
+    is($session->{'username'}, 'omdadmin', "got session file");
+    is($session->{'private_key'}, $sessionid, "got session id");
+    is($session->{'hash'}, $hash, "got basic auth hash");
+    ok(! -f $sessionfile, 'session should have been migrated');
+    ok(-f $session->{'file'}, 'session should have been migrated');
+    unlink($session->{'file'});
+}
 #########################
