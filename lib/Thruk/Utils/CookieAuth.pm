@@ -372,14 +372,14 @@ sub retrieve_session {
         if(!$digest_nr) {
             # REMOVE AFTER: 01.01.2020
             if(length($sessionid) < 64) {
-                (undef, undef, $digest_nr) = _upgrade_session_file($config, $sessionid);
+                (undef, undef, $digest_nr, $digest_name) = _upgrade_session_file($config, $sessionid);
             }
             # /REMOVE AFTER
             else {
                 return;
             }
         }
-        $digest_name = Thruk::Utils::Crypt::digest_name($digest_nr);
+        $digest_name = Thruk::Utils::Crypt::digest_name($digest_nr) unless $digest_name;
     }
     return unless $digest_name;
 
@@ -433,9 +433,9 @@ sub retrieve_session {
 sub _upgrade_session_file {
     my($config, $sessionid) = @_;
     my $folder = $config->{'var_path'}.'/sessions';
-    return unless -e $folder.'/'.$sessionid;
     my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($sessionid);
     my $newfile = $folder.'/'.$hashed_key.'.'.$digest_name;
+    return($hashed_key, $newfile, $digest_nr, $digest_name) unless -e $folder.'/'.$sessionid;
     move($folder.'/'.$sessionid, $newfile);
     return($hashed_key, $newfile, $digest_nr, $digest_name);
 }

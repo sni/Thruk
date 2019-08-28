@@ -9,7 +9,7 @@ use utf8;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 176;
+    plan tests => 179;
 
     use lib('t');
     require TestUtils;
@@ -395,6 +395,12 @@ for my $urls (@{$absolute_urls}) {
     is($session->{'hash'}, $hash, "got basic auth hash");
     ok(! -f $sessionfile, 'session should have been migrated');
     ok(-f $session->{'file'}, 'session should have been migrated');
+
+    my $session2 = Thruk::Utils::CookieAuth::retrieve_session(id => $sessionid, config => $c->config);
+    is($session2->{'username'}, 'omdadmin', "got session file");
+    is($session2->{'private_key'}, $sessionid, "got session id");
+    is($session2->{'hash'}, $hash, "got basic auth hash");
+
     unlink($session->{'file'});
 }
 #########################
