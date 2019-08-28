@@ -1,9 +1,8 @@
 use strict;
 use warnings;
 use Test::More;
-use Digest::MD5 qw(md5_hex);
 
-plan tests => 294;
+plan tests => 295;
 
 BEGIN {
     $ENV{'THRUK_TEST_CONF_NO_LOG'} = 1;
@@ -13,14 +12,16 @@ BEGIN {
     import TestUtils;
 }
 
+use_ok('Thruk::Utils::Crypt');
+
 ###########################################################
 TestUtils::set_test_user_token();
 my($host,$service)  = TestUtils::get_test_service();
 my($c)              = TestUtils::get_c();
 my $default_user    = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
 my $other_user      = 'test_user';
-my $default_user_id = md5_hex($default_user);
-my $other_user_id   = md5_hex($other_user);
+my $default_user_id = Thruk::Utils::Crypt::hexdigest($default_user);
+my $other_user_id   = Thruk::Utils::Crypt::hexdigest($other_user);
 
 ###########################################################
 # cleanup
