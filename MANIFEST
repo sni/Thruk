@@ -540,6 +540,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_slider.js
 plugins/plugins-available/panorama/root/js/panorama_js_state_provider.js
 plugins/plugins-available/panorama/root/js/panorama_js_tab_reorder.js
 plugins/plugins-available/panorama/root/js/panorama_js_tabbar.js
+plugins/plugins-available/panorama/root/js/panorama_js_tabbar_search.js
 plugins/plugins-available/panorama/root/js/panorama_js_track_timers.js
 plugins/plugins-available/panorama/root/js/panorama_js_utils_base64.js
 plugins/plugins-available/panorama/root/panorama-2.30-3.css

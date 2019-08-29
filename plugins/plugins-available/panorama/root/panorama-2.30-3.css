@@ -752,13 +752,23 @@ A.x-color-picker-item SPAN {
   height: 12px;
 }
 
+DIV.searchresult SPAN.x-menu-item-text {
+  height: 21px;
+}
 SPAN.searchname {
+  display: inline-block;
+  width: 150px;
+  overflow: hidden;
+}
+SPAN.searchhints {
+  color: #888888;
+  font-size: 10px;
+  text-align: right;
+  display: inline-block;
+  width: 200px;
+  overflow: hidden;
 }
 SPAN.searchhint {
-  font-size: 10px;
-  margin-left: 3px;
-  color: #888888;
 }
 SPAN.searchhint.type {
-  margin-left: 7px;
 }

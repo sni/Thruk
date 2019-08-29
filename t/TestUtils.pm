@@ -1096,7 +1096,7 @@ sub _check_marker {
             fail('found trailing comma in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
-        if($line =~ m/JS_ERROR_MARKER2:/mx and $line !~ m/var\s+(peer_key|key|section)/) {
+        if($line =~ m/JS_ERROR_MARKER2:/mx and $line !~ m/var\s+(peer_key|key|section|id)/) {
             my $orig = $line;
             $orig =~ s/JS_ERROR_MARKER2://gmx;
             fail('found insecure for loop in '.($file || 'content').' line: '.$x);

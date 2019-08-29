@@ -905,62 +905,102 @@ sub _task_search {
     $query =~ s/^\s+//gmx;
     $query =~ s/\s+$//gmx;
     $query =~ s/\s+/.*/gmx;
-    my $data  = [];
-    my $json = { 'rc' => 0, 'data' => $data };
+    my $json = { 'rc' => 0, 'data' => [] };
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json) unless $query;
 
     my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all', 1);
+
+    # search names and aliases
+    my $search = {
+        'host'         => $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
+        'hostgroup'    => $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
+        'service'      => $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { '-or' => [ { description => { '~~' => $query } }, { display_name => { '~~' => $query } } ] } ], columns => [qw/description display_name/]),
+        'servicegroup' => $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
+    };
+
+    # normalize services
+    for my $o (@{$search->{"service"}}) {
+        $o->{'name'}  = delete $o->{'description'};
+        $o->{'alias'} = delete $o->{'display_name'};
+    }
+
+    my $data  = {};
     for my $d (@{$dashboards}) {
-        my $found = _search_match($d->{'tab'}->{'xdata'}->{'title'}, $query, "title")
-                 || _search_match($d->{'tab'}->{'xdata'}->{'description'}, $query, "description");
-        # search in icons
-        if(!$found) {
-            for my $icon_id (sort keys %{$d}) {
-                my $icon = $d->{$icon_id};
-                next unless ref $icon eq 'HASH';
-                next unless $icon->{'xdata'};
-                $found = _search_match($icon->{'xdata'}->{'label'}->{'labeltext'}, $query, "iconlabel")
-                      || _search_match($icon->{'xdata'}->{'general'}->{'text'}, $query, "icontext")
-                      || _search_match($icon->{'xdata'}->{'general'}->{'host'}, $query, "host")
-                      || _search_match($icon->{'xdata'}->{'general'}->{'service'}, $query, "service")
-                      || _search_match($icon->{'xdata'}->{'general'}->{'hostgroup'}, $query, "hostgroup")
-                      || _search_match($icon->{'xdata'}->{'general'}->{'servicegroup'}, $query, "servicegroup");
-                if($found) {
-                    $found->{'highlight'} = $icon_id;
-                    last;
+        my $found = _search_match($data, $d, $d->{'tab'}->{'xdata'}->{'title'}, $query, "title")
+                 || _search_match($data, $d, $d->{'tab'}->{'xdata'}->{'description'}, $query, "description");
+
+        for my $icon_id (sort keys %{$d}) {
+            my $icon = $d->{$icon_id};
+            next unless ref $icon eq 'HASH';
+            next unless $icon->{'xdata'};
+
+            for my $type (sort keys %{$search}) {
+                if($icon->{'xdata'}->{'general'}->{$type}) {
+                    for my $o (@{$search->{$type}}) {
+                        my $found = _search_match($data, $d, $icon->{'xdata'}->{'general'}->{$type}, $o->{'name'}, $type, 1)
+                                 || _search_match($data, $d, $icon->{'xdata'}->{'general'}->{$type}, $o->{'alias'}, $type, 1);
+                        if($found) {
+                            $found->{'highlight'} = $icon_id;
+                            $found->{'object'}    = $o;
+                        }
+                    }
                 }
             }
-        }
-        if($found) {
-            $found->{'id'}   = $d->{id};
-            $found->{'name'} = $d->{'tab'}->{'xdata'}->{'title'};
-            push @{$data}, $found;
+
+            my $found = _search_match($data, $d, $icon->{'xdata'}->{'label'}->{'labeltext'}, $query, "iconlabel")
+                     || _search_match($data, $d, $icon->{'xdata'}->{'general'}->{'text'}, $query, "icontext");
+            if($found) {
+                $found->{'highlight'} = $icon_id;
+            }
         }
     }
+
+    # sort by dashboard name
+    $json->{'data'} = [sort { $a->{'name'} cmp $b->{'name'} } values(%{$data})];
 
     return $c->render(json => $json);
 }
 
 ##########################################################
 sub _search_match {
-    my($field, $query, $type, $return) = @_;
+    my($result, $dashboard, $field, $query, $type, $exact) = @_;
     return unless defined $field;
 
     # strip html and tags
     $field =~ s/\{\{.*?\}\}//gmx;
     $field =~ s/<.*?>//gmx;
 
-    ## no critic
-    if($field =~ m#(.*)($query)(.*)#si) {
-        my($pre,$match,$post) = ($1,$2,$3);
-        return({
+    my($matched, $pre,$match,$post) = (0, '', '', '');
+    if($exact) {
+        if($field eq $query) {
+            $match = $query;
+            $matched = 1;
+        }
+    } else {
+        ## no critic
+        if($field =~ m#(.*)($query)(.*)#si) {
+            ($pre,$match,$post) = ($1,$2,$3);
+            $matched = 1;
+        }
+        ## use critic
+    }
+
+    if($matched) {
+        my $found = {
             type  => $type,
             match => $match,
             pre   => $pre,
             post  => $post,
             value => $field,
-        });
+        };
+        $result->{$dashboard->{id}} = {
+            id      => $dashboard->{id},
+            name    => $dashboard->{'tab'}->{'xdata'}->{'title'},
+            matches => [],
+        } unless $result->{$dashboard->{id}};
+        push @{$result->{$dashboard->{id}}->{'matches'}}, $found;
+        return($found);
     }
     return;
 }
