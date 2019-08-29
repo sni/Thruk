@@ -261,6 +261,13 @@ sub load_dashboard {
     $dashboard->{'tab'}->{'xdata'}->{'owner'}    = $dashboard->{'user'};
     $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
 
+    for my $key (keys %{$dashboard}) {
+        if($key =~ m/^tabpan-tab_\d+_panlet_(\d+)$/mx) {
+            my $newkey = "tabpan-tab_".$nr."_panlet_".$1;
+            $dashboard->{$newkey} = delete $dashboard->{$key};
+        }
+    }
+
     $dashboard->{'objects'} = scalar grep(/^tabpan-tab_/mx, keys %{$dashboard});
     return $dashboard;
 }
