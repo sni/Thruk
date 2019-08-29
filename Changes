@@ -18,6 +18,7 @@ next:
             - fix fetching roles when contact has groups
           - Panorama:
             - add search bar
+            - add details button to host/service extinfo panel
             - improve saving column layout in grid panel (#811)
             - add custom variables to grid panel (#849)
             - add alias names to label (#941)

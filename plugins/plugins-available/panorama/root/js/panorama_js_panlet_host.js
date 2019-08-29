@@ -160,7 +160,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
     }
 };
 
-TP.ExtinfoPanel = function(type) {
+TP.ExtinfoPanel = function(panlet, type) {
     return {
         xtype:     'panel',
         autoScroll: true,
@@ -207,7 +207,7 @@ TP.ExtinfoPanel = function(type) {
             dock:   'bottom',
             ui:     'footer',
             defaults: {
-                width: 120,
+                width: 110,
                 listeners: {
                     mouseover: function( This, eOpts ) { if(This.menu) { This.menu.letItClose = true  }},
                     mouseout: function(  This, eOpts ) { if(This.menu) { This.menu.letItClose = false }}
@@ -232,6 +232,12 @@ TP.ExtinfoPanel = function(type) {
                     text:   'Reschedule',
                     icon:   url_prefix+'plugins/panorama/images/btn_delay.png',
                     menu:    type == 'host' ? TP.host_reschedule_menu() : TP.service_reschedule_menu()
+                }, {
+                    itemId:     'details',
+                    text:       'Details',
+                    icon:        url_prefix+'plugins/panorama/images/link_go.png',
+                    href:        type == 'host' ? 'extinfo.cgi?type=1&host='+encodeURIComponent(panlet.xdata.host) : 'extinfo.cgi?type=2&host='+encodeURIComponent(panlet.xdata.host)+'&service='+encodeURIComponent(panlet.xdata.service),
+                    hrefTarget: '_blank'
             }]
         }]
     }
@@ -268,37 +274,37 @@ Ext.define('TP.PanletHost', {
     type:   'host',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.url         = 'panorama.cgi?task=host_detail';
-        if(this.xdata.host    == undefined) { this.xdata.host    = '' }
+        panel.callParent();
+        panel.xdata.url         = 'panorama.cgi?task=host_detail';
+        if(panel.xdata.host    == undefined) { panel.xdata.host    = '' }
 
         /* load host data */
-        this.loader = TP.ExtinfoPanelLoader(this),
-        this.add(TP.ExtinfoPanel('host'));
+        panel.loader = TP.ExtinfoPanelLoader(panel),
+        panel.add(TP.ExtinfoPanel(panel, 'host'));
 
         /* auto load when host is set */
-        this.addListener('afterrender', function() {
-            this.setTitle(this.xdata.host);
-            if(this.xdata.host == '') {
-                this.gearHandler();
+        panel.addListener('afterrender', function() {
+            panel.setTitle(panel.xdata.host);
+            if(panel.xdata.host == '') {
+                panel.gearHandler();
             } else {
                 // update must be delayed, IE8 breaks otherwise
-                TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.manualRefresh, this, []), 500);
+                TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.manualRefresh, panel, []), 500);
             }
         });
 
-        this.formUpdatedCallback = function() {
-            this.setTitle(this.xdata.host);
+        panel.formUpdatedCallback = function() {
+            panel.setTitle(panel.xdata.host);
         }
 
         /* should be closeable/moveable all the time because they can be openend even on readonly dashboards */
-        this.closable  = true;
-        this.draggable = true;
+        panel.closable  = true;
+        panel.draggable = true;
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        this.addGearItems(
+        panel.callParent();
+        panel.addGearItems(
             TP.objectSearchItem(panel, 'host', 'Hostname')
         );
     }

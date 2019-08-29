@@ -8,38 +8,38 @@ Ext.define('TP.PanletService', {
     type:   'service',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.url         = 'panorama.cgi?task=service_detail';
-        if(this.xdata.host    == undefined) { this.xdata.host    = '' }
-        if(this.xdata.service == undefined) { this.xdata.service = '' }
+        panel.callParent();
+        panel.xdata.url         = 'panorama.cgi?task=service_detail';
+        if(panel.xdata.host    == undefined) { panel.xdata.host    = '' }
+        if(panel.xdata.service == undefined) { panel.xdata.service = '' }
 
         /* load service data */
-        this.loader = TP.ExtinfoPanelLoader(this),
-        this.add(TP.ExtinfoPanel('service'));
+        panel.loader = TP.ExtinfoPanelLoader(panel),
+        panel.add(TP.ExtinfoPanel(panel, 'service'));
 
         /* auto load when host is set */
-        this.addListener('afterrender', function() {
-            this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
-            if(this.xdata.host == '') {
-                this.gearHandler();
+        panel.addListener('afterrender', function() {
+            panel.setTitle(panel.xdata.host + ' - ' + panel.xdata.service);
+            if(panel.xdata.host == '') {
+                panel.gearHandler();
             } else {
                 // update must be delayed, IE8 breaks otherwise
-                TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.manualRefresh, this, []), 500);
+                TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.manualRefresh, panel, []), 500);
             }
         });
 
-        this.formUpdatedCallback = function() {
-            this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
+        panel.formUpdatedCallback = function() {
+            panel.setTitle(panel.xdata.host + ' - ' + panel.xdata.service);
         }
 
         /* should be closeable/moveable all the time because they can be openend even on readonly dashboards */
-        this.closable  = true;
-        this.draggable = true;
+        panel.closable  = true;
+        panel.draggable = true;
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        this.addGearItems([
+        panel.callParent();
+        panel.addGearItems([
             TP.objectSearchItem(panel, 'host', 'Hostname'),
             TP.objectSearchItem(panel, 'service', 'Servicename')
         ]);
