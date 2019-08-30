@@ -910,49 +910,58 @@ Ext.define('TP.ActionMenuButton', {
 
     alias:  'widget.tp_action_menu_button',
 
-    constructor: function(config) {
-        var me = this;
-        Ext.apply(me, config);
-        me.callParent();
-        me.addListener("beforedestroy", function() {
-            if(me.fakePanel) {
-                me.fakePanel.destroy();
-                delete me.fakePanel;
-            }
-        });
-    },
+    action_link:        '',    // contains the action link like ex.: menu://
+    panel:              null,  // reference to panel
+    host:               '',    // hostname used for macros
+    service:            '',    // service description used for macros
+    target:             '',    // target used for links
+    afterClickCallback: null,  // callback called after click is done
+
     handler: function(btn, evt) {
         // create fake panel context to execute the click command from the menu
-        btn.fakePanel = Ext.create('Ext.panel.Panel', {
-            autoShow: false,
-            floating: true,
-            x: 100,
-            y: 100,
-            autoEl:  'a',
-            href:    '#',
-            text:    ' ',
-            renderTo: Ext.getBody(),
-            listeners: {
-                afterrender: function(This) {
-                    This.panel    = btn.panel;
-                    This.panel_id = btn.panel.panel_id;
-                    This.xdata = {
-                        link: {
-                            link: btn.action_link
-                        },
-                        general: {
-                            host: btn.host,
-                            service: btn.service
-                        }
-                    };
-                    var options = {
-                        alignTo:  btn,
-                        callback: btn.afterClickCallback
-                    };
-                    TP.iconClickHandlerExec(This.id, btn.action_link, This, undefined, undefined, options);
-                }
-            }
-        });
-        btn.fakePanel.show();
+        openActionUrlWithFakePanel(btn, btn.panel, btn.action_link, btn.host, btn.service, btn.target, btn.afterClickCallback);
     }
 });
+
+function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, target, callback) {
+    var fakePanel = Ext.create('Ext.panel.Panel', {
+        autoShow: false,
+        floating: true,
+        x: 100,
+        y: 100,
+        autoEl:  'a',
+        href:    '#',
+        text:    ' ',
+        renderTo: Ext.getBody(),
+        listeners: {
+            afterrender: function(This) {
+                This.panel    = panel;
+                This.panel_id = panel.panel_id;
+                This.xdata = {
+                    link: {
+                        link: action_link
+                    },
+                    general: {
+                        host: host,
+                        service: service
+                    }
+                };
+                var options = {
+                    alignTo:  alignTo,
+                    callback: function() {
+                        if(callback) {
+                            callback();
+                        }
+                        window.setTimeout(function() {
+                            This.destroy();
+                        }, 1000);
+                    }
+                };
+                TP.iconClickHandlerExec(This.id, action_link, This, target, undefined, options);
+            }
+        }
+    });
+    fakePanel.show();
+    return;
+}
+

@@ -1771,6 +1771,7 @@ sub _task_hosts {
                     $h->{$var} = $cust->{$var} // '';
                 }
             }
+            $h->{'THRUK_ACTION_MENU'} = $cust->{'THRUK_ACTION_MENU'} // '';
         }
     }
     if(!$c->check_user_roles("authorized_for_configuration_information")) {
@@ -1884,15 +1885,17 @@ sub _task_services {
                 { 'header' => $var, dataIndex => $var, hidden => Cpanel::JSON::XS::true };
             }
         }
-        for my $s ( @{$c->stash->{'data'}}) {
-            my $cust = Thruk::Utils::get_custom_vars($c, $s, undef, 1);
-            for my $var (@{$c->config->{'show_custom_vars'}}) {
-                if($var !~ m/\*/mx) { # does not work with wildcards
-                    $var =~ s/^_//gmx;
-                    $s->{$var} = $cust->{$var} // $cust->{'HOST'.$var} // '';
-                }
+    }
+    for my $s ( @{$c->stash->{'data'}}) {
+        my $cust = Thruk::Utils::get_custom_vars($c, $s, undef, 1);
+        for my $var (@{$c->config->{'show_custom_vars'}}) {
+            if($var !~ m/\*/mx) { # does not work with wildcards
+                $var =~ s/^_//gmx;
+                $s->{$var} = $cust->{$var} // $cust->{'HOST'.$var} // '';
             }
         }
+        $s->{'THRUK_ACTION_MENU'}     = $cust->{'THRUK_ACTION_MENU'} // '';
+        $s->{'HOSTTHRUK_ACTION_MENU'} = $cust->{'HOSTTHRUK_ACTION_MENU'} // '';
     }
     if(!$c->check_user_roles("authorized_for_configuration_information")) {
         # remove custom macro colums which could contain confidential informations

@@ -381,7 +381,7 @@ TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
 }
 
 /* parse action menu from json string data */
-TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
+TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plain) {
     var tmp = str.split(/\//);
     var menuName = tmp.shift();
     var menuArgs = tmp;
@@ -413,7 +413,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
             return(false);
         }
     }
-    if(!menuData['menu']) {
+    if(!menuData['menu'] || plain) {
         return(menuData);
     }
     return(TP.parseActionMenuItems(menuData['menu'], id, panel, target, extraOptions));

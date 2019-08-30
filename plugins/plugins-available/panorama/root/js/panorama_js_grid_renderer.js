@@ -244,6 +244,7 @@ TP.render_host_service_icons = function(v, td, item, row, col, store, view) {
         return '';
     }
     var data = {
+        name:                     d.host_name,
         notifications_enabled:    d.host_notifications_enabled,
         check_type:               d.host_check_type,
         active_checks_enabled:    d.host_active_checks_enabled,
@@ -257,7 +258,8 @@ TP.render_host_service_icons = function(v, td, item, row, col, store, view) {
         icon_image_expanded:      d.host_icon_image_expanded,
         icon_image_alt:           d.host_icon_image_alt,
         custom_variable_names:    d.host_custom_variable_names,
-        custom_variable_values:   d.host_custom_variable_values
+        custom_variable_values:   d.host_custom_variable_values,
+        THRUK_ACTION_MENU:        item.raw.HOSTTHRUK_ACTION_MENU
     };
     return TP.render_host_icons(v, td, item, row, col, store, view, data);
 }
@@ -290,6 +292,10 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(d.action_url_expanded )         { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, host_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Host Actions' title='Perform Extra Host Actions'><\/a>"; }
     if(d.notes_url_expanded )          { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Host Notes' title='View Extra Host Notes'><\/a>"; }
     if(d.icon_image_expanded )         { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
+    var action_menu = d.THRUK_ACTION_MENU || item.raw.THRUK_ACTION_MENU;
+    if(action_menu) {
+        icons += TP.addActionIconsFromMenu(action_menu, d.name);
+    }
     return icons;
 }
 
@@ -321,6 +327,10 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(d.action_url_expanded )         { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, service_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>"; }
     if(d.notes_url_expanded )          { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Service Notes' title='View Extra Service Notes'><\/a>"; }
     if(d.icon_image_expanded )         { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
+    var action_menu = d.THRUK_ACTION_MENU || item.raw.THRUK_ACTION_MENU;
+    if(action_menu) {
+        icons += TP.addActionIconsFromMenu(action_menu, d.host_name, d.description);
+    }
     return icons;
 }
 
@@ -521,3 +531,54 @@ function action_icon(o, action_icon) {
     }
     return action_icon;
 }
+
+TP.addActionIconsFromMenu = function(action_menu_name, host, service) {
+    var icons = "";
+    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', '', '', {}, true);
+    if(Ext.isArray(menuData)) {
+        Ext.Array.forEach(menuData, function(icon, i) {
+            icons += TP.addActionIcon(icon, action_menu_name, host, service);
+        });
+    } else {
+        icons += TP.addActionIcon(menuData, action_menu_name, host, service);
+    }
+    return(icons);
+}
+
+TP.addActionIcon = function(icon, menuName, host, service) {
+    var href = "";
+    if(icon.action) {
+        href = icon.action;
+    }
+    else {
+        href = "menu://"+menuName;
+    }
+    var icon = '<a href="'+href+'" target="'+(icon.target || '')+'" onclick="return(TP.checkActionLink(this))" data-host="'+encodeURIComponent(host||'')+'" data-service="'+encodeURIComponent(service||'')+'">'
+              +'<img src="'+replace_macros(icon.icon)+'" alt="'+replace_macros(icon.title||icon.label)+'" border="0" height="20" width="20">'
+              +'</a>';
+    return(icon);
+}
+
+TP.checkActionLink = function(a) {
+    var panel = undefined;
+
+    // find panel by iterating all parents
+    var p = a;
+    var panel;
+    while(p.parentNode) {
+        p = p.parentNode;
+        if(p.id) {
+            panel = Ext.getCmp(p.id);
+            if(panel && panel.panel_id) {
+                break;
+            }
+            panel = null;
+        }
+    }
+    if(!panel) {
+        return(false);
+    }
+    openActionUrlWithFakePanel(a, panel, a.href, decodeURIComponent(a.dataset.host || ''), decodeURIComponent(a.dataset.service || ''), a.target);
+    return(false);
+}
+
