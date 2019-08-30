@@ -141,15 +141,25 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
             commands.get("noack").setVisible(false);
             commands.get("ack").setDisabled(d.state == 0);
         }
+        panel.action_menu_link = data.action_menu;
+        if(panel.action_menu_link) {
+            var btn = panel.dockedItems.getAt(0).items.get('actionMenuLink');
+            btn.action_link = 'menu://'+panel.action_menu_link;
+            btn.setVisible(true);
+        } else {
+            btn.setVisible(false);
+        }
+        panel.setVisible(true);
     }
 };
 
 TP.ExtinfoPanel = function(panel, type) {
-    return {
+    var extinfo_panel = {
         xtype:     'panel',
         panel:      panel,
         autoScroll: true,
         border:     false,
+        hidden:     true,
         layout: {
             type:   'table',
             columns: 2,
@@ -234,9 +244,21 @@ TP.ExtinfoPanel = function(panel, type) {
                     icon:        url_prefix+'plugins/panorama/images/information.png',
                     href:        type == 'host' ? 'extinfo.cgi?type=1&host='+encodeURIComponent(panel.xdata.host) : 'extinfo.cgi?type=2&host='+encodeURIComponent(panel.xdata.host)+'&service='+encodeURIComponent(panel.xdata.service),
                     hrefTarget: '_blank'
+            }, {
+                text:        "Action Menu",
+                xtype:      'tp_action_menu_button',
+                itemId:     'actionMenuLink',
+                hidden:      true,
+                icon:        url_prefix+'plugins/panorama/images/menu-down.gif',
+                panel:       panel,
+                host:        panel.xdata.host,
+                service:     panel.xdata.service,
+                action_link: 'menu://'
             }]
         }]
     }
+
+    return(extinfo_panel);
 };
 
 TP.ExtinfoPanelLoader = function(scope) {

@@ -316,46 +316,17 @@ Ext.define('TP.PanletSquares', {
                     name = matches[1];
                 }
                 popup_fbar_btn.push({
-                    type: 'button',
-                    text:  name,
-                    icon:  icon,
-                    handler: function(This) {
-                        var btn = This;
-                        // create fake panel context to execute the click command from the menu
-                        panel.fakePanel = Ext.create('Ext.panel.Panel', {
-                            autoShow: false,
-                            floating: true,
-                            x: 100,
-                            y: 100,
-                            autoEl:  'a',
-                            href:    '#',
-                            text:    ' ',
-                            renderTo: Ext.getBody(),
-                            panel_id: panel.panel_id,
-                            xdata: {
-                                link: {
-                                    link: val
-                                },
-                                general: {
-                                    host: panel.tip.item.host_name,
-                                    service: panel.tip.item.description
-                                }
-                            },
-                            listeners: {
-                                afterrender: function(This) {
-                                    var options = {
-                                        alignTo:  btn,
-                                        callback: function() {
-                                            window.setTimeout(function() {
-                                                panel.tip.hide();
-                                            }, 500);
-                                        }
-                                    };
-                                    TP.iconClickHandlerExec(This.id, val, This, undefined, undefined, options);
-                                }
-                            }
-                        });
-                        panel.fakePanel.show();
+                    xtype:      'tp_action_menu_button',
+                    text:        name,
+                    icon:        icon,
+                    panel:       panel,
+                    host:        '',
+                    service:     '',
+                    action_link: val,
+                    afterClickCallback: function() {
+                        window.setTimeout(function() {
+                            panel.tip.hide();
+                        }, 500)
                     }
                 });
             }
@@ -370,7 +341,13 @@ Ext.define('TP.PanletSquares', {
             cls: 'squares_popup',
             minWidth: Ext.Array.max([200, (popup_fbar_btn.length * 110)]),
             buttonAlign: 'left',
-            fbar: popup_fbar_btn,
+            dockedItems: [{
+                xtype:  'toolbar',
+                dock:   'bottom',
+                ui:     'footer',
+                itemId: 'buttons',
+                items:   popup_fbar_btn
+            }],
             listeners: {
                 beforeshow: function updateTipBody(tip, eOpts) {
                     if(!panel.tip.itemUniq || !panel.dataStore[panel.tip.itemUniq]) { return false; }
@@ -398,16 +375,18 @@ Ext.define('TP.PanletSquares', {
                             detailsBtn.setHref(item.link);
                         }
                     }
+                    Ext.Array.each(tip.dockedItems.get("buttons").items.items, function(btn, i) {
+                        if(btn.xtype == 'tp_action_menu_button') {
+                            btn.host    = item.host_name;
+                            btn.service = item.description;
+                        }
+                    })
                     return(true);
                 },
                 beforehide: function(tip, eOpts) {
                     // don't hide if there is still a menu open
                     if(Ext.getCmp('iconActionMenu')) {
                         return(false);
-                    }
-                    if(panel.fakePanel) {
-                        panel.fakePanel.destroy();
-                        delete panel.fakePanel;
                     }
                     return(true);
                 }

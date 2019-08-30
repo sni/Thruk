@@ -2568,7 +2568,8 @@ sub _task_host_detail {
         if($c->stash->{'escape_html_tags'}) {
             _escape($hosts->[0]);
         }
-        $json = { data => $hosts->[0], downtimes => $downtimes };
+        my $cust_vars = Thruk::Utils::get_custom_vars($c, $hosts->[0]);
+        $json = { data => $hosts->[0], downtimes => $downtimes, action_menu => $cust_vars->{'THRUK_ACTION_MENU'} };
     }
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json);
@@ -2606,7 +2607,8 @@ sub _task_service_detail {
         if($c->stash->{'escape_html_tags'}) {
             _escape($services->[0]);
         }
-        $json = { data => $services->[0], downtimes => $downtimes };
+        my $cust_vars = Thruk::Utils::get_custom_vars($c, $services->[0]);
+        $json = { data => $services->[0], downtimes => $downtimes, action_menu => $cust_vars->{'THRUK_ACTION_MENU'} };
     }
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json);
