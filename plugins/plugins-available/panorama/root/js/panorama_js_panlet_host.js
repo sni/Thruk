@@ -132,37 +132,22 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
         panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'<\/div>');
         panel.getComponent('site').update(d.peer_name);
         /* update acknowledged button */
-        var toolbar = panel.dockedItems.getAt(0);
+        var commands = panel.dockedItems.getAt(0).items.get('commandsMenu').menu.items;
         if(d.acknowledged) {
-            if(toolbar.items.get('ack')) {
-                toolbar.remove(1);
-                toolbar.insert(1, new Ext.button.Button({
-                    itemId: 'noack',
-                    text:   'Remove Ack.',
-                    icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
-                    menu:    this.type == 'host' ? TP.host_ack_remove_menu() : TP.service_ack_remove_menu()
-                }));
-            }
+            commands.get("ack").setVisible(false);
+            commands.get("noack").setVisible(true);
         } else {
-            if(toolbar.items.get('noack')) {
-                toolbar.remove(1);
-                toolbar.insert(1, new Ext.button.Button({
-                    itemId:  'ack',
-                    text:    'Acknowledge',
-                    icon:    url_prefix+'plugins/panorama/images/btn_ack.png',
-                    menu:     this.type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu(),
-                    disabled: d.state == 0 ? true : false
-                }));
-            } else {
-                d.state == 0 ? toolbar.items.get('ack').disable() : toolbar.items.get('ack').enable();
-            }
+            commands.get("ack").setVisible(true);
+            commands.get("noack").setVisible(false);
+            commands.get("ack").setDisabled(d.state == 0);
         }
     }
 };
 
-TP.ExtinfoPanel = function(panlet, type) {
+TP.ExtinfoPanel = function(panel, type) {
     return {
         xtype:     'panel',
+        panel:      panel,
         autoScroll: true,
         border:     false,
         layout: {
@@ -215,28 +200,39 @@ TP.ExtinfoPanel = function(panlet, type) {
             },
             buttonAlign: 'center',
             items: [{
-                    /* Add New Downtime */
-                    itemId: 'downtime',
-                    text:   'Add Downtime',
-                    icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
-                    menu:    type == 'host' ? TP.host_downtime_menu() : TP.service_downtime_menu()
-                }, {
-                    /* Acknowledge */
-                    itemId: 'ack',
-                    text:   'Acknowledge',
-                    icon:   url_prefix+'plugins/panorama/images/btn_ack.png',
-                    menu:    type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu()
-                }, {
-                    /* Reschedule */
-                    itemId: 'reschedule',
-                    text:   'Reschedule',
-                    icon:   url_prefix+'plugins/panorama/images/btn_delay.png',
-                    menu:    type == 'host' ? TP.host_reschedule_menu() : TP.service_reschedule_menu()
+                    text:   'Commands',
+                    icon:   url_prefix+'plugins/panorama/images/bricks.png',
+                    itemId: 'commandsMenu',
+                    menu: [{
+                            /* Add New Downtime */
+                            itemId: 'downtime',
+                            text:   'Add Downtime',
+                            icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
+                            menu:    type == 'host' ? TP.host_downtime_menu() : TP.service_downtime_menu()
+                        }, {
+                            /* Acknowledge */
+                            itemId: 'ack',
+                            text:   'Acknowledge',
+                            icon:   url_prefix+'plugins/panorama/images/btn_ack.png',
+                            menu:    type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu()
+                        }, {
+                            /* Acknowledge remove */
+                            itemId: 'noack',
+                            text:   'Remove Ack.',
+                            icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
+                            menu:    type == 'host' ? TP.host_ack_remove_menu() : TP.service_ack_remove_menu()
+                        }, {
+                            /* Reschedule */
+                            itemId: 'reschedule',
+                            text:   'Reschedule',
+                            icon:   url_prefix+'plugins/panorama/images/btn_delay.png',
+                            menu:    type == 'host' ? TP.host_reschedule_menu() : TP.service_reschedule_menu()
+                        }]
                 }, {
                     itemId:     'details',
                     text:       'Details',
-                    icon:        url_prefix+'plugins/panorama/images/link_go.png',
-                    href:        type == 'host' ? 'extinfo.cgi?type=1&host='+encodeURIComponent(panlet.xdata.host) : 'extinfo.cgi?type=2&host='+encodeURIComponent(panlet.xdata.host)+'&service='+encodeURIComponent(panlet.xdata.service),
+                    icon:        url_prefix+'plugins/panorama/images/information.png',
+                    href:        type == 'host' ? 'extinfo.cgi?type=1&host='+encodeURIComponent(panel.xdata.host) : 'extinfo.cgi?type=2&host='+encodeURIComponent(panel.xdata.host)+'&service='+encodeURIComponent(panel.xdata.service),
                     hrefTarget: '_blank'
             }]
         }]
@@ -322,7 +318,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
     /* this is a Ext.menu.Menu */
     return {
         plain:      true,
-        letItClose: false,
+        letItClose: true,
         items: [{
             xtype: 'panel',
             items: [{
@@ -346,7 +342,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
         }],
         listeners: {
             beforehide: function( This, eOpts ) {
-                var panel = This.up('panel').up('panel');
+                var panel = This.up('panel').up('panel').panel;
                 if(This.letItClose) {
                     panel.menusnr = panel.menusnr - 1;
                     return true;
@@ -359,7 +355,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
             },
             beforeshow: function(This, eOpts) {
                 /* don't show more than one menu */
-                var panel = This.up('panel').up('panel');
+                var panel = This.up('panel').up('panel').panel;
                 if(panel.menusnr > 0) {
                     return false;
                 }
