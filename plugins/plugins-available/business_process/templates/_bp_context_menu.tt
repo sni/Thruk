@@ -10,6 +10,7 @@
   <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
   [% IF editmode %]
   <li><a href="#" onclick="bp_add_new_node()"><span class="ui-icon ui-icon-plus">&nbsp;</span>Add New Node</a></li>
+  <li id="bp_menu_clone_node" class="ui-state-disabled"><a href="#" onclick="bp_clone_node()"><span class="ui-icon ui-icon-copy">&nbsp;</span>Clone This Node</a></li>
   <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
   <li id='bp_menu_remove_node'><a href="#" onclick="bp_show_remove()"><span class="ui-icon ui-icon-trash">&nbsp;</span>Remove Node</a></li>
   <li id='bp_menu_rename_node'><a href="#" onclick="bp_show_rename(event)"><span class="ui-icon ui-icon-tag">&nbsp;</span>Rename Node</a></li>

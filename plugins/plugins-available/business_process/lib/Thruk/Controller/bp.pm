@@ -226,6 +226,25 @@ sub index {
             my $json = { rc => 0, 'message' => 'OK' };
             return $c->render(json => $json);
         }
+        elsif($action eq 'clone_node' and $nodeid) {
+            my $node = $bp->get_node($nodeid); # node from the 'node' parameter
+            if(!$node) {
+                my $json = { rc => 1, 'message' => 'ERROR: no such node' };
+                return $c->render(json => $json);
+            }
+            my $data  = $node->TO_JSON();
+            $data->{'id'} = undef;
+            my $clone = Thruk::BP::Components::Node->new($data);
+            $bp->add_node($clone);
+            for my $id (@{$node->{'parents'}}) {
+                my $parent = $bp->get_node($id);
+                $parent->append_child($clone);
+            }
+            $bp->save($c);
+            $bp->update_status($c, 1);
+            my $json = { rc => 0, 'message' => 'OK' };
+            return $c->render(json => $json);
+        }
         elsif($action eq 'edit_node' and $nodeid) {
             my $type = lc($c->req->parameters->{'bp_function'} || '');
             my $node = $bp->get_node($nodeid); # node from the 'node' parameter

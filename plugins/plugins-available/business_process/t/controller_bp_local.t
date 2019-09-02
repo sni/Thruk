@@ -7,7 +7,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 334;
+    plan tests => 348;
 }
 
 BEGIN {
@@ -41,6 +41,8 @@ my $pages = [
     '/thruk/cgi-bin/bp.cgi?action=details&bp='.$bpid.'&debug=1',
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'Test App', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=rename_node&bp='.$bpid.'&node=node1&label=Test App Renamed', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=remove_node&bp='.$bpid.'&node=node3', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=clone_node&bp='.$bpid.'&node=node1', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove_node&bp='.$bpid.'&node=node3', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_fixed=Critical&bp_function=Fixed&bp_label_fixed=addednode', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },

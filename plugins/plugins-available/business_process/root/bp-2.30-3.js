@@ -159,11 +159,13 @@ function bp_context_menu_open(evt, node) {
             jQuery("#bp_menu").css('top', h+'px');
         }
         bp_update_firstnode_css();
-        // first node cannot be removed
+        // first node cannot be removed or cloned
         if(node.id == 'node1' || !editmode) {
             jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
+            jQuery('#bp_menu_clone_node').addClass('ui-state-disabled');
         } else {
             jQuery('#bp_menu_remove_node').removeClass('ui-state-disabled');
+            jQuery('#bp_menu_clone_node').removeClass('ui-state-disabled');
         }
     } else if(node) {
         bp_unset_active_node();
@@ -291,6 +293,12 @@ function bp_add_new_node() {
     });
     jQuery('.bp_type_btn').button();
     showElement('bp_add_new_node');
+}
+
+function bp_clone_node() {
+    bp_post_and_refresh('bp.cgi?action=clone_node&bp='+bp_id+'&node='+current_node, []);
+    hideElement('bp_menu');
+    bp_context_menu = false;
 }
 
 /* fill in form with current values */
