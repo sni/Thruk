@@ -18,6 +18,7 @@ use URI::Escape qw/uri_escape/;
 use Cpanel::JSON::XS ();
 use Encode qw/decode_utf8/;
 use File::Slurp qw/read_file/;
+use Data::Dumper qw//;
 
 ##############################################
 # use faster HTML::Escape if available
@@ -1177,6 +1178,20 @@ returns lower case string
 sub lc {
     my($text) = @_;
     return(lc($text));
+}
+
+##############################################
+
+=head2 debug
+
+  print anything to stderr
+
+returns empty string
+
+=cut
+sub debug {
+    print STDERR Data::Dumper::Dumper(\@_);
+    return("");
 }
 
 ########################################

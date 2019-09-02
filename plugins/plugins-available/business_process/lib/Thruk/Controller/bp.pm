@@ -448,6 +448,7 @@ sub _bp_start_page {
 
     my $type = $c->req->parameters->{'type'} // 'local';
     $c->stash->{'type'} = $type;
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     # load business processes
     my $drafts_too = $c->stash->{allowed_for_edit} ? 1 : 0;
@@ -456,24 +457,6 @@ sub _bp_start_page {
     }
     my $local_bps = [];
     $local_bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
-
-    if($c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'json') {
-        my $json;
-        if($c->req->parameters->{'format'} and $c->req->parameters->{'format'} eq 'search') {
-            my $data = [];
-            for my $bp (@{$local_bps}) {
-                push @{$data}, $bp->{'name'};
-            }
-            $json = [ { 'name' => "business processs", 'data' => $data } ];
-        } else {
-            my $data = {};
-            for my $bp (@{$local_bps}) {
-                $data->{$bp->{'id'}} = $bp->TO_JSON();
-            }
-            $json = $data;
-        }
-        return $c->render(json => $json);
-    }
 
     my $bps = [];
     if($type eq 'local' || $type eq 'all') {
@@ -490,6 +473,14 @@ sub _bp_start_page {
     }
 
     if($c->req->parameters->{'format'} && $c->req->parameters->{'format'} eq 'search') {
+        if($view_mode eq 'json') {
+            my $data = [];
+            for my $bp (@{$bps}) {
+                push @{$data}, $bp->{'name'};
+            }
+            my $json = [ { 'name' => "business processs", 'data' => $data } ];
+            return $c->render(json => $json);
+        }
         my $data = [];
         for my $bp (@{$bps}) {
             push @{$data}, $bp->{'name'};
@@ -509,6 +500,22 @@ sub _bp_start_page {
         $bps = $new_bps;
     }
     $c->stash->{'filter'} = $filter;
+
+    $c->stash->{'excel_columns'} = ['Name', 'Status', 'Last Check', 'Duration', 'Status Information'];
+    if($view_mode eq 'json') {
+        my $data = {};
+        for my $bp (@{$bps}) {
+            $data->{$bp->{'id'}} = $bp->TO_JSON();
+        }
+        return $c->render(json => $data);
+    }
+    elsif($view_mode eq 'xls') {
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'bp', $c->stash->{'excel_columns'});
+        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="bp.xls"' );
+        $c->stash->{'data'}     = $bps;
+        $c->stash->{'template'} = 'excel/bp.tt';
+        return $c->render_excel();
+    }
 
     Thruk::Backend::Manager::page_data($c, $bps);
 

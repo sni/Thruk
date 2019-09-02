@@ -5,7 +5,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 63;
+    plan tests => 70;
 }
 
 BEGIN {
@@ -55,6 +55,19 @@ for my $url (@{$json_hash_pages}) {
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
+}
+
+###########################################################
+# test excel export
+my $xls_pages = [
+    '/thruk/cgi-bin/bp.cgi?view_mode=xls',
+];
+
+for my $url (@{$xls_pages}) {
+    TestUtils::test_page(
+        'url'          => $url,
+        'content_type' => 'application/x-msexcel',
+    );
 }
 
 ###########################################################
