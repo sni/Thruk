@@ -20,10 +20,27 @@ Ext.define('TP.PanletGridServices', {
         var panel = this;
         this.callParent();
         TP.addFormFilter(this, this.has_search_button);
-        this.addGearItems({
-            fieldLabel: 'Show Border',
-            xtype:      'checkbox',
-            name:       'showborder'
+        panel.addGearItems({
+            fieldLabel:   'Background',
+            xtype:        'fieldcontainer',
+            layout:      { type: 'hbox', align: 'stretch' },
+            items:        [{
+                xtype:        'label',
+                text:         'Border: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 0}
+            }, {
+                xtype:        'checkbox',
+                name:         'showborder'
+            }, {
+                xtype:        'label',
+                text:         'Color: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 7}
+            }, {
+                xtype:        'colorcbo',
+                name:         'background',
+                value:        '',
+                flex:          1
+            }]
         });
     }
 });

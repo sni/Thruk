@@ -12,6 +12,7 @@ Ext.define('TP.GridLoader', {
             if(panel.loading) {
                 return false;
             }
+            panel.adjustBodyStyle();
             panel.loading = true;
             return true;
         },
@@ -246,6 +247,15 @@ Ext.define('TP.PanletGrid', {
             xtype:      'textfield',
             name:       'url'
         });
+    },
+    adjustBodyStyle: function() {
+        var panel = this;
+        if(panel.xdata.background) {
+            panel.setBodyStyle("background: "+panel.xdata.background+";");
+            if(panel.grid) {
+                panel.grid.setBodyStyle("background:transparent");
+            }
+        }
     }
 });
 

@@ -780,3 +780,7 @@ SPAN.searchhint {
 }
 SPAN.searchhint.type {
 }
+
+.x-grid-with-row-lines .x-grid-table {
+  border-top: 1px solid transparent;
+}
