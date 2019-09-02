@@ -316,11 +316,11 @@ SPAN.bp_label {
 
 .bp_node_add_icon {
     position: fixed;
+    width: 124px;
     display: none;
 }
 .bp_node_add_icon IMG {
     position: relative;
-    left: 54px;
     top: 2px;
 }
 
