@@ -193,6 +193,7 @@ Ext.define('TP.GridLoader', {
         return;
     },
     updateData: function(panel, data) {
+        if(!panel.gridStore) { return; }
         panel.gridStore.loadData(data);
         if(panel.pagingToolbar) {
             panel.pagingToolbar.onLoad();

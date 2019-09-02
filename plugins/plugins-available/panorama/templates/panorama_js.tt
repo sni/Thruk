@@ -113,4 +113,19 @@ Ext.onReady(function() {
             }
         }
     }, 500);
+
+    /* reset scrollbar timeout on html element scroll */
+    var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
+    htmlRootEl.on({
+        'mousewheel': TP.setBaseHTMLScroll,
+        'wheel':  TP.setBaseHTMLScroll,
+        'DOMMouseScroll': TP.setBaseHTMLScroll,
+        'scroll': TP.setBaseHTMLScroll
+    });
+    Ext.getBody().on({
+        'mousewheel': TP.setBaseHTMLScroll,
+        'wheel':  TP.setBaseHTMLScroll,
+        'DOMMouseScroll': TP.setBaseHTMLScroll,
+        'scroll': TP.setBaseHTMLScroll
+    });
 });

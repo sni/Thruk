@@ -292,7 +292,7 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(d.action_url_expanded )         { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, host_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Host Actions' title='Perform Extra Host Actions'><\/a>"; }
     if(d.notes_url_expanded )          { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Host Notes' title='View Extra Host Notes'><\/a>"; }
     if(d.icon_image_expanded )         { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
-    var action_menu = d.THRUK_ACTION_MENU || item.raw.THRUK_ACTION_MENU;
+    var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
     if(action_menu) {
         icons += TP.addActionIconsFromMenu(action_menu, d.name);
     }
@@ -327,7 +327,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(d.action_url_expanded )         { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, service_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>"; }
     if(d.notes_url_expanded )          { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Service Notes' title='View Extra Service Notes'><\/a>"; }
     if(d.icon_image_expanded )         { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
-    var action_menu = d.THRUK_ACTION_MENU || item.raw.THRUK_ACTION_MENU;
+    var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
     if(action_menu) {
         icons += TP.addActionIconsFromMenu(action_menu, d.host_name, d.description);
     }

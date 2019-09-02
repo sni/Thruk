@@ -19,6 +19,14 @@ HTML, BODY {
 .x-viewport {
     overflow: auto;
 }
+.x-viewport.hidescroll {
+    overflow: auto;
+    overflow: -moz-scrollbars-none;
+    -ms-overflow-style: none;
+}
+.x-viewport.hidescroll::-webkit-scrollbar {
+    display: none;
+}
 .x-viewport.geomap {
     overflow: hidden;
 }

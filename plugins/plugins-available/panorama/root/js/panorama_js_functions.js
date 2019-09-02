@@ -2215,6 +2215,18 @@ var TP = {
             }
         }
         cookieSave('thruk_panorama_tabs', numbers.join(':'));
+    },
+    setBaseHTMLScroll: function() {
+        var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
+        htmlRootEl.removeCls('hidescroll');
+        if(htmlRootEl.hasCls('geomap')) {
+            return;
+        }
+        window.clearTimeout(TP.timeouts['timeout_base_scroll']);
+        TP.timeouts['timeout_base_scroll'] = window.setTimeout(function() {
+            var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
+            htmlRootEl.addCls('hidescroll');
+        }, 3000);
     }
 }
 TP.log('[global] starting');

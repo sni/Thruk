@@ -85,7 +85,7 @@ Ext.define('TP.Pantab', {
                 TP.suppressIconTip = false;
                 This.disableMapControls();
             }
-            This.setBaseHtmlClass();
+            This.setBaseHtmlClass(true);
             /* scroll to top, otherwise geomap icons would be at wrong position */
             try {
                 document.documentElement.scrollIntoView();
@@ -285,13 +285,17 @@ Ext.define('TP.Pantab', {
         }
         TP.skipResetMoveIcons = false;
     },
-    setBaseHtmlClass: function() {
+    setBaseHtmlClass: function(hidescroll) {
         var This = this;
         var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
         if(This.mapEl) {
             htmlRootEl.addCls('geomap');
+            htmlRootEl.removeCls('hidescroll');
         } else {
             htmlRootEl.removeCls('geomap');
+            if(hidescroll) {
+                TP.setBaseHTMLScroll();
+            }
         }
     },
     forceSaveState: function() {
@@ -510,6 +514,7 @@ Ext.define('TP.Pantab', {
             if(TP.initialized) {
                 This.startTimeouts();
             } else {
+                This.setBaseHtmlClass(true);
                 TP.timeouts['timeout_' + This.id + '_starttimeouts'] = window.setTimeout(Ext.bind(This.startTimeouts, This, []), 30000);
             }
         }

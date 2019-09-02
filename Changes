@@ -22,6 +22,7 @@ next:
             - improve saving column layout in grid panel (#811)
             - add custom variables to grid panel (#849)
             - add alias names to label (#941)
+            - hide scrollbars after 3 seconds
             - fix changing open dashboards on reloads
           - Business Process:
             - add node clone menu entry to node context menu
