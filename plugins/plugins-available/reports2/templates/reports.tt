@@ -46,7 +46,7 @@
   </tr>
 </table>
 <div id="reports_table">
-<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px; width: 1000px;">
+<table border="1" class='status hoverable' id="statusTable" style="min-width: 1000px; max-width: 100%;">
   <tr>
     <th class="status" nowrap width="200">Name</th>
     <th class="status" nowrap width="200">Description</th>
@@ -64,13 +64,13 @@
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
-    <td class="status [% rowclass %]" align="left">[% r.name | html %]</td>
-    <td class="status [% rowclass %]" align="left" style="overflow: hidden;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
+    <td class="status [% rowclass %]" align="left" style="overflow: hidden; white-space: nowrap;" nowrap>[% IF r.name.length > 50 %]<span title="[% r.name | html %]">[% r.name.substr(0,50) | html %]...</span>[% ELSE %][% r.name | html %][% END %]</td>
+    <td class="status [% rowclass %]" align="left" style="overflow: hidden; white-space: nowrap;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
-    <td class="status [% rowclass %] usercol">[% r.user | html %]</td>
+    <td class="status [% rowclass %] usercol" style="white-space: nowrap;">[% r.user | html %]</td>
     <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %]" nowrap>[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
-    <td class="status [% rowclass %]">
+    <td class="status [% rowclass %]" style="white-space: nowrap;">
       [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
     </td>
     <td class="status [% rowclass %] report_progessbar">
