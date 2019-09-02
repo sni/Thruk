@@ -1944,7 +1944,11 @@ var TP = {
                     for(var x=0; x<old_window_ids.length; x++) {
                         var id = old_window_ids[x];
                         if(data[id] == undefined) {
-                            Ext.getCmp(id).destroy();
+                            var p = Ext.getCmp(id);
+                            // remove unless this is ex. an host/service extinfo detail panel openened by the user
+                            if(!p.userOpened) {
+                                p.destroy();
+                            }
                         }
                     }
                     /* update stateproviders last data to prevent useless updates */
