@@ -68,7 +68,7 @@ function update_reports_type_step2() {
     // scroll to report settings
     jQuery('TR.report_options TD').effect('highlight', {}, 1000);
     jQuery([document.documentElement, document.body]).animate({
-        scrollTop: $("#report_type").offset().top
+        scrollTop: jQuery("#report_type").offset().top
     }, 1000);
 }
 
