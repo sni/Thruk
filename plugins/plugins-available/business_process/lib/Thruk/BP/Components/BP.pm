@@ -954,6 +954,57 @@ sub FROM_JSON {
 }
 
 ##########################################################
+
+=head2 get_outgoing_refs
+
+    get_outgoing_refs()
+
+return list of outgoing bp references
+
+=cut
+sub get_outgoing_refs {
+    my($self, $c) = @_;
+    $c->stats->profile(begin => "get_outgoing_refs");
+
+    my $refs = [];
+    for my $n (@{$self->{'nodes'}}) {
+        if($n->{'bp_ref'}) {
+            my $bps = Thruk::BP::Utils::load_bp_data($c, $n->{'bp_ref'}, undef, undef, $n->{'bp_ref_peer'});
+            push @{$refs}, $bps->[0] if $bps->[0];
+        }
+    }
+
+    $c->stats->profile(end => "get_outgoing_refs");
+    return $refs;
+}
+
+##########################################################
+
+=head2 get_incoming_refs
+
+    get_incoming_refs()
+
+return list of incoming bp references
+
+=cut
+sub get_incoming_refs {
+    my($self, $c, $bps) = @_;
+    $c->stats->profile(begin => "get_incoming_refs");
+
+    my $refs = [];
+    for my $bp (@{$bps}) {
+        for my $n (@{$bp->{'nodes'}}) {
+            if($n->{'bp_ref'} && $n->{'bp_ref'} == $self->{'id'}) {
+                push @{$refs}, $bp;
+            }
+        }
+    }
+
+    $c->stats->profile(end => "get_incoming_refs");
+    return $refs;
+}
+
+##########################################################
 # return list of affected backends from given livestatus data
 sub _extract_affected_backends {
     my($self, $livedata) = @_;

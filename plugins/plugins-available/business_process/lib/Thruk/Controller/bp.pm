@@ -394,6 +394,9 @@ sub index {
                 my $json = { $bp->{'id'} => $bp->TO_JSON() };
                 return $c->render(json => $json);
             }
+            $c->stash->{'outgoing_refs'}  = $bp->get_outgoing_refs($c);
+            my $bps = Thruk::BP::Utils::load_bp_data($c);
+            $c->stash->{'incoming_refs'}  = $bp->get_incoming_refs($c, $bps);
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
             return 1;

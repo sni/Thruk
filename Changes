@@ -27,6 +27,7 @@ next:
             - fix changing open dashboards on reloads
           - Business Process:
             - add node clone menu entry to node context menu
+            - add navigation to link incoming/outgoing business processes
           - internals:
             - update daterangepicker 3.0.5
 

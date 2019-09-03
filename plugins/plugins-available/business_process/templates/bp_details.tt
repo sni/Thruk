@@ -212,54 +212,43 @@
   </tr>
   [% END %]
 
-  [% IF debug %]
+  [% IF outgoing_refs.size > 0 || incoming_refs.size > 0 %]
   <tr>
     <td style="height: 20px;"></td>
   </tr>
 
   <tr>
     <td align="center" valign="top" class='commandPanel'>
-      <div class='dataTitle'>Graph Options</div>
-      <form id="bp_graph_option_form" action="#" onsubmit="return false;">
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+      <div class='dataTitle'>Navigation</div>
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel" style="width:100%">
         <tr>
-          <td>
-            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
+          <td width="100%">
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info" width="100%">
+              [% FOREACH r = incoming_refs %]
               <tr class='data'>
-                <td>Direction</td>
-                <td>
-                  <select onchange="bp_redraw_changed('bp_rankDir', this.value)" id="bp_rankDir" name="bp_rankDir">
-                    <option value="TB">Top-Bottom</option>
-                    <option value="LR">Left Right</option>
-                  </select>
-                </td>
+                <td width=16><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='Incoming business process' title='Incoming business process' width="16" height="16" style="vertical-align: top;"></td>
+                <td class="command mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% r.fullid %]"><b>[% r.name | html %]</b></a></td>
               </tr>
+              [% END %]
+              [% IF incoming_refs.size > 0 %]
+              <tr class='data'><td colspan=2><hr></td></tr>
+              [% END %]
+              [% FOREACH r = outgoing_refs %]
               <tr class='data'>
-                <td>Node Seperation</td>
-                <td>
-                  <input type="text" value="20" name="bp_nodeSep" onkeyup="bp_redraw_changed('bp_nodeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_nodeSep">
-                </td>
+                <td width=16><img src='[% url_prefix %]themes/[% theme %]/images/arrow_right.png' border="0" alt='Outgoing business process' title='Outgoing business process' width="16" height="16" style="vertical-align: top;"></td>
+                <td class="command mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% r.fullid %]"><b>[% r.name | html %]</b></a></td>
               </tr>
-              <tr class='data'>
-                <td>Edge Seperation</td>
-                <td>
-                  <input type="text" value="10" name="bp_edgeSep" onkeyup="bp_redraw_changed('bp_edgeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_edgeSep">
-                </td>
-              </tr>
-              <tr class='data'>
-                <td>Rank Seperation</td>
-                <td>
-                  <input type="text" value="30" name="bp_rankSep" onkeyup="bp_redraw_changed('bp_rankSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_rankSep">
-                </td>
-              </tr>
+              [% END %]
             </table>
           </td>
         </tr>
       </table>
-      </form>
     </td>
   </tr>
   [% END %]
+
+
+
 </table>
 
 
