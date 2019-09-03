@@ -6403,8 +6403,9 @@ var ajax_search = {
             removeEvent( input, 'keyup', ajax_search.suggest );
             return true;
         } else {
-            if(   search_type == 'event handler'
-               || search_type == 'contact'
+            if(   ajax_search.search_type == 'event handler'
+               || ajax_search.search_type == 'contact'
+               || ajax_search.search_type == 'timeperiod'
             ) {
                 if(!search_url.match(/type=/)) {
                     search_url = search_url + "&type=" + ajax_search.search_type;
