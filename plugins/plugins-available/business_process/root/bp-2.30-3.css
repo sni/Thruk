@@ -79,6 +79,9 @@ LI.bp_menu_seperator.ui-state-disabled A {
 DIV.ui-dialog INPUT[type=text] {
     width: 290px;
 }
+DIV.ui-dialog TD.filterValueInput INPUT[type=text] {
+    width: 135px;
+}
 
 DIV.ui-dialog SELECT.filter_op_select {
     width: 40px;
@@ -398,4 +401,12 @@ TABLE.bp_filter TD {
 
 TABLE.bp_filter TD:first-child {
   text-align: left;
+}
+
+#bp_select_statusfilter div.filter_pane {
+  position: fixed;
+}
+
+.bp_statusfilter_radio LABEL {
+  width: 72px;
 }

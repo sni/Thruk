@@ -371,6 +371,130 @@ sub random {
 
 ##########################################################
 
+=head2 statusfilter
+
+    statusfilter($c, $bp, $n)
+
+returns state based on livestatus filter
+
+=cut
+sub statusfilter {
+    my($c, $bp, $n, $args) = @_;
+    my($aggregation, $type, $filter, $hostwarn, $hostcrit, $servicewarn, $servicecrit) = @{$args};
+
+    $c->stash->{'minimal'} = 1; # do not fill totals boxes
+    my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '');
+
+    my($worst_host, $total_hosts, $good_hosts, $down_hosts) = (0,0,0,0);
+    my $best_host = -1;
+    if($type eq 'hosts' || $type eq 'both') {
+        my $data = $c->{'db'}->get_host_totals_stats( filter => [ $hostfilter ]);
+        $total_hosts = $data->{'total'};
+        $good_hosts  = $data->{'up'} + $data->{'pending'};
+        $down_hosts  = $data->{'down'} + $data->{'unreachable'};
+        if(   $data->{'unreachable'}) { ($best_host, $worst_host) = _set_best_worst(2, $best_host, $worst_host); }
+        elsif($data->{'down'})        { ($best_host, $worst_host) = _set_best_worst(1, $best_host, $worst_host); }
+        elsif($data->{'up'})          { ($best_host, $worst_host) = _set_best_worst(0, $best_host, $worst_host); }
+    }
+
+    my $best_service = -1;
+    my($worst_service, $total_services, $good_services, $down_services) = (0,0,0,0);
+    if($type eq 'services' || $type eq 'both') {
+        my $data = $c->{'db'}->get_service_totals_stats( filter => [ $servicefilter ]);
+        $total_services = $data->{'total'};
+        $good_services  = $data->{'ok'}   + $data->{'pending'} + $data->{'warning'};
+        $down_services  = $data->{'critical'} + $data->{'unknown'};
+        if(   $data->{'unknown'})  { ($best_service, $worst_service) = _set_best_worst(3, $best_service, $worst_service); }
+        elsif($data->{'critical'}) { ($best_service, $worst_service) = _set_best_worst(2, $best_service, $worst_service); }
+        elsif($data->{'warning'})  { ($best_service, $worst_service) = _set_best_worst(1, $best_service, $worst_service); }
+        elsif($data->{'ok'})       { ($best_service, $worst_service) = _set_best_worst(0, $best_service, $worst_service); }
+    }
+
+    my $status         = 0;
+    my $output         = "";
+    if($type eq 'hosts' || $type eq 'both') {
+        if(defined $hostwarn and $hostwarn ne '') {
+            if($hostwarn =~ m/^(\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
+            if($hostwarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host warning threshold must be numeric"; }
+            if($down_hosts >= $hostwarn) {
+                $status = 1;
+            }
+        }
+        if(defined $hostcrit and $hostcrit ne '') {
+            if($hostcrit =~ m/^(\d+)%$/mx) { $hostcrit = $total_hosts / 100 * $1; }
+            if($hostcrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host critical threshold must be numeric"; }
+            if($down_hosts >= $hostcrit) {
+                $status = 2;
+            }
+        }
+    }
+    if($type eq 'services' || $type eq 'both') {
+        if(defined $servicewarn and $servicewarn ne '') {
+            if($servicewarn =~ m/^(\d+)%$/mx) { $servicewarn = $total_services / 100 * $1; }
+            if($servicewarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service warning threshold must be numeric"; }
+            if($down_services >= $servicewarn) {
+                $status = 1 unless $status > 1;
+            }
+        }
+        if(defined $servicecrit and $servicecrit ne '') {
+            if($servicecrit =~ m/^(\d+)%$/mx) { $servicecrit = $total_services / 100 * $1; }
+            if($servicecrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service critical threshold must be numeric"; }
+            if($down_services >= $servicecrit) {
+                $status = 2;
+            }
+        }
+    }
+    if($aggregation eq 'worst') {
+        $status = $worst_service;
+        # map host state to service state
+        if($worst_host) { $status = 2; }
+    }
+    elsif($aggregation eq 'best') {
+        $status = $best_host;
+        $status = $best_service if $best_service < $best_host;
+    }
+
+    my $perfdata   = '';
+    my $thresholdoutput = [];
+    if($type eq 'hosts' || $type eq 'both') {
+        push @{$thresholdoutput}, sprintf("%d/%d hosts up", $good_hosts, $total_hosts);
+        $perfdata .= 'hosts_up='.$good_hosts.' hosts_down='.$down_hosts;
+    }
+    if($type eq 'services' || $type eq 'both') {
+        push @{$thresholdoutput}, sprintf("%d/%d services up", $good_services, $total_services);
+        $perfdata .= 'services_up='.$good_services.' services_down='.$down_services;
+    }
+
+    $output = sprintf("%s - %s|%s",
+                            Thruk::BP::Utils::state2text($status),
+                            join(', ', @{$thresholdoutput}),
+                            $perfdata) unless $output;
+
+    my $shortname = "";
+    for my $search (@{$searches}) {
+        for my $f (@{$search->{'text_filter'}}) {
+            $shortname .= "\n" if $shortname;
+            $shortname .= $f->{'type'}.$f->{'op'}.$f->{'value'};
+        }
+    }
+    $shortname = "filer" unless $shortname;
+
+    return($status, $shortname, $output);
+}
+
+sub _set_best_worst {
+    my($state, $best, $worst) = @_;
+    if($best == -1 || $state < $best) {
+        $best = $state;
+    }
+    if($state > $worst) {
+        $worst = $state;
+    }
+    return($best, $worst);
+}
+
+##########################################################
+
 =head2 custom
 
     custom($c, $bp, $n, $args, \%livedata)

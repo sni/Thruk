@@ -331,6 +331,12 @@ function bp_fill_select_form(data, form) {
             jQuery('#'+form).find('SELECT[name='+key+'] option[value="'+d+'"]').prop("selected",true);
         }
     }
+    if(data.filter) {
+        for(var key in data.filter) {
+            var d = data.filter[key];
+            resetFilter('dfl_s0_', d[0]);
+        }
+    }
 }
 
 /* change graph options */
@@ -355,7 +361,7 @@ function bp_select_type(type, defaults) {
     bp_show_edit_node(undefined, false);
     jQuery('.bp_type_box').prop('checked', false).button("refresh");
     jQuery('#bp_check_'+type).prop('checked', true).button("refresh");
-    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst', 'custom'], function(nr, s) {
+    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst', 'custom', 'statusfilter'], function(nr, s) {
         hideElement('bp_select_'+s);
     });
     // change details tab
@@ -372,6 +378,7 @@ function bp_select_type(type, defaults) {
     }
     if     (type == 'status')      { bp_select_status(node)      }
     else if(type == 'groupstatus') { bp_select_groupstatus(node) }
+    else if(type == 'statusfilter'){ bp_select_statusfilter(node) }
     else if(type == 'fixed')       { bp_select_fixed(node)       }
     else if(type == 'at_least')    { bp_select_at_least(node)    }
     else if(type == 'not_more')    { bp_select_not_more(node)    }
@@ -385,7 +392,7 @@ function bp_select_type(type, defaults) {
             jQuery('#'+key).val(defaults[key]);
         }
     }
-    bp_update_status_function();
+    bp_update_status_function(type, node);
 }
 
 /* show node type select: status */
@@ -428,6 +435,34 @@ function bp_select_groupstatus(node) {
         });
     }
     bp_groupstatus_check_changed();
+}
+
+/* show node type select: statusfilter */
+function bp_select_statusfilter(node) {
+    if(node && node.func.toLowerCase() == 'statusfilter') {
+        bp_fill_select_form({
+            radio:  { 'bp_arg1_statusfilter': [ node.func_args[0].toLowerCase(), '.bp_statusfilter_radio'],
+                      'bp_arg2_statusfilter': [ node.func_args[1].toLowerCase(), '.bp_statusfilter_radio'] },
+            filter: { 'bp_arg3_statusfilter': node.func_args[2] },
+            text:   { 'bp_arg4_statusfilter': node.func_args[3],
+                      'bp_arg5_statusfilter': node.func_args[4],
+                      'bp_arg6_statusfilter': node.func_args[5],
+                      'bp_arg7_statusfilter': node.func_args[6]
+                    }
+        });
+    } else {
+        bp_fill_select_form({
+            radio:  { 'bp_arg1_statusfilter': [ 'worst', '.bp_statusfilter_radio'],
+                      'bp_arg2_statusfilter': [ 'both', '.bp_statusfilter_radio'] },
+            filter: { 'bp_arg3_statusfilter': [{hoststatustypes: 15, hostprops: 0, servicestatustypes: 31, serviceprops: 0, text_filter:[{type: 'host', value:'all', op:'='}]}] },
+            text:   { 'bp_arg4_statusfilter': '',
+                      'bp_arg5_statusfilter': '',
+                      'bp_arg6_statusfilter': '',
+                      'bp_arg7_statusfilter': ''
+                    }
+        });
+    }
+    bp_statusfilter_changed();
 }
 
 /* show node type select: fixed */
@@ -626,7 +661,7 @@ function bp_show_edit_node(id, refreshType) {
     // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
     jQuery("#edit_dialog_"+bp_id).tabs().dialog({
         autoOpen: false, modal: true,
-        width: 550, height: 370,
+        width: 570, height: 400,
         draggable: false, // disable the dialog's drag we're using the tabs titlebar instead
         modal: true,
         closeOnEscape: true,
@@ -675,40 +710,14 @@ function bp_show_edit_node(id, refreshType) {
         jQuery("INPUT[name=bp_notification_period]").val(node.notification_period);
         jQuery("INPUT[name=bp_event_handler]").val(node.event_handler);
         jQuery("INPUT[name=bp_max_check_attempts]").val(node.max_check_attempts);
-
-        if(node.contactgroups.length == 0) {
-            jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();
-        } else {
-            jQuery("INPUT[name=bp_contactgroups]").parents("TR").show();
-        }
-        if(node.contacts.length == 0) {
-            jQuery("INPUT[name=bp_contacts]").parents("TR").hide();
-        } else {
-            jQuery("INPUT[name=bp_contacts]").parents("TR").show();
-        }
-        if(!node.event_handler) {
-            jQuery("INPUT[name=bp_event_handler]").parents("TR").hide();
-        } else {
-            jQuery("INPUT[name=bp_event_handler]").parents("TR").show();
-        }
-        if(!node.notification_period) {
-            jQuery("INPUT[name=bp_notification_period]").parents("TR").hide();
-        } else {
-            jQuery("INPUT[name=bp_notification_period]").parents("TR").show();
-        }
-        if(!node.max_check_attempts) {
-            jQuery("INPUT[name=bp_max_check_attempts]").parents("TR").hide();
-        } else {
-            jQuery("INPUT[name=bp_max_check_attempts]").parents("TR").show();
-        }
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
         jQuery("INPUT[name=bp_template]").val('');
         bpRemoveAttribute('contactgroups');
         bpRemoveAttribute('contacts');
-        bpRemoveAttribute('notification_period');
         bpRemoveAttribute('event_handler');
+        bpRemoveAttribute('notification_period');
         bpRemoveAttribute('max_check_attempts');
     }
     var checkbox = document.getElementById('bp_create_link');
@@ -900,7 +909,10 @@ function bp_update_status(evt, node) {
     funct = funct.replace(/,\s*$/, ''); // remove last ,
     while(funct.match(/, ''$/)) { funct = funct.replace(/, ''$/, ''); } // remove trailing empty args
     funct += ')';
-    jQuery('#bp_status_function').html(funct);
+    if(n.func == "statusfilter") {
+        funct = n.short_desc;
+    }
+    jQuery('#bp_status_function').text(funct);
 
     if(n.scheduled_downtime_depth > 0) {
         jQuery('#bp_status_icon_downtime').css('display', '');
@@ -1009,7 +1021,6 @@ function bp_details_link_click(evt, el) {
     document.body.appendChild(link);
     bp_details_link_clicked(evt, link);
     link.click();
-    console.log(link);
 }
 
 // panorama dashboard registers callbacks to set loading mask
@@ -1071,7 +1082,7 @@ function bp_update_obj_create() {
 }
 
 /* toggle status function disabled fields */
-function bp_update_status_function() {
+function bp_update_status_function(type, node) {
     var type = jQuery('#bp_function').val();
     if(type == "status" || type == "groupstatus") {
         jQuery(".no_supports_link").show();
@@ -1080,6 +1091,20 @@ function bp_update_status_function() {
         jQuery(".no_supports_link").hide();
         jQuery(".supports_link").show();
     }
+
+    jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();
+    jQuery("INPUT[name=bp_contacts]").parents("TR").hide();
+    jQuery("INPUT[name=bp_event_handler]").parents("TR").hide();
+    jQuery("INPUT[name=bp_notification_period]").parents("TR").hide();
+    jQuery("INPUT[name=bp_max_check_attempts]").parents("TR").hide();
+    if(node) {
+        if(node.contactgroups.length > 0) { jQuery("INPUT[name=bp_contactgroups]").parents("TR").show();       }
+        if(node.contacts.length > 0)      { jQuery("INPUT[name=bp_contacts]").parents("TR").show();            }
+        if(node.event_handler)            { jQuery("INPUT[name=bp_event_handler]").parents("TR").show();       }
+        if(node.notification_period)      { jQuery("INPUT[name=bp_notification_period]").parents("TR").show(); }
+        if(node.max_check_attempts)       { jQuery("INPUT[name=bp_max_check_attempts]").parents("TR").show();  }
+    }
+
     bp_update_firstnode_css();
 }
 
@@ -1423,4 +1448,25 @@ function bp_on_save_click(btn) {
         btn.click();
     }, 100);
     return false;
+}
+
+function bp_statusfilter_changed() {
+    var type = jQuery("INPUT[name=bp_arg2_statusfilter]:checked").val();
+    var aggr = jQuery("INPUT[name=bp_arg1_statusfilter]:checked").val();
+
+    jQuery(".statusfilter_host_thresholds").hide();
+    jQuery(".statusfilter_service_thresholds").hide();
+    jQuery(".substyle_service").hide();
+
+    // show service specific filter
+    if(type == "services" || type == "both") {
+        jQuery(".substyle_service").show();
+    }
+
+    if(aggr == "threshold") {
+        jQuery(".statusfilter_host_thresholds").show();
+        if(type == "services" || type == "both") {
+            jQuery(".statusfilter_service_thresholds").show();
+        }
+    }
 }

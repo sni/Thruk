@@ -2390,6 +2390,7 @@ templates/_sounds.tt
 templates/_status_cmd_pane.tt
 templates/_status_detail_table.tt
 templates/_status_filter.tt
+templates/_status_filter_single.tt
 templates/_status_hostdetail_table.tt
 templates/_table_search_field.tt
 templates/_third_graph.tt

@@ -5229,7 +5229,7 @@ function accept_filter_types(search_prefix, checkbox_names, result_name, checkbo
     });
     inp[0].value = sum;
 
-    set_filter_name(search_prefix, checkbox_names, checkbox_prefix, parseInt(sum));
+    set_filter_name(search_prefix, checkbox_prefix, parseInt(sum));
 }
 
 /* set the initial state of filter checkboxes */
@@ -5259,7 +5259,7 @@ function set_filter_types(search_prefix, initial_id, checkbox_prefix) {
 }
 
 /* set the filtername */
-function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filtervalue) {
+function set_filter_name(search_prefix, checkbox_prefix, filtervalue) {
   var order;
   if(checkbox_prefix == 'ht') {
     order = hoststatustypes;
@@ -5868,6 +5868,39 @@ function selectByValue(select, val) {
       select.options[x].selected = false;
     }
   }
+}
+
+function resetFilter(prefix, d) {
+    var filterTable = document.getElementById(prefix+'filterTable');
+    // remove all existing text filter
+    jQuery(filterTable).find('TD.filterValueInput').parents().first().find(".newfilter").click();
+
+    // add our text filter
+    var tablePrefix = prefix.substring(0,4);
+    for(var x = 0; x< d.text_filter.length; x++) {
+        var f = d.text_filter[x];
+        add_new_filter(prefix+"add", tablePrefix+"filterTable");
+        selectByValue(document.getElementById(prefix+x+"_ts"), f.type);
+        selectByValue(document.getElementById(prefix+x+"_to"), f.op);
+        document.getElementById(prefix+x+"_val_pre").value = f.val_pre;
+        document.getElementById(prefix+x+"_value").value = f.value;
+    }
+
+    // set bit values
+    jQuery(filterTable).find("INPUT[name="+prefix+"hoststatustypes]").val(d.hoststatustypes);
+    jQuery(filterTable).find("INPUT[name="+prefix+"hostprops]").val(d.hostprops);
+    jQuery(filterTable).find("INPUT[name="+prefix+"servicestatustypes]").val(d.servicestatustypes);
+    jQuery(filterTable).find("INPUT[name="+prefix+"serviceprops]").val(d.serviceprops);
+    set_filter_types(prefix, "hoststatustypes", 'ht');
+    set_filter_types(prefix, "hostprops", 'hp');
+    set_filter_types(prefix, "servicestatustypes", 'st');
+    set_filter_types(prefix, "serviceprops", 'sp');
+    set_filter_name(prefix, 'ht', parseInt(d.hoststatustypes));
+    set_filter_name(prefix, 'hp', parseInt(d.hostprops));
+    set_filter_name(prefix, 'st', parseInt(d.servicestatustypes));
+    set_filter_name(prefix, 'sp', parseInt(d.serviceprops));
+
+    return;
 }
 
 /* toggle visibility of top status informations */

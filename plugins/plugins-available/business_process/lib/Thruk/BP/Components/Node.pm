@@ -168,13 +168,8 @@ sub get_save_obj {
     };
 
     # save this keys
-    for my $key (qw/template create_obj notification_period max_check_attempts event_handler contactgroups contacts filter depends/) {
+    for my $key (qw/template create_obj notification_period max_check_attempts event_handler contactgroups contacts filter depends function function_args/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
-    }
-
-    # function
-    if($self->{'function'}) {
-        $obj->{'function'} = sprintf("%s(%s)", $self->{'function'}, Thruk::BP::Utils::join_args($self->{'function_args'}));
     }
 
     return $obj;
@@ -317,6 +312,7 @@ sub update_status {
     };
     if($@) {
         $self->set_status(3, 'Internal Error: '.$@, $bp);
+        $bp->{'failed'} = $@;
     }
 
     $c->stats->profile(end => "update_status bp-".$bp->{id}."-".$self->{'id'});
@@ -403,18 +399,22 @@ sub set_status {
 sub _set_function {
     my($self, $data) = @_;
     if($data->{'function'}) {
-        my($fname, $fargs) = $data->{'function'} =~ m|^(\w+)\((.*)\)|mx;
-        $fname = lc $fname;
-        my $function = \&{'Thruk::BP::Functions::'.$fname};
-        if(!defined &{$function}) {
-            $self->set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
+        if(ref $data->{'function'} eq 'ARRAY') {
+            $self->{'function'}      = shift(@{$data->{'function'}});
+            $self->{'function_args'} = $data->{'function'};
         } else {
+            my($fname, $fargs) = $data->{'function'} =~ m|^(\w+)\((.*)\)|mx;
+            $self->{'function'}      = lc($fname || $data->{'function'} || '');
             $self->{'function_args'} = Thruk::BP::Utils::clean_function_args($fargs);
-            $self->{'function'}      = $fname;
         }
     }
-    $self->{'function_args'} = [] unless defined $self->{'function_args'};
-    if($self->{'function'} eq 'status') {
+    $self->{'function_args'} = $data->{'function_args'} || $self->{'function_args'} || [];
+    my $fname    = $self->{'function'} || 'none';
+    my $function = \&{'Thruk::BP::Functions::'.$fname};
+    if(!defined &{$function}) {
+        $self->set_status(3, 'Unknown function: '.$fname);
+    }
+    if($fname eq 'status') {
         $self->{'host'}                 = $self->{'function_args'}->[0] || '';
         $self->{'service'}              = $self->{'function_args'}->[1] || '';
         $self->{'template'}             = '';
@@ -440,7 +440,7 @@ sub _set_function {
             $self->{'function_args'}->[2] = $op;
         }
     }
-    if($self->{'function'} eq 'groupstatus') {
+    if($fname eq 'groupstatus') {
         if($self->{'function_args'}->[0] eq 'hostgroup') {
             $self->{'hostgroup'}    = $self->{'function_args'}->[1] || '';
         } else {

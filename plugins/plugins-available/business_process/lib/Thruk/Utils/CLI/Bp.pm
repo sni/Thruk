@@ -202,8 +202,9 @@ sub cmd {
                 eval {
                     $bp->update_status($c);
                 };
-                if($@) {
-                    _error("[$$] bp '".$bp->{'name'}."' failed: $@");
+                my $err = $@ || $bp->{'failed'};
+                if($err) {
+                    _error("[$$] bp '".$bp->{'name'}."' failed: ".$err);
                     $local_rc = 1;
                     $rc = 1;
                 }

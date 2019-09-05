@@ -28,6 +28,7 @@ next:
           - Business Process:
             - add node clone menu entry to node context menu
             - add navigation to link incoming/outgoing business processes
+            - add flexible filter aggregation function
           - internals:
             - update daterangepicker 3.0.5
 

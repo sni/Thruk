@@ -257,7 +257,11 @@ sub index {
             for my $x (1..10) {
                 $arg[$x-1] = $c->req->parameters->{'bp_arg'.$x.'_'.$type} if defined $c->req->parameters->{'bp_arg'.$x.'_'.$type};
             }
-            my $function = sprintf("%s(%s)", $type, Thruk::BP::Utils::join_args(\@arg));
+            my $function_args = \@arg;
+            if($type eq 'statusfilter') {
+                my $filter          = Thruk::Utils::Status::get_search_from_param($c, 'dfl_s0', 1);
+                $function_args->[2] = [$filter]; # make it a list, maybe we support multiple filter somewhere in the future
+            }
 
             # check create first
             my $new = 0;
@@ -266,7 +270,7 @@ sub index {
                 my $parent = $node;
                 $node = Thruk::BP::Components::Node->new({
                                     'label'    => Thruk::BP::Utils::clean_nasty($c->req->parameters->{'bp_label_'.$type}),
-                                    'function' => $function,
+                                    'function' => $type,
                                     'depends'  => [],
                 });
                 die('could not create node: '.Data::Dumper($c->req->parameters)) unless $node;
@@ -313,7 +317,7 @@ sub index {
             }
             $node->{'label'} = $label;
 
-            $node->_set_function({'function' => $function});
+            $node->_set_function({'function' => $type, 'function_args' => $function_args});
 
             # bp options
             for my $key (qw/rankDir state_type/) {
@@ -397,6 +401,13 @@ sub index {
             $c->stash->{'outgoing_refs'}  = $bp->get_outgoing_refs($c);
             my $bps = Thruk::BP::Utils::load_bp_data($c);
             $c->stash->{'incoming_refs'}  = $bp->get_incoming_refs($c, $bps);
+
+            my($search) = Thruk::Utils::Status::classic_filter($c, { 'host' => 'all' });
+            $c->stash->{'search'}         = $search;
+            $c->stash->{'substyle'}       = 'service';
+            $c->stash->{'paneprefix'}     = 'dfl_';
+            $c->stash->{'prefix'}         = 's0';
+
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
             return 1;
