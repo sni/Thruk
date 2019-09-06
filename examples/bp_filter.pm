@@ -146,6 +146,11 @@ sub _add_recursive_output_filter_recurse {
         @lines = split(/\n|\\+n/mx, '- ['.($node->{'label'} // '').'] '._add_recursive_output_filter_clean_status($node->{'status_text'} || $node->{'short_desc'}, 1));
         my $firstline = shift @lines;
         $text .= _add_recursive_output_filter_indent($indent, $firstline)."\n";
+        if($node->{'function'} eq 'statusfilter') {
+            for my $line (@lines) {
+                $text .= _add_recursive_output_filter_indent($indent+1, "- ".$line)."\n";
+            }
+        }
     }
 
     my $depends = $node->depends($bp);

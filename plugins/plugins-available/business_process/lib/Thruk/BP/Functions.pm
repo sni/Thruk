@@ -410,8 +410,8 @@ sub statusfilter {
         elsif($data->{'ok'})       { ($best_service, $worst_service) = _set_best_worst(0, $best_service, $worst_service); }
     }
 
-    my $status         = 0;
-    my $output         = "";
+    my $status = 0;
+    my $output = "";
     if($type eq 'hosts' || $type eq 'both') {
         if(defined $hostwarn and $hostwarn ne '') {
             if($hostwarn =~ m/^(\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
@@ -473,11 +473,34 @@ sub statusfilter {
     my $shortname = "";
     for my $search (@{$searches}) {
         for my $f (@{$search->{'text_filter'}}) {
-            $shortname .= "\n" if $shortname;
+            $shortname .= " & " if $shortname;
             $shortname .= $f->{'type'}.$f->{'op'}.$f->{'value'};
         }
     }
     $shortname = "filer" unless $shortname;
+
+    # append issues to output
+    if($status > 0) {
+        my $maximum_output = 10;
+        my $num = 0;
+        if($worst_host > 0) {
+            my $data = $c->{'db'}->get_hosts( filter => [ $hostfilter, { state => { '>' => 0 }} ], columns => [qw/name state plugin_output/]);
+            for my $h (@{$data}) {
+                $output .= sprintf("\n[%s] %s - %s", Thruk::BP::Utils::hoststate2text($h->{'state'}), $h->{'name'}, substr($h->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
+                $num++;
+            }
+        }
+        if($worst_service > 0) {
+            my $data = $c->{'db'}->get_services( filter => [ $servicefilter, { state => { '>' => 0 }} ], columns => [qw/host_name description state plugin_output/]);
+            for my $s (@{$data}) {
+                $output .= sprintf("\n[%s] %s - %s - %s", Thruk::BP::Utils::state2text($s->{'state'}), $s->{'host_name'}, $s->{'description'}, substr($s->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
+                $num++;
+            }
+        }
+        if($num > $maximum_output) {
+            $output .= sprintf("\nfound %d more issues...", $num - $maximum_output);
+        }
+    }
 
     return($status, $shortname, $output);
 }

@@ -553,6 +553,25 @@ sub state2text {
 
 ##########################################################
 
+=head2 hoststate2text
+
+    hoststatus2text($state)
+
+return string of given host state
+
+=cut
+sub hoststate2text {
+    my($nr) = @_;
+    if($nr == 0) { return 'UP'; }
+    if($nr == 1) { return 'DOWN'; }
+    if($nr == 2) { return 'UNREACHABLE'; }
+    if($nr == 3) { return 'UNKOWN'; }
+    if($nr == 4) { return 'PENDING'; }
+    return;
+}
+
+##########################################################
+
 =head2 merge_obj_hash
 
     merge_obj_hash($hash, $data)

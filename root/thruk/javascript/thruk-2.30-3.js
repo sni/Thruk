@@ -5873,17 +5873,23 @@ function selectByValue(select, val) {
 function resetFilter(prefix, d) {
     var filterTable = document.getElementById(prefix+'filterTable');
     // remove all existing text filter
-    jQuery(filterTable).find('TD.filterValueInput').parents().first().find(".newfilter").click();
+    jQuery(filterTable).find('TD.filterValueInput').each(function(i, el) {
+      jQuery(el).parents().first().find(".newfilter").click();
+    });
 
     // add our text filter
     var tablePrefix = prefix.substring(0,4);
-    for(var x = 0; x< d.text_filter.length; x++) {
-        var f = d.text_filter[x];
-        add_new_filter(prefix+"add", tablePrefix+"filterTable");
-        selectByValue(document.getElementById(prefix+x+"_ts"), f.type);
-        selectByValue(document.getElementById(prefix+x+"_to"), f.op);
-        document.getElementById(prefix+x+"_val_pre").value = f.val_pre;
-        document.getElementById(prefix+x+"_value").value = f.value;
+    if(d.text_filter ) {
+        for(var x = 0; x< d.text_filter.length; x++) {
+            var f = d.text_filter[x];
+            if(f.val_pre == undefined) { f.val_pre = ""; }
+            if(f.value   == undefined) { f.value = ""; }
+            add_new_filter(prefix+"add", tablePrefix+"filterTable");
+            selectByValue(document.getElementById(prefix+x+"_ts"), f.type);
+            selectByValue(document.getElementById(prefix+x+"_to"), f.op);
+            document.getElementById(prefix+x+"_val_pre").value = f.val_pre;
+            document.getElementById(prefix+x+"_value").value = f.value;
+        }
     }
 
     // set bit values
@@ -5901,6 +5907,30 @@ function resetFilter(prefix, d) {
     set_filter_name(prefix, 'sp', parseInt(d.serviceprops));
 
     return;
+}
+
+function filterToUrlParam(prefix, filter) {
+    var param = {}
+
+    param[prefix+'hoststatustypes']    = filter.hoststatustypes;
+    param[prefix+'hostprops']          = filter.hostprops;
+    param[prefix+'servicestatustypes'] = filter.servicestatustypes;
+    param[prefix+'serviceprops']       = filter.serviceprops;
+
+    param[prefix+'type']    = [];
+    param[prefix+'val_pre'] = [];
+    param[prefix+'op']      = [];
+    param[prefix+'value']   = [];
+    if(filter.text_filter) {
+        for(var x = 0; x< filter.text_filter.length; x++) {
+            var f = filter.text_filter[x];
+            param[prefix+'type'].push(f.type);
+            param[prefix+'val_pre'].push(f.val_pre);
+            param[prefix+'op'].push(f.op);
+            param[prefix+'value'].push(f.value);
+        }
+    }
+    return(param);
 }
 
 /* toggle visibility of top status informations */

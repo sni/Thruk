@@ -975,6 +975,10 @@ function bp_update_status(evt, node) {
         link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"&backend=ALL'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>";
     }
 
+    else if(n.func == "statusfilter") {
+        link = "<a href='"+bp_statusfilter_link(n)+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Details' width='16' height='16'><\/a>";
+    }
+
     jQuery('.bp_status_extinfo_link').css('display', 'none');
     if(link) {
         jQuery('.bp_status_extinfo_link').html(link);
@@ -1469,4 +1473,14 @@ function bp_statusfilter_changed() {
             jQuery(".statusfilter_service_thresholds").show();
         }
     }
+}
+
+function bp_statusfilter_link(node) {
+    var options = filterToUrlParam('dfl_s0_', node.func_args[2][0]);
+    if(node.func_args[1] == "hosts") {
+        options.style = 'hostdetail';
+    } else {
+        options.style = 'detail';
+    }
+    return('status.cgi?'+toQueryString(options));
 }
