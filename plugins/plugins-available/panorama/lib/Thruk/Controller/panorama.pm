@@ -938,8 +938,7 @@ sub _task_search {
             for my $type (sort keys %{$search}) {
                 if($icon->{'xdata'}->{'general'}->{$type}) {
                     for my $o (@{$search->{$type}}) {
-                        my $found = _search_match($data, $d, $icon->{'xdata'}->{'general'}->{$type}, $o->{'name'}, $type, 1)
-                                 || _search_match($data, $d, $icon->{'xdata'}->{'general'}->{$type}, $o->{'alias'}, $type, 1);
+                        my $found = _search_match($data, $d, $icon->{'xdata'}->{'general'}->{$type}, $query, $type, $o);
                         if($found) {
                             $found->{'highlight'} = $icon_id;
                             $found->{'object'}    = $o;
@@ -964,7 +963,7 @@ sub _task_search {
 
 ##########################################################
 sub _search_match {
-    my($result, $dashboard, $field, $query, $type, $exact) = @_;
+    my($result, $dashboard, $field, $query, $type, $names) = @_;
     return unless defined $field;
 
     # strip html and tags
@@ -972,37 +971,34 @@ sub _search_match {
     $field =~ s/<.*?>//gmx;
 
     my($matched, $pre,$match,$post) = (0, '', '', '');
-    if($exact) {
-        if($field eq $query) {
-            $match = $query;
-            $matched = 1;
-        }
-    } else {
-        ## no critic
-        if($field =~ m#(.*)($query)(.*)#si) {
-            ($pre,$match,$post) = ($1,$2,$3);
-            $matched = 1;
-        }
-        ## use critic
+    if($names) {
+        return if $names->{'name'} ne $field;
+        $field   = $names->{'name'} eq $names->{'alias'} ? $names->{'name'} : $names->{'name'}.' - '.$names->{'alias'};
+        $match   = $query;
+        $matched = 1;
     }
+    ## no critic
+    if($field =~ m#(.*)($query)(.*)#si) {
+        ($pre,$match,$post) = ($1,$2,$3);
+        $matched = 1;
+    }
+    ## use critic
 
-    if($matched) {
-        my $found = {
-            type  => $type,
-            match => $match,
-            pre   => $pre,
-            post  => $post,
-            value => $field,
-        };
-        $result->{$dashboard->{id}} = {
-            id      => $dashboard->{id},
-            name    => $dashboard->{'tab'}->{'xdata'}->{'title'},
-            matches => [],
-        } unless $result->{$dashboard->{id}};
-        push @{$result->{$dashboard->{id}}->{'matches'}}, $found;
-        return($found);
-    }
-    return;
+    return unless $matched;
+    my $found = {
+        type  => $type,
+        match => $match,
+        pre   => $pre,
+        post  => $post,
+        value => $field,
+    };
+    $result->{$dashboard->{id}} = {
+        id      => $dashboard->{id},
+        name    => $dashboard->{'tab'}->{'xdata'}->{'title'},
+        matches => [],
+    } unless $result->{$dashboard->{id}};
+    push @{$result->{$dashboard->{id}}->{'matches'}}, $found;
+    return($found);
 }
 
 ##########################################################
