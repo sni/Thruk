@@ -200,7 +200,7 @@ sub _process_raw_request {
         $alias = Thruk::Utils::array2hash($alias, "name");
         for my $group (@{$hostgroups}) {
             my $row = $alias->{$group};
-            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mx);
+            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
             push @{$data}, $row;
         }
         push @{$json}, { 'name' => "hostgroups", 'data' => $data };
@@ -213,7 +213,7 @@ sub _process_raw_request {
         $alias = Thruk::Utils::array2hash($alias, "name");
         for my $group (@{$servicegroups}) {
             my $row = $alias->{$group};
-            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mx);
+            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
             push @{$data}, $row;
         }
         push @{$json}, { 'name' => "servicegroups", 'data' => $data };

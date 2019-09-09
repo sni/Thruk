@@ -2715,42 +2715,58 @@ sub _get_dashboard_by_name {
 sub _task_dashboard_list {
     my($c) = @_;
 
-    my $type = $c->req->parameters->{'list'} || 'my';
-
+    my $type       = $c->req->parameters->{'list'} || 'my';
     my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, $type);
 
+    my $columns = [
+        { 'header' => 'Id',                        dataIndex => 'id',                              hidden => Cpanel::JSON::XS::true },
+        { 'header' => 'Nr',                        dataIndex => 'nr',                              hidden => Cpanel::JSON::XS::true },
+        { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
+        { 'header' => 'Name',        width => 120, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
+        { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
+        { 'header' => 'Owner',        width => 120, dataIndex => 'user',        align => 'center',
+                                        editor => $c->stash->{'is_admin'} ? {} : undef,
+                                        hidden => $type eq 'my' ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
+                                        tdCls => $c->stash->{'is_admin'} ? 'editable' : '',
+        },
+        { 'header' => 'Read-Write Groups',  width => 120, dataIndex => 'groups_rw',    align => 'left' },
+        { 'header' => 'Read-Only Groups',   width => 120, dataIndex => 'groups_ro',    align => 'left' },
+        { 'header' => 'Direct Link',        width =>  65, dataIndex => 'link',         align => 'center', renderer => 'TP.render_directlink' },
+        { 'header' => 'Objects',     width => 50,  dataIndex => 'objects',      align => 'center' },
+        { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
+        { 'header' => 'Actions',     width => 60,
+                    xtype => 'actioncolumn',
+                    items => [{
+                        icon => '../plugins/panorama/images/edit.png',
+                        handler => 'TP.dashboardActionHandler',
+                        action  => 'edit',
+                    }, {
+                        icon => '../plugins/panorama/images/delete.png',
+                        handler => 'TP.dashboardActionHandler',
+                        action  => 'remove',
+                    }],
+                    tdCls => 'clickable icon_column',
+        },
+    ];
+
+    my $search = $c->req->parameters->{'query'};
+    if($search) {
+        my $filtered = [];
+        for my $d (@{$dashboards}) {
+            next unless $d->{'name'} =~ m/$search/mxi;
+            push @{$filtered}, $d;
+        }
+        $dashboards = $filtered;
+    }
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 12;
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
+    Thruk::Backend::Manager::page_data($c, $dashboards);
     my $json = {
-        columns => [
-            { 'header' => 'Id',                        dataIndex => 'id',                              hidden => Cpanel::JSON::XS::true },
-            { 'header' => 'Nr',                        dataIndex => 'nr',                              hidden => Cpanel::JSON::XS::true },
-            { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
-            { 'header' => 'Name',        width => 120, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
-            { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
-            { 'header' => 'Owner',        width => 120, dataIndex => 'user',        align => 'center',
-                                         editor => $c->stash->{'is_admin'} ? {} : undef,
-                                         hidden => $type eq 'my' ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
-                                         tdCls => $c->stash->{'is_admin'} ? 'editable' : '',
-            },
-            { 'header' => 'Read-Write Groups',  width => 120, dataIndex => 'groups_rw',    align => 'left' },
-            { 'header' => 'Read-Only Groups',   width => 120, dataIndex => 'groups_ro',    align => 'left' },
-            { 'header' => 'Direct Link',        width =>  65, dataIndex => 'link',         align => 'center', renderer => 'TP.render_directlink' },
-            { 'header' => 'Objects',     width => 50,  dataIndex => 'objects',      align => 'center' },
-            { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
-            { 'header' => 'Actions',     width => 60,
-                      xtype => 'actioncolumn',
-                      items => [{
-                            icon => '../plugins/panorama/images/edit.png',
-                            handler => 'TP.dashboardActionHandler',
-                            action  => 'edit',
-                      }, {
-                            icon => '../plugins/panorama/images/delete.png',
-                            handler => 'TP.dashboardActionHandler',
-                            action  => 'remove',
-                      }],
-                      tdCls => 'clickable icon_column',
-            },
-        ],
-        data        => $dashboards,
+        columns     => $columns,
+        data        => $c->stash->{'data'},
+        total       => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => Cpanel::JSON::XS::true,
     };
 
     _add_misc_details($c, 1, $json);

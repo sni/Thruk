@@ -507,7 +507,7 @@ Ext.define('TP.StaticIcon', {
             store:       imagesStore,
             queryMode:      'remote',
             triggerAction:  'all',
-            pageSize:       true,
+            pageSize:       12,
             selectOnFocus:  true,
             typeAhead:      true,
             displayField: 'image',
@@ -566,8 +566,10 @@ var dashboardStore = Ext.create('Ext.data.Store', {
             root: 'data'
         }
     },
-    autoLoad: false,
-    data : []
+    pageSize:   12,
+    remoteSort: true,
+    autoLoad:   false,
+    data :      []
 });
 Ext.define('TP.DashboardStatusIcon', {
     extend: 'TP.IconWidget',
@@ -590,9 +592,11 @@ Ext.define('TP.DashboardStatusIcon', {
                 store:           dashboardStore,
                 queryMode:      'remote',
                 triggerAction:  'all',
-                pageSize:        true,
                 selectOnFocus:   true,
+                selectOnTab:    true,
                 typeAhead:       true,
+                minChars:       0,
+                pageSize:       12,
                 displayField:   'name',
                 valueField:     'nr',
                 listConfig : {
