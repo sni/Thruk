@@ -12,7 +12,7 @@ Ext.define('TP.GridLoader', {
             if(panel.loading) {
                 return false;
             }
-            panel.adjustBodyStyle();
+            if(panel.adjustBodyStyle) { panel.adjustBodyStyle(); }
             panel.loading = true;
             return true;
         },
@@ -34,7 +34,7 @@ Ext.define('TP.GridLoader', {
 
         // return early if dashboard is not visible (breaks column layout otherwise)
         var tab = Ext.getCmp(panel.panel_id);
-        if(!tab.isActiveTab()) {
+        if(tab && !tab.isActiveTab()) {
             This.updateData(panel, data.data);
             return;
         }
