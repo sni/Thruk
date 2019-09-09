@@ -2179,6 +2179,15 @@ sub _object_new {
 
     $obj->{'conf'} = { %{$obj->{'conf'}}, %{$obj->sanitize_values($default_values)} };
 
+    if($c->req->parameters->{'template'}) {
+        $obj->{'conf'}->{'name'}     = '';
+        $obj->{'conf'}->{'register'} = 0;
+        delete $obj->{'conf'}->{'host_name'};
+        delete $obj->{'conf'}->{'service_description'};
+        delete $obj->{'conf'}->{'contact_name'};
+        delete $obj->{'conf'}->{'alias'};
+    }
+
     # set initial config from cgi parameters
     my $initial_conf = $obj->get_data_from_param($c->req->parameters, $obj->{'conf'});
     if(scalar keys %{$initial_conf} > 0 && $obj->has_object_changed($initial_conf)) {

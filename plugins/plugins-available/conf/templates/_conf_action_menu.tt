@@ -10,7 +10,12 @@
               [% IF type != "apply" %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/page_add.png' border="0" alt="Create a new [% type | html %]" title="Create a new [% type | html %]" width="16" height="16"></td>
-                <td class='command'><a href="conf.cgi?sub=objects&amp;action=new&amp;type=[% type | uri %]">Create a new [% type | html %]</a></td>
+                <td class='command'>
+                  <a href="conf.cgi?sub=objects&amp;action=new&amp;type=[% type | uri %]">Create a new [% type | html %]</a>
+                  [% IF type == "host" || type == "service" || type == "contact" %]
+                    <a href="conf.cgi?sub=objects&amp;action=new&amp;type=[% type | uri %]&amp;template=1" style="margin-left: 6px;">(new template)</a>
+                  [% END %]
+                </td>
               </tr>
               [% END %]
               [% IF show_object && object.get_id() != "new" %]
