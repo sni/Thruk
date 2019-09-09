@@ -2031,7 +2031,7 @@ sub _object_save {
                                 $c->stash->{'remote_user'},
                                 $new ? 'created' : 'changed',
                                 $obj->get_type(),
-                                $c->stash->{'data_name'},
+                                ($c->stash->{'data_name'} || 'undefined'),
     );
     $c->stash->{'obj_model_changed'} = 1;
 
@@ -2049,10 +2049,9 @@ sub _object_save {
     if(!defined $c->stash->{'data_name'} || $c->stash->{'data_name'} eq '') {
         $obj->set_name('undefined');
         $c->{'obj_db'}->_rebuild_index();
-        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
+        Thruk::Utils::set_message( $c, 'fail_message', sprintf('%s %s without a name', ucfirst($c->stash->{'type'}), $new ? 'created' : 'changed'));
     } else {
-        Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' ) if !$new;
-        Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' created successfully' ) if  $new;
+        Thruk::Utils::set_message( $c, 'success_message', sprintf('%s %s successfully', ucfirst($c->stash->{'type'}), $new ? 'created' : 'changed'));
     }
 
     if($c->req->parameters->{'referer'}) {
