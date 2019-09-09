@@ -46,6 +46,8 @@ sub new {
         'parsed'       => 0,
         'changed'      => 0,
         'readonly'     => 0,
+        'readonly_from_pattern' => 0,
+        'readonly_from_file'    => 0,
         'lines'        => 0,
         'is_new_file'  => 0,
         'deleted'      => 0,
@@ -134,6 +136,7 @@ sub update_objects_from_text {
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
     $self->{'comments'}     = [];
+    $self->{'readonly_from_file'} = 0;
 
     my $linenr = 0;
     my $buffer = '';
@@ -163,7 +166,7 @@ sub update_objects_from_text {
 
         if($linenr < 10) {
             if($line =~ m/^\#\s*thruk:\s*readonly/mxo) {
-                $self->{'readonly'} = 1;
+                $self->{'readonly_from_file'} = 1;
             }
         }
 
@@ -311,6 +314,7 @@ sub update_objects_from_text {
 
     $self->{'parsed'}  = 1;
     $self->{'changed'} = 1;
+    $self->{'readonly'} = $self->{'readonly_from_pattern'} || $self->{'readonly_from_file'} || 0;
 
     # return object for given line
     if(defined $lastline) {
@@ -365,14 +369,16 @@ updates the readonly status for this file
 =cut
 sub update_readonly_status {
     my($self, $readonlypattern) = @_;
+    $self->{'readonly_from_pattern'} = 0;
     if(defined $readonlypattern) {
         for my $p ( ref $readonlypattern eq 'ARRAY' ? @{$readonlypattern} : ($readonlypattern) ) {
             if($self->{'path'} =~ m|$p|mx) {
-                $self->{'readonly'} = 1;
+                $self->{'readonly_from_pattern'} = 1;
                 last;
             }
         }
     }
+    $self->{'readonly'} = $self->{'readonly_from_pattern'} || $self->{'readonly_from_file'} || 0;
     return $self->{'readonly'};
 }
 
