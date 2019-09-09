@@ -67,6 +67,8 @@ body.config TD.conf_row {
   border-bottom: 3px solid white;
   margin: 0px;
   vertical-align: middle;
+  white-space: normal;
+  vertical-align: top;
 }
 
 TD#filesystem {
