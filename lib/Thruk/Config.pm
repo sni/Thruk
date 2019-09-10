@@ -427,6 +427,7 @@ sub set_default_config {
         cluster_node_stale_timeout      => 120,
         rest_api_enabled                => 1,
         api_keys_enabled                => 1,
+        max_api_keys_per_user           => 10,
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,

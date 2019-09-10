@@ -16,6 +16,7 @@ next:
             - support limited regex matching
             - add button to create new templates
           - REST:
+            - add max_api_keys_per_user option to limit api keys per user
             - fix fetching roles when contact has groups
           - Panorama:
             - add search bar

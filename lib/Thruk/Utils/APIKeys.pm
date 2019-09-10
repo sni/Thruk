@@ -24,25 +24,33 @@ my $private_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
 
 =head2 get_keys
 
-    get_keys($c, $username, [$filepattern])
+    get_keys($c, { [hashed_key => $hashed_key], [user => $username], [file => $filename], [system => 0/1])
 
-returns list of api keys
+returns list of api keys, filtered by user, file or system
 
 =cut
 sub get_keys {
-    my($c, $user, $filepattern) = @_;
-    my $keys = [];
+    my($c, $filter) = @_;
+    my $filename   = $filter->{'file'};
+    my $system     = $filter->{'system'};
+    my $user       = $filter->{'user'};
+    my $hashed_key = $filter->{'user'};
+    my $all        = (defined $user || defined $system) ? 0 : 1;
+
+    my $keys   = [];
     my $folder = $c->config->{'var_path'}.'/api_keys';
     for my $file (glob($folder.'/*')) {
         my $basename = Thruk::Utils::basename($file);
-        if($basename !~ $hashed_key_file_regex) {
+        next unless $basename =~ $hashed_key_file_regex;
+        if($filename && $basename ne $filename) {
             next;
         }
-        if($filepattern && $basename ne $filepattern) {
-            next;
-        }
+        next if($hashed_key && $basename !~ m/^$hashed_key\..*$/mx);
         my $data = read_key($c->config, $file);
-        if($data && $data->{'user'} && $data->{'user'} eq $user) {
+        next unless $data;
+        if(  $all
+          || ($system && $data->{'system'})
+          || ($user && $data->{'user'} && $user eq $data->{'user'})) {
             push @{$keys}, $data;
         }
     }
@@ -53,29 +61,14 @@ sub get_keys {
 
 =head2 get_system_keys
 
-    get_system_keys($c, [$filepattern])
+    get_system_keys($c, [$filename])
 
 returns list of system api keys
 
 =cut
 sub get_system_keys {
-    my($c, $filepattern) = @_;
-    my $keys = [];
-    my $folder = $c->config->{'var_path'}.'/api_keys';
-    for my $file (glob($folder.'/*')) {
-        my $basename = Thruk::Utils::basename($file);
-        if($basename !~ $hashed_key_file_regex) {
-            next;
-        }
-        if($filepattern && $basename ne $filepattern) {
-            next;
-        }
-        my $data = read_key($c->config, $file);
-        if($data && $data->{'system'}) {
-            push @{$keys}, $data;
-        }
-    }
-    return($keys);
+    my($c, $filename) = @_;
+    return(get_keys($c, {file => $filename, system => 1}));
 }
 
 ##############################################
@@ -205,7 +198,7 @@ removes given key
 sub remove_key {
     my($c, $username, $file) = @_;
 
-    my $keys = get_keys($c, $username, $file);
+    my $keys = get_keys($c, { user => $username, file => $file});
     for my $k (@{$keys}) {
         if(Thruk::Utils::basename($k->{'file'}) eq $file) {
             unlink($k->{'file'});

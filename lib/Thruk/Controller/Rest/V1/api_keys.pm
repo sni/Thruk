@@ -22,26 +22,15 @@ Thruk Controller
 # lists api keys
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/api_keys?$%mx, \&_rest_get_thruk_api_keys);
 sub _rest_get_thruk_api_keys {
-    my($c, undef, $key) = @_;
+    my($c, undef, $hashed_key) = @_;
     require Thruk::Utils::APIKeys;
 
-    my $is_admin = 0;
-    if($c->check_user_roles('admin')) {
-        $is_admin = 1;
-    }
-    my $user = $c->stash->{'remote_user'};
-    my $keys = [];
-    my $folder = $c->config->{'var_path'}.'/api_keys';
-    for my $file (glob($folder.'/*')) {
-        my $hashed_key = Thruk::Utils::basename($file);
-        next if($key && $hashed_key !~ m/^$key\..*$/mx);
-        my $data = Thruk::Utils::APIKeys::read_key($c->config, $file);
-        if($data && ($is_admin || ($data->{'user'} && $data->{'user'} eq $user))) {
-            push @{$keys}, $data;
-        }
-    }
+    my $keys = Thruk::Utils::APIKeys::get_keys($c, {
+            hashed_key => $hashed_key,
+            user       => $c->check_user_roles('admin') ? undef : $c->stash->{'remote_user'},
+    });
 
-    if(!$key) {
+    if(!defined $hashed_key) {
         return($keys);
     }
 
@@ -62,9 +51,7 @@ sub _rest_get_thruk_api_keys {
         });
     }
 
-    if($key) {
-        return($keys->[0]);
-    }
+    return($keys->[0]);
 }
 
 ##########################################################
@@ -95,7 +82,20 @@ sub _rest_get_thruk_api_key_new {
             'code'    => 400,
         });
     }
+    if($c->config->{'max_api_keys_per_user'} <= 0) {
+        return({
+            'message' => 'no permission to create api keys',
+            'code'    => 403,
+        });
+    }
     require Thruk::Utils::APIKeys;
+    my $keys = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
+    if(scalar @{$keys} >= $c->config->{'max_api_keys_per_user'}) {
+        return({
+            'message' => 'maximum number of api keys ('.$c->config->{'max_api_keys_per_user'}.') reached, cannot create more.',
+            'code'    => 403,
+        });
+    }
     my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key_from_req_params($c);
     if($private_key) {
         return({
