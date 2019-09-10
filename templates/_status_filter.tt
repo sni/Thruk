@@ -74,7 +74,7 @@
             or
           </td>
         </tr>
-        [% PROCESS _status_filter_single.tt loop_index = loop.index %]
+        [% PROCESS _status_filter_single.tt %]
       </table>
     </td>
   </tr>
