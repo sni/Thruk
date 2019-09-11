@@ -618,7 +618,7 @@ sub _remove_item_from_links {
     my($links, $name) = @_;
     my $new_links = [];
     for my $link (@{$links}) {
-        push @{$new_links}, $link unless $link->{'name'} eq $name;
+        push @{$new_links}, $link if(!defined $link->{'name'} || $link->{'name'} ne $name);
     }
     return($new_links);
 }
