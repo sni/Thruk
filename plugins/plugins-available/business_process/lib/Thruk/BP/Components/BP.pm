@@ -43,6 +43,7 @@ sub new {
         'id'                => undef,
         'editmode'          => $editmode,
         'name'              => undef,
+        'site'              => '',
         'template'          => $bpdata->{'template'} || '',
         'filter'            => [],
         'nodes'             => [],
