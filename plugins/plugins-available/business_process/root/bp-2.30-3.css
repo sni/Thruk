@@ -82,6 +82,9 @@ DIV.ui-dialog INPUT[type=text] {
 DIV.ui-dialog TD.filterValueInput INPUT[type=text] {
     width: 135px;
 }
+DIV.ui-dialog TD.filterValueInput INPUT.filter_pre_value[type=text] {
+    width: 80px;
+}
 
 DIV.ui-dialog SELECT.filter_op_select {
     width: 40px;
