@@ -5889,6 +5889,8 @@ function resetFilter(prefix, d) {
             selectByValue(document.getElementById(prefix+x+"_to"), f.op);
             document.getElementById(prefix+x+"_val_pre").value = f.val_pre;
             document.getElementById(prefix+x+"_value").value = f.value;
+
+            verify_op(prefix+x+"_ts");
         }
     }
 
