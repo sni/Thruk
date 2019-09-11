@@ -45,26 +45,25 @@
     </td>
   </tr>
 </table>
-<div id="reports_table">
-<table border="1" class='status hoverable' id="statusTable" style="min-width: 1000px; max-width: 100%;">
+<table border="1" class='status hoverable' id="statusTable" style="min-width: 1000px;">
   <tr>
-    <th class="status" nowrap width="200">Name</th>
-    <th class="status" nowrap width="200">Description</th>
-    <th class="status" nowrap width="40">Public</th>
-    <th class="status usercol" nowrap width="60">Owner</th>
-    <th class="status" nowrap width="40">Mail</th>
-    <th class="status" nowrap width="100">Schedule</th>
-    <th class="status" nowrap width="150">Last Time Run</th>
-    <th class="status" nowrap width="163">Duration</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
+    <th class="status" nowrap>Name</th>
+    <th class="status" nowrap>Description</th>
+    <th class="status" nowrap>Public</th>
+    <th class="status usercol" nowrap>Owner</th>
+    <th class="status" nowrap>Mail</th>
+    <th class="status" nowrap>Schedule</th>
+    <th class="status" nowrap>Last Time Run</th>
+    <th class="status" nowrap>Duration</th>
+    <th class="status" nowrap>&nbsp;</th>
+    <th class="status" nowrap>&nbsp;</th>
+    <th class="status" nowrap>&nbsp;</th>
   </tr>
   [% FOREACH r = reports %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
-    <td class="status [% rowclass %]" align="left" style="overflow: hidden; white-space: nowrap;" nowrap>[% IF r.name.length > 50 %]<span title="[% r.name | html %]">[% r.name.substr(0,50) | html %]...</span>[% ELSE %][% r.name | html %][% END %]</td>
+    <td class="status [% rowclass %] mightOverflow50" align="left" nowrap title="[% r.name | html %]">[% r.name | html %]</td>
     <td class="status [% rowclass %]" align="left" style="overflow: hidden; white-space: nowrap;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %] usercol" style="white-space: nowrap;">[% r.user | html %]</td>
@@ -181,7 +180,6 @@
   </tr>
   [% END %]
 </table>
-</div>
 
 <script type="text/javascript">
 <!--

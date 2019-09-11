@@ -1485,6 +1485,13 @@ TD.contacts {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.mightOverflow50 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 50%;
+  max-width: 0;
+  white-space: nowrap;
+}
 
 TD.host_name > TABLE TD {
   padding: 0;
