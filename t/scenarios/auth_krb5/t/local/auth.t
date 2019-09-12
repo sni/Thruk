@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 60;
+plan tests => 76;
 
 ###########################################################
 # test thruks script path
@@ -49,6 +49,14 @@ for my $site (qw/local/) {
         cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: wrong" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/wrong authentication key/'],
     });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env curl -s -b "thruk_auth=test" "http://omd.test.local/demo/thruk/r/thruk/whoami"',
+        like => ['/login.cgi\?expired/'],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: wrong" "http://omd.test.local/demo/thruk/r/thruk/whoami"',
+        like => ['/wrong authentication key/'],
+    });
 };
 
 {
@@ -60,6 +68,10 @@ for my $site (qw/local/) {
     TestUtils::test_command({
         cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/Logged in as <i>omdadmin<\/i>/', '/Tactical Monitoring Overview/'],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "http://omd.test.local/demo/thruk/r/thruk/whoami"',
+        like => ['/has_thruk_profile/'],
     });
     TestUtils::test_command({
         cmd   => '/bin/bash -c "kinit -f omdadmin"',
@@ -82,5 +94,9 @@ for my $site (qw/local/) {
     TestUtils::test_command({
         cmd  => '/usr/bin/env curl -s --negotiate -u : "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/Logged in as <i>omdadmin<\/i>/', '/Tactical Monitoring Overview/'],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env curl -s --negotiate -u : "http://omd.test.local/demo/thruk/r/thruk/whoami"',
+        like => ['/You are not authorized/'], # rest api is api key or session only when using krb
     });
 };
