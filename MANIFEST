@@ -1891,6 +1891,7 @@ t/scenarios/auth/t/100-auth.t
 t/scenarios/auth/t/local/010-auth_groups.t
 t/scenarios/auth/t/local/011-api_keys.t
 t/scenarios/auth/t/local/012-grafana-export.t
+t/scenarios/auth/t/local/013-basic-auth.t
 t/scenarios/auth/t/local_test.sh
 t/scenarios/auth_krb5/docker-compose.yml
 t/scenarios/auth_krb5/krb5/Dockerfile
