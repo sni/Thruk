@@ -571,7 +571,7 @@ sub _add_remote_bps {
         $uniq->{$bp->{'id'}.':'.$bp->{'name'}} = 1;
         $bp->{'site'} = '';
         next unless $bp->{'bp_backend'};
-        $bp->{'site'} = $site_names->{$bp->{'bp_backend'}};
+        $bp->{'site'} = $site_names->{$bp->{'bp_backend'}} // '';
     }
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ] );
     for my $svc (@{$services}) {
