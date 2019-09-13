@@ -73,7 +73,7 @@
     <tr>
       <td class='dataVar'>Change Password</td>
       <td class='dataVal'>
-        <input type="button" name="submit" value="Change User Password" onClick="window.location='[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer='+full_uri; return false;">
+        <input type="button" name="submit" value="Change User Password" onClick="window.location='[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'; return false;">
       </td>
     </tr>
     [% END %]
