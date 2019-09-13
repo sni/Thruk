@@ -217,6 +217,11 @@ sub index {
             'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
             'code' => 403, # forbidden
         },
+        '27'  => {
+            'mess'    => 'Wrong Authentication Key',
+            'dscr'    => 'It seems like you are using an non-existing or invalid API key.',
+            'code'    => 403, # forbidden
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

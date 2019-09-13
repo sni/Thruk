@@ -118,7 +118,7 @@ sub process {
                 return "/loginok/".$data->{'user'}."/".$path."\n";
             }
         }
-        return $loginurl."?invalid&".$path."\n";
+        return "/pass/".$prefix."cgi-bin/error.cgi?error=27\n";
     }
 
     # direct access with basic auth
