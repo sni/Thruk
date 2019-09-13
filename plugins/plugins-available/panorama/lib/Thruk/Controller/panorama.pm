@@ -2758,7 +2758,7 @@ sub _task_dashboard_list {
         }
         $dashboards = $filtered;
     }
-    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 12;
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} // 'all';
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     Thruk::Backend::Manager::page_data($c, $dashboards);
     my $json = {

@@ -56,8 +56,10 @@ var TP = {
             if(!tab.rendered) {
                 tab.destroy();
             } else {
-                // dont add same dashboard twice
-                debug("attemted to add dashboard twice");
+                // simply activate tab
+                if(!hidden) {
+                    tabpan.setActiveTab(tab);
+                }
                 return;
             }
         }

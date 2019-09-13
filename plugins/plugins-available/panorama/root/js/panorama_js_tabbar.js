@@ -249,8 +249,8 @@ Ext.define('TP.TabBar', {
                     }
                 }
             }).showBy(This);
-            TP.load_dashboard_menu_items(menu.items.get(6).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
-            TP.load_dashboard_menu_items(menu.items.get(7).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(6).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab);
+            TP.load_dashboard_menu_items(menu.items.get(7).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab);
         });
 
         this.addListener('afterrender', function(This, eOpts) {
@@ -421,7 +421,7 @@ Ext.define('TP.TabBar', {
 });
 
 
-TP.load_dashboard_menu_items = function(menu, url, handler, all) {
+TP.load_dashboard_menu_items = function(menu, url, handler) {
     Ext.Ajax.request({
         url:      url,
         method:  'POST',
@@ -444,15 +444,13 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                     TP.addMenuSearchField(menu);
                 }
                 for(var x=0; x<data.length; x++) {
-                    if(all || (!Ext.getCmp(data[x].id)) || !Ext.getCmp(data[x].id).rendered) {
-                        found++;
-                        menu.add({text:    data[x].name,
-                                  val:     data[x].id,
-                                  icon:   url_prefix+'plugins/panorama/images/table_go.png',
-                                  handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
-                                }
-                        );
-                    }
+                    found++;
+                    menu.add({text:    data[x].name,
+                                val:     data[x].id,
+                                icon:   url_prefix+'plugins/panorama/images/table_go.png',
+                                handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
+                            }
+                    );
                 }
             }
             if(found == 0) {
