@@ -34,6 +34,7 @@ sub index {
         load Carp, qw/confess carp/;
         load Thruk::Utils::Reports;
         load Thruk::Utils::Avail;
+        load URI::Escape;
         $c->config->{'reports2_modules_loaded'} = 1;
     }
 
@@ -84,7 +85,10 @@ sub index {
             for my $str (split/&/mx, $c->req->parameters->{'param'}) {
                 my($key,$val) = split(/=/mx, $str, 2);
                 if($key =~ s/^params\.//mx) {
-                    $c->req->parameters->{$key} = $val unless exists $c->req->parameters->{$key};
+                    $c->req->parameters->{$key} = URI::Escape::uri_unescape($val) unless exists $c->req->parameters->{$key};
+                }
+                elsif($key =~ m/^t\d+/mx) {
+                    $c->req->parameters->{$key} = URI::Escape::uri_unescape($val) unless exists $c->req->parameters->{$key};
                 }
             }
         }
@@ -492,8 +496,10 @@ sub report_email {
 sub _set_report_data {
     my($c, $r) = @_;
 
-    $c->stash->{'t1'} = $r->{'params'}->{'t1'} || time() - 86400;
-    $c->stash->{'t2'} = $r->{'params'}->{'t2'} || time();
+    $c->stash->{'t1'} = Thruk::Utils::_parse_date($c, ($r->{'params'}->{'t1'} || time() - 86400));
+    $c->stash->{'t2'} = Thruk::Utils::_parse_date($c, ($r->{'params'}->{'t2'} || time()));
+
+    # round to full minute
     $c->stash->{'t1'} = $c->stash->{'t1'} - $c->stash->{'t1'}%60;
     $c->stash->{'t2'} = $c->stash->{'t2'} - $c->stash->{'t2'}%60;
 

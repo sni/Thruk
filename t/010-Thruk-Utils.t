@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 90;
+    plan tests => 86;
 
     use lib('t');
     require TestUtils;
@@ -309,23 +309,6 @@ is('.*',        Thruk::Utils::convert_wildcards_to_regex('.*'), 'regex wildcard'
 is('a*',        Thruk::Utils::convert_wildcards_to_regex('a*'), 'letter wildcard');
 is('a+',        Thruk::Utils::convert_wildcards_to_regex('a+'), 'normal regex 1');
 is('^a(b|c)d*', Thruk::Utils::convert_wildcards_to_regex('^a(b|c)d*'), 'normal regex 2');
-
-#########################
-# test timezone detection
-my $tz = $c->app->_detect_timezone();
-ok($tz, "got a timezone: ".($tz || '<none>'));
-my $ts     = time();
-my $parsed = Thruk::Utils::_parse_date($c, "now");
-ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for 'now'");
-
-#########################
-$ts     = time() + 3600;
-$parsed = Thruk::Utils::_parse_date($c, "+60m");
-ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '+60m'");
-#########################
-$ts     = time() - 3600;
-$parsed = Thruk::Utils::_parse_date($c, "-60m");
-ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '-60m'");
 
 #########################
 my $absolute_urls = [

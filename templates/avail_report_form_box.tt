@@ -48,10 +48,7 @@
   </tr>
   <tr>
     <td valign="top" align="left" class='optBoxItem'>
-      <select name='timeperiod'>
-        <option value="current"[% IF timeperiod == 'current' %] selected[% END %]>[ Current time range ]</option>
-        [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod %]
-      </select>
+      [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=1 name="timeperiod" t1=start t2=end current=1 %]
     </td>
     <td valign="top" align="left" class='optBoxItem'>
       <input type='text' size='2' maxlength='2' name='backtrack' value="[% backtrack | html %]">

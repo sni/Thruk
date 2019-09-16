@@ -408,13 +408,13 @@ sub get_start_end_for_timeperiod {
     }
     else {
         if(defined $t1) {
-            $start = $t1;
+            $start = Thruk::Utils::_parse_date($c, $t1);
         } else {
             $start = normal_mktime($syear,$smon,$sday, $shour,$smin,$ssec);
         }
 
         if(defined $t2) {
-            $end   = $t2;
+            $end = Thruk::Utils::_parse_date($c, $t2);
         } else {
             $end   = normal_mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
         }
@@ -3049,19 +3049,54 @@ sub _initialassumedservicestate_to_state {
 sub _parse_date {
     my($c, $string) = @_;
 
-    # just a timestamp?
-    if($string =~ m/^(\d+)$/mx) {
-        return($1);
+    # time arithmetic
+    my @parts = split(/\s*(\-|\+)\s*/mx, $string);
+    my $timestamp;
+
+    if(scalar @parts >= 3 && $parts[0] eq '') { $parts[0] = time(); }
+    if(scalar @parts == 1 && $parts[0] =~ m/^\d+$/mx && length($parts[0]) <= 8) { unshift(@parts, "now", "+"); }
+
+    while(scalar @parts > 0) {
+        my $part1 = shift @parts;
+        my $val1  = _expand_timestring($part1);
+        if(!defined $val1) {
+            die("parse error, cannot expand '".$part1."' in ".$string);
+        }
+        if(!defined $timestamp) {
+            $timestamp = $val1;
+        }
+        if(scalar @parts == 0) {
+            return($timestamp);
+        }
+        if(scalar @parts == 1) {
+            die("operator expected, got '".$parts[0]."' in ".$string);
+        }
+        my $op    = shift @parts;
+        my $part2 = shift @parts;
+        my $val2  = _expand_timestring($part2);
+        if(!defined $val2) {
+            die("parse error, cannot expand '".$part2."' in ".$string);
+        }
+        if($op eq '+') {
+            $timestamp += $val2;
+        }
+        elsif($op eq '-') {
+            $timestamp -= $val2;
+        } else {
+            die("unknown operator: "+$op+", +- are supported only");
+        }
     }
 
-    # relative time?
-    if($string =~ m/^(\-|\+)(\d+\w)$/mx) {
-        my $direction = $1;
-        my $val = expand_duration($2);
-        if($direction eq '-') {
-            return(time() - $val);
-        }
-        return(time() + $val);
+    return($timestamp);
+}
+
+##############################################
+sub _expand_timestring {
+    my($string) = @_;
+
+    # just a timestamp?
+    if($string =~ m/^(\d+)$/mx && length($string) >= 9) {
+        return($1);
     }
 
     # real date (YYYY-MM-DD HH:MM:SS)
@@ -3082,15 +3117,21 @@ sub _parse_date {
         return($timestamp);
     }
 
+    # relative time?
+    if($string =~ m/^(\-|\+|)(\d+\w*)$/mx) {
+        my $direction = $1;
+        my $val = expand_duration($2);
+        if($direction eq '-') {
+            return -$val;
+        }
+        return $val;
+    }
+
     # everything else
     # Date::Manip increases start time, so load it here upon request
     require Date::Manip;
     Date::Manip->import(qw/UnixDate/);
     my $timestamp = UnixDate($string, '%s');
-    $c->log->debug("not a valid date: ".$string) if $c;
-    if(!defined $timestamp) {
-        return;
-    }
     return($timestamp);
 }
 

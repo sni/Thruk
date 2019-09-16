@@ -164,10 +164,7 @@
           </tr>
           <tr>
             <td class='optBoxItem' valign="top" align="left">
-              <select name='timeperiod'>
-                <option value="current"[% IF      timeperiod == 'current'      %] selected[% END %]>[ Current time range ]</option>
-                [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod %]
-              </select>
+              [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=1 name="timeperiod" t1=start t2=end current=1 %]
             </td>
             <td class='optBoxItem' valign="top" align="left">
               <select name='zoom'>

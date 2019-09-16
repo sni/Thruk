@@ -34,22 +34,7 @@
         <span class="value" id="reports_expected_objects">&nbsp;</span>
         <span class="name">expected objects:</span>
       [% ELSIF type == 'rptimeperiod' %]
-        <select name="params.[% key %]" onchange="if(this.value == 'custom') { showElement('custom_timeperiod') } else { hideElement('custom_timeperiod') }">
-          [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value %]
-          <option value="custom"[% IF value == 'custom' %] selected[% END %]>Custom</option>
-        </select>
-        <div [% IF value != 'custom' %]style="display:none"[% END %] id="custom_timeperiod">
-        <table>
-          <tr>
-            <td>Start</td>
-            <td><input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" size="20" class="date_input cal_popup_range"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t1"></td>
-          </tr>
-          <tr>
-            <td>End</td>
-            <td><input type="text" value="[% IF format_date(t2, '%S') == "00" %][% format_date(t2, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t2, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t2" name="t2" size="20" class="date_input cal_popup_range"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t2"></td>
-          </tr>
-        </table>
-        </div>
+        [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value custom=2 name="params." _ key t1=r.params.t1 t2=r.params.t2 current=0 %]
       [% ELSIF type == 'breakdowns' %]
         <select name="params.[% key %]">
           <option value="months"[% IF value == 'months' %] selected[% END %]>Months</option>

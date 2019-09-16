@@ -828,6 +828,9 @@ sub get_report_data_from_param {
             $p->{$1} = -1;
         }
     }
+    for my $key (qw/t1 t2/) {
+        $p->{$key} = $params->{$key} if defined $params->{$key};
+    }
 
     # only save backends if checkbox checked
     if(!$params->{'backends_toggle'} && !$params->{'report_backends_toggle'}) {
