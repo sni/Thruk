@@ -857,6 +857,7 @@ sub _finished_job_page {
             for my $key (keys %{$stash}) {
             next if $key eq 'theme';
             $c->stash->{$key} = $stash->{$key};
+            $c->stash->{'time_begin'} = [Time::HiRes::gettimeofday()]; # trigger slow page log otherwise
         }
 
         # model?
