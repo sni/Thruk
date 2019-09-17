@@ -43,7 +43,7 @@ sub parse_date {
     my($c, $string) = @_;
     my $timestamp;
     eval {
-        $timestamp = Thruk::Utils::_parse_date($c, $string);
+        $timestamp = _parse_date($c, $string);
         if(defined $timestamp) {
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
         } else {
@@ -408,13 +408,13 @@ sub get_start_end_for_timeperiod {
     }
     else {
         if(defined $t1) {
-            $start = Thruk::Utils::_parse_date($c, $t1);
+            $start = _parse_date($c, $t1);
         } else {
             $start = normal_mktime($syear,$smon,$sday, $shour,$smin,$ssec);
         }
 
         if(defined $t2) {
-            $end = Thruk::Utils::_parse_date($c, $t2);
+            $end = _parse_date($c, $t2);
         } else {
             $end   = normal_mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
         }
@@ -1503,12 +1503,12 @@ sub get_perf_image {
     $options->{'show_title'}  = 1      unless defined $options->{'show_title'};
     $options->{'show_legend'} = 1      unless defined $options->{'show_legend'};
     if(defined $options->{'end'}) {
-        $options->{'end'} = Thruk::Utils::_parse_date($c, $options->{'end'});
+        $options->{'end'} = _parse_date($c, $options->{'end'});
     } else {
         $options->{'end'} = time();
     }
     if(defined $options->{'start'}) {
-        $options->{'start'} = Thruk::Utils::_parse_date($c, $options->{'start'});
+        $options->{'start'} = _parse_date($c, $options->{'start'});
     } else {
         $options->{'start'} = $options->{'end'} - 86400;
     }
@@ -3048,6 +3048,9 @@ sub _initialassumedservicestate_to_state {
 ##############################################
 sub _parse_date {
     my($c, $string) = @_;
+
+    # simply try to expand first
+    return(_expand_timestring($string)) if $string =~ m/:/mx;
 
     # time arithmetic
     my @parts = split(/\s*(\-|\+)\s*/mx, $string);
