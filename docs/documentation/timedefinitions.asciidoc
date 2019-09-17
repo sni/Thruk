@@ -24,7 +24,8 @@ They should be pretty much self-explanatory.
 
 
 ==== Time Arithmetics
-If the predefined fixed ranges don't fit, you can also use basic self defined time arithmetics like `today - 2d` which is 2 days before today.
+If the predefined fixed ranges don't fit, choose `custom` and you can use basic
+self defined time arithmetics like `today - 2d` which is 2 days before today.
 
 Available terms:
 
