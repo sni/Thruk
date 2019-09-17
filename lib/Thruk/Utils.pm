@@ -3130,6 +3130,14 @@ sub _expand_timestring {
         return $val;
     }
 
+    # known terms
+    if($string eq 'lastmonday') {
+        my @today  = Today();
+        my @monday = Monday_of_Week(Week_of_Year(@today));
+        my $ts = Mktime(@monday,  0,0,0);
+        return($ts);
+    }
+
     # everything else
     # Date::Manip increases start time, so load it here upon request
     require Date::Manip;

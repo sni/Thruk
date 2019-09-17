@@ -162,7 +162,7 @@
           </tr>
           <tr>
             <td class='optBoxItem' valign="top" align="left">
-              [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 %]
+              [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 %]
             </td>
             <td class='optBoxItem' valign="top" align="left">
               <select name='zoom'>

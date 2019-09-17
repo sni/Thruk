@@ -46,7 +46,7 @@
   </tr>
   <tr>
     <td valign="top" align="left" class='optBoxItem'>
-      [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 %]
+      [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 %]
     </td>
     <td valign="top" align="left" class='optBoxItem'>
       <input type='text' size='2' maxlength='2' name='backtrack' value="[% backtrack | html %]">

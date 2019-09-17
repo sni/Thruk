@@ -32,6 +32,30 @@
       <input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" size="20" class="date_input cal_popup_range cal_popup_select"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t1">
     [% END %]
     </td>
+    [% IF show_hint %]
+    <td rowspan="3" valign="top">
+      <table style="margin-left: 30px; border: 1px solid grey;">
+        <tr>
+          <th colspan="2">Examples for custom timeranges</th>
+        </tr>
+        <tr>
+          <td>fixed dates</td>
+          <td>2019-09-17 16:30:00</td>
+        </tr>
+        <tr>
+          <td>absolute names</td>
+          <td>yesterday / today</td>
+        </tr>
+        <tr>
+          <td>simple arithmetics</td>
+          <td>now - 2d</td>
+        </tr>
+        <tr>
+          <td colspan="2"><a target="_blank" href="https://thruk.org/documentation/timedefinitions.html">find more examples online.</a></td>
+        </tr>
+      </table>
+    </td>
+    [% END %]
   </tr>
   <tr>
     <td>End</td>
@@ -43,6 +67,7 @@
     [% END %]
     </td>
   </tr>
+  <tr><td style="height: 70px;"></td></tr>
 </table>
 </div>
 [% END %]

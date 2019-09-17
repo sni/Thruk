@@ -1,0 +1,53 @@
+---
+layout: docs
+title: Time Definitions
+breadcrumb: [ "advanced.html", "Advanced" ]
+lightbox: true
+---
+
+== Time Definitions
+{% include new_since.ad version="2.32" %}
+Whenever you need to enter a time definition in Thruk you can do that in several ways.
+
+++++
+<div align="center">
+<a title="thruk timedefinitions" rel="lightbox[timedefinition]" href="advanced/timedefinition.png"><img src="advanced/timedefinition.png" alt="thruk timedefinition" width="50%" height="50%" /></a>
+</div>
+<br style="clear: both;">
+++++
+
+
+=== Fixed Ranges
+
+Usually there is a set of predefined ranges, like `last week` to choose from.
+They should be pretty much self-explanatory.
+
+
+==== Time Arithmetics
+If the predefined fixed ranges don't fit, you can also use basic self defined time arithmetics like `today - 2d` which is 2 days before today.
+
+Available terms:
+
+     ** `now`            Current time.
+     ** `today`          Refers to today at 00:00.
+     ** `yesterday`      Yesterday at 00:00.
+     ** `lastmonday`     Last Monday at 00:00.
+
+Simple calculation are possible like this:
+
+Tuesday 00:00 of current week: `lastmonday + 86400`
+
+The following suffixes can be used to make times more human readable:
+
+  - `y`: years
+  - `w`: weeks
+  - `d`: days
+  - `h`: hours
+  - `m`: minutes
+
+So the example above could also be written as: `lastmonday + 1d`
+
+[WARNING]
+=======
+These calculation do no timezone or daylight saving adjustments.
+=======
