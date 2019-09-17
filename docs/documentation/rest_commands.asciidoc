@@ -72,6 +72,9 @@ This will create a 1hour downtime. Other suffixes are:
   - `h`: hours
   - `m`: minutes
 
+More time definition examples can be found on the link:timedefinitions.html[time definitions page].
+
+
 
 == Example Usage
 
@@ -1544,4 +1547,3 @@ Sends the STOP_OBSESSING_OVER_SVC_CHECKS command.
 This command does not require any arguments.
 
 See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
-
