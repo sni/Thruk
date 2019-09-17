@@ -16,7 +16,7 @@ use Thruk::Utils::IO ();
 use Thruk::Utils::CookieAuth ();
 use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
-use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
+use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Add_Delta_Days Normalize_DHMS/;
 use File::Slurp qw/read_file/;
 use Encode qw/encode encode_utf8 decode is_utf8/;
 use File::Copy qw/move copy/;
@@ -3131,10 +3131,55 @@ sub _expand_timestring {
     }
 
     # known terms
-    if($string eq 'lastmonday') {
+    if($string eq 'lastmonday' || $string eq 'thisweek') {
         my @today  = Today();
         my @monday = Monday_of_Week(Week_of_Year(@today));
-        my $ts = Mktime(@monday,  0,0,0);
+        my $ts = Mktime(@monday, 0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'lastweek') {
+        my @lastmonday = Monday_of_Week(Week_of_Year(Add_Delta_Days(Today(), -7)));
+        my $ts = Mktime(@lastmonday, 0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'nextweek') {
+        my @lastmonday = Monday_of_Week(Week_of_Year(Add_Delta_Days(Today(), 7)));
+        my $ts = Mktime(@lastmonday, 0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'thismonth') {
+        # start on month
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year,$month,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'lastmonth') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $lastmonth = $month - 1;
+        if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
+        my $ts = Mktime($year,$lastmonth,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'nextmonth') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $nextmonth = $month + 1;
+        if($nextmonth > 12) { $nextmonth = $nextmonth - 12; $year++; }
+        my $ts = Mktime($year,$nextmonth,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'thisyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year,1,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'lastyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year-1,1,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'nextyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year+1,1,1,  0,0,0);
         return($ts);
     }
 

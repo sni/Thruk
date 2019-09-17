@@ -32,6 +32,15 @@ Available terms:
      ** `today`          Refers to today at 00:00.
      ** `yesterday`      Yesterday at 00:00.
      ** `lastmonday`     Last Monday at 00:00.
+     ** `thisweek`       Monday of current week at 00:00. Same as `lastmonday`
+     ** `lastweek`       Monday of last week at 00:00.
+     ** `nextweek`       Monday of next week at 00:00.
+     ** `thismonth`      First day of current month at 00:00.
+     ** `lastmonth`      First day of last month at 00:00.
+     ** `nextmonth`      First day of next month at 00:00.
+     ** `thisyear`       First day of current year at 00:00.
+     ** `lastyear`       First day of previous year at 00:00.
+     ** `nextyear`       First day of next year at 00:00.
 
 Simple calculation are possible like this:
 
