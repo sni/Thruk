@@ -5986,6 +5986,7 @@ function show_cal(ev) {
     var hasRange  = ev.target.className.match(/cal_popup_range/)       ? true : false;
     var hasSelect = ev.target.className.match(/cal_popup_select/)      ? true : false;
     var hasSubmit = ev.target.className.match(/cal_popup_auto_submit/) ? true : false;
+    var hasCustom = ev.target.className.match(/cal_custom/)            ? true : false;
 
     if(document.getElementById(id1).picker) {
         return;
@@ -6034,14 +6035,18 @@ function show_cal(ev) {
     var date1 = _parseDate(document.getElementById(id1).value);
     if(!date1) {
         date1 = new Date();
-        document.getElementById(id1).value = date1.strftime("%Y-%m-%d %H:%M:%S");
+        if(!hasCustom) {
+            document.getElementById(id1).value = date1.strftime("%Y-%m-%d %H:%M:%S");
+        }
     }
     var date2;
     if(hasRange) {
         date2 = _parseDate(document.getElementById(id2).value);
         if(!date2) {
             date2 = new Date();
-            document.getElementById(id2).value = date2.strftime("%Y-%m-%d %H:%M:%S");
+            if(!hasCustom) {
+                document.getElementById(id2).value = date2.strftime("%Y-%m-%d %H:%M:%S");
+            }
         }
         // reverse dates, because we always click on the end date when having ranges
         var tmp = date2;

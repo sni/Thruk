@@ -391,7 +391,7 @@ body.cmd img {
 .cal_icon {
   vertical-align:text-bottom;
 }
-.date_input {
+.navBoxDate .date_input {
   border: none;
   font-weight: bold;
   font-size: 8pt;

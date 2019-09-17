@@ -117,6 +117,8 @@ sub calculate_availability {
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
+    $c->stash->{t1}         = $c->req->parameters->{'t1'} || $start;
+    $c->stash->{t2}         = $c->req->parameters->{'t2'} || $end;
     if(defined $c->req->parameters->{'timeperiod'}) {
         $c->stash->{timeperiod} = $c->req->parameters->{'timeperiod'};
     } elsif(!defined $c->req->parameters->{'t1'} && !defined $c->req->parameters->{'t2'}) {

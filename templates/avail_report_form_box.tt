@@ -3,8 +3,6 @@
 [% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
 [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
 [% IF servicegroup %]<input type='hidden' name='servicegroup' value="[% servicegroup | html %]">[% END %]
-<input type='hidden' name='t1' value="[% start | html %]">
-<input type='hidden' name='t2' value="[% end | html %]">
 [% IF show_log_entries %]<input type='hidden' name='show_log_entries' value="[% show_log_entries | html %]">[% END %]
 [% IF full_log_entries %]<input type='hidden' name='full_log_entries' value="[% full_log_entries | html %]">[% END %]
 <input type='hidden' name='assumeinitialstates' value="[% assumeinitialstates | html %]">
@@ -48,7 +46,7 @@
   </tr>
   <tr>
     <td valign="top" align="left" class='optBoxItem'>
-      [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=1 name="timeperiod" t1=start t2=end current=1 %]
+      [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 %]
     </td>
     <td valign="top" align="left" class='optBoxItem'>
       <input type='text' size='2' maxlength='2' name='backtrack' value="[% backtrack | html %]">

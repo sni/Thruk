@@ -34,7 +34,10 @@
         <span class="value" id="reports_expected_objects">&nbsp;</span>
         <span class="name">expected objects:</span>
       [% ELSIF type == 'rptimeperiod' %]
-        [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value custom=2 name="params." _ key t1=r.params.t1 t2=r.params.t2 current=0 %]
+        [% t1=date.now; IF r.params.defined("t1"); t1 = r.params.t1; END %]
+        [% t2=date.now; IF r.params.defined("t2"); t2 = r.params.t2; END %]
+        [% custom=1; IF value == "custom"; custom=2; END %]
+        [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value custom=custom name="params." _ key t1=t1 t2=t2 current=0 %]
       [% ELSIF type == 'breakdowns' %]
         <select name="params.[% key %]">
           <option value="months"[% IF value == 'months' %] selected[% END %]>Months</option>
