@@ -204,6 +204,8 @@ sub begin {
     ###############################
     # parse cgi.cfg
     Thruk::Config::read_cgi_cfg($c);
+    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
 
     ###############################
     # Authentication
