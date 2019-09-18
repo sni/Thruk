@@ -1329,4 +1329,92 @@ sub load_any {
 
 ########################################
 
+=head2 read_cgi_cfg
+
+  read_cgi_cfg($c, $config);
+
+parse the cgi.cfg and put it into $c->config
+
+=cut
+sub read_cgi_cfg {
+    my($c, $config) = @_;
+    $config = $c->config unless defined $config;
+
+    $c->stats->profile(begin => "Config::read_cgi_cfg()") if defined $c;
+
+    # read only if its changed
+    my $file = $config->{'cgi.cfg'};
+    if(!defined $file || $file eq '') {
+        $config->{'cgi_cfg'} = 'undef';
+        if(defined $c) {
+            $c->log->error("cgi.cfg not set");
+            $c->error("cgi.cfg not set");
+            return $c->detach('/error/index/4');
+        }
+        print STDERR "cgi.cfg option must be set in thruk.conf or thruk_local.conf\n\n";
+        return;
+    }
+    elsif( -r $file ) {
+        # perfect, file exists and is readable
+    }
+    elsif(-r $config->{'project_root'}.'/'.$file) {
+        $file = $config->{'project_root'}.'/'.$file;
+    }
+    else {
+        if(defined $c) {
+            $c->log->error("cgi.cfg not readable: ".$!);
+            $c->error("cgi.cfg not readable: ".$!);
+            return $c->detach('/error/index/4');
+        }
+        print STDERR "$file not readable: ".$!."\n\n";
+        return;
+    }
+
+    # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
+    my @cgi_cfg_stat = stat($file);
+
+    my $last_stat = $config->{'cgi_cfg_stat'};
+    if(!defined $last_stat
+       || $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
+       || $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
+      ) {
+        $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
+        $c->log->debug("reading $file") if defined $c;
+        $config->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
+        $config->{'cgi.cfg_effective'} = $file;
+        $config->{'cgi_cfg_orig'}      = Thruk::Config::read_config_file($file);
+        $config->{'cgi_cfg'}           = $config->{'cgi_cfg_orig'};
+    }
+
+    $c->stats->profile(end => "Config::read_cgi_cfg()") if defined $c;
+
+    return 1;
+}
+
+########################################
+
+=head2 merge_cgi_cfg
+
+  merge_cgi_cfg($config)
+
+merge entries from $config into $config->{'cgi_cfg'}
+
+=cut
+sub merge_cgi_cfg {
+    my($config) = @_;
+
+    $config->{'cgi_cfg'} = $config->{'cgi_cfg_orig'};
+    my @keys = qw/show_context_help refresh_rate escape_html_tags
+                  action_url_target notes_url_target lock_author_names
+                  host_unreachable_sound host_down_sound
+                  service_critical_sound service_warning_sound service_unknown_sound
+                /;
+    for my $key (@keys) {
+        $config->{'cgi_cfg'}->{$key} = $config->{$key} if defined $config->{$key};
+    }
+    return;
+}
+
+########################################
+
 1;

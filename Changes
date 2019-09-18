@@ -8,6 +8,7 @@ next:
           - store last editor username along with recurring downtimes
           - improve storing session credentials
           - allow basic time arithmetics when setting start and end dates
+          - allow cgi.cfg options to be set from the thruk config
           - fix keyboard control of datepicker (#946)
           - Broadcasts:
             - use authorized_for_broadcasts role everywhere

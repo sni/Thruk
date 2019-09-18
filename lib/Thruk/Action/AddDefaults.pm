@@ -203,9 +203,7 @@ sub begin {
 
     ###############################
     # parse cgi.cfg
-    Thruk::Utils::read_cgi_cfg($c);
-    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
-    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
+    Thruk::Config::read_cgi_cfg($c);
 
     ###############################
     # Authentication
@@ -659,6 +657,13 @@ sub add_defaults {
 
     ###############################
     $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
+
+    ###############################
+    # merge cgi.cfg parameters set in
+    Thruk::Config::merge_cgi_cfg($c->config);
+    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
+
 
     ###############################
     # user / group specific config?

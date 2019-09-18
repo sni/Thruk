@@ -154,7 +154,7 @@ sub _build_app {
 
     ###################################################
     # load and parse cgi.cfg into $c->config
-    unless(Thruk::Utils::read_cgi_cfg(undef, $self->{'config'})) {
+    unless(Thruk::Config::read_cgi_cfg(undef, $self->{'config'})) {
         die("\n\n*****\nfailed to load cgi config: ".$self->{'config'}->{'cgi.cfg'}."\n*****\n\n");
     }
     #&timing_breakpoint('startup() cgi.cfg parsed');
