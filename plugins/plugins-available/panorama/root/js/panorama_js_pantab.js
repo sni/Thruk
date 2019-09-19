@@ -239,6 +239,7 @@ Ext.define('TP.Pantab', {
                 This.map.setSize(This.getSize());
                 This.moveMapIcons();
                 This.saveState();
+                This.setZoomControl(); // zoom functionality gets lost when screen resizes
             }
         },
         beforestatesave: function( This, state, eOpts ) {
@@ -396,7 +397,7 @@ Ext.define('TP.Pantab', {
         var size = This.getSize();
         for(var nr=0; nr<This.visibleIcons.length; nr++) {
             var panel = This.visibleIcons[nr];
-            panel.moveToMapLonLat(size, true);
+            panel.moveToMapLonLat(size);
         }
     },
     isActiveTab: function() {
@@ -701,7 +702,7 @@ Ext.define('TP.Pantab', {
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
-            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom});
+            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom})
             map.addControl(zoomControl);
             map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
@@ -734,11 +735,15 @@ Ext.define('TP.Pantab', {
                         tab.saveState();
                     },
                     destroy: function(This){
+                        tab.zoomControl = null;
+                        tab.zoomControlMap = null;
                         zoomControl.destroy();
                         zoomDiv.destroy();
                         controlsDiv.destroy();
                         tab.lockButton.destroy();
                         tab.lockButton = undefined;
+                        tab.keyMap.destroy();
+                        tab.keyMap = null;
                     }
                 }
             };
@@ -771,10 +776,6 @@ Ext.define('TP.Pantab', {
                 }
                 tab.visibleIcons = visible;
             });
-            map.events.register("moveend", map, function() {
-                delete tab.visibleIcons;
-                tab.moveMapIcons(true);
-            });
             controlsDiv.dom.style.display = "";
             tab.lockButton = controlsDiv.createChild('<div class="lockButton unlocked">', controlsDiv.dom.childNodes[0]);
             tab.lockButton.on("click", function(evt) {
@@ -785,9 +786,9 @@ Ext.define('TP.Pantab', {
                 }
             });
             /* create our own zoom controls, because they do not work when not using default div from map */
-            zoomControl.buttons[0].onclick = function() { map.zoomIn() }
-            zoomControl.buttons[1].onclick = function() { map.zoomOut() }
-            zoomControl.buttons[2].onclick = function() { map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom) }
+            tab.zoomControl    = zoomControl;
+            tab.zoomControlMap = map;
+            tab.setZoomControl();
             if(tab.xdata.map == undefined) {
                 var data = map.getCenter();
                 tab.xdata.map = {
@@ -797,6 +798,20 @@ Ext.define('TP.Pantab', {
                 };
                 tab.saveState();
             }
+            // toggle map navigation on space
+            tab.keyMap = new Ext.util.KeyMap({
+                target: Ext.getBody(),
+                key: Ext.EventObject.SPACE,
+                fn: function(key, evt) {
+                    if(!tab.map) { return; }
+                    if(evt.target.tagName == "INPUT" || evt.target.tagName == "TEXTAREA") { return; }
+                    if(tab.lockButton.hasCls('unlocked')) {
+                        tab.disableMapControls();
+                    } else {
+                        tab.enableMapControls();
+                    }
+                }
+            });
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
@@ -871,6 +886,14 @@ Ext.define('TP.Pantab', {
         tab.fixIconsMapPosition(xdata);
 
         return;
+    },
+    setZoomControl: function() {
+        var tab = this;
+        var map = tab.zoomControlMap;
+        if(!map || !tab.zoomControl) { return; }
+        tab.zoomControl.buttons[0].onclick = function() { map.zoomIn() }
+        tab.zoomControl.buttons[1].onclick = function() { map.zoomOut() }
+        tab.zoomControl.buttons[2].onclick = function() { map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom) }
     },
     // set current position to each panel which does not have a lon/lat yet
     fixIconsMapPosition: function(xdata) {
