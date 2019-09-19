@@ -387,6 +387,18 @@ Ext.define('TP.Pantab', {
             }
         }
     },
+    // moves all visible icons
+    moveVisibleMapIcons: function() {
+        if(!this.map) { return; }
+        var This = this;
+        if(!This.isActiveTab()) { return; }
+        if(!This.visibleIcons) { return; }
+        var size = This.getSize();
+        for(var nr=0; nr<This.visibleIcons.length; nr++) {
+            var panel = This.visibleIcons[nr];
+            panel.moveToMapLonLat(size, true);
+        }
+    },
     isActiveTab: function() {
         if(one_tab_only) {
             return(true);
@@ -737,6 +749,30 @@ Ext.define('TP.Pantab', {
             tab.mapEl.lastCenter = [mapData.center[0], mapData.center[1], mapData.zoom];
             tab.map = Ext.create('GeoExt.panel.Map', mapData);
             map.events.register("move", map, function() {
+                tab.moveVisibleMapIcons();
+            });
+            // if there are too many icons, hide them before moving the map to reduce lag
+            map.events.register("movestart", map, function() {
+                var panels = TP.getAllPanel(tab);
+                var visible = [];
+                for(var nr=0; nr<panels.length; nr++) {
+                    var panel = panels[nr];
+                    if(!panel.xdata.layout || panel.xdata.layout.lon == undefined || panel.isHidden()) {
+                        continue;
+                    }
+                    visible.push(panel);
+                }
+                if(visible.length > 30) {
+                    for(var nr=0; nr<visible.length; nr++) {
+                        var panel = visible[nr];
+                        panel.hide();
+                    }
+                    visible = [];
+                }
+                tab.visibleIcons = visible;
+            });
+            map.events.register("moveend", map, function() {
+                delete tab.visibleIcons;
                 tab.moveMapIcons(true);
             });
             controlsDiv.dom.style.display = "";
