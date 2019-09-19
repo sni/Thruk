@@ -29,6 +29,7 @@ next:
             - hide scrollbars after 3 seconds
             - add background colour option for hosts and service lists
             - toggle geomap navigation with space key
+            - improve dashboard menu filter performance
             - fix changing open dashboards on reloads
           - Business Process:
             - add node clone menu entry to node context menu

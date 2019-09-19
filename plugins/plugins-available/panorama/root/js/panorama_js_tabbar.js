@@ -475,15 +475,18 @@ TP.addMenuSearchField = function(menu) {
             }
             // reset if no search is done at all
             if(cleaned.length == 0) {
+                menu.hide(); // avoid redrawing menu on each item change
                 menu.items.each(function(item, index, len) {
                     if(item.origText) {
                         item.setText(item.origText);
                     }
                     item.show();
                 });
+                menu.show();
                 return;
             }
             var replacePattern = new RegExp('('+cleaned.join('|')+')', 'gi');
+            menu.hide(); // avoid redrawing menu on each item change
             menu.items.each(function(item, index, len) {
                 if(index == 0) { return; } // don't hide the search itself
                 if(!item.origText) {
@@ -503,6 +506,7 @@ TP.addMenuSearchField = function(menu) {
                     item.hide();
                 }
             });
+            menu.show();
         }, 300, 'menu_search_delay');
     };
     var searchField = {
