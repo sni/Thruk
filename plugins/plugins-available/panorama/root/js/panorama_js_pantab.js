@@ -756,6 +756,9 @@ Ext.define('TP.Pantab', {
             map.events.register("move", map, function() {
                 tab.moveVisibleMapIcons();
             });
+            map.events.register("zoomend", map, function() {
+                tab.moveMapIcons();
+            });
             // if there are too many icons, hide them before moving the map to reduce lag
             map.events.register("movestart", map, function() {
                 var panels = TP.getAllPanel(tab);

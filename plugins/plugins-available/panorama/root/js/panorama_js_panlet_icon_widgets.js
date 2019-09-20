@@ -41,7 +41,7 @@ Ext.define('TP.SmallWidget', {
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
         this.xdata.general    = {};
-        this.xdata.layout     = { rotation: 0 };
+        this.xdata.layout     = { rotation: 0, center: 'centered' };
         if(this.xdata.appearance == undefined) {
             this.xdata.appearance = { type: 'icon' };
         }
@@ -284,6 +284,7 @@ Ext.define('TP.SmallWidget', {
 
         /* restore position */
         if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
+            if(!panel.xdata.layout.center) { panel.xdata.layout.center = "centered"; }
             panel.moveToMapLonLat(undefined, false, xdata);
         } else {
             xdata.layout.x = Number(xdata.layout.x);
@@ -645,8 +646,9 @@ Ext.define('TP.SmallWidget', {
         } else {
             s     = panel.getSize();
         }
-        var p = panel.getPosition();
-        var lonLat = tab.map.map.getLonLatFromPixel({x: (p[0]+s.width/2), y: (p[1]+s.height/2)-TP.offset_y});
+        var p   = panel.getPosition();
+        var ref = TP.getRefPixel({x: p[0], y: p[1], size: s, center: xdata.layout.center, nsize: xdata.nsize});
+        var lonLat = tab.map.map.getLonLatFromPixel({x: ref.x, y: ref.y});
         if(key == undefined || key == "center") {
             xdata.layout.lon  = lonLat.lon;
             xdata.layout.lat  = lonLat.lat;
@@ -707,7 +709,6 @@ Ext.define('TP.SmallWidget', {
                 panel.updateRender(xdata);
             }
         } else {
-            var pixel = tab.map.map.getPixelFromLonLat({lon: Number(xdata.layout.lon), lat: Number(xdata.layout.lat)});
             var s;
             if(xdata.size || !panel.el) {
                 s     = {width: xdata.size, height: xdata.size};
@@ -717,16 +718,22 @@ Ext.define('TP.SmallWidget', {
             if(s.width == undefined) {
                 s     = {width: 16, height: 16};
             }
-            var x     = (pixel.x-s.width/2);
-            var y     = (pixel.y-s.height/2)+TP.offset_y;
-            xdata.layout.x = Math.floor(x);
-            xdata.layout.y = Math.floor(y);
+            var pos = TP.getPosFromLonLat({
+                        map:    tab.map.map,
+                        lon:    Number(xdata.layout.lon),
+                        lat:    Number(xdata.layout.lat),
+                        size:   s,
+                        nsize:  xdata.nsize,
+                        center: xdata.layout.center
+            });
+            xdata.layout.x = pos.x;
+            xdata.layout.y = pos.y;
             panel.setRawPosition(xdata.layout.x, xdata.layout.y);
             if(panel.el && TP.isThisTheActiveTab(panel)) {
                 if(xdata.appearance.type == "connector") {
                     if(panel.isHidden()) { panel.show(); }
                 } else {
-                    if(maxSize != undefined && (x < 0 || y < 0 || x > maxSize.width || y > maxSize.height)) {
+                    if(maxSize != undefined && (pos.x < 0 || pos.y < 0 || pos.x > maxSize.width || pos.y > maxSize.height)) {
                         if(!panel.isHidden()) { panel.hide(); }
                     } else {
                         if(panel.isHidden()) { panel.show(); }

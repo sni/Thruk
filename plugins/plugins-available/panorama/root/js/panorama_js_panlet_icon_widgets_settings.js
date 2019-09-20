@@ -215,8 +215,9 @@ TP.iconShowEditDialog = function(panel) {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
-                                        var lon = Number(This.up('panel').getValues().lon);
-                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: lon, lat: newValue}, appearance:{}});
+                                        var lon    = Number(This.up('panel').getValues().lon);
+                                        var center = This.up('panel').getValues().center;
+                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: lon, lat: newValue, center: center}, appearance:{}, nsize: panel.xdata.nsize});
                                         panel.noMoreMoves = false;
                                     }
                                 }
@@ -227,12 +228,31 @@ TP.iconShowEditDialog = function(panel) {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
-                                        var lat = Number(This.up('panel').getValues().lat);
-                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: newValue, lat: lat}, appearance:{}});
+                                        var lat    = Number(This.up('panel').getValues().lat);
+                                        var center = This.up('panel').getValues().center;
+                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: newValue, lat: lat, center: center}, appearance:{}, nsize: panel.xdata.nsize});
                                         panel.noMoreMoves = false;
                                     }
                                 }
-                            }},
+                            }}, {
+                                name:         'center',
+                                xtype:        'combobox',
+                                store:        ['centered', 'bottom-center', 'bottom-left', 'bottom-right', 'top-center', 'top-left', 'top-right', 'center-left', 'center-right'],
+                                editable:      false,
+                                hidden:       !tab.map || panel.xdata.appearance.type == "connector",
+                                width:        100,
+                                listeners: {
+                                    change: function(This, newValue, oldValue, eOpts) {
+                                        if(!panel.noMoreMoves) {
+                                            panel.noMoreMoves = true;
+                                            var lat = Number(This.up('panel').getValues().lat);
+                                            var lon = Number(This.up('panel').getValues().lon);
+                                            panel.moveToMapLonLat(undefined, false, {layout:{lon: lon, lat: lat, center: newValue}, appearance:{}, nsize: panel.xdata.nsize});
+                                            panel.noMoreMoves = false;
+                                        }
+                                    }
+                                }
+                            },
 
                             { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint', hidden: !!tab.map }
                     ]

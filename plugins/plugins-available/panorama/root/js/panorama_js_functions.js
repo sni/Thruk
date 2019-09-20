@@ -2229,6 +2229,79 @@ var TP = {
             var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
             htmlRootEl.addCls('hidescroll');
         }, 3000);
+    },
+    getPosFromLonLat: function(options) {
+        var map    = options.map,
+            lon    = options.lon,
+            lat    = options.lat,
+            center = options.center,
+            size   = options.size,
+            nsize  = options.nsize;
+        var pixel = map.getPixelFromLonLat({lon: lon, lat: lat});
+
+        // calculate center position of icon
+        var x = (pixel.x-size.width/2);
+        var y = (pixel.y-size.height/2)+TP.offset_y;
+
+        var c = center.split("-");
+        if(c.length == 2) {
+            var widthOffset = size.width;
+            var heightOffset = size.height;
+            if(nsize) {
+                widthOffset  = nsize[0];
+                heightOffset = nsize[1];
+            }
+
+            if(c[0] == "bottom") {
+                y = y - heightOffset/2;
+            }
+            else if(c[0] == "top") {
+                y = y + heightOffset/2;
+            }
+
+            if(c[1] == "left") {
+                x = x + widthOffset/2;
+            }
+            else if(c[1] == "right") {
+                x = x - widthOffset/2;
+            }
+        }
+        return({x:Math.floor(x), y:Math.floor(y)});
+    },
+    getRefPixel: function(options) {
+        var x      = options.x,
+            y      = options.y,
+            center = options.center,
+            size   = options.size,
+            nsize  = options.nsize;
+
+        x = x+(size.width/2);
+        y = y+(size.height/2)-TP.offset_y;
+
+        var c = center.split("-");
+        if(c.length == 2) {
+            var widthOffset = size.width;
+            var heightOffset = size.height;
+            if(nsize) {
+                widthOffset  = nsize[0];
+                heightOffset = nsize[1];
+            }
+
+            if(c[0] == "bottom") {
+                y = y + heightOffset/2;
+            }
+            else if(c[0] == "top") {
+                y = y - heightOffset/2;
+            }
+
+            if(c[1] == "left") {
+                x = x - widthOffset/2;
+            }
+            else if(c[1] == "right") {
+                x = x + widthOffset/2;
+            }
+        }
+        return({x:Math.floor(x), y:Math.floor(y)});
     }
 }
 TP.log('[global] starting');
