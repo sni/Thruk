@@ -251,7 +251,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         }
         else if(special[1] == 'refresh') {
             var el = panel.getEl();
-            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, undefined, el)
+            TP.updateAllIcons(panel.tab, panel.id, undefined, el)
             el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
         } else {
             TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
@@ -307,7 +307,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
             TP.iconClickHandlerClickLink(panel, link, target);
             if(extraOptions.callback) { extraOptions.callback(true, extraOptions); }
         } else {
-            var tab = Ext.getCmp(panel.panel_id);
+            var tab = panel.tab;
             Ext.Ajax.request({
                 url:    url_prefix+'cgi-bin/status.cgi?replacemacros=1',
                 params:  {
@@ -508,7 +508,7 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
 }
 
 TP.getMenuArgs = function(panel, target, args) {
-    var tab      = Ext.getCmp(panel.panel_id);
+    var tab      = panel.tab;
     args.panel   = panel;
     args.target  = target;
     args.backend = TP.getActiveBackendsPanel(tab, panel);
@@ -551,7 +551,7 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
     }
     var cfg = panel.xdata.general;
     var options = {
-        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id), panel)
+        backends: TP.getActiveBackendsPanel(panel.tab, panel)
     };
     var base = "status.cgi";
     if(cfg.hostgroup) {
@@ -691,7 +691,7 @@ function availability(panel, opts) {
             return(TP.availabilities[panel.id][opts_enc]['last']);
         }
         TP.availabilities[panel.id][opts_enc]['last_refresh'] = now;
-        TP.updateAllLabelAvailability(Ext.getCmp(panel.panel_id));
+        TP.updateAllLabelAvailability(panel.tab);
     }
     if(!Ext.isNumeric(TP.availabilities[panel.id][opts_enc]['last'])) {
         TP.lastAvailError = TP.availabilities[panel.id][opts_enc]['last'];

@@ -400,7 +400,7 @@ TP.square_item_details_link = function(panel, item) {
         return("#");
     }
     var options = {
-        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id)),
+        backends: TP.getActiveBackendsPanel(panel.tab),
         filter:   panel.xdata.filter,
         task:    'redirect_status'
     };
@@ -452,7 +452,7 @@ TP.square_item_details = function(item) {
 TP.square_update_callback = function(panel, data, retries) {
     if(!panel.el || !panel.el.dom) { return; }
     if(!panel.containerItem || !panel.containerItem.body.el || !panel.containerItem.body.el.dom) { return; }
-    var tab   = Ext.getCmp(panel.panel_id);
+    var tab   = panel.tab;
     var iconsetName = panel.xdata.iconSet;
     if(iconsetName == '' || iconsetName == undefined) {
         if(!tab) { return; }

@@ -54,7 +54,7 @@ Ext.define('TP.IconWidgetAppearancePerfBar', {
             if(TP.iconSettingsWindow) {
                 xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
             }
-            var tab = Ext.getCmp(panel.panel_id);
+            var tab = panel.tab;
             // flag wether the last status update found an object
             // only force refresh if flag is not set, would result in an endless loop otherwise
             if(!panel.no_data) {

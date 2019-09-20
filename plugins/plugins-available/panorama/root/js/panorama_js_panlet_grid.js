@@ -33,7 +33,7 @@ Ext.define('TP.GridLoader', {
         TP.log('['+panel.id+'] loaded');
 
         // return early if dashboard is not visible (breaks column layout otherwise)
-        var tab = Ext.getCmp(panel.panel_id);
+        var tab = panel.tab;
         if(tab && !tab.isActiveTab()) {
             This.updateData(panel, data.data);
             return;

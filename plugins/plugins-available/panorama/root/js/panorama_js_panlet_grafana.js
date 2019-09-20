@@ -34,7 +34,7 @@ TP.grafanaStore = Ext.create('Ext.data.Store', {
     listeners: {
         beforeload: function(store, operation, eOpts) {
             if(store.panel) {
-                store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
+                store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(store.panel.tab, store.panel);
                 store.proxy.extraParams['query2']   = store.panel.xdata.graph;
             } else {
                 store.proxy.extraParams = {};
@@ -160,7 +160,7 @@ Ext.define('TP.PanletGrafana', {
             if(this.xdata.background_color != undefined) {
                 url = url + '&background_color='+encodeURIComponent(this.xdata.background_color);
             }
-            var global = Ext.getCmp(this.panel_id);
+            var global = this.tab;
             if(!global.xdata.autohideheader || this.xdata.showborder) {
                 this.heightOverflow = this.heightOverflow / 5;
             }

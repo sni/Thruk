@@ -219,7 +219,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
     },
 
     getAppearanceTabItems: function(panel) {
-        var tab = Ext.getCmp(panel.panel_id);
+        var tab = panel.tab;
         var endpointsChanged = function() {
             if(panel.noMoreMoves) { return; }
             if(!TP.iconSettingsWindow) { return; }

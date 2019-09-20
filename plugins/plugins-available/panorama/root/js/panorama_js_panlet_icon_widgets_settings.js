@@ -14,7 +14,7 @@ TP.iconTypesStore = Ext.create('Ext.data.Store', {
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
-    var tab      = Ext.getCmp(panel.panel_id);
+    var tab      = panel.tab;
     var lastType = panel.xdata.appearance.type;
     TP.iconShowEditDialogPanel = panel;
 
@@ -1137,7 +1137,7 @@ TP.iconShowEditDialog = function(panel) {
                     settingsWindow.destroy();
                     panel.firstRun = false;
                     panel.applyXdata();
-                    var tab = Ext.getCmp(panel.panel_id);
+                    var tab = panel.tab;
                     TP.updateAllIcons(tab, panel.id);
                     TP.updateAllLabelAvailability(tab, panel.id);
                  }
@@ -1185,7 +1185,7 @@ TP.iconShowEditDialog = function(panel) {
                 if(panel.dragEl1 && panel.dragEl1.el) { panel.dragEl1.el.dom.style.outline = ""; }
                 if(panel.dragEl2 && panel.dragEl2.el) { panel.dragEl2.el.dom.style.outline = ""; }
                 if(panel.labelEl && panel.labelEl.el) { panel.labelEl.el.dom.style.outline = ""; }
-                TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
+                TP.updateAllIcons(panel.tab); // workaround to put labels in front
 
                 if(panel.labelEl && panel.xdata.label.display && panel.xdata.label.display == 'mouseover') { panel.labelEl.hide(); }
             },
@@ -1207,7 +1207,7 @@ TP.iconShowEditDialog = function(panel) {
     };
     TP.iconSettingsGlobals.stateUpdate = function() {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
-        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata, undefined, function() {
+        TP.updateAllIcons(panel.tab, panel.id, xdata, undefined, function() {
             if(!TP.iconSettingsWindow) { return; } // closed meanwhile
             panel.refreshHandler(panel.lastState); // recalculate state
             TP.iconSettingsGlobals.renderUpdate();

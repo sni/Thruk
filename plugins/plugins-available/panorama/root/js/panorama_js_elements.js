@@ -542,7 +542,7 @@ Ext.define('Ext.ux.SearchStore', {
         beforeload: function(store, operation, eOpts) {
             var now = new Date();
             store.proxy.extraParams = Ext.Object.merge({format: 'search', hash: 1}, store.proxy.addParams);
-            store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
+            store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(store.panel.tab, store.panel);
             if(!store.search_type) { return false; }
             var type = store.search_type.toLowerCase();
             if(type == 'check period' || type == 'notification period') {
@@ -863,7 +863,7 @@ Ext.define('TP.dragEl', {
             window.setTimeout(Ext.bind(panel.addDDListener, panel, [retries+1]), 1000);
             return;
         }
-        var tab   = Ext.getCmp(panel.panel.panel_id);
+        var tab   = panel.panel.tab;
         panel.dd.addListener('dragstart', function(This, evt) {
             TP.isShift = is_shift_pressed(evt);
             if(!panel.ddShadow) {
@@ -937,6 +937,7 @@ function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, 
             afterrender: function(This) {
                 This.panel    = panel;
                 This.panel_id = panel.panel_id;
+                This.tab      = panel.tab;
                 This.xdata = {
                     link: {
                         link: action_link
@@ -964,4 +965,3 @@ function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, 
     fakePanel.show();
     return;
 }
-

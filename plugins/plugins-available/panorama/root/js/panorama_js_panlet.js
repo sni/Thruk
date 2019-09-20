@@ -28,7 +28,7 @@ Ext.define('TP.Panlet', {
         this.xdata.cls      = this.$className;
         this.xdata.backends = [];
 
-        var tab     = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         if(tab == undefined) {
             var err = new Error;
             TP.logError(this.id, "noTabException", err);
@@ -128,7 +128,7 @@ Ext.define('TP.Panlet', {
         TP.log('['+this.id+'] startTimeouts');
         var refresh = this.xdata.refresh;
         if(this.xdata.refresh == -1) {
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             refresh = tab.xdata.refresh;
         }
         if(refresh > 0) {
@@ -256,10 +256,10 @@ Ext.define('TP.Panlet', {
             }
             /* make header show on mouseover only */
             var div    = This.getEl();
-            var global = Ext.getCmp(This.panel_id);
-            div.on("mouseout", function()  { This.hideHeader(global); });
-            if(global.xdata.autohideheader === 1 || !this.locked) {
-                div.on("mouseover", function() { This.showHeader(global); });
+            var tab = This.tab;
+            div.on("mouseout", function()  { This.hideHeader(tab); });
+            if(tab.xdata.autohideheader === 1 || !this.locked) {
+                div.on("mouseover", function() { This.showHeader(tab); });
             }
         },
         afterrender: function(This, eOpts) {
@@ -314,7 +314,7 @@ Ext.define('TP.Panlet', {
         return null;
     },
     showHeader: function(global) {
-        if(global == undefined) { global = Ext.getCmp(this.panel_id); }
+        if(global == undefined) { global = this.tab; }
         if(global.xdata.autohideheader === 1 || this.xdata.showborder == false) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
@@ -343,7 +343,7 @@ Ext.define('TP.Panlet', {
         }
     },
     hideHeader: function(global) {
-        if(global == undefined) { global = Ext.getCmp(this.panel_id); }
+        if(global == undefined) { global = this.tab; }
         if((global.xdata.autohideheader === 1 || this.xdata.showborder == false) && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
@@ -361,7 +361,7 @@ Ext.define('TP.Panlet', {
     },
     applyBorderAndBackground: function(backgroundColor) {
         var panel = this;
-        var global = Ext.getCmp(this.panel_id);
+        var global = this.tab;
         var panelCls = "";
         if(backgroundColor == undefined) {
             backgroundColor = panel.xdata.background;
@@ -413,7 +413,7 @@ Ext.define('TP.Panlet', {
             }
         }
         if(!this.header) { return; }
-        var global = Ext.getCmp(this.panel_id);
+        var global = this.tab;
         if(global.xdata.autohideheader === 1 || this.xdata.showborder == false) {
             this.header.hide();
         }
@@ -464,7 +464,7 @@ Ext.define('TP.Panlet', {
     },
     /* destroys and redraws everything */
     redrawPanlet: function() {
-        var tab = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         this.saveState();
         this.redraw = true;
         this.destroy();
@@ -481,7 +481,7 @@ Ext.define('TP.PanletGearItem', {
     listeners: {
         afterrender: function(This, eOpts) {
             var panel = this.up('window');
-            var tab   = Ext.getCmp(panel.panel_id);
+            var tab   = panel.tab;
             // settings panel is somehow hidden below header
             if(tab.xdata.autohideheader === 1 || panel.xdata.showborder == false) {
                 This.body.dom.style.marginTop = '17px';
@@ -570,7 +570,7 @@ Ext.define('TP.PanletGearItem', {
 TP.panletGearHandler = function(panel) {
     if(panel == undefined) { panel = this; }
     if(panel.locked) { return; }
-    var tab = Ext.getCmp(panel.panel_id);
+    var tab = panel.tab;
     if(panel.gearitem == undefined) {
         // show settings
         panel.add(Ext.create('TP.PanletGearItem', {}));

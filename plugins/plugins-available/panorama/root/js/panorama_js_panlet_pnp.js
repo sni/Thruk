@@ -16,7 +16,7 @@ TP.graphStore = Ext.create('Ext.data.Store', {
     listeners: {
         beforeload: function(store, operation, eOpts) {
             if(store.panel) {
-                store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
+                store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(store.panel.tab, store.panel);
             } else {
                 store.proxy.extraParams = {};
             }

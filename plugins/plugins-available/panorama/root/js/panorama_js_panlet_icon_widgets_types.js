@@ -113,7 +113,7 @@ Ext.define('TP.HostgroupStatusIcon', {
                 this.xdata.general.incl_svc = true;
                 this.xdata.general.incl_hst = true;
             }
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             var res = TP.get_group_status({
                 group:          this.hostgroup,
                 incl_ack:       this.xdata.general.incl_ack,
@@ -257,7 +257,7 @@ Ext.define('TP.ServicegroupStatusIcon', {
     refreshHandler: function(newStatus) {
         // calculate summarized status
         if(this.servicegroup) {
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             var res = TP.get_group_status({
                 group:          this.servicegroup,
                 incl_ack:       this.xdata.general.incl_ack,
@@ -351,7 +351,7 @@ Ext.define('TP.FilterStatusIcon', {
     refreshHandler: function(newStatus) {
         // calculate summarized status
         if(this.results) {
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             var res = TP.get_group_status({
                 group:          this.results,
                 incl_ack:       this.xdata.general.incl_ack,

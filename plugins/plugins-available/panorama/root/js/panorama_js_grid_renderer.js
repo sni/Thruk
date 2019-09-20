@@ -33,7 +33,7 @@ TP.render_icon_site = function(v, td, item, row, col, store, view) {
         title="title=\""+item.data.version+"\"";
     };
     var panel = view.up().up();
-    var tab   = Ext.getCmp(panel.panel_id);
+    var tab   = panel.tab;
     if(tab.activeBackends != undefined && tab.activeBackends[item.data.id] == false) {
         v = 'sport_golf.png';
     }

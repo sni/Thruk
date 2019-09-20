@@ -29,7 +29,7 @@ Ext.define('TP.SmallWidget', {
         } else {
             this.xdata = TP.clone(this.xdata);
         }
-        var tab     = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         if(!tab) { return(false); } /* tab may be closed already */
         this.locked = tab.xdata.locked;
         if(readonly) {
@@ -74,7 +74,7 @@ Ext.define('TP.SmallWidget', {
             var state      = {
                 xdata: TP.clone(this.xdata)
             };
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             if(state.xdata.map || tab.map) {
                 delete state.xdata.layout.x;
                 delete state.xdata.layout.y;
@@ -245,7 +245,7 @@ Ext.define('TP.SmallWidget', {
             }
 
             // save coordinates when created first time
-            var tab = Ext.getCmp(This.panel_id);
+            var tab = This.tab;
             if(tab.map && (This.xdata.layout.lon == undefined || This.xdata.layout.lon == "")) {
                 This.updateMapLonLat();
             }
@@ -385,7 +385,7 @@ Ext.define('TP.SmallWidget', {
     /* enable / disable editing of this panlet */
     setLock: function(val) {
         var panel = this;
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(panel.locked != val) {
             panel.saveState();
             TP.redraw_panlet(panel, tab);
@@ -394,12 +394,12 @@ Ext.define('TP.SmallWidget', {
 
     addClickEventhandler: function(el) {
         var This = this;
-        var tab  = Ext.getCmp(This.panel_id);
+        var tab  = This.tab;
 
         el.on("click", function(evt) {
             if(!readonly) {
                 if(evt.ctrlKey || is_shift_pressed(evt)) {
-                    var tab = Ext.getCmp(This.panel_id);
+                    var tab = This.tab;
                     if(This.locked) { return; }
                     if(TP.moveIcons == undefined) {
                         TP.moveIcons = [];
@@ -460,7 +460,7 @@ Ext.define('TP.SmallWidget', {
                     text:   'Refresh',
                     icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                     handler: function() {
-                        TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id, undefined, el)
+                        TP.updateAllIcons(This.tab, This.id, undefined, el)
                         el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
                     },
                     hidden:  This.xdata.state == undefined ? true : false
@@ -541,7 +541,7 @@ Ext.define('TP.SmallWidget', {
                     }, {
                         text:   'Unlock Dashboard',
                         icon:   url_prefix+'plugins/panorama/images/lock_open.png',
-                        handler: function() { var tab = Ext.getCmp(This.panel_id); TP.createRestorePoint(tab, "a"); tab.setLock(false); },
+                        handler: function() { var tab = This.tab; TP.createRestorePoint(tab, "a"); tab.setLock(false); },
                         hidden: !This.locked      // only show when locked
                     }
                 ]);
@@ -570,7 +570,7 @@ Ext.define('TP.SmallWidget', {
     },
     addDDListener: function(el) {
         var panel = this;
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(el.dd && !el.dd_listener_added) {
             el.dd.addListener('dragstart', function(This, evt) {
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
@@ -638,7 +638,7 @@ Ext.define('TP.SmallWidget', {
     updateMapLonLat: function(xdata, key) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(tab == undefined || tab.map == undefined || tab.map.map == undefined) { return; }
         var s;
         if(xdata.size || !panel.el) {
@@ -691,7 +691,7 @@ Ext.define('TP.SmallWidget', {
     // moves panel to position accoring to lat/lon
     moveToMapLonLat: function(movedOnly, xdata) {
         var panel = this;
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
         if(xdata.layout == undefined) { xdata.layout = {}; }
@@ -831,9 +831,9 @@ Ext.define('TP.IconWidget', {
         this.applyZindex(this.xdata.layout.zindex);
     },
     refreshHandler: function(newStatus) {
-        var tab   = Ext.getCmp(this.panel_id);
-        if(!tab) { return; } // maybe just closed
         var panel = this;
+        var tab   = panel.tab;
+        if(!tab) { return; } // maybe just closed
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) { return; }
         var oldState = {
             state        : panel.xdata.state,
@@ -863,7 +863,7 @@ Ext.define('TP.IconWidget', {
 
     /* save state of icons back to servers runtime file */
     saveIconsStates: function() {
-        var tab = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         if(tab) { /* may be closed already*/
             tab.saveIconsStates();
         }
@@ -943,7 +943,7 @@ Ext.define('TP.IconWidget', {
     redraw: function() {
         var panel = this;
         var key = panel.id;
-        var tab = Ext.getCmp(panel.panel_id);
+        var tab = panel.tab;
         panel.redrawOnly = true;
         panel.destroy();
         TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
@@ -958,7 +958,7 @@ Ext.define('TP.IconWidget', {
     /* set main render item*/
     setRenderItem: function(xdata, forceRecreate, forceColor) {
         var panel = this;
-        var tab = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(panel.itemRendering && !forceRecreate) { return; }
 

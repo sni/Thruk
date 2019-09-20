@@ -412,7 +412,7 @@ var TP = {
             panel.hide(); // workaround for not removed labels on text elements
             panel.show();
             panel.firstRun = firstRun;
-            TP.updateAllIcons(Ext.getCmp(panel.panel_id));
+            TP.updateAllIcons(panel.tab);
         }, 50);
     },
 
@@ -706,7 +706,7 @@ var TP = {
             baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
             delete baseParams['gridstate']; // not needed
             // add backend settings
-            var tab = Ext.getCmp(panel.panel_id);
+            var tab = panel.tab;
             baseParams['backends'] = TP.getActiveBackendsPanel(tab, panel);
 
             // update proc info?
@@ -1133,7 +1133,7 @@ var TP = {
     removeWindowFromPanels: function(win_id) {
         /* remove panel reference */
         var panel = Ext.getCmp(win_id);
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(tab.window_ids) {
             tab.window_ids = TP.removeFromList(tab.window_ids, win_id);
             tab.saveState();
