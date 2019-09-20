@@ -285,7 +285,7 @@ Ext.define('TP.SmallWidget', {
         /* restore position */
         if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
             if(!panel.xdata.layout.center) { panel.xdata.layout.center = "centered"; }
-            panel.moveToMapLonLat(undefined, false, xdata);
+            panel.moveToMapLonLat(false, xdata);
         } else {
             xdata.layout.x = Number(xdata.layout.x);
             xdata.layout.y = Number(xdata.layout.y);
@@ -339,7 +339,7 @@ Ext.define('TP.SmallWidget', {
         layout.x = x;
         layout.y = y;
         if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
-            panel.moveToMapLonLat(undefined, false);
+            panel.moveToMapLonLat(false);
             return;
         }
         if(panel.shrinked) {
@@ -689,7 +689,7 @@ Ext.define('TP.SmallWidget', {
         panel.saveState();
     },
     // moves panel to position accoring to lat/lon
-    moveToMapLonLat: function(maxSize, movedOnly, xdata) {
+    moveToMapLonLat: function(movedOnly, xdata) {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
         if(xdata == undefined) { xdata = panel.xdata; }
@@ -733,7 +733,8 @@ Ext.define('TP.SmallWidget', {
                 if(xdata.appearance.type == "connector") {
                     if(panel.isHidden()) { panel.show(); }
                 } else {
-                    if(maxSize != undefined && (pos.x < 0 || pos.y < 0 || pos.x > maxSize.width || pos.y > maxSize.height)) {
+                    var maxSize = panel.tab.size;
+                    if(pos.x < 0 || pos.y < 0 || pos.x > maxSize.width || pos.y > maxSize.height) {
                         if(!panel.isHidden()) { panel.hide(); }
                     } else {
                         if(panel.isHidden()) { panel.show(); }
@@ -850,7 +851,7 @@ Ext.define('TP.IconWidget', {
             }
         }
         if(tab.map) {
-            panel.moveToMapLonLat(undefined, false);
+            panel.moveToMapLonLat(false);
         }
         panel.setIconLabel();
 

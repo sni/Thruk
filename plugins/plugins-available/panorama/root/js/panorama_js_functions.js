@@ -315,6 +315,7 @@ var TP = {
         }
         config.conf.panel_id = tb.id;
         TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
+        config.conf.tab      = tb;
         var win = Ext.create(config.type, config.conf);
         if(config.conf.autoShow) { win.show(); }
         if(smartPlacement == undefined || smartPlacement == true) {
@@ -2219,14 +2220,15 @@ var TP = {
         cookieSave('thruk_panorama_tabs', numbers.join(':'));
     },
     setBaseHTMLScroll: function() {
+        window.clearTimeout(TP.timeouts['timeout_base_scroll']);
         var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
         htmlRootEl.removeCls('hidescroll');
         if(htmlRootEl.hasCls('geomap')) {
             return;
         }
-        window.clearTimeout(TP.timeouts['timeout_base_scroll']);
         TP.timeouts['timeout_base_scroll'] = window.setTimeout(function() {
             var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
+            if(htmlRootEl.hasCls('geomap')) { return; }
             htmlRootEl.addCls('hidescroll');
         }, 3000);
     },
@@ -2243,27 +2245,29 @@ var TP = {
         var x = (pixel.x-size.width/2);
         var y = (pixel.y-size.height/2)+TP.offset_y;
 
-        var c = center.split("-");
-        if(c.length == 2) {
-            var widthOffset = size.width;
-            var heightOffset = size.height;
-            if(nsize) {
-                widthOffset  = nsize[0];
-                heightOffset = nsize[1];
-            }
+        if(center && center != "centered") {
+            var c = center.split("-");
+            if(c.length == 2) {
+                var widthOffset = size.width;
+                var heightOffset = size.height;
+                if(nsize) {
+                    widthOffset  = nsize[0];
+                    heightOffset = nsize[1];
+                }
 
-            if(c[0] == "bottom") {
-                y = y - heightOffset/2;
-            }
-            else if(c[0] == "top") {
-                y = y + heightOffset/2;
-            }
+                if(c[0] == "bottom") {
+                    y = y - heightOffset/2;
+                }
+                else if(c[0] == "top") {
+                    y = y + heightOffset/2;
+                }
 
-            if(c[1] == "left") {
-                x = x + widthOffset/2;
-            }
-            else if(c[1] == "right") {
-                x = x - widthOffset/2;
+                if(c[1] == "left") {
+                    x = x + widthOffset/2;
+                }
+                else if(c[1] == "right") {
+                    x = x - widthOffset/2;
+                }
             }
         }
         return({x:Math.floor(x), y:Math.floor(y)});
@@ -2278,27 +2282,29 @@ var TP = {
         x = x+(size.width/2);
         y = y+(size.height/2)-TP.offset_y;
 
-        var c = center.split("-");
-        if(c.length == 2) {
-            var widthOffset = size.width;
-            var heightOffset = size.height;
-            if(nsize) {
-                widthOffset  = nsize[0];
-                heightOffset = nsize[1];
-            }
+        if(center && center != "centered") {
+            var c = center.split("-");
+            if(c.length == 2) {
+                var widthOffset = size.width;
+                var heightOffset = size.height;
+                if(nsize) {
+                    widthOffset  = nsize[0];
+                    heightOffset = nsize[1];
+                }
 
-            if(c[0] == "bottom") {
-                y = y + heightOffset/2;
-            }
-            else if(c[0] == "top") {
-                y = y - heightOffset/2;
-            }
+                if(c[0] == "bottom") {
+                    y = y + heightOffset/2;
+                }
+                else if(c[0] == "top") {
+                    y = y - heightOffset/2;
+                }
 
-            if(c[1] == "left") {
-                x = x - widthOffset/2;
-            }
-            else if(c[1] == "right") {
-                x = x + widthOffset/2;
+                if(c[1] == "left") {
+                    x = x - widthOffset/2;
+                }
+                else if(c[1] == "right") {
+                    x = x + widthOffset/2;
+                }
             }
         }
         return({x:Math.floor(x), y:Math.floor(y)});

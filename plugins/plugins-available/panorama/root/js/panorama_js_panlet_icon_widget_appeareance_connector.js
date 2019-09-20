@@ -37,7 +37,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         if(isNaN(fromX)) {
             // may happen if from and to is not yet calculated
             if(panel.xdata.layout.lon != undefined) {
-                panel.moveToMapLonLat(undefined, false, xdata);
+                panel.moveToMapLonLat(false, xdata);
             }
             return;
         }
@@ -225,7 +225,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
             if(!TP.iconSettingsWindow) { return; }
             if(tab.map) {
                 var xdata = TP.get_icon_form_xdata(TP.iconSettingsWindow);
-                panel.moveToMapLonLat(undefined, undefined, xdata);
+                panel.moveToMapLonLat(undefined, xdata);
             } else {
                 TP.iconSettingsGlobals.renderUpdate();
             }

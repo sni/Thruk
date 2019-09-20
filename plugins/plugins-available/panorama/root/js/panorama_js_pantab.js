@@ -235,8 +235,9 @@ Ext.define('TP.Pantab', {
         },
         resize: function(This, adjWidth, adjHeight, eOpts) {
             This.adjustTabHeaderOffset();
+            This.size = This.getSize();
             if(This.map) {
-                This.map.setSize(This.getSize());
+                This.map.setSize(This.size);
                 This.moveMapIcons();
                 This.saveState();
                 This.setZoomControl(); // zoom functionality gets lost when screen resizes
@@ -288,6 +289,7 @@ Ext.define('TP.Pantab', {
     },
     setBaseHtmlClass: function(hidescroll) {
         var This = this;
+        if(!This.isActiveTab()) { return; }
         var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
         if(This.mapEl) {
             htmlRootEl.addCls('geomap');
@@ -379,12 +381,11 @@ Ext.define('TP.Pantab', {
         if(!this.map) { return; }
         var This = this;
         if(!This.isActiveTab()) { return; }
-        var size = This.getSize();
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
             if(panel.xdata.layout && panel.xdata.layout.lon != undefined) {
-                panel.moveToMapLonLat(size, movedOnly);
+                panel.moveToMapLonLat(movedOnly);
             }
         }
     },
@@ -394,10 +395,9 @@ Ext.define('TP.Pantab', {
         var This = this;
         if(!This.isActiveTab()) { return; }
         if(!This.visibleIcons) { return; }
-        var size = This.getSize();
         for(var nr=0; nr<This.visibleIcons.length; nr++) {
             var panel = This.visibleIcons[nr];
-            panel.moveToMapLonLat(size);
+            panel.moveToMapLonLat();
         }
     },
     isActiveTab: function() {
@@ -756,9 +756,6 @@ Ext.define('TP.Pantab', {
             map.events.register("move", map, function() {
                 tab.moveVisibleMapIcons();
             });
-            map.events.register("zoomend", map, function() {
-                tab.moveMapIcons();
-            });
             // if there are too many icons, hide them before moving the map to reduce lag
             map.events.register("movestart", map, function() {
                 var panels = TP.getAllPanel(tab);
@@ -778,6 +775,12 @@ Ext.define('TP.Pantab', {
                     visible = [];
                 }
                 tab.visibleIcons = visible;
+            });
+            map.events.register("moveend", map, function() {
+                tab.moveMapIcons();
+            });
+            map.events.register("zoomend", map, function() {
+                tab.moveMapIcons();
             });
             controlsDiv.dom.style.display = "";
             tab.lockButton = controlsDiv.createChild('<div class="lockButton unlocked">', controlsDiv.dom.childNodes[0]);

@@ -217,7 +217,7 @@ TP.iconShowEditDialog = function(panel) {
                                         panel.noMoreMoves = true;
                                         var lon    = Number(This.up('panel').getValues().lon);
                                         var center = This.up('panel').getValues().center;
-                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: lon, lat: newValue, center: center}, appearance:{}, nsize: panel.xdata.nsize});
+                                        panel.moveToMapLonLat(false, {layout:{lon: lon, lat: newValue, center: center}, appearance:{}, nsize: panel.xdata.nsize});
                                         panel.noMoreMoves = false;
                                     }
                                 }
@@ -230,7 +230,7 @@ TP.iconShowEditDialog = function(panel) {
                                         panel.noMoreMoves = true;
                                         var lat    = Number(This.up('panel').getValues().lat);
                                         var center = This.up('panel').getValues().center;
-                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: newValue, lat: lat, center: center}, appearance:{}, nsize: panel.xdata.nsize});
+                                        panel.moveToMapLonLat(false, {layout:{lon: newValue, lat: lat, center: center}, appearance:{}, nsize: panel.xdata.nsize});
                                         panel.noMoreMoves = false;
                                     }
                                 }
@@ -247,7 +247,7 @@ TP.iconShowEditDialog = function(panel) {
                                             panel.noMoreMoves = true;
                                             var lat = Number(This.up('panel').getValues().lat);
                                             var lon = Number(This.up('panel').getValues().lon);
-                                            panel.moveToMapLonLat(undefined, false, {layout:{lon: lon, lat: lat, center: newValue}, appearance:{}, nsize: panel.xdata.nsize});
+                                            panel.moveToMapLonLat(false, {layout:{lon: lon, lat: lat, center: newValue}, appearance:{}, nsize: panel.xdata.nsize});
                                             panel.noMoreMoves = false;
                                         }
                                     }
