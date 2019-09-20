@@ -30,6 +30,7 @@ next:
             - add background colour option for hosts and service lists
             - toggle geomap navigation with space key
             - improve dashboard menu filter performance
+            - add pins status icon set
             - fix changing open dashboards on reloads
           - Business Process:
             - add node clone menu entry to node context menu
