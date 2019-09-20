@@ -729,7 +729,7 @@ Ext.define('TP.SmallWidget', {
             xdata.layout.x = pos.x;
             xdata.layout.y = pos.y;
             panel.setRawPosition(xdata.layout.x, xdata.layout.y);
-            if(panel.el && TP.isThisTheActiveTab(panel)) {
+            if(panel.el && panel.tab.isActiveTab()) {
                 if(xdata.appearance.type == "connector") {
                     if(panel.isHidden()) { panel.show(); }
                 } else {
@@ -935,7 +935,7 @@ Ext.define('TP.IconWidget', {
         /* static icons must be refreshed, even when inactive, because they won't be updated later on */
         if(panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata); }
         /* no need for changes if we are not the active tab */
-        if(!TP.isThisTheActiveTab(panel)) { return; }
+        if(!panel.tab.isActiveTab()) { return; }
         if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
         if(panel.el) { panel.size = panel.getSize(); }
     },
@@ -1220,7 +1220,7 @@ Ext.define('TP.IconWidget', {
         var src = panel.src || xdata.general.src;
         if(!panel.el) { return; }
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(TP.isThisTheActiveTab(panel) && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
+        if(panel.tab.isActiveTab() && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
             panel.el.dom.style.border    = "1px dashed black";
             panel.el.dom.style.minWidth  = 20;
             panel.el.dom.style.minHeight = 20;

@@ -313,7 +313,6 @@ var TP = {
         if(config.state) {
             TP.cp.set(config.conf.id, config.state);
         }
-        config.conf.panel_id = tb.id;
         TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
         config.conf.tab      = tb;
         var win = Ext.create(config.type, config.conf);
@@ -711,7 +710,7 @@ var TP = {
 
             // update proc info?
             baseParams['update_proc'] = TP.setUpdateProcInfo();
-            baseParams['current_tab'] = panel.panel_id;
+            baseParams['current_tab'] = panel.tab.id;
         }
         TP.log('['+panel.id+'] loading '+url);
         panel.loader.load({url:url, baseParams: baseParams});
@@ -1134,7 +1133,7 @@ var TP = {
         /* remove panel reference */
         var panel = Ext.getCmp(win_id);
         var tab   = panel.tab;
-        if(tab.window_ids) {
+        if(tab && tab.window_ids) {
             tab.window_ids = TP.removeFromList(tab.window_ids, win_id);
             tab.saveState();
         }
@@ -2090,12 +2089,6 @@ var TP = {
                 callback();
             }
         }, delay);
-    },
-    isThisTheActiveTab: function(panel) {
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
-        if(activeTab && panel.panel_id != activeTab.id) { return(false); }
-        return(true);
     },
     /* return true if there are any masks visible */
     masksVisible: function() {

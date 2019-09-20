@@ -258,12 +258,11 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         }
     }
     if(action && action[1]) {
-        var panel_id = panel.panel_id.replace(/^tabpan\-tab_/, '');
         var params = {
             host:      panel.xdata.general.host,
             service:   panel.xdata.general.service,
             link:      link,
-            dashboard: panel_id,
+            dashboard: panel.tab.nr(),
             icon:      id,
             CSRFtoken: CSRFtoken
         };

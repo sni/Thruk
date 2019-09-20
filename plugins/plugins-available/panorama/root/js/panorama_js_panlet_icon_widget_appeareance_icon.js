@@ -75,7 +75,7 @@ Ext.define('TP.IconWidgetAppearanceIcon', {
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
         panel.iconFixSize(xdata);
-        if(!TP.isThisTheActiveTab(panel)) { panel.hide(); }
+        if(!panel.tab.isActiveTab()) { panel.hide(); }
     },
 
     getAppearanceTabItems: function(panel) {

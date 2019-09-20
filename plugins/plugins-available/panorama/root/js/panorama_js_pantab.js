@@ -140,7 +140,7 @@ Ext.define('TP.Pantab', {
             if(delay > 0) {
                 // make sure we hide all panlets if the user meanwhile changed tab again
                 TP.timeouts['timeout_'+this.id+'_check_panel_show'] = window.setTimeout(function() {
-                    if(This.id != tabpan.getActiveTab().id) {
+                    if(!This.isActiveTab()) {
                         // hide all except the active one
                         tabpan.checkPanletVisibility(tabpan.getActiveTab());
                     }
@@ -556,30 +556,29 @@ Ext.define('TP.Pantab', {
 
     /* start all timed actions for this tab and its panels */
     startTimeouts: function() {
-        this.stopTimeouts();
-        TP.log('['+this.id+'] startTimeouts');
-
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
+        var tab = this;
+        tab.stopTimeouts();
+        TP.log('['+tab.id+'] startTimeouts');
 
         /* ensure panels from the active tab are displayed */
-        if(activeTab && this.id == activeTab.id) {
-            if(this.window_ids) {
-                for(var nr=0; nr<this.window_ids.length; nr++) {
-                    var panlet = Ext.getCmp(this.window_ids[nr]);
-                    if(panlet) { // may not yet exists due to delayed rendering
-                        try {    // so allow it to fail
-                            panlet.show(false);
-                        } catch(err) {
-                            TP.logError(this.id, "panelStarttimeoutException", err);
-                        }
+        if(!tab.isActiveTab()) {
+            return;
+        }
+        if(tab.window_ids) {
+            for(var nr=0; nr<tab.window_ids.length; nr++) {
+                var panlet = Ext.getCmp(tab.window_ids[nr]);
+                if(panlet) { // may not yet exists due to delayed rendering
+                    try {    // so allow it to fail
+                        panlet.show(false);
+                    } catch(err) {
+                        TP.logError(tab.id, "panelStarttimeoutException", err);
                     }
                 }
             }
         }
 
         /* start refresh for all panlets with our refresh rate */
-        var panels = TP.getAllPanel(this);
+        var panels = TP.getAllPanel(tab);
         if(panels.length > 0) {
             // spread panel reload
             var delay    = 0;
@@ -592,27 +591,26 @@ Ext.define('TP.Pantab', {
                     delay = delay + Math.round(interval*1000);
                 }
                 if(p.header) {
-                    if(this.xdata.autohideheader === 1) { p.header.hide() }
+                    if(tab.xdata.autohideheader === 1) { p.header.hide() }
                 }
             }
         }
-        var This = this;
-        if(This.xdata && This.xdata.refresh > 0) {
-            TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
+        if(tab.xdata && tab.xdata.refresh > 0) {
+            TP.timeouts['interval_global_icons' + tab.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(tab) }, tab.xdata.refresh * 1000);
             var skipUpdate = false;
-            if(TP.lastFullIconRefresh[This.id]) {
-                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[This.id].getTime())/1000;
+            if(TP.lastFullIconRefresh[tab.id]) {
+                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[tab.id].getTime())/1000;
                 /* no update neccessary if the last update is not older than half of the usual refresh interval */
-                if(deltaRefresh < (This.xdata.refresh / 2)) {
+                if(deltaRefresh < (tab.xdata.refresh / 2)) {
                     skipUpdate = true;
                 }
             }
             if(!skipUpdate) {
-                TP.updateAllIcons(This);
+                TP.updateAllIcons(tab);
             }
         }
 
-        if(TP.initMask && !this.keepMask) { TP.initMask.destroy(); delete TP.initMask; }
+        if(TP.initMask && !tab.keepMask) { TP.initMask.destroy(); delete TP.initMask; }
 
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();

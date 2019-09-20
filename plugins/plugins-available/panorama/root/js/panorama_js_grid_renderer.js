@@ -569,7 +569,7 @@ TP.checkActionLink = function(a) {
         p = p.parentNode;
         if(p.id) {
             panel = Ext.getCmp(p.id);
-            if(panel && panel.panel_id) {
+            if(panel && panel.tab && panel.tab.id) {
                 break;
             }
             panel = null;

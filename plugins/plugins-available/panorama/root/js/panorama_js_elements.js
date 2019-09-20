@@ -936,7 +936,6 @@ function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, 
         listeners: {
             afterrender: function(This) {
                 This.panel    = panel;
-                This.panel_id = panel.panel_id;
                 This.tab      = panel.tab;
                 This.xdata = {
                     link: {

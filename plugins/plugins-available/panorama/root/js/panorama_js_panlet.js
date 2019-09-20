@@ -196,7 +196,7 @@ Ext.define('TP.Panlet', {
             var shadow = Ext.get(This.id + '_shadow');
             if(shadow != undefined) { shadow.hide(); }
         },
-        destroy: function( This, eOpts ) {
+        destroy: function(This, eOpts) {
             TP.log('['+This.id+'] destroy');
 
             /* remove shadow */
@@ -207,10 +207,11 @@ Ext.define('TP.Panlet', {
 
             if(!This.redraw) {
                 /* remove window from panels window ids */
-                TP.removeWindowFromPanels(this.id);
+                TP.removeWindowFromPanels(This.id);
 
                 // make sure timer is not started again
-                this.xdata.refresh = 0;
+                This.xdata.refresh = 0;
+                This.tab = null;
 
                 /* clear state information */
                 TP.cp.clear(This.id);

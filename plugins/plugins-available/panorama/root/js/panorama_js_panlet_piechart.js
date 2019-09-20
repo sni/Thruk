@@ -53,7 +53,7 @@ Ext.define('TP.PanletPieChart', {
                     this.chart.series.getAt(0).colorSet = data.colors;
                     this.chart.bindStore(this.pieStore);
                     /* rendering pie charts on inactive tabs leads to setAttribute errors */
-                    if(!TP.isThisTheActiveTab(panel)) {
+                    if(!panel.tab.isActiveTab()) {
                         return false;
                     }
                     if(this.chart.isVisible()) {

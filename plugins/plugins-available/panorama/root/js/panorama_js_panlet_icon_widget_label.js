@@ -246,7 +246,7 @@ Ext.define('TP.IconLabel', {
     /* creates the label element */
     createLabelEl: function() {
         var panel = this;
-        if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
+        if(!panel.tab.isActiveTab()) { return; } /* no need for a label on inactive tab */
         this.labelEl = Ext.create("Ext.Component", {
             'html':     ' ',
             panel:       panel,
@@ -348,4 +348,3 @@ function nl2br(text) {
     text = text.replace(/\\n/g, "<br>");
     return(text);
 }
-

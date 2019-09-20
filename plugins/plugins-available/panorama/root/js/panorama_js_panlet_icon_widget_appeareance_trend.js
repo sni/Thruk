@@ -244,7 +244,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
         panel.iconFixSize(xdata);
-        if(!TP.isThisTheActiveTab(panel)) { panel.hide(); }
+        if(!panel.tab.isActiveTab()) { panel.hide(); }
     },
 
     getBaseValue: function(func, data, start, end, fixed) {
