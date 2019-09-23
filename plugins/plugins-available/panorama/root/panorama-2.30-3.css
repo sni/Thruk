@@ -784,3 +784,8 @@ SPAN.searchhint.type {
 .x-grid-with-row-lines .x-grid-table {
   border-top: 1px solid transparent;
 }
+
+.highlight {
+  background-color: #00b3ac !important;
+  box-shadow: 0 0 25px 25px #00b3ac !important;
+}

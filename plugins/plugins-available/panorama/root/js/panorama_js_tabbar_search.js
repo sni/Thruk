@@ -99,9 +99,9 @@ Ext.define('TP.TabBarSearch', {
             var icon = Ext.getCmp(el.highlight);
             if(!icon)    { return; }
             if(!icon.el) { return; }
-            icon.el.dom.style.boxShadow = "0 0 25px 25px #0083ee";
+            icon.el.addCls("highlight");
             TP.flickerImg(icon.el.id, function() {
-                icon.el.dom.style.boxShadow = "";
+                icon.el.removeCls("highlight");
             });
         }
         var highlightAll = function() {
