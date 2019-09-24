@@ -34,7 +34,7 @@ sub get_keys {
     my $filename   = $filter->{'file'};
     my $system     = $filter->{'system'};
     my $user       = $filter->{'user'};
-    my $hashed_key = $filter->{'user'};
+    my $hashed_key = $filter->{'hashed_key'};
     my $all        = (defined $user || defined $system) ? 0 : 1;
 
     my $keys   = [];
@@ -166,13 +166,13 @@ sub create_key_from_req_params {
     }
 
     # roles cannot exceed existing roles
-    if($c->req->parameters->{'roles'}) {
-        my $roles = [];
+    my $roles ;
+    if($c->req->parameters->{'roles'} && (!$c->req->parameters->{'restrict_only'} || $c->req->parameters->{'restrict'})) {
+        $roles = [];
         for my $role (@{Thruk::Utils::list($c->req->parameters->{'roles'})}) {
             next unless $c->user->check_role_permissions($role);
             push @{$roles}, $role;
         }
-        $c->req->parameters->{'roles'} = $roles;
     }
 
     my($private_key, $hashed_key, $filename)
@@ -180,7 +180,7 @@ sub create_key_from_req_params {
             $c,
             $username,
            ($c->req->parameters->{'comment'} // ''),
-            $c->req->parameters->{'roles'},
+            $roles,
             $c->req->parameters->{'system'} ? 1 : 0,
     );
     return($private_key, $hashed_key, $filename);

@@ -99,7 +99,10 @@
       <td class='dataVar'></td>
       <td>
         <input type="checkbox" id="system" name="system" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
-        <b><label for="system" title="Enable to create a global shared api key, which is not bound to this user."[% IF !c.check_user_roles("admin") %] class="disabled" [% END %]>System Api Key</label></b><br>
+        <b><label for="system" title="Enable to create a global shared api key, which is not bound to this user."[% IF !c.check_user_roles("admin") %] class="disabled" [% END %]>System Api Key</label></b>
+        <span class="hint" style="margin-left: 20px;"><a href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(read more about system keys)</a></span><br>
+        <hr style="margin: 0; color:#5f6268;">
+        <input type="hidden" name="restrict_only" value="1">
         <input type="checkbox" id="restrict" name="restrict" value="1" onchange="if(this.checked) { showElement('restricted_roles'); } else { hideElement('restricted_roles'); } ">
         <b><label for="restrict" title="Enable to select roles. Otherwise this API key will get the same roles as the user itself.">Select Roles</label></b><br>
         <div id="restricted_roles" style="display: none;">
@@ -128,7 +131,16 @@
           [% BLOCK key_block %]
           <tr class="api_keys">
             <td>[% IF key.exists('system') && key.system %]<input type="checkbox" checked disabled>[% ELSE %]<input type="checkbox" disabled>[% END %]</td>
-            <td>[% IF key.exists('roles') %][% key.roles.join(',<br>') %][% ELSE %]no[% END %]</td>
+            <td>[% IF key.exists('roles') %]
+                  [% IF contains(key.roles, 'authorized_for_admin') %]
+                    &lt;admin&gt;
+                  [% ELSE %]
+                    [% key.roles.join(',<br>') %]
+                  [% END %]
+                [% ELSE %]
+                  &lt;no restriction&gt;
+                [% END %]
+            </td>
             <td>[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
             <td>[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
             <td>[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
