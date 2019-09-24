@@ -303,6 +303,11 @@ sub authenticate {
     if(Thruk->verbose) {
         $c->log->debug("authenticated as ".$user->{'username'});
     }
+    # save current roles in session file so it can be used from external tools
+    if(!$sessiondata->{'current_roles'} && $sessiondata->{'file'}) {
+        $sessiondata->{'current_roles'} = $c->{'user'}->{'roles'};
+        my $data = Thruk::Utils::IO::json_lock_patch($sessiondata->{'file'}, { current_roles => $sessiondata->{'current_roles'} });
+    }
     return($user);
 }
 

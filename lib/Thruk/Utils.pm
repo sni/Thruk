@@ -1733,6 +1733,7 @@ sub get_fake_session {
     my($sessionid, $sessionfile,$newsessiondata) = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;
+    $sessiondata->{'file'}           = $sessionfile;
     return($sessionid, $newsessiondata);
 }
 

@@ -47,6 +47,26 @@ sub index {
         $keywords = 'logout';
         $logoutref = $1;
     }
+
+    my $login   = $c->req->parameters->{'login'}    || '';
+    my $pass    = $c->req->parameters->{'password'} || '';
+    my $submit  = $c->req->parameters->{'submit'}   || '';
+    my $referer = $c->req->parameters->{'referer'}  || '';
+    $referer    =~ s#^//#/#gmx;         # strip double slashes
+    $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
+    $referer    = $c->stash->{'url_prefix'} unless $referer;
+    # append slash for omd sites, IE and chrome wont send the login cookie otherwise
+    if(($ENV{'OMD_SITE'} and $referer eq '/'.$ENV{'OMD_SITE'})
+       or ($referer eq $c->stash->{'url_prefix'})) {
+        $referer =~ s/\/*$//gmx;
+        $referer = $referer.'/';
+    }
+    $referer =~ s/%3f/?/mx;
+    # add trailing slash if referer ends with the product prefix and nothing else
+    if($referer =~ m|\Q/$product_prefix\E$|mx) {
+        $referer = $referer.'/';
+    }
+
     if(defined $keywords) {
         if($keywords eq 'logout') {
             _invalidate_current_session($c, $cookie_path);
@@ -79,25 +99,11 @@ sub index {
             _invalidate_current_session($c, $cookie_path);
             Thruk::Utils::set_message( $c, 'fail_message', 'account is locked, please contact an administrator' );
         }
-    }
-
-    my $login   = $c->req->parameters->{'login'}    || '';
-    my $pass    = $c->req->parameters->{'password'} || '';
-    my $submit  = $c->req->parameters->{'submit'}   || '';
-    my $referer = $c->req->parameters->{'referer'}  || '';
-    $referer    =~ s#^//#/#gmx;         # strip double slashes
-    $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
-    $referer    = $c->stash->{'url_prefix'} unless $referer;
-    # append slash for omd sites, IE and chrome wont send the login cookie otherwise
-    if(($ENV{'OMD_SITE'} and $referer eq '/'.$ENV{'OMD_SITE'})
-       or ($referer eq $c->stash->{'url_prefix'})) {
-        $referer =~ s/\/*$//gmx;
-        $referer = $referer.'/';
-    }
-    $referer =~ s/%3f/?/mx;
-    # add trailing slash if referer ends with the product prefix and nothing else
-    if($referer =~ m|\Q/$product_prefix\E$|mx) {
-        $referer = $referer.'/';
+        if($keywords =~ /^setsession\&(.*)$/mx or $keywords eq 'setsession') {
+            $c->authenticate();
+            return $c->redirect_to($referer) if $referer;
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
+        }
     }
 
     # make lowercase username

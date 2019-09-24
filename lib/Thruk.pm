@@ -322,8 +322,9 @@ sub _dispatcher {
     eval {
         Thruk::Action::AddDefaults::begin($c);
     };
-    if($@) {
-        $c->log->debug($@);
+    my $err = $@;
+    if($err) {
+        $c->log->debug($err);
         $c->{'errored'} = 1;
     }
     #&timing_breakpoint("_dispatcher begin done");
@@ -354,8 +355,8 @@ sub _dispatcher {
                 }
             }
         };
-        if($@ && !$c->{'detached'}) { # prevent overriding previously detached errors
-            my $err = $@;
+        my $err = $@;
+        if($err && !$c->{'detached'}) { # prevent overriding previously detached errors
             $c->log->error("Error path_info: ".$path_info) unless $c->req->url;
             $c->error($err);
             Thruk::Controller::error::index($c, 13);
