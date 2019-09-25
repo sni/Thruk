@@ -114,7 +114,10 @@ sub process {
         if($config->{'api_keys_enabled'}) {
             my $data = Thruk::Utils::APIKeys::get_key_by_private_key($config, $extra->[2]);
             if($data) {
-                my $user = $data->{'user'} // $extra->[3];
+                my $user = $data->{'user'};
+                if($data->{'system'}) {
+                    $user = $extra->[3] ne '' ? $extra->[3] : '(api)';
+                }
                 Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time() }, 1);
                 return "/loginok/".$user."/".$path."\n" if defined $user;
                 return "/pass/".$path."\n";

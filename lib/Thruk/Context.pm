@@ -354,7 +354,7 @@ sub _request_username {
             $username = $data->{'user'};
             if($data->{'system'}) {
                 $system   = 1;
-                $username = '(api)';
+                $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'} || '(api)';
             }
             $roles    = $data->{'roles'};
             $auth_src = "api_key";

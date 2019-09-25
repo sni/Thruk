@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 26;
+plan tests => 58;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -34,6 +34,44 @@ my $curl = '/usr/bin/env curl -ks --header "X-Thruk-Auth-Key: '.$data->{'private
 TestUtils::test_command({
     cmd  => $curl.' https://127.0.0.1/demo/thruk/r/',
     like => ['/lists cluster nodes/'],
+});
+
+TestUtils::test_command({
+    cmd  => $curl.' https://127.0.0.1/demo/thruk/r/thruk/whoami',
+    like => ['/"auth_src" : "api_key",/', '/"id" : "\(cli\)",/'],
+});
+
+TestUtils::test_command({
+    cmd  => $curl.' https://127.0.0.1/demo/thruk/r/thruk/api_keys',
+    like => ['/last_from/', '/hashed_key/', '/'.$data->{'hashed_key'}.'/'],
+});
+
+TestUtils::test_command({
+    cmd  => $curl.' --data "comment_data=testDowntime" https://127.0.0.1/demo/thruk/r/sites/ALL/hosts/test/cmd/schedule_host_downtime',
+    like => ['/Command successfully submitted/', '/SCHEDULE_HOST_DOWNTIME/'],
+});
+
+###########################################################
+# create system api key
+$test = {
+    cmd  => '/usr/bin/env thruk r -d system=1 -m POST /thruk/api_keys',
+    like => ['/private_key/', '/hashed_key/', '/\.SHA\-256/'],
+};
+TestUtils::test_command($test);
+$data = decode_json($test->{'stdout'});
+isnt($data->{'private_key'}, undef, "created system api key");
+
+###########################################################
+# check some curl requests
+my $curl = '/usr/bin/env curl -ks --header "X-Thruk-Auth-Key: '.$data->{'private_key'}.'"';
+TestUtils::test_command({
+    cmd  => $curl.' https://127.0.0.1/demo/thruk/r/',
+    like => ['/lists cluster nodes/'],
+});
+
+TestUtils::test_command({
+    cmd  => $curl.' --header "X-Thruk-Auth-User: testuser" https://127.0.0.1/demo/thruk/r/thruk/whoami',
+    like => ['/"auth_src" : "api_key",/', '/"id" : "testuser",/'],
 });
 
 TestUtils::test_command({
