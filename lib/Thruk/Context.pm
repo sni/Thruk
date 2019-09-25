@@ -291,7 +291,7 @@ sub authenticate {
     }
     if($sessiondata) {
         my $now = time();
-        utime($now, $now, $sessiondata->{'file'}) if $sessiondata->{'file'};
+        utime($now, $now, $sessiondata->{'file'});
         $c->{'session'} = $sessiondata;
     }
     $c->{'user'} = $user;
@@ -304,7 +304,7 @@ sub authenticate {
         $c->log->debug("authenticated as ".$user->{'username'});
     }
     # save current roles in session file so it can be used from external tools
-    if(!$sessiondata->{'current_roles'} && $sessiondata->{'file'}) {
+    if($sessiondata && !$sessiondata->{'current_roles'}) {
         $sessiondata->{'current_roles'} = $c->{'user'}->{'roles'};
         my $data = Thruk::Utils::IO::json_lock_patch($sessiondata->{'file'}, { current_roles => $sessiondata->{'current_roles'} });
     }

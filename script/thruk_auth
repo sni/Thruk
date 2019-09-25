@@ -114,8 +114,10 @@ sub process {
         if($config->{'api_keys_enabled'}) {
             my $data = Thruk::Utils::APIKeys::get_key_by_private_key($config, $extra->[2]);
             if($data) {
+                my $user = $data->{'user'} // $extra->[3];
                 Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time() }, 1);
-                return "/loginok/".$data->{'user'}."/".$path."\n";
+                return "/loginok/".$user."/".$path."\n" if defined $user;
+                return "/pass/".$path."\n";
             }
         }
         return "/pass/".$prefix."cgi-bin/error.cgi?error=27\n";
