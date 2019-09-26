@@ -48,12 +48,27 @@ already and will return the results with permissions of the current user.
 === API Key
 
 The web rest api accepts the api key as http header. You can create API keys from
-the user profile page if `api_keys_enabled` is enabled in your thruk config.
+the user profile page if `api_keys_enabled` is enabled in your thruk config or with
+the rest api itself using the `/thruk/api_keys` endpoint.
 
 ------
   %> curl -H 'X-Thruk-Auth-Key: apikey' \
           -gk 'https://localhost/thruk/r/hosts
 ------
+
+=== System API Key
+A system API key can be created by admins and is not bound to a specific user.
+Instead you can set a username with the `X-Thruk-Auth-User` HTTP header. This
+makes system api keys very powerful and they should be handled with the same care
+as the secret key.
+
+------
+  %> curl -H 'X-Thruk-Auth-Key: apikey' \
+          -H 'X-Thruk-Auth-User: automation' \
+          -d 'comment=test' \
+          -gk 'https://localhost/thruk/r/hosts/localhost/cmd/schedule_host_downtime
+------
+
 
 === Secret Key
 
@@ -66,6 +81,7 @@ when using OMD.
           -H 'X-Thruk-Auth-User: thrukadmin' \
           -gk 'https://localhost/thruk/r/hosts
 ------
+
 
 Since the secretkey gives you superadminpower. You can set the context of the
 result to any user you like with the `X-Thruk-Auth-User` HTTP header.
@@ -1698,4 +1714,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
