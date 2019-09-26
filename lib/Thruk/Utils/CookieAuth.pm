@@ -396,6 +396,7 @@ sub retrieve_session {
         $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
     };
     # REMOVE AFTER: 01.01.2020
+    my $needs_save;
     if(!$data) {
         my $raw = scalar read_file($sessionfile);
         chomp($raw);
@@ -408,6 +409,7 @@ sub retrieve_session {
             hash     => $auth,
             roles    => \@roles,
         };
+        $needs_save = 1;
     }
     # /REMOVE
 
@@ -425,6 +427,10 @@ sub retrieve_session {
     $data->{roles}       = [] unless $data->{roles};
     $data->{private_key} = $sessionid if $sessionid;
     delete $data->{current_roles};
+
+    # REMOVE AFTER: 01.01.2020
+    store_session($config, $sessionid, $data) if($needs_save && $sessionid);
+    # /REMOVE
     return($data);
 }
 
