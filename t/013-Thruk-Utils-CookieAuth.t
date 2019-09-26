@@ -7,7 +7,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 16;
+    plan tests => 17;
 
     use lib('t');
     require TestUtils;
@@ -29,7 +29,11 @@ my $c = TestUtils::get_c();
     my($sessionid2,$sessionfile,$data2) = Thruk::Utils::CookieAuth::store_session($c->config, $sessionid, $data);
     is($sessionid2, $sessionid, "session id did not change: ".$sessionid2);
     isnt($sessionfile, undef, "got file: ".$sessionfile);
-    like($data2->{'hash'}, '/^CBC,.+/', "basic auth hash is crypted");
+    is($data2->{'hash'}, $data->{'hash'}, "basic auth hash is untouched");
+
+    $data2 = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
+    like($data2->{'hash'}, '/^CBC,.+/', "basic auth hash is stored crypted");
+
     my $session2 = Thruk::Utils::CookieAuth::retrieve_session(id => $sessionid, config => $c->config);
     is($session2->{'file'}, $sessionfile, "got session file");
     is($session2->{'hash'}, "test", "hash has been decrypted");
