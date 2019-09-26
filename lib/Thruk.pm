@@ -157,6 +157,7 @@ sub _build_app {
     unless(Thruk::Config::read_cgi_cfg(undef, $self->{'config'})) {
         die("\n\n*****\nfailed to load cgi config: ".$self->{'config'}->{'cgi.cfg'}."\n*****\n\n");
     }
+    $self->_add_additional_roles();
     #&timing_breakpoint('startup() cgi.cfg parsed');
 
     $self->_create_secret_file();
@@ -1173,6 +1174,23 @@ sub _load_plugin_class {
         $self->log->error($err);
         return($err);
     }
+    return;
+}
+
+###################################################
+sub _add_additional_roles {
+    my($self) = @_;
+    my $roles = $Thruk::Authentication::User::possible_roles;
+    for my $role (sort keys %{$self->config->{'cgi_cfg'}}) {
+        next unless $role =~ m/authorized_(contactgroup_|)for_/mx;
+        $role =~ s/authorized_contactgroup_for_/authorized_for_/mx;
+        push @{$roles}, $role;
+    }
+    $roles = Thruk::Config::array_uniq($roles);
+    # always put readonly role at the end
+    @{$roles} = sort grep(!/^authorized_for_read_only$/mx, @{$roles});
+    push @{$roles}, "authorized_for_read_only";
+    $Thruk::Authentication::User::possible_roles = $roles;
     return;
 }
 
