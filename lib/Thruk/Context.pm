@@ -305,7 +305,7 @@ sub authenticate {
     }
     # save current roles in session file so it can be used from external tools
     if($sessiondata && !$sessiondata->{'current_roles'}) {
-        $sessiondata->{'current_roles'} = $c->{'user'}->{'roles'};
+        $sessiondata->{'current_roles'} = $c->{'user'}->{'roles'} || [];
         my $data = Thruk::Utils::IO::json_lock_patch($sessiondata->{'file'}, { current_roles => $sessiondata->{'current_roles'} });
     }
     return($user);
@@ -383,8 +383,8 @@ sub _request_username {
         my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $c->req->cookies->{'thruk_auth'});
         if($sessiondata && $sessiondata->{'address'} && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
             $username = $sessiondata->{'username'};
+            $auth_src = "cookie";
         }
-        $auth_src = "cookie";
     }
 
     # default_user_name?

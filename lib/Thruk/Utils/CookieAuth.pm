@@ -291,6 +291,7 @@ sub store_session {
 
     $data->{'csrf_token'} = Thruk::Utils::Crypt::random_uuid([$sessionid]) unless $data->{'csrf_token'};
     delete $data->{'private_key'};
+    delete $data->{'file'};
     my $hash_raw  = delete $data->{'hash_raw'};
     my $hash_orig;
 
@@ -317,6 +318,7 @@ sub store_session {
     $data->{'private_key'} = $sessionid;
     $data->{'hash_raw'} = $hash_raw if $hash_raw;
     $data->{'hash'}     = $hash_orig if $hash_orig;
+    $data->{'file'}     = $sessionfile;
 
     return($sessionid, $sessionfile, $data);
 }
