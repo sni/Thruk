@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 139;
+plan tests => 159;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -173,5 +173,32 @@ TestUtils::test_command({
     like => ['/Command request successfully submitted/'],
     errlike => ['/SCHEDULE_HOST_CHECK/'],
 });
+
+###########################################################
+# thruk cli reports
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk 'avail.cgi?hostgroup=all&timeperiod=last24hours&view_mode=csv'",
+    like => ['/^HOST_NAME/'],
+    unlike => ['/ERROR/'],
+});
+
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk --local 'avail.cgi?hostgroup=all&timeperiod=last24hours&view_mode=csv'",
+    like => ['/^HOST_NAME/'],
+    unlike => ['/ERROR/'],
+});
+
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk 'avail.cgi?hostgroup=all&timeperiod=last24hours'",
+    like => ['/Availability report completed/'],
+    unlike => ['/ERROR/'],
+});
+
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk --local 'avail.cgi?hostgroup=all&timeperiod=last24hours'",
+    like => ['/Availability report completed/'],
+    unlike => ['/ERROR/'],
+});
+
 
 ###########################################################

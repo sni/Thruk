@@ -37,6 +37,7 @@ sub index {
     $c->stash->{'text'}       = 'OK';
 
     if(defined $c->req->parameters->{'data'}) {
+        $c->stash->{'inject_stats'} = 0;
         $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->req->parameters->{'data'});
     }
 

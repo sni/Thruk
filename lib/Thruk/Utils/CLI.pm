@@ -237,12 +237,17 @@ sub request_url {
        and $result->{'headers'}->{'location'} =~ m|/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
         my $jobid = $1;
         my $x = 0;
-        while($result->{'code'} == 302 or $result->{'result'} =~ m/thruk:\ waiting\ for\ job\ $jobid/mx) {
+        while($result->{'code'} == 302 || $result->{'result'} =~ m/thruk:\ waiting\ for\ job\ $jobid/mx) {
             my $sleep = 0.1 * $x;
             $sleep = 1 if $x > 10;
             sleep($sleep);
             $url = $result->{'headers'}->{'location'} if defined $result->{'headers'}->{'location'};
-            (undef, undef, $result) = _internal_request($url);
+            (undef, undef, $res) = _internal_request($url);
+            $result = {
+                code    => $res->code,
+                result  => $res->decoded_content || $res->content,
+                headers => $res->headers,
+            };
             $x++;
         }
     }
