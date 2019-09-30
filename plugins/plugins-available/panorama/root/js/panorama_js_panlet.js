@@ -217,6 +217,13 @@ Ext.define('TP.Panlet', {
                 TP.cp.clear(This.id);
             }
         },
+        beforeshow: function(This, eOpts) {
+            if(!This.tab) {
+                // may be closed already
+                return false;
+            }
+            return true;
+        },
         show: function(This, eOpts) {
             // make move show snap shadow
             if(This.dd_overriden == false && This.dd != undefined) {
@@ -345,6 +352,7 @@ Ext.define('TP.Panlet', {
     },
     hideHeader: function(global) {
         if(global == undefined) { global = this.tab; }
+        if(!global) { return; } // maybe closed already
         if((global.xdata.autohideheader === 1 || this.xdata.showborder == false) && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
@@ -451,7 +459,7 @@ Ext.define('TP.Panlet', {
         if(delay == undefined) { delay = 100; }
         if(win.xdata.showborder == false) {
             TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                if(win.getEl().shadow && win.getEl().shadow.el) {
+                if(win && win.getEl() && win.getEl().shadow && win.getEl().shadow.el) {
                     win.getEl().shadow.el.addCls('hidden');
                 }
             }, win, []), delay);

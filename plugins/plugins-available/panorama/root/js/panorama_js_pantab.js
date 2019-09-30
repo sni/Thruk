@@ -53,6 +53,9 @@ Ext.define('TP.Pantab', {
             TP.log('['+This.id+'] closing tab');
             return true;
         },
+        beforedestroy: function( This, eOpts ) {
+            This.destroying = true;
+        },
         destroy: function( This, eOpts ) {
             TP.log('['+This.id+'] destroy');
             This.stopTimeouts();
@@ -120,12 +123,19 @@ Ext.define('TP.Pantab', {
             var delay = 0;
             var missingPanlets = 0;
             for(var nr=0; nr<This.window_ids.length; nr++) {
-                var panlet = Ext.getCmp(This.window_ids[nr]);
+                if(This.destroying) { return; }
+                var panlet_nr = This.window_ids[nr];
+                var panlet    = Ext.getCmp(panlet_nr);
                 if(panlet) { // may not yet exists due to delayed rendering
                     try {    // so allow it to fail
                         if(panlet.rendered == false) {
                             /* delay initial show when its not yet rendered */
-                            window.setTimeout(Ext.bind(panlet.show, panlet, []), delay);
+                            window.setTimeout(function() {
+                                var panlet = Ext.getCmp(panlet_nr);
+                                if(!This.destroying && panlet && panlet.show) {
+                                    panlet.show();
+                                }
+                            }, delay);
                             delay = delay + 25;
                         } else {
                             panlet.show(false);
