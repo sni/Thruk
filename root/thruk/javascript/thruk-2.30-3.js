@@ -94,9 +94,6 @@ function init_page() {
             icons: {primary: 'ui-wzd-button'},
             text: false,
             label: 'open list wizard'
-        }).click(function() {
-            init_tool_list_wizard(this.id, this.name);
-            return false;
         });
     }
 
