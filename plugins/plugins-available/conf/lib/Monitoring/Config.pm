@@ -63,6 +63,8 @@ $Monitoring::Config::save_options = {
 };
 $Monitoring::Config::key_sort = undef;
 
+$Monitoring::Config::plugin_pathspec = '(/plugins/|/libexec/|/monitoring\-plugins/)';
+
 ##########################################################
 
 =head2 new
@@ -2652,11 +2654,12 @@ sub get_plugins {
 
     my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
     my $objects     = {};
+    my $pathspec    = $Monitoring::Config::plugin_pathspec;
     for my $macro (keys %{$user_macros}) {
         my $dir = $user_macros->{$macro};
         $dir = $dir.'/.';
         next unless -d $dir;
-        if($dir =~ m%/plugins/|/libexec/|/monitoring-plugins/%mx) {
+        if($dir =~ m%$pathspec%mx) {
             $self->_set_plugins_for_directory($c, $dir, $macro, $objects);
         }
     }
@@ -2690,7 +2693,7 @@ return plugin help
 sub get_plugin_help {
     my($self, $c, $name) = @_;
     my $help = 'help is only available for plugins!';
-    return $help unless defined $name;
+    return "got no command name" unless defined $name;
 
     if($self->is_remote()) {
         return $self->remote_get_pluginhelp($c, $name);
@@ -2699,26 +2702,33 @@ sub get_plugin_help {
     my $cmd;
     my $plugins         = $self->get_plugins($c);
     my $objects         = $self->get_objects_by_name('command', $name);
-    if(defined $objects->[0]) {
-        my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-        my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
-        ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
-        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
-            $cmd = $file;
-        }
+    if(!defined $objects->[0]) {
+        return(sprintf("did not find a command with name: %s", $name));
     }
+    my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+    my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
+    ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
+    if(!-x $file) {
+        return(sprintf("%s is not executable", $file));
+    }
+    my $pathspec = $Monitoring::Config::plugin_pathspec;
+    if($file !~ m%$pathspec%mx) {
+        return(sprintf("%s does not match path spec: %s", $file, $pathspec));
+    }
+    $cmd = $file;
     if(defined $plugins->{$name}) {
         $cmd = $plugins->{$name};
     }
-    if(defined $cmd) {
-        eval {
-            local $SIG{ALRM} = sub { die('alarm'); };
-            alarm(5);
-            $cmd = $cmd." -h 2>/dev/null";
-            $help = `$cmd`;
-            alarm(0);
-        };
+    if(!defined $cmd) {
+        return $help;
     }
+    eval {
+        local $SIG{ALRM} = sub { die('alarm'); };
+        alarm(5);
+        $cmd = $cmd." -h 2>/dev/null";
+        $help = `$cmd`;
+        alarm(0);
+    };
     return $help;
 }
 
@@ -2769,7 +2779,7 @@ sub get_plugin_preview {
     if(!-x $file) {
         return(sprintf("%s is not executable", $file));
     }
-    my $pathspec = '(/plugins/|/libexec/|/monitoring\-plugins/)';
+    my $pathspec = $Monitoring::Config::plugin_pathspec;
     if($file !~ m%$pathspec%mx) {
         return(sprintf("%s does not match path spec: %s", $file, $pathspec));
     }
