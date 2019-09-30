@@ -2737,7 +2737,7 @@ sub get_plugin_preview {
     }
 
     my $output = 'plugin preview is only available for plugins!';
-    return $output unless defined $args;
+    return("command has no arguments") unless defined $args;
 
     my $cfg = $Monitoring::Config::save_options;
     $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
@@ -2759,24 +2759,33 @@ sub get_plugin_preview {
         }
     }
 
-    my $cmd;
-    my $objects         = $self->get_objects_by_name('command', $command);
-    if(defined $objects->[0]) {
-        my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-        ($file)    = $c->{'db'}->_get_replaced_string($file, $macros);
-        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
-            ($cmd) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
-        }
+    my $objects = $self->get_objects_by_name('command', $command);
+    if(!defined $objects->[0]) {
+        return(sprintf("did not find a command with name: %s", $command));
     }
-    if(defined $cmd) {
-        eval {
-            local $SIG{ALRM} = sub { die('alarm'); };
-            alarm(45);
-            $cmd = $cmd." 2>/dev/null";
-            $output = `$cmd`;
-            alarm(0);
-        };
+
+    my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+    ($file) = $c->{'db'}->_get_replaced_string($file, $macros);
+    if(!-x $file) {
+        return(sprintf("%s is not executable", $file));
     }
+    my $pathspec = '(/plugins/|/libexec/|/monitoring\-plugins/)';
+    if($file !~ m%$pathspec%mx) {
+        return(sprintf("%s does not match path spec: %s", $file, $pathspec));
+    }
+    my($cmd, $rc) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
+
+    if(!defined $cmd || !$rc) {
+        return(sprintf("could not replace all macros in: %s", $file));
+    }
+
+    eval {
+        local $SIG{ALRM} = sub { die('alarm'); };
+        alarm(45);
+        $cmd = $cmd." 2>/dev/null";
+        $output = `$cmd`;
+        alarm(0);
+    };
     return $output;
 }
 

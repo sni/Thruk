@@ -17,6 +17,7 @@ next:
             - add git blame page for config objects
             - support limited regex matching
             - add button to create new templates
+            - fix command preview with OMD 3.x path changes
           - REST:
             - add max_api_keys_per_user option to limit api keys per user
             - fix fetching roles when contact has groups
