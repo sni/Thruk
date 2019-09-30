@@ -1017,6 +1017,30 @@ var TP = {
         });
         panel.addGearItems(panel.obj_filter);
     },
+    addGearBackgroundOptions: function(panel) {
+        panel.addGearItems({
+            fieldLabel:   'Background',
+            xtype:        'fieldcontainer',
+            layout:      { type: 'hbox', align: 'stretch' },
+            items:        [{
+                xtype:        'label',
+                text:         'Border: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 0}
+            }, {
+                xtype:        'checkbox',
+                name:         'showborder'
+            }, {
+                xtype:        'label',
+                text:         'Color: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 7}
+            }, {
+                xtype:        'colorcbo',
+                name:         'background',
+                value:        '',
+                flex:          1
+            }]
+        });
+    },
     /* convert number to binary list */
     dec2bin: function(dec) {
         var potencies = new Array();

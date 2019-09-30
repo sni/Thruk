@@ -126,29 +126,7 @@ Ext.define('TP.PanletSquares', {
             }]
         });
         TP.addFormFilter(panel, panel.has_search_button);
-
-        panel.addGearItems({
-            fieldLabel:   'Background',
-            xtype:        'fieldcontainer',
-            layout:      { type: 'hbox', align: 'stretch' },
-            items:        [{
-                xtype:        'label',
-                text:         'Border: ',
-                margins:      {top: 3, right: 2, bottom: 0, left: 0}
-            }, {
-                xtype:        'checkbox',
-                name:         'showborder'
-            }, {
-                xtype:        'label',
-                text:         'Color: ',
-                margins:      {top: 3, right: 2, bottom: 0, left: 7}
-            }, {
-                xtype:        'colorcbo',
-                name:         'background',
-                value:        '',
-                flex:          1
-            }]
-        });
+        TP.addGearBackgroundOptions(panel);
 
         panel.addGearItems({
             xtype:        'fieldcontainer',

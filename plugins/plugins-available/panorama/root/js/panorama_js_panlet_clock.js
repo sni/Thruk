@@ -142,28 +142,7 @@ Ext.define('TP.PanletClock', {
             typeAhead:       true,
             minChars:        1
         });
-        this.addGearItems({
-            fieldLabel:   'Background',
-            xtype:        'fieldcontainer',
-            layout:      { type: 'hbox', align: 'stretch' },
-            items:        [{
-                xtype:        'label',
-                text:         'Border: ',
-                margins:      {top: 3, right: 2, bottom: 0, left: 0}
-            }, {
-                xtype:        'checkbox',
-                name:         'showborder'
-            }, {
-                xtype:        'label',
-                text:         'Color: ',
-                margins:      {top: 3, right: 2, bottom: 0, left: 7}
-            }, {
-                xtype:        'colorcbo',
-                name:         'background',
-                value:        '',
-                flex:          1
-            }]
-        });
+        TP.addGearBackgroundOptions(panel);
         this.addGearItems({
             xtype:        'fieldcontainer',
             fieldLabel:   'Font',

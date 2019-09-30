@@ -584,9 +584,7 @@ TP.panletGearHandler = function(panel) {
         // show settings
         panel.add(Ext.create('TP.PanletGearItem', {}));
         panel.gearitem = panel.items.getAt(panel.items.length-1);
-        if(!panel.gearItemsExtra) {
-            panel.setGearItems();
-        }
+        panel.setGearItems();
         if(panel.gearItemsExtra) {
             panel.gearitem.down('form').add(panel.gearItemsExtra);
         }
