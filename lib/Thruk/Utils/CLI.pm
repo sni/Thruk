@@ -1053,8 +1053,8 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        if($Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}) {
-            my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'};
+        if($Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'}) {
+            my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'};
             $res->[2]->{$key}->{'configtool'} = {
                 'core_type'      => $tmp->{'core_type'},
                 'obj_readonly'   => $tmp->{'obj_readonly'},
