@@ -5,6 +5,7 @@ use Test::More;
 plan tests => 295;
 
 BEGIN {
+    delete $ENV{PLACK_TEST_EXTERNALSERVER_URI};
     $ENV{'THRUK_TEST_CONF_NO_LOG'} = 1;
     $ENV{'THRUK_AUTHOR'} = 1;
     use lib('t');

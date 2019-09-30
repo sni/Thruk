@@ -2072,6 +2072,8 @@ t/scenarios/config_tool/omd/Dockerfile
 t/scenarios/config_tool/omd/playbook.yml
 t/scenarios/config_tool/omd/test.cfg
 t/scenarios/config_tool/t/concurrent_edits.t
+t/scenarios/config_tool/t/local/plugin_preview.t
+t/scenarios/config_tool/t/local_test.sh
 t/scenarios/config_tool/thruk.conf
 t/scenarios/config_tool/thruk_local.conf
 t/scenarios/cookie_auth_ldap_e2e/docker-compose.yml
