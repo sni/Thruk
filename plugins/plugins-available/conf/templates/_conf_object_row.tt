@@ -117,6 +117,7 @@
       [% ELSIF type == 'service' && key == 'servicegroups'       %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicegroups,1" %]
       [% ELSIF type == 'contactgroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contacts,1" %]
       [% ELSIF type == 'hostgroup'    && key == 'members'        %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
+      [% ELSIF type == 'hostgroup'    && key == 'hostgroup_members' %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hostgroups,1" %]
       [% ELSIF key == 'hostgroups'
             || key == 'contacts'
             || key == 'contactgroups'
