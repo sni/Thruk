@@ -142,8 +142,8 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
             commands.get("ack").setDisabled(d.state == 0);
         }
         panel.action_menu_link = data.action_menu;
+        var btn = panel.dockedItems.getAt(0).items.get('actionMenuLink');
         if(panel.action_menu_link) {
-            var btn = panel.dockedItems.getAt(0).items.get('actionMenuLink');
             btn.action_link = 'menu://'+panel.action_menu_link;
             btn.setVisible(true);
         } else {
