@@ -35,7 +35,7 @@ Ext.define('TP.GridLoader', {
         // return early if dashboard is not visible (breaks column layout otherwise)
         var tab = panel.tab;
         if(!tab || !tab.isActiveTab || !tab.isActiveTab()) {
-            This.updateData(panel, data.data);
+            This.updateData(panel, data);
             return;
         }
 
@@ -57,7 +57,7 @@ Ext.define('TP.GridLoader', {
 
         // replace data only if columns haven't changed (does not work in IE11, panel will be blank afterwards)
         if(!Ext.isIE && !columnsChanged && panel.gridStore) {
-            This.updateData(panel, data.data);
+            This.updateData(panel, data);
             return;
         }
 
@@ -195,9 +195,9 @@ Ext.define('TP.GridLoader', {
     },
     updateData: function(panel, data) {
         if(!panel.gridStore) { return; }
-        panel.gridStore.loadData(data);
+        panel.gridStore.loadData(data.data);
         if(panel.pagingToolbar) {
-            panel.pagingToolbar.onLoad();
+            TP.setPagingToolbarVisibility(panel, panel.pagingToolbar, data);
         }
     }
 });
