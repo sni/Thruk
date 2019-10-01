@@ -143,6 +143,9 @@ sub index {
         elsif($task eq 'show_logs') {
             return(_task_show_logs($c));
         }
+        elsif($task eq 'show_comments') {
+            return(_task_show_comments($c));
+        }
         elsif($task eq 'site_status') {
             return(_task_site_status($c));
         }
@@ -2251,6 +2254,98 @@ sub _task_servicesminemap {
         }
         push @{$json->{'data'}}, $data;
     }
+
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
+}
+
+##########################################################
+sub _task_show_comments {
+    my($c) = @_;
+
+    my($hostfilter, $servicefilter, undef, undef, $has_service_filter) = _do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $source = $c->req->parameters->{'source'} || 'both';
+
+    my $generalfilter;
+    if($source eq 'hosts') {
+        push @{$generalfilter},  { service_description => { '=' => '' }};
+    }
+    elsif($source eq 'services') {
+        push @{$generalfilter},  { service_description => { '!=' => '' }};
+    }
+
+    if($hostfilter && ($source eq 'hosts' || $source eq 'both')) {
+        my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], columns => [qw/name/]);
+        my $host_comments_filter = [{ host_name => ''}]; # add useless filter, so the -or will not match on empty hostlists
+        for my $hst (@{$hosts}) {
+            push @{$host_comments_filter}, { host_name => $hst->{'name'}};
+        }
+        push @{$generalfilter},  Thruk::Utils::combine_filter( '-or', $host_comments_filter );
+    }
+
+    if($servicefilter && ($source eq 'services' || $source eq 'both')) {
+        my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], columns => [qw/host_name description/]);
+        my $svc_comments_filter = [{ host_name => ''}]; # add useless filter, so the -or will not match on empty servicelists
+        for my $svc (@{$services}) {
+            push @{$svc_comments_filter}, [{ host_name => $svc->{'host_name'}}, { service_description => $svc->{'service_description'}}];
+        }
+        push @{$generalfilter}, Thruk::Utils::combine_filter( '-or', $svc_comments_filter );
+    }
+
+    my $types = Thruk::Utils::list($c->req->parameters->{'type'});
+    my $commentfilter = [];
+    my $typesfilter   = [];
+    my $add_downtimes = 0;
+    my $add_comments  = 0;
+    for my $t (@{$types}) {
+        if(   $t eq 'comment')  { $add_comments  = 1; push @{$typesfilter}, { entry_type => 1 }; }
+        elsif($t eq 'flap')     { $add_comments  = 1; push @{$typesfilter}, { entry_type => 3 }; }
+        elsif($t eq 'ack')      { $add_comments  = 1; push @{$typesfilter}, { entry_type => 4 }; }
+        elsif($t eq 'downtime') { $add_downtimes = 1; }
+    }
+    push @{$commentfilter}, Thruk::Utils::combine_filter( '-or', $typesfilter );
+
+    my $data = [];
+    if($add_comments) {
+        $data = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), $generalfilter, $commentfilter ]);
+        # move some fields to match downtimes
+        for my $d (@{$data}) {
+            $d->{'start_time'} = $d->{'entry_time'};
+            $d->{'end_time'}   = -1;
+        }
+    }
+
+    if($add_downtimes) {
+        my $downtimes = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), $generalfilter ]);
+        for my $d (@{$downtimes}) {
+            $d->{'entry_type'} = 2;
+        }
+        push @{$data}, @{$downtimes};
+    }
+
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
+    $data = [sort { $a->{'host_name'} cmp $b->{'host_name'} || $a->{'service_description'} cmp $b->{'service_description'} } @{$data}];
+    Thruk::Backend::Manager::page_data($c, $data);
+    my $json = {
+        columns => [
+            { 'header' => 'Hostname',               width => 120, dataIndex => 'host_name',           renderer => 'TP.render_service_host' },
+            { 'header' => 'Service',                width => 120, dataIndex => 'service_description', renderer => 'TP.render_clickable_service' },
+            { 'header' => 'Type',                   width => 120, dataIndex => 'entry_type',          renderer => 'TP.render_entry_type'    },
+            { 'header' => 'Start Time',             width => 120, dataIndex => 'start_time',          align => 'right', renderer => 'TP.render_date' },
+            { 'header' => 'End Time',               width => 120, dataIndex => 'end_time',            align => 'right', renderer => 'TP.render_date' },
+            { 'header' => 'Entry Time',             width => 120, dataIndex => 'entry_time',          hidden => Cpanel::JSON::XS::true, align => 'right', renderer => 'TP.render_date' },
+            { 'header' => 'Author',                 width => 100, dataIndex => 'author',              },
+            { 'header' => 'Comment',                flex  => 1,   dataIndex => 'comment',             },
+            { 'header' => 'ID',                                   dataIndex => 'id',                  hidden => Cpanel::JSON::XS::true },
+        ],
+        data        => $c->stash->{'data'},
+        totalCount  => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => Cpanel::JSON::XS::true,
+    };
 
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json);

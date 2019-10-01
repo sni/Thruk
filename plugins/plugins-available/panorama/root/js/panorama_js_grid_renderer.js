@@ -1,6 +1,7 @@
 /* render date */
 TP.render_date = function(v, td, item) {
-    if(v == 0) { return 'never'; }
+    if(v == 0)  { return 'never'; }
+    if(v == -1) { return ''; }
     return TP.date_format(v);
 }
 
@@ -365,7 +366,8 @@ TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
 /* make service description clickable */
 TP.render_clickable_service = function(v, td, item, row, col, store, view) {
     td.tdCls = 'clickable';
-    var description = item.data.description.replace(/\\/g, '\\\\');
+    var description = item.data.service_description || item.data.description || '';
+    description = description.replace(/\\/g, '\\\\');
     var host_name   = item.data.host_name.replace(/\\/g, '\\\\');
     return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { userOpened: true, xdata: { host: '"+host_name+"', service: '"+description+"'}}})\">"+v+"<\/div>";
 }
@@ -442,6 +444,15 @@ TP.render_long_pluginoutput = function(v, td, item, row, col, store, view) {
 /* render direct link */
 TP.render_directlink = function(v, td, item, row, col, store, view) {
     return "<a target='_blank' href='panorama.cgi?map="+item.data.name+"'><img src='"+url_prefix+"plugins/panorama/images/application_put.png' border='0' width='16' height='16' alt='direct url' title='open this dashboard only (new window)'><\/a>";
+}
+
+/* render enabled / disabled switch */
+TP.render_entry_type = function(v, td, item) {
+    if(v==1) { return "User Comment"; };
+    if(v==2) { return "Scheduled Downtime"; };
+    if(v==3) { return "Flap Detection"; };
+    if(v==4) { return "Acknowledgement"; };
+    return "?";
 }
 
 /* format timestamp */

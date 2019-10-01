@@ -33,6 +33,7 @@ next:
             - improve dashboard menu filter performance
             - allow changing icon center position on geo maps
             - add pins status icon set
+            - add comments / downtimes / acknowledgements list widget
             - fix changing open dashboards on reloads
           - Business Process:
             - add node clone menu entry to node context menu

@@ -505,6 +505,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_panlet_chart.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_clock.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grafana.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid.js
+plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_comments.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_core_metrics.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_gearman.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_hosts.js
