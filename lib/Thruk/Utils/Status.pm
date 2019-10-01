@@ -2552,4 +2552,38 @@ sub get_custom_variable_names {
 
 ##############################################
 
+=head2 filter_to_param
+
+  filter_to_param($prefix, $filter)
+
+returns url parameters for this filter
+
+=cut
+sub filter_to_param {
+    my($prefix, $filter) = @_;
+    my $params = {};
+
+    $params->{$prefix.'hoststatustypes'}    = $filter->{'hoststatustypes'};
+    $params->{$prefix.'hostprops'}          = $filter->{'hostprops'};
+    $params->{$prefix.'servicestatustypes'} = $filter->{'servicestatustypes'};
+    $params->{$prefix.'serviceprops'}       = $filter->{'serviceprops'};
+
+    $params->{$prefix.'type'}    = [];
+    $params->{$prefix.'val_pre'} = [];
+    $params->{$prefix.'op'}      = [];
+    $params->{$prefix.'value'}   = [];
+    if($filter->{'text_filter'}) {
+        for my $f (@{$filter->{'text_filter'}}) {
+            push @{$params->{$prefix.'type'}}, $f->{'type'};
+            push @{$params->{$prefix.'val_pre'}}, $f->{'val_pre'};
+            push @{$params->{$prefix.'op'}}, $f->{'op'};
+            push @{$params->{$prefix.'value'}}, $f->{'value'};
+        }
+    }
+
+    return($params);
+}
+
+##############################################
+
 1;

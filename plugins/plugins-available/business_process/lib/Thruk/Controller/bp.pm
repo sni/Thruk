@@ -641,6 +641,22 @@ sub _bp_list_add_objects {
                 $svc++;
             }
         }
+        elsif(lc $n->{'function'} eq 'statusfilter') {
+            $c->stash->{'minimal'} = 1; # do not fill totals boxes
+            my $type   = $n->{'function_args'}->[1];
+            my $filter = $n->{'function_args'}->[2];
+            my $p;
+            for my $f (@{$filter}) {
+                if($type eq 'hosts') {
+                    $p = Thruk::Utils::Status::filter_to_param('hst_s'.$hst.'_', $f);
+                    $hst++;
+                } else {
+                    $p = Thruk::Utils::Status::filter_to_param('svc_s'.$svc.'_', $f);
+                    $svc++;
+                }
+            }
+            $params = {%{$params}, %{$p}};
+        }
     }
 
     # check recursive for other linked business processes
