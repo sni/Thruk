@@ -748,6 +748,24 @@ Ext.define('TP.SmallWidget', {
             panel.setIconLabel();
         }
     },
+    // return Openlayer.Bounds for this icon
+    getMapBounds: function() {
+        var panel = this;
+        var bounds = new OpenLayers.Bounds();
+        if(panel.xdata.layout.lon) {
+            var b = new OpenLayers.LonLat(Number(panel.xdata.layout.lon),Number(panel.xdata.layout.lat));
+            bounds.extend(b);
+        }
+        if(panel.xdata.layout.lon1) {
+            var b = new OpenLayers.LonLat(Number(panel.xdata.layout.lon1),Number(panel.xdata.layout.lat1));
+            bounds.extend(b);
+        }
+        if(panel.xdata.layout.lon2) {
+            var b = new OpenLayers.LonLat(Number(panel.xdata.layout.lon2),Number(panel.xdata.layout.lat2));
+            bounds.extend(b);
+        }
+        return(bounds);
+    },
     setRawPosition: function(x, y) {
         var panel = this;
         panel.suspendEvents();

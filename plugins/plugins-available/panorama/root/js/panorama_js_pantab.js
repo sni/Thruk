@@ -1256,6 +1256,21 @@ Ext.define('TP.Pantab', {
             document.getElementsByTagName('head')[0].appendChild(style);
         }
         style.innerHTML = value;
+    },
+    // zoom and pad a geomap so all icon from list are visible
+    zoomIntoView: function(list) {
+        var tab = this;
+        if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
+        if(!list || list.length == 0) { return; }
+        var bounds = new OpenLayers.Bounds();
+        for(var x = 0; x<list.length; x++) {
+            var panel = list[x];
+            bounds.extend(panel.getMapBounds());
+        }
+        tab.map.map.zoomToExtent(bounds);
+        if(bounds.getHeight() == 0) {
+            tab.map.map.zoomTo(17);
+        }
     }
 });
 

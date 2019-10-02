@@ -94,9 +94,9 @@ Ext.define('TP.TabBarSearch', {
         }]
     },
     menuHandler: function(item, e) {
-        var highlight = function(el) {
+        var tab = Ext.getCmp(item.data.id);
+        var highlight = function(icon) {
             // highlight this icon
-            var icon = Ext.getCmp(el.highlight);
             if(!icon)    { return; }
             if(!icon.el) { return; }
             icon.el.addCls("highlight");
@@ -105,14 +105,21 @@ Ext.define('TP.TabBarSearch', {
             });
         }
         var highlightAll = function() {
+            var list = [];
             for(var x = 0; x<item.highlight.length; x++) {
                 var el = item.highlight[x];
                 if(el.highlight) {
-                    highlight(el);
+                    var panel = Ext.getCmp(el.highlight);
+                    list.push(panel);
                 }
             }
+            if(tab.map) {
+                tab.zoomIntoView(list);
+            }
+            for(var x = 0; x<list.length; x++) {
+                highlight(list[x]);
+            }
         };
-        var tab = Ext.getCmp(item.data.id);
         if(tab && tab.rendered) {
             var tabpan = Ext.getCmp('tabpan');
             tabpan.setActiveTab(tab);
