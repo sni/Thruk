@@ -2325,6 +2325,32 @@ sub _task_show_comments {
         push @{$data}, @{$downtimes};
     }
 
+    my $include = $c->req->parameters->{'pattern'};
+    if($include) {
+        my $filtered = [];
+        for my $d (@{$data}) {
+            ## no critic
+            if($d->{'author'} =~ m/$include/ || $d->{'comment'} =~ m/$include/) {
+                push @{$filtered}, $d;
+            }
+            ## use critic
+        }
+        $data = $filtered;
+    }
+
+    my $exclude = $c->req->parameters->{'exclude'};
+    if($exclude) {
+        my $filtered = [];
+        for my $d (@{$data}) {
+            ## no critic
+            if($d->{'author'} !~ m/$exclude/ && $d->{'comment'} !~ m/$exclude/) {
+                push @{$filtered}, $d;
+            }
+            ## use critic
+        }
+        $data = $filtered;
+    }
+
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
     $data = [sort { $a->{'host_name'} cmp $b->{'host_name'} || $a->{'service_description'} cmp $b->{'service_description'} } @{$data}];

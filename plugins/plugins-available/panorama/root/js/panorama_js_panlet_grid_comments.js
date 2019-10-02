@@ -2,7 +2,7 @@ Ext.define('TP.PanletGridComments', {
     extend: 'TP.PanletGrid',
 
     title:  'Comments',
-    height: 200,
+    height: 300,
     width:  1000,
     //maximizable: true, // does not work stateful
     hideSettingsForm: ['url'],
@@ -18,17 +18,8 @@ Ext.define('TP.PanletGridComments', {
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        TP.addFormFilter(panel, panel.has_search_button);
-        this.addGearItems({
-            xtype:          'combobox',
-            fieldLabel:     'Host/Service',
-            name:           'source',
-            editable:        false,
-            triggerAction:  'all',
-            store:           [['both','Both'], ['hosts','Hosts'], ['services','Services']]
-        });
-        this.addGearItems({
+        panel.callParent();
+        panel.addGearItems({
             xtype:          'combobox',
             fieldLabel:     'Type',
             name:           'type',
@@ -41,6 +32,27 @@ Ext.define('TP.PanletGridComments', {
                     return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
                 }
             }
+        });
+        panel.addGearItems({
+            xtype:          'combobox',
+            fieldLabel:     'Host/Service',
+            name:           'source',
+            editable:        false,
+            triggerAction:  'all',
+            store:           [['both','Both'], ['hosts','Hosts'], ['services','Services']]
+        });
+        TP.addFormFilter(panel, panel.has_search_button);
+        panel.addGearItems({
+            fieldLabel: 'Include Pattern',
+            xtype:      'textfield',
+            name:       'pattern',
+            emptyText:  'regular search expression (author / comment field)'
+        });
+        panel.addGearItems({
+            fieldLabel: 'Exclude Pattern',
+            xtype:      'textfield',
+            name:       'exclude',
+            emptyText:  'regular search exclude expression (author / comment field)'
         });
         TP.addGearBackgroundOptions(panel);
     }
