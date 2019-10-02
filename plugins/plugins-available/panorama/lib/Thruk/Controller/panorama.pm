@@ -948,6 +948,12 @@ sub _task_search {
                         }
                     }
                 }
+                if(!$found) {
+                    my $found = _search_match($data, $d, $icon->{'xdata'}->{'general'}->{$type}, $query, $type);
+                    if($found) {
+                        $found->{'highlight'} = $icon_id;
+                    }
+                }
             }
 
             my $found = _search_match($data, $d, $icon->{'xdata'}->{'label'}->{'labeltext'}, $query, "iconlabel")
