@@ -1664,6 +1664,8 @@ ex.:
     persistent_ack         = 0  # Persistent Acknowledgement Comments
     ptc                    = 0  # For Child Hosts Too
     use_expire             = 0  # Use expire time ( for cores which support it)
+    childoptions           = 0  # 0 = Do nothing with child hosts, 1 = Triggered downtime for all child hosts, 2 = Non-triggered downtime for all childs
+    hostserviceoptions     = 0  # 0 = Do nothing with services, 1 = Schedule downtime for all services
   </cmd_defaults>
 
 

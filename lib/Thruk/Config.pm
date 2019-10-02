@@ -508,6 +508,8 @@ sub set_default_config {
                     persistent_ack         => 0,
                     ptc                    => 0,
                     use_expire             => 0,
+                    childoptions           => 0,
+                    hostserviceoptions     => 0,
         },
         command_disabled                    => {},
         command_enabled                     => {},
