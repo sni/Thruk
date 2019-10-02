@@ -11,7 +11,7 @@
 Name:          thruk
 Version:       2.30
 Release: 3
-License:       GPLv2+
+License:       GPL-2.0-or-later
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
 URL:           http://thruk.org
