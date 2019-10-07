@@ -431,6 +431,11 @@ sub index {
             return 1;
         }
         if($action eq 'list_objects') {
+            # save request parameters
+            my $saved_req_params = {};
+            for my $key (keys %{$c->req->parameters}) {
+                $saved_req_params->{$key} = $c->req->parameters->{$key};
+            }
             my $params = {};
             my $hst = 0;
             my $svc = 0;
@@ -453,7 +458,7 @@ sub index {
             }
 
             for my $key (keys %{$c->req->parameters}) {
-                if($key !~ m/^(hoststatustypes|servicestatustypes)/mx) {
+                if($key !~ m/^(hoststatustypes|servicestatustypes|page|previous|next|entries|first|last|total_pages)/mx) {
                     delete $c->req->parameters->{$key};
                 }
             }
@@ -462,7 +467,16 @@ sub index {
             }
             local $c->config->{'maximum_search_boxes'} = 9999;
             require Thruk::Controller::status;
-            return(Thruk::Controller::status::index($c));
+            Thruk::Controller::status::index($c);
+
+            # cleanup request parameters again
+            for my $key (keys %{$c->req->parameters}) {
+                delete $c->req->parameters->{$key};
+            }
+            for my $key (keys %{$saved_req_params}) {
+                $c->req->parameters->{$key} = $saved_req_params->{$key};
+            }
+            return(1);
         }
     }
 
