@@ -55,6 +55,9 @@ function preloader() {
 [%+ END %]
     }
 }
+
+var info_popup_options = [[% c.config.info_popup_options %]];
+
 -->
 </script>
 </body>

@@ -789,3 +789,58 @@ SPAN.searchhint.type {
   background-color: #00b3ac !important;
   box-shadow: 0 0 25px 25px #00b3ac !important;
 }
+
+
+
+.overDivContent {
+  background-color:#ffffff;
+  border:0 none #000000;
+}
+
+.overDivHead {
+  font-size:12px;
+  line-height:12px;
+}
+
+TABLE.overDivHead {
+  background-color:#5f6268;
+  color:#f1f1f1;
+  border:0 none;
+  margin:0;
+  padding:3px;
+}
+
+table.overDivTable {
+  font-size: 11px;
+  border: 0px none;
+  box-shadow: 3px 6px 15px 3px rgba(0, 0, 0, 0.46);
+  border-spacing: 0px;
+
+}
+
+table.overDivTable > tbody > tr > td {
+  background-color:#ffffff;
+  border:0px none;
+  margin:0;
+}
+
+table.overDivTable a {
+  font-size:12px;
+  color:#f1f1f1;
+}
+
+TABLE.hostcomments TD, TABLE.hostdowntimes TD,TABLE.servicecomments TD, TABLE.servicedowntimes TD {
+  border-right: 1px solid #eaeff6;
+  text-align: center;
+}
+TABLE.hostcomments TD:last-child, TABLE.hostdowntimes TD:last-child, TABLE.servicecomments TD:last-child, TABLE.servicedowntimes TD:last-child {
+  border-right: 0px none;
+}
+
+TABLE.hostcomments TH, TABLE.hostdowntimes TH,TABLE.servicecomments TH, TABLE.servicedowntimes TH {
+  border-right: 1px solid #eaeff6;
+  border-bottom: 1px solid #eaeff6;
+}
+TABLE.hostcomments TH:last-child, TABLE.hostdowntimes TH:last-child, TABLE.servicecomments TH:last-child, TABLE.servicedowntimes TH:last-child {
+  border-right: 0px none;
+}
