@@ -3199,6 +3199,8 @@ sub clean_regex {
     $regex =~ s/^\s+//mx;
     $regex =~ s/\s+$//mx;
 
+    return $regex if $regex eq '.*';
+
     # trim leading and trailing .*(?)
     $regex =~ s/^\.\*\??//mx;
     $regex =~ s/\.\*\??$//mx;

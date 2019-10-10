@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 68;
+use Test::More tests => 69;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');
@@ -253,6 +253,17 @@ test_filter(
     ],
     " WHERE time >= 1524053699",
 );
+
+#####################################################################
+test_filter(
+    'all hosts filter',
+    [{ '-and' => [
+        { 'host_name'   => { '~~' => '.*' } },
+        { 'description' => 'http' }
+    ]}],
+    " WHERE (host_name RLIKE '.*' AND description = 'http')",
+);
+
 
 #####################################################################
 # SUBS
