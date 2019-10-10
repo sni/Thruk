@@ -75,7 +75,7 @@ Requires:    apache2 apache2-mod_fcgid cron
 %endif
 
 # >=rhel7 and fedora
-%if 0%{?el7}%{?fedora}
+%if 0%{?el7}%{?el8}%{?fedora}
 BuildRequires: perl(ExtUtils::Install) httpd
 Requires: httpd mod_fcgid cronie
 %endif
