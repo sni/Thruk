@@ -797,14 +797,13 @@ sub get_custom_vars {
 
 =head2 set_custom_vars
 
-  set_custom_vars($c)
+  set_custom_vars($c, { options... })
 
 set stash value for all allowed custom variables
 
 =cut
 sub set_custom_vars {
-    my $c      = shift;
-    my $args   = shift;
+    my($c, $args) = @_;
 
     my $prefix   = $args->{'prefix'} || '';
     my $search   = $args->{'search'} || 'show_custom_vars';
@@ -829,53 +828,40 @@ sub set_custom_vars {
     return unless ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY';
     return unless defined $c->config->{$search};
 
-    my $vars        = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
+    my $vars        = Thruk::Utils::list($c->config->{$search});
     my $custom_vars = get_custom_vars($c, $data, $prefix, $add_host);
 
     my $already_added = {};
-    for my $test (@{$vars}) {
-        for my $cust_name (sort keys %{$custom_vars}) {
-            my $found      = 0;
-            if($test eq $cust_name or $test eq '_'.$cust_name) {
-                $found = 1;
-            } else {
-                my $v = "".$test;
-                next if CORE::index($v, '*') == -1;
-                $v =~ s/\*/.*/gmx;
-                if($cust_name =~ m/^$v$/mx or ('_'.$cust_name) =~ m/^$v$/mx) {
-                    $found = 1;
-                }
-            }
-            next unless $found;
+    for my $cust_name (sort keys %{$custom_vars}) {
+        next unless Thruk::Utils::check_custom_var_list($cust_name, $vars);
 
-            # expand macros in custom vars
-            my $cust_value = $custom_vars->{$cust_name};
-            if(defined $host and defined $service) {
-                    #($cust_value, $rc)...
-                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                        string  => $cust_value,
-                        host    => $host,
-                        service => $service,
-                    });
-            } elsif (defined $host) {
-                    #($cust_value, $rc)...
-                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                        string  => $cust_value,
-                        host    => $host,
-                    });
-            }
-
-            # add to dest
-            my $is_host = defined $service ? 0 : 1;
-            if($add_host) {
-                if($cust_name =~ s/^HOST//gmx) {
-                    $is_host = 1;
-                }
-            }
-            next if $already_added->{$cust_name};
-            $already_added->{$cust_name} = 1;
-            push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
+        # expand macros in custom vars
+        my $cust_value = $custom_vars->{$cust_name};
+        if(defined $host and defined $service) {
+                #($cust_value, $rc)...
+                ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                    string  => $cust_value,
+                    host    => $host,
+                    service => $service,
+                });
+        } elsif (defined $host) {
+                #($cust_value, $rc)...
+                ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                    string  => $cust_value,
+                    host    => $host,
+                });
         }
+
+        # add to dest
+        my $is_host = defined $service ? 0 : 1;
+        if($add_host) {
+            if($cust_name =~ s/^HOST//gmx) {
+                $is_host = 1;
+            }
+        }
+        next if $already_added->{$cust_name};
+        $already_added->{$cust_name} = 1;
+        push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
     }
     return;
 }
@@ -889,7 +875,6 @@ sub set_custom_vars {
 returns true if custom variable name is in the list of allowed variable names
 
 =cut
-
 sub check_custom_var_list {
     my($varname, $allowed) = @_;
 
@@ -897,13 +882,21 @@ sub check_custom_var_list {
 
     for my $cust_name (@{$allowed}) {
         $cust_name =~ s/^_//gmx;
+        # direct match
         if($varname eq $cust_name) {
             return(1);
         } else {
-            my $v = "".$varname;
+            # wildcard match
+            my $v = "".$cust_name;
             next if CORE::index($v, '*') == -1;
             $v =~ s/\*/.*/gmx;
-            if($cust_name =~ m/^$v$/mx) {
+
+            # if variable starts with HOST, the matcher has to start with HOST too
+            if($varname =~ m/^host/mxi && $v !~ m/^host/mxi) {
+                next;
+            }
+
+            if($varname =~ m/^$v$/mx) {
                 return(1);
             }
         }
@@ -920,7 +913,6 @@ sub check_custom_var_list {
 returns normalized timestamp for given date
 
 =cut
-
 sub normal_mktime {
     my($year,$mon,$day,$hour,$min,$sec) = @_;
 
@@ -960,7 +952,6 @@ sub _initialassumedhoststate_to_state {
 returns user profile data
 
 =cut
-
 sub get_user_data {
     my($c, $username) = @_;
 
@@ -990,7 +981,6 @@ sub get_user_data {
 store user profile data
 
 =cut
-
 sub store_user_data {
     my($c, $data, $username) = @_;
 

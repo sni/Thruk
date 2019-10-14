@@ -1211,10 +1211,19 @@ variables. Use * as wildcard, ex.: _VAR*
 To show a host custom variable for services, prepend
 _HOST, ex.:  _HOSTVAR1. To show all host variables in the service view, use
 wildcards, ex.: _HOST*
+Host variables are only used with HOST*, not by * alone, see examples.
 
 ex.:
 
+  # only match a single variable
   show_custom_vars = _VAR1
+
+  # show all host variables for hosts and all service variables for services
+  show_custom_vars = *
+
+  # show all host variables for hosts and all host and service variables for services
+  show_custom_vars = HOST*
+  show_custom_vars = *
 
 
 === expand_user_macros

@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 86;
+    plan tests => 98;
 
     use lib('t');
     require TestUtils;
@@ -319,3 +319,29 @@ for my $urls (@{$absolute_urls}) {
     my $got = Thruk::Utils::absolute_url($urls->[0], $urls->[1],1);
     is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
 }
+
+#########################
+# test custom variables
+{
+    my $show_custom_vars = ["A*"];
+    is(Thruk::Utils::check_custom_var_list("_ABC", $show_custom_vars),     1, "check_custom_var_list I");
+    is(Thruk::Utils::check_custom_var_list("_DEF", $show_custom_vars), undef, "check_custom_var_list II");
+    is(Thruk::Utils::check_custom_var_list("_HOSTABD", $show_custom_vars), undef, "check_custom_var_list III");
+    is(Thruk::Utils::check_custom_var_list("_HOSTDEF", $show_custom_vars), undef, "check_custom_var_list III");
+};
+
+{
+    my $show_custom_vars = ["*"];
+    is(Thruk::Utils::check_custom_var_list("_ABC", $show_custom_vars),     1, "check_custom_var_list IV");
+    is(Thruk::Utils::check_custom_var_list("_DEF", $show_custom_vars),     1, "check_custom_var_list V");
+    is(Thruk::Utils::check_custom_var_list("_HOSTABD", $show_custom_vars), undef, "check_custom_var_list VI");
+    is(Thruk::Utils::check_custom_var_list("_HOSTDEF", $show_custom_vars), undef, "check_custom_var_list VII");
+};
+
+{
+    my $show_custom_vars = ["A*", "HOST*"];
+    is(Thruk::Utils::check_custom_var_list("_ABC", $show_custom_vars),     1, "check_custom_var_list VIII");
+    is(Thruk::Utils::check_custom_var_list("_DEF", $show_custom_vars),undef , "check_custom_var_list IIX");
+    is(Thruk::Utils::check_custom_var_list("_HOSTABD", $show_custom_vars), 1, "check_custom_var_list IX");
+    is(Thruk::Utils::check_custom_var_list("_HOSTDEF", $show_custom_vars), 1, "check_custom_var_list X");
+};

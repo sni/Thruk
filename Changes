@@ -9,6 +9,7 @@ next:
           - improve storing session credentials
           - allow basic time arithmetics when setting start and end dates
           - allow cgi.cfg options to be set from the thruk config
+          - show_custom_vars host variables must be prefixed with HOST when displayed for services
           - fix keyboard control of datepicker (#946)
           - Broadcasts:
             - use authorized_for_broadcasts role everywhere
