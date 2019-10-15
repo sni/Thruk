@@ -34,7 +34,7 @@ Ext.define('TP.GridLoader', {
 
         // return early if dashboard is not visible (breaks column layout otherwise)
         var tab = panel.tab;
-        if(!tab || !tab.isActiveTab || !tab.isActiveTab()) {
+        if(tab && tab.isActiveTab && !tab.isActiveTab()) {
             This.updateData(panel, data);
             return;
         }
