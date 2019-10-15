@@ -354,7 +354,7 @@ sub _run {
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if($self->{'opt'}->{'local'} && !$ENV{'THRUK_CRON'});
 
     # force some commands to be local
-    if($action =~ m/^(logcache|livecache|bpd|bp|report|plugin|lmd|find)/mx) {
+    if($action =~ m/^(logcache|livecache|bpd|bp|report|plugin|lmd|find|cluster)/mx) {
         $self->{'opt'}->{'local'} = 1;
     }
 

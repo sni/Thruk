@@ -25,6 +25,7 @@ Show information about a Thruk cluster
     available commands are:
 
     - status       displays status of the cluster
+    - ping         send heartbeat to cluster nodes
 
 =back
 
@@ -89,6 +90,14 @@ sub cmd {
         }
         $output .= ('-' x 110)."\n";
         $output .= sprintf("%d/%d nodes online\n", $ok, $total);
+    } elsif($mode eq 'ping') {
+        my $res = $c->sub_request('/r/thruk/cluster/heartbeat', 'POST', {});
+        if($res && $res->{'message'}) {
+            $output = $res->{'message'}."\n";
+        } else {
+            $output = "failed, please check logfiles and output or retry with -v\n";
+            $rc     = 2;
+        }
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
