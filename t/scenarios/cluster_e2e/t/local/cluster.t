@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 14;
+plan tests => 19;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -28,4 +28,9 @@ TestUtils::test_command({
     like => ['/heartbeat send/'],
 });
 
+###########################################################
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk cluster status',
+    like => ['/OK/', '/nodes online/'],
+});
 ###########################################################

@@ -113,6 +113,7 @@ lib/Thruk/Utils/Cache.pm
 lib/Thruk/Utils/CLI.pm
 lib/Thruk/Utils/CLI/Backend.pm
 lib/Thruk/Utils/CLI/Cache.pm
+lib/Thruk/Utils/CLI/Cluster.pm
 lib/Thruk/Utils/CLI/Command.pm
 lib/Thruk/Utils/CLI/Contact.pm
 lib/Thruk/Utils/CLI/Cron.pm
