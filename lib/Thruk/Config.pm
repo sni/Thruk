@@ -574,6 +574,7 @@ sub set_default_config {
         'http_backend_reverse_proxy'        => 1,
         'logcache_delta_updates'            => 0,
         'slow_page_log_threshold'           => 15,
+        'resource_file'                     => [],
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};

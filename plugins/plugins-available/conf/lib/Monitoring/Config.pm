@@ -73,7 +73,7 @@ $Monitoring::Config::plugin_pathspec = '(/plugins/|/libexec/|/monitoring\-plugin
         core_conf           => path to core config
         obj_file            => path to core config file
         obj_dir             => path to core config path
-        obj_resource_file   => path to resource.cfg file
+        obj_resource_file   => paths to resource.cfg file
         obj_readonly        => readonly pattern
         obj_exclude         => exclude pattern
         git_base_dir        => git history base folder
@@ -1522,7 +1522,7 @@ sub _set_config {
     if($self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_file'}          = [];
         $self->{'config'}->{'obj_dir'}           = [];
-        $self->{'config'}->{'obj_resource_file'} = undef;
+        $self->{'config'}->{'obj_resource_file'} = [];
 
         my $core_conf = $self->{'config'}->{'core_conf'};
         if(defined $ENV{'OMD_ROOT'}
@@ -1614,7 +1614,7 @@ sub _update_core_conf {
             push @{$self->{'config'}->{'obj_dir'}}, $self->_resolve_relative_path($value, $basedir);
         }
         if($key eq 'resource_file') {
-            $self->{'config'}->{'obj_resource_file'} = $self->_resolve_relative_path($value, $basedir);
+            push @{$self->{'config'}->{'obj_resource_file'}}, $self->_resolve_relative_path($value, $basedir);
         }
     }
     CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);

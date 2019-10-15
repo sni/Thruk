@@ -381,7 +381,11 @@ sub get_component_as_string {
         for my $p (@{$b->{options}->{peer}}) {
         $string .= "            peer          = ".$p."\n";
         }
-        $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if $b->{'options'}->{'resource_file'};
+        if($b->{'options'}->{'resource_file'}) {
+            for my $r (@{Thruk::Utils::list($b->{'options'}->{'resource_file'})}) {
+                $string .= "            resource_file = ".$r."\n";
+            }
+        }
         $string .= "            auth          = ".$b->{'options'}->{'auth'}."\n"          if $b->{'options'}->{'auth'};
         $string .= "            proxy         = ".$b->{'options'}->{'proxy'}."\n"         if $b->{'options'}->{'proxy'};
         $string .= "            remote_name   = ".$b->{'options'}->{'remote_name'}."\n"   if $b->{'options'}->{'remote_name'};

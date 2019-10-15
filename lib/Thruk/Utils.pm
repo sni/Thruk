@@ -549,7 +549,7 @@ sub read_ssi {
 
 =head2 read_resource_file
 
-  read_resource_file($file, [ $macros ], [$with_comments])
+  read_resource_file($files, [ $macros ], [$with_comments])
 
 returns a hash with all USER1-32 macros. macros can
 be a predefined hash.
@@ -557,27 +557,32 @@ be a predefined hash.
 =cut
 
 sub read_resource_file {
-    my($file, $macros, $with_comments) = @_;
+    my($files, $macros, $with_comments) = @_;
+
+    $files = Thruk::Utils::list($files);
+    return unless scalar @{$files} > 0;
+
     my $comments    = {};
     my $lastcomment = "";
-    return unless defined $file;
-    return unless -f $file;
-    $macros   = {} unless defined $macros;
-    open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
-    while(my $line = <$fh>) {
-        if($line =~ m/^\s*(\$[A-Z0-9_]+\$)\s*=\s*(.*)$/mx) {
-            $macros->{$1}   = $2;
-            $comments->{$1} = $lastcomment;
-            $lastcomment    = "";
+    $macros         = {} unless defined $macros;
+    for my $file (@{$files}) {
+        next unless -f $file;
+        open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
+        while(my $line = <$fh>) {
+            if($line =~ m/^\s*(\$[A-Z0-9_]+\$)\s*=\s*(.*)$/mx) {
+                $macros->{$1}   = $2;
+                $comments->{$1} = $lastcomment;
+                $lastcomment    = "";
+            }
+            elsif($line =~ m/^(\#.*$)/mx) {
+                $lastcomment .= $1;
+            }
+            elsif($line =~ m/^\s*$/mx) {
+                $lastcomment = '';
+            }
         }
-        elsif($line =~ m/^(\#.*$)/mx) {
-            $lastcomment .= $1;
-        }
-        elsif($line =~ m/^\s*$/mx) {
-            $lastcomment = '';
-        }
+        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     }
-    CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     return($macros) unless $with_comments;
     return($macros, $comments);
 }
