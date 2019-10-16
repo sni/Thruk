@@ -260,9 +260,20 @@ sub read_conf {
 
     my $content   = read_file($file);
     my $hexdigest = Thruk::Utils::Crypt::hexdigest($content);
+    my $in_block = 0;
     for my $line (split/\n/mx, $content) {
         next if $line eq '';
         next if substr($line, 0, 1) eq '#';
+        if($line =~ m/\s*<\//mx) {
+            $in_block--;
+            next;
+        }
+        if($line =~ m/\s*</mx) {
+            $in_block++;
+            next;
+        }
+
+        next if $in_block;
         if($line =~ m/\s*(\w+)\s*=\s*(.*)\s*(\#.*|)$/mx) {
             my $key   = $1;
             my $value = $2;
