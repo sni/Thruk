@@ -92,7 +92,13 @@ function remove_conf_attribute(key, nr) {
 }
 
 /* initialize all buttons */
+var init_conf_tool_buttons_ready = false;
 function init_conf_tool_buttons() {
+    if(init_conf_tool_buttons_ready) {
+        // click() will be called twice in that case
+        throw new Error("init_conf_tool_buttons should not be called twice");
+    }
+    init_conf_tool_buttons_ready = true;
     jQuery('INPUT.conf_button').button();
     jQuery('BUTTON.conf_button').button();
     jQuery('.radioset').controlgroup();
