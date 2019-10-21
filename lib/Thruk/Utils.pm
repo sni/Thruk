@@ -1830,6 +1830,27 @@ sub list {
 
 ########################################
 
+=head2 extract_list
+
+  extract_list($var, $separator)
+
+return list by splitting $var by $sep ($var can be an array or string)
+
+=cut
+
+sub extract_list {
+    my($var, $sep) = @_;
+    my $result = [];
+    for my $v (@{list($var)}) {
+        for my $v2 (split($sep, $v)) {
+            push @{$result}, $v2;
+        }
+    }
+    return($result);
+}
+
+########################################
+
 =head2 array_chunk
 
   array_chunk($list, $number)
