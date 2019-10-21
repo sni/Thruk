@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix creating broadcasts from api
+          - fix config tool plugin preview
+
 2.32     Thu Oct 17 11:27:22 CEST 2019
           - show all host columns only once in service details
           - add list view process info when connecting more than 5 sites
