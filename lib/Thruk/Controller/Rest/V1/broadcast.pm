@@ -123,7 +123,7 @@ sub _rest_get_thruk_broadcast_new {
         });
     }
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
-    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcast, 1, 1);
+    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file, $broadcast, 1, 1);
     return({
         'message' => 'successfully created broadcast.',
         'file'    => $file,
