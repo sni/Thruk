@@ -101,7 +101,7 @@ sub new {
     # parse json body parameters
     if($self->req->content_type && $self->req->content_type =~ m%^application/json%mx) {
         my $raw = $self->req->raw_body;
-        if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mx) {
+        if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mxs) {
             my $data;
             my $json = Cpanel::JSON::XS->new->utf8;
             $json->relaxed();
