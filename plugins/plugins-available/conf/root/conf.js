@@ -92,13 +92,7 @@ function remove_conf_attribute(key, nr) {
 }
 
 /* initialize all buttons */
-var init_conf_tool_buttons_ready = false;
 function init_conf_tool_buttons() {
-    if(init_conf_tool_buttons_ready) {
-        // click() will be called twice in that case
-        throw new Error("init_conf_tool_buttons should not be called twice");
-    }
-    init_conf_tool_buttons_ready = true;
     jQuery('INPUT.conf_button').button();
     jQuery('BUTTON.conf_button').button();
     jQuery('.radioset').controlgroup();
@@ -137,7 +131,7 @@ function init_conf_tool_buttons() {
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}
-    }).click(function() {
+    }).unbind("click").click(function() {
         check_plugin_exec(this.id);
         return false;
     });
@@ -152,14 +146,14 @@ function init_conf_tool_buttons() {
     });
     jQuery('#attr_opener').button({
         icons: {primary: 'ui-add-button'}
-    }).click(function() {
+    }).unbind("click").click(function() {
         $dialog.dialog('open');
         return false;
     });
 
     jQuery('#finish_button').button({
         icons: {primary: 'ui-ok-button'}
-    }).click(function() {
+    }).unbind("click").click(function() {
         $dialog.dialog('close');
         return false;
     });
@@ -169,7 +163,7 @@ function init_conf_tool_buttons() {
         icons: {primary: 'ui-wzd-button'},
         text: false,
         label: 'open command line wizard'
-    }).click(function() {
+    }).unbind("click").click(function() {
         init_conf_tool_command_wizard(this.id);
         return false;
     });
@@ -179,7 +173,7 @@ function init_conf_tool_buttons() {
         icons: {primary: 'ui-wzd-button'},
         text: false,
         label: 'open command line wizard'
-    }).click(function() {
+    }).unbind("click").click(function() {
         init_conf_tool_plugin_wizard(this.id);
         return false;
     });
@@ -189,7 +183,7 @@ function init_conf_tool_buttons() {
         icons: {primary: 'ui-wzd-button'},
         text: false,
         label: 'set ip based on current hostname'
-    }).click(function() {
+    }).unbind("click").click(function() {
         var host = jQuery('#attr_table').find('.obj_host_name').val();
         if(host == undefined) {
             return false;
@@ -211,7 +205,7 @@ function init_conf_tool_buttons() {
         return false;
     });
 
-    jQuery("#depsopen").on("click", function(ev) {
+    jQuery("#depsopen").unbind("click").on("click", function(ev) {
         var menu = [{
             'text': "Hostdepenendency",
             'href': "conf.cgi?sub=objects&amp;type=hostdependency"
@@ -222,7 +216,7 @@ function init_conf_tool_buttons() {
         show_action_menu(ev.target.parentNode, menu,null, null, null, null, "b-r");
         return false;
     });
-    jQuery("#escopen").on("click", function(ev) {
+    jQuery("#escopen").unbind("click").on("click", function(ev) {
         var menu = [{
             'text': "Hostescalation",
             'href': "conf.cgi?sub=objects&amp;type=hostescalation"
