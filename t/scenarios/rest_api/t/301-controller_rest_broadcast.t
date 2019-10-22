@@ -21,7 +21,7 @@ my $pages = [{
 # create new broadcast
         url     => '/thruk/broadcasts',
         method  => 'post',
-        post    => { 'file' => 'test', text => 'test broadcast' },
+        post    => { 'file' => 'test.json', text => 'test broadcast' },
         like    => ['successfully created broadcast'],
     }, {
         url     => '/thruk/broadcasts',
