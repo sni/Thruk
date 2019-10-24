@@ -13,7 +13,7 @@ jQuery(document).ready(function() {
       if(e.pageX + popup_width > screen_width) {
         popup_pos_x  = e.pageX - popup_width - 5;
       }
-      jQuery("body").append("<div id='tooltip'><iframe src='"+url+"' width='"+popup_width+"' height='"+popup_height+"' frameBorder='0' scrolling='no' onload='resizeGraphIFrame(this)'></iframe></div>");
+      jQuery("body").append("<div id='tooltip'><iframe src='"+url+"' width='"+popup_width+"' height='"+popup_height+"' frameBorder='0' scrolling='no' onload='resizeGraphIFrame(this)'><\/iframe><\/div>");
       jQuery("#tooltip")
         .css("position","absolute")
         .css("z-index","15")
