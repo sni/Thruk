@@ -52,7 +52,7 @@ sub _rest_get_thruk_cluster_heartbeat {
         return;
     }
     alarm(60);
-    local $ENV{'THRUK_SKIP_CLUSTER'} = 0;
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 0; # allow further subsequent cluster calls
     $c->cluster->load_statefile();
     my $nodes = {};
     for my $n (@{$c->cluster->{'nodes'}}) {
@@ -63,6 +63,45 @@ sub _rest_get_thruk_cluster_heartbeat {
     }
     alarm(0);
     return({ 'message' => 'heartbeat send', 'nodes' => $nodes });
+}
+
+##########################################################
+# REST PATH: POST /thruk/cluster/restart
+# restarts all cluster nodes sequentially
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/cluster/restart$%mx, \&_rest_get_thruk_cluster_restart, ['admin']);
+sub _rest_get_thruk_cluster_restart {
+    my($c) = @_;
+    return({ 'message' => 'cluster disabled', 'description' => 'this is a single node installation and not clustered', code => 501 }) unless $c->cluster->is_clustered();
+    if($c->req->method() eq 'GET') {
+        return({ 'message' => 'bad request', description => 'POST method required', code => 400 });
+    }
+
+    alarm(60);
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 0; # allow further subsequent cluster calls
+    $c->cluster->load_statefile();
+    my $nodes = {};
+    for my $n (@{$c->cluster->{'nodes'}}) {
+        next if $c->cluster->is_it_me($n);
+        $c->log->debug(sprintf("restarting node: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        # run stop on all nodes, apache will start them again automatically
+        $c->cluster->run_cluster($n, "Thruk::Utils::stop_all", [$c]);
+        $c->log->debug(sprintf("restarting node: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+    }
+
+    # ping nodes to start at least one process
+    for my $n (@{$c->cluster->{'nodes'}}) {
+        next if $c->cluster->is_it_me($n);
+        $c->log->debug(sprintf("sending heartbeat: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
+        $c->log->debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+    }
+
+    alarm(0);
+
+    # stop our own process gracefully
+    $c->app->stop_all();
+
+    return({'message' => 'all cluster nodes restarted', 'nodes' => $nodes});
 }
 
 ##########################################################

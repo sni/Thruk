@@ -1196,6 +1196,55 @@ sub _add_additional_roles {
 
 ###################################################
 
+=head2 stop_all
+
+    stop_all()
+
+stop all thruk pids except ourselves
+
+=cut
+sub stop_all {
+    my($self) = @_;
+    $pidfile  = $self->config->{'tmp_path'}.'/thruk.pid';
+    if(-f $pidfile) {
+        my @pids = read_file($pidfile);
+        for my $pid (@pids) {
+            next if $pid == $$;
+            kill(15, $pid);
+        }
+    }
+    return 1;
+}
+
+###################################################
+
+=head2 graceful_stop
+
+    graceful_stop($c)
+
+stop our process gracefully
+
+=cut
+sub graceful_stop {
+    my($self, $c) = @_;
+    if($c && $c->env->{'psgix.harakiri'}) {
+        # if plack server does support harakiri mode, only supported if plack uses a procmanager
+        $c->env->{'psgix.harakiri.commit'} = 1;
+    }
+    elsif($c && $c->env->{'psgix.cleanup'}) {
+        # supported since plack 1.0046
+        push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
+            kill(15, $$);
+        };
+    } else {
+        # kill it the hard way
+        kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
+    }
+    return 1;
+}
+
+###################################################
+
 =head1 SEE ALSO
 
 L<Thruk::Controller::Root>, L<Plack>

@@ -26,6 +26,7 @@ Show information about a Thruk cluster
 
     - status       displays status of the cluster
     - ping         send heartbeat to cluster nodes
+    - restart      restart thruk instance on each cluster node
 
 =back
 
@@ -92,6 +93,14 @@ sub cmd {
         $output .= sprintf("%d/%d nodes online\n", $ok, $total);
     } elsif($mode eq 'ping') {
         my $res = $c->sub_request('/r/thruk/cluster/heartbeat', 'POST', {});
+        if($res && $res->{'message'}) {
+            $output = $res->{'message'}."\n";
+        } else {
+            $output = "failed, please check logfiles and output or retry with -v\n";
+            $rc     = 2;
+        }
+    } elsif($mode eq 'restart') {
+        my $res = $c->sub_request('/r/thruk/cluster/restart', 'POST', {});
         if($res && $res->{'message'}) {
             $output = $res->{'message'}."\n";
         } else {

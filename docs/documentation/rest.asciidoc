@@ -1434,6 +1434,10 @@ should not be used, use POST method instead
 
 send cluster heartbeat to all other nodes
 
+=== POST /thruk/cluster/restart
+
+restarts all cluster nodes sequentially
+
 === GET /thruk/config
 
 lists configuration information
@@ -1714,3 +1718,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+
