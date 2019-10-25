@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add thruk restart cli command
+          - add thruk cluster restart cli command
           - fix creating broadcasts from api
           - fix config tool plugin preview
 
