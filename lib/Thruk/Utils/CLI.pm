@@ -354,7 +354,7 @@ sub _run {
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if($self->{'opt'}->{'local'} && !$ENV{'THRUK_CRON'});
 
     # force some commands to be local
-    if($action =~ m/^(logcache|livecache|bpd|bp|report|plugin|lmd|find|cluster)/mx) {
+    if($action =~ m/^(logcache|livecache|bpd|bp|report|plugin|lmd|find|cluster|restart)/mx) {
         $self->{'opt'}->{'local'} = 1;
     }
 
@@ -685,6 +685,11 @@ sub _run_command_action {
         $data->{'output'} = _cmd_precompile($c);
     }
 
+    # restart process
+    elsif($action eq 'restart' || $action eq 'stop') {
+        $data->{'output'} = _cmd_stop($c, $action);
+    }
+
     else {
         # generic sub commands
 
@@ -809,6 +814,15 @@ sub _cmd_precompile {
     my $msg = Thruk::Utils::precompile_templates($c);
     $c->stats->profile(end => "_cmd_precompile()");
     return $msg;
+}
+
+##############################################
+sub _cmd_stop {
+    my($c, $action) = @_;
+    $c->stats->profile(begin => "_cmd_stop()");
+    $c->app->stop_all();
+    $c->stats->profile(end => "_cmd_stop()");
+    return(sprintf("OK - all processes %s\n", $action eq 'stop' ? "stopped" : "restarted"));
 }
 
 ##########################################################

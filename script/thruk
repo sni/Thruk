@@ -215,6 +215,7 @@ script has the following arguments
     Internal Commands
       - compile                     compile templates for faster access
       - clean_dashboards            remove empty dashboards which are older than 1 day
+      - stop/restart                stop thruk process (restart assumes they will be restarted automatically from apache)
 
 
 
