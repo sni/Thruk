@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.32-2   Fri Oct 25 17:05:54 CEST 2019
           - add thruk restart cli command
           - add thruk cluster restart cli command
           - fix creating broadcasts from api
