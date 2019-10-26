@@ -6,8 +6,6 @@ DESTDIR=$(CURDIR)/debian/tmp/
 PERLVER=$(shell perl -e 'use Config; print $$Config{version}')
 HTTPDCONF=$(shell if [ -d "/etc/apache2/conf-available" ]; then echo "/etc/apache2/conf-available"; else echo "/etc/apache2/conf.d"; fi )
 SHELL=bash
-DIST := $(shell lsb_release -i | awk '{print tolower($$3)}')
-RELEASE := $(shell lsb_release -r | awk '{print $$2}')
 export PERL5LIB = /usr/lib/thruk/perl5:/usr/lib64/thruk/perl5
 FIXPHANTOMJS=$(shell if [ -f script/phantomjs ]; then echo "fix_phantomjs_location"; else echo ""; fi )
 
@@ -36,16 +34,8 @@ override_dh_auto_install: local_auto_install $(FIXPHANTOMJS)
 
 local_auto_install:
 	dh_auto_install
-	# enable su logrotate directive if required
-	if [[ ${DIST} == debian ]] ; then \
-		if [[ $$(echo "${RELEASE}>=7" | bc -l) -eq 1 || ${RELEASE} == testing || ${RELEASE} == unstable ]] ; then \
-			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
-		fi ; \
-	elif [[ ${DIST} == ubuntu ]] ; then \
-		if [[ $$(echo "${RELEASE}>=13.04" | bc -l) -eq 1 ]] ; then \
-			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
-		fi ; \
-	fi
+	# enable su logrotate, available since ubuntu 13.04 and debian 6
+	sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
 	echo "debian/thruk-plugin-reporting.lintian-overrides" >> MANIFEST
 
 fix_phantomjs_location:
