@@ -43,6 +43,10 @@ sub cmd {
     my($c, $action, $commandoptions, $data, $src, $global_options) = @_;
     $c->stats->profile(begin => "_cmd_report()");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     my $mail = 0;
     if(scalar @{$commandoptions} >= 1 && $commandoptions->[0] eq 'mail') {
         $mail = 1;

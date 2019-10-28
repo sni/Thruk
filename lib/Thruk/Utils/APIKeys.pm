@@ -24,18 +24,18 @@ my $private_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
 
 =head2 get_keys
 
-    get_keys($c, { [hashed_key => $hashed_key], [user => $username], [file => $filename], [system => 0/1])
+    get_keys($c, { [hashed_key => $hashed_key], [user => $username], [file => $filename], [superuser => 0/1])
 
-returns list of api keys, filtered by user, file or system
+returns list of api keys, filtered by user, file or superuser
 
 =cut
 sub get_keys {
     my($c, $filter) = @_;
     my $filename   = $filter->{'file'};
-    my $system     = $filter->{'system'};
+    my $superuser  = $filter->{'superuser'};
     my $user       = $filter->{'user'};
     my $hashed_key = $filter->{'hashed_key'};
-    my $all        = (defined $user || defined $system) ? 0 : 1;
+    my $all        = (defined $user || defined $superuser) ? 0 : 1;
 
     my $keys   = [];
     my $folder = $c->config->{'var_path'}.'/api_keys';
@@ -49,7 +49,7 @@ sub get_keys {
         my $data = read_key($c->config, $file);
         next unless $data;
         if(  $all
-          || ($system && $data->{'system'})
+          || ($superuser && $data->{'superuser'})
           || ($user && $data->{'user'} && $user eq $data->{'user'})) {
             push @{$keys}, $data;
         }
@@ -59,16 +59,16 @@ sub get_keys {
 
 ##############################################
 
-=head2 get_system_keys
+=head2 get_superuser_keys
 
-    get_system_keys($c, [$filename])
+    get_superuser_keys($c, [$filename])
 
-returns list of system api keys
+returns list of superuser api keys
 
 =cut
-sub get_system_keys {
+sub get_superuser_keys {
     my($c, $filename) = @_;
-    return(get_keys($c, {file => $filename, system => 1}));
+    return(get_keys($c, {file => $filename, superuser => 1}));
 }
 
 ##############################################
@@ -109,7 +109,7 @@ sub get_key_by_private_key {
 
 =head2 create_key
 
-    create_key($c, $username, [$comment], [$roles], [$system])
+    create_key($c, $username, [$comment], [$roles], [$superuser])
 
 create new api key for user
 
@@ -117,7 +117,7 @@ returns private, hashed key and filename
 
 =cut
 sub create_key {
-    my($c, $username, $comment, $roles, $system) = @_;
+    my($c, $username, $comment, $roles, $superuser) = @_;
 
     my $privatekey = Thruk::Utils::Crypt::random_uuid([$username, $comment, time()]);
     my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($privatekey);
@@ -129,9 +129,9 @@ sub create_key {
         created => time(),
     };
     $data->{'comment'}  = $comment // '';
-    if($system) {
+    if($superuser) {
         delete $data->{'user'};
-        $data->{'system'} = 1;
+        $data->{'superuser'} = 1;
     }
     if(defined $roles) {
         $data->{'roles'} = $roles;
@@ -159,10 +159,12 @@ sub create_key_from_req_params {
     if($c->check_user_roles('admin')) {
         if($c->req->parameters->{'username'}) {
             $username = $c->req->parameters->{'username'};
+        } elsif($c->user->{'internal'}) {
+            $c->req->parameters->{'superuser'} = 1;
         }
     } else {
         # only allowed for admins
-        $c->req->parameters->{'system'} = 0;
+        $c->req->parameters->{'superuser'} = 0;
     }
 
     # roles cannot exceed existing roles
@@ -181,7 +183,7 @@ sub create_key_from_req_params {
             $username,
            ($c->req->parameters->{'comment'} // ''),
             $roles,
-            $c->req->parameters->{'system'} ? 1 : 0,
+            $c->req->parameters->{'superuser'} ? 1 : 0,
     );
     return($private_key, $hashed_key, $filename);
 }
@@ -205,7 +207,7 @@ sub remove_key {
         }
     }
     if($c->check_user_roles('admin')) {
-        my $keys = get_system_keys($c, $file);
+        my $keys = get_superuser_keys($c, $file);
         for my $k (@{$keys}) {
             if(Thruk::Utils::basename($k->{'file'}) eq $file) {
                 unlink($k->{'file'});
@@ -248,6 +250,7 @@ sub read_key {
     $data->{'hashed_key'} = $hashed_key;
     $data->{'file'}       = $file;
     $data->{'digest'}     = $type;
+    $data->{'superuser'}  = 1 if delete $data->{'system'}; # migrate system keys
     return($data);
 }
 

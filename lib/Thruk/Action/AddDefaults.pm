@@ -215,7 +215,7 @@ sub begin {
         if($c->req->path_info =~ m#/$product_prefix/(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
             $c->log->debug($1.".cgi does not require authentication") if Thruk->debug;
         } else {
-            if(!$c->authenticate(1)) {
+            if(!$c->authenticate(skip_db_access => 1)) {
                 $c->log->debug("user authentication failed") if Thruk->verbose;
                 return $c->detach('/error/index/10');
             }

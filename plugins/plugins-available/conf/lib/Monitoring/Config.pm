@@ -2371,10 +2371,12 @@ sub _remote_do {
     eval {
         $res = $self->{'remotepeer'}
                     ->{'class'}
-                    ->_req('configtool', {
-                            auth     => $c->stash->{'remote_user'},
-                            sub      => $sub,
-                            args     => $args,
+                    ->request('configtool', {
+                        sub      => $sub,
+                        args     => $args,
+                    }, {
+                        auth     => $c->stash->{'remote_user'},
+                        keep_su  => 1,
                     });
     };
     if($@) {
@@ -2385,10 +2387,9 @@ sub _remote_do {
         my @text = split(/\n/mx, $msg);
         Thruk::Utils::set_message( $c, 'fail_message', $sub." failed: ".$text[0] );
         return;
-    } else {
-        die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
-        return $res->[2];
     }
+    die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
+    return $res->[2];
 }
 
 ##########################################################
@@ -2397,12 +2398,14 @@ sub _remote_do_bg {
     my($self, $c, $sub, $args) = @_;
     my $res = $self->{'remotepeer'}
                    ->{'class'}
-                   ->_req('configtool', {
-                            auth     => $c->stash->{'remote_user'},
-                            sub      => $sub,
-                            args     => $args,
-                            wait     => 1,
-                    });
+                   ->request('configtool', {
+                        sub      => $sub,
+                        args     => $args,
+                   }, {
+                        auth     => $c->stash->{'remote_user'},
+                        keep_su  => 1,
+                        wait     => 1,
+                   });
     die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
     return $res->[2];
 }

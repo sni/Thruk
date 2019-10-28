@@ -38,7 +38,7 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd  => $curl.' https://127.0.0.1/demo/thruk/r/thruk/whoami',
-    like => ['/"auth_src" : "api_key",/', '/"id" : "\(cli\)",/'],
+    like => ['/"auth_src" : "api_key",/', '/"id" : "\(api\)",/'],
 });
 
 TestUtils::test_command({
@@ -52,18 +52,18 @@ TestUtils::test_command({
 });
 
 ###########################################################
-# create system api key
+# create superuser api key
 $test = {
-    cmd  => '/usr/bin/env thruk r -d system=1 -m POST /thruk/api_keys',
+    cmd  => '/usr/bin/env thruk r -d superuser=1 -m POST /thruk/api_keys',
     like => ['/private_key/', '/hashed_key/', '/\.SHA\-256/'],
 };
 TestUtils::test_command($test);
 $data = decode_json($test->{'stdout'});
-isnt($data->{'private_key'}, undef, "created system api key");
+isnt($data->{'private_key'}, undef, "created superuser api key");
 
 ###########################################################
 # check some curl requests
-my $curl = '/usr/bin/env curl -ks --header "X-Thruk-Auth-Key: '.$data->{'private_key'}.'"';
+$curl = '/usr/bin/env curl -ks --header "X-Thruk-Auth-Key: '.$data->{'private_key'}.'"';
 TestUtils::test_command({
     cmd  => $curl.' https://127.0.0.1/demo/thruk/r/',
     like => ['/lists cluster nodes/'],

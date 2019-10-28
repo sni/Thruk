@@ -52,6 +52,10 @@ sub cmd {
     my($c, $action, $commandoptions) = @_;
     $c->stats->profile(begin => "_cmd_cron($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     my $output;
     my $type = shift @{$commandoptions} || 'help';
     if($type eq 'install') {

@@ -49,12 +49,13 @@ for my $dir (@{$scenarios}) {
         next if $dir =~ /nagios4/mx;
         my $dirname = $dir;
         $dirname =~ s%^.*/%%gmx;
-        if(-e 't/610-scenario-'.$dirname.'.t') {
+        my $filename = 't/610-scenario-'.$dirname.'.t';
+        if(-e $filename) {
             ok(1, "test case for $dirname exists");
         } elsif($dirname =~ m/^pentest_/mx) {
             ok(1, "no test case for pentests required");
         } else {
-            fail("missing test case for $dir");
+            fail("missing test case file: ".$filename);
         }
     }
 }

@@ -55,6 +55,7 @@ sub cmd {
     Getopt::Long::GetOptionsFromArray($commandoptions,
        "i|all-inclusive"    => \$opt->{'all_inclusive'},
     ) or do {
+        $c->stats->profile(end => "_cmd_url($action)");
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
 
@@ -64,6 +65,7 @@ sub cmd {
 
     my $url = shift @{$commandoptions};
     if(!$url) {
+        $c->stats->profile(end => "_cmd_url($action)");
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 

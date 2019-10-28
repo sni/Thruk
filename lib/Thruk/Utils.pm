@@ -1716,6 +1716,19 @@ create and return fake session id along with session data for current user
 
 sub get_fake_session {
     my($c, $id, $username, $roles, $ip) = @_;
+
+    if(!$c->user_exists) {
+        confess("no user");
+    }
+    if(!$c->user->{'superuser'}) {
+        $username = $c->stash->{'remote_user'};
+    }
+
+    # get intersection of roles
+    if($roles && ref $roles eq 'ARRAY') {
+        $roles = $c->user->clean_roles($roles);
+    }
+
     my $sessiondata = {
         hash     => 'none',
         address  => $ip,
@@ -2177,21 +2190,80 @@ sub get_cron_time_entry {
 
 =head2 set_user
 
-  set_user($c, $username)
+  set_user($c, %options)
 
 set and authenticate a user
+
+options are: {
+    username  => username of the resulting user
+    auth_src  => hint about where this user came from
+    superuser => superuser can change to other user names, roles will not exceed initial role set
+    internal  => internal technical user can change into any user and has admin roles
+    force     => force setting new user, even if already authenticated
+}
 
 =cut
 
 sub set_user {
-    my($c, $username, $auth_src) = @_;
-    confess("no auth_src") unless $auth_src;
-    $c->authenticate(0, $username);
+    my($c, %options) = @_;
+    confess("no username") unless $options{'username'};
+    confess("no auth_src") unless $options{'auth_src'};
+    $c->log->debug(sprintf("set_user: %s, superuser: %s, internal: %s", $options{'username'}, $options{'superuser'} ? 'yes' : 'no', $options{'internal'} ? 'yes' : 'no'));
+    if($c->user_exists) {
+        if($c->user->{'internal'} || $options{'force'}) {
+            # ok
+        } elsif($c->user->{'superuser'}) {
+            return(change_user($c, $options{'username'}, $options{'auth_src'}));
+        } else {
+            # not allowed
+            return;
+        }
+        delete $c->{'user'};
+        delete $c->stash->{'remote_user'};
+        delete $c->{'session'};
+    }
+    $c->authenticate(
+            username  => $options{'username'},
+            superuser => $options{'superuser'},
+            internal  => $options{'internal'},
+            auth_src  => $options{'auth_src'},
+    );
     confess("no user") unless $c->user_exists;
-    $c->user->{'auth_src'} = $auth_src;
-    return;
+    $c->user->{'auth_src'} = $options{'auth_src'};
+    return $c->user;
 }
 
+##############################################
+
+=head2 change_user
+
+  change_user($c, $username)
+
+changes username to given user, cannot exceed current roles and permissions
+
+=cut
+
+sub change_user {
+    my($c, $username, $auth_src) = @_;
+    confess("no username") unless $username;
+    confess("not yet authenticated") unless $c->user_exists;
+    confess("not allowed") unless $c->user->{'superuser'};
+    return $c->user if $c->user->{'username'} eq $username;
+
+    $c->log->debug(sprintf("change_user: %s", $username));
+    my $previous_user = delete $c->{'user'};
+    delete $c->stash->{'remote_user'};
+    delete $c->{'session'};
+
+    # replace current user
+    $c->authenticate(
+        username => $username,
+        auth_src => $auth_src,
+        roles    => $previous_user->{'roles'},
+    );
+
+    return $c->user;
+}
 
 ##############################################
 

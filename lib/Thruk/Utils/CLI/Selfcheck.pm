@@ -51,6 +51,10 @@ sub cmd {
     my($c, $action, $commandoptions, $data) = @_;
     $c->stats->profile(begin => "_cmd_selfcheck($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     my $type = shift @{$commandoptions} || 'all';
 
     require Thruk::Utils::SelfCheck;

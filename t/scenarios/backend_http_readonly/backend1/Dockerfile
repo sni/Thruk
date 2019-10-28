@@ -1,0 +1,5 @@
+FROM  consol/omd-labs-centos:latest
+
+COPY playbook.yml /root/ansible_dropin/
+COPY test.cfg /root/
+COPY 88db079c08a1aa46d4df2e5fb770d66d6572972cde4831ec64b20ccbe66f287b.SHA-256 /root/

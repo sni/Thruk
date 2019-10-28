@@ -431,7 +431,6 @@ sub retrieve_session {
     $data->{active}      = $stat[9];
     $data->{roles}       = [] unless $data->{roles};
     $data->{private_key} = $sessionid if $sessionid;
-    delete $data->{current_roles};
 
     # REMOVE AFTER: 01.01.2020
     store_session($config, $sessionid, $data) if($needs_save && $sessionid);

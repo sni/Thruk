@@ -977,6 +977,7 @@ sub get_backends_with_obj_config {
     # first non hidden peer with object config enabled
     for my $peer (@peers) {
         next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
+        next if $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} == DISABLED_CONF;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
             next if $peer->{'configtool'}->{'disable'};
             $firstpeer = $peer->{'key'} unless defined $firstpeer;
@@ -987,6 +988,7 @@ sub get_backends_with_obj_config {
     # first peer with object config enabled
     if(!defined $firstpeer) {
         for my $peer (@peers) {
+            next if $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} == DISABLED_CONF;
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 next if $peer->{'configtool'}->{'disable'};
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;

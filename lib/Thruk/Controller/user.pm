@@ -37,7 +37,7 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'API keys are disabled' );
                 return $c->redirect_to('user.cgi');
             }
-            if($c->config->{'max_api_keys_per_user'} <= 0) {
+            if($c->config->{'max_api_keys_per_user'} <= 0 || $c->check_user_roles("authorized_for_read_only")) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to create API keys.' );
                 return $c->redirect_to('user.cgi');
             }
@@ -54,6 +54,10 @@ sub index {
             return(user_page($c));
         }
         if($action eq 'remove_key') {
+            if($c->check_user_roles("authorized_for_read_only")) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to delete API keys.' );
+                return $c->redirect_to('user.cgi');
+            }
             Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'file'});
             Thruk::Utils::set_message( $c, 'success_message', 'API key removed' );
             return $c->redirect_to('user.cgi');
@@ -131,11 +135,11 @@ sub user_page {
 
     Thruk::Utils::ssi_include($c, 'user');
 
-    $c->stash->{'profile_user'} = $c->user;
-    $c->stash->{api_keys}    = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
-    $c->stash->{system_keys} = $c->check_user_roles('admin') ? Thruk::Utils::APIKeys::get_system_keys($c) : [];
-    $c->stash->{'available_roles'} = $Thruk::Authentication::User::possible_roles;
-    $c->stash->{template} = 'user_profile.tt';
+    $c->stash->{profile_user}    = $c->user;
+    $c->stash->{api_keys}        = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
+    $c->stash->{superuser_keys}  = $c->check_user_roles('admin') ? Thruk::Utils::APIKeys::get_superuser_keys($c) : [];
+    $c->stash->{available_roles} = $Thruk::Authentication::User::possible_roles;
+    $c->stash->{template}        = 'user_profile.tt';
 
     return 1;
 }

@@ -60,6 +60,10 @@ sub cmd {
     my($c, $action, $commandoptions, undef, undef, $globaloptions) = @_;
     $c->stats->profile(begin => "_cmd_plugin($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     require Thruk::Utils::Plugin;
 
     # cache actions

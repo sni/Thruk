@@ -1348,6 +1348,7 @@ sub _rest_get_thruk_sessions {
         }
         delete $session_data->{'hash'};       # basic auth token is never public
         delete $session_data->{'csrf_token'}; # also not public
+        delete $session_data->{'current_roles'}; # for internal use
         push @{$data}, $session_data;
     }
     if($id) {

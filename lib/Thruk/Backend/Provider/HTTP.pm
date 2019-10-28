@@ -777,7 +777,7 @@ sub propagate_session_file {
     my($self, $c) = @_;
     my $session_id = $c->req->cookies->{'thruk_auth'};
     confess("no user") unless $c->user_exists();
-    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id, undef, $c->user->{'roles'}], undef, $c->stash->{'remote_user'});
+    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id, $c->stash->{'remote_user'}, $c->user->{'roles'}], { auth => $c->stash->{'remote_user'} } );
     $session_id = $r->[0] if $r && ref($r) eq 'ARRAY';
     return $session_id;
 }
@@ -795,8 +795,32 @@ sub rpc {
     my($self, $c, $function, $args) = @_;
     if(ref $args ne 'ARRAY') { confess("arguments must be an array"); }
     $args = Thruk::Utils::encode_arg_refs($args);
-    my @res = @{$self->_req($function, $args, undef, $c->stash->{'remote_user'})};
+    my @res = @{$self->_req($function, $args, { auth => $c->stash->{'remote_user'} })};
     return($res[0]);
+}
+
+##########################################################
+
+=head2 request
+
+    request($sub, $args, $options)
+
+returns result for given request
+
+    $sub is answered in Thruk::Utils::CLI::_cmd_raw
+    $args are arguments for _cmd_raw
+    $options are request / transport related options like:
+    {
+        auth      => username set on remoteside
+        keep_su   => change username on remotesite, but keep superuser permissions
+        want_data => return raw data result
+        wait      => wait for remote job to complete
+    }
+
+=cut
+sub request {
+    my($self, $sub, $args, $options) = @_;
+    return($self->_req($sub, $args, $options));
 }
 
 ##########################################################
@@ -809,23 +833,17 @@ returns result for given request
 
 =cut
 sub _req {
-    my($self, $sub, $args, $redirects, $auth, $want_data) = @_;
+    my($self, $sub, $args, $options, $redirects) = @_;
     $redirects = 0 unless defined $redirects;
     my $c = $Thruk::Request::c;
 
     # clean code refs
     _clean_code_refs($args);
 
-    my $options = {
-        'action'        => 'raw',
-        'sub'           => $sub,
-        'remote_name'   => $self->{'remote_name'},
-        'args'          => $args,
-    };
-    if(defined $args and ref $args eq 'HASH') {
-        $options->{'auth'} = $args->{'auth'} if defined $args->{'auth'};
-    }
-    $options->{'auth'} = $auth if $auth;
+    $options->{'action'}      = 'raw';
+    $options->{'sub'}         = $sub;
+    $options->{'remote_name'} = $self->{'remote_name'};
+    $options->{'args'}        = $args;
 
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});
@@ -844,7 +862,7 @@ sub _req {
         $self->_wait_for_remote_job($2);
         $redirects++;
         die("too many redirects") if $redirects > 2;
-        return $self->_req($sub, $args, $redirects);
+        return $self->_req($sub, $args, $options, $redirects);
     }
 
     if($response->is_success) {
@@ -877,11 +895,11 @@ sub _req {
             }
             $self->_replace_peer_key($data->{'output'}->[2]);
 
-            if(defined $args and ref $args eq 'HASH' and $args->{'wait'} and $data->{'output'}->[2] =~ m/^jobid:(.*)$/mx) {
+            if($options->{'wait'} and $data->{'output'}->[2] =~ m/^jobid:(.*)$/mx) {
                 return $self->_wait_for_remote_job($1);
             }
 
-            return $data if $want_data;
+            return $data if $options->{'want_data'};
             return $data->{'output'};
         }
         die("not an array ref, got ".ref($data->{'output'}));

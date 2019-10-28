@@ -26,7 +26,7 @@ use LWP::UserAgent;
 use File::Temp qw/tempfile/;
 use Carp qw/confess/;
 use Plack::Test;
-use Cpanel::JSON::XS qw/encode_json/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -638,6 +638,25 @@ sub wait_for_job {
     my($job) = @_;
     my $start  = time();
     my $config = Thruk::Config::get_config();
+
+    if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
+        local $SIG{ALRM} = sub { die("timeout while waiting for external job: ".$job) };
+        alarm(300);
+        my $data;
+        eval {
+            while(1) {
+                my $r = _request('/thruk/r/thruk/jobs/'.$job);
+                $data = decode_json($r->decoded_content);
+                last unless $data->{'is_running'};
+                sleep(0.1);
+            }
+        };
+        my $end  = time();
+        is($data->{'is_running'}, 0, 'job is finished in '.($end-$start).' seconds');
+        alarm(0);
+        return;
+    }
+
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
     if(!-e $jobdir) {
         fail("job folder ".$jobdir.": ".$!);
@@ -645,6 +664,7 @@ sub wait_for_job {
     }
     local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
     require Thruk::Utils::External;
+
     alarm(300);
     eval {
         while(Thruk::Utils::External::_is_running(undef, $jobdir)) {
@@ -886,7 +906,7 @@ sub _external_request {
 
     if($url !~ m/^http/) {
         $url =~ s#//#/#gmx;
-        $url =~ s#/demo##gmx;
+        $url =~ s#^/demo##gmx;
         if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
             $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
         }

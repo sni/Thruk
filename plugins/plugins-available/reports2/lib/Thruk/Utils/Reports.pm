@@ -458,9 +458,14 @@ sub generate_report {
 
     $c->req->parameters->{'debug'} = 1 if $ENV{'THRUK_REPORT_DEBUG'};
 
-    Thruk::Utils::set_user($c, $options->{'user'}, "report");
-    local $ENV{'REMOTE_USER'} = $options->{'user'};
-    $c->stash->{'remote_user'} = $options->{'user'};
+    # report should always run in the report owner context
+    if(!$c->user_exists || ($options->{'user'} ne $c->user->{'username'})) {
+        Thruk::Utils::set_user($c,
+            username => $options->{'user'},
+            auth_src => "report",
+            force    => 1,
+        );
+    }
 
     $c->stash->{'refresh_rate'}   = 0;
     $c->stash->{'no_auto_reload'} = 1;
@@ -766,8 +771,13 @@ sub generate_report_background {
 
     $report = _read_report_file($c, $report_nr) unless $report;
 
-    if(!defined $c->stash->{'remote_user'}) {
-        Thruk::Utils::set_user($c, $report->{'user'}, "report");
+    # report should always run in the report owner context
+    if(!$c->user_exists || ($report->{'user'} ne $c->user->{'username'})) {
+        Thruk::Utils::set_user($c,
+            username => $report->{'user'},
+            auth_src => "report",
+            force    => 1,
+        );
     }
 
     set_running($c, $report_nr, $$, time());

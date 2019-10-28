@@ -39,6 +39,10 @@ use strict;
 sub cmd {
     my($c, $action, $commandoptions) = @_;
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     $c->stats->profile(begin => "_cmd_downtimetask($action)");
     require URI::Escape;
     require Thruk::Utils::RecurringDowntimes;

@@ -34,7 +34,7 @@ my $curl = '/usr/bin/env curl -ks --header "X-Thruk-Auth-Key: '.$data->{'private
 # wait till grafana is ready
 TestUtils::test_command({
     cmd     => $curl.' "https://127.0.0.1/demo/grafana/"',
-    waitfor => '"login":"\(cli\)"',
+    waitfor => '"login":"\(api\)"',
 });
 TestUtils::test_command({
     cmd  => $curl.' "https://127.0.0.1/demo/thruk/cgi-bin/extinfo.cgi?type=grafana&host=test&service=Ping&width=200&height=200" -o tmp/grafana.png',

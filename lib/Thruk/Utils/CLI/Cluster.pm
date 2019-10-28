@@ -50,6 +50,10 @@ sub cmd {
     my($c, $action, $commandoptions) = @_;
     $c->stats->profile(begin => "_cmd_cluster($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     if(scalar @{$commandoptions} == 0) {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }

@@ -218,13 +218,12 @@ sub request_url {
         return $result->{'result'};
     }
 
-    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} && $c->stash->{'remote_user'});
     local $ENV{'NO_EXTERNAL_JOBS'} = 1;
 
     # fork setting may be overriden in child requests
     my $old_no_external_job_forks = $c->config->{'no_external_job_forks'};
 
-    my(undef, undef, $res) = _internal_request($url, $method, $postdata);
+    my(undef, undef, $res) = _internal_request($url, $method, $postdata, $c->user);
 
     my $result = {
         code    => $res->code,
@@ -242,7 +241,7 @@ sub request_url {
             $sleep = 1 if $x > 10;
             sleep($sleep);
             $url = $result->{'headers'}->{'location'} if defined $result->{'headers'}->{'location'};
-            (undef, undef, $res) = _internal_request($url);
+            (undef, undef, $res) = _internal_request($url, undef, undef, $c->user);
             $result = {
                 code    => $res->code,
                 result  => $res->decoded_content || $res->content,
@@ -504,7 +503,7 @@ sub _dummy_c {
 
 ##############################################
 sub _internal_request {
-    my($url, $method, $postdata) = @_;
+    my($url, $method, $postdata, $user) = @_;
     $method = 'GET' unless $method;
 
     _debug("_internal_request()") if $Thruk::Utils::CLI::verbose >= 2;
@@ -516,6 +515,10 @@ sub _internal_request {
         $app = Plack::Test->create(Thruk->startup);
     }
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
+
+    delete $Thruk::thruk->{'TRANSFER_USER'} if $app->{'thruk'};
+    $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
+
     my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
     my $c      = $Thruk::Request::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
@@ -530,7 +533,28 @@ sub _from_local {
     ## no critic
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     ## use critic
-    local $ENV{'THRUK_CLI_SRC'}      = 'CLI';
+    local $ENV{'THRUK_CLI_SRC'} = 'CLI';
+
+    # user can be set from command line
+    if(defined $options->{'auth'}) {
+        Thruk::Utils::set_user($c,
+                username  => $options->{'auth'},
+                auth_src  => "cli",
+        );
+    } elsif(defined $c->config->{'default_cli_user_name'}) {
+        Thruk::Utils::set_user($c,
+                username  => $c->config->{'default_cli_user_name'},
+                auth_src  => "cli",
+        );
+    } else {
+        Thruk::Utils::set_user($c,
+                username  => $ENV{'THRUK_CRON'} ? '(cron)' : '(cli)',
+                auth_src  => 'cli',
+                internal  => 1,
+                superuser => 1,
+        );
+    }
+
     return _run_commands($c, $options, 'local');
 }
 
@@ -546,61 +570,44 @@ sub _from_fcgi {
     local $ENV{'THRUK_CLI_SRC'}      = 'FCGI';
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
 
-    # ensure secret key is fresh
-    my $secret_file = $c->config->{'var_path'}.'/secret.key';
-    $c->config->{'secret_key'}  = read_file($secret_file) if -s $secret_file;
-    chomp($c->config->{'secret_key'});
-
     # check credentials
-    my $res = {};
-    if(   !defined $c->config->{'secret_key'}
-       || !defined $data->{'credential'}
-       || $c->config->{'secret_key'} ne $data->{'credential'}) {
-        my $msg = "authorization failed, ". $c->req->url." does not accept this key.\n";
-        if(!defined $data->{'credential'} || $data->{'credential'} eq '') {
-            $msg = "authorization failed, no auth key specified for ". $c->req->url."\n";
+    if(!defined $data->{'credential'} || $data->{'credential'} eq '') {
+        return({
+            'output' => "authorization failed, no auth key specified for ". $c->req->url."\n",
+            'rc'     => 1,
+        });
+    }
+
+    if(!$c->authenticate(apikey => $data->{'credential'})) {
+        return({
+            'output' => "authorization failed, ". $c->req->url." does not accept this key.\n",
+            'rc'     => 1,
+        });
+    }
+
+    if(defined $data->{'options'}->{'auth'} && $c->user->{'superuser'}) {
+        if($c->user->{'internal'} && $data->{'options'}->{'keep_su'}) {
+            Thruk::Utils::set_user($c,
+                username  => $data->{'options'}->{'auth'},
+                auth_src  => 'api',
+                internal  => 1,
+                superuser => 1,
+            );
+        } else {
+            if(!Thruk::Utils::change_user($c, $data->{'options'}->{'auth'}, "fcgi")) {
+                return({
+                    'output' => "no permission to change the user\n",
+                    'rc'     => 1,
+                });
+            }
         }
-        $res = {
-            'output'  => $msg,
-            'rc'      => 1,
-        };
-    } else {
-        $res = _run_commands($c, $data->{'options'}, 'fcgi');
     }
-    if(defined $res->{'output'} && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
-        $c->res->body($res->{'output'});
-        $c->{'rendered'} = 1;
-        return;
-    }
-    if(ref $res eq 'HASH') {
-        $res->{'version'} = $c->config->{'version'} unless defined $res->{'version'};
-        $res->{'branch'}  = $c->config->{'branch'}  unless defined $res->{'branch'};
-    }
-    my $res_json;
-    eval {
-        $res_json = encode_json($res);
-    };
-    if($@) {
-        die("unable to encode to json: ".Dumper($res));
-    }
-    return $res_json;
+    return(_run_commands($c, $data->{'options'}, 'fcgi'));
 }
 
 ##############################################
 sub _run_commands {
     my($c, $opt, $src) = @_;
-
-    if(defined $opt->{'auth'}) {
-        Thruk::Utils::set_user($c, $opt->{'auth'}, "cli");
-    } elsif(defined $c->config->{'default_cli_user_name'}) {
-        Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'}, "cli");
-    } else {
-        if($ENV{'THRUK_CRON'}) {
-            Thruk::Utils::set_user($c, '(cron)', "cli");
-        } else {
-            Thruk::Utils::set_user($c, '(cli)', "cli");
-        }
-    }
 
     my $data = {
         'output'  => '',
@@ -676,7 +683,6 @@ sub _run_command_action {
 
     # raw query
     if($action eq 'raw') {
-        die('no local raw requests!') if $src ne 'fcgi';
         ($data->{'output'}, $data->{'rc'}) = _cmd_raw($c, $opt, $src);
     }
 
@@ -728,11 +734,13 @@ sub _run_command_action {
         }
         if($err) {
             $data->{'rc'} = 1;
+            $c->stats->profile(end => "_run_command_action()");
             return $data;
         }
 
         # print help only?
         if(scalar @{$opt->{'commandoptions'}} > 0 && $opt->{'commandoptions'}->[0] =~ /^(help|\-h|--help)$/mx) {
+            $c->stats->profile(end => "_run_command_action()");
             return(get_submodule_help(ucfirst($action)));
         }
 
@@ -830,6 +838,10 @@ sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
     my $res        = undef;
     my $last_error = undef;
+
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("admin privileges required to access the config tool ", 1);
+    }
 
     $c->stash->{'param_backend'}     = $peerkey;
     $c->req->parameters->{'backend'} = $peerkey;
@@ -1000,11 +1012,6 @@ sub _cmd_raw {
     die("no backends...") unless $key;
 
     if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
-        # fake remote user unless we have one. renewing the logcache requires
-        # a remote user for starting external job
-        if(!defined $c->stash->{'remote_user'}) {
-            $c->stash->{'remote_user'} = 'cli';
-        }
         $c->{'db'}->renew_logcache($c);
     }
 
@@ -1019,6 +1026,9 @@ sub _cmd_raw {
     }
 
     elsif($function =~ /^cmd:\s+(\w+)\s*(.*)/mx) {
+        if(!$c->check_user_roles('authorized_for_admin')) {
+            return("admin privileges required to run ".$function, 1);
+        }
         local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
         my $action = $1;
         $opt->{'commandoptions'} = [split/\s+/mx, $2];
@@ -1028,6 +1038,9 @@ sub _cmd_raw {
 
     # run code
     elsif($function =~ /::/mx) {
+        if(!$c->check_user_roles('authorized_for_admin') && $function ne 'Thruk::Utils::get_fake_session') {
+            return("admin privileges required to run ".$function, 1);
+        }
         local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
         require Thruk::Utils::Cluster;
         $opt->{'args'}   = Thruk::Utils::unencode_arg_refs($c, $opt->{'args'});
@@ -1047,7 +1060,13 @@ sub _cmd_raw {
         return(\@res, 0);
     }
 
-    # passthrough livestatus results if possible
+    # check permissions
+    my $err = _authorize_function($c, $function, $opt);
+    if($err) {
+        return($err, 1);
+    }
+
+    # passthrough livestatus results if possible (used by cascaded lmd setups)
     if($ENV{'THRUK_USE_LMD'} && $function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
         my $peer = $Thruk::Backend::Pool::lmd_peer;
         my $query = $opt->{'args'}->[0];
@@ -1062,19 +1081,21 @@ sub _cmd_raw {
     my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
-    # add proxy version to processinfo
+    # add proxy version and config tool settings to processinfo
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        if($Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'}) {
-            my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'};
-            $res->[2]->{$key}->{'configtool'} = {
-                'core_type'      => $tmp->{'core_type'},
-                'obj_readonly'   => $tmp->{'obj_readonly'},
-                'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
-                'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
-            };
+        if($c->check_user_roles('authorized_for_admin')) {
+            if($Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'}) {
+                my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'};
+                $res->[2]->{$key}->{'configtool'} = {
+                    'core_type'      => $tmp->{'core_type'},
+                    'obj_readonly'   => $tmp->{'obj_readonly'},
+                    'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
+                    'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
+                };
+            }
         }
     }
 
@@ -1087,12 +1108,12 @@ sub _cmd_ext_job {
     my $jobid       = $opt->{'args'};
     my $res         = "";
     my $last_error  = "";
-    if(Thruk::Utils::External::is_running($c, $jobid, 1)) {
+    if(Thruk::Utils::External::is_running($c, $jobid, $c->user->{'superuser'})) {
         $res = "jobid:".$jobid.":0";
     }
     else {
         #my($out,$err,$time,$dir,$stash,$rc)
-        my @res = Thruk::Utils::External::get_result($c, $jobid, 1);
+        my @res = Thruk::Utils::External::get_result($c, $jobid, $c->user->{'superuser'});
         $res = {
             'out'   => $res[0],
             'err'   => $res[1],
@@ -1120,6 +1141,206 @@ sub _format_response_error {
     } else {
         return Dumper($response);
     }
+}
+
+##############################################
+sub _authorize_function {
+    my($c, $function, $opt) = @_;
+
+    if($c->check_user_roles('authorized_for_admin')) {
+        # OK
+        return;
+    }
+    my $standard_error = "permission denied - function $function requires admin permissions.";
+
+    if($function eq 'send_command') {
+        return _authorize_send_command($c, $opt);
+    }
+    elsif($function eq '_raw_query') {
+        return _authorize_raw_query($c, $opt);
+    }
+    elsif($function eq 'get_sites'
+       || $function eq 'get_processinfo'
+       || $function eq 'get_can_submit_commands'
+    ) {
+        # OK
+        return;
+    }
+    elsif($function eq 'get_contactgroups_by_contact') {
+        if(!$c->user->{'superuser'}) {
+            $opt->{'args'}->[0] = $c->user->{'username'};
+        }
+        # OK
+        return;
+    }
+    elsif($function eq 'get_hosts' || $function =~ /^get_host_/mx) {
+        _extend_filter($c, $opt, 'filter', 'hosts');
+        return;
+    }
+    elsif($function eq 'get_services' || $function =~ /^get_service_/mx || $function eq 'get_hosts_by_servicequery') {
+        _extend_filter($c, $opt, 'filter', 'services');
+        return;
+    }
+    elsif($function eq 'get_performance_stats') {
+        _extend_filter($c, $opt, 'hosts_filter', 'hosts');
+        _extend_filter($c, $opt, 'services_filter', 'services');
+        return;
+    }
+    elsif($function eq 'get_hostgroups')        { return _extend_filter($c, $opt, 'filter', 'hostgroups'); }
+    elsif($function eq 'get_servicegroups')     { return _extend_filter($c, $opt, 'filter', 'servicegroups'); }
+    elsif($function eq 'get_extra_perf_stats')  { return _extend_filter($c, $opt, 'filter', 'status'); }
+    elsif($function eq 'get_comments')          { return _extend_filter($c, $opt, 'filter', 'comments'); }
+    elsif($function eq 'get_downtimes')         { return _extend_filter($c, $opt, 'filter', 'downtimes'); }
+    elsif($function eq 'get_commands')          { return _extend_filter($c, $opt, 'filter', 'commands'); }
+    elsif($function eq 'get_logs' || $function eq 'get_logs_start_end') {
+        return _extend_filter($c, $opt, 'filter', 'log');
+    } elsif($function eq 'get_timeperiods' || $function eq 'get_timeperiod_names') {
+        _extend_filter($c, $opt, 'filter', 'timeperiods');
+        return;
+    }
+
+    return($standard_error);
+}
+
+##############################################
+sub _extend_filter {
+    my($c, $opt, $key, $authname) = @_;
+    my %args = @{$opt->{'args'}};
+    $args{'filter'} = [] unless defined $args{'filter'};
+    push @{$args{'filter'}}, Thruk::Utils::Auth::get_auth_filter($c, $authname);
+    @{$opt->{'args'}} = %args;
+    return;
+}
+
+##############################################
+sub _authorize_raw_query {
+    my($c, $opt) = @_;
+
+    my $queries = _extract_queries($opt->{'args'});
+
+    for my $q (@{$queries}) {
+        if($q =~ m/^GET\s+(.*)$/mx) {
+            my $table = $1;
+            if($c->check_user_roles(["authorized_for_all_hosts", "authorized_for_all_services"])) {
+                # OK without changes
+                next;
+            }
+            if(!$c->check_user_roles("authorized_for_all_hosts") && ($table eq 'services' || $table eq 'comments' || $table eq 'downtimes')) {
+                # there can be hosts which are not directly assigned to this contact but may be visible because of service contacts
+                # in case of raw queries (from lmd) we have to limit services to host contacts only, since we cannot fetch the corresponding host
+                # and will get inconsistant state otherwise
+                $q .= "Filter: host_contacts >= ".$c->user->{'username'}."\n";
+                next;
+            }
+            my @filter = Thruk::Utils::Auth::get_auth_filter($c, $table);
+            if(scalar @filter == 0) {
+                # OK without changes
+                next;
+            }
+            require Monitoring::Livestatus::Class::Lite;
+            @filter = Monitoring::Livestatus::Class::Lite::_apply_filter(undef, \@filter);
+            $q .= join("\n", @filter)."\n";
+            next;
+        }
+        elsif($q =~ m/^COMMAND/mx) {
+            if($c->check_user_roles("authorized_for_read_only")) {
+                $c->log->warn(sprintf("rejected query command for readonly user %s: %s", $c->user->{'username'}, $q));
+                return("permission denied - sending commands requires admin permissions.");
+            }
+            if($c->check_user_roles(["authorized_for_all_service_commands", "authorized_for_all_host_commands", "authorized_for_system_commands"])) {
+                # OK without changes
+                next;
+            }
+
+            if($q =~ m/^COMMAND\s+\[\d+\]\s([A-Z_]+);?(.*)/mx) {
+                my $cmd_name = lc($1);
+                my $cmd_args = [split(/;/mx, $2)];
+                next if _authorize_command($c, $cmd_name, $cmd_args);
+            }
+
+            $c->log->warn(sprintf("rejected query command for user %s: %s", $c->user->{'username'}, $q));
+            return("permission denied - sending this command requires admin permissions.");
+        }
+
+        $c->log->warn(sprintf("rejected unknown query for user %s: %s", $c->user->{'username'}, $q));
+        return("permission denied - unnown query.");
+    }
+
+    # OK
+    $opt->{'args'} = [join("\n", @{$queries})];
+    return;
+}
+
+##############################################
+sub _authorize_send_command {
+    my($c, $opt) = @_;
+    my %args = @{$opt->{'args'}};
+    my $queries = _extract_queries($args{'command'});
+    for my $q (@{$queries}) {
+        if($q =~ m/^COMMAND\s+\[\d+\]\s([A-Z_]+);?(.*)/mx) {
+            my $cmd_name = lc($1);
+            my $cmd_args = [split(/;/mx, $2)];
+            next if _authorize_command($c, $cmd_name, $cmd_args);
+        }
+        return("permission denied - sending this command requires admin permissions.");
+    }
+    return;
+}
+
+##############################################
+sub _extract_queries {
+    my($raw_queries) = @_;
+    my $queries = [];
+    my $current = "";
+    for my $raw (@{Thruk::Utils::list($raw_queries)}) {
+        for my $line (split(/\n/mx, $raw)) {
+            chomp($line);
+            if($line eq '') {
+                push @{$queries}, $current;
+                $current = '';
+            }
+            else {
+                $current .= $line."\n";
+            }
+        }
+        if($current ne '') {
+            push @{$queries}, $current;
+        }
+    }
+    return($queries);
+}
+
+##############################################
+sub _authorize_command {
+    my($c, $cmd_name, $cmd_args) = @_;
+    require Thruk::Controller::Rest::V1::cmd;
+    my $available_commands = Thruk::Controller::Rest::V1::cmd::get_rest_external_command_data();
+    my($cmd, $cat);
+    for my $cat_name (sort keys %{$available_commands}) {
+        if($available_commands->{$cat_name}->{$cmd_name}) {
+            $cmd = $available_commands->{$cat_name}->{$cmd_name};
+            $cat = $cat_name;
+            last;
+        }
+    }
+    $cat =~ s/s$//gmx;
+    if($cat eq 'service') {
+        if($c->user->check_cmd_permissions($c, $cat, $cmd_args->[1], $cmd_args->[0])) {
+            # OK
+            return 1;
+        }
+    } elsif($cat eq 'system') {
+        if($c->user->check_cmd_permissions($c, $cat)) {
+            # OK
+            return 1;
+        }
+    } else {
+        if($c->user->check_cmd_permissions($c, $cat, $cmd_args->[0])) {
+            # OK
+            return 1;
+        }
+    }
+    return;
 }
 
 ##############################################

@@ -315,7 +315,7 @@ sub run_cluster {
         my $t1   = [gettimeofday];
         my $r;
         eval {
-            $r = $http->_req($sub, $args, undef, undef, 1);
+            $r = $http->request($sub, $args, { want_data => 1 });
         };
         my $elapsed = tv_interval($t1);
         if($@) {

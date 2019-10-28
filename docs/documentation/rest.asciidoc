@@ -56,11 +56,12 @@ the rest api itself using the `/thruk/api_keys` endpoint.
           -gk 'https://localhost/thruk/r/hosts
 ------
 
-=== System API Key
-A system API key can be created by admins and is not bound to a specific user.
-Instead you can set a username with the `X-Thruk-Auth-User` HTTP header. This
-makes system api keys very powerful and they should be handled with the same care
-as the secret key.
+=== Superuser API Key
+A superuser API key (previously named system api key) can be created by admins
+and is not bound to a specific user. Instead you can set a username with the
+`X-Thruk-Auth-User` HTTP header. This makes superuser api keys very powerful
+and they should be handled with the same care as the secret key.
+A superuser key can still be restricted to certain roles.
 
 ------
   %> curl -H 'X-Thruk-Auth-Key: apikey' \
@@ -1284,7 +1285,7 @@ lists api keys
 |last_from                         | ip address of last usage
 |last_used                         | unixtimestamp of last usage
 |roles                             | list of roles this key is limited too
-|system                            | flag wether this a global system key and not bound to a specific user
+|superuser                         | flag wether this a global superuser key and not bound to a specific user
 |user                              | username of key owner
 |===========================================
 
@@ -1296,7 +1297,7 @@ create new api key.
 Optional arguments:
 
   * comment
-  * system (flag to create system api key)
+  * superuser (flag to create superuser api key)
   * username (requires admin privileges)
   * roles (restrict roles to given list)
 

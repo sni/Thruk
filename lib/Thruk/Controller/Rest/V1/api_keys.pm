@@ -40,6 +40,12 @@ sub _rest_get_thruk_api_keys {
 
     my $method = $c->req->method();
     if($method eq 'DELETE') {
+        if($c->check_user_roles("authorized_for_read_only")) {
+            return({
+                'message' => 'no permission to delete api keys',
+                'code'    => 403,
+            });
+        }
         if(unlink($keys->[0]->{'file'})) {
             return({
                 'message' => 'successfully removed 1 api key.',
@@ -70,7 +76,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE'], qr%^/thruk/api_key
 # Optional arguments:
 #
 #   * comment
-#   * system (flag to create system api key)
+#   * superuser (flag to create superuser api key)
 #   * username (requires admin privileges)
 #   * roles (restrict roles to given list)
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/api_keys?$%mx, \&_rest_get_thruk_api_key_new);
@@ -82,7 +88,7 @@ sub _rest_get_thruk_api_key_new {
             'code'    => 400,
         });
     }
-    if($c->config->{'max_api_keys_per_user'} <= 0) {
+    if($c->config->{'max_api_keys_per_user'} <= 0 || $c->check_user_roles("authorized_for_read_only")) {
         return({
             'message' => 'no permission to create api keys',
             'code'    => 403,

@@ -323,9 +323,13 @@ sub _dispatcher {
     eval {
         Thruk::Action::AddDefaults::begin($c);
     };
-    my $err = $@;
-    if($err) {
-        $c->log->debug($err);
+    my $begin_err = $@;
+    if($begin_err) {
+        if(!$c->{'detached'}) {
+            $c->log->error($begin_err);
+        } else {
+            $c->log->debug($begin_err);
+        }
         $c->{'errored'} = 1;
     }
     #&timing_breakpoint("_dispatcher begin done");
@@ -333,11 +337,12 @@ sub _dispatcher {
     ###############################################
     # route cgi request
     $c->{'stage'} = 'main';
+    my($route, $routename);
     if(!$c->{'errored'} && !$c->{'rendered'} && !$c->{'detached'}) {
         my $path_info = $c->req->path_info;
         eval {
             my $rc;
-            if(my($route, $routename) = $thruk->find_route_match($c, $path_info)) {
+            if(($route, $routename) = $thruk->find_route_match($c, $path_info)) {
                 $c->stats->profile(begin => $routename);
                 $c->stash->{controller} = $routename;
                 $rc = &{$route}($c, $path_info);
@@ -367,7 +372,13 @@ sub _dispatcher {
     unless($c->{'rendered'}) {
         Thruk::Action::AddDefaults::end($c);
         if(!$c->stash->{'template'}) {
-            confess(Dumper("not rendered and no template for: ", $c->req, $c->stash->{'text'}));
+            my $error = "ERROR - not rendered and no template\n";
+            $error   .= Dumper(sprintf("detached: %s, errored: %s", $c->{'detached'} ? 'yes' : 'no', $c->{'errored'} ? 'yes' : 'no'));
+            $error   .= Dumper(["begin err",  $begin_err]) if defined $begin_err;
+            $error   .= Dumper(["request",    $c->req]);
+            $error   .= Dumper(["stash text", $c->stash->{'text'}]) if defined $c->stash->{'text'};
+            $error   .= Dumper(["route",      $route, $routename])  if defined $route;
+            confess($error);
         }
         Thruk::Views::ToolkitRenderer::render_tt($c);
     }

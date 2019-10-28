@@ -46,17 +46,19 @@ create a new C<Thruk::Authentication::User> object.
 =cut
 
 sub new {
-    my($class, $c, $username, $sessiondata) = @_;
+    my($class, $c, $username, $sessiondata, $superuser, $internal) = @_;
     my $self = {};
     bless $self, $class;
 
     confess("no username") unless defined $username;
 
-    $self->{'username'} = $username;
-    $self->{'roles'}    = [];
-    $self->{'groups'}   = [];
-    $self->{'alias'}    = undef;
+    $self->{'username'}          = $username;
+    $self->{'roles'}             = [];
+    $self->{'groups'}            = [];
+    $self->{'alias'}             = undef;
     $self->{'roles_from_groups'} = {};
+    $self->{'superuser'}         = $superuser ? 1 : 0;
+    $self->{'internal'}          = $internal  ? 1 : 0;
 
     # add roles from cgi_conf
     for my $role (@{$possible_roles}) {
@@ -75,8 +77,8 @@ sub new {
 
     $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
 
-    # Is this user an admin?
-    if($username =~ m%^\(.*\)$%mx || $self->check_user_roles('admin')) {
+    # Is this user internal or an admin user?
+    if($self->{'internal'} || $self->check_user_roles('admin')) {
         $self->grant('admin');
         $self->{'can_submit_commands'} = 1;
     }
@@ -91,7 +93,7 @@ sub new {
 
 =head2 set_dynamic_attributes
 
-  set_dynamic_attributes($c)
+  set_dynamic_attributes($c, [$skip_db_access], [$roles])
 
 sets attributes based on livestatus data
 
@@ -103,9 +105,10 @@ sub set_dynamic_attributes {
     my $username = $self->{'username'};
     confess("no username") unless defined $username;
 
-    # system users do not have any dynamic attributes
-    if($self->{'username'} =~ m%^\(.*\)$%mx) {
-        $self->_clean_roles($roles);
+    # internal technical users do not have any dynamic attributes
+    if($self->{'internal'}) {
+        $self->clean_roles($roles);
+        $c->stats->profile(end => "User::set_dynamic_attributes");
         return $self;
     }
 
@@ -128,7 +131,7 @@ sub set_dynamic_attributes {
         push @{$self->{'roles'}}, $role;
     }
 
-    $self->_clean_roles($roles);
+    $self->clean_roles($roles);
 
     if($self->check_user_roles('admin')) {
         $self->grant('admin');
@@ -145,10 +148,23 @@ sub set_dynamic_attributes {
 }
 
 ########################################
-# limit roles to given list (using the intersection of user roles and list)
-sub _clean_roles {
+
+=head2 clean_roles
+
+  clean_roles($roles)
+
+limit roles to given list (using the intersection of user roles and list)
+
+=cut
+sub clean_roles {
     my($self, $roles) = @_;
-    return unless defined $roles;
+    return($self->{'roles'}) unless defined $roles;
+
+    my $readonly;
+    if($self->check_user_roles('authorized_for_read_only')) {
+        $readonly = 1;
+        push @{$roles}, 'authorized_for_read_only';
+    }
 
     my $cleaned_roles = [];
     for my $r (@{$roles}) {
@@ -156,13 +172,23 @@ sub _clean_roles {
             push @{$cleaned_roles}, $r;
         }
     }
-    $self->{'roles'} = $cleaned_roles;
+    $self->{'roles'} = Thruk::Utils::array_uniq($cleaned_roles);
 
     # update read-only flag
-    if($self->check_user_roles('authorized_for_read_only')) {
+    if($readonly || $self->check_user_roles('authorized_for_read_only')) {
         $self->{'can_submit_commands'} = 0;
     }
-    return;
+
+    # clean role origins
+    my $roles_hash = Thruk::Utils::array2hash($cleaned_roles);
+    for my $key (qw/roles_from_cgi_cfg roles_from_session/) {
+        next unless $self->{$key};
+        for my $k2 (sort keys %{$self->{$key}}) {
+            delete $self->{$key}->{$k2} unless $roles_hash->{$k2};
+        }
+    }
+
+    return($self->{'roles'});
 }
 
 ########################################

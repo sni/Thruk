@@ -87,6 +87,13 @@
         API keys have to be enabled in the thruk_local.conf via <i>api_keys_enabled=1</i>
       </td>
     </tr>
+    [% ELSIF c.check_user_roles("authorized_for_read_only") %]
+    <tr>
+      <td class='dataVar'></td>
+      <td class='dataVal'>
+        Read-Only sessions cannot create API keys.
+      </td>
+    </tr>
     [% ELSE %]
     <tr>
       <td class='dataVar'>New API Key</td>
@@ -98,9 +105,9 @@
     <tr>
       <td class='dataVar'></td>
       <td>
-        <input type="checkbox" id="system" name="system" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
-        <b><label for="system" title="Enable to create a global shared api key, which is not bound to this user."[% IF !c.check_user_roles("admin") %] class="disabled" [% END %]>System Api Key</label></b>
-        <span class="hint" style="margin-left: 20px;"><a href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(read more about system keys)</a></span><br>
+        <input type="checkbox" id="superuser" name="superuser" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
+        <b><label for="superuser" title="Enable to create a global shared api key, which is not bound to this user."[% IF !c.check_user_roles("admin") %] class="disabled" [% END %]>Superuser Key</label></b>
+        <span class="hint" style="margin-left: 20px;"><a href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(read more about superuser keys)</a></span><br>
         <hr style="margin: 0; color:#5f6268;">
         <input type="hidden" name="restrict_only" value="1">
         <input type="checkbox" id="restrict" name="restrict" value="1" onchange="if(this.checked) { showElement('restricted_roles'); } else { hideElement('restricted_roles'); } ">
@@ -113,7 +120,7 @@
         </div>
       </td>
     </tr>
-    [% IF api_keys.size > 0 || system_keys.size > 0 %]
+    [% IF api_keys.size > 0 || superuser_keys.size > 0 %]
     <tr>
       <td class='dataVar' colspan="2"><hr></td>
     </tr>
@@ -121,7 +128,7 @@
       <td class='dataVal' colspan="2">
         <table style="width: 100%;">
           <tr>
-            <th>System</th>
+            <th>Superuser</th>
             <th>Restricted to Roles</th>
             <th>Comment</th>
             <th>Created At</th>
@@ -130,7 +137,7 @@
           </tr>
           [% BLOCK key_block %]
           <tr class="api_keys">
-            <td>[% IF key.exists('system') && key.system %]<input type="checkbox" checked disabled>[% ELSE %]<input type="checkbox" disabled>[% END %]</td>
+            <td>[% IF key.exists('superuser') && key.superuser %]<input type="checkbox" checked disabled>[% ELSE %]<input type="checkbox" disabled>[% END %]</td>
             <td>[% IF key.exists('roles') %]
                   [% IF contains(key.roles, 'authorized_for_admin') %]
                     &lt;admin&gt;
@@ -149,10 +156,10 @@
             </td>
           </tr>
           [% END %]
-          [% FOREACH key = system_keys %]
+          [% FOREACH key = superuser_keys %]
             [% PROCESS key_block %]
           [% END %]
-          [% IF api_keys.size > 0 && system_keys.size > 0 %]
+          [% IF api_keys.size > 0 && superuser_keys.size > 0 %]
           <tr>
             <td colspan="5"><hr></td>
           </tr>

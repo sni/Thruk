@@ -65,6 +65,10 @@ sub cmd {
         return("ERROR - business process addon is disabled\n", 1);
     }
 
+    if(!$c->check_user_roles('authorized_for_business_processes')) {
+        return("ERROR - authorized_for_business_processes role required", 1);
+    }
+
     $c->stats->profile(begin => "_cmd_bp($action)");
     # parse options
     my $opt = {

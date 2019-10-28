@@ -94,6 +94,16 @@ sub get_auth_filter {
         return();
     }
 
+    # commands authorization
+    elsif($type eq 'commands') {
+        return();
+    }
+
+    # contacts authorization
+    elsif($type eq 'contacts') {
+        return('name' => $c->user->get('username'));
+    }
+
     # comments / downtimes authorization
     elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;

@@ -53,6 +53,10 @@ sub cmd {
     my($c, $action, $commandoptions, $data) = @_;
     $c->stats->profile(begin => "_cmd_cache($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     # cache actions
     my $command = shift @{$commandoptions} || 'help';
     if($command eq 'dump') {

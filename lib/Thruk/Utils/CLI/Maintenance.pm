@@ -44,6 +44,10 @@ sub cmd {
     my($c, $action) = @_;
     $c->stats->profile(begin => "_cmd_maintenance($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     Thruk::Utils::CookieAuth::clean_session_files($c);
 
     $c->stats->profile(end => "_cmd_maintenance($action)");
