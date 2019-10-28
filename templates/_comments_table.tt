@@ -6,6 +6,9 @@
       [% IF type == 'service' %]
       <th class='comment'>Service&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 2 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service description (ascending)' title='Sort by service description (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 2 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service description (descending)' title='Sort by service description (descending)'></a></th>
       [% END %]
+      [% IF backends.size > 1 %]
+      <th class='comment'>Site&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 10 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site (ascending)' title='Sort by site (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 10 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site (descending)' title='Sort by site (descending)'></a></th>
+      [% END %]
       [% END %]
       <th class='comment'>Entry Time&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 3 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by entry time (ascending)' title='Sort by entry time (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 3 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by entry time (descending)' title='Sort by entry time (descending)'></a></th>
       <th class='comment'>Author&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 4 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by author (ascending)' title='Sort by author (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 4 ) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by author (descending)' title='Sort by author (descending)'></a></th>
@@ -24,6 +27,9 @@
       <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]">[% com.host_name | html %]</a></td>
       [% IF type == 'service' %]
       <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]">[% com.service_description | html %]</a></td>
+      [% END %]
+      [% IF backends.size > 1 %]
+      <td align='center' class='[% class %]'>[% com.peer_name %]</td>
       [% END %]
       [% END %]
       <td align='center' class='[% class %]'>[% date_format(c, com.entry_time) %]</td>

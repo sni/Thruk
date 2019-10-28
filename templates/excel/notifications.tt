@@ -8,6 +8,7 @@
         [% FOREACH col = columns %]
         [% IF    col == "Host"        %]<cell width='18'>Host</cell>
         [% ELSIF col == "Service"     %]<cell width='23'>Service</cell>
+        [% ELSIF col == "Site"        %]<cell width='18'>Site</cell>
         [% ELSIF col == "Type"        %]<cell width='18'>Type</cell>
         [% ELSIF col == "Time"        %]<cell width='18'>Time</cell>
         [% ELSIF col == "Contact"     %]<cell width='18'>Contact</cell>
@@ -23,6 +24,7 @@
         [% FOREACH col = columns %]
         [% IF    col == "Host"        %]<cell>[% escape_xml(n.host_name) %]</cell>
         [% ELSIF col == "Service"     %]<cell>[% escape_xml(n.service_description) %]</cell>
+        [% ELSIF col == "Site"        %]<cell>[% escape_xml(n.peer_name) %]</cell>
         [% ELSIF col == "Type"        %]<format bg_color='[% state_color %]'><cell>[% level %]</cell></format>
         [% ELSIF col == "Time"        %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(n.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>
         [% ELSIF col == "Contact"     %]<cell>[% escape_xml(n.contact_name) %]</cell>

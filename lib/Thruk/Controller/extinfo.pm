@@ -113,6 +113,7 @@ sub _get_comment_sort_option {
         '7' => [ [ 'persistent' ],                         'persistent' ],
         '8' => [ [ 'entry_type' ],                         'entry_type' ],
         '9' => [ [ 'expires' ],                            'expires' ],
+        '10'=> [ [ 'peer_name' ],                          'site' ],
     };
 
     return $sortoptions->{$option};
@@ -135,6 +136,7 @@ sub _get_downtime_sort_option {
         '9' => [ [ 'duration' ],                           'duration' ],
         '10' =>[ [ 'id' ],                                 'id' ],
         '11' =>[ [ 'triggered_by' ],                       'trigger id' ],
+        '12' =>[ [ 'peer_name' ],                          'site' ],
     };
 
     return $sortoptions->{$option};
