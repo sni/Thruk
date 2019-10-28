@@ -65,12 +65,18 @@
           <table border="0" cellspacing="0" cellpadding="0" class='optBox'>
             <tr>
               <td align="left" valign="bottom" class='optBoxItem'>
-                <input type='checkbox' name='oldestfirst'[% IF oldestfirst %] checked[% END %]> Older Entries First:
+                <input type='checkbox' id="oldestfirst" name="oldestfirst" [% IF oldestfirst %] checked[% END %]> <label for="oldestfirst">Older Entries First</label>
               </td>
             </tr>
+            [% IF backends.size > 1 %]
             <tr>
               <td align="left" valign="bottom" class='optBoxItem'>
+                <input type='checkbox' id="showsites" name="showsites" [% IF showsites %] checked[% END %]> <label for="showsites">Show Site Names</label>
               </td>
+            </tr>
+            [% END %]
+            <tr>
+              <td align="left" class='optBoxItem'><input type='submit' value='Update'></td>
             </tr>
             <tr>
               <td align="right"></td>

@@ -9,7 +9,7 @@
 <td style="width:10%" align="right">
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
-  [% PROCESS _excel_export.tt columns=[ 'Time', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] with_custom_vars=0 %]
+  [% PROCESS _excel_export.tt columns=[ 'Time', 'Site', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] with_custom_vars=0 %]
 </td>
 </tr></table>
 
@@ -25,12 +25,11 @@
 
 [% END %]
 [% PROCESS _logs_line %]
-<img align='middle' src='[% url_prefix %]themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]] [% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]<br clear='all'>
+<img align='middle' src='[% url_prefix %]themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]][% IF showsites %][[% l.peer_name %]][% END %] [% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]<br clear='all'>
 
 [% END %]
 
-<div align="center">[% PROCESS _pager.tt %]</div>
-
 [% IF data.size and data.size > 0 %]</div>[% END %]
 <hr>
+<div align="center">[% PROCESS _pager.tt %]</div>
 <div class="itemTotalsTitle">[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>

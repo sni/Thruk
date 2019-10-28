@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - renamed system api keys to superuser api keys
+          - show sites name in comments/downtimes, logs and notifications
 
 2.32-2   Fri Oct 25 17:05:54 CEST 2019
           - add thruk restart cli command

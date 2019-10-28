@@ -28,6 +28,7 @@ sub index {
     my $timeframe = 86400;
 
     my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
+    my $showsites   = $c->req->parameters->{'showsites'}   || 0;
     my $archive     = $c->req->parameters->{'archive'}     || 0;
     my $param_start = $c->req->parameters->{'start'};
     my $param_end   = $c->req->parameters->{'end'};
@@ -140,6 +141,7 @@ sub index {
     $c->stash->{pattern}          = $pattern         || '';
     $c->stash->{exclude_pattern}  = $exclude_pattern || '';
     $c->stash->{oldestfirst}      = $oldestfirst;
+    $c->stash->{showsites}        = $showsites;
     $c->stash->{title}            = 'Log File';
     $c->stash->{infoBoxTitle}     = 'Event Log';
     $c->stash->{page}             = 'showlog';

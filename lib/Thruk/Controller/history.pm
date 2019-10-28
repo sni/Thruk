@@ -30,6 +30,7 @@ sub index {
     my $timeframe = 86400;
     my $filter;
 
+    my $showsites   = $c->req->parameters->{'showsites'}   || 0;
     my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
     my $archive     = $c->req->parameters->{'archive'}     || 0;
     my $type        = $c->req->parameters->{'type'}        || 0;
@@ -180,6 +181,7 @@ sub index {
     $c->stash->{nodowntime}       = $nodowntime;
     $c->stash->{nosystem}         = $nosystem;
     $c->stash->{oldestfirst}      = $oldestfirst;
+    $c->stash->{showsites}        = $showsites;
     $c->stash->{start}            = $start;
     $c->stash->{end}              = $end;
     $c->stash->{host}             = $host    || '';
