@@ -1,9 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - renamed system api keys to superuser api keys
+
 2.32-2   Fri Oct 25 17:05:54 CEST 2019
           - add thruk restart cli command
           - add thruk cluster restart cli command
-          - renamed system api keys to superuser api keys
           - fix creating broadcasts from api
           - fix config tool plugin preview
 
