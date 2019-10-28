@@ -78,7 +78,7 @@ sub load_statefile {
             $n->{'node_url'} = $registered->{$key}->{'node_url'};
 
             # no contact in last x seconds, remove it completely from cluster
-            if($registered->{$key}->{'last_update'} < $now - $c->config->{'cluster_node_stale_timeout'}) {
+            if($registered->{$key}->{'last_update'} < $now - $self->{'config'}->{'cluster_node_stale_timeout'}) {
                 Thruk::Utils::IO::json_lock_patch($self->{'registerfile'}, {
                     $key => undef,
                 },1);
