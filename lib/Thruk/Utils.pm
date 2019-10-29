@@ -2200,6 +2200,7 @@ options are: {
     superuser => superuser can change to other user names, roles will not exceed initial role set
     internal  => internal technical user can change into any user and has admin roles
     force     => force setting new user, even if already authenticated
+    roles     => maximum set of roles
 }
 
 =cut
@@ -2227,6 +2228,7 @@ sub set_user {
             superuser => $options{'superuser'},
             internal  => $options{'internal'},
             auth_src  => $options{'auth_src'},
+            roles     => $options{'roles'},
     );
     confess("no user") unless $c->user_exists;
     $c->user->{'auth_src'} = $options{'auth_src'};

@@ -592,6 +592,7 @@ sub _from_fcgi {
                 auth_src  => 'api',
                 internal  => 1,
                 superuser => 1,
+                roles     => $c->user->{'roles'},
             );
         } else {
             if(!Thruk::Utils::change_user($c, $data->{'options'}->{'auth'}, "fcgi")) {
