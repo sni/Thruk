@@ -943,14 +943,13 @@ sub get_backends_with_obj_config {
         }
         $fetch = $new_fetch;
 
-        # when using lmd/shadownaemon, do fetch the real config data now
-        if(scalar @{$fetch} > 0 && $Thruk::Backend::Pool::xs && ($ENV{'THRUK_USE_LMD'} || !defined $ENV{'THRUK_USE_SHADOW'} || $ENV{'THRUK_USE_SHADOW'})) {
+        # when using lmd, do fetch the real config data now
+        if(scalar @{$fetch} > 0 && $ENV{'THRUK_USE_LMD'}) {
             for my $key (@{$fetch}) {
                 my $peer = $c->{'db'}->get_peer_by_key($key);
                 delete $peer->{'configtool'}->{remote};
             }
             # make sure we have uptodate information about config section of http backends
-            local $ENV{'THRUK_USE_SHADOW'} = 0;
             local $ENV{'THRUK_USE_LMD'}    = 0;
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config III a');
             get_backends_with_obj_config($c);
@@ -1042,6 +1041,10 @@ sub _get_peer_keys_without_configtool {
     for my $peer (@peers) {
         next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
         for my $addr (@{$peer->peer_list()}) {
+            my $prev_remote;
+            if(defined $peer->{'configtool'} && defined $peer->{'configtool'}->{'remote'}) {
+                $prev_remote = delete $peer->{'configtool'}->{'remote'};
+            }
             if($addr =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
                 if(!$c->stash->{'failed_backends'}->{$peer->{'key'}}) {
                     $peer->{'configtool'} = { remote => 1 };
@@ -1049,6 +1052,7 @@ sub _get_peer_keys_without_configtool {
                     last;
                 }
             }
+            $peer->{'configtool'}->{'remote'} = $prev_remote if defined $prev_remote;
         }
     }
     #&timing_breakpoint('_get_peer_keys_without_configtool done');
