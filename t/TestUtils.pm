@@ -646,13 +646,15 @@ sub wait_for_job {
         eval {
             while(1) {
                 my $r = _request('/thruk/r/thruk/jobs/'.$job);
-                $data = decode_json($r->decoded_content);
-                last unless $data->{'is_running'};
+                eval {
+                    $data = decode_json($r->decoded_content);
+                };
+                last if($data && $data->{'end'} > 0 && $data->{'is_running'} == 0);
                 sleep(0.1);
             }
         };
         my $end  = time();
-        is($data->{'is_running'}, 0, 'job is finished in '.($end-$start).' seconds');
+        is($data->{'is_running'}, 0, 'job '.$job.' is finished in '.($end-$start).' seconds');
         alarm(0);
         return;
     }
