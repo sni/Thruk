@@ -251,6 +251,7 @@ sub index {
             $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
             $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
             $c->log->error($c->stash->{errorMessage}) if $c->stash->{errorMessage};
+            $c->log->error($c->stash->{errorDescription}) if $c->stash->{errorDescription};
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
