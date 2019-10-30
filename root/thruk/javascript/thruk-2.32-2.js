@@ -6718,6 +6718,7 @@ var ajax_search = {
         var search_pattern = ajax_search.get_current_input_search_pattern();
         if(search_pattern.length >= 1 || ajax_search.search_type != 'all') {
             var needs_refresh = false;
+            var orig_search_pattern = search_pattern;
             prefix = search_pattern.substr(0,3);
             if(prefix == 'ho:' || prefix == 'hg:' || prefix == 'se:' || prefix == 'sg:') {
                 search_pattern = search_pattern.substr(3);
@@ -6797,11 +6798,11 @@ var ajax_search = {
                       }
                   });
                 }
-                if(ajax_search.initialized_q && !search_pattern.match(ajax_search.initialized_q)) {
+                if(ajax_search.initialized_q && !orig_search_pattern.match(ajax_search.initialized_q)) {
                     // filter does not match our data base
                     needs_refresh = true;
                 }
-                if(ajax_search.initialized_q && ajax_search.initialized_q.length > search_pattern.length) {
+                if(ajax_search.initialized_q && ajax_search.initialized_q.length > orig_search_pattern.length) {
                     // data base is more precise than our filter
                     needs_refresh = true;
                 }
