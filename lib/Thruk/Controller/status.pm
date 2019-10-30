@@ -175,6 +175,13 @@ sub _process_raw_request {
     if($c->req->parameters->{'query'}) {
         $filter = $c->req->parameters->{'query'};
         $filter =~ s/\s+/\.\*/gmx;
+        if($filter =~ s/^(\w{2}:)//mx) {
+            my $prefix = $1;
+            if($prefix eq 'ho:') { $type = "host"; }
+            if($prefix eq 'se:') { $type = "service"; }
+            if($prefix eq 'hg:') { $type = "hostgroup"; }
+            if($prefix eq 'sg:') { $type = "servicegroup"; }
+        }
     }
 
     my $json;
