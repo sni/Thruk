@@ -2443,6 +2443,7 @@ templates/_third_graph.tt
 templates/_timeperiods_select_options.tt
 templates/_user_roles.tt
 templates/_wizard_list.tt
+templates/avail_outages.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt

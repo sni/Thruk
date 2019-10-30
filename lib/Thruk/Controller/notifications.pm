@@ -26,10 +26,8 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
-    my($start,$end);
-    my $timeframe = 86400;
-    my $filter;
-
+    my $filter = [];
+    my($start,$end) = Thruk::Utils::get_start_end_from_date_select_params($c);
     my $type        = $c->req->parameters->{'type'}        || 0;
     my $archive     = $c->req->parameters->{'archive'}     || 0;
     my $contact     = $c->req->parameters->{'contact'}     || '';
@@ -37,41 +35,10 @@ sub index {
     my $service     = $c->req->parameters->{'service'}     || '';
     my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
 
-    push @{$filter}, _get_log_prop_filter($type);
-
-    my $param_start = $c->req->parameters->{'start'};
-    my $param_end   = $c->req->parameters->{'end'};
-
-    # start / end date from formular values?
-    if(defined $param_start and defined $param_end) {
-        # convert to timestamps
-        $start = Thruk::Utils::parse_date($c, $param_start);
-        $end   = Thruk::Utils::parse_date($c, $param_end);
-    }
-    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
-        # start with today 00:00
-        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
-        $start = POSIX::mktime(0, 0, 0, $mday, $mon, $year);
-        $end   = $start + $timeframe;
-    }
-    if($archive eq '+1') {
-        $start = $start + $timeframe;
-        $end   = $end   + $timeframe;
-    }
-    elsif($archive eq '-1') {
-        $start = $start - $timeframe;
-        $end   = $end   - $timeframe;
-    }
-
-    # swap date if they are mixed up
-    if($start > $end) {
-        my $tmp = $start;
-        $start = $end;
-        $end   = $tmp;
-    }
-
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<=' => $end }};
+
+    push @{$filter}, _get_log_prop_filter($type);
 
     if($host eq '' and $service eq '' and $contact eq '') {
         $host = 'all';

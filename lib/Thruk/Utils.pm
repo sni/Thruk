@@ -378,7 +378,7 @@ will use cgi params for input
 
 =cut
 sub get_start_end_for_timeperiod_from_param {
-    my $c = shift;
+    my($c) = @_;
 
     confess("no c") unless defined($c);
 
@@ -401,6 +401,58 @@ sub get_start_end_for_timeperiod_from_param {
 
     $timeperiod = 'last24hours' if(!defined $timeperiod && !defined $t1 && !defined $t2);
     return Thruk::Utils::get_start_end_for_timeperiod($c, $timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
+}
+
+
+########################################
+
+=head2 get_start_end_from_date_select_params
+
+  my($start, $end) = get_start_end_from_date_select_params($c)
+
+returns a start and end timestamp from date select, like ex.: on the showlog page
+
+=cut
+sub get_start_end_from_date_select_params {
+    my($c) = @_;
+    confess("no c") unless defined($c);
+
+    my($start,$end);
+    my $archive     = $c->req->parameters->{'archive'} || 0;
+    my $param_start = $c->req->parameters->{'start'};
+    my $param_end   = $c->req->parameters->{'end'};
+
+    # start / end date from formular values?
+    if(defined $param_start and defined $param_end) {
+        # convert to timestamps
+        $start = Thruk::Utils::parse_date($c, $param_start);
+        $end   = Thruk::Utils::parse_date($c, $param_end);
+    }
+    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
+        # start with today 00:00
+        $start = Mktime(Today(), 0,0,0);
+        $end   = Mktime(Add_Delta_Days(Today(), 1), 0,0,0);
+    }
+    if($archive eq '+1') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($start);
+        $start = Mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
+        ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
+        $end = Mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
+    }
+    elsif($archive eq '-1') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($start);
+        $start = Mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
+        ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
+        $end = Mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
+    }
+
+    # swap date if they are mixed up
+    if($start > $end) {
+        my $tmp = $start;
+        $start = $end;
+        $end   = $tmp;
+    }
+    return($start, $end);
 }
 
 ########################################

@@ -26,10 +26,8 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
-    my($start,$end);
-    my $timeframe = 86400;
-    my $filter;
-
+    my $filter = [];
+    my($start,$end) = Thruk::Utils::get_start_end_from_date_select_params($c);
     my $showsites   = $c->req->parameters->{'showsites'}   || 0;
     my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
     my $archive     = $c->req->parameters->{'archive'}     || 0;
@@ -49,35 +47,9 @@ sub index {
         $c->stash->{infoBoxTitle} = 'Alert History';
     }
 
-    my $param_start = $c->req->parameters->{'start'};
-    my $param_end   = $c->req->parameters->{'end'};
-
-    # start / end date from formular values?
-    if(defined $param_start and defined $param_end) {
-        # convert to timestamps
-        $start = Thruk::Utils::parse_date($c, $param_start);
-        $end   = Thruk::Utils::parse_date($c, $param_end);
-    }
-    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
-        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
-        $start = POSIX::mktime(0, 0, 0, $mday, $mon, $year);
-        $end   = $start + $timeframe;
-    }
-    if($archive eq '+1') {
-        $start = $start + $timeframe;
-        $end   = $end   + $timeframe;
-    }
-    elsif($archive eq '-1') {
-        $start = $start - $timeframe;
-        $end   = $end   - $timeframe;
-    }
-
-    # swap date if they are mixed up
-    if($start > $end) {
-        my $tmp = $start;
-        $start = $end;
-        $end   = $tmp;
-    }
+    # time filter
+    push @{$filter}, { time => { '>=' => $start }};
+    push @{$filter}, { time => { '<=' => $end }};
 
     # service filter
     if(defined $service and $host ne 'all') {
@@ -88,10 +60,6 @@ sub index {
     elsif($host ne 'all') {
         push @{$filter}, { host_name => $host };
     }
-
-    # time filter
-    push @{$filter}, { time => { '>=' => $start }};
-    push @{$filter}, { time => { '<=' => $end }};
 
     # type filter
     my $typefilter = _get_log_type_filter($type);
