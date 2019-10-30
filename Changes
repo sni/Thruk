@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+2.32-3   not yet released
+          - fix search results not loading after some time
+
 2.32-2   Fri Oct 25 17:05:54 CEST 2019
           - add thruk restart cli command
           - add thruk cluster restart cli command
