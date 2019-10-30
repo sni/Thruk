@@ -251,7 +251,7 @@ sub _process_raw_request {
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             $data = ["you are not authorized for configuration information"];
         } else {
-            my $commands = $c->{'db'}->get_commands( filter => [ name => { '~~' => $filter } ], columns => ['name'], limit => $limit );
+            my $commands = $c->{'db'}->get_commands( filter => [ name => { '~~' => $filter } ], columns => ['name'] );
             $data = [];
             for my $d (@{$commands}) {
                 push @{$data}, $d->{'name'};
@@ -315,7 +315,6 @@ sub _process_raw_request {
                                                                     {      event_handler => { '~~' => $filter }},
                                                                     ]],
                                                 columns => [qw/host_event_handler event_handler/],
-                                                limit => $limit,
                                             );
             my $eventhandler = {};
             for my $d (@{$data}) {
