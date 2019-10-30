@@ -5338,7 +5338,9 @@ function getFilterTypeOptions() {
         '----------------'
     );
     var others = new Array(
+        'Action Menu',
         'Check Period',
+        'Command',
         'Comment',
         'Contact',
         'Current Attempt',
@@ -5752,6 +5754,8 @@ function verify_op(event) {
          && selValue != 'timeperiod'
          && selValue != 'contact'
          && selValue != 'custom variable'
+         && selValue != 'command'
+         && selValue != 'action menu'
          && selValue != 'comment'
          && selValue != 'event handler'
          && selValue != 'plugin output') {
@@ -6423,6 +6427,7 @@ var ajax_search = {
                || search_type == 'custom variable'
                || search_type == 'contact'
                || search_type == 'event handler'
+               || search_type == 'command'
             ) {
                 ajax_search.search_type = search_type;
             }
@@ -6437,6 +6442,14 @@ var ajax_search = {
             }
             if(search_type == 'business impact') {
                 ajax_search.search_type = 'priority';
+            }
+            if(search_type == 'action menu') {
+                ajax_search.search_type = 'custom variable';
+                var varFieldId = input.id.replace(/_value$/, '_val_pre');
+                var varField   = document.getElementById(varFieldId);
+                if(varField) {
+                    varField.value = "THRUK_ACTION_MENU";
+                }
             }
             if(   search_type == 'comment'
                || search_type == 'next check'
@@ -6472,6 +6485,8 @@ var ajax_search = {
         } else {
             if(   ajax_search.search_type == 'event handler'
                || ajax_search.search_type == 'contact'
+               || ajax_search.search_type == 'command'
+               || ajax_search.search_type == 'action menu'
                || ajax_search.search_type == 'timeperiod'
             ) {
                 if(!search_url.match(/type=/)) {

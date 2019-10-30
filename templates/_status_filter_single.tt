@@ -306,10 +306,12 @@
       <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
       <option disabled>----------------</option>
       <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
+      <option value="action menu"[% IF s.type == 'action menu' %] selected[% END %]>Action Menu</option>
       [% IF enable_shinken_features %]
       <option value="priority"[% IF s.type == 'priority' %] selected[% END %]>Business Impact</option>
       [% END %]
       <option value="check period"[% IF s.type == 'check period' %] selected[% END %]>Check Period</option>
+      <option value="command"[% IF s.type == 'command' %] selected[% END %]>Command</option>
       <option value="comment"[% IF s.type == 'comment' %] selected[% END %]>Comment</option>
       <option value="contact"[% IF s.type == 'contact' %] selected[% END %]>Contact</option>
       <option value="current attempt"[% IF s.type == 'current attempt' %] selected[% END %]>Current Attempt</option>

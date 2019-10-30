@@ -551,6 +551,10 @@ Ext.define('Ext.ux.SearchStore', {
             if(type == 'parent') {
                 type = 'host';
             }
+            if(type == 'action menu') {
+                type = 'custom value';
+                store.pre_val = "THRUK_ACTION_MENU";
+            }
             if(  type == 'host'
               || type == 'service'
               || type == 'hostgroup'
@@ -559,6 +563,7 @@ Ext.define('Ext.ux.SearchStore', {
               || type == 'site'
               || type == 'contactgroup'
               || type == 'eventhandler'
+              || type == 'command'
               || type == 'custom variable'
               || type == 'custom value'
             ) {

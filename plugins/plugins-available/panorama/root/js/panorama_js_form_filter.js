@@ -136,7 +136,9 @@ Ext.define('TP.formFilterSelect', {
 
         var ops = {
             'search':              ['~','!~','=','!='],
+            'action menu':         ['~','!~','=','!='],
             'check period':        ['~','!~','=','!='],
+            'command':             ['~','!~','=','!='],
             'comment':             ['~','!~','=','!='],
             'contact':             ['~','!~','=','!='],
             'current attempt':     ['=','!=','<=','>='],

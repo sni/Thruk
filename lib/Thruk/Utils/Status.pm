@@ -819,6 +819,11 @@ sub single_search {
             }
         }
 
+        if ( $filter->{'type'} eq 'action menu' ) {
+            $filter->{'type'}    = 'custom variable';
+            $filter->{'val_pre'} = "THRUK_ACTION_MENU";
+        }
+
         if ( $filter->{'type'} eq 'search' ) {
             # skip empty searches
             next if $value eq '';
@@ -995,6 +1000,19 @@ sub single_search {
             push @hostfilter,    { event_handler => { $op => $value } };
             push @servicefilter, { event_handler => { $op => $value } };
         }
+        elsif ( $filter->{'type'} eq 'command' ) {
+            # convert equal filter to regex, because check_command looks like: check-host-alive!args...
+            if($op eq '=') {
+                $op = '~';
+                $value = '^'.$value.'\!';
+            }
+            elsif($op eq '!=') {
+                $op = '!~';
+                $value = '^'.$value.'\!';
+            }
+            push @hostfilter,    { check_command => { $op => $value } };
+            push @servicefilter, { check_command => { $op => $value } };
+        }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
@@ -1091,6 +1109,11 @@ sub single_search {
                 $errors++;
                 Thruk::Utils::set_message($c, 'fail_message', "unknown filter: ".$filter->{'type'});
             }
+        }
+
+
+        if($filter->{'type'} eq 'custom variable' && $filter->{'val_pre'} eq "THRUK_ACTION_MENU") {
+            $filter->{'type'} = "action menu";
         }
     }
 
