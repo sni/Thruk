@@ -21,6 +21,7 @@ use IPC::Open3 qw/open3/;
 use IO::Select ();
 use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
+use Cwd qw/abs_path/;
 use Time::HiRes qw/sleep/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -616,6 +617,20 @@ sub untaint {
     my($v) = @_;
     if($v && $v =~ /\A(.*)\z/msx) { $v = $1; }
     return($v);
+}
+
+########################################
+
+=head2 realpath
+
+  realpath($file)
+
+return realpath of this file
+
+=cut
+sub realpath {
+    my($file) = @_;
+    return(abs_path($file));
 }
 
 ##############################################

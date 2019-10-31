@@ -32,6 +32,7 @@ our $possible_roles = [
     'authorized_for_broadcasts',
     'authorized_for_reports',
     'authorized_for_business_processes',
+    'authorized_for_panorama_media_manager',
     'authorized_for_read_only',
 ];
 

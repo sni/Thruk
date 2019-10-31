@@ -710,9 +710,9 @@ sub _task_upload {
     }
 
     my $newlocation = $folder.'/'.$filename;
-    if(-s $newlocation && !$c->stash->{'is_admin'}) {
+    if(-s $newlocation && !_check_media_permissions($c, $newlocation)) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Only administrator may overwrite existing files.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Only administrator/panorama_view_media_manager roles may overwrite existing files.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -873,7 +873,7 @@ sub _task_load_dashboard {
         for my $file (sort keys %{$data->{'usercontent'}}) {
             my $size = -s $usercontent_folder.$file;
             next if $c->config->{'demo_mode'};
-            next if $size && !$c->stash->{'is_admin'}; # overwrite only if this is an admin
+            next if $size && !_check_media_permissions($c, $usercontent_folder.$file); # overwrite only if user is allowed to
             my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
             next if($size && length($content) == $size);
             my $dir     = $file;
@@ -3571,6 +3571,33 @@ sub _get_available_fonts {
     }
     unshift @{$fonts}, 'inherit';
     return($fonts);
+}
+
+##########################################################
+sub _check_media_permissions {
+    my($c, $file) = @_;
+    return 1 if $c->stash->{'is_admin'};
+    return 1 if $c->check_user_roles('panorama_view_media_manager');
+
+    my $folder = $c->stash->{'usercontent_folder'}.'/';
+    $file = Thruk::Utils::IO::realpath($file);
+
+    # user is allowed to change the image if he has write access to all dashboards using this image
+    my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all', 1);
+    for my $d (@{$dashboards}) {
+        # we are looking for dashboards without access which use this image,so skip the dashboard we have full access to
+        next if Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $d->{'nr'}, $d) >= ACCESS_READWRITE;
+        if($d->{'tab'}->{'xdata'}->{'background'}) {
+            return if Thruk::Utils::IO::realpath($folder.$d->{'tab'}->{'xdata'}->{'background'}) eq $file;
+        }
+        for my $key (sort keys %{$d}) {
+            if(ref($d->{$key}) eq 'HASH' && $d->{$key}->{'xdata'} && $d->{$key}->{'xdata'}->{'general'} && $d->{$key}->{'xdata'}->{'general'}->{'src'}) {
+                return if Thruk::Utils::IO::realpath($folder.$d->{$key}->{'xdata'}->{'general'}->{'src'}) eq $file;
+            }
+        }
+    }
+
+    return 1;
 }
 
 ##########################################################
