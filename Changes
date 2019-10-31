@@ -5,6 +5,8 @@ next:
           - show sites name in comments/downtimes, logs and notifications
           - add outages overview for hosts and services
           - add action menu and command search filter
+          - Panorama:
+            - raise icons zindex if its in a none-ok state
 
 2.32-2   Fri Oct 25 17:05:54 CEST 2019
           - add thruk restart cli command

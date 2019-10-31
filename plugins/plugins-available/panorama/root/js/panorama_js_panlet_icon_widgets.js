@@ -303,7 +303,7 @@ Ext.define('TP.SmallWidget', {
             this.applyRotation(0, xdata);
         }
         if(xdata.layout.zindex) {
-            this.applyZindex(Number(xdata.layout.zindex));
+            this.applyZindex(xdata.layout.zindex);
         } else {
             this.applyZindex(0);
         }
@@ -353,8 +353,13 @@ Ext.define('TP.SmallWidget', {
     },
     /* apply z-index */
     applyZindex: function(value) {
-        value = Number(value);
         var This = this;
+        value  = Number(value);
+        // adjust zindex by current state and raise issues a bit
+        if(This.xdata && This.xdata.state != 0) {
+            var pos = TP.get_state_position(default_state_order, This.xdata.state, This.hostProblem, This.acknowledged, This.downtime);
+            value += pos;
+        }
         This.style['z-index'] = 30+(value+10)*2;
         if(This.el && This.el.dom) {
             This.el.dom.style.zIndex = This.style['z-index'];

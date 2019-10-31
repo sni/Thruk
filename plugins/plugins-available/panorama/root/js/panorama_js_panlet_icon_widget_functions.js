@@ -157,6 +157,86 @@ TP.get_group_status = function(options) {
     return({state: s, downtime: downtime, acknowledged: acknowledged, hostProblem: hostProblem });
 }
 
+/* returns state position */
+TP.get_state_position = function(order, state, isHostProblem, acknowledged, downtime) {
+    var pos;
+    for(var x = 0; x < order.length; x++) {
+        switch (order[x]) {
+            case "down":
+                if(state == 1 && isHostProblem && !acknowledged && !downtime)   { pos = x; }
+                break;
+            case "unreachable":
+                if(state == 2 && isHostProblem && !acknowledged && !downtime)   { pos = x; }
+                break;
+            case "unknown":
+                if(state == 3 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "acknowledged_unknown":
+                if(state == 3 && !isHostProblem && acknowledged)                { pos = x; }
+                break;
+            case "downtime_unknown":
+                if(state == 3 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "acknowledged_unreachable":
+                if(state == 2 && isHostProblem && acknowledged)                 { pos = x; }
+                break;
+            case "acknowledged_down":
+                if(state == 1 && isHostProblem && acknowledged)                 { pos = x; }
+                break;
+            case "downtime_down":
+                if(state == 1 && isHostProblem && downtime)                     { pos = x; }
+                break;
+            case "downtime_unreachable":
+                if(state == 2 && isHostProblem && downtime)                     { pos = x; }
+                break;
+            case "critical":
+                if(state == 2 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "acknowledged_critical":
+                if(state == 2 && !isHostProblem && acknowledged)                { pos = x; }
+                break;
+            case "downtime_critical":
+                if(state == 2 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "warning":
+                if(state == 1 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "acknowledged_warning":
+                if(state == 1 && !isHostProblem && acknowledged)                { pos = x; }
+                break;
+            case "downtime_warning":
+                if(state == 1 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "ok":
+                if(state == 0 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "up":
+                if(state == 0 && isHostProblem && !acknowledged && !downtime)   { pos = x; }
+                break;
+            case "downtime_up":
+                if(state == 0 && isHostProblem && downtime)                     { pos = x; }
+                break;
+            case "downtime_ok":
+                if(state == 0 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "pending":
+                if(state == 4 && !acknowledged && !downtime)                    { pos = x; }
+                break;
+            case "downtime_pending":
+                if(state == 4 && downtime)                                      { pos = x; }
+                break;
+            default:
+                //throw new Error("unhandled state: '"+order[x]+"'");
+                break;
+        }
+        // first hit sets the current overall state
+        if(pos != undefined) {
+            break;
+        }
+    }
+    return(order.length - pos);
+}
+
 TP.resetMoveIcons = function() {
     Ext.Array.each(TP.moveIcons, function(item) {
         item.el.dom.style.outline = "";
