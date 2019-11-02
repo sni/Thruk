@@ -1175,6 +1175,11 @@ sub _report_save {
         confess("tried to save empty report");
     }
 
+    if($report->{'params'}->{'timeperiod'} && $report->{'params'}->{'timeperiod'} ne 'custom') {
+        delete $report->{'params'}->{'t1'};
+        delete $report->{'params'}->{'t2'};
+    }
+
     Thruk::Utils::IO::json_store($file, $report, 1);
 
     $report->{'backends_hash'} = $report->{'backends'};
