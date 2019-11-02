@@ -405,7 +405,7 @@ sub _request_username {
     elsif($c->req->cookies->{'thruk_auth'}) {
         # verify ip address
         my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $c->req->cookies->{'thruk_auth'});
-        if($sessiondata && (!$sessiondata->{'address'} || (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'})))) {
+        if($sessiondata) {
             $username = $sessiondata->{'username'};
             $auth_src = "cookie";
             $roles    = $sessiondata->{'roles'} if($sessiondata->{'roles'} && scalar @{$sessiondata->{'roles'}} > 0);
@@ -416,11 +416,11 @@ sub _request_username {
         $auth_src = "ssl_authentication";
     }
     # basic authentication
-    elsif(defined $env->{'REMOTE_USER'} and $env->{'REMOTE_USER'} ne '' ) {
+    elsif(defined $env->{'REMOTE_USER'} && $env->{'REMOTE_USER'} ne '' ) {
         $username = $env->{'REMOTE_USER'};
         $auth_src = "basic auth";
     }
-    elsif(defined $ENV{'REMOTE_USER'}and $ENV{'REMOTE_USER'} ne '' ) {
+    elsif(defined $ENV{'REMOTE_USER'} && $ENV{'REMOTE_USER'} ne '' ) {
         $username = $ENV{'REMOTE_USER'};
         $auth_src = "basic auth";
     }
