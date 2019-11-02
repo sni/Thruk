@@ -496,8 +496,12 @@ sub report_email {
 sub _set_report_data {
     my($c, $r) = @_;
 
-    $c->stash->{'t1'} = Thruk::Utils::_parse_date($c, ($r->{'params'}->{'t1'} || time() - 86400));
-    $c->stash->{'t2'} = Thruk::Utils::_parse_date($c, ($r->{'params'}->{'t2'} || time()));
+    $c->stash->{'t1'} = time() - 86400;
+    $c->stash->{'t2'} = time();
+    if($r->{'params'}->{'t1'} && $r->{'params'}->{'t2'}) {
+        $c->stash->{'t1'} = Thruk::Utils::parse_date($c, $r->{'params'}->{'t1'}) // $c->stash->{'t1'};
+        $c->stash->{'t2'} = Thruk::Utils::parse_date($c, $r->{'params'}->{'t2'}) // $c->stash->{'t2'};
+    }
 
     # round to full minute
     $c->stash->{'t1'} = $c->stash->{'t1'} - $c->stash->{'t1'}%60;

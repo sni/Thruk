@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use Thruk::Utils::IO ();
 use Thruk::Utils::CookieAuth ();
-use Carp qw/confess croak/;
+use Carp qw/confess croak longmess/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Add_Delta_Days Normalize_DHMS/;
 use File::Slurp qw/read_file/;
@@ -51,7 +51,8 @@ sub parse_date {
         }
     };
     if($@) {
-        $c->log->error($@);
+        $c->log->error("parse_date error for '".$string."' - ".$@);
+        $c->log->error(longmess());
     }
     return $timestamp;
 }
