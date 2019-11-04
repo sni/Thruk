@@ -632,15 +632,15 @@ sub fill_totals_box {
                 }
                 elsif($service->{'state'} == 1) {
                     $service_stats->{'warning'}++;
-                    $service_stats->{'warning_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                    $service_stats->{'warning_and_unhandled'}++  if _is_service_unhandled($service);
                 }
                 elsif($service->{'state'} == 2) {
                     $service_stats->{'critical'}++;
-                    $service_stats->{'critical_and_unhandled'}++ if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                    $service_stats->{'critical_and_unhandled'}++ if _is_service_unhandled($service);
                 }
                 elsif($service->{'state'} == 3) {
                     $service_stats->{'unknown'}++;
-                    $service_stats->{'unknown_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                    $service_stats->{'unknown_and_unhandled'}++  if _is_service_unhandled($service);
                 }
             }
             next if defined $hosts{$service->{'host_name'}};
@@ -660,7 +660,6 @@ sub fill_totals_box {
                     $host_stats->{'unreachable'}++;
                     $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
                 }
-
             }
         }
     } else {
@@ -676,6 +675,17 @@ sub fill_totals_box {
     return 1;
 }
 
+##############################################
+# return true if service problem is unhandled
+sub _is_service_unhandled {
+    my($service) = @_;
+    return if $service->{'scheduled_downtime_depth'} != 0;
+    return if $service->{'acknowledged'} != 0;
+    return if $service->{'host_scheduled_downtime_depth'} != 0;
+    return if $service->{'host_acknowledged'} != 0;
+    return if $service->{'host_state'} != 0;
+    return 1;
+}
 
 ##############################################
 
