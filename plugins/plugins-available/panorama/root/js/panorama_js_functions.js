@@ -2325,6 +2325,12 @@ var TP = {
             }
         }
         return({x:Math.floor(x), y:Math.floor(y)});
+    },
+    showPanletById: function(tab, id) {
+        var panlet = Ext.getCmp(id);
+        if(!tab.destroying && panlet && panlet.show) {
+            panlet.show();
+        }
     }
 }
 TP.log('[global] starting');

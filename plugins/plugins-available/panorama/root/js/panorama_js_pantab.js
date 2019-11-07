@@ -130,12 +130,7 @@ Ext.define('TP.Pantab', {
                     try {    // so allow it to fail
                         if(panlet.rendered == false) {
                             /* delay initial show when its not yet rendered */
-                            window.setTimeout(function() {
-                                var panlet = Ext.getCmp(panlet_nr);
-                                if(!This.destroying && panlet && panlet.show) {
-                                    panlet.show();
-                                }
-                            }, delay);
+                            window.setTimeout(Ext.bind(TP.showPanletById, This, [This, panlet.id]), delay);
                             delay = delay + 25;
                         } else {
                             panlet.show(false);
