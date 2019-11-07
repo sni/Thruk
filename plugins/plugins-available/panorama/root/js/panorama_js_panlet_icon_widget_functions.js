@@ -234,6 +234,9 @@ TP.get_state_position = function(order, state, isHostProblem, acknowledged, down
             break;
         }
     }
+    if(pos == undefined) {
+        return(0);
+    }
     return(order.length - pos);
 }
 

@@ -357,8 +357,7 @@ Ext.define('TP.SmallWidget', {
         value  = Number(value);
         // adjust zindex by current state and raise issues a bit
         if(This.xdata && This.xdata.state != 0) {
-            var pos = TP.get_state_position(default_state_order, This.xdata.state, This.hostProblem, This.acknowledged, This.downtime);
-            value += pos;
+            value += TP.get_state_position(default_state_order, This.xdata.state, This.hostProblem, This.acknowledged, This.downtime);
         }
         This.style['z-index'] = 30+(value+10)*2;
         if(This.el && This.el.dom) {
