@@ -195,7 +195,7 @@ sub index {
                 return $c->detach('/error/index/7');
             }
             #my( $host, $service, $backend )...
-            my( $host, undef, $backend ) = split /;/mx, $hostdata;
+            my( $host, $backend ) = split /;/mx, $hostdata;
             my @backends                 = split /\|/mx, defined $backend ? $backend : '';
             $c->stash->{'lasthost'}      = $host;
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
