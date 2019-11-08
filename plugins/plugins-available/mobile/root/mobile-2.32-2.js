@@ -508,7 +508,7 @@ ThrukMobile = {
                     jQuery('.host_name').text(host.name);
                     jQuery('#host_state').removeClass().text(get_host_status(host)).addClass(get_host_class(host));
                     jQuery('.host_referer').val('mobile.cgi#host?host='+encoder(params['host']));
-                    jQuery('.selected_hosts').val(params['host']+";"+params['backend']);
+                    jQuery('.selected_hosts').val(params['host']+";;"+params['backend']);
                     jQuery('.host_alerts').attr('href', '#alerts?host='+encoder(params['host']));
                     jQuery('.host_notifications').attr('href', '#notifications?host='+encoder(params['host']));
                     show_common_acks_n_downtimes('host', host, data.comments, data.downtimes);
@@ -755,7 +755,7 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
         jQuery('#'+typ+'_ack_list').listview();
     }
     if(typ == 'host') {
-        jQuery('.selected_hosts').val(obj.name+";"+obj.peer_key);
+        jQuery('.selected_hosts').val(obj.name+";;"+obj.peer_key);
     }
     if(typ == 'service') {
         jQuery('.selected_services').val(obj.host_name+';'+obj.description+";"+obj.peer_key);
