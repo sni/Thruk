@@ -740,14 +740,14 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
                 txt += '<li>';
                 txt += '<a href="#" onclick="alert(&quot;'+ format_time(com.entry_time) + '\\n' + com.author + '\\n' + com.comment+'&quot;);"><img src="' + url_prefix + 'plugins/mobile/img/ack.gif" class="ui-li-icon">';
                 txt += '' + com.author + ': ' + com.comment + '<\/a>';
-                txt += '<a href="cmd.cgi?cmd_mod=2';
+                txt += '<a href="#" onclick="return(send_ajax_cmd(this))"';
                 if(typ == 'host') {
-                    txt += '&cmd_typ=51&host='+encoder(obj.name)+'&referer='+encoder('mobile.cgi#host?host='+obj.name);
+                    txt += 'data-cmd="51" data-host="'+encoder(obj.name)+'"';
                 }
                 if(typ == 'service') {
-                    txt += '&cmd_typ=52&host='+encoder(obj.host_name)+'&service='+encoder(obj.description)+'&referer='+encoder('mobile.cgi#service?host='+obj.host_name+'&service='+obj.description);
+                    txt += 'data-cmd="52" data-host="'+encoder(obj.host_name)+'" data-service="'+encoder(obj.description)+'"';
                 }
-                txt += '" data-icon="delete" data-iconpos="notext" data-inline="true" data-ajax=false>remove</a>';
+                txt += ' data-icon="delete" data-iconpos="notext" data-inline="true" data-ajax=false>remove</a>';
                 txt += '<\/li>';
             }
         });
@@ -772,6 +772,29 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
         });
         jQuery('#'+typ+'_downtime').html('<img src="' + url_prefix + 'plugins/mobile/img/downtime.gif" alt="acknowledged"> ' + txt+'<hr>');
     }
+}
+
+function send_ajax_cmd(link) {
+    jQuery.mobile.loading('show', {text: 'sending command', textVisible: true});
+    jQuery.ajax({
+        type:   'POST',
+        url:    'cmd.cgi',
+        data:    {
+            cmd_typ:   link.dataset.cmd,
+            cmd_mod:   2,
+            host:      decodeURIComponent(link.dataset.host),
+            service:   decodeURIComponent(link.dataset.service),
+            CSRFtoken: CSRFtoken
+        },
+        success: function() {
+            location.reload();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.log(textStatus);
+            jQuery.mobile.loading('hide');
+        }
+    });
+    return(false);
 }
 
 /* set list icons for downtimes & acknowledements */
