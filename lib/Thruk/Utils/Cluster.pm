@@ -120,6 +120,7 @@ sub load_statefile {
         $n->{'response_time'} = '' unless defined $n->{'response_time'};
         $n->{'version'}       = '' unless defined $n->{'version'};
         $n->{'branch'}        = '' unless defined $n->{'branch'};
+        $n->{'maintenance'}   = 0  unless defined $n->{'maintenance'};
 
         # add node to store
         push @{$self->{'nodes'}}, $n;
@@ -342,6 +343,7 @@ sub run_cluster {
                         branch        => $r->{'branch'},
                         hostname      => $r->{'output'}->[0]->{'hostname'},
                         node_id       => $n,
+                        maintenance   => $r->{'output'}->[0]->{'maintenance'},
                     },
                 }, 1);
             } else {
@@ -394,6 +396,7 @@ return a ping request
 sub pong {
     my($c, $node, $url) = @_;
     # update our url
+    $c->cluster->load_statefile();
     if($c->cluster->{'node'}->{'node_url'} && $c->cluster->{'node'}->{'node_url'} ne $url) {
         Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
             $Thruk::NODE_ID => {
@@ -403,11 +406,12 @@ sub pong {
         $c->cluster->{'node'}->{'node_url'} = $url;
     }
     return({
-        time     => time(),
-        node_id  => $Thruk::NODE_ID,
-        hostname => $Thruk::HOSTNAME,
-        version  => $c->config->{'version'},
-        branch   => $c->config->{'branch'},
+        time        => time(),
+        node_id     => $Thruk::NODE_ID,
+        hostname    => $Thruk::HOSTNAME,
+        version     => $c->config->{'version'},
+        branch      => $c->config->{'branch'},
+        maintenance => $c->cluster->{'node'}->{'maintenance'},
     });
 }
 
@@ -432,6 +436,58 @@ sub is_it_me {
         return(1);
     }
     return(0);
+}
+
+##########################################################
+
+=head2 maint
+
+  maint($self, $node, [$value])
+
+returns true if this node is in maintenance mode.
+
+=cut
+sub maint {
+    my($self, $node, $val) = @_;
+    my $c = $Thruk::Utils::Cluster::context;
+    $node = $c->cluster->{'node'} unless defined $node;
+    my $old = $node->{'maintenance'} ? 1 : 0;
+    if(defined $val) {
+        Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
+            $node->{'node_id'} => {
+                maintenance => $val,
+            },
+        },1);
+        $node->{'maintenance'} = $val;
+        # update others
+        $self->run_cluster('others', "Thruk::Utils::Cluster::heartbeat", [$self, $node->{'node_id'}]);
+    }
+    return $old;
+}
+
+##########################################################
+
+=head2 heartbeat
+
+  heartbeat($self, [$node_id])
+
+request pong from other nodes (or node if if given)
+
+=cut
+sub heartbeat {
+    my($self, $node_id) = @_;
+    local $ENV{'THRUK_SKIP_CLUSTER'} = 0; # allow further subsequent cluster calls
+    my $c = $Thruk::Utils::Cluster::context;
+    $c->cluster->load_statefile();
+    my $nodes = {};
+    for my $n (@{$c->cluster->{'nodes'}}) {
+        next if $c->cluster->is_it_me($n);
+        next if(defined $node_id && $n->{'node_id'} ne $node_id);
+        $c->log->debug(sprintf("sending heartbeat: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
+        $c->log->debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+    }
+    return($nodes);
 }
 
 ##########################################################

@@ -25,8 +25,10 @@ Show information about a Thruk cluster
     available commands are:
 
     - status       displays status of the cluster
-    - ping         send heartbeat to cluster nodes
     - restart      restart thruk instance on each cluster node
+    - ping         send heartbeat to cluster nodes
+    - maint        set current node into maintenance mode
+    - activate     removes maintenance mode from current node
 
 =back
 
@@ -73,7 +75,11 @@ sub cmd {
         for my $n (@{$c->cluster->{'nodes'}}) {
             $total++;
             my $status = '';
-            if($c->cluster->is_it_me($n)) {
+            if($c->cluster->maint($n)) {
+                $status = 'MAINTENANCE';
+                $ok++;
+            }
+            elsif($c->cluster->is_it_me($n)) {
                 $status = 'OK';
                 $ok++;
             }
@@ -90,7 +96,7 @@ sub cmd {
                 $n->{'hostname'},
                 $n->{'node_url'},
                 $n->{'response_time'} ? sprintf("%.2fs", $n->{'response_time'}) : '',
-                $n->{'branch'} ? $n->{'version'}.' - '.$n->{'branch'} : $n->{'version'},
+                $n->{'branch'} ? $n->{'version'}.'-'.$n->{'branch'} : $n->{'version'},
             );
         }
         $output .= ('-' x 110)."\n";
@@ -111,6 +117,12 @@ sub cmd {
             $output = "failed, please check logfiles and output or retry with -v\n";
             $rc     = 2;
         }
+    } elsif($mode eq 'maint' || $mode eq 'maintenance') {
+        $c->cluster->maint($c->cluster->{'node'}, 1);
+        $output = sprintf("OK - node %s set into maintenance mode\n", $Thruk::HOSTNAME);
+    } elsif($mode eq 'activate' || $mode eq 'unmaint') {
+        $c->cluster->maint($c->cluster->{'node'}, 0);
+        $output = sprintf("OK - removed maintenance mode for node %s.\n", $Thruk::HOSTNAME);
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }

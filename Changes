@@ -9,6 +9,8 @@ next:
             - raise icons zindex if its in a none-ok state
             - add new role panorama_view_media_manager to allow uploading images (#944)
             - allow changing background images if user has write access to dashboard
+          - Cluster:
+            - add 'thruk cluster maint/unmaint' commands
 
 2.32-2   Fri Oct 25 17:05:54 CEST 2019
           - add thruk restart cli command

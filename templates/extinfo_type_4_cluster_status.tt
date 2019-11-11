@@ -40,7 +40,9 @@
                       <tr id="row_node_[% loop.index %]">
                         <td class='dataVal'><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
                         <td class='dataVal' style="text-align: center;">
-                          [% IF c.cluster.is_it_me(n) %]
+                          [% IF c.cluster.maint(n) %]
+                            <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" width="16" height="16" alt="maintenance" title="node is in maintenance mode">
+                          [% ELSIF c.cluster.is_it_me(n) %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
                           [% ELSIF n.last_contact == 0 %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" width="16" height="16" alt="starting">

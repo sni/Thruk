@@ -108,6 +108,13 @@ sub index {
         return;
     }
 
+    if($action eq 'lb_ping' or exists $c->req->parameters->{'lb_ping'}) {
+        if($c->cluster->is_clustered() && $c->cluster->maint()) {
+            $c->stash->{'text'} = 'MAINTENANCE';
+            $c->res->code(503); # Service Unavailable
+        }
+    }
+
     return;
 }
 
