@@ -1413,6 +1413,7 @@ lists cluster nodes
 |hostname                          | host name of the cluster node
 |last_contact                      | timestamp of last successful contact
 |last_error                        | text of last error message
+|maintenance                       | Flag whether this node is in maintenance mode
 |node_id                           | internal id for this node
 |node_url                          | url to access this node directly
 |pids                              | list of current process ids of this node
