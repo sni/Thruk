@@ -354,12 +354,14 @@ Ext.define('TP.SmallWidget', {
     /* apply z-index */
     applyZindex: function(value) {
         var This = this;
+        if(!Ext.isNumeric(String(value))) { return; }
         value  = Number(value);
+        value = 30+(value+10)*2;
         // adjust zindex by current state and raise issues a bit
-        if(This.xdata && This.xdata.state != 0) {
+        if(This.xdata && Ext.isNumeric(This.xdata.state) && This.xdata.state > 0) {
             value += TP.get_state_position(default_state_order, This.xdata.state, This.hostProblem, This.acknowledged, This.downtime);
         }
-        This.style['z-index'] = 30+(value+10)*2;
+        This.style['z-index'] = value;
         if(This.el && This.el.dom) {
             This.el.dom.style.zIndex = This.style['z-index'];
         }
