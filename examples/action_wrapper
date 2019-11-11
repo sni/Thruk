@@ -1,15 +1,19 @@
 #!/usr/bin/env perl
 #
-# usage: action_wrapper [-u user] [-g group] command options...
+# usage: action_wrapper [-u user] [-g group] [-t timeout] [-T timeout no kill] command options...
 #
 # wrapper for action menu scripts which checks user and groups
 # permissions from REMOTE_USER and REMOTE_USER_GROUPS environment.
+#
+# timeout handling:
+# use -t to set a timeout after which the command will be killed. Sets exit code 1 if timeout hit.
+# use -T to set a timeout but the command will continue to run in background.
 #
 
 use warnings;
 use strict;
 
-my($users, $groups) = ({},{});
+my($users, $groups, $timeout, $timeout_background) = ({},{}, 0, 0);
 while(scalar @ARGV > 1) {
     if($ARGV[0] eq '-u') {
         $users->{$ARGV[1]} = 1;
@@ -17,6 +21,15 @@ while(scalar @ARGV > 1) {
     }
     elsif($ARGV[0] eq '-g') {
         $groups->{$ARGV[1]} = 1;
+        shift @ARGV; shift @ARGV;
+    }
+    elsif($ARGV[0] eq '-t') {
+        $timeout = $ARGV[1];
+        shift @ARGV; shift @ARGV;
+    }
+    elsif($ARGV[0] eq '-T') {
+        $timeout = $ARGV[1];
+        $timeout_background = 1;
         shift @ARGV; shift @ARGV;
     } else {
         last;
@@ -39,6 +52,37 @@ elsif($ENV{'REMOTE_USER_GROUPS'}) {
 if(!$allowed) {
     print "you are not allowed to run this action!";
     exit 1;
+}
+
+if($timeout) {
+    my $pid = fork();
+    if($pid == -1) {
+        print STDERR "fork failed: $!";
+        exit(1);
+    }
+
+    if(!$pid) {
+        # child
+        setpgrp();
+        system(@ARGV);
+        my $rc = ($? >> 8);
+        exit($rc);
+    }
+
+    # parent
+    alarm($timeout);
+    $SIG{'ALRM'} = sub {
+        if($timeout_background) {
+            exit 0;
+        }
+        kill("-KILL", $pid);
+        exit 1;
+    };
+    # wait for child
+    waitpid($pid, 0);
+    my $rc = ($? >> 8);
+    alarm(0);
+    exit($rc);
 }
 
 exec(@ARGV);

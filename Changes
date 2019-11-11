@@ -5,6 +5,7 @@ next:
           - show sites name in comments/downtimes, logs and notifications
           - add outages overview for hosts and services
           - add action menu and command search filter
+          - add timeout handling to action_wrapper example
           - Panorama:
             - raise icons zindex if its in a none-ok state
             - add new role panorama_view_media_manager to allow uploading images (#944)
