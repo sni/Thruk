@@ -298,10 +298,17 @@ send test query and kill hard if it does not respond
 sub kill_if_not_responding {
     my($c, $config) = @_;
 
+    my $lmd_timeout = $config->{'lmd_timeout'} // 5;
+    return if $lmd_timeout <= 0;
     my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
     my $pid_file = $lmd_dir.'/pid';
     my $lmd_pid  = check_pid($pid_file);
     return unless $lmd_pid;
+
+    # do not restart too soon, check if pidfile is older than 2 minutes
+    my $ctime = (stat($pid_file))[10];
+    return if($ctime > time() - 120);
+
     my $data;
     local $SIG{CHLD} = 'DEFAULT';
     local $SIG{PIPE} = 'DEFAULT';
@@ -310,14 +317,16 @@ sub kill_if_not_responding {
 
     if(!$pid) {
         Thruk::Utils::External::_do_child_stuff($c, 0, 0);
-        alarm(5);
+        alarm($lmd_timeout);
         eval {
             $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites\n");
         };
+        my $err = $@;
         alarm(0);
-        if($@) {
-            $c->log->warn("lmd not responding, killing with force: err - ".$@);
+        if($err) {
+            $c->log->warn("lmd not responding, killing with force: err - ".$err);
             kill('USR1', $lmd_pid);
+            sleep(1);
             kill(2, $lmd_pid);
             sleep(1);
             kill(9, $lmd_pid);
@@ -327,7 +336,7 @@ sub kill_if_not_responding {
 
     my $waited = 0;
     my $rc = -1;
-    while($waited++ < 2 && $rc != 0) {
+    while($waited++ <= $lmd_timeout && $rc != 0) {
         POSIX::waitpid($pid, POSIX::WNOHANG);
         $rc = $?;
         sleep(1);
@@ -336,6 +345,7 @@ sub kill_if_not_responding {
         $c->log->warn("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
         kill('USR1', $lmd_pid);
         kill(2, $pid);
+        sleep(1);
         kill(2, $lmd_pid);
         sleep(1);
         kill(9, $lmd_pid);

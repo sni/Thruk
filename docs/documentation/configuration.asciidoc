@@ -1381,6 +1381,14 @@ ex.:
   lmd_core_config = /etc/thruk/lmd.ini
 
 
+=== lmd_timeout
+Thruk waits this timeout for lmd to respond, otherwise it gets killed and restarted.
+Set to 0 to turn off automatic restarts (it will still be started if it is not running).
+
+ex.:
+
+  lmd_timeout=5
+
 
 
 === logcache
