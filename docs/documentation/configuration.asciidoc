@@ -730,6 +730,16 @@ ex.:
   maximum_search_boxes = 9
 
 
+=== search_long_plugin_output
+Search long_plugin_output in default search, ex. from the side navigation.
+It is enabled by default, but can have significat performance impact in larger
+setups.
+
+ex.:
+
+  search_long_plugin_output = 1
+
+
 === default_service_filter
 {% include new_since.ad version="1.86-2" %}
 The `default_service_filter` set a default service filter which is used when no

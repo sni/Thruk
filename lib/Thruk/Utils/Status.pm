@@ -850,9 +850,11 @@ sub single_search {
                                        { address            => { $op     => $value } },
                                        { groups             => { $listop => $value } },
                                        { plugin_output      => { $op     => $value } },
-                                       { long_plugin_output => { $op     => $value } },
                                        $hfilter,
                                     ];
+            if($c->config->{'search_long_plugin_output'}) {
+                push @{$host_search_filter}, { long_plugin_output => { $op     => $value } };
+            }
             push @hostfilter,       { $joinop => $host_search_filter };
             push @hosttotalsfilter, { $joinop => $host_search_filter };
 
@@ -861,7 +863,6 @@ sub single_search {
                                           { display_name       => { $op     => $value } },
                                           { groups             => { $listop => $value } },
                                           { plugin_output      => { $op     => $value } },
-                                          { long_plugin_output => { $op     => $value } },
                                           { host_name          => { $op     => $value } },
                                           { host_display_name  => { $op     => $value } },
                                           { host_alias         => { $op     => $value } },
@@ -869,6 +870,9 @@ sub single_search {
                                           { host_groups        => { $listop => $value } },
                                           $sfilter,
                                         ];
+            if($c->config->{'search_long_plugin_output'}) {
+                push @{$service_search_filter}, { long_plugin_output => { $op     => $value } },;
+            }
             push @servicefilter,       { $joinop => $service_search_filter };
             push @servicetotalsfilter, { $joinop => $service_search_filter };
         }

@@ -435,6 +435,7 @@ sub set_default_config {
         connection_pool_size            => undef,
         product_prefix                  => 'thruk',
         maximum_search_boxes            => 9,
+        search_long_plugin_output       => 1,
         shown_inline_pnp                => 1,
         use_feature_trends              => 1,
         use_wait_feature                => 1,
