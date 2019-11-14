@@ -100,7 +100,7 @@ unlink($tmpfilename);
 # some tests for full disks
 if(-e '/dev/full') {
     eval {
-        Thruk::Utils::IO::json_store('/dev/full', {'a' => 'b' }, undef, undef, '/dev/full');
+        Thruk::Utils::IO::json_store('/dev/full', {'a' => 'b' }, { tmpfile => '/dev/full' });
     };
     my $err = $@;
     like($err, '/cannot write to/', "json_store failed on full filesystem");

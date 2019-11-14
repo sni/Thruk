@@ -292,9 +292,9 @@ sub _update_docs {
     my $system_api_key = decode_json(`./script/thruk r -d "comment=test" -d "system=1" -d "roles=admin" /thruk/api_keys`);
     my $api_key = decode_json(`./script/thruk r -d "comment=test" -d "username=restapidocs" /thruk/api_keys`);
     # fake usage
-    Thruk::Utils::IO::json_lock_patch($api_key->{'file'}, { last_used => time(), last_from => "127.0.0.1" }, 1);
+    Thruk::Utils::IO::json_lock_patch($api_key->{'file'}, { last_used => time(), last_from => "127.0.0.1" });
     # fake error message
-    Thruk::Utils::IO::json_lock_patch('var/downtimes/9999.tsk', { error => "test" }, 1);
+    Thruk::Utils::IO::json_lock_patch('var/downtimes/9999.tsk', { error => "test" });
 
     my $content    = read_file($output_file);
     my $attributes = _parse_attribute_docs($content);

@@ -137,7 +137,7 @@ sub create_key {
         $data->{'roles'} = $roles;
     }
     die("hash collision") if -e $file;
-    Thruk::Utils::IO::json_lock_store($file, $data , 1);
+    Thruk::Utils::IO::json_lock_store($file, $data, { pretty => 1 });
 
     return($privatekey, $hashed_key, $file);
 }

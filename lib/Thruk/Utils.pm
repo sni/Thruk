@@ -2569,7 +2569,7 @@ sub write_data_file {
     my($filename, $data, $changed_only) = @_;
 
     # store new data files in json format
-    return(Thruk::Utils::IO::json_lock_store($filename, $data, 1, $changed_only));
+    return(Thruk::Utils::IO::json_lock_store($filename, $data, { pretty => 1, changed_only => $changed_only }));
 }
 
 ##############################################

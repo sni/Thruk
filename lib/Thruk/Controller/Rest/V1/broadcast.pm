@@ -48,7 +48,7 @@ sub _rest_get_thruk_broadcast {
     my $method = $c->req->method();
     if($method eq 'PATCH') {
         Thruk::Utils::IO::merge_deep($broadcasts->[0], $c->req->parameters);
-        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], 1, 1);
+        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], { pretty => 1, changed_only => 1 });
         return({
             'message' => 'successfully saved 1 broadcast.',
             'count'   => 1,
@@ -57,7 +57,7 @@ sub _rest_get_thruk_broadcast {
     elsif($method eq 'POST') {
         $broadcasts->[0] = \%{$c->req->parameters};
         Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
-        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], 1, 1);
+        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], { pretty => 1, changed_only => 1 });
         return({
             'message' => 'successfully saved 1 broadcast.',
             'count'   => 1,
@@ -123,7 +123,7 @@ sub _rest_get_thruk_broadcast_new {
         });
     }
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
-    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file, $broadcast, 1, 1);
+    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file, $broadcast, { pretty => 1, changed_only => 1 });
     return({
         'message' => 'successfully created broadcast.',
         'file'    => $file,

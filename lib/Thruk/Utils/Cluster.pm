@@ -81,7 +81,7 @@ sub load_statefile {
             if($registered->{$key}->{'last_update'} < $now - $self->{'config'}->{'cluster_node_stale_timeout'}) {
                 Thruk::Utils::IO::json_lock_patch($self->{'registerfile'}, {
                     $key => undef,
-                },1);
+                }, { pretty => 1 });
                 next:
             }
             $nodes->{$key} = $n;
@@ -137,7 +137,7 @@ sub load_statefile {
     # sort nodes by url
     @{$self->{'nodes'}} = sort { $a->{'node_url'} cmp $b->{'node_url'} } @{$self->{'nodes'}};
 
-    Thruk::Utils::IO::json_lock_store($self->{'localstate'}, $self->{'nodes_by_id'}, 1);
+    Thruk::Utils::IO::json_lock_store($self->{'localstate'}, $self->{'nodes_by_id'}, { pretty => 1 });
     $c->stats->profile(end => "cluster::load_statefile") if $c;
     return $nodes;
 }
@@ -160,7 +160,7 @@ sub register {
                 node_url    => $self->_build_node_url() || '',
                 last_update => time(),
             },
-        }, 1);
+        }, { pretty => 1 });
     }
 
     $self->load_statefile();
@@ -182,7 +182,7 @@ sub unregister {
         $Thruk::NODE_ID => {
             pids => { $$ => undef },
         },
-    }, 1);
+    }, { pretty => 1 });
     return;
 }
 
@@ -205,7 +205,7 @@ sub refresh {
         $Thruk::NODE_ID => {
             pids => { $$ => $now },
         },
-    }, 1);
+    }, { pretty => 1 });
     $self->{'node'}->{'pids'}->{$$}  = $now;
     return;
 }
@@ -325,14 +325,14 @@ sub run_cluster {
                 $n => {
                     last_error => $@,
                 },
-            }, 1);
+            }, { pretty => 1 });
         } else {
             if($sub =~ m/Cluster::pong/mx) {
                 if($n ne $r->{'output'}->[0]->{'node_id'}) {
                     my $new_id = $r->{'output'}->[0]->{'node_id'};
                     $self->{'nodes_by_id'}->{$new_id} = delete $self->{'nodes_by_id'}->{$n};
                     $n = $new_id;
-                    Thruk::Utils::IO::json_lock_store($self->{'localstate'}, $self->{'nodes_by_id'}, 1);
+                    Thruk::Utils::IO::json_lock_store($self->{'localstate'}, $self->{'nodes_by_id'}, { pretty => 1 });
                 }
                 Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                     $n => {
@@ -345,14 +345,14 @@ sub run_cluster {
                         node_id       => $n,
                         maintenance   => $r->{'output'}->[0]->{'maintenance'},
                     },
-                }, 1);
+                }, { pretty => 1 });
             } else {
                 Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                     $n => {
                         last_contact  => time(),
                         last_error    => '',
                     },
-                }, 1);
+                }, { pretty => 1 });
             }
         }
         $r = $r->{'output'} if $r;
@@ -402,7 +402,7 @@ sub pong {
             $Thruk::NODE_ID => {
                 node_url => $url,
             },
-        },1);
+        }, { pretty => 1 });
         $c->cluster->{'node'}->{'node_url'} = $url;
     }
     return({
@@ -457,7 +457,7 @@ sub maint {
             $node->{'node_id'} => {
                 maintenance => $val,
             },
-        },1);
+        }, { pretty => 1 });
         $node->{'maintenance'} = $val;
         # update others
         $self->run_cluster('others', "Thruk::Utils::Cluster::heartbeat", [$self, $node->{'node_id'}]);

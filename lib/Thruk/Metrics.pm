@@ -72,14 +72,14 @@ sub store {
     my $data = {};
     if(!-s $self->{'file'}) {
         $self->_apply_data($data);
-        Thruk::Utils::IO::json_store($self->{'file'}, $data, 1);
+        Thruk::Utils::IO::json_store($self->{'file'}, $data, { pretty => 1 });
         $self->{'store'} = [];
         return;
     }
     my($fh, $lock_fh) = Thruk::Utils::IO::file_lock($self->{'file'}, 'ex');
     $data = Thruk::Utils::IO::json_retrieve($self->{'file'}, $fh);
     $self->_apply_data($data);
-    Thruk::Utils::IO::json_store($self->{'file'}, $data, 1);
+    Thruk::Utils::IO::json_store($self->{'file'}, $data, { pretty => 1 });
     Thruk::Utils::IO::file_unlock($self->{'file'}, $fh, $lock_fh);
     $self->{'store'} = [];
     return;
@@ -89,13 +89,13 @@ sub store {
 sub _save_help {
     my($self) = @_;
     if(!-s $self->{'help_file'}) {
-        Thruk::Utils::IO::json_store($self->{'help_file'}, {}, 1);
+        Thruk::Utils::IO::json_store($self->{'help_file'}, {}, { pretty => 1 });
     }
     my $help = Thruk::Utils::IO::json_lock_retrieve($self->{'help_file'});
     for my $key (keys %{$self->{'help'}}) {
         $help->{$key} = $self->{'help'}->{$key};
     }
-    Thruk::Utils::IO::json_lock_store($self->{'help_file'}, $help, 1);
+    Thruk::Utils::IO::json_lock_store($self->{'help_file'}, $help, { pretty => 1 });
     delete $self->{'save_help'};
     return;
 }

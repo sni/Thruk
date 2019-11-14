@@ -520,7 +520,7 @@ sub save {
         push @{$obj->{'nodes'}}, $n->get_save_obj();
     }
 
-    Thruk::Utils::IO::json_lock_store($self->{'editfile'}, $obj, 1);
+    Thruk::Utils::IO::json_lock_store($self->{'editfile'}, $obj, { pretty => 1 });
     $self->{'need_save'} = 0;
 
     return 1;

@@ -326,27 +326,43 @@ sub file_unlock {
 
 =head2 json_store
 
-  json_store($file, $data, [$pretty], [$changed_only])
+  json_store($file, $data, $options)
 
 stores data json encoded
+
+$options can be {
+    pretty       => 0/1,       # don't write json into a single line and use human readable intendation
+    tmpfile      => <filename> # use this tmpfile while writing new contents
+    changed_only => 0/1,       # only write the file if it has changed
+    compare_data => "...",     # use this string to compare for changed content
+}
 
 =cut
 
 sub json_store {
-    my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $data, $options) = @_;
+
+    if(defined $options && ref $options ne 'HASH') {
+        confess("json_store options have been changed to hash.");
+    }
 
     my $json = Cpanel::JSON::XS->new->utf8;
-    $json = $json->pretty if $pretty;
+    $json = $json->pretty if $options->{'pretty'};
     $json = $json->canonical; # keys will be randomly ordered otherwise
 
     my $write_out;
-    if($changed_only && -f $file) {
+    if($options->{'changed_only'}) {
         $write_out = $json->encode($data);
-        my $old = read_file($file);
-        return 1 if $old eq $write_out;
+        if(defined $options->{'compare_data'}) {
+            return 1 if $options->{'compare_data'} eq $write_out;
+        }
+        elsif(-f $file) {
+            my $old = read_file($file);
+            return 1 if $old eq $write_out;
+        }
     }
 
-    $tmpfile = $file.'.new' unless $tmpfile;
+    my $tmpfile = $options->{'tmpfile'} // $file.'.new';
     open(my $fh2, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
     print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
     Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
@@ -368,16 +384,16 @@ sub json_store {
 
 =head2 json_lock_store
 
-  json_lock_store($file, $data, [$pretty], [$changed_only])
+  json_lock_store($file, $data, [$options])
 
-stores data json encoded
+stores data json encoded. options are passed to json_store.
 
 =cut
 
 sub json_lock_store {
-    my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $data, $options) = @_;
     my($fh, $lock_fh) = file_lock($file, 'ex');
-    json_store($file, $data, $pretty, $changed_only, $tmpfile);
+    json_store($file, $data, $options);
     file_unlock($file, $fh, $lock_fh);
     return 1;
 }
@@ -413,6 +429,7 @@ sub json_retrieve {
     if($err) {
         confess("error while reading $file: ".$err);
     }
+    return($data, $content) if wantarray;
     return $data;
 }
 
@@ -440,16 +457,16 @@ sub json_lock_retrieve {
 
 =head2 json_lock_patch
 
-  json_lock_patch($file, $patch_data, [$pretty], [$changed_only], [$tmpfile])
+  json_lock_patch($file, $patch_data, [$options])
 
-update json data
+update json data with locking. options are passed to json_store.
 
 =cut
 
 sub json_lock_patch {
-    my($file, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $patch_data, $options) = @_;
     my($fh, $lock_fh) = file_lock($file, 'ex');
-    my $data = json_patch($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile);
+    my $data = json_patch($file, $fh, $patch_data, $options);
     file_unlock($file, $fh, $lock_fh);
     return $data;
 }
@@ -458,18 +475,28 @@ sub json_lock_patch {
 
 =head2 json_patch
 
-  json_patch($file, $fh, $patch_data, [$pretty], [$changed_only], [$tmpfile])
+  json_patch($file, $fh, $patch_data, [$options])
 
-update json data
+update json data. options are passed to json_store.
 
 =cut
 
 sub json_patch {
-    my($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $fh, $patch_data, $options) = @_;
+    if(defined $options && ref $options ne 'HASH') {
+        confess("json_store options have been changed to hash.");
+    }
     confess("got no filehandle") unless defined $fh;
-    my $data = -s $file ? json_retrieve($file, $fh) : {};
+    my($data, $content);
+    if(-s $file) {
+        ($data, $content) = json_retrieve($file, $fh);
+    } else {
+        ($data, $content) = ({}, "");
+    }
     $data = merge_deep($data, $patch_data);
-    json_store($file, $data, $pretty, $changed_only, $tmpfile);
+    $options->{'changed_only'} = 1;
+    $options->{'compare_data'} = $content;
+    json_store($file, $data, $options);
     return $data;
 }
 
