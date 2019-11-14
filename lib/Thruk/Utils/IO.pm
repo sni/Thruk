@@ -26,6 +26,7 @@ use Time::HiRes qw/sleep/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::config = undef;
+$Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;
 
 ##############################################
 =head1 METHODS
@@ -225,10 +226,11 @@ sub file_lock {
                     my $new_inode = (stat($lock_fh))[1];
                     if($new_inode && $new_inode == $old_inode) {
                         $retrys++;
-                        if($retrys > 20) {
+                        if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
                             # lock seems to be orphaned, continue normally unless in test mode
                             confess("got orphaned lock") if $ENV{'TEST_RACE'};
                             $locked = 1;
+                            warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
                             last;
                         }
                         next;
@@ -239,16 +241,17 @@ sub file_lock {
                     }
                 } else {
                     $retrys++;
-                    if($retrys > 20) {
+                    if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
                         unlink($lock_file);
                         # we have to move and copy the file itself, otherwise
                         # the orphaned process may overwrite the file
                         # and the later flock() might hang again
                         copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
-                        move($file, $file.'.orphaned') or confess("cannot move file $file: $!");
-                        move($file.'.copy', $file) or confess("cannot move file $file: $!");
+                        move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
+                        move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
                         unlink($file.'.orphaned');
-                        $retrys = 0;
+                        warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                        $retrys = 0; # start over...
                     }
                 }
             }
@@ -265,9 +268,10 @@ sub file_lock {
     }
 
     my $fh;
-    my $retrys = 5;
+    my $retrys = 0;
     my $err;
-    while($retrys > 0) {
+    while($retrys < 5) {
+        undef $fh;
         eval {
             sysopen($fh, $file, O_RDWR|O_CREAT) or confess("cannot open file ".$file.": ".$!);
             if($mode eq 'ex') {
@@ -277,17 +281,20 @@ sub file_lock {
                 flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
             }
         };
-        if(!$@ && $fh) {
-            undef $err;
+        $err = $@;
+        if(!$err && $fh) {
             last;
         }
-        $err = $@;
-        $retrys--;
+        $retrys++;
         sleep(0.5);
     }
 
     if($err) {
         die("failed to lock $file: $err");
+    }
+
+    if($retrys > 0) {
+        warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
 
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
@@ -403,12 +410,8 @@ sub json_retrieve {
         $data    = $json->decode($content);
     };
     my $err = $@;
-    if($err && !$data) {
-        if($content && $content =~ m/^\$VAR/mx) {
-            warn("cannot read old datafile format, use .../support/convert_old_datafile.pl '$file' to migrate this file.");
-            return;
-        }
-        confess("error while reading $file: ".$@);
+    if($err) {
+        confess("error while reading $file: ".$err);
     }
     return $data;
 }

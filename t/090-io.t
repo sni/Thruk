@@ -87,11 +87,14 @@ unlink($tmpfilename);
 
 #########################
 # lock store with orphaned lock
-($tfh, $tmpfilename) = tempfile();
-Thruk::Utils::IO::write($tmpfilename.'.lock', '');
-$rc = Thruk::Utils::IO::json_lock_store($tmpfilename, {'a' => 'b' });
-is($rc, 1, "json_lock_store succeeded on tmpfile with orphaned lock file");
-unlink($tmpfilename);
+{
+    local $ENV{'TEST_IO_NOWARNINGS'}  = 1;
+    ($tfh, $tmpfilename) = tempfile();
+    Thruk::Utils::IO::write($tmpfilename.'.lock', '');
+    $rc = Thruk::Utils::IO::json_lock_store($tmpfilename, {'a' => 'b' });
+    is($rc, 1, "json_lock_store succeeded on tmpfile with orphaned lock file");
+    unlink($tmpfilename);
+};
 
 #########################
 # some tests for full disks

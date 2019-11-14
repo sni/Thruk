@@ -10,6 +10,7 @@ plan skip_all => 'Race condition test. Set $ENV{TEST_RACE} to a true value to ru
 BEGIN {
     use lib('t');
     $ENV{'THRUK_NO_TOUCH_PERM'} = 1;
+    $ENV{'TEST_IO_NOWARNINGS'}  = 1;
     require TestUtils;
     import TestUtils;
 }
