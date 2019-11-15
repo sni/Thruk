@@ -198,6 +198,7 @@ Forget all changes made so far and not yet saved to disk
 =cut
 sub discard_changes {
     my($self) = @_;
+    $self->{'logs'} = []; # clear audit log stash
     $self->check_files_changed(1);
     return;
 }
