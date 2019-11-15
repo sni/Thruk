@@ -116,9 +116,9 @@ sub process {
             if($data) {
                 my $user = $data->{'user'};
                 if($data->{'superuser'}) {
-                    $user = $extra->[3] ne '' ? $extra->[3] : '(api)';
+                    $user = (defined $extra->[3] && $extra->[3] ne '') ? $extra->[3] : '(api)';
                 }
-                Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time() }, 1);
+                Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time() }, { pretty => 1});
                 return "/loginok/".$user."/".$path."\n" if defined $user;
                 return "/pass/".$path."\n";
             }
