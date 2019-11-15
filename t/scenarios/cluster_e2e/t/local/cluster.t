@@ -20,12 +20,12 @@ TestUtils::test_command({
 ###########################################################
 # thruk cluster commands
 TestUtils::test_command({
-    cmd  => '/usr/bin/env thruk r /thruk/cluster',
-    like => ['/"node_url"/', '/"last_error" : "",/', '/"response_time" : 0./'],
-});
-TestUtils::test_command({
     cmd  => '/usr/bin/env thruk r -m POST /thruk/cluster/heartbeat',
     like => ['/heartbeat send/'],
+});
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk r /thruk/cluster',
+    like => ['/"node_url"/', '/"last_error" : "",/', '/"response_time" : 0./'],
 });
 
 ###########################################################
@@ -38,11 +38,8 @@ TestUtils::test_command({
     cmd  => '/usr/bin/env thruk cluster ping',
     like => ['/heartbeat send/'],
 });
-TestUtils::test_command({
-    cmd  => '/usr/bin/env thruk cluster restart',
-    like => ['/all cluster nodes restarted/'],
-});
 
+###########################################################
 # maint mode
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk cluster maint',
@@ -60,6 +57,12 @@ TestUtils::test_command({
     cmd    => '/usr/bin/env thruk cluster status',
     like   => ['/OK/', '/nodes online/'],
     unlike => ['/MAINT/'],
+});
+
+###########################################################
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk cluster restart',
+    like => ['/all cluster nodes restarted/'],
 });
 TestUtils::test_command({ cmd  => '/bin/mv .thruk.off .thruk' });
 ###########################################################
