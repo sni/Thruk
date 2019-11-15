@@ -318,14 +318,20 @@ sub run_cluster {
         eval {
             $r = $http->request($sub, $args, { want_data => 1 });
         };
+        my $err = $@;
         my $elapsed = tv_interval($t1);
-        if($@) {
-            $c->log->error(sprintf("%s failed on %s: %s", $sub, $n, $@));
+        if($err) {
+            if(!$node->{'last_error'} && !$node->{'maintenance'}) {
+                $c->log->error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
+            } else {
+                $c->log->debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
+            }
             Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                 $n => {
-                    last_error => $@,
+                    last_error => $err,
                 },
             }, { pretty => 1 });
+            $node->{'last_error'} = $err;
         } else {
             if($sub =~ m/Cluster::pong/mx) {
                 if($n ne $r->{'output'}->[0]->{'node_id'}) {
