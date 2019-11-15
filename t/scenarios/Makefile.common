@@ -54,11 +54,15 @@ failed_test:
 	-docker ps
 	-docker-compose logs --tail=30 --no-color -t | sort
 	for svc in $$(docker-compose config --services | sort); do \
-		echo "*** $$svc"; \
-		echo "*** $$svc - apache/error_log"; \
-		docker-compose exec $(DOCKER_COMPOSE_TTY) --user root $$svc tail -20 /opt/omd/sites/demo/var/log/apache/error_log; \
-		echo "*** $$svc - thruk.log"; \
-		docker-compose exec $(DOCKER_COMPOSE_TTY) --user root $$svc tail -20 /opt/omd/sites/demo/var/log/thruk.log; \
+		for index in $$(seq 1 $$(docker-compose ps -q $$svc | wc -l)); do \
+			echo "*** $${svc}_$${index}"; \
+			if docker-compose exec  --user root --index $$index $$svc test -d /opt/omd/sites/demo; then \
+				echo "*** $${svc}_$${index} - apache/error_log"; \
+				docker-compose exec $(DOCKER_COMPOSE_TTY) --user root --index $$index $$svc tail -20 /opt/omd/sites/demo/var/log/apache/error_log; \
+				echo "*** $${svc}_$${index} - thruk.log"; \
+				docker-compose exec $(DOCKER_COMPOSE_TTY) --user root --index $$index $$svc tail -20 /opt/omd/sites/demo/var/log/thruk.log; \
+			fi; \
+		done; \
 	done
 	-$(MAKE) extra_failed_test
 	exit 1
