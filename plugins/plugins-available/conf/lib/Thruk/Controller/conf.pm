@@ -2672,7 +2672,7 @@ sub _config_reload {
     my $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
     if(!$last_reload) {
         my $processinfo = $c->{'db'}->get_processinfo(backends => $pkey);
-        $last_reload = $processinfo->{$pkey}->{'program_start'} || (time() - 1);
+        $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time() - 1);
     }
 
     $c->stats->profile(comment => "program_start before reload: ".$last_reload);
