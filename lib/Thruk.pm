@@ -652,7 +652,8 @@ sub _check_exit_reason {
     my $url = $c->req->url;
     printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
     printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
-    printf(STDERR "ERROR: timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
+    printf(STDERR "ERROR: Runtime:    %1.fs\n", $request_runtime);
+    printf(STDERR "ERROR: Timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
     printf(STDERR "ERROR: Address:    %s\n", $c->req->address) if $c->req->address;
     printf(STDERR "ERROR: Parameters: %s\n", Thruk::Utils::dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
     if($c->stash->{errorDetails}) {
