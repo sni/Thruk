@@ -1498,6 +1498,7 @@ lists all panorama dashboards.
 |tab                               | structure of global dashboard settings
 |ts                                | timestamp of last modification
 |user                              | owner of this dashboard
+|version                           | file version
 |===========================================
 
 
