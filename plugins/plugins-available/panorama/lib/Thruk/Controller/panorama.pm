@@ -768,7 +768,7 @@ sub _task_save_dashboard {
 
     my $data = {
         usercontent => {},
-        version     => $c->config->{'version'},
+        version     => Thruk::Utils::Filter::fullversion($c),
     };
     for my $key (keys %{$d}) {
         if($key =~ m/^tab/mx) {
@@ -866,6 +866,8 @@ sub _task_load_dashboard {
         $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'This is not a valid dashboard', success => Cpanel::JSON::XS::false });
         return;
     }
+
+    delete $data->{'version'};
 
     if($data->{'usercontent'}) {
         require MIME::Base64;
@@ -3401,6 +3403,7 @@ sub _save_dashboard {
         }
     }
 
+    delete $dashboard->{'version'}; # leftover from imported dashboard
     delete $dashboard->{'nr'};
     delete $dashboard->{'id'};
     delete $dashboard->{'file'};
