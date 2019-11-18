@@ -385,10 +385,19 @@ sub statusfilter {
     $c->stash->{'minimal'} = 1; # do not fill totals boxes
     my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '');
 
+    my $node_filter = Thruk::Utils::array_uniq([@{$n->{'filter'}}, @{$bp->{'filter'}}]);
+    my($ack_filter, $downtime_filter, $unknown_filter) = (0,0,0);
+    for my $f (@{$node_filter}) {
+        $ack_filter      = 1 if $f eq 'acknowledged_filter';
+        $downtime_filter = 1 if $f eq 'downtime_filter';
+        $unknown_filter  = 1 if $f eq 'unknown_filter';
+    }
+
     my($worst_host, $total_hosts, $good_hosts, $down_hosts) = (0,0,0,0);
     my $best_host = -1;
     if($type eq 'hosts' || $type eq 'both') {
-        my $data = $c->{'db'}->get_host_totals_stats( filter => [ $hostfilter ]);
+        my $data = $c->{'db'}->get_host_stats( filter => [ $hostfilter ]);
+        $data    = _statusfilter_apply_filter("host", $data, $ack_filter, $downtime_filter, $unknown_filter);
         $total_hosts = $data->{'total'};
         $good_hosts  = $data->{'up'} + $data->{'pending'};
         $down_hosts  = $data->{'down'} + $data->{'unreachable'};
@@ -400,7 +409,8 @@ sub statusfilter {
     my $best_service = -1;
     my($worst_service, $total_services, $good_services, $down_services) = (0,0,0,0);
     if($type eq 'services' || $type eq 'both') {
-        my $data = $c->{'db'}->get_service_totals_stats( filter => [ $servicefilter ]);
+        my $data = $c->{'db'}->get_service_stats( filter => [ $servicefilter ]);
+        $data    = _statusfilter_apply_filter("service", $data, $ack_filter, $downtime_filter, $unknown_filter);
         $total_services = $data->{'total'};
         $good_services  = $data->{'ok'}   + $data->{'pending'} + $data->{'warning'};
         $down_services  = $data->{'critical'} + $data->{'unknown'};
@@ -484,15 +494,20 @@ sub statusfilter {
         my $maximum_output = 10;
         my $num = 0;
         if($worst_host > 0) {
-            my $data = $c->{'db'}->get_hosts( filter => [ $hostfilter, { state => { '>' => 0 }} ], columns => [qw/name state plugin_output/]);
+            my $data = $c->{'db'}->get_hosts( filter => [ $hostfilter, { state => { '>' => 0 }} ], columns => [qw/name state plugin_output scheduled_downtime_depth acknowledged/]);
             for my $h (@{$data}) {
+                next if($ack_filter      && $h->{'acknowledged'});
+                next if($downtime_filter && $h->{'scheduled_downtime_depth'} > 0);
                 $output .= sprintf("\n[%s] %s - %s", Thruk::BP::Utils::hoststate2text($h->{'state'}), $h->{'name'}, substr($h->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
                 $num++;
             }
         }
         if($worst_service > 0) {
-            my $data = $c->{'db'}->get_services( filter => [ $servicefilter, { state => { '>' => 0 }} ], columns => [qw/host_name description state plugin_output/]);
+            my $data = $c->{'db'}->get_services( filter => [ $servicefilter, { state => { '>' => 0 }} ], columns => [qw/host_name description state plugin_output scheduled_downtime_depth acknowledged/]);
             for my $s (@{$data}) {
+                next if($ack_filter      && $s->{'acknowledged'});
+                next if($downtime_filter && $s->{'scheduled_downtime_depth'} > 0);
+                next if($unknown_filter  && $s->{'state'} == 3);
                 $output .= sprintf("\n[%s] %s - %s - %s", Thruk::BP::Utils::state2text($s->{'state'}), $s->{'host_name'}, $s->{'description'}, substr($s->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
                 $num++;
             }
@@ -514,6 +529,65 @@ sub _set_best_worst {
         $worst = $state;
     }
     return($best, $worst);
+}
+
+# kind of a hack, but there is no easy way to apply filter to any filter
+# so we just assume the function from the name of the filter which is ok,
+# since these are shiped filters, so we know what they do and try to
+# rebuild their functionality here
+sub _statusfilter_apply_filter {
+    my($type, $data, $ack_filter, $downtime_filter, $unknown_filter) = @_;
+
+    # if both filter (ack and downtime) should be applied, we substract plain_down from down which
+    # because that is the number of downs which are not in downtime or acknowledged
+    if($ack_filter && $downtime_filter) {
+        if($type eq 'host') {
+            for my $state (qw/down unreachable/) {
+                $data->{'up'}  += ($data->{$state} - $data->{'plain_'.$state});
+                $data->{$state} = $data->{'plain_'.$state};
+            }
+        }
+        if($type eq 'service') {
+            for my $state (qw/warning critical unknown/) {
+                $data->{'ok'}  += ($data->{$state} - $data->{'plain_'.$state});
+                $data->{$state} = $data->{'plain_'.$state};
+            }
+        }
+    }
+    elsif($ack_filter) {
+        if($type eq 'host') {
+            for my $state (qw/down unreachable/) {
+                $data->{'up'}   += $data->{$state.'_and_ack'};
+                $data->{$state} -= $data->{$state.'_and_ack'};
+            }
+        }
+        if($type eq 'service') {
+            for my $state (qw/warning critical unknown/) {
+                $data->{'ok'}   += $data->{$state.'_and_ack'};
+                $data->{$state} -= $data->{$state.'_and_ack'};
+            }
+        }
+    }
+    elsif($downtime_filter) {
+        if($type eq 'host') {
+            for my $state (qw/down unreachable/) {
+                $data->{'up'}   += $data->{$state.'_and_scheduled'};
+                $data->{$state} -= $data->{$state.'_and_scheduled'};
+            }
+        }
+        if($type eq 'service') {
+            for my $state (qw/warning critical unknown/) {
+                $data->{'ok'}   += $data->{$state.'_and_scheduled'};
+                $data->{$state} -= $data->{$state.'_and_scheduled'};
+            }
+        }
+    }
+
+    if($unknown_filter && $type eq 'service') {
+        $data->{'ok'}     += $data->{'unknown'};
+        $data->{'unknown'} = 0;
+    }
+    return($data);
 }
 
 ##########################################################
