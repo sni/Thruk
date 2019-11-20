@@ -1347,6 +1347,9 @@ sub get_remote_thruk_url {
         $url = $peer->{'addr'};
     }
     if($url) {
+        if($url !~ m/^https?:\/\//mx) {
+            return("");
+        }
         $url =~ s|^https?://[^/]*/?|/|gmx;
         $url =~ s|cgi-bin\/remote\.cgi$||gmx;
         $url =~ s|thruk/?$||gmx;
