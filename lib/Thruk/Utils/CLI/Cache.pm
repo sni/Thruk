@@ -34,7 +34,7 @@ The cache handles the internal thruk cache.
 use warnings;
 use strict;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
-use Data::Dumper;
+use Cpanel::JSON::XS qw//;
 
 ##############################################
 # no backends required for this command
@@ -61,7 +61,10 @@ sub cmd {
     my $command = shift @{$commandoptions} || 'help';
     if($command eq 'dump') {
         $data->{'rc'} = 0;
-        $data->{'output'} = Dumper($c->cache->dump);
+        my $json = Cpanel::JSON::XS->new->utf8;
+        $json = $json->pretty;
+        $json = $json->canonical; # keys will be randomly ordered otherwise
+        $data->{'output'} = $json->encode($c->cache->dump);
     }
     elsif($command eq 'clear' || $command eq 'clean' || $command eq 'drop') {
         $data->{'rc'} = 0;

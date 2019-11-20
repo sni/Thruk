@@ -30,7 +30,7 @@ TestUtils::test_command({
     });
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk cache dump',
-        like   => ['/VAR1/'],
+        like   => ['/\{\}/'],
         unlike => ['/testuser/'],
     });
     TestUtils::test_command({
@@ -45,6 +45,6 @@ TestUtils::test_command({
     });
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk cache dump',
-        like   => ['/VAR1/', '/testgroup/', '/admin/'],
+        like   => ['/global/', '/testgroup/', '/admin/'],
     });
 }
