@@ -60,11 +60,25 @@ sub cmd {
     # cache actions
     my $command = shift @{$commandoptions} || 'help';
     if($command eq 'dump') {
+        my $cache_data = $c->cache->dump;
+        my $filter = shift @{$commandoptions};
+        if($filter) {
+            $filter =~ s/^\.//gmx;
+            for my $key (split/\./mx, $filter) {
+                if(ref $cache_data eq 'HASH' && defined $cache_data->{$key}) {
+                    $cache_data = $cache_data->{$key};
+                } else {
+                    $data->{'rc'}     = 1;
+                    $data->{'output'} = "";
+                    return $data;
+                }
+            }
+        }
         $data->{'rc'} = 0;
         my $json = Cpanel::JSON::XS->new->utf8;
         $json = $json->pretty;
         $json = $json->canonical; # keys will be randomly ordered otherwise
-        $data->{'output'} = $json->encode($c->cache->dump);
+        $data->{'output'} = $json->encode($cache_data);
     }
     elsif($command eq 'clear' || $command eq 'clean' || $command eq 'drop') {
         $data->{'rc'} = 0;
@@ -82,11 +96,15 @@ sub cmd {
 
 =head1 EXAMPLES
 
-Display cache
+Display complete cache
 
   %> thruk cache dump
 
-Drop cache
+Display specific key from cache:
+
+  %> thruk cache dump .users.thrukadmin
+
+Drop cache (you might need to reload apache/thruk afterwards)
 
   %> thruk cache clean
 
