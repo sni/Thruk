@@ -32,9 +32,33 @@
       regexp: '^authorized_contactgroup_for_admin='
       line: 'authorized_contactgroup_for_admin=testgroup'
   - lineinfile:
+      path: /omd/sites/demo/etc/thruk/cgi.cfg
+      regexp: '^authorized_contactgroup_for_configuration_information='
+      line: 'authorized_contactgroup_for_configuration_information=testgroup2'
+  - lineinfile:
+      path: /omd/sites/demo/etc/thruk/cgi.cfg
+      regexp: '^authorized_contactgroup_for_all_services='
+      line: 'authorized_contactgroup_for_all_services=testgroup2'
+  - lineinfile:
+      path: /omd/sites/demo/etc/thruk/cgi.cfg
+      regexp: '^authorized_contactgroup_for_all_hosts='
+      line: 'authorized_contactgroup_for_all_hosts=testgroup2'
+  - lineinfile:
+      path: /omd/sites/demo/etc/thruk/cgi.cfg
+      regexp: '^authorized_contactgroup_for_all_service_commands='
+      line: 'authorized_contactgroup_for_all_service_commands=testgroup2'
+  - lineinfile:
+      path: /omd/sites/demo/etc/thruk/cgi.cfg
+      regexp: '^authorized_contactgroup_for_all_host_commands='
+      line: 'authorized_contactgroup_for_all_host_commands=testgroup2'
+  - lineinfile:
       path: /omd/sites/demo/etc/htpasswd
       regexp: '^testuser:'
       line: 'testuser:$apr1$rYJHrFjl$CXBAGzkW1.dklpbNZ2rKu/'
+  - lineinfile:
+      path: /omd/sites/demo/etc/htpasswd
+      regexp: '^testuser2:'
+      line: 'testuser2:$apr1$XCZk.pKm$sN8YtngAPWNvNU1DLJci9/'
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:
       path: /omd/sites/demo/var/thruk/secret.key

@@ -2242,6 +2242,7 @@ t/scenarios/rest_api/t/301-controller_rest_scenario.t
 t/scenarios/rest_api/t/305-controller_rest_commands.t
 t/scenarios/rest_api/t/local/rest.t
 t/scenarios/rest_api/t/local/testuser.t
+t/scenarios/rest_api/t/local/testuser2.t
 t/scenarios/rest_api/t/local_test.sh
 t/scenarios/rest_api/thruk.conf
 t/scenarios/rest_api/thruk_local.conf
