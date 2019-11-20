@@ -405,11 +405,13 @@ sub _request_username {
     elsif($c->req->cookies->{'thruk_auth'}) {
         # verify ip address
         my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $c->req->cookies->{'thruk_auth'});
-        if($sessiondata) {
-            $username = $sessiondata->{'username'};
-            $auth_src = "cookie";
-            $roles    = $sessiondata->{'roles'} if($sessiondata->{'roles'} && scalar @{$sessiondata->{'roles'}} > 0);
+        if(!$sessiondata) {
+            # should not happen, because expired sessions are handled in thruk_auth script
+            return $c->detach_error({msg => "session expired", code => 403, log => 1});
         }
+        $username = $sessiondata->{'username'};
+        $auth_src = "cookie";
+        $roles    = $sessiondata->{'roles'} if($sessiondata->{'roles'} && scalar @{$sessiondata->{'roles'}} > 0);
     }
     elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
         $username = $env->{'SSL_CLIENT_S_DN_CN'};
