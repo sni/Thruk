@@ -635,22 +635,23 @@ sub _check_exit_reason {
         return;
     }
 
-    if(!defined $Thruk::Request::c || $reason !~ m|Plack::Util::run_app|mx) {
+    if(!defined $Thruk::Request::c) {
         # not processing any request right now -> simply exit
         return;
     }
 
     my $request_runtime = $now - $Thruk::Request::c->stash->{'time_begin'}->[0];
-    if($request_runtime < 10) {
-        # probably a simple webserver restart, no worries yet
-        return;
-    }
 
-    # print stacktrace, possible timeout
     local $| = 1;
     my $c = $Thruk::Request::c;
     my $url = $c->req->url;
-    printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
+
+    # print stacktrace
+    if($request_runtime >= 10 && $sig eq 'TERM') {
+        printf(STDERR "ERROR: got signal %s while handling request, possible timeout in %s\n", $sig, $url);
+    } else {
+        printf(STDERR "ERROR: got signal %s while handling request in %s\n", $sig, $url);
+    }
     printf(STDERR "ERROR: User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
     printf(STDERR "ERROR: Runtime:    %1.fs\n", $request_runtime);
     printf(STDERR "ERROR: Timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
@@ -661,7 +662,7 @@ sub _check_exit_reason {
             printf(STDERR "ERROR: %s\n", $row);
         }
     }
-    printf(STDERR "ERROR: Stacktrace: \n%s\n", $reason);
+    printf(STDERR "ERROR: Stacktrace: \n%s", $reason);
 
     # send sigusr1 to lmd to create a backtrace as well
     if($c->config->{'use_lmd_core'}) {
