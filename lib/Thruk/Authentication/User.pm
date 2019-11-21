@@ -85,7 +85,7 @@ sub new {
     }
 
     # ex.: user settings from var/users/<name>
-    $self->{settings} = Thruk::Utils::get_user_data($c, $username);
+    $self->{settings} = $self->{'internal'} ? {} : Thruk::Utils::get_user_data($c, $username);
 
     return $self;
 }
