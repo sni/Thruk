@@ -300,7 +300,6 @@ sub selectall_arrayref {
 
     if(!defined $result) {
         $result = &_send($self, $statement, $opt);
-        return $result if $ENV{'THRUK_SELECT'};
 
         if(!defined $result) {
             return unless $self->{'errors_are_fatal'};
@@ -819,7 +818,6 @@ sub _send {
         my $send = "$statement\n$header";
         $self->{'logger'}->debug('> '.Dumper($send)) if $self->{'verbose'};
         ($status,$msg,$body) = &_send_socket($self, $send);
-        return([$status, $opt, $keys]) if $ENV{'THRUK_SELECT'};
         if($self->{'verbose'}) {
             #$self->{'logger'}->debug("got:");
             #$self->{'logger'}->debug(Dumper(\@erg));
@@ -1099,7 +1097,6 @@ sub _send_socket {
         if($self->{'retries_on_connection_error'} <= 0) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($sock, $msg, $recv) if $msg;
-            return $sock if $ENV{'THRUK_SELECT'};
             ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             return($status, $msg, $recv);
         }
@@ -1108,7 +1105,6 @@ sub _send_socket {
             $retries++;
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
-            return $sock if $ENV{'THRUK_SELECT'};
             ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             $self->{'logger'}->debug('query status '.$status) if $self->{'verbose'};
             if($status == 491 or $status == 497 or $status == 500) {
@@ -1123,14 +1119,12 @@ sub _send_socket {
         if(defined $@ and $@ =~ /broken\ pipe/mx) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
-            return $sock if $ENV{'THRUK_SELECT'};
             return(&_read_socket_do($self, $sock, $statement));
         }
         confess($@) if $self->{'errors_are_fatal'};
     }
 
     $status = $sock unless $status;
-    return $sock if $ENV{'THRUK_SELECT'};
     $msg =~ s/^$status:\s+//gmx;
     confess($status.": ".$msg) if($status >= 400 and $self->{'errors_are_fatal'});
 

@@ -248,7 +248,6 @@ sub get_processinfo {
                      ->columns(@{$options{'columns'}})
                      ->options($options{'options'}))
                      ->hashref_pk('peer_key');
-        return $data if $ENV{'THRUK_SELECT'};
         return $data if $self->{'lmd_optimizations'};
     }
 
@@ -400,7 +399,6 @@ sub get_hosts {
 
     # get result
     my $data = $self->_get_table('hosts', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
 
     # set total size
     if(!$size && $self->{'optimized'}) {
@@ -437,7 +435,6 @@ sub get_hosts_by_servicequery {
     }
 
     my $data = $self->_get_table('services', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_hosts_by_servicequery() should not be called in scalar context");
     }
@@ -463,7 +460,6 @@ sub get_host_names{
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hosts', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -515,7 +511,6 @@ sub get_hostgroup_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hostgroups', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -602,7 +597,6 @@ sub get_services {
 
     # get result
     my $data = $self->_get_table('services', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
 
     # set total size
     if(!$size && $self->{'optimized'}) {
@@ -634,7 +628,6 @@ sub get_service_names {
     }
     $options{'columns'} = [qw/description/];
     my $data = $self->_get_hash_table('services', 'description', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_service_names() should not be called in scalar context");
@@ -684,7 +677,6 @@ sub get_servicegroup_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('servicegroups', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_servicegroup_names() should not be called in scalar context");
@@ -873,7 +865,6 @@ sub get_timeperiod_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('timeperiods', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_timeperiods_names() should not be called in scalar context");
@@ -944,7 +935,6 @@ sub get_contact_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('contacts', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -972,7 +962,6 @@ sub get_host_stats {
     my $class = $self->_get_class('hosts', \%options);
     if($class->apply_filter('hoststats')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_host_stats() should not be called in scalar context");
         }
@@ -1038,7 +1027,6 @@ sub get_host_totals_stats {
     my $class = $self->_get_class('hosts', \%options);
     if($class->apply_filter('hoststatstotals')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_host_totals_stats() should not be called in scalar context");
         }
@@ -1078,7 +1066,6 @@ sub get_service_stats {
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicestats')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_service_stats() should not be called in scalar context");
         }
@@ -1153,7 +1140,6 @@ sub get_service_totals_stats {
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicestatstotals')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_service_totals_stats() should not be called in scalar context");
         }
@@ -1202,7 +1188,6 @@ sub get_performance_stats {
     my $minall = $options{'last_program_starts'}->{$self->peer_key()} || 0;
 
     my $data = {};
-    my $selects = [];
     for my $type (qw{hosts services}) {
         my $stats = [
             $type.'_active_sum'      => { -isa => { -and => [ 'check_type' => 0 ]}},
@@ -1222,11 +1207,7 @@ sub get_performance_stats {
         $options{'filter'} = $options{$type.'_filter'};
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
-        if($ENV{'THRUK_SELECT'}) {
-            push @{$selects}, $rows;
-        } else {
-            $data = { %{$data}, %{$rows->[0]} }
-        }
+        $data = { %{$data}, %{$rows->[0]} };
 
         # add stats for active checks
         $stats = [
@@ -1246,11 +1227,7 @@ sub get_performance_stats {
         $rows = $class
                     ->filter([ check_type => 0, has_been_checked => 1 ])
                     ->stats($stats)->hashref_array();
-        if($ENV{'THRUK_SELECT'}) {
-            push @{$selects}, $rows;
-        } else {
-            $data = { %{$data}, %{$rows->[0]} } if $rows->[0];
-        }
+        $data = { %{$data}, %{$rows->[0]} } if $rows->[0];
 
         # add stats for passive checks
         $stats = [
@@ -1261,14 +1238,9 @@ sub get_performance_stats {
         $class = $self->_get_class($type, \%options);
         $rows  = $class->filter([ check_type => 1, has_been_checked => 1 ])
                        ->stats($stats)->hashref_array();
-        if($ENV{'THRUK_SELECT'}) {
-            push @{$selects}, $rows;
-        } else {
-            $data  = { %{$data}, %{$rows->[0]} } if $rows->[0];
-        }
+        $data  = { %{$data}, %{$rows->[0]} } if $rows->[0];
     }
 
-    return $selects if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_performance_stats() should not be called in scalar context");
     }
@@ -1300,7 +1272,6 @@ sub get_extra_perf_stats {
                         log_messages log_messages_rate forks forks_rate
                   /)
                   ->hashref_array();
-    return $data if $ENV{'THRUK_SELECT'};
 
     if(defined $data) {
         $data = shift @{$data};

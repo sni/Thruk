@@ -252,8 +252,6 @@ sub hashref_pk {
 
     confess("no key!") unless $key;
 
-    return([$self->statement(), $self->{_columns}, $self->{_options}]) if $ENV{'THRUK_SELECT'};
-
     my %indexed;
     my @data = $self->hashref_array();
     confess('undefined index: '.$key) if(defined $data[0] && !defined $data[0]->{$key});
@@ -274,7 +272,6 @@ return result as array
 =cut
 sub hashref_array {
     my($self) = @_;
-    return([$self->statement(), $self->{_columns}, $self->{_options}]) if $ENV{'THRUK_SELECT'};
     my @data = $self->_execute();
     return wantarray ? @data : \@data;
 }
