@@ -196,7 +196,6 @@ sub report_send {
     $c->stash->{'r'} = $report;
 
     local $SIG{CHLD} = 'DEFAULT';
-    local $SIG{PIPE} = 'DEFAULT';
 
     my $attachment;
     if($skip_generate) {

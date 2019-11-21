@@ -545,7 +545,6 @@ sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached) = @_;
 
     local $SIG{CHLD} = 'DEFAULT';
-    local $SIG{PIPE} = 'DEFAULT';
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
     local $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c;

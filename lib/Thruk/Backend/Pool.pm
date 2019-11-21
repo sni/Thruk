@@ -26,10 +26,6 @@ Pool of backend connections
 
 =cut
 
-## no critic
-$SIG{PIPE} = sub { confess("broken pipe"); };
-## use critic
-
 ########################################
 
 =head2 init_backend_thread_pool

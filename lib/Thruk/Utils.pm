@@ -2434,7 +2434,6 @@ sub wait_after_reload {
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
-            local $SIG{'PIPE'} = sub { die "pipe error\n" };
             alarm(5);
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey, options => $options);

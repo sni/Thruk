@@ -1088,12 +1088,12 @@ sub _send_socket {
     my $retries = 0;
     my($status, $msg, $recv, $sock);
 
+    # closing a socket sends SIGPIPE to reader
+    # https://riptutorial.com/posix/example/17424/handle-sigpipe-generated-by-write---in-a-thread-safe-manner
+    local $SIG{PIPE} = 'IGNORE';
+
     # try to avoid connection errors
     eval {
-        local $SIG{PIPE} = sub {
-            die('broken pipe');
-        };
-
         if($self->{'retries_on_connection_error'} <= 0) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($sock, $msg, $recv) if $msg;

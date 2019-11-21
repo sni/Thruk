@@ -690,9 +690,7 @@ sub _setup_pidfile {
 ###################################################
 sub _remove_pid {
     return unless $pidfile;
-    ## no critic
-    $SIG{PIPE} = 'IGNORE';
-    ## use critic
+    local $SIG{PIPE} = 'IGNORE';
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         my $remaining = [];
         if($pidfile && -f $pidfile) {
@@ -734,14 +732,33 @@ sub _remove_pid {
         CORE::alarm($_[0]);
     };
 };
-$SIG{INT}  = sub { _check_exit_reason("INT");  _clean_exit(); };
-$SIG{TERM} = sub { _check_exit_reason("TERM"); _clean_exit(); };
-$SIG{PIPE} = sub { _check_exit_reason("PIPE"); _clean_exit(); };
-$SIG{ALRM} = sub { _check_exit_reason("ALRM"); _clean_exit(); };
 ## use critic
+set_signal_handler();
 END {
     _remove_pid();
     $cluster->unregister() if $cluster;
+}
+
+###################################################
+# watch a few signals and print extra information
+sub set_signal_handler {
+    ## no critic
+    $SIG{INT}  = sub { _check_exit_reason("INT");  _clean_exit(); };
+    $SIG{TERM} = sub { _check_exit_reason("TERM"); _clean_exit(); };
+    $SIG{PIPE} = sub { _check_exit_reason("PIPE"); _clean_exit(); };
+    $SIG{ALRM} = sub { _check_exit_reason("ALRM"); _clean_exit(); };
+    ## use critic
+}
+
+###################################################
+# reset all changed signals
+sub restore_signal_handler {
+    ## no critic
+    $SIG{INT}  = 'DEFAULT';
+    $SIG{TERM} = 'DEFAULT';
+    $SIG{PIPE} = 'DEFAULT';
+    $SIG{ALRM} = 'DEFAULT';
+    ## use critic
 }
 
 ###################################################

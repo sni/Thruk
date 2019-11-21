@@ -311,7 +311,6 @@ sub kill_if_not_responding {
 
     my $data;
     local $SIG{CHLD} = 'DEFAULT';
-    local $SIG{PIPE} = 'DEFAULT';
     my $pid = fork();
     if($pid == -1) { die("fork failed: $!"); }
 

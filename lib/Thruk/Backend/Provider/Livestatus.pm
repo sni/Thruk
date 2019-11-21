@@ -173,6 +173,11 @@ send a raw query to the backend
 =cut
 sub _raw_query {
     my($self, $query) = @_;
+
+    # closing a socket sends SIGPIPE to reader
+    # https://riptutorial.com/posix/example/17424/handle-sigpipe-generated-by-write---in-a-thread-safe-manner
+    local $SIG{PIPE} = 'IGNORE';
+
     my($socket, $msg, undef) = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
     die($msg) if $msg;
     shutdown($socket, 1) if $query =~ m/^COMMAND/mx;
