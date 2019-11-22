@@ -210,22 +210,14 @@ sub check_initial_start {
     if($background) {
         ## no critic
         $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
-        $SIG{CHLD} = 'IGNORE';
         ## use critic
-        my $pid = fork();
-        if(!$pid) {
-            Thruk::Utils::External::_do_child_stuff();
-            ## no critic
-            $SIG{CHLD} = 'DEFAULT';
-            ## use critic
-            check_proc($config, $c, 0);
-            _check_changed_lmd_config($config);
-            exit;
-        }
-    } else {
-        check_proc($config, $c, 0);
-        _check_changed_lmd_config($config);
+
+        Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::check_initial_start($c, $c->config, 0)', background => 1 });
+        return;
     }
+
+    check_proc($config, $c, 0);
+    _check_changed_lmd_config($config);
 
     #&timing_breakpoint("lmd check_initial_start done");
 
@@ -310,7 +302,6 @@ sub kill_if_not_responding {
     return if($ctime > time() - 120);
 
     my $data;
-    local $SIG{CHLD} = 'DEFAULT';
     my $pid = fork();
     if($pid == -1) { die("fork failed: $!"); }
 
@@ -349,6 +340,8 @@ sub kill_if_not_responding {
         sleep(1);
         kill(9, $lmd_pid);
         kill(9, $pid);
+        sleep(1);
+        POSIX::waitpid(-1, POSIX::WNOHANG);
     }
 
     return;

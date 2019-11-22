@@ -2043,9 +2043,6 @@ sub update_cron_file {
     # this function must be run on all cluster nodes
     return if $c->cluster->run_cluster("all", "cmd: cron install");
 
-    # prevents 'No child processes' error
-    local $SIG{CHLD} = 'DEFAULT';
-
     my $errorlog = $c->config->{'var_path'}.'/cron.log';
     # ensure proper cron.log permission
     open(my $fh, '>>', $errorlog);
@@ -2055,8 +2052,7 @@ sub update_cron_file {
         my($fh2, $tmperror) = tempfile();
         Thruk::Utils::IO::close($fh2, $tmperror);
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$tmperror;
-        my $output = `$cmd`;
-        my $rc     = $?;
+        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
         my $errors = read_file($tmperror);
         unlink($tmperror);
         print $fh $errors;
@@ -2147,14 +2143,9 @@ sub update_cron_file {
     if($c->config->{'cron_post_edit_cmd'}) {
         local $< = $> if $< == 0; # set real and effective uid to user, crontab will still be run as root on some systems otherwise
         my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
-        my $output = `$cmd`;
-        if ($? == -1) {
-            die("cron_post_edit_cmd (".$cmd.") failed: ".$!);
-        } elsif ($? & 127) {
-            die(sprintf("cron_post_edit_cmd (".$cmd.") died with signal %d:\n", ($? & 127), $output));
-        } else {
-            my $rc = $? >> 8;
-            die(sprintf("cron_post_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output)) if $rc != 0;
+        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+        if($rc != 0) {
+            die(sprintf("cron_post_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output));
         }
     }
     return 1;
@@ -2658,7 +2649,7 @@ returns path to program or undef
 =cut
 sub which {
     my($prog) = @_;
-    my $path = `which $prog 2>/dev/null`;
+    my $path = Thruk::Utils::IO::cmd("which $prog 2>/dev/null");
     return unless $path;
     chomp($path);
     return($path);

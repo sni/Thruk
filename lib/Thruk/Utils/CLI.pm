@@ -308,7 +308,7 @@ sub _read_secret {
     my $var_path = './var';
     for my $file (@{$files}) {
         next unless -f $file;
-        open(my $fh, '<', $file) or die("open file $file failed (id: ".`id -a`.", pwd: ".`pwd`."): ".$!);
+        open(my $fh, '<', $file) or die("open file $file failed (id: ".Thruk::Utils::IO::cmd("id -a").", pwd: ".Thruk::Utils::IO::cmd("pwd")."): ".$!);
         while(my $line = <$fh>) {
             next if substr($line, 0, 1) eq '#';
             if($line =~ m/^\s*var_path\s*=\s*(.*?)\s*$/mxo) {
@@ -775,7 +775,7 @@ sub _run_command_action {
 
     if($ENV{'THRUK_JOB_DIR'}) {
         Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
-        `touch $ENV{'THRUK_JOB_DIR'}/stdout`;
+        Thruk::Utils::IO::touch($ENV{'THRUK_JOB_DIR'}."/stdout");
     }
 
     return $data;

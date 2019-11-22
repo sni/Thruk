@@ -1396,7 +1396,7 @@ sub _process_user_password_page {
         Thruk::Utils::set_message($c, 'fail_message', 'could not find htpasswd or htpasswd2, cannot update passwords');
         return $c->redirect_to($referer);
     }
-    my $help        = `$binary --help 2>&1`;
+    my $help        = Thruk::Utils::IO::cmd("$binary --help 2>&1");
     my $has_minus_v = $help =~ m|\s+\-v\s+|gmx;
 
     my $user     = $c->user->get('username');
@@ -1520,7 +1520,7 @@ sub _htpasswd_password {
     }
 
     # check if htpasswd support -i switch
-    my $help = `$htpasswd --help 2>&1`;
+    my $help = Thruk::Utils::IO::cmd("$htpasswd --help 2>&1");
     my $has_minus_i = $help =~ m|\s+\-i\s+|gmx;
     my $has_minus_v = $help =~ m|\s+\-v\s+|gmx;
 
@@ -2423,7 +2423,7 @@ sub _file_history_blame_obj {
 sub _get_git_logs {
     my($c, $dir) = @_;
     my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%s')."\x1e'";
-    my $out = `$cmd`;
+    my($rc, $out) = Thruk::Utils::IO::cmd($cmd);
     $out = decode_utf8($out);
     my $logs = [];
     my $last;
@@ -2452,7 +2452,7 @@ sub _get_git_logs {
 sub _get_git_commit {
     my($c, $dir, $commit) = @_;
     my $cmd = "cd '".$dir."' && git show --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%p', '%t', '%s', '%b')."\x1f' ".$commit;
-    my $output = `$cmd`;
+    my $output = Thruk::Utils::IO::cmd($cmd);
     $output = decode_utf8($output);
     my @d = split(/\x1f/mx, $output);
     return if scalar @d < 4;
@@ -2475,7 +2475,7 @@ sub _get_git_blame {
     my($c, $path, $line_start, $line_end) = @_;
     my $dir = Thruk::Utils::dirname($path);
     my $cmd = "cd '".$dir."' && git blame -swp -L $line_start,$line_end '".$path."'";
-    my $output = `$cmd`;
+    my $output = Thruk::Utils::IO::cmd($cmd);
     $output = decode_utf8($output);
     my $blame = {lines => [], commits => {}};
     my($state, $block, $commit) = (0, {}, {});

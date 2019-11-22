@@ -51,7 +51,7 @@ for my $x (1..$max_proc) {
     }
     exit;
 }
-for(1..$max_proc) { wait; }
+for(1..$max_proc) { wait(); }
 
 my $data = Thruk::Utils::IO::json_lock_retrieve($filename);
 is($data->{'test'}, $max_proc * $test_runs * 0.5, 'file containts correct number');

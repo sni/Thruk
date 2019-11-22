@@ -12,6 +12,7 @@ Bash completion for Thruk
 
 use strict;
 use warnings;
+use Thruk::Utils::IO;
 
 ##############################################
 
@@ -40,7 +41,7 @@ sub _complete_rest_path {
     my($comp_words, $comp_cword, $cur) = @_;
     my $result    = [];
     my $rest_tree = {};
-    for my $url (split(/\n/mx, `$0 rest '/csv/index?columns=url'`)) {
+    for my $url (split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/index?columns=url'")) {
         _add_rest_tree($rest_tree, $url);
     }
 
@@ -76,7 +77,7 @@ sub _complete_rest_path {
     # complete /sites/...<tab>
     if($path[scalar @path - 2] && $path[scalar @path - 2] =~ m%^(sites?|backends?)$%mx) {
         my $key = $1;
-        for my $site (split(/\n/mx, `$0 rest '/csv/processinfo/?columns=peer_key,peer_name'`)) {
+        for my $site (split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/processinfo/?columns=peer_key,peer_name'"))) {
             my($id,$name) = split(';', $site, 2);
             $rest_tree->{$key}->{$id}   = {};
             $rest_tree->{$key}->{$name} = {};
@@ -155,9 +156,9 @@ sub _expand_rest_objects {
     $type =~ s/s$//gmx;
     if($type eq 'service') { $type = 'host'; }
     if($type =~ /^(host|contact|contactgroup|hostgroup|servicegroup|timeperiod|command)$/mx) {
-        return([split(/\n/mx, `$0 rest '/csv/${type}s/?columns=name'`)]);
+        return([split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/${type}s/?columns=name'"))]);
     }
-    return([split(/\n/mx, `$0 rest '/csv/hosts/$type/services?columns=description'`)]);
+    return([split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/hosts/$type/services?columns=description'"))]);
 }
 
 1;

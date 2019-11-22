@@ -41,8 +41,7 @@ run command in an external process
 
 =cut
 sub cmd {
-    my $c         = shift;
-    my $conf      = shift;
+    my($c, $conf) = @_;
 
     my $cmd = $c->config->{'thruk_shell'}." '".$conf->{'cmd'}."'";
     if($conf->{'no_shell'}) {
@@ -63,17 +62,14 @@ sub cmd {
 
     my($id,$dir) = _init_external($c);
     return unless $id;
-    my $pid       = fork();
+
+    my $pid = fork();
     die "fork() failed: $!" unless defined $pid;
 
     if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir, $id);
-
-        ## no critic
-        $SIG{CHLD} = 'DEFAULT';
-        ## use critic
 
         POSIX::close(0);
         POSIX::close(1);
@@ -129,7 +125,8 @@ sub perl {
 
     my ($id,$dir) = _init_external($c);
     return unless $id;
-    my $pid       = fork();
+
+    my $pid = fork();
     die "fork() failed: $!" unless defined $pid;
 
     if($pid) {
@@ -143,7 +140,6 @@ sub perl {
     eval {
         $c->stats->profile(begin => 'External::perl');
         _do_child_stuff($c, $dir, $id);
-        local $SIG{CHLD} = 'DEFAULT';
 
         do {
             # some db drivers need reconnect after forking
@@ -347,9 +343,6 @@ sub get_status {
     my($c, $id) = @_;
     confess("got no id") unless $id;
 
-    # reap pending zombies
-    POSIX::waitpid(-1, WNOHANG);
-
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
 
@@ -488,7 +481,8 @@ sub get_result {
         $end[9] = time();
         $err    = 'job was killed';
         $c->log->error('killed job: '.$dir);
-        $c->log->error(`ls -la $dir`);
+        my $folder = Thruk::Utils::IO::cmd("ls -la $dir");
+        $c->log->error($folder);
     }
 
     my $time = $end[9] - $start[9];
@@ -637,6 +631,8 @@ sub _do_child_stuff {
     delete $ENV{'THRUK_VERBOSE'};
     delete $ENV{'THRUK_PERFORMANCE_DEBUG'};
 
+    Thruk::restore_signal_handler();
+
     ## no critic
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1; # don't use connection pool after forking
     $ENV{'NO_EXTERNAL_JOBS'}         = 1; # don't fork twice
@@ -737,7 +733,7 @@ sub _do_parent_stuff {
 
 ##############################################
 sub _init_external {
-    my $c = shift;
+    my($c) = @_;
 
     my $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, 5);
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
@@ -759,10 +755,6 @@ sub _init_external {
             remove_job_dir($olddir);
         }
     }
-
-    ## no critic
-    $SIG{CHLD} = 'IGNORE';
-    ## use critic
 
     $c->stash->{job_id}       = $id;
     $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
@@ -816,6 +808,9 @@ sub _is_running {
             return(0);
         }
     }
+
+    # reap pending zombies
+    waitpid(-1, WNOHANG);
 
     my $pid = read_file($dir."/pid");
     $pid = Thruk::Utils::IO::untaint($pid);

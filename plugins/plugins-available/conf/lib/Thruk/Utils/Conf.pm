@@ -678,7 +678,7 @@ sub get_model_retention {
     my $tmp_path = $c->config->{'tmp_path'};
     my $var_path = $c->config->{'var_path'};
     # REMOVE AFTER: 01.01.2020
-    `mv $tmp_path/obj_retention* $var_path/ >/dev/null 2>&1`;
+    Thruk::Utils::IO::cmd("mv $tmp_path/obj_retention* $var_path/ >/dev/null 2>&1");
     # </REMOVE AFTER>
 
     my $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";

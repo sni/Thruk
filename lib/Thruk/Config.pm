@@ -9,6 +9,7 @@ use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::Broadcast ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -310,7 +311,7 @@ sub get_config {
                     if($ext ne 'conf' && $ext ne 'cfg') {
                         # only read if the extension matches the hostname
                         our $hostname;
-                        if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
+                        chomp($hostname = Thruk::Utils::IO::cmd("hostname")) unless $hostname;
                         if($tmpfile !~ m/\Q$hostname\E$/mx) {
                             if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
                                 print STDERR "skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'\n";
@@ -702,13 +703,12 @@ sub get_git_name {
     my $project_root = $INC{'Thruk/Config.pm'};
     $project_root =~ s/\/Config\.pm$//gmx;
     return '' unless -d $project_root.'/../../.git';
-    my($tag, $hash, $branch);
+    my($hash);
     my $dir = Cwd::getcwd;
     chdir($project_root.'/../../');
 
     # directly on git tag?
-    $tag = `git describe --tag --exact-match 2>&1`;
-    my $rc = $?;
+    my($rc, $tag) = Thruk::Utils::IO::cmd("git describe --tag --exact-match 2>&1");
     if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
@@ -716,10 +716,10 @@ sub get_git_name {
         return '';
     }
 
-    chomp($branch = `git branch --no-color 2>/dev/null`);
+    my $branch = Thruk::Utils::IO::cmd("git branch --no-color 2>/dev/null");
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$hash) {
-        chomp($hash = `git log -1 --no-color --pretty=format:%h 2> /dev/null`);
+        $hash = Thruk::Utils::IO::cmd("git log -1 --no-color --pretty=format:%h 2> /dev/null");
     }
     chdir($dir);
     if($branch eq 'master') {
@@ -1051,8 +1051,9 @@ sub _do_finalize_config {
     if($ENV{'OMD_ROOT'}) {
         my $site = $ENV{'OMD_SITE'};
         my $root = $ENV{'OMD_ROOT'};
-        my($siteport) = (`grep CONFIG_APACHE_TCP_PORT $root/etc/omd/site.conf` =~ m/(\d+)/mx);
-        my($ssl)      = (`grep CONFIG_APACHE_MODE     $root/etc/omd/site.conf` =~ m/'(\w+)'/mx);
+        my $site_config = _parse_omd_site_config($root."/etc/omd/site.conf");
+        my $siteport    = $site_config->{'CONFIG_APACHE_TCP_PORT'};
+        my $ssl         = $site_config->{'CONFIG_APACHE_MODE'};
         my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
         $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
         # bypass system reverse proxy for restricted cgi for permormance and locking reasons
@@ -1421,5 +1422,16 @@ sub merge_cgi_cfg {
 }
 
 ########################################
+# parses omd sites key/value config file
+sub _parse_omd_site_config {
+    my($file) = @_;
+    my $site_config = {};
+    for my $line (read_file($file)) {
+        if($line =~ m/^(CONFIG_.*?)='([^']*)'$/mx) {
+            $site_config->{$1} = $2;
+        }
+    }
+    return($site_config);
+}
 
 1;

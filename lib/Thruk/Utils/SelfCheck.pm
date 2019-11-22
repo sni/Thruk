@@ -154,7 +154,7 @@ sub _logfile_checks  {
         next unless $log;    # may not be set
         next unless -e $log; # may not exist either
         # count errors
-        my @out = `grep 'ERROR' $log`;
+        my @out = split(/\n/mx, Thruk::Utils::IO::cmd("grep 'ERROR' $log"));
         $details .= sprintf("  - %s: ", $log);
         if(scalar @out == 0) {
             $details .= "no errors\n";

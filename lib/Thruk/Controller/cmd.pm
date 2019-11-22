@@ -997,7 +997,7 @@ sub _get_affected_backends {
 
 =head2 add_remove_comments_commands_from_disabled_commands
 
-    add comment remove commands for comments added from the `require_comments_for_disable_cmds` option.
+    add comment remove commands for comments added from the 'require_comments_for_disable_cmds' option.
 
 =cut
 sub add_remove_comments_commands_from_disabled_commands {

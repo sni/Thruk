@@ -528,6 +528,7 @@ sub save_logs_to_tempfile {
 
 =head2 cmd
 
+  cmd($command)
   cmd($c, $command [, $stdin] [, $print_prefix] [, $detached])
 
 run command and return exit code and output
@@ -543,10 +544,14 @@ optional detached will run the command detached in the background
 
 sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached) = @_;
+    if(defined $c && !defined $cmd) {
+        $cmd = $c;
+        $c = undef;
+    }
 
-    local $SIG{CHLD} = 'DEFAULT';
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
+    local $SIG{PIPE} = 'DEFAULT';
     local $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c;
     my $groups = [];
     if($c && $c->user_exists) {
@@ -607,7 +612,7 @@ sub cmd {
         confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);
         $c->log->debug( "running cmd: ". $cmd ) if $c;
-        local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx;
+        local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx; # let the system reap the childs, we don't care
 
         # background process?
         if($cmd =~ m/&\s*$/mx) {
@@ -630,7 +635,8 @@ sub cmd {
     $c->log->debug( "rc:     ". $rc )     if $c;
     $c->log->debug( "output: ". $output ) if $c;
     #&timing_breakpoint('IO::cmd done');
-    return($rc, $output);
+    return($rc, $output) if wantarray;
+    return($output);
 }
 
 ########################################
@@ -660,6 +666,21 @@ return realpath of this file
 sub realpath {
     my($file) = @_;
     return(abs_path($file));
+}
+
+########################################
+
+=head2 touch
+
+  touch($file)
+
+create file if not exists and update timestamp
+
+=cut
+sub touch {
+    my($file) = @_;
+    &write($file, "", time(), 1);
+    return;
 }
 
 ##############################################

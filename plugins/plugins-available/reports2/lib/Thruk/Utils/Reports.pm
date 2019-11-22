@@ -195,8 +195,6 @@ sub report_send {
     $report->{'desc'} = $desc if $to;
     $c->stash->{'r'} = $report;
 
-    local $SIG{CHLD} = 'DEFAULT';
-
     my $attachment;
     if($skip_generate) {
         $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
@@ -648,7 +646,7 @@ sub generate_report {
         if($debug_file) {
             my $rpt_debug_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
             if(-s $debug_file > 1000000) {
-                `gzip $debug_file >/dev/null 2>&1`;
+                Thruk::Utils::IO::cmd("gzip $debug_file >/dev/null 2>&1");
                 if(!-s $debug_file && -s $debug_file.'.gz') {
                     $rpt_debug_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dbg.gz';
                     move($debug_file.'.gz', $rpt_debug_file);
@@ -1475,7 +1473,7 @@ sub _convert_to_pdf {
     Thruk::Utils::IO::close($fh, $htmlfile);
 
     if($htmlonly) {
-        `touch $attachment`;
+        Thruk::Utils::IO::touch($attachment);
         return;
     }
 
@@ -1487,14 +1485,14 @@ sub _convert_to_pdf {
 
     local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--autoscale=1' if $autoscale;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
-    my $out = `$cmd 2>&1`;
+    my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
     # try again to avoid occasionally qt errors
     if(!-e $attachment.'.pdf') {
         my $error = read_file($logfile);
         if($error eq "") { $error = $out; }
         if($error =~ m/QPainter::begin/mx) {
-            `$cmd`;
+            $out = Thruk::Utils::IO::cmd($cmd);
         }
         if($error eq "") {
             $error = "failed to produce a pdf file without any error message.\npwd: ".Cwd::getcwd()."\ncmdline:\n$cmd";

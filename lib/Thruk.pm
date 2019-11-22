@@ -13,6 +13,8 @@ Monitoring web interface for Naemon, Nagios, Icinga and Shinken.
 use strict;
 use warnings;
 use Cwd qw/abs_path/;
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::IO ();
 
 use 5.008000;
 
@@ -748,6 +750,7 @@ sub set_signal_handler {
     $SIG{PIPE} = sub { _check_exit_reason("PIPE"); _clean_exit(); };
     $SIG{ALRM} = sub { _check_exit_reason("ALRM"); _clean_exit(); };
     ## use critic
+    return;
 }
 
 ###################################################
@@ -759,6 +762,7 @@ sub restore_signal_handler {
     $SIG{PIPE} = 'DEFAULT';
     $SIG{ALRM} = 'DEFAULT';
     ## use critic
+    return;
 }
 
 ###################################################
@@ -824,8 +828,7 @@ sub set_timezone {
 # create cluster files
 sub _setup_cluster {
     my($self) = @_;
-    require Thruk::Utils::Crypt;
-    chomp(my $hostname = `hostname`);
+    chomp(my $hostname = Thruk::Utils::IO::cmd("hostname"));
     $self->config->{'hostname'} = $hostname unless $self->config->{'hostname'};
     $Thruk::HOSTNAME            = $self->config->{'hostname'};
     $Thruk::NODE_ID_HUMAN       = $self->config->{'hostname'}."-".$self->{'config'}->{'home'}."-".abs_path($ENV{'THRUK_CONFIG'} || '.');
@@ -996,7 +999,7 @@ sub _check_plugin_cron_file {
         }
         if(!$found) {
             symlink('../thruk/plugins-enabled/'.$plugin_name.'/cron', 'etc/cron.d/thruk-plugin-'.$plugin_name);
-            `omd status crontab >/dev/null 2>&1 && omd reload crontab > /dev/null`;
+            Thruk::Utils::IO::cmd("omd status crontab >/dev/null 2>&1 && omd reload crontab > /dev/null");
             $self->log->info("enabled cronfile for plugin: ".$plugin_name);
         }
     }
@@ -1164,7 +1167,7 @@ sub _detect_timezone {
         }
     }
 
-    my $out = `timedatectl 2>/dev/null`;
+    my $out = Thruk::Utils::IO::cmd("timedatectl 2>/dev/null");
     if($out =~ m/^\s*Time\ zone:\s+(\S+)/mx) {
         $self->log->debug(sprintf("server timezone: %s (from timedatectl)", $1)) if Thruk->verbose;
         return($1);
@@ -1179,7 +1182,7 @@ sub _detect_timezone {
     }
 
     # last ressort, date, fails for ex. to set CET instead of CEST
-    chomp(my $tz = `date +%Z`);
+    my $tz = Thruk::Utils::IO::cmd("date +%Z");
     $self->log->debug(sprintf("server timezone: %s (from date +%%Z)", $tz)) if Thruk->verbose;
     return $tz;
 }

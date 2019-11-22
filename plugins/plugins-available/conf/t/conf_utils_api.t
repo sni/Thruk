@@ -86,29 +86,31 @@ my($http_dir, $local_dir, $input_dir,$test_name);
 
 ###########################################################
 # start test server
-my $cmd = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
-ok($cmd, $cmd);
-$SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
-my $httppid = fork();
-if(!$httppid) {
-    exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
-    exit 1;
-}
-ok($httppid, "http server started with pid: ".$httppid);
+my $httppid;
 my $now = time();
-my $connected;
-for my $x (1..15) {
-    my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
-    $connected = 1 if($socket and $socket->connected());
-    last if $connected;
-    last unless -d "/proc/$httppid";
-    sleep(1);
-}
-bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
-ok($httppid, 'test server started: '.$httppid);
-$SIG{CHLD} = 'DEFAULT';
-sleep(2);
-alarm(30);
+{
+    my $cmd = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
+    ok($cmd, $cmd);
+    local $SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
+    $httppid = fork();
+    if(!$httppid) {
+        exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
+        exit 1;
+    }
+    ok($httppid, "http server started with pid: ".$httppid);
+    my $connected;
+    for my $x (1..15) {
+        my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
+        $connected = 1 if($socket and $socket->connected());
+        last if $connected;
+        last unless -d "/proc/$httppid";
+        sleep(1);
+    }
+    bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
+    ok($httppid, 'test server started: '.$httppid);
+    sleep(2);
+    alarm(30);
+};
 
 ###########################################################
 # start fake live socket

@@ -1761,6 +1761,7 @@ t/090-external.t
 t/090-io-race-test.t
 t/090-io.t
 t/091-io-locked-test.t
+t/092-backticks.t
 t/092-clean_debug.t
 t/092-stash-config.t
 t/092-thruk-view-json.t

@@ -1291,7 +1291,7 @@ sub _update_logcache_clean {
 
         # sort all used ids
         my $sortcmd = 'sort -nu -o '.$tempfile.'2 '.$tempfile.' && mv '.$tempfile.'2 '.$tempfile;
-        `$sortcmd`;
+        Thruk::Utils::IO::cmd($sortcmd);
         confess("sorting ids failed") if $? != 0;
         print "sorted used ids\n" if $verbose > 1;
 
@@ -1413,7 +1413,7 @@ sub _update_logcache_optimize {
         # remove temp files from previously repair attempt if filesystem was full
         if($ENV{'OMD_ROOT'}) {
             my $root = $ENV{'OMD_ROOT'};
-            `rm -f $root/var/mysql/thruk_log_cache/*.TMD`;
+            Thruk::Utils::IO::cmd("rm -f $root/var/mysql/thruk_log_cache/*.TMD");
         }
         # repair / optimize tables
         print "optimizing / repairing tables\n" if $verbose > 1;

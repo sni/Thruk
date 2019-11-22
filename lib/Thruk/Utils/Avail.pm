@@ -790,7 +790,7 @@ sub fix_and_sort_logs {
             $c->stats->profile(begin => "avail.pm sort logs");
             Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
             my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.'2 '.$tempfile;
-            `$cmd`;
+            Thruk::Utils::IO::cmd($cmd);
             unlink($tempfile);
             $file = $tempfile.'2';
             $c->stats->profile(end   => "avail.pm sort logs");
@@ -798,7 +798,7 @@ sub fix_and_sort_logs {
             # use short file handling if no timeperiods have to be altered
             $c->stats->profile(begin => "avail.pm sort logs");
             my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.' '.join(' ', values %{$logs});
-            `$cmd`;
+            Thruk::Utils::IO::cmd($cmd);
             unlink(values %{$logs});
             $file = $tempfile;
             $c->stats->profile(end   => "avail.pm sort logs");

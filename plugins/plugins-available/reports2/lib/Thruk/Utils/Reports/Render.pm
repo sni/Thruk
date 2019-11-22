@@ -299,7 +299,7 @@ sub get_url {
         my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
         my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
         local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
-        `$cmd`;
+        Thruk::Utils::IO::cmd($cmd);
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
         $Thruk::Utils::PDF::attachment = 'report.pdf';
