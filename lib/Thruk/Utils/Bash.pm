@@ -41,7 +41,7 @@ sub _complete_rest_path {
     my($comp_words, $comp_cword, $cur) = @_;
     my $result    = [];
     my $rest_tree = {};
-    for my $url (split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/index?columns=url'")) {
+    for my $url (split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/index?columns=url'"))) {
         _add_rest_tree($rest_tree, $url);
     }
 
