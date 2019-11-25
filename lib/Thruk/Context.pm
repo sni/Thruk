@@ -278,7 +278,7 @@ sub authenticate {
     my $internal  = $options{'internal'};
     my $auth_src  = $options{'auth_src'};
     my($original_username, $roles);
-    my $sessionid;
+    my($sessionid, $sessiondata);
     if(defined $username) {
         confess("auth_src required") unless defined $auth_src;
         $original_username = $username;
@@ -290,13 +290,14 @@ sub authenticate {
             _set_stash_user($c, $user, $auth_src);
             return($user);
         }
-        $sessionid = $c->req->cookies->{'thruk_auth'};
-        ($username, $auth_src, $original_username, $roles, $superuser,$internal) = _request_username($c, $options{'apikey'});
+        ($username, $auth_src, $roles, $superuser,$internal, $sessionid, $sessiondata) = _request_username($c, $options{'apikey'});
+
+        # transform username upper/lower case?
+        $original_username = $username;
+        $username = Thruk::Authentication::User::transform_username($c->config, $username, $c);
     }
     return unless $username;
-    my $sessiondata;
     if($sessionid) {
-        $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid);
         $sessiondata = undef if(!$sessiondata || $sessiondata->{'username'} ne $username);
         $sessiondata->{'private_key'} = $sessionid if $sessiondata;
     }
@@ -355,9 +356,11 @@ returns $username, $src, $original_username, $roles, $superuser, $internal
 sub _request_username {
     my($c, $apikey) = @_;
 
-    my $env    = $c->env;
-    $apikey    = $c->req->header('X-Thruk-Auth-Key') unless defined $apikey;
-    my($username, $auth_src, $superuser, $internal, $roles);
+    my($username, $auth_src, $superuser, $internal, $roles, $sessiondata);
+    my $env       = $c->env;
+    $apikey       = $c->req->header('X-Thruk-Auth-Key') unless defined $apikey;
+    my $sessionid = $c->req->cookies->{'thruk_auth'};
+    $sessiondata  = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid) if $sessionid;
 
     # authenticate by secret.key from http header
     if($apikey) {
@@ -402,13 +405,7 @@ sub _request_username {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
     }
-    elsif($c->req->cookies->{'thruk_auth'}) {
-        # verify ip address
-        my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $c->req->cookies->{'thruk_auth'});
-        if(!$sessiondata) {
-            # should not happen, because expired sessions are handled in thruk_auth script
-            return $c->detach_error({msg => "session expired", code => 403, log => 1});
-        }
+    elsif($sessiondata) {
         $username = $sessiondata->{'username'};
         $auth_src = "cookie";
         $roles    = $sessiondata->{'roles'} if($sessiondata->{'roles'} && scalar @{$sessiondata->{'roles'}} > 0);
@@ -442,10 +439,7 @@ sub _request_username {
         return;
     }
 
-    # transform username upper/lower case?
-    my $original_username = $username;
-    $username = Thruk::Authentication::User::transform_username($c->config, $username, $c);
-    return($username, $auth_src, $original_username, $roles, $superuser, $internal);
+    return($username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata);
 }
 
 =head2 user_exists
