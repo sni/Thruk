@@ -742,7 +742,12 @@ END {
 }
 
 ###################################################
-# watch a few signals and print extra information
+
+=head2 set_signal_handler
+
+    watch a few signals and print extra information
+
+=cut
 sub set_signal_handler {
     ## no critic
     $SIG{INT}  = sub { _check_exit_reason("INT");  _clean_exit(); };
@@ -754,7 +759,12 @@ sub set_signal_handler {
 }
 
 ###################################################
-# reset all changed signals
+
+=head2 restore_signal_handler
+
+    reset all changed signals
+
+=cut
 sub restore_signal_handler {
     ## no critic
     $SIG{INT}  = 'DEFAULT';
