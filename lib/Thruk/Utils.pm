@@ -2056,16 +2056,9 @@ sub update_cron_file {
         my $errors = read_file($tmperror);
         unlink($tmperror);
         print $fh $errors;
-        if ($rc == -1) {
-            die("cron_pre_edit_cmd (".$cmd.") failed: ".$!);
-        } elsif ($rc & 127) {
-            die(sprintf("cron_pre_edit_cmd (%s) died with signal %d: %s\n%s\n", $cmd, ($rc & 127), $output, $errors));
-        } else {
-            $rc = $rc >> 8;
-            # override know error with initial crontab
-            if($rc != 1 or $errors !~ m/no\ crontab\ for/mx) {
-                die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n%s\n", $rc, $output, $errors)) if $rc != 0;
-            }
+        # override know error with initial crontab
+        if($rc != 0 && ($rc != 1 || $errors !~ m/no\ crontab\ for/mx)) {
+            die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n%s\n", $rc, $output, $errors));
         }
     }
     Thruk::Utils::IO::close($fh, $errorlog);
