@@ -1188,7 +1188,9 @@ sub _authorize_function {
         return;
     }
     elsif($function eq 'get_hostgroups')        { return _extend_filter($c, $opt, 'filter', 'hostgroups'); }
+    elsif($function eq 'get_hostgroup_names')   { return _extend_filter($c, $opt, 'filter', 'hostgroups'); }
     elsif($function eq 'get_servicegroups')     { return _extend_filter($c, $opt, 'filter', 'servicegroups'); }
+    elsif($function eq 'get_servicegroup_names'){ return _extend_filter($c, $opt, 'filter', 'servicegroups'); }
     elsif($function eq 'get_extra_perf_stats')  { return _extend_filter($c, $opt, 'filter', 'status'); }
     elsif($function eq 'get_comments')          { return _extend_filter($c, $opt, 'filter', 'comments'); }
     elsif($function eq 'get_downtimes')         { return _extend_filter($c, $opt, 'filter', 'downtimes'); }
