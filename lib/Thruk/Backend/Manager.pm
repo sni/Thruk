@@ -612,9 +612,13 @@ respect permissions
 =cut
 
 sub get_hostgroup_names_from_hosts {
-    my($self, @args) = @_;
-    if(scalar @args == 0) { return $self->get_hostgroup_names(); }
-    my $hosts = $self->get_hosts( @args, 'columns', ['groups'] );
+    my($self, %args) = @_;
+    # clean args if possible
+    if(defined $args{'filter'} && scalar @{$args{'filter'}} == 0) {
+        delete $args{'filter'};
+    }
+    if(scalar keys %args == 0) { return $self->get_hostgroup_names(); }
+    my $hosts = $self->get_hosts( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $host (@{$hosts}) {
         for my $group (@{$host->{'groups'}}) {
@@ -637,9 +641,13 @@ respect permissions
 =cut
 
 sub get_servicegroup_names_from_services {
-    my($self, @args) = @_;
-    if(scalar @args == 0) { return $self->get_servicegroup_names(); }
-    my $services = $self->get_services( @args, 'columns', ['groups'] );
+    my($self, %args) = @_;
+    # clean args if possible
+    if(defined $args{'filter'} && scalar @{$args{'filter'}} == 0) {
+        delete $args{'filter'};
+    }
+    if(scalar keys %args == 0) { return $self->get_servicegroup_names(); }
+    my $services = $self->get_services( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $service (@{$services}) {
         for my $group (@{$service->{'groups'}}) {
