@@ -618,6 +618,8 @@ sub get_hostgroup_names_from_hosts {
         delete $args{'filter'};
     }
     if(scalar keys %args == 0) { return $self->get_hostgroup_names(); }
+    $args{'filter'} = [] unless $args{'filter'};
+    push @{$args{'filter'}}, { 'groups' => { '>=' => '' }};
     my $hosts = $self->get_hosts( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $host (@{$hosts}) {
@@ -647,6 +649,8 @@ sub get_servicegroup_names_from_services {
         delete $args{'filter'};
     }
     if(scalar keys %args == 0) { return $self->get_servicegroup_names(); }
+    $args{'filter'} = [] unless $args{'filter'};
+    push @{$args{'filter'}}, { 'groups' => { '>=' => '' }};
     my $services = $self->get_services( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $service (@{$services}) {
