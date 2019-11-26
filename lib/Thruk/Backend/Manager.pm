@@ -1890,8 +1890,20 @@ sub _get_result_lmd {
     }
 
     if($function eq 'get_hostgroups' || $function eq 'get_servicegroups' || ($type && (lc($type) eq 'file' || lc($type) eq 'stats'))) {
-        my $key = @{$self->get_peers()}[0]->{'key'};
-        $result = { $key => $result };
+        # sort result by peer_key
+        if(ref $result eq 'ARRAY' && $result->[0] && ref $result->[0] eq 'HASH' && $result->[0]->{'peer_key'}) {
+            my $sorted_result = {};
+            for my $r (@{$result}) {
+                my $key = $r->{'peer_key'};
+                $sorted_result->{$key} = [] unless $sorted_result->{$key};
+                push @{$sorted_result->{$key}}, $r;
+            }
+            $result = $sorted_result;
+        } else {
+            # if no peer_key is available, simply use the first one
+            my $key = @{$self->get_peers()}[0]->{'key'};
+            $result = { $key => $result };
+        }
     }
 
     if($function eq 'send_command') {
