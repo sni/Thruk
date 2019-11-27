@@ -619,13 +619,11 @@ sub get_hostgroup_names_from_hosts {
     }
     if(scalar keys %args == 0) { return $self->get_hostgroup_names(); }
     $args{'filter'} = [] unless $args{'filter'};
-    push @{$args{'filter'}}, { 'groups' => { '>=' => '' }};
+    push @{$args{'filter'}}, { 'groups' => { '!=' => '' }};
     my $hosts = $self->get_hosts( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $host (@{$hosts}) {
-        for my $group (@{$host->{'groups'}}) {
-            $groups->{$group} = 1;
-        }
+        map { $groups->{$_} = 1; } @{$host->{'groups'}};
     }
     my @sorted = sort keys %{$groups};
     return \@sorted;
@@ -650,13 +648,11 @@ sub get_servicegroup_names_from_services {
     }
     if(scalar keys %args == 0) { return $self->get_servicegroup_names(); }
     $args{'filter'} = [] unless $args{'filter'};
-    push @{$args{'filter'}}, { 'groups' => { '>=' => '' }};
+    push @{$args{'filter'}}, { 'groups' => { '!=' => '' }};
     my $services = $self->get_services( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $service (@{$services}) {
-        for my $group (@{$service->{'groups'}}) {
-            $groups->{$group} = 1;
-        }
+        map { $groups->{$_} = 1; } @{$service->{'groups'}};
     }
     my @sorted = sort keys %{$groups};
     return \@sorted;
