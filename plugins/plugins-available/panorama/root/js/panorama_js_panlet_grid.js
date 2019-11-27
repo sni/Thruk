@@ -369,7 +369,7 @@ TP.applyColumns = function(columns, state) {
     }
     // sort them in state order
     if(has_names) {
-        columns = columns.sort(function(a,b) { return(a.pos > b.pos) });
+        columns = columns.sort(function(a,b) { return(a.pos - b.pos) });
     }
     return;
 };
