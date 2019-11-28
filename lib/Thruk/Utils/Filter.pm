@@ -1130,7 +1130,7 @@ sub get_cmd_submit_hash {
     else {
         confess("no such type: $type");
     }
-    return(Cpanel::JSON::XS::encode_json($hash));
+    return(&json_encode($hash));
 }
 
 ########################################
