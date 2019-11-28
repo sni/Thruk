@@ -512,13 +512,15 @@ Ext.define('TP.Pantab', {
         if(This.xdata.autohideheader === false) { This.xdata.autohideheader = 0; }
 
         xdata.locked = This.locked;
+
+        if(This.hidden) { return; }
+
         This.setLock(xdata.locked);
         This.setTitle(xdata.title);
         if(!xdata.map) {
             if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
             if(This.map)   { This.map.destroy();   This.map   = undefined; }
         }
-        if(This.hidden) { return; }
         This.setUserStyles();
         if(xdata.hide_tab_header && This.tab) {
             This.tab.hide();

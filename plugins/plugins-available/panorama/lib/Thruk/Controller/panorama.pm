@@ -307,26 +307,9 @@ sub _js {
     if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
         my $shapes         = {};
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
-        for my $nr (@{$open_tabs}) {
-            my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
-            if(!$dashboard && $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}) {
-                # remove orphaned or removed dashboards
-                @{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}} = grep !/^\Q$nr\E$/mx, @{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}};
-            }
-            _merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
-            # add shapes data
-            for my $key (keys %{$dashboard}) {
-                if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'appearance'}) {
-                    my $shape = $dashboard->{$key}->{'xdata'}->{'appearance'}->{'shapename'};
-                    if($shape && !exists $shapes->{$shape}) {
-                        if(-e $c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js') {
-                            $shapes->{$shape} = scalar read_file($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
-                        } else {
-                            $shapes->{$shape} = undef;
-                        }
-                    }
-                }
-            }
+        $open_tabs         = Thruk::Utils::array2hash($open_tabs);
+        for my $nr (sort keys %{$open_tabs}) {
+            _add_initial_dashboard($c, $nr, $data->{'panorama'}->{dashboards}, $shapes, $open_tabs);
         }
         $c->stash->{shapes} = $shapes;
         $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'}) if $data->{'panorama'}->{dashboards}->{'tabpan'};
@@ -3458,6 +3441,44 @@ sub _merge_dashboard_into_hash {
         }
     }
     return $data;
+}
+
+##########################################################
+sub _add_initial_dashboard {
+    my($c, $nr, $data, $shapes, $open_tabs) = @_;
+
+    my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    if(!$dashboard && $data->{'tabpan'}->{'open_tabs'}) {
+        # remove orphaned or removed dashboards
+        @{$data->{'tabpan'}->{'open_tabs'}} = grep !/^\Q$nr\E$/mx, @{$data->{'tabpan'}->{'open_tabs'}};
+    }
+    _merge_dashboard_into_hash($dashboard, $data);
+    my $add_hidden = {};
+    # add shapes data
+    for my $key (keys %{$dashboard}) {
+        if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'appearance'}) {
+            my $shape = $dashboard->{$key}->{'xdata'}->{'appearance'}->{'shapename'};
+            if($shape && !exists $shapes->{$shape}) {
+                if(-e $c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js') {
+                    $shapes->{$shape} = scalar read_file($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
+                } else {
+                    $shapes->{$shape} = undef;
+                }
+            }
+            if($dashboard->{$key}->{'xdata'}->{'cls'} eq 'TP.DashboardStatusIcon') {
+                my $sub = $dashboard->{$key}->{'xdata'}->{'general'}->{'dashboard'};
+                if(!defined $open_tabs->{$sub}) {
+                    $open_tabs->{$sub} = 1;
+                    $add_hidden->{$sub} = 1;
+                }
+            }
+        }
+    }
+    # add hidden dashboards recursivly
+    for my $key (sort keys %{$add_hidden}) {
+        _add_initial_dashboard($c, $key, $data, $shapes, $open_tabs);
+    }
+    return;
 }
 
 ##########################################################
