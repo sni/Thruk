@@ -6758,7 +6758,7 @@ var ajax_search = {
                       if(data && data['name']) {
                           name = data['name'];
                       }
-                      var search_name = name;
+                      var search_name = String(name);
                       if(data && data['alias']) {
                           alias = data['alias'];
                           search_name = search_name+' '+alias;
