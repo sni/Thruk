@@ -208,11 +208,11 @@ Ext.define('TP.TabBar', {
                 items: [{
                     text:   'New Dashboard',
                     icon:   url_prefix+'plugins/panorama/images/add.png',
-                    handler: function() { TP.log('[global] adding new dashboard from menu'); TP.add_pantab('new') }
+                    handler: function() { TP.log('[global] adding new dashboard from menu'); TP.add_pantab({ id: 'new' }) }
                 }, {
                     text:   'New Geo Map',
                     icon:   url_prefix+'plugins/panorama/images/map.png',
-                    handler: function() { TP.log('[global] adding new geo map from menu'); TP.add_pantab('new_geo') }
+                    handler: function() { TP.log('[global] adding new geo map from menu'); TP.add_pantab({ id: 'new_geo' }) }
                 }, '-', {
                     text:   'Dashboard Management',
                     icon:   url_prefix+'plugins/panorama/images/new_tab.gif',
@@ -220,7 +220,7 @@ Ext.define('TP.TabBar', {
                 }, {
                     text:   'Dashboard Overview',
                     icon:   url_prefix+'plugins/panorama/images/dashboard_overview.png',
-                    handler: function() { TP.add_pantab("tabpan-tab_0"); }
+                    handler: function() { TP.add_pantab({ id: "tabpan-tab_0" }); }
                 }, '-', {
                     text: 'My Dashboards',
                     icon: url_prefix+'plugins/panorama/images/user_suit.png',
@@ -267,10 +267,10 @@ Ext.define('TP.TabBar', {
                 TP.initial_active_tab = String(TP.initial_active_tab).replace(/^tabpan-tab_/, '');
                 TP.initial_active_tab = "tabpan-tab_"+TP.initial_active_tab;
                 for(var x = 0; x<default_dashboard.length; x++) {
-                    TP.add_pantab(default_dashboard[x], undefined, x == 0 ? false : true);
+                    TP.add_pantab({ id: default_dashboard[x], skipAutoShow: x == 0 ? false : true });
                 }
             } else if(open_tabs.length == 0) {
-                TP.add_pantab("tabpan-tab_0");
+                TP.add_pantab({ id: "tabpan-tab_0" });
             }
             TP.startServerTime();
         });
@@ -330,13 +330,13 @@ Ext.define('TP.TabBar', {
                 if(state.open_tabs) {
                     for(var nr=0; nr<state.open_tabs.length; nr++) {
                         var name = state.open_tabs[nr];
-                        TP.add_pantab(state.open_tabs[nr], undefined, undefined, undefined, undefined, true);
+                        TP.add_pantab({ id: state.open_tabs[nr], skipAutoShow: true });
                     };
                 }
 
                 /* open tab from url */
                 if(!Ext.getCmp(TP.initial_active_tab)) {
-                    TP.add_pantab(TP.initial_active_tab, undefined, undefined, undefined, undefined, true);
+                    TP.add_pantab({ id: TP.initial_active_tab, skipAutoShow: true });
                     state.activeTab = TP.initial_active_tab;
                 }
 

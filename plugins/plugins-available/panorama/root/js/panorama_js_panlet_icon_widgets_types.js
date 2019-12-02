@@ -709,7 +709,7 @@ Ext.define('TP.DashboardStatusIcon', {
                 This.callParent([newStatus]);
                 return;
             }
-            TP.add_pantab(tab_id, undefined, true, function(id, success, response) {
+            TP.add_pantab({ id: tab_id, hidden: true, callback: function(id, success, response) {
                 if(success) {
                     This.refreshHandler(newStatus, skipUpdate);
                 } else {
@@ -722,7 +722,7 @@ Ext.define('TP.DashboardStatusIcon', {
                     skipUpdate        = true;
                     This.refreshHandler(newStatus, skipUpdate);
                 }
-            });
+            }});
             return;
         }
         if(tab.rendered) { skipUpdate = true; }

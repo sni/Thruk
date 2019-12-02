@@ -188,9 +188,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     if(nr != undefined) {
         tab = Ext.getCmp(TP.nr2TabId(nr));
         if(tab == undefined) {
-            TP.add_pantab(nr, undefined, true, function() {
+            TP.add_pantab({ id: nr, hidden: true, callback: function() {
                 TP.tabSettingsWindow(nr, true);
-            });
+            }});
             return(false);
         }
     } else {
@@ -1284,7 +1284,7 @@ TP.loadDashboardWindow = function() {
                         success: function(form, action) {
                             /* refresh icon sets, there might be new ones now */
                             TP.iconsetsStore.load({callback: function() {
-                                TP.add_pantab(action.result.newid);
+                                TP.add_pantab({ id: action.result.newid });
                                 TP.Msg.msg("success_message~~dashboard loaded successfully.");
                             }});
                             win.destroy();

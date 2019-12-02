@@ -326,7 +326,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
                 if(!target) {
                     replace = tabpan.getActiveTab().id;
                 }
-                TP.add_pantab(tab_id, replace);
+                TP.add_pantab({ id: tab_id, replace_id: replace });
             }
         }
         else if(special[1] == 'show_details') {

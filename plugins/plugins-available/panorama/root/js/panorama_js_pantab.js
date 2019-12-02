@@ -48,7 +48,7 @@ Ext.define('TP.Pantab', {
             var tabpan = Ext.getCmp('tabpan');
             var tabState = tabpan.getState(); // recalculate open_tabs
             if(tabpan.open_tabs.length <= 1) {
-                TP.add_pantab("tabpan-tab_0");
+                TP.add_pantab({ id: "tabpan-tab_0" });
             }
             TP.log('['+This.id+'] closing tab');
             return true;

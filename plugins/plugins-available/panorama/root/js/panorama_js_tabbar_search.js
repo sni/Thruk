@@ -126,10 +126,10 @@ Ext.define('TP.TabBarSearch', {
             // delay highlight a bit
             window.setTimeout(highlightAll, 500);
         } else {
-            TP.add_pantab(item.data.id, undefined, undefined, function() {
+            TP.add_pantab({ id: item.data.id, callback: function() {
                 // delay highlight a bit
                 window.setTimeout(highlightAll, 2000);
-            });
+            }});
         }
     },
     menuAddFoundEntry: function(menu, data) {

@@ -44,7 +44,14 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function(id, replace_id, hidden, callback, extraConf, skipAutoShow) {
+    add_pantab: function(opt) {
+        if(!Ext.isObject(opt)) { opt = { id: opt }; }
+        var id           = opt.id,           // the id to open
+            replace_id   = opt.replace_id,   // replace given dashboard
+            hidden       = opt.hidden,       // dashboard will be invisible and kept in background
+            callback     = opt.callback,     // run callback after dashboard finished loading
+            extraConf    = opt.extraConf,    // merge config into dashboard data
+            skipAutoShow = opt.skipAutoShow; // do not put dashboard in front
         var tabpan = Ext.getCmp('tabpan');
         if(id && Ext.isNumeric(String(id))) {
             id = TP.nr2TabId(id);
@@ -142,7 +149,7 @@ var TP = {
                     if(!hidden) {
                         TP.initial_active_tab = id; // set inital tab, so panlets will be shown
                     }
-                    TP.add_pantab(id, replace_id, hidden, callback, extraConf, skipAutoShow);
+                    TP.add_pantab(opt);
 
                     /* disable lock for new dashboard */
                     if(newDashboard) {
@@ -812,7 +819,7 @@ var TP = {
                     var resp = TP.getResponse(undefined, response, false);
                     if(resp.newid) {
                         TP.initial_active_tab = resp.newid;
-                        TP.add_pantab(resp.newid);
+                        TP.add_pantab({ id: resp.newid });
                     } else {
                         Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
                         return(false);
@@ -890,7 +897,7 @@ var TP = {
                             if(tab.rendered) {
                                 TP.renewDashboard(tab);
                             } else {
-                                TP.add_pantab(tab.id, undefined, true);
+                                TP.add_pantab({ id: tab.id, hidden: true });
                             }
                         }
                     }
