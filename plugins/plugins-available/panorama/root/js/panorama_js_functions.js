@@ -220,9 +220,9 @@ var TP = {
                     }
                 } else {
                     var replace_nr;
-                    tabpan.getState(); // recalculate open tabs
-                    for(var x=0; x<tabpan.open_tabs.length; x++) {
-                        if(tabpan.open_tabs[x] == replace_id) {
+                    var open_tabs = tabpan.getOpenTabs();
+                    for(var x=0; x<open_tabs.length; x++) {
+                        if(open_tabs[x] == replace_id) {
                             replace_nr = x+1;
                         }
                     }

@@ -278,7 +278,7 @@ Ext.define('TP.TabBar', {
             TP.initComplete();
         }
     },
-    getState: function() {
+    getOpenTabs: function() {
         var open_tabs = [];
         this.items.each(function(item, idx, length) {
             var stateId = item.getStateId();
@@ -286,29 +286,33 @@ Ext.define('TP.TabBar', {
                 open_tabs.push(stateId);
             }
         });
-        if(this.tabs_tr == undefined) {
-            this.tabs_tr = {};
-        }
+        var tabs_tr = {};
         var tabs = Ext.query('.x-tab-closable');
         for(var nr=0; nr<tabs.length; nr++) {
-            if(this.tabs_tr[tabs[nr].id] == undefined) {
-                this.tabs_tr[tabs[nr].id] = open_tabs[nr];
+            if(tabs_tr[tabs[nr].id] == undefined) {
+                tabs_tr[tabs[nr].id] = open_tabs[nr];
             }
         }
         var ordered_items = [];
         for(var nr=0; nr<tabs.length; nr++) {
-            ordered_items.push(this.tabs_tr[tabs[nr].id]);
+            ordered_items.push(tabs_tr[tabs[nr].id]);
         }
         if(open_tabs.length == ordered_items.length) {
             open_tabs = ordered_items;
         }
+
+        this.tabs_tr   = tabs_tr;
+        this.open_tabs = open_tabs;
+        return(open_tabs);
+    },
+    getState: function() {
+        var open_tabs = this.getOpenTabs();
 
         // save open tabs and active tab as cookie
         if(TP.initialized) {
             TP.saveOpenTabsToCookie(this, open_tabs);
         }
 
-        this.open_tabs = open_tabs;
         return {
             xdata: this.xdata
         }
@@ -329,7 +333,6 @@ Ext.define('TP.TabBar', {
 
                 if(state.open_tabs) {
                     for(var nr=0; nr<state.open_tabs.length; nr++) {
-                        var name = state.open_tabs[nr];
                         TP.add_pantab({ id: state.open_tabs[nr], skipAutoShow: true });
                     };
                 }
