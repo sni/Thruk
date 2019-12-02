@@ -394,6 +394,16 @@ Ext.define('TP.TabBar', {
         });
     },
 
+    // activate the most right tab from the tab bar
+    activateLastTab: function() {
+        var open_tabs = this.getOpenTabs();
+        if(open_tabs.length > 0) {
+            this.setActiveTab(open_tabs[open_tabs.length - 1]);
+        } else {
+            TP.add_pantab("tabpan-tab_0");
+        }
+    },
+
     /* stop all timed actions all tabs all panels */
     stopTimeouts: function() {
         TP.log('['+this.id+'] stopTimeouts');

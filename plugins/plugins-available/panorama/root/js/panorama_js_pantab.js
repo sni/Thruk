@@ -64,12 +64,7 @@ Ext.define('TP.Pantab', {
             TP.cp.clear(This.id);
             // activate first tab
             if(!tabpan.getActiveTab()) {
-                var tabs = Ext.query('.x-tab-closable');
-                for(var nr=0; nr<tabs.length; nr++) {
-                    if(tabpan.tabs_tr[tabs[nr].id] != undefined) {
-                        tabpan.setActiveTab(tabpan.tabs_tr[tabs[nr].id]);
-                    }
-                }
+                tabpan.activateLastTab();
             }
             if(This.bgDragEl) { This.bgDragEl.destroy(); }
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
