@@ -2,11 +2,7 @@
 
 Ext.BLANK_IMAGE_URL = url_prefix+'plugins/panorama/images/s.gif';
 Ext.namespace("TP");
-[%+ IF state +%]
-var ExtState      = [% state %];
-[%+ ELSE +%]
-var ExtState      = [% dashboards %];
-[%+ END +%]
+var ExtState          = [% dashboards %];
 var default_dashboard = [% default_dashboard %];
 var initial_shapes = [% json_encode(shapes) %];
 var default_state_order = [% json_encode(default_state_order) %];
@@ -20,6 +16,7 @@ Ext.onReady(function() {
 
     TP.unloading = false;
     var state = TP.cp.readValues();
+    // TODO: check hidden dashboards
     for(var key in ExtState) {
         if(key.search(/panlet_/) != -1) {
             TP.num_panels++;

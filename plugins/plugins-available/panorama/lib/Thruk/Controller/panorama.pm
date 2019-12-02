@@ -301,7 +301,6 @@ sub _js {
     }
 
     $c->stash->{shapes} = {};
-    $c->stash->{state}  = '';
 
     # restore last open tab
     if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
@@ -312,7 +311,7 @@ sub _js {
             _add_initial_dashboard($c, $nr, $data->{'panorama'}->{dashboards}, $shapes, $open_tabs);
         }
         $c->stash->{shapes} = $shapes;
-        $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'}) if $data->{'panorama'}->{dashboards}->{'tabpan'};
+        $data->{'panorama'}->{dashboards}->{'tabpan'} = $data->{'panorama'}->{dashboards}->{'tabpan'} if $data->{'panorama'}->{dashboards}->{'tabpan'};
     }
 
     $c->stash->{dashboards}        = Thruk::Utils::Filter::json_encode($data->{'panorama'}->{'dashboards'} || {});
@@ -3430,14 +3429,14 @@ sub _merge_dashboard_into_hash {
         if($key =~ m/^panlet_\d+$/mx or $key =~ m/^tabpan-tab_\d+_panlet_\d+/mx) {
             my $pkey = $key;
             $pkey =~ s/^tabpan-tab_\d+_//mx;
-            $data->{$id.'_'.$pkey} = decode_utf8(encode_json($dashboard->{$key}));
+            $data->{$id.'_'.$pkey} = $dashboard->{$key};
         }
         elsif($key eq 'tab') {
             # add some values to the tab
             for my $k (qw/user public readonly ts scripted/) {
                 $dashboard->{'tab'}->{$k} = $dashboard->{$k} if defined $dashboard->{$k};
             }
-            $data->{$id} = decode_utf8(encode_json($dashboard->{$key}));
+            $data->{$id} = $dashboard->{$key};
         }
     }
     return $data;

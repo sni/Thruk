@@ -113,7 +113,7 @@ Ext.define('TP.TabBarSearch', {
                     list.push(panel);
                 }
             }
-            if(tab.map) {
+            if(tab && tab.map) {
                 tab.zoomIntoView(list);
             }
             for(var x = 0; x<list.length; x++) {

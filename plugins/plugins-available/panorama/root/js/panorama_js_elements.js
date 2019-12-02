@@ -337,6 +337,8 @@ TP.Msg = function() {
             m.slideIn('t');
             if(p[0] == 'fail_message' || p[0] == 'info_message') {
                 debug(title + ': ' + p[1]);
+                var err = new Error;
+                TP.logError("global", "fail_message", err);
                 delay = 30000;
             } else {
                 delay = 5000;

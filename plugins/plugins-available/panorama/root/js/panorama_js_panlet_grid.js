@@ -232,7 +232,7 @@ Ext.define('TP.PanletGrid', {
 
         var state = TP.cp.get(panel.id);
         if(state && state.xdata && state.xdata.gridstate) {
-            panel.initialState = Ext.JSON.decode(Ext.JSON.encode(state.xdata.gridstate));
+            panel.initialState = TP.clone(state.xdata.gridstate);
         }
 
         panel.addListener('afterrender', function() {

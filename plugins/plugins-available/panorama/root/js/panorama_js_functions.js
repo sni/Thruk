@@ -125,15 +125,14 @@ var TP = {
 
                     var data = TP.getResponse(undefined, response);
                     data = data.data;
-                    TP.log('['+id+'] dashboard_data: '+Ext.JSON.encode(data));
                     if(data && data.newid) { id = data.newid; delete data.newid; }
                     if(extraConf) {
-                        var tmp = Ext.JSON.decode(data[id]);
+                        var tmp = anyDecode(data[id]);
                         Ext.apply(tmp.xdata, extraConf);
                         data[id] = Ext.JSON.encode(tmp);
                     }
                     for(var key in data) {
-                        TP.cp.set(key, Ext.JSON.decode(data[key]));
+                        TP.cp.set(key, anyDecode(data[key]));
                     }
                     if(TP.cp.state[id]) {
                         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
@@ -220,9 +219,8 @@ var TP = {
                     }
                 } else {
                     var replace_nr;
-                    var open_tabs = tabpan.getOpenTabs();
-                    for(var x=0; x<open_tabs.length; x++) {
-                        if(open_tabs[x] == replace_id) {
+                    for(var x=0; x<tabpan.open_tabs.length; x++) {
+                        if(tabpan.open_tabs[x] == replace_id) {
                             replace_nr = x+1;
                         }
                     }
@@ -1615,7 +1613,7 @@ var TP = {
                     var data = TP.getResponse(undefined, response);
                     data = data.data;
                     for(var key in data) {
-                        TP.cp.set(key, Ext.JSON.decode(data[key]));
+                        TP.cp.set(key, anyDecode(data[key]));
                     }
                     if(TP.cp.state[nr]) {
                         tab.applyXdata(TP.cp.state[nr].xdata);
@@ -1915,7 +1913,7 @@ var TP = {
                     /* make sure tab itself is updated first */
                     var mapChanged = false;
                     for(var key in data) {
-                        var cfg = Ext.JSON.decode(data[key]);
+                        var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
                         if(p && key.search(/tabpan-tab_\d+$/) != -1) {
                             if((p.xdata.map && !cfg.xdata.map) || (!p.xdata.map && cfg.xdata.map)) { mapChanged = true; }
@@ -1935,7 +1933,7 @@ var TP = {
                     }
 
                     for(var key in data) {
-                        var cfg = Ext.JSON.decode(data[key]);
+                        var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
 
                         if(key.search(/tabpan-tab_\d+$/) != -1) {
@@ -2063,11 +2061,11 @@ var TP = {
             if(str1.length != str2.length) {
                 return(false);
             }
-            var dec1 = Ext.JSON.decode(str1);
-            var dec2 = Ext.JSON.decode(str2);
+            var dec1 = anyDecode(str1);
+            var dec2 = anyDecode(str2);
             for(var key2 in dec1) {
-                var obj1 = dec1[key2]; if(Ext.isString(dec1[key2]) && dec1[key2].match(/^\{/)) { obj1 = Ext.JSON.decode(dec1[key2]); }
-                var obj2 = dec2[key2]; if(Ext.isString(dec2[key2]) && dec2[key2].match(/^\{/)) { obj2 = Ext.JSON.decode(dec2[key2]); }
+                var obj1 = anyDecode(dec1[key2]);
+                var obj2 = anyDecode(dec2[key2]);
                 if(!Object.my_equals(obj1, obj2)) {
                     return(false);
                 }

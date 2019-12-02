@@ -7,6 +7,7 @@ Ext.define('TP.TabBar', {
             listeners: {
                 Drop: function(This, container, dragCmp, idx, eOpts) {
                     tabpan = Ext.getCmp('tabpan');
+                    tabpan.recalculateOpenTabs();
                     tabpan.saveState();
                 }
             }
@@ -19,6 +20,23 @@ Ext.define('TP.TabBar', {
     minTabWidth:    80,
     deferredRender: false,
     stateful:       true,
+    open_tabs:      [], // list of open tab (ids)
+    listeners: {
+        add: function(This, component, index, eOpts) {
+            if(!TP.initialized) { return; }
+            This.recalculateOpenTabs();
+            This.saveState();
+        },
+        remove: function(This, component, eOpts) {
+            if(!TP.initialized) { return; }
+            This.recalculateOpenTabs();
+            // activate last tab
+            if(!This.getActiveTab()) {
+                This.activateLastTab();
+            }
+            This.saveState();
+        }
+    },
     tabBar:{
         id:        'maintabbar',
         listeners: {
@@ -254,14 +272,7 @@ Ext.define('TP.TabBar', {
         });
 
         this.addListener('afterrender', function(This, eOpts) {
-            var open_tabs = [];
-            this.items.each(function(item, idx, length) {
-                var stateId = item.getStateId();
-                if(stateId) {
-                    open_tabs.push(stateId);
-                }
-            });
-            if(open_tabs.length == 0 && default_dashboard && default_dashboard.length > 0) {
+            if(this.open_tabs.length == 0 && default_dashboard && default_dashboard.length > 0) {
                 debug("using default view");
                 TP.initial_active_tab = default_dashboard[0];
                 TP.initial_active_tab = String(TP.initial_active_tab).replace(/^tabpan-tab_/, '');
@@ -269,54 +280,39 @@ Ext.define('TP.TabBar', {
                 for(var x = 0; x<default_dashboard.length; x++) {
                     TP.add_pantab({ id: default_dashboard[x], skipAutoShow: x == 0 ? false : true });
                 }
-            } else if(open_tabs.length == 0) {
+            } else if(this.open_tabs.length == 0) {
                 TP.add_pantab({ id: "tabpan-tab_0" });
             }
             TP.startServerTime();
         });
-        if(!ExtState[this.id]) {
-            TP.initComplete();
-        }
     },
-    getOpenTabs: function() {
+
+    recalculateOpenTabs: function() {
+        if(!TP.initialized) { return; }
+        var This      = this;
         var open_tabs = [];
-        this.items.each(function(item, idx, length) {
-            var stateId = item.getStateId();
-            if(stateId && item.rendered) {
-                open_tabs.push(stateId);
+
+        var tabbarItems = This.getTabBar().items.items;
+        for(var x = 0; x < tabbarItems.length; x++) {
+            if(tabbarItems[x].card && tabbarItems[x].card.getStateId()) {
+                open_tabs.push(tabbarItems[x].card.getStateId());
             }
-        });
-        var tabs_tr = {};
-        var tabs = Ext.query('.x-tab-closable');
-        for(var nr=0; nr<tabs.length; nr++) {
-            if(tabs_tr[tabs[nr].id] == undefined) {
-                tabs_tr[tabs[nr].id] = open_tabs[nr];
-            }
-        }
-        var ordered_items = [];
-        for(var nr=0; nr<tabs.length; nr++) {
-            ordered_items.push(tabs_tr[tabs[nr].id]);
-        }
-        if(open_tabs.length == ordered_items.length) {
-            open_tabs = ordered_items;
         }
 
-        this.tabs_tr   = tabs_tr;
-        this.open_tabs = open_tabs;
-        return(open_tabs);
-    },
-    getState: function() {
-        var open_tabs = this.getOpenTabs();
+        This.open_tabs = open_tabs;
 
         // save open tabs and active tab as cookie
-        if(TP.initialized) {
-            TP.saveOpenTabsToCookie(this, open_tabs);
-        }
+        TP.saveOpenTabsToCookie(This, open_tabs);
 
-        return {
-            xdata: this.xdata
-        }
+        return;
     },
+
+    getState: function() {
+        return({
+            xdata: this.xdata || {}
+        });
+    },
+
     applyState: function(state) {
         TP.log('['+this.id+'] applyState: '+(state ? Ext.JSON.encode(state) : 'none'));
         try {
@@ -338,6 +334,9 @@ Ext.define('TP.TabBar', {
                 }
 
                 /* open tab from url */
+                if(TP.initial_active_tab == undefined) {
+                    TP.initial_active_tab = "tabpan-tab_0";
+                }
                 if(!Ext.getCmp(TP.initial_active_tab)) {
                     TP.add_pantab({ id: TP.initial_active_tab, skipAutoShow: true });
                     state.activeTab = TP.initial_active_tab;
@@ -394,16 +393,6 @@ Ext.define('TP.TabBar', {
         });
     },
 
-    // activate the most right tab from the tab bar
-    activateLastTab: function() {
-        var open_tabs = this.getOpenTabs();
-        if(open_tabs.length > 0) {
-            this.setActiveTab(open_tabs[open_tabs.length - 1]);
-        } else {
-            TP.add_pantab("tabpan-tab_0");
-        }
-    },
-
     /* stop all timed actions all tabs all panels */
     stopTimeouts: function() {
         TP.log('['+this.id+'] stopTimeouts');
@@ -414,6 +403,20 @@ Ext.define('TP.TabBar', {
                 tab.stopTimeouts();
             }
         });
+    },
+
+    // activate the most right tab from the tab bar
+    activateLastTab: function() {
+        if(this.open_tabs.length > 0) {
+            this.setActiveTab(this.open_tabs[this.open_tabs.length - 1]);
+        } else {
+            TP.add_pantab("tabpan-tab_0");
+        }
+    },
+
+    // remove all hidden dashboards which are no longer in use
+    closeAllHiddenDashboards: function() {
+        // TODO: implement
     },
 
     /* ensure only panlets from the active tab are visible */

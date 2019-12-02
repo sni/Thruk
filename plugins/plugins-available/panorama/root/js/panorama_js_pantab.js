@@ -44,28 +44,14 @@ Ext.define('TP.Pantab', {
         this.callParent();
     },
     listeners: {
-        beforeclose: function( This, eOpts ) {
-            var tabpan = Ext.getCmp('tabpan');
-            var tabState = tabpan.getState(); // recalculate open_tabs
-            if(tabpan.open_tabs.length <= 1) {
-                TP.add_pantab({ id: "tabpan-tab_0" });
-            }
-            TP.log('['+This.id+'] closing tab');
-            return true;
-        },
         beforedestroy: function( This, eOpts ) {
             This.destroying = true;
         },
         destroy: function( This, eOpts ) {
             TP.log('['+This.id+'] destroy');
             This.stopTimeouts();
-            var tabpan = Ext.getCmp('tabpan');
             This.destroyPanlets();
             TP.cp.clear(This.id);
-            // activate first tab
-            if(!tabpan.getActiveTab()) {
-                tabpan.activateLastTab();
-            }
             if(This.bgDragEl) { This.bgDragEl.destroy(); }
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             if(This.mapEl)    { This.mapEl.destroy();    }
@@ -74,7 +60,10 @@ Ext.define('TP.Pantab', {
                 // remove ?maps= from url
                 TP.cleanPanoramUrl();
             }
-            tabpan.saveState();
+            if(!This.hidden) {
+                var tabpan = Ext.getCmp('tabpan');
+                tabpan.closeAllHiddenDashboards();
+            }
         },
         beforeactivate: function( This, eOpts ) {
             /* must be done before active, otherwise map zoom control flicker */
@@ -149,7 +138,6 @@ Ext.define('TP.Pantab', {
 
             var curNr = this.nr();
             cookieSave('thruk_panorama_active', curNr);
-            tabpan.getState(); // saves open dashboards
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
@@ -669,7 +657,7 @@ Ext.define('TP.Pantab', {
                 TP.log('['+tab.id+'] fallback to default wms provider, "'+xdata.wms_provider+'" does not exist.');
                 xdata.wms_provider = wmsProvider.getAt(0).data.name;
             }
-            wmsData = Ext.JSON.decode(wmsData);
+            wmsData = anyDecode(wmsData);
             if(tab.mapEl && tab.mapEl.lastWMSProvider != xdata.wms_provider) {
                 if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
                 if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }

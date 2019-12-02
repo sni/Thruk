@@ -38,13 +38,13 @@ function setStateByTab(state) {
     state = TP.clone(state);
     var data = {};
     for(var key in state) {
-        if(key == 'tabpan') { data.tabpan = Ext.JSON.decode(state[key]); }
+        if(key == 'tabpan') { data.tabpan = anyDecode(state[key]); }
         if(key.search(/tabpan-tab_\d+$/) != -1) {
             if(data[key] == undefined) { data[key] = {}; }
             data[key].tab = state[key];
 
             // allow import of old data
-            var tmp = Ext.JSON.decode(state[key]);
+            var tmp = anyDecode(state[key]);
             if(tmp.window_ids) {
                 for(var x = 0; x<tmp.window_ids.length;x++) {
                     var win_id = tmp.window_ids[x];
@@ -61,7 +61,7 @@ function setStateByTab(state) {
         if(matches) {
             var tab_id = matches[1];
             if(data[tab_id] == undefined) { data[tab_id] = {}; }
-            data[tab_id][key] = Ext.JSON.decode(state[key]);
+            data[tab_id][key] = anyDecode(state[key]);
         }
     }
     return(data);
@@ -99,10 +99,14 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         for (var key in ExtState) {
             if(key!='remove') {
                 // new is json already
-                try {
-                    state[key] = Ext.JSON.decode(ExtState[key]);
-                } catch(err) {
-                    TP.Msg.msg("fail_message~~decode failed: "+err);
+                if(Ext.isObject(ExtState[key])) {
+                        state[key] = ExtState[key];
+                } else {
+                    try {
+                        state[key] = anyDecode(ExtState[key]);
+                    } catch(err) {
+                        TP.Msg.msg("fail_message~~decode failed: "+err);
+                    }
                 }
             }
         }
@@ -113,11 +117,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 
     /* sets value by name */
     setValue: function(name, value) {
-        encoded = Ext.JSON.encode(value);
-        if(ExtState[name] != undefined && ExtState[name] == encoded) {
-            return;
-        }
-        ExtState[name] = encoded;
+        ExtState[name] = value;
         this.queueChanges();
     },
 
@@ -141,7 +141,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         ExtState = {};
         for(var key in data) {
             this.set(key, data[key]);
-            ExtState[key] = Ext.JSON.encode(data[key]);
+            ExtState[key] = data[key];
         }
         if(save) {
             this.saveChanges();
@@ -170,9 +170,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         var params  = {};
         var changed = 0;
         for(var key in data) {
-            var encoded1 = Ext.JSON.encode(cp.lastdata[key]);
-            var encoded2 = Ext.JSON.encode(data[key]);
-            if(cp.lastdata[key] != null && !TP.JSONequals(encoded1, encoded2)) {
+            if(cp.lastdata[key] != null && !TP.JSONequals(cp.lastdata[key], data[key])) {
                 params[key] = encoded2;
                 changed++;
             }
@@ -235,3 +233,10 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         });
     }
 });
+
+function anyDecode(data) {
+    if(Ext.isString(data)) {
+        return(Ext.JSON.decode(data));
+    }
+    return(data);
+}
