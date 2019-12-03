@@ -568,12 +568,7 @@ var TP = {
     getAllPanel: function(tab) {
         var panels = [];
         if(tab == undefined) {
-            throw new Error("TP.getAllPanel(): no tab! (caller: " + (TP.getAllPanel.caller ? TP.getAllPanel.caller : 'unknown') + ")");
-            var tabbar = Ext.getCmp('tabbar');
-            tab = tabbar.getActiveTab();
-            if(!tab) {
-                tab = tabbar.setActiveTab(0);
-            }
+            throw new Error("TP.getAllPanel(): no tab!");
         }
         if(tab.window_ids) {
             for(var nr=0; nr<tab.window_ids.length; nr++) {
