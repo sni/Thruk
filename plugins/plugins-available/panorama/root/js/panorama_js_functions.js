@@ -24,6 +24,7 @@ var TP = {
     cur_panels:   1,
     logHistory:   [],
     lastFullIconRefresh: {},
+    allDashboards: {},
 
     /* called once the initialization */
     initComplete: function() {
@@ -106,6 +107,7 @@ var TP = {
                 return;
             }
             /* fetch state info and add new tab as callback */
+            // TODO: load multiple hidden dashboards at once
             Ext.Ajax.request({
                 url: 'panorama.cgi?task=dashboard_data',
                 method: 'POST',
@@ -162,7 +164,7 @@ var TP = {
 
         /* add new tab panel */
         if(hidden) {
-            Ext.create("TP.Pantab", {id: id, hidden: true});
+            var tab = Ext.create("TP.Pantab", {id: id, hidden: true});
         } else {
             if(TP.initial_active_tab == undefined || one_tab_only) {
                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
@@ -2336,6 +2338,33 @@ var TP = {
         if(!tab.destroying && panlet && panlet.show) {
             panlet.show();
         }
+    },
+    // remove all hidden dashboards which are no longer in use
+    closeAllHiddenDashboards: function() {
+        if(!TP.initialized) { return; }
+
+        // collect all required dashboards
+        var required = {};
+        for(var key in TP.allDashboards) {
+            var pantab = TP.allDashboards[key];
+            if(!pantab.destroying) {
+                var panels = TP.getAllPanel(pantab);
+                for(var y=0; y<panels.length; y++) {
+                    var p = panels[y];
+                    if(p.xdata.cls == 'TP.DashboardStatusIcon' && p.xdata.general.dashboard) {
+                        required[TP.nr2TabId(p.xdata.general.dashboard)] = true;
+                    }
+                }
+            }
+        }
+
+        // close all not rendered (hidden) dashboards
+        for(var key in TP.allDashboards) {
+            if(!required[key] && !TP.hiddenDashboards[key].rendered) {
+                TP.hiddenDashboards[key].destroy();
+            }
+        }
+        return;
     }
 }
 TP.log('[global] starting');

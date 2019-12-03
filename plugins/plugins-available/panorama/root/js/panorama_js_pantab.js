@@ -16,6 +16,8 @@ Ext.define('TP.Pantab', {
         } else {
             this.xdata = TP.clone(this.xdata);
         }
+
+        TP.allDashboards[this.id] = this;
         // defaults are set in panorama.pm
 
         // fetch window ids from ExtState
@@ -52,6 +54,7 @@ Ext.define('TP.Pantab', {
             This.stopTimeouts();
             This.destroyPanlets();
             TP.cp.clear(This.id);
+            delete TP.allDashboards[This.id];
             if(This.bgDragEl) { This.bgDragEl.destroy(); }
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             if(This.mapEl)    { This.mapEl.destroy();    }
@@ -60,10 +63,9 @@ Ext.define('TP.Pantab', {
                 // remove ?maps= from url
                 TP.cleanPanoramUrl();
             }
-            if(!This.hidden) {
-                var tabbar = Ext.getCmp('tabbar');
-                tabbar.closeAllHiddenDashboards();
-            }
+            TP.reduceDelayEvents(TP, function() {
+                TP.closeAllHiddenDashboards();
+            }, 3000, 'timeout_close_hidden_dashboards', true);
         },
         beforeactivate: function( This, eOpts ) {
             /* must be done before active, otherwise map zoom control flicker */

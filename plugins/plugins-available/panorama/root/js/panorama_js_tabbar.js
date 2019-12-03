@@ -415,11 +415,6 @@ Ext.define('TP.TabBar', {
         }
     },
 
-    // remove all hidden dashboards which are no longer in use
-    closeAllHiddenDashboards: function() {
-        // TODO: implement
-    },
-
     /* ensure only panlets from the active tab are visible */
     checkPanletVisibility: function(activeTab) {
         this.items.each(function(tab) {
