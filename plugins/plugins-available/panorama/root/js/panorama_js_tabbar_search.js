@@ -121,8 +121,8 @@ Ext.define('TP.TabBarSearch', {
             }
         };
         if(tab && tab.rendered) {
-            var tabpan = Ext.getCmp('tabpan');
-            tabpan.setActiveTab(tab);
+            var tabbar = Ext.getCmp('tabbar');
+            tabbar.setActiveTab(tab);
             // delay highlight a bit
             window.setTimeout(highlightAll, 500);
         } else {

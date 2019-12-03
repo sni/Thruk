@@ -6,15 +6,15 @@ Ext.define('TP.TabBar', {
             animate:       0,                // causes flickering server_time otherwise
             listeners: {
                 Drop: function(This, container, dragCmp, idx, eOpts) {
-                    tabpan = Ext.getCmp('tabpan');
-                    tabpan.recalculateOpenTabs();
-                    tabpan.saveState();
+                    var tabbar = Ext.getCmp('tabbar');
+                    tabbar.recalculateOpenTabs();
+                    tabbar.saveState();
                 }
             }
         })
     ],
 
-    id:             'tabpan',
+    id:             'tabbar',
     bodyCls:        'tabbarbody',
     region:         'center',
     minTabWidth:    80,
@@ -122,13 +122,13 @@ Ext.define('TP.TabBar', {
             menu: {
                 listeners: {
                     afterrender: function(menu, eOpts) {
-                        var tabpan = Ext.getCmp('tabpan');
-                        var tab    = tabpan.getActiveTab();
+                        var tabbar = Ext.getCmp('tabbar');
+                        var tab    = tabbar.getActiveTab();
                         tab.disableMapControlsTemp();
                     },
                     beforehide: function(menu, eOpts) {
-                        var tabpan = Ext.getCmp('tabpan');
-                        var tab    = tabpan.getActiveTab();
+                        var tabbar = Ext.getCmp('tabbar');
+                        var tab    = tabbar.getActiveTab();
                         tab.enableMapControlsTemp();
                     }
                 },
@@ -152,7 +152,7 @@ Ext.define('TP.TabBar', {
                         href:   'panorama.cgi?task=save_dashboard&nr=',
                         listeners: {
                             focus: function(item, e, eOpts) {
-                                item.el.dom.firstChild.href = 'panorama.cgi?task=save_dashboard&nr='+Ext.getCmp('tabpan').getActiveTab().id;
+                                item.el.dom.firstChild.href = 'panorama.cgi?task=save_dashboard&nr='+Ext.getCmp('tabbar').getActiveTab().id;
                             }
                         }
                     }, {
@@ -166,8 +166,8 @@ Ext.define('TP.TabBar', {
                         text:   'Show Grid',
                         id:     'show_helper_grid',
                         handler: function(item, e) {
-                            var tabpan = Ext.getCmp('tabpan');
-                            var tab    = tabpan.getActiveTab();
+                            var tabbar = Ext.getCmp('tabbar');
+                            var tab    = tabbar.getActiveTab();
                             tab.setBackground(tab.xdata);
                         }
                     },
@@ -216,8 +216,8 @@ Ext.define('TP.TabBar', {
         /* create new tab */
         var tabhead = this.getTabBar().items.getAt(0);
         tabhead.addListener('click', function(This, eOpts) {
-            var tabpan = Ext.getCmp('tabpan');
-            var tab    = tabpan.getActiveTab();
+            var tabbar = Ext.getCmp('tabbar');
+            var tab    = tabbar.getActiveTab();
             if(tab) {
                 tab.disableMapControlsTemp();
             }
@@ -238,7 +238,7 @@ Ext.define('TP.TabBar', {
                 }, {
                     text:   'Dashboard Overview',
                     icon:   url_prefix+'plugins/panorama/images/dashboard_overview.png',
-                    handler: function() { TP.add_pantab({ id: "tabpan-tab_0" }); }
+                    handler: function() { TP.add_pantab({ id: "pantab_0" }); }
                 }, '-', {
                     text: 'My Dashboards',
                     icon: url_prefix+'plugins/panorama/images/user_suit.png',
@@ -275,13 +275,13 @@ Ext.define('TP.TabBar', {
             if(this.open_tabs.length == 0 && default_dashboard && default_dashboard.length > 0) {
                 debug("using default view");
                 TP.initial_active_tab = default_dashboard[0];
-                TP.initial_active_tab = String(TP.initial_active_tab).replace(/^tabpan-tab_/, '');
-                TP.initial_active_tab = "tabpan-tab_"+TP.initial_active_tab;
+                TP.initial_active_tab = String(TP.initial_active_tab).replace(/^pantab_/, '');
+                TP.initial_active_tab = "pantab_"+TP.initial_active_tab;
                 for(var x = 0; x<default_dashboard.length; x++) {
                     TP.add_pantab({ id: default_dashboard[x], skipAutoShow: x == 0 ? false : true });
                 }
             } else if(this.open_tabs.length == 0) {
-                TP.add_pantab({ id: "tabpan-tab_0" });
+                TP.add_pantab({ id: "pantab_0" });
             }
             TP.startServerTime();
         });
@@ -309,7 +309,7 @@ Ext.define('TP.TabBar', {
 
     getState: function() {
         return({
-            xdata: this.xdata || {}
+            xdata: this.xdata
         });
     },
 
@@ -320,7 +320,7 @@ Ext.define('TP.TabBar', {
             TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
             if(state) {
                 if(TP.initial_active_tab == undefined && get_hash(1)) {
-                    TP.initial_active_tab = "tabpan-tab_"+get_hash(1);
+                    TP.initial_active_tab = get_hash(1);
                 }
                 if(state.activeTab && TP.initial_active_tab == undefined) {
                     TP.initial_active_tab = state.activeTab;
@@ -335,14 +335,15 @@ Ext.define('TP.TabBar', {
 
                 /* open tab from url */
                 if(TP.initial_active_tab == undefined) {
-                    TP.initial_active_tab = "tabpan-tab_0";
+                    TP.initial_active_tab = 0;
                 }
+                TP.initial_active_tab = TP.nr2TabId(TP.initial_active_tab);
                 if(!Ext.getCmp(TP.initial_active_tab)) {
                     TP.add_pantab({ id: TP.initial_active_tab, skipAutoShow: true });
                     state.activeTab = TP.initial_active_tab;
                 }
 
-                this.setActiveTab(state.activeTab);
+                this.setActiveTab(TP.nr2TabId(state.activeTab));
                 Ext.apply(this, state);
             }
             TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_active);
@@ -410,7 +411,7 @@ Ext.define('TP.TabBar', {
         if(this.open_tabs.length > 0) {
             this.setActiveTab(this.open_tabs[this.open_tabs.length - 1]);
         } else {
-            TP.add_pantab("tabpan-tab_0");
+            TP.add_pantab("pantab_0");
         }
     },
 
@@ -428,10 +429,10 @@ Ext.define('TP.TabBar', {
         });
         if(activeTab.map) {
             /* remove chrome workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+            Ext.get('tabbar') && Ext.get('tabbar').dom.style.setProperty('z-index', "", "");
         } else {
             /* apply chrome background workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "21", "important");
+            Ext.get('tabbar') && Ext.get('tabbar').dom.style.setProperty('z-index', "21", "important");
         }
     }
 });

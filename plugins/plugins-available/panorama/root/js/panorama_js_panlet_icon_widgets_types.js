@@ -623,7 +623,7 @@ Ext.define('TP.DashboardStatusIcon', {
         }]);
     },
     getName: function() {
-        var tab = Ext.getCmp('tabpan-tab_'+this.xdata.general.dashboard);
+        var tab = Ext.getCmp('pantab_'+this.xdata.general.dashboard);
         if(tab) {
             return(tab.title);
         }
@@ -636,7 +636,7 @@ Ext.define('TP.DashboardStatusIcon', {
                                         +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
                                         +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
-        var tab = Ext.getCmp('tabpan-tab_'+this.xdata.general.dashboard);
+        var tab = Ext.getCmp('pantab_'+this.xdata.general.dashboard);
         if(tab) {
             /* Totals */
             var group = TP.getTabTotals(tab);
@@ -702,7 +702,7 @@ Ext.define('TP.DashboardStatusIcon', {
     },
     refreshHandler: function(newStatus, skipUpdate) {
         var This   = this;
-        var tab_id = 'tabpan-tab_'+This.xdata.general.dashboard;
+        var tab_id = 'pantab_'+This.xdata.general.dashboard;
         var tab    = Ext.getCmp(tab_id);
         if(!tab) {
             if(skipUpdate) {

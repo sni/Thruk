@@ -52,7 +52,7 @@ var TP = {
             callback     = opt.callback,     // run callback after dashboard finished loading
             extraConf    = opt.extraConf,    // merge config into dashboard data
             skipAutoShow = opt.skipAutoShow; // do not put dashboard in front
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         if(id && Ext.isNumeric(String(id))) {
             id = TP.nr2TabId(id);
         }
@@ -65,7 +65,7 @@ var TP = {
             } else {
                 // simply activate tab
                 if(!hidden) {
-                    tabpan.setActiveTab(tab);
+                    tabbar.setActiveTab(tab);
                 }
                 return;
             }
@@ -83,7 +83,7 @@ var TP = {
 
             if(one_tab_only) {
                 if(replace_id && id != replace_id) {
-                    tabpan.getActiveTab().body.mask("loading");
+                    tabbar.getActiveTab().body.mask("loading");
                 }
             }
         }
@@ -119,7 +119,7 @@ var TP = {
                                 TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
                             }
                         }
-                        tabpan.saveState();
+                        tabbar.saveState();
                         return;
                     }
 
@@ -142,7 +142,7 @@ var TP = {
                         if(!hidden) {
                             TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
                         }
-                        tabpan.saveState();
+                        tabbar.saveState();
                     }
 
                     if(!hidden) {
@@ -168,16 +168,16 @@ var TP = {
                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
             }
 
-            var tab = tabpan.add(new TP.Pantab({id: id}));
+            var tab = tabbar.add(new TP.Pantab({id: id}));
             if(!skipAutoShow) {
                 tab.show();
             }
 
-            var tabPos, tabbar;
-            if(tabpan.getTabBar) {
-                tabbar = tabpan.getTabBar();
-                for(var x=0; x<tabbar.items.items.length; x++) {
-                    if(tabbar.items.items[x].card && tabbar.items.items[x].card.id == id) {
+            var tabPos, bar;
+            if(tabbar.getTabBar) {
+                bar = tabbar.getTabBar();
+                for(var x=0; x<bar.items.items.length; x++) {
+                    if(bar.items.items[x].card && bar.items.items[x].card.id == id) {
                         tabPos = x;
                         break;
                     }
@@ -187,11 +187,11 @@ var TP = {
             /* move new-tab button at the end */
             if(!one_tab_only) {
                 /* switch added tab with "new tab" */
-                tabbar.move(tabPos-1, tabPos);
+                bar.move(tabPos-1, tabPos);
 
                 /* make tab title editable */
                 if(!readonly && !dashboard_ignore_changes) {
-                    var tabhead = tabpan.getTabBar().items.getAt(tabPos-1);
+                    var tabhead = tabbar.getTabBar().items.getAt(tabPos-1);
                     if(tabhead == undefined) {
                         // do nothing
                     } else if(tabhead.rendered == false) {
@@ -210,7 +210,7 @@ var TP = {
                     if(id != replace_id) {
                         Ext.getCmp(replace_id).destroy();
                         if(history.replaceState) {
-                            var tab    = tabpan.getActiveTab();
+                            var tab    = tabbar.getActiveTab();
                             var newloc = new String(window.document.location);
                             newloc     = newloc.replace(/\?map=.*$/g, '');
                             newloc     = newloc + "?map="+tab.xdata.title;
@@ -219,19 +219,19 @@ var TP = {
                     }
                 } else {
                     var replace_nr;
-                    for(var x=0; x<tabpan.open_tabs.length; x++) {
-                        if(tabpan.open_tabs[x] == replace_id) {
+                    for(var x=0; x<tabbar.open_tabs.length; x++) {
+                        if(tabbar.open_tabs[x] == replace_id) {
                             replace_nr = x+1;
                         }
                     }
                     if(replace_nr != undefined) {
-                        tabpan.getTabBar().move(tabPos-1, replace_nr);
+                        bar.move(tabPos-1, replace_nr);
                         if(id != replace_id) {
                             Ext.getCmp(replace_id).destroy();
                         }
                     }
                 }
-                var tab = tabpan.getActiveTab();
+                var tab = tabbar.getActiveTab();
                 tab.adjustTabHeaderOffset();
             }
 
@@ -269,7 +269,7 @@ var TP = {
         if(config.conf == undefined) {
             config.conf = {};
         }
-        var pan = Ext.getCmp('tabpan');
+        var pan = Ext.getCmp('tabbar');
         var tb;
         if(config.tb) {
             tb                   = config.tb;
@@ -381,7 +381,7 @@ var TP = {
     /* add panel, but let the user choose position */
     add_panlet_delayed: function(config, offsetX, offsetY) {
         var tb;
-        var pan = Ext.getCmp('tabpan');
+        var pan = Ext.getCmp('tabbar');
         if(config.tb) {
             tb = config.tb;
         } else {
@@ -567,10 +567,10 @@ var TP = {
         var panels = [];
         if(tab == undefined) {
             throw new Error("TP.getAllPanel(): no tab! (caller: " + (TP.getAllPanel.caller ? TP.getAllPanel.caller : 'unknown') + ")");
-            var tabpan = Ext.getCmp('tabpan');
-            tab = tabpan.getActiveTab();
+            var tabbar = Ext.getCmp('tabbar');
+            tab = tabbar.getActiveTab();
             if(!tab) {
-                tab = tabpan.setActiveTab(0);
+                tab = tabbar.setActiveTab(0);
             }
         }
         if(tab.window_ids) {
@@ -780,9 +780,9 @@ var TP = {
         if(decoded == '') { decoded = {}; }
 
         /* stop everything */
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
 
-        if(decoded.tabpan) {
+        if(decoded.tabbar) {
             /* old export with all tabs*/
             TP.cp.saveChanges(undefined, function() {
                 Ext.Msg.confirm(
@@ -790,7 +790,7 @@ var TP = {
                     'This is a complete import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and can be added again afterwards.',
                     function(button) {
                         if(button === 'yes') {
-                            tabpan.stopTimeouts();
+                            tabbar.stopTimeouts();
                             TP.cp.loadData(decoded, false);
                             TP.cp.saveChanges({replace: 1}, function() {
                                 Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
@@ -804,9 +804,9 @@ var TP = {
         } else {
             /* new single tab export */
             var param = {
-                task:  'update2',
-                nr:    'new',
-                'tabpan-tab_1': Ext.JSON.encode(decoded)
+                task:    'update2',
+                nr:      'new',
+                pantab_1: Ext.JSON.encode(decoded)
             }
             var conn = new Ext.data.Connection();
             conn.request({
@@ -936,19 +936,19 @@ var TP = {
     },
     /* start tab rotation interval */
     startRotatingTabs: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         this.stopRotatingTabs();
-        if(tabpan.xdata.rotate_tabs > 0) {
-            debug("starting tab rotation every " + tabpan.xdata.rotate_tabs + "seconds");
-            TP.timeouts['interval_global_rotate_tabs'] = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
+        if(tabbar.xdata.rotate_tabs > 0) {
+            debug("starting tab rotation every " + tabbar.xdata.rotate_tabs + "seconds");
+            TP.timeouts['interval_global_rotate_tabs'] = window.setInterval(TP.rotateTabs, tabbar.xdata.rotate_tabs * 1000);
         }
     },
     /* start server time */
     startServerTime: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         this.stopServerTime();
         var label = Ext.getCmp('server_time');
-        if(!tabpan.xdata.server_time) {
+        if(!tabbar.xdata.server_time) {
             label.hide();
             return;
         }
@@ -956,7 +956,7 @@ var TP = {
         TP.timeouts['interval_global_servertime'] = window.setInterval(TP.updateServerTime, 1000);
     },
     stopServerTime: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         window.clearInterval(TP.timeouts['interval_global_servertime']);
     },
     /* update server time */
@@ -975,17 +975,17 @@ var TP = {
     },
     /* stop tab rotation interval */
     stopRotatingTabs: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         window.clearInterval(TP.timeouts['interval_global_rotate_tabs']);
     },
     /* rotate tabs once */
     rotateTabs: function() {
-        var tabpan = Ext.getCmp('tabpan');
-        var at     = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var at     = tabbar.getActiveTab();
         // find next tab
         var found = false;
         var next  = undefined;
-        tabpan.items.each(function(tab) {
+        tabbar.items.each(function(tab) {
             if(found == true) {
                 next = tab.id;
                 return false;
@@ -994,8 +994,8 @@ var TP = {
                 found = true;
             }
         });
-        if(next == undefined || !tabpan.setActiveTab(next)) {
-            tabpan.setActiveTab(1);
+        if(next == undefined || !tabbar.setActiveTab(next)) {
+            tabbar.setActiveTab(1);
         }
     },
     addTabBarMouseEvents: function(el, tabId) {
@@ -1350,7 +1350,7 @@ var TP = {
                         for(var x=0; x<ref.dashboards[key].length; x++) {
                             var p = ref.dashboards[key][x];
                             p.refreshHandler(undefined, true);
-                            var tab_id = 'tabpan-tab_'+p.xdata.general.dashboard;
+                            var tab_id = 'pantab_'+p.xdata.general.dashboard;
                             var skipUpdate = false;
                             if(TP.lastFullIconRefresh[tab_id]) {
                                 var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[tab_id].getTime())/1000;
@@ -1539,8 +1539,8 @@ var TP = {
             }
             if(ids && p.oldXdata) { p.xdata = p.oldXdata; delete p.oldXdata; }
         };
-        var tabpan = Ext.getCmp('tabpan');
-        if(count == 0 && tab != tabpan.getActiveTab()) { return; }
+        var tabbar = Ext.getCmp('tabbar');
+        if(count == 0 && tab != tabbar.getActiveTab()) { return; }
         return({req: req, ref: ref });
     },
 
@@ -1783,8 +1783,8 @@ var TP = {
                    || tab.xdata[name+'_repeat'] == 0 // forever
                    || tab.xdata[name+'_repeat'] > TP.alertNumbers[tab_id][name])
                 {
-                    var tabpan = Ext.getCmp('tabpan');
-                    if(tabpan.xdata.sounds_enabled) {
+                    var tabbar = Ext.getCmp('tabbar');
+                    if(tabbar.xdata.sounds_enabled) {
                         TP.playWave(tab.xdata[name+'_sound']);
                         TP.alertNumbers[tab_id][name]++;
                     }
@@ -1915,7 +1915,7 @@ var TP = {
                     for(var key in data) {
                         var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
-                        if(p && key.search(/tabpan-tab_\d+$/) != -1) {
+                        if(p && key.search(/pantab_\d+$/) != -1) {
                             if((p.xdata.map && !cfg.xdata.map) || (!p.xdata.map && cfg.xdata.map)) { mapChanged = true; }
                             /* changes in our dashboard itself */
                             Ext.apply(p, cfg);
@@ -1936,7 +1936,7 @@ var TP = {
                         var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
 
-                        if(key.search(/tabpan-tab_\d+$/) != -1) {
+                        if(key.search(/pantab_\d+$/) != -1) {
                             /* tab has been updated already */
                             continue;
                         }
@@ -2027,7 +2027,7 @@ var TP = {
     fullReload: function() {
         TP.log('[global] full reload');
         // save current dashboards to a cookie, otherwise we would display something else after the reload
-        Ext.getCmp('tabpan').getState();
+        Ext.getCmp('tabbar').getState();
         reloadPage();
     },
     log: function(str) {
@@ -2079,8 +2079,8 @@ var TP = {
     },
     /* convert number to tab id */
     nr2TabId: function(nr) {
-        nr = String(nr).replace(/^tabpan-tab_/, '');
-        nr = "tabpan-tab_"+nr;
+        nr = String(nr).replace(/^pantab_/, '');
+        nr = "pantab_"+nr;
         return(nr);
     },
     reduceDelayEvents: function(scope, callback, delay, timeoutName, skipInitialRun) {
@@ -2141,8 +2141,8 @@ var TP = {
     },
     getAllUsedColors: function() {
         var colors = {};
-        var tabpan = Ext.getCmp('tabpan');
-        var tab    = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var tab    = tabbar.getActiveTab();
         if(!tab) { return; }
         for(var nr=0; nr<tab.window_ids.length; nr++) {
             var panel = Ext.getCmp(tab.window_ids[nr]);
@@ -2231,10 +2231,10 @@ var TP = {
             debug("forced setting activeTab");
             activeTab = tab.setActiveTab(open_tabs.length > 0 ? open_tabs[0] : 0);
         }
-        cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^tabpan-tab_/, '') : 0);
+        cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^pantab_/, '') : 0);
         var numbers = [];
         for(var nr=0; nr<open_tabs.length; nr++) {
-            var num = open_tabs[nr].replace(/^tabpan-tab_/, '');
+            var num = open_tabs[nr].replace(/^pantab_/, '');
             if(num > 0) {
                 numbers.push(num);
             }

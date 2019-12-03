@@ -21,7 +21,7 @@ Ext.define('TP.Pantab', {
         // fetch window ids from ExtState
         this.window_ids = [];
         for(var key in ExtState) {
-            var matches = key.match(/^(tabpan-tab_\d+)_panlet_(\d+)$/);
+            var matches = key.match(/^(pantab_\d+)_panlet_(\d+)$/);
             if(matches && matches[1] == this.id) {
                 this.window_ids.push(key);
             }
@@ -61,8 +61,8 @@ Ext.define('TP.Pantab', {
                 TP.cleanPanoramUrl();
             }
             if(!This.hidden) {
-                var tabpan = Ext.getCmp('tabpan');
-                tabpan.closeAllHiddenDashboards();
+                var tabbar = Ext.getCmp('tabbar');
+                tabbar.closeAllHiddenDashboards();
             }
         },
         beforeactivate: function( This, eOpts ) {
@@ -84,7 +84,7 @@ Ext.define('TP.Pantab', {
         },
         activate: function(This, eOpts) {
             /* close start page */
-            var startPage = Ext.getCmp('tabpan-tab_0');
+            var startPage = Ext.getCmp('pantab_0');
             if(startPage && startPage.id != This.id) {
                 try {
                     startPage.destroy();
@@ -125,13 +125,13 @@ Ext.define('TP.Pantab', {
                 }
                 else { missingPanlets++ }
             }
-            var tabpan = Ext.getCmp('tabpan');
+            var tabbar = Ext.getCmp('tabbar');
             if(delay > 0) {
                 // make sure we hide all panlets if the user meanwhile changed tab again
                 TP.timeouts['timeout_'+this.id+'_check_panel_show'] = window.setTimeout(function() {
                     if(!This.isActiveTab()) {
                         // hide all except the active one
-                        tabpan.checkPanletVisibility(tabpan.getActiveTab());
+                        tabbar.checkPanletVisibility(tabbar.getActiveTab());
                     }
                 }, delay + 100);
             }
@@ -240,9 +240,9 @@ Ext.define('TP.Pantab', {
     },
     updateHeaderTooltip: function(text) {
         var tab         = this;
-        var tabpan      = Ext.getCmp('tabpan');
-        if(!tabpan || !tabpan.getTabBar) { return; }
-        var tabbarItems = tabpan.getTabBar().items.items;
+        var tabbar      = Ext.getCmp('tabbar');
+        if(!tabbar || !tabbar.getTabBar) { return; }
+        var tabbarItems = tabbar.getTabBar().items.items;
         var tabhead;
         for(var x = 0; x < tabbarItems.length; x++) {
             if(tabbarItems[x].card && tabbarItems[x].card.id == tab.id) {
@@ -266,7 +266,7 @@ Ext.define('TP.Pantab', {
     },
     nr: function() {
         var tab = this;
-        var nr  = tab.id.replace(/^tabpan-tab_/, '');
+        var nr  = tab.id.replace(/^pantab_/, '');
         return(nr);
     },
     tabBodyClick: function(evt) {
@@ -389,8 +389,8 @@ Ext.define('TP.Pantab', {
         }
     },
     isActiveTab: function() {
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
+        var tabbar    = Ext.getCmp('tabbar');
+        var activeTab = tabbar.getActiveTab();
         if(activeTab && this.id == activeTab.id) { return(true); }
         return(false);
     },
@@ -643,7 +643,7 @@ Ext.define('TP.Pantab', {
             }
 
             /* remove chrome workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+            Ext.get('tabbar') && Ext.get('tabbar').dom.style.setProperty('z-index', "", "");
 
             /* get wms provider */
             var wmsData;
@@ -807,7 +807,7 @@ Ext.define('TP.Pantab', {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
             /* add chrome workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "21", "important");
+            Ext.get('tabbar') && Ext.get('tabbar').dom.style.setProperty('z-index', "21", "important");
         }
         tab.setBaseHtmlClass();
 
@@ -1106,7 +1106,7 @@ Ext.define('TP.Pantab', {
                     text:   'Paste',
                     icon:   url_prefix+'plugins/panorama/images/page_paste.png',
                     handler: function() {
-                        var tb = Ext.getCmp('tabpan').getActiveTab();
+                        var tb = Ext.getCmp('tabbar').getActiveTab();
                         if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
                             // workaround for not existing gradient after copy&paste
                             if(TP.clipboard.state.xdata.appearance.piegradient) {
@@ -1266,8 +1266,8 @@ Ext.onReady(function() {
     });
     Ext.getBody().on("dragstart", function(evt) {
         evt.preventDefault();
-        var tabpan = Ext.getCmp('tabpan');
-        var tab    = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var tab    = tabbar.getActiveTab();
         if(tab.locked)            { return(false); };
         if(TP.iconSettingsWindow) { return(false); };
         var pos = evt.getXY();
@@ -1333,8 +1333,8 @@ TP.lassoMarkIcons = function(x, y) {
     window.clearTimeout(TP.timeouts['timeout_icon_mark_update']);
     if(!TP.lassoEl) { return; }
     var lassoPos = TP.lassoEl.getPosition();
-    var tabpan = Ext.getCmp('tabpan');
-    var tab    = tabpan.getActiveTab();
+    var tabbar = Ext.getCmp('tabbar');
+    var tab    = tabbar.getActiveTab();
     var panels = TP.getAllPanel(tab);
     TP.moveIcons = [];
     var elements = [];

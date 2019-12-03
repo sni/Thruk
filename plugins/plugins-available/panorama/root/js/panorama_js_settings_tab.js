@@ -183,7 +183,7 @@ TP.tabSettingsWindow = function(nr, closeAfterEdit) {
 }
 
 TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
-    var tabpan = Ext.getCmp('tabpan');
+    var tabbar = Ext.getCmp('tabbar');
     var tab;
     if(nr != undefined) {
         tab = Ext.getCmp(TP.nr2TabId(nr));
@@ -194,7 +194,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             return(false);
         }
     } else {
-        tab = tabpan.getActiveTab();
+        tab = tabbar.getActiveTab();
     }
 
     /* stop rotation */
@@ -220,7 +220,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             minValue:   0,
             nameS:      'rotate_tabs',
             nameL:      'rotate_tabs_txt',
-            value:      tabpan.xdata['rotate_tabs']
+            value:      tabbar.xdata['rotate_tabs']
         }
     }, {
         /* show server time */
@@ -1060,22 +1060,22 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         tab.forceSaveState();
 
                         if(oldstate != newstate && !one_tab_only) {
-                            tabpan.startTimeouts();
+                            tabbar.startTimeouts();
                         }
 
                         /* user settings */
-                        var oldstate = Ext.JSON.encode(tabpan.getState());
+                        var oldstate = Ext.JSON.encode(tabbar.getState());
                         var u_form  = Ext.getCmp('usersettingsForm').getForm();
                         if(!u_form.isValid()) { return false; }
                         var values = u_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
-                        Ext.apply(tabpan.xdata, values);
-                        var newstate = Ext.JSON.encode(tabpan.getState());
+                        Ext.apply(tabbar.xdata, values);
+                        var newstate = Ext.JSON.encode(tabbar.getState());
                         /* avoid useless updates */
                         if(oldstate != newstate && !one_tab_only) {
                             TP.log('['+tab.id+'] settings changed: '+newstate);
-                            tabpan.saveState();
-                            tabpan.startTimeouts();
+                            tabbar.saveState();
+                            tabbar.startTimeouts();
                         }
 
                         document.title = tab.xdata.title;
@@ -1119,7 +1119,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('stylesForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
-    Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
+    Ext.getCmp('usersettingsForm').getForm().setValues(tabbar.xdata);
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
     tab_win_settings.show();
     setBackgroundOptionVisibility(tab.xdata);

@@ -171,7 +171,7 @@ return dashboard data.
 =cut
 sub load_dashboard {
     my($c, $nr, $meta_data_only) = @_;
-    $nr       =~ s/^tabpan-tab_//gmx;
+    $nr       =~ s/^pantab_//gmx;
     my $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
     # only numbers allowed
@@ -211,7 +211,7 @@ sub load_dashboard {
     my @stat = stat($file);
     $dashboard->{'ts'}       = $stat[9] unless ($scripted && $dashboard->{'ts'});
     $dashboard->{'nr'}       = $nr;
-    $dashboard->{'id'}       = 'tabpan-tab_'.$nr;
+    $dashboard->{'id'}       = 'pantab_'.$nr;
     $dashboard->{'file'}     = $file;
     $dashboard->{'scripted'} = $scripted;
 
@@ -229,7 +229,7 @@ sub load_dashboard {
             # convert label x/y from old dashboard versions which had them mixed up
             for my $id (keys %{$dashboard}) {
                 my $tab = $dashboard->{$id};
-                if($id =~ m|^tabpan\-tab_|mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
+                if($id =~ m%^tabpan\-tab_%mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
                     my $offsetx = $tab->{'xdata'}->{'label'}->{'offsetx'};
                     my $offsety = $tab->{'xdata'}->{'label'}->{'offsety'};
                     $tab->{'xdata'}->{'label'}->{'offsety'} = $offsetx;
@@ -262,13 +262,13 @@ sub load_dashboard {
     $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
 
     for my $key (keys %{$dashboard}) {
-        if($key =~ m/^tabpan-tab_\d+_panlet_(\d+)$/mx) {
-            my $newkey = "tabpan-tab_".$nr."_panlet_".$1;
+        if($key =~ m/_panlet_(\d+)$/mx) {
+            my $newkey = "panlet_".$1;
             $dashboard->{$newkey} = delete $dashboard->{$key};
         }
     }
 
-    $dashboard->{'objects'} = scalar grep(/^tabpan-tab_/mx, keys %{$dashboard});
+    $dashboard->{'objects'} = scalar grep(/^pantab_/mx, keys %{$dashboard});
     return $dashboard;
 }
 
@@ -289,7 +289,7 @@ returns:
 =cut
 sub is_authorized_for_dashboard {
     my($c, $nr, $dashboard) = @_;
-    $nr =~ s/^tabpan-tab_//gmx;
+    $nr =~ s/^pantab_//gmx;
     my $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
     # super user have permission for all reports

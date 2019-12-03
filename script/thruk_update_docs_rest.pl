@@ -447,7 +447,7 @@ sub _fetch_keys {
         # combine keys from all results
         for my $d (@{$data}) {
             for my $k (sort keys %{$d}) {
-                next if $k =~ m/^tabpan/mx;
+                $k =~ s/^panlet_\d+/panlet_<nr>/mx;
                 $keys->{$k} = 1;
             }
         }

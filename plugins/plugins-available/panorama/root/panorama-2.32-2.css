@@ -30,7 +30,7 @@ HTML, BODY {
 .x-viewport.geomap {
     overflow: hidden;
 }
-#tabpan {
+#tabbar {
     position: fixed !important;
 }
 #maintabbar {

@@ -86,7 +86,7 @@ sub _cleanup_dashboard {
     if($dashboard && ref $dashboard eq 'HASH') {
         for my $key (keys %{$dashboard}) {
             if($key =~ m/^panlet_(\d+)$/mx) {
-                my $newkey = "tabpan-tab_".$nr."_panlet_".$1;
+                my $newkey = "pantab_".$nr."_panlet_".$1;
                 $dashboard->{$newkey} = delete $dashboard->{$key};
             }
         }

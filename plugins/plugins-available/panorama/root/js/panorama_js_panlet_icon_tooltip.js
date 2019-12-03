@@ -52,8 +52,8 @@ Ext.onReady(function() {
                     This.hide();
                     return false;
                 }
-                var tabpan = Ext.getCmp('tabpan');
-                var tab = tabpan.getActiveTab();
+                var tabbar = Ext.getCmp('tabbar');
+                var tab = tabbar.getActiveTab();
                 if(!tab || !tab.locked && !TP.iconSettingsWindow) {
                     return(false);
                 }
@@ -180,8 +180,8 @@ Ext.onReady(function() {
             TP.mouseoverLabel = img.labelEl;
         }
 
-        var tabpan = Ext.getCmp('tabpan');
-        var tab = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var tab = tabbar.getActiveTab();
         if(tab && !tab.locked && !TP.iconSettingsWindow) { delete TP.iconTipTarget; return; }
 
         if(!force && TP.suppressIconTip) { delete TP.iconTipTarget; return; }

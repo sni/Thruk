@@ -316,15 +316,15 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         link = undefined;
         if(special[1].match(/^\d+$/)) {
             // is that tab already open?
-            var tabpan = Ext.getCmp('tabpan');
-            var tab_id = "tabpan-tab_"+special[1];
+            var tabbar = Ext.getCmp('tabbar');
+            var tab_id = "pantab_"+special[1];
             var tab    = Ext.getCmp(tab_id);
             if(tab && tab.rendered) {
-                tabpan.setActiveTab(tab);
+                tabbar.setActiveTab(tab);
             } else {
                 var replace;
                 if(!target) {
-                    replace = tabpan.getActiveTab().id;
+                    replace = tabbar.getActiveTab().id;
                 }
                 TP.add_pantab({ id: tab_id, replace_id: replace });
             }

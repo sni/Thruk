@@ -1493,6 +1493,7 @@ lists all panorama dashboards.
 |id                                | internal id
 |nr                                | number of the dashboard
 |objects                           | number of objects
+|panlet_<nr>                       | panlet definition
 |readonly                          | flag whether this dashboard is read-only
 |scripted                          | flag whether this is a scripted dashboard
 |tab                               | structure of global dashboard settings

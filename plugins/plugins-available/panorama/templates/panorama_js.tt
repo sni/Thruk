@@ -1,10 +1,10 @@
 ﻿[%+ PROCESS _common_js_bugs.tt +%]
 
-Ext.BLANK_IMAGE_URL = url_prefix+'plugins/panorama/images/s.gif';
 Ext.namespace("TP");
-var ExtState          = [% dashboards %];
-var default_dashboard = [% default_dashboard %];
-var initial_shapes = [% json_encode(shapes) %];
+Ext.BLANK_IMAGE_URL     = url_prefix+'plugins/panorama/images/s.gif';
+var ExtState            = [% json_encode(extstate) %];
+var default_dashboard   = [% json_encode(default_dashboard) %];
+var initial_shapes      = [% json_encode(shapes) %];
 var default_state_order = [% json_encode(default_state_order) %];
 
 Ext.onReady(function() {
@@ -35,7 +35,7 @@ Ext.onReady(function() {
     /* main viewport */
     if(one_tab_only) {
         TP.viewport = new Ext.Viewport({
-            id:       'tabpan',
+            id:       'tabbar',
             layout:   'border',
             renderTo: Ext.getBody(),
             margins:  '0 0 0 0',

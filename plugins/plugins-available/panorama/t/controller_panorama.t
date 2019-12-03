@@ -60,8 +60,8 @@ my $test_dashboard_nr   = 0;
 my $test_dashboard_name = 'Test Dashboard '.time();
 $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=availability', post => {
-          'avail' => '{"tabpan-tab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
-          'types' => '{"filter":{},"hosts":{"'.encode_utf8($host).'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
+          'avail' => '{"pantab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
+          'types' => '{"filter":{},"hosts":{"'.encode_utf8($host).'":["pantab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
           'force' => '1'
     }},
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_data', post => { nr => 'new', title => $test_dashboard_name }, callback => sub {
@@ -144,19 +144,19 @@ _test_json_page({ url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_update', po
 my $res = _test_json_page({
     url  => '/thruk/cgi-bin/panorama.cgi?task=availability',
     post => {
-        'avail' => '{"tabpan-tab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
-        'types' => '{"filter":{},"hosts":{"'.encode_utf8($host).'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
+        'avail' => '{"pantab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
+        'types' => '{"filter":{},"hosts":{"'.encode_utf8($host).'":["pantab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
         'force' => '1'
     },
 });
-isnt($res->{'data'}->{'tabpan-tab_4_panlet_1'}->{'{\\"d\\":\\"60m\\"}'}, -1);
+isnt($res->{'data'}->{'pantab_4_panlet_1'}->{'{\\"d\\":\\"60m\\"}'}, -1);
 
 # filter
 $res = _test_json_page({
     url  => '/thruk/cgi-bin/panorama.cgi?task=availability',
     post => {
         'avail' => encode_json({
-                'tabpan-tab_12_panlet_22' => {
+                'pantab_12_panlet_22' => {
                     '{"d":"31d","incl_hst":1,"incl_svc":1}' => {
                         'active'       => 1,
                         'last'         => -1,
@@ -167,7 +167,7 @@ $res = _test_json_page({
         }),
         'types' => encode_json({
                 'filter' => {
-                    '["on","on","[{\\"hoststatustypes\\":15,\\"hostprops\\":0,\\"servicestatustypes\\":31,\\"serviceprops\\":0,\\"type\\":\\"Host\\",\\"val_pre\\":\\"\\",\\"op\\":\\"=\\",\\"value\\":\\"'.encode_utf8($host).'\\",\\"value_date\\":\\"2014-09-12T13:22:33\\",\\"displayfield-1671-inputEl\\":\\"\\"}]",null]' => [ 'tabpan-tab_12_panlet_22' ],
+                    '["on","on","[{\\"hoststatustypes\\":15,\\"hostprops\\":0,\\"servicestatustypes\\":31,\\"serviceprops\\":0,\\"type\\":\\"Host\\",\\"val_pre\\":\\"\\",\\"op\\":\\"=\\",\\"value\\":\\"'.encode_utf8($host).'\\",\\"value_date\\":\\"2014-09-12T13:22:33\\",\\"displayfield-1671-inputEl\\":\\"\\"}]",null]' => [ 'pantab_12_panlet_22' ],
                 },
                 'hostgroups' => {},
                 'hosts' => {},
@@ -177,7 +177,7 @@ $res = _test_json_page({
         'force' => '1'
     }
 });
-isnt($res->{'data'}->{'tabpan-tab_12_panlet_22'}->{'{\\"d\\":\\"31d\\",\\"incl_hst\\":1,\\"incl_svc\\":1}'}, -1);
+isnt($res->{'data'}->{'pantab_12_panlet_22'}->{'{\\"d\\":\\"31d\\",\\"incl_hst\\":1,\\"incl_svc\\":1}'}, -1);
 
 #################################################
 # make sure all tasks are covered with tests

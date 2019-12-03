@@ -38,8 +38,8 @@ function setStateByTab(state) {
     state = TP.clone(state);
     var data = {};
     for(var key in state) {
-        if(key == 'tabpan') { data.tabpan = anyDecode(state[key]); }
-        if(key.search(/tabpan-tab_\d+$/) != -1) {
+        if(key == 'tabbar') { data.tabbar = anyDecode(state[key]); }
+        if(key.search(/pantab_\d+$/) != -1) {
             if(data[key] == undefined) { data[key] = {}; }
             data[key].tab = state[key];
 
@@ -57,7 +57,7 @@ function setStateByTab(state) {
             }
 
         }
-        var matches = key.match(/(tabpan-tab_\d+)_(.*)$/);
+        var matches = key.match(/(pantab_\d+)_(.*)$/);
         if(matches) {
             var tab_id = matches[1];
             if(data[tab_id] == undefined) { data[tab_id] = {}; }
@@ -171,7 +171,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         var changed = 0;
         for(var key in data) {
             if(cp.lastdata[key] != null && !TP.JSONequals(cp.lastdata[key], data[key])) {
-                params[key] = encoded2;
+                params[key] = Ext.JSON.encode(data[key]);
                 changed++;
             }
         }
@@ -181,8 +181,8 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(extraParams) {
             Ext.apply(params, extraParams);
         }
-        if(Ext.getCmp('tabpan').getActiveTab()) {
-            params.current_tab = Ext.getCmp('tabpan').getActiveTab().id;
+        if(Ext.getCmp('tabbar').getActiveTab()) {
+            params.current_tab = Ext.getCmp('tabbar').getActiveTab().id;
         }
 
         if(!TP.stateSaveImage) {
