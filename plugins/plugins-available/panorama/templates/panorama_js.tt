@@ -7,31 +7,27 @@ var default_dashboard   = [% json_encode(default_dashboard) %];
 var initial_shapes      = [% json_encode(shapes) %];
 var default_state_order = [% json_encode(default_state_order) %];
 
+/* create state provider */
+TP.cp = new Ext.state.HttpProvider({
+    url: 'panorama.cgi?state'
+});
+Ext.state.Manager.setProvider(TP.cp);
+
+TP.unloading = false;
+var state = TP.cp.readValues();
+if(TP.initial_active_tab == undefined && get_hash(1)) {
+    TP.initial_active_tab = TP.nr2TabId(get_hash(1));
+}
+if(state['tabbar'].activeTab && TP.initial_active_tab == undefined) {
+    TP.initial_active_tab = TP.nr2TabId(state['tabbar'].activeTab);
+}
+if(TP.initial_active_tab == undefined) {
+    TP.initial_active_tab = TP.nr2TabId("0");
+}
+
+Ext.QuickTips.init();
+
 Ext.onReady(function() {
-    /* create state provider */
-    TP.cp = new Ext.state.HttpProvider({
-        url: 'panorama.cgi?state'
-    });
-    Ext.state.Manager.setProvider(TP.cp);
-
-    TP.unloading = false;
-    var state = TP.cp.readValues();
-    // TODO: check hidden dashboards
-    for(var key in ExtState) {
-        if(key.search(/panlet_/) != -1) {
-            TP.num_panels++;
-        }
-    }
-    if(TP.num_panels > 0) {
-        TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
-        TP.initMask.show();
-    }
-    if(TP.num_panels == 0) {
-        TP.initComplete();
-    }
-
-    Ext.QuickTips.init();
-
     /* main viewport */
     if(one_tab_only) {
         TP.viewport = new Ext.Viewport({
@@ -50,11 +46,7 @@ Ext.onReady(function() {
             },
             setActiveTab: function() {}
         });
-        TP.add_pantab({ id: one_tab_only, callback: function(id) {
-            // delay initComplete a bit, otherwise panlet cannot be added in readonly / single tab mode
-            TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initComplete();", 30000);
-            if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
-        }});
+        TP.add_pantab({ id: one_tab_only });
     } else {
         TP.viewport = new Ext.Viewport({
             id:       'viewport',
@@ -73,9 +65,6 @@ Ext.onReady(function() {
             icon.parentNode.parentNode.parentNode.style.display = 'none';
         }
     }
-
-    /* make sure initialized is set to true */
-    TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initComplete();", 60000);
 
     /* full reload page interval */
     [% IF full_reload_interval != 0 %]

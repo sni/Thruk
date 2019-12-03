@@ -53,7 +53,8 @@ TP.getExportTab = function(options) {
             text:   'Save Active Dashboard',
             iconCls:'save-btn',
             width:   150,
-            href:   'panorama.cgi?task=save_dashboard&nr='+options.tab.id
+            hidden:  options.tab == null,
+            href:   'panorama.cgi?task=save_dashboard&nr='+(options.tab != null ? options.tab.id : '')
         }, {
             xtype:  'button',
             text:   'Load Dashboard',

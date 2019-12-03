@@ -302,19 +302,22 @@ sub _js {
         }
     }
 
+    if(scalar @{$open_tabs} == 0) {
+        $open_tabs = ["0"];
+        $user_data->{'activeTab'} = "0";
+    }
+
     # restore last open tabs
     $user_data->{'open_tabs'} = $open_tabs;
     my $extstate = {
         tabbar => $user_data,
     };
     my $shapes = {};
-    if(scalar @{$open_tabs} > 0) {
-        my $open_tabs_hash = Thruk::Utils::array2hash($open_tabs);
-        for my $nr (@{$open_tabs}) {
-            _add_initial_dashboard($c, $nr, $extstate, $shapes, $open_tabs_hash);
-        }
-        $c->stash->{shapes} = $shapes;
+    my $open_tabs_hash = Thruk::Utils::array2hash($open_tabs);
+    for my $nr (@{$open_tabs}) {
+        _add_initial_dashboard($c, $nr, $extstate, $shapes, $open_tabs_hash);
     }
+    $c->stash->{shapes} = $shapes;
 
     $c->stash->{extstate}          = $extstate;
     $c->stash->{default_dashboard} = [];
@@ -481,15 +484,21 @@ sub _nice_ext_value {
 
 ##########################################################
 sub _task_status {
-    my($c) = @_;
+    my($c, $data_only, $params) = @_;
+
+    $params = $c->req->parameters unless defined $params;
 
     # make status group filter faster
-    $c->stash->{'cache_groups_filter'} = {};
+    $c->stash->{'cache_groups_filter'} = {} unless defined $c->stash->{'cache_groups_filter'};
 
     my $types        = {};
-    my $tab_backends = $c->req->parameters->{'backends'};
-    if($c->req->parameters->{'types'}) {
-        $types = decode_json($c->req->parameters->{'types'});
+    my $tab_backends = $params->{'backends'};
+    if($params->{'types'}) {
+        if(ref $params->{'types'}) {
+            $types = $params->{'types'};
+        } else {
+            $types = decode_json($params->{'types'});
+        }
     }
 
     my $hostfilter    = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
@@ -502,11 +511,11 @@ sub _task_status {
     $servicefilter = Thruk::Utils::combine_filter('-or', $servicefilter);
 
     my $state_type = SOFT_STATE;
-    if(defined $c->req->parameters->{'state_type'} && $c->req->parameters->{'state_type'} eq 'hard') {
+    if(defined $params->{'state_type'} && $params->{'state_type'} eq 'hard') {
         $state_type = HARD_STATE;
     }
 
-    if($c->req->parameters->{'reschedule'}) {
+    if($params->{'reschedule'}) {
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
         # works only for a single host or service
         $c->stash->{'now'}                   = time();
@@ -539,7 +548,7 @@ sub _task_status {
             }
         }
         $c->stash->{'use_csrf'} = 0;
-        if($c->req->parameters->{'cmd_typ'}) {
+        if($params->{'cmd_typ'}) {
             require Thruk::Controller::cmd;
             if(Thruk::Controller::cmd::_do_send_command($c)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
@@ -592,6 +601,17 @@ sub _task_status {
             for my $svc (@{$data->{'services'}}) {
                 $svc->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $svc);
             }
+        }
+    }
+
+    return $data if $data_only;
+
+    # add status data for sub dashboards
+    if($params->{'sub'}) {
+        my $sub = decode_json($params->{'sub'});
+        $data->{'sub'} = {};
+        for my $key (keys %{$sub}) {
+            $data->{'sub'}->{$key} = _task_status($c, 1, $sub->{$key});
         }
     }
 
@@ -2761,8 +2781,18 @@ sub _task_dashboard_save_states {
 sub _task_dashboard_data {
     my($c) = @_;
     my $nr = $c->req->parameters->{'nr'} || die('no number supplied');
-    my $dashboard;
 
+    my $open_tabs_hash = Thruk::Utils::array2hash(Thruk::Utils::list($c->req->parameters->{'recursive'}));
+    if(ref $nr eq 'ARRAY') {
+        my $json;
+        my $data = {};
+        for my $n (@{$nr}) {
+            _add_initial_dashboard($c, $n, $data, undef, $open_tabs_hash);
+        }
+        return $c->render(json => { data => $data });
+    }
+
+    my $dashboard;
     my $new_override = 0;
     if($nr eq 'new_or_empty' || $nr eq 'first_or_new') {
         # avoid too many empty dashboards, so return the first existing empty dashboard for this user
@@ -2800,6 +2830,7 @@ sub _task_dashboard_data {
     } else {
         my $data = {};
         _merge_dashboard_into_hash($dashboard, $data);
+        _add_recursive_dashboards($c, $dashboard, $data, undef, $open_tabs_hash);
         if($nr eq 'new' || $new_override) {
             $data->{'newid'} = $dashboard->{'id'};
         }
@@ -3457,14 +3488,22 @@ sub _add_initial_dashboard {
     if(!$dashboard && $data->{'tabbar'}->{'open_tabs'}) {
         # remove orphaned or removed dashboards
         @{$data->{'tabbar'}->{'open_tabs'}} = grep !/^\Q$nr\E$/mx, @{$data->{'tabbar'}->{'open_tabs'}};
+        return;
     }
     _merge_dashboard_into_hash($dashboard, $data);
+    _add_recursive_dashboards($c, $dashboard, $data, $shapes, $open_tabs);
+    return;
+}
+
+##########################################################
+sub _add_recursive_dashboards {
+    my($c, $dashboard, $data, $shapes, $open_tabs) = @_;
     my $add_hidden = {};
     # add shapes data
     for my $key (keys %{$dashboard}) {
         if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'appearance'}) {
             my $shape = $dashboard->{$key}->{'xdata'}->{'appearance'}->{'shapename'};
-            if($shape && !exists $shapes->{$shape}) {
+            if(defined $shapes && $shape && !exists $shapes->{$shape}) {
                 if(-e $c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js') {
                     $shapes->{$shape} = scalar read_file($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
                 } else {

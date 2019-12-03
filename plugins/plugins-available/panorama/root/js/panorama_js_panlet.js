@@ -248,6 +248,7 @@ Ext.define('TP.Panlet', {
                 };
                 This.dd_overriden = true;
             }
+            TP.increaseLoadedPanels();
         },
         render: function(This, eOpts) {
             /* make title editable */

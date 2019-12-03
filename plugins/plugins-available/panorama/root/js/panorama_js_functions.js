@@ -23,17 +23,43 @@ var TP = {
     num_panels:   0,
     cur_panels:   1,
     logHistory:   [],
-    lastFullIconRefresh: {},
     allDashboards: {},
 
     /* called once the initialization */
     initComplete: function() {
+        if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
         if(TP.initialized) { return; }
         TP.log('[global] init complete');
         TP.initialized = true;
-        if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+
+        var tabbar = Ext.getCmp("tabbar");
+        var activeTab = tabbar.getActiveTab();
+        if(!activeTab) {
+            activeTab = tabbar.setActiveTab(0);
+        }
+        if(!one_tab_only) {
+            tabbar.startTimeouts();
+        }
+
         /* preload images */
         window.setTimeout(preloader, 2000);
+    },
+
+    // check if init has completed
+    increaseLoadedPanels: function() {
+        if(TP.cur_panels > TP.num_panels) {
+            return;
+        }
+        // update initial panlet counter
+        var tmp = Ext.dom.Query.select('.x-mask-loading DIV');
+        if(tmp.length > 0) {
+            TP.cur_panels++;
+            if(TP.cur_panels > TP.num_panels) {
+                TP.initComplete();
+            } else {
+                tmp[0].innerHTML = "loading panel "+TP.cur_panels+'/'+TP.num_panels+"...";
+            }
+        }
     },
 
     get_snap: function (x, y) {
@@ -45,134 +71,100 @@ var TP = {
         return([newx, newy]);
     },
 
+    /*
+    add_pantab(options):
+        id                  the id to open
+        replace_id          replace given dashboard
+        hidden              dashboard will be invisible and kept in background
+        callback            run callback after dashboard finished loading
+        extraConf           merge config into dashboard data
+        skipAutoShow        do not put dashboard in front
+    */
     add_pantab: function(opt) {
         if(!Ext.isObject(opt)) { opt = { id: opt }; }
-        var id           = opt.id,           // the id to open
-            replace_id   = opt.replace_id,   // replace given dashboard
-            hidden       = opt.hidden,       // dashboard will be invisible and kept in background
-            callback     = opt.callback,     // run callback after dashboard finished loading
-            extraConf    = opt.extraConf,    // merge config into dashboard data
-            skipAutoShow = opt.skipAutoShow; // do not put dashboard in front
-        var tabbar = Ext.getCmp('tabbar');
+        var id = opt.id;
         if(id && Ext.isNumeric(String(id))) {
             id = TP.nr2TabId(id);
         }
+        var tabbar = Ext.getCmp('tabbar');
 
-        /* if previously added as hidden tab, destroy it and add it normal */
-        if(id && Ext.getCmp(id)) {
-            var tab = Ext.getCmp(id);
-            if(!tab.rendered) {
-                tab.destroy();
-            } else {
-                // simply activate tab
-                if(!hidden) {
-                    tabbar.setActiveTab(tab);
-                }
-                return;
-            }
+        if(id == undefined) {
+            id = 'new_or_empty';
         }
-
         if(id == 'new_geo') {
             id = 'new';
-            extraConf = {map: {}};
+            opt.extraConf = {map: {}};
         }
 
-        if(!hidden) {
+        /* if previously added as hidden tab, destroy it and add it normal */
+        var tab = Ext.getCmp(id);
+        if(tab && tab.rendered) {
+            if(!opt.hidden) {
+                // simply activate tab
+                tabbar.setActiveTab(tab);
+            }
+            return;
+        }
+
+
+        if(!opt.hidden) {
             if(TP.dashboardsSettingWindow) {
                 TP.dashboardsSettingWindow.body.mask('loading...');
             }
-
             if(one_tab_only) {
-                if(replace_id && id != replace_id) {
+                if(opt.replace_id && id != opt.replace_id) {
                     tabbar.getActiveTab().body.mask("loading");
                 }
             }
         }
 
-        if(id == undefined) {
-            TP.initComplete();
-            id = 'new_or_empty';
-        }
-
-        TP.log('[global] add_pantab: id:'+id+(replace_id ? ', replace_id: '+replace_id : ''));
+        TP.log('[global] add_pantab: id:'+id+(opt.replace_id ? ', replace_id: '+opt.replace_id : ''));
 
         /* get tab data from server */
-        var newDashboard = false;
+        opt.newDashboard = false;
         if(id && (id == "new" || id == "new_or_empty")) {
-            newDashboard = true;
+            opt.newDashboard = true;
         }
         if(id && TP.cp.state[id] == undefined) {
             if(!TP.initialized) {
                 // all initial tabs should have a state, if not, do not open that tab
                 return;
             }
-            /* fetch state info and add new tab as callback */
-            // TODO: load multiple hidden dashboards at once
-            Ext.Ajax.request({
-                url: 'panorama.cgi?task=dashboard_data',
-                method: 'POST',
-                params: { nr: id, hidden: hidden },
-                callback: function(options, success, response) {
-                    if(!success) {
-                        if(!hidden) {
-                            if(response.status == 0) {
-                                TP.Msg.msg("fail_message~~adding new dashboard failed");
-                            } else {
-                                TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
-                            }
-                        }
-                        tabbar.saveState();
-                        return;
-                    }
-
-                    var data = TP.getResponse(undefined, response);
-                    data = data.data;
-                    if(data && data.newid) { id = data.newid; delete data.newid; }
-                    if(extraConf) {
-                        var tmp = anyDecode(data[id]);
-                        Ext.apply(tmp.xdata, extraConf);
-                        data[id] = Ext.JSON.encode(tmp);
-                    }
-                    for(var key in data) {
-                        TP.cp.set(key, anyDecode(data[key]));
-                    }
-                    if(TP.cp.state[id]) {
-                        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
-                            TP.dashboardsSettingGrid.getView().refresh();
-                        }
-                    } else {
-                        if(!hidden) {
-                            TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
-                        }
-                        tabbar.saveState();
-                    }
-
-                    if(!hidden) {
-                        TP.initial_active_tab = id; // set inital tab, so panlets will be shown
-                    }
-                    TP.add_pantab(opt);
-
-                    /* disable lock for new dashboard */
-                    if(newDashboard) {
-                        Ext.getCmp(id).locked = false;
-                        Ext.getCmp(id).setLock(false);
-                    }
-                }
-            });
-            return;
+            opt.id = id;
+            if(opt.hidden) {
+                TP.add_pantab_delayed_hidden(id, opt.callback);
+                return;
+            }
+            return(TP.add_pantab_load(opt));
         }
 
         /* add new tab panel */
-        if(hidden) {
-            var tab = Ext.create("TP.Pantab", {id: id, hidden: true});
+        if(opt.hidden) {
+            if(tab) {
+                // recreate as hidden tab
+                tab.redraw = true;
+                tab.destroy();
+            }
+            tab = Ext.create("TP.Pantab", {id: id, hidden: true});
         } else {
             if(TP.initial_active_tab == undefined || one_tab_only) {
                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
             }
 
-            var tab = tabbar.add(new TP.Pantab({id: id}));
-            if(!skipAutoShow) {
+            if(tab) {
+                tabbar.add(tab);
+            } else {
+                tab = tabbar.add(new TP.Pantab({id: id}));
+            }
+            if(!opt.skipAutoShow) {
+                tab.showLoadMask();
                 tab.show();
+                tabbar.setActiveTab(tab);
+                if(tab.xdata.hide_tab_header) {
+                    tab.tab.hide();
+                } else {
+                    tab.tab.show();
+                }
             }
 
             var tabPos, bar;
@@ -207,10 +199,10 @@ var TP = {
             }
 
             /* replace existing tab with current one */
-            if(replace_id) {
+            if(opt.replace_id) {
                 if(one_tab_only) {
-                    if(id != replace_id) {
-                        Ext.getCmp(replace_id).destroy();
+                    if(id != opt.replace_id) {
+                        Ext.getCmp(opt.replace_id).destroy();
                         if(history.replaceState) {
                             var tab    = tabbar.getActiveTab();
                             var newloc = new String(window.document.location);
@@ -222,14 +214,14 @@ var TP = {
                 } else {
                     var replace_nr;
                     for(var x=0; x<tabbar.open_tabs.length; x++) {
-                        if(tabbar.open_tabs[x] == replace_id) {
+                        if(tabbar.open_tabs[x] == opt.replace_id) {
                             replace_nr = x+1;
                         }
                     }
                     if(replace_nr != undefined) {
                         bar.move(tabPos-1, replace_nr);
-                        if(id != replace_id) {
-                            Ext.getCmp(replace_id).destroy();
+                        if(id != opt.replace_id) {
+                            Ext.getCmp(opt.replace_id).destroy();
                         }
                     }
                 }
@@ -244,13 +236,129 @@ var TP = {
         }
 
         /* set initial timestamp */
-        Ext.getCmp(id).ts = TP.cp.state[id].ts;
+        tab.ts = TP.cp.state[id].ts;
+
+        /* disable lock for new dashboard */
+        if(opt.newDashboard) {
+            tab.locked = false;
+            tab.setLock(false);
+        }
 
         /* any callbacks? */
-        if(callback) { callback(id); }
+        if(opt.callback) { opt.callback(id); }
 
         /* return false to prevent newtab button being activated */
         return false;
+    },
+
+    add_pantab_load: function(opt, callback) {
+        /* fetch state info and add new tab(s) as callback */
+        var alreadyopen = [];
+        for(var key in TP.allDashboards) {
+            var key_id = String(key).replace(/^pantab_/, "");
+            alreadyopen.push(key_id);
+        }
+        Ext.Ajax.request({
+            url: 'panorama.cgi?task=dashboard_data',
+            method: 'POST',
+            params: {
+                nr:        opt.id,
+                hidden:    opt.hidden,
+                recursive: alreadyopen
+            },
+            callback: function(options, success, response) {
+                if(!success) {
+                    if(!opt.hidden) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                        }
+                    }
+                    var tabbar = Ext.getCmp('tabbar');
+                    tabbar.saveState();
+                    return;
+                }
+
+                var data = TP.getResponse(undefined, response);
+                data = data.data;
+                if(data && data.newid) {
+                    opt.id = data.newid;
+                    delete data.newid;
+                    opt.newDashboard = true;
+                }
+                if(opt.extraConf) {
+                    var tmp = anyDecode(data[opt.id]);
+                    Ext.apply(tmp.xdata, opt.extraConf);
+                    data[opt.id] = Ext.JSON.encode(tmp);
+                }
+                for(var key in data) {
+                    TP.cp.set(key, anyDecode(data[key]));
+                }
+
+                if(Ext.isArray(opt.id)) {
+                    if(callback) { callback(); }
+                    return;
+                }
+
+                if(TP.cp.state[opt.id]) {
+                    if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
+                        TP.dashboardsSettingGrid.getView().refresh();
+                    }
+                } else {
+                    if(!opt.hidden) {
+                        TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                    }
+                    var tabbar = Ext.getCmp('tabbar');
+                    tabbar.saveState();
+                    return;
+                }
+
+                if(!opt.hidden) {
+                    TP.initial_active_tab = TP.nr2TabId(opt.id); // set inital tab, so panlets will be shown
+                }
+
+                TP.add_pantab(opt);
+                if(callback) { callback(); }
+
+                // add additionall hidden dashboards required from icons
+                for(var key in data) {
+                    var matches = key.match(/^pantab_\d+$/);
+                    if(matches && matches[0] != opt.id && !Ext.getCmp(matches[0])) {
+                        TP.add_pantab({ id: matches[0], hidden: true });
+                    }
+                }
+            }
+        });
+        return;
+    },
+
+    // adds multiple (hidden) dashboards in bulk mode
+    add_pantab_bulk_hidden: function(ids, callbacks) {
+        TP.add_pantab_load({ id: ids, hidden: true }, function() {
+            for(var x=0; x<ids.length; x++) {
+                var id = ids[x];
+                TP.add_pantab({ id: id, hidden: true, callback: callbacks[x] });
+            }
+        });
+    },
+
+    // collect dashboard ids to open in bulk
+    add_pantab_delayed_hidden: function(id, callback) {
+        if(!TP.load_bulk_ids)       { TP.load_bulk_ids = []; }
+        if(!TP.load_bulk_callbacks) { TP.load_bulk_callbacks = []; }
+
+        TP.load_bulk_ids.push(id);
+        TP.load_bulk_callbacks.push(callback);
+
+        window.clearTimeout(TP.timeouts['timeout_bulk_load']);
+        TP.timeouts['timeout_bulk_load'] = window.setTimeout(function() {
+            var ids       = TP.load_bulk_ids
+            var callbacks = TP.load_bulk_callbacks;
+            TP.load_bulk_ids       = [];
+            TP.load_bulk_callbacks = [];
+            TP.add_pantab_bulk_hidden(ids, callbacks);
+        }, 3000);
     },
 
     /* clone config from given panel which can be used to create a clone */
@@ -336,12 +444,6 @@ var TP = {
             tb.window_ids.push(win.id);
             tb.saveState();
             win.firstRun = false;
-        }
-        // update initial panlet counter
-        var tmp = Ext.dom.Query.select('.x-mask-loading DIV');
-        if(tmp.length > 0) {
-            tmp[0].innerHTML = "loading panel "+TP.cur_panels+'/'+TP.num_panels+"...";
-            TP.cur_panels++;
         }
         return win;
     },
@@ -813,7 +915,7 @@ var TP = {
                     /* allow response to contain cookie messages */
                     var resp = TP.getResponse(undefined, response, false);
                     if(resp.newid) {
-                        TP.initial_active_tab = resp.newid;
+                        TP.initial_active_tab = TP.nr2TabId(resp.newid);
                         TP.add_pantab({ id: resp.newid });
                     } else {
                         Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
@@ -1179,6 +1281,9 @@ var TP = {
         if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
         if(TP.iconUpdateRunning[tab.id]) { return; }
 
+        // background tabs are refreshed separately
+        if(!tab.rendered) { return; }
+
         /* Delay update if not all icons are rendered yet.
          * Those icons would be missing from getStatusReq()
          */
@@ -1206,9 +1311,33 @@ var TP = {
             state_type:  tab.xdata.state_type
         };
         TP.iconUpdateRunning[tab.id] = true;
+        var subReqs = {};
         if(!id) {
-            TP.lastFullIconRefresh[tab.id] = new Date();
+            // add dashboard icons status request
+            params.sub = {};
+            var subtabs = tab.getAllSubDashboards(true);
+            for(var x=0; x<subtabs.length; x++) {
+                var subtab = Ext.getCmp(subtabs[x]);
+                if(!subtab) {
+                    TP.add_pantab({ id: subtabs[x], hidden: true });
+                }
+                if(subtab && !subtab.rendered) {
+                    var subreq = TP.getStatusReq(subtab);
+                    if(subreq) {
+                        TP.iconUpdateRunning[subtab.id] = true;
+                        params.sub[subtab.id] = {
+                            types:       subreq.req,
+                            backends:    TP.getActiveBackendsPanel(subtab),
+                            current_tab: subtab.id,
+                            state_type:  subtab.xdata.state_type
+                        }
+                        subReqs[subtab.id] = { tab: subtab, ref: subreq.ref };
+                    }
+                }
+            }
+            params.sub = Ext.JSON.encode(params.sub);
         }
+
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
             method: 'POST',
@@ -1236,168 +1365,163 @@ var TP = {
                         if(callback) { callback(); }
                         return;
                     }
-                    data = data.data;
-                    /* update custom filter */
-                    if(data.filter) {
-                        for(var key in data.filter) {
-                            for(var x=0; x<ref.filter[key].length; x++) {
-                                ref.filter[key][x].results = data.filter[key];
-                                ref.filter[key][x].refreshHandler();
-                            }
-                            delete ref.filter[key];
-                        }
+                    // first insert sub dashboards if there are some
+                    for(var key in subReqs) {
+                        TP.insertStatusResponseData(subReqs[key].tab, data.data.sub[key], subReqs[key].ref);
                     }
-                    /* update hosts */
-                    if(data.hosts) {
-                        for(var x=0; x<data.hosts.length; x++) {
-                            var name  = data.hosts[x]['name'];
-                            var state = data.hosts[x]['state'];
-                            if(ref.hosts[name]) { // may be empty if we get the same host twice in a result
-                                if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
-                                if(data.hosts[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
-                                for(var y=0; y<ref.hosts[name].length; y++) {
-                                    /* update host object but keep trend values */
-                                    if(ref.hosts[name][y].host) {
-                                        var lastTrend = ref.hosts[name][y].host.trend;
-                                        if(lastTrend) { data.hosts[x].trend = lastTrend; }
-                                    }
-
-                                    delete ref.hosts[name][y]['no_data'];
-                                    ref.hosts[name][y].host = data.hosts[x];
-                                    ref.hosts[name][y].lastState = state;
-                                    ref.hosts[name][y].refreshHandler(state);
-                                }
-                                delete ref.hosts[name];
-                            }
-                        }
-                    }
-                    /* update hostgroups */
-                    if(data.hostgroups) {
-                        for(var x=0; x<data.hostgroups.length; x++) {
-                            var name  = data.hostgroups[x]['name'];
-                            var state = data.hostgroups[x]['state'];
-                            if(ref.hostgroups[name]) { // may be empty if we get the same hostgroup twice in a result
-                                for(var y=0; y<ref.hostgroups[name].length; y++) {
-                                    delete ref.hostgroups[name][y]['no_data'];
-                                    ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
-                                    ref.hostgroups[name][y].refreshHandler();
-                                }
-                                delete ref.hostgroups[name];
-                            }
-                        }
-                    }
-                    /* update servicegroups */
-                    if(data.servicegroups) {
-                        for(var x=0; x<data.servicegroups.length; x++) {
-                            var name  = data.servicegroups[x]['name'];
-                            var state = data.servicegroups[x]['state'];
-                            if(ref.servicegroups[name]) { // may be empty if we get the same servicegroup twice in a result
-                                for(var y=0; y<ref.servicegroups[name].length; y++) {
-                                    delete ref.servicegroups[name][y]['no_data'];
-                                    ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
-                                    ref.servicegroups[name][y].refreshHandler();
-                                }
-                                delete ref.servicegroups[name];
-                            }
-                        }
-                    }
-                    /* update services */
-                    if(data.services) {
-                        for(var x=0; x<data.services.length; x++) {
-                            var hst   = data.services[x]['host_name'];
-                            var svc   = data.services[x]['description'];
-                            var state = data.services[x]['state'];
-                            if(data.services[x]['has_been_checked'] == 0) { state = 4; }
-                            if(data.services[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
-                            if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
-                                for(var y=0; y<ref.services[hst][svc].length; y++) {
-                                    /* update service object but keep trend values */
-                                    if(ref.services[hst][svc][y].service) {
-                                        var lastTrend = ref.services[hst][svc][y].service.trend;
-                                        if(lastTrend) { data.services[x].trend = lastTrend; }
-                                    }
-
-                                    delete ref.services[hst][svc][y]['no_data'];
-                                    ref.services[hst][svc][y].service = data.services[x];
-                                    ref.services[hst][svc][y].lastState = state;
-                                    ref.services[hst][svc][y].refreshHandler(state);
-                                }
-                                delete ref.services[hst][svc];
-                            }
-                        }
-                    }
-                    /* update sites */
-                    if(data.backends) {
-                        for(var key in data.backends) {
-                            var name = data.backends[key].name;
-                            if(ref.sites[name]) {
-                                for(var x=0; x<ref.sites[name].length; x++) {
-                                    delete ref.sites[name][x]['no_data'];
-                                    ref.sites[name][x].site = data.backends[key];
-                                    ref.sites[name][x].refreshHandler();
-                                }
-                            }
-                            delete ref.sites[name];
-                        }
-                    }
-
-                    /* update all dashboard/map icons */
-                    var delay = 1000;
-                    for(var key in ref.dashboards) {
-                        for(var x=0; x<ref.dashboards[key].length; x++) {
-                            var p = ref.dashboards[key][x];
-                            p.refreshHandler(undefined, true);
-                            var tab_id = 'pantab_'+p.xdata.general.dashboard;
-                            var skipUpdate = false;
-                            if(TP.lastFullIconRefresh[tab_id]) {
-                                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[tab_id].getTime())/1000;
-                                if(deltaRefresh < 15) {
-                                    skipUpdate = true;
-                                }
-                            }
-                            if(!skipUpdate) {
-                                window.clearTimeout(TP.timeouts['timeout_' + p.id + '_refresh']);
-                                TP.timeouts['timeout_' + p.id + '_refresh'] = window.setTimeout(Ext.bind(p.refreshHandler, p, []), delay);
-                                delay = delay + 200;
-                            }
-                        }
-                        delete ref.dashboards[key];
-                    }
-
-                    /* mark remaining as unknown */
-                    var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites', 'filter'];
-                    for(var x=0; x<keys.length; x++) {
-                        var name = keys[x];
-                        for(var key in ref[name]) {
-                            for(var y=0; y<ref[name][key].length; y++) {
-                                ref[name][key][y]['no_data'] = true;
-                                delete ref[name][key][y]['hostgroup'];
-                                delete ref[name][key][y]['host'];
-                                delete ref[name][key][y]['servicegroup'];
-                                delete ref[name][key][y]['site'];
-                                delete ref[name][key][y]['data'];
-                                ref[name][key][y].refreshHandler(3);
-                                delete ref[name][key][y][name];
-                            }
-                        }
-                    }
-                    /* mark unknown services */
-                    for(var key in ref.services) {
-                        for(var key2 in ref.services[key]) {
-                            for(var y=0; y<ref.services[key][key2].length; y++) {
-                                ref.services[key][key2][y]['no_data'] = true;
-                                ref.services[key][key2][y].refreshHandler(3);
-                                delete ref.services[key][key2][y]['service'];
-                            }
-                        }
-                    }
+                    // then calculate own status
+                    TP.insertStatusResponseData(tab, data.data, ref);
                 }
+
                 TP.checkSoundAlerts(tab);
 
                 /* run callback */
                 if(callback) { callback(); }
             }
         });
+    },
+
+    insertStatusResponseData: function(tab, data, ref) {
+        /* update custom filter */
+        if(data.filter) {
+            for(var key in data.filter) {
+                for(var x=0; x<ref.filter[key].length; x++) {
+                    ref.filter[key][x].results = data.filter[key];
+                    ref.filter[key][x].refreshHandler();
+                }
+                delete ref.filter[key];
+            }
+        }
+        /* update hosts */
+        if(data.hosts) {
+            for(var x=0; x<data.hosts.length; x++) {
+                var name  = data.hosts[x]['name'];
+                var state = data.hosts[x]['state'];
+                if(ref.hosts[name]) { // may be empty if we get the same host twice in a result
+                    if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
+                    if(data.hosts[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
+                    for(var y=0; y<ref.hosts[name].length; y++) {
+                        /* update host object but keep trend values */
+                        if(ref.hosts[name][y].host) {
+                            var lastTrend = ref.hosts[name][y].host.trend;
+                            if(lastTrend) { data.hosts[x].trend = lastTrend; }
+                        }
+
+                        delete ref.hosts[name][y]['no_data'];
+                        ref.hosts[name][y].host = data.hosts[x];
+                        ref.hosts[name][y].lastState = state;
+                        ref.hosts[name][y].refreshHandler(state);
+                    }
+                    delete ref.hosts[name];
+                }
+            }
+        }
+        /* update hostgroups */
+        if(data.hostgroups) {
+            for(var x=0; x<data.hostgroups.length; x++) {
+                var name  = data.hostgroups[x]['name'];
+                var state = data.hostgroups[x]['state'];
+                if(ref.hostgroups[name]) { // may be empty if we get the same hostgroup twice in a result
+                    for(var y=0; y<ref.hostgroups[name].length; y++) {
+                        delete ref.hostgroups[name][y]['no_data'];
+                        ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
+                        ref.hostgroups[name][y].refreshHandler();
+                    }
+                    delete ref.hostgroups[name];
+                }
+            }
+        }
+        /* update servicegroups */
+        if(data.servicegroups) {
+            for(var x=0; x<data.servicegroups.length; x++) {
+                var name  = data.servicegroups[x]['name'];
+                var state = data.servicegroups[x]['state'];
+                if(ref.servicegroups[name]) { // may be empty if we get the same servicegroup twice in a result
+                    for(var y=0; y<ref.servicegroups[name].length; y++) {
+                        delete ref.servicegroups[name][y]['no_data'];
+                        ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
+                        ref.servicegroups[name][y].refreshHandler();
+                    }
+                    delete ref.servicegroups[name];
+                }
+            }
+        }
+        /* update services */
+        if(data.services) {
+            for(var x=0; x<data.services.length; x++) {
+                var hst   = data.services[x]['host_name'];
+                var svc   = data.services[x]['description'];
+                var state = data.services[x]['state'];
+                if(data.services[x]['has_been_checked'] == 0) { state = 4; }
+                if(data.services[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
+                if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
+                    for(var y=0; y<ref.services[hst][svc].length; y++) {
+                        /* update service object but keep trend values */
+                        if(ref.services[hst][svc][y].service) {
+                            var lastTrend = ref.services[hst][svc][y].service.trend;
+                            if(lastTrend) { data.services[x].trend = lastTrend; }
+                        }
+
+                        delete ref.services[hst][svc][y]['no_data'];
+                        ref.services[hst][svc][y].service = data.services[x];
+                        ref.services[hst][svc][y].lastState = state;
+                        ref.services[hst][svc][y].refreshHandler(state);
+                    }
+                    delete ref.services[hst][svc];
+                }
+            }
+        }
+        /* update sites */
+        if(data.backends) {
+            for(var key in data.backends) {
+                var name = data.backends[key].name;
+                if(ref.sites[name]) {
+                    for(var x=0; x<ref.sites[name].length; x++) {
+                        delete ref.sites[name][x]['no_data'];
+                        ref.sites[name][x].site = data.backends[key];
+                        ref.sites[name][x].refreshHandler();
+                    }
+                }
+                delete ref.sites[name];
+            }
+        }
+
+        /* update all dashboard/map icons */
+        for(var key in ref.dashboards) {
+            for(var x=0; x<ref.dashboards[key].length; x++) {
+                var p = ref.dashboards[key][x];
+                p.refreshHandler(undefined, true);
+            }
+            delete ref.dashboards[key];
+        }
+
+        /* mark remaining as unknown */
+        var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites', 'filter'];
+        for(var x=0; x<keys.length; x++) {
+            var name = keys[x];
+            for(var key in ref[name]) {
+                for(var y=0; y<ref[name][key].length; y++) {
+                    ref[name][key][y]['no_data'] = true;
+                    delete ref[name][key][y]['hostgroup'];
+                    delete ref[name][key][y]['host'];
+                    delete ref[name][key][y]['servicegroup'];
+                    delete ref[name][key][y]['site'];
+                    delete ref[name][key][y]['data'];
+                    ref[name][key][y].refreshHandler(3);
+                    delete ref[name][key][y][name];
+                }
+            }
+        }
+        /* mark unknown services */
+        for(var key in ref.services) {
+            for(var key2 in ref.services[key]) {
+                for(var y=0; y<ref.services[key][key2].length; y++) {
+                    ref.services[key][key2][y]['no_data'] = true;
+                    ref.services[key][key2][y].refreshHandler(3);
+                    delete ref.services[key][key2][y]['service'];
+                }
+            }
+        }
     },
 
     /* do delayed availability update */
@@ -1457,9 +1581,10 @@ var TP = {
 
     /* get request parameters for status requests */
     getStatusReq: function(tab, ids, xdata) {
-        var panels   = TP.getAllPanel(tab);
-        var req      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
-        var ref      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
+        var panels = TP.getAllPanel(tab);
+        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
+        var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
+
         var count  = 0;
         if(ids && typeof(ids) == "string") {
             var id = ids;
@@ -1529,8 +1654,9 @@ var TP = {
                 }
                 /* update dashboards */
                 else if(p.xdata.general.dashboard) {
-                    if(ref.dashboards[p.xdata.general.dashboard] == undefined) { ref.dashboards[p.xdata.general.dashboard] = []; }
-                    ref.dashboards[p.xdata.general.dashboard].push(p);
+                    var tab_id = TP.nr2TabId(p.xdata.general.dashboard);
+                    if(ref.dashboards[tab_id] == undefined) { ref.dashboards[tab_id] = []; }
+                    ref.dashboards[tab_id].push(p);
                     count++;
                 }
             }
@@ -2225,8 +2351,7 @@ var TP = {
     saveOpenTabsToCookie: function(tab, open_tabs) {
         var activeTab = tab.getActiveTab();
         if(!activeTab) {
-            debug("forced setting activeTab");
-            activeTab = tab.setActiveTab(open_tabs.length > 0 ? open_tabs[0] : 0);
+            return;
         }
         cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^pantab_/, '') : 0);
         var numbers = [];
@@ -2355,8 +2480,8 @@ var TP = {
 
         // close all not rendered (hidden) dashboards
         for(var key in TP.allDashboards) {
-            if(!required[key] && !TP.hiddenDashboards[key].rendered) {
-                TP.hiddenDashboards[key].destroy();
+            if(!required[key] && !TP.allDashboards[key].rendered) {
+                TP.allDashboards[key].destroy();
             }
         }
         return;

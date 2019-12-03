@@ -23,18 +23,29 @@ Ext.define('TP.TabBar', {
     open_tabs:      [], // list of open tab (ids)
     listeners: {
         add: function(This, component, index, eOpts) {
-            if(!TP.initialized) { return; }
-            This.recalculateOpenTabs();
-            This.saveState();
+            if(component.xdata && component.xdata.hide_tab_header) {
+                component.tab.hide();
+            }
         },
         remove: function(This, component, eOpts) {
             if(!TP.initialized) { return; }
             This.recalculateOpenTabs();
+
             // activate last tab
-            if(!This.getActiveTab()) {
+            if(!This.getActiveTab() || this.open_tabs.length == 0) {
                 This.activateLastTab();
             }
             This.saveState();
+        },
+        tabchange: function(This, newCard, oldCard, eOpts) {
+            if(!TP.initialized) { return; }
+            var curNr = newCard.nr();
+            cookieSave('thruk_panorama_active', curNr);
+            This.recalculateOpenTabs();
+            This.saveState();
+        },
+        afterrender: function(This, eOpts) {
+            This.createInitialPantabs();
         }
     },
     tabBar:{
@@ -274,9 +285,7 @@ Ext.define('TP.TabBar', {
         this.addListener('afterrender', function(This, eOpts) {
             if(this.open_tabs.length == 0 && default_dashboard && default_dashboard.length > 0) {
                 debug("using default view");
-                TP.initial_active_tab = default_dashboard[0];
-                TP.initial_active_tab = String(TP.initial_active_tab).replace(/^pantab_/, '');
-                TP.initial_active_tab = "pantab_"+TP.initial_active_tab;
+                TP.initial_active_tab = TP.nr2TabId(default_dashboard[0]);
                 for(var x = 0; x<default_dashboard.length; x++) {
                     TP.add_pantab({ id: default_dashboard[x], skipAutoShow: x == 0 ? false : true });
                 }
@@ -315,49 +324,11 @@ Ext.define('TP.TabBar', {
 
     applyState: function(state) {
         TP.log('['+this.id+'] applyState: '+(state ? Ext.JSON.encode(state) : 'none'));
-        try {
-            TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
-            TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
-            if(state) {
-                if(TP.initial_active_tab == undefined && get_hash(1)) {
-                    TP.initial_active_tab = get_hash(1);
-                }
-                if(state.activeTab && TP.initial_active_tab == undefined) {
-                    TP.initial_active_tab = state.activeTab;
-                }
-                this.xdata = state.xdata || {};
-
-                if(state.open_tabs) {
-                    for(var nr=0; nr<state.open_tabs.length; nr++) {
-                        TP.add_pantab({ id: state.open_tabs[nr], skipAutoShow: true });
-                    };
-                }
-
-                /* open tab from url */
-                if(TP.initial_active_tab == undefined) {
-                    TP.initial_active_tab = 0;
-                }
-                TP.initial_active_tab = TP.nr2TabId(TP.initial_active_tab);
-                if(!Ext.getCmp(TP.initial_active_tab)) {
-                    TP.add_pantab({ id: TP.initial_active_tab, skipAutoShow: true });
-                    state.activeTab = TP.initial_active_tab;
-                }
-
-                this.setActiveTab(TP.nr2TabId(state.activeTab));
-                Ext.apply(this, state);
-            }
-            TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_active);
-        } catch(err) {
-            TP.logError(this.id, "tabbarApplyStateException", err);
-            if(confirm("Errors while loading your saved settings:\n\n"+err+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
-                window.location = 'panorama.cgi?clean=1';
-            }
-        }
-        if(TP.initMask) {
-            TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
-                // hide mask
-                if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
-            } ,TP.initial_create_delay_active + 500);
+        TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
+        TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
+        if(state) {
+            this.xdata = state || {};
+            Ext.apply(this, state);
         }
     },
     items: [{
@@ -376,14 +347,8 @@ Ext.define('TP.TabBar', {
 
     /* start all timed actions all tabs all panels */
     startTimeouts: function() {
-        TP.initComplete();
         this.stopTimeouts();
         TP.log('['+this.id+'] startTimeouts');
-
-        var activeTab = this.getActiveTab();
-        if(!activeTab) {
-            activeTab = this.setActiveTab(0);
-        }
 
         TP.startRotatingTabs();
         TP.startServerTime();
@@ -428,6 +393,37 @@ Ext.define('TP.TabBar', {
         } else {
             /* apply chrome background workaround */
             Ext.get('tabbar') && Ext.get('tabbar').dom.style.setProperty('z-index', "21", "important");
+        }
+    },
+
+    // open all initial tabs
+    createInitialPantabs: function() {
+        var This = this;
+
+        if(This.xdata.open_tabs) {
+            for(var nr=0; nr<This.xdata.open_tabs.length; nr++) {
+                var id = TP.nr2TabId(This.xdata.open_tabs[nr]);
+                var skipAutoShow = true;
+                if(id == TP.initial_active_tab) {
+                    skipAutoShow = false;
+                }
+                TP.add_pantab({ id: id, skipAutoShow: skipAutoShow });
+            };
+        }
+
+        var t = This.setActiveTab(TP.nr2TabId(TP.initial_active_tab));
+        if(!This.getActiveTab()) {
+            TP.initComplete();
+            This.recalculateOpenTabs();
+            This.activateLastTab();
+        }
+
+        // add additionall hidden dashboards required from icons
+        for(var key in ExtState) {
+            var matches = key.match(/^pantab_\d+$/);
+            if(matches && !Ext.getCmp(matches[0])) {
+                TP.add_pantab({ id: matches[0], hidden: true });
+            }
         }
     }
 });

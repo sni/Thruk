@@ -51,7 +51,7 @@ var window = {
         })
     }
   })},
-  location: {},
+  location: { hash: '' },
   addEventListener:    function(){},
   removeEventListener: function(){},
   setTimeout:          function(){},

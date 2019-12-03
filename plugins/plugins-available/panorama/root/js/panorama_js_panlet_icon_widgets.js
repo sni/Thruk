@@ -185,6 +185,7 @@ Ext.define('TP.SmallWidget', {
             /* update label */
             This.setIconLabel();
             if(This.labelEl) { This.labelEl.show(); }
+            TP.increaseLoadedPanels();
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }

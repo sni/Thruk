@@ -29,18 +29,6 @@ Ext.define('TP.Pantab', {
             }
         }
 
-        if(TP.initial_active_tab && TP.initial_active_tab == this.id && TP.initMask == undefined && this.window_ids.length > 1) {
-            TP.initial_create_delay_active   = 0;
-            TP.initial_create_delay_inactive = 0;
-            TP.cur_panels                    = 1;
-            TP.num_panels                    = this.window_ids.length;
-            if(!this.hidden) {
-                TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
-                TP.initMask.show();
-                this.keepMask = true;
-            }
-        }
-
         // contains the currently active backends
         this.activeBackends = undefined;
         this.callParent();
@@ -52,9 +40,11 @@ Ext.define('TP.Pantab', {
         destroy: function( This, eOpts ) {
             TP.log('['+This.id+'] destroy');
             This.stopTimeouts();
-            This.destroyPanlets();
-            TP.cp.clear(This.id);
-            delete TP.allDashboards[This.id];
+            if(!This.redraw) {
+                This.destroyPanlets();
+                TP.cp.clear(This.id);
+                delete TP.allDashboards[This.id];
+            }
             if(This.bgDragEl) { This.bgDragEl.destroy(); }
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             if(This.mapEl)    { This.mapEl.destroy();    }
@@ -63,9 +53,12 @@ Ext.define('TP.Pantab', {
                 // remove ?maps= from url
                 TP.cleanPanoramUrl();
             }
-            TP.reduceDelayEvents(TP, function() {
-                TP.closeAllHiddenDashboards();
-            }, 3000, 'timeout_close_hidden_dashboards', true);
+            if(!This.redraw) {
+                TP.reduceDelayEvents(TP, function() {
+                    TP.closeAllHiddenDashboards();
+                }, 3000, 'timeout_close_hidden_dashboards', true);
+            }
+            delete This.redraw;
         },
         beforeactivate: function( This, eOpts ) {
             /* must be done before active, otherwise map zoom control flicker */
@@ -138,9 +131,6 @@ Ext.define('TP.Pantab', {
                 }, delay + 100);
             }
 
-            var curNr = this.nr();
-            cookieSave('thruk_panorama_active', curNr);
-
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
                 if(This.xdata.locked) {
@@ -177,8 +167,9 @@ Ext.define('TP.Pantab', {
             /* set id from active tab, otherwise adding new background tabs might become visible (they set autoshow if this id matches) */
             TP.initial_active_tab = This.id;
 
-            // set title
-            document.title = This.xdata.title;
+            if(!This.title) {
+                This.applyXdata();
+            }
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
@@ -197,23 +188,10 @@ Ext.define('TP.Pantab', {
             if(!tab.title) {
                 tab.applyXdata();
             }
-            var header = tab.getDockedItems()[0];
-            if(header) { header.hide() }
-            tab.el.on("contextmenu", function(evt) {
-                tab.contextmenu(evt);
+            This.el.on("contextmenu", function(evt) {
+                This.contextmenu(evt);
             });
-            tab.el.on("click", tab.tabBodyClick);
-            if(This.xdata.hide_tab_header) {
-                This.tab.hide();
-            }
-            if(one_tab_only) {
-                document.title = This.xdata.title;
-            }
-            if(readonly || dashboard_ignore_changes) {
-                This.updateHeaderTooltip("this is dashboard #"+This.nr());
-            } else {
-                This.updateHeaderTooltip("double click to open settings (dashboard #"+This.nr()+")");
-            }
+            This.el.on("click", This.tabBodyClick);
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -400,7 +378,7 @@ Ext.define('TP.Pantab', {
         this.callParent(arguments);
         this.applyXdata();
         if(state) {
-            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
+            //TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             /* create panlets */
             Ext.apply(this.xdata, state.xdata);
             this.createInitialPanlets();
@@ -418,11 +396,9 @@ Ext.define('TP.Pantab', {
             TP.logError(tab.id, "tooManyRetriesException", err);
             return;
         }
-        if(tab.rendered && tab.xdata.map && (!tab.mapEl || !tab.map)) {
-            if(autoshow) {
-                window.setTimeout(Ext.bind(tab.createInitialPanlets, tab, [retries+1, autoshow]), 50);
-            } else {
-            }
+        // wait for the map in geomaps
+        if(tab.rendered && autoshow && tab.xdata.map && (!tab.mapEl || !tab.map)) {
+            window.setTimeout(Ext.bind(tab.createInitialPanlets, tab, [retries+1, autoshow]), 50);
             return;
         }
 
@@ -463,14 +439,7 @@ Ext.define('TP.Pantab', {
             }
         });
 
-        // adding panels completed
-        if(TP.initMask && tab.keepMask) {
-            TP.timeouts['timeout_'+tab.id+'_remove_mask'] = window.setTimeout(function() {
-                if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete tab.keepMask; }
-            }, TP.initial_create_delay_active);
-            TP.initial_create_delay_active = TP.initial_create_delay_active + 200;
-        }
-        if(one_tab_only) {
+        if(one_tab_only || TP.num_panels == 0) {
             TP.timeouts['timeout_' + tab.id + '_starttimeouts'] = window.setTimeout(function() {
                 TP.initComplete();
                 tab.startTimeouts();
@@ -520,6 +489,21 @@ Ext.define('TP.Pantab', {
                 TP.timeouts['timeout_' + This.id + '_starttimeouts'] = window.setTimeout(Ext.bind(This.startTimeouts, This, []), 30000);
             }
         }
+
+        var header = This.getDockedItems()[0];
+        if(header) { header.hide() }
+
+        if(This.xdata.hide_tab_header && This.tab) {
+            This.tab.hide();
+        }
+        if(one_tab_only) {
+            document.title = This.xdata.title;
+        }
+        if(readonly || dashboard_ignore_changes) {
+            This.updateHeaderTooltip("this is dashboard #"+This.nr());
+        } else {
+            This.updateHeaderTooltip("double click to open settings (dashboard #"+This.nr()+")");
+        }
     },
 
     hidePanlets: function() {
@@ -546,6 +530,7 @@ Ext.define('TP.Pantab', {
     /* start all timed actions for this tab and its panels */
     startTimeouts: function() {
         var tab = this;
+        if(!tab.rendered) { return; }
         tab.stopTimeouts();
         TP.log('['+tab.id+'] startTimeouts');
 
@@ -586,20 +571,8 @@ Ext.define('TP.Pantab', {
         }
         if(tab.xdata && tab.xdata.refresh > 0) {
             TP.timeouts['interval_global_icons' + tab.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(tab) }, tab.xdata.refresh * 1000);
-            var skipUpdate = false;
-            if(TP.lastFullIconRefresh[tab.id]) {
-                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[tab.id].getTime())/1000;
-                /* no update neccessary if the last update is not older than half of the usual refresh interval */
-                if(deltaRefresh < (tab.xdata.refresh / 2)) {
-                    skipUpdate = true;
-                }
-            }
-            if(!skipUpdate) {
-                TP.updateAllIcons(tab);
-            }
+            TP.updateAllIcons(tab);
         }
-
-        if(TP.initMask && !tab.keepMask) { TP.initMask.destroy(); delete TP.initMask; }
 
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();
@@ -1250,6 +1223,40 @@ Ext.define('TP.Pantab', {
         if(bounds.getHeight() == 0) {
             tab.map.map.zoomTo(17);
         }
+    },
+
+    showLoadMask: function() {
+        if(this.window_ids.length  == 0) { return; }
+        TP.initial_create_delay_active   = 0;
+        TP.initial_create_delay_inactive = 0;
+        TP.cur_panels                    = 1;
+        TP.num_panels                    = this.window_ids.length;
+        TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
+        TP.initMask.show();
+    },
+
+    // returns all dashboard ids from dashboard icons
+    getAllSubDashboards: function(recursive, dashboards) {
+        var tab = this;
+        if(dashboards == undefined) { dashboards = {} };
+        var panels = TP.getAllPanel(tab);
+        for(var nr=0; nr<panels.length; nr++) {
+            var p = panels[nr];
+            if(p.xdata && p.xdata.general) {
+                if(p.xdata.general.dashboard) {
+                    var subtab_id = TP.nr2TabId(p.xdata.general.dashboard);
+                    if(dashboards[subtab_id]) { continue; }
+                    dashboards[subtab_id] = true;
+                    if(recursive) {
+                        var subtab = Ext.getCmp(subtab_id);
+                        if(subtab) {
+                            subtab.getAllSubDashboards(true, dashboards);
+                        }
+                    }
+                }
+            }
+        }
+        return(Object.keys(dashboards));
     }
 });
 
