@@ -74,6 +74,9 @@ sub check_proc {
     for my $cfg (@{Thruk::Utils::array_uniq(Thruk::Utils::list($config->{'lmd_core_config'}))}) {
         $cmd .= ' -config '.$cfg;
     }
+    if($config->{'lmd_options'}) {
+        $cmd .= ' '.$config->{'lmd_options'}.' ';
+    }
     $cmd .= ' >/dev/null 2>&1 &';
 
     $c->log->debug("start cmd: ". $cmd);

@@ -1384,12 +1384,20 @@ ex.:
 
 === lmd_core_config
 Path to additional lmd configuration. The sites will be automatically
-generated.
+generated. Can be used multiple times.
 
 ex.:
 
   lmd_core_config = /etc/thruk/lmd.ini
+  lmd_core_config = /etc/thruk/lmd.ini.d/*.ini
 
+
+=== lmd_options
+Set some extra command line options when starting lmd.
+
+ex.:
+
+    lmd_options = -debug-deadlock 30 -debug-profiler localhost:6060
 
 === lmd_timeout
 Thruk waits this timeout for lmd to respond, otherwise it gets killed and restarted.
