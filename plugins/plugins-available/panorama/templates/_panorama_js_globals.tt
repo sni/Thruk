@@ -46,6 +46,7 @@ var action_menu_items        = [% json_encode(action_menu_items) %];
 var default_map_zoom         = [% default_map_zoom %];
 var default_map_lon          = [% default_map_lon %];
 var default_map_lat          = [% default_map_lat %];
+var default_maintenance_text = "[% escape_quotes(default_maintenance_text) %]";
 var available_fonts          = [% json_encode(fonts) %];
 var omd_site                 = '[% omd_site %]';
 var grafana_default_panelId  = [% c.config.grafana_default_panelId %];

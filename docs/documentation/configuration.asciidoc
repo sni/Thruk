@@ -2483,14 +2483,15 @@ you to build your own panorama views.
 ex.:
 
   <Component Thruk::Plugin::Panorama>
-    default_dashboard      = 1,3,7,4
-    readonly               = 0
-    full_reload_interval   = 10800
-    geo_map_default_center = 13.74,47.77
-    geo_map_default_zoom   = 5
-    extra_fonts            = CompanyFont1, CompanyFont2
-    new_files_start_at     = 1
-    default_state_order    = down, unreachable, ...
+    default_dashboard        = 1,3,7,4
+    readonly                 = 0
+    full_reload_interval     = 10800
+    geo_map_default_center   = 13.74,47.77
+    geo_map_default_zoom     = 5
+    extra_fonts              = CompanyFont1, CompanyFont2
+    new_files_start_at       = 1
+    default_state_order      = down, unreachable, ...
+    default_maintenance_text = "this dashboard is currently in <b>maintenance mode</b>"
   </Component>
 
 
@@ -2518,6 +2519,9 @@ the same folder.
 
 === default_state_order
 Defines the order to determine the worst state for filter and group icons.
+
+=== default_maintenance_text
+Sets the default text when setting dashboards into maintenance mode. You can use html to format the text.
 
 === geo_map_default_center
 Default coordinates (lon,lat) for new geo maps.

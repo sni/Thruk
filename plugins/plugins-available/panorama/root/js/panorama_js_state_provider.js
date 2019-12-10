@@ -235,7 +235,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 });
 
 function anyDecode(data) {
-    if(Ext.isString(data)) {
+    if(Ext.isString(data) && data.length > 1 && (data.substring(0,1) == "{" || data.substring(0,1) == "[")) {
         return(Ext.JSON.decode(data));
     }
     return(data);

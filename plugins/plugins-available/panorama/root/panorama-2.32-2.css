@@ -844,3 +844,15 @@ TABLE.hostcomments TH, TABLE.hostdowntimes TH,TABLE.servicecomments TH, TABLE.se
 TABLE.hostcomments TH:last-child, TABLE.hostdowntimes TH:last-child, TABLE.servicecomments TH:last-child, TABLE.servicedowntimes TH:last-child {
   border-right: 0px none;
 }
+
+DIV.x-mask.maintenance {
+  opacity: 0.75;
+}
+DIV.maintenance .x-mask-msg-text {
+  font-size: 14px;
+	background-image: url("images/btn_downtime.png");
+}
+
+DIV.maintenance .show {
+  font-size: 11px;
+}

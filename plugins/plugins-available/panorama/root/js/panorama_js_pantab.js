@@ -49,6 +49,7 @@ Ext.define('TP.Pantab', {
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             if(This.mapEl)    { This.mapEl.destroy();    }
             if(This.map)      { This.map.destroy();      }
+            if(This.maintEl)  { This.maintEl.destroy();  }
             if(TP.initialized) {
                 // remove ?maps= from url
                 TP.cleanPanoramUrl();
@@ -149,6 +150,7 @@ Ext.define('TP.Pantab', {
                 }
             }
             if(This.bgDragEl) { This.bgDragEl.show(); }
+            if(This.maintEl)  { This.maintEl.show();  }
             if(This.bgImgEl)  { This.bgImgEl.show();  }
             if(This.mapEl)    { This.mapEl.show();    }
             if(This.map)      { This.map.controlsDiv.dom.style.display = ""; }
@@ -174,6 +176,7 @@ Ext.define('TP.Pantab', {
         hide: function(This, eOpts) {
             This.hidePanlets();
             if(This.bgDragEl) { This.bgDragEl.hide(); }
+            if(This.maintEl)  { This.maintEl.hide();  }
             if(This.bgImgEl)  { This.bgImgEl.hide();  }
             if(This.mapEl)    { This.mapEl.hide();    }
             if(This.map)      { This.map.controlsDiv.dom.style.display = "none"; }
@@ -504,6 +507,8 @@ Ext.define('TP.Pantab', {
         } else {
             This.updateHeaderTooltip("double click to open settings (dashboard #"+This.nr()+")");
         }
+
+        This.applyMaintenance();
     },
 
     hidePanlets: function() {
@@ -656,8 +661,8 @@ Ext.define('TP.Pantab', {
             OpenLayers.ImgPath               = url_prefix +'vendor/openlayer-2.13.1/images/';
             OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
             var controlsBody = Ext.getBody();
-            var controlsDiv  = controlsBody.createChild('<div style="position: absolute; z-index: 100001; top: 50px; left: 3px; display: none;">');
-            var zoomDiv      = controlsDiv.createChild('<div style="position: absolute; z-index: 100001; top: 0; left: 0;">');
+            var controlsDiv  = controlsBody.createChild('<div style="position: absolute; z-index: 9000; top: 50px; left: 3px; display: none;">');
+            var zoomDiv      = controlsDiv.createChild('<div style="position: absolute; z-index: 9000; top: 0; left: 0;">');
             var map   = new OpenLayers.Map('map', { controls: [], theme: url_prefix+'vendor/openlayer-2.13.1/theme/default/style.css' });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
@@ -1062,6 +1067,22 @@ Ext.define('TP.Pantab', {
                     handler: function() { thruk_debug_window_handler() },
                     hidden:  (!thruk_debug_js || thruk_demo_mode)
                 }]
+            }, {
+                text:   'Set Maintenance Mode',
+                icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
+                hidden: readonly || tab.readonly || tab.isMaintenance(),
+                handler: function() {
+                    Ext.Msg.prompt('Put Dashboard into Maintenance Mode', 'Please enter maintenance message:', function(btn, text){
+                        if (btn == 'ok'){
+                            tab.setMaintenance(text);
+                        }
+                    }, null, true, (default_maintenance_text || 'this dashboard is currently in maintenance mode'));
+                }
+            }, {
+                text:   'Remove Maintenance Mode',
+                icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
+                hidden: readonly || tab.readonly || !tab.isMaintenance(),
+                handler: function() { tab.setMaintenance(); }
             }, '-', {
                 text:   'Save Dashboard',
                 icon:    url_prefix+'plugins/panorama/images/disk.png',
@@ -1257,6 +1278,52 @@ Ext.define('TP.Pantab', {
             }
         }
         return(Object.keys(dashboards));
+    },
+
+    isMaintenance: function() {
+        if(this.xdata.maintenance) {
+            return true;
+        }
+        return false;
+    },
+    setMaintenance: function(text) {
+        var tab = this;
+        if(text) {
+            tab.xdata.maintenance = text;
+        } else {
+            delete tab.xdata.maintenance;
+        }
+        tab.applyMaintenance();
+        tab.saveState()
+        return;
+    },
+    applyMaintenance: function() {
+        var tab = this;
+        var text = tab.xdata.maintenance;
+        if(text) {
+            if(!readonly && !tab.readonly) {
+                text += '<center><a href="#" class="show" onclick="Ext.getCmp(\''+tab.id+'\').maintEl.hide(); return false;">show anyway<\/a><\/center>';
+            }
+            if(!tab.maintEl) {
+                var iconContainer = Ext.fly('iconContainer');
+                tab.maintEl = iconContainer.createChild('<div>', iconContainer.dom.childNodes[0]);
+                tab.maintEl.dom.style.position = "fixed";
+                tab.maintEl.dom.style.top      = TP.offset_y+"px";
+                tab.maintEl.dom.style.left     = "0px";
+                tab.maintEl.dom.style.width    = "100%";
+                tab.maintEl.dom.style.height   = "100%";
+                tab.maintEl.dom.style.zIndex   = 9001;
+            }
+            tab.maintenanceMask = new Ext.LoadMask(tab.maintEl, {msg:text, maskCls: 'maintenance', msgCls: 'maintenance'});
+            tab.maintenanceMask.show();
+            tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
+        } else if(tab.maintenanceMask) {
+            tab.maintenanceMask.destroy();
+            delete tab.maintenanceMask;
+            tab.maintEl.destroy();
+            delete tab.maintEl;
+        }
+        return;
     }
 });
 
