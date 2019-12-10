@@ -623,11 +623,11 @@ Ext.define('TP.DashboardStatusIcon', {
         }]);
     },
     getName: function() {
-        var tab = Ext.getCmp('pantab_'+this.xdata.general.dashboard);
+        var tab = Ext.getCmp(TP.nr2TabId(this.xdata.general.dashboard));
         if(tab) {
-            return(tab.title);
+            return(tab.xdata.title || tab.title);
         }
-        return("");
+        return("dashboard #"+this.xdata.general.dashboard);
     },
     getDetails: function() {
         var details = [];
