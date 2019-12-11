@@ -112,7 +112,6 @@ sub _rest_get_thruk_bp_by_id_crud {
     }
     if($method eq 'POST') {
         $bp->FROM_JSON($c, $c->req->parameters);
-{ open(my $fh5, '>', '/omd/sites/demo/var/thruk/test.log'); use Data::Dumper; print $fh5 Dumper($bp); CORE::close($fh5); }
         $bp->save($c);
         $bp->commit($c);
     }
