@@ -1491,6 +1491,7 @@ lists all panorama dashboards.
 |file                              | filename of the dashboard
 |file_version                      | version of dashboard format
 |id                                | internal id
+|maintenance                       | maintenance reason (only if in maintenance mode)
 |nr                                | number of the dashboard
 |objects                           | number of objects
 |panlet_<nr>                       | panlet definition
@@ -1506,6 +1507,18 @@ lists all panorama dashboards.
 
 returns panorama dashboard for given number.
 alias for /thruk/panorama?nr=<nr>
+
+=== POST /thruk/panorama/<nr>/maintenance
+
+Puts given dashboard into maintenance mode.
+
+Required arguments:
+
+  * text
+
+=== DELETE /thruk/panorama/<nr>/maintenance
+
+removes maintenance mode from given dashboard.
 
 === GET /thruk/recurring_downtimes
 

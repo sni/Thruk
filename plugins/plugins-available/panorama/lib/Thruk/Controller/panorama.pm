@@ -71,10 +71,8 @@ sub index {
     $c->stash->{'dashboard_ignore_changes'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} : 0;
     $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->req->parameters->{'dashboard_ignore_changes'};
 
-    $c->stash->{'is_admin'} = 0;
-    if($c->check_user_roles('admin')) {
-        $c->stash->{'is_admin'} = 1;
-    }
+    Thruk::Utils::Panorama::set_is_admin($c);
+
     $c->stash->{one_tab_only}           = '';
     $c->stash->{'full_reload_interval'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} : 10800;
     $c->stash->{'extjs_version'}        = "4.2.2";
@@ -3473,7 +3471,7 @@ sub _merge_dashboard_into_hash {
         }
         elsif($key eq 'tab') {
             # add some values to the tab
-            for my $k (qw/user public readonly ts scripted/) {
+            for my $k (qw/user public readonly ts scripted maintenance/) {
                 $dashboard->{'tab'}->{$k} = $dashboard->{$k} if defined $dashboard->{$k};
             }
             $data->{$id} = $dashboard->{'tab'};
@@ -3567,6 +3565,13 @@ sub _add_json_dashboard_timestamps {
             }
         } else {
             $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
+        }
+        my $maintfile  = Thruk::Utils::Panorama::_get_maint_file($c, $nr);
+        if(-e $maintfile) {
+            my $maintenance = Thruk::Utils::IO::json_lock_retrieve($maintfile);
+            $json->{'maintenance'}->{$tab} = $maintenance->{'maintenance'};
+        } else {
+            $json->{'maintenance'}->{$tab} = "";
         }
     }
     return;

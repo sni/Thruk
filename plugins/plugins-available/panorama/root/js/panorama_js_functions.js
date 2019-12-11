@@ -1000,6 +1000,16 @@ var TP = {
                     }
                 }
             }
+
+            // response contains maintenance modes
+            if(data && data.maintenance != undefined) {
+                var tab_id = TP.nr2TabId(key);
+                var tab = Ext.getCmp(tab_id);
+                for(var key in data.maintenance) {
+                    tab.setMaintenance(data.maintenance[key], false);
+                }
+            }
+
             /* contains a message? */
             var msg = Ext.util.Cookies.get('thruk_message');
             if(msg) {
@@ -2485,7 +2495,20 @@ var TP = {
             }
         }
         return;
+    },
+    defaultHTTPCallback: function(options, success, response) {
+        if(!success) {
+            if(response.status == 0) {
+                TP.Msg.msg("fail_message~~request failed");
+            } else {
+                TP.Msg.msg("fail_message~~request failed: "+response.status+' - '+response.statusText);
+            }
+            return;
+        }
+        TP.getResponse(undefined, response);
+        return;
     }
+
 }
 TP.log('[global] starting');
 TP.log('[global] '+thruk_version);

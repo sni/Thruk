@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 144;
+    plan tests => 185;
 
     use lib('t');
     require TestUtils;
@@ -65,6 +65,23 @@ my $pages = [{
         url          => '/config/revert',
         post         => {},
         like         => ['successfully reverted stashed changes'],
+    }, {
+        url          => '/thruk/panorama',
+        like         => ['title'],
+    }, {
+        url          => '/thruk/panorama/1',
+        like         => ['title'],
+    }, {
+        url          => '/thruk/panorama/1/maintenance',
+        post         => { text => "test maint mode" },
+        like         => ['put into maintenance mode'],
+    }, {
+        url          => '/thruk/panorama/1',
+        like         => ['maintenance', "test maint mode"],
+    }, {
+        url          => '/thruk/panorama/1/maintenance',
+        method       => 'DELETE',
+        like         => ['maintenance mode removed'],
     }
 ];
 

@@ -295,6 +295,8 @@ sub _update_docs {
     Thruk::Utils::IO::json_lock_patch($api_key->{'file'}, { last_used => time(), last_from => "127.0.0.1" });
     # fake error message
     Thruk::Utils::IO::json_lock_patch('var/downtimes/9999.tsk', { error => "test" });
+    # fake panorama maintmode
+    Thruk::Utils::IO::json_lock_patch('panorama/9999.tab', { maintenance => "test" });
 
     my $content    = read_file($output_file);
     my $attributes = _parse_attribute_docs($content);

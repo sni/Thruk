@@ -97,10 +97,13 @@ return list of dashboards. Type can be 'public', 'my' or 'all'
 sub get_dashboard_list {
     my($c, $type, $full) = @_;
 
+    set_is_admin($c);
+
     # returns wrong list of public dashboards otherwise
-    my $is_admin;
+    my $orig_is_admin;
     if($type eq 'public') {
-        $is_admin = delete $c->stash->{'is_admin'};
+        $orig_is_admin = $c->stash->{'is_admin'};
+        $c->stash->{'is_admin'} = 0;
     }
 
     my $dashboards = [];
@@ -153,7 +156,7 @@ sub get_dashboard_list {
 
     # restore admin flag
     if($type eq 'public') {
-        $c->stash->{'is_admin'} = $is_admin;
+        $c->stash->{'is_admin'} = $orig_is_admin;
     }
 
     $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
@@ -181,6 +184,8 @@ sub load_dashboard {
     if($nr == 0 && !-s $file) {
         $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }
+
+    set_is_admin($c);
 
     return unless -s $file;
     my $dashboard;
@@ -266,6 +271,13 @@ sub load_dashboard {
             my $newkey = "panlet_".$1;
             $dashboard->{$newkey} = delete $dashboard->{$key};
         }
+    }
+
+    # check for maintenance mode
+    my $maintfile  = Thruk::Utils::Panorama::_get_maint_file($c, $nr);
+    if(-e $maintfile) {
+        my $maintenance = Thruk::Utils::IO::json_lock_retrieve($maintfile);
+        $dashboard->{'maintenance'} = $maintenance->{'maintenance'};
     }
 
     $dashboard->{'objects'} = scalar grep(/^pantab_/mx, keys %{$dashboard});
@@ -355,6 +367,30 @@ sub _get_runtime_file {
     return($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.'.$user.'runtime');
 }
 
+##########################################################
+sub _get_maint_file {
+    my($c, $nr) = @_;
+    return($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.maint');
+}
+
+##########################################################
+
+=head2 set_is_admin
+
+    set_is_admin($c)
+
+return nothing
+
+=cut
+sub set_is_admin {
+    my($c) = @_;
+    return if defined $c->stash->{'is_admin'};
+    $c->stash->{'is_admin'} = 0;
+    if($c->check_user_roles('admin')) {
+        $c->stash->{'is_admin'} = 1;
+    }
+    return;
+}
 ##########################################################
 
 1;

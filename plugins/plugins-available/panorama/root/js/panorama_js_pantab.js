@@ -470,6 +470,8 @@ Ext.define('TP.Pantab', {
 
         xdata.locked = This.locked;
 
+        This.applyMaintenance();
+
         if(This.hidden) { return; }
 
         This.setLock(xdata.locked);
@@ -507,8 +509,6 @@ Ext.define('TP.Pantab', {
         } else {
             This.updateHeaderTooltip("double click to open settings (dashboard #"+This.nr()+")");
         }
-
-        This.applyMaintenance();
     },
 
     hidePanlets: function() {
@@ -1074,7 +1074,7 @@ Ext.define('TP.Pantab', {
                 handler: function() {
                     Ext.Msg.prompt('Put Dashboard into Maintenance Mode', 'Please enter maintenance message:', function(btn, text){
                         if (btn == 'ok'){
-                            tab.setMaintenance(text);
+                            tab.setMaintenance(text, true);
                         }
                     }, null, true, (default_maintenance_text || 'this dashboard is currently in maintenance mode'));
                 }
@@ -1082,7 +1082,7 @@ Ext.define('TP.Pantab', {
                 text:   'Remove Maintenance Mode',
                 icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
                 hidden: readonly || tab.readonly || !tab.isMaintenance(),
-                handler: function() { tab.setMaintenance(); }
+                handler: function() { tab.setMaintenance(null, true); }
             }, '-', {
                 text:   'Save Dashboard',
                 icon:    url_prefix+'plugins/panorama/images/disk.png',
@@ -1281,25 +1281,39 @@ Ext.define('TP.Pantab', {
     },
 
     isMaintenance: function() {
-        if(this.xdata.maintenance) {
+        if(this.maintenance) {
             return true;
         }
         return false;
     },
-    setMaintenance: function(text) {
+    setMaintenance: function(text, save) {
         var tab = this;
         if(text) {
-            tab.xdata.maintenance = text;
+            tab.maintenance = text;
+            if(save) {
+                Ext.Ajax.request({
+                    url:     '../r/thruk/panorama/'+tab.nr()+'/maintenance',
+                    method:  'POST',
+                    params: { text: text },
+                    callback: TP.defaultHTTPCallback
+                });
+            }
         } else {
-            delete tab.xdata.maintenance;
+            delete tab.maintenance;
+            if(save) {
+                Ext.Ajax.request({
+                    url:     '../r/thruk/panorama/'+tab.nr()+'/maintenance',
+                    method:  'DELETE',
+                    callback: TP.defaultHTTPCallback
+                });
+            }
         }
         tab.applyMaintenance();
-        tab.saveState()
         return;
     },
     applyMaintenance: function() {
         var tab = this;
-        var text = tab.xdata.maintenance;
+        var text = tab.maintenance;
         if(text) {
             if(!readonly && !tab.readonly) {
                 text += '<center><a href="#" class="show" onclick="Ext.getCmp(\''+tab.id+'\').maintEl.hide(); return false;">show anyway<\/a><\/center>';
@@ -1313,10 +1327,18 @@ Ext.define('TP.Pantab', {
                 tab.maintEl.dom.style.width    = "100%";
                 tab.maintEl.dom.style.height   = "100%";
                 tab.maintEl.dom.style.zIndex   = 9001;
+                tab.maintenanceMask = new Ext.LoadMask(tab.maintEl, {msg:text, maskCls: 'maintenance', msgCls: 'maintenance'});
+                if(tab.isActiveTab()) {
+                    tab.maintenanceMask.show();
+                    tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
+                }
+            } else {
+                tab.maintenanceMask.msg = text;
+                if(tab.isActiveTab()) {
+                    tab.maintenanceMask.show();
+                    tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
+                }
             }
-            tab.maintenanceMask = new Ext.LoadMask(tab.maintEl, {msg:text, maskCls: 'maintenance', msgCls: 'maintenance'});
-            tab.maintenanceMask.show();
-            tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
         } else if(tab.maintenanceMask) {
             tab.maintenanceMask.destroy();
             delete tab.maintenanceMask;
