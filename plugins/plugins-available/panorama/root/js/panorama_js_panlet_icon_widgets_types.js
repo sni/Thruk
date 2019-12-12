@@ -702,7 +702,7 @@ Ext.define('TP.DashboardStatusIcon', {
     },
     refreshHandler: function(newStatus, skipUpdate) {
         var This   = this;
-        var tab_id = 'pantab_'+This.xdata.general.dashboard;
+        var tab_id = TP.nr2TabId(This.xdata.general.dashboard);
         var tab    = Ext.getCmp(tab_id);
         if(!tab) {
             if(skipUpdate) {

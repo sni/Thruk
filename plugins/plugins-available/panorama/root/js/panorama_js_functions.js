@@ -76,7 +76,7 @@ var TP = {
         id                  the id to open
         replace_id          replace given dashboard
         hidden              dashboard will be invisible and kept in background
-        callback            run callback after dashboard finished loading
+        callback            run callback after dashboard finished loading function(tab_id, success, response)
         extraConf           merge config into dashboard data
         skipAutoShow        do not put dashboard in front
     */
@@ -245,7 +245,7 @@ var TP = {
         }
 
         /* any callbacks? */
-        if(opt.callback) { opt.callback(id); }
+        if(opt.callback) { opt.callback(id, true); }
 
         /* return false to prevent newtab button being activated */
         return false;
@@ -277,6 +277,7 @@ var TP = {
                     }
                     var tabbar = Ext.getCmp('tabbar');
                     tabbar.saveState();
+                    if(callback) { callback(opt.id, success, response); }
                     return;
                 }
 
@@ -297,7 +298,7 @@ var TP = {
                 }
 
                 if(Ext.isArray(opt.id)) {
-                    if(callback) { callback(); }
+                    if(callback) { callback(opt.id, success, response); }
                     return;
                 }
 
@@ -319,7 +320,7 @@ var TP = {
                 }
 
                 TP.add_pantab(opt);
-                if(callback) { callback(); }
+                if(callback) { callback(opt.id, success, response); }
 
                 // add additionall hidden dashboards required from icons
                 for(var key in data) {
@@ -338,7 +339,13 @@ var TP = {
         TP.add_pantab_load({ id: ids, hidden: true }, function() {
             for(var x=0; x<ids.length; x++) {
                 var id = ids[x];
-                TP.add_pantab({ id: id, hidden: true, callback: callbacks[x] });
+                if(TP.cp.state[id]) {
+                    TP.add_pantab({ id: id, hidden: true, callback: callbacks[x] });
+                } else {
+                    if(callbacks[x]) {
+                        callbacks[x](id, false);
+                    }
+                }
             }
         });
     },
@@ -347,6 +354,13 @@ var TP = {
     add_pantab_delayed_hidden: function(id, callback) {
         if(!TP.load_bulk_ids)       { TP.load_bulk_ids = []; }
         if(!TP.load_bulk_callbacks) { TP.load_bulk_callbacks = []; }
+
+        // do not add it twice
+        for(var x=0; x<TP.load_bulk_ids.length; x++) {
+            if(TP.load_bulk_ids[x] == id) {
+                return;
+            }
+        }
 
         TP.load_bulk_ids.push(id);
         TP.load_bulk_callbacks.push(callback);
@@ -1327,9 +1341,15 @@ var TP = {
             params.sub = {};
             var subtabs = tab.getAllSubDashboards(true);
             for(var x=0; x<subtabs.length; x++) {
-                var subtab = Ext.getCmp(subtabs[x]);
+                var subtab_id = subtabs[x];
+                var subtab    = Ext.getCmp(subtab_id);
                 if(!subtab) {
-                    TP.add_pantab({ id: subtabs[x], hidden: true });
+                    TP.add_pantab({ id: subtabs[x], hidden: true, callback: function(subtab_id) {
+                        var subtab = Ext.getCmp(subtab_id);
+                        if(!subtab) {
+                            TP.log('['+subtab_id+'] failed to load dashboard');
+                        }
+                    }});
                 }
                 if(subtab && !subtab.rendered) {
                     var subreq = TP.getStatusReq(subtab);
@@ -1936,6 +1956,9 @@ var TP = {
         }
         var group = TP.getTabTotals(tab);
         var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes, order: tab.xdata.state_order});
+        if(tab.isMaintenance()) {
+            res.downtime = true;
+        }
         return(res);
     },
     getTabTotals: function(tab) {

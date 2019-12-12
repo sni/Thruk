@@ -2781,9 +2781,10 @@ sub _task_dashboard_save_states {
 sub _task_dashboard_data {
     my($c) = @_;
     my $nr = $c->req->parameters->{'nr'} || die('no number supplied');
+    $nr = Thruk::Utils::array_uniq(Thruk::Utils::list($nr));
 
     my $open_tabs_hash = Thruk::Utils::array2hash(Thruk::Utils::list($c->req->parameters->{'recursive'}));
-    if(ref $nr eq 'ARRAY') {
+    if(scalar @{$nr} > 1) {
         my $json;
         my $data = {};
         for my $n (@{$nr}) {
@@ -2791,6 +2792,7 @@ sub _task_dashboard_data {
         }
         return $c->render(json => { data => $data });
     }
+    $nr = $nr->[0];
 
     my $dashboard;
     my $new_override = 0;

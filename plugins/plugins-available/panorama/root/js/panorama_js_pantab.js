@@ -50,6 +50,7 @@ Ext.define('TP.Pantab', {
             if(This.mapEl)    { This.mapEl.destroy();    }
             if(This.map)      { This.map.destroy();      }
             if(This.maintEl)  { This.maintEl.destroy();  }
+            if(This.maintenanceMask) { This.maintenanceMask.destroy(); }
             if(TP.initialized) {
                 // remove ?maps= from url
                 TP.cleanPanoramUrl();
@@ -221,9 +222,9 @@ Ext.define('TP.Pantab', {
             return(true);
         }
     },
-    updateHeaderTooltip: function(text) {
-        var tab         = this;
-        var tabbar      = Ext.getCmp('tabbar');
+    updateHeaderTooltip: function() {
+        var tab    = this;
+        var tabbar = Ext.getCmp('tabbar');
         if(!tabbar || !tabbar.getTabBar) { return; }
         var tabbarItems = tabbar.getTabBar().items.items;
         var tabhead;
@@ -231,6 +232,11 @@ Ext.define('TP.Pantab', {
             if(tabbarItems[x].card && tabbarItems[x].card.id == tab.id) {
                 tabhead = tabbarItems[x];
             }
+        }
+
+        var text = "double click to open settings (dashboard #"+tab.nr()+")";
+        if(readonly || dashboard_ignore_changes) {
+            text = "this is dashboard #"+tab.nr();
         }
         if(tabhead == undefined) {
             return;
@@ -504,11 +510,7 @@ Ext.define('TP.Pantab', {
         if(one_tab_only) {
             document.title = This.xdata.title;
         }
-        if(readonly || dashboard_ignore_changes) {
-            This.updateHeaderTooltip("this is dashboard #"+This.nr());
-        } else {
-            This.updateHeaderTooltip("double click to open settings (dashboard #"+This.nr()+")");
-        }
+        This.updateHeaderTooltip();
     },
 
     hidePanlets: function() {
@@ -1294,7 +1296,10 @@ Ext.define('TP.Pantab', {
                 Ext.Ajax.request({
                     url:     '../r/thruk/panorama/'+tab.nr()+'/maintenance',
                     method:  'POST',
-                    params: { text: text },
+                    params: {
+                        text:      text,
+                        CSRFtoken: CSRFtoken
+                    },
                     callback: TP.defaultHTTPCallback
                 });
             }
@@ -1304,6 +1309,9 @@ Ext.define('TP.Pantab', {
                 Ext.Ajax.request({
                     url:     '../r/thruk/panorama/'+tab.nr()+'/maintenance',
                     method:  'DELETE',
+                    params: {
+                        CSRFtoken: CSRFtoken
+                    },
                     callback: TP.defaultHTTPCallback
                 });
             }
@@ -1329,14 +1337,24 @@ Ext.define('TP.Pantab', {
                 tab.maintEl.dom.style.zIndex   = 9001;
                 tab.maintenanceMask = new Ext.LoadMask(tab.maintEl, {msg:text, maskCls: 'maintenance', msgCls: 'maintenance'});
                 if(tab.isActiveTab()) {
+                    tab.maintEl.show();
                     tab.maintenanceMask.show();
                     tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
+                    tab.maintEl.dom.style.display  = "";
+                } else {
+                    tab.maintEl.hide();
                 }
+                tab.maintEl.on("contextmenu", function(evt) {
+                    tab.contextmenu(evt);
+                });
             } else {
                 tab.maintenanceMask.msg = text;
                 if(tab.isActiveTab()) {
+                    tab.maintEl.show();
                     tab.maintenanceMask.show();
                     tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
+                } else {
+                    tab.maintEl.hide();
                 }
             }
         } else if(tab.maintenanceMask) {

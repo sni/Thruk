@@ -22,12 +22,15 @@ Ext.define('TP.TabBar', {
     stateful:       true,
     open_tabs:      [], // list of open tab (ids)
     listeners: {
-        add: function(This, component, index, eOpts) {
-            if(component.xdata && component.xdata.hide_tab_header) {
-                component.tab.hide();
+        add: function(This, tab, index, eOpts) {
+            if(tab.xdata && tab.xdata.hide_tab_header) {
+                tab.tab.hide();
+            }
+            if(tab.updateHeaderTooltip) {
+                tab.updateHeaderTooltip();
             }
         },
-        remove: function(This, component, eOpts) {
+        remove: function(This, tab, eOpts) {
             if(!TP.initialized) { return; }
             This.recalculateOpenTabs();
 
@@ -37,9 +40,9 @@ Ext.define('TP.TabBar', {
             }
             This.saveState();
         },
-        tabchange: function(This, newCard, oldCard, eOpts) {
+        tabchange: function(This, newTab, oldTab, eOpts) {
             if(!TP.initialized) { return; }
-            var curNr = newCard.nr();
+            var curNr = newTab.nr();
             cookieSave('thruk_panorama_active', curNr);
             This.recalculateOpenTabs();
             This.saveState();
