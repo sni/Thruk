@@ -846,7 +846,7 @@ TABLE.hostcomments TH:last-child, TABLE.hostdowntimes TH:last-child, TABLE.servi
 }
 
 DIV.x-mask.maintenance {
-  opacity: 0.75;
+  opacity: 0.97;
 }
 DIV.maintenance .x-mask-msg-text {
   font-size: 14px;
