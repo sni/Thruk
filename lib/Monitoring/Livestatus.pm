@@ -1405,6 +1405,7 @@ sub _get_error {
         '403' => 'The request is incomplete.',
         '404' => 'The target of the GET has not been found (e.g. the table).',
         '405' => 'A non-existing column was being referred to',
+        '413' => 'Maximum response size reached',
         '452' => 'internal livestatus error',
         '490' => 'no query',
         '491' => 'failed to connect',
