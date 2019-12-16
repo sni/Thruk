@@ -2863,7 +2863,7 @@ check if memory limit is above the threshold
 
 sub check_memory_usage {
     my($c) = @_;
-    my $mem = Thruk::Backend::Pool::get_memory_usage();
+    my $mem = $c->stash->{'memory_end'} || Thruk::Backend::Pool::get_memory_usage();
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
         $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
