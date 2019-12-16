@@ -2867,7 +2867,7 @@ sub check_memory_usage {
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
         $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
-        $c->app->graceful_stop();
+        $c->app->graceful_stop($c);
     }
     return;
 }
