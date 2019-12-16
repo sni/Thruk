@@ -12,6 +12,8 @@ services:
   backend:
     build: backend/
     ports: []
+    volumes:
+        - ../../../:/thruk:ro
   db:
      image: mysql:5
      restart: always
