@@ -388,10 +388,13 @@ sub _dispatcher {
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$url);
 
-    # restore timezone setting
-    $thruk->set_timezone($c->config->{'_server_timezone'});
-
-    _after_dispatch($c, $res);
+    if($c->env->{'psgix.cleanup'}) {
+        push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
+            _after_dispatch($c, $res);
+        };
+    } else {
+        _after_dispatch($c, $res);
+    }
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
     return($res);
 }
@@ -1051,6 +1054,9 @@ sub _set_content_length {
 sub _after_dispatch {
     my($c, $res) = @_;
     $c->stats->profile(begin => "_after_dispatch");
+
+    # restore timezone setting
+    $thruk->set_timezone($c->config->{'_server_timezone'});
 
     if($ENV{THRUK_LEAK_CHECK}) {
         eval {

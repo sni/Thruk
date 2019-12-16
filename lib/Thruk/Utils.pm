@@ -2866,7 +2866,9 @@ sub check_memory_usage {
     my $mem = $c->stash->{'memory_end'} || Thruk::Backend::Pool::get_memory_usage();
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
-        $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
+        my $msg = "[$$] Thruk exiting process due to memory usage: ".$mem.'mb (limit: '.$c->config->{'max_process_memory'}.'mb)';
+        $c->log->debug($msg);
+        print STDERR $msg,"\n";
         $c->app->graceful_stop($c);
     }
     return;
