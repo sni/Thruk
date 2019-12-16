@@ -93,25 +93,6 @@ sub cmd {
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
     }
-    if($mode eq 'import' && !$global_options->{'yes'}) {
-        local $|=1;
-        print "import removes current cache and imports new logfile data.\n";
-        print "use logcacheupdate to update cache. Continue? [n]: ";
-        my $buf;
-        sysread STDIN, $buf, 1;
-        if($buf !~ m/^(y|j)/mxi) {
-            return("canceled\n", 1);
-        }
-    }
-    if($mode eq 'drop' && !$global_options->{'yes'}) {
-        local $|=1;
-        print "Do you really want to drop all data and remove the logcache? Continue? [n]: ";
-        my $buf;
-        sysread STDIN, $buf, 1;
-        if($buf !~ m/^(y|j)/mxi) {
-            return("canceled\n", 1);
-        }
-    }
 
     my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
@@ -130,35 +111,57 @@ sub cmd {
         return("FAILED - failed to load ".$type." support: ".$@."\n", 1);
     }
 
+    Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
+    my $backends = $c->stash->{'backends'};
+
+    if($mode eq 'import' && !$global_options->{'yes'}) {
+        # check if tables already existing
+        my $exist = 0;
+        for my $peer_key (@{$backends}) {
+            my($stats) = Thruk::Backend::Provider::Mysql->_log_stats($c, $peer_key);
+            if($stats && $stats->{'items'} > 0) {
+                printf("logcache does already exist for backend: %s.\n", $stats->{'name'});
+                $exist = 1;
+            }
+        }
+
+        if($exist) {
+            local $|=1;
+            print "import removes current cache and imports new logfile data.\n";
+            print "use logcacheupdate to update cache. Continue? [n]: ";
+            my $buf;
+            sysread STDIN, $buf, 1;
+            if($buf !~ m/^(y|j)/mxi) {
+                return("canceled\n", 1);
+            }
+        }
+    }
+
+    if($mode eq 'drop' && !$global_options->{'yes'}) {
+        local $|=1;
+        print "Do you really want to drop all data and remove the logcache? Continue? [n]: ";
+        my $buf;
+        sysread STDIN, $buf, 1;
+        if($buf !~ m/^(y|j)/mxi) {
+            return("canceled\n", 1);
+        }
+    }
+
     if($mode eq 'stats') {
         my $stats;
-        if($type eq 'mysql') {
-            $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
-        } else {
-            die("unknown logcache type: ".$type);
-        }
+        $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         Thruk::Backend::Manager::close_logcache_connections($c);
         return($stats."\n", 0);
     }
     elsif($mode eq 'removeunused') {
-        if($type eq 'mysql') {
-            my $stats= Thruk::Backend::Provider::Mysql->_log_removeunused($c);
-            Thruk::Backend::Manager::close_logcache_connections($c);
-            $c->stats->profile(end => "_cmd_import_logs($action)");
-            return($stats."\n", 0);
-        }
+        my $stats= Thruk::Backend::Provider::Mysql->_log_removeunused($c);
         Thruk::Backend::Manager::close_logcache_connections($c);
         $c->stats->profile(end => "_cmd_import_logs($action)");
-        return($type." logcache does not support this operation\n", 1);
+        return($stats."\n", 0);
     } else {
         my $t0 = [gettimeofday];
-        my($backend_count, $log_count, $errors);
-        if($type eq 'mysql') {
-            ($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
-        } else {
-            die("unknown logcache type: ".$type);
-        }
+        my($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         my $plugin_ref_count;

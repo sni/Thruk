@@ -906,14 +906,16 @@ gather log statistics
 =cut
 
 sub _log_stats {
-    my($self, $c) = @_;
+    my($self, $c, $backends) = @_;
 
     $c->stats->profile(begin => "Mysql::_log_stats");
 
-    my($get_results_for, undef, undef) = $c->{'db'}->select_backends('get_logs');
+    ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
+    $backends  = Thruk::Utils::list($backends);
+
     my $output = sprintf("%-20s %-15s %-13s %7s\n", 'Backend', 'Index Size', 'Data Size', 'Items');
     my @result;
-    for my $key (@{$get_results_for}) {
+    for my $key (@{$backends}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'logcache'};
         $peer->logcache->reconnect();
@@ -1169,15 +1171,25 @@ sub _finish_update {
 }
 
 ##########################################################
-# returns 1 if tables have been newly created or 0 if already exists
+# returns 1 if tables have been newly created or undef if already exist
 sub _create_tables_if_not_exist {
     my($dbh, $prefix, $verbose) = @_;
 
+    return if _tables_exist($dbh, $prefix);
+
+    print "creating logcache tables\n" if $verbose > 1;
+    _create_tables($dbh, $prefix);
+    return 1;
+}
+
+##########################################################
+# returns 1 if logcache tables exist, undef if not
+sub _tables_exist {
+    my($dbh, $prefix) = @_;
+
     # check if our tables exist
     my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'\_%"')};
-    if(scalar @tables == 0) {
-        print "creating logcache tables\n" if $verbose > 1;
-        _create_tables($dbh, $prefix);
+    if(scalar @tables >= 1) {
         return 1;
     }
 
