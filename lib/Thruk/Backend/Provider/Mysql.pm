@@ -887,8 +887,9 @@ sub _get_logs_start_end {
     my($start, $end);
     my $prefix = $options{'collection'} || $self->{'peer_config'}->{'peer_key'};
     $prefix    =~ s/^logs_//gmx;
-    my($where) = $self->_get_filter($options{'filter'});
     my $dbh  = $self->_dbh();
+    return([$start, $end]) unless _tables_exist($dbh, $prefix);
+    my($where) = $self->_get_filter($options{'filter'});
     my @data = @{$dbh->selectall_arrayref('SELECT MIN(time) as mi, MAX(time) as ma FROM `'.$prefix.'_log` '.$where.' LIMIT 1', { Slice => {} })};
     $start   = $data[0]->{'mi'} if defined $data[0];
     $end     = $data[0]->{'ma'} if defined $data[0];
