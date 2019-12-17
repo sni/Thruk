@@ -1905,6 +1905,7 @@ t/data/separated_hashes/thruk_local.d/b.conf
 t/data/test_c_style.conf
 t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
+t/helper/create_test_logs
 t/perlcriticrc
 t/scenarios/auth/docker-compose.yml
 t/scenarios/auth/Makefile
