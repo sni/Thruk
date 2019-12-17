@@ -1465,8 +1465,10 @@ sub _get_host_lookup {
         push @values, '('.$dbh->quote($h->{'name'}).')';
     }
     if(scalar @values > 0) {
-        $dbh->do($stm.join(',', @values));
-        $sth->execute;
+        for my $chunk (@{Thruk::Utils::array_chunk_fixed_size(\@values, 50)}) {
+            $dbh->do($stm.join(',', @{$chunk}));
+            $sth->execute;
+        }
         for my $r (@{$sth->fetchall_arrayref()}) { $hosts_lookup->{$r->[1]} = $r->[0]; }
     }
     return $hosts_lookup;
@@ -1492,8 +1494,10 @@ sub _get_service_lookup {
         push @values, '('.$host_id.','.$dbh->quote($s->{'description'}).')';
     }
     if(scalar @values > 0) {
-        $dbh->do($stm.join(',', @values));
-        $sth->execute;
+        for my $chunk (@{Thruk::Utils::array_chunk_fixed_size(\@values, 50)}) {
+            $dbh->do($stm.join(',', @{$chunk}));
+            $sth->execute;
+        }
         for my $r (@{$sth->fetchall_arrayref()}) { $services_lookup->{$r->[1]}->{$r->[2]} = $r->[0]; }
     }
     return $services_lookup;
@@ -1517,8 +1521,10 @@ sub _get_contact_lookup {
         push @values, '('.$dbh->quote($c->{'name'}).')';
     }
     if(scalar @values > 0) {
-        $dbh->do($stm.join(',', @values));
-        $sth->execute;
+        for my $chunk (@{Thruk::Utils::array_chunk_fixed_size(\@values, 50)}) {
+            $dbh->do($stm.join(',', @{$chunk}));
+            $sth->execute;
+        }
         for my $r (@{$sth->fetchall_arrayref()}) { $contact_lookup->{$r->[1]} = $r->[0]; }
     }
     return $contact_lookup;
