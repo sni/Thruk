@@ -305,6 +305,7 @@ sub authenticate {
     return unless $user;
     if(!$internal) {
         if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
+            $c->log->debug(sprintf("user account '%s' is locked", $user->{'username'})) if Thruk->verbose;
             $c->error("account is locked, please contact an administrator");
             return;
         }
@@ -312,9 +313,7 @@ sub authenticate {
     _set_stash_user($c, $user, $auth_src);
     $c->{'user'}->{'original_username'} = $original_username;
     $user->set_dynamic_attributes($c, $options{'skip_db_access'},$roles);
-    if(Thruk->verbose) {
-        $c->log->debug("authenticated as ".$user->{'username'});
-    }
+    $c->log->debug(sprintf("authenticated as '%s' - auth src '%s'", $user->{'username'}, $auth_src)) if Thruk->verbose;
 
     # set session id for all requests
     if(!$sessiondata && !$internal) {
