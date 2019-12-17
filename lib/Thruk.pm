@@ -388,13 +388,8 @@ sub _dispatcher {
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$url);
 
-    if($c->env->{'psgix.cleanup'}) {
-        push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
-            _after_dispatch($c, $res);
-        };
-    } else {
-        _after_dispatch($c, $res);
-    }
+    _finalize_request($c, $res);
+
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
     return($res);
 }
@@ -1051,9 +1046,9 @@ sub _set_content_length {
 }
 
 ###################################################
-sub _after_dispatch {
+sub _finalize_request {
     my($c, $res) = @_;
-    $c->stats->profile(begin => "_after_dispatch");
+    $c->stats->profile(begin => "_finalize_request");
 
     # restore timezone setting
     $thruk->set_timezone($c->config->{'_server_timezone'});
@@ -1081,7 +1076,7 @@ sub _after_dispatch {
     }
 
     my $elapsed = tv_interval($c->stash->{'time_begin'});
-    $c->stats->profile(end => "_after_dispatch");
+    $c->stats->profile(end => "_finalize_request");
     $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
     $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
     $c->stash->{'time_total'} = $elapsed;
