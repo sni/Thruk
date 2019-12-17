@@ -378,6 +378,10 @@ sub get_logs {
         $orderby = ' ORDER BY l.time ASC';
         $sorted  = 1;
     }
+    my $limit = '';
+    if(defined $options{'options'} && $options{'options'}->{'limit'}) {
+        $limit = ' LIMIT '.$options{'options'}->{'limit'};
+    }
 
     my($where,$auth_data) = $self->_get_filter($options{'filter'});
 
@@ -414,6 +418,7 @@ sub get_logs {
             LEFT JOIN `'.$prefix.'_contact` c ON l.contact_id = c.contact_id
         '.$where.'
         '.$orderby.'
+        '.$limit.'
     ';
     confess($sql) if $sql =~ m/(ARRAY|HASH)/mx;
 

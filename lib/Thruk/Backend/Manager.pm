@@ -1106,7 +1106,7 @@ sub get_logs_start_end_no_filter {
 
     # fetching logs without any filter is a terrible bad idea
     # try to determine start date, simply requesting min/max without filter parses all logfiles
-    # so we try a very early date, since requests with an non-existing timerange a super fast
+    # so we try a very early date, since requests with an non-existing timerange are super fast
     # (livestatus has an index on all files with start and end timestamp and only parses the file if it matches)
 
     $time = time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
