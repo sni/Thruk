@@ -1930,9 +1930,28 @@ return list of <number> evenly chunked parts
 
 sub array_chunk {
     my($list, $number) = @_;
+    my $size   = POSIX::ceil(scalar @{$list} / $number);
+    my $chunks = array_chunk_fixed_size($list, $size);
+    return($chunks);
+}
+
+########################################
+
+=head2 array_chunk_fixed_size
+
+  array_chunk_fixed_size($list, $size)
+
+return list of chunked parts each with $size
+
+=cut
+
+sub array_chunk_fixed_size {
+    my($list, $size) = @_;
+    if(scalar @{$list} < $size) {
+        return([$list]);
+    }
     my $chunks = [];
-    my $size = POSIX::floor(scalar @{$list} / $number);
-    while(my @chunk = splice( @{$list}, 0, $size+1 ) ) {
+    while(my @chunk = splice( @{$list}, 0, $size ) ) {
         push @{$chunks}, \@chunk;
     }
     return($chunks);

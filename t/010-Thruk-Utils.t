@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 98;
+    plan tests => 107;
 
     use lib('t');
     require TestUtils;
@@ -345,3 +345,22 @@ for my $urls (@{$absolute_urls}) {
     is(Thruk::Utils::check_custom_var_list("_HOSTABD", $show_custom_vars), 1, "check_custom_var_list IX");
     is(Thruk::Utils::check_custom_var_list("_HOSTDEF", $show_custom_vars), 1, "check_custom_var_list X");
 };
+
+#########################
+# test array functions
+my $chunks = Thruk::Utils::array_chunk([1..100], 5);
+is(scalar @{$chunks}, 5, "array_chunk returns 5 chunks");
+is(scalar @{$chunks->[0]}, 20, "array_chunk returns evenly sized chunks");
+
+$chunks = Thruk::Utils::array_chunk([1..100], 150);
+is(scalar @{$chunks}, 100, "array_chunk returns 100 chunks");
+is(scalar @{$chunks->[0]}, 1, "array_chunk returns evenly sized chunks");
+
+$chunks = Thruk::Utils::array_chunk_fixed_size([1..100], 50);
+is(scalar @{$chunks}, 2, "array_chunk_fixed_size returns 2 chunks");
+is(scalar @{$chunks->[0]}, 50, "array_chunk_fixed_size returns fixed sized chunks");
+
+$chunks = Thruk::Utils::array_chunk_fixed_size([1..100], 3);
+is(scalar @{$chunks}, 34, "array_chunk_fixed_size returns 34 chunks");
+is(scalar @{$chunks->[0]}, 3, "array_chunk_fixed_size returns fixed sized chunks");
+is(scalar @{$chunks->[33]}, 1, "array_chunk_fixed_size returns fixed sized chunks");
