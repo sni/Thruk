@@ -677,19 +677,11 @@ sub get_model_retention {
     # migrate files from tmp_path to var_path
     my $tmp_path = $c->config->{'tmp_path'};
     my $var_path = $c->config->{'var_path'};
-    # REMOVE AFTER: 01.01.2020
-    Thruk::Utils::IO::cmd("mv $tmp_path/obj_retention* $var_path/ >/dev/null 2>&1");
-    # </REMOVE AFTER>
 
     my $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";
     if(! -f $file) {
         $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     }
-    # REMOVE AFTER: 01.01.2020
-    if(! -f $file) {
-        $file  = $c->config->{'var_path'}."/obj_retention.dat";
-    }
-    # </REMOVE AFTER>
 
     if(! -f $file) {
         return 1 if $model->cache_exists($backend);

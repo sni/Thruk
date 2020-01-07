@@ -89,7 +89,7 @@ sub get_key_by_private_key {
         return;
     }
     if(!$nr) {
-        # REMOVE AFTER: 01.01.2020
+        # REMOVE AFTER: 01.01.2022
         if(length($privatekey) < 64) {
             _upgrade_key($config, $privatekey);
             $nr = 1;
@@ -236,7 +236,7 @@ sub read_key {
     if($hashed_key =~ m%\.([^\.]+)$%gmx) {
         $type = $1;
     }
-    # REMOVE AFTER: 01.01.2020
+    # REMOVE AFTER: 01.01.2022
     if(!$type && length($hashed_key) < 64) {
         my($newkey, $newfile, $digest_name) = _upgrade_key($config, $hashed_key);
         if($newkey) {
@@ -256,7 +256,7 @@ sub read_key {
 
 ##############################################
 # migrate key from old md5hex to current format
-# REMOVE AFTER: 01.01.2020
+# REMOVE AFTER: 01.01.2022
 sub _upgrade_key {
     my($config, $key) = @_;
     my $folder = $config->{'var_path'}.'/api_keys';

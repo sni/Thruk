@@ -894,10 +894,6 @@ sub update_cron_file {
         push @{$cron_entries}, [$time, $cmd];
     }
 
-    # REMOVE AFTER: 01.01.2020
-    unlink(glob($c->config->{'var_path'}.'/reports/report*.sh'));
-    # </REMOVE AFTER>
-
     Thruk::Utils::update_cron_file($c, 'reports', $cron_entries);
     return 1;
 }

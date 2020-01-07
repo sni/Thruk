@@ -103,7 +103,7 @@
   /* workaround for https://github.com/grafana/grafana/issues/12075
    * and https://github.com/grafana/grafana/issues/15493
    * fixed in grafana 5.3 but broken again in 5.4.2
-   * REMOVE AFTER: 01.01.2020
+   * REMOVE AFTER: 01.01.2022
    */
   var p = document.getElementById('histou_graph_pane');
   p.style.position = "absolute";

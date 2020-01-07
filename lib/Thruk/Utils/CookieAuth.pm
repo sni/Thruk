@@ -351,7 +351,7 @@ sub retrieve_session {
     my($digest_name, $hashed_key);
     if($args{'file'}) {
         $sessionfile = Thruk::Utils::basename($args{'file'});
-        # REMOVE AFTER: 01.01.2020
+        # REMOVE AFTER: 01.01.2022
         if($sessionfile =~ $hashed_key_file_regex) {
             $hashed_key  = $1;
             $digest_name = substr($2, 1) if $2;
@@ -375,7 +375,7 @@ sub retrieve_session {
             return;
         }
         if(!$digest_nr) {
-            # REMOVE AFTER: 01.01.2020
+            # REMOVE AFTER: 01.01.2022
             if(length($sessionid) < 64) {
                 (undef, undef, $digest_nr, $digest_name) = _upgrade_session_file($config, $sessionid);
             }
@@ -400,7 +400,7 @@ sub retrieve_session {
     eval {
         $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
     };
-    # REMOVE AFTER: 01.01.2020
+    # REMOVE AFTER: 01.01.2022
     my $needs_save;
     if(!$data) {
         my $raw = scalar read_file($sessionfile);
@@ -432,7 +432,7 @@ sub retrieve_session {
     $data->{roles}       = [] unless $data->{roles};
     $data->{private_key} = $sessionid if $sessionid;
 
-    # REMOVE AFTER: 01.01.2020
+    # REMOVE AFTER: 01.01.2022
     store_session($config, $sessionid, $data) if($needs_save && $sessionid);
     # /REMOVE
     return($data);
@@ -440,7 +440,7 @@ sub retrieve_session {
 
 ##############################################
 # migrate session from old md5hex to current format
-# REMOVE AFTER: 01.01.2020
+# REMOVE AFTER: 01.01.2022
 sub _upgrade_session_file {
     my($config, $sessionid) = @_;
     my $folder = $config->{'var_path'}.'/sessions';

@@ -46,7 +46,7 @@ my $c = TestUtils::get_c();
     unlink($sessionfile);
 };
 #########################
-# REMOVE AFTER: 01.01.2020
+# REMOVE AFTER: 01.01.2022
 {
     # test upgrading existing sessions
     my $hash        = 'b21kYWRtaW46b21k';

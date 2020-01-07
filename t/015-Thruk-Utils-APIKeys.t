@@ -32,7 +32,7 @@ my $c = TestUtils::get_c();
 }
 
 #########################
-# REMOVE AFTER: 01.01.2020
+# REMOVE AFTER: 01.01.2022
 {
     # test upgrading existing api keys
     my $username   = 'test';
