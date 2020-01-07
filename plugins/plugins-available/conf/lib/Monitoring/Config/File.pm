@@ -482,15 +482,19 @@ get diff of changes
 
 =cut
 sub diff {
-    my ( $self ) = @_;
+    my($self, $ignore_whitespace) = @_;
 
     my ($fh, $filename) = tempfile();
     my $content         = $self->get_new_file_content();
     print $fh $content;
     CORE::close($fh);
 
+    my $options = "-Nu";
+    if($ignore_whitespace) {
+        $options = $options."w";
+    }
+    my $cmd = 'diff '.$options.' "'.$self->{'path'}.'" "'.$filename.'" 2>&1';
     my $diff = "";
-    my $cmd = 'diff -wuN "'.$self->{'path'}.'" "'.$filename.'" 2>&1';
     open(my $ph, '-|', $cmd);
     while(<$ph>) {
         my $line = $_;

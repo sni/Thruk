@@ -370,11 +370,17 @@ sub _rest_get_config_objects_update {
 
 ##########################################################
 # REST PATH: GET /config/diff
+#
+# Optional arguments:
+#
+#   * ignore_whitespace
+#
 # Returns differences between filesystem and stashed config changes.
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/diff$%mx, \&_rest_get_config_diff, ["admin"]);
 sub _rest_get_config_diff {
     my($c) = @_;
     my $diff = [];
+    my $ignore_whitespace_changes = $c->req->parameters->{'ignore_whitespace'} // 0;
     my($backends) = $c->{'db'}->select_backends("get_");
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
@@ -382,7 +388,7 @@ sub _rest_get_config_diff {
         for my $file (@{$changed_files}) {
             push @{$diff}, {
                 'peer_key' => $peer_key,
-                'output'   => $file->diff(),
+                'output'   => $file->diff($ignore_whitespace_changes),
                 'file'     => $file->{'path'},
             };
         }

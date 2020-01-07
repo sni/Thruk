@@ -377,3 +377,14 @@ TR.tools_category TD {
   padding-left: 20px;
   margin: 0;
 }
+
+FORM.diffoptions input[type=checkbox] {
+  vertical-align: middle;
+}
+
+FORM.diffoptions {
+  border: 1px solid #444444;
+  float: right;
+  margin: 0;
+  padding: 2px 5px;
+}

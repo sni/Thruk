@@ -1229,16 +1229,45 @@ sub _apply_config_changes {
 
     # get diff of changed files
     if(defined $c->req->parameters->{'diff'}) {
-        $c->stash->{'output'} .= "<ul>\n";
+        my $ignore_whitespace_changes = $c->req->parameters->{'ignore_whitespace'} // 0;
+        my $diffs = {};
         for my $file (@{$c->stash->{'changed_files'}}) {
-            $c->stash->{'output'} .= "<li><a href='#".Thruk::Utils::Filter::name2id($file->{'display'})."'>".$file->{'display'}."</a></li>\n";
+            my $diff = $file->diff($ignore_whitespace_changes);
+            if($diff ne '') {
+                $diffs->{$file->{'display'}} = $diff;
+            }
+        }
+
+        $c->stash->{'output'} .= "<hr style='margin: 0;'>\n";
+        $c->stash->{'output'} .= "<form action='conf.cgi#output' method='POST' class='diffoptions'>\n";
+        $c->stash->{'output'} .= "<input type='hidden' name='diff' value='1'>\n";
+        $c->stash->{'output'} .= "<input type='hidden' name='apply' value='yes'>\n";
+        $c->stash->{'output'} .= "<input type='hidden' name='sub' value='objects'>\n";
+        $c->stash->{'output'} .= "<input type='checkbox' name='ignore_whitespace' id='ignore_whitespace' value='1'".($ignore_whitespace_changes ? ' checked' : '')."><label for='ignore_whitespace'>Ignore Whitespace Changes</label>\n";
+        $c->stash->{'output'} .= "<input type='submit' value='update'>\n";
+        $c->stash->{'output'} .= "</form>\n";
+
+        if(scalar keys %{$diffs} == 0) {
+            if($ignore_whitespace_changes) {
+                return $c->redirect_to('conf.cgi?sub=objects&apply=yes&diff=1&ignore_whitespace=0');
+            }
+            $c->stash->{'output'} .= "<br><br>no changes\n";
+            return;
+        }
+
+        $c->stash->{'output'} .= "<ul>\n";
+        for my $file_display (sort keys %{$diffs}) {
+            $c->stash->{'output'} .= "<li><a href='#".Thruk::Utils::Filter::name2id($file_display)."'>".$file_display."</a></li>\n";
         }
         $c->stash->{'output'} .= "</ul>\n";
-        for my $file (@{$c->stash->{'changed_files'}}) {
-            $c->stash->{'output'} .= "<hr><a id='".Thruk::Utils::Filter::name2id($file->{'display'})."'></a><pre>\n";
-            $c->stash->{'output'} .= Thruk::Utils::Filter::escape_html($file->diff());
+
+        for my $file_display (sort keys %{$diffs}) {
+            $c->stash->{'output'} .= "<hr><a id='".Thruk::Utils::Filter::name2id($file_display)."'></a><pre>\n";
+            $c->stash->{'output'} .= Thruk::Utils::Filter::escape_html($diffs->{$file_display});
             $c->stash->{'output'} .= "</pre><br>\n";
         }
+
+        $c->stash->{'output'} = Thruk::Utils::beautify_diff($c->stash->{'output'});
     }
 
     # config check
@@ -1289,11 +1318,6 @@ sub _apply_config_changes {
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
     }
 
-    # make nicer output
-    if(defined $c->req->parameters->{'diff'}) {
-        $c->stash->{'output'} = Thruk::Utils::beautify_diff($c->stash->{'output'});
-    }
-
     # discard changes
     if($c->req->parameters->{'discard'}) {
         return unless Thruk::Utils::check_csrf($c);
@@ -1302,9 +1326,10 @@ sub _apply_config_changes {
         Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
     }
-    $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    $c->stash->{'files'}             = $c->{'obj_db'}->get_files();
+
+    $c->stash->{'needs_commit'} = $c->{'obj_db'}->{'needs_commit'};
+    $c->stash->{'last_changed'} = $c->{'obj_db'}->{'last_changed'};
+    $c->stash->{'files'}        = $c->{'obj_db'}->get_files();
     return;
 }
 

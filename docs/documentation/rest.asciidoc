@@ -524,6 +524,11 @@ Returns result from config check.
 
 === GET /config/diff
 
+
+Optional arguments:
+
+  * ignore_whitespace
+
 Returns differences between filesystem and stashed config changes.
 
 [options="header"]

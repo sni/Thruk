@@ -45,6 +45,7 @@
       </td>
       <td class='dataVal' style="padding-top: 5px; text-align: center;">
         [% IF changed_files.size > 0 %]
+        <input type='hidden' name='ignore_whitespace' value='1'>
         <input type="submit" name="diff" value="view diff of changed files" style="width:250px" class="conf_button" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
         [% ELSE %]
           There are no pending changes.
