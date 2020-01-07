@@ -355,6 +355,7 @@ Ext.define('TP.SmallWidget', {
     /* apply z-index */
     applyZindex: function(value) {
         var This = this;
+        if(!This.el || !This.el.dom) { return; }
         if(!Ext.isNumeric(String(value))) { return; }
         value  = Number(value);
         value = 30+(value+10)*2;

@@ -421,7 +421,10 @@ Ext.define('TP.Pantab', {
                && state[id].xdata.layout) {
                 zIndex = state[id].xdata.layout.zindex || 0;
             }
-            zIndex = Number(zIndex) + 10;
+            zIndex = Number(zIndex) + 100;
+            if(zIndex < 0) {
+                zIndex = 0;
+            }
             if(zIndexList[zIndex] == undefined) { zIndexList[zIndex] = []; }
             zIndexList[zIndex].push(id);
         }
