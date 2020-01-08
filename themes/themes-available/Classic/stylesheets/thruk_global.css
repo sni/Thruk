@@ -1615,6 +1615,10 @@ SPAN.btn_sitesplus {
   border-color: #70c0e7;
 }
 
+#site_panel_sections .fancytree-exp-n.has_sub span.fancytree-expander {
+  background-image: url(../../../images/expand.png);
+}
+
 th.sticky-header {
   position: -webkit-sticky;
   position: sticky;

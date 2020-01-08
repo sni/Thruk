@@ -1077,6 +1077,7 @@ function create_site_panel_popup_tree_populate() {
         click: function(event, data){
             resetRefresh();
             data.node.setActive();
+            data.node.collapseSiblings();
             jQuery("DIV.tree_peer_btn").hide();
             jQuery(data.node.data.peers).each(function(i, peer_key) {
                 jQuery("#button_"+peer_key).parent().show();
@@ -1173,7 +1174,8 @@ function create_site_panel_popup_tree_data(d, current, tree) {
             'children': create_site_panel_popup_tree_data(d.sub[sectionname], key, tree),
             'peers': d.sub[sectionname].peers,
             'icon': icon,
-            'selected': selected
+            'selected': selected,
+            'extraClasses': d.sub[sectionname] ? 'has_sub' : 'has_no_sub'
         });
         if(tree) {
             var node  = tree.getNodeByKey(key);
