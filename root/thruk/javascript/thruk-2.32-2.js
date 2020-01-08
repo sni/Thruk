@@ -1145,6 +1145,8 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
 
 function create_site_panel_popup_tree_data(d, current, tree) {
     var nodes = [];
+
+    // append folders
     jQuery(keys(d.sub).sort()).each(function(i, sectionname) {
         var icon;
         icon = "../images/folder_green.png";
@@ -1184,17 +1186,19 @@ function create_site_panel_popup_tree_data(d, current, tree) {
             node.renderTitle();
         }
     });
+
+    // append root nodes
     if(current == "" && d.peers != undefined && d.peers.length > 0) {
         jQuery(d.peers).each(function(i, peer_key) {
             var icon;
             var peer = initial_backends[peer_key];
             if(!peer) { return true; }
-            icon = "../images/folder_green.png";
+            icon = "../images/nofolder_green.png";
             var selected = true; // checkbox enabled
             if(current_backend_states[peer_key] == 1) {
-                icon = "../images/folder_red.png";
+                icon = "../images/nofolder_red.png";
             } else if(current_backend_states[peer_key] == 2) {
-                icon = "../images/folder_gray.png";
+                icon = "../images/nofolder_gray.png";
                 selected = false; // checkbox off
             }
             var key = '/'+peer_key;
