@@ -16,6 +16,7 @@ next:
             - add 'thruk cluster maint/unmaint' commands
           - internals:
             - update jstree 3.3.8
+            - update fancytree 2.34.0
 
 2.32-2   Fri Oct 25 17:05:54 CEST 2019
           - add thruk restart cli command
