@@ -386,7 +386,7 @@ sub statusfilter {
     my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '');
 
     my $node_filter = Thruk::Utils::array_uniq([@{$n->{'filter'}}, @{$bp->{'filter'}}]);
-    my($ack_filter, $downtime_filter, $unknown_filter) = (0,0,0);
+    my($ack_filter, $downtime_filter, $unknown_filter, $extra) = (0,0,0, {});
     for my $f (@{$node_filter}) {
         $ack_filter      = 1 if $f eq 'acknowledged_filter';
         $downtime_filter = 1 if $f eq 'downtime_filter';
@@ -404,6 +404,14 @@ sub statusfilter {
         if(   $data->{'unreachable'}) { ($best_host, $worst_host) = _set_best_worst(2, $best_host, $worst_host); }
         elsif($data->{'down'})        { ($best_host, $worst_host) = _set_best_worst(1, $best_host, $worst_host); }
         elsif($data->{'up'})          { ($best_host, $worst_host) = _set_best_worst(0, $best_host, $worst_host); }
+        $extra->{acknowledged} = 0;
+        if($down_hosts <= $data->{'down_and_ack'} + $data->{'unreachable_and_ack'}) {
+            $extra->{acknowledged} = 1;
+        }
+        $extra->{scheduled_downtime_depth} = 0;
+        if($down_hosts <= $data->{'down_and_scheduled'} + $data->{'unreachable_and_scheduled'}) {
+            $extra->{scheduled_downtime_depth} = 1;
+        }
     }
 
     my $best_service = -1;
@@ -418,6 +426,18 @@ sub statusfilter {
         elsif($data->{'critical'}) { ($best_service, $worst_service) = _set_best_worst(2, $best_service, $worst_service); }
         elsif($data->{'warning'})  { ($best_service, $worst_service) = _set_best_worst(1, $best_service, $worst_service); }
         elsif($data->{'ok'})       { ($best_service, $worst_service) = _set_best_worst(0, $best_service, $worst_service); }
+        if($type eq 'services' || $extra->{acknowledged} == 1) {
+            $extra->{acknowledged} = 0;
+            if($down_services <= $data->{'critical_and_ack'} + $data->{'unknown_and_ack'}) {
+                $extra->{acknowledged} = 1;
+            }
+        }
+        if($type eq 'services' || $extra->{scheduled_downtime_depth} == 1) {
+            $extra->{scheduled_downtime_depth} = 0;
+            if($down_services <= $data->{'critical_and_scheduled'} + $data->{'unknown_and_scheduled'}) {
+                $extra->{scheduled_downtime_depth} = 1;
+            }
+        }
     }
 
     my $status = 0;
@@ -517,9 +537,10 @@ sub statusfilter {
         }
     }
 
-    return($status, $shortname, $output);
+    return($status, $shortname, $output, $extra);
 }
 
+##########################################################
 sub _set_best_worst {
     my($state, $best, $worst) = @_;
     if($best == -1 || $state < $best) {
@@ -531,6 +552,7 @@ sub _set_best_worst {
     return($best, $worst);
 }
 
+##########################################################
 # kind of a hack, but there is no easy way to apply filter to any filter
 # so we just assume the function from the name of the filter which is ok,
 # since these are shiped filters, so we know what they do and try to
